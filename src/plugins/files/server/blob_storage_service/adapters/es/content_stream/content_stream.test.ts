@@ -282,12 +282,12 @@ describe('ContentStream', () => {
     });
 
     it('should emit an error event', async () => {
-      client.index.mockRejectedValueOnce('some error');
+      client.index.mockRejectedValueOnce(new Error('some error'));
 
       stream.end('data');
       const error = await new Promise((resolve) => stream.once('error', resolve));
 
-      expect(error).toBe('some error');
+      expect(error.toString()).toEqual('FilesPluginError: ContentStream.indexChunk(): some error');
     });
 
     it('should remove all previous chunks before writing', async () => {

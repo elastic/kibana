@@ -21,7 +21,7 @@ export function createDefaultFileAttributes(): Pick<
   };
 }
 
-class FilesPluginError extends Error {
+export class FilesPluginError extends Error {
   constructor(message: string, public readonly meta: any) {
     super(message);
     // For debugging - capture name of subclasses
