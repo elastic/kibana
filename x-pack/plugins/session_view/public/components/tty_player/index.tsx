@@ -71,9 +71,7 @@ export const TTYPlayer = ({
   const { getUrlForApp } = useKibana<CoreStart>().services.application;
   const policiesUrl = useMemo(
     () =>
-    canReadPolicyManagement
-        ? getUrlForApp(SECURITY_APP_ID, { path: POLICIES_PAGE_PATH })
-        : '',
+      canReadPolicyManagement ? getUrlForApp(SECURITY_APP_ID, { path: POLICIES_PAGE_PATH }) : '',
     [canReadPolicyManagement, getUrlForApp]
   );
 
