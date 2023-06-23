@@ -21,6 +21,7 @@ import {
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   ESRE_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
+  VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 import { ENGINES_PATH, EngineViewTabs } from '../../applications/routes';
@@ -62,6 +63,14 @@ export const useEnterpriseSearchNav = () => {
           ...generateNavLink({
             shouldNotCreateHref: true,
             to: ESRE_PLUGIN.URL,
+          }),
+        },
+        {
+          id: 'vectorSearch',
+          name: VECTOR_SEARCH_PLUGIN.NAME,
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: VECTOR_SEARCH_PLUGIN.URL,
           }),
         },
         {
