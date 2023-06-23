@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { Route } from './router';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { SUPPORTED_KBN_TYPES } from './constants';
+
+export const isTypeSupportedByCellActions = (kbnFieldType: KBN_FIELD_TYPES) =>
+  SUPPORTED_KBN_TYPES.includes(kbnFieldType);
