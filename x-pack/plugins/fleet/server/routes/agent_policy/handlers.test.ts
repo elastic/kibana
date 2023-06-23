@@ -51,7 +51,14 @@ describe('agent policy handlers', () => {
     describe('getUninstallTokensByPolicyIdHandler', () => {
       const policyId = 'abcdef';
       const tokenForOnePolicy: GetUninstallTokensByPolicyIdResponse = {
-        items: [{ token: '123456', policy_id: policyId, created_at: '2023-06-15T16:46:48.274Z' }],
+        items: [
+          {
+            id: 'id',
+            token: '123456',
+            policy_id: policyId,
+            created_at: '2023-06-15T16:46:48.274Z',
+          },
+        ],
         total: 1,
       };
       let request: KibanaRequest<TypeOf<typeof GetUninstallTokensByPolicyIdRequestSchema.params>>;

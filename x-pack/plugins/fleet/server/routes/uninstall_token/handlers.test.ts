@@ -33,9 +33,9 @@ describe('uninstall token handlers', () => {
 
   const uninstallTokensResponseFixture: GetUninstallTokensMetadataResponse = {
     items: [
-      { policy_id: 'policy-id-1', created_at: '2023-06-15T16:46:48.274Z' },
-      { policy_id: 'policy-id-2', created_at: '2023-06-15T16:46:48.274Z' },
-      { policy_id: 'policy-id-3', created_at: '2023-06-15T16:46:48.274Z' },
+      { id: 'id-1', policy_id: 'policy-id-1', created_at: '2023-06-15T16:46:48.274Z' },
+      { id: 'id-2', policy_id: 'policy-id-2', created_at: '2023-06-15T16:46:48.274Z' },
+      { id: 'id-3', policy_id: 'policy-id-3', created_at: '2023-06-15T16:46:48.274Z' },
     ],
     total: 3,
     page: 1,

@@ -43,7 +43,12 @@ describe('UninstallCommandFlyout', () => {
   beforeEach(() => {
     const response: GetUninstallTokensByPolicyIdResponse = {
       items: [
-        { policy_id: 'policy_id', token: '123456789', created_at: '2023-06-19T08:47:31.457Z' },
+        {
+          id: 'id-1',
+          policy_id: 'policy_id',
+          token: '123456789',
+          created_at: '2023-06-19T08:47:31.457Z',
+        },
       ],
       total: 1,
     };

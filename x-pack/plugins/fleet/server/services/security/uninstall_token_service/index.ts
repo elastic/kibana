@@ -162,17 +162,20 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     }
     tokensFinder.close();
 
-    const decryptedTokens = decryptedTokenObjects.map(({ created_at: createdAt, attributes }) => {
-      this.assertPolicyId(attributes);
-      this.assertToken(attributes);
-      this.assertCreatedAt(createdAt);
+    const decryptedTokens = decryptedTokenObjects.map<UninstallToken>(
+      ({ id, created_at: createdAt, attributes }) => {
+        this.assertPolicyId(attributes);
+        this.assertToken(attributes);
+        this.assertCreatedAt(createdAt);
 
-      return {
-        policy_id: attributes.policy_id,
-        token: attributes.token || attributes.token_plain,
-        created_at: createdAt,
-      };
-    });
+        return {
+          id,
+          policy_id: attributes.policy_id,
+          token: attributes.token || attributes.token_plain,
+          created_at: createdAt,
+        };
+      }
+    );
 
     return {
       items: decryptedTokens,
@@ -191,11 +194,12 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
     const items: UninstallTokenMetadata[] = tokenObjects
       .slice((page - 1) * perPage, page * perPage)
-      .map<UninstallTokenMetadata>(({ _source }) => {
+      .map<UninstallTokenMetadata>(({ _id, _source }) => {
         this.assertPolicyId(_source[UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]);
         this.assertCreatedAt(_source.created_at);
 
         return {
+          id: _id.replace(`${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:`, ''),
           policy_id: _source[UNINSTALL_TOKENS_SAVED_OBJECT_TYPE].policy_id,
           created_at: _source.created_at,
         };
@@ -234,12 +238,13 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     tokensFinder.close();
 
     const uninstallTokens: UninstallToken[] = tokenObjects.map(
-      ({ attributes, created_at: createdAt }) => {
+      ({ id, attributes, created_at: createdAt }) => {
         this.assertPolicyId(attributes);
         this.assertToken(attributes);
         this.assertCreatedAt(createdAt);
 
         return {
+          id,
           policy_id: attributes.policy_id,
           token: attributes.token || attributes.token_plain,
           created_at: createdAt,

@@ -207,6 +207,7 @@ describe('UninstallTokenService', () => {
 
           const expectedItems: UninstallToken[] = [
             {
+              id: so.id,
               policy_id: so.attributes.policy_id,
               token: getToken(so, canEncrypt),
               created_at: so.created_at,
@@ -264,10 +265,12 @@ describe('UninstallTokenService', () => {
           const actualItems = (await uninstallTokenService.getTokenMetadata()).items;
           const expectedItems: UninstallTokenMetadata[] = [
             {
+              id: so.id,
               policy_id: so.attributes.policy_id,
               created_at: so.created_at,
             },
             {
+              id: so2.id,
               policy_id: so2.attributes.policy_id,
               created_at: so2.created_at,
             },

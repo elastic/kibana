@@ -55,7 +55,7 @@ export default function (providerContext: FtrProviderContext) {
           );
         });
 
-        it('should return token metadata with creation date', async () => {
+        it('should return token metadata with creation date and id', async () => {
           const response = await supertest
             .get(uninstallTokensRouteService.getListPath())
             .expect(200);
@@ -63,6 +63,7 @@ export default function (providerContext: FtrProviderContext) {
           const body: GetUninstallTokensMetadataResponse = response.body;
           expect(body.items[0]).to.have.property('policy_id');
           expect(body.items[0]).to.have.property('created_at');
+          expect(body.items[0]).to.have.property('id');
 
           const createdAt = new Date(body.items[0].created_at!).getTime();
           const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).getTime();

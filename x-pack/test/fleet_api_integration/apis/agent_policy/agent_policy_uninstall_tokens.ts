@@ -51,7 +51,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(body.items.length).to.equal(body.total);
         expect(body.items[0]).to.have.property('policy_id', generatedPolicyId);
-        expect(body.items[0]).to.have.keys('created_at', 'token');
+        expect(body.items[0]).to.have.keys('created_at', 'token', 'id');
       });
 
       it('should return all tokens with the latest on top', async () => {

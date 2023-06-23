@@ -6,6 +6,7 @@
  */
 
 export interface UninstallToken {
+  id: string;
   policy_id: string;
   token: string;
   created_at: string;
