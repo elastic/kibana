@@ -45,5 +45,4 @@ export enum SYNTHETICS_API_URLS {
   SYNTHETICS_MONITORS_PROJECT = '/api/synthetics/project/{projectName}/monitors',
   SYNTHETICS_MONITORS_PROJECT_UPDATE = '/api/synthetics/project/{projectName}/monitors/_bulk_update',
   SYNTHETICS_MONITORS_PROJECT_DELETE = '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
-  SYNTHETICS_MONITORS_PROJECT_LEGACY = '/api/synthetics/service/project/monitors',
 }

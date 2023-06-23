@@ -25,18 +25,25 @@ export function registerActionStatusRoutes(
   endpointContext: EndpointAppContext
 ) {
   // Summary of action status for a given list of endpoints
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: ACTION_STATUS_ROUTE,
-      validate: ActionStatusRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canReadSecuritySolution'] },
-      endpointContext.logFactory.get('hostIsolationStatus'),
-      actionStatusRequestHandler(endpointContext)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: ActionStatusRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canReadSecuritySolution'] },
+        endpointContext.logFactory.get('hostIsolationStatus'),
+        actionStatusRequestHandler(endpointContext)
+      )
+    );
 }
 
 export const actionStatusRequestHandler = function (

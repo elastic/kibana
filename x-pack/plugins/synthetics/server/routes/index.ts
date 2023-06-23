@@ -38,13 +38,9 @@ import { installIndexTemplatesRoute } from './synthetics_service/install_index_t
 import { editSyntheticsMonitorRoute } from './monitor_cruds/edit_monitor';
 import { addSyntheticsMonitorRoute } from './monitor_cruds/add_monitor';
 import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/add_monitor_project';
-import { addSyntheticsProjectMonitorRouteLegacy } from './monitor_cruds/add_monitor_project_legacy';
 import { syntheticsGetPingsRoute, syntheticsGetPingStatusesRoute } from './pings';
 import { createGetCurrentStatusRoute } from './overview_status/overview_status';
-import {
-  SyntheticsRestApiRouteFactory,
-  SyntheticsStreamingRouteFactory,
-} from '../legacy_uptime/routes';
+import { SyntheticsRestApiRouteFactory } from '../legacy_uptime/routes';
 import { getHasIntegrationMonitorsRoute } from './fleet/get_has_integration_monitors';
 import { addSyntheticsParamsRoute } from './settings/add_param';
 import { deleteSyntheticsParamsRoute } from './settings/delete_param';
@@ -104,8 +100,4 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   inspectSyntheticsMonitorRoute,
   getAgentPoliciesRoute,
   getSyntheticsCertsRoute,
-];
-
-export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [
-  addSyntheticsProjectMonitorRouteLegacy,
 ];
