@@ -1,0 +1,130 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState } from 'react';
+import {
+  EuiAccordion,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  EuiSuperDatePicker,
+  EuiTitle,
+  OnTimeChangeProps,
+} from '@elastic/eui';
+import { RiskScoreEntity } from '../../../common/risk_engine/types';
+import { RiskScorePreviewTable } from './risk_score_preview_table';
+import * as i18n from '../translations';
+import { RiskScore } from '../../../server/lib/risk_engine/types';
+import { useRiskScorePreview } from '../api/hooks/use_preview_risk_scores';
+
+interface IRiskScorePreviewPanel {
+  showMessage: string;
+  hideMessage: string;
+  isLoading: boolean;
+  items: RiskScore[];
+  type: RiskScoreEntity;
+}
+
+const RiskScorePreviewPanel = ({
+  items,
+  showMessage,
+  hideMessage,
+  isLoading,
+  type,
+}: IRiskScorePreviewPanel) => {
+  const [trigger, setTrigger] = useState<'closed' | 'open'>('open');
+  const onToggle = (isOpen: boolean) => {
+    const newState = isOpen ? 'open' : 'closed';
+    setTrigger(newState);
+  };
+
+  return (
+    <EuiPanel hasBorder={true}>
+      <EuiAccordion
+        initialIsOpen={true}
+        isLoading={isLoading}
+        id={'host-table'}
+        buttonContent={trigger === 'closed' ? showMessage : hideMessage}
+        forceState={trigger}
+        onToggle={onToggle}
+      >
+        <>
+          <EuiSpacer size={'s'} />
+          <RiskScorePreviewTable items={items} type={type} />
+        </>
+      </EuiAccordion>
+    </EuiPanel>
+  );
+};
+
+export const RiskScorePreviewSection = () => {
+  const [start, setStart] = useState('now-24h');
+  const [end, setEnd] = useState('now');
+
+  const { data, isLoading, refetch } = useRiskScorePreview({
+    range: {
+      start,
+      end,
+    },
+  });
+
+  const onTimeChangeCallback = (props: OnTimeChangeProps) => {
+    setStart(props.start);
+    setEnd(props.end);
+  };
+
+  const hosts =
+    data?.scores
+      ?.filter((item) => item?.identifierField === 'host.name')
+      ?.sort((a, b) => b?.totalScoreNormalized - a?.totalScoreNormalized)
+      ?.slice(0, 5) || [];
+
+  const users =
+    data?.scores
+      ?.filter((item) => item?.identifierField === 'user.name')
+      ?.sort((a, b) => b?.totalScoreNormalized - a?.totalScoreNormalized)
+      ?.slice(0, 5) || [];
+
+  return (
+    <>
+      <EuiTitle>
+        <h2>{i18n.PREVIEW}</h2>
+      </EuiTitle>
+      <EuiSpacer />
+      <EuiFormRow fullWidth>
+        <EuiSuperDatePicker
+          start={start}
+          end={end}
+          onTimeChange={onTimeChangeCallback}
+          onRefresh={() => refetch()}
+          isLoading={isLoading}
+          width="full"
+        />
+      </EuiFormRow>
+
+      <EuiSpacer />
+
+      <RiskScorePreviewPanel
+        items={hosts}
+        showMessage={i18n.SHOW_HOSTS_RISK_SCORE}
+        hideMessage={i18n.HIDE_HOSTS_RISK_SCORE}
+        isLoading={isLoading}
+        type={RiskScoreEntity.host}
+      />
+
+      <EuiSpacer />
+
+      <RiskScorePreviewPanel
+        items={users}
+        showMessage={i18n.SHOW_USERS_RISK_SCORE}
+        hideMessage={i18n.HIDE_USERS_RISK_SCORE}
+        isLoading={isLoading}
+        type={RiskScoreEntity.user}
+      />
+    </>
+  );
+};

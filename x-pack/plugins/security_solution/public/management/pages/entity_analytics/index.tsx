@@ -9,7 +9,7 @@ import { Route } from '@kbn/shared-ux-router';
 import React, { memo } from 'react';
 import { MANAGEMENT_ROUTING_ENTITY_ANALYTICS } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
-import { EntityAnalyticsManagementPage } from './view/entity_analytics_management_page';
+import { EntityAnalyticsManagementPage } from '../../../risk_score/pages/entity_analytics_management_page';
 
 export const EntityAnalyticsContainer = memo(() => {
   return (
