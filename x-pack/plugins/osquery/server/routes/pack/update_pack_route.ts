@@ -181,12 +181,12 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         filter(currentPackSO.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]),
         'id'
       );
-      const updatedPackSO = await savedObjectsClient.get<{
-        name: string;
-        enabled: boolean;
-        queries: Record<string, unknown>;
-      }>(packSavedObjectType, request.params.id);
+      const updatedPackSO = await savedObjectsClient.get<PackSavedObject>(
+        packSavedObjectType,
+        request.params.id
+      );
 
+      // @ts-expect-error update types
       updatedPackSO.attributes.queries = convertSOQueriesToPack(updatedPackSO.attributes.queries);
 
       if (enabled == null && !currentPackSO.attributes.enabled) {
@@ -349,8 +349,25 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
       }
 
+      const { attributes } = updatedPackSO;
+
       return response.ok({
-        body: { data: { ...updatedPackSO.attributes, saved_object_id: updatedPackSO.id } },
+        body: {
+          data: {
+            name: attributes.name,
+            description: attributes.description,
+            queries: attributes.queries,
+            version: attributes.version,
+            enabled: attributes.enabled,
+            created_at: attributes.created_at,
+            created_by: attributes.created_by,
+            updated_at: attributes.updated_at,
+            updated_by: attributes.updated_by,
+            policy_ids: attributes.policy_ids,
+            shards,
+            saved_object_id: updatedPackSO.id,
+          },
+        },
       });
     }
   );
