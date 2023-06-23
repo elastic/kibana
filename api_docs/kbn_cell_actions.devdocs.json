@@ -197,7 +197,7 @@
         "label": "CellActions",
         "description": [],
         "signature": [
-          "({ field, triggerId, children, mode, showActionTooltips, visibleCellActions, disabledActionTypes, metadata, className, }: React.PropsWithChildren<",
+          "({ data, triggerId, children, mode, showActionTooltips, visibleCellActions, disabledActionTypes, metadata, className, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/cell-actions",
             "scope": "common",
@@ -216,7 +216,7 @@
             "id": "def-common.CellActions.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  field,\n  triggerId,\n  children,\n  mode,\n  showActionTooltips = true,\n  visibleCellActions = 3,\n  disabledActionTypes = [],\n  metadata,\n  className,\n}",
+            "label": "{\n  data,\n  triggerId,\n  children,\n  mode,\n  showActionTooltips = true,\n  visibleCellActions = 3,\n  disabledActionTypes = [],\n  metadata,\n  className,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -564,7 +564,7 @@
         "label": "useDataGridColumnsCellActions",
         "description": [],
         "signature": [
-          "({ fields, triggerId, metadata, dataGridRef, disabledActionTypes, }: ",
+          "({ data, triggerId, metadata, dataGridRef, disabledActionTypes, }: ",
           {
             "pluginId": "@kbn/cell-actions",
             "scope": "common",
@@ -585,7 +585,7 @@
             "id": "def-common.useDataGridColumnsCellActions.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  fields,\n  triggerId,\n  metadata,\n  dataGridRef,\n  disabledActionTypes = [],\n}",
+            "label": "{\n  data,\n  triggerId,\n  metadata,\n  dataGridRef,\n  disabledActionTypes = [],\n}",
             "description": [],
             "signature": [
               {
@@ -721,15 +721,15 @@
         "children": [
           {
             "parentPluginId": "@kbn/cell-actions",
-            "id": "def-common.CellActionCompatibilityContext.field",
-            "type": "Object",
+            "id": "def-common.CellActionCompatibilityContext.data",
+            "type": "Array",
             "tags": [],
-            "label": "field",
+            "label": "data",
             "description": [
-              "\nThe object containing the field name and type, needed for the compatibility check"
+              "\nCellActionsData containing the field spec but not the value for the compatibility check"
             ],
             "signature": [
-              "{ [P in Exclude<keyof C[\"field\"], \"value\">]: C[\"field\"][P]; }"
+              "Omit<C[\"data\"][number], \"value\">[]"
             ],
             "path": "packages/kbn-cell-actions/src/types.ts",
             "deprecated": false,
@@ -785,13 +785,14 @@
         "children": [
           {
             "parentPluginId": "@kbn/cell-actions",
-            "id": "def-common.CellActionExecutionContext.field",
-            "type": "Object",
+            "id": "def-common.CellActionExecutionContext.data",
+            "type": "Array",
             "tags": [],
-            "label": "field",
+            "label": "data",
             "description": [],
             "signature": [
-              "CellActionField"
+              "CellActionsData",
+              "[]"
             ],
             "path": "packages/kbn-cell-actions/src/types.ts",
             "deprecated": false,
@@ -939,15 +940,16 @@
         "children": [
           {
             "parentPluginId": "@kbn/cell-actions",
-            "id": "def-common.CellActionsProps.field",
-            "type": "Object",
+            "id": "def-common.CellActionsProps.data",
+            "type": "CompoundType",
             "tags": [],
-            "label": "field",
-            "description": [
-              "\nCommon set of properties used by most actions."
-            ],
+            "label": "data",
+            "description": [],
             "signature": [
-              "CellActionField"
+              "CellActionsData",
+              " | ",
+              "CellActionsData",
+              "[]"
             ],
             "path": "packages/kbn-cell-actions/src/types.ts",
             "deprecated": false,
@@ -1100,13 +1102,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/cell-actions",
-            "id": "def-common.UseDataGridColumnsCellActionsProps.fields",
+            "id": "def-common.UseDataGridColumnsCellActionsProps.data",
             "type": "Array",
             "tags": [],
-            "label": "fields",
+            "label": "data",
             "description": [],
             "signature": [
-              "BulkField[] | undefined"
+              "BulkData[] | undefined"
             ],
             "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
             "deprecated": false,
