@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { LandingCards } from '.';
+import { LandingCards } from './landing_cards';
 import { ADD_DATA_PATH } from '@kbn/security-solution-plugin/common';
-import { useVariation } from '../../../common/hooks/use_variation';
+import { useVariation } from '../../common/hooks/use_variation';
 
-jest.mock('../../../common/hooks/use_variation');
-jest.mock('../../../services');
+jest.mock('../../common/hooks/use_variation');
+jest.mock('../../services');
 
 describe('LandingCards component', () => {
   beforeEach(() => {
