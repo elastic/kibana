@@ -672,15 +672,6 @@ describe('processFields', () => {
   });
 
   describe('processFieldsWithWildcard', () => {
-    const wildcardYml = `
-    - name: a.*.b
-      type: long
-      format: bytes
-      unit: byte
-      metric_type: gauge
-      description: |
-        Total swap memory.
-`;
     const wildcardWithObjectTypeYml = `
     - name: a.*.b
       type: long
@@ -703,11 +694,10 @@ describe('processFields', () => {
 `;
 
     const noWildcardFields: Field[] = safeLoad(noWildcardYml);
-    const wildcardFields: Field[] = safeLoad(wildcardYml);
     const wildcardWithObjectTypeFields: Field[] = safeLoad(wildcardWithObjectTypeYml);
 
-    test('Does not add object type when object_type field when is alraedy defined and name has wildcard', () => {
-      expect(processFieldsWithWildcard(wildcardWithObjectTypeFields, false)).toMatchInlineSnapshot(`
+    test('Does not add object type when object_type field when is already defined and name has wildcard', () => {
+      expect(processFieldsWithWildcard(wildcardWithObjectTypeFields)).toMatchInlineSnapshot(`
         [
           {
             "name": "a.*.b",
