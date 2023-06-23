@@ -79,9 +79,8 @@
     "@kbn/cloud-chat-plugin",
     "@kbn/cloud-plugin",
     "@kbn/stack-alerts-plugin",
-    "@kbn/data-view-editor-plugin"
+    "@kbn/data-view-editor-plugin",
+    "@kbn/actions-plugin"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

@@ -51,17 +51,23 @@ import {
   RULE_DETAILS_ALERTS_SEARCH_BAR_ID,
   SEARCH_BAR_URL_STORAGE_KEY,
 } from './constants';
-import { RuleDetailsPathParams, TabId } from './types';
+
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { PageTitle } from './components/page_title';
 import { getHealthColor } from './helpers/get_health_color';
-import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
+import { hasAllPrivilege } from './helpers/has_all_privilege';
+import { hasExecuteActionsCapability } from './helpers/has_execute_actions_capability';
 import { paths } from '../../config/paths';
 import { ALERT_STATUS_ALL } from '../../../common/constants';
 import { observabilityFeatureId, ruleDetailsLocatorID } from '../../../common';
 import type { AlertStatus } from '../../../common/typings';
 
+export type TabId = typeof ALERTS_TAB | typeof EXECUTION_TAB;
+
+interface RuleDetailsPathParams {
+  ruleId: string;
+}
 export function RuleDetailsPage() {
   const {
     charts,
