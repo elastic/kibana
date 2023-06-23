@@ -26,11 +26,10 @@ export const useGetIncidentTypes = ({ http, connector }: Props) => {
   const { showErrorToast } = useCasesToast();
   return useQuery<ActionTypeExecutorResult<IncidentTypes>, ServerError>(
     connectorsQueriesKeys.resilientGetIncidentTypes(connector?.id ?? ''),
-    () => {
-      const abortCtrlRef = new AbortController();
+    ({ signal }) => {
       return getIncidentTypes({
         http,
-        signal: abortCtrlRef.signal,
+        signal,
         connectorId: connector?.id ?? '',
       });
     },
