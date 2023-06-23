@@ -6,30 +6,19 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useHistory, useParams, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiText,
   EuiSpacer,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiPopover,
   EuiTabbedContent,
-  EuiEmptyPrompt,
-  EuiSuperSelectOption,
-  EuiButton,
   EuiFlyoutSize,
   EuiTabbedContentTab,
 } from '@elastic/eui';
 
-import {
-  useLoadRuleTypes,
-  RuleType,
-  getNotifyWhenOptions,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import { useLoadRuleTypes, RuleType } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import { Query, BoolQuery } from '@kbn/es-query';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
@@ -40,10 +29,19 @@ import {
   defaultTimeRange,
   getDefaultAlertSummaryTimeRange,
 } from '../../utils/alert_summary_widget';
+import { PageTitle } from './components/page_title';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/alert_search_bar/alert_search_bar_with_url_sync';
 import { DeleteConfirmationModal } from './components/delete_confirmation_modal';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
-
+import { NoRuleFoundPanel } from './components/no_rule_found_panel';
+import { HeaderActions } from './components/header_actions';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { getHealthColor } from './helpers/get_health_color';
+import { hasAllPrivilege } from './helpers/has_all_privilege';
+import { paths } from '../../config/paths';
+import { ALERT_STATUS_ALL } from '../../../common/constants';
+import { observabilityFeatureId, ruleDetailsLocatorID } from '../../../common';
 import {
   EXECUTION_TAB,
   ALERTS_TAB,
@@ -51,16 +49,6 @@ import {
   RULE_DETAILS_ALERTS_SEARCH_BAR_ID,
   SEARCH_BAR_URL_STORAGE_KEY,
 } from './constants';
-
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useFetchRule } from '../../hooks/use_fetch_rule';
-import { PageTitle } from './components/page_title';
-import { getHealthColor } from './helpers/get_health_color';
-import { hasAllPrivilege } from './helpers/has_all_privilege';
-import { hasExecuteActionsCapability } from './helpers/has_execute_actions_capability';
-import { paths } from '../../config/paths';
-import { ALERT_STATUS_ALL } from '../../../common/constants';
-import { observabilityFeatureId, ruleDetailsLocatorID } from '../../../common';
 import type { AlertStatus } from '../../../common/typings';
 
 export type TabId = typeof ALERTS_TAB | typeof EXECUTION_TAB;
@@ -70,8 +58,14 @@ interface RuleDetailsPathParams {
 }
 export function RuleDetailsPage() {
   const {
-    charts,
-    http,
+    application: { capabilities, navigateToUrl },
+    charts: {
+      theme: { useChartsBaseTheme, useChartsTheme },
+    },
+    http: { basePath },
+    share: {
+      url: { locators },
+    },
     triggersActionsUi: {
       actionTypeRegistry,
       alertsTableConfigurationRegistry,
@@ -83,41 +77,53 @@ export function RuleDetailsPage() {
       getRuleEventLogList: RuleEventLogList,
       getRuleStatusPanel: RuleStatusPanel,
     },
-    application: { capabilities, navigateToUrl },
-    share: {
-      url: { locators },
-    },
   } = useKibana().services;
+  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const history = useHistory();
   const location = useLocation();
 
-  const chartProps = {
-    theme: charts.theme.useChartsTheme(),
-    baseTheme: charts.theme.useChartsBaseTheme(),
-  };
+  const theme = useChartsTheme();
+  const baseTheme = useChartsBaseTheme();
+
+  const { rule, isLoading, isError, refetch } = useFetchRule({ ruleId });
+
+  useBreadcrumbs([
+    {
+      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+        defaultMessage: 'Alerts',
+      }),
+      href: basePath.prepend(paths.observability.alerts),
+    },
+    {
+      href: basePath.prepend(paths.observability.rules),
+      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+        defaultMessage: 'Rules',
+      }),
+    },
+    {
+      text: rule && rule.name,
+    },
+  ]);
 
   const filteredRuleTypes = useMemo(
     () => observabilityRuleTypeRegistry.list(),
     [observabilityRuleTypeRegistry]
   );
 
-  const { rule, isLoading, isError, refetch } = useFetchRule({ ruleId });
-
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,
   });
+
+  const [isEditRuleFlyoutVisible, setEditRuleFlyoutVisible] = useState<boolean>(false);
+
   const [tabId, setTabId] = useState<TabId>(() => {
     const urlTabId = (toQuery(location.search)?.tabId as TabId) || EXECUTION_TAB;
     return [EXECUTION_TAB, ALERTS_TAB].includes(urlTabId) ? urlTabId : EXECUTION_TAB;
   });
   const [featureIds, setFeatureIds] = useState<ValidFeatureId[]>();
   const [ruleType, setRuleType] = useState<RuleType<string, string>>();
-
-  const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
-  const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
 
   const [ruleToDelete, setRuleToDelete] = useState<string | undefined>(undefined);
   const [isRuleDeleting, setIsRuleDeleting] = useState(false);
@@ -135,6 +141,7 @@ export function RuleDetailsPage() {
       'kibana.alert.rule.uuid': ruleId,
     },
   });
+
   const tabsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -180,28 +187,18 @@ export function RuleDetailsPage() {
     updateUrl({ tabId: newTabId });
   };
 
-  const NOTIFY_WHEN_OPTIONS = useRef<Array<EuiSuperSelectOption<unknown>>>([]);
-  useEffect(() => {
-    const loadNotifyWhenOption = async () => {
-      NOTIFY_WHEN_OPTIONS.current = await getNotifyWhenOptions();
-    };
-    loadNotifyWhenOption();
-  }, []);
+  const handleEditRule = () => {
+    setEditRuleFlyoutVisible(true);
+  };
 
-  const togglePopover = () =>
-    setIsRuleEditPopoverOpen((pervIsRuleEditPopoverOpen) => !pervIsRuleEditPopoverOpen);
+  const handleCloseRuleFlyout = () => {
+    setEditRuleFlyoutVisible(false);
+  };
 
-  const handleClosePopover = () => setIsRuleEditPopoverOpen(false);
-
-  const handleRemoveRule = useCallback(() => {
-    setIsRuleEditPopoverOpen(false);
-    if (rule) setRuleToDelete(rule.id);
-  }, [rule]);
-
-  const handleEditRule = useCallback(() => {
-    setIsRuleEditPopoverOpen(false);
-    setEditFlyoutVisible(true);
-  }, []);
+  const handleDeleteRule = () => {
+    setRuleToDelete(rule?.id);
+    setEditRuleFlyoutVisible(false);
+  };
 
   const handleIsDeletingRule = () => {
     setIsRuleDeleting(true);
@@ -210,7 +207,7 @@ export function RuleDetailsPage() {
   const handleIsRuleDeleted = () => {
     setRuleToDelete(undefined);
     setIsRuleDeleting(false);
-    navigateToUrl(http.basePath.prepend(paths.observability.rules));
+    navigateToUrl(basePath.prepend(paths.observability.rules));
   };
 
   useEffect(() => {
@@ -224,25 +221,7 @@ export function RuleDetailsPage() {
     }
   }, [rule, ruleTypes]);
 
-  useBreadcrumbs([
-    {
-      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
-        defaultMessage: 'Alerts',
-      }),
-      href: http.basePath.prepend(paths.observability.alerts),
-    },
-    {
-      href: http.basePath.prepend(paths.observability.rules),
-      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
-        defaultMessage: 'Rules',
-      }),
-    },
-    {
-      text: rule && rule.name,
-    },
-  ]);
-
-  const canExecuteActions = hasExecuteActionsCapability(capabilities);
+  const canExecuteActions = capabilities?.actions?.execute;
 
   const canSaveRule =
     rule &&
@@ -250,13 +229,14 @@ export function RuleDetailsPage() {
     // if the rule has actions, can the user save the rule's action params
     (canExecuteActions || (!canExecuteActions && rule.actions.length === 0));
 
-  const hasEditButton =
+  const isRuleEditable = Boolean(
     // can the user save the rule
     canSaveRule &&
-    // is this rule type editable from within Rules Management
-    (ruleTypeRegistry.has(rule.ruleTypeId)
-      ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
-      : false);
+      // is this rule type editable from within Rules Management
+      (ruleTypeRegistry.has(rule.ruleTypeId)
+        ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
+        : false)
+  );
 
   const tabs: EuiTabbedContentTab[] = [
     {
@@ -312,38 +292,12 @@ export function RuleDetailsPage() {
 
   if (isLoading || isRuleDeleting) return <CenterJustifiedSpinner />;
 
-  if (!rule || isError)
-    return (
-      <EuiPanel>
-        <EuiEmptyPrompt
-          iconType="warning"
-          color="danger"
-          title={
-            <h2>
-              {i18n.translate('xpack.observability.ruleDetails.errorPromptTitle', {
-                defaultMessage: 'Unable to load rule details',
-              })}
-            </h2>
-          }
-          body={
-            <p>
-              {i18n.translate('xpack.observability.ruleDetails.errorPromptBody', {
-                defaultMessage: 'There was an error loading the rule details.',
-              })}
-            </p>
-          }
-        />
-      </EuiPanel>
-    );
+  if (!rule || isError) return <NoRuleFoundPanel />;
 
-  const isLicenseError =
-    rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
-
-  const statusMessage = isLicenseError
-    ? i18n.translate('xpack.observability.ruleDetails.ruleStatusLicenseError', {
-        defaultMessage: 'License Error',
-      })
-    : rulesStatusesTranslationsMapping[rule.executionStatus.status];
+  const statusMessage =
+    rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License
+      ? rulesStatusesTranslationsMapping.noLicense
+      : rulesStatusesTranslationsMapping[rule.executionStatus.status];
 
   return (
     <ObservabilityPageTemplate
@@ -351,67 +305,21 @@ export function RuleDetailsPage() {
       pageHeader={{
         pageTitle: <PageTitle rule={rule} />,
         bottomBorder: false,
-        rightSideItems: hasEditButton
-          ? [
-              <EuiFlexGroup direction="rowReverse" alignItems="flexStart">
-                <EuiFlexItem>
-                  <EuiPopover
-                    id="contextRuleEditMenu"
-                    isOpen={isRuleEditPopoverOpen}
-                    closePopover={handleClosePopover}
-                    button={
-                      <EuiButton
-                        fill
-                        iconSide="right"
-                        onClick={togglePopover}
-                        iconType="arrowDown"
-                        data-test-subj="actions"
-                      >
-                        {i18n.translate('xpack.observability.ruleDetails.actionsButtonLabel', {
-                          defaultMessage: 'Actions',
-                        })}
-                      </EuiButton>
-                    }
-                  >
-                    <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
-                      <EuiButtonEmpty
-                        data-test-subj="editRuleButton"
-                        size="s"
-                        iconType="pencil"
-                        onClick={handleEditRule}
-                      >
-                        <EuiText size="s">
-                          {i18n.translate('xpack.observability.ruleDetails.editRule', {
-                            defaultMessage: 'Edit rule',
-                          })}
-                        </EuiText>
-                      </EuiButtonEmpty>
-                      <EuiButtonEmpty
-                        size="s"
-                        iconType="trash"
-                        color="danger"
-                        onClick={handleRemoveRule}
-                        data-test-subj="deleteRuleButton"
-                      >
-                        <EuiText size="s">
-                          {i18n.translate('xpack.observability.ruleDetails.deleteRule', {
-                            defaultMessage: 'Delete rule',
-                          })}
-                        </EuiText>
-                      </EuiButtonEmpty>
-                    </EuiFlexGroup>
-                  </EuiPopover>
-                </EuiFlexItem>
-              </EuiFlexGroup>,
-            ]
-          : [],
+        rightSideItems: [
+          <HeaderActions
+            isLoading={isLoading || isRuleDeleting}
+            isRuleEditable={isRuleEditable}
+            onEditRule={handleEditRule}
+            onDeleteRule={handleDeleteRule}
+          />,
+        ],
       }}
     >
       <EuiFlexGroup wrap gutterSize="m">
         <EuiFlexItem style={{ minWidth: 350 }}>
           <RuleStatusPanel
             rule={rule}
-            isEditable={hasEditButton}
+            isEditable={isRuleEditable}
             requestRefresh={refetch}
             healthColor={getHealthColor(rule.executionStatus.status)}
             statusMessage={statusMessage}
@@ -419,7 +327,7 @@ export function RuleDetailsPage() {
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
-            chartProps={chartProps}
+            chartProps={{ theme, baseTheme }}
             featureIds={featureIds}
             onClick={onAlertSummaryWidgetClick}
             timeRange={alertSummaryWidgetTimeRange}
@@ -450,12 +358,10 @@ export function RuleDetailsPage() {
         }}
       />
 
-      {editFlyoutVisible && (
+      {isEditRuleFlyoutVisible && (
         <EditRuleFlyout
           initialRule={rule}
-          onClose={() => {
-            setEditFlyoutVisible(false);
-          }}
+          onClose={handleCloseRuleFlyout}
           onSave={async () => {
             refetch();
           }}
@@ -493,5 +399,8 @@ const rulesStatusesTranslationsMapping = {
   }),
   warning: i18n.translate('xpack.observability.ruleDetails.ruleStatusWarning', {
     defaultMessage: 'Warning',
+  }),
+  noLicense: i18n.translate('xpack.observability.ruleDetails.ruleStatusLicenseError', {
+    defaultMessage: 'License Error',
   }),
 };
