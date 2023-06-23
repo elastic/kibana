@@ -47,7 +47,7 @@ import { getFilterItemObjListFromControlInput } from './utils';
 import { FiltersChangedBanner } from './filters_changed_banner';
 import { FilterGroupContext } from './filter_group_context';
 import { NUM_OF_CONTROLS } from './config';
-import { TEST_IDS } from './constants';
+import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS, TIMEOUTS } from './constants';
 import { URL_PARAM_ARRAY_EXCEPTION_MSG } from './translations';
 import { convertToBuildEsQuery } from '../../lib/kuery';
 
@@ -212,7 +212,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   );
 
   const debouncedFilterUpdates = useMemo(
-    () => debounce(handleOutputFilterUpdates, 500),
+    () => debounce(handleOutputFilterUpdates, TIMEOUTS.FILTER_UPDATES_DEBOUNCE_TIME),
     [handleOutputFilterUpdates]
   );
 
@@ -325,10 +325,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       finalControls.forEach((control, idx) => {
         addOptionsListControl(initialInput, {
           controlId: String(idx),
-          hideExclude: true,
-          hideSort: true,
-          hidePanelTitles: true,
-          placeholder: '',
+          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
           // option List controls will handle an invalid dataview
           // & display an appropriate message
           dataViewId: dataViewId ?? '',
@@ -397,10 +394,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
           // add persitable controls
           await controlGroup?.addOptionsListControl({
             title: control.title,
-            hideExclude: true,
-            hideSort: true,
-            hidePanelTitles: true,
-            placeholder: '',
+            ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
             // option List controls will handle an invalid dataview
             // & display an appropriate message
             dataViewId: dataViewId ?? '',

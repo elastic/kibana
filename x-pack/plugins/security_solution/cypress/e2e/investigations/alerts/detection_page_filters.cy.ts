@@ -12,7 +12,6 @@ import {
   CONTROL_FRAME_TITLE,
   CONTROL_POPOVER,
   FILTER_GROUP_CHANGED_BANNER,
-  OPTION_IGNORED,
   OPTION_LIST_LABELS,
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
@@ -38,7 +37,7 @@ import {
   waitForAlerts,
   waitForPageFilters,
 } from '../../../tasks/alerts';
-import { ALERTS_COUNT, ALERTS_REFRESH_BTN } from '../../../screens/alerts';
+import { ALERTS_COUNT, ALERTS_REFRESH_BTN, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
 import { kqlSearch, navigateFromHeaderTo } from '../../../tasks/security_header';
 import { ALERTS, CASES } from '../../../screens/security_header';
 import {
@@ -331,7 +330,7 @@ describe('Detections : Page Filters', () => {
     afterEach(() => {
       resetFilters();
     });
-    it('should recover from invalide kql Query result', () => {
+    it('should recover from invalid kql Query result', () => {
       // do an invalid search
       //
       kqlSearch('\\');
@@ -350,7 +349,7 @@ describe('Detections : Page Filters', () => {
       waitForPageFilters();
       togglePageFilterPopover(0);
       cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
-      cy.get(OPTION_IGNORED(0, 'open')).should('be.visible');
+      cy.get(EMPTY_ALERT_TABLE).should('be.visible');
     });
 
     it('should take filters into account', () => {
@@ -362,7 +361,7 @@ describe('Detections : Page Filters', () => {
       waitForPageFilters();
       togglePageFilterPopover(0);
       cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
-      cy.get(OPTION_IGNORED(0, 'open')).should('be.visible');
+      cy.get(EMPTY_ALERT_TABLE).should('be.visible');
     });
     it('should take timeRange into account', () => {
       const startDateWithZeroAlerts = 'Jan 1, 2002 @ 00:00:00.000';
@@ -375,7 +374,7 @@ describe('Detections : Page Filters', () => {
       waitForPageFilters();
       togglePageFilterPopover(0);
       cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
-      cy.get(OPTION_IGNORED(0, 'open')).should('be.visible');
+      cy.get(EMPTY_ALERT_TABLE).should('be.visible');
     });
   });
   it('Number fields are not visible in field edit panel', () => {

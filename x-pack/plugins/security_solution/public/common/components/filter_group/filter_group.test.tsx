@@ -26,7 +26,7 @@ import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import { initialInputData, sampleOutputData } from './mocks/data';
 import { createStore } from '../../store';
 import { useGetInitialUrlParamValue } from '../../utils/global_query_string/helpers';
-import { TEST_IDS } from './constants';
+import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS } from './constants';
 import {
   controlGroupFilterInputMock$,
   controlGroupFilterOutputMock$,
@@ -366,10 +366,7 @@ describe(' Filter Group Component ', () => {
         // check if upsert was called correctely
         expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(2);
         expect(controlGroupMock.addOptionsListControl.mock.calls[0][0]).toMatchObject({
-          hideExclude: true,
-          hideSort: true,
-          hidePanelTitles: true,
-          placeholder: '',
+          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
           ...DEFAULT_DETECTION_PAGE_FILTERS[0],
         });
         expect(controlGroupMock.addOptionsListControl.mock.calls[1][0]).toMatchObject({
@@ -595,18 +592,12 @@ describe(' Filter Group Component ', () => {
       updateControlGroupInputMock(initialInputData as ControlGroupInput);
       expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(2);
       expect(controlGroupMock.addOptionsListControl.mock.calls[0][1]).toMatchObject({
-        hideExclude: true,
-        hideSort: true,
-        hidePanelTitles: true,
-        placeholder: '',
+        ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
         ...DEFAULT_DETECTION_PAGE_FILTERS[0],
       });
 
       expect(controlGroupMock.addOptionsListControl.mock.calls[1][1]).toMatchObject({
-        hideExclude: true,
-        hideSort: true,
-        hidePanelTitles: true,
-        placeholder: '',
+        ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
         fieldName: 'abc',
       });
 
