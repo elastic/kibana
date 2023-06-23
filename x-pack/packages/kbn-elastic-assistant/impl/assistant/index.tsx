@@ -31,18 +31,16 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/c
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { getMessageFromRawResponse } from './helpers';
 
-import { ConversationSettingsPopover } from './conversation_settings_popover/conversation_settings_popover';
 import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
-import { SettingsPopover } from '../data_anonymization/settings/settings_popover';
 import { PromptTextArea } from './prompt_textarea';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
 import { useConversation } from './use_conversation';
 import { CodeBlockDetails } from './use_conversation/helpers';
 import { useSendMessages } from './use_send_messages';
 import type { Message } from '../assistant_context/types';
-import { ConversationSelector } from './conversation_selector';
+import { ConversationSelector } from './conversations/conversation_selector';
 import { PromptEditor } from './prompt_editor';
 import { getCombinedMessage } from './prompt/helpers';
 import * as i18n from './translations';
@@ -51,6 +49,7 @@ import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { ConnectorSetup } from '../connectorland/connector_setup';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import { BASE_CONVERSATIONS } from './use_conversation/sample_conversations';
+import { AssistantSettingsButton } from './settings/assistant_settings_button';
 
 const CommentsContainer = styled.div`
   max-height: 600px;
@@ -398,7 +397,7 @@ const AssistantComponent: React.FC<Props> = ({
                     </EuiFlexItem>
 
                     <EuiFlexItem grow={false}>
-                      <SettingsPopover />
+                      <AssistantSettingsButton selectedConversation={currentConversation} />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </>
@@ -530,14 +529,6 @@ const AssistantComponent: React.FC<Props> = ({
                     isLoading={isLoading}
                   />
                 </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={true}>
-                <ConversationSettingsPopover
-                  actionTypeRegistry={actionTypeRegistry}
-                  conversation={currentConversation}
-                  isDisabled={isWelcomeSetup}
-                  http={http}
-                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </ChatOptionsFlexItem>

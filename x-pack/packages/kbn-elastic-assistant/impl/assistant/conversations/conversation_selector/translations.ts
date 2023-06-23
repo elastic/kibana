@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const SELECTED_CONVERSATION_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.conversationSelector.defaultConversationTitle',
   {
-    defaultMessage: 'Selected conversation',
+    defaultMessage: 'Conversations',
   }
 );
 

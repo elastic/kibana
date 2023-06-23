@@ -6,13 +6,11 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiPopover } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
-import { QuickPrompt } from '../../..';
 import * as i18n from './translations';
-import { AddQuickPromptModal } from './add_quick_prompt_modal/add_quick_prompt_modal';
 import { useAssistantContext } from '../../assistant_context';
 
 const QuickPromptsFlexGroup = styled(EuiFlexGroup)`
@@ -30,8 +28,7 @@ interface QuickPromptsProps {
  * and localstorage for storing new and edited prompts.
  */
 export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ setInput }) => {
-  const { allQuickPrompts, basePromptContexts, promptContexts, setAllQuickPrompts } =
-    useAssistantContext();
+  const { allQuickPrompts, promptContexts } = useAssistantContext();
 
   const contextFilteredQuickPrompts = useMemo(() => {
     const registeredPromptContextTitles = Object.values(promptContexts).map((pc) => pc.category);
@@ -62,13 +59,9 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ setInput 
     },
     [closeOverflowPopover, setInput]
   );
-  // Callback for manage modal, saves to local storage on change
-  const onQuickPromptsChange = useCallback(
-    (newQuickPrompts: QuickPrompt[]) => {
-      setAllQuickPrompts(newQuickPrompts);
-    },
-    [setAllQuickPrompts]
-  );
+
+  const handleAddQuickPrompt = useCallback(() => {}, []);
+
   return (
     <QuickPromptsFlexGroup gutterSize="s" alignItems="center">
       {contextFilteredQuickPrompts.slice(0, COUNT_BEFORE_OVERFLOW).map((badge, index) => (
@@ -114,11 +107,9 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ setInput 
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <AddQuickPromptModal
-          promptContexts={basePromptContexts}
-          quickPrompts={allQuickPrompts}
-          onQuickPromptsChange={onQuickPromptsChange}
-        />
+        <EuiButtonEmpty onClick={handleAddQuickPrompt} iconType="plus" size="xs">
+          {i18n.ADD_QUICK_PROMPT}
+        </EuiButtonEmpty>
       </EuiFlexItem>
     </QuickPromptsFlexGroup>
   );

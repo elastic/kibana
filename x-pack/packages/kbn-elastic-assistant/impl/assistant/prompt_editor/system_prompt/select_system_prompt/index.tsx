@@ -23,13 +23,13 @@ import * as i18n from '../translations';
 import type { Prompt } from '../../../types';
 import { useAssistantContext } from '../../../../assistant_context';
 import { useConversation } from '../../../use_conversation';
-import { SystemPromptModal } from '../system_prompt_modal/system_prompt_modal';
+import { SystemPromptSettings } from '../system_prompt_modal/system_prompt_settings';
 
 export interface Props {
+  compressed?: boolean;
   conversation: Conversation | undefined;
   selectedPrompt: Prompt | undefined;
   clearSelectedSystemPrompt?: () => void;
-  fullWidth?: boolean;
   isClearable?: boolean;
   isEditing?: boolean;
   isOpen?: boolean;
@@ -41,10 +41,10 @@ export interface Props {
 const ADD_NEW_SYSTEM_PROMPT = 'ADD_NEW_SYSTEM_PROMPT';
 
 const SelectSystemPromptComponent: React.FC<Props> = ({
+  compressed = false,
   conversation,
   selectedPrompt,
   clearSelectedSystemPrompt,
-  fullWidth = true,
   isClearable = false,
   isEditing = false,
   isOpen = false,
@@ -149,8 +149,9 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
             `}
           >
             <EuiSuperSelect
+              compressed={compressed}
               data-test-subj="promptSuperSelect"
-              fullWidth={fullWidth}
+              fullWidth
               hasDividers
               itemLayoutAlign="top"
               isOpen={isOpenLocal && !isSystemPromptModalVisible}
@@ -187,10 +188,10 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
         )}
       </EuiFlexItem>
       {isSystemPromptModalVisible && (
-        <SystemPromptModal
-          onClose={() => setIsSystemPromptModalVisible(false)}
+        <SystemPromptSettings
+          // onClose={() => setIsSystemPromptModalVisible(false)}
           onSystemPromptsChange={onSystemPromptsChange}
-          systemPrompts={allSystemPrompts}
+          // systemPrompts={allSystemPrompts}
         />
       )}
     </EuiFlexGroup>

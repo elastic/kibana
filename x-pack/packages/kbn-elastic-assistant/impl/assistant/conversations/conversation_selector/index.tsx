@@ -20,12 +20,12 @@ import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
-import { Conversation } from '../../..';
-import { useAssistantContext } from '../../assistant_context';
+import { Conversation } from '../../../..';
+import { useAssistantContext } from '../../../assistant_context';
 import * as i18n from './translations';
-import { DEFAULT_CONVERSATION_TITLE } from '../use_conversation/translations';
-import { useConversation } from '../use_conversation';
-import { SystemPromptSelectorOption } from '../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
+import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
+import { useConversation } from '../../use_conversation';
+import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
