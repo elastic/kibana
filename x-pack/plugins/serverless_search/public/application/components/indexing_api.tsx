@@ -137,6 +137,7 @@ export const ElasticsearchIndexingApi = () => {
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchURL,
     apiKey: API_KEY_PLACEHOLDER,
+    indexName: selectedIndex?.name,
   };
   const showNoIndices = !isLoading && data?.indices?.length === 0 && indexSearchQuery === undefined;
 
@@ -205,7 +206,7 @@ export const ElasticsearchIndexingApi = () => {
               </EuiFlexGroup>
               <EuiSpacer />
               <CodeBox
-                code="ingestData"
+                code="ingestDataIndex"
                 codeArgs={codeSnippetArguments}
                 languages={languageDefinitions}
                 selectedLanguage={selectedLanguage}
