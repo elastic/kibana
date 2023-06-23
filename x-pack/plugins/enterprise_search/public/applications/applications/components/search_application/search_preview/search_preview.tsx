@@ -426,13 +426,13 @@ export const SearchApplicationSearchPreview: React.FC = () => {
                           isLoading={lastAPICall == null}
                         >
                           {i18n.translate(
-                            'xpack.enterpriseSearch.content.searchApplication.searchPreview.inputView.appendButtonLabel',
+                            'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.inputView.appendButtonLabel',
                             { defaultMessage: 'View API call' }
                           )}
                         </EuiButtonEmpty>
                       ),
                       placeholder: i18n.translate(
-                        'xpack.enterpriseSearch.content.engine.searchPreview.inputView.placeholder',
+                        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.inputView.placeholder',
                         { defaultMessage: 'Search' }
                       ),
                     })}

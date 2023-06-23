@@ -152,9 +152,12 @@ export const SearchBar: React.FC<InputProps> = ({ additionalInputProps }) => (
   <EuiFlexGroup gutterSize="s">
     <EuiFieldSearch fullWidth {...additionalInputProps} />
     <EuiButton type="submit" color="primary" fill>
-      {i18n.translate('xpack.enterpriseSearch.content.engine.searchPreview.inputView.searchLabel', {
-        defaultMessage: 'Search',
-      })}
+      {i18n.translate(
+        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.inputView.searchLabel',
+        {
+          defaultMessage: 'Search',
+        }
+      )}
     </EuiButton>
   </EuiFlexGroup>
 );
