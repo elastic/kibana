@@ -21,6 +21,7 @@ import { coreServices, dashboardServices } from '../services/navigation_embeddab
 import { navigationEmbeddableReducers } from '../navigation_embeddable_reducers';
 import { NavigationEmbeddableInput, NavigationEmbeddableReduxState } from '../types';
 import { NavigationEmbeddableComponent } from '../components/navigation_embeddable_component';
+import { isEmpty } from 'lodash';
 
 export const NAVIGATION_EMBEDDABLE_TYPE = 'navigation';
 
@@ -79,11 +80,7 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
 
-    const parentDashboardId = (this.parent as DashboardContainer | undefined)?.getState()
-      .componentState.lastSavedId;
-    if (parentDashboardId) {
-      this.dispatch.setCurrentDashboardId(parentDashboardId);
-    }
+    this.initialize();
   }
 
   public destroy() {
@@ -106,6 +103,48 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
       </KibanaThemeProvider>,
       node
     );
+  }
+
+  private async initialize() {
+    const { dashboardLinks } = this.getInput();
+
+    const parentDashboardId = (this.parent as DashboardContainer | undefined)?.getState()
+      .componentState.lastSavedId;
+    if (parentDashboardId) {
+      this.dispatch.setCurrentDashboardId(parentDashboardId);
+    }
+
+    if (dashboardLinks && !isEmpty(dashboardLinks)) {
+      const findDashboardsService = await dashboardServices.findDashboardsService();
+      const responses = await findDashboardsService.findByIds(
+        dashboardLinks.map((link) => link.id)
+      );
+      const componentStateDashboardLinks = responses.map((response, i) => {
+        if (response.status === 'error') {
+          throw new Error('failure');
+        }
+        return {
+          id: response.id,
+          label: dashboardLinks[i].label,
+          title: response.attributes.title,
+          description: response.attributes.description,
+        };
+      });
+
+      this.dispatch.setDashboardLinks(componentStateDashboardLinks);
+      console.log('componentStateDashboardLinks', componentStateDashboardLinks);
+    }
+
+    this.setInitializationFinished();
+    console.log(dashboardLinks);
+  }
+
+  public async getDashboard(id: string) {
+    const findDashboardsService = await dashboardServices.findDashboardsService();
+
+    const responses = await findDashboardsService.findByIds([id]);
+    console.log(responses);
+    return responses;
   }
 
   public async fetchDashboardList(

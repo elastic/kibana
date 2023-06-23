@@ -39,7 +39,7 @@ export const NavigationEmbeddableDashboardList = ({ onDashboardSelected, ...othe
           onDashboardSelected(dashboard);
         }
         return {
-          data: dashboard,
+          data: dashboard, // just store the ID here - that's all that is necessary
           className: classNames({
             'navEmbeddable-currentDashboard': isCurrentDashboard,
           }),

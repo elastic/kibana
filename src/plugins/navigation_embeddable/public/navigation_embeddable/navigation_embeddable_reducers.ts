@@ -30,13 +30,24 @@ export const navigationEmbeddableReducers = {
   ) => {
     state.componentState.totalDashboards = action.payload;
   },
+  setDashboardLinks: (
+    state: WritableDraft<NavigationEmbeddableReduxState>,
+    action: PayloadAction<DashboardLink[]>
+  ) => {
+    state.componentState.dashboardLinks = action.payload;
+  },
   addLink: (
     state: WritableDraft<NavigationEmbeddableReduxState>,
     action: PayloadAction<DashboardLink>
   ) => {
+    if (!state.componentState.dashboardLinks) {
+      state.componentState.dashboardLinks = [];
+    }
+    state.componentState.dashboardLinks.push(action.payload);
+
     if (!state.explicitInput.dashboardLinks) {
       state.explicitInput.dashboardLinks = [];
     }
-    state.explicitInput.dashboardLinks.push(action.payload);
+    state.explicitInput.dashboardLinks.push({ id: action.payload.id, label: action.payload.label });
   },
 };

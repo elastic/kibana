@@ -12,22 +12,22 @@ import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public
 
 export interface DashboardLink {
   id: string;
-  title: string; // TODO: Should not be saved into the explicit input - it can be changed
+  title?: string;
   label?: string;
-  description?: string; // TODO: Should not be saved into the explicit input - it can be changed
+  description?: string;
 }
 
 export interface NavigationEmbeddableInput extends EmbeddableInput {
-  dashboardLinks?: DashboardLink[];
+  dashboardLinks?: Array<Pick<DashboardLink, 'id' | 'label'>>;
 }
 
 export interface NavigationEmbeddableComponentState {
   totalDashboards?: number;
   currentDashboardId?: string;
   dashboardList?: DashboardItem[];
+  dashboardLinks?: DashboardLink[];
 }
 
-// public only - redux embeddable state type
 export type NavigationEmbeddableReduxState = ReduxEmbeddableState<
   NavigationEmbeddableInput,
   EmbeddableOutput,

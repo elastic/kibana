@@ -6,23 +6,30 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { EuiListGroup, EuiListGroupItemProps, EuiPanel } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiListGroup,
+  EuiListGroupItemProps,
+  EuiPanel,
+  EuiPopover,
+} from '@elastic/eui';
 
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
-import { NavigationEmbeddableDashboardPicker } from './navigation_embeddable_dashboard_picker';
 
 import './navigation_embeddable.scss';
+import { NavigationEmbeddableLinkEditor } from './navigation_embeddable_link_editor';
 
 export const NavigationEmbeddableComponent = () => {
   const navEmbeddable = useNavigationEmbeddable();
 
-  const selectedDashboards = navEmbeddable.select((state) => state.explicitInput.dashboardLinks);
+  const selectedDashboards = navEmbeddable.select((state) => state.componentState.dashboardLinks);
   const currentDashboardId = navEmbeddable.select(
     (state) => state.componentState.currentDashboardId
   );
 
+  const [isEditPopoverOpen, setIsEditPopoverOpen] = useState(false);
   const [dashboardListGroupItems, setDashboardListGroupItems] = useState<EuiListGroupItemProps[]>(
     []
   );
@@ -33,16 +40,40 @@ export const NavigationEmbeddableComponent = () => {
         return {
           label: dashboard.label || dashboard.title,
           iconType: 'dashboardApp',
-          color: dashboard.id === currentDashboardId ? 'text' : 'primary',
+          ...(dashboard.id === currentDashboardId
+            ? {
+                color: 'text',
+              }
+            : {
+                color: 'primary',
+                onClick: () => {}, // TODO: connect to drilldown
+              }),
         };
       })
     );
   }, [selectedDashboards, currentDashboardId]);
 
+  const onButtonClick = useCallback(() => setIsEditPopoverOpen((isOpen) => !isOpen), []);
+
+  const addLinkButton = (
+    <EuiButtonEmpty onClick={onButtonClick} iconType="plusInCircle">
+      Add link
+    </EuiButtonEmpty>
+  );
+
+  // TODO: horizontal VS vertical layout rather than `EuiListGroup`
   return (
     <EuiPanel>
       <EuiListGroup flush listItems={dashboardListGroupItems} size="s" />
-      <NavigationEmbeddableDashboardPicker />
+      <EuiPopover
+        button={addLinkButton}
+        panelStyle={{ width: 300 }}
+        isOpen={isEditPopoverOpen}
+        panelPaddingSize="s"
+        closePopover={() => setIsEditPopoverOpen(false)}
+      >
+        <NavigationEmbeddableLinkEditor setIsPopoverOpen={setIsEditPopoverOpen} />
+      </EuiPopover>
     </EuiPanel>
   );
 };
