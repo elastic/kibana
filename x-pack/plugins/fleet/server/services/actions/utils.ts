@@ -9,6 +9,8 @@ import type { KueryNode } from '@kbn/es-query';
 import { get } from 'lodash';
 import { deepFreeze } from '@kbn/std';
 
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
+
 const getFieldType = (
   key: string | undefined | null,
   indexMappings: FleetActionsIndexMapping
@@ -41,7 +43,7 @@ export const hasFieldKeyError = (
         ? ALLOWED_FLEET_ACTIONS_FIELD_TYPES.includes(type)
         : ALLOWED_FLEET_ACTIONS_RESULTS_FIELD_TYPES.includes(type)
     );
-    const indexName = indexType === 'actions' ? '.fleet-actions' : '.fleet-actions-results';
+    const indexName = indexType === 'actions' ? AGENT_ACTIONS_INDEX : AGENT_ACTIONS_RESULTS_INDEX;
     if (!isFieldDefined(indexMapping, key)) {
       return `This key '${key}' does not exist in ${indexName} index mappings`;
     }
