@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import { CoreStart, Plugin } from '@kbn/core/public';
 import { LOG_EXPLORER_PROFILE_ID } from '../common/constants';
 import { createLazyCustomDatasetSelector } from './customizations';
-import { DiscoverLogExplorerClientPluginClass, DiscoverLogExplorerStartDeps } from './types';
+import {
+  DiscoverLogExplorerPluginSetup,
+  DiscoverLogExplorerPluginStart,
+  DiscoverLogExplorerStartDeps,
+} from './types';
 
-export class DiscoverLogExplorerPlugin implements DiscoverLogExplorerClientPluginClass {
+export class DiscoverLogExplorerPlugin
+  implements Plugin<DiscoverLogExplorerPluginSetup, DiscoverLogExplorerPluginStart>
+{
   public setup() {}
 
   public start(core: CoreStart, plugins: DiscoverLogExplorerStartDeps) {
