@@ -10,6 +10,8 @@ import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
+import type { KafkaOutput } from '../../../../../../../common/types/models';
+
 import {
   kafkaAuthType,
   kafkaBrokerAckReliability,
@@ -113,7 +115,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const isPreconfigured = output?.is_preconfigured ?? false;
   const allowEdit = output?.allow_edit ?? [];
 
-  function isDisabled(field: keyof Output) {
+  function isDisabled(field: keyof Output | keyof KafkaOutput) {
     if (!isPreconfigured) {
       return false;
     }
@@ -234,10 +236,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
    * Kafka inputs
    */
 
+  const kafkaOutput = output as KafkaOutput;
+
   const kafkaVersionInput = useInput(
-    (output as any)?.version ?? '1.0.0',
+    kafkaOutput?.version ?? '1.0.0',
     undefined,
-    isDisabled('version' as any)
+    isDisabled('version')
   );
 
   const kafkaHostsInput = useComboInput(
@@ -248,58 +252,83 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const kafkaAuthMethodInput = useRadioInput(
-    kafkaAuthType.Userpass,
-    isDisabled('auth_type' as any)
+    kafkaOutput?.auth_type ?? kafkaAuthType.Userpass,
+    isDisabled('auth_type')
   );
 
-  const kafkaAuthUsernameInput = useInput('', validateKafkaUsername, isDisabled('username' as any));
-  const kafkaAuthPasswordInput = useInput('', validateKafkaPassword, isDisabled('password' as any));
+  const kafkaAuthUsernameInput = useInput(
+    kafkaOutput?.username ?? '',
+    validateKafkaUsername,
+    isDisabled('username')
+  );
+  const kafkaAuthPasswordInput = useInput(
+    kafkaOutput?.password ?? '',
+    validateKafkaPassword,
+    isDisabled('password')
+  );
 
   const kafkaSaslMechanismInput = useRadioInput(
-    kafkaSaslMechanism.Plain,
-    isDisabled('sasl' as any)
+    kafkaOutput?.sasl?.mechanism ?? kafkaSaslMechanism.Plain,
+    isDisabled('sasl')
   );
 
   const kafkaPartitionTypeInput = useRadioInput(
-    kafkaPartitionType.Random,
-    isDisabled('partition' as any)
+    kafkaOutput?.partition ?? kafkaPartitionType.Random,
+    isDisabled('partition')
   );
 
-  const kafkaPartitionTypeRandomInput = useInput('', undefined, isDisabled('partition' as any));
-  const kafkaPartitionTypeHashInput = useInput('', undefined, isDisabled('partition' as any));
-  const kafkaPartitionTypeRoundRobinInput = useInput('', undefined, isDisabled('partition' as any));
+  const kafkaPartitionTypeRandomInput = useInput(
+    `${kafkaOutput?.random?.group_events ?? ''}`,
+    undefined,
+    isDisabled('partition')
+  );
+  const kafkaPartitionTypeHashInput = useInput(
+    kafkaOutput?.hash?.hash ?? '',
+    undefined,
+    isDisabled('partition')
+  );
+  const kafkaPartitionTypeRoundRobinInput = useInput(
+    `${kafkaOutput?.round_robin?.group_events ?? ''}`,
+    undefined,
+    isDisabled('partition')
+  );
   const kafkaHeadersInput = useComboInput(
     'kafkaHeadersComboBox',
     [],
     undefined,
-    isDisabled('headers' as any)
+    isDisabled('headers')
   ); // TODO: validate headers
   const kafkaHeadersKeyInput = useInput('', undefined, isDisabled('headers' as any));
   const kafkaHeadersValueInput = useInput('', undefined, isDisabled('headers' as any));
-  const kafkaCompressionInput = useSwitchInput(false, isDisabled('compression' as any));
+
+  const kafkaCompressionInput = useSwitchInput(
+    !!kafkaOutput?.compression,
+    isDisabled('compression')
+  );
   const kafkaCompressionLevelInput = useInput(
-    (output as any)?.compression_level ?? 4,
+    `${kafkaOutput?.compression_level ?? 4}`,
     undefined,
-    isDisabled('compression_level' as any)
+    isDisabled('compression_level')
   );
   const kafkaCompressionCodecInput = useInput(
-    (output as any)?.compression ?? kafkaCompressionType.Gzip,
+    kafkaOutput?.compression ?? kafkaCompressionType.Gzip,
     undefined,
-    isDisabled('compression' as any)
+    isDisabled('compression')
   );
 
   const kafkaBrokerTimeoutInput = useInput(
-    (output as any)?.broker_timeout ?? 30,
+    `${kafkaOutput?.broker_timeout ?? 30}`,
     undefined,
-    isDisabled('broker_timeout' as any)
+    isDisabled('broker_timeout')
   );
 
   const kafkaBrokerReachabilityTimeoutInput = useInput(
-    (output as any)?.broker_reachability_timeout ?? 30,
+    `${kafkaOutput?.timeout ?? 30}`,
     undefined,
-    isDisabled('broker_reachability_timeout' as any)
+    isDisabled('timeout')
   );
 
+  // TODO:
   const kafkaBrokerChannelBufferSizeInput = useInput(
     (output as any)?.broker_channel_buffer_size ?? 256,
     undefined,
@@ -312,7 +341,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isDisabled('broker_ack_replicas' as any)
   );
 
-  const kafkaKeyInput = useInput('', undefined, isDisabled('key' as any));
+  const kafkaKeyInput = useInput(kafkaOutput?.key ?? '', undefined, isDisabled('key'));
 
   const isLogstash = typeInput.value === outputType.Logstash;
   const isKafka = typeInput.value === outputType.Kafka;
