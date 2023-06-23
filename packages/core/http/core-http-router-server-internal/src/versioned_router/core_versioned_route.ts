@@ -24,7 +24,12 @@ import type { Method } from './types';
 import type { CoreVersionedRouter } from './core_versioned_router';
 
 import { validate } from './validate';
-import { isAllowedPublicVersion, isValidRouteVersion } from './is_valid_route_version';
+import {
+  isAllowedPublicVersion,
+  isValidRouteVersion,
+  hasVersion,
+  readVersion,
+} from './route_version_utils';
 import { injectResponseHeaders } from './inject_response_headers';
 
 import { resolvers } from './handler_resolvers';
@@ -109,7 +114,10 @@ export class CoreVersionedRoute implements VersionedRoute {
       });
     }
 
-    if (!this.hasVersion(req) && (this.isInternal || this.router.isDev)) {
+    if (
+      !hasVersion(req, this.options.enableQueryVersion) &&
+      (this.isInternal || this.router.isDev)
+    ) {
       return res.badRequest({
         body: `Please specify a version via ${ELASTIC_HTTP_VERSION_HEADER} header. Available versions: ${this.versionsToString()}`,
       });
@@ -185,13 +193,8 @@ export class CoreVersionedRoute implements VersionedRoute {
     );
   };
 
-  private hasVersion(request: KibanaRequest): boolean {
-    return ELASTIC_HTTP_VERSION_HEADER in request.headers;
-  }
-
   private getVersion(request: KibanaRequest): ApiVersion {
-    const versions = request.headers?.[ELASTIC_HTTP_VERSION_HEADER];
-    return Array.isArray(versions) ? versions[0] : versions ?? this.getDefaultVersion();
+    return readVersion(request, this.options.enableQueryVersion) ?? this.getDefaultVersion();
   }
 
   private validateVersion(version: string) {

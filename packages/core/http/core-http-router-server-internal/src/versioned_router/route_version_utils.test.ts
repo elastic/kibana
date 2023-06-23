@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { isValidRouteVersion, isAllowedPublicVersion } from './is_valid_route_version';
+import {
+  isValidRouteVersion,
+  isAllowedPublicVersion,
+  hasVersion,
+  readVersion,
+} from './route_version_utils';
 
 describe('isAllowedPublicVersion', () => {
   test('allows 2023-10-31', () => {
@@ -52,5 +57,40 @@ describe('isValidRouteVersion', () => {
     ])('%p returns an error message', (value: string) => {
       expect(isValidRouteVersion(false, value)).toMatch(/Invalid version number/);
     });
+  });
+});
+
+describe('hasVersion', () => {
+  test('detects the version header', () => {
+    expect(hasVersion({ headers: { 'elastic-api-version': '1' } } as any)).toBe(true);
+    expect(hasVersion({ headers: {} } as any)).toBe(false);
+  });
+  test('detects query version, when enabled', () => {
+    expect(hasVersion({ headers: {}, query: { apiVersion: '1' } } as any, true)).toBe(true);
+    expect(hasVersion({ headers: {} } as any, false)).toBe(false);
+  });
+  test('returns true when both are present', () => {
+    expect(
+      hasVersion({ headers: { 'elastic-api-version': 1 }, query: { apiVersion: '2' } } as any, true)
+    ).toBe(true);
+  });
+});
+
+describe('readVersion', () => {
+  test('reads the version header', () => {
+    expect(readVersion({ headers: { 'elastic-api-version': '1' } } as any)).toBe('1');
+    expect(readVersion({ headers: {} } as any)).toBe(undefined);
+  });
+  test('reads query version when enabled', () => {
+    expect(readVersion({ headers: {}, query: { apiVersion: '1' } } as any, true)).toBe('1');
+    expect(readVersion({ headers: {} } as any, false)).toBe(undefined);
+  });
+  test('header version takes precedence', () => {
+    expect(
+      readVersion(
+        { headers: { 'elastic-api-version': '3' }, query: { apiVersion: '2' } } as any,
+        true
+      )
+    ).toBe('3');
   });
 });

@@ -5,6 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import {
+  ApiVersion,
+  ELASTIC_HTTP_VERSION_HEADER,
+  ELASTIC_HTTP_VERSION_QUERY_PARAM,
+} from '@kbn/core-http-common';
+import { isObject } from 'lodash';
+import { schema } from '@kbn/config-schema';
+import { KibanaRequest } from '@kbn/core-http-server';
 import moment from 'moment';
 
 const PUBLIC_VERSION_REGEX = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
@@ -37,4 +45,41 @@ export function isValidRouteVersion(isPublicApi: boolean, version: string): unde
   return INTERNAL_VERSION_REGEX.test(version) && version !== '0'
     ? undefined
     : `Invalid version number. Received "${version}", expected a string containing _only_ a finite, whole number greater than 0.`;
+}
+
+function hasQueryVersion(request: KibanaRequest) {
+  return isObject(request.query) && ELASTIC_HTTP_VERSION_QUERY_PARAM in request.query;
+}
+export function hasVersion(request: KibanaRequest, isQueryVersionEnabled?: boolean): boolean {
+  return Boolean(
+    ELASTIC_HTTP_VERSION_HEADER in request.headers ||
+      (isQueryVersionEnabled && hasQueryVersion(request))
+  );
+}
+
+export const queryVersionSchema = schema.object(
+  {
+    [ELASTIC_HTTP_VERSION_QUERY_PARAM]: schema.maybe(schema.string()),
+  },
+  { unknowns: 'ignore' }
+);
+function readQueryVersion(request: KibanaRequest): undefined | ApiVersion {
+  try {
+    const { [ELASTIC_HTTP_VERSION_QUERY_PARAM]: version } = queryVersionSchema.validate(
+      request.query
+    );
+    return version;
+  } catch (e) {
+    return undefined;
+  }
+}
+/** Reading from header takes precedence over query param */
+export function readVersion(
+  request: KibanaRequest,
+  isQueryVersionEnabled?: boolean
+): undefined | ApiVersion {
+  const versions = request.headers?.[ELASTIC_HTTP_VERSION_HEADER];
+  const headerVersion = Array.isArray(versions) ? versions[0] : versions;
+  if (headerVersion) return headerVersion;
+  if (isQueryVersionEnabled) return readQueryVersion(request);
 }
