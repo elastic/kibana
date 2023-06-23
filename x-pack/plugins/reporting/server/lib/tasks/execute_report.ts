@@ -121,9 +121,7 @@ export class ExecuteReportTask implements ReportingTask {
   }
 
   private getJobContentEncoding(jobType: string) {
-    const exportType = this.exportTypesRegistry.get(
-      ({ jobType: _jobType }) => _jobType === jobType
-    );
+    const exportType = this.exportTypesRegistry.get((e) => e.jobType === jobType);
     return exportType.jobContentEncoding;
   }
 
@@ -245,7 +243,7 @@ export class ExecuteReportTask implements ReportingTask {
     cancellationToken: CancellationToken,
     stream: Writable
   ): Promise<TaskRunResult> {
-    const exportType = this.exportTypesRegistry.get(({ jobType }) => jobType === task.jobtype);
+    const exportType = this.exportTypesRegistry.get((e) => e.jobType === task.jobtype);
     if (!exportType) {
       throw new Error(`No export type from ${task.jobtype} found to execute report`);
     }
@@ -253,7 +251,7 @@ export class ExecuteReportTask implements ReportingTask {
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
     return Rx.lastValueFrom(
-      Rx.from(exportType.runTask(task.payload, task.id, cancellationToken, stream)).pipe(
+      Rx.from(exportType.runTask(task.id, task.payload, cancellationToken, stream)).pipe(
         timeout(queueTimeout)
       ) // throw an error if a value is not emitted before timeout
     );
@@ -278,7 +276,6 @@ export class ExecuteReportTask implements ReportingTask {
     docId = `/${report._index}/_doc/${report._id}`;
 
     const resp = await store.setReportCompleted(report, doc);
-
     this.logger.info(`Saved ${report.jobtype} job ${docId}`);
     report._seq_no = resp._seq_no;
     report._primary_term = resp._primary_term;
@@ -361,6 +358,7 @@ export class ExecuteReportTask implements ReportingTask {
                 encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
               }
             );
+
             eventLog.logExecutionStart();
 
             const output = await Promise.race<TaskRunResult>([

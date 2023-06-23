@@ -89,7 +89,6 @@ describe('Execute Report Task', () => {
       name: 'Noop',
       setup: jest.fn(),
       start: jest.fn(),
-      getSpaceId: jest.fn(),
       createJob: () => new Promise(() => {}),
       runTask: () => new Promise(() => {}),
       jobContentExtension: 'pdf',

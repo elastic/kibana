@@ -45,7 +45,7 @@ export class RequestHandler {
   }
 
   public async enqueueJob(exportTypeId: string, jobParams: BaseParams) {
-    const { reporting, logger, context, user, req } = this;
+    const { reporting, logger, context, req, user } = this;
 
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
 
@@ -56,14 +56,16 @@ export class RequestHandler {
     const store = await reporting.getStore();
 
     if (!exportType.createJob) {
-      throw new Error(`Export type ${exportTypeId} is not an async job type!`);
+      throw new Error(`Export type ${exportTypeId} is not a valid instance!`);
     }
 
-    // 1. ensure the incoming params have a version field (should be set by the UI)
+    // 1. Ensure the incoming params have a version field (should be set by the UI)
     jobParams.version = checkParamsVersion(jobParams, logger);
-    // 2. encrypt request headers for the running report job to authenticate itself with Kibana
+
+    // 2. Encrypt request headers to store for the running report job to authenticate itself with Kibana
     const headers = await this.encryptHeaders();
 
+    // 3. Create a payload object by calling exportType.createJob(), and adding some automatic parameters
     const job = exportType.createJob(jobParams, context, req);
 
     const payload = {

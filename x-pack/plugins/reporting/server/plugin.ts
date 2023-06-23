@@ -36,8 +36,6 @@ export class ReportingPlugin
 {
   private logger: Logger;
   private reportingCore?: ReportingCore;
-  // // private pdfExport?: PdfExportType;
-  // private exportTypesRegistry: ExportTypesRegistry = new ExportTypesRegistry();
 
   constructor(private initContext: PluginInitializerContext<ReportingConfigType>) {
     this.logger = initContext.logger.get();
@@ -62,15 +60,6 @@ export class ReportingPlugin
     // Usage counter for reporting telemetry
     const usageCounter = plugins.usageCollection?.createUsageCounter(PLUGIN_ID);
 
-    // this.pdfExport = new PdfExportType(
-    //   core,
-    //   reportingCore.getConfig(),
-    //   this.logger,
-    //   this.initContext
-    // );
-
-    // this.exportTypesRegistry.register(this.pdfExport);
-
     reportingCore.pluginSetup({
       logger: this.logger,
       status,
@@ -78,8 +67,6 @@ export class ReportingPlugin
       router: http.createRouter<ReportingRequestHandlerContext>(),
       usageCounter,
       docLinks: core.docLinks,
-      // pdfExport: this.pdfExport,
-      // exportTypesRegistry: this.exportTypesRegistry,
       ...plugins,
     });
 

@@ -64,8 +64,8 @@ export type CreateJobFn<JobParamsType> = (
 ) => JobParamsType & { isDeprecated: boolean; browserTimezone: any };
 
 export type RunTaskFn<TaskPayloadType> = (
-  payload: TaskPayloadType,
   jobId: string,
+  payload: TaskPayloadType,
   cancellationToken: CancellationToken,
   stream: Writable
 ) => Promise<TaskRunResult>;

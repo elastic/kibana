@@ -13,24 +13,22 @@ import {
 } from 'url';
 import { ReportingConfigType } from '../../config';
 import { ReportingServerInfo } from '../../core';
-// import { TaskPayloadPNG } from '../png/types';
+import { TaskPayloadPNG } from '../png/types';
 import { TaskPayloadPDF } from '../printable_pdf/types';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
 import { validateUrls } from './validate_urls';
 
-// @TODO removing code that isn't typed with PDF_v2 for type check passing
-
-// function isPngJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPNG {
-//   return (job as TaskPayloadPNG).relativeUrl !== undefined;
-// }
-function isPdfJob(job: TaskPayloadPDF): job is TaskPayloadPDF {
+function isPngJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPNG {
+  return (job as TaskPayloadPNG).relativeUrl !== undefined;
+}
+function isPdfJob(job: TaskPayloadPNG | TaskPayloadPDF): job is TaskPayloadPDF {
   return (job as TaskPayloadPDF).objects !== undefined;
 }
 
 export function getFullUrls(
   serverInfo: ReportingServerInfo,
   config: ReportingConfigType,
-  job: TaskPayloadPDF
+  job: TaskPayloadPDF | TaskPayloadPNG
 ) {
   const {
     kibanaServer: { protocol, hostname, port },
@@ -45,10 +43,9 @@ export function getFullUrls(
   // PDF and PNG job params put in the url differently
   let relativeUrls: string[] = [];
 
-  // if (isPngJob(job)) {
-  //   relativeUrls = [job.relativeUrl];
-  // } else
-  if (isPdfJob(job)) {
+  if (isPngJob(job)) {
+    relativeUrls = [job.relativeUrl];
+  } else if (isPdfJob(job)) {
     relativeUrls = job.objects.map((obj) => obj.relativeUrl);
   } else {
     throw new Error(

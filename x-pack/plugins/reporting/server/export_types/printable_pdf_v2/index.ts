@@ -4,35 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import apm from 'elastic-apm-node';
+
+import { Headers } from '@kbn/core/server';
 import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import { Writable } from 'stream';
+import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
+import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
-import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
-import { Headers } from '@kbn/core/server';
+import { Writable } from 'stream';
 import {
-  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
-  REPORTING_TRANSACTION_TYPE,
+  LICENSE_TYPE_CLOUD_STANDARD,
+  LICENSE_TYPE_ENTERPRISE,
+  LICENSE_TYPE_GOLD,
+  LICENSE_TYPE_PLATINUM,
+  LICENSE_TYPE_TRIAL,
   PDF_JOB_TYPE_V2,
   PDF_REPORT_TYPE_V2,
+  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
+  REPORTING_TRANSACTION_TYPE,
 } from '../../../common/constants';
 import { JobParamsPDFV2 } from '../../../common/types';
 import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
-import {
-  decryptJobHeaders,
-  ExportType,
-  ExportTypeSetupDeps,
-  ExportTypeStartDeps,
-  getCustomLogo,
-} from '../common';
-import { generatePdfObservable } from './lib/generate_pdf';
+import { decryptJobHeaders, ExportType, getCustomLogo } from '../common';
 import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
-export type {
-  JobParamsPDFV2,
-  TaskPayloadPDFV2,
-} from '../../../common/types/export_types/printable_pdf_v2';
+import { generatePdfObservable } from './lib/generate_pdf';
+
 /**
  * @TODO move to be within @kbn-reporting-export-types
  */
@@ -42,28 +39,27 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
   jobType = PDF_JOB_TYPE_V2;
   jobContentEncoding = 'base64' as const;
   jobContentExtension = 'pdf' as const;
-  super() {
-    this.logger = this.logger.get('pdf-export');
+  validLicenses = [
+    LICENSE_TYPE_TRIAL,
+    LICENSE_TYPE_CLOUD_STANDARD,
+    LICENSE_TYPE_GOLD,
+    LICENSE_TYPE_PLATINUM,
+    LICENSE_TYPE_ENTERPRISE,
+  ];
+
+  constructor(...args: ConstructorParameters<typeof ExportType>) {
+    super(...args);
+    const logger = args[2];
+    this.logger = logger.get('pdf-export-v2');
   }
 
-  setup(setupDeps: ExportTypeSetupDeps) {
-    this.setupDeps = setupDeps;
-  }
-
-  start(startDeps: ExportTypeStartDeps) {
-    this.startDeps = startDeps;
-  }
-
-  public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult> {
-    return Rx.defer(() => {
-      return this.startDeps.screenshotting.getScreenshots({
-        ...options,
-        urls: options.urls.map((url) =>
-          typeof url === 'string'
-            ? url
-            : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-        ),
-      } as PdfScreenshotOptions);
+  private getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult> {
+    return this.startDeps.screenshotting.getScreenshots({
+      ...options,
+      // NOTE: `options.urls` could be undefined: an expression string is also allowed to be provided by the PdfScreenshotOptions interface, but is not yet exposed
+      urls: options.urls?.map((url) =>
+        typeof url === 'string' ? url : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+      ),
     });
   }
 
@@ -89,8 +85,8 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
    * @param stream
    */
   public runTask = (
-    payload: TaskPayloadPDFV2,
     jobId: string,
+    payload: TaskPayloadPDFV2,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
