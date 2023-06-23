@@ -112,7 +112,7 @@ export async function downloadToDisk({
         const downloadedSha = hash.digest('hex');
         if (downloadedSha !== shaChecksum) {
           throw new Error(
-            `Downloaded checksum ${downloadedSha} does not match the expected ${shaChecksum} (${shaAlgorithm}) checksum, for file: ${url}`
+            `Downloaded checksum ${downloadedSha} does not match the expected (${shaAlgorithm}) checksum ${shaChecksum}, for file: ${url}.`
           );
         }
       }
