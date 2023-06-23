@@ -12,9 +12,18 @@ import { collectServices } from '../../implicit_collection/collectors/services';
 export async function getServicesBySignals(
   options: GetServicesOptionsInjected
 ): Promise<{ services: Asset[] }> {
-  const filters: { [term: string]: string } = {};
+  const filters = [];
+
   if (options.parent) {
-    filters['host.hostname'] = options.parent;
+    filters.push({
+      bool: {
+        should: [
+          { term: { 'host.name': options.parent } },
+          { term: { 'host.hostname': options.parent } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
   }
 
   const { assets } = await collectServices({

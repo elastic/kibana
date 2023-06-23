@@ -22,7 +22,7 @@ export interface CollectorOptions {
   transaction?: Transaction | null;
   sourceIndices: AssetManagerConfig['sourceIndices'];
   afterKey?: estypes.SortResults;
-  filters?: { [term: string]: string };
+  filters?: estypes.QueryDslQueryContainer[];
 }
 
 export interface CollectorResult {

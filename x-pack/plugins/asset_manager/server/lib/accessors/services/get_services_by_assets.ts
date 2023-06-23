@@ -29,7 +29,7 @@ export async function getServicesByAssets(
   return { services };
 }
 
-export async function getServicesByParent(
+async function getServicesByParent(
   options: GetServicesOptionsInjected
 ): Promise<{ services: Asset[] }> {
   const { descendants } = await getAllRelatedAssets(options.esClient, {
