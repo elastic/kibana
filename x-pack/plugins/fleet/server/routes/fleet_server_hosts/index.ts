@@ -16,11 +16,11 @@ import {
 } from '../../types';
 
 import {
-  deleteFleetServerPolicyHandler,
-  getAllFleetServerPolicyHandler,
-  getFleetServerPolicyHandler,
+  deleteFleetServerHostHandler,
+  getAllFleetServerHostsHandler,
+  getFleetServerHostHandler,
   postFleetServerHost,
-  putFleetServerPolicyHandler,
+  putFleetServerHostHandler,
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -32,7 +32,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         fleet: { all: true },
       },
     },
-    getAllFleetServerPolicyHandler
+    getAllFleetServerHostsHandler
   );
   router.post(
     {
@@ -52,7 +52,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         fleet: { all: true },
       },
     },
-    getFleetServerPolicyHandler
+    getFleetServerHostHandler
   );
   router.delete(
     {
@@ -62,7 +62,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         fleet: { all: true },
       },
     },
-    deleteFleetServerPolicyHandler
+    deleteFleetServerHostHandler
   );
   router.put(
     {
@@ -72,6 +72,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         fleet: { all: true },
       },
     },
-    putFleetServerPolicyHandler
+    putFleetServerHostHandler
   );
 };
