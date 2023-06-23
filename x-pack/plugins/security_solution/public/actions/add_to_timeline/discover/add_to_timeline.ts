@@ -7,8 +7,7 @@
 
 import type { CellAction, CellActionFactory } from '@kbn/cell-actions';
 import type { SecurityAppStore } from '../../../common/store';
-import { fieldHasCellActions, isInSecurityApp } from '../../utils';
-import { isValidDataProviderField } from '../data_provider';
+import { isInSecurityApp } from '../../utils';
 import type { StartServices } from '../../../types';
 import { createAddToTimelineCellActionFactory } from '../cell_action/add_to_timeline';
 
@@ -32,9 +31,6 @@ export const createAddToTimelineDiscoverCellActionFactory = ({
   });
 
   return securityAddToTimelineActionFactory.combine<CellAction>({
-    isCompatible: async ({ field }) =>
-      isInSecurityApp(currentAppId) &&
-      fieldHasCellActions(field.name) &&
-      isValidDataProviderField(field.name, field.type),
+    isCompatible: async () => isInSecurityApp(currentAppId),
   });
 };

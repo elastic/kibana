@@ -6,7 +6,7 @@
  */
 
 import type { CellAction, CellActionFactory } from '@kbn/cell-actions';
-import { fieldHasCellActions, isInSecurityApp } from '../../utils';
+import { isInSecurityApp } from '../../utils';
 import type { StartServices } from '../../../types';
 import { createCopyToClipboardCellActionFactory } from '../cell_action/copy_to_clipboard';
 
@@ -27,7 +27,6 @@ export const createCopyToClipboardDiscoverCellActionFactory = ({
   });
 
   return genericCopyToClipboardActionFactory.combine<CellAction>({
-    isCompatible: async ({ field }) =>
-      isInSecurityApp(currentAppId) && fieldHasCellActions(field.name),
+    isCompatible: async () => isInSecurityApp(currentAppId),
   });
 };

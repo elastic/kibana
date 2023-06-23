@@ -106,11 +106,14 @@ async function toggleDocSelection(
 }
 
 describe('DiscoverGrid', () => {
+  afterEach(async () => {
+    jest.clearAllMocks();
+  });
+
   describe('Document selection', () => {
     let component: ReactWrapper<DiscoverGridProps>;
     beforeEach(async () => {
       component = await getComponent();
-      jest.clearAllMocks();
     });
 
     test('no documents are selected initially', async () => {
@@ -257,14 +260,16 @@ describe('DiscoverGrid', () => {
           getCellValue: expect.any(Function),
           fields: [
             {
-              aggregatable: true,
               name: '@timestamp',
               type: 'date',
+              aggregatable: true,
+              searchable: undefined,
             },
             {
-              aggregatable: false,
               name: 'message',
               type: 'string',
+              aggregatable: false,
+              searchable: undefined,
             },
           ],
         })
@@ -278,22 +283,27 @@ describe('DiscoverGrid', () => {
         onFieldEdited: jest.fn(),
         cellActionsTriggerId: 'test',
       });
+
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
         expect.objectContaining({
           triggerId: 'test',
           getCellValue: expect.any(Function),
           fields: [
             {
-              aggregatable: true,
               name: '@timestamp',
               type: 'date',
+              aggregatable: true,
+              searchable: undefined,
             },
             {
-              aggregatable: false,
               name: 'message',
               type: 'string',
+              aggregatable: false,
+              searchable: undefined,
             },
             {
+              searchable: false,
+              aggregatable: false,
               name: '',
               type: '',
             },

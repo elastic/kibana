@@ -466,12 +466,15 @@ export const DiscoverGrid = ({
               return {
                 name: '',
                 type: '',
+                aggregatable: false,
+                searchable: false,
               };
             }
             return {
               name: columnName,
               type: field.type,
               aggregatable: field.aggregatable,
+              searchable: field.searchable,
             };
           })
         : undefined,
