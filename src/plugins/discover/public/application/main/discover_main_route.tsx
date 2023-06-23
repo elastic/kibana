@@ -353,23 +353,23 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
   return (
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
-      <QueryClientProvider client={queryClient}>
-        <AssistantProvider
-          actionTypeRegistry={actionTypeRegistry}
-          augmentMessageCodeBlocks={() => []}
-          baseQuickPrompts={BASE_DISCOVER_QUICK_PROMPTS}
-          baseSystemPrompts={BASE_SYSTEM_PROMPTS}
-          getComments={getComments}
-          getInitialConversations={getInitialConversation}
-          http={http}
-          nameSpace={PLUGIN_ID}
-          setConversations={setLocalStorageConversations}
-          title={ELASTIC_DISCOVER_ASSISTANT}
-        >
-          <AssistantOverlay />
-          <DiscoverMainAppMemoized stateContainer={stateContainer} />
-        </AssistantProvider>
-      </QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          <AssistantProvider
+            actionTypeRegistry={actionTypeRegistry}
+            augmentMessageCodeBlocks={() => []}
+            baseQuickPrompts={BASE_DISCOVER_QUICK_PROMPTS}
+            baseSystemPrompts={BASE_SYSTEM_PROMPTS}
+            getComments={getComments}
+            getInitialConversations={getInitialConversation}
+            http={http}
+            nameSpace={PLUGIN_ID}
+            setConversations={setLocalStorageConversations}
+            title={ELASTIC_DISCOVER_ASSISTANT}
+          >
+            <AssistantOverlay />
+            <DiscoverMainAppMemoized stateContainer={stateContainer} />
+          </AssistantProvider>
+        </QueryClientProvider>
       </DiscoverMainProvider>
     </DiscoverCustomizationProvider>
   );
