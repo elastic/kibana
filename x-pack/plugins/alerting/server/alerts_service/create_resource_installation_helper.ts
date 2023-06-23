@@ -13,6 +13,13 @@ export interface InitializationPromise {
   result: boolean;
   error?: string;
 }
+
+// get multiples of 2 min
+const DEFAULT_RETRY_BACKOFF_PER_ATTEMPT = 2 * 60 * 1000;
+interface Retry {
+  time: string; // last time retry was requested
+  attempts: number; // number of retry attemps
+}
 export interface ResourceInstallationHelper {
   add: (context: IRuleTypeAlerts, namespace?: string, timeoutMs?: number) => void;
   retry: (
@@ -42,6 +49,7 @@ export function createResourceInstallationHelper(
 ): ResourceInstallationHelper {
   let commonInitPromise: Promise<InitializationPromise> = commonResourcesInitPromise;
   const initializedContexts: Map<string, Promise<InitializationPromise>> = new Map();
+  const lastRetry: Map<string, Retry> = new Map();
 
   const waitUntilContextResourcesInstalled = async (
     context: IRuleTypeAlerts,
@@ -84,18 +92,31 @@ export function createResourceInstallationHelper(
       initPromise?: Promise<InitializationPromise>,
       timeoutMs?: number
     ) => {
+      const key = `${context.context}_${namespace}`;
       // Use the new common initialization promise if specified
       if (initPromise) {
         commonInitPromise = initPromise;
       }
 
-      // Create and set a new promise for this context
-      initializedContexts.set(
-        `${context.context}_${namespace}`,
+      // Check the last retry time to see if we want to throttle this attempt
+      const retryInfo = lastRetry.get(key);
+      const shouldRetry = retryInfo ? getShouldRetry(retryInfo) : true;
 
-        // Return a promise than can be checked when needed
-        waitUntilContextResourcesInstalled(context, namespace, timeoutMs)
-      );
+      if (shouldRetry) {
+        logger.info(`Retrying resource initialization for context "${context.context}"`);
+        // Update the last retry information
+        lastRetry.set(key, {
+          time: new Date().toISOString(),
+          attempts: (retryInfo?.attempts ?? 0) + 1,
+        });
+
+        // Create and set a new promise for this context
+        initializedContexts.set(
+          key,
+          // Return a promise than can be checked when needed
+          waitUntilContextResourcesInstalled(context, namespace, timeoutMs)
+        );
+      }
     },
     getInitializedContext: async (
       context: string,
@@ -111,3 +132,18 @@ export function createResourceInstallationHelper(
 
 export const successResult = () => ({ result: true });
 export const errorResult = (error?: string) => ({ result: false, error });
+
+export const getShouldRetry = ({ time, attempts }: Retry) => {
+  const now = new Date().valueOf();
+  const nextRetryDate = new Date(time).valueOf() + calculateDelay(attempts);
+  return now > nextRetryDate;
+};
+
+export const calculateDelay = (attempts: number) => {
+  if (attempts === 1) {
+    return 30 * 1000; // 30s
+  } else {
+    // 2, 4, 6, 8, etc minutes
+    return DEFAULT_RETRY_BACKOFF_PER_ATTEMPT * Math.pow(2, attempts - 2);
+  }
+};

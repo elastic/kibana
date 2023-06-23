@@ -1577,6 +1577,70 @@ describe('Alerts Service', () => {
       ).toEqual(1);
     });
 
+    test('should throttle retries of initializing context specific resources', async () => {
+      // this is the initial call that fails
+      clusterClient.indices.simulateTemplate.mockImplementation(async () => ({
+        ...SimulateTemplateResponse,
+        template: {
+          ...SimulateTemplateResponse.template,
+          mappings: {},
+        },
+      }));
+
+      alertsService = new AlertsService({
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        pluginStop$,
+        kibanaVersion: '8.8.0',
+      });
+      alertsService.register(TestRegistrationContext);
+
+      await retryUntil(
+        'alert service initialized',
+        async () => alertsService.isInitialized() === true
+      );
+
+      const createAlertsClientWithDelay = async (delayMs: number | null) => {
+        if (delayMs) {
+          await new Promise((r) => setTimeout(r, delayMs));
+        }
+
+        return await alertsService.createAlertsClient({
+          logger,
+          ruleType: ruleTypeWithAlertDefinition,
+          namespace: 'default',
+          rule: {
+            consumer: 'bar',
+            executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+            id: '1',
+            name: 'rule-name',
+            parameters: {
+              bar: true,
+            },
+            revision: 0,
+            spaceId: 'default',
+            tags: ['rule-', '-tags'],
+          },
+        });
+      };
+
+      await Promise.all([
+        createAlertsClientWithDelay(null),
+        createAlertsClientWithDelay(1),
+        createAlertsClientWithDelay(2),
+      ]);
+
+      expect(logger.info).not.toHaveBeenCalledWith(`Retrying common resource initialization`);
+
+      // Should only log the retry once because the second and third retries should be throttled
+      expect(
+        logger.info.mock.calls.filter(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (calls: any[]) => calls[0] === `Retrying resource initialization for context "test"`
+        ).length
+      ).toEqual(1);
+    });
+
     test('should return null if retrying common resources initialization fails again', async () => {
       clusterClient.ilm.putLifecycle.mockRejectedValueOnce(new Error('fail'));
       clusterClient.ilm.putLifecycle.mockRejectedValueOnce(new Error('fail again'));

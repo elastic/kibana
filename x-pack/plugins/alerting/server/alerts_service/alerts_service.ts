@@ -176,9 +176,6 @@ export class AlertsService implements IAlertsService {
         }
       }
 
-      this.options.logger.info(
-        `Retrying resource initialization for context "${opts.ruleType.alerts.context}"`
-      );
       this.resourceInitializationHelper.retry(opts.ruleType.alerts, opts.namespace, initPromise);
 
       const retryResult = await this.resourceInitializationHelper.getInitializedContext(

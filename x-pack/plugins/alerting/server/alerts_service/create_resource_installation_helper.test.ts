@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { range } from 'lodash';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { IRuleTypeAlerts } from '../types';
@@ -14,6 +15,8 @@ import {
   InitializationPromise,
   ResourceInstallationHelper,
   successResult,
+  calculateDelay,
+  getShouldRetry,
 } from './create_resource_installation_helper';
 import { retryUntil } from './test_utils';
 
@@ -246,9 +249,101 @@ describe('createResourceInstallationHelper', () => {
     await retryUntil('init fns retried', async () => logger.info.mock.calls.length === 3);
 
     expect(logger.info).toHaveBeenNthCalledWith(1, `commonInitPromise resolved`);
-    expect(logger.info).toHaveBeenNthCalledWith(2, 'test1_default successfully retried');
+    expect(logger.info).toHaveBeenNthCalledWith(
+      2,
+      `Retrying resource initialization for context "test1"`
+    );
+    expect(logger.info).toHaveBeenNthCalledWith(3, 'test1_default successfully retried');
     expect(await helper.getInitializedContext('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
       result: true,
     });
+  });
+
+  test(`should throttle retry`, async () => {
+    const initFnErrorOnce = jest
+      .fn()
+      .mockImplementationOnce(() => {
+        throw new Error('first error');
+      })
+      .mockImplementationOnce(() => {
+        throw new Error('second error');
+      })
+      .mockImplementation((context: IRuleTypeAlerts, namespace: string, timeoutMs?: number) => {
+        logger.info(`${context.context}_${namespace} successfully retried`);
+      });
+    const context = {
+      context: 'test1',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    };
+    const helper = createResourceInstallationHelper(
+      logger,
+      getCommonInitPromise(true, 100),
+      initFnErrorOnce
+    );
+
+    helper.add(context);
+
+    await retryUntil(
+      'context init fns run',
+      async () => (await getContextInitialized(helper)) === false
+    );
+
+    expect(logger.error).toHaveBeenCalledWith(`Error initializing context test1 - first error`);
+    expect(await helper.getInitializedContext('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
+      result: false,
+      error: `first error`,
+    });
+
+    logger.info.mockClear();
+    logger.error.mockClear();
+
+    helper.retry(context, undefined);
+    await new Promise((r) => setTimeout(r, 10));
+    helper.retry(context, undefined);
+
+    await retryUntil('init fns retried', async () => {
+      return logger.error.mock.calls.length === 1;
+    });
+
+    expect(logger.error).toHaveBeenCalledWith(`Error initializing context test1 - second error`);
+
+    // the second retry is throttled so this is never called
+    expect(logger.info).not.toHaveBeenCalledWith('test1_default successfully retried');
+    expect(await helper.getInitializedContext('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
+      result: false,
+      error: 'second error',
+    });
+  });
+});
+
+describe('calculateDelay', () => {
+  test('should return 30 seconds if attempts = 1', () => {
+    expect(calculateDelay(1)).toEqual(30000);
+  });
+
+  test('should return multiple of 5 minutes if attempts > 1', () => {
+    range(2, 20).forEach((attempt: number) => {
+      expect(calculateDelay(attempt)).toEqual(Math.pow(2, attempt - 2) * 120000);
+    });
+  });
+});
+
+describe('getShouldRetry', () => {
+  test('should return true if current time is past the previous retry time + the retry delay', () => {
+    const now = new Date();
+    const retry = {
+      time: new Date(now.setMinutes(now.getMinutes() - 1)).toISOString(),
+      attempts: 1,
+    };
+    expect(getShouldRetry(retry)).toEqual(true);
+  });
+
+  test('should return false if current time is not past the previous retry time + the retry delay', () => {
+    const now = new Date();
+    const retry = {
+      time: new Date(now.setMinutes(now.getMinutes() - 1)).toISOString(),
+      attempts: 2,
+    };
+    expect(getShouldRetry(retry)).toEqual(false);
   });
 });
