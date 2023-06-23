@@ -41,11 +41,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should copy as curl and show toast when copy as curl button is clicked', async () => {
+      await PageObjects.console.clearTextArea();
+      await PageObjects.console.enterRequest();
       await PageObjects.console.clickContextMenu();
       await PageObjects.console.clickCopyAsCurlButton();
 
-      const resultToast = await toasts.getToastElement(1);
-      const toastText = await resultToast.getVisibleText();
+      const toastText = await toasts.getToastContent(1);
 
       if (toastText.includes('Write permission denied')) {
         log.debug('Write permission denied, skipping test');
