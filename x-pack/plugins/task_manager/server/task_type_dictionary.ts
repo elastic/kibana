@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ObjectType } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { ObjectType } from '@kbn/config-schema';
 import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
