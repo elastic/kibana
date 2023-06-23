@@ -5,14 +5,37 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, FC } from 'react';
-
-import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState, FC } from 'react';
+import moment from 'moment-timezone';
+import {
+  EuiCallOut,
+  type EuiDataGridColumn,
+  type EuiDataGridCellValueElementProps,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { isOutlierAnalysis, FEATURE_INFLUENCE } from '@kbn/ml-data-frame-analytics-utils';
+import { getNestedProperty } from '@kbn/ml-nested-property';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  getDataGridSchemasFromFieldTypes,
+  getFeatureImportance,
+  getTopClasses,
+  UseIndexDataReturnType,
+} from '@kbn/ml-data-grid';
+
+import {
+  sortExplorationResultsFields,
+  DEFAULT_RESULTS_FIELD,
+} from '@kbn/ml-data-frame-analytics-utils';
+
 import {
   useColorRange,
   COLOR_RANGE,
@@ -34,6 +57,7 @@ import { useOutlierData } from './use_outlier_data';
 import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
 import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
 import { IndexPatternPrompt } from '../index_pattern_prompt';
+import { getIndexFields } from '../../../../common';
 
 export type TableItem = Record<string, any>;
 
@@ -47,7 +71,124 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
   const [pageUrlState, setPageUrlState] = useExplorationUrlState();
   const [searchQuery, setSearchQuery] =
     useState<estypes.QueryDslQueryContainer>(defaultSearchQuery);
-  const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery);
+
+  const columns = useMemo(() => {
+    const newColumns: EuiDataGridColumn[] = [];
+    const needsDestIndexFields =
+      indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
+
+    if (jobConfig !== undefined && indexPattern !== undefined) {
+      const resultsField = jobConfig.dest.results_field;
+      const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
+      newColumns.push(
+        ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField!).sort((a: any, b: any) =>
+          sortExplorationResultsFields(a.id, b.id, jobConfig)
+        )
+      );
+    }
+
+    return newColumns;
+  }, [jobConfig, indexPattern]);
+
+  const outlierData = useOutlierData(indexPattern, jobConfig, searchQuery, columns);
+  const { columnsWithCharts, pagination, tableItems } = outlierData;
+  const resultsField = jobConfig?.dest.results_field ?? '';
+  const featureCount = getFeatureCount(resultsField, tableItems);
+  const colorRange = useColorRange(COLOR_RANGE.BLUE, COLOR_RANGE_SCALE.INFLUENCER, featureCount);
+
+  const renderCellValue = ({
+    rowIndex,
+    columnId,
+    setCellProps,
+  }: EuiDataGridCellValueElementProps): any => {
+    const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
+    const fullItem = tableItems[adjustedRowIndex];
+    let backgroundColor: string | undefined;
+    const featureNames = fullItem[`${resultsField}.${FEATURE_INFLUENCE}`];
+    // column with feature values get color coded by its corresponding influencer value
+    if (Array.isArray(featureNames)) {
+      const featureForColumn = featureNames.find((feature) => columnId === feature.feature_name[0]);
+      if (featureForColumn) {
+        backgroundColor = colorRange(featureForColumn.influence[0]);
+      }
+    }
+    // From EUI docs: Treated as React component allowing hooks, context, and other React concepts to be used.
+    // This is the recommended use of setCellProps: https://github.com/elastic/eui/blob/main/src/components/datagrid/data_grid_types.ts#L521-L525
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+      setCellProps({
+        style: { backgroundColor: String(backgroundColor ?? '#ffffff') },
+      });
+    }, [backgroundColor, setCellProps]);
+
+    if (fullItem === undefined) {
+      return null;
+    }
+
+    if (indexPattern === undefined) {
+      return null;
+    }
+
+    const field = indexPattern.fields.getByName(columnId);
+    let fieldFormat: FieldFormat | undefined;
+
+    if (field !== undefined) {
+      fieldFormat = indexPattern.getFormatterForField(field);
+    }
+
+    function getCellValue(cId: string) {
+      if (tableItems.hasOwnProperty(adjustedRowIndex)) {
+        const item = tableItems[adjustedRowIndex];
+
+        // Try if the field name is available as is.
+        if (item.hasOwnProperty(cId)) {
+          return item[cId];
+        }
+
+        // For classification and regression results, we need to treat some fields with a custom transform.
+        if (cId === `${resultsField}.feature_importance`) {
+          return getFeatureImportance(fullItem, resultsField ?? DEFAULT_RESULTS_FIELD);
+        }
+
+        if (cId === `${resultsField}.top_classes`) {
+          return getTopClasses(fullItem, resultsField ?? DEFAULT_RESULTS_FIELD);
+        }
+
+        // Try if the field name is available as a nested field.
+        return getNestedProperty(tableItems[adjustedRowIndex], cId, null);
+      }
+
+      return null;
+    }
+
+    const cellValue = getCellValue(columnId);
+
+    if (typeof cellValue === 'object' && cellValue !== null) {
+      return JSON.stringify(cellValue);
+    }
+
+    if (cellValue === undefined || cellValue === null) {
+      return null;
+    }
+
+    if (fieldFormat !== undefined) {
+      return fieldFormat.convert(cellValue, 'text');
+    }
+
+    if (typeof cellValue === 'string' || cellValue === null) {
+      return cellValue;
+    }
+
+    if (field?.type === KBN_FIELD_TYPES.DATE) {
+      return formatHumanReadableDateTimeSeconds(moment(cellValue).unix() * 1000);
+    }
+
+    if (typeof cellValue === 'boolean') {
+      return cellValue ? 'true' : 'false';
+    }
+
+    return cellValue;
+  };
 
   const searchQueryUpdateHandler: ExplorationQueryBarProps['setSearchQuery'] = useCallback(
     (update) => {
@@ -65,12 +206,6 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     query: pageUrlState.queryText,
     language: pageUrlState.queryLanguage,
   };
-
-  const { columnsWithCharts, tableItems } = outlierData;
-
-  const resultsField = jobConfig?.dest.results_field ?? '';
-  const featureCount = getFeatureCount(resultsField, tableItems);
-  const colorRange = useColorRange(COLOR_RANGE.BLUE, COLOR_RANGE_SCALE.INFLUENCER, featureCount);
 
   // Show the color range only if feature influence is enabled.
   const showColorRange =
@@ -164,7 +299,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
         colorRange={
           showColorRange && !showLegacyFeatureInfluenceFormatCallout ? colorRange : undefined
         }
-        indexData={outlierData}
+        indexData={{ ...outlierData, renderCellValue } as UseIndexDataReturnType}
         indexPattern={indexPattern}
         jobConfig={jobConfig}
         needsDestIndexPattern={needsDestIndexPattern}
