@@ -74,10 +74,21 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
    * created.
    */
   private static createIndexIfNotExists = once(
-    async (index: string, esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
+    async (
+      index: string,
+      esClient: ElasticsearchClient,
+      logger: Logger,
+      indexIsAlias: boolean
+    ): Promise<void> => {
+      // We don't attempt to create the index if it is an Alias/DS
+      if (indexIsAlias) {
+        logger.debug(`No need to create index [${index}] as it is an Alias or DS.`);
+        return;
+      }
+
       try {
         if (await esClient.indices.exists({ index })) {
-          logger.debug(`${index} already exists.`);
+          logger.debug(`${index} already exists. Nothing to do`);
           return;
         }
 
@@ -96,7 +107,9 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
         });
       } catch (e) {
         if (e instanceof errors.ResponseError && e.statusCode === 400) {
-          logger.warn('Unable to create blob storage index, it may have been created already.');
+          logger.warn(
+            `Unable to create blob storage index [${index}], it may have been created already.`
+          );
         }
         // best effort
       }
@@ -109,7 +122,8 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
     await ElasticsearchBlobStorageClient.createIndexIfNotExists(
       this.index,
       this.esClient,
-      this.logger
+      this.logger,
+      this.indexIsAlias
     );
 
     const processUpload = async () => {
