@@ -30,8 +30,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import React, { createRef, useCallback, useState } from 'react';
-import { Router } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { Router } from '@kbn/shared-ux-router';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable, debounceTime } from 'rxjs';
@@ -176,32 +175,30 @@ export const ProjectHeader = ({
         <EuiHeaderSection grow={false}>
           <EuiHeaderSectionItem css={headerCss.nav.toggleNavButton}>
             <Router history={application.history}>
-              <CompatRouter>
-                <ProjectNavigation
-                  isOpen={isOpen!}
-                  closeNav={() => {
-                    setIsOpen(false);
-                    if (toggleCollapsibleNavRef.current) {
-                      toggleCollapsibleNavRef.current.focus();
-                    }
-                  }}
-                  button={
-                    <EuiHeaderSectionItemButton
-                      data-test-subj="toggleNavButton"
-                      aria-label={headerStrings.nav.closeNavAriaLabel}
-                      onClick={() => setIsOpen(!isOpen)}
-                      aria-expanded={isOpen!}
-                      aria-pressed={isOpen!}
-                      aria-controls={navId}
-                      ref={toggleCollapsibleNavRef}
-                    >
-                      <EuiIcon type={isOpen ? 'menuLeft' : 'menuRight'} size="m" />
-                    </EuiHeaderSectionItemButton>
+              <ProjectNavigation
+                isOpen={isOpen!}
+                closeNav={() => {
+                  setIsOpen(false);
+                  if (toggleCollapsibleNavRef.current) {
+                    toggleCollapsibleNavRef.current.focus();
                   }
-                >
-                  {children}
-                </ProjectNavigation>
-              </CompatRouter>
+                }}
+                button={
+                  <EuiHeaderSectionItemButton
+                    data-test-subj="toggleNavButton"
+                    aria-label={headerStrings.nav.closeNavAriaLabel}
+                    onClick={() => setIsOpen(!isOpen)}
+                    aria-expanded={isOpen!}
+                    aria-pressed={isOpen!}
+                    aria-controls={navId}
+                    ref={toggleCollapsibleNavRef}
+                  >
+                    <EuiIcon type={isOpen ? 'menuLeft' : 'menuRight'} size="m" />
+                  </EuiHeaderSectionItemButton>
+                }
+              >
+                {children}
+              </ProjectNavigation>
             </Router>
           </EuiHeaderSectionItem>
 
