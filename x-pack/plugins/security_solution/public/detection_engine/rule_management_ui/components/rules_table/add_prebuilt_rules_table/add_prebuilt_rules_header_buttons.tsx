@@ -12,7 +12,7 @@ import * as i18n from './translations';
 
 export const AddPrebuiltRulesHeaderButtons = () => {
   const {
-    state: { rules, selectedRules, loadingRules, shouldShowLinearProgress },
+    state: { rules, selectedRules, loadingRules, isFetchingRulesPackage },
     actions: { installAllRules, installSelectedRules },
   } = useAddPrebuiltRulesTableContext();
 
@@ -21,7 +21,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
   const shouldDisplayInstallSelectedRulesButton = numberOfSelectedRules > 0;
 
   const isRuleInstalling = loadingRules.length > 0;
-  const isRequestInProgress = isRuleInstalling || shouldShowLinearProgress;
+  const isRequestInProgress = isRuleInstalling || isFetchingRulesPackage;
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>

@@ -86,13 +86,13 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 const createUpgradeButtonColumn = (
   upgradeOneRule: UpgradePrebuiltRulesTableActions['upgradeOneRule'],
   loadingRules: RuleSignatureId[],
-  shouldShowLinearProgress: boolean
+  isFetchingRulesPackage: boolean
 ): TableColumn => ({
   field: 'rule_id',
   name: '',
   render: (ruleId: RuleUpgradeInfoForReview['rule_id']) => {
     const isRuleUpgrading = loadingRules.includes(ruleId);
-    const isUpgradeButtonDisabled = isRuleUpgrading || shouldShowLinearProgress;
+    const isUpgradeButtonDisabled = isRuleUpgrading || isFetchingRulesPackage;
     return (
       <EuiButtonEmpty
         size="s"
@@ -112,7 +112,7 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
-    state: { loadingRules, shouldShowLinearProgress },
+    state: { loadingRules, isFetchingRulesPackage },
     actions: { upgradeOneRule },
   } = useUpgradePrebuiltRulesTableContext();
 
@@ -143,13 +143,13 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
         width: '12%',
       },
       ...(hasCRUDPermissions
-        ? [createUpgradeButtonColumn(upgradeOneRule, loadingRules, shouldShowLinearProgress)]
+        ? [createUpgradeButtonColumn(upgradeOneRule, loadingRules, isFetchingRulesPackage)]
         : []),
     ],
     [
       hasCRUDPermissions,
       loadingRules,
-      shouldShowLinearProgress,
+      isFetchingRulesPackage,
       showRelatedIntegrations,
       upgradeOneRule,
     ]

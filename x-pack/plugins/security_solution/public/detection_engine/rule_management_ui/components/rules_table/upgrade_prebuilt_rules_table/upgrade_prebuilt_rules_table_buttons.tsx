@@ -12,7 +12,7 @@ import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_ta
 
 export const UpgradePrebuiltRulesTableButtons = () => {
   const {
-    state: { rules, selectedRules, loadingRules, shouldShowLinearProgress },
+    state: { rules, selectedRules, loadingRules, isFetchingRulesPackage },
     actions: { upgradeAllRules, upgradeSelectedRules },
   } = useUpgradePrebuiltRulesTableContext();
 
@@ -21,7 +21,7 @@ export const UpgradePrebuiltRulesTableButtons = () => {
   const shouldDisplayUpgradeSelectedRulesButton = numberOfSelectedRules > 0;
 
   const isRuleUpgrading = loadingRules.length > 0;
-  const isRequestInProgress = isRuleUpgrading || shouldShowLinearProgress;
+  const isRequestInProgress = isRuleUpgrading || isFetchingRulesPackage;
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
