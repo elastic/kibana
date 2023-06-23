@@ -42,7 +42,6 @@ describe('SecuritySolutionPageWrapper', () => {
     expect(wrapperElement).toHaveClass('securitySolutionWrapper--noPadding');
     expect(wrapperElement).not.toHaveClass('securitySolutionWrapper--withTimeline');
     expect(wrapperElement).not.toHaveClass('securitySolutionWrapper--fullHeight');
-    expect(wrapperElement).not.toHaveClass('securitySolutionWrapper--padding-l');
     expect(wrapperElement).toHaveClass('custom-class');
     expect(wrapperElement).toHaveStyle('color: red');
 
@@ -65,26 +64,6 @@ describe('SecuritySolutionPageWrapper', () => {
     expect(wrapperElement).toHaveClass('securitySolutionWrapper--noPadding');
     expect(wrapperElement).toHaveClass('securitySolutionWrapper--withTimeline');
     expect(wrapperElement).not.toHaveClass('securitySolutionWrapper--fullHeight');
-    expect(wrapperElement).not.toHaveClass('securitySolutionWrapper--padding-l');
-  });
-
-  it('should not apply "noPadding" class when "noPadding" prop is false', () => {
-    const { container } = render(
-      <SecuritySolutionPageWrapper noPadding={false}>
-        <div>{'Child Component'}</div>
-      </SecuritySolutionPageWrapper>,
-      {
-        wrapper: TestProviders,
-      }
-    );
-
-    const wrapperElement = container.firstChild;
-
-    expect(wrapperElement).toHaveClass('securitySolutionWrapper');
-    expect(wrapperElement).not.toHaveClass('securitySolutionWrapper--noPadding');
-    expect(wrapperElement).toHaveClass('securitySolutionWrapper--withTimeline');
-    expect(wrapperElement).not.toHaveClass('securitySolutionWrapper--fullHeight');
-    expect(wrapperElement).toHaveClass('securitySolutionWrapper--padding-l');
   });
 
   it('should apply "noTimeline" class when "noTimeline" prop is true', () => {
@@ -103,7 +82,6 @@ describe('SecuritySolutionPageWrapper', () => {
     expect(wrapperElement).not.toHaveClass('securitySolutionWrapper--noPadding');
     expect(wrapperElement).not.toHaveClass('securitySolutionWrapper--withTimeline');
     expect(wrapperElement).not.toHaveClass('securitySolutionWrapper--fullHeight');
-    expect(wrapperElement).toHaveClass('securitySolutionWrapper--padding-l');
   });
 
   it('should not apply "noTimeline" class when "noTimeline" prop is false', () => {
@@ -122,6 +100,5 @@ describe('SecuritySolutionPageWrapper', () => {
     expect(wrapperElement).not.toHaveClass('securitySolutionWrapper--noPadding');
     expect(wrapperElement).toHaveClass('securitySolutionWrapper--withTimeline');
     expect(wrapperElement).not.toHaveClass('securitySolutionWrapper--fullHeight');
-    expect(wrapperElement).toHaveClass('securitySolutionWrapper--padding-l');
   });
 });
