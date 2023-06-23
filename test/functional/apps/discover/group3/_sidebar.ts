@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.cleanSidebarLocalStorage();
     });
 
-    describe('field filtering', function () {
+    describe.only('field filtering', function () {
       it('should reveal and hide the filter form when the toggle is clicked', async function () {
         await PageObjects.unifiedFieldList.openSidebarFieldFilter();
         await PageObjects.unifiedFieldList.closeSidebarFieldFilter();
