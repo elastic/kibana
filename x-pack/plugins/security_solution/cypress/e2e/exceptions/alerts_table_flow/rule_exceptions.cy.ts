@@ -29,6 +29,7 @@ import {
   validateExceptionCommentCountAndText,
   editExceptionFlyoutItemName,
   validateHighlightedFieldsPopulatedAsExceptionConditions,
+  validateEmptyExceptionConditionField,
 } from '../../../tasks/exceptions';
 import {
   esArchiverLoad,
@@ -47,6 +48,7 @@ import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import { postDataView, deleteAlertsAndRules } from '../../../tasks/common';
 import {
   ADD_AND_BTN,
+  ENTRY_DELETE_BTN,
   EXCEPTION_CARD_ITEM_CONDITIONS,
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -226,5 +228,46 @@ describe('Rule Exceptions workflows from Alert', () => {
     cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
     cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME_EDIT);
     cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).contains('span', 'host.hostname');
+  });
+  it('Should delete all prefilled exception entries when creating a Rule exception from Alerts take action button without resetting to initial auto-prefilled entries', () => {
+    loadEndpointRuleAndAlerts();
+
+    cy.get(LOADING_INDICATOR).should('not.exist');
+
+    // The Rule exception should populated with highlighted fields
+    openAddRuleExceptionFromAlertDetails();
+
+    const highlightedFieldsBasedOnAlertDoc = [
+      'host.name',
+      'agent.id',
+      'user.name',
+      'process.executable',
+      'file.path',
+    ];
+
+    /**
+     * Validate the highlighted fields are auto populated, these
+     * fields are based on the alert document that should be generated
+     * when the endpoint rule runs
+     */
+    validateHighlightedFieldsPopulatedAsExceptionConditions(highlightedFieldsBasedOnAlertDoc);
+
+    /**
+     * Delete all the highlighted fields to see if any condition
+     * will prefuilled again.
+     */
+    const highlightedFieldsCount = highlightedFieldsBasedOnAlertDoc.length - 1;
+    highlightedFieldsBasedOnAlertDoc.forEach((_, index) =>
+      cy
+        .get(ENTRY_DELETE_BTN)
+        .eq(highlightedFieldsCount - index)
+        .click()
+    );
+
+    /**
+     * Validate that there are no highlighted fields are auto populated
+     * after the deletion
+     */
+    validateEmptyExceptionConditionField();
   });
 });

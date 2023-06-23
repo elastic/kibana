@@ -167,6 +167,9 @@ export const addExceptionConditions = (exception: Exception) => {
 export const validateExceptionConditionField = (value: string) => {
   cy.get(EXCEPTION_ITEM_CONTAINER).contains('span', value);
 };
+export const validateEmptyExceptionConditionField = () => {
+  cy.get(FIELD_INPUT).should('be.empty');
+};
 export const submitNewExceptionItem = () => {
   cy.get(CONFIRM_BTN).click();
   cy.get(CONFIRM_BTN).should('not.exist');
