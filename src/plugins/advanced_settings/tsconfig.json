@@ -28,8 +28,6 @@
     "@kbn/core-notifications-browser",
     "@kbn/core-theme-browser",
     "@kbn/core-ui-settings-common",
-    "@kbn/config-schema",
-    "@kbn/core-plugins-server",
   ],
   "exclude": [
     "target/**/*",
