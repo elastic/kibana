@@ -5,15 +5,14 @@
  * 2.0.
  */
 
+import { ChromeNavControl, CoreStart, Plugin } from '@kbn/core/public';
+import { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Observable } from 'rxjs';
-import { I18nProvider } from '@kbn/i18n-react';
-import { ApplicationStart, CoreTheme, CoreStart, Plugin } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
-import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { SearchBar } from './components/search_bar';
 import { TrackUiMetricFn } from './types';
 
@@ -28,69 +27,48 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}> {
     return {};
   }
 
-  public start(
-    core: CoreStart,
-    { globalSearch, savedObjectsTagging, usageCollection }: GlobalSearchBarPluginStartDeps
-  ) {
-    let trackUiMetric: TrackUiMetricFn = () => {};
-    if (usageCollection) {
-      trackUiMetric = (...args) => {
-        usageCollection.reportUiCounter('global_search_bar', ...args);
-      };
-    }
-
-    core.chrome.navControls.registerCenter({
-      order: 1000,
-      mount: (container) =>
-        this.mount({
-          container,
-          globalSearch,
-          savedObjectsTagging,
-          navigateToUrl: core.application.navigateToUrl,
-          basePathUrl: core.http.basePath.prepend('/plugins/globalSearchBar/assets/'),
-          darkMode: core.uiSettings.get('theme:darkMode'),
-          theme$: core.theme.theme$,
-          trackUiMetric,
-        }),
-    });
+  public start(core: CoreStart, startDeps: GlobalSearchBarPluginStartDeps) {
+    core.chrome.navControls.registerCenter(this.getNavControl({ core, ...startDeps }));
     return {};
   }
 
-  private mount({
-    container,
-    globalSearch,
-    savedObjectsTagging,
-    navigateToUrl,
-    basePathUrl,
-    darkMode,
-    theme$,
-    trackUiMetric,
-  }: {
-    container: HTMLElement;
-    globalSearch: GlobalSearchPluginStart;
-    savedObjectsTagging?: SavedObjectTaggingPluginStart;
-    navigateToUrl: ApplicationStart['navigateToUrl'];
-    basePathUrl: string;
-    darkMode: boolean;
-    theme$: Observable<CoreTheme>;
-    trackUiMetric: TrackUiMetricFn;
-  }) {
-    ReactDOM.render(
-      <KibanaThemeProvider theme$={theme$}>
-        <I18nProvider>
-          <SearchBar
-            globalSearch={globalSearch}
-            navigateToUrl={navigateToUrl}
-            taggingApi={savedObjectsTagging}
-            basePathUrl={basePathUrl}
-            darkMode={darkMode}
-            trackUiMetric={trackUiMetric}
-          />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      container
-    );
+  private getNavControl(deps: { core: CoreStart } & GlobalSearchBarPluginStartDeps) {
+    const { core, globalSearch, savedObjectsTagging, usageCollection } = deps;
+    const { application, http, theme, uiSettings } = core;
 
-    return () => ReactDOM.unmountComponentAtNode(container);
+    let trackUiMetric: TrackUiMetricFn = () => {};
+    if (usageCollection) {
+      trackUiMetric = (...args) => {
+        // track UI Counter metrics
+        usageCollection.reportUiCounter('global_search_bar', ...args);
+
+        // TODO track EBT metrics using core.analytics
+      };
+    }
+
+    const navControl: ChromeNavControl = {
+      order: 1000,
+      mount: (container) => {
+        ReactDOM.render(
+          <KibanaThemeProvider theme$={theme.theme$}>
+            <I18nProvider>
+              <SearchBar
+                globalSearch={globalSearch}
+                navigateToUrl={application.navigateToUrl}
+                taggingApi={savedObjectsTagging}
+                basePathUrl={http.basePath.prepend('/plugins/globalSearchBar/assets/')}
+                darkMode={uiSettings.get('theme:darkMode')}
+                chromeStyle$={core.chrome.getChromeStyle$()}
+                trackUiMetric={trackUiMetric}
+              />
+            </I18nProvider>
+          </KibanaThemeProvider>,
+          container
+        );
+
+        return () => ReactDOM.unmountComponentAtNode(container);
+      },
+    };
+    return navControl;
   }
 }
