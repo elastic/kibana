@@ -361,6 +361,7 @@
     "react-shortcuts": "^2.0.0",
     "react-sizeme": "^2.3.6",
     "react-syntax-highlighter": "^15.3.1",
+    "react-textarea-autosize": "^8.3.4",
     "react-tiny-virtual-list": "^2.2.0",
     "react-use": "^15.3.8",
     "react-virtualized": "^9.21.2",
