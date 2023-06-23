@@ -201,7 +201,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
                 onClick={setCloseConfiguration}
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.buttonTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.buttonTitle',
                   {
                     defaultMessage: 'Configuration',
                   }
@@ -216,7 +216,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiTitle size="xxxs">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.contentTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.contentTitle',
                   {
                     defaultMessage: 'Content',
                   }
@@ -239,7 +239,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             }
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.content.Indices',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.content.Indices',
               {
                 defaultMessage: 'Indices',
               }
@@ -259,13 +259,13 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
           >
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <FormattedMessage
-                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.content.schema"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.content.schema"
                 defaultMessage="Schema"
               />
               {hasSchemaConflicts && (
                 <EuiText size="s" color="danger">
                   <FormattedMessage
-                    id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.content.schemaConflict"
+                    id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.content.schemaConflict"
                     defaultMessage="Conflict"
                   />
                 </EuiText>
@@ -277,7 +277,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiTitle size="xxxs">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.connectTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.connectTitle',
                   {
                     defaultMessage: 'Connect',
                   }
@@ -299,7 +299,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             }
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.connect.Api',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.connect.Api',
               {
                 defaultMessage: 'API',
               }
@@ -310,7 +310,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiTitle size="xxxs">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.settingsTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.settingsTitle',
                   {
                     defaultMessage: 'Settings',
                   }
@@ -335,7 +335,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiTextColor color="danger">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.settings.delete',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.settings.delete',
                   {
                     defaultMessage: 'Delete this app',
                   }
@@ -384,7 +384,7 @@ export const SearchApplicationSearchPreview: React.FC = () => {
       pageChrome={[
         searchApplicationName,
         i18n.translate(
-          'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.pageChrome',
+          'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.pageChrome',
           {
             defaultMessage: 'Search Preview',
           }
@@ -450,7 +450,7 @@ export const SearchApplicationSearchPreview: React.FC = () => {
               <EuiSpacer size="m" />
               <EuiLink href={docLinks.searchTemplates} target="_blank">
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.improveResultsLink"
+                  id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.improveResultsLink"
                   defaultMessage="Improve these results"
                 />
               </EuiLink>

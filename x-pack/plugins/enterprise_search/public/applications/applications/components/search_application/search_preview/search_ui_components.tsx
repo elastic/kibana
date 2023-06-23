@@ -73,7 +73,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
     {
       field: 'field',
       name: i18n.translate(
-        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.result.nameColumn',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.result.nameColumn',
         { defaultMessage: 'Field' }
       ),
       render: (field: string) => {
@@ -91,7 +91,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
     {
       field: 'value',
       name: i18n.translate(
-        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.result.valueColumn',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.result.valueColumn',
         { defaultMessage: 'Value' }
       ),
       render: (value: FieldValue) => (
@@ -111,7 +111,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
           <EuiFlexGroup justifyContent="spaceBetween">
             <code>
               <FormattedMessage
-                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.result.id"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.result.id"
                 defaultMessage="ID: {id}"
                 values={{ id }}
               />
@@ -120,7 +120,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
               <EuiFlexGroup gutterSize="xs" alignItems="center">
                 <code>
                   <FormattedMessage
-                    id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.result.fromIndex"
+                    id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.result.fromIndex"
                     defaultMessage="from"
                   />
                 </code>
@@ -135,7 +135,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
               <EuiTextColor color="subdued">
                 <code>
                   <FormattedMessage
-                    id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.result.moreFieldsButton"
+                    id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.result.moreFieldsButton"
                     defaultMessage="{count} {count, plural, one {More Field} other {More Fields}}"
                     values={{ count: hiddenFields }}
                   />
@@ -165,7 +165,7 @@ export const PagingInfoView: React.FC<PagingInfoViewProps> = ({ start, end, tota
   <EuiText size="s">
     <FormattedHTMLMessage
       tagName="p"
-      id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.pagingInfo.text"
+      id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.pagingInfo.text"
       defaultMessage="Showing <strong>{start}-{end}</strong> of {totalResults}"
       values={{ end, start, totalResults }}
     />
@@ -184,7 +184,7 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
       <EuiTitle size="xxxs">
         <label htmlFor="results-per-page">
           <FormattedMessage
-            id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.resultsPerPage.label"
+            id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.resultsPerPage.label"
             defaultMessage="Show"
           />
         </label>
@@ -194,7 +194,7 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
         options={
           options?.map((option) => ({
             text: i18n.translate(
-              'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.resultsPerPage.option.label',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.resultsPerPage.option.label',
               {
                 defaultMessage: '{value} {value, plural, one {Result} other {Results}}',
                 values: { value: option },
@@ -216,7 +216,7 @@ export const Sorting = withSearch<
 >(({ setSort, sortList }) => ({ setSort, sortList }))(({ sortableFields, sortList, setSort }) => {
   const [{ direction, field }] = !sortList?.length ? [{ direction: '', field: '' }] : sortList;
   const relevance = i18n.translate(
-    'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.sortingView.relevanceLabel',
+    'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.sortingView.relevanceLabel',
     { defaultMessage: 'Relevance' }
   );
 
@@ -226,7 +226,7 @@ export const Sorting = withSearch<
         <EuiTitle size="xxxs">
           <label htmlFor="sorting-field">
             <FormattedMessage
-              id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.sortingView.fieldLabel"
+              id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.sortingView.fieldLabel"
               defaultMessage="Sort By"
             />
           </label>
@@ -252,7 +252,7 @@ export const Sorting = withSearch<
             <EuiTitle size="xxxs">
               <label htmlFor="sorting-direction">
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.sortingView.directionLabel"
+                  id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.sortingView.directionLabel"
                   defaultMessage="Order By"
                 />
               </label>
@@ -271,14 +271,14 @@ export const Sorting = withSearch<
               options={[
                 {
                   text: i18n.translate(
-                    'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.sortingView.ascLabel',
+                    'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.sortingView.ascLabel',
                     { defaultMessage: 'Ascending' }
                   ),
                   value: 'asc',
                 },
                 {
                   text: i18n.translate(
-                    'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.sortingView.descLabel',
+                    'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.sortingView.descLabel',
                     { defaultMessage: 'Descending' }
                   ),
                   value: 'desc',
