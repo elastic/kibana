@@ -174,7 +174,7 @@ export class ManifestTask {
         diff.removals.map((artifact) => getArtifactId(artifact))
       );
       if (deleteErrors) {
-        reportErrors(this.logger, [deleteErrors]);
+        reportErrors(this.logger, deleteErrors);
       }
       await manifestManager.cleanup(newManifest);
     } catch (err) {

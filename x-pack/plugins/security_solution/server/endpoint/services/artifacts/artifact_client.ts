@@ -22,9 +22,9 @@ export interface EndpointArtifactClientInterface {
     artifacts: InternalArtifactCompleteSchema[]
   ): Promise<{ artifacts?: InternalArtifactCompleteSchema[]; errors?: Error[] }>;
 
-  bulkDeleteArtifacts(ids: string[]): Promise<void>;
-
   deleteArtifact(id: string): Promise<void>;
+
+  bulkDeleteArtifacts(ids: string[]): Promise<Error[] | undefined>;
 
   listArtifacts(options?: ListArtifactsProps): Promise<ListResult<Artifact>>;
 }
@@ -99,7 +99,7 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
     return this.fleetArtifacts.deleteArtifact(artifactId);
   }
 
-  async bulkDeleteArtifacts(ids: string[]): Promise<void> {
-    await this.fleetArtifacts.bulkDeleteArtifacts(ids);
+  async bulkDeleteArtifacts(ids: string[]): Promise<Error[] | undefined> {
+    return this.fleetArtifacts.bulkDeleteArtifacts(ids);
   }
 }

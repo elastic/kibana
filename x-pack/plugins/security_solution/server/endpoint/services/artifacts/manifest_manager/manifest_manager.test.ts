@@ -612,18 +612,20 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
       const error = new Error();
 
-      artifactClient.bulkDeleteArtifacts.mockImplementation(async (ids) => {
-        if (ids[1] === ARTIFACT_ID_EXCEPTIONS_WINDOWS) {
-          throw error;
+      artifactClient.bulkDeleteArtifacts.mockImplementation(
+        async (ids): Promise<Error[] | undefined> => {
+          if (ids[1] === ARTIFACT_ID_EXCEPTIONS_WINDOWS) {
+            return [error];
+          }
         }
-      });
+      );
 
-      await expect(
-        manifestManager.deleteArtifacts([
+      expect(
+        await manifestManager.deleteArtifacts([
           ARTIFACT_ID_EXCEPTIONS_MACOS,
           ARTIFACT_ID_EXCEPTIONS_WINDOWS,
         ])
-      ).resolves.toStrictEqual(error);
+      ).toEqual([error]);
 
       expect(artifactClient.bulkDeleteArtifacts).toHaveBeenCalledTimes(1);
       expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([

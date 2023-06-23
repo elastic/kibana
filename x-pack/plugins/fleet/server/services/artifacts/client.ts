@@ -113,7 +113,7 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
     }
   }
 
-  async bulkDeleteArtifacts(ids: string[]) {
+  async bulkDeleteArtifacts(ids: string[]): Promise<Error[] | undefined> {
     const idsMappedWithPackageName = ids.map((id) => uniqueIdFromId(id, this.packageName));
     return await bulkDeleteArtifacts(this.esClient, idsMappedWithPackageName);
   }
