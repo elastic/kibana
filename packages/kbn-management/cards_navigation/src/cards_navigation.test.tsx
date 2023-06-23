@@ -31,15 +31,36 @@ describe('ProjectSwitcher', () => {
     });
   });
 
-  describe('with RedirectAppLinks provider', () => {
+  describe('With providers', () => {
     beforeEach(() => {
       cleanup();
     });
 
-    test('is rendered', () => {
+    test('it renders categories and cards', () => {
       renderCardsNavigationComponent({ sections: sectionsMock, appBasePath: APP_BASE_PATH });
-      const pipelinesCard = screen.queryByTestId('app-card-pipelines');
-      expect(pipelinesCard).not.toBeNull();
+
+      const dataCategory = screen.queryByTestId('category-data');
+      const dataPipelinesApp = screen.queryByTestId('app-card-pipelines');
+
+      expect(dataCategory).not.toBeNull();
+      expect(dataPipelinesApp).not.toBeNull();
+    });
+
+    test('it doesnt show empty categories', () => {
+      renderCardsNavigationComponent({
+        sections: [
+          {
+            id: 'data',
+            title: 'Data',
+            apps: [],
+          },
+        ],
+        appBasePath: APP_BASE_PATH,
+      });
+
+      const dataCategory = screen.queryByTestId('category-data');
+
+      expect(dataCategory).toBeNull();
     });
   });
 });

@@ -10,7 +10,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { flatMap } from 'lodash';
 import {
-  EuiPageBody,
   EuiPageSection,
   EuiPageHeader,
   EuiSpacer,
@@ -92,51 +91,49 @@ export const CardsNavigationComponent = ({
   const appsByCategory = getEnabledAppsByCategory(sections);
 
   return (
-    <EuiPageBody restrictWidth={true}>
-      <EuiPageSection color="transparent" paddingSize="none">
-        <EuiPageHeader
-          bottomBorder
-          pageTitle={i18n.translate('management.landing.withCardNavigation.pageTitle', {
-            defaultMessage: 'Management',
-          })}
-          description={i18n.translate('management.landing.withCardNavigation.pageDescription', {
-            defaultMessage: 'Manage your indices, data views, saved objects, settings, and more.',
-          })}
-        />
+    <EuiPageSection color="transparent" paddingSize="none">
+      <EuiPageHeader
+        bottomBorder
+        pageTitle={i18n.translate('management.landing.withCardNavigation.pageTitle', {
+          defaultMessage: 'Management',
+        })}
+        description={i18n.translate('management.landing.withCardNavigation.pageDescription', {
+          defaultMessage: 'Manage your indices, data views, saved objects, settings, and more.',
+        })}
+      />
 
-        {appsByCategory.map((category, index) => (
-          <div key={category.id}>
-            {index === 0 ? (
-              <EuiSpacer size="l" />
-            ) : (
-              <>
-                <EuiSpacer size="s" />
-                <EuiHorizontalRule />
-              </>
-            )}
-            <EuiText>
-              <h3>{category.title}</h3>
-            </EuiText>
+      {appsByCategory.map((category, index) => (
+        <div key={category.id}>
+          {index === 0 ? (
             <EuiSpacer size="l" />
-            <EuiFlexGrid columns={3}>
-              {category.apps.map((app) => (
-                <EuiFlexItem key={app!.id}>
-                  <EuiCard
-                    data-test-subj={`app-card-${app!.id}`}
-                    layout="horizontal"
-                    icon={app!.icon}
-                    titleSize="xs"
-                    title={app!.title}
-                    description={app!.description}
-                    href={appBasePath + app!.href}
-                    onClick={onCardClick}
-                  />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGrid>
-          </div>
-        ))}
-      </EuiPageSection>
-    </EuiPageBody>
+          ) : (
+            <>
+              <EuiSpacer size="s" />
+              <EuiHorizontalRule />
+            </>
+          )}
+          <EuiText data-test-subj={`category-${category.id}`}>
+            <h3>{category.title}</h3>
+          </EuiText>
+          <EuiSpacer size="l" />
+          <EuiFlexGrid columns={3}>
+            {category.apps.map((app) => (
+              <EuiFlexItem key={app!.id}>
+                <EuiCard
+                  data-test-subj={`app-card-${app!.id}`}
+                  layout="horizontal"
+                  icon={app!.icon}
+                  titleSize="xs"
+                  title={app!.title}
+                  description={app!.description}
+                  href={appBasePath + app!.href}
+                  onClick={onCardClick}
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGrid>
+        </div>
+      ))}
+    </EuiPageSection>
   );
 };

@@ -10,6 +10,8 @@ export const APP_BASE_PATH = 'http://localhost:9001';
 
 export const sectionsMock = [
   {
+    id: 'data',
+    title: 'Data',
     apps: [
       {
         id: 'ingest_pipelines',
@@ -50,6 +52,8 @@ export const sectionsMock = [
     ],
   },
   {
+    id: 'content',
+    title: 'Content',
     apps: [
       {
         id: 'objects',
@@ -69,19 +73,15 @@ export const sectionsMock = [
         enabled: true,
         basePath: '/app/management/ingest/pipelines_logstash',
       },
-      {
-        id: 'api_keys',
-        title: 'API Keys',
-        enabled: true,
-        basePath: '/app/management/ingest/pipelines_logstash',
-      },
     ],
   },
   {
+    id: 'other',
+    title: 'Other',
     apps: [
       {
-        id: 'settings',
-        title: 'Advanced Settings',
+        id: 'api_keys',
+        title: 'API Keys',
         enabled: true,
         basePath: '/app/management/ingest/pipelines_logstash',
       },
