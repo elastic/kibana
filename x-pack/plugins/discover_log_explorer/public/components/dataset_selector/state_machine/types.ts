@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Dataset, DatasetPlain } from '../../../../common/datasets/models/dataset';
+import { Dataset } from '../../../../common/datasets/models/dataset';
 import { ReloadDatasets, SearchDatasets } from '../../../hooks/use_datasets';
 import {
   LoadMoreIntegrations,
@@ -15,7 +15,7 @@ import type { IImmutableCache } from '../../../../common/immutable_cache';
 import { DatasetSelectionHandler, DatasetsSelectorSearchParams, PanelId } from '../types';
 
 export interface DefaultDatasetsSelectorContext {
-  selected?: DatasetPlain;
+  selected?: Dataset;
   panelId: PanelId;
   searchCache: IImmutableCache<PanelId, DatasetsSelectorSearchParams>;
   search: DatasetsSelectorSearchParams;

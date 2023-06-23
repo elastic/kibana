@@ -10,8 +10,7 @@
 import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Meta, Story } from '@storybook/react';
-import { IndexPatternType } from '@kbn/io-ts-utils';
-import { DatasetPlain } from '../../../common/datasets/models/dataset';
+import { IndexPattern } from '@kbn/io-ts-utils';
 import { Dataset, Integration } from '../../../common/datasets';
 import { DatasetSelector } from './dataset_selector';
 import {
@@ -38,13 +37,10 @@ const meta: Meta<typeof DatasetSelector> = {
 export default meta;
 
 const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
-  const [selected, setSelected] = useState<DatasetPlain>({
-    dataset: mockIntegrations[0].dataStreams[0],
-    integration: {
-      name: mockIntegrations[0].name,
-      version: mockIntegrations[0].version,
-    },
-  });
+  const [selected, setSelected] = useState<Dataset>(() =>
+    Dataset.create(mockIntegrations[0].dataStreams[0], mockIntegrations[0])
+  );
+
   const [search, setSearch] = useState<DatasetsSelectorSearchParams>({
     sortOrder: 'asc',
     name: '',
@@ -58,7 +54,7 @@ const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
   };
 
   const onDatasetSelected: DatasetSelectionHandler = (dataset) => {
-    setSelected(dataset.toPlain());
+    setSelected(dataset);
   };
 
   const filteredIntegrations = integrations.filter((integration) =>
@@ -111,11 +107,11 @@ const mockIntegrations: Integration[] = [
     dataStreams: [
       {
         title: 'System metrics stream',
-        name: 'system-metrics-*' as IndexPatternType,
+        name: 'system-metrics-*' as IndexPattern,
       },
       {
         title: 'System logs stream',
-        name: 'system-logs-*' as IndexPatternType,
+        name: 'system-logs-*' as IndexPattern,
       },
     ],
   },
@@ -126,11 +122,11 @@ const mockIntegrations: Integration[] = [
     dataStreams: [
       {
         title: 'Kubernetes metrics stream',
-        name: 'k8s-metrics-*' as IndexPatternType,
+        name: 'k8s-metrics-*' as IndexPattern,
       },
       {
         title: 'Kubernetes logs stream',
-        name: 'k8s-logs-*' as IndexPatternType,
+        name: 'k8s-logs-*' as IndexPattern,
       },
     ],
   },
@@ -141,15 +137,15 @@ const mockIntegrations: Integration[] = [
     dataStreams: [
       {
         title: 'MySQL metrics stream',
-        name: 'mysql-metrics-*' as IndexPatternType,
+        name: 'mysql-metrics-*' as IndexPattern,
       },
       {
         title: 'MySQL slow logs stream',
-        name: 'mysql-slow-logs-*' as IndexPatternType,
+        name: 'mysql-slow-logs-*' as IndexPattern,
       },
       {
         title: 'MySQL error logs stream',
-        name: 'mysql-error-logs-*' as IndexPatternType,
+        name: 'mysql-error-logs-*' as IndexPattern,
       },
     ],
   },
@@ -160,15 +156,15 @@ const mockIntegrations: Integration[] = [
     dataStreams: [
       {
         title: 'Apache metrics stream',
-        name: 'apache-metrics-*' as IndexPatternType,
+        name: 'apache-metrics-*' as IndexPattern,
       },
       {
         title: 'Apache logs stream',
-        name: 'apache-logs-*' as IndexPatternType,
+        name: 'apache-logs-*' as IndexPattern,
       },
       {
         title: 'Apache error logs stream',
-        name: 'apache-error-logs-*' as IndexPatternType,
+        name: 'apache-error-logs-*' as IndexPattern,
       },
     ],
   },
@@ -179,11 +175,11 @@ const mockIntegrations: Integration[] = [
     dataStreams: [
       {
         title: 'Nginx metrics stream',
-        name: 'nginx-metrics-*' as IndexPatternType,
+        name: 'nginx-metrics-*' as IndexPattern,
       },
       {
         title: 'Nginx access logs stream',
-        name: 'nginx-access-logs-*' as IndexPatternType,
+        name: 'nginx-access-logs-*' as IndexPattern,
       },
     ],
   },
@@ -194,15 +190,15 @@ const mockIntegrations: Integration[] = [
     dataStreams: [
       {
         title: 'PostgreSQL metrics stream',
-        name: 'postgresql-metrics-*' as IndexPatternType,
+        name: 'postgresql-metrics-*' as IndexPattern,
       },
       {
         title: 'PostgreSQL slow query logs stream',
-        name: 'postgresql-slow-query-logs-*' as IndexPatternType,
+        name: 'postgresql-slow-query-logs-*' as IndexPattern,
       },
       {
         title: 'PostgreSQL error logs stream',
-        name: 'postgresql-error-logs-*' as IndexPatternType,
+        name: 'postgresql-error-logs-*' as IndexPattern,
       },
     ],
   },
@@ -213,15 +209,15 @@ const mockIntegrations: Integration[] = [
     dataStreams: [
       {
         title: 'RabbitMQ metrics stream',
-        name: 'rabbitmq-metrics-*' as IndexPatternType,
+        name: 'rabbitmq-metrics-*' as IndexPattern,
       },
       {
         title: 'RabbitMQ queues stream',
-        name: 'rabbitmq-queues-*' as IndexPatternType,
+        name: 'rabbitmq-queues-*' as IndexPattern,
       },
       {
         title: 'RabbitMQ error logs stream',
-        name: 'rabbitmq-error-logs-*' as IndexPatternType,
+        name: 'rabbitmq-error-logs-*' as IndexPattern,
       },
     ],
   },
@@ -232,11 +228,11 @@ const mockIntegrations: Integration[] = [
     dataStreams: [
       {
         title: 'Redis metrics stream',
-        name: 'redis-metrics-*' as IndexPatternType,
+        name: 'redis-metrics-*' as IndexPattern,
       },
       {
         title: 'Redis slow logs stream',
-        name: 'redis-slow-logs-*' as IndexPatternType,
+        name: 'redis-slow-logs-*' as IndexPattern,
       },
     ],
   },
@@ -247,11 +243,11 @@ const mockIntegrations: Integration[] = [
     dataStreams: [
       {
         title: 'Elasticsearch metrics stream',
-        name: 'elasticsearch-metrics-*' as IndexPatternType,
+        name: 'elasticsearch-metrics-*' as IndexPattern,
       },
       {
         title: 'Elasticsearch indices stream',
-        name: 'elasticsearch-indices-*' as IndexPatternType,
+        name: 'elasticsearch-indices-*' as IndexPattern,
       },
     ],
   },
@@ -262,11 +258,11 @@ const mockIntegrations: Integration[] = [
     dataStreams: [
       {
         title: 'MongoDB metrics stream',
-        name: 'mongodb-metrics-*' as IndexPatternType,
+        name: 'mongodb-metrics-*' as IndexPattern,
       },
       {
         title: 'MongoDB slow query logs stream',
-        name: 'mongodb-slow-query-logs-*' as IndexPatternType,
+        name: 'mongodb-slow-query-logs-*' as IndexPattern,
       },
     ],
   },
@@ -277,7 +273,7 @@ const mockIntegrations: Integration[] = [
     dataStreams: [
       {
         title: 'Prometheus metrics stream',
-        name: 'prometheus-metrics-*' as IndexPatternType,
+        name: 'prometheus-metrics-*' as IndexPattern,
       },
     ],
   },
@@ -288,11 +284,11 @@ const mockIntegrations: Integration[] = [
     dataStreams: [
       {
         title: 'HAProxy metrics stream',
-        name: 'haproxy-metrics-*' as IndexPatternType,
+        name: 'haproxy-metrics-*' as IndexPattern,
       },
       {
         title: 'HAProxy logs stream',
-        name: 'haproxy-logs-*' as IndexPatternType,
+        name: 'haproxy-logs-*' as IndexPattern,
       },
     ],
   },
@@ -301,8 +297,8 @@ const mockIntegrations: Integration[] = [
     version: '1.10.0',
     status: 'installed' as Integration['status'],
     dataStreams: [
-      { title: 'Atlassian metrics stream', name: 'metrics-*' as IndexPatternType },
-      { title: 'Atlassian secondary', name: 'metrics-*' as IndexPatternType },
+      { title: 'Atlassian metrics stream', name: 'metrics-*' as IndexPattern },
+      { title: 'Atlassian secondary', name: 'metrics-*' as IndexPattern },
     ],
   },
   {
@@ -310,8 +306,8 @@ const mockIntegrations: Integration[] = [
     version: '1.10.0',
     status: 'installed' as Integration['status'],
     dataStreams: [
-      { title: 'Atlassian metrics stream', name: 'metrics-*' as IndexPatternType },
-      { title: 'Atlassian secondary', name: 'metrics-*' as IndexPatternType },
+      { title: 'Atlassian metrics stream', name: 'metrics-*' as IndexPattern },
+      { title: 'Atlassian secondary', name: 'metrics-*' as IndexPattern },
     ],
   },
   {
@@ -319,8 +315,8 @@ const mockIntegrations: Integration[] = [
     version: '1.9.0',
     status: 'installed' as Integration['status'],
     dataStreams: [
-      { title: 'Atlassian metrics stream', name: 'metrics-*' as IndexPatternType },
-      { title: 'Atlassian secondary', name: 'metrics-*' as IndexPatternType },
+      { title: 'Atlassian metrics stream', name: 'metrics-*' as IndexPattern },
+      { title: 'Atlassian secondary', name: 'metrics-*' as IndexPattern },
     ],
   },
   {
@@ -328,8 +324,8 @@ const mockIntegrations: Integration[] = [
     version: '2.4.3',
     status: 'installed' as Integration['status'],
     dataStreams: [
-      { title: 'Docker container logs', name: 'docker-*' as IndexPatternType },
-      { title: 'Docker daemon logs', name: 'docker-daemon-*' as IndexPatternType },
+      { title: 'Docker container logs', name: 'docker-*' as IndexPattern },
+      { title: 'Docker daemon logs', name: 'docker-daemon-*' as IndexPattern },
     ],
   },
   {
@@ -337,8 +333,8 @@ const mockIntegrations: Integration[] = [
     version: '1.36.3',
     status: 'installed' as Integration['status'],
     dataStreams: [
-      { title: 'AWS S3 object access logs', name: 'aws-s3-access-' as IndexPatternType },
-      { title: 'AWS S3 bucket access logs', name: 'aws-s3-bucket-access-' as IndexPatternType },
+      { title: 'AWS S3 object access logs', name: 'aws-s3-access-' as IndexPattern },
+      { title: 'AWS S3 bucket access logs', name: 'aws-s3-bucket-access-' as IndexPattern },
     ],
   },
   {
@@ -346,137 +342,137 @@ const mockIntegrations: Integration[] = [
     version: '1.6.0',
     status: 'installed' as Integration['status'],
     dataStreams: [
-      { title: 'Cassandra server logs', name: 'cassandra-' as IndexPatternType },
-      { title: 'Cassandra slow queries', name: 'cassandra-slow-' as IndexPatternType },
-      { title: 'Cassandra errors', name: 'cassandra-errors-' as IndexPatternType },
+      { title: 'Cassandra server logs', name: 'cassandra-' as IndexPattern },
+      { title: 'Cassandra slow queries', name: 'cassandra-slow-' as IndexPattern },
+      { title: 'Cassandra errors', name: 'cassandra-errors-' as IndexPattern },
     ],
   },
   {
     name: 'nginx_ingress_controller',
     version: '1.7.1',
     status: 'installed' as Integration['status'],
-    dataStreams: [{ title: 'Nginx ingress logs', name: 'nginx-ingress-' as IndexPatternType }],
+    dataStreams: [{ title: 'Nginx ingress logs', name: 'nginx-ingress-' as IndexPattern }],
   },
   {
     name: 'gcp',
     version: '2.20.1',
     status: 'installed' as Integration['status'],
-    dataStreams: [{ title: 'GCP Stackdriver logs', name: 'gcp-stackdriver-*' as IndexPatternType }],
+    dataStreams: [{ title: 'GCP Stackdriver logs', name: 'gcp-stackdriver-*' as IndexPattern }],
   },
   {
     name: 'kafka',
     version: '1.5.6',
     status: 'installed' as Integration['status'],
-    dataStreams: [{ title: 'Kafka server logs', name: 'kafka-*' as IndexPatternType }],
+    dataStreams: [{ title: 'Kafka server logs', name: 'kafka-*' as IndexPattern }],
   },
   {
     name: 'kibana',
     version: '2.3.4',
     status: 'installed' as Integration['status'],
-    dataStreams: [{ title: 'Kibana server logs', name: 'kibana-*' as IndexPatternType }],
+    dataStreams: [{ title: 'Kibana server logs', name: 'kibana-*' as IndexPattern }],
   },
 ].map(Integration.create);
 
 const mockDatasets: Dataset[] = [
-  { name: 'logs-*' as IndexPatternType },
-  { name: 'system-logs-*' as IndexPatternType },
-  { name: 'nginx-logs-*' as IndexPatternType },
-  { name: 'apache-logs-*' as IndexPatternType },
-  { name: 'security-logs-*' as IndexPatternType },
-  { name: 'error-logs-*' as IndexPatternType },
-  { name: 'access-logs-*' as IndexPatternType },
-  { name: 'firewall-logs-*' as IndexPatternType },
-  { name: 'application-logs-*' as IndexPatternType },
-  { name: 'debug-logs-*' as IndexPatternType },
-  { name: 'transaction-logs-*' as IndexPatternType },
-  { name: 'audit-logs-*' as IndexPatternType },
-  { name: 'server-logs-*' as IndexPatternType },
-  { name: 'database-logs-*' as IndexPatternType },
-  { name: 'event-logs-*' as IndexPatternType },
-  { name: 'auth-logs-*' as IndexPatternType },
-  { name: 'billing-logs-*' as IndexPatternType },
-  { name: 'network-logs-*' as IndexPatternType },
-  { name: 'performance-logs-*' as IndexPatternType },
-  { name: 'email-logs-*' as IndexPatternType },
-  { name: 'job-logs-*' as IndexPatternType },
-  { name: 'task-logs-*' as IndexPatternType },
-  { name: 'user-logs-*' as IndexPatternType },
-  { name: 'request-logs-*' as IndexPatternType },
-  { name: 'payment-logs-*' as IndexPatternType },
-  { name: 'inventory-logs-*' as IndexPatternType },
-  { name: 'debugging-logs-*' as IndexPatternType },
-  { name: 'scheduler-logs-*' as IndexPatternType },
-  { name: 'diagnostic-logs-*' as IndexPatternType },
-  { name: 'cluster-logs-*' as IndexPatternType },
-  { name: 'service-logs-*' as IndexPatternType },
-  { name: 'framework-logs-*' as IndexPatternType },
-  { name: 'api-logs-*' as IndexPatternType },
-  { name: 'load-balancer-logs-*' as IndexPatternType },
-  { name: 'reporting-logs-*' as IndexPatternType },
-  { name: 'backend-logs-*' as IndexPatternType },
-  { name: 'frontend-logs-*' as IndexPatternType },
-  { name: 'chat-logs-*' as IndexPatternType },
-  { name: 'error-tracking-logs-*' as IndexPatternType },
-  { name: 'payment-gateway-logs-*' as IndexPatternType },
-  { name: 'auth-service-logs-*' as IndexPatternType },
-  { name: 'billing-service-logs-*' as IndexPatternType },
-  { name: 'database-service-logs-*' as IndexPatternType },
-  { name: 'api-gateway-logs-*' as IndexPatternType },
-  { name: 'event-service-logs-*' as IndexPatternType },
-  { name: 'notification-service-logs-*' as IndexPatternType },
-  { name: 'search-service-logs-*' as IndexPatternType },
-  { name: 'logging-service-logs-*' as IndexPatternType },
-  { name: 'performance-service-logs-*' as IndexPatternType },
-  { name: 'load-testing-logs-*' as IndexPatternType },
-  { name: 'mobile-app-logs-*' as IndexPatternType },
-  { name: 'web-app-logs-*' as IndexPatternType },
-  { name: 'stream-processing-logs-*' as IndexPatternType },
-  { name: 'batch-processing-logs-*' as IndexPatternType },
-  { name: 'cloud-service-logs-*' as IndexPatternType },
-  { name: 'container-logs-*' as IndexPatternType },
-  { name: 'serverless-logs-*' as IndexPatternType },
-  { name: 'server-administration-logs-*' as IndexPatternType },
-  { name: 'application-deployment-logs-*' as IndexPatternType },
-  { name: 'webserver-logs-*' as IndexPatternType },
-  { name: 'payment-processor-logs-*' as IndexPatternType },
-  { name: 'inventory-service-logs-*' as IndexPatternType },
-  { name: 'data-pipeline-logs-*' as IndexPatternType },
-  { name: 'frontend-service-logs-*' as IndexPatternType },
-  { name: 'backend-service-logs-*' as IndexPatternType },
-  { name: 'resource-monitoring-logs-*' as IndexPatternType },
-  { name: 'logging-aggregation-logs-*' as IndexPatternType },
-  { name: 'container-orchestration-logs-*' as IndexPatternType },
-  { name: 'security-audit-logs-*' as IndexPatternType },
-  { name: 'api-management-logs-*' as IndexPatternType },
-  { name: 'service-mesh-logs-*' as IndexPatternType },
-  { name: 'data-processing-logs-*' as IndexPatternType },
-  { name: 'data-science-logs-*' as IndexPatternType },
-  { name: 'machine-learning-logs-*' as IndexPatternType },
-  { name: 'experimentation-logs-*' as IndexPatternType },
-  { name: 'data-visualization-logs-*' as IndexPatternType },
-  { name: 'data-cleaning-logs-*' as IndexPatternType },
-  { name: 'data-transformation-logs-*' as IndexPatternType },
-  { name: 'data-analysis-logs-*' as IndexPatternType },
-  { name: 'data-storage-logs-*' as IndexPatternType },
-  { name: 'data-retrieval-logs-*' as IndexPatternType },
-  { name: 'data-warehousing-logs-*' as IndexPatternType },
-  { name: 'data-modeling-logs-*' as IndexPatternType },
-  { name: 'data-integration-logs-*' as IndexPatternType },
-  { name: 'data-quality-logs-*' as IndexPatternType },
-  { name: 'data-security-logs-*' as IndexPatternType },
-  { name: 'data-encryption-logs-*' as IndexPatternType },
-  { name: 'data-governance-logs-*' as IndexPatternType },
-  { name: 'data-compliance-logs-*' as IndexPatternType },
-  { name: 'data-privacy-logs-*' as IndexPatternType },
-  { name: 'data-auditing-logs-*' as IndexPatternType },
-  { name: 'data-discovery-logs-*' as IndexPatternType },
-  { name: 'data-protection-logs-*' as IndexPatternType },
-  { name: 'data-archiving-logs-*' as IndexPatternType },
-  { name: 'data-backup-logs-*' as IndexPatternType },
-  { name: 'data-recovery-logs-*' as IndexPatternType },
-  { name: 'data-replication-logs-*' as IndexPatternType },
-  { name: 'data-synchronization-logs-*' as IndexPatternType },
-  { name: 'data-migration-logs-*' as IndexPatternType },
-  { name: 'data-load-balancing-logs-*' as IndexPatternType },
-  { name: 'data-scaling-logs-*' as IndexPatternType },
-].map((dataset) => Dataset.create({ dataset }));
+  { name: 'logs-*' as IndexPattern },
+  { name: 'system-logs-*' as IndexPattern },
+  { name: 'nginx-logs-*' as IndexPattern },
+  { name: 'apache-logs-*' as IndexPattern },
+  { name: 'security-logs-*' as IndexPattern },
+  { name: 'error-logs-*' as IndexPattern },
+  { name: 'access-logs-*' as IndexPattern },
+  { name: 'firewall-logs-*' as IndexPattern },
+  { name: 'application-logs-*' as IndexPattern },
+  { name: 'debug-logs-*' as IndexPattern },
+  { name: 'transaction-logs-*' as IndexPattern },
+  { name: 'audit-logs-*' as IndexPattern },
+  { name: 'server-logs-*' as IndexPattern },
+  { name: 'database-logs-*' as IndexPattern },
+  { name: 'event-logs-*' as IndexPattern },
+  { name: 'auth-logs-*' as IndexPattern },
+  { name: 'billing-logs-*' as IndexPattern },
+  { name: 'network-logs-*' as IndexPattern },
+  { name: 'performance-logs-*' as IndexPattern },
+  { name: 'email-logs-*' as IndexPattern },
+  { name: 'job-logs-*' as IndexPattern },
+  { name: 'task-logs-*' as IndexPattern },
+  { name: 'user-logs-*' as IndexPattern },
+  { name: 'request-logs-*' as IndexPattern },
+  { name: 'payment-logs-*' as IndexPattern },
+  { name: 'inventory-logs-*' as IndexPattern },
+  { name: 'debugging-logs-*' as IndexPattern },
+  { name: 'scheduler-logs-*' as IndexPattern },
+  { name: 'diagnostic-logs-*' as IndexPattern },
+  { name: 'cluster-logs-*' as IndexPattern },
+  { name: 'service-logs-*' as IndexPattern },
+  { name: 'framework-logs-*' as IndexPattern },
+  { name: 'api-logs-*' as IndexPattern },
+  { name: 'load-balancer-logs-*' as IndexPattern },
+  { name: 'reporting-logs-*' as IndexPattern },
+  { name: 'backend-logs-*' as IndexPattern },
+  { name: 'frontend-logs-*' as IndexPattern },
+  { name: 'chat-logs-*' as IndexPattern },
+  { name: 'error-tracking-logs-*' as IndexPattern },
+  { name: 'payment-gateway-logs-*' as IndexPattern },
+  { name: 'auth-service-logs-*' as IndexPattern },
+  { name: 'billing-service-logs-*' as IndexPattern },
+  { name: 'database-service-logs-*' as IndexPattern },
+  { name: 'api-gateway-logs-*' as IndexPattern },
+  { name: 'event-service-logs-*' as IndexPattern },
+  { name: 'notification-service-logs-*' as IndexPattern },
+  { name: 'search-service-logs-*' as IndexPattern },
+  { name: 'logging-service-logs-*' as IndexPattern },
+  { name: 'performance-service-logs-*' as IndexPattern },
+  { name: 'load-testing-logs-*' as IndexPattern },
+  { name: 'mobile-app-logs-*' as IndexPattern },
+  { name: 'web-app-logs-*' as IndexPattern },
+  { name: 'stream-processing-logs-*' as IndexPattern },
+  { name: 'batch-processing-logs-*' as IndexPattern },
+  { name: 'cloud-service-logs-*' as IndexPattern },
+  { name: 'container-logs-*' as IndexPattern },
+  { name: 'serverless-logs-*' as IndexPattern },
+  { name: 'server-administration-logs-*' as IndexPattern },
+  { name: 'application-deployment-logs-*' as IndexPattern },
+  { name: 'webserver-logs-*' as IndexPattern },
+  { name: 'payment-processor-logs-*' as IndexPattern },
+  { name: 'inventory-service-logs-*' as IndexPattern },
+  { name: 'data-pipeline-logs-*' as IndexPattern },
+  { name: 'frontend-service-logs-*' as IndexPattern },
+  { name: 'backend-service-logs-*' as IndexPattern },
+  { name: 'resource-monitoring-logs-*' as IndexPattern },
+  { name: 'logging-aggregation-logs-*' as IndexPattern },
+  { name: 'container-orchestration-logs-*' as IndexPattern },
+  { name: 'security-audit-logs-*' as IndexPattern },
+  { name: 'api-management-logs-*' as IndexPattern },
+  { name: 'service-mesh-logs-*' as IndexPattern },
+  { name: 'data-processing-logs-*' as IndexPattern },
+  { name: 'data-science-logs-*' as IndexPattern },
+  { name: 'machine-learning-logs-*' as IndexPattern },
+  { name: 'experimentation-logs-*' as IndexPattern },
+  { name: 'data-visualization-logs-*' as IndexPattern },
+  { name: 'data-cleaning-logs-*' as IndexPattern },
+  { name: 'data-transformation-logs-*' as IndexPattern },
+  { name: 'data-analysis-logs-*' as IndexPattern },
+  { name: 'data-storage-logs-*' as IndexPattern },
+  { name: 'data-retrieval-logs-*' as IndexPattern },
+  { name: 'data-warehousing-logs-*' as IndexPattern },
+  { name: 'data-modeling-logs-*' as IndexPattern },
+  { name: 'data-integration-logs-*' as IndexPattern },
+  { name: 'data-quality-logs-*' as IndexPattern },
+  { name: 'data-security-logs-*' as IndexPattern },
+  { name: 'data-encryption-logs-*' as IndexPattern },
+  { name: 'data-governance-logs-*' as IndexPattern },
+  { name: 'data-compliance-logs-*' as IndexPattern },
+  { name: 'data-privacy-logs-*' as IndexPattern },
+  { name: 'data-auditing-logs-*' as IndexPattern },
+  { name: 'data-discovery-logs-*' as IndexPattern },
+  { name: 'data-protection-logs-*' as IndexPattern },
+  { name: 'data-archiving-logs-*' as IndexPattern },
+  { name: 'data-backup-logs-*' as IndexPattern },
+  { name: 'data-recovery-logs-*' as IndexPattern },
+  { name: 'data-replication-logs-*' as IndexPattern },
+  { name: 'data-synchronization-logs-*' as IndexPattern },
+  { name: 'data-migration-logs-*' as IndexPattern },
+  { name: 'data-load-balancing-logs-*' as IndexPattern },
+  { name: 'data-scaling-logs-*' as IndexPattern },
+].map((dataset) => Dataset.create(dataset));

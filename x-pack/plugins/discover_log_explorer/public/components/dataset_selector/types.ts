@@ -6,7 +6,6 @@
  */
 
 import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
-import { DatasetPlain } from '../../../common/datasets/models/dataset';
 import { SortOrder } from '../../../common/latest';
 import { Dataset, Integration, IntegrationId } from '../../../common/datasets';
 import { LoadDatasets, ReloadDatasets, SearchDatasets } from '../../hooks/use_datasets';
@@ -23,7 +22,7 @@ export interface DatasetSelectorProps {
   /* Any error occurred to show when the user preview the generic data streams */
   datasetsError?: Error | null;
   /* The integrations list, each integration includes its data streams */
-  initialSelected: DatasetPlain;
+  initialSelected: Dataset;
   /* The integrations list, each integration includes its data streams */
   integrations: Integration[] | null;
   /* Any error occurred to show when the user preview the integrations */

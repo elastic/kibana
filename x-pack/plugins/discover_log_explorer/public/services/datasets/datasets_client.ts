@@ -70,6 +70,6 @@ export class DatasetsClient implements IDatasetsClient {
         new FindDatasetsError(`Failed to decode data streams response: ${message}"`)
     )(response);
 
-    return { items: data.items.map((dataset) => Dataset.create({ dataset })) };
+    return { items: data.items.map((dataset) => Dataset.create(dataset)) };
   }
 }

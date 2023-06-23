@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
-import { IndexPatternType } from '@kbn/io-ts-utils';
-import { Dataset, DatasetPlain } from '../../common/datasets/models/dataset';
+import { IndexPattern } from '@kbn/io-ts-utils';
+import { Dataset } from '../../common/datasets/models/dataset';
 import { DatasetSelectionHandler, DatasetSelector } from '../components/dataset_selector';
 import { DatasetsProvider, useDatasetsContext } from '../hooks/use_datasets';
 import { InternalStateProvider, useDataView } from '../hooks/use_data_view';
@@ -23,12 +23,10 @@ export const CustomDatasetSelector = withProviders(({ stateContainer }) => {
   // Container component, here goes all the state management and custom logic usage to keep the DatasetSelector presentational.
   const dataView = useDataView();
 
-  const initialSelected: DatasetPlain = Dataset.create({
-    dataset: {
-      name: dataView.getIndexPattern() as IndexPatternType,
-      title: dataView.getName(),
-    },
-  }).toPlain();
+  const initialSelected: Dataset = Dataset.create({
+    name: dataView.getIndexPattern() as IndexPattern,
+    title: dataView.getName(),
+  });
 
   const {
     error: integrationsError,

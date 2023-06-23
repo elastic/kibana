@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
-import { DatasetPlain } from '../../../../common/datasets/models/dataset';
+import { Dataset } from '../../../../common/datasets/models/dataset';
 import { DATA_VIEW_POPOVER_CONTENT_WIDTH, POPOVER_ID, selectDatasetLabel } from '../constants';
 import { getPopoverButtonStyles } from '../utils';
 
@@ -25,7 +25,7 @@ const panelStyle = { width: DATA_VIEW_POPOVER_CONTENT_WIDTH };
 interface DatasetsPopoverProps extends Omit<EuiPopoverProps, 'button'> {
   children: React.ReactNode;
   onClick: () => void;
-  selected?: DatasetPlain;
+  selected?: Dataset;
 }
 
 export const DatasetsPopover = ({
@@ -34,11 +34,11 @@ export const DatasetsPopover = ({
   selected,
   ...props
 }: DatasetsPopoverProps) => {
-  const { dataset, integration } = selected ?? {};
+  const { title, parentIntegration } = selected ?? {};
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const buttonStyles = getPopoverButtonStyles({ fullWidth: isMobile });
-  const hasIntegration = typeof integration === 'object';
+  const hasIntegration = typeof parentIntegration === 'object';
 
   return (
     <EuiPopover
@@ -53,13 +53,13 @@ export const DatasetsPopover = ({
         >
           {hasIntegration && (
             <PackageIcon
-              packageName={integration.name}
-              version={integration.version}
+              packageName={parentIntegration.name}
+              version={parentIntegration.version}
               size="m"
               tryApi
             />
           )}
-          <span className="eui-textTruncate">{dataset?.title || dataset?.name}</span>
+          <span className="eui-textTruncate">{title}</span>
         </EuiButton>
       }
       panelPaddingSize="none"

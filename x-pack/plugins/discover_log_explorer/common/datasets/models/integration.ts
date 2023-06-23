@@ -27,9 +27,7 @@ export class Integration {
     return {
       ...integration,
       id: `integration-${integration.name}-${integration.version}` as IntegrationId,
-      dataStreams: integration.dataStreams.map((dataset) =>
-        Dataset.create({ dataset, integration })
-      ),
+      dataStreams: integration.dataStreams.map((dataset) => Dataset.create(dataset, integration)),
     };
   }
 }

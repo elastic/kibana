@@ -9,56 +9,33 @@ import { DatasetId, DatasetType, IntegrationType } from '../types';
 
 type IntegrationBase = Pick<IntegrationType, 'name' | 'version'>;
 
-interface DatasetDeps {
-  dataset: DatasetType;
-  integration?: IntegrationBase;
-}
-
 interface DatasetSpec {
   id: DatasetId;
   name: DatasetType['title'];
   title: DatasetType['name'];
 }
 
-export interface DatasetPlain {
-  dataset: DatasetType & { id: DatasetId };
-  integration?: IntegrationBase;
+export interface DatasetPlain extends DatasetType {
+  id: DatasetId;
+  parentIntegration?: IntegrationBase;
 }
-
-export interface IDataset {
+export class Dataset {
   id: DatasetId;
   name: DatasetType['name'];
   title: DatasetType['title'];
-  integration?: IntegrationBase;
-  toPlain: () => DatasetPlain;
-  toSpec: () => DatasetSpec;
-}
+  parentIntegration?: IntegrationBase;
 
-export class Dataset implements IDataset {
-  id: DatasetId;
-  name: DatasetType['name'];
-  title: DatasetType['title'];
-  integration?: IntegrationBase;
-
-  private constructor({ integration, dataset }: DatasetDeps) {
+  private constructor(dataset: DatasetType, parentIntegration?: IntegrationType) {
     this.id = `dataset-${dataset.name}` as DatasetId;
     this.name = dataset.name;
     this.title = dataset.title ?? dataset.name;
-    this.integration = integration;
-  }
-
-  toPlain() {
-    return {
-      dataset: {
-        id: this.id,
-        name: this.name,
-        title: this.title,
-      },
-      integration: this.integration,
+    this.parentIntegration = parentIntegration && {
+      name: parentIntegration.name,
+      version: parentIntegration.version,
     };
   }
 
-  toSpec() {
+  toSpec(): DatasetSpec {
     // Invert the property because the API returns the index pattern as `name` and a readable name as `title`
     return {
       id: this.id,
@@ -67,7 +44,7 @@ export class Dataset implements IDataset {
     };
   }
 
-  public static create({ integration, dataset }: DatasetDeps) {
-    return new Dataset({ integration, dataset });
+  public static create(dataset: DatasetType, parentIntegration?: IntegrationType) {
+    return new Dataset(dataset, parentIntegration);
   }
 }

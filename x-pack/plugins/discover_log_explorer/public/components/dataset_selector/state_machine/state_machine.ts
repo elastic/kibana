@@ -117,7 +117,7 @@ export const createPureDatasetsSelectorStateMachine = (
           return {};
         }),
         storeSelected: assign((_context, event) =>
-          'dataset' in event ? { selected: event.dataset.toPlain() } : {}
+          'dataset' in event ? { selected: event.dataset } : {}
         ),
         retrieveSearchFromCache: assign((context, event) =>
           'panelId' in event
