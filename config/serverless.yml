@@ -42,8 +42,9 @@ server.versioned.versionResolution: newest
 # do not enforce client version check
 server.versioned.strictClientVersionCheck: false
 
-# Enforce single "default" space
+# Enforce single "default" space and disable feature visibility controls
 xpack.spaces.maxSpaces: 1
+xpack.spaces.allowFeatureVisibility: false
 
 # Temporarily allow unauthenticated access to task manager utilization & status/stats APIs for autoscaling
 status.allowAnonymous: true
