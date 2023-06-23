@@ -72,14 +72,12 @@ const logEntryRt = t.type({
   ),
 });
 
-const significantFieldValuesRt = t.type({
-  fields: t.array(
-    t.type({
-      field: t.string,
-      value: t.string,
-    })
-  ),
-});
+const significantFieldValuesRt = t.array(
+  t.type({
+    field: t.string,
+    value: t.union([t.string, t.number]),
+  })
+);
 
 export const coPilotPrompts = {
   [CoPilotPromptId.ProfilingOptimizeFunction]: prompt({
@@ -311,11 +309,9 @@ export const coPilotPrompts = {
     }),
     messages: ({ significantFieldValues }) => {
       const customMessageForPrompt =
-        significantFieldValues.fields.length === 1
-          ? `There has been an alert on spike of logs. The spike mainly consists of logs with field ${significantFieldValues.fields[0]?.field} with value "${significantFieldValues.fields[0]?.value}".`
-          : significantFieldValues.fields.length > 1
-          ? `There has been an alert on spike of logs. The spike mainly consists of logs with field ${significantFieldValues.fields[0]?.field} with value "${significantFieldValues.fields[0]?.value}" and field ${significantFieldValues.fields[1]?.field} with value "${significantFieldValues.fields[1]?.value}".`
-          : '';
+        significantFieldValues.length === 1
+          ? `There has been an alert on spike of logs. The spike mainly consists of logs with field ${significantFieldValues[0]?.field} with value "${significantFieldValues[0]?.value}".`
+          : `There has been an alert on spike of logs. The spike mainly consists of logs with field ${significantFieldValues[0]?.field} with value "${significantFieldValues[0]?.value}" and field ${significantFieldValues[1]?.field} with value "${significantFieldValues[1]?.value}".`;
       return [
         LOGS_SYSTEM_MESSAGE,
         {

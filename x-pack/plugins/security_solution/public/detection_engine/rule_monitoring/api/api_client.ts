@@ -16,6 +16,7 @@ import type {
 import {
   getRuleExecutionEventsUrl,
   getRuleExecutionResultsUrl,
+  SETUP_HEALTH_URL,
 } from '../../../../common/detection_engine/rule_monitoring';
 
 import type {
@@ -25,6 +26,12 @@ import type {
 } from './api_client_interface';
 
 export const api: IRuleMonitoringApiClient = {
+  setupDetectionEngineHealthApi: async (): Promise<void> => {
+    await http().fetch(SETUP_HEALTH_URL, {
+      method: 'POST',
+    });
+  },
+
   fetchRuleExecutionEvents: (
     args: FetchRuleExecutionEventsArgs
   ): Promise<GetRuleExecutionEventsResponse> => {

@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "8.9.0",
+  "version": "8.10.0",
   "branch": "main",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -73,7 +73,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "16.19.1",
+    "node": "16.20.1",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -796,7 +796,7 @@
     "compare-versions": "3.5.1",
     "constate": "^3.3.2",
     "copy-to-clipboard": "^3.0.8",
-    "core-js": "^3.29.0",
+    "core-js": "^3.31.0",
     "cronstrue": "^1.51.0",
     "cuid": "^2.1.8",
     "cytoscape": "^3.10.0",
@@ -816,7 +816,7 @@
     "deepmerge": "^4.2.2",
     "del": "^6.1.0",
     "elastic-apm-http-client": "^11.0.1",
-    "elastic-apm-node": "^3.46.0",
+    "elastic-apm-node": "^3.47.0",
     "email-addresses": "^5.0.0",
     "execa": "^4.0.2",
     "expiry-js": "0.1.7",

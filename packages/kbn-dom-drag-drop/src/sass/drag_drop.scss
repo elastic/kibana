@@ -15,7 +15,7 @@
   width: 100%;
   left: 0;
   opacity: .9;
-  transform: translate($euiSizeXS, $euiSizeXS);
+  transform: translate($euiSizeS, $euiSizeL);
   z-index: $domDragDropZLevel3;
   pointer-events: none;
   outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
@@ -138,6 +138,10 @@ $reorderItemMargin: $euiSizeS;
   }
 }
 
+.domDragDrop--isDragStarted {
+  opacity: .5;
+}
+
 // Draggable item when it is moving
 .domDragDrop-isHidden {
   opacity: 0;
@@ -147,10 +151,6 @@ $reorderItemMargin: $euiSizeS;
       animation: none;
     }
   }
-}
-
-.domDragDrop--isDragStarted {
-  opacity: .5;
 }
 
 .domDragDrop__extraDrops {

@@ -67,7 +67,7 @@ import {
   ActionsRequestHandlerContext,
 } from './types';
 
-import { getActionsConfigurationUtilities } from './actions_config';
+import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
@@ -129,6 +129,7 @@ export interface PluginSetupContract {
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
+  getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
 }
 
 export interface PluginStartContract {
@@ -370,6 +371,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           hasPermanentEncryptionKey: plugins.encryptedSavedObjects.canEncrypt,
         };
       },
+      getActionsConfigurationUtilities: () => actionsConfigUtils,
     };
   }
 
