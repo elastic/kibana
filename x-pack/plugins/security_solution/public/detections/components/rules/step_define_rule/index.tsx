@@ -686,13 +686,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       assertFieldsExists(indexPattern?.fields)
         ? Object.values(indexPattern?.fields ?? {}).reduce(
             (acc, field) => {
-             if (field?.esTypes?.includes('keyword')) {
-              acc.keywordFields.push({ label: field.name });
-            } else if (field.type === 'date') {
-              acc.dateFields.push({ label: field.name });
-            } else if (field.type !== 'date') {
-              acc.nonDateFields.push({ label: field.name });
-            }
+              if (field?.esTypes?.includes('keyword')) {
+                acc.keywordFields.push({ label: field.name });
+              } else if (field.type === 'date') {
+                acc.dateFields.push({ label: field.name });
+              } else if (field.type !== 'date') {
+                acc.nonDateFields.push({ label: field.name });
+              }
               return acc;
             },
             { keywordFields: [], dateFields: [], nonDateFields: [] } as {
