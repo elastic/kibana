@@ -16,6 +16,7 @@ import {
 import { normalizeKuery } from '../../services/saved_object';
 
 import { validateFilterKueryNode } from './filter_utils';
+const FLEET_ENROLLMENT_API_PREFIX = 'fleet-enrollment-api-keys';
 
 const agentPoliciesMappings = {
   properties: {
@@ -323,9 +324,80 @@ const agentMappings = {
   },
 } as const;
 
+const enrollmentApiKeyMappings = {
+  properties: {
+    active: {
+      type: 'boolean',
+    },
+    api_key: {
+      type: 'keyword',
+    },
+    api_key_id: {
+      type: 'keyword',
+    },
+    created_at: {
+      type: 'date',
+    },
+    expire_at: {
+      type: 'date',
+    },
+    name: {
+      type: 'keyword',
+    },
+    policy_id: {
+      type: 'keyword',
+    },
+    updated_at: {
+      type: 'date',
+    },
+  },
+} as const;
+
 describe('ValidateFilterKueryNode validates real kueries through KueryNode', () => {
-  describe('Agent policies kuerys', () => {
-    it('Test 1', async () => {
+  describe('Agent policies', () => {
+    it('Test 1 - search by data_output_id', async () => {
+      const astFilter = esKuery.fromKueryExpression(
+        `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id`
+      );
+      const validationObject = validateFilterKueryNode({
+        astFilter,
+        types: [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        indexMapping: agentPoliciesMappings,
+        storeValue: true,
+      });
+      expect(validationObject).toEqual([
+        {
+          astPath: 'arguments.0',
+          error: null,
+          isSavedObjectAttr: true,
+          key: 'ingest-agent-policies.data_output_id',
+          type: 'ingest-agent-policies',
+        },
+      ]);
+    });
+
+    it('Test 2 - search by inactivity timeout', async () => {
+      const astFilter = esKuery.fromKueryExpression(
+        `${AGENT_POLICY_SAVED_OBJECT_TYPE}.inactivity_timeout:*`
+      );
+      const validationObject = validateFilterKueryNode({
+        astFilter,
+        types: [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        indexMapping: agentPoliciesMappings,
+        storeValue: true,
+      });
+      expect(validationObject).toEqual([
+        {
+          astPath: 'arguments.0',
+          error: null,
+          isSavedObjectAttr: true,
+          key: 'ingest-agent-policies.inactivity_timeout',
+          type: 'ingest-agent-policies',
+        },
+      ]);
+    });
+
+    it('Test 3 -  complex query', async () => {
       const validationObject = validateFilterKueryNode({
         astFilter: esKuery.fromKueryExpression(
           `${AGENT_POLICY_SAVED_OBJECT_TYPE}.download_source_id:some_id or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.download_source_id:*)`
@@ -353,7 +425,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       ]);
     });
 
-    it('Test 2', async () => {
+    it('Test 4', async () => {
       const astFilter = esKuery.fromKueryExpression(
         `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id or ${AGENT_POLICY_SAVED_OBJECT_TYPE}.monitoring_output_id: test_id  or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*)`
       );
@@ -389,49 +461,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       ]);
     });
 
-    it('Test 3', async () => {
-      const astFilter = esKuery.fromKueryExpression(
-        `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id`
-      );
-      const validationObject = validateFilterKueryNode({
-        astFilter,
-        types: [AGENT_POLICY_SAVED_OBJECT_TYPE],
-        indexMapping: agentPoliciesMappings,
-        storeValue: true,
-      });
-      expect(validationObject).toEqual([
-        {
-          astPath: 'arguments.0',
-          error: null,
-          isSavedObjectAttr: true,
-          key: 'ingest-agent-policies.data_output_id',
-          type: 'ingest-agent-policies',
-        },
-      ]);
-    });
-
-    it('Test 4', async () => {
-      const astFilter = esKuery.fromKueryExpression(
-        `${AGENT_POLICY_SAVED_OBJECT_TYPE}.inactivity_timeout:*`
-      );
-      const validationObject = validateFilterKueryNode({
-        astFilter,
-        types: [AGENT_POLICY_SAVED_OBJECT_TYPE],
-        indexMapping: agentPoliciesMappings,
-        storeValue: true,
-      });
-      expect(validationObject).toEqual([
-        {
-          astPath: 'arguments.0',
-          error: null,
-          isSavedObjectAttr: true,
-          key: 'ingest-agent-policies.inactivity_timeout',
-          type: 'ingest-agent-policies',
-        },
-      ]);
-    });
-
-    it('returns error if the attribute does not exist - test 5', async () => {
+    it('Test 5 - returns error if the attribute does not exist', async () => {
       const astFilter = esKuery.fromKueryExpression(
         `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:test_id_1 or ${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:test_id_2`
       );
@@ -488,7 +518,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
     });
   });
 
-  describe('Agents kuerys', () => {
+  describe('Agents', () => {
     it('Test 1 - search policy id', async () => {
       const astFilter = esKuery.fromKueryExpression(`${AGENTS_PREFIX}.policy_id: "policy_id"`);
       const validationObject = validateFilterKueryNode({
@@ -609,7 +639,44 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       ]);
     });
 
-    it('Test 5 - returns error if kuery is passed without a reference to the index', async () => {
+    it('Test 5 - search agent by multiple tags', async () => {
+      const astFilter = esKuery.fromKueryExpression(
+        `${AGENTS_PREFIX}.tags: (tag1 or tag2 or tag3)`
+      );
+      const validationObject = validateFilterKueryNode({
+        astFilter,
+        types: [AGENTS_PREFIX],
+        indexMapping: agentMappings,
+        storeValue: true,
+      });
+      expect(validationObject).toEqual([
+        {
+          astPath: 'arguments.0',
+          error: null,
+          isSavedObjectAttr: true,
+          key: 'fleet-agents.tags',
+          type: 'fleet-agents',
+        },
+        {
+          astPath: 'arguments.1',
+          error: null,
+          isSavedObjectAttr: true,
+          key: 'fleet-agents.tags',
+          type: 'fleet-agents',
+        },
+        {
+          astPath: 'arguments.2',
+          error: null,
+          isSavedObjectAttr: true,
+          key: 'fleet-agents.tags',
+          type: 'fleet-agents',
+        },
+      ]);
+    });
+
+    // TODO: fix
+    // this kuery should work (getAgentStatus)
+    it('Test 6 - returns error if kuery is passed without a reference to the index', async () => {
       const astFilter = esKuery.fromKueryExpression(
         `status:online or (status:updating or status:unenrolling or status:enrolling)`
       );
@@ -652,19 +719,27 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
     });
   });
 
-  // describe('#validateConvertFilterToKueryNode', () => {
-  //   describe('Validate real kueries', () => {
-  //     it('Agent policies kuerys - test 1', async () => {
-  //       const converted = validateConvertFilterToKueryNode(
-  //         [AGENT_POLICY_SAVED_OBJECT_TYPE],
-  //         `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
-  //         agentPoliciesMappings
-  //       );
-
-  //       expect(validationObject).toEqual(
-  //         esKuery.fromKueryExpression(`${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed: "true"`)
-  //       );
-  //     });
-  //   });
-  // });
+  describe('Enrollment Api keys', () => {
+    // should also tests kuerys from the search bar
+    it('Test 1', async () => {
+      const astFilter = esKuery.fromKueryExpression(
+        `${FLEET_ENROLLMENT_API_PREFIX}.policy_id: policyId1`
+      );
+      const validationObject = validateFilterKueryNode({
+        astFilter,
+        types: [FLEET_ENROLLMENT_API_PREFIX],
+        indexMapping: enrollmentApiKeyMappings,
+        storeValue: true,
+      });
+      expect(validationObject).toEqual([
+        {
+          astPath: 'arguments.0',
+          error: null,
+          isSavedObjectAttr: true,
+          key: 'fleet-enrollment-api-keys.policy_id',
+          type: 'fleet-enrollment-api-keys',
+        },
+      ]);
+    });
+  });
 });
