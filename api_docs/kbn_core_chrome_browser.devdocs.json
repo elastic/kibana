@@ -1486,7 +1486,7 @@
             "tags": [],
             "label": "href",
             "description": [
-              "\nTemporarilly we allow href to be passed.\nOnce all the deeplinks will be exposed in packages we will not allow href anymore\nand force deeplink id to be passed"
+              "\nhref for absolute links only. Internal links should use \"link\"."
             ],
             "signature": [
               "string | undefined"
@@ -1494,6 +1494,59 @@
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeProjectNavigationNode.isActive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isActive",
+            "description": [
+              "\nFlag to indicate if the node is currently active."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeProjectNavigationNode.getIsActive",
+            "type": "Function",
+            "tags": [],
+            "label": "getIsActive",
+            "description": [
+              "\nOptional function to get the active state. This function is called whenever the location changes."
+            ],
+            "signature": [
+              "((location: ",
+              "Location",
+              "<unknown>) => boolean) | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-common.ChromeProjectNavigationNode.getIsActive.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "location",
+                "description": [],
+                "signature": [
+                  "Location",
+                  "<unknown>"
+                ],
+                "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2691,6 +2744,43 @@
             "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.NodeDefinition.getIsActive",
+            "type": "Function",
+            "tags": [],
+            "label": "getIsActive",
+            "description": [
+              "\nOptional function to get the active state. This function is called whenever the location changes."
+            ],
+            "signature": [
+              "((location: ",
+              "Location",
+              "<unknown>) => boolean) | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-common.NodeDefinition.getIsActive.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "location",
+                "description": [],
+                "signature": [
+                  "Location",
+                  "<unknown>"
+                ],
+                "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2705,7 +2795,29 @@
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.SideNavCompProps.activeNodes",
+            "type": "Array",
+            "tags": [],
+            "label": "activeNodes",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeProjectNavigationNode",
+                "text": "ChromeProjectNavigationNode"
+              },
+              "[][]"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ],
