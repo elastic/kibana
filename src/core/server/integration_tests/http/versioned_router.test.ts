@@ -340,4 +340,30 @@ describe('Routing versioned requests', () => {
         .then(({ body }) => body.v)
     ).resolves.toEqual('oldest');
   });
+
+  describe('query parameter version negotiation', () => {
+    beforeEach(() => {
+      router.versioned
+        .get({ path: '/my-public', access: 'public', enableQueryVersion: true })
+        .addVersion({ validate: false, version: '2023-10-31' }, async (ctx, req, res) => {
+          return res.ok({ body: 'ok' });
+        });
+
+      router.versioned
+        .get({ path: '/my-internal', access: 'internal', enableQueryVersion: true })
+        .addVersion({ validate: false, version: '1' }, async (ctx, req, res) => {
+          return res.ok({ body: 'ok' });
+        });
+    });
+    it('finds version based on header', async () => {
+      await server.start();
+      await supertest.get('/my-public').set('Elastic-Api-Version', '2023-10-31').expect(200);
+      await supertest.get('/my-internal').set('Elastic-Api-Version', '1').expect(200);
+    });
+    it('finds version based on query param', async () => {
+      await server.start();
+      await supertest.get('/my-public').query({ apiVersion: '2023-10-31' }).expect(200);
+      await supertest.get('/my-internal').query({ apiVersion: '1' }).expect(200);
+    });
+  });
 });
