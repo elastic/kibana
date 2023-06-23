@@ -56,6 +56,7 @@ export const HealthIndicatorFlyout = ({ deprecation, closeFlyout }: HealthIndica
   const { message, url, details, correctiveAction } = deprecation;
   const { action, cause, impacts } = correctiveAction as HealthIndicatorAction;
   const showAction = Boolean(action && action !== '');
+  const showLearnMore = Boolean(url && url !== '');
 
   return (
     <>
@@ -102,11 +103,13 @@ export const HealthIndicatorFlyout = ({ deprecation, closeFlyout }: HealthIndica
         </EuiText>
         <EuiSpacer size="s" />
 
-        <EuiText>
-          <p>
-            <DeprecationFlyoutLearnMoreLink documentationUrl={url} />
-          </p>
-        </EuiText>
+        (showLearnMore && (
+            <EuiText>
+            <p>
+              <DeprecationFlyoutLearnMoreLink documentationUrl={url} />
+            </p>
+          </EuiText>
+        )
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
