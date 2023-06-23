@@ -39,6 +39,7 @@ import {
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 interface HostAlertsTableProps {
   signalIndexName: string | null;
@@ -152,14 +153,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     'data-test-subj': 'hostSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { hostName }) => (
       <SecurityCellActions
-        field={{
-          name: 'host.name',
+        data={{
           value: hostName,
-          type: 'keyword',
-          aggregatable: true,
+          field: 'host.name',
         }}
         mode={CellActionsMode.HOVER_RIGHT}
         triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+        sourcererScopeId={SourcererScopeName.detections}
         metadata={{
           andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
         }}
@@ -181,14 +181,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
       <EuiHealth data-test-subj="hostSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
         {count > 0 ? (
           <SecurityCellActions
-            field={{
-              name: 'host.name',
+            data={{
               value: hostName,
-              type: 'keyword',
-              aggregatable: true,
+              field: 'host.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            sourcererScopeId={SourcererScopeName.detections}
             metadata={{
               andFilters: [
                 { field: 'kibana.alert.severity', value: 'critical' },
@@ -216,14 +215,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
       <EuiHealth data-test-subj="hostSeverityAlertsTable-high" color={SEVERITY_COLOR.high}>
         {count > 0 ? (
           <SecurityCellActions
-            field={{
-              name: 'host.name',
+            data={{
               value: hostName,
-              type: 'keyword',
-              aggregatable: true,
+              field: 'host.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            sourcererScopeId={SourcererScopeName.detections}
             metadata={{
               andFilters: [
                 { field: 'kibana.alert.severity', value: 'high' },
@@ -248,14 +246,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
       <EuiHealth data-test-subj="hostSeverityAlertsTable-medium" color={SEVERITY_COLOR.medium}>
         {count > 0 ? (
           <SecurityCellActions
-            field={{
-              name: 'host.name',
+            data={{
               value: hostName,
-              type: 'keyword',
-              aggregatable: true,
+              field: 'host.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            sourcererScopeId={SourcererScopeName.detections}
             metadata={{
               andFilters: [
                 { field: 'kibana.alert.severity', value: 'medium' },
@@ -280,14 +277,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
       <EuiHealth data-test-subj="hostSeverityAlertsTable-low" color={SEVERITY_COLOR.low}>
         {count > 0 ? (
           <SecurityCellActions
-            field={{
-              name: 'host.name',
+            data={{
               value: hostName,
-              type: 'keyword',
-              aggregatable: true,
+              field: 'host.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            sourcererScopeId={SourcererScopeName.detections}
             metadata={{
               andFilters: [
                 { field: 'kibana.alert.severity', value: 'low' },
