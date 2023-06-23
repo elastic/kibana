@@ -240,7 +240,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
                         'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.dlsDisabledCallout.text',
                         {
                           defaultMessage:
-                            'Enable DLS connector’s configurations to activate these options.',
+                            'Enable document level security for this connector to activate these options.',
                         }
                       )}
                     </p>
