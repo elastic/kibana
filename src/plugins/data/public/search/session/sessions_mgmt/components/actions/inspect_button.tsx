@@ -22,14 +22,9 @@ import { SearchSessionsMgmtAPI } from '../../lib/api';
 
 interface InspectFlyoutProps {
   searchSession: UISession;
-  uiSettings: CoreStart['uiSettings'];
 }
 
-const InspectFlyout = ({ uiSettings, searchSession }: InspectFlyoutProps) => {
-  const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
-    uiSettings,
-  });
-
+const InspectFlyout: React.FC<InspectFlyoutProps> = ({ searchSession }) => {
   const renderInfo = () => {
     return (
       <Fragment>
@@ -54,7 +49,7 @@ const InspectFlyout = ({ uiSettings, searchSession }: InspectFlyoutProps) => {
   };
 
   return (
-    <KibanaReactContextProvider>
+    <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="flyoutTitle">
@@ -79,6 +74,29 @@ const InspectFlyout = ({ uiSettings, searchSession }: InspectFlyoutProps) => {
           {renderInfo()}
         </EuiText>
       </EuiFlyoutBody>
+    </>
+  );
+};
+
+interface InspectFlyoutWrapperProps {
+  searchSession: UISession;
+  settings: CoreStart['settings'];
+  theme: CoreStart['theme'];
+}
+
+const InspectFlyoutWrapper: React.FC<InspectFlyoutWrapperProps> = ({
+  searchSession,
+  settings,
+  theme,
+}) => {
+  const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+    settings,
+    theme,
+  });
+
+  return (
+    <KibanaReactContextProvider>
+      <InspectFlyout searchSession={searchSession} />
     </KibanaReactContextProvider>
   );
 };
@@ -97,8 +115,12 @@ export const createInspectActionDescriptor = (
     />
   ),
   onClick: async () => {
-    const flyout = <InspectFlyout uiSettings={core.uiSettings} searchSession={uiSession} />;
-    const overlay = core.overlays.openFlyout(toMountPoint(flyout, { theme$: core.theme.theme$ }));
+    const flyoutWrapper = (
+      <InspectFlyoutWrapper settings={core.settings} theme={core.theme} searchSession={uiSession} />
+    );
+    const overlay = core.overlays.openFlyout(
+      toMountPoint(flyoutWrapper, { theme$: core.theme.theme$ })
+    );
     await overlay.onClose;
   },
 });
