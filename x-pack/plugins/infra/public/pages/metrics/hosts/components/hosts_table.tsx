@@ -47,7 +47,7 @@ export const HostsTable = () => {
         />
       )}
       <EuiBasicTable
-        ref={refs.hostsTableRef}
+        ref={refs.tableRef}
         data-test-subj="hostsView-table"
         itemId="id"
         isSelectable
