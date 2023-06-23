@@ -14,6 +14,7 @@ import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal'
 type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
+const allowedTerms = ['_exists_'];
 
 export const validateConvertFilterToKueryNode = (
   allowedTypes: string[],
@@ -158,8 +159,15 @@ export const validateFilterKueryNode = ({
   }, []);
 };
 
-const getType = (key: string | undefined | null) =>
-  key != null && key.includes('.') ? key.split('.')[0] : null;
+const getType = (key: string | undefined | null) => {
+  if (key != null && key.includes('.')) {
+    return key.split('.')[0];
+  } else if (allowedTerms.some((term) => term === key)) {
+    return 'searchTerm';
+  } else {
+    return null;
+  }
+};
 
 /**
  * Is this filter key referring to a a top-level SavedObject attribute such as
@@ -190,6 +198,9 @@ export const hasFilterKeyError = (
     return `The key is empty and needs to be wrapped by a saved object type like ${types.join()}`;
   }
   if (!key.includes('.')) {
+    if (allowedTerms.some((term) => term === key)) {
+      return null;
+    }
     return `This key '${key}' need to be wrapped by a saved object type like ${types.join()}`;
   } else if (key.includes('.')) {
     const keySplit = key.split('.');
@@ -217,8 +228,12 @@ export const hasFilterKeyError = (
 };
 
 export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean => {
+  const keySplit = key.split('.');
+  const shortenedKey = `${keySplit[1]}.${keySplit.slice(2, keySplit.length).join('.')}`;
   const mappingKey = 'properties.' + key.split('.').join('.properties.');
-  if (get(indexMappings, mappingKey) != null) {
+  const shortenedMappingKey = 'properties.' + shortenedKey.split('.').join('.properties.');
+
+  if (get(indexMappings, mappingKey) != null || get(indexMappings, shortenedMappingKey) != null) {
     return true;
   }
 

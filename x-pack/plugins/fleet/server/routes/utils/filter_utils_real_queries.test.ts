@@ -467,7 +467,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       const astFilter = esKuery.fromKueryExpression(
         normalizeKuery(
           PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:packageName`
+          `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:packageName`
         )
       );
       const validationObject = validateFilterKueryNode({
@@ -509,9 +509,12 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
     });
 
     it('Test 2 - search by multiple ids', async () => {
-      const astFilter = esKuery.fromKueryExpression(
-        `${AGENTS_PREFIX}.agent.attributes.id : (id_1 or id_2)`
+      const normalizedKuery = normalizeKuery(
+        `${AGENTS_PREFIX}`,
+        `${AGENTS_PREFIX}.attributes.agent.id : (id_1 or id_2)`
       );
+      const astFilter = esKuery.fromKueryExpression(normalizedKuery);
+
       const validationObject = validateFilterKueryNode({
         astFilter,
         types: [AGENTS_PREFIX],
@@ -523,14 +526,14 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
           astPath: 'arguments.0',
           error: null,
           isSavedObjectAttr: false,
-          key: 'fleet-agents.agent.attributes.id',
+          key: 'fleet-agents.attributes.agent.id',
           type: 'fleet-agents',
         },
         {
           astPath: 'arguments.1',
           error: null,
           isSavedObjectAttr: false,
-          key: 'fleet-agents.agent.attributes.id',
+          key: 'fleet-agents.attributes.agent.id',
           type: 'fleet-agents',
         },
       ]);
@@ -550,16 +553,16 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
         {
           astPath: 'arguments.0',
           error: null,
-          isSavedObjectAttr: false,
+          isSavedObjectAttr: true,
           key: 'fleet-agents.policy_id',
           type: 'fleet-agents',
         },
         {
-          astPath: 'arguments.1',
+          astPath: 'arguments.1.arguments.0',
           error: null,
           isSavedObjectAttr: false,
-          key: 'fleet-agents.agent.attributes.id',
-          type: 'fleet-agents',
+          key: '_exists_',
+          type: 'searchTerm',
         },
         {
           astPath: 'arguments.2',
@@ -567,6 +570,83 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
           isSavedObjectAttr: true,
           key: 'fleet-agents.enrolled_at',
           type: 'fleet-agents',
+        },
+      ]);
+    });
+
+    it('Test 4 - search agent by multiple policy Ids and tags', async () => {
+      const astFilter = esKuery.fromKueryExpression(
+        `${AGENTS_PREFIX}.policy_id: (policyId1 or policyId2) and ${AGENTS_PREFIX}.tags: (tag1)`
+      );
+      const validationObject = validateFilterKueryNode({
+        astFilter,
+        types: [AGENTS_PREFIX],
+        indexMapping: agentMappings,
+        storeValue: true,
+      });
+      expect(validationObject).toEqual([
+        {
+          astPath: 'arguments.0.arguments.0',
+          error: null,
+          isSavedObjectAttr: true,
+          key: 'fleet-agents.policy_id',
+          type: 'fleet-agents',
+        },
+        {
+          astPath: 'arguments.0.arguments.1',
+          error: null,
+          isSavedObjectAttr: true,
+          key: 'fleet-agents.policy_id',
+          type: 'fleet-agents',
+        },
+        {
+          astPath: 'arguments.1',
+          error: null,
+          isSavedObjectAttr: true,
+          key: 'fleet-agents.tags',
+          type: 'fleet-agents',
+        },
+      ]);
+    });
+
+    it('Test 5 - returns error if kuery is passed without a reference to the index', async () => {
+      const astFilter = esKuery.fromKueryExpression(
+        `status:online or (status:updating or status:unenrolling or status:enrolling)`
+      );
+      const validationObject = validateFilterKueryNode({
+        astFilter,
+        types: [AGENTS_PREFIX],
+        indexMapping: agentMappings,
+        storeValue: true,
+      });
+      expect(validationObject).toEqual([
+        {
+          astPath: 'arguments.0',
+          error: "This key 'status' need to be wrapped by a saved object type like fleet-agents",
+          isSavedObjectAttr: false,
+          key: 'status',
+          type: null,
+        },
+        {
+          astPath: 'arguments.1.arguments.0',
+          error: "This key 'status' need to be wrapped by a saved object type like fleet-agents",
+          isSavedObjectAttr: false,
+          key: 'status',
+          type: null,
+        },
+        {
+          astPath: 'arguments.1.arguments.1',
+          error: "This key 'status' need to be wrapped by a saved object type like fleet-agents",
+          isSavedObjectAttr: false,
+          key: 'status',
+          type: null,
+        },
+        {
+          astPath: 'arguments.1.arguments.2',
+          error: "This key 'status' need to be wrapped by a saved object type like fleet-agents",
+          isSavedObjectAttr: false,
+          key: 'status',
+          type: null,
         },
       ]);
     });
