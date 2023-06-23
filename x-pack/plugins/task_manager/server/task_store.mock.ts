@@ -15,7 +15,8 @@ export const taskStoreMock = {
   create({ index = '', taskManagerId = '' }: TaskStoreOptions = {}) {
     const mocked = {
       taskValidator: {
-        getValidatedTaskInstance: jest.fn().mockImplementation((task) => task),
+        getValidatedTaskInstanceFromReading: jest.fn().mockImplementation((task) => task),
+        getValidatedTaskInstanceForUpdating: jest.fn().mockImplementation((task) => task),
       },
       convertToSavedObjectIds: jest.fn(),
       update: jest.fn(),

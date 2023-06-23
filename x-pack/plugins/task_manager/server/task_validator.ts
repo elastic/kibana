@@ -47,9 +47,8 @@ export class TaskValidator {
     );
   }
 
-  public getValidatedTaskInstance<T extends TaskInstance>(
+  public getValidatedTaskInstanceFromReading<T extends TaskInstance>(
     task: T,
-    mode: 'read' | 'write',
     options: { validate: boolean } = { validate: true }
   ): T {
     if (!options.validate) {
@@ -72,28 +71,51 @@ export class TaskValidator {
       return task;
     }
 
-    if (mode === 'read') {
-      let state = task.state;
-      try {
-        state = this.getValidatedStateSchema(
-          this.migrateTaskState(task.state, task.stateVersion, taskTypeDef, latestStateSchema),
-          task.taskType,
-          latestStateSchema,
-          'ignore'
-        );
-      } catch (e) {
-        if (!this.allowReadingInvalidState) {
-          throw e;
-        }
-        this.logger.debug(
-          `[${task.taskType}][${task.id}] Failed to validate the task's state. Allowing read operation to proceed because allow_reading_invalid_state is true. Error: ${e.message}`
-        );
+    let state = task.state;
+    try {
+      state = this.getValidatedStateSchema(
+        this.migrateTaskState(task.state, task.stateVersion, taskTypeDef, latestStateSchema),
+        task.taskType,
+        latestStateSchema,
+        'ignore'
+      );
+    } catch (e) {
+      if (!this.allowReadingInvalidState) {
+        throw e;
       }
+      this.logger.debug(
+        `[${task.taskType}][${task.id}] Failed to validate the task's state. Allowing read operation to proceed because allow_reading_invalid_state is true. Error: ${e.message}`
+      );
+    }
 
-      return {
-        ...task,
-        state,
-      };
+    return {
+      ...task,
+      state,
+    };
+  }
+
+  public getValidatedTaskInstanceForUpdating<T extends TaskInstance>(
+    task: T,
+    options: { validate: boolean } = { validate: true }
+  ): T {
+    if (!options.validate) {
+      return task;
+    }
+
+    // In the scenario the task is unused / deprecated and Kibana needs to manipulate the task,
+    // we'll do a pass-through for those
+    if (!this.definitions.has(task.taskType)) {
+      return task;
+    }
+
+    const taskTypeDef = this.definitions.get(task.taskType);
+    const latestStateSchema = this.cachedGetLatestStateSchema(taskTypeDef);
+
+    // TODO: Remove once all task types have defined their state schema.
+    // https://github.com/elastic/kibana/issues/159347
+    // Otherwise, failures on read / write would occur. (don't forget to unskip test)
+    if (!latestStateSchema) {
+      return task;
     }
 
     // We are doing a write operation which must validate against the latest state schema

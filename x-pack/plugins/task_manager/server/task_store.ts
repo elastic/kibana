@@ -159,10 +159,8 @@ export class TaskStore {
 
     let savedObject;
     try {
-      const validatedTaskInstance = this.taskValidator.getValidatedTaskInstance(
-        taskInstance,
-        'write'
-      );
+      const validatedTaskInstance =
+        this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
       savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
         'task',
         taskInstanceToAttributes(validatedTaskInstance),
@@ -177,7 +175,7 @@ export class TaskStore {
     }
 
     const result = savedObjectToConcreteTaskInstance(savedObject);
-    return this.taskValidator.getValidatedTaskInstance(result, 'read');
+    return this.taskValidator.getValidatedTaskInstanceFromReading(result);
   }
 
   /**
@@ -188,10 +186,8 @@ export class TaskStore {
   public async bulkSchedule(taskInstances: TaskInstance[]): Promise<ConcreteTaskInstance[]> {
     const objects = taskInstances.map((taskInstance) => {
       this.definitions.ensureHas(taskInstance.taskType);
-      const validatedTaskInstance = this.taskValidator.getValidatedTaskInstance(
-        taskInstance,
-        'write'
-      );
+      const validatedTaskInstance =
+        this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
       return {
         type: 'task',
         attributes: taskInstanceToAttributes(validatedTaskInstance),
@@ -217,7 +213,7 @@ export class TaskStore {
 
     return savedObjects.saved_objects.map((so) => {
       const taskInstance = savedObjectToConcreteTaskInstance(so);
-      return this.taskValidator.getValidatedTaskInstance(taskInstance, 'read');
+      return this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
     });
   }
 
@@ -247,7 +243,7 @@ export class TaskStore {
     doc: ConcreteTaskInstance,
     options: { validate: boolean }
   ): Promise<ConcreteTaskInstance> {
-    const taskInstance = this.taskValidator.getValidatedTaskInstance(doc, 'write', {
+    const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
       validate: options.validate,
     });
     const attributes = taskInstanceToAttributes(taskInstance);
@@ -275,7 +271,7 @@ export class TaskStore {
       // This is far from ideal, but unless we change the SavedObjectsClient this is the best we can do
       { ...updatedSavedObject, attributes: defaults(updatedSavedObject.attributes, attributes) }
     );
-    return this.taskValidator.getValidatedTaskInstance(result, 'read', {
+    return this.taskValidator.getValidatedTaskInstanceFromReading(result, {
       validate: options.validate,
     });
   }
@@ -292,7 +288,7 @@ export class TaskStore {
     options: { validate: boolean }
   ): Promise<BulkUpdateResult[]> {
     const attributesByDocId = docs.reduce((attrsById, doc) => {
-      const taskInstance = this.taskValidator.getValidatedTaskInstance(doc, 'write', {
+      const taskInstance = this.taskValidator.getValidatedTaskInstanceForUpdating(doc, {
         validate: options.validate,
       });
       attrsById.set(doc.id, taskInstanceToAttributes(taskInstance));
@@ -334,7 +330,7 @@ export class TaskStore {
           attributesByDocId.get(updatedSavedObject.id)!
         ),
       });
-      const result = this.taskValidator.getValidatedTaskInstance(taskInstance, 'read', {
+      const result = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance, {
         validate: options.validate,
       });
       return asOk(result);
@@ -387,7 +383,7 @@ export class TaskStore {
       throw e;
     }
     const taskInstance = savedObjectToConcreteTaskInstance(result);
-    return this.taskValidator.getValidatedTaskInstance(taskInstance, 'read');
+    return this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
   }
 
   /**
@@ -411,10 +407,8 @@ export class TaskStore {
         return asErr({ id: task.id, type: task.type, error: task.error });
       }
       const taskInstance = savedObjectToConcreteTaskInstance(task);
-      const validatedTaskInstance = this.taskValidator.getValidatedTaskInstance(
-        taskInstance,
-        'read'
-      );
+      const validatedTaskInstance =
+        this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
       return asOk(validatedTaskInstance);
     });
   }
@@ -460,7 +454,7 @@ export class TaskStore {
           .map((doc) => this.serializer.rawToSavedObject(doc))
           .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
           .map((doc) => savedObjectToConcreteTaskInstance(doc))
-          .map((doc) => this.taskValidator.getValidatedTaskInstance(doc, 'read'))
+          .map((doc) => this.taskValidator.getValidatedTaskInstanceFromReading(doc))
           .filter((doc): doc is ConcreteTaskInstance => !!doc),
       };
     } catch (e) {

@@ -26,12 +26,14 @@ import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr } from './lib/result_type';
 
-const mockGetValidatedTaskInstance = jest.fn();
+const mockGetValidatedTaskInstanceFromReading = jest.fn();
+const mockGetValidatedTaskInstanceForUpdating = jest.fn();
 jest.mock('./task_validator', () => {
   return {
     TaskValidator: jest.fn().mockImplementation(() => {
       return {
-        getValidatedTaskInstance: mockGetValidatedTaskInstance,
+        getValidatedTaskInstanceFromReading: mockGetValidatedTaskInstanceFromReading,
+        getValidatedTaskInstanceForUpdating: mockGetValidatedTaskInstanceForUpdating,
       };
     }),
   };
@@ -47,10 +49,12 @@ beforeEach(() => {
   jest.resetAllMocks();
   jest.requireMock('./task_validator').TaskValidator.mockImplementation(() => {
     return {
-      getValidatedTaskInstance: mockGetValidatedTaskInstance,
+      getValidatedTaskInstanceFromReading: mockGetValidatedTaskInstanceFromReading,
+      getValidatedTaskInstanceForUpdating: mockGetValidatedTaskInstanceForUpdating,
     };
   });
-  mockGetValidatedTaskInstance.mockImplementation((task) => task);
+  mockGetValidatedTaskInstanceFromReading.mockImplementation((task) => task);
+  mockGetValidatedTaskInstanceForUpdating.mockImplementation((task) => task);
 });
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
@@ -481,11 +485,12 @@ describe('TaskStore', () => {
 
       const result = await store.update(task, { validate: true });
 
-      expect(mockGetValidatedTaskInstance).toHaveBeenCalledTimes(2);
-      expect(mockGetValidatedTaskInstance).toHaveBeenNthCalledWith(1, task, 'write', {
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledTimes(1);
+      expect(mockGetValidatedTaskInstanceFromReading).toHaveBeenCalledTimes(1);
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
         validate: true,
       });
-      expect(mockGetValidatedTaskInstance).toHaveBeenNthCalledWith(2, task, 'read', {
+      expect(mockGetValidatedTaskInstanceFromReading).toHaveBeenCalledWith(task, {
         validate: true,
       });
       expect(savedObjectsClient.update).toHaveBeenCalledWith(
@@ -552,7 +557,9 @@ describe('TaskStore', () => {
 
       await store.update(task, { validate: false });
 
-      expect(mockGetValidatedTaskInstance).toHaveBeenCalledWith(task, 'write', { validate: false });
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
+        validate: false,
+      });
     });
 
     test('pushes error from saved objects client to errors$', async () => {
@@ -633,7 +640,9 @@ describe('TaskStore', () => {
 
       await store.bulkUpdate([task], { validate: false });
 
-      expect(mockGetValidatedTaskInstance).toHaveBeenCalledWith(task, 'write', { validate: false });
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
+        validate: false,
+      });
     });
 
     test('pushes error from saved objects client to errors$', async () => {
