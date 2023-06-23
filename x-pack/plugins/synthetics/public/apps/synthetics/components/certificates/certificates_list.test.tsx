@@ -25,7 +25,7 @@ describe('CertificateList', () => {
         page={page}
         sort={sort}
         onChange={jest.fn()}
-        certificates={{ loading: false, total: 0, certs: [] }}
+        certificates={{ isLoading: false, total: 0, certs: [] }}
       />
     );
 
@@ -48,7 +48,7 @@ describe('CertificateList', () => {
         sort={sort}
         onChange={jest.fn()}
         certificates={{
-          loading: false,
+          isLoading: false,
           total: 1,
           certs: [
             {

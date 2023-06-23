@@ -15,6 +15,8 @@ import linearCombinationIllustration from '../../../../assets/images/linear.svg'
 import rrfRankingIllustration from '../../../../assets/images/rrf.svg';
 
 import { EsreGuideAccordion } from './esre_guide_accordion';
+import { LinearCombinationPanel } from './linear_combination_panel';
+import { RrfRankingPanel } from './rrf_ranking_panel';
 
 export const RankAggregationSection: React.FC = () => (
   <EuiFlexGroup alignItems="center">
@@ -47,6 +49,7 @@ export const RankAggregationSection: React.FC = () => (
         <EuiFlexItem grow={false}>
           <EsreGuideAccordion
             id="rrfRankingAccordion"
+            data-telemetry-id="entSearch-esre-rankAggregation-rrfRankingAccordion"
             icon={rrfRankingIllustration}
             title={i18n.translate('xpack.enterpriseSearch.esre.rrfRankingAccordion.title', {
               defaultMessage: 'RRF hybrid ranking',
@@ -58,14 +61,13 @@ export const RankAggregationSection: React.FC = () => (
               }
             )}
           >
-            <>
-              <p>Placeholder</p>
-            </>
+            <RrfRankingPanel />
           </EsreGuideAccordion>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EsreGuideAccordion
             id="linearCombinationAccordion"
+            data-telemetry-id="entSearch-esre-rankAggregation-linearCombinationAccordion"
             icon={linearCombinationIllustration}
             title={i18n.translate('xpack.enterpriseSearch.esre.linearCombinationAccordion.title', {
               defaultMessage: 'Linear combination',
@@ -77,9 +79,7 @@ export const RankAggregationSection: React.FC = () => (
               }
             )}
           >
-            <>
-              <p>Placeholder</p>
-            </>
+            <LinearCombinationPanel />
           </EsreGuideAccordion>
         </EuiFlexItem>
       </EuiFlexGroup>

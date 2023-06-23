@@ -290,6 +290,30 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Embeddable.getFullAttributes",
+            "type": "Function",
+            "tags": [],
+            "label": "getFullAttributes",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.LensSavedObjectAttributes",
+                "text": "LensSavedObjectAttributes"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Embeddable.initializeSavedVis",
             "type": "Function",
             "tags": [],
