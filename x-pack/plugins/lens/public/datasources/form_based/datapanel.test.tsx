@@ -14,9 +14,9 @@ import {
   Start as DataViewPublicStart,
 } from '@kbn/data-views-plugin/public/mocks';
 import { InnerFormBasedDataPanel, FormBasedDataPanel } from './datapanel';
-import { FieldListGrouped } from '@kbn/unified-field-list-plugin/public';
-import * as UseExistingFieldsApi from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
-import * as ExistingFieldsServiceApi from '@kbn/unified-field-list-plugin/public/services/field_existing/load_field_existing';
+import { FieldListGrouped } from '@kbn/unified-field-list';
+import * as UseExistingFieldsApi from '@kbn/unified-field-list/src/hooks/use_existing_fields';
+import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/field_existing/load_field_existing';
 import { FieldItem } from '../common/field_item';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';

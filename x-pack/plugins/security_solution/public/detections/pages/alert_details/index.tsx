@@ -6,8 +6,8 @@
  */
 
 import React, { memo, useEffect, useMemo } from 'react';
-import { Switch, useParams } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { useParams } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
 import { EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
@@ -75,7 +75,7 @@ export const AlertDetailsPage = memo(() => {
           <AlertDetailsHeader loading={loading} ruleName={ruleName} timestamp={timestamp} />
           <TabNavigation navTabs={getAlertDetailsNavTabs(eventId)} />
           <EuiSpacer size="l" />
-          <Switch>
+          <Routes>
             <Route exact path={getAlertDetailsTabUrl(eventId, AlertDetailRouteType.summary)}>
               <DetailsSummaryTab
                 eventId={eventId}
@@ -85,7 +85,7 @@ export const AlertDetailsPage = memo(() => {
                 sourcererDataView={sourcererDataView}
               />
             </Route>
-          </Switch>
+          </Routes>
         </>
       )}
       <SpyRoute pageName={SecurityPageName.alerts} state={{ ruleName }} />
