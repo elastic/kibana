@@ -12,7 +12,7 @@ import type { EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public'
 import { EmbeddableFactory, EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
 
 import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_embeddable';
-import { untilPluginStartServicesReady } from '../services/services';
+import { untilPluginStartServicesReady } from '../services/navigation_embeddable_services';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
@@ -32,7 +32,24 @@ export class NavigationEmbeddableFactoryDefinition implements EmbeddableFactoryD
     const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
     const { NavigationEmbeddable } = await import('./navigation_embeddable');
 
-    return new NavigationEmbeddable(reduxEmbeddablePackage, initialInput, parent);
+    /**
+     * TODO: What are our conditions to ensure this embeddable is editable?
+     * Example from Lens:
+     *   private getIsEditable() {
+     *      return (
+     *        this.deps.capabilities.canSaveVisualizations ||
+     *        (!this.inputIsRefType(this.getInput()) &&
+     *          this.deps.capabilities.canSaveDashboards &&
+     *          this.deps.capabilities.canOpenVisualizations)
+     *      );
+     *   }
+     */
+    return new NavigationEmbeddable(
+      reduxEmbeddablePackage,
+      { editable: true },
+      initialInput,
+      parent
+    );
   }
 
   public getDisplayName() {

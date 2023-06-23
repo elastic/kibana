@@ -12,9 +12,9 @@ import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public
 
 export interface DashboardLink {
   id: string;
-  title: string;
+  title: string; // TODO: Should not be saved into the explicit input - it can be changed
   label?: string;
-  description?: string;
+  description?: string; // TODO: Should not be saved into the explicit input - it can be changed
 }
 
 export interface NavigationEmbeddableInput extends EmbeddableInput {

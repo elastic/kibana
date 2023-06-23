@@ -12,7 +12,7 @@ import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public'
 
 import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_embeddable';
 import { NavigationEmbeddableFactoryDefinition } from './navigation_embeddable';
-import { setKibanaServices } from './navigation_embeddable/services/services';
+import { setKibanaServices } from './navigation_embeddable/services/navigation_embeddable_services';
 
 export interface NavigationEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;

@@ -17,7 +17,7 @@ import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
-import { coreServices, dashboardServices } from '../services/services';
+import { coreServices, dashboardServices } from '../services/navigation_embeddable_services';
 import { navigationEmbeddableReducers } from '../navigation_embeddable_reducers';
 import { NavigationEmbeddableInput, NavigationEmbeddableReduxState } from '../types';
 import { NavigationEmbeddableComponent } from '../components/navigation_embeddable_component';
@@ -38,6 +38,10 @@ type NavigationReduxEmbeddableTools = ReduxEmbeddableTools<
   typeof navigationEmbeddableReducers
 >;
 
+interface NavigationEmbeddableConfig {
+  editable: boolean;
+}
+
 export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> {
   public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
 
@@ -53,10 +57,11 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
 
   constructor(
     reduxToolsPackage: ReduxToolsPackage,
+    config: NavigationEmbeddableConfig,
     initialInput: NavigationEmbeddableInput,
     parent?: IContainer
   ) {
-    super(initialInput, {}, parent);
+    super(initialInput, { editable: config.editable }, parent);
 
     // build redux embeddable tools
     const reduxEmbeddableTools = reduxToolsPackage.createReduxEmbeddableTools<
