@@ -27,7 +27,7 @@ import {
   threat_query,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import { RuleExecutionSummary } from '../rule_monitoring';
+import { RuleExecutionSummary } from '../rule_monitoring/model/execution_summary';
 import { ResponseActionArray } from '../rule_response_actions';
 import {
   saved_id,
