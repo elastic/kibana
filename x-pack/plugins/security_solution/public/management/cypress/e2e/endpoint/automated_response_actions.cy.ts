@@ -30,7 +30,7 @@ describe('Automated Response Actions', () => {
   let createdHost: CreateAndEnrollEndpointHostResponse;
 
   before(() => {
-    getEndpointIntegrationVersion().then((version) => {
+    getEndpointIntegrationVersion().then((version) =>
       createAgentPolicyTask(version, 'automated_response_actions').then((data) => {
         indexedPolicy = data;
         policy = indexedPolicy.integrationPolicies[0];
@@ -41,8 +41,8 @@ describe('Automated Response Actions', () => {
             createdHost = host as CreateAndEnrollEndpointHostResponse;
           });
         });
-      });
-    });
+      })
+    );
   });
 
   after(() => {

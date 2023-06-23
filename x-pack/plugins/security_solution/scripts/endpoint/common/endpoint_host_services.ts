@@ -20,7 +20,7 @@ import {
   waitForHostToEnroll,
 } from './fleet_services';
 
-const VAGRANT_CWD = `${__dirname}/../endpoint_agent_runner/`;
+export const VAGRANT_CWD = `${__dirname}/../endpoint_agent_runner/`;
 
 export interface CreateAndEnrollEndpointHostOptions
   extends Pick<CreateMultipassVmOptions, 'disk' | 'cpus' | 'memory'> {

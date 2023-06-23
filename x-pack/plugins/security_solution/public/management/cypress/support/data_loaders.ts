@@ -54,6 +54,7 @@ import {
   destroyEndpointHost,
   getEndpointHosts,
   stopEndpointHost,
+  VAGRANT_CWD,
 } from '../../../../scripts/endpoint/common/endpoint_host_services';
 
 /**
@@ -224,7 +225,6 @@ export const dataLoadersForRealEndpoints = (
       password: config.env.ELASTICSEARCH_PASSWORD,
       asSuperuser: true,
     });
-    console.error('test', test);
     const data = await runFleetServerIfNeeded();
     console.error('data', data);
     // .then(runFleetServerIfNeeded)
@@ -285,7 +285,16 @@ export const dataLoadersForRealEndpoints = (
       srcPath: string;
       destPath: string;
     }): Promise<null> => {
-      await execa(`multipass`, ['transfer', srcPath, `${hostname}:${destPath}`]);
+      if (process.env.CI) {
+        await execa('vagrant', ['upload', srcPath, destPath], {
+          env: {
+            VAGRANT_CWD,
+          },
+        });
+      } else {
+        await execa(`multipass`, ['transfer', srcPath, `${hostname}:${destPath}`]);
+      }
+
       return null;
     },
 

@@ -43,7 +43,7 @@ describe('Artifact pages', () => {
   let createdHost: CreateAndEnrollEndpointHostResponse;
 
   before(() => {
-    getEndpointIntegrationVersion().then((version) => {
+    getEndpointIntegrationVersion().then((version) =>
       createAgentPolicyTask(version, 'alerts test').then((data) => {
         indexedPolicy = data;
         policy = indexedPolicy.integrationPolicies[0];
@@ -54,8 +54,8 @@ describe('Artifact pages', () => {
             createdHost = host as CreateAndEnrollEndpointHostResponse;
           });
         });
-      });
-    });
+      })
+    );
 
     login();
     // loadEndpointDataForEventFiltersIfNeeded();

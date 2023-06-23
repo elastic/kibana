@@ -56,7 +56,7 @@ describe('Isolate command', () => {
     });
   });
 
-  after(() => {
+  afterEach(() => {
     if (createdHost) {
       cy.task('destroyEndpointHost', createdHost).then(() => {});
     }
