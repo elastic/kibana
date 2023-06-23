@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import {
-  ApiVersion,
+  type ApiVersion,
   ELASTIC_HTTP_VERSION_HEADER,
   ELASTIC_HTTP_VERSION_QUERY_PARAM,
 } from '@kbn/core-http-common';
