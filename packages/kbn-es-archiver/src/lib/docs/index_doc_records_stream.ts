@@ -32,6 +32,7 @@ export function createIndexDocRecordsStream(
     await client.helpers.bulk(
       {
         retries: 5,
+        refreshOnCompletion: true,
         datasource: docs.map((doc) => {
           const body = doc.source;
           const op = doc.data_stream ? BulkOperation.Create : operation;
