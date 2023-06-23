@@ -112,7 +112,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('should return examples for non-aggregatable fields', async () => {
-        await PageObjects.unifiedFieldList.clickFieldListItem('extension');
+        await PageObjects.unifiedFieldList.clickFieldListItem('meta.user.firstname');
         expect(await PageObjects.unifiedFieldList.getFieldStatsViewType()).to.be('exampleValues');
         expect(await PageObjects.unifiedFieldList.getFieldStatsDocsCount()).to.be(100);
         // actual hits might vary
