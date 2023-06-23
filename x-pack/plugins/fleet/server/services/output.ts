@@ -38,6 +38,7 @@ import {
   kafkaSaslMechanism,
   kafkaPartitionType,
   kafkaCompressionType,
+  kafkaAcknowledgeReliabilityLevel,
 } from '../../common/constants';
 import { normalizeHostsForAgents } from '../../common/services';
 import {
@@ -514,6 +515,12 @@ class OutputService {
       if (!output.broker_timeout) {
         data.broker_timeout = 10;
       }
+      if (!output.broker_ack_reliability) {
+        data.broker_ack_reliability = kafkaAcknowledgeReliabilityLevel.Commit;
+      }
+      if (!output.broker_buffer_size) {
+        data.broker_buffer_size = 256;
+      }
     }
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
@@ -713,6 +720,8 @@ class OutputService {
       target.topics = null;
       target.timeout = null;
       target.broker_timeout = null;
+      target.broker_ack_reliability = null;
+      target.broker_buffer_size = null;
     };
 
     // If the output type changed
@@ -777,6 +786,12 @@ class OutputService {
         }
         if (!data.broker_timeout) {
           updateData.broker_timeout = 10;
+        }
+        if (!data.broker_ack_reliability) {
+          updateData.broker_ack_reliability = kafkaAcknowledgeReliabilityLevel.Commit;
+        }
+        if (!data.broker_buffer_size) {
+          updateData.broker_buffer_size = 256;
         }
       }
     }

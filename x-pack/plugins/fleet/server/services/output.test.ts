@@ -796,6 +796,8 @@ describe('Output Service', () => {
         hosts: ['http://test:4343'],
         auth_type: null,
         broker_timeout: null,
+        broker_ack_reliability: null,
+        broker_buffer_size: null,
         client_id: null,
         compression: null,
         compression_level: null,
@@ -909,6 +911,8 @@ describe('Output Service', () => {
         ca_trusted_fingerprint: null,
         auth_type: null,
         broker_timeout: null,
+        broker_ack_reliability: null,
+        broker_buffer_size: null,
         client_id: null,
         compression: null,
         compression_level: null,
@@ -1129,6 +1133,8 @@ describe('Output Service', () => {
         ca_sha256: null,
         ca_trusted_fingerprint: null,
         broker_timeout: 10,
+        broker_ack_reliability: 'Wait for local commit',
+        broker_buffer_size: 256,
         client_id: 'Elastic Agent',
         compression: 'gzip',
         compression_level: 4,
@@ -1154,6 +1160,8 @@ describe('Output Service', () => {
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         hosts: ['test:4343'],
         broker_timeout: 10,
+        broker_ack_reliability: 'Wait for local commit',
+        broker_buffer_size: 256,
         ca_sha256: null,
         ca_trusted_fingerprint: null,
         client_id: 'Elastic Agent',
@@ -1192,6 +1200,8 @@ describe('Output Service', () => {
         timeout: 30,
         version: '1.0.0',
         broker_timeout: 10,
+        broker_ack_reliability: 'Wait for local commit',
+        broker_buffer_size: 256,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -1236,6 +1246,8 @@ describe('Output Service', () => {
         timeout: 30,
         version: '1.0.0',
         broker_timeout: 10,
+        broker_ack_reliability: 'Wait for local commit',
+        broker_buffer_size: 256,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),

@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import {
+  kafkaAcknowledgeReliabilityLevel,
   kafkaAuthType,
   kafkaCompressionType,
   kafkaPartitionType,
@@ -204,6 +205,14 @@ export const KafkaSchema = {
   ),
   timeout: schema.maybe(schema.number()),
   broker_timeout: schema.maybe(schema.number()),
+  broker_buffer_size: schema.maybe(schema.number()),
+  broker_ack_reliability: schema.maybe(
+    schema.oneOf([
+      schema.literal(kafkaAcknowledgeReliabilityLevel.Commit),
+      schema.literal(kafkaAcknowledgeReliabilityLevel.Replica),
+      schema.literal(kafkaAcknowledgeReliabilityLevel.DoNotWait),
+    ])
+  ),
 };
 
 const KafkaUpdateSchema = {
