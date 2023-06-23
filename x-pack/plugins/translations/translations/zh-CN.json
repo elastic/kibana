@@ -26622,7 +26622,6 @@
     "xpack.observability.breadcrumbs.overviewLinkText": "概览",
     "xpack.observability.breadcrumbs.rulesLinkText": "规则",
     "xpack.observability.breadcrumbs.sloDetailsLinkText": "详情",
-    "xpack.observability.breadcrumbs.sloEditLinkText": "SLO",
     "xpack.observability.breadcrumbs.slosLinkText": "SLO",
     "xpack.observability.cases.caseFeatureNoPermissionsMessage": "要查看案例，必须对 Kibana 工作区中的案例功能有权限。有关详细信息，请联系您的 Kibana 管理员。",
     "xpack.observability.cases.caseFeatureNoPermissionsTitle": "需要 Kibana 功能权限",
