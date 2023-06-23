@@ -46,6 +46,8 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
    *
    * @note When enabled and both query parameter and header are present, header
    *       will take precedence.
+   * @note When enabled `apiVersion` is a reserved query parameter and will not
+   *       be passed to the route handler or handler validation.
    * @experimental
    * @default false
    */
