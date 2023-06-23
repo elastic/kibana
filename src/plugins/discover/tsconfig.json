@@ -53,6 +53,7 @@
     "@kbn/dom-drag-drop",
     "@kbn/unified-field-list",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/cell-actions",
   ],
   "exclude": [
     "target/**/*",
