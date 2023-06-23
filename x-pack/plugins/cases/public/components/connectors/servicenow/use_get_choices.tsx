@@ -26,12 +26,10 @@ export const useGetChoices = ({ http, connector, fields }: Props) => {
   const { showErrorToast } = useCasesToast();
   return useQuery<ActionTypeExecutorResult<Choice[]>, ServerError>(
     connectorsQueriesKeys.servicenowGetChoices(connector?.id ?? '', fields),
-    () => {
-      const abortCtrlRef = new AbortController();
-
+    ({ signal }) => {
       return getChoices({
         http,
-        signal: abortCtrlRef.signal,
+        signal,
         connectorId: connector?.id ?? '',
         fields,
       });
