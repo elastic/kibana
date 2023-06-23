@@ -108,7 +108,7 @@ describe('TTYPlayer component', () => {
 
     it('renders a message warning when max_bytes exceeded with link to policies page', async () => {
       renderResult = mockedContext.render(
-        <TTYPlayer {...props} canAccessEndpointManagement={true} />
+        <TTYPlayer {...props} canReadPolicyManagement={true} />
       );
 
       await waitForApiCall();
