@@ -115,28 +115,30 @@ exports[`MonitorBarSeries component shallow renders a series when there are down
       }
     }
   >
-    <MonitorBarSeries
-      histogramSeries={
-        Array [
-          Object {
-            "down": 1,
-            "timestamp": 124,
-            "up": 0,
-          },
-          Object {
-            "down": 1,
-            "timestamp": 125,
-            "up": 0,
-          },
-          Object {
-            "down": 1,
-            "timestamp": 126,
-            "up": 0,
-          },
-        ]
-      }
-      minInterval={10}
-    />
+    <CompatRouter>
+      <MonitorBarSeries
+        histogramSeries={
+          Array [
+            Object {
+              "down": 1,
+              "timestamp": 124,
+              "up": 0,
+            },
+            Object {
+              "down": 1,
+              "timestamp": 125,
+              "up": 0,
+            },
+            Object {
+              "down": 1,
+              "timestamp": 126,
+              "up": 0,
+            },
+          ]
+        }
+        minInterval={10}
+      />
+    </CompatRouter>
   </ContextProvider>
 </ContextProvider>
 `;

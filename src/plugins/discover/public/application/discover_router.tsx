@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Redirect, Router, Switch, useParams } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect, useParams } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import React, { useCallback, useMemo } from 'react';
 import { History } from 'history';
 import { EuiErrorBoundary } from '@elastic/eui';
@@ -36,7 +35,7 @@ export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProp
   );
 
   return (
-    <Switch>
+    <Routes>
       <Route path={prefixPath('context/:dataViewId/:id')}>
         <ContextAppRoute />
       </Route>
@@ -61,7 +60,7 @@ export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProp
         <DiscoverMainRoute {...mainRouteProps} />
       </Route>
       <NotFoundRoute />
-    </Switch>
+    </Routes>
   );
 };
 
@@ -112,16 +111,14 @@ export const DiscoverRouter = ({
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <Router history={history} data-test-subj="discover-react-router">
-          <CompatRouter>
-            <Switch>
-              <Route path={addProfile('', ':profile')}>
-                <CustomDiscoverRoutes profileRegistry={profileRegistry} {...routeProps} />
-              </Route>
-              <Route path="/">
-                <DiscoverRoutes customizationCallbacks={customizationCallbacks} {...routeProps} />
-              </Route>
-            </Switch>
-          </CompatRouter>
+          <Routes>
+            <Route path={addProfile('', ':profile')}>
+              <CustomDiscoverRoutes profileRegistry={profileRegistry} {...routeProps} />
+            </Route>
+            <Route path="/">
+              <DiscoverRoutes customizationCallbacks={customizationCallbacks} {...routeProps} />
+            </Route>
+          </Routes>
         </Router>
       </EuiErrorBoundary>
     </KibanaContextProvider>
