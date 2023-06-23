@@ -40,11 +40,7 @@
     "@kbn/reporting-common",
     "@kbn/saved-search-plugin",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-http-router-server-internal",
     "@kbn/core-lifecycle-server",
-    "@kbn/core-saved-objects-api-server",
-    "@kbn/core-saved-objects-server",
-    "@kbn/core-ui-settings-server",
   ],
   "exclude": [
     "target/**/*",
