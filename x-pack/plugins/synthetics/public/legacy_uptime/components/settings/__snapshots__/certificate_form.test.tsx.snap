@@ -85,20 +85,22 @@ exports[`CertificateForm shallow renders expected elements for valid props 1`] =
       }
     }
   >
-    <CertificateExpirationForm
-      fieldErrors={null}
-      formFields={
-        Object {
-          "certAgeThreshold": 36,
-          "certExpirationThreshold": 7,
-          "defaultConnectors": Array [],
-          "heartbeatIndices": "heartbeat-8*",
+    <CompatRouter>
+      <CertificateExpirationForm
+        fieldErrors={null}
+        formFields={
+          Object {
+            "certAgeThreshold": 36,
+            "certExpirationThreshold": 7,
+            "defaultConnectors": Array [],
+            "heartbeatIndices": "heartbeat-8*",
+          }
         }
-      }
-      isDisabled={false}
-      loading={false}
-      onChange={[MockFunction]}
-    />
+        isDisabled={false}
+        loading={false}
+        onChange={[MockFunction]}
+      />
+    </CompatRouter>
   </ContextProvider>
 </ContextProvider>
 `;
