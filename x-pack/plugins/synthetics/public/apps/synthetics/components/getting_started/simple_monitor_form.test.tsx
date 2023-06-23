@@ -31,7 +31,7 @@ describe('SimpleMonitorForm', () => {
 
     // calls enabled API
     await waitFor(async () => {
-      expect(dispatchSpy).toHaveBeenCalledTimes(6);
+      expect(dispatchSpy).toHaveBeenCalledTimes(3);
     });
   });
 
