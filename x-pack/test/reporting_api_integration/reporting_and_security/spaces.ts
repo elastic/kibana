@@ -84,9 +84,9 @@ export default function ({ getService }: FtrProviderContext) {
           "\\"order_date\\",category,\\"customer_full_name\\",\\"taxful_total_price\\",currency
           \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Sultan Al Boone\\",174,EUR
           \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",\\"Pia Richards\\",\\"41.969\\",EUR
-          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",\\"Brigitte Meyer\\",\\"40.969\\",EUR
-          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",\\"Abd Mccarthy\\",\\"41.969\\",EUR
-          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",\\"Robert "
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing\\",\\"JimHansen\\",100,EUR
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes\\",\\"Thad Lamb\\",\\"39.969\\",EUR
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",\\"JimBryant\\""
         `);
       });
 
@@ -128,11 +128,11 @@ export default function ({ getService }: FtrProviderContext) {
         const csv = await lastValueFrom(getCompleted$(path));
         expectSnapshot(csv.slice(0, 500)).toMatchInline(`
           "\\"order_date\\",category,\\"customer_full_name\\",\\"taxful_total_price\\",currency
-          \\"Jul 11, 2019 @ 17:00:00.000\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Sultan Al Boone\\",174,EUR
-          \\"Jul 11, 2019 @ 17:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",\\"Pia Richards\\",\\"41.969\\",EUR
-          \\"Jul 11, 2019 @ 17:00:00.000\\",\\"Women's Clothing\\",\\"Brigitte Meyer\\",\\"40.969\\",EUR
-          \\"Jul 11, 2019 @ 17:00:00.000\\",\\"Men's Clothing\\",\\"Abd Mccarthy\\",\\"41.969\\",EUR
-          \\"Jul 11, 2019 @ 17:00:00.000\\",\\"Men's Clothing\\",\\"Robert "
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Sultan Al Boone\\",174,EUR
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",\\"Pia Richards\\",\\"41.969\\",EUR
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing\\",\\"JimHansen\\",100,EUR
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes\\",\\"Thad Lamb\\",\\"39.969\\",EUR
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",\\"JimBryant\\""
         `);
       });
 
@@ -146,9 +146,9 @@ export default function ({ getService }: FtrProviderContext) {
           "\\"order_date\\",category,\\"customer_full_name\\",\\"taxful_total_price\\",currency
           \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Sultan Al Boone\\",174,EUR
           \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Shoes, Women's Clothing\\",\\"Pia Richards\\",\\"41.969\\",EUR
-          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Women's Clothing\\",\\"Brigitte Meyer\\",\\"40.969\\",EUR
-          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",\\"Abd Mccarthy\\",\\"41.969\\",EUR
-          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",\\"Robert "
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes, Men's Clothing\\",\\"JimHansen\\",100,EUR
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Shoes\\",\\"Thad Lamb\\",\\"39.969\\",EUR
+          \\"Jul 12, 2019 @ 00:00:00.000\\",\\"Men's Clothing\\",\\"JimBryant\\""
         `);
       });
     });
