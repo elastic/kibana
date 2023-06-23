@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { Redirect, Switch } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
@@ -49,26 +49,26 @@ export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
   };
 
   return (
-    <Switch>
+    <Routes>
       <Route exact path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
       <Route>{showView()}</Route>
-    </Switch>
+    </Routes>
   );
 };
 
 export const EnterpriseSearchContentUnconfigured: React.FC = () => (
-  <Switch>
+  <Routes>
     <Route>
       <Redirect to={SETUP_GUIDE_PATH} />
     </Route>
-  </Switch>
+  </Routes>
 );
 
 export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData>> = () => {
   return (
-    <Switch>
+    <Routes>
       <Redirect exact from={ROOT_PATH} to={SEARCH_INDICES_PATH} />
       <Route path={SEARCH_INDICES_PATH}>
         <SearchIndicesRouter />
@@ -79,6 +79,6 @@ export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData
       <Route>
         <NotFound />
       </Route>
-    </Switch>
+    </Routes>
   );
 };
