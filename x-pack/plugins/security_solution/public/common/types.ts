@@ -32,9 +32,3 @@ export interface SecuritySolutionDataViewBase extends DataViewBase {
 
 export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
 export type Refetch = () => void;
-
-// /**
-//  * @deprecated use DataViewSpec from @kbn/data-views-plugin/common
-//  * or DataView if absolutely necessary
-//  */
-// export type DataViewBase = DataViewBase;

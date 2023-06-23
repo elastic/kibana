@@ -137,7 +137,6 @@ import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 import { useRuleIndexPattern } from '../../../rule_creation_ui/pages/form';
-// import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.

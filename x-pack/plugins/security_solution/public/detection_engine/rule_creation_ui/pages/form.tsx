@@ -6,8 +6,6 @@
  */
 
 import { useState, useMemo } from 'react';
-// import type { DataViewBase } from '@kbn/es-query';
-// import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { DataViewFieldMap, DataViewSpec } from '@kbn/data-views-plugin/common';
 
 import { isThreatMatchRule } from '../../../../common/detection_engine/utils';
@@ -17,7 +15,6 @@ import type {
   DefineStepRule,
   ScheduleStepRule,
 } from '../../../detections/pages/detection_engine/rules/types';
-// import { DataSourceType } from '../../../detections/pages/detection_engine/rules/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { useForm, useFormData } from '../../../shared_imports';
 import { schema as defineRuleSchema } from '../../../detections/components/rules/step_define_rule/schema';
