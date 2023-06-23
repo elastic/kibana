@@ -57,10 +57,9 @@ export function hasVersion(request: KibanaRequest, isQueryVersionEnabled?: boole
   );
 }
 
-export function redactQueryVersion(request: KibanaRequest): void {
-  const mutableRequest = request as Mutable<KibanaRequest>;
+export function redactQueryVersion(request: Mutable<KibanaRequest>): void {
   if (hasQueryVersion(request)) {
-    mutableRequest.query = omit({ ...(request.query as {}) }, ELASTIC_HTTP_VERSION_QUERY_PARAM);
+    request.query = omit({ ...(request.query as {}) }, ELASTIC_HTTP_VERSION_QUERY_PARAM);
   }
 }
 
