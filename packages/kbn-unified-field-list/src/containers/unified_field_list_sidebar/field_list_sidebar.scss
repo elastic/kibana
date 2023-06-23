@@ -1,4 +1,4 @@
-.dscSidebar {
+.unifiedFieldListSidebar {
   overflow: hidden;
   margin: 0 !important;
   flex-grow: 1;
@@ -13,7 +13,7 @@
   }
 }
 
-.dscSidebar__list {
+.unifiedFieldListSidebar__list {
   padding: $euiSizeS 0 $euiSizeS $euiSizeS;
 
   @include euiBreakpoint('xs', 's') {
@@ -21,20 +21,20 @@
   }
 }
 
-.dscSidebar__group {
+.unifiedFieldListSidebar__group {
   height: 100%;
 }
 
-.dscSidebar__mobile {
+.unifiedFieldListSidebar__mobile {
   width: 100%;
   padding: $euiSizeS $euiSizeS 0;
 
-  .dscSidebar__mobileBadge {
+  .unifiedFieldListSidebar__mobileBadge {
     margin-left: $euiSizeS;
     vertical-align: text-bottom;
   }
 }
 
-.dscSidebar__flyoutHeader {
+.unifiedFieldListSidebar__flyoutHeader {
   align-items: center;
 }

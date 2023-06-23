@@ -10,13 +10,17 @@ import { useEffect, useState } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import { getResolvedDateRange } from '../utils/get_resolved_date_range';
+import type { TimeRangeUpdatesType } from '../types';
 
 /**
  * Hook params
  */
 export interface QuerySubscriberParams {
   data: DataPublicPluginStart;
-  listenToSearchSessionUpdates?: boolean;
+  /**
+   * Pass `timefilter` only if you are not using search sessions for the global search
+   */
+  timeRangeUpdatesType?: TimeRangeUpdatesType;
 }
 
 /**
@@ -32,12 +36,12 @@ export interface QuerySubscriberResult {
 /**
  * Memorizes current query, filters and absolute date range
  * @param data
- * @param listenToSearchSessionUpdates
+ * @param timeRangeUpdatesType
  * @public
  */
 export const useQuerySubscriber = ({
   data,
-  listenToSearchSessionUpdates = true,
+  timeRangeUpdatesType = 'search-session',
 }: QuerySubscriberParams) => {
   const timefilter = data.query.timefilter.timefilter;
   const [result, setResult] = useState<QuerySubscriberResult>(() => {
@@ -52,7 +56,7 @@ export const useQuerySubscriber = ({
   });
 
   useEffect(() => {
-    if (!listenToSearchSessionUpdates) {
+    if (timeRangeUpdatesType !== 'search-session') {
       return;
     }
 
@@ -66,10 +70,10 @@ export const useQuerySubscriber = ({
     });
 
     return () => subscription.unsubscribe();
-  }, [setResult, timefilter, data.search.session.state$, listenToSearchSessionUpdates]);
+  }, [setResult, timefilter, data.search.session.state$, timeRangeUpdatesType]);
 
   useEffect(() => {
-    if (listenToSearchSessionUpdates) {
+    if (timeRangeUpdatesType !== 'timefilter') {
       return;
     }
 
@@ -83,7 +87,7 @@ export const useQuerySubscriber = ({
     });
 
     return () => subscription.unsubscribe();
-  }, [setResult, timefilter, listenToSearchSessionUpdates]);
+  }, [setResult, timefilter, timeRangeUpdatesType]);
 
   useEffect(() => {
     const subscription = data.query.state$.subscribe(({ state, changes }) => {

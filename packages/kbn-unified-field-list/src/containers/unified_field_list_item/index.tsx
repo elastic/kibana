@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { DiscoverSidebarResponsive } from './discover_sidebar_responsive';
+export { UnifiedFieldListItem, type UnifiedFieldListItemProps } from './field_list_item';

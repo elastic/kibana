@@ -7,26 +7,32 @@
  */
 
 import React, { useMemo } from 'react';
-import { FieldStats, FieldStatsProps } from '@kbn/unified-field-list/src/components/field_stats';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
-  useQuerySubscriber,
-  hasQuerySubscriberData,
-} from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+  FieldStats,
+  type FieldStatsProps,
+  type FieldStatsServices,
+} from '../../components/field_stats';
+import { useQuerySubscriber, hasQuerySubscriberData } from '../../hooks/use_query_subscriber';
+import type { UnifiedFieldListSidebarContainerStateService } from '../../types';
 
-export interface DiscoverFieldStatsProps {
+export interface UnifiedFieldListItemStatsProps {
+  stateService: UnifiedFieldListSidebarContainerStateService;
   field: DataViewField;
+  services: Omit<FieldStatsServices, 'uiSettings'> & {
+    core: CoreStart;
+  };
   dataView: DataView;
   multiFields?: Array<{ field: DataViewField; isSelected: boolean }>;
   onAddFilter: FieldStatsProps['onAddFilter'];
 }
 
-export const DiscoverFieldStats: React.FC<DiscoverFieldStatsProps> = React.memo(
-  ({ field, dataView, multiFields, onAddFilter }) => {
-    const services = useDiscoverServices();
+export const UnifiedFieldListItemStats: React.FC<UnifiedFieldListItemStatsProps> = React.memo(
+  ({ stateService, services, field, dataView, multiFields, onAddFilter }) => {
     const querySubscriberResult = useQuerySubscriber({
       data: services.data,
+      timeRangeUpdatesType: stateService.creationOptions.timeRangeUpdatesType,
     });
     // prioritize an aggregatable multi field if available or take the parent field
     const fieldForStats = useMemo(
@@ -37,20 +43,31 @@ export const DiscoverFieldStats: React.FC<DiscoverFieldStatsProps> = React.memo(
       [field, multiFields]
     );
 
+    const statsServices: FieldStatsServices = useMemo(
+      () => ({
+        data: services.data,
+        dataViews: services.dataViews,
+        fieldFormats: services.fieldFormats,
+        charts: services.charts,
+        uiSettings: services.core.uiSettings,
+      }),
+      [services]
+    );
+
     if (!hasQuerySubscriberData(querySubscriberResult)) {
       return null;
     }
 
     return (
       <FieldStats
-        services={services}
+        services={statsServices}
         query={querySubscriberResult.query}
         filters={querySubscriberResult.filters}
         fromDate={querySubscriberResult.fromDate}
         toDate={querySubscriberResult.toDate}
         dataViewOrDataViewId={dataView}
         field={fieldForStats}
-        data-test-subj="dscFieldStats"
+        data-test-subj={stateService.creationOptions.dataTestSubj?.fieldListItemStatsDataTestSubj}
         onAddFilter={onAddFilter}
       />
     );

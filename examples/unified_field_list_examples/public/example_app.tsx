@@ -7,13 +7,11 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiPageSidebar,
   EuiTitle,
   EuiEmptyPrompt,
   EuiLoadingLogo,
@@ -124,20 +122,13 @@ export const UnifiedFieldListExampleApp: React.FC<UnifiedFieldListExampleAppProp
                 <RootDragDropProvider>
                   <EuiFlexGroup direction="row" alignItems="stretch">
                     <EuiFlexItem grow={false}>
-                      <EuiPageSidebar
-                        css={css`
-                          flex: 1;
-                          width: 320px;
-                        `}
-                      >
-                        <FieldListSidebar
-                          services={services}
-                          dataView={dataView}
-                          selectedFieldNames={selectedFieldNames}
-                          onAddFieldToWorkplace={onAddFieldToWorkplace}
-                          onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
-                        />
-                      </EuiPageSidebar>
+                      <FieldListSidebar
+                        services={services}
+                        dataView={dataView}
+                        selectedFieldNames={selectedFieldNames}
+                        onAddFieldToWorkplace={onAddFieldToWorkplace}
+                        onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+                      />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <ExampleDropZone onDropField={onDropFieldToWorkplace} />

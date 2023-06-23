@@ -52,6 +52,7 @@ export type {
   FieldListItem,
   GetCustomFieldType,
   RenderFieldItemParams,
+  SearchMode,
 } from './src/types';
 export { ExistenceFetchStatus, FieldsGroupNames } from './src/types';
 
@@ -91,3 +92,9 @@ export {
   getFieldType,
   getFieldIconType,
 } from './src/utils/field_types';
+
+export {
+  UnifiedFieldListSidebarContainer,
+  type UnifiedFieldListSidebarContainerApi,
+  type UnifiedFieldListSidebarContainerProps,
+} from './src/containers/unified_field_list_sidebar';
