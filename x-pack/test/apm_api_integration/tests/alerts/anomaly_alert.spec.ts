@@ -88,8 +88,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             name: 'Latency anomaly | service-a',
             params: {
               environment: 'production',
-              windowSize: 99,
-              windowUnit: 'y',
+              windowSize: 5,
+              windowUnit: 'h',
               anomalySeverityType: ML_ANOMALY_SEVERITY.WARNING,
             },
             ruleTypeId: ApmRuleType.Anomaly,

@@ -94,7 +94,7 @@ downloadElasticAgentConfig() {
   echo "Downloading elastic-agent.yml"
   updateStepProgress "ea-config" "loading"
   curl --request GET \
-    --url "${API_ENDPOINT}/elastic_agent/config?id=${ONBOARDING_ID}" \
+    --url "${API_ENDPOINT}/elastic_agent/config?onboardingId=${ONBOARDING_ID}" \
     --header "Authorization: ApiKey ${API_KEY_ENCODED}" \
     --header "Content-Type: application/json" \
     --header "kbn-xsrf: true" \
