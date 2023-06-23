@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { dataTypes } from '../../common/constants';
+import { dataTypes } from '../constants';
 
-import type { NewAgentPolicy } from '../types';
+import type { AgentPolicy, NewAgentPolicy } from '../types';
 
 const TWO_WEEKS_SECONDS = 1209600;
 // create a new agent policy with the defaults set
@@ -22,5 +22,21 @@ export function generateNewAgentPolicyWithDefaults(
     monitoring_enabled: Object.values(dataTypes),
     inactivity_timeout: TWO_WEEKS_SECONDS,
     ...overrideProps,
+  };
+}
+
+export function agentPolicyWithSupportedFeatures(
+  agentPolicy: Partial<AgentPolicy>
+): Partial<AgentPolicy> {
+  return {
+    ...agentPolicy,
+    is_protected: true,
+  };
+}
+
+export function agentPolicyWithoutPaidFeatures(agentPolicy: AgentPolicy): AgentPolicy {
+  return {
+    ...agentPolicy,
+    is_protected: false,
   };
 }

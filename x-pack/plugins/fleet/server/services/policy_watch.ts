@@ -17,24 +17,29 @@ import type {
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 
+import { cloneDeep } from 'lodash';
+
 import type { LicenseService } from '../../common/services/license';
 
 import type { AgentPolicy } from '../../common';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../common';
+import {
+  isAgentPolicyValidForLicense,
+  unsetAgentPolicyAccordingToLicenseLevel,
+} from '../../common/services/agent_policy_config';
+
+import { agentPolicyService } from './agent_policy';
 
 export class PolicyWatcher {
   private logger: Logger;
   private esClient: ElasticsearchClient;
-  private policyService: AgentPolicyService;
   private subscription: Subscription | undefined;
   private soStart: SavedObjectsServiceStart;
   constructor(
-    policyService: AgentPolicyService,
     soStart: SavedObjectsServiceStart,
     esStart: ElasticsearchServiceStart,
     logger: Logger
   ) {
-    this.policyService = policyService;
     this.esClient = esStart.client.asInternalUser;
     this.logger = logger;
     this.soStart = soStart;
@@ -80,7 +85,7 @@ export class PolicyWatcher {
 
     do {
       try {
-        response = await this.policyService.list(this.makeInternalSOClient(this.soStart), {
+        response = await agentPolicyService.list(this.makeInternalSOClient(this.soStart), {
           page: page++,
           perPage: 100,
           kuery: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -93,17 +98,13 @@ export class PolicyWatcher {
       }
 
       for (const policy of response.items as AgentPolicy[]) {
-        // const updatePolicy = getAgentPolicyDataForUpdate(policy);
-        // const policyConfig = updatePolicy.inputs[0].config.policy.value;
+        let updatePolicy = cloneDeep(policy) as AgentPolicy;
 
         try {
-          if (!isAgentPolicyValidForLicense(policyConfig, license)) {
-            updatePolicy.inputs[0].config.policy.value = unsetAgentPolicyAccordingToLicenseLevel(
-              policyConfig,
-              license
-            );
+          if (!isAgentPolicyValidForLicense(updatePolicy, license)) {
+            updatePolicy = unsetAgentPolicyAccordingToLicenseLevel(updatePolicy, license);
             try {
-              await this.policyService.update(
+              await agentPolicyService.update(
                 this.makeInternalSOClient(this.soStart),
                 this.esClient,
                 policy.id,
@@ -112,21 +113,23 @@ export class PolicyWatcher {
             } catch (e) {
               // try again for transient issues
               try {
-                await this.policyService.update(
+                await agentPolicyService.update(
                   this.makeInternalSOClient(this.soStart),
                   this.esClient,
                   policy.id,
                   updatePolicy
                 );
               } catch (ee) {
-                this.logger.warn(`Unable to remove platinum features from policy ${policy.id}`);
+                this.logger.warn(
+                  `Unable to remove platinum features from agent policy ${policy.id}`
+                );
                 this.logger.warn(ee);
               }
             }
           }
         } catch (error) {
           this.logger.warn(
-            `Failure while attempting to verify Agent Policy features for policy [${policy.id}]`
+            `Failure while attempting to verify features for agent policy [${policy.id}]`
           );
           this.logger.warn(error);
         }

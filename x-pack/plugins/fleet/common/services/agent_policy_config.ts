@@ -11,16 +11,21 @@ import type { AgentPolicy } from '../types';
 
 import { hasAtLeast } from './license';
 
+import {
+  agentPolicyWithSupportedFeatures,
+  agentPolicyWithoutPaidFeatures,
+} from './generate_new_agent_policy';
+
 function isAgentTamperingPolicyValidForLicense(policy: AgentPolicy, license: ILicense | null) {
   if (hasAtLeast(license, 'platinum')) {
     // platinum allows agent tamper protection
     return true;
   }
 
-  const defaults = policyFactoryWithoutPaidFeatures();
+  const defaults = agentPolicyWithoutPaidFeatures(policy);
 
   // only platinum or higher may modify agent tampering
-  if (policy.agent.protection.enabled !== defaults.policy.agent.protection.enabled) {
+  if (policy.is_protected !== defaults.is_protected) {
     return false;
   }
 
@@ -43,9 +48,9 @@ export const unsetAgentPolicyAccordingToLicenseLevel = (
   license: ILicense | null
 ): AgentPolicy => {
   if (hasAtLeast(license, 'platinum')) {
-    return policyFactoryWithSupportedFeatures(policy);
+    return agentPolicyWithSupportedFeatures(policy);
   }
 
   // set any license-gated features back to the defaults
-  return policyFactoryWithoutPaidFeatures(policy);
+  return agentPolicyWithoutPaidFeatures(policy);
 };
