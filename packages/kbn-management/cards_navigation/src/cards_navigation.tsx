@@ -12,6 +12,8 @@ import { CardsNavigationComponent as Component } from './cards_navigation.compon
 
 import type { CardsNavigationProps } from './types';
 
+// We need to wrap the component in a redirect app links component so that when the user
+// clicks on a link in the card, they are redirected to the correct app without a full page reload
 export const CardsNavigation = ({ coreStart, ...props }: CardsNavigationProps) => {
   return (
     <RedirectAppLinks coreStart={coreStart}>

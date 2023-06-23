@@ -21,7 +21,6 @@ export const appIds = {
   TAGS: 'tags',
   FILES_MANAGEMENT: 'filesManagement',
   API_KEYS: 'api_keys',
-  ADVANCED_SETTINGS: 'settings',
 };
 
 export const appCategories = {
@@ -111,16 +110,6 @@ export const appDefinitions = {
       defaultMessage: 'Allow applications to access Elastic on your behalf.',
     }),
     icon: <EuiIcon size="l" type="lockOpen" />,
-  },
-  [appIds.ADVANCED_SETTINGS]: {
-    category: appCategories.OTHER,
-    description: i18n.translate(
-      'management.landing.withCardNavigation.advancedSettingsDescription',
-      {
-        defaultMessage: 'Settings intended for advanced users.',
-      }
-    ),
-    icon: <EuiIcon size="l" type="controlsHorizontal" />,
   },
 };
 

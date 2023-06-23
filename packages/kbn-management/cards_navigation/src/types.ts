@@ -7,8 +7,19 @@
  */
 import { CoreStart } from '@kbn/core/public';
 
+export interface Application {
+  id: string;
+  title: string;
+  basePath: string;
+  enabled: boolean;
+}
+
+export interface AppRegistrySections {
+  apps: Application[];
+}
+
 export interface CardsNavigationComponentProps {
-  sections: any[];
+  sections: AppRegistrySections[];
   appBasePath: string;
   onCardClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }

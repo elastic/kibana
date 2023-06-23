@@ -19,11 +19,11 @@ import {
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { CardsNavigationComponentProps } from './types';
+import { CardsNavigationComponentProps, AppRegistrySections, Application } from './types';
 import { appCategories, appDefinitions, getAppIdsByCategory } from './consts';
 
 // Retrieve the data we need from a given app from the management app registry
-const getDataFromManagementApp = (app: any) => {
+const getDataFromManagementApp = (app: Application) => {
   return {
     id: app.id,
     title: app.title,
@@ -32,7 +32,7 @@ const getDataFromManagementApp = (app: any) => {
 };
 
 // Given a category and a list of apps, build an array of apps that belong to that category
-const getAppsForCategory = (category: string, filteredApps: { [key: string]: any }) => {
+const getAppsForCategory = (category: string, filteredApps: { [key: string]: Application }) => {
   return getAppIdsByCategory(category)
     .map((appId: string) => {
       if (!filteredApps[appId]) {
@@ -47,14 +47,17 @@ const getAppsForCategory = (category: string, filteredApps: { [key: string]: any
     .filter(Boolean);
 };
 
-const getEnabledAppsByCategory = (sections: any[]) => {
+const getEnabledAppsByCategory = (sections: AppRegistrySections[]) => {
   // Flatten all apps into a single array
   const flattenApps = flatMap(sections, (section) => section.apps);
   // Filter out apps that are not enabled and create an object with the
   // app id as the key so we can easily do app look up by id.
-  const filteredApps: { [key: string]: any } = flattenApps.reduce((obj, item: any) => {
-    return item.enabled ? { ...obj, [item.id]: item } : obj;
-  }, {});
+  const filteredApps: { [key: string]: Application } = flattenApps.reduce(
+    (obj, item: Application) => {
+      return item.enabled ? { ...obj, [item.id]: item } : obj;
+    },
+    {}
+  );
 
   // Build list of categories with apps that are enabled
   return [
