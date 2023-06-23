@@ -7,9 +7,11 @@
 
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { CoverageOverviewRequestBody } from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
 import { CoverageOverviewRuleActivity } from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
 import type { CoverageOverviewResponse } from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/response_schema';
 import type { RuleParams } from '../../../../rule_schema';
+import { convertFilterToKQL } from './utils/convert_filter_to_kql';
 
 type CoverageOverviewRuleParams = Pick<RuleParams, 'threat'>;
 
@@ -18,16 +20,20 @@ interface CoverageOverviewRouteDependencies {
 }
 
 interface HandleCoverageOverviewRequestArgs {
+  resolveParameters: () => CoverageOverviewRequestBody;
   resolveDependencies: () => Promise<CoverageOverviewRouteDependencies>;
 }
 
 export async function handleCoverageOverviewRequest({
+  resolveParameters,
   resolveDependencies,
 }: HandleCoverageOverviewRequestArgs): Promise<CoverageOverviewResponse> {
+  const { filter } = resolveParameters();
   const { rulesClient } = await resolveDependencies();
 
   const rules = await rulesClient.find<CoverageOverviewRuleParams>({
     options: {
+      filter: filter ? convertFilterToKQL(filter) : undefined,
       fields: ['name', 'enabled', 'params.threat'],
       page: 1,
       perPage: 10000,
@@ -42,9 +48,9 @@ export async function handleCoverageOverviewRequest({
 }
 
 /**
- * Extracts rule's MITRE ATT&CK™ tacticts, techniques and subtechniques
+ * Extracts rule's MITRE ATT&CK™ tactics, techniques and subtechniques
  *
- * @returns an array of MITRE ATT&CK™ tacticts, techniques and subtechniques
+ * @returns an array of MITRE ATT&CK™ tactics, techniques and subtechniques
  */
 function extractRuleMitreCategories(rule: SanitizedRule<CoverageOverviewRuleParams>): string[] {
   if (!rule.params.threat) {

@@ -6,16 +6,20 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { CoverageOverviewRequestBody } from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL } from '../../../../../../../common/detection_engine/rule_management/api/urls';
 import { buildSiemResponse } from '../../../../routes/utils';
+import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { handleCoverageOverviewRequest } from './handle_coverage_overview_request';
 
 export const getCoverageOverviewRoute = (router: SecuritySolutionPluginRouter) => {
-  router.get(
+  router.post(
     {
       path: RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
-      validate: {},
+      validate: {
+        body: buildRouteValidation(CoverageOverviewRequestBody),
+      },
       options: {
         tags: ['access:securitySolution'],
       },
@@ -25,6 +29,7 @@ export const getCoverageOverviewRoute = (router: SecuritySolutionPluginRouter) =
 
       try {
         const responseData = await handleCoverageOverviewRequest({
+          resolveParameters: () => request.body,
           resolveDependencies: async () => {
             const ctx = await context.resolve(['alerting']);
 
