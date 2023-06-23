@@ -55,7 +55,7 @@ export const CustomDatasetSelector = withProviders(({ stateContainer }) => {
    * since we'll need to handle more actions from the stateContainer
    */
   const handleStreamSelection: DatasetSelectionHandler = (dataset) => {
-    return stateContainer.actions.onCreateDefaultAdHocDataView(dataset.toSpec());
+    return stateContainer.actions.onCreateDefaultAdHocDataView(dataset.toDataviewSpec());
   };
 
   return (

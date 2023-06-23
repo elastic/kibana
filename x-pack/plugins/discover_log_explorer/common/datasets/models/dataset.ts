@@ -5,15 +5,10 @@
  * 2.0.
  */
 
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { DatasetId, DatasetType, IntegrationType } from '../types';
 
 type IntegrationBase = Pick<IntegrationType, 'name' | 'version'>;
-
-interface DatasetSpec {
-  id: DatasetId;
-  name: DatasetType['title'];
-  title: DatasetType['name'];
-}
 
 export class Dataset {
   id: DatasetId;
@@ -31,7 +26,7 @@ export class Dataset {
     };
   }
 
-  toSpec(): DatasetSpec {
+  toDataviewSpec(): DataViewSpec {
     // Invert the property because the API returns the index pattern as `name` and a readable name as `title`
     return {
       id: this.id,
