@@ -95,7 +95,6 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         normalizedMonitor: monitorWithRevision,
         spaceId,
       });
-
       if (failedPolicyUpdates && failedPolicyUpdates.length > 0) {
         const hasError = failedPolicyUpdates.find((update) => update.error);
         await rollbackUpdate({

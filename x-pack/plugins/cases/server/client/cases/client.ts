@@ -11,6 +11,7 @@ import type {
   CasesFindRequest,
   User,
   AllTagsFindRequest,
+  AllCategoriesFindRequest,
   AllReportersFindRequest,
   CasesByAlertId,
   CasesBulkGetRequest,
@@ -33,7 +34,7 @@ import { create } from './create';
 import { deleteCases } from './delete';
 import { find } from './find';
 import type { CasesByAlertIDParams, GetParams } from './get';
-import { get, resolve, getCasesByAlertID, getReporters, getTags } from './get';
+import { get, resolve, getCasesByAlertID, getReporters, getTags, getCategories } from './get';
 import type { PushParams } from './push';
 import { push } from './push';
 import { update } from './update';
@@ -84,6 +85,10 @@ export interface CasesSubClient {
    */
   getTags(params: AllTagsFindRequest): Promise<string[]>;
   /**
+   * Retrieves all the categories across all cases the user making the request has access to.
+   */
+  getCategories(params: AllCategoriesFindRequest): Promise<string[]>;
+  /**
    * Retrieves all the reporters across all accessible cases.
    */
   getReporters(params: AllReportersFindRequest): Promise<User[]>;
@@ -113,6 +118,7 @@ export const createCasesSubClient = (
     update: (cases: CasesPatchRequest) => update(cases, clientArgs),
     delete: (ids: string[]) => deleteCases(ids, clientArgs),
     getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),
+    getCategories: (params: AllCategoriesFindRequest) => getCategories(params, clientArgs),
     getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),
     getCasesByAlertID: (params: CasesByAlertIDParams) => getCasesByAlertID(params, clientArgs),
   };

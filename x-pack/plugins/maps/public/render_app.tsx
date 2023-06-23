@@ -15,7 +15,7 @@ import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-f
 import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { TableListViewKibanaProvider } from '@kbn/content-management-table-list';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import {
   getCoreChrome,
   getCoreI18n,

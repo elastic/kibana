@@ -40,7 +40,7 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
     return (
       <AlertAttachmentContext.Provider value={ecsData}>
         <EuiComment
-          username={ruleName && ruleName[0]}
+          username={ruleName}
           timestamp={<FormattedRelative value={startDate} />}
           event={ATTACHED_QUERY}
           data-test-subj={'osquery-results-comment'}

@@ -84,7 +84,7 @@ export const transformNewCase = ({
   updated_at: null,
   updated_by: null,
   assignees: dedupAssignees(newCase.assignees) ?? [],
-  category: null,
+  category: newCase.category ?? null,
 });
 
 export const transformCases = ({
@@ -460,3 +460,17 @@ export const getCaseViewPath = (params: {
 };
 
 export const isSOError = <T>(so: { error?: unknown }): so is SOWithErrors<T> => so.error != null;
+
+export const countUserAttachments = (
+  attachments: Array<SavedObject<CommentAttributes>>
+): number => {
+  let total = 0;
+
+  for (const attachment of attachments) {
+    if (attachment.attributes.type === CommentType.user) {
+      total += 1;
+    }
+  }
+
+  return total;
+};

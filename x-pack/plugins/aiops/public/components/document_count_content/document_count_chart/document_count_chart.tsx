@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
 import {
@@ -63,6 +63,10 @@ interface DocumentCountChartProps {
   isBrushCleared: boolean;
   /* Timestamp for start of initial analysis */
   autoAnalysisStart?: number | WindowParameters;
+  /** Optional color override for the default bar color for charts */
+  barColorOverride?: string;
+  /** Optional color override for the highlighted bar color for charts */
+  barHighlightColorOverride?: string;
 }
 
 const SPEC_ID = 'document_count';
@@ -109,6 +113,8 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   chartPointsSplitLabel,
   isBrushCleared,
   autoAnalysisStart,
+  barColorOverride,
+  barHighlightColorOverride,
 }) => {
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
@@ -324,6 +330,9 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   const baselineBadgeMarginLeft =
     (mlBrushMarginLeft ?? 0) + (windowParametersAsPixels?.baselineMin ?? 0);
 
+  const barColor = barColorOverride ? [barColorOverride] : undefined;
+  const barHighlightColor = barHighlightColorOverride ? [barHighlightColorOverride] : ['orange'];
+
   return (
     <>
       {isBrushVisible && (
@@ -405,6 +414,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               yAccessors={['value']}
               data={adjustedChartPoints}
               timeZone={timeZone}
+              color={barColor}
               yNice
             />
           )}
@@ -418,7 +428,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               yAccessors={['value']}
               data={adjustedChartPointsSplit}
               timeZone={timeZone}
-              color={['orange']}
+              color={barHighlightColor}
               yNice
             />
           )}

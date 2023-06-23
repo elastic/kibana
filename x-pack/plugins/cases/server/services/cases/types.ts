@@ -81,6 +81,11 @@ export interface GetReportersArgs {
   filter?: KueryNode;
 }
 
+export interface GetCategoryArgs {
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  filter?: KueryNode;
+}
+
 export interface GetCaseIdsByAlertIdAggs {
   references: {
     doc_count: number;

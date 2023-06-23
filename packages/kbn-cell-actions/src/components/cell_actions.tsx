@@ -8,13 +8,14 @@
 
 import React, { useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { isArray } from 'lodash/fp';
 import { InlineActions } from './inline_actions';
 import { HoverActionsPopover } from './hover_actions_popover';
 import { CellActionsMode } from '../constants';
 import type { CellActionsProps, CellActionExecutionContext } from '../types';
 
 export const CellActions: React.FC<CellActionsProps> = ({
-  field,
+  data,
   triggerId,
   children,
   mode,
@@ -26,14 +27,16 @@ export const CellActions: React.FC<CellActionsProps> = ({
 }) => {
   const nodeRef = useRef<HTMLDivElement | null>(null);
 
+  const dataArray = useMemo(() => (isArray(data) ? data : [data]), [data]);
+
   const actionContext: CellActionExecutionContext = useMemo(
     () => ({
-      field,
+      data: dataArray,
       trigger: { id: triggerId },
       nodeRef,
       metadata,
     }),
-    [field, triggerId, metadata]
+    [dataArray, triggerId, metadata]
   );
 
   const anchorPosition = useMemo(
@@ -41,7 +44,10 @@ export const CellActions: React.FC<CellActionsProps> = ({
     [mode]
   );
 
-  const dataTestSubj = `cellActions-renderContent-${field.name}`;
+  const dataTestSubj = `cellActions-renderContent-${dataArray
+    .map(({ field }) => field.name)
+    .join('-')}`;
+
   if (mode === CellActionsMode.HOVER_DOWN || mode === CellActionsMode.HOVER_RIGHT) {
     return (
       <div className={className} ref={nodeRef} data-test-subj={dataTestSubj}>

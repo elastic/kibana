@@ -34,7 +34,8 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
       },
       thresholdRule: { enabled: false },
     },
-    coPilot: {
+    compositeSlo: { enabled: false },
+    aiAssistant: {
       enabled: false,
     },
   };

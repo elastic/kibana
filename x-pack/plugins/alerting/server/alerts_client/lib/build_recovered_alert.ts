@@ -9,6 +9,7 @@ import type { Alert } from '@kbn/alerts-as-data-utils';
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
+import { stripFrameworkFields } from './strip_framework_fields';
 
 interface BuildRecoveredAlertOpts<
   AlertData extends RuleAlertData,
@@ -21,6 +22,7 @@ interface BuildRecoveredAlertOpts<
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
   recoveryActionGroup: string;
+  payload?: AlertData;
   timestamp: string;
 }
 
@@ -40,6 +42,7 @@ export const buildRecoveredAlert = <
   legacyAlert,
   rule,
   timestamp,
+  payload,
   recoveryActionGroup,
 }: BuildRecoveredAlertOpts<
   AlertData,
@@ -48,9 +51,11 @@ export const buildRecoveredAlert = <
   ActionGroupIds,
   RecoveryActionGroupId
 >): Alert & AlertData => {
+  const cleanedPayload = payload ? stripFrameworkFields(payload) : {};
   return deepmerge.all(
     [
       alert,
+      cleanedPayload,
       {
         // Update the timestamp to reflect latest update time
         '@timestamp': timestamp,

@@ -206,7 +206,6 @@ export const GettingStarted = () => {
         <EuiText size="m" textAlign="center">
           <p>{subtitle}</p>
         </EuiText>
-        <EuiSpacer size="s" />
         <EuiSpacer size="xxl" />
         <GuideFilters
           application={application}

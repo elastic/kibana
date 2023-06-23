@@ -19,6 +19,7 @@ import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types'
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
 import { getMonitorFilters, MonitorsQuery, QuerySchema, SEARCH_FIELDS } from '../common';
+import { mapSavedObjectToMonitor } from './helper';
 
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -42,9 +43,8 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: U
       const { decrypted } = request.query;
 
       if (!decrypted) {
-        return await savedObjectsClient.get<EncryptedSyntheticsMonitor>(
-          syntheticsMonitorType,
-          monitorId
+        return mapSavedObjectToMonitor(
+          await savedObjectsClient.get<EncryptedSyntheticsMonitor>(syntheticsMonitorType, monitorId)
         );
       } else {
         // only user with write permissions can decrypt the monitor
@@ -55,7 +55,8 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: U
         }
 
         const encryptedSavedObjectsClient = encryptedSavedObjects.getClient();
-        return await libs.requests.getSyntheticsMonitor({
+
+        return libs.requests.getSyntheticsMonitor({
           monitorId,
           encryptedSavedObjectsClient,
           savedObjectsClient,

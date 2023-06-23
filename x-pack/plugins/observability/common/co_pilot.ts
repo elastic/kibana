@@ -22,6 +22,8 @@ export enum CoPilotPromptId {
   ApmExplainError = 'apmExplainError',
   LogsExplainMessage = 'logsExplainMessage',
   LogsFindSimilar = 'logsFindSimilar',
+  InfraExplainProcess = 'infraExplainProcess',
+  ExplainLogSpike = 'explainLogSpike',
 }
 
 const PERF_GPT_SYSTEM_MESSAGE = {
@@ -37,7 +39,13 @@ const APM_GPT_SYSTEM_MESSAGE = {
 };
 
 const LOGS_SYSTEM_MESSAGE = {
-  content: `You logsapm-gpt, a helpful assistant for logs-based observability. Answer as
+  content: `You are logs-gpt, a helpful assistant for logs-based observability. Answer as
+    concisely as possible.`,
+  role: 'system' as const,
+};
+
+const INFRA_SYSTEM_MESSAGE = {
+  content: `You are infra-gpt, a helpful assistant for metrics-based infrastructure observability. Answer as
     concisely as possible.`,
   role: 'system' as const,
 };
@@ -63,6 +71,13 @@ const logEntryRt = t.type({
     })
   ),
 });
+
+const significantFieldValuesRt = t.array(
+  t.type({
+    field: t.string,
+    value: t.union([t.string, t.number]),
+  })
+);
 
 export const coPilotPrompts = {
   [CoPilotPromptId.ProfilingOptimizeFunction]: prompt({
@@ -123,7 +138,7 @@ export const coPilotPrompts = {
             The library is: ${library}
             The function is: ${functionName}
             
-            Your task is to desribe what the library is and what its use cases are, and to describe what the function
+            Your task is to describe what the library is and what its use cases are, and to describe what the function
             does. The output format should look as follows:
             
             Library description: Provide a concise description of the library
@@ -216,6 +231,94 @@ export const coPilotPrompts = {
         LOGS_SYSTEM_MESSAGE,
         {
           content: `I'm looking at a log entry. Can you construct a Kibana KQL query that I can enter in the search bar that gives me similar log entries, based on the \`message\` field: ${message}`,
+          role: 'user',
+        },
+      ];
+    },
+  }),
+  [CoPilotPromptId.InfraExplainProcess]: prompt({
+    params: t.type({
+      command: t.string,
+    }),
+    messages: ({ command }) => {
+      return [
+        INFRA_SYSTEM_MESSAGE,
+        {
+          content: `I am a software engineer. I am trying to understand what a process running on my
+          machine does.
+          
+          Your task is to first describe what the process is and what its general use cases are. If I also provide you
+          with the arguments to the process you should then explain its arguments and how they influence the behaviour
+          of the process. If I do not provide any arguments then explain the behaviour of the process when no arguments are
+          provided.
+          
+          If you do not recognise the process say "No information available for this process". If I provide an argument
+          to the process that you do not recognise then say "No information available for this argument" when explaining
+          that argument.
+          
+          Here is an example with arguments.
+          Process: metricbeat -c /etc/metricbeat.yml -d autodiscover,kafka -e -system.hostfs=/hostfs
+          Explaination: Metricbeat is part of the Elastic Stack. It is a lightweight shipper that you can install on your
+          servers to periodically collect metrics from the operating system and from services running on the server.
+          Use cases for Metricbeat generally revolve around infrastructure monitoring. You would typically install
+          Metricbeat on your servers to collect metrics from your systems and services. These metrics are then
+          used for performance monitoring, anomaly detection, system status checks, etc.
+          
+          Here is a breakdown of the arguments used:
+          
+          * -c /etc/metricbeat.yml: The -c option is used to specify the configuration file for Metricbeat. In
+          this case, /etc/metricbeat.yml is the configuration file. This file contains configurations for what
+          metrics to collect and where to send them (e.g., to Elasticsearch or Logstash).
+          
+          * -d autodiscover,kafka: The -d option is used to enable debug output for selected components. In
+          this case, debug output is enabled for autodiscover and kafka components. The autodiscover feature
+          allows Metricbeat to automatically discover services as they get started and stopped in your environment,
+          and kafka is presumably a monitored service from which Metricbeat collects metrics.
+          
+          * -e: The -e option is used to log to stderr and disable syslog/file output. This is useful for debugging.
+          
+          * -system.hostfs=/hostfs: The -system.hostfs option is used to set the mount point of the host’s
+          filesystem for use in monitoring a host from within a container. In this case, /hostfs is the mount
+          point. When running Metricbeat inside a container, filesystem metrics would be for the container by
+          default, but with this option, Metricbeat can get metrics for the host system.
+          
+          Here is an example without arguments.
+          Process: metricbeat
+          Explanation: Metricbeat is part of the Elastic Stack. It is a lightweight shipper that you can install on your
+          servers to periodically collect metrics from the operating system and from services running on the server.
+          Use cases for Metricbeat generally revolve around infrastructure monitoring. You would typically install
+          Metricbeat on your servers to collect metrics from your systems and services. These metrics are then
+          used for performance monitoring, anomaly detection, system status checks, etc.
+          
+          Running it without any arguments will start the process with the default configuration file, typically
+          located at /etc/metricbeat/metricbeat.yml. This file specifies the metrics to be collected and where
+          to ship them to.
+          
+          Now explain this process to me.
+          Process: ${command}
+          Explanation:
+            `,
+          role: 'user',
+        },
+      ];
+    },
+  }),
+  [CoPilotPromptId.ExplainLogSpike]: prompt({
+    params: t.type({
+      significantFieldValues: significantFieldValuesRt,
+    }),
+    messages: ({ significantFieldValues }) => {
+      const customMessageForPrompt =
+        significantFieldValues.length === 1
+          ? `There has been an alert on spike of logs. The spike mainly consists of logs with field ${significantFieldValues[0]?.field} with value "${significantFieldValues[0]?.value}".`
+          : `There has been an alert on spike of logs. The spike mainly consists of logs with field ${significantFieldValues[0]?.field} with value "${significantFieldValues[0]?.value}" and field ${significantFieldValues[1]?.field} with value "${significantFieldValues[1]?.value}".`;
+      return [
+        LOGS_SYSTEM_MESSAGE,
+        {
+          content: `You are an observability expert being consulted about an alert raised on elastic observability suite.
+          ${customMessageForPrompt}
+          Please advice on what could be the 3 top causes and remediations for this alert.  Format your response on bullets.
+          `,
           role: 'user',
         },
       ];

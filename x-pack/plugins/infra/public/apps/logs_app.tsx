@@ -14,7 +14,6 @@ import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import '../index.scss';
-import { CoPilotContextProvider } from '@kbn/observability-plugin/public';
 import { LinkToLogsPage } from '../pages/link_to/link_to_logs';
 import { LogsPage } from '../pages/logs';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
@@ -69,20 +68,19 @@ const LogsApp: React.FC<{
         storage={storage}
         theme$={theme$}
         triggersActionsUI={plugins.triggersActionsUi}
+        observabilityCopilot={plugins.observability.getCoPilotService()}
       >
-        <CoPilotContextProvider value={plugins.observability.getCoPilotService()}>
-          <Router history={history}>
-            <KbnUrlStateStorageFromRouterProvider
-              history={history}
-              toastsService={core.notifications.toasts}
-            >
-              <Switch>
-                <Route path="/link-to" component={LinkToLogsPage} />
-                {uiCapabilities?.logs?.show && <Route path="/" component={LogsPage} />}
-              </Switch>
-            </KbnUrlStateStorageFromRouterProvider>
-          </Router>
-        </CoPilotContextProvider>
+        <Router history={history}>
+          <KbnUrlStateStorageFromRouterProvider
+            history={history}
+            toastsService={core.notifications.toasts}
+          >
+            <Switch>
+              <Route path="/link-to" component={LinkToLogsPage} />
+              {uiCapabilities?.logs?.show && <Route path="/" component={LogsPage} />}
+            </Switch>
+          </KbnUrlStateStorageFromRouterProvider>
+        </Router>
       </CommonInfraProviders>
     </CoreProviders>
   );

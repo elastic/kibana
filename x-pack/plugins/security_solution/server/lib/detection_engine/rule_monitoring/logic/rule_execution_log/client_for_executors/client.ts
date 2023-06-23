@@ -27,8 +27,8 @@ import {
 
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
-import { truncateValue } from '../utils/normalization';
-import type { ExtMeta } from '../utils/console_logging';
+import { truncateValue } from '../../utils/normalization';
+import type { ExtMeta } from '../../utils/console_logging';
 import { getCorrelationIds } from './correlation_ids';
 
 import type { IEventLogWriter } from '../event_log/event_log_writer';
@@ -38,7 +38,7 @@ import type {
   StatusChangeArgs,
 } from './client_interface';
 
-export const createClientForExecutors = (
+export const createRuleExecutionLogClientForExecutors = (
   settings: RuleExecutionSettings,
   eventLog: IEventLogWriter,
   logger: Logger,

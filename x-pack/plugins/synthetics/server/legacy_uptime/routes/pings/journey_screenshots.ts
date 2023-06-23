@@ -4,9 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { IKibanaResponse } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
-import { isRefResult, isFullScreenshot } from '../../../../common/runtime_types/ping/synthetics';
+import {
+  isRefResult,
+  isFullScreenshot,
+  RefResult,
+} from '../../../../common/runtime_types/ping/synthetics';
 import { UMServerLibs } from '../../lib/lib';
 import {
   getJourneyScreenshot,
@@ -14,6 +18,8 @@ import {
 } from '../../lib/requests/get_journey_screenshot';
 import { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
 import { API_URLS } from '../../../../common/constants';
+
+export type ClientContract = Buffer | { screenshotRef: RefResult };
 
 function getSharedHeaders(stepName: string, totalSteps: number) {
   return {
@@ -23,7 +29,9 @@ function getSharedHeaders(stepName: string, totalSteps: number) {
   };
 }
 
-export const createJourneyScreenshotRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createJourneyScreenshotRoute: UMRestApiRouteFactory<ClientContract> = (
+  libs: UMServerLibs
+) => ({
   method: 'GET',
   path: API_URLS.JOURNEY_SCREENSHOT,
   validate: {
@@ -41,7 +49,7 @@ export const journeyScreenshotHandler = async ({
   response,
   request,
   uptimeEsClient,
-}: RouteContext | UptimeRouteContext) => {
+}: RouteContext | UptimeRouteContext): Promise<IKibanaResponse<ClientContract>> => {
   const { checkGroup, stepIndex } = request.params;
 
   const result: ScreenshotReturnTypesUnion | null = await getJourneyScreenshot({

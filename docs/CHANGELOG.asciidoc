@@ -135,7 +135,7 @@ The 8.8.0 release splits the `.kibana` index into multiple saved object indices.
 This can result in a loss of saved objects during the upgrade. This can also leave {kib} in a bootlooping state where it's unable to start due to `write_blocked` indices.
 
 *Impact* +
-The 8.8.1 release includes in {kibana-pull}158940[a fix] for this problem. Customers affected by a failed 8.8.0 upgrade should contact Elastic support. For more information, see the {kibana-issue}58733[related issue].
+The 8.8.1 release includes in {kibana-pull}158940[a fix] for this problem. Customers affected by a failed 8.8.0 upgrade should contact Elastic support. For more information, see the {kibana-issue}158733[related issue].
 ====
 // end::known-issue-158940[]
 
