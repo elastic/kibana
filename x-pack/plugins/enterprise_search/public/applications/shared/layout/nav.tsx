@@ -24,7 +24,7 @@ import {
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
-import { ENGINES_PATH, EngineViewTabs } from '../../applications/routes';
+import { SEARCH_APPLICATIONS_PATH, SearchApplicationViewTabs } from '../../applications/routes';
 import { SEARCH_INDICES_PATH, SETTINGS_PATH } from '../../enterprise_search_content/routes';
 import { KibanaLogic } from '../kibana';
 
@@ -192,47 +192,50 @@ export const useEnterpriseSearchNav = () => {
   return navItems;
 };
 
-export const useEnterpriseSearchEngineNav = (
-  engineName?: string,
+export const useEnterpriseSearchApplicationNav = (
+  searchApplicationName?: string,
   isEmptyState?: boolean,
   hasSchemaConflicts?: boolean
 ) => {
   const navItems = useEnterpriseSearchNav();
   if (!navItems) return undefined;
-  if (!engineName) return navItems;
+  if (!searchApplicationName) return navItems;
   const applicationsItem = navItems.find((item) => item.id === 'applications');
   if (!applicationsItem || !applicationsItem.items) return navItems;
-  const enginesItem = applicationsItem.items?.find((item) => item.id === 'searchApplications');
-  if (!enginesItem || enginesItem.id !== 'searchApplications') return navItems;
+  const searchApplicationsItem = applicationsItem.items?.find(
+    (item) => item.id === 'searchApplications'
+  );
+  if (!searchApplicationsItem || searchApplicationsItem.id !== 'searchApplications')
+    return navItems;
 
-  const enginePath = `${APPLICATIONS_PLUGIN.URL}${ENGINES_PATH}/${engineName}`;
+  const searchApplicationPath = `${APPLICATIONS_PLUGIN.URL}${SEARCH_APPLICATIONS_PATH}/${searchApplicationName}`;
 
-  enginesItem.items = !isEmptyState
+  searchApplicationsItem.items = !isEmptyState
     ? [
         {
-          id: 'engineId',
-          name: engineName,
+          id: 'searchApplicationId',
+          name: searchApplicationName,
           ...generateNavLink({
             shouldNotCreateHref: true,
             shouldShowActiveForSubroutes: false,
-            to: enginePath,
+            to: searchApplicationPath,
           }),
           items: [
             {
-              id: 'enterpriseSearchEnginePreview',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.previewTitle', {
+              id: 'enterpriseSearchApplicationPreview',
+              name: i18n.translate('xpack.enterpriseSearch.nav.searchApplication.previewTitle', {
                 defaultMessage: 'Search Preview',
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.PREVIEW}`,
+                to: `${searchApplicationPath}/${SearchApplicationViewTabs.PREVIEW}`,
               }),
             },
             {
               id: 'enterpriseSearchApplicationsContent',
               name: (
                 <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                  {i18n.translate('xpack.enterpriseSearch.nav.engine.contentTitle', {
+                  {i18n.translate('xpack.enterpriseSearch.nav.searchApplication.contentTitle', {
                     defaultMessage: 'Content',
                   })}
                   {hasSchemaConflicts && <EuiIcon type="warning" color="danger" />}
@@ -241,7 +244,7 @@ export const useEnterpriseSearchEngineNav = (
               ...generateNavLink({
                 shouldNotCreateHref: true,
                 shouldShowActiveForSubroutes: true,
-                to: `${enginePath}/${EngineViewTabs.CONTENT}`,
+                to: `${searchApplicationPath}/${SearchApplicationViewTabs.CONTENT}`,
               }),
             },
             {
@@ -255,7 +258,7 @@ export const useEnterpriseSearchEngineNav = (
               ...generateNavLink({
                 shouldNotCreateHref: true,
                 shouldShowActiveForSubroutes: true,
-                to: `${enginePath}/${EngineViewTabs.CONNECT}`,
+                to: `${searchApplicationPath}/${SearchApplicationViewTabs.CONNECT}`,
               }),
             },
           ],
@@ -263,12 +266,12 @@ export const useEnterpriseSearchEngineNav = (
       ]
     : [
         {
-          id: 'engineId',
-          name: engineName,
+          id: 'searchApplicationId',
+          name: searchApplicationName,
           ...generateNavLink({
             shouldNotCreateHref: true,
             shouldShowActiveForSubroutes: true,
-            to: enginePath,
+            to: searchApplicationPath,
           }),
         },
       ];

@@ -16,7 +16,7 @@ import { KibanaLogic } from '../kibana';
 import {
   useGenerateBreadcrumbs,
   useEnterpriseSearchBreadcrumbs,
-  useEnterpriseSearchEnginesBreadcrumbs,
+  useEnterpriseSearchApplicationsBreadcrumbs,
   useAnalyticsBreadcrumbs,
   useEnterpriseSearchContentBreadcrumbs,
   useEsreBreadcrumbs,
@@ -193,13 +193,13 @@ export const SetSearchExperiencesChrome: React.FC<SetChromeProps> = ({ trail = [
   return null;
 };
 
-export const SetEnterpriseSearchEnginesChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+export const SetEnterpriseSearchApplicationsChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
   const docTitle = appSearchTitle(title);
 
-  const breadcrumbs = useEnterpriseSearchEnginesBreadcrumbs(
+  const breadcrumbs = useEnterpriseSearchApplicationsBreadcrumbs(
     useGenerateBreadcrumbs([APPLICATIONS_PLUGIN.NAV_TITLE, ...trail])
   );
 
