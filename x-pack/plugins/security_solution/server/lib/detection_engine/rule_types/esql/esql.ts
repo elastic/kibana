@@ -15,8 +15,6 @@ import type {
 import { buildEsqlSearchRequest } from './build_esql_search_request';
 import { performEsqlRequest } from './esql_request';
 import { wrapGroupedEsqlAlerts } from './wrap_grouped_esql_alerts';
-import { getLastDocumentTimestamp } from './get_last_document_timestamp';
-import { getHistoryFilter } from './get_history_filter';
 import { bulkCreateWithSuppression } from '../query/alert_suppression/bulk_create_with_suppression';
 
 import type { RunOpts } from '../types';
@@ -64,17 +62,13 @@ export const esqlExecutor = async ({
   return withSecuritySpan('esqlExecutor', async () => {
     const result = createSearchAfterReturnType();
 
-    const historyFilters = getHistoryFilter({
-      ruleQuery: ruleParams.query,
-      ruleState: state,
-    });
 
     const esqlRequest = buildEsqlSearchRequest({
       query: ruleParams.query,
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
       size: ruleParams.maxSignals,
-      filters: [...(ruleParams.filters ?? []), ...historyFilters],
+      filters: ruleParams.filters,
       primaryTimestamp,
       secondaryTimestamp,
       exceptionFilter,
@@ -87,14 +81,6 @@ export const esqlExecutor = async ({
     }
 
     const isGrouping = computeIfGrouping(completeRule.ruleParams.query);
-    let lastDocumentTimestamp: string | null = null;
-    if (isGrouping) {
-      lastDocumentTimestamp = await getLastDocumentTimestamp({
-        esClient: services.scopedClusterClient.asCurrentUser,
-        requestParams: esqlRequest,
-        query: ruleParams.query,
-      });
-    }
 
     const esqlSignalSearchStart = performance.now();
 
@@ -166,10 +152,6 @@ export const esqlExecutor = async ({
       result.warningMessages.push(getMaxSignalsWarning());
     }
 
-    const updatedState = lastDocumentTimestamp
-      ? { lastDocumentTimestamp, query: ruleParams.query }
-      : { lastDocumentTimestamp: null };
-
-    return { ...result, state: { ...state, ...updatedState } };
+    return { ...result, state };
   });
 };
