@@ -16,13 +16,17 @@ import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
-import type { UpgradeSpecificRulesRequest } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_request_schema';
-import type { PerformRuleUpgradeResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_response_schema';
-import type { InstallSpecificRulesRequest } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_request_schema';
-import type { PerformRuleInstallationResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_response_schema';
-import type { GetPrebuiltRulesStatusResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/response_schema';
-import type { RuleManagementFiltersResponse } from '../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
-import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../common/detection_engine/rule_management/api/urls';
+import type {
+  UpgradeSpecificRulesRequest,
+  PerformRuleUpgradeResponseBody,
+  InstallSpecificRulesRequest,
+  PerformRuleInstallationResponseBody,
+  GetPrebuiltRulesStatusResponseBody,
+  ReviewRuleUpgradeResponseBody,
+  ReviewRuleInstallationResponseBody,
+} from '../../../../common/api/detection_engine/prebuilt_rules';
+import type { RuleManagementFiltersResponse } from '../../../../common/api/detection_engine/rule_management';
+import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../common/api/detection_engine/rule_management';
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -38,20 +42,20 @@ import {
   PREBUILT_RULES_STATUS_URL,
   REVIEW_RULE_INSTALLATION_URL,
   REVIEW_RULE_UPGRADE_URL,
-} from '../../../../common/detection_engine/prebuilt_rules';
+} from '../../../../common/api/detection_engine/prebuilt_rules';
 
-import type { RulesReferencedByExceptionListsSchema } from '../../../../common/detection_engine/rule_exceptions';
-import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/detection_engine/rule_exceptions';
+import type { RulesReferencedByExceptionListsSchema } from '../../../../common/api/detection_engine/rule_exceptions';
+import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/api/detection_engine/rule_exceptions';
 
 import type {
   BulkActionDuplicatePayload,
   BulkActionEditPayload,
-} from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionType } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+} from '../../../../common/api/detection_engine/rule_management/bulk_actions/request_schema';
+import { BulkActionType } from '../../../../common/api/detection_engine/rule_management/bulk_actions/request_schema';
 import type {
   PreviewResponse,
   RuleResponse,
-} from '../../../../common/detection_engine/rule_schema';
+} from '../../../../common/api/detection_engine/rule_schema';
 
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from '../../../detections/pages/detection_engine/rules/translations';
@@ -74,8 +78,6 @@ import type {
   UpdateRulesProps,
 } from '../logic/types';
 import { convertRulesFilterToKQL } from '../logic/utils';
-import type { ReviewRuleUpgradeResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
-import type { ReviewRuleInstallationResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 
 /**
  * Create provided Rule

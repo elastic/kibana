@@ -17,12 +17,12 @@ import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server
 import type {
   FindRulesResponse,
   RuleToImport,
-} from '../../../../../common/detection_engine/rule_management';
+} from '../../../../../common/api/detection_engine/rule_management';
 import type {
   AlertSuppression,
   RuleResponse,
   AlertSuppressionCamel,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/rule_schema';
 
 import type { RuleAlertType, RuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';

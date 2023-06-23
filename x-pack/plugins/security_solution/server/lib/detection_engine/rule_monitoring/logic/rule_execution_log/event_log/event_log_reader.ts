@@ -13,13 +13,13 @@ import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
   RuleExecutionEvent,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   LogLevel,
   logLevelFromString,
   RuleExecutionEventType,
   ruleExecutionEventTypeFromString,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { invariant } from '../../../../../../../common/utils/invariant';

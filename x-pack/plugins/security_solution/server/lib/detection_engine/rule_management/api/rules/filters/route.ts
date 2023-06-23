@@ -8,8 +8,10 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { RuleManagementFiltersResponse } from '../../../../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
-import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../../../../common/detection_engine/rule_management/api/urls';
+import {
+  RuleManagementFiltersResponse,
+  RULE_MANAGEMENT_FILTERS_URL,
+} from '../../../../../../../common/api/detection_engine/rule_management';
 import { buildSiemResponse } from '../../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';

@@ -7,8 +7,8 @@
 
 import React, { useCallback } from 'react';
 
-import type { RuleExecutionEventType } from '../../../../../../../common/detection_engine/rule_monitoring';
-import { RULE_EXECUTION_EVENT_TYPES } from '../../../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionEventType } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import { RULE_EXECUTION_EVENT_TYPES } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { EventTypeIndicator } from '../../indicators/event_type_indicator';
 import { MultiselectFilter } from '../multiselect_filter';
 

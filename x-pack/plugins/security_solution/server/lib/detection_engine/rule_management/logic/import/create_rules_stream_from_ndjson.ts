@@ -28,7 +28,7 @@ import type { SavedObject } from '@kbn/core-saved-objects-server';
 import {
   RuleToImport,
   validateRuleToImport,
-} from '../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../common/api/detection_engine/rule_management';
 import {
   parseNdjsonStrings,
   createRulesLimitStream,

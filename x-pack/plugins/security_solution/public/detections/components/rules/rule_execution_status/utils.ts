@@ -8,7 +8,7 @@
 import type { IconColor } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { assertUnreachable } from '../../../../../common/utility_types';
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 export const getStatusText = (value: RuleExecutionStatus | null | undefined): string | null => {
   if (value == null) {

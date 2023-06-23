@@ -6,6 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { IKibanaResponse } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_URL } from '../../../../../../common/constants';
@@ -20,6 +21,7 @@ import { patchTimelineSchema } from '../../../schemas/timelines/patch_timelines_
 import { buildFrameworkRequest, TimelineStatusActions } from '../../../utils/common';
 import { createTimelines } from '../create_timelines';
 import { CompareTimelinesStatus } from '../../../utils/compare_timelines_status';
+import type { PatchTimelinesResponse } from '../../../../../../common/types/timeline/api';
 
 export const patchTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -36,7 +38,7 @@ export const patchTimelinesRoute = (
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<PatchTimelinesResponse>> => {
       const siemResponse = buildSiemResponse(response);
 
       try {

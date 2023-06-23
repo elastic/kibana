@@ -15,7 +15,7 @@ import type {
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 
-import type { RuleToImport } from '../../../../../../common/detection_engine/rule_management';
+import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 import { createRules } from '../crud/create_rules';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getImportRulesSchemaMock } from '../../../../../../common/detection_engine/rule_management/mocks';
+import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 
 import { requestContextMock } from '../../../routes/__mocks__';

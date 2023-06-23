@@ -6,6 +6,8 @@
  */
 import * as t from 'io-ts';
 import { v4 as uuidv4 } from 'uuid';
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { IKibanaResponse } from '@kbn/core/server';
 
 import { SHARED_EXCEPTION_LIST_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
@@ -41,7 +43,7 @@ export const createSharedExceptionListRoute = (router: SecuritySolutionPluginRou
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, request, response): Promise<IKibanaResponse<ExceptionListSchema>> => {
       const siemResponse = buildSiemResponse(response);
       const { description, name } = request.body;
 

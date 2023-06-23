@@ -8,7 +8,10 @@
 import moment from 'moment';
 import { rootRequest } from '../common';
 import { DETECTION_ENGINE_RULES_URL } from '../../../common/constants';
-import type { RuleCreateProps, RuleResponse } from '../../../common/detection_engine/rule_schema';
+import type {
+  RuleCreateProps,
+  RuleResponse,
+} from '../../../common/api/detection_engine/rule_schema';
 import { internalAlertingSnoozeRule } from '../../urls/routes';
 
 export const createRule = (

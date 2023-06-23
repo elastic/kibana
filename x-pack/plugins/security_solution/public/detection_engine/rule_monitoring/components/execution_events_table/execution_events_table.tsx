@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
-import type { RuleExecutionEvent } from '../../../../../common/detection_engine/rule_monitoring';
+import type { RuleExecutionEvent } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 import { HeaderSection } from '../../../../common/components/header_section';
 import { EventTypeFilter } from '../basic/filters/event_type_filter';

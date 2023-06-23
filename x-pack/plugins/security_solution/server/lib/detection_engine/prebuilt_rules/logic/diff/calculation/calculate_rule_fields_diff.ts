@@ -18,7 +18,7 @@ import type {
   DiffableSavedQueryFields,
   DiffableThreatMatchFields,
   DiffableThresholdFields,
-} from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule';
+} from '../../../../../../../common/api/detection_engine/prebuilt_rules/diff/diffable_rule/diffable_rule';
 import type {
   CommonFieldsDiff,
   CustomQueryFieldsDiff,
@@ -29,11 +29,11 @@ import type {
   SavedQueryFieldsDiff,
   ThreatMatchFieldsDiff,
   ThresholdFieldsDiff,
-} from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/rule_diff/rule_diff';
+} from '../../../../../../../common/api/detection_engine/prebuilt_rules/diff/rule_diff/rule_diff';
 
-import type { FieldsDiffAlgorithmsFor } from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/rule_diff/fields_diff';
-import type { ThreeVersionsOf } from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
-import { MissingVersion } from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
+import type { FieldsDiffAlgorithmsFor } from '../../../../../../../common/api/detection_engine/prebuilt_rules/diff/rule_diff/fields_diff';
+import type { ThreeVersionsOf } from '../../../../../../../common/api/detection_engine/prebuilt_rules/diff/three_way_diff/three_way_diff';
+import { MissingVersion } from '../../../../../../../common/api/detection_engine/prebuilt_rules/diff/three_way_diff/three_way_diff';
 import { calculateFieldsDiffFor } from './diff_calculation_helpers';
 import { simpleDiffAlgorithm } from './algorithms/simple_diff_algorithm';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AlertTagQuery } from '@kbn/security-solution-plugin/common/detection_engine/schemas/common';
-import { SetAlertTagsSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request/set_alert_tags_schema';
+import { AlertTagQuery } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { SetAlertTagsSchema } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags';
 
 export const setAlertTags = ({
   tagsToAdd,

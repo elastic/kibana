@@ -18,12 +18,8 @@ import {
   SavedObjectResolveAliasPurpose,
   SavedObjectResolveAliasTargetId,
   SavedObjectResolveOutcome,
-} from '../../detection_engine/rule_schema';
-import {
-  success,
-  success_count as successCount,
-} from '../../detection_engine/schemas/common/schemas';
-import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
+} from '../../api/detection_engine/rule_schema';
+import { errorSchema, success, success_count as successCount } from '../../api/detection_engine';
 import type { Note } from './note/api';
 import { NoteRuntimeType } from './note/api';
 
@@ -635,6 +631,18 @@ export interface ResponseTimeline {
   code?: Maybe<number>;
   message?: Maybe<string>;
   timeline: TimelineResult;
+}
+
+export interface CreateTimelinesResponse {
+  data: {
+    persistTimeline: ResponseTimeline;
+  };
+}
+
+export interface PatchTimelinesResponse {
+  data: {
+    persistTimeline: ResponseTimeline;
+  };
 }
 export interface SortTimeline {
   sortField: SortFieldTimeline;

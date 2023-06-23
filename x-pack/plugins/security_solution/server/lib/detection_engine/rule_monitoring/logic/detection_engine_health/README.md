@@ -1,6 +1,6 @@
 # Detection Engine health logic
 
-See [README](../../../../../../common/detection_engine/rule_monitoring/api/detection_engine_health/README.md) in the common folder for info about the Detection Engine health API.
+See [README](../../../../../../common/api/detection_engine/rule_monitoring/detection_engine_health/README.md) in the common folder for info about the Detection Engine health API.
 
 This logic provides the following functionality via the `IDetectionEngineHealthClient` interface:
 
@@ -34,15 +34,15 @@ Only a few adjustments would need to be done after that manually in the source f
 - the dashboard's id has to be updated to `security-detection-rule-monitoring-<spaceId>`
 - you have to make sure the references to tags are specified correctly:
 
-    ```json
-    {
-      "id": "fleet-managed-<spaceId>",
-      "name": "tag-ref-fleet-managed",
-      "type": "tag"
-    },
-    {
-      "id": "security-solution-<spaceId>",
-      "name": "tag-ref-security-solution",
-      "type": "tag"
-    }
-    ```
+  ```json
+  {
+    "id": "fleet-managed-<spaceId>",
+    "name": "tag-ref-fleet-managed",
+    "type": "tag"
+  },
+  {
+    "id": "security-solution-<spaceId>",
+    "name": "tag-ref-security-solution",
+    "type": "tag"
+  }
+  ```

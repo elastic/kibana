@@ -38,7 +38,7 @@ import {
   DEFAULT_ALERT_TAGS_VALUE,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
-import { LogLevelSetting } from '../common/detection_engine/rule_monitoring';
+import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
 
 type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
 

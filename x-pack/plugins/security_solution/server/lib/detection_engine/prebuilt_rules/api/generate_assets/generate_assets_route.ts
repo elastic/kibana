@@ -10,7 +10,7 @@ import moment from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { PositiveIntegerGreaterThanZero } from '@kbn/securitysolution-io-ts-types';
 
-import { GENERATE_ASSETS_URL } from '../../../../../../common/detection_engine/prebuilt_rules';
+import { GENERATE_ASSETS_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';

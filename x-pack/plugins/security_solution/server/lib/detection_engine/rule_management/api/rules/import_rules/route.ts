@@ -16,7 +16,7 @@ import type { ImportQuerySchemaDecoded } from '@kbn/securitysolution-io-ts-types
 import { importQuerySchema } from '@kbn/securitysolution-io-ts-types';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { ImportRulesResponse } from '../../../../../../../common/detection_engine/rule_management';
+import { ImportRulesResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { ConfigType } from '../../../../../../config';

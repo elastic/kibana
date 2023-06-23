@@ -12,11 +12,11 @@ import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../../../common/con
 import type {
   FindRulesRequestQueryDecoded,
   FindRulesResponse,
-} from '../../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   FindRulesRequestQuery,
   validateFindRulesRequestQuery,
-} from '../../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../../common/api/detection_engine/rule_management';
 
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';

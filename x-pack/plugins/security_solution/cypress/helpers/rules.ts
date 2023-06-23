@@ -8,7 +8,7 @@
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
 
-import type { ThreatArray } from '../../common/detection_engine/rule_schema';
+import type { ThreatArray } from '../../common/api/detection_engine/rule_schema';
 
 export const formatMitreAttackDescription = (mitre: ThreatArray) => {
   return mitre

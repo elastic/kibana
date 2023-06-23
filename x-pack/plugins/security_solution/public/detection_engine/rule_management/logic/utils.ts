@@ -7,7 +7,7 @@
 
 import { escapeKuery } from '../../../common/lib/kuery';
 import type { FilterOptions } from './types';
-import { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring/model/execution_status';
+import { RuleExecutionStatus } from '../../../../common/api/detection_engine/rule_monitoring/model/execution_status';
 
 const SEARCHABLE_RULE_PARAMS = [
   'alert.attributes.name',
