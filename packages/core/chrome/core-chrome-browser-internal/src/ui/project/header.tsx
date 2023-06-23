@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import {
   ChromeBreadcrumb,
   ChromeGlobalHelpExtensionMenuLink,
@@ -224,7 +225,9 @@ export const ProjectHeader = ({
           </EuiHeaderSectionItem>
 
           <EuiHeaderSectionItem>
-            <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} application={application} />
+            <RedirectAppLinks coreStart={{ application }}>
+              <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+            </RedirectAppLinks>
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
 

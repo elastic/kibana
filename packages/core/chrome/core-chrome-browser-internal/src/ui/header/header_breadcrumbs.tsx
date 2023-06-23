@@ -7,20 +7,17 @@
  */
 
 import { EuiHeaderBreadcrumbs } from '@elastic/eui';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import classNames from 'classnames';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
-import { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 
 interface Props {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  application: InternalApplicationStart;
 }
 
-export function HeaderBreadcrumbs({ breadcrumbs$, application }: Props) {
+export function HeaderBreadcrumbs({ breadcrumbs$ }: Props) {
   const breadcrumbs = useObservable(breadcrumbs$, []);
   let crumbs = breadcrumbs;
 
@@ -38,9 +35,5 @@ export function HeaderBreadcrumbs({ breadcrumbs$, application }: Props) {
     ),
   }));
 
-  return (
-    <RedirectAppLinks coreStart={{ application }}>
-      <EuiHeaderBreadcrumbs breadcrumbs={crumbs} max={10} data-test-subj="breadcrumbs" />
-    </RedirectAppLinks>
-  );
+  return <EuiHeaderBreadcrumbs breadcrumbs={crumbs} max={10} data-test-subj="breadcrumbs" />;
 }
