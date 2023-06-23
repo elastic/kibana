@@ -828,4 +828,18 @@ describe('transformSummaryActionParams', () => {
       }
     `);
   });
+
+  test('renders alert values', () => {
+    const actionParams = {
+      message:
+        'Value "{{alert.id}}", "{{alert.uuid}}", "{{alert.actionGroup}}", "{{alert.actionGroupName}}", and "{{alert.flapping}}" exist',
+    };
+
+    const result = transformSummaryActionParams({ ...params, actionParams });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "message": "Value \\"1\\", \\"1\\", \\"default\\", \\"Default\\", and \\"false\\" exist",
+      }
+    `);
+  });
 });

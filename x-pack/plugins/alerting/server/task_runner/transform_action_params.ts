@@ -150,6 +150,13 @@ export function transformSummaryActionParams({
     alertInstanceId: rule.id,
     alertActionGroup: 'default',
     alertActionGroupName: 'Default',
+    alert: {
+      id: rule.id,
+      uuid: rule.id,
+      actionGroup: 'default',
+      actionGroupName: 'Default',
+      flapping: false,
+    },
     kibanaBaseUrl,
     date: new Date().toISOString(),
     // For backwards compatibility with security solutions rules
