@@ -57,6 +57,7 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
   private createIfNotExists = once(async () => {
     // We don't attempt to create the index if it is an Alias/DS
     if (this.indexIsAlias) {
+      this.logger.debug(`No need to create index [${this.index}] as it is an Alias or DS.`);
       return;
     }
 
