@@ -177,35 +177,49 @@ export function useBulkActions({
   const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
   const configBulkActionPanels = useBulkActionsConfig(query);
 
-  const clearSelection = () => {
+  const clearSelection = useCallback(() => {
     updateBulkActionsState({ action: BulkActionsVerbs.clear });
-  };
+  }, [updateBulkActionsState]);
   const caseBulkActions = useBulkAddToCaseActions({ casesConfig, refresh, clearSelection });
 
-  const bulkActions =
-    caseBulkActions.length !== 0
-      ? addItemsToInitialPanel({
-          panels: configBulkActionPanels,
-          items: caseBulkActions,
-        })
-      : configBulkActionPanels;
-
+  const bulkActions = useMemo(
+    () =>
+      caseBulkActions.length !== 0
+        ? addItemsToInitialPanel({
+            panels: configBulkActionPanels,
+            items: caseBulkActions,
+          })
+        : configBulkActionPanels,
+    [caseBulkActions, configBulkActionPanels]
+  );
   const isBulkActionsColumnActive = bulkActions.length !== 0;
 
   useEffect(() => {
     updateBulkActionsState({ action: BulkActionsVerbs.rowCountUpdate, rowCount: alerts.length });
   }, [alerts, updateBulkActionsState]);
 
-  const setIsBulkActionsLoading = (isLoading: boolean = true) => {
-    updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
-  };
+  const setIsBulkActionsLoading = useCallback(
+    (isLoading: boolean = true) => {
+      updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
+    },
+    [updateBulkActionsState]
+  );
 
-  return {
-    isBulkActionsColumnActive,
-    getBulkActionsLeadingControlColumn,
-    bulkActionsState,
-    bulkActions,
-    setIsBulkActionsLoading,
-    clearSelection,
-  };
+  return useMemo(
+    () => ({
+      isBulkActionsColumnActive,
+      getBulkActionsLeadingControlColumn,
+      bulkActionsState,
+      bulkActions,
+      setIsBulkActionsLoading,
+      clearSelection,
+    }),
+    [
+      bulkActions,
+      bulkActionsState,
+      clearSelection,
+      isBulkActionsColumnActive,
+      setIsBulkActionsLoading,
+    ]
+  );
 }

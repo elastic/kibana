@@ -34,7 +34,7 @@ export const RuleLastRunOutcomeFilter: React.FunctionComponent<RuleLastRunOutcom
   }, [setIsPopoverOpen]);
 
   const onFilterSelectItem = useCallback(
-    (filterItem: string) => () => {
+    (filterItem: string) => {
       const isPreviouslyChecked = selectedOutcomes.includes(filterItem);
       if (isPreviouslyChecked) {
         onChange?.(selectedOutcomes.filter((val) => val !== filterItem));
@@ -72,7 +72,7 @@ export const RuleLastRunOutcomeFilter: React.FunctionComponent<RuleLastRunOutcom
             <EuiFilterSelectItem
               key={item}
               style={{ textTransform: 'capitalize' }}
-              onClick={onFilterSelectItem(item)}
+              onClick={onFilterSelectItem.bind(this, item)}
               checked={selectedOutcomes.includes(item) ? 'on' : undefined}
               data-test-subj={`ruleLastRunOutcome${item}FilterOption`}
             >

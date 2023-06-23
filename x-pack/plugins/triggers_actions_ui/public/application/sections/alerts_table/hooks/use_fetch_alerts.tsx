@@ -354,7 +354,7 @@ const useFetchAlerts = ({
     [alertResponse, getInspectQuery, refetchGrid]
   );
 
-  return [loading, alertResponseMemo];
+  return useMemo(() => [loading, alertResponseMemo], [alertResponseMemo, loading]);
 };
 
 export { useFetchAlerts };

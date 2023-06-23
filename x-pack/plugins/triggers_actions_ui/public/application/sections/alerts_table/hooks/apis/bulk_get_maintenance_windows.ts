@@ -15,6 +15,7 @@ import { AsApiContract } from '@kbn/actions-plugin/common';
 export interface BulkGetMaintenanceWindowsParams {
   http: HttpStart;
   ids: string[];
+  signal?: AbortSignal;
 }
 
 export interface BulkGetMaintenanceWindowError {
@@ -76,11 +77,13 @@ const rewriteBodyRes = (
 export const bulkGetMaintenanceWindows = async ({
   http,
   ids,
+  signal,
 }: BulkGetMaintenanceWindowsParams): Promise<BulkGetMaintenanceWindowsResult> => {
   const res = await http.post<BulkGetMaintenanceWindowsResponse>(
     `${INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH}/_bulk_get`,
     {
       body: JSON.stringify({ ids }),
+      signal,
     }
   );
 

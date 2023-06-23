@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import { useMemo } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ServerError } from '../types';
 import { useLicense } from '../../../hooks/use_license';
@@ -57,26 +58,30 @@ export const useBulkGetMaintenanceWindows = (props: UseBulkGetMaintenanceWindows
   const { isAtLeastPlatinum } = useLicense();
   const hasLicense = isAtLeastPlatinum();
 
-  const queryFn = () => {
-    return bulkGetMaintenanceWindows({ http, ids });
-  };
-
   const onError = (error: ServerError) => {
     toasts.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
       title: ERROR_TITLE,
     });
   };
 
-  const { data, isFetching } = useQuery({
-    queryKey: triggersActionsUiQueriesKeys.maintenanceWindowsBulkGet(ids),
-    enabled: hasLicense && show && ids.length > 0 && canFetchMaintenanceWindows,
-    select: transformMaintenanceWindows,
-    queryFn,
-    onError,
-  });
+  const { data, isFetching } = useQuery(
+    triggersActionsUiQueriesKeys.maintenanceWindowsBulkGet(ids),
+    ({ signal }) => {
+      return bulkGetMaintenanceWindows({ http, ids, signal });
+    },
+    {
+      enabled: hasLicense && show && ids.length > 0 && canFetchMaintenanceWindows,
+      select: transformMaintenanceWindows,
 
-  return {
-    data,
-    isFetching,
-  };
+      onError,
+    }
+  );
+
+  return useMemo(
+    () => ({
+      data,
+      isFetching,
+    }),
+    [data, isFetching]
+  );
 };

@@ -27,7 +27,7 @@ export const EventLogListStatusFilter = (props: EventLogListStatusFilterProps) =
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const onFilterItemClick = useCallback(
-    (newOption: string) => () => {
+    (newOption: string) => {
       if (selectedOptions.includes(newOption)) {
         onChange(selectedOptions.filter((option) => option !== newOption));
         return;
@@ -68,7 +68,7 @@ export const EventLogListStatusFilter = (props: EventLogListStatusFilterProps) =
               <EuiFilterSelectItem
                 key={status}
                 data-test-subj={`eventLogStatusFilter-${status}`}
-                onClick={onFilterItemClick(status)}
+                onClick={onFilterItemClick.bind(this, status)}
                 checked={selectedOptions.includes(status) ? 'on' : undefined}
               >
                 <EventLogListStatus

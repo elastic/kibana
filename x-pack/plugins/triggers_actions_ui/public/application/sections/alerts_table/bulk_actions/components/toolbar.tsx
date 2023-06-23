@@ -87,6 +87,23 @@ const useBulkActionsToMenuPanelMapper = (
 ) => {
   const [{ isAllSelected, rowSelection }] = useContext(BulkActionsContext);
 
+  const itemOnClick = useCallback(
+    (item, selectedAlertItems) =>
+      item.onClick
+        ? () => {
+            closeIfPopoverIsOpen();
+            item.onClick?.(
+              selectedAlertItems,
+              isAllSelected,
+              setIsBulkActionsLoading,
+              clearSelection,
+              refresh
+            );
+          }
+        : undefined,
+    [clearSelection, closeIfPopoverIsOpen, isAllSelected, refresh, setIsBulkActionsLoading]
+  );
+
   const bulkActionsPanels = useMemo(() => {
     const bulkActionPanelsToReturn = [];
     for (const panel of panels) {
@@ -98,18 +115,7 @@ const useBulkActionsToMenuPanelMapper = (
             key: item.key,
             'data-test-subj': item['data-test-subj'],
             disabled: isDisabled,
-            onClick: item.onClick
-              ? () => {
-                  closeIfPopoverIsOpen();
-                  item.onClick?.(
-                    selectedAlertItems,
-                    isAllSelected,
-                    setIsBulkActionsLoading,
-                    clearSelection,
-                    refresh
-                  );
-                }
-              : undefined,
+            onClick: itemOnClick(item, selectedAlertItems),
             name: isDisabled && item.disabledLabel ? item.disabledLabel : item.label,
             panel: item.panel,
           };
@@ -129,13 +135,14 @@ const useBulkActionsToMenuPanelMapper = (
     }
     return bulkActionPanelsToReturn;
   }, [
-    alerts,
-    clearSelection,
-    isAllSelected,
     panels,
-    refresh,
+    alerts,
     rowSelection,
+    isAllSelected,
+    itemOnClick,
     setIsBulkActionsLoading,
+    clearSelection,
+    refresh,
     closeIfPopoverIsOpen,
   ]);
 

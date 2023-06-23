@@ -34,9 +34,8 @@ export const useBulkGetCases = (caseIds: string[], fetchCases: boolean) => {
 
   return useQuery(
     triggersActionsUiQueriesKeys.casesBulkGet(caseIds),
-    () => {
-      const abortCtrlRef = new AbortController();
-      return bulkGetCases(http, { ids: caseIds }, abortCtrlRef.signal);
+    ({ signal }) => {
+      return bulkGetCases(http, { ids: caseIds }, signal);
     },
     {
       enabled: caseIds.length > 0 && fetchCases,

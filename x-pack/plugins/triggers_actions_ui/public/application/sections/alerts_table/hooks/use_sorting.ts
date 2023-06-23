@@ -7,7 +7,7 @@
 
 import type { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridSorting } from '@elastic/eui';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { DefaultSort } from './constants';
 
@@ -43,5 +43,5 @@ export function useSorting(
     },
     [setSortingColumns, onSortChange]
   );
-  return { sortingColumns, onSort };
+  return useMemo(() => ({ sortingColumns, onSort }), [onSort, sortingColumns]);
 }

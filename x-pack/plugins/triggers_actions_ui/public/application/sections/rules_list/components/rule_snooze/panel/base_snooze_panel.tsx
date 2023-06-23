@@ -130,7 +130,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
 
   const onClickAddSchedule = useCallback(() => navigateToScheduler(), [navigateToScheduler]);
   const onClickEditScheduleFactory = useCallback(
-    (schedule: SnoozeSchedule) => () => navigateToScheduler(schedule),
+    (schedule: SnoozeSchedule) => navigateToScheduler(schedule),
     [navigateToScheduler]
   );
 
@@ -220,7 +220,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                           backgroundColor: isActive ? 'rgba(240,78,152,0.2)' : euiTheme.colors.body,
                         }}
                         className="euiButton euiPanel euiPanel--borderRadiusMedium euiPanel--noShadow euiPanel--noBorder"
-                        onClick={onClickEditScheduleFactory(schedule as SnoozeSchedule)}
+                        onClick={onClickEditScheduleFactory.bind(this, schedule as SnoozeSchedule)}
                       >
                         <EuiFlexGroup alignItems="center">
                           <EuiFlexItem grow={false}>

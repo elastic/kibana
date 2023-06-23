@@ -7,7 +7,7 @@
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH, BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Alerts } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ERROR_FETCH_BROWSER_FIELDS } from './translations';
@@ -76,5 +76,5 @@ export const useFetchBrowserFieldCapabilities = ({
     callApi();
   }, [getBrowserFieldInfo, isLoading, featureIds, initialBrowserFields]);
 
-  return [isLoading, browserFields];
+  return useMemo(() => [isLoading, browserFields], [browserFields, isLoading]);
 };
