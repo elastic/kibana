@@ -1550,7 +1550,7 @@ describe('TaskManagerRunner', () => {
         expect(instance.state).toEqual(mockTaskInstance.state);
         expect(instance.schedule).toEqual(mockTaskInstance.schedule);
         expect(instance.attempts).toBe(0);
-        expect(instance.requeueInvalidTask?.attempts).toBe(1);
+        expect(instance.numSkippedRuns).toBe(1);
         expect(result).toEqual(
           asErr({
             error: createSkipError(
@@ -1607,7 +1607,7 @@ describe('TaskManagerRunner', () => {
         expect(instance.state).toEqual(mockTaskInstance.state);
         expect(instance.schedule).toEqual(mockTaskInstance.schedule);
         expect(instance.attempts).toBe(0);
-        expect(instance.requeueInvalidTask?.attempts).toBe(1);
+        expect(instance.numSkippedRuns).toBe(1);
         expect(logger.warn).toHaveBeenCalledWith(
           'Task Manager has skipped executing the Task (bar/foo) 1 times as it has invalid params.'
         );
@@ -1623,9 +1623,7 @@ describe('TaskManagerRunner', () => {
           enabled: true,
           state: { existingStatePAram: 'foo' },
           runAt: new Date(),
-          requeueInvalidTask: {
-            attempts: mockRequeueInvalidTasksConfig.max_attempts,
-          },
+          numSkippedRuns: mockRequeueInvalidTasksConfig.max_attempts,
         };
         const skipError = createSkipError(new Error('test'));
 
@@ -1652,7 +1650,7 @@ describe('TaskManagerRunner', () => {
         expect(instance.state).toEqual({ new: 'foo' });
         expect(instance.schedule).toEqual(mockTaskInstance.schedule);
         expect(instance.attempts).toBe(mockTaskInstance.attempts);
-        expect(instance.requeueInvalidTask?.attempts).toBe(20);
+        expect(instance.numSkippedRuns).toBe(20);
         expect(logger.warn).not.toHaveBeenCalled();
         expect(result).toEqual(asErr({ state: { new: 'foo' }, error: skipError }));
       });
@@ -1665,9 +1663,7 @@ describe('TaskManagerRunner', () => {
           enabled: true,
           state: { existingStatePAram: 'foo' },
           runAt: new Date(),
-          requeueInvalidTask: {
-            attempts: 0,
-          },
+          numSkippedRuns: 0,
         };
         const skipError = createSkipError(new Error('test'));
 
@@ -1700,7 +1696,7 @@ describe('TaskManagerRunner', () => {
           enabled: true,
           state: { existingStateParam: 'foo' },
           runAt: new Date(),
-          requeueInvalidTask: { attempts: 10 },
+          numSkippedRuns: 10,
         };
 
         const { runner, store, logger } = await readyToRunStageSetup({
@@ -1723,7 +1719,7 @@ describe('TaskManagerRunner', () => {
         const instance = store.update.mock.calls[0][0];
         expect(instance.state).toEqual({});
         expect(instance.attempts).toBe(0);
-        expect(instance.requeueInvalidTask?.attempts).toBe(0);
+        expect(instance.numSkippedRuns).toBe(0);
         expect(logger.warn).not.toHaveBeenCalled();
         expect(result).toEqual(asOk({ state: {} }));
       });
@@ -1736,7 +1732,7 @@ describe('TaskManagerRunner', () => {
           enabled: true,
           state: { existingStateParam: 'foo' },
           runAt: new Date(),
-          requeueInvalidTask: { attempts: 10 },
+          numSkippedRuns: 10,
         };
 
         const { runner, store, logger } = await readyToRunStageSetup({
@@ -1771,7 +1767,7 @@ describe('TaskManagerRunner', () => {
           enabled: true,
           state: { existingStateParam: 'foo' },
           runAt: new Date(),
-          requeueInvalidTask: { attempts: 10 },
+          numSkippedRuns: 10,
         };
 
         const { runner, store, logger } = await readyToRunStageSetup({
@@ -1793,9 +1789,7 @@ describe('TaskManagerRunner', () => {
         expect(store.update).toHaveBeenCalledTimes(1);
         expect(store.remove).not.toHaveBeenCalled();
         const instance = store.update.mock.calls[0][0];
-        expect(instance.requeueInvalidTask?.attempts).toBe(
-          mockTaskInstance.requeueInvalidTask?.attempts
-        );
+        expect(instance.numSkippedRuns).toBe(mockTaskInstance.numSkippedRuns);
         expect(logger.warn).not.toHaveBeenCalled();
         expect(result).toEqual(asOk({ state: {}, hasError: true }));
       });
@@ -1807,7 +1801,7 @@ describe('TaskManagerRunner', () => {
           enabled: true,
           state: { existingStateParam: 'foo' },
           runAt: new Date(),
-          requeueInvalidTask: { attempts: 10 },
+          numSkippedRuns: 10,
           attempts: 2,
         };
         const error = new Error('test');
@@ -1831,7 +1825,7 @@ describe('TaskManagerRunner', () => {
         expect(store.update).toHaveBeenCalledWith(
           expect.objectContaining({
             attempts: 2,
-            requeueInvalidTask: { attempts: 10 },
+            numSkippedRuns: 10,
             state: {},
             status: TaskStatus.Idle,
           })
@@ -1848,7 +1842,7 @@ describe('TaskManagerRunner', () => {
           enabled: true,
           state: { existingStateParam: 'foo' },
           runAt: new Date(),
-          requeueInvalidTask: { attempts: 20 }, // max
+          numSkippedRuns: 20, // max
           attempts: 5, // default max
         };
         const error = new Error('test');
@@ -1877,7 +1871,7 @@ describe('TaskManagerRunner', () => {
         expect(store.update).toHaveBeenCalledWith(
           expect.objectContaining({
             attempts: mockTaskInstance.attempts, // default max
-            requeueInvalidTask: mockTaskInstance.requeueInvalidTask,
+            numSkippedRuns: mockTaskInstance.numSkippedRuns,
             state: mockTaskInstance.state,
             status: TaskStatus.DeadLetter,
           })

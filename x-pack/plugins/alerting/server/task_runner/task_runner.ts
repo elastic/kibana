@@ -776,8 +776,7 @@ export class TaskRunner<
   private shouldSkipRun(err: Error) {
     return (
       this.requeueInvalidTasksConfig.enabled &&
-      (this.taskInstance.requeueInvalidTask?.attempts || 0) <
-        this.requeueInvalidTasksConfig.max_attempts &&
+      (this.taskInstance.numSkippedRuns || 0) < this.requeueInvalidTasksConfig.max_attempts &&
       isValidationError(err)
     );
   }

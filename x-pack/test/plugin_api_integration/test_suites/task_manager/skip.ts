@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
         const task = await currentTask(createdTask.id);
         lastRunAt = task.runAt;
         // skips 3 times
-        expect(task.requeueInvalidTask?.attempts).to.eql(2);
+        expect(task.numSkippedRuns).to.eql(2);
       });
 
       await retry.try(async () => {
@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(task.attempts).to.eql(0);
         expect(task.retryAt).to.eql(null);
         // skip attempts remains as it is
-        expect(task.requeueInvalidTask?.attempts).to.eql(2);
+        expect(task.numSkippedRuns).to.eql(2);
         // keeps rescheduling after skips
         expect(new Date(task.runAt).getTime()).to.greaterThan(new Date(lastRunAt).getTime());
       });
@@ -85,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         const task = await currentTask(createdTask.id);
         // skips 2 times
-        expect(task.requeueInvalidTask?.attempts).to.eql(2);
+        expect(task.numSkippedRuns).to.eql(2);
       });
 
       await retry.try(async () => {
@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
         // reschedules 1 more time and set the status as 'dead_letter'
         expect(task.attempts).to.eql(1);
         expect(task.status).to.eql(TaskStatus.DeadLetter);
-        expect(task.requeueInvalidTask?.attempts).to.eql(2);
+        expect(task.numSkippedRuns).to.eql(2);
       });
     });
 
@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         const task = await currentTask(createdTask.id);
         // skips 2 times
-        expect(task.requeueInvalidTask?.attempts).to.eql(2);
+        expect(task.numSkippedRuns).to.eql(2);
       });
 
       await retry.try(async () => {
@@ -124,7 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
         // reschedules 1 more time and set the status as 'dead_letter'
         expect(task.attempts).to.eql(1);
         expect(task.status).to.eql(TaskStatus.DeadLetter);
-        expect(task.requeueInvalidTask?.attempts).to.eql(2);
+        expect(task.numSkippedRuns).to.eql(2);
       });
     });
   });

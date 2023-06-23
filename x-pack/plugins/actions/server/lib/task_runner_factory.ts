@@ -91,14 +91,14 @@ export class TaskRunnerFactory {
     const taskInfo = {
       scheduled: taskInstance.runAt,
       attempts: taskInstance.attempts,
-      requeueInvalidTask: taskInstance.requeueInvalidTask,
+      numSkippedRuns: taskInstance.numSkippedRuns,
     };
     const actionExecutionId = uuidv4();
     const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
 
     const shouldSkip = ({ status, message }: ActionTypeExecutorResult<unknown>) => {
       const { enabled, max_attempts: maxAttempts } = requeueInvalidTasksConfig;
-      const attempts = taskInstance.requeueInvalidTask?.attempts || 0;
+      const attempts = taskInstance.numSkippedRuns || 0;
       return !!(
         enabled &&
         status === 'error' &&

@@ -3143,7 +3143,7 @@ describe('Task Runner', () => {
   });
 
   test('does not skips task with invalid params when it reaches the skip.max_attempts limit ', async () => {
-    const mockTask = { ...mockedTaskInstance, requeueInvalidTask: { attempts: 20 } };
+    const mockTask = { ...mockedTaskInstance, numSkippedRuns: 20 };
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockTask,

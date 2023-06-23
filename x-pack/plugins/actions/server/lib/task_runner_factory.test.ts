@@ -587,7 +587,7 @@ test('throws error after trying to skip a task {requeueInvalidTasksConfig.max_at
   const mockTaskInstance = {
     ...mockedTaskInstance,
     state: { foo: 'bar' },
-    requeueInvalidTask: { attempts: 20 },
+    numSkippedRuns: 20,
   };
 
   const taskRunner = taskRunnerFactory.create({

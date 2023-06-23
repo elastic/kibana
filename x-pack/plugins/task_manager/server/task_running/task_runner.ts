@@ -354,13 +354,7 @@ export class TaskManagerRunner implements TaskRunner {
 
   private validateTaskParams() {
     let error;
-    const {
-      state,
-      taskType,
-      params,
-      id,
-      requeueInvalidTask: { attempts = 0 } = {},
-    } = this.instance.task;
+    const { state, taskType, params, id, numSkippedRuns = 0 } = this.instance.task;
     const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
 
     if (this.requeueInvalidTasksConfig.enabled) {
@@ -371,7 +365,7 @@ export class TaskManagerRunner implements TaskRunner {
         }
       } catch (err) {
         this.logger.warn(`Task (${taskType}/${id}) has a validation error: ${err.message}`);
-        if (attempts < maxAttempts) {
+        if (numSkippedRuns < maxAttempts) {
           error = createSkipError(err);
         }
         error = err;
@@ -548,7 +542,7 @@ export class TaskManagerRunner implements TaskRunner {
     const { state, error } = failureResult;
     const { schedule, attempts } = this.instance.task;
     const { max_attempts: maxSkipAttempts, enabled, delay } = this.requeueInvalidTasksConfig;
-    let skipAttempts = this.instance.task.requeueInvalidTask?.attempts ?? 0;
+    let skipAttempts = this.instance.task.numSkippedRuns ?? 0;
 
     // skipAttempts and enabled are also checked in where the SkipError is created as well.
     if (isSkipError(error) && skipAttempts < maxSkipAttempts && enabled) {
@@ -616,9 +610,9 @@ export class TaskManagerRunner implements TaskRunner {
           attempts = 0,
           skipAttempts,
         }: SuccessfulRunResult & { attempts: number; skipAttempts: number }) => {
-          const { startedAt, schedule, requeueInvalidTask } = this.instance.task;
+          const { startedAt, schedule, numSkippedRuns } = this.instance.task;
           const { hasError } = unwrap(result);
-          let requeueInvalidTaskAttempts = skipAttempts || requeueInvalidTask?.attempts || 0;
+          let requeueInvalidTaskAttempts = skipAttempts || numSkippedRuns || 0;
 
           // Alerting TaskRunner returns SuccessResult even though there is an error
           // therefore we use "hasError" to be sure that there was not an error
@@ -633,9 +627,7 @@ export class TaskManagerRunner implements TaskRunner {
             schedule: reschedule ?? schedule,
             attempts,
             status: TaskStatus.Idle,
-            requeueInvalidTask: {
-              attempts: requeueInvalidTaskAttempts,
-            },
+            numSkippedRuns: requeueInvalidTaskAttempts,
           });
         }
       ),

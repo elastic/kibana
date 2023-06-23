@@ -171,10 +171,7 @@ export class SampleTaskManagerFixturePlugin
           requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
         }) => ({
           async run() {
-            if (
-              (taskInstance.requeueInvalidTask?.attempts || 0) <
-              requeueInvalidTasksConfig.max_attempts
-            ) {
+            if ((taskInstance.numSkippedRuns || 0) < requeueInvalidTasksConfig.max_attempts) {
               return { state: {}, error: createSkipError(new Error('Skip')) };
             }
             return { state: {}, schedule: { interval: '1s' }, hasError: true };
@@ -194,10 +191,7 @@ export class SampleTaskManagerFixturePlugin
           requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
         }) => ({
           async run() {
-            if (
-              (taskInstance.requeueInvalidTask?.attempts || 0) <
-              requeueInvalidTasksConfig.max_attempts
-            ) {
+            if ((taskInstance.numSkippedRuns || 0) < requeueInvalidTasksConfig.max_attempts) {
               return { state: {}, error: createSkipError(new Error('Skip')) };
             }
             throwRetryableError(new Error('Retry'), true);
