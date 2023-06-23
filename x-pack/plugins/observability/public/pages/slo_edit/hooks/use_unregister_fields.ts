@@ -7,8 +7,10 @@
 
 import { IndicatorType } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
+import deepmerge from 'deepmerge';
 import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useFetchApmIndex } from '../../../hooks/slo/use_fetch_apm_indices';
 import {
   APM_AVAILABILITY_DEFAULT_VALUES,
   APM_LATENCY_DEFAULT_VALUES,
@@ -24,6 +26,7 @@ import { CreateSLOForm } from '../types';
  * which was unmounting the components and therefore unregistering the associated values.
  */
 export function useUnregisterFields({ isEditMode }: { isEditMode: boolean }) {
+  const { data: apmIndex } = useFetchApmIndex();
   const { watch, unregister, reset, resetField } = useFormContext<CreateSLOForm>();
   const [indicatorTypeState, setIndicatorTypeState] = useState<IndicatorType>(
     watch('indicator.type')
@@ -58,7 +61,7 @@ export function useUnregisterFields({ isEditMode }: { isEditMode: boolean }) {
         case 'sli.apm.transactionDuration':
           reset(
             Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, {
-              indicator: APM_LATENCY_DEFAULT_VALUES,
+              indicator: deepmerge(APM_LATENCY_DEFAULT_VALUES, { params: { index: apmIndex } }),
             }),
             {
               keepDefaultValues: true,
@@ -68,7 +71,9 @@ export function useUnregisterFields({ isEditMode }: { isEditMode: boolean }) {
         case 'sli.apm.transactionErrorRate':
           reset(
             Object.assign({}, SLO_EDIT_FORM_DEFAULT_VALUES, {
-              indicator: APM_AVAILABILITY_DEFAULT_VALUES,
+              indicator: deepmerge(APM_AVAILABILITY_DEFAULT_VALUES, {
+                params: { index: apmIndex },
+              }),
             }),
             {
               keepDefaultValues: true,
@@ -79,5 +84,5 @@ export function useUnregisterFields({ isEditMode }: { isEditMode: boolean }) {
           assertNever(indicatorType);
       }
     }
-  }, [isEditMode, indicatorType, indicatorTypeState, unregister, reset, resetField]);
+  }, [isEditMode, indicatorType, indicatorTypeState, unregister, reset, resetField, apmIndex]);
 }
