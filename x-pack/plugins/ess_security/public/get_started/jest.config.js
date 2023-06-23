@@ -8,9 +8,9 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/plugins/ess_security/public/components'],
+  roots: ['<rootDir>/x-pack/plugins/ess_security/public/get_started'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/ess_security/public/components',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/ess_security/public/get_started',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/plugins/ess_security/public/components/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/plugins/ess_security/public/get_started/**/*.{ts,tsx}'],
 };

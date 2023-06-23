@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { getSecurityGetStartedComponent } from './components/get_started';
+import { getSecurityGetStartedComponent } from './get_started';
 import {
   EssSecurityPluginSetup,
   EssSecurityPluginStart,
