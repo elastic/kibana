@@ -230,7 +230,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
                   <EuiCallOut
                     title={i18n.translate(
                       'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.dlsDisabledCallout.title',
-                      { defaultMessage: 'Permissions and identity syncs not allowed' }
+                      { defaultMessage: 'Access control syncs not allowed' }
                     )}
                     color="warning"
                     iconType="iInCircle"
