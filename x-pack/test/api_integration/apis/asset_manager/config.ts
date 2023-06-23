@@ -5,14 +5,39 @@
  * 2.0.
  */
 
+import { format, UrlObject } from 'url';
 import { FtrConfigProviderContext } from '@kbn/test';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+import { bootstrapApmSynthtrace, getApmSynthtraceKibanaClient } from './bootstrap_apm_synthtrace';
+import { FtrProviderContext as InheritedFtrProviderContext } from '../../ftr_provider_context';
+import { InheritedServices } from './types';
+
+interface AssetManagerConfig {
+  services: InheritedServices & {
+    synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
+  };
+}
+
+export default async function createTestConfig({
+  readConfigFile,
+}: FtrConfigProviderContext): Promise<AssetManagerConfig> {
   const baseIntegrationTestsConfig = await readConfigFile(require.resolve('../../config.ts'));
+  const services = baseIntegrationTestsConfig.get('services');
 
   return {
     ...baseIntegrationTestsConfig.getAll(),
     testFiles: [require.resolve('.')],
+    services: {
+      ...services,
+      synthtraceEsClient: (context: InheritedFtrProviderContext) => {
+        const servers = baseIntegrationTestsConfig.get('servers');
+        const kibanaServer = servers.kibana as UrlObject;
+        const kibanaServerUrl = format(kibanaServer);
+        const synthtraceKibanaClient = getApmSynthtraceKibanaClient(kibanaServerUrl);
+        return bootstrapApmSynthtrace(context, synthtraceKibanaClient);
+      },
+    },
     kbnTestServer: {
       ...baseIntegrationTestsConfig.get('kbnTestServer'),
       serverArgs: [
@@ -22,3 +47,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
   };
 }
+
+export type CreateTestConfig = Awaited<ReturnType<typeof createTestConfig>>;
+
+export type AssetManagerServices = CreateTestConfig['services'];
