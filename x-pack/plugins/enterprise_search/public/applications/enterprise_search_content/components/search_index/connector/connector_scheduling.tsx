@@ -28,7 +28,7 @@ import { ConnectorStatus, SyncJobType } from '../../../../../../common/types/con
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
-import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { UnsavedChangesPrompt } from '../../../../shared/unsaved_changes_prompt';
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
 import { IngestionStatus } from '../../../types';
@@ -236,13 +236,27 @@ export const ConnectorSchedulingComponent: React.FC = () => {
                     iconType="iInCircle"
                   >
                     <p>
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.dlsDisabledCallout.text',
-                        {
-                          defaultMessage:
-                            'Enable document level security for this connector to activate these options.',
-                        }
-                      )}
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.dlsDisabledCallout.text"
+                        defaultMessage="{link} for this connector to activate these options."
+                        values={{
+                          link: (
+                            <EuiLinkTo
+                              to={generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+                                indexName: index.name,
+                                tabId: SearchIndexTabId.CONFIGURATION,
+                              })}
+                            >
+                              {i18n.translate(
+                                'xpack.enterpriseSearch.content.indices.connectorScheduling.schedulePanel.documentLevelSecurity.dlsDisabledCallout.link',
+                                {
+                                  defaultMessage: 'Enable document level security',
+                                }
+                              )}
+                            </EuiLinkTo>
+                          ),
+                        }}
+                      />
                     </p>
                   </EuiCallOut>
                 </EuiFlexItem>
