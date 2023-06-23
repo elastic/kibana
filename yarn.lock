@@ -4036,6 +4036,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-service@link:packages/kbn-data-service":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-view-editor-plugin@link:src/plugins/data_view_editor":
   version "0.0.0"
   uid ""
@@ -5712,7 +5716,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/unified-field-list-plugin@link:src/plugins/unified_field_list":
+"@kbn/unified-field-list@link:packages/kbn-unified-field-list":
   version "0.0.0"
   uid ""
 
@@ -14653,10 +14657,10 @@ elastic-apm-node@^3.38.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^3.46.0:
-  version "3.46.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.46.0.tgz#38a8cf8ee1da73d10d62eca59a770643171d16b2"
-  integrity sha512-MuM7Xe+5K7AkfFqrKWrvBJVFcS+hPcTKGj7yR/0/WHR5/r/ZjkBEX/t2bUMjgyHHG4lu5LH/RN86ScGdw1GG2w==
+elastic-apm-node@^3.47.0:
+  version "3.47.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.47.0.tgz#6b75566318bd042def6106ba3c96e38704f37ca3"
+  integrity sha512-waLVIQpFEQRI7RYscm/UD7EHm+8WF2haCXbwmAXNiCnAz8F2egKeafkzfWpfdDQ+O/Dk9Tj0eXSWWfREk2eBPQ==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     "@opentelemetry/api" "^1.4.1"
@@ -14690,7 +14694,6 @@ elastic-apm-node@^3.46.0:
     shallow-clone-shim "^2.0.0"
     source-map "^0.8.0-beta.0"
     sql-summary "^1.0.1"
-    traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
 elasticsearch@^16.4.0:

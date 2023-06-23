@@ -21,7 +21,12 @@ describe('Default createCopyToClipboardActionFactory', () => {
   });
   const copyToClipboardAction = copyToClipboardActionFactory({ id: 'testAction' });
   const context = {
-    field: { name: 'user.name', value: 'the value', type: 'text' },
+    data: [
+      {
+        field: { name: 'user.name', type: 'text' },
+        value: 'the value',
+      },
+    ],
   } as CellActionExecutionContext;
 
   beforeEach(() => {
@@ -52,7 +57,12 @@ describe('Default createCopyToClipboardActionFactory', () => {
     it('should escape value', async () => {
       await copyToClipboardAction.execute({
         ...context,
-        field: { ...context.field, value: 'the "value"' },
+        data: [
+          {
+            ...context.data[0],
+            value: 'the "value"',
+          },
+        ],
       });
       expect(mockCopy).toHaveBeenCalledWith('user.name: "the \\"value\\""');
       expect(mockSuccessToast).toHaveBeenCalled();
@@ -61,7 +71,12 @@ describe('Default createCopyToClipboardActionFactory', () => {
     it('should suport multiple values', async () => {
       await copyToClipboardAction.execute({
         ...context,
-        field: { ...context.field, value: ['the "value"', 'another value', 'last value'] },
+        data: [
+          {
+            ...context.data[0],
+            value: ['the "value"', 'another value', 'last value'],
+          },
+        ],
       });
       expect(mockCopy).toHaveBeenCalledWith(
         'user.name: "the \\"value\\"" AND "another value" AND "last value"'
