@@ -12,6 +12,7 @@ import styled from 'styled-components';
 
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
+import { QUICK_PROMPTS_TAB } from '../settings/assistant_settings';
 
 const QuickPromptsFlexGroup = styled(EuiFlexGroup)`
   margin: 16px;
@@ -28,7 +29,8 @@ interface QuickPromptsProps {
  * and localstorage for storing new and edited prompts.
  */
 export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ setInput }) => {
-  const { allQuickPrompts, promptContexts } = useAssistantContext();
+  const { allQuickPrompts, promptContexts, setIsSettingsModalVisible, setSelectedSettingsTab } =
+    useAssistantContext();
 
   const contextFilteredQuickPrompts = useMemo(() => {
     const registeredPromptContextTitles = Object.values(promptContexts).map((pc) => pc.category);
@@ -60,7 +62,10 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ setInput 
     [closeOverflowPopover, setInput]
   );
 
-  const handleAddQuickPrompt = useCallback(() => {}, []);
+  const showQuickPromptSettings = useCallback(() => {
+    setIsSettingsModalVisible(true);
+    setSelectedSettingsTab(QUICK_PROMPTS_TAB);
+  }, [setIsSettingsModalVisible, setSelectedSettingsTab]);
 
   return (
     <QuickPromptsFlexGroup gutterSize="s" alignItems="center">
@@ -107,7 +112,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ setInput 
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={handleAddQuickPrompt} iconType="plus" size="xs">
+        <EuiButtonEmpty onClick={showQuickPromptSettings} iconType="plus" size="xs">
           {i18n.ADD_QUICK_PROMPT}
         </EuiButtonEmpty>
       </EuiFlexItem>

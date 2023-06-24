@@ -5,59 +5,69 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { Conversation } from '../../..';
-import { AssistantSettings } from './assistant_settings';
+import { AssistantSettings, CONVERSATIONS_TAB } from './assistant_settings';
 import * as i18n from './translations';
+import { useAssistantContext } from '../../assistant_context';
 
 interface Props {
   selectedConversation: Conversation;
-  showSettingsModal?: (isVisible: boolean) => void;
 }
 
 /**
  * Gear button that opens the assistant settings modal
  */
-export const AssistantSettingsButton: React.FC<Props> = React.memo(
-  ({ selectedConversation, showSettingsModal }) => {
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    // Modal control functions
-    const cleanupAndCloseModal = useCallback(() => {
-      setIsModalVisible(false);
-    }, [setIsModalVisible]);
+export const AssistantSettingsButton: React.FC<Props> = React.memo(({ selectedConversation }) => {
+  const {
+    isSettingsModalVisible,
+    selectedSettingsTab,
+    setIsSettingsModalVisible,
+    setSelectedSettingsTab,
+  } = useAssistantContext();
 
-    const handleCloseModal = useCallback(() => {
-      cleanupAndCloseModal();
-    }, [cleanupAndCloseModal]);
+  // Modal control functions
+  const cleanupAndCloseModal = useCallback(() => {
+    setIsSettingsModalVisible(false);
+  }, [setIsSettingsModalVisible]);
 
-    const handleSave = useCallback(() => {
-      cleanupAndCloseModal();
-    }, [cleanupAndCloseModal]);
+  const handleCloseModal = useCallback(() => {
+    cleanupAndCloseModal();
+  }, [cleanupAndCloseModal]);
 
-    return (
-      <>
-        <EuiToolTip position="right" content={i18n.SETTINGS_TOOLTIP}>
-          <EuiButtonIcon
-            aria-label={i18n.SETTINGS}
-            data-test-subj="settings"
-            onClick={() => setIsModalVisible(true)}
-            iconType="gear"
-            size="xs"
-          />
-        </EuiToolTip>
+  const handleSave = useCallback(() => {
+    cleanupAndCloseModal();
+  }, [cleanupAndCloseModal]);
 
-        {isModalVisible && (
-          <AssistantSettings
-            selectedConversation={selectedConversation}
-            onClose={handleCloseModal}
-            onSave={handleSave}
-          />
-        )}
-      </>
-    );
-  }
-);
+  const handleShowConversationSettings = useCallback(() => {
+    setSelectedSettingsTab(CONVERSATIONS_TAB);
+    setIsSettingsModalVisible(true);
+  }, [setIsSettingsModalVisible, setSelectedSettingsTab]);
+
+  return (
+    <>
+      <EuiToolTip position="right" content={i18n.SETTINGS_TOOLTIP}>
+        <EuiButtonIcon
+          aria-label={i18n.SETTINGS}
+          data-test-subj="settings"
+          onClick={handleShowConversationSettings}
+          iconType="gear"
+          size="xs"
+        />
+      </EuiToolTip>
+
+      {isSettingsModalVisible && (
+        <AssistantSettings
+          selectedConversation={selectedConversation}
+          selectedTab={selectedSettingsTab}
+          onClose={handleCloseModal}
+          onSave={handleSave}
+        />
+      )}
+    </>
+  );
+});
 
 AssistantSettingsButton.displayName = 'AssistantSettingsButton';

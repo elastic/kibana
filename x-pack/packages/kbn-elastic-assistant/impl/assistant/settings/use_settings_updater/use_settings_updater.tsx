@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { QuickPrompt } from '../../../..';
+import { Prompt, QuickPrompt } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
 
 interface UseSettingsUpdater {
@@ -19,12 +19,22 @@ interface UseSettingsUpdater {
 
 export const useSettingsUpdater = (): UseSettingsUpdater => {
   // Initial state from assistant context
-  const { setAllQuickPrompts } = useAssistantContext();
+  const { setAllQuickPrompts, setAllSystemPrompts, setIsSettingsModalVisible } =
+    useAssistantContext();
   const { allQuickPrompts } = useAssistantContext();
 
   // Pending updated state
   const [updatedQuickPromptSettings, setUpdatedQuickPromptSettings] =
     useState<QuickPrompt[]>(allQuickPrompts);
+
+  // Callback for modal onSave, saves to local storage on change
+  const onSystemPromptsChange = useCallback(
+    (newSystemPrompts: Prompt[]) => {
+      setAllSystemPrompts(newSystemPrompts);
+      setIsSettingsModalVisible(false);
+    },
+    [setAllSystemPrompts, setIsSettingsModalVisible]
+  );
 
   /**
    * Save all pending settings

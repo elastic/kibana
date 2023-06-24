@@ -56,8 +56,8 @@ interface Props {
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
   ) => void;
   onSave: () => void;
-  selectedMenuItemId?: string;
   selectedConversation: Conversation;
+  selectedTab?: SettingsTabs;
 }
 
 /**
@@ -65,9 +65,11 @@ interface Props {
  * anonymization, functions (coming soon!), and advanced settings.
  */
 export const AssistantSettings: React.FC<Props> = React.memo(
-  ({ onClose, onSave, selectedConversation, selectedMenuItemId }) => {
+  ({ onClose, onSave, selectedConversation, selectedTab: defaultSelectedTab }) => {
     const { actionTypeRegistry, http } = useAssistantContext();
-    const [selectedTab, setSelectedTab] = useState<SettingsTabs>(CONVERSATIONS_TAB);
+    const [selectedTab, setSelectedTab] = useState<SettingsTabs>(
+      defaultSelectedTab ?? CONVERSATIONS_TAB
+    );
 
     return (
       <StyledEuiModal onClose={onClose}>

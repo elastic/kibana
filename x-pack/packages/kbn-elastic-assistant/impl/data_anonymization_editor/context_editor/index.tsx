@@ -106,7 +106,7 @@ const ContextEditorComponent: React.FC<Props> = ({
         totalFields={rows.length}
       />
     ),
-    [onListUpdated, onSelectAll, rawData, rows.length, selected]
+    [onListUpdated, onReset, onSelectAll, rawData, rows.length, selected]
   );
 
   return (

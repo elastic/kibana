@@ -61,7 +61,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             compressed
             conversation={conversation}
             isEditing={true}
-            onSystemPromptModalVisibilityChange={() => {}}
             selectedPrompt={selectedPrompt}
             showTitles={true}
           />

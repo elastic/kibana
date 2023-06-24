@@ -8,6 +8,7 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
 
+import { BulkActions } from '../bulk_actions';
 import * as i18n from '../translations';
 import { BatchUpdateListItem, ContextEditorRow } from '../types';
 
@@ -44,6 +45,16 @@ const ToolbarComponent: React.FC<Props> = ({
       >
         {i18n.SELECT_ALL_FIELDS(totalFields)}
       </EuiButtonEmpty>
+    </EuiFlexItem>
+
+    <EuiFlexItem grow={false}>
+      <BulkActions
+        appliesTo="multipleRows"
+        disabled={selected.length === 0}
+        onListUpdated={onListUpdated}
+        onlyDefaults={onlyDefaults}
+        selected={selected}
+      />
     </EuiFlexItem>
 
     <EuiFlexItem grow={true}>
