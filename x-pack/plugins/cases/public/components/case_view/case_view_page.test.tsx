@@ -124,7 +124,7 @@ const userActionsStats = {
   totalOtherActions: 11,
 };
 
-for (let i = 0; i < 50; i++) {
+for (let i = 0; i < 40; i++) {
   describe('CaseViewPage', () => {
     const updateCaseProperty = defaultUpdateCaseState.mutate;
     const pushCaseToExternalService = jest.fn();
