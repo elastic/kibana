@@ -11,7 +11,6 @@ import {
   BarSeries,
   Chart,
   LineAnnotation,
-  niceTimeFormatter,
   Position,
   RectAnnotation,
   RectAnnotationDatum,
@@ -19,6 +18,7 @@ import {
   Settings,
   TickFormatter,
   TooltipProps,
+  niceTimeFormatter,
 } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
@@ -26,6 +26,7 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import moment from 'moment';
+import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { getTimeZone } from '../../../shared/charts/helper/timezone';
 import {
@@ -34,7 +35,6 @@ import {
   getDomain,
 } from './chart_preview_helper';
 import { ALERT_PREVIEW_BUCKET_SIZE } from '../../utils/helper';
-import { Coordinate } from '../../../../../typings/timeseries';
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;

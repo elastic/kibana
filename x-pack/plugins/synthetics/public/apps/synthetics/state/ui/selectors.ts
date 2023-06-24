@@ -9,28 +9,11 @@ import { createSelector } from 'reselect';
 import type { SyntheticsAppState } from '../root_reducer';
 
 const uiStateSelector = (appState: SyntheticsAppState) => appState.ui;
-export const selectBasePath = createSelector(uiStateSelector, ({ basePath }) => basePath);
-
-export const selectIsIntegrationsPopupOpen = createSelector(
-  uiStateSelector,
-  ({ integrationsPopoverOpen }) => integrationsPopoverOpen
-);
 
 export const selectAlertFlyoutVisibility = createSelector(
   uiStateSelector,
   ({ alertFlyoutVisible }) => alertFlyoutVisible
 );
-
-export const selectAlertFlyoutType = createSelector(
-  uiStateSelector,
-  ({ alertFlyoutType }) => alertFlyoutType
-);
-
-export const selectEsKuery = createSelector(uiStateSelector, ({ esKuery }) => esKuery);
-
-export const selectSearchText = createSelector(uiStateSelector, ({ searchText }) => searchText);
-
-export const selectMonitorId = createSelector(uiStateSelector, ({ monitorId }) => monitorId);
 
 export const selectRefreshPaused = createSelector(
   uiStateSelector,

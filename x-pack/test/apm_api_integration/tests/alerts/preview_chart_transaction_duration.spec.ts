@@ -5,24 +5,31 @@
  * 2.0.
  */
 
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '@kbn/apm-plugin/common/es_fields/apm';
+import type { PreviewChartResponseItem } from '@kbn/apm-plugin/server/routes/alerts/route';
 import expect from '@kbn/expect';
-import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { generateLatencyData } from './generate_data';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const archiveName = 'apm_8.0.0';
-  const { end } = archives[archiveName];
-  const start = new Date(Date.parse(end) - 600000).toISOString();
+  const synthtraceEsClient = getService('synthtraceEsClient');
+  const start = new Date('2021-01-01T00:00:00.000Z').getTime();
+  const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
   const getOptions = () => ({
     params: {
       query: {
-        start,
-        end,
-        serviceName: 'opbeans-java',
-        transactionType: 'request' as string | undefined,
+        start: new Date(start).toISOString(),
+        end: new Date(end).toISOString(),
+        serviceName: 'synth-go',
+        transactionType: 'request',
         environment: 'ENVIRONMENT_ALL',
         interval: '5m',
       },
@@ -39,74 +46,246 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       expect(response.status).to.be(200);
-      expect(response.body.latencyChartPreview).to.eql([]);
+      expect(response.body.latencyChartPreview.series).to.eql([]);
     });
   });
 
-  registry.when(`with data loaded`, { config: 'basic', archives: [archiveName] }, () => {
-    it('transaction_duration (with data)', async () => {
-      const options = getOptions();
-      const response = await apmApiClient.readUser({
-        ...options,
-        endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+  registry.when(`with data loaded`, { config: 'basic', archives: [] }, () => {
+    describe('transaction_duration', () => {
+      before(async () => {
+        await generateLatencyData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
+        await generateLatencyData({ serviceName: 'synth-java', start, end, synthtraceEsClient });
       });
 
-      expect(response.status).to.be(200);
-      expect(
-        response.body.latencyChartPreview.some(
-          (item: { name: string; data: Array<{ x: number; y: number | null }> }) =>
+      after(() => synthtraceEsClient.clean());
+
+      it('with data', async () => {
+        const options = getOptions();
+        const response = await apmApiClient.readUser({
+          ...options,
+          endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+        });
+
+        expect(response.status).to.be(200);
+        expect(
+          response.body.latencyChartPreview.series.some((item: PreviewChartResponseItem) =>
             item.data.some((coordinate) => coordinate.x && coordinate.y)
-        )
-      ).to.equal(true);
-    });
+          )
+        ).to.equal(true);
+      });
 
-    it('transaction_duration with transaction name', async () => {
-      const options = {
-        params: {
-          query: {
-            start,
-            end,
-            serviceName: 'opbeans-java',
-            transactionName: 'DispatcherServlet#doGet',
-            transactionType: 'request',
-            environment: 'ENVIRONMENT_ALL',
-            interval: '5m',
+      it('with transaction name', async () => {
+        const options = {
+          params: {
+            query: {
+              start: new Date(start).toISOString(),
+              end: new Date(end).toISOString(),
+              serviceName: 'synth-go',
+              transactionName: 'GET /banana',
+              transactionType: 'request',
+              environment: 'ENVIRONMENT_ALL',
+              interval: '5m',
+            },
           },
-        },
-      };
-      const response = await apmApiClient.readUser({
-        ...options,
-        endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+        };
+        const response = await apmApiClient.readUser({
+          ...options,
+          endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+        });
+
+        expect(response.status).to.be(200);
+        expect(
+          response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
+        ).to.eql([{ name: 'synth-go_production_request', y: 5000 }]);
       });
 
-      expect(response.status).to.be(200);
-      expect(response.body.latencyChartPreview[0].data[0]).to.eql({
-        x: 1627974600000,
-        y: 18485.85714285714,
-      });
-    });
-
-    it('transaction_duration with nonexistent transaction name', async () => {
-      const options = {
-        params: {
-          query: {
-            start,
-            end,
-            serviceName: 'opbeans-java',
-            transactionType: 'request',
-            transactionName: 'foo',
-            environment: 'ENVIRONMENT_ALL',
-            interval: '5m',
+      it('with nonexistent transaction name', async () => {
+        const options = {
+          params: {
+            query: {
+              start: new Date(start).toISOString(),
+              end: new Date(end).toISOString(),
+              serviceName: 'synth-go',
+              transactionType: 'request',
+              transactionName: 'foo',
+              environment: 'ENVIRONMENT_ALL',
+              interval: '5m',
+            },
           },
-        },
-      };
-      const response = await apmApiClient.readUser({
-        ...options,
-        endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+        };
+        const response = await apmApiClient.readUser({
+          ...options,
+          endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body.latencyChartPreview.series).to.eql([]);
       });
 
-      expect(response.status).to.be(200);
-      expect(response.body.latencyChartPreview).to.eql([]);
+      it('with no group by parameter', async () => {
+        const options = getOptions();
+        const response = await apmApiClient.readUser({
+          ...options,
+          endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body.latencyChartPreview.series.length).to.equal(1);
+        expect(
+          response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
+        ).to.eql([{ name: 'synth-go_production_request', y: 7500 }]);
+      });
+
+      it('with default group by fields', async () => {
+        const options = {
+          params: {
+            query: {
+              ...getOptions().params.query,
+              groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE],
+            },
+          },
+        };
+
+        const response = await apmApiClient.readUser({
+          ...options,
+          endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body.latencyChartPreview.series.length).to.equal(1);
+        expect(
+          response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
+        ).to.eql([{ name: 'synth-go_production_request', y: 7500 }]);
+      });
+
+      it('with group by on transaction name', async () => {
+        const options = {
+          params: {
+            query: {
+              ...getOptions().params.query,
+              groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME],
+            },
+          },
+        };
+
+        const response = await apmApiClient.readUser({
+          ...options,
+          endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body.latencyChartPreview.series.length).to.equal(2);
+        expect(
+          response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
+        ).to.eql([
+          { name: 'synth-go_production_request_GET /apple', y: 10000 },
+          { name: 'synth-go_production_request_GET /banana', y: 5000 },
+        ]);
+      });
+
+      it('with group by on transaction name and filter on transaction name', async () => {
+        const options = {
+          params: {
+            query: {
+              ...getOptions().params.query,
+              transactionName: 'GET /apple',
+              groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME],
+            },
+          },
+        };
+
+        const response = await apmApiClient.readUser({
+          ...options,
+          endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body.latencyChartPreview.series.length).to.equal(1);
+        expect(
+          response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
+        ).to.eql([{ name: 'synth-go_production_request_GET /apple', y: 10000 }]);
+      });
+
+      it('with empty service name, transaction name and transaction type', async () => {
+        const options = {
+          params: {
+            query: {
+              start: new Date(start).toISOString(),
+              end: new Date(end).toISOString(),
+              serviceName: '',
+              transactionName: '',
+              transactionType: '',
+              environment: 'ENVIRONMENT_ALL',
+              interval: '5m',
+            },
+          },
+        };
+        const response = await apmApiClient.readUser({
+          ...options,
+          endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+        });
+
+        expect(response.status).to.be(200);
+        expect(
+          response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
+        ).to.eql([
+          { name: 'synth-go_production_request', y: 7500 },
+          { name: 'synth-java_production_request', y: 7500 },
+        ]);
+      });
+
+      it('with empty service name, transaction name, transaction type and group by on transaction name', async () => {
+        const options = {
+          params: {
+            query: {
+              start: new Date(start).toISOString(),
+              end: new Date(end).toISOString(),
+              serviceName: '',
+              transactionName: '',
+              transactionType: '',
+              environment: 'ENVIRONMENT_ALL',
+              interval: '5m',
+              groupBy: [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME],
+            },
+          },
+        };
+        const response = await apmApiClient.readUser({
+          ...options,
+          endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
+        });
+
+        expect(response.status).to.be(200);
+        expect(response.body.latencyChartPreview.series.length).to.equal(4);
+        expect(
+          response.body.latencyChartPreview.series.map((item: PreviewChartResponseItem) => ({
+            name: item.name,
+            y: item.data[0].y,
+          }))
+        ).to.eql([
+          { name: 'synth-go_production_request_GET /apple', y: 10000 },
+          { name: 'synth-java_production_request_GET /apple', y: 10000 },
+          { name: 'synth-go_production_request_GET /banana', y: 5000 },
+          { name: 'synth-java_production_request_GET /banana', y: 5000 },
+        ]);
+      });
     });
   });
 }

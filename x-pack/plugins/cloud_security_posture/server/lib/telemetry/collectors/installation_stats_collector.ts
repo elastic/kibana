@@ -50,7 +50,6 @@ export const getInstallationStats = async (
           deployment_mode: packagePolicy.vars?.deployment?.value as string,
           package_version: packagePolicy.package?.version as string,
           created_at: packagePolicy.created_at,
-          created_by: packagePolicy.created_by,
           agent_policy_id: packagePolicy.policy_id,
           agent_count: agentCounts,
         };
