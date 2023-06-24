@@ -16,7 +16,7 @@ export function ProfilingHeaderActionMenu() {
     <EuiHeaderLinks gutterSize="xs">
       <EuiHeaderLink
         href={router.link('/add-data-instructions', {
-          query: { selectedTab: NoDataTabs.Kubernete },
+          query: { selectedTab: NoDataTabs.Kubernetes },
         })}
         color="primary"
       >

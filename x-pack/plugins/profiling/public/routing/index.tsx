@@ -43,7 +43,7 @@ const routes = {
               t.literal(NoDataTabs.Deb),
               t.literal(NoDataTabs.Docker),
               t.literal(NoDataTabs.ElasticAgentIntegration),
-              t.literal(NoDataTabs.Kubernete),
+              t.literal(NoDataTabs.Kubernetes),
               t.literal(NoDataTabs.RPM),
               t.literal(NoDataTabs.Symbols),
             ]),
@@ -51,7 +51,7 @@ const routes = {
         }),
         defaults: {
           query: {
-            selectedTab: NoDataTabs.Kubernete,
+            selectedTab: NoDataTabs.Kubernetes,
           },
         },
       },

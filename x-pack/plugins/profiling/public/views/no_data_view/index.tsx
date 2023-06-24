@@ -32,7 +32,7 @@ import { useProfilingDependencies } from '../../components/contexts/profiling_de
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 
 export enum NoDataTabs {
-  Kubernete = 'kubernetes',
+  Kubernetes = 'kubernetes',
   Docker = 'docker',
   Binary = 'binary',
   Deb = 'deb',
@@ -66,7 +66,7 @@ export function NoDataView() {
 
   const tabs = [
     {
-      key: NoDataTabs.Kubernete,
+      key: NoDataTabs.Kubernetes,
       title: i18n.translate('xpack.profiling.tabs.kubernetesTitle', {
         defaultMessage: 'Kubernetes',
       }),

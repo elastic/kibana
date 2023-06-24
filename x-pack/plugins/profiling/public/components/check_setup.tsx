@@ -97,7 +97,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     // when there's no data redirect the user to the add data instructions page
     router.push('/add-data-instructions', {
       path: {},
-      query: { selectedTab: NoDataTabs.Kubernete },
+      query: { selectedTab: NoDataTabs.Kubernetes },
     });
     return null;
   }
