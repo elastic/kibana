@@ -58,15 +58,17 @@ async function processRulesByPages(
 
   // As it's unknown how many rules are there in total we calculate it after fetching the first chunk.
   // If there is something left fetch it in chunks
-  const pages = range(2, Math.ceil(total / perPage) + 1);
+  if (total > perPage) {
+    const pages = range(2, Math.ceil(total / perPage) + 1);
 
-  pMap(pages, async (page) =>
-    processPage(rulesClient, response, {
-      kqlFilter,
-      page,
-      perPage,
-    })
-  );
+    pMap(pages, async (page) =>
+      processPage(rulesClient, response, {
+        kqlFilter,
+        page,
+        perPage,
+      })
+    );
+  }
 
   return response;
 }
