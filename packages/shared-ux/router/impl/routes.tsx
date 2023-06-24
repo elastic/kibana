@@ -49,6 +49,7 @@ export const Routes = ({
     <ReactRouterRoutes>
       {Children.map(children, (child) => {
         if (React.isValidElement(child)) {
+          // render v6 route directly
           if (child.type === LegacyRoute && child.props.element) {
             return (
               <Route
@@ -63,6 +64,7 @@ export const Routes = ({
             );
           }
 
+          // backwards compatibility for v5 routes
           if (child.type === LegacyRoute && !child.props.element) {
             const path = replace(child?.props.path, match.url, '');
             const renderFunction =
@@ -86,6 +88,7 @@ export const Routes = ({
               />
             );
           }
+
           if (child.type === LegacyRedirect) {
             const childProps = child.props as LegacyRedirectProps;
             return (

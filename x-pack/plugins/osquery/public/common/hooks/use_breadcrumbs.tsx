@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 
@@ -158,30 +159,36 @@ const breadcrumbGetters: {
 export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
   const { chrome, http, application } = useKibana().services;
 
-  const breadcrumbs: ChromeBreadcrumb[] =
-    breadcrumbGetters[page]?.(values).map((breadcrumb) => {
-      const href = breadcrumb.href
-        ? http.basePath.prepend(`${BASE_PATH}${breadcrumb.href}`)
-        : undefined;
+  const breadcrumbs: ChromeBreadcrumb[] = useMemo(
+    () =>
+      breadcrumbGetters[page]?.(values).map((breadcrumb) => {
+        const href = breadcrumb.href
+          ? http.basePath.prepend(`${BASE_PATH}${breadcrumb.href}`)
+          : undefined;
 
-      return {
-        ...breadcrumb,
-        href,
-        onClick: href
-          ? (ev: React.MouseEvent) => {
-              if (ev.metaKey || ev.altKey || ev.ctrlKey || ev.shiftKey) {
-                return;
+        return {
+          ...breadcrumb,
+          href,
+          onClick: href
+            ? (ev: React.MouseEvent) => {
+                if (ev.metaKey || ev.altKey || ev.ctrlKey || ev.shiftKey) {
+                  return;
+                }
+
+                ev.preventDefault();
+                application.navigateToUrl(href);
               }
-
-              ev.preventDefault();
-              application.navigateToUrl(href);
-            }
-          : undefined,
-      };
-    }) || [];
+            : undefined,
+        };
+      }) || [],
+    [application, http.basePath, page, values]
+  );
   const docTitle: string[] = [...breadcrumbs]
     .reverse()
     .map((breadcrumb) => breadcrumb.text as string);
-  chrome.docTitle.change(docTitle);
-  chrome.setBreadcrumbs(breadcrumbs);
+
+  useEffect(() => {
+    chrome.docTitle.change(docTitle);
+    chrome.setBreadcrumbs(breadcrumbs);
+  }, [docTitle, breadcrumbs, chrome]);
 }
