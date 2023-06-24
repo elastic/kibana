@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Redirect } from 'react-router-dom';
+import { Navigate } from 'react-router-dom-v5-compat';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { useBreadcrumbs } from '../common/hooks/use_breadcrumbs';
@@ -28,7 +28,7 @@ const OsqueryAppRoutesComponent = () => {
       <Route path="/live_queries">
         <LiveQueries />
       </Route>
-      <Redirect to="/live_queries" />
+      <Route index element={<Navigate to="/live_queries" replace />} />
     </Routes>
   );
 };

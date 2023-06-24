@@ -18,7 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useAllLiveQueries } from './use_all_live_queries';
@@ -53,7 +53,7 @@ ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
 const ActionsTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
-  const { push } = useHistory();
+  const navigate = useNavigate();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
 
@@ -118,10 +118,31 @@ const ActionsTableComponent = () => {
       const packId = item._source.pack_id;
 
       if (packId) {
-        return push('/live_queries/new', {
+        return navigate('/live_queries/new', {
+          state: {
+            form: pickBy(
+              {
+                packId: item._source.pack_id,
+                agentSelection: {
+                  agents: item._source.agent_ids,
+                  allAgentsSelected: item._source.agent_all,
+                  platformsSelected: item._source.agent_platforms,
+                  policiesSelected: item._source.agent_policy_ids,
+                },
+              },
+              (value) => !isEmpty(value)
+            ),
+          },
+        });
+      }
+
+      navigate('/live_queries/new', {
+        state: {
           form: pickBy(
             {
-              packId: item._source.pack_id,
+              query: item._source.queries[0].query,
+              ecs_mapping: item._source.queries[0].ecs_mapping,
+              savedQueryId: item._source.queries[0].saved_query_id,
               agentSelection: {
                 agents: item._source.agent_ids,
                 allAgentsSelected: item._source.agent_all,
@@ -131,27 +152,10 @@ const ActionsTableComponent = () => {
             },
             (value) => !isEmpty(value)
           ),
-        });
-      }
-
-      push('/live_queries/new', {
-        form: pickBy(
-          {
-            query: item._source.queries[0].query,
-            ecs_mapping: item._source.queries[0].ecs_mapping,
-            savedQueryId: item._source.queries[0].saved_query_id,
-            agentSelection: {
-              agents: item._source.agent_ids,
-              allAgentsSelected: item._source.agent_all,
-              platformsSelected: item._source.agent_platforms,
-              policiesSelected: item._source.agent_policy_ids,
-            },
-          },
-          (value) => !isEmpty(value)
-        ),
+        },
       });
     },
-    [push]
+    [navigate]
   );
   const renderPlayButton = useCallback(
     (item, enabled) => {
