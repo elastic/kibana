@@ -8,6 +8,7 @@
 import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { cloneDeep } from 'lodash';
+import { isFilterPinned } from '@kbn/es-query';
 import { isTextBasedQuery } from './is_text_based_query';
 import { DiscoverAppState } from '../services/discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
@@ -34,20 +35,33 @@ export function updateSavedSearch(
     state?: DiscoverAppState;
     services: DiscoverServices;
   },
-  useFilterAndQueryServices: boolean = false
+  {
+    useFilterAndQueryServices,
+    excludeGlobalFilters = true,
+  }: { useFilterAndQueryServices?: boolean; excludeGlobalFilters?: boolean } = {
+    excludeGlobalFilters: true,
+  }
 ) {
   if (dataView) {
     savedSearch.searchSource.setField('index', dataView);
     savedSearch.usesAdHocDataView = !dataView.isPersisted();
   }
   if (useFilterAndQueryServices) {
+    const filters = excludeGlobalFilters
+      ? services.data.query.filterManager.getAppFilters()
+      : services.data.query.filterManager.getFilters();
+
     savedSearch.searchSource
       .setField('query', services.data.query.queryString.getQuery())
-      .setField('filter', services.data.query.filterManager.getFilters());
+      .setField('filter', filters);
   } else if (state) {
+    const filters = excludeGlobalFilters
+      ? state.filters?.filter((filter) => !isFilterPinned(filter))
+      : state.filters;
+
     savedSearch.searchSource
       .setField('query', state.query ?? undefined)
-      .setField('filter', state.filters ? cloneDeep(state.filters) : []);
+      .setField('filter', cloneDeep(filters ?? []));
   }
   if (state) {
     savedSearch.columns = state.columns || [];

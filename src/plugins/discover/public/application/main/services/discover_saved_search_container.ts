@@ -144,7 +144,10 @@ export function getSavedSearchContainer({
 
   const persist = async (nextSavedSearch: SavedSearch, saveOptions?: SavedObjectSaveOpts) => {
     addLog('[savedSearch] persist', { nextSavedSearch, saveOptions });
-    updateSavedSearch({ savedSearch: nextSavedSearch, services }, true);
+    updateSavedSearch(
+      { savedSearch: nextSavedSearch, services },
+      { useFilterAndQueryServices: true, excludeGlobalFilters: true }
+    );
 
     const id = await services.savedSearch.save(nextSavedSearch, saveOptions || {});
 
@@ -168,7 +171,7 @@ export function getSavedSearchContainer({
         state: nextState || {},
         services,
       },
-      useFilterAndQueryServices
+      { useFilterAndQueryServices }
     );
 
     const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
