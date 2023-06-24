@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useLocation } from 'react-router-dom';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
-import { useLoadRuleTypes, RuleType } from '@kbn/triggers-actions-ui-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
-import { BoolQuery } from '@kbn/es-query';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
+import type { BoolQuery } from '@kbn/es-query';
+import type { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { useFetchRuleTypes } from '../../hooks/use_fetch_rule_types';
 import { PageTitle } from './components/page_title';
 import { DeleteConfirmationModal } from './components/delete_confirmation_modal';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
@@ -27,17 +25,21 @@ import { HeaderActions } from './components/header_actions';
 import { RuleDetailsTabs } from './components/rule_details_tabs';
 import { getHealthColor } from './helpers/get_health_color';
 import { hasAllPrivilege } from './helpers/has_all_privilege';
-import { ALERT_STATUS_ALL } from '../../../common/constants';
 import { ruleDetailsLocatorID } from '../../../common';
-import { EXECUTION_TAB, ALERTS_TAB } from './constants';
-import type { AlertStatus } from '../../../common/typings';
+import { ALERT_STATUS_ALL } from '../../../common/constants';
+import {
+  RULE_DETAILS_EXECUTION_TAB,
+  RULE_DETAILS_ALERTS_TAB,
+  RULE_DETAILS_TAB_URL_STORAGE_KEY,
+} from './constants';
 import { paths } from '../../config/paths';
-import { toQuery } from '../../utils/url';
 import {
   defaultTimeRange,
   getDefaultAlertSummaryTimeRange,
 } from '../../utils/alert_summary_widget';
-export type TabId = typeof ALERTS_TAB | typeof EXECUTION_TAB;
+import type { AlertStatus } from '../../../common/typings';
+
+export type TabId = typeof RULE_DETAILS_ALERTS_TAB | typeof RULE_DETAILS_EXECUTION_TAB;
 
 interface RuleDetailsPathParams {
   ruleId: string;
@@ -64,11 +66,16 @@ export function RuleDetailsPage() {
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
+  const { search } = useLocation();
 
   const theme = useChartsTheme();
   const baseTheme = useChartsBaseTheme();
 
   const { rule, isLoading, isError, refetch } = useFetchRule({ ruleId });
+
+  const { ruleTypes } = useFetchRuleTypes({
+    filterByRuleTypeIds: observabilityRuleTypeRegistry.list(),
+  });
 
   useBreadcrumbs([
     {
@@ -88,37 +95,26 @@ export function RuleDetailsPage() {
     },
   ]);
 
-  const filteredRuleTypes = useMemo(
-    () => observabilityRuleTypeRegistry.list(),
-    [observabilityRuleTypeRegistry]
-  );
-
-  const { ruleTypes } = useLoadRuleTypes({
-    filteredRuleTypes,
-  });
-
-  const [isEditRuleFlyoutVisible, setEditRuleFlyoutVisible] = useState<boolean>(false);
-
   const [tabId, setTabId] = useState<TabId>(() => {
-    const urlTabId = (toQuery(location.search)?.tabId as TabId) || EXECUTION_TAB;
-    return [EXECUTION_TAB, ALERTS_TAB].includes(urlTabId) ? urlTabId : EXECUTION_TAB;
-  });
-  const [featureIds, setFeatureIds] = useState<ValidFeatureId[]>();
-  const [ruleType, setRuleType] = useState<RuleType<string, string>>();
+    const searchParams = new URLSearchParams(search);
 
-  const [ruleToDelete, setRuleToDelete] = useState<string | undefined>(undefined);
-  const [isRuleDeleting, setIsRuleDeleting] = useState(false);
+    const urlTabId = searchParams.get(RULE_DETAILS_TAB_URL_STORAGE_KEY);
+
+    return urlTabId && [RULE_DETAILS_EXECUTION_TAB, RULE_DETAILS_ALERTS_TAB].includes(urlTabId)
+      ? (urlTabId as TabId)
+      : RULE_DETAILS_EXECUTION_TAB;
+  });
 
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
+
   const [alertSummaryWidgetTimeRange, setAlertSummaryWidgetTimeRange] = useState(
     getDefaultAlertSummaryTimeRange
   );
 
-  const alertSummaryWidgetFilter = useRef<estypes.QueryDslQueryContainer>({
-    term: {
-      'kibana.alert.rule.uuid': ruleId,
-    },
-  });
+  const [isEditRuleFlyoutVisible, setEditRuleFlyoutVisible] = useState<boolean>(false);
+
+  const [ruleToDelete, setRuleToDelete] = useState<string | undefined>(undefined);
+  const [isRuleDeleting, setIsRuleDeleting] = useState(false);
 
   const tabsRef = useRef<HTMLDivElement>(null);
 
@@ -126,21 +122,24 @@ export function RuleDetailsPage() {
     setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
   }, [esQuery]);
 
-  const onAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
+  const handleAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
     setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
+
     await locators.get(ruleDetailsLocatorID)?.navigate(
       {
         rangeFrom: defaultTimeRange.from,
         rangeTo: defaultTimeRange.to,
         ruleId,
         status,
-        tabId: ALERTS_TAB,
+        tabId: RULE_DETAILS_ALERTS_TAB,
       },
       {
         replace: true,
       }
     );
-    setTabId(ALERTS_TAB);
+
+    setTabId(RULE_DETAILS_ALERTS_TAB);
+
     tabsRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -167,19 +166,14 @@ export function RuleDetailsPage() {
     navigateToUrl(basePath.prepend(paths.observability.rules));
   };
 
-  useEffect(() => {
-    if (ruleTypes.length && rule) {
-      const matchedRuleType = ruleTypes.find((type) => type.id === rule.ruleTypeId);
+  const ruleType = ruleTypes?.find((type) => type.id === rule?.ruleTypeId);
 
-      setRuleType(matchedRuleType);
-
-      if (rule.consumer === ALERTS_FEATURE_ID && matchedRuleType && matchedRuleType.producer) {
-        setFeatureIds([matchedRuleType.producer] as ValidFeatureId[]);
-      } else {
-        setFeatureIds([rule.consumer] as ValidFeatureId[]);
-      }
-    }
-  }, [rule, ruleTypes]);
+  const featureIds =
+    rule?.consumer === ALERTS_FEATURE_ID && ruleType?.producer
+      ? [ruleType.producer as AlertConsumers]
+      : rule
+      ? [rule.consumer as AlertConsumers]
+      : [];
 
   const canExecuteActions = capabilities?.actions?.execute;
 
@@ -198,7 +192,7 @@ export function RuleDetailsPage() {
         : false)
   );
 
-  const statusMessage =
+  const ruleStatusMessage =
     rule?.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License
       ? rulesStatusesTranslationsMapping.noLicense
       : rule
@@ -232,16 +226,20 @@ export function RuleDetailsPage() {
             isEditable={isRuleEditable}
             requestRefresh={refetch}
             healthColor={getHealthColor(rule.executionStatus.status)}
-            statusMessage={statusMessage}
+            statusMessage={ruleStatusMessage}
           />
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
             chartProps={{ theme, baseTheme }}
             featureIds={featureIds}
-            onClick={onAlertSummaryWidgetClick}
+            onClick={handleAlertSummaryWidgetClick}
             timeRange={alertSummaryWidgetTimeRange}
-            filter={alertSummaryWidgetFilter.current}
+            filter={{
+              term: {
+                'kibana.alert.rule.uuid': ruleId,
+              },
+            }}
           />
         </EuiFlexItem>
 
@@ -265,7 +263,7 @@ export function RuleDetailsPage() {
         rule={rule}
         ruleId={ruleId}
         ruleType={ruleType}
-        tabId={tabId}
+        activeTabId={tabId}
         onEsQueryChange={setEsQuery}
         onSetTabId={setTabId}
       />
