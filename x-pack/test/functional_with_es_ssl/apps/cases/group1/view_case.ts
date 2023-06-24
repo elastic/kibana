@@ -182,144 +182,178 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           );
         });
       });
+    });
 
-      describe('draft comments', () => {
-        createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+    describe('draft comments', () => {
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
-        it('persists new comment when status is updated in dropdown', async () => {
-          const commentArea = await find.byCssSelector(
-            '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
-          );
-          await commentArea.focus();
-          await commentArea.type('Test comment from automation');
+      it('persists new comment when status is updated in dropdown', async () => {
+        const commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+        await commentArea.focus();
+        await commentArea.type('Test comment from automation');
 
-          await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
-          // validate user action
-          await find.byCssSelector(
-            '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-in-progress"]'
-          );
-          // validates dropdown tag
-          await testSubjects.existOrFail(
-            'case-view-status-dropdown > case-status-badge-popover-button-in-progress'
-          );
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+        // validate user action
+        await find.byCssSelector(
+          '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-in-progress"]'
+        );
+        // validates dropdown tag
+        await testSubjects.existOrFail(
+          'case-view-status-dropdown > case-status-badge-popover-button-in-progress'
+        );
 
-          await testSubjects.click('submit-comment');
+        await testSubjects.click('submit-comment');
 
-          // validate user action
-          const newComment = await find.byCssSelector(
-            '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
-          );
-          expect(await newComment.getVisibleText()).equal('Test comment from automation');
-        });
+        // validate user action
+        const newComment = await find.byCssSelector(
+          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+        );
+        expect(await newComment.getVisibleText()).equal('Test comment from automation');
+      });
 
-        it('persists new comment when case is closed through the close case button', async () => {
-          const commentArea = await find.byCssSelector(
-            '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
-          );
-          await commentArea.focus();
-          await commentArea.type('Test comment from automation');
+      it('persists new comment when case is closed through the close case button', async () => {
+        const commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+        await commentArea.focus();
+        await commentArea.type('Test comment from automation');
 
-          await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
-          await header.waitUntilLoadingHasFinished();
-          await testSubjects.click('case-view-status-action-button');
-          await header.waitUntilLoadingHasFinished();
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('case-view-status-action-button');
+        await header.waitUntilLoadingHasFinished();
 
-          await testSubjects.existOrFail(
-            'header-page-supplements > case-status-badge-popover-button-closed',
-            {
-              timeout: 5000,
-            }
-          );
+        await testSubjects.existOrFail(
+          'header-page-supplements > case-status-badge-popover-button-closed',
+          {
+            timeout: 5000,
+          }
+        );
 
-          // validate user action
-          await find.byCssSelector(
-            '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-closed"]'
-          );
-          // validates dropdown tag
-          await testSubjects.existOrFail(
-            'case-view-status-dropdown >case-status-badge-popover-button-closed'
-          );
+        // validate user action
+        await find.byCssSelector(
+          '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-closed"]'
+        );
+        // validates dropdown tag
+        await testSubjects.existOrFail(
+          'case-view-status-dropdown >case-status-badge-popover-button-closed'
+        );
 
-          await testSubjects.click('submit-comment');
+        await testSubjects.click('submit-comment');
 
-          // validate user action
-          const newComment = await find.byCssSelector(
-            '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
-          );
-          expect(await newComment.getVisibleText()).equal('Test comment from automation');
-        });
+        // validate user action
+        const newComment = await find.byCssSelector(
+          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+        );
+        expect(await newComment.getVisibleText()).equal('Test comment from automation');
+      });
 
-        it('persists new comment to the case when user goes to case list table and comes back to the case', async () => {
-          const commentArea = await find.byCssSelector(
-            '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
-          );
-          await commentArea.focus();
-          await commentArea.type('Test comment from automation');
+      it('persists new comment to the case when user goes to case list table and comes back to the case', async () => {
+        const commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+        await commentArea.focus();
+        await commentArea.type('Test comment from automation');
 
-          await testSubjects.click('backToCases');
+        await testSubjects.click('backToCases');
 
-          const caseLink = await find.byCssSelector('[data-test-subj="case-details-link"');
+        const caseLink = await find.byCssSelector('[data-test-subj="case-details-link"');
 
-          caseLink.click();
+        caseLink.click();
 
-          await testSubjects.click('submit-comment');
+        await testSubjects.click('submit-comment');
 
-          // validate user action
-          const newComment = await find.byCssSelector(
-            '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
-          );
-          expect(await newComment.getVisibleText()).equal('Test comment from automation');
-        });
+        // validate user action
+        const newComment = await find.byCssSelector(
+          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+        );
+        expect(await newComment.getVisibleText()).equal('Test comment from automation');
+      });
 
-        it('shows unsaved comment message when page is refreshed', async () => {
-          await testSubjects.click('property-actions-user-action-ellipses');
+      it('shows unsaved comment message when page is refreshed', async () => {
+        await testSubjects.click('property-actions-user-action-ellipses');
 
-          await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
-          await testSubjects.click('property-actions-user-action-pencil');
+        await testSubjects.click('property-actions-user-action-pencil');
 
-          await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
-          const editCommentTextArea = await find.byCssSelector(
-            '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
-          );
+        const editCommentTextArea = await find.byCssSelector(
+          '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
+        );
 
-          await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
-          await editCommentTextArea.focus();
-          await editCommentTextArea.type('Edited comment');
+        await editCommentTextArea.focus();
+        await editCommentTextArea.type('Edited comment');
 
-          await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
-          await browser.refresh();
+        await browser.refresh();
 
-          await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
-          await testSubjects.existOrFail('user-action-comment-unsaved-draft');
-        });
+        await testSubjects.existOrFail('user-action-comment-unsaved-draft');
+      });
 
-        it('shows unsaved description message when page is refreshed', async () => {
-          await testSubjects.click('description-edit-icon');
+      it('shows unsaved description message when page is refreshed', async () => {
+        await testSubjects.click('description-edit-icon');
 
-          await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
-          const editCommentTextArea = await find.byCssSelector(
-            '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
-          );
+        const editCommentTextArea = await find.byCssSelector(
+          '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
+        );
 
-          await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
-          await editCommentTextArea.focus();
-          await editCommentTextArea.type('Edited description');
+        await editCommentTextArea.focus();
+        await editCommentTextArea.type('Edited description');
 
-          await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
-          await browser.refresh();
+        await browser.refresh();
 
-          await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
-          await testSubjects.existOrFail('description-unsaved-draft');
-        });
+        await testSubjects.existOrFail('description-unsaved-draft');
+      });
+
+      it('should persist the draft of new comment while description is updated', async () => {
+        let commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        await commentArea.focus();
+        await commentArea.type('Test comment from automation');
+
+        await testSubjects.click('description-edit-icon');
+
+        await header.waitUntilLoadingHasFinished();
+
+        const description = await find.byCssSelector(
+          '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        await header.waitUntilLoadingHasFinished();
+
+        await description.focus();
+        await description.type('Edited description');
+
+        await testSubjects.click('editable-save-markdown');
+        await header.waitUntilLoadingHasFinished();
+
+        await browser.refresh();
+        await header.waitUntilLoadingHasFinished();
+
+        commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        expect(await commentArea.getVisibleText()).to.be('Test comment from automation');
       });
     });
 

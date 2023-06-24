@@ -124,7 +124,7 @@ const userActionsStats = {
   totalOtherActions: 11,
 };
 
-for (let i = 0; i < 40; i++) {
+for (let i = 0; i < 50; i++) {
   describe('CaseViewPage', () => {
     const updateCaseProperty = defaultUpdateCaseState.mutate;
     const pushCaseToExternalService = jest.fn();
@@ -591,27 +591,6 @@ for (let i = 0; i < 40; i++) {
           appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
           expect(await screen.findByTestId('description')).toBeInTheDocument();
-        });
-
-        // TODO: Move this to an integration test
-        it.skip('it should persist the draft of new comment while description is updated', async () => {
-          const newComment = 'another cool comment';
-
-          appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-          userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-all'));
-
-          userEvent.type(await screen.findByTestId('euiMarkdownEditorTextArea'), newComment);
-
-          userEvent.click(await screen.findByTestId('description-edit-icon'));
-
-          userEvent.type(screen.getAllByTestId('euiMarkdownEditorTextArea')[0], 'Edited!');
-
-          userEvent.click(screen.getByTestId('editable-save-markdown'));
-
-          expect(await screen.findByTestId('euiMarkdownEditorTextArea')).toHaveTextContent(
-            newComment
-          );
         });
       });
 
