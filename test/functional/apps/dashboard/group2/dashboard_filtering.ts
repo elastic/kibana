@@ -76,7 +76,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('adding a filter that excludes all data', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/160062
+    describe.skip('adding a filter that excludes all data', () => {
       before(async () => {
         await populateDashboard();
         await addFilterAndRefresh();
