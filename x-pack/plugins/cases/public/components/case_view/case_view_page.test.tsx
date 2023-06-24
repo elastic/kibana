@@ -42,6 +42,7 @@ import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
 import { useGetCaseUserActionsStats } from '../../containers/use_get_case_user_actions_stats';
+import { createQueryWithMarkup } from '../../common/test_utils';
 
 const mockSetTitle = jest.fn();
 
@@ -434,18 +435,27 @@ for (let i = 0; i < 50; i++) {
     });
 
     describe('Callouts', () => {
+      const errorText =
+        'The connector used to send updates to the external service has been deleted or you do not have the appropriate licenseExternal link(opens in a new tab or window) to use it. To update cases in external systems, select a different connector or create a new one.';
+
       it('it shows the danger callout when a connector has been deleted', async () => {
         useGetConnectorsMock.mockImplementation(() => ({ data: [], isLoading: false }));
-        const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+        appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-        expect(result.container.querySelector('.euiCallOut--danger')).toBeInTheDocument();
+        expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
+
+        const getByText = createQueryWithMarkup(screen.getByText);
+        expect(getByText(errorText)).toBeInTheDocument();
       });
 
       it('it does NOT shows the danger callout when connectors are loading', async () => {
         useGetConnectorsMock.mockImplementation(() => ({ data: [], isLoading: true }));
-        const result = appMockRenderer.render(<CaseViewPage {...caseProps} />);
+        appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-        expect(result.container.querySelector('.euiCallOut--danger')).not.toBeInTheDocument();
+        expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
+        expect(
+          screen.queryByTestId('case-callout-a25a5b368b6409b179ef4b6c5168244f')
+        ).not.toBeInTheDocument();
       });
     });
 
@@ -595,10 +605,12 @@ for (let i = 0; i < 50; i++) {
       });
 
       describe('breadcrumbs', () => {
-        it('should set the cases title', () => {
+        it('should set the cases title', async () => {
           appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-          expect(mockSetTitle).toHaveBeenCalledWith([caseProps.caseData.title, 'Cases', 'Test']);
+          await waitFor(() => {
+            expect(mockSetTitle).toHaveBeenCalledWith([caseProps.caseData.title, 'Cases', 'Test']);
+          });
         });
       });
     });
