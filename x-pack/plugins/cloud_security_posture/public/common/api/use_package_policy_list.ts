@@ -21,7 +21,7 @@ interface PackagePolicyListData {
 
 const PACKAGE_POLICY_LIST_QUERY_KEY = ['packagePolicyList'];
 
-export const usePackagePolicyList = (packageInfoName: string, enabled = true) => {
+export const usePackagePolicyList = (packageInfoName: string, { enabled = true }) => {
   const { http } = useKibana<CoreStart>().services;
 
   const query = useQuery<PackagePolicyListData, Error>(
