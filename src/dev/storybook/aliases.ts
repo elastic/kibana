@@ -8,7 +8,7 @@
 
 // Please also add new aliases to test/scripts/jenkins_storybook.sh
 //
-// If you wish for your Storybook to be built and included in CI, also add your 
+// If you wish for your Storybook to be built and included in CI, also add your
 // alias to .buildkite/scripts/steps/storybooks/build_and_upload.ts
 export const storybookAliases = {
   apm: 'x-pack/plugins/apm/.storybook',
