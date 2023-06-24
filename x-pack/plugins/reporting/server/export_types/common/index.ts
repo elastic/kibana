@@ -72,13 +72,8 @@ export abstract class ExportType<
   abstract createJob: CreateJobFn<JobParamsType>;
   abstract runTask: RunTaskFn<TaskPayloadType>;
 
-  public validLicenses: LicenseType[] = [
-    LICENSE_TYPE_TRIAL,
-    LICENSE_TYPE_CLOUD_STANDARD,
-    LICENSE_TYPE_GOLD,
-    LICENSE_TYPE_PLATINUM,
-    LICENSE_TYPE_ENTERPRISE,
-  ];
+  abstract validLicenses: LicenseType[];
+
   public setupDeps!: ExportTypeSetupDeps;
   public startDeps!: ExportTypeStartDeps;
   public http!: HttpServiceSetup;
@@ -126,13 +121,13 @@ export abstract class ExportType<
 
   public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
     const spacesService = this.setupDeps.spaces?.spacesService;
-    const spaceId = await this.getSpaceId(request, logger);
+    const spaceId = this.getSpaceId(request, logger);
 
     if (spacesService && spaceId) {
       logger.info(`Creating UI Settings Client for space: ${spaceId}`);
     }
     const savedObjectsClient = await this.getSavedObjectsClient(request);
-    return await this.getUiSettingsServiceFactory(savedObjectsClient);
+    return this.getUiSettingsServiceFactory(savedObjectsClient);
   }
 
   public getFakeRequest(

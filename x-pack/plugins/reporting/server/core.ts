@@ -31,7 +31,6 @@ import {
   ScreenshottingStart,
 } from '@kbn/screenshotting-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -39,7 +38,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
@@ -182,9 +181,12 @@ export class ReportingCore {
   private async assertKibanaIsAvailable(): Promise<void> {
     const { status } = this.getPluginSetupDeps();
 
-    await Rx.firstValueFrom(
-      status.overall$.pipe(filter((current) => current.level === ServiceStatusLevels.available))
-    );
+    await status.overall$
+      .pipe(
+        filter((current) => current.level === ServiceStatusLevels.available),
+        first()
+      )
+      .toPromise();
   }
 
   /*
@@ -321,6 +323,7 @@ export class ReportingCore {
   public async getLicenseInfo() {
     const { license$ } = (await this.getPluginStartDeps()).licensing;
     const registry = this.getExportTypesRegistry();
+
     return await Rx.firstValueFrom(
       license$.pipe(map((license) => checkLicense(registry, license)))
     );
@@ -335,63 +338,6 @@ export class ReportingCore {
     }
     return this.pluginSetupDeps;
   }
-
-  // private async getSavedObjectsClient(request: KibanaRequest) {
-  //   const { savedObjects } = await this.getPluginStartDeps();
-  //   return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
-  // }
-
-  // public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
-  //   const { uiSettings: uiSettingsService } = await this.getPluginStartDeps();
-  //   const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
-  //   return scopedUiSettingsService;
-  // }
-
-  public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
-    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
-    if (spacesService) {
-      const spaceId = spacesService?.getSpaceId(request);
-
-      if (spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Request uses Space ID: ${spaceId}`);
-        return spaceId;
-      } else {
-        logger.debug(`Request uses default Space`);
-      }
-    }
-  }
-
-  // public getFakeRequest(
-  //   headers: Headers,
-  //   spaceId: string | undefined,
-  //   logger = this.logger
-  // ): KibanaRequest {
-  //   const rawRequest: FakeRawRequest = {
-  //     headers,
-  //     path: '/',
-  //   };
-  //   const fakeRequest = CoreKibanaRequest.from(rawRequest);
-
-  //   const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
-  //   if (spacesService) {
-  //     if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-  //       logger.info(`Generating request for space: ${spaceId}`);
-  //       this.getPluginSetupDeps().basePath.set(fakeRequest, `/s/${spaceId}`);
-  //     }
-  //   }
-
-  //   return fakeRequest;
-  // }
-
-  // public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
-  // const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
-  // const spaceId = this.getSpaceId(request, logger);
-  // if (spacesService && spaceId) {
-  //   logger.info(`Creating UI Settings Client for space: ${spaceId}`);
-  // }
-  //   const savedObjectsClient = await this.getSavedObjectsClient(request);
-  //   return await this.getUiSettingsServiceFactory(savedObjectsClient);
-  // }
 
   public async getDataViewsService(request: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
@@ -419,7 +365,7 @@ export class ReportingCore {
     options: PngScreenshotOptions | PdfScreenshotOptions
   ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
-      Rx.switchMap(({ screenshotting }) => {
+      switchMap(({ screenshotting }) => {
         return screenshotting.getScreenshots({
           ...options,
           urls: options.urls.map((url) =>

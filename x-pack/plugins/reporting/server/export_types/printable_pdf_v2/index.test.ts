@@ -41,7 +41,8 @@ const getBasePayload = (baseObj: any) =>
     ...baseObj,
   } as TaskPayloadPDFV2);
 
-beforeAll(async () => {
+beforeEach(async () => {
+  content = '';
   stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
 
   const configType = createMockConfigSchema({ encryptionKey: mockEncryptionKey });
@@ -62,10 +63,7 @@ beforeAll(async () => {
   });
 });
 
-beforeEach(() => {
-  // clear content from previous test
-  content = '';
-});
+afterEach(() => (generatePdfObservable as jest.Mock).mockReset());
 
 test(`passes browserTimezone to generatePdf`, async () => {
   const encryptedHeaders = await encryptHeaders({});
@@ -73,6 +71,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
 
   const browserTimezone = 'UTC';
   await mockPdfExportType.runTask(
+    'pdfJobId',
     getBasePayload({
       forceNow: 'test',
       title: 'PDF Params Timezone Test',
@@ -80,7 +79,6 @@ test(`passes browserTimezone to generatePdf`, async () => {
       browserTimezone,
       headers: encryptedHeaders,
     }),
-    'pdfJobId',
     cancellationToken,
     stream
   );
@@ -101,8 +99,8 @@ test(`returns content_type of application/pdf`, async () => {
   (generatePdfObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
 
   const { content_type: contentType } = await mockPdfExportType.runTask(
-    getBasePayload({ locatorParams: [], headers: encryptedHeaders }),
     'pdfJobId',
+    getBasePayload({ locatorParams: [], headers: encryptedHeaders }),
     cancellationToken,
     stream
   );
@@ -115,8 +113,8 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
 
   const encryptedHeaders = await encryptHeaders({});
   await mockPdfExportType.runTask(
-    getBasePayload({ locatorParams: [], headers: encryptedHeaders }),
     'pdfJobId',
+    getBasePayload({ locatorParams: [], headers: encryptedHeaders }),
     cancellationToken,
     stream
   );
