@@ -7,50 +7,36 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useHistory, useParams, useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTabbedContent,
-  EuiFlyoutSize,
-  EuiTabbedContentTab,
-} from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useLoadRuleTypes, RuleType } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
-import { Query, BoolQuery } from '@kbn/es-query';
+import { BoolQuery } from '@kbn/es-query';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
-import { fromQuery, toQuery } from '../../utils/url';
-import {
-  defaultTimeRange,
-  getDefaultAlertSummaryTimeRange,
-} from '../../utils/alert_summary_widget';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { PageTitle } from './components/page_title';
-import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/alert_search_bar/alert_search_bar_with_url_sync';
 import { DeleteConfirmationModal } from './components/delete_confirmation_modal';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { NoRuleFoundPanel } from './components/no_rule_found_panel';
 import { HeaderActions } from './components/header_actions';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { RuleDetailsTabs } from './components/rule_details_tabs';
 import { getHealthColor } from './helpers/get_health_color';
 import { hasAllPrivilege } from './helpers/has_all_privilege';
-import { paths } from '../../config/paths';
 import { ALERT_STATUS_ALL } from '../../../common/constants';
-import { observabilityFeatureId, ruleDetailsLocatorID } from '../../../common';
-import {
-  EXECUTION_TAB,
-  ALERTS_TAB,
-  RULE_DETAILS_PAGE_ID,
-  RULE_DETAILS_ALERTS_SEARCH_BAR_ID,
-  SEARCH_BAR_URL_STORAGE_KEY,
-} from './constants';
+import { ruleDetailsLocatorID } from '../../../common';
+import { EXECUTION_TAB, ALERTS_TAB } from './constants';
 import type { AlertStatus } from '../../../common/typings';
-
+import { paths } from '../../config/paths';
+import { toQuery } from '../../utils/url';
+import {
+  defaultTimeRange,
+  getDefaultAlertSummaryTimeRange,
+} from '../../utils/alert_summary_widget';
 export type TabId = typeof ALERTS_TAB | typeof EXECUTION_TAB;
 
 interface RuleDetailsPathParams {
@@ -68,21 +54,16 @@ export function RuleDetailsPage() {
     },
     triggersActionsUi: {
       actionTypeRegistry,
-      alertsTableConfigurationRegistry,
       ruleTypeRegistry,
-      getAlertsStateTable: AlertsStateTable,
       getAlertSummaryWidget: AlertSummaryWidget,
       getEditRuleFlyout: EditRuleFlyout,
       getRuleDefinition: RuleDefinition,
-      getRuleEventLogList: RuleEventLogList,
       getRuleStatusPanel: RuleStatusPanel,
     },
   } = useKibana().services;
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
-  const history = useHistory();
-  const location = useLocation();
 
   const theme = useChartsTheme();
   const baseTheme = useChartsBaseTheme();
@@ -133,9 +114,6 @@ export function RuleDetailsPage() {
     getDefaultAlertSummaryTimeRange
   );
 
-  const ruleQuery = useRef<Query[]>([
-    { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
-  ]);
   const alertSummaryWidgetFilter = useRef<estypes.QueryDslQueryContainer>({
     term: {
       'kibana.alert.rule.uuid': ruleId,
@@ -166,27 +144,6 @@ export function RuleDetailsPage() {
     tabsRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const updateUrl = (nextQuery: { tabId: TabId }) => {
-    const newTabId = nextQuery.tabId;
-    const nextSearch =
-      newTabId === ALERTS_TAB
-        ? {
-            ...toQuery(location.search),
-            ...nextQuery,
-          }
-        : { tabId: EXECUTION_TAB };
-
-    history.replace({
-      ...location,
-      search: fromQuery(nextSearch),
-    });
-  };
-
-  const onTabIdChange = (newTabId: TabId) => {
-    setTabId(newTabId);
-    updateUrl({ tabId: newTabId });
-  };
-
   const handleEditRule = () => {
     setEditRuleFlyoutVisible(true);
   };
@@ -213,11 +170,14 @@ export function RuleDetailsPage() {
   useEffect(() => {
     if (ruleTypes.length && rule) {
       const matchedRuleType = ruleTypes.find((type) => type.id === rule.ruleTypeId);
+
       setRuleType(matchedRuleType);
 
       if (rule.consumer === ALERTS_FEATURE_ID && matchedRuleType && matchedRuleType.producer) {
         setFeatureIds([matchedRuleType.producer] as ValidFeatureId[]);
-      } else setFeatureIds([rule.consumer] as ValidFeatureId[]);
+      } else {
+        setFeatureIds([rule.consumer] as ValidFeatureId[]);
+      }
     }
   }, [rule, ruleTypes]);
 
@@ -238,66 +198,16 @@ export function RuleDetailsPage() {
         : false)
   );
 
-  const tabs: EuiTabbedContentTab[] = [
-    {
-      id: EXECUTION_TAB,
-      name: i18n.translate('xpack.observability.ruleDetails.rule.eventLogTabText', {
-        defaultMessage: 'Execution history',
-      }),
-      'data-test-subj': 'eventLogListTab',
-      content: (
-        <EuiFlexGroup style={{ minHeight: 600 }} direction={'column'}>
-          <EuiFlexItem>
-            {rule && ruleType ? <RuleEventLogList ruleId={rule.id} ruleType={ruleType} /> : null}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    },
-    {
-      id: ALERTS_TAB,
-      name: i18n.translate('xpack.observability.ruleDetails.rule.alertsTabText', {
-        defaultMessage: 'Alerts',
-      }),
-      'data-test-subj': 'ruleAlertListTab',
-      content: (
-        <>
-          <EuiSpacer size="m" />
-          <ObservabilityAlertSearchbarWithUrlSync
-            appName={RULE_DETAILS_ALERTS_SEARCH_BAR_ID}
-            onEsQueryChange={setEsQuery}
-            urlStorageKey={SEARCH_BAR_URL_STORAGE_KEY}
-            defaultSearchQueries={ruleQuery.current}
-          />
-          <EuiSpacer size="s" />
-          <EuiFlexGroup style={{ minHeight: 450 }} direction={'column'}>
-            <EuiFlexItem>
-              {esQuery && featureIds && (
-                <AlertsStateTable
-                  alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-                  configurationId={observabilityFeatureId}
-                  id={RULE_DETAILS_PAGE_ID}
-                  flyoutSize={'s' as EuiFlyoutSize}
-                  featureIds={featureIds}
-                  query={esQuery}
-                  showExpandToDetails={false}
-                  showAlertStatusWithFlapping
-                />
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      ),
-    },
-  ];
+  const statusMessage =
+    rule?.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License
+      ? rulesStatusesTranslationsMapping.noLicense
+      : rule
+      ? rulesStatusesTranslationsMapping[rule.executionStatus.status]
+      : '';
 
   if (isLoading || isRuleDeleting) return <CenterJustifiedSpinner />;
 
   if (!rule || isError) return <NoRuleFoundPanel />;
-
-  const statusMessage =
-    rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License
-      ? rulesStatusesTranslationsMapping.noLicense
-      : rulesStatusesTranslationsMapping[rule.executionStatus.status];
 
   return (
     <ObservabilityPageTemplate
@@ -349,13 +259,15 @@ export function RuleDetailsPage() {
 
       <div ref={tabsRef} />
 
-      <EuiTabbedContent
-        data-test-subj="ruleDetailsTabbedContent"
-        tabs={tabs}
-        selectedTab={tabs.find((tab) => tab.id === tabId)}
-        onTabClick={(tab) => {
-          onTabIdChange(tab.id as TabId);
-        }}
+      <RuleDetailsTabs
+        esQuery={esQuery}
+        featureIds={featureIds}
+        rule={rule}
+        ruleId={ruleId}
+        ruleType={ruleType}
+        tabId={tabId}
+        onEsQueryChange={setEsQuery}
+        onSetTabId={setTabId}
       />
 
       {isEditRuleFlyoutVisible && (

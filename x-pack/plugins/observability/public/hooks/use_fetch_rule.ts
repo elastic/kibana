@@ -53,7 +53,6 @@ export function useFetchRule({ ruleId }: { ruleId?: string }): UseFetchRuleRespo
           return transformRule(res);
         } catch (error) {
           throw error;
-          // ignore error for retrieving slos
         }
       },
       keepPreviousData: true,
