@@ -211,15 +211,18 @@ for (let i = 0; i < 40; i++) {
       };
 
       const props = { ...caseProps, caseData: caseDataWithDamagedRaccoon };
+
       appMockRenderer = createAppMockRenderer({
         features: { metrics: ['alerts.count'] },
         license: platinumLicense,
       });
+
       appMockRenderer.render(<CaseViewPage {...props} />);
 
-      expect(screen.getByTestId('header-page-title')).toHaveTextContent(data.title);
-      expect(screen.getByTestId('case-view-status-dropdown')).toHaveTextContent('Open');
+      expect(await screen.findByTestId('header-page-title')).toHaveTextContent(data.title);
       expect(screen.getByTestId('case-view-metrics-panel')).toBeInTheDocument();
+      expect(await screen.findByTestId('case-view-status-dropdown')).toHaveTextContent('Open');
+
       expect(
         within(screen.getByTestId('case-view-tag-list')).getByTestId('tag-coke')
       ).toHaveTextContent(data.tags[0]);
@@ -247,15 +250,17 @@ for (let i = 0; i < 40; i++) {
 
       appMockRenderer.render(<CaseViewPage {...caseClosedProps} />);
 
-      expect(screen.getByTestId('case-view-status-dropdown')).toHaveTextContent('Closed');
+      expect(await screen.findByTestId('case-view-status-dropdown')).toHaveTextContent('Closed');
     });
 
     it('should update status', async () => {
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-      const dropdown = screen.getByTestId('case-view-status-dropdown');
+      const dropdown = await screen.findByTestId('case-view-status-dropdown');
+
       userEvent.click(dropdown.querySelector('button')!);
       await waitForEuiPopoverOpen();
+
       userEvent.click(screen.getByTestId('case-view-status-dropdown-closed'));
       const updateObject = updateCaseProperty.mock.calls[0][0];
 
@@ -269,7 +274,8 @@ for (let i = 0; i < 40; i++) {
     it('should update title', async () => {
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
       const newTitle = 'The new title';
-      userEvent.click(screen.getByTestId('editable-title-edit-icon'));
+
+      userEvent.click(await screen.findByTestId('editable-title-edit-icon'));
       userEvent.clear(screen.getByTestId('editable-title-input-field'));
       userEvent.type(screen.getByTestId('editable-title-input-field'), newTitle);
       userEvent.click(screen.getByTestId('editable-title-submit-btn'));
@@ -313,9 +319,8 @@ for (let i = 0; i < 40; i++) {
           }}
         />
       );
-      await waitFor(() => {
-        expect(screen.getByTestId('push-to-external-service')).toBeDisabled();
-      });
+
+      expect(await screen.findByTestId('push-to-external-service')).toBeDisabled();
     });
 
     it('should update connector', async () => {
@@ -334,14 +339,12 @@ for (let i = 0; i < 40; i++) {
         />
       );
 
-      userEvent.click(screen.getByTestId('connector-edit').querySelector('button')!);
+      userEvent.click((await screen.findByTestId('connector-edit')).querySelector('button')!);
       userEvent.click(screen.getByTestId('dropdown-connectors'));
       await waitForEuiPopoverOpen();
       userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
-      await waitFor(() => {
-        expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('connector-fields-resilient')).toBeInTheDocument();
 
       userEvent.click(screen.getByTestId('edit-connectors-submit'));
 
@@ -377,17 +380,18 @@ for (let i = 0; i < 40; i++) {
       useGetCaseUserActionsStatsMock.mockReturnValue({ isLoading: true });
 
       appMockRenderer.render(<CaseViewPage {...caseProps} useFetchAlertData={useFetchAlertData} />);
-      await waitFor(() => {
-        expect(screen.getByTestId('case-view-loading-content')).toBeInTheDocument();
-        expect(screen.queryByTestId('user-actions-list')).not.toBeInTheDocument();
-      });
+
+      expect(await screen.findByTestId('case-view-loading-content')).toBeInTheDocument();
+      expect(screen.queryByTestId('user-actions-list')).not.toBeInTheDocument();
     });
 
     it('should call show alert details with expected arguments', async () => {
       const showAlertDetails = jest.fn();
       appMockRenderer.render(<CaseViewPage {...caseProps} showAlertDetails={showAlertDetails} />);
 
-      userEvent.click(screen.getAllByTestId('comment-action-show-alert-alert-action-id')[1]);
+      userEvent.click(
+        (await screen.findAllByTestId('comment-action-show-alert-alert-action-id'))[1]
+      );
 
       await waitFor(() => {
         expect(showAlertDetails).toHaveBeenCalledWith('alert-id-1', 'alert-index-1');
@@ -397,18 +401,18 @@ for (let i = 0; i < 40; i++) {
     it('should show the rule name', async () => {
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-      await waitFor(() => {
-        expect(
-          screen
-            .getAllByTestId('user-action-alert-comment-create-action-alert-action-id')[1]
-            .querySelector('.euiCommentEvent__headerEvent')
-        ).toHaveTextContent('added an alert from Awesome rule');
-      });
+      expect(
+        (
+          await screen.findAllByTestId('user-action-alert-comment-create-action-alert-action-id')
+        )[1].querySelector('.euiCommentEvent__headerEvent')
+      ).toHaveTextContent('added an alert from Awesome rule');
     });
 
     it('should update settings', async () => {
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
-      userEvent.click(screen.getByTestId('sync-alerts-switch'));
+
+      userEvent.click(await screen.findByTestId('sync-alerts-switch'));
+
       const updateObject = updateCaseProperty.mock.calls[0][0];
 
       await waitFor(() => {
@@ -424,11 +428,9 @@ for (let i = 0; i < 40; i++) {
         <CaseViewPage {...{ ...caseProps, connector: { ...caseProps, name: 'old-name' } }} />
       );
 
-      await waitFor(() => {
-        expect(screen.getByTestId('push-to-external-service')).toHaveTextContent(
-          'My Resilient connector'
-        );
-      });
+      expect(await screen.findByTestId('push-to-external-service')).toHaveTextContent(
+        'My Resilient connector'
+      );
     });
 
     describe('Callouts', () => {
@@ -574,7 +576,7 @@ for (let i = 0; i < 40; i++) {
         it('renders the description correctly', async () => {
           appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-          const description = within(screen.getByTestId('description'));
+          const description = within(await screen.findByTestId('description'));
 
           expect(await description.findByText(caseData.description)).toBeInTheDocument();
         });
@@ -588,9 +590,7 @@ for (let i = 0; i < 40; i++) {
 
           appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-          await waitFor(() => {
-            expect(screen.getByTestId('description')).toBeInTheDocument();
-          });
+          expect(await screen.findByTestId('description')).toBeInTheDocument();
         });
 
         // TODO: Move this to an integration test
