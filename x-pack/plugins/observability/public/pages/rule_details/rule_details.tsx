@@ -24,7 +24,7 @@ import { NoRuleFoundPanel } from './components/no_rule_found_panel';
 import { HeaderActions } from './components/header_actions';
 import { RuleDetailsTabs } from './components/rule_details_tabs';
 import { getHealthColor } from './helpers/get_health_color';
-import { hasAllPrivilege } from './helpers/has_all_privilege';
+import { isRuleEditable } from './helpers/is_rule_editable';
 import { ruleDetailsLocatorID } from '../../../common';
 import { ALERT_STATUS_ALL } from '../../../common/constants';
 import {
@@ -97,7 +97,6 @@ export function RuleDetailsPage() {
 
   const [tabId, setTabId] = useState<TabId>(() => {
     const searchParams = new URLSearchParams(search);
-
     const urlTabId = searchParams.get(RULE_DETAILS_TAB_URL_STORAGE_KEY);
 
     return urlTabId && [RULE_DETAILS_EXECUTION_TAB, RULE_DETAILS_ALERTS_TAB].includes(urlTabId)
@@ -121,6 +120,20 @@ export function RuleDetailsPage() {
   useEffect(() => {
     setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
   }, [esQuery]);
+
+  const handleSetTabId = async (newTabId: TabId) => {
+    setTabId(newTabId);
+
+    await locators.get(ruleDetailsLocatorID)?.navigate(
+      {
+        ruleId,
+        tabId: newTabId,
+      },
+      {
+        replace: true,
+      }
+    );
+  };
 
   const handleAlertSummaryWidgetClick = async (status: AlertStatus = ALERT_STATUS_ALL) => {
     setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
@@ -168,29 +181,14 @@ export function RuleDetailsPage() {
 
   const ruleType = ruleTypes?.find((type) => type.id === rule?.ruleTypeId);
 
+  const isEditable = isRuleEditable({ capabilities, rule, ruleType, ruleTypeRegistry });
+
   const featureIds =
     rule?.consumer === ALERTS_FEATURE_ID && ruleType?.producer
       ? [ruleType.producer as AlertConsumers]
       : rule
       ? [rule.consumer as AlertConsumers]
       : [];
-
-  const canExecuteActions = capabilities?.actions?.execute;
-
-  const canSaveRule =
-    rule &&
-    hasAllPrivilege(rule, ruleType) &&
-    // if the rule has actions, can the user save the rule's action params
-    (canExecuteActions || (!canExecuteActions && rule.actions.length === 0));
-
-  const isRuleEditable = Boolean(
-    // can the user save the rule
-    canSaveRule &&
-      // is this rule type editable from within Rules Management
-      (ruleTypeRegistry.has(rule.ruleTypeId)
-        ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
-        : false)
-  );
 
   const ruleStatusMessage =
     rule?.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License
@@ -212,7 +210,7 @@ export function RuleDetailsPage() {
         rightSideItems: [
           <HeaderActions
             isLoading={isLoading || isRuleDeleting}
-            isRuleEditable={isRuleEditable}
+            isRuleEditable={isEditable}
             onEditRule={handleEditRule}
             onDeleteRule={handleDeleteRule}
           />,
@@ -223,12 +221,13 @@ export function RuleDetailsPage() {
         <EuiFlexItem style={{ minWidth: 350 }}>
           <RuleStatusPanel
             rule={rule}
-            isEditable={isRuleEditable}
+            isEditable={isEditable}
             requestRefresh={refetch}
             healthColor={getHealthColor(rule.executionStatus.status)}
             statusMessage={ruleStatusMessage}
           />
         </EuiFlexItem>
+
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
             chartProps={{ theme, baseTheme }}
@@ -265,7 +264,7 @@ export function RuleDetailsPage() {
         ruleType={ruleType}
         activeTabId={tabId}
         onEsQueryChange={setEsQuery}
-        onSetTabId={setTabId}
+        onSetTabId={handleSetTabId}
       />
 
       {isEditRuleFlyoutVisible && (

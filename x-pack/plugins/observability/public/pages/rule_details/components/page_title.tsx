@@ -17,7 +17,9 @@ interface PageTitleProps {
 }
 
 export function PageTitle({ rule }: PageTitleProps) {
-  const { triggersActionsUi } = useKibana().services;
+  const {
+    triggersActionsUi: { getRuleTagBadge: RuleTagBadge },
+  } = useKibana().services;
 
   return (
     <>
@@ -39,29 +41,29 @@ export function PageTitle({ rule }: PageTitleProps) {
       <EuiFlexGroup direction="column" alignItems="flexStart">
         <EuiFlexItem component="span" grow={false}>
           <EuiText color="subdued" size="xs">
-            <b>
+            <strong>
               {i18n.translate('xpack.observability.ruleDetails.lastUpdatedMessage', {
                 defaultMessage: 'Last updated',
               })}
-            </b>
+            </strong>
+            &nbsp;
             {BY_WORD} {rule.updatedBy} {ON_WORD}&nbsp;
             {moment(rule.updatedAt).format('ll')} &emsp;
-            <b>
+            <strong>
               {i18n.translate('xpack.observability.ruleDetails.createdWord', {
                 defaultMessage: 'Created',
               })}
-            </b>
+            </strong>
+            &nbsp;
             {BY_WORD} {rule.createdBy} {ON_WORD}&nbsp;
             {moment(rule.createdAt).format('ll')}
           </EuiText>
         </EuiFlexItem>
         <EuiSpacer size="xs" />
       </EuiFlexGroup>
-      {rule.tags.length > 0 &&
-        triggersActionsUi.getRuleTagBadge<'tagsOutPopover'>({
-          tagsOutPopover: true,
-          tags: rule.tags,
-        })}
+
+      {rule.tags.length > 0 && <RuleTagBadge tagsOutPopover tags={rule.tags} />}
+
       <EuiSpacer size="xs" />
     </>
   );

@@ -6,7 +6,6 @@
  */
 
 import React, { useRef } from 'react';
-import { useHistory } from 'react-router-dom';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,7 +20,6 @@ import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Query, BoolQuery } from '@kbn/es-query';
 import { useKibana } from '../../../utils/kibana_react';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
-import { toQuery, fromQuery } from '../../../utils/url';
 import { observabilityFeatureId } from '../../../../common';
 import {
   RULE_DETAILS_ALERTS_TAB,
@@ -57,8 +55,6 @@ export function RuleDetailsTabs({
   onSetTabId,
   onEsQueryChange,
 }: Props) {
-  const history = useHistory();
-
   const {
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
@@ -70,22 +66,6 @@ export function RuleDetailsTabs({
   const ruleQuery = useRef<Query[]>([
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
   ]);
-
-  const updateUrl = (nextQuery: { tabId: TabId }) => {
-    const newTabId = nextQuery.tabId;
-    const nextSearch =
-      newTabId === RULE_DETAILS_ALERTS_TAB
-        ? {
-            ...toQuery(location.search),
-            ...nextQuery,
-          }
-        : { tabId: RULE_DETAILS_EXECUTION_TAB };
-
-    history.replace({
-      ...location,
-      search: fromQuery(nextSearch),
-    });
-  };
 
   const tabs: EuiTabbedContentTab[] = [
     {
@@ -130,8 +110,8 @@ export function RuleDetailsTabs({
                   featureIds={featureIds}
                   flyoutSize="s"
                   query={esQuery}
-                  showExpandToDetails={false}
                   showAlertStatusWithFlapping
+                  showExpandToDetails={false}
                 />
               )}
             </EuiFlexItem>
@@ -142,7 +122,6 @@ export function RuleDetailsTabs({
   ];
 
   const handleTabIdChange = (newTabId: TabId) => {
-    updateUrl({ tabId: newTabId });
     onSetTabId(newTabId);
   };
 
