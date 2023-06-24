@@ -34,17 +34,13 @@ export function HeaderActions({
 
   const togglePopover = () => setIsRuleEditPopoverOpen(!isRuleEditPopoverOpen);
 
-  const handleClosePopover = () => setIsRuleEditPopoverOpen(false);
-
   const handleEditRule = () => {
     setIsRuleEditPopoverOpen(false);
-
     onEditRule();
   };
 
   const handleRemoveRule = () => {
     setIsRuleEditPopoverOpen(false);
-
     onDeleteRule();
   };
 
@@ -54,7 +50,7 @@ export function HeaderActions({
         <EuiPopover
           id="contextRuleEditMenu"
           isOpen={isRuleEditPopoverOpen}
-          closePopover={handleClosePopover}
+          closePopover={togglePopover}
           button={
             <EuiButton
               data-test-subj="actions"

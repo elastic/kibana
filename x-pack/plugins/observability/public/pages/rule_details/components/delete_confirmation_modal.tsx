@@ -7,9 +7,8 @@
 
 import React, { useState } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
-import { bulkDeleteRules } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../utils/kibana_react';
+import { useDeleteRules } from '../../../hooks/use_delete_rules';
 
 interface DeleteConfirmationPropsModal {
   ruleIdToDelete: string | undefined;
@@ -26,12 +25,21 @@ export function DeleteConfirmationModal({
   onDeleted,
   onDeleting,
 }: DeleteConfirmationPropsModal) {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
-
   const [isVisible, setIsVisible] = useState(Boolean(ruleIdToDelete));
+
+  const { mutateAsync: deleteRules } = useDeleteRules();
+
+  const handleConfirm = async () => {
+    if (ruleIdToDelete) {
+      setIsVisible(false);
+
+      onDeleting();
+
+      await deleteRules({ ids: [ruleIdToDelete] });
+
+      onDeleted();
+    }
+  };
 
   return isVisible ? (
     <EuiConfirmModal
@@ -55,44 +63,7 @@ export function DeleteConfirmationModal({
         }
       )}
       onCancel={onCancel}
-      onConfirm={async () => {
-        if (ruleIdToDelete) {
-          setIsVisible(false);
-
-          onDeleting();
-
-          const { errors, rules } = await bulkDeleteRules({ ids: [ruleIdToDelete], http });
-
-          const hasSucceeded = Boolean(rules.length);
-          const hasErrored = Boolean(errors.length);
-
-          if (hasSucceeded) {
-            toasts.addSuccess(
-              i18n.translate(
-                'xpack.observability.rules.deleteConfirmationModal.successNotification.descriptionText',
-                {
-                  defaultMessage: 'Deleted {title}',
-                  values: { title },
-                }
-              )
-            );
-          }
-
-          if (hasErrored) {
-            toasts.addDanger(
-              i18n.translate(
-                'xpack.observability.rules.deleteConfirmationModal.errorNotification.descriptionText',
-                {
-                  defaultMessage: 'Failed to delete {title}',
-                  values: { title },
-                }
-              )
-            );
-          }
-
-          onDeleted();
-        }
-      }}
+      onConfirm={handleConfirm}
     >
       {i18n.translate('xpack.observability.rules.deleteConfirmationModal.descriptionText', {
         defaultMessage: "You can't recover {title} after deleting.",

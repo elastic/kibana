@@ -95,7 +95,7 @@ export function RuleDetailsPage() {
     },
   ]);
 
-  const [tabId, setTabId] = useState<TabId>(() => {
+  const [activeTabId, setActiveTabId] = useState<TabId>(() => {
     const searchParams = new URLSearchParams(search);
     const urlTabId = searchParams.get(RULE_DETAILS_TAB_URL_STORAGE_KEY);
 
@@ -121,13 +121,13 @@ export function RuleDetailsPage() {
     setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
   }, [esQuery]);
 
-  const handleSetTabId = async (newTabId: TabId) => {
-    setTabId(newTabId);
+  const handleSetTabId = async (tabId: TabId) => {
+    setActiveTabId(tabId);
 
     await locators.get(ruleDetailsLocatorID)?.navigate(
       {
         ruleId,
-        tabId: newTabId,
+        tabId,
       },
       {
         replace: true,
@@ -151,7 +151,7 @@ export function RuleDetailsPage() {
       }
     );
 
-    setTabId(RULE_DETAILS_ALERTS_TAB);
+    setActiveTabId(RULE_DETAILS_ALERTS_TAB);
 
     tabsRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -262,7 +262,7 @@ export function RuleDetailsPage() {
         rule={rule}
         ruleId={ruleId}
         ruleType={ruleType}
-        activeTabId={tabId}
+        activeTabId={activeTabId}
         onEsQueryChange={setEsQuery}
         onSetTabId={handleSetTabId}
       />
