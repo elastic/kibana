@@ -61,10 +61,7 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
       >
         <FormattedMessage
           id="xpack.fleet.agentEnrollment.cloudFormation.launchButton"
-          defaultMessage="Launch {cloudFormation}"
-          values={{
-            cloudFormation: <strong>CloudFormation</strong>,
-          }}
+          defaultMessage="Launch CloudFormation"
         />
       </EuiButton>
     </EuiSkeletonText>

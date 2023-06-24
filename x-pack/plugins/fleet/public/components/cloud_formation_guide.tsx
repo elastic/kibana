@@ -6,9 +6,22 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Link } from 'react-router-dom';
+
+const CLOUD_FORMATION_EXTERNAL_DOC_URL =
+  'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html';
+
+const Link = ({ children, url }: { children: React.ReactNode; url: string }) => (
+  <EuiLink
+    href={url}
+    target="_blank"
+    rel="noopener nofollow noreferrer"
+    data-test-subj="externalLink"
+  >
+    {children}
+  </EuiLink>
+);
 
 export const CloudFormationGuide = () => {
   return (
@@ -19,10 +32,10 @@ export const CloudFormationGuide = () => {
           defaultMessage="CloudFormation will create all the necessary resources to evaluate the security posture of your AWS environment. {learnMore}."
           values={{
             learnMore: (
-              <Link to={'https://ela.st/cspm-get-started'}>
+              <Link url={CLOUD_FORMATION_EXTERNAL_DOC_URL}>
                 <FormattedMessage
                   id="xpack.fleet.cloudFormation.guide.learnMoreLinkText"
-                  defaultMessage="Learn more"
+                  defaultMessage="Learn more about CloudFormation"
                 />
               </Link>
             ),
