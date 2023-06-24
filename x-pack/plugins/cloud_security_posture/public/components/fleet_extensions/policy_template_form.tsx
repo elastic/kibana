@@ -94,12 +94,14 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
       ? integrationParam
       : undefined;
+    // Handling validation state
+    const [isValid, setIsValid] = useState(true);
 
     const input = getSelectedOption(newPolicy.inputs, integration);
 
     const updatePolicy = useCallback(
-      (updatedPolicy: NewPackagePolicy) => onChange({ isValid: true, updatedPolicy }),
-      [onChange]
+      (updatedPolicy: NewPackagePolicy) => onChange({ isValid, updatedPolicy }),
+      [onChange, isValid]
     );
     /**
      * - Updates policy inputs by user selection
@@ -107,11 +109,11 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
      */
     const setEnabledPolicyInput = useCallback(
       (inputType: PostureInput) => {
-        const inputVars = getPostureInputHiddenVars(inputType);
+        const inputVars = getPostureInputHiddenVars(inputType, packageInfo);
         const policy = getPosturePolicy(newPolicy, inputType, inputVars);
         updatePolicy(policy);
       },
-      [newPolicy, updatePolicy]
+      [newPolicy, updatePolicy, packageInfo]
     );
 
     // search for non null fields of the validation?.vars object
@@ -134,7 +136,9 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setTimeout(() => setIsLoading(false), 200);
     }, [validationResultsNonNullFields]);
 
-    const { data: packagePolicyList } = usePackagePolicyList(packageInfo.name, canFetchIntegration);
+    const { data: packagePolicyList } = usePackagePolicyList(packageInfo.name, {
+      enabled: canFetchIntegration,
+    });
 
     useEffect(() => {
       if (isEditPage) return;
@@ -236,6 +240,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           newPolicy={newPolicy}
           updatePolicy={updatePolicy}
           packageInfo={packageInfo}
+          onChange={onChange}
+          setIsValid={setIsValid}
         />
         <EuiSpacer />
       </>
