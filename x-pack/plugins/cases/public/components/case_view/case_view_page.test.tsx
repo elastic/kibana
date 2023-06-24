@@ -302,7 +302,8 @@ for (let i = 0; i < 50; i++) {
 
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-      expect(screen.getByTestId('push-to-external-service')).toBeInTheDocument();
+      expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
+      expect(await screen.findByTestId('push-to-external-service')).toBeInTheDocument();
 
       userEvent.click(screen.getByTestId('push-to-external-service'));
 
@@ -321,6 +322,7 @@ for (let i = 0; i < 50; i++) {
         />
       );
 
+      expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
       expect(await screen.findByTestId('push-to-external-service')).toBeDisabled();
     });
 
@@ -429,9 +431,8 @@ for (let i = 0; i < 50; i++) {
         <CaseViewPage {...{ ...caseProps, connector: { ...caseProps, name: 'old-name' } }} />
       );
 
-      expect(await screen.findByTestId('push-to-external-service')).toHaveTextContent(
-        'My Resilient connector'
-      );
+      expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
+      expect(await screen.findByText('Update My Resilient connector incident')).toBeInTheDocument();
     });
 
     describe('Callouts', () => {
@@ -601,16 +602,6 @@ for (let i = 0; i < 50; i++) {
           appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
           expect(await screen.findByTestId('description')).toBeInTheDocument();
-        });
-      });
-
-      describe('breadcrumbs', () => {
-        it('should set the cases title', async () => {
-          appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-          await waitFor(() => {
-            expect(mockSetTitle).toHaveBeenCalledWith([caseProps.caseData.title, 'Cases', 'Test']);
-          });
         });
       });
     });

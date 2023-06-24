@@ -804,6 +804,23 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
     });
+
+    describe('breadcrumbs', () => {
+      after(async () => {
+        await cases.api.deleteAllCases();
+      });
+
+      it('should set the cases title', async () => {
+        const theCase = await createAndNavigateToCase(getPageObject, getService);
+        const firstBreadcrumb = await testSubjects.getVisibleText('breadcrumb first');
+        const middleBreadcrumb = await testSubjects.getVisibleText('breadcrumb');
+        const lastBreadcrumb = await testSubjects.getVisibleText('breadcrumb last');
+
+        expect(firstBreadcrumb).to.be('Management');
+        expect(middleBreadcrumb).to.be('Cases');
+        expect(lastBreadcrumb).to.be(theCase.title);
+      });
+    });
   });
 };
 
@@ -830,8 +847,10 @@ const createAndNavigateToCase = async (
   const cases = getService('cases');
 
   await cases.navigation.navigateToApp();
-  await cases.api.createNthRandomCases(1);
+  const theCase = await cases.api.createCase();
   await cases.casesTable.waitForCasesToBeListed();
   await cases.casesTable.goToFirstListedCase();
   await header.waitUntilLoadingHasFinished();
+
+  return theCase;
 };
