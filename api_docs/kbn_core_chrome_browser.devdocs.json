@@ -2862,7 +2862,15 @@
             "section": "def-common.DeepLinkId",
             "text": "DeepLinkId"
           },
-          " | \"serverlessElasticsearch\" | ",
+          " | ",
+          {
+            "pluginId": "@kbn/deeplinks-search",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksSearchPluginApi",
+            "section": "def-common.DeepLinkId",
+            "text": "DeepLinkId"
+          },
+          " | ",
           {
             "pluginId": "@kbn/deeplinks-observability",
             "scope": "common",
