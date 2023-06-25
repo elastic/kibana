@@ -125,7 +125,7 @@ const userActionsStats = {
   totalOtherActions: 11,
 };
 
-for (let i = 0; i < 45; i++) {
+for (let i = 0; i < 50; i++) {
   describe('CaseViewPage', () => {
     const updateCaseProperty = defaultUpdateCaseState.mutate;
     const pushCaseToExternalService = jest.fn();
@@ -463,14 +463,18 @@ for (let i = 0; i < 45; i++) {
     describe('Tabs', () => {
       const getAlertsStateTableMock = jest.fn();
 
+      appMockRenderer.coreStart.triggersActionsUi.getAlertsStateTable =
+        getAlertsStateTableMock.mockReturnValue(<div data-test-subj="alerts-table" />);
+
       beforeEach(() => {
-        appMockRenderer.coreStart.triggersActionsUi.getAlertsStateTable =
-          getAlertsStateTableMock.mockReturnValue(<div data-test-subj="alerts-table" />);
         jest.clearAllMocks();
       });
 
       it('renders tabs correctly', async () => {
         appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+        expect(await screen.getByRole('tablist')).toBeInTheDocument();
+
         expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
         expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
         expect(await screen.findByTestId('case-view-tab-title-files')).toBeInTheDocument();
