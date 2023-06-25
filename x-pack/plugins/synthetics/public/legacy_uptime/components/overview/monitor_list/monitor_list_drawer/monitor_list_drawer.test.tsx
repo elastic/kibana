@@ -83,7 +83,8 @@ describe('MonitorListDrawer component', () => {
         loading={false}
       />
     );
-    expect(component).toMatchSnapshot();
+    // dive() removes all unnecessary React-Router wrapping elements
+    expect(component.dive()).toMatchSnapshot();
   });
 
   it('renders a MonitorListDrawer when there are many checks', () => {
@@ -108,6 +109,7 @@ describe('MonitorListDrawer component', () => {
         loading={false}
       />
     );
-    expect(component).toMatchSnapshot();
+    // dive() removes all unnecessary React-Router wrapping elements
+    expect(component.dive()).toMatchSnapshot();
   });
 });
