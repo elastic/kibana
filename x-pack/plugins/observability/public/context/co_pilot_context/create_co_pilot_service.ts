@@ -127,7 +127,15 @@ export function createCoPilotService({
 
               read();
             })
-            .catch((err) => {
+            .catch(async (err) => {
+              if ('response' in err) {
+                try {
+                  const responseBody = await err.response.json();
+                  err.message = responseBody.message;
+                } catch {
+                  // leave message as-is
+                }
+              }
               subject.error(err);
             });
         })

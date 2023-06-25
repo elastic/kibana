@@ -42,7 +42,14 @@ const promptRoutes: {
           throw Boom.notImplemented();
         }
 
-        return client.chatCompletion.create(prompt.messages(resources.params.body as any));
+        try {
+          return await client.chatCompletion.create(prompt.messages(resources.params.body as any));
+        } catch (error: any) {
+          if (axios.isAxiosError(error) && error.response?.status === 401) {
+            throw Boom.forbidden(error.response?.statusText);
+          }
+          throw error;
+        }
       },
     });
   })
