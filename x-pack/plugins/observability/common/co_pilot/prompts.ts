@@ -5,26 +5,12 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import {
-  type ChatCompletionRequestMessage,
-  type CreateChatCompletionResponse,
-  type CreateChatCompletionResponseChoicesInner,
+import type {
+  ChatCompletionRequestMessage,
+  CreateChatCompletionResponse,
+  CreateChatCompletionResponseChoicesInner,
 } from 'openai';
-
-export enum OpenAIProvider {
-  OpenAI = 'openAI',
-  AzureOpenAI = 'azureOpenAI',
-}
-
-export enum CoPilotPromptId {
-  ProfilingExplainFunction = 'profilingExplainFunction',
-  ProfilingOptimizeFunction = 'profilingOptimizeFunction',
-  ApmExplainError = 'apmExplainError',
-  LogsExplainMessage = 'logsExplainMessage',
-  LogsFindSimilar = 'logsFindSimilar',
-  InfraExplainProcess = 'infraExplainProcess',
-  ExplainLogSpike = 'explainLogSpike',
-}
+import { CoPilotPromptId } from '.';
 
 const PERF_GPT_SYSTEM_MESSAGE = {
   content: `You are perf-gpt, a helpful assistant for performance analysis and optimisation

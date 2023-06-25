@@ -11,7 +11,8 @@ import * as t from 'io-ts';
 import { map } from 'lodash';
 import { ChatCompletionRequestMessageRoleEnum, CreateChatCompletionResponse } from 'openai';
 import { Readable } from 'stream';
-import { CoPilotPromptMap, coPilotPrompts } from '../../../common/co_pilot';
+import { CoPilotPromptMap } from '../../../common/co_pilot';
+import { coPilotPrompts } from '../../../common/co_pilot/prompts';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 import { ObservabilityRouteCreateOptions, ObservabilityRouteHandlerResources } from '../types';
 
