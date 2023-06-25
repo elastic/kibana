@@ -30,7 +30,8 @@ export const Route = <T extends {}>({
   render,
   element: Element,
   ...rest
-}: LegacyRouteProps<string, { [K: string]: string } & T> & RouteProps) => {
+}: LegacyRouteProps<string, { [K: string]: string } & T> &
+  Pick<RouteProps, 'index' | 'element'>) => {
   const component = useMemo(() => {
     if (!Component) {
       return undefined;
