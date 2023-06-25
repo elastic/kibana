@@ -24,13 +24,24 @@ export const sortFirstTableColumn = () => {
 };
 
 export const expectTablePage = (pageNumber: number) => {
-  cy.get(tablePageSelector(pageNumber)).should('have.text', pageNumber);
+  cy.get(tablePageSelector(pageNumber)).first().should('have.text', pageNumber);
+};
+
+export const expectTablePageActive = (pageNumber: number) => {
+  cy.get(tablePageSelector(pageNumber)).last().should('have.attr', 'aria-current', 'true');
 };
 
 export const setRowsPerPageTo = (rowsCount: number) => {
   cy.get(TABLE_PER_PAGE_POPOVER_BTN).click({ force: true });
   cy.get(rowsPerPageSelector(rowsCount)).click();
   cy.get(rowsPerPageSelector(rowsCount)).should('not.exist');
+};
+
+export const setWithinRowsPerPageTo = (selector: string, rowsCount: number) => {
+  cy.get(selector).within(() => {
+    cy.get(TABLE_PER_PAGE_POPOVER_BTN).click({ force: true });
+  });
+  cy.get(rowsPerPageSelector(rowsCount)).trigger('click');
 };
 
 export const searchByTitle = (title: string) => {

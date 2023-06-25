@@ -201,3 +201,13 @@ export const MIXED_ALERT_TAG = '[data-test-subj="mixed-alert-tag"]';
 export const UNSELECTED_ALERT_TAG = '[data-test-subj="unselected-alert-tag"]';
 
 export const ALERTS_TABLE_ROW_LOADER = '[data-test-subj="row-loader"]';
+
+export const GROUP_LOADER = '[data-test-subj="is-loading-grouping-table"]';
+
+export const GROUP_SELECTOR = '[data-test-subj="group-selector-dropdown"]';
+export const GROUP_COUNT = '[data-test-subj="group-count"]';
+export const GROUP_OPTION_SELECTOR = (fieldName: string) => `[data-test-subj="panel-${fieldName}"]`;
+export const GROUP_LEVEL_SELECTOR = (num: number) => `[data-test-subj="grouping-level-${num}"]`;
+export const GROUP_PAGINATION_SELECTOR = (num: number) =>
+  `[data-test-subj="grouping-level-${num}-pagination"]`;
+export const GROUP_SELECTOR_OPTION = '[data-test-subj="group-panel-toggle"]';
