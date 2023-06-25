@@ -63,6 +63,14 @@ export const ADD_ELASTIC_RULES_BTN = '[data-test-subj="addElasticRulesButton"]';
 
 export const INSTALL_ALL_RULES_BUTTON = '[data-test-subj="installAllRulesButton"]';
 
+export const INSTALL_SELECTED_RULES_BUTTON = '[data-test-subj="installSelectedRulesButton"]';
+
+export const UPGRADE_ALL_RULES_BUTTON = '[data-test-subj="upgradeAllRulesButton"]';
+
+export const UPGRADE_SELECTED_RULES_BUTTON = '[data-test-subj="upgradeSelectedRulesButton"]';
+
+export const GO_BACK_TO_RULES_TABLE_BUTTON = '[data-test-subj="addRulesGoBackToRulesTableBtn"]';
+
 export const RULES_TABLE_INITIAL_LOADING_INDICATOR =
   '[data-test-subj="initialLoadingPanelAllRulesTable"]';
 
@@ -93,6 +101,8 @@ export const RULES_UPDATES_TAB = '[data-test-subj="navigation-updates"]';
 export const RULES_MANAGEMENT_TABLE = '[data-test-subj="rules-management-table"]';
 
 export const RULES_MONITORING_TABLE = '[data-test-subj="rules-monitoring-table"]';
+
+export const RULES_UPDATES_TABLE = '[data-test-subj="rules-upgrades-table"]';
 
 export const RULES_ROW = '.euiTableRow';
 

@@ -10,12 +10,20 @@ import type { Rule } from '../../../public/detection_engine/rule_management/logi
 import { createRuleAssetSavedObject } from '../../helpers/rules';
 import {
   ELASTIC_RULES_BTN,
+  GO_BACK_TO_RULES_TABLE_BUTTON,
+  INSTALL_ALL_RULES_BUTTON,
+  INSTALL_SELECTED_RULES_BUTTON,
   LOAD_PREBUILT_RULES_BTN,
   LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
+  RULES_MANAGEMENT_TAB,
   RULES_MANAGEMENT_TABLE,
   RULES_ROW,
+  RULES_UPDATES_TAB,
+  RULES_UPDATES_TABLE,
+  SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   TOASTER,
   UPDATE_PREBUILT_RULES_CALLOUT_BUTTON,
+  UPGRADE_ALL_RULES_BUTTON,
 } from '../../screens/alerts_detection_rules';
 import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import {
@@ -28,12 +36,7 @@ import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
-import {
-  installPrebuiltRulesButtonClick,
-  installPrebuiltRulesButtonClickWithError,
-  updatePrebuiltRulesButtonClick,
-  updatePrebuiltRulesButtonClickWithError,
-} from '../../tasks/prebuilt_rules';
+import { addElasticRulessButtonClick, ruleUpdatesTabClick } from '../../tasks/prebuilt_rules';
 
 describe('Detection rules, Prebuilt Rules Installation and Update workflow', () => {
   beforeEach(() => {
@@ -82,15 +85,12 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           );
 
           const numberOfRulesToInstall = [...new Set(ruleIds)].length;
-          installPrebuiltRulesButtonClick(LOAD_PREBUILT_RULES_BTN);
+          addElasticRulessButtonClick();
+
+          cy.get(INSTALL_ALL_RULES_BUTTON).click();
           cy.get(TOASTER)
             .should('be.visible')
-            .should(
-              'have.text',
-              'Installed pre-packaged rules and timeline templates from elastic'
-            );
-
-          cy.get(ELASTIC_RULES_BTN).contains(numberOfRulesToInstall);
+            .should('have.text', `${numberOfRulesToInstall} rules installed successfully.`);
         });
       });
     });
@@ -114,21 +114,12 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       waitForRulesTableToBeLoaded();
     });
 
-    it('should install available rules when user clicks on main installation call to action', () => {
-      installPrebuiltRulesButtonClick(LOAD_PREBUILT_RULES_BTN);
-      cy.get(TOASTER)
-        .should('be.visible')
-        .should('have.text', 'Installed pre-packaged rules and timeline templates from elastic');
-      cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length', 2);
-      cy.get(RULES_MANAGEMENT_TABLE).contains(RULE_1['security-rule'].name);
-      cy.get(RULES_MANAGEMENT_TABLE).contains(RULE_2['security-rule'].name);
-    });
-
-    it('should install available rules succesfully when user clicks on header installation call to action', () => {
-      installPrebuiltRulesButtonClick(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN);
-      cy.get(TOASTER)
-        .should('be.visible')
-        .should('have.text', 'Installed pre-packaged rules and timeline templates from elastic');
+    it('should install selected rules when user clicks on Install selected rules', () => {
+      addElasticRulessButtonClick();
+      cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
+      cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
+      cy.get(TOASTER).should('be.visible').should('have.text', `2 rules installed successfully.`);
+      cy.get(GO_BACK_TO_RULES_TABLE_BUTTON).click();
       cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length', 2);
       cy.get(RULES_MANAGEMENT_TABLE).contains(RULE_1['security-rule'].name);
       cy.get(RULES_MANAGEMENT_TABLE).contains(RULE_2['security-rule'].name);
@@ -136,15 +127,14 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
 
     it('should fail gracefully with toast error message when request to install rules fails', () => {
       /* Stub request to force rules installation to fail */
-      cy.intercept('PUT', '/api/detection_engine/rules/prepackaged', {
+      cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/installation/_perform', {
         statusCode: 500,
       }).as('installPrebuiltRules');
-      installPrebuiltRulesButtonClickWithError(LOAD_PREBUILT_RULES_BTN);
+      addElasticRulessButtonClick();
+      cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
+      cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
       cy.wait('@installPrebuiltRules');
-      cy.get(LOAD_PREBUILT_RULES_BTN).should('not.have.attr', 'disabled');
-      cy.get(TOASTER)
-        .should('be.visible')
-        .should('have.text', 'Failed to installed pre-packaged rules and timelines from elastic');
+      cy.get(TOASTER).should('be.visible').should('have.text', 'Rule installation failed');
     });
   });
 
@@ -171,29 +161,32 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       reload();
     });
 
-    it('should update rule succesfully when user clicks on update callout', () => {
-      updatePrebuiltRulesButtonClick();
-      cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length', 1);
-      cy.get(RULES_MANAGEMENT_TABLE).should('not.contain', OUTDATED_RULE['security-rule'].name);
-      cy.get(RULES_MANAGEMENT_TABLE).contains(UPDATED_RULE['security-rule'].name);
+    it('should update rule succesfully', () => {
+      cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/upgrade/_perform').as(
+        'updatePrebuiltRules'
+      );
+      ruleUpdatesTabClick();
+      cy.get(RULES_UPDATES_TABLE).find(RULES_ROW).should('have.length', 1);
+      cy.get(RULES_UPDATES_TABLE).contains(OUTDATED_RULE['security-rule'].name);
+      cy.get(UPGRADE_ALL_RULES_BUTTON).click();
+      cy.wait('@updatePrebuiltRules');
+      cy.get(TOASTER).should('be.visible').should('have.text', `1 rule updated successfully.`);
     });
 
     it('should fail gracefully with toast error message when request to update rules fails', () => {
       /* Stub request to force rules update to fail */
-      cy.intercept('PUT', '/api/detection_engine/rules/prepackaged', {
+      cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/upgrade/_perform', {
         statusCode: 500,
       }).as('updatePrebuiltRules');
-      updatePrebuiltRulesButtonClickWithError();
+      ruleUpdatesTabClick();
+      cy.get(RULES_UPDATES_TABLE).find(RULES_ROW).should('have.length', 1);
+      cy.get(RULES_UPDATES_TABLE).contains(OUTDATED_RULE['security-rule'].name);
+      cy.get(UPGRADE_ALL_RULES_BUTTON).click();
       cy.wait('@updatePrebuiltRules');
+      cy.get(TOASTER).should('be.visible').should('have.text', 'Rule update failed');
 
       /* Assert that the rule has not been updated in the UI */
-      cy.get(RULES_MANAGEMENT_TABLE).should('contain', OUTDATED_RULE['security-rule'].name);
-      cy.get(RULES_MANAGEMENT_TABLE).should('not.contain', UPDATED_RULE['security-rule'].name);
-      cy.get(UPDATE_PREBUILT_RULES_CALLOUT_BUTTON).should('not.have.attr', 'disabled');
-      /* Toast error is generic and mentions "installation" instead of "update" for all cases */
-      cy.get(TOASTER)
-        .should('be.visible')
-        .should('have.text', 'Failed to installed pre-packaged rules and timelines from elastic');
+      cy.get(RULES_UPDATES_TABLE).should('contain', OUTDATED_RULE['security-rule'].name);
     });
   });
 });
