@@ -47,49 +47,62 @@ const promptRoutes: {
   })
 );
 
-const feedbackRoute = createObservabilityServerRoute({
-  endpoint: 'POST /internal/observability/copilot/prompts/{promptId}/feedback',
+const trackRoute = createObservabilityServerRoute({
+  endpoint: 'POST /internal/observability/copilot/prompts/{promptId}/track',
   params: t.type({
     path: t.type({
       promptId: t.string,
     }),
-    body: t.type({
-      positive: t.boolean,
-      responseTime: t.number,
-      messages: t.array(
-        t.intersection([
-          t.type({
-            role: t.union([
-              t.literal(ChatCompletionRequestMessageRoleEnum.System),
-              t.literal(ChatCompletionRequestMessageRoleEnum.User),
-              t.literal(ChatCompletionRequestMessageRoleEnum.Assistant),
-            ]),
-            content: t.string,
-          }),
-          t.partial({
-            name: t.string,
-          }),
-        ])
-      ),
-      response: t.string,
-    }),
+    body: t.intersection([
+      t.type({
+        responseTime: t.number,
+        messages: t.array(
+          t.intersection([
+            t.type({
+              role: t.union([
+                t.literal(ChatCompletionRequestMessageRoleEnum.System),
+                t.literal(ChatCompletionRequestMessageRoleEnum.User),
+                t.literal(ChatCompletionRequestMessageRoleEnum.Assistant),
+              ]),
+              content: t.string,
+            }),
+            t.partial({
+              name: t.string,
+            }),
+          ])
+        ),
+        response: t.string,
+      }),
+      t.partial({
+        feedbackAction: t.union([t.literal('thumbsup'), t.literal('thumbsdown')]),
+      }),
+    ]),
   }),
   options: {
     tags: [],
   },
   handler: async (resources): Promise<void> => {
-    const { params, config } = resources;
+    const {
+      params,
+      config,
+      dependencies: {
+        pluginsSetup: { core },
+      },
+    } = resources;
 
     if (!config.aiAssistant?.enabled) {
       throw Boom.notImplemented;
     }
 
-    const deploymentId = resources.dependencies.pluginsSetup.cloud?.deploymentId || 'local';
+    const info = await (
+      await core.getStartServices()
+    )[0].elasticsearch.client.asInternalUser.info();
 
     const feedbackBody = {
-      cluster_id: deploymentId,
+      cluster_id: info.cluster_uuid,
+      // cluster_name: info.cluster_name,
       prompt_name: params.path.promptId,
-      feedback_action: params.body.positive ? 'thumbsup' : 'thumbsdown',
+      feedback_action: params.body.feedbackAction,
       model:
         'openAI' in config.aiAssistant.provider
           ? config.aiAssistant.provider.openAI.model
@@ -101,13 +114,11 @@ const feedbackRoute = createObservabilityServerRoute({
       ],
     };
 
-    resources.logger.debug(JSON.stringify(feedbackBody));
-
-    await axios.post(config.aiAssistant.feedbackUrl, feedbackBody);
+    await axios.post(config.aiAssistant.feedback.url, feedbackBody);
   },
 });
 
 export const observabilityCoPilotRouteRepository = {
   ...promptRoutes,
-  ...feedbackRoute,
+  ...trackRoute,
 };

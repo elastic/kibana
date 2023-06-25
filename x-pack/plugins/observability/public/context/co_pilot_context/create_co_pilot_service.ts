@@ -6,9 +6,9 @@
  */
 
 import { type HttpSetup } from '@kbn/core/public';
-import { concatMap, delay, Observable, of } from 'rxjs';
+import { BehaviorSubject, concatMap, delay, of } from 'rxjs';
 import { coPilotPrompts, type CreateChatCompletionResponseChunk } from '../../../common/co_pilot';
-import { type CoPilotService, type PromptObservableState } from '../../typings/co_pilot';
+import { type CoPilotService } from '../../typings/co_pilot';
 
 function getMessageFromChunks(chunks: CreateChatCompletionResponseChunk[]) {
   let message = '';
@@ -18,108 +18,118 @@ function getMessageFromChunks(chunks: CreateChatCompletionResponseChunk[]) {
   return message;
 }
 
-export function createCoPilotService({ enabled, http }: { enabled: boolean; http: HttpSetup }) {
+export function createCoPilotService({
+  enabled,
+  trackingEnabled,
+  http,
+}: {
+  enabled: boolean;
+  trackingEnabled: boolean;
+  http: HttpSetup;
+}) {
   const service: CoPilotService = {
     isEnabled: () => enabled,
+    isTrackingEnabled: () => trackingEnabled,
     prompt: (promptId, params) => {
-      return new Observable<PromptObservableState>((observer) => {
-        const messages = coPilotPrompts[promptId].messages(params as any);
+      const messages = coPilotPrompts[promptId].messages(params as any);
+      const subject = new BehaviorSubject({
+        messages,
+        loading: true,
+        message: '',
+      });
 
-        observer.next({ messages, chunks: [], loading: true });
+      http
+        .post(`/internal/observability/copilot/prompts/${promptId}`, {
+          body: JSON.stringify(params),
+          asResponse: true,
+          rawResponse: true,
+        })
+        .then((response) => {
+          const status = response.response?.status;
 
-        http
-          .post(`/internal/observability/copilot/prompts/${promptId}`, {
-            body: JSON.stringify(params),
-            asResponse: true,
-            rawResponse: true,
-          })
-          .then((response) => {
-            const status = response.response?.status;
+          if (!status || status >= 400) {
+            throw new Error(response.response?.statusText || 'Unexpected error');
+          }
 
-            if (!status || status >= 400) {
-              throw new Error(response.response?.statusText || 'Unexpected error');
-            }
+          const reader = response.response.body?.getReader();
 
-            const reader = response.response.body?.getReader();
+          if (!reader) {
+            throw new Error('Could not get reader from response');
+          }
 
-            if (!reader) {
-              throw new Error('Could not get reader from response');
-            }
+          const decoder = new TextDecoder();
 
-            const decoder = new TextDecoder();
+          const chunks: CreateChatCompletionResponseChunk[] = [];
 
-            const chunks: CreateChatCompletionResponseChunk[] = [];
+          let prev: string = '';
 
-            let prev: string = '';
-
-            function read() {
-              reader!.read().then(({ done, value }) => {
-                try {
-                  if (done) {
-                    observer.next({
-                      messages,
-                      chunks,
-                      message: getMessageFromChunks(chunks),
-                      loading: false,
-                    });
-                    observer.complete();
-                    return;
-                  }
-
-                  let lines = (prev + decoder.decode(value)).split('\n');
-
-                  const lastLine = lines[lines.length - 1];
-
-                  const isPartialChunk = !!lastLine && lastLine !== 'data: [DONE]';
-
-                  if (isPartialChunk) {
-                    prev = lastLine;
-                    lines.pop();
-                  } else {
-                    prev = '';
-                  }
-
-                  lines = lines
-                    .map((str) => str.substr(6))
-                    .filter((str) => !!str && str !== '[DONE]');
-
-                  const nextChunks: CreateChatCompletionResponseChunk[] = lines.map((line) =>
-                    JSON.parse(line)
-                  );
-
-                  nextChunks.forEach((chunk) => {
-                    chunks.push(chunk);
-                    observer.next({
-                      chunks,
-                      messages,
-                      message: getMessageFromChunks(chunks),
-                      loading: true,
-                    });
+          function read() {
+            reader!.read().then(({ done, value }) => {
+              try {
+                if (done) {
+                  subject.next({
+                    messages,
+                    message: getMessageFromChunks(chunks),
+                    loading: false,
                   });
-                } catch (err) {
-                  observer.error(err);
+                  subject.complete();
                   return;
                 }
-                read();
-              });
-            }
 
-            read();
+                let lines = (prev + decoder.decode(value)).split('\n');
 
-            return () => {
-              reader.cancel();
-            };
-          })
-          .catch((err) => {
-            observer.error(err);
-          });
-      }).pipe(concatMap((value) => of(value).pipe(delay(25))));
+                const lastLine = lines[lines.length - 1];
+
+                const isPartialChunk = !!lastLine && lastLine !== 'data: [DONE]';
+
+                if (isPartialChunk) {
+                  prev = lastLine;
+                  lines.pop();
+                } else {
+                  prev = '';
+                }
+
+                lines = lines
+                  .map((str) => str.substr(6))
+                  .filter((str) => !!str && str !== '[DONE]');
+
+                const nextChunks: CreateChatCompletionResponseChunk[] = lines.map((line) =>
+                  JSON.parse(line)
+                );
+
+                nextChunks.forEach((chunk) => {
+                  chunks.push(chunk);
+                  subject.next({
+                    messages,
+                    message: getMessageFromChunks(chunks),
+                    loading: true,
+                  });
+                });
+              } catch (err) {
+                subject.error(err);
+                return;
+              }
+              read();
+            });
+          }
+
+          read();
+
+          return () => {
+            reader.cancel();
+          };
+        })
+        .catch((err) => {
+          subject.error(err);
+        });
+
+      return subject.pipe(concatMap((value) => of(value).pipe(delay(25))));
     },
-    submitFeedback: async ({ messages, response, responseTime, positive, promptId }) => {
-      await http.post(`/internal/observability/copilot/prompts/${promptId}/feedback`, {
+    track: async ({ messages, response, responseTime, feedbackAction, promptId }) => {
+      await http.post(`/internal/observability/copilot/prompts/${promptId}/track`, {
         body: JSON.stringify({
           response,
-          positive,
+          feedbackAction,
           messages,
           responseTime,
         }),

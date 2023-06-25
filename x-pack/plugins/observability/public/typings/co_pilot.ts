@@ -7,14 +7,9 @@
 
 import type { ChatCompletionRequestMessage } from 'openai';
 import type { Observable } from 'rxjs';
-import type {
-  CoPilotPromptId,
-  PromptParamsOf,
-  CreateChatCompletionResponseChunk,
-} from '../../common/co_pilot';
+import type { CoPilotPromptId, PromptParamsOf } from '../../common/co_pilot';
 
 export interface PromptObservableState {
-  chunks: CreateChatCompletionResponseChunk[];
   message?: string;
   messages: ChatCompletionRequestMessage[];
   loading: boolean;
@@ -22,15 +17,16 @@ export interface PromptObservableState {
 
 export interface CoPilotService {
   isEnabled: () => boolean;
+  isTrackingEnabled: () => boolean;
   prompt<TPromptId extends CoPilotPromptId>(
     promptId: TPromptId,
     params: PromptParamsOf<TPromptId>
   ): Observable<PromptObservableState>;
-  submitFeedback: (options: {
+  track: (options: {
     messages: ChatCompletionRequestMessage[];
     response: string;
     promptId: CoPilotPromptId;
-    positive: boolean;
+    feedbackAction?: 'thumbsup' | 'thumbsdown';
     responseTime: number;
   }) => Promise<void>;
 }

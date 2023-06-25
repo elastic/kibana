@@ -42,12 +42,34 @@ export function CoPilotPromptFeedback({
       setHasSubmittedFeedback(true);
       if (messages) {
         coPilot
-          .submitFeedback({ messages, response, responseTime, promptId, positive })
+          .track({
+            messages,
+            response,
+            responseTime,
+            promptId,
+            feedbackAction: positive ? 'thumbsup' : 'thumbsdown',
+          })
           .catch((err) => {});
       }
     },
     [coPilot, promptId, messages, response, responseTime]
   );
+
+  const [hasSubmittedTelemetry, setHasSubmittedTelemetry] = useState(false);
+
+  useEffect(() => {
+    if (!hasSubmittedTelemetry && messages) {
+      setHasSubmittedTelemetry(true);
+      coPilot
+        .track({
+          messages,
+          response,
+          responseTime,
+          promptId,
+        })
+        .catch((err) => {});
+    }
+  }, [coPilot, promptId, messages, response, responseTime, hasSubmittedTelemetry]);
 
   useEffect(() => {
     setHasSubmittedFeedback(false);

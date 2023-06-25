@@ -94,7 +94,7 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
       return observable;
     }
 
-    return new Observable<PromptObservableState>(() => {});
+    return new Observable<PromptObservableState & { error?: any }>(() => {});
   }, [params, promptId, coPilot, hasOpened, setResponseTime]);
 
   const conversation = useObservable(conversation$);
@@ -124,13 +124,15 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
         {state === 'complete' ? (
           <>
             <EuiSpacer size="m" />
-            <CoPilotPromptFeedback
-              messages={messages}
-              response={content}
-              responseTime={responseTime!}
-              promptId={promptId}
-              coPilot={coPilot}
-            />
+            {coPilot.isTrackingEnabled() ? (
+              <CoPilotPromptFeedback
+                messages={messages}
+                response={content}
+                responseTime={responseTime!}
+                promptId={promptId}
+                coPilot={coPilot}
+              />
+            ) : undefined}
           </>
         ) : undefined}
       </>

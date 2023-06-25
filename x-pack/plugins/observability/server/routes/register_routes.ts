@@ -16,12 +16,11 @@ import {
 } from '@kbn/server-route-repository';
 import axios from 'axios';
 import * as t from 'io-ts';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { ObservabilityConfig } from '..';
 import { getHTTPResponseCode, ObservabilityError } from '../errors';
 import { IOpenAIClient } from '../services/openai/types';
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';
-import { ObservabilityConfig } from '..';
 
 interface RegisterRoutes {
   config: ObservabilityConfig;
@@ -33,7 +32,7 @@ interface RegisterRoutes {
 
 export interface RegisterRoutesDependencies {
   pluginsSetup: {
-    cloud?: CloudSetup;
+    core: CoreSetup;
   };
   ruleDataService: RuleDataPluginService;
   getRulesClientWithRequest: (request: KibanaRequest) => RulesClientApi;

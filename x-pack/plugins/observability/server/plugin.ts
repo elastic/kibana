@@ -253,7 +253,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         core,
         config,
         dependencies: {
-          pluginsSetup: plugins,
+          pluginsSetup: {
+            ...plugins,
+            core,
+          },
           ruleDataService,
           getRulesClientWithRequest: pluginStart.alerting.getRulesClientWithRequest,
           getOpenAIClient: () => openAIService?.client,
