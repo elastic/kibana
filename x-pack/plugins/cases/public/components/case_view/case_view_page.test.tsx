@@ -463,11 +463,10 @@ for (let i = 0; i < 50; i++) {
     describe('Tabs', () => {
       const getAlertsStateTableMock = jest.fn();
 
-      appMockRenderer.coreStart.triggersActionsUi.getAlertsStateTable =
-        getAlertsStateTableMock.mockReturnValue(<div data-test-subj="alerts-table" />);
-
       beforeEach(() => {
         jest.clearAllMocks();
+        appMockRenderer.coreStart.triggersActionsUi.getAlertsStateTable =
+          getAlertsStateTableMock.mockReturnValue(<div data-test-subj="alerts-table" />);
       });
 
       it('renders tabs correctly', async () => {
