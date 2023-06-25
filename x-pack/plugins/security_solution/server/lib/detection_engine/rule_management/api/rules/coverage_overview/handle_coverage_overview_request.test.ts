@@ -63,6 +63,29 @@ describe('handleCoverageOverviewRequest', () => {
       }),
     });
   });
+
+  it('request only the first chunk if there are less rules than the chunk size', async () => {
+    const rulesClientMock = {
+      find: jest.fn().mockReturnValue({
+        total: 9000,
+        data: generateRules(9000),
+      }),
+    };
+    const resolveParameters = jest.fn().mockReturnValue({});
+    const resolveDependencies = jest.fn().mockResolvedValue({
+      rulesClient: rulesClientMock,
+    });
+
+    await handleCoverageOverviewRequest({ resolveParameters, resolveDependencies });
+
+    expect(rulesClientMock.find).toHaveBeenCalledTimes(1);
+    expect(rulesClientMock.find).toHaveBeenCalledWith({
+      options: expect.objectContaining({
+        page: 1,
+        perPage: 10000,
+      }),
+    });
+  });
 });
 
 function generateRules(count: number): Rule[] {
