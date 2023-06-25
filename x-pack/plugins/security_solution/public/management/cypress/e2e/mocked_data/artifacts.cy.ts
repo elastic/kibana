@@ -12,6 +12,7 @@ import {
   loginWithRole,
   ROLE,
 } from '../../tasks/login';
+import { visit } from '../../tasks/common';
 
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { removeAllArtifacts } from '../../tasks/artifacts';

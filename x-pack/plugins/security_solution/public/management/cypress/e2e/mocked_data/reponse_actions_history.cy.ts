@@ -8,6 +8,7 @@
 import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
+import { visit } from '../../tasks/common';
 
 describe('Response actions history page', () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;

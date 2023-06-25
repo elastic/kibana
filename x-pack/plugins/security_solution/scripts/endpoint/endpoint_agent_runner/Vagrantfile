@@ -12,6 +12,7 @@ Vagrant.configure("2") do |config|
   end
   config.vm.provision "file", source: cachedAgentSource, destination: "~/#{cachedAgentFilename}"
   config.vm.provision "shell", inline: "tar -zxf #{cachedAgentFilename} && rm -f #{cachedAgentFilename}"
+  config.vm.provision "shell", inline: "sudo apt-get install unzip"
 end
 
 # Vagrant.configure("2") do |config|

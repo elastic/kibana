@@ -38,14 +38,7 @@ describe('Isolate command', () => {
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
 
-  // createdHost = {
-  //   agentId: '81ac2a3c-0fda-4aae-a932-f44ea5861b10',
-  //   hostname: 'test-host-2348',
-  // };
-  // isolateComment = `Isolating ${createdHost.hostname}`;
-  // releaseComment = `Releasing ${createdHost.hostname}`;
-
-  beforeEach(() => {
+  before(() => {
     getEndpointIntegrationVersion().then((version) => {
       createAgentPolicyTask(version, 'alerts test').then((data) => {
         indexedPolicy = data;
@@ -63,7 +56,7 @@ describe('Isolate command', () => {
     });
   });
 
-  afterEach(() => {
+  after(() => {
     if (createdHost) {
       cy.task('destroyEndpointHost', createdHost).then(() => {});
     }
@@ -122,7 +115,10 @@ describe('Isolate command', () => {
     let ruleName: string;
 
     before(() => {
-      loadRule({ query: `agent.name: ${createdHost.hostname}` }, false).then((data) => {
+      loadRule(
+        { query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` },
+        false
+      ).then((data) => {
         ruleId = data.id;
         ruleName = data.name;
       });
@@ -134,14 +130,11 @@ describe('Isolate command', () => {
       }
     });
 
-    it('should have generated endpoint and rule', () => {
+    it('should isolate and release host', () => {
       visit(APP_ENDPOINTS_PATH);
       cy.contains(createdHost.hostname).should('exist');
 
       toggleRuleOffAndOn(ruleName);
-    });
-
-    it('should isolate and release host', () => {
       visitRuleAlerts(ruleName);
 
       closeAllToasts();
@@ -177,7 +170,10 @@ describe('Isolate command', () => {
     const caseOwner = 'securitySolution';
 
     before(() => {
-      loadRule({ query: `agent.name: ${createdHost.hostname}` }, false).then((data) => {
+      loadRule(
+        { query: `agent.name: ${createdHost.hostname} and agent.type: endpoint` },
+        false
+      ).then((data) => {
         ruleId = data.id;
         ruleName = data.name;
       });
@@ -199,14 +195,12 @@ describe('Isolate command', () => {
       }
     });
 
-    it('should have generated endpoint and rule', () => {
+    it('should isolate and release host', () => {
       visit(APP_ENDPOINTS_PATH);
       cy.contains(createdHost.hostname).should('exist');
 
       toggleRuleOffAndOn(ruleName);
-    });
 
-    it('should isolate and release host', () => {
       visitRuleAlerts(ruleName);
       closeAllToasts();
 

@@ -16,6 +16,7 @@ import {
   setResponderActionLogDateRange,
 } from '../../screens/responder';
 import { login } from '../../tasks/login';
+import { visit } from '../../tasks/common';
 import { indexNewCase } from '../../tasks/index_new_case';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
