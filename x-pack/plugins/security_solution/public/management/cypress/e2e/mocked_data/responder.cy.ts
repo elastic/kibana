@@ -102,14 +102,14 @@ describe('When accessing Endpoint Response Console', () => {
     });
 
     it('should display responder option in take action menu', () => {
-      cy.visit(caseUrlPath);
+      visit(caseUrlPath);
       closeAllToasts();
       openCaseAlertDetails();
       cy.getByTestSubj('endpointResponseActions-action-item').should('be.enabled');
     });
 
     it('should display Responder response action interface', () => {
-      cy.visit(caseUrlPath);
+      visit(caseUrlPath);
       closeAllToasts();
       openCaseAlertDetails();
       cy.getByTestSubj('endpointResponseActions-action-item').click();

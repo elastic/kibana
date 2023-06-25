@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import type { Agent } from '@kbn/fleet-plugin/common';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/toasts';
 import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { login } from '../../tasks/login';
+import { visit } from '../../tasks/common';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import {
-  createAgentPolicyTask,
-  getEndpointIntegrationVersion,
-  reassignAgentPolicy,
-} from '../../tasks/fleet';
+import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import { changeAlertsFilter } from '../../tasks/alerts';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
@@ -67,38 +63,28 @@ describe('Automated Response Actions', () => {
   });
 
   describe('From alerts', () => {
-    let response: IndexedFleetEndpointPolicyResponse;
-    let initialAgentData: Agent;
     let ruleId: string;
     let ruleName: string;
 
     before(() => {
-      loadRule(true).then((data) => {
+      loadRule({}, true).then((data) => {
         ruleId = data.id;
         ruleName = data.name;
       });
     });
 
     after(() => {
-      if (initialAgentData?.policy_id) {
-        reassignAgentPolicy(initialAgentData.id, initialAgentData.policy_id);
-      }
-      if (response) {
-        cy.task('deleteIndexedFleetEndpointPolicies', response);
-      }
       if (ruleId) {
         cleanupRule(ruleId);
       }
     });
 
     it('should have generated endpoint and rule', () => {
-      cy.visit(APP_ENDPOINTS_PATH);
+      visit(APP_ENDPOINTS_PATH);
       cy.contains(createdHost.hostname).should('exist');
 
       toggleRuleOffAndOn(ruleName);
-    });
 
-    it('should display endpoint automated response action in event details flyout ', () => {
       visitRuleAlerts(ruleName);
       closeAllToasts();
 

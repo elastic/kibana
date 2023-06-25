@@ -78,7 +78,7 @@ describe('Isolate command', () => {
     });
 
     it('should allow filtering endpoint by Isolated status', () => {
-      cy.visit(APP_PATH + getEndpointListPath({ name: 'endpointList' }));
+      visit(APP_PATH + getEndpointListPath({ name: 'endpointList' }));
       closeAllToasts();
       filterOutIsolatedHosts();
       isolatedEndpointHostnames.forEach(checkEndpointIsIsolated);
@@ -130,7 +130,7 @@ describe('Isolate command', () => {
       let isolateRequestResponse: ActionDetails;
       let releaseRequestResponse: ActionDetails;
 
-      cy.visit(APP_ALERTS_PATH);
+      visit(APP_ALERTS_PATH);
       closeAllToasts();
 
       cy.getByTestSubj('alertsTable').within(() => {
@@ -256,7 +256,7 @@ describe('Isolate command', () => {
       const releaseComment = `Releasing ${hostname}`;
       const caseAlertId = caseAlertActions.comments[alertId];
 
-      cy.visit(caseUrlPath);
+      visit(caseUrlPath);
       closeAllToasts();
       openCaseAlertDetails(caseAlertId);
 

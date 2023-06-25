@@ -16,7 +16,7 @@ export const cleanupRule = (id: string) => {
   request({ method: 'DELETE', url: `/api/detection_engine/rules?id=${id}` });
 };
 
-export const loadRule = (includeResponseActions = true) =>
+export const loadRule = (body = {}, includeResponseActions = true) =>
   request<RuleResponse>({
     method: 'POST',
     url: `/api/detection_engine/rules`,
@@ -55,6 +55,7 @@ export const loadRule = (includeResponseActions = true) =>
       actions: [],
       enabled: true,
       throttle: 'no_actions',
+      ...body,
       ...(includeResponseActions
         ? {
             response_actions: [

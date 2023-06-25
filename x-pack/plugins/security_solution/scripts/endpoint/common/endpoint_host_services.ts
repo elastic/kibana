@@ -350,9 +350,24 @@ export async function getEndpointHosts(): Promise<
 }
 
 export function stopEndpointHost(hostName: string) {
+  if (process.env.CI) {
+    return execa('vagrant', ['suspend'], {
+      env: {
+        VAGRANT_CWD,
+        VMNAME: hostName,
+      },
+    });
+  }
   return execa('multipass', ['stop', hostName]);
 }
 
 export function startEndpointHost(hostName: string) {
+  if (process.env.CI) {
+    return execa('vagrant', ['up'], {
+      env: {
+        VAGRANT_CWD,
+      },
+    });
+  }
   return execa('multipass', ['start', hostName]);
 }

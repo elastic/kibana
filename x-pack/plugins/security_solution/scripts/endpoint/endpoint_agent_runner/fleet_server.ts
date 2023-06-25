@@ -57,8 +57,9 @@ export const runFleetServerIfNeeded = async (): Promise<
   log.indent(4);
 
   // const currentFleetServerUrl = await fetchFleetServerUrl(kbnClient);
+  // const fleetServerPackagePolicy = await getFleetServerPackagePolicy();
 
-  // if (currentFleetServerUrl) {
+  // if (currentFleetServerUrl && fleetServerPackagePolicy) {
   //   log.info(
   //     `Fleet server is already enrolled with Fleet - URL:\n${currentFleetServerUrl}\nNothing to do.`
   //   );

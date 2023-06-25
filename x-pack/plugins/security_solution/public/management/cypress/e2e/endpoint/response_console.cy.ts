@@ -102,7 +102,7 @@ describe('Response console', () => {
 
     before(() => {
       getEndpointIntegrationVersion().then((version) =>
-        createAgentPolicyTask(version, 'alerts test').then((data) => {
+        createAgentPolicyTask(version).then((data) => {
           indexedPolicy = data;
           policy = indexedPolicy.integrationPolicies[0];
 
@@ -188,11 +188,11 @@ describe('Response console', () => {
     });
   });
 
-  describe('File operations: get-file and  execute', () => {
-    const homeFilePath = `~`;
+  describe('File operations: get-file and execute', () => {
+    const homeFilePath = process.env.CI || true ? '/home/vagrant' : `/home/ubuntu`;
 
     const fileContent = 'This is a test file for the get-file command.';
-    const filePath = `~/test_file.txt`;
+    const filePath = `${homeFilePath}/test_file.txt`;
 
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
     let policy: PolicyData;
@@ -228,8 +228,13 @@ describe('Response console', () => {
       }
     });
 
-    it.skip('"get-file --path" - should retrieve a file', () => {
+    it('"get-file --path" - should retrieve a file', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
+      cy.task('createFileOnEndpoint', {
+        hostname: createdHost.hostname,
+        path: filePath,
+        content: fileContent,
+      });
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`get-file --path ${filePath}`);
       submitCommand();
@@ -259,7 +264,7 @@ describe('Response console', () => {
       });
     });
 
-    it('"execute --command" - should execute a command', async () => {
+    it('"execute --command" - should execute a command', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`execute --command "ls -al ${homeFilePath}"`);
@@ -310,13 +315,13 @@ describe('Response console', () => {
       performCommandInputChecks('isolate');
 
       // stop host so that we ensure tamper happens before endpoint processes the action
-      cy.task('stopEndpointHost');
+      cy.task('stopEndpointHost', createdHost.hostname);
       // get action doc before we submit command so we know when the new action doc is indexed
       cy.task('getLatestActionDoc').then((previousActionDoc) => {
         submitCommand();
         cy.task('tamperActionDoc', previousActionDoc);
       });
-      cy.task('startEndpointHost');
+      cy.task('startEndpointHost', createdHost.hostname);
 
       const actionValidationErrorMsg =
         'Fleet action response error: Failed to validate action signature; check Endpoint logs for details';

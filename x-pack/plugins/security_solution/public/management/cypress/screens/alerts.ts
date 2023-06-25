@@ -6,9 +6,10 @@
  */
 
 import { APP_ALERTS_PATH } from '../../../../common/constants';
+import { visit } from '../tasks/common';
 
 export const navigateToAlertsList = (urlQueryParams: string = '') => {
-  cy.visit(`${APP_ALERTS_PATH}${urlQueryParams ? `?${urlQueryParams}` : ''}`);
+  visit(`${APP_ALERTS_PATH}${urlQueryParams ? `?${urlQueryParams}` : ''}`);
 };
 
 export const clickAlertListRefreshButton = (): Cypress.Chainable => {

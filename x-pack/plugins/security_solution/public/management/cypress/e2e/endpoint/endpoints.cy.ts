@@ -16,6 +16,7 @@ import {
 } from '../../tasks/fleet';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { login } from '../../tasks/login';
+import { visit } from '../../tasks/common';
 import {
   AGENT_HOSTNAME_CELL,
   TABLE_ROW_ACTIONS,
@@ -71,7 +72,7 @@ describe('Endpoints page', () => {
   });
 
   it('Shows endpoint on the list', () => {
-    cy.visit(APP_ENDPOINTS_PATH);
+    visit(APP_ENDPOINTS_PATH);
     cy.contains('Hosts running Elastic Defend').should('exist');
     cy.getByTestSubj(AGENT_HOSTNAME_CELL)
       .contains(createdHost.hostname)
@@ -107,7 +108,7 @@ describe('Endpoints page', () => {
     });
 
     it('User can reassign a single endpoint to a different Agent Configuration', () => {
-      cy.visit(APP_ENDPOINTS_PATH);
+      visit(APP_ENDPOINTS_PATH);
       const hostname = cy
         .getByTestSubj(AGENT_HOSTNAME_CELL)
         .filter(`:contains("${createdHost.hostname}")`);
@@ -132,7 +133,7 @@ describe('Endpoints page', () => {
   it('should update endpoint policy on Endpoint', () => {
     const parseRevNumber = (revString: string) => Number(revString.match(/\d+/)?.[0]);
 
-    cy.visit(APP_ENDPOINTS_PATH);
+    visit(APP_ENDPOINTS_PATH);
 
     cy.getByTestSubj('policyListRevNo')
       .first()

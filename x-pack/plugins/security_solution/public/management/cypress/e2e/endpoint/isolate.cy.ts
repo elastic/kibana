@@ -12,7 +12,6 @@ import {
   checkEndpointListForOnlyIsolatedHosts,
   checkEndpointListForOnlyUnIsolatedHosts,
   checkFlyoutEndpointIsolation,
-  filterOutEndpoints,
   filterOutIsolatedHosts,
   isolateHostWithComment,
   openAlertDetails,
@@ -24,6 +23,7 @@ import {
 } from '../../tasks/isolate';
 import { cleanupCase, cleanupRule, loadCase, loadRule } from '../../tasks/api_fixtures';
 import { login } from '../../tasks/login';
+import { visit } from '../../tasks/common';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
@@ -37,6 +37,13 @@ describe('Isolate command', () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
+
+  // createdHost = {
+  //   agentId: '81ac2a3c-0fda-4aae-a932-f44ea5861b10',
+  //   hostname: 'test-host-2348',
+  // };
+  // isolateComment = `Isolating ${createdHost.hostname}`;
+  // releaseComment = `Releasing ${createdHost.hostname}`;
 
   beforeEach(() => {
     getEndpointIntegrationVersion().then((version) => {
@@ -76,7 +83,7 @@ describe('Isolate command', () => {
 
   describe('From manage', () => {
     it('should allow filtering endpoint by Isolated status', () => {
-      cy.visit(APP_ENDPOINTS_PATH);
+      visit(APP_ENDPOINTS_PATH);
       closeAllToasts();
       cy.getByTestSubj('globalLoadingIndicator-hidden').should('exist');
       checkEndpointListForOnlyUnIsolatedHosts();
@@ -115,7 +122,7 @@ describe('Isolate command', () => {
     let ruleName: string;
 
     before(() => {
-      loadRule(false).then((data) => {
+      loadRule({ query: `agent.name: ${createdHost.hostname}` }, false).then((data) => {
         ruleId = data.id;
         ruleName = data.name;
       });
@@ -128,7 +135,7 @@ describe('Isolate command', () => {
     });
 
     it('should have generated endpoint and rule', () => {
-      cy.visit(APP_ENDPOINTS_PATH);
+      visit(APP_ENDPOINTS_PATH);
       cy.contains(createdHost.hostname).should('exist');
 
       toggleRuleOffAndOn(ruleName);
@@ -136,8 +143,6 @@ describe('Isolate command', () => {
 
     it('should isolate and release host', () => {
       visitRuleAlerts(ruleName);
-
-      filterOutEndpoints(createdHost.hostname);
 
       closeAllToasts();
       openAlertDetails();
@@ -172,7 +177,7 @@ describe('Isolate command', () => {
     const caseOwner = 'securitySolution';
 
     before(() => {
-      loadRule(false).then((data) => {
+      loadRule({ query: `agent.name: ${createdHost.hostname}` }, false).then((data) => {
         ruleId = data.id;
         ruleName = data.name;
       });
@@ -195,7 +200,7 @@ describe('Isolate command', () => {
     });
 
     it('should have generated endpoint and rule', () => {
-      cy.visit(APP_ENDPOINTS_PATH);
+      visit(APP_ENDPOINTS_PATH);
       cy.contains(createdHost.hostname).should('exist');
 
       toggleRuleOffAndOn(ruleName);
@@ -203,7 +208,6 @@ describe('Isolate command', () => {
 
     it('should isolate and release host', () => {
       visitRuleAlerts(ruleName);
-      filterOutEndpoints(createdHost.hostname);
       closeAllToasts();
 
       openAlertDetails();
@@ -213,7 +217,7 @@ describe('Isolate command', () => {
       cy.contains(`An alert was added to \"Test ${caseOwner} case`);
 
       cy.intercept('GET', `/api/cases/${caseId}/user_actions/_find*`).as('case');
-      cy.visit(`${APP_CASES_PATH}/${caseId}`);
+      visit(`${APP_CASES_PATH}/${caseId}`);
       cy.wait('@case', { timeout: 30000 }).then(({ response: res }) => {
         const caseAlertId = res?.body.userActions[1].id;
 

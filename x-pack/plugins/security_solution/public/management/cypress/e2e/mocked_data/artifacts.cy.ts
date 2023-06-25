@@ -20,18 +20,18 @@ import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoi
 
 const loginWithWriteAccess = (url: string) => {
   loginWithRole(ROLE.endpoint_security_policy_manager);
-  cy.visit(url);
+  visit(url);
 };
 
 const loginWithReadAccess = (privilegePrefix: string, url: string) => {
   const roleWithArtifactReadPrivilege = getRoleWithArtifactReadPrivilege(privilegePrefix);
   loginWithCustomRole('roleWithArtifactReadPrivilege', roleWithArtifactReadPrivilege);
-  cy.visit(url);
+  visit(url);
 };
 
 const loginWithoutAccess = (url: string) => {
   loginWithRole(ROLE.t1_analyst);
-  cy.visit(url);
+  visit(url);
 };
 
 describe('Artifacts pages', () => {

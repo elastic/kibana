@@ -31,7 +31,7 @@ describe('Endpoints page', () => {
   });
 
   it('Loads the endpoints page', () => {
-    cy.visit('/app/security/administration/endpoints');
+    visit('/app/security/administration/endpoints');
     cy.contains('Hosts running Elastic Defend').should('exist');
   });
 });

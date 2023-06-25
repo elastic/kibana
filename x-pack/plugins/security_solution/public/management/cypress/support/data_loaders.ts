@@ -52,7 +52,6 @@ import {
   startEndpointHost,
   createAndEnrollEndpointHost,
   destroyEndpointHost,
-  getEndpointHosts,
   stopEndpointHost,
   VAGRANT_CWD,
 } from '../../../../scripts/endpoint/common/endpoint_host_services';
@@ -217,7 +216,7 @@ export const dataLoadersForRealEndpoints = (
   });
 
   on('before:run', async () => {
-    const test = await startRuntimeServices({
+    await startRuntimeServices({
       kibanaUrl: config.env.KIBANA_URL,
       elasticUrl: config.env.ELASTICSEARCH_URL,
       fleetServerUrl: config.env.FLEET_SERVER_URL,
@@ -226,18 +225,14 @@ export const dataLoadersForRealEndpoints = (
       asSuperuser: true,
     });
     const data = await runFleetServerIfNeeded();
-    console.error('data', data);
-    // .then(runFleetServerIfNeeded)
-    // .then((result) => {
-    //   fleetServerContainerId = result?.fleetServerContainerId;
-    // });
+    fleetServerContainerId = data?.fleetServerContainerId;
   });
 
-  // on('after:run', () => {
-  //   if (fleetServerContainerId) {
-  //     execa.sync('docker', ['kill', fleetServerContainerId]);
-  //   }
-  // });
+  on('after:run', () => {
+    if (fleetServerContainerId) {
+      execa.sync('docker', ['kill', fleetServerContainerId]);
+    }
+  });
 
   on('task', {
     createEndpointHost: async (
@@ -272,7 +267,15 @@ export const dataLoadersForRealEndpoints = (
       path: string;
       content: string;
     }): Promise<null> => {
-      await execa(`multipass`, ['exec', hostname, '--', 'sh', '-c', `echo ${content} > ${path}`]);
+      if (process.env.CI) {
+        await execa('vagrant', ['ssh', '--', `echo ${content} > ${path}`], {
+          env: {
+            VAGRANT_CWD,
+          },
+        });
+      } else {
+        await execa(`multipass`, ['exec', hostname, '--', 'sh', '-c', `echo ${content} > ${path}`]);
+      }
       return null;
     },
 
@@ -325,26 +328,37 @@ export const dataLoadersForRealEndpoints = (
       path: string;
       password?: string;
     }): Promise<string> => {
-      const result = await execa(`multipass`, [
-        'exec',
-        hostname,
-        '--',
-        'sh',
-        '-c',
-        `unzip -p ${password ? `-P ${password} ` : ''}${path}`,
-      ]);
+      let result;
+
+      if (process.env.CI) {
+        result = await execa(
+          `vagrant`,
+          ['ssh', '--', `unzip -p ${password ? `-P ${password} ` : ''}${path}`],
+          {
+            env: {
+              VAGRANT_CWD,
+            },
+          }
+        );
+      } else {
+        result = await execa(`multipass`, [
+          'exec',
+          hostname,
+          '--',
+          'sh',
+          '-c',
+          `unzip -p ${password ? `-P ${password} ` : ''}${path}`,
+        ]);
+      }
+
       return result.stdout;
     },
 
-    stopEndpointHost: async () => {
-      const hosts = await getEndpointHosts();
-      const hostName = hosts[0].name;
+    stopEndpointHost: async (hostName) => {
       return stopEndpointHost(hostName);
     },
 
-    startEndpointHost: async () => {
-      const hosts = await getEndpointHosts();
-      const hostName = hosts[0].name;
+    startEndpointHost: async (hostName) => {
       return startEndpointHost(hostName);
     },
   });

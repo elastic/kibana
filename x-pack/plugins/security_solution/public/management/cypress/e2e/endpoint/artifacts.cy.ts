@@ -12,10 +12,9 @@ import type { MetadataListResponse, PolicyData } from '../../../../../common/end
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { removeAllArtifacts } from '../../tasks/artifacts';
-// import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
 import { login } from '../../tasks/login';
 import { performUserActions } from '../../tasks/perform_user_actions';
-import { request } from '../../tasks/common';
+import { request, visit } from '../../tasks/common';
 import {
   createAgentPolicyTask,
   getEndpointIntegrationVersion,
@@ -58,7 +57,6 @@ describe('Artifact pages', () => {
     );
 
     login();
-    // loadEndpointDataForEventFiltersIfNeeded();
     removeAllArtifacts();
 
     // wait for ManifestManager to pick up artifact changes that happened either here
@@ -76,7 +74,7 @@ describe('Artifact pages', () => {
 
   beforeEach(() => {
     login();
-    cy.visit(APP_ENDPOINTS_PATH);
+    visit(APP_ENDPOINTS_PATH);
   });
 
   after(() => {
@@ -103,7 +101,7 @@ describe('Artifact pages', () => {
           .invoke('text')
           .then(parseRevNumber)
           .then((initialRevisionNumber) => {
-            cy.visit(`/app/security/administration/${testData.urlPath}`);
+            visit(`/app/security/administration/${testData.urlPath}`);
 
             cy.getByTestSubj(`${testData.pagePrefix}-emptyState-addButton`).click();
             performUserActions(testData.create.formActions);
@@ -114,7 +112,7 @@ describe('Artifact pages', () => {
               cy.getByTestSubj(checkResult.selector).should('have.text', checkResult.value);
             }
 
-            cy.visit(APP_ENDPOINTS_PATH);
+            visit(APP_ENDPOINTS_PATH);
 
             // depends on the 10s auto refresh
             cy.getByTestSubj('policyListRevNo')

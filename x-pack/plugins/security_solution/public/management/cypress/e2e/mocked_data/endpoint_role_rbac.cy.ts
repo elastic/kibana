@@ -18,7 +18,7 @@ describe('When defining a kibana role for Endpoint security access', () => {
 
   beforeEach(() => {
     login();
-    cy.visit('/app/management/security/roles/edit');
+    visit('/app/management/security/roles/edit');
     closeAllToasts();
     cy.getByTestSubj('addSpacePrivilegeButton').click();
     cy.getByTestSubj('featureCategoryButton_securitySolution').closest('button').click();
