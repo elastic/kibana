@@ -14,20 +14,16 @@ describe('handleCoverageOverviewRequest', () => {
       find: jest
         .fn()
         .mockReturnValueOnce({
-          total: 35555,
+          total: 25555,
           data: generateRules(10000),
         })
         .mockReturnValueOnce({
-          total: 35555,
+          total: 25555,
           data: generateRules(10000),
         })
         .mockReturnValueOnce({
-          total: 35555,
+          total: 25555,
           data: generateRules(10000),
-        })
-        .mockReturnValueOnce({
-          total: 35555,
-          data: generateRules(5555),
         }),
     };
     const resolveParameters = jest.fn().mockReturnValue({});
@@ -37,7 +33,7 @@ describe('handleCoverageOverviewRequest', () => {
 
     await handleCoverageOverviewRequest({ resolveParameters, resolveDependencies });
 
-    expect(rulesClientMock.find).toHaveBeenCalledTimes(4);
+    expect(rulesClientMock.find).toHaveBeenCalledTimes(3);
     expect(rulesClientMock.find).toHaveBeenCalledWith({
       options: expect.objectContaining({
         page: 1,
@@ -53,12 +49,6 @@ describe('handleCoverageOverviewRequest', () => {
     expect(rulesClientMock.find).toHaveBeenCalledWith({
       options: expect.objectContaining({
         page: 3,
-        perPage: 10000,
-      }),
-    });
-    expect(rulesClientMock.find).toHaveBeenCalledWith({
-      options: expect.objectContaining({
-        page: 4,
         perPage: 10000,
       }),
     });
