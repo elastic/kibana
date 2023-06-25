@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { waitForPageToBeLoaded } from '../../../../cypress/tasks/common';
-
 export const API_AUTH = Object.freeze({
   user: Cypress.env('ELASTICSEARCH_USERNAME'),
   pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
 });
 
 export const API_HEADERS = Object.freeze({ 'kbn-xsrf': 'cypress' });
+
+export const waitForPageToBeLoaded = () => {
+  cy.getByTestSubj('globalLoadingIndicator-hidden').should('exist');
+  cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
+};
 
 export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}) => {
   cy.visit(url, options);
