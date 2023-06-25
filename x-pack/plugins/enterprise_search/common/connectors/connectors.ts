@@ -61,7 +61,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'azure_blob_storage.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     keywords: ['cloud', 'azure', 'blob', 's3', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.azureBlob.name', {
       defaultMessage: 'Azure Blob Storage',
@@ -71,7 +71,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'confluence_cloud.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     keywords: ['confluence', 'cloud', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.confluence.name', {
       defaultMessage: 'Confluence Cloud & Server',
@@ -91,7 +91,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'jira_cloud.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     keywords: ['jira', 'cloud', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.jira.name', {
       defaultMessage: 'Jira Cloud & Server',
@@ -101,7 +101,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'network_drive.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     keywords: ['network', 'drive', 'file', 'directory', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.networkDrive.name', {
       defaultMessage: 'Network drive',
