@@ -50,7 +50,7 @@ export const runFleetServerIfNeeded = async (): Promise<
   const {
     log,
     kibana: { isLocalhost: isKibanaOnLocalhost },
-    kbnClient,
+    // kbnClient,
   } = getRuntimeServices();
 
   log.info(`Setting up fleet server (if necessary)`);
