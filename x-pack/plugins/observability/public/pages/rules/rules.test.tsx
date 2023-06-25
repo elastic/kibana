@@ -46,8 +46,11 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
     compositeSlo: {
       enabled: false,
     },
-    coPilot: {
+    aiAssistant: {
       enabled: false,
+      feedback: {
+        enabled: false,
+      },
     },
   },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
