@@ -83,7 +83,7 @@ export interface ConfigSchema {
     };
   };
   compositeSlo: { enabled: boolean };
-  aiAssistant: {
+  aiAssistant?: {
     enabled: boolean;
     feedback: {
       enabled: boolean;
@@ -335,7 +335,7 @@ export class Plugin
     this.coPilotService = createCoPilotService({
       enabled: !!config.aiAssistant?.enabled,
       http: coreSetup.http,
-      trackingEnabled: !!config.aiAssistant.feedback.enabled,
+      trackingEnabled: !!config.aiAssistant?.feedback.enabled,
     });
 
     return {
