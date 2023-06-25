@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 import styled from 'styled-components';
 
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
@@ -38,8 +38,8 @@ const Divider = styled.div`
 const PackDetailsPageComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
   const { packId } = useParams<{ packId: string }>();
-  const packsListProps = useRouterNavigate('packs');
-  const editQueryLinkProps = useRouterNavigate(`packs/${packId}/edit`);
+  const packsListProps = useRouterNavigate('/packs');
+  const editQueryLinkProps = useRouterNavigate(`/packs/${packId}/edit`);
 
   const { data } = usePack({ packId });
   const { data: agentIds } = useAgentPolicyAgentIds({

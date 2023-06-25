@@ -8,7 +8,7 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import qs from 'query-string';
 
 import { WithHeaderLayout } from '../../../components/layouts';
@@ -22,9 +22,9 @@ interface LocationState {
 
 const NewLiveQueryPageComponent = () => {
   useBreadcrumbs('live_query_new');
-  const { replace } = useHistory();
-  const location = useLocation<LocationState>();
-  const liveQueryListProps = useRouterNavigate('live_queries');
+  const navigate = useNavigate();
+  const location: { state: LocationState; search: string } = useLocation();
+  const liveQueryListProps = useRouterNavigate('/live_queries');
   const [initialFormData, setInitialFormData] = useState<Record<string, unknown> | undefined>({});
 
   const agentPolicyIds = useMemo(() => {
@@ -36,9 +36,9 @@ const NewLiveQueryPageComponent = () => {
   useEffect(() => {
     if (location.state?.form) {
       setInitialFormData(location.state?.form);
-      replace({ state: null });
+      navigate({}, { replace: true, state: null });
     }
-  }, [location.state?.form, replace]);
+  }, [location.state?.form, navigate]);
 
   const LeftColumn = useMemo(
     () => (

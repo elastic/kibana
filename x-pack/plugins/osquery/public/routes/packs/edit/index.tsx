@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';

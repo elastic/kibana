@@ -16,7 +16,7 @@ import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 
 const AddPackPageComponent = () => {
   useBreadcrumbs('pack_add');
-  const packListProps = useRouterNavigate('packs');
+  const packListProps = useRouterNavigate('/packs');
 
   const LeftColumn = useMemo(
     () => (

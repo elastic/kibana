@@ -36,7 +36,7 @@ const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
   handleSubmit,
   viewMode,
 }) => {
-  const savedQueryListProps = useRouterNavigate('saved_queries');
+  const savedQueryListProps = useRouterNavigate('/saved_queries');
 
   const hooksForm = useSavedQueryForm({
     defaultValue,

@@ -17,7 +17,7 @@ import {
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom-v5-compat';
 
 import styled from 'styled-components';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
@@ -34,8 +34,9 @@ const EditSavedQueryPageComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
 
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-  const { savedQueryId } = useParams<{ savedQueryId: string }>();
-  const savedQueryListProps = useRouterNavigate('saved_queries');
+  const params = useParams<{ savedQueryId: string }>();
+  const savedQueryId = params.savedQueryId as string;
+  const savedQueryListProps = useRouterNavigate('/saved_queries');
 
   const { isLoading, data: savedQueryDetails } = useSavedQuery({ savedQueryId });
   const updateSavedQueryMutation = useUpdateSavedQuery({ savedQueryId });

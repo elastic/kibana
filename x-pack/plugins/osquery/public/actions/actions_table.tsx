@@ -157,6 +157,7 @@ const ActionsTableComponent = () => {
     },
     [navigate]
   );
+
   const renderPlayButton = useCallback(
     (item, enabled) => {
       const playText = i18n.translate('xpack.osquery.liveQueryActions.table.runActionAriaLabel', {

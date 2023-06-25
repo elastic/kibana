@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom-v5-compat';
 import { useRouterNavigate } from '../common/lib/kibana';
 import { ManageIntegrationLink } from './manage_integration_link';
 import { Nav } from './layouts';

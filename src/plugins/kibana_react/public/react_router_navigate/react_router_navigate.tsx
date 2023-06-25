@@ -30,11 +30,11 @@ export const reactRouterNavigate = (
   onClickCallback?: Function
 ) => ({
   href: history.createHref(toLocationObject(to)),
-  onClick: reactRouterOnClickHandler(history, toLocationObject(to), onClickCallback),
+  onClick: reactRouterOnClickHandler(history.push, toLocationObject(to), onClickCallback),
 });
 
 export const reactRouterOnClickHandler =
-  (history: ScopedHistory | History, to: string | LocationObject, onClickCallback?: Function) =>
+  (push: History['push'], to: string | LocationObject, onClickCallback?: Function) =>
   (event: MouseEvent) => {
     if (onClickCallback) {
       onClickCallback(event);
@@ -56,5 +56,5 @@ export const reactRouterOnClickHandler =
 
     // prevents page reload
     event.preventDefault();
-    history.push(toLocationObject(to));
+    push(toLocationObject(to));
   };

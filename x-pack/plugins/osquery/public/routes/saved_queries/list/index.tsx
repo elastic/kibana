@@ -19,7 +19,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom-v5-compat';
 import deepEqual from 'fast-deep-equal';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { Direction } from '../../../../common/search_strategy';
@@ -45,19 +45,21 @@ interface PlayButtonProps {
 }
 
 const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, savedQuery }) => {
-  const { push } = useHistory();
+  const navigate = useNavigate();
 
   // TODO: Add href
   const handlePlayClick = useCallback(
     () =>
-      push('/live_queries/new', {
-        form: {
-          savedQueryId: savedQuery.id,
-          query: savedQuery.query,
-          ecs_mapping: savedQuery.ecs_mapping,
+      navigate('/live_queries/new', {
+        state: {
+          form: {
+            savedQueryId: savedQuery.id,
+            query: savedQuery.query,
+            ecs_mapping: savedQuery.ecs_mapping,
+          },
         },
       }),
-    [push, savedQuery]
+    [navigate, savedQuery]
   );
 
   const playText = useMemo(
@@ -97,7 +99,7 @@ const EditButtonComponent: React.FC<EditButtonProps> = ({
   savedQueryId,
   savedQueryName,
 }) => {
-  const buttonProps = useRouterNavigate(`saved_queries/${savedQueryId}`);
+  const buttonProps = useRouterNavigate(`/saved_queries/${savedQueryId}`);
 
   const editText = useMemo(
     () =>
@@ -129,7 +131,7 @@ const SavedQueriesPageComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
 
   useBreadcrumbs('saved_queries');
-  const newQueryLinkProps = useRouterNavigate('saved_queries/new');
+  const newQueryLinkProps = useRouterNavigate('/saved_queries/new');
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
   const [sortField, setSortField] = useState('updated_at');
