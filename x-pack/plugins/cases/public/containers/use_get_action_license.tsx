@@ -19,9 +19,8 @@ export const useGetActionLicense = () => {
   const toasts = useToasts();
   return useQuery(
     casesQueriesKeys.license(),
-    async () => {
-      const abortCtrl = new AbortController();
-      const response = await getActionLicense(abortCtrl.signal);
+    async ({ signal }) => {
+      const response = await getActionLicense(signal);
       return response.find((l) => l.id === MINIMUM_LICENSE_REQUIRED_CONNECTOR) ?? null;
     },
     {
