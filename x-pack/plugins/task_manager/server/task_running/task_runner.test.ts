@@ -1664,7 +1664,7 @@ describe('TaskManagerRunner', () => {
         expect(result).toEqual(asErr({ state: { new: 'foo' }, error: skipError }));
       });
 
-      test('xxx  does not skip when disabled (non-recurring task)', async () => {
+      test('does not skip when disabled (non-recurring task)', async () => {
         const mockTaskInstance: Partial<ConcreteTaskInstance> = {
           attempts: 5, // defaultMaxAttempts
           status: TaskStatus.Running,

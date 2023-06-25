@@ -354,8 +354,7 @@ export class TaskManagerRunner implements TaskRunner {
 
   private validateTaskParams() {
     let error;
-    const { state, taskType, params, id, numSkippedRuns = 0 } = this.instance.task;
-    const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
+    const { state, taskType, params, id } = this.instance.task;
 
     if (this.requeueInvalidTasksConfig.enabled) {
       try {
@@ -365,14 +364,11 @@ export class TaskManagerRunner implements TaskRunner {
         }
       } catch (err) {
         this.logger.warn(`Task (${taskType}/${id}) has a validation error: ${err.message}`);
-        if (numSkippedRuns < maxAttempts) {
-          error = createSkipError(err);
-        }
-        error = err;
+        error = createSkipError(err);
       }
     }
 
-    return { error, state };
+    return { ...(error ? { error } : {}), state };
   }
 
   public async removeTask(): Promise<void> {
