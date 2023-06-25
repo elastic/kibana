@@ -11,7 +11,8 @@ import { CertificateSearch } from './cert_search';
 
 describe('CertificatesSearch', () => {
   it('shallow renders expected elements for valid props', () => {
-    expect(shallowWithRouter(<CertificateSearch setSearch={jest.fn()} />)).toMatchSnapshot();
+    // dive() removes all unnecessary React-Router wrapping elements
+    expect(shallowWithRouter(<CertificateSearch setSearch={jest.fn()} />).dive()).toMatchSnapshot();
   });
   it('renders expected elements for valid props', () => {
     expect(renderWithRouter(<CertificateSearch setSearch={jest.fn()} />)).toMatchSnapshot();

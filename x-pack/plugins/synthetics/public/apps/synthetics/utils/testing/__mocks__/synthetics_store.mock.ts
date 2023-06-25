@@ -156,6 +156,13 @@ export const mockState: SyntheticsAppState = {
   certificates: {
     total: 0,
   },
+  certsList: {
+    error: null,
+    data: {
+      total: 0,
+      certs: [],
+    },
+  },
 };
 
 function getBrowserJourneyMockSlice() {
