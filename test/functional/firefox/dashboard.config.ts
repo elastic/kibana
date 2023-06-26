@@ -18,7 +18,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     testFiles: [
       require.resolve('../apps/dashboard/group4/dashboard_save'),
-      require.resolve('../apps/dashboard_elements'),
+      require.resolve('../apps/dashboard_elements/controls'),
+      require.resolve('../apps/dashboard_elements/image_embeddable'),
+      require.resolve('../apps/dashboard_elements/input_control_vis'),
+      require.resolve('../apps/dashboard_elements/markdown/_markdown_vis.ts'),
     ],
 
     junit: {
