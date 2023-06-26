@@ -184,7 +184,7 @@ export function getPluginPrivileges() {
         all: [],
         read: [ML_JOB_SAVED_OBJECT_TYPE],
       },
-      api: apmUserMlCapabilitiesKeys.map((k) => `ml:${k}`), // should this include feature keys?!!!!!!!!!!!!!!!!!!!!!!!
+      api: apmUserMlCapabilitiesKeys.map((k) => `ml:${k}`),
       ui: apmUserMlCapabilitiesKeys,
     },
   };
