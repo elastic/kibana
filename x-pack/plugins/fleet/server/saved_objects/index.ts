@@ -213,6 +213,8 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         },
         timeout: { type: 'integer' },
         broker_timeout: { type: 'integer' },
+        broker_ack_reliability: { type: 'text' },
+        broker_buffer_size: { type: 'integer' },
       },
     },
     migrations: {

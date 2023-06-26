@@ -10,6 +10,7 @@ import type { ValueOf } from '..';
 import type { kafkaAuthType, kafkaCompressionType, kafkaSaslMechanism } from '../../constants';
 import type { kafkaPartitionType } from '../../constants';
 import type { kafkaTopicWhenType } from '../../constants';
+import type { kafkaAcknowledgeReliabilityLevel } from '../../constants';
 
 export type OutputType = typeof outputType;
 export type KafkaCompressionType = typeof kafkaCompressionType;
@@ -17,6 +18,7 @@ export type KafkaAuthType = typeof kafkaAuthType;
 export type KafkaSaslMechanism = typeof kafkaSaslMechanism;
 export type KafkaPartitionType = typeof kafkaPartitionType;
 export type KafkaTopicWhenType = typeof kafkaTopicWhenType;
+export type KafkaAcknowledgeReliabilityLevel = typeof kafkaAcknowledgeReliabilityLevel;
 
 interface NewBaseOutput {
   is_default: boolean;
@@ -103,4 +105,6 @@ export interface KafkaOutput extends NewBaseOutput {
   }>;
   timeout?: number;
   broker_timeout?: number;
+  broker_ack_reliability?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
+  broker_buffer_size?: number;
 }

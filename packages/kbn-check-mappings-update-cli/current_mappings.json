@@ -1718,6 +1718,12 @@
       },
       "broker_timeout": {
         "type": "integer"
+      },
+      "broker_ack_reliability": {
+        "type": "text"
+      },
+      "broker_buffer_size": {
+        "type": "integer"
       }
     }
   },

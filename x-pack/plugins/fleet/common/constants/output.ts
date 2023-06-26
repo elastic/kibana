@@ -73,6 +73,12 @@ export const kafkaTopicWhenType = {
   Not: 'not',
 } as const;
 
+export const kafkaAcknowledgeReliabilityLevel = {
+  Commit: 'Wait for local commit',
+  Replica: 'Wait for all replicas to commit',
+  DoNotWait: 'Do not wait',
+} as const;
+
 export const kafkaSupportedVersions = [
   '0.8.2.0',
   '0.8.2.1',

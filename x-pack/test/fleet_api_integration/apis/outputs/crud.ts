@@ -202,6 +202,7 @@ export default function (providerContext: FtrProviderContext) {
             username: 'user',
             password: 'pass',
             is_default: true,
+            is_default_monitoring: true,
             topics: [{ topic: 'topic1' }],
           })
           .expect(400);
@@ -584,6 +585,8 @@ export default function (providerContext: FtrProviderContext) {
           password: 'pass',
           topics: [{ topic: 'topic1' }],
           broker_timeout: 10,
+          broker_ack_reliability: 'Wait for local commit',
+          broker_buffer_size: 256,
           client_id: 'Elastic Agent',
           compression: 'gzip',
           compression_level: 4,
@@ -624,6 +627,8 @@ export default function (providerContext: FtrProviderContext) {
           is_default: true,
           is_default_monitoring: false,
           broker_timeout: 10,
+          broker_ack_reliability: 'Wait for local commit',
+          broker_buffer_size: 256,
           client_id: 'Elastic Agent',
           compression: 'gzip',
           compression_level: 4,

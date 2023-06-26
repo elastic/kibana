@@ -13,6 +13,7 @@ import type {
   AgentMetadata,
   OutputType,
   ShipperOutput,
+  KafkaAcknowledgeReliabilityLevel,
 } from '../../common/types';
 import type { AgentType, FleetServerAgentComponent } from '../../common/types/models';
 
@@ -187,6 +188,8 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
   }>;
   timeout?: number;
   broker_timeout?: number;
+  broker_buffer_size?: number;
+  broker_ack_reliability?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
 }
 
 export type OutputSOAttributes =

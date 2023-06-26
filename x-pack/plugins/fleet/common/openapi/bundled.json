@@ -7763,6 +7763,12 @@
           },
           "broker_timeout": {
             "type": "number"
+          },
+          "broker_buffer_size": {
+            "type": "number"
+          },
+          "broker_ack_reliability": {
+            "type": "string"
           }
         },
         "required": [
@@ -8144,6 +8150,12 @@
             "type": "number"
           },
           "broker_timeout": {
+            "type": "number"
+          },
+          "broker_ack_reliability": {
+            "type": "string"
+          },
+          "broker_buffer_size": {
             "type": "number"
           }
         },
