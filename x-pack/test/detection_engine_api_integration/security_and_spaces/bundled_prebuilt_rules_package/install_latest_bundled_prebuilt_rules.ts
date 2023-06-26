@@ -6,34 +6,23 @@
  */
 import fs from 'fs/promises';
 import path from 'path';
-
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { REPO_ROOT } from '@kbn/repo-info';
+import JSON5 from 'json5';
 import expect from 'expect';
+import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
   deleteAllRules,
   getPrebuiltRulesAndTimelinesStatus,
 } from '../../utils';
-import { BUNDLED_PACKAGE_DIR } from './config';
-import { downloadPackageFromFleet } from '../../utils/prebuilt_rules/download_prebuilt_rules_from_epr';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
-
-  const removeBundledPackages = async (bundledFleetPackageDir: string) => {
-    const files = await fs.readdir(bundledFleetPackageDir);
-
-    // Do not remove mock packages with version 99.0.0 and 99.0.1
-    // which are used to test the installation of prerelease packages
-    const downloadedFiles = files.filter((file) => !file.includes('99')) || [];
-
-    for (const file of downloadedFiles) {
-      await fs.unlink(path.join(bundledFleetPackageDir, file));
-    }
-  };
 
   /* This test simulates an air-gapped environment in which the user doesn't have access to EPR.
   /* We first download the package from the registry as done during build time, and then
@@ -46,8 +35,19 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllPrebuiltRuleAssets(es);
     });
 
-    afterEach(async () => {
-      await removeBundledPackages(BUNDLED_PACKAGE_DIR);
+    it('should list `security_detection_engine` as a bundled fleet package in the `fleet_package.json` file', async () => {
+      const configFilePath = path.resolve(REPO_ROOT, 'fleet_packages.json');
+      const fleetPackages = await fs.readFile(configFilePath, 'utf8');
+
+      const parsedFleetPackages: PackageSpecManifest[] = JSON5.parse(fleetPackages);
+
+      const securityDetectionEnginePackage = parsedFleetPackages.find(
+        (fleetPackage) => fleetPackage.name === 'security_detection_engine'
+      );
+
+      expect(securityDetectionEnginePackage).not.toBeUndefined();
+
+      expect(securityDetectionEnginePackage?.name).toBe('security_detection_engine');
     });
 
     it('should install prebuilt rules from the package that comes bundled with Kibana', async () => {
@@ -57,11 +57,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statusBeforePackageInstallation.rules_not_installed).toBe(0);
       expect(statusBeforePackageInstallation.rules_not_updated).toBe(0);
 
-      // Download the package from the registry as done during build time,
-      // according to the fleet packages configured in fleet_packages.json file
-      const { version } = await downloadPackageFromFleet(BUNDLED_PACKAGE_DIR, log);
-
-      const EPM_URL = `/api/fleet/epm/packages/security_detection_engine/${version}`;
+      const EPM_URL = `/api/fleet/epm/packages/security_detection_engine/99.0.0`;
 
       const bundledInstallResponse = await supertest
         .post(EPM_URL)
