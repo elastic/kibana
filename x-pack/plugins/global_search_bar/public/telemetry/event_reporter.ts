@@ -20,9 +20,7 @@ import {
 } from '../types';
 
 export class EventReporter {
-  private deps: {
-    analytics: AnalyticsServiceStart;
-  };
+  private reportEvent: AnalyticsServiceStart['reportEvent'];
   private trackUiMetric: TrackUiMetricFn;
   private focusStart = Infinity;
 
@@ -33,11 +31,10 @@ export class EventReporter {
     analytics: AnalyticsServiceStart;
     usageCollection: UsageCollectionSetup | undefined;
   }) {
-    this.deps = { analytics };
+    this.reportEvent = analytics.reportEvent;
 
-    let trackUiMetric: TrackUiMetricFn = () => {};
     if (usageCollection) {
-      trackUiMetric = (metricType, eventName, context) => {
+      this.trackUiMetric = (metricType, eventName, context) => {
         let counter: [string, string | [string, string]];
         switch (eventName) {
           case ClickMetric.USER_NAVIGATED_TO_APPLICATION:
@@ -50,9 +47,9 @@ export class EventReporter {
         }
         usageCollection.reportUiCounter('global_search_bar', ...counter);
       };
+    } else {
+      this.trackUiMetric = () => {};
     }
-
-    this.trackUiMetric = trackUiMetric;
   }
 
   /**
@@ -61,16 +58,16 @@ export class EventReporter {
   public searchFocus() {
     this.trackUiMetric(METRIC_TYPE.COUNT, CountMetric.SEARCH_FOCUS);
 
-    this.focusStart = new Date(Date.now()).valueOf();
+    this.focusStart = Date.now();
   }
 
   /**
    * Called when the text input component has lost focus
    */
   public searchBlur() {
-    const focusTime = new Date(Date.now()).valueOf() - this.focusStart;
+    const focusTime = Date.now() - this.focusStart;
     if (focusTime > 0) {
-      this.deps.analytics.reportEvent(EventMetric.SEARCH_BLUR, {
+      this.reportEvent(EventMetric.SEARCH_BLUR, {
         [FieldType.FOCUS_TIME]: focusTime,
       });
       this.focusStart = Infinity;
@@ -102,7 +99,7 @@ export class EventReporter {
     this.trackUiMetric(METRIC_TYPE.CLICK, ClickMetric.USER_NAVIGATED_TO_APPLICATION, application);
 
     const terms = context?.searchValue ?? null;
-    this.deps.analytics.reportEvent(EventMetric.CLICK_APPLICATION, {
+    this.reportEvent(EventMetric.CLICK_APPLICATION, {
       [FieldType.TERMS]: terms,
       [FieldType.APPLICATION]: application,
     });
@@ -119,7 +116,7 @@ export class EventReporter {
     this.trackUiMetric(METRIC_TYPE.CLICK, ClickMetric.USER_NAVIGATED_TO_SAVED_OBJECT, type);
 
     const terms = context?.searchValue ?? null;
-    this.deps.analytics.reportEvent(EventMetric.CLICK_SAVED_OBJECT, {
+    this.reportEvent(EventMetric.CLICK_SAVED_OBJECT, {
       [FieldType.TERMS]: terms,
       [FieldType.SAVED_OBJECT_TYPE]: type,
     });
@@ -133,7 +130,7 @@ export class EventReporter {
 
     const message = context?.message.toString() ?? 'unknown';
     const terms = context?.searchValue ?? null;
-    this.deps.analytics.reportEvent(EventMetric.ERROR, {
+    this.reportEvent(EventMetric.ERROR, {
       [FieldType.TERMS]: terms,
       [FieldType.ERROR_MESSAGE]: message,
     });
