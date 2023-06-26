@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { DoneInvokeEvent } from 'xstate';
-import type { IHashedCache } from '../../../../common/immutable_cache';
+import type { IHashedCache } from '../../../../common/hashed_cache';
 import { FindDatasetsResponse, SortOrder } from '../../../../common/latest';
 import { Dataset } from '../../../../common/datasets';
 

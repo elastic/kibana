@@ -11,7 +11,7 @@ import {
   ReloadIntegrations,
   SearchIntegrations,
 } from '../../../hooks/use_integrations';
-import type { IHashedCache } from '../../../../common/immutable_cache';
+import type { IHashedCache } from '../../../../common/hashed_cache';
 import { DatasetSelectionHandler, DatasetsSelectorSearchParams, PanelId } from '../types';
 
 export interface DefaultDatasetsSelectorContext {

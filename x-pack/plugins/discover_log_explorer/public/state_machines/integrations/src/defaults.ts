@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HashedCache } from '../../../../common/immutable_cache';
+import { HashedCache } from '../../../../common/hashed_cache';
 import { DefaultIntegrationsContext } from './types';
 
 export const DEFAULT_CONTEXT: DefaultIntegrationsContext = {

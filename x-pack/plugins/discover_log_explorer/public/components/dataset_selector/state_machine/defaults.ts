@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HashedCache } from '../../../../common/immutable_cache';
+import { HashedCache } from '../../../../common/hashed_cache';
 import { INTEGRATION_PANEL_ID } from '../constants';
 import { DatasetsSelectorSearchParams } from '../types';
 import { DefaultDatasetsSelectorContext } from './types';
