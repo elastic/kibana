@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createRuleAssetSavedObject } from '../../helpers/rules';
 import {
   COLLAPSED_ACTION_BTN,
   ELASTIC_RULES_BTN,
@@ -25,15 +26,25 @@ import {
   enableSelectedRules,
   selectAllRules,
   selectNumberOfRules,
+  waitForPrebuiltDetectionRulesToBeLoaded,
   waitForRuleToUpdate,
 } from '../../tasks/alerts_detection_rules';
 import {
+  createNewRuleAsset,
   excessivelyInstallAllPrebuiltRules,
   getAvailablePrebuiltRulesCount,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../tasks/api_calls/prebuilt_rules';
-import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
+import { cleanKibana, deleteAlertsAndRules, deletePrebuiltRulesAssets } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
+
+const rules = [1, 2, 3, 4, 5].map((i) => {
+  return createRuleAssetSavedObject({
+    name: `Test rule ${i}`,
+    rule_id: `rule_${i}`,
+  });
+});
 
 describe('Prebuilt rules', () => {
   before(() => {
@@ -43,9 +54,16 @@ describe('Prebuilt rules', () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
+    deletePrebuiltRulesAssets();
+    preventPrebuiltRulesPackageInstallation();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    /* Create mock prebuilt rules */
+    for (const rule of rules) {
+      createNewRuleAsset({ rule });
+    }
     excessivelyInstallAllPrebuiltRules();
     cy.reload();
+    waitForPrebuiltDetectionRulesToBeLoaded();
   });
 
   describe('Alerts rules, prebuilt rules', () => {
