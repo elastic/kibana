@@ -9,20 +9,14 @@ import type { BulkInstallPackageInfo } from '@kbn/fleet-plugin/common';
 import type { Rule } from '../../../public/detection_engine/rule_management/logic/types';
 import { createRuleAssetSavedObject } from '../../helpers/rules';
 import {
-  ELASTIC_RULES_BTN,
   GO_BACK_TO_RULES_TABLE_BUTTON,
   INSTALL_ALL_RULES_BUTTON,
   INSTALL_SELECTED_RULES_BUTTON,
-  LOAD_PREBUILT_RULES_BTN,
-  LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
-  RULES_MANAGEMENT_TAB,
   RULES_MANAGEMENT_TABLE,
   RULES_ROW,
-  RULES_UPDATES_TAB,
   RULES_UPDATES_TABLE,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   TOASTER,
-  UPDATE_PREBUILT_RULES_CALLOUT_BUTTON,
   UPGRADE_ALL_RULES_BUTTON,
 } from '../../screens/alerts_detection_rules';
 import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
