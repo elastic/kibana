@@ -6,7 +6,7 @@
  */
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type {
   JobParamsCsvFromSavedObject,
   ReportApiJSON,
