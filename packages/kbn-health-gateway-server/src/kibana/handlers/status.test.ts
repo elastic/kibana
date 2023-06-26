@@ -12,9 +12,9 @@ import { URL } from 'url';
 import fetch, { Response } from 'node-fetch';
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import type { KibanaConfig } from '../kibana_config';
-import { RootRoute } from './root';
+import { StatusHandler } from './status';
 
-describe('RootRoute', () => {
+describe('StatusHandler', () => {
   let kibanaConfig: KibanaConfig;
   let logger: MockedLogger;
   let server: Server;
@@ -31,7 +31,11 @@ describe('RootRoute', () => {
     logger = loggerMock.create();
 
     server = new Server();
-    server.route(new RootRoute(kibanaConfig, logger));
+    server.route({
+      method: 'GET',
+      path: '/',
+      handler: new StatusHandler(kibanaConfig, logger).handler,
+    });
     await server.initialize();
   });
 

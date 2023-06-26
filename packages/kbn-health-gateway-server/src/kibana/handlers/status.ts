@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { capitalize, chain, memoize, pick } from 'lodash';
+import { capitalize, chain, memoize } from 'lodash';
 import { Agent, AgentOptions } from 'https';
 import { URL } from 'url';
-import type { Request, ResponseObject, ResponseToolkit, ServerRoute } from '@hapi/hapi';
+import type { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
 import nodeFetch, { Response } from 'node-fetch';
 import type { Logger } from '@kbn/logging';
 import type { KibanaConfig } from '../kibana_config';
@@ -18,7 +18,7 @@ type Status = 'healthy' | 'unhealthy' | 'failure' | 'timeout';
 
 const statusApiPath = '/api/status';
 
-interface RootRouteResponse {
+interface StatusRouteResponse {
   status: Status;
   hosts?: HostStatus[];
 }
@@ -29,9 +29,9 @@ interface HostStatus {
   code?: number;
 }
 
-export class RootRoute implements ServerRoute {
+export class StatusHandler {
   private static isHealthy(response: Response) {
-    return RootRoute.isSuccess(response) || RootRoute.isUnauthorized(response);
+    return StatusHandler.isSuccess(response) || StatusHandler.isUnauthorized(response);
   }
 
   private static isUnauthorized({ status, headers }: Response): boolean {
@@ -49,25 +49,20 @@ export class RootRoute implements ServerRoute {
     timeout: 504,
   };
 
-  readonly method = 'GET';
-  readonly path = '/';
-
   constructor(private kibanaConfig: KibanaConfig, private logger: Logger) {
     this.handler = this.handler.bind(this);
-
-    return pick(this, ['method', 'path', 'handler']) as RootRoute;
   }
 
   async handler(request: Request, toolkit: ResponseToolkit): Promise<ResponseObject> {
     const body = await this.poll();
-    const code = RootRoute.STATUS_CODE[body.status];
+    const code = StatusHandler.STATUS_CODE[body.status];
 
     this.logger.debug(`Returning ${code} response with body: ${JSON.stringify(body)}`);
 
     return toolkit.response(body).type('application/json').code(code);
   }
 
-  private async poll(): Promise<RootRouteResponse> {
+  private async poll(): Promise<StatusRouteResponse> {
     const hosts = await Promise.all(this.kibanaConfig.hosts.map(this.pollHost.bind(this)));
     const statuses = chain(hosts).map('status').uniq().value();
     const status = statuses.length <= 1 ? statuses[0] ?? 'healthy' : 'unhealthy';
@@ -83,7 +78,7 @@ export class RootRoute implements ServerRoute {
 
     try {
       const response = await this.fetch(host);
-      const status = RootRoute.isHealthy(response) ? 'healthy' : 'unhealthy';
+      const status = StatusHandler.isHealthy(response) ? 'healthy' : 'unhealthy';
       this.logger.debug(
         `${capitalize(status)} response from '${host}' with code ${response.status}`
       );
