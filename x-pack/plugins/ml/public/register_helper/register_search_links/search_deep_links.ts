@@ -161,9 +161,10 @@ function getModelManagementDeepLink(mlCapabilities: MlCapabilities): AppDeepLink
           defaultMessage: 'Nodes',
         }),
         path: `/${ML_PAGES.NODES}`,
-        navLinkStatus: mlCapabilities.isNLPEnabled
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.hidden,
+        navLinkStatus:
+          mlCapabilities.isADEnabled && mlCapabilities.isDFAEnabled && mlCapabilities.isNLPEnabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.hidden,
       },
     ],
   };
