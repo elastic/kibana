@@ -42,9 +42,11 @@ export interface AlertDetailsExplainLogRateSpikesSectionProps {
   alert: TopAlert<Record<string, any>>;
 }
 
-interface FieldValuePair {
+interface SignificantFieldValue {
   field: string;
   value: string | number;
+  docCount: number;
+  pValue: number | null;
 }
 
 export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionProps> = ({
@@ -56,7 +58,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
   const [logSpikeParams, setLogSpikeParams] = useState<
-    { significantFieldValues: FieldValuePair[] } | undefined
+    { significantFieldValues: SignificantFieldValue[] } | undefined
   >();
 
   useEffect(() => {

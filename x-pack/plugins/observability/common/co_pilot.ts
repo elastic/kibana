@@ -77,7 +77,7 @@ const significantFieldValuesRt = t.array(
     field: t.string,
     value: t.union([t.string, t.number]),
     docCount: t.number,
-    pValue: t.number,
+    pValue: t.union([t.number, t.null]),
   })
 );
 
@@ -102,7 +102,7 @@ export const coPilotPrompts = {
         - Better disk I/O efficiency so that less data is read and written from disk
 
         Make up to five suggestions. Your suggestions must meet all of the following criteria:
-        1. Your suggestions should detailed, technical and include concrete examples.
+        1. Your suggestions should be detailed, technical and include concrete examples.
         2. Your suggestions should be specific to improving performance of a system in which the ${functionName} function from
         the ${library} library is consuming significant CPU.
         2. If you suggest replacing the function or library with a more efficient replacement you must suggest at least
@@ -260,7 +260,7 @@ export const coPilotPrompts = {
 
           Here is an example with arguments.
           Process: metricbeat -c /etc/metricbeat.yml -d autodiscover,kafka -e -system.hostfs=/hostfs
-          Explaination: Metricbeat is part of the Elastic Stack. It is a lightweight shipper that you can install on your
+          Explanation: Metricbeat is part of the Elastic Stack. It is a lightweight shipper that you can install on your
           servers to periodically collect metrics from the operating system and from services running on the server.
           Use cases for Metricbeat generally revolve around infrastructure monitoring. You would typically install
           Metricbeat on your servers to collect metrics from your systems and services. These metrics are then
