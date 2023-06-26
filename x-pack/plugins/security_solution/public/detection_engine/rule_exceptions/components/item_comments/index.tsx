@@ -105,15 +105,10 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
       return [];
     }
   }, [exceptionItemComments]);
-  const isInitiallyOpened = useMemo(
-    () => initialIsOpen && !!newCommentValue,
-    [initialIsOpen, newCommentValue]
-  );
-
   return (
     <div>
       <CommentAccordion
-        initialIsOpen={isInitiallyOpened}
+        initialIsOpen={initialIsOpen && !!newCommentValue}
         id={'add-exception-comments-accordion'}
         buttonClassName={COMMENT_ACCORDION_BUTTON_CLASS_NAME}
         buttonContent={accordionTitle ?? commentsAccordionTitle}
