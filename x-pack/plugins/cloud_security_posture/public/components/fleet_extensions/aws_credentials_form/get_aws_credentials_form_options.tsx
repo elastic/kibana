@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 
 const AssumeRoleDescription = (
   <div>
@@ -75,11 +76,26 @@ export type AwsCredentialsType =
   | 'shared_credentials'
   | 'cloud_formation';
 
+type AwsCredentialsFields = Record<string, { label: string; type?: 'password' | 'text' }>;
+
 interface AwsOptionValue {
   label: string;
   info: React.ReactNode;
-  fields: Record<string, { label: string; type?: 'password' | 'text' }>;
+  fields: AwsCredentialsFields;
 }
+
+export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AwsCredentialsFields) =>
+  Object.entries(input.streams[0].vars || {})
+    .filter(([id]) => id in fields)
+    .map(([id, inputVar]) => {
+      const field = fields[id];
+      return {
+        id,
+        label: field.label,
+        type: field.type || 'text',
+        value: inputVar.value,
+      } as const;
+    });
 
 export type AwsOptions = Record<AwsCredentialsType, AwsOptionValue>;
 

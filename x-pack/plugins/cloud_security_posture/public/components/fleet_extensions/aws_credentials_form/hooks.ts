@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
 import {
   getCspmCloudFormationDefaultValue,
@@ -15,9 +15,9 @@ import {
 } from '../utils';
 import {
   AwsCredentialsType,
-  AwsOptions,
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
   getAwsCredentialsFormOptions,
+  getInputVarsFields,
 } from './get_aws_credentials_form_options';
 import { CLOUDBEAT_AWS } from '../../../../common/constants';
 /**
@@ -42,22 +42,6 @@ const getSetupFormatFromInput = (
 
   return 'cloud_formation';
 };
-
-const getInputVarsFields = (
-  input: NewPackagePolicyInput,
-  fields: AwsOptions[keyof AwsOptions]['fields']
-) =>
-  Object.entries(input.streams[0].vars || {})
-    .filter(([id]) => id in fields)
-    .map(([id, inputVar]) => {
-      const field = fields[id];
-      return {
-        id,
-        label: field.label,
-        type: field.type || 'text',
-        value: inputVar.value,
-      } as const;
-    });
 
 const getAwsCredentialsType = (
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>
