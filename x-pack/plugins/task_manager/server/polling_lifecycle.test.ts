@@ -48,6 +48,7 @@ describe('TaskPollingLifecycle', () => {
       poll_interval: 6000000,
       version_conflict_threshold: 80,
       request_capacity: 1000,
+      allow_reading_invalid_state: false,
       monitored_aggregated_stats_refresh_rate: 5000,
       monitored_stats_health_verbose_log: {
         enabled: false,
