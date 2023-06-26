@@ -134,7 +134,7 @@ export class GeoPointFormat extends FieldFormat {
       case 'dms':
         return `${ddToDMS(point.coordinates[1], point.coordinates[0])}`;
       case 'mgrs':
-        return `${ddToMGRS(point.coordinates[1], point.coordinates[0])}`
+        return `${ddToMGRS(point.coordinates[1], point.coordinates[0])}`;
       case 'multi':
         return `Lat Lon: ${point.coordinates[1]},${point.coordinates[0]}
 WKT: POINT (${point.coordinates[0]} ${point.coordinates[1]})
