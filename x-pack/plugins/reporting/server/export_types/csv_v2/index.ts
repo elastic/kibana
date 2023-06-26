@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { KibanaRequest, CoreSetup, IClusterClient } from '@kbn/core/server';
+import { KibanaRequest, IClusterClient } from '@kbn/core/server';
 import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { CsvGenerator } from '@kbn/generate-csv';
@@ -41,9 +41,10 @@ export class CsvV2ExportType extends ExportType<
   jobContentExtension = 'csv' as const;
   declare startDeps: CsvExportTypeStartDeps;
 
-  super(core: CoreSetup) {
-    this.logger = this.logger.get('csv-export');
-    this.http = core.http;
+  constructor(...args: ConstructorParameters<typeof ExportType>) {
+    super(...args);
+    const logger = args[2];
+    this.logger = logger.get('csv-export-v2');
   }
 
   setup(setupDeps: ExportTypeSetupDeps) {
@@ -85,12 +86,12 @@ export class CsvV2ExportType extends ExportType<
     const locatorClient = await discoverPluginStart.locator.asScopedClient(req);
     const title = await locatorClient.titleFromLocator(params);
 
-    return { ...jobParams, title, isDeprecated: false };
+    return { ...jobParams, title, objectType: 'search', isDeprecated: false };
   };
 
   public runTask = async (
-    job: TaskPayloadCsvFromSavedObject,
     jobId: string,
+    job: TaskPayloadCsvFromSavedObject,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {

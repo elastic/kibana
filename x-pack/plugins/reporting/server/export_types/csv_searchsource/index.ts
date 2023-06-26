@@ -6,7 +6,6 @@
  */
 
 import { IClusterClient } from '@kbn/core-elasticsearch-server';
-import { CoreSetup } from '@kbn/core-lifecycle-server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import { CsvGenerator } from '@kbn/generate-csv';
@@ -37,9 +36,10 @@ export class CsvSearchsourceExportType extends ExportType<JobParamsCSV, TaskPayl
   jobContentExtension = 'csv' as const;
   declare startDeps: CsvSearchsourceExportTypeStartDeps;
 
-  super(core: CoreSetup) {
-    this.logger = this.logger.get('csv-export');
-    this.http = core.http;
+  constructor(...args: ConstructorParameters<typeof ExportType>) {
+    super(...args);
+    const logger = args[2];
+    this.logger = logger.get('csv-searchsource-export');
   }
 
   setup(setupDeps: ExportTypeSetupDeps) {
@@ -69,8 +69,8 @@ export class CsvSearchsourceExportType extends ExportType<JobParamsCSV, TaskPayl
   };
 
   public runTask = async (
-    job: TaskPayloadCSV,
     jobId: string,
+    job: TaskPayloadCSV,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
