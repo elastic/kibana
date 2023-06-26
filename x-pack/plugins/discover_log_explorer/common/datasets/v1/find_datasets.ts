@@ -6,7 +6,6 @@
  */
 
 import * as rt from 'io-ts';
-import { removeEmptyStringPropsRT } from '../../runtime_types';
 import { datasetRT } from '../types';
 import { sortOrderRT } from './common';
 
@@ -14,15 +13,13 @@ export const findDatasetsResponseRT = rt.type({
   items: rt.array(datasetRT),
 });
 
-export const findDatasetsRequestQueryRT = removeEmptyStringPropsRT(
-  rt.exact(
-    rt.partial({
-      datasetQuery: rt.string,
-      type: rt.literal('logs'),
-      sortOrder: sortOrderRT,
-      uncategorisedOnly: rt.boolean,
-    })
-  )
+export const findDatasetsRequestQueryRT = rt.exact(
+  rt.partial({
+    datasetQuery: rt.string,
+    type: rt.literal('logs'),
+    sortOrder: sortOrderRT,
+    uncategorisedOnly: rt.boolean,
+  })
 );
 
 export type FindDatasetsRequestQuery = rt.TypeOf<typeof findDatasetsRequestQueryRT>;

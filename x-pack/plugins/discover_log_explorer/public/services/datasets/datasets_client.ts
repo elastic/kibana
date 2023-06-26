@@ -37,7 +37,7 @@ export class DatasetsClient implements IDatasetsClient {
   public async findIntegrations(
     params: FindIntegrationsRequestQuery = {}
   ): Promise<FindIntegrationsValue> {
-    const search = { ...params, ...defaultIntegrationsParams };
+    const search = { ...defaultIntegrationsParams, ...params };
 
     const query = findIntegrationsRequestQueryRT.encode(search);
 
@@ -55,7 +55,7 @@ export class DatasetsClient implements IDatasetsClient {
   }
 
   public async findDatasets(params: FindDatasetsRequestQuery = {}): Promise<FindDatasetsResponse> {
-    const search = { ...params, ...defaultDatasetsParams };
+    const search = { ...defaultDatasetsParams, ...params };
 
     const query = findDatasetsRequestQueryRT.encode(search);
 

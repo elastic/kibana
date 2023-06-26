@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Context, Errors, IntersectionType, Type, UnionType, ValidationError } from 'io-ts';
-import { isEmpty, omitBy } from 'lodash';
 
 type ErrorFactory = (message: string) => Error;
 
@@ -53,14 +51,3 @@ export const decodeOrThrow =
   ) =>
   (inputValue: InputValue) =>
     pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
-
-export const removeEmptyStringPropsRT = <Codec extends rt.Mixed>(codec: Codec) =>
-  new rt.Type<rt.TypeOf<Codec>, rt.OutputOf<Codec>, rt.UnknownRecordC>(
-    `removeEmptyStringPropsRT<${codec.name}>`,
-    codec.is,
-    (input, context) => {
-      const sanitizedInput = omitBy(input, isEmpty) as rt.TypeOf<Codec>;
-      return codec.validate(sanitizedInput, context);
-    },
-    (input) => omitBy(codec.encode(input), isEmpty) as rt.TypeOf<Codec>
-  );

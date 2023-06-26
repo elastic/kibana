@@ -6,6 +6,7 @@
  */
 
 import { assign, createMachine } from 'xstate';
+import { isEmpty, omitBy } from 'lodash';
 import { EntityList } from '../../../../common/entity_list';
 import { Dataset, Integration } from '../../../../common/datasets';
 import { FindIntegrationsResponse } from '../../../../common/latest';
@@ -180,7 +181,7 @@ export const createIntegrationStateMachine = ({
 
         return context.cache.has(searchParams)
           ? Promise.resolve(context.cache.get(searchParams) as FindIntegrationsResponse)
-          : datasetsClient.findIntegrations(searchParams);
+          : datasetsClient.findIntegrations(omitBy(searchParams, isEmpty));
       },
     },
   });

@@ -7,7 +7,6 @@
 
 import { jsonRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { removeEmptyStringPropsRT } from '../../runtime_types';
 import { integrationRT } from '../types';
 import { sortOrderRT } from './common';
 
@@ -25,16 +24,14 @@ export const findIntegrationsResponseRT = rt.exact(
   ])
 );
 
-export const findIntegrationsRequestQueryRT = removeEmptyStringPropsRT(
-  rt.exact(
-    rt.partial({
-      nameQuery: rt.string,
-      perPage: rt.number,
-      dataStreamType: rt.literal('logs'),
-      searchAfter: jsonRt.pipe(searchAfterRT),
-      sortOrder: sortOrderRT,
-    })
-  )
+export const findIntegrationsRequestQueryRT = rt.exact(
+  rt.partial({
+    nameQuery: rt.string,
+    perPage: rt.number,
+    dataStreamType: rt.literal('logs'),
+    searchAfter: jsonRt.pipe(searchAfterRT),
+    sortOrder: sortOrderRT,
+  })
 );
 
 export type SearchAfter = rt.TypeOf<typeof searchAfterRT>;

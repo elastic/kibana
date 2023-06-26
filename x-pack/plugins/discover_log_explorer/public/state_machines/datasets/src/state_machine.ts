@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty, omitBy } from 'lodash';
 import { assign, createMachine } from 'xstate';
 import { FindDatasetsResponse } from '../../../../common/latest';
 import { IDatasetsClient } from '../../../services/datasets';
@@ -107,7 +108,7 @@ export const createDatasetsStateMachine = ({
 
         return context.cache.has(searchParams)
           ? Promise.resolve(context.cache.get(searchParams) as FindDatasetsResponse)
-          : datasetsClient.findDatasets(searchParams);
+          : datasetsClient.findDatasets(omitBy(searchParams, isEmpty));
       },
     },
   });
