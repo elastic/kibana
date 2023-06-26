@@ -1,0 +1,12 @@
+[role="xpack"]
+[[logs]]
+=== Logs
+
+The *Logs* tab shows contextual logs for the selected APM Service.
+To learn how to correlate your logs with your instrumented services,
+see {observability-guide}/log-correlation.html[log correlation]
+
+[role="screenshot"]
+image::apm/images/logs.png[Example view of the Logs tab in APM app in Kibana]
+
+TIP: Logs displayed on this page are filtered on `service.name`
