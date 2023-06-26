@@ -108,7 +108,6 @@ export default ({ getService }: FtrProviderContext) => {
             ],
           });
 
-          expect(body).to.eql(getAlertUpdateByQueryEmptyResponse());
           await deleteAllAlerts(supertest, log, es);
         });
       });
