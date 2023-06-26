@@ -129,6 +129,7 @@
     "@kbn/core-http-common",
     "@kbn/slo-schema",
     "@kbn/lens-plugin",
-    "@kbn/telemetry-tools"
+    "@kbn/telemetry-tools",
+    "@kbn/profiling-plugin"
   ]
 }
