@@ -6,7 +6,15 @@
  */
 
 import type { ReactChild } from 'react';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
 import { catchError, of, timeout } from 'rxjs';
@@ -26,7 +34,7 @@ export interface TourContextValue {
 }
 
 const initialState: TourContextValue = {
-  activeStep: 0,
+  activeStep: 1,
   endTourStep: () => {},
   incrementStep: () => {},
   isTourShown: () => false,
@@ -34,9 +42,11 @@ const initialState: TourContextValue = {
 };
 
 const TourContext = createContext<TourContextValue>(initialState);
+type TourContextState = React.MutableRefObject<TourContextValue>;
 
 export const RealTourContextProvider = ({ children }: { children: ReactChild }) => {
   const { guidedOnboardingApi } = useKibana().services.guidedOnboarding;
+  const context: TourContextState = useRef(initialState);
 
   const isRulesTourActive = useObservable(
     guidedOnboardingApi?.isGuideStepActive$(siemGuideId, SecurityStepId.rules).pipe(
@@ -64,17 +74,24 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
   );
 
   const isTourShown = useCallback((tourId: SecurityStepId) => tourStatus[tourId], [tourStatus]);
-  const [activeStep, _setActiveStep] = useState<number>(1);
-
-  const incrementStep = useCallback((tourId: SecurityStepId) => {
-    _setActiveStep(
-      (prevState) => (prevState >= securityTourConfig[tourId].length ? 0 : prevState) + 1
-    );
+  const setActiveStep = useCallback((step: number) => {
+    context.current.activeStep = step;
   }, []);
 
-  const setStep = useCallback((tourId: SecurityStepId, step: number) => {
-    if (step <= securityTourConfig[tourId].length) _setActiveStep(step);
-  }, []);
+  const incrementStep = useCallback(
+    (tourId: SecurityStepId) => {
+      const stepNumber = (securityTourConfig[tourId].length ? 0 : context.current.activeStep) + 1;
+      setActiveStep(stepNumber);
+    },
+    [setActiveStep]
+  );
+
+  const setStep = useCallback(
+    (tourId: SecurityStepId, step: number) => {
+      if (step <= securityTourConfig[tourId].length) setActiveStep(step);
+    },
+    [setActiveStep]
+  );
 
   const [completeStep, setCompleteStep] = useState<null | SecurityStepId>(null);
 
@@ -87,28 +104,30 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
       await guidedOnboardingApi.completeGuideStep(siemGuideId, completeStep);
       if (!ignore) {
         setCompleteStep(null);
-        _setActiveStep(1);
+        setActiveStep(1);
       }
     };
     complete();
     return () => {
       ignore = true;
     };
-  }, [completeStep, guidedOnboardingApi]);
+  }, [completeStep, guidedOnboardingApi, setActiveStep]);
 
   const endTourStep = useCallback((tourId: SecurityStepId) => {
     setCompleteStep(tourId);
   }, []);
 
-  const context = {
-    activeStep,
-    endTourStep,
-    incrementStep,
-    isTourShown,
-    setStep,
-  };
+  useEffect(() => {
+    context.current = {
+      ...context.current,
+      setStep,
+      incrementStep,
+      isTourShown,
+      endTourStep,
+    };
+  }, [setStep, incrementStep, isTourShown, endTourStep]);
 
-  return <TourContext.Provider value={context}>{children}</TourContext.Provider>;
+  return <TourContext.Provider value={context.current}>{children}</TourContext.Provider>;
 };
 
 export const TourContextProvider = ({ children }: { children: ReactChild }) => {
