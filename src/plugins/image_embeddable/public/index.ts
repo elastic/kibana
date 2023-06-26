@@ -9,6 +9,8 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { ImageEmbeddablePlugin } from './plugin';
 
+export { createValidateUrl } from './utils/validate_url';
+
 export { type ImageClickContext, IMAGE_CLICK_TRIGGER } from './actions';
 
 export function plugin(context: PluginInitializerContext) {

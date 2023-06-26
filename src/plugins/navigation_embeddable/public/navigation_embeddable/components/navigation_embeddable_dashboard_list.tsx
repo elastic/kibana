@@ -10,23 +10,30 @@ import classNames from 'classnames';
 import useAsync from 'react-use/lib/useAsync';
 import React, { useEffect, useState } from 'react';
 
-import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
+// import { isValidUrl } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   EuiSpacer,
-  EuiSelectable,
-  EuiLoadingSpinner,
-  EuiSelectableOption,
-  EuiFieldSearch,
   EuiHighlight,
+  EuiSelectable,
+  EuiFieldSearch,
+  EuiSelectableOption,
 } from '@elastic/eui';
+import { createValidateUrl } from '@kbn/image-embeddable-plugin/public';
 
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
+import { DashboardItem } from '../types';
+import { coreServices } from '../services/navigation_embeddable_services';
 
 interface Props {
+  onUrlSelected: (url: string) => void;
   onDashboardSelected: (selectedDashboard: DashboardItem) => void;
 }
 
-export const NavigationEmbeddableDashboardList = ({ onDashboardSelected, ...other }: Props) => {
+export const NavigationEmbeddableDashboardList = ({
+  onUrlSelected,
+  onDashboardSelected,
+  ...other
+}: Props) => {
   const navEmbeddable = useNavigationEmbeddable();
   const currentDashboardId = navEmbeddable.select(
     (state) => state.componentState.currentDashboardId
@@ -42,12 +49,13 @@ export const NavigationEmbeddableDashboardList = ({ onDashboardSelected, ...othe
   useEffect(() => {
     const dashboardOptions =
       dashboardList?.map((dashboard: DashboardItem) => {
+        const isCurrentDashboard = dashboard.id === currentDashboardId;
         return {
-          data: dashboard, // just store the ID here - that's all that is necessary
+          data: dashboard, // TODO: just store the ID here - that's all that is necessary
           className: classNames({
-            'navEmbeddable-currentDashboard': dashboard.id === currentDashboardId,
+            'navEmbeddable-currentDashboard': isCurrentDashboard,
           }),
-          label: dashboard.attributes.title,
+          label: isCurrentDashboard ? 'Current' : dashboard.attributes.title,
         } as EuiSelectableOption;
       }) ?? [];
     setDashboardListOptions(dashboardOptions);
@@ -60,7 +68,13 @@ export const NavigationEmbeddableDashboardList = ({ onDashboardSelected, ...othe
         isClearable={true}
         placeholder={'Search for a dashboard or enter external URL'}
         onSearch={(value) => {
-          setSearchString(value);
+          const validateUrl = createValidateUrl(coreServices.http.externalUrl);
+          if (validateUrl(value).isValid) {
+            setSearchString('');
+            onUrlSelected(value);
+          } else {
+            setSearchString(value);
+          }
         }}
       />
       <EuiSpacer size="s" />

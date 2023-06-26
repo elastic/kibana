@@ -7,9 +7,13 @@
  */
 
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
-import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 
+export interface ExternalLink {
+  url: string;
+  label?: string;
+}
 export interface DashboardLink {
   id: string;
   title?: string;
@@ -17,16 +21,34 @@ export interface DashboardLink {
   description?: string;
 }
 
+export type IExternalLink = ExternalLink & { order: number };
+export type IDashboardLink = Pick<DashboardLink, 'id' | 'label'> & { order: number };
+
+export interface DashboardItem {
+  id: string;
+  attributes: DashboardAttributes;
+}
+
 export interface NavigationEmbeddableInput extends EmbeddableInput {
-  dashboardLinks?: Array<Pick<DashboardLink, 'id' | 'label'>>;
+  links?: { [id: string]: IExternalLink | IDashboardLink };
 }
 
 export interface NavigationEmbeddableComponentState {
   totalDashboards?: number;
   currentDashboardId?: string;
   dashboardList?: DashboardItem[];
-  dashboardLinks?: DashboardLink[];
+  links?: Array<DashboardLink | ExternalLink>;
 }
+
+export const isDashboardLink = (
+  link: DashboardLink | ExternalLink
+): link is IDashboardLink | DashboardLink => {
+  return Boolean((link as IDashboardLink).id);
+};
+
+// export const isExternalLink = (link: DashboardLink | ExternalLink): link is ExternalLink => {
+//   return Boolean((link as ExternalLink).url);
+// };
 
 export type NavigationEmbeddableReduxState = ReduxEmbeddableState<
   NavigationEmbeddableInput,

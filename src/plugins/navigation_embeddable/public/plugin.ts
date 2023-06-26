@@ -7,7 +7,7 @@
  */
 
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { CoreSetup, CoreStart, IExternalUrl, Plugin } from '@kbn/core/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 
 import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_embeddable';

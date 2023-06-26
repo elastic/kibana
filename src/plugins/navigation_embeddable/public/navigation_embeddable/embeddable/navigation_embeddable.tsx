@@ -15,12 +15,17 @@ import { distinctUntilChanged, Subscription } from 'rxjs';
 import { Embeddable } from '@kbn/embeddable-plugin/public';
 import type { IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
+import { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
 import { navigationEmbeddableReducers } from '../navigation_embeddable_reducers';
-import { NavigationEmbeddableInput, NavigationEmbeddableReduxState } from '../types';
+import {
+  DashboardItem,
+  isDashboardLink,
+  NavigationEmbeddableInput,
+  NavigationEmbeddableReduxState,
+} from '../types';
 import { coreServices, dashboardServices } from '../services/navigation_embeddable_services';
 import { NavigationEmbeddableComponent } from '../components/navigation_embeddable_component';
 
@@ -103,7 +108,7 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
      **/
     this.subscriptions.add(
       this.getInput$()
-        .pipe(distinctUntilChanged((a, b) => isEqual(a.dashboardLinks, b.dashboardLinks)))
+        .pipe(distinctUntilChanged((a, b) => isEqual(a.links, b.links)))
         .subscribe(async () => {
           await this.updateDashboardLinks();
         })
@@ -111,31 +116,60 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
   }
 
   private async updateDashboardLinks() {
-    const { dashboardLinks } = this.getInput();
+    const { links } = this.getInput();
 
-    if (dashboardLinks && !isEmpty(dashboardLinks)) {
+    if (links) {
       this.dispatch.setLoading(true);
-      const findDashboardsService = await dashboardServices.findDashboardsService();
-      const responses = await findDashboardsService.findByIds(
-        dashboardLinks.map((link) => link.id)
-      );
-      const updatedDashboardLinks = responses.map((response, i) => {
-        if (response.status === 'error') {
-          throw new Error('failure');
+
+      // Get all of the dashboard IDs that are referenced so we can fetch their saved objects
+      const uniqueDashboardIds = new Set<string>();
+      Object.keys(links).forEach((linkId) => {
+        const link = links[linkId];
+        if (isDashboardLink(link)) {
+          uniqueDashboardIds.add(link.id);
         }
-        return {
-          id: response.id,
-          label: dashboardLinks[i].label,
-          title: response.attributes.title,
-          description: response.attributes.description,
-        };
       });
+
+      // Fetch the dashboard saved objects from their IDs and store the attributes
+      const dashboardAttributes: { [dashboardId: string]: DashboardAttributes } = {};
+      if (!isEmpty(uniqueDashboardIds)) {
+        const findDashboardsService = await dashboardServices.findDashboardsService();
+        const responses = await findDashboardsService.findByIds(Array.from(uniqueDashboardIds));
+        responses.forEach((response) => {
+          if (response.status === 'error') {
+            throw new Error('failure'); // TODO: better error handling
+          }
+          dashboardAttributes[response.id] = response.attributes;
+        });
+      }
+
+      // Convert the explicit input `links` object to a sorted array for component state
+      const sortedLinks = Object.keys(links)
+        .sort(function (a, b) {
+          return links[a].order - links[b].order;
+        })
+        .map((linkId) => {
+          const link = links[linkId];
+          if (isDashboardLink(link)) {
+            const dashboardId = link.id;
+            return {
+              id: dashboardId,
+              label: link.label,
+              order: link.order,
+              title: dashboardAttributes[dashboardId].title,
+              description: dashboardAttributes[dashboardId].description,
+            };
+          }
+          return link;
+        });
+
+      // Update component state to keep in sync with changes to explicit input
       batch(() => {
-        this.dispatch.setDashboardLinks(updatedDashboardLinks);
+        this.dispatch.setLinks(sortedLinks);
         this.dispatch.setLoading(false);
       });
     } else {
-      this.dispatch.setDashboardLinks([]);
+      this.dispatch.setLinks([]);
     }
   }
 
@@ -150,16 +184,32 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
     });
 
     const { currentDashboardId } = this.getState().componentState;
-    const sortedDashboards = responses.hits.sort((hit) => {
-      return hit.id === currentDashboardId ? -1 : 1; // force the current dashboard to the top of the list - we might not actually want this ¯\_(ツ)_/¯
-    });
+    const sortedDashboards = responses.hits
+      .sort((hit) => {
+        return hit.id === currentDashboardId ? -1 : 1; // force the current dashboard to the top of the list - we might not actually want this ¯\_(ツ)_/¯
+      })
+      .map((hit) => {
+        return { id: hit.id, attributes: hit.attributes };
+      });
+
+    // TODO: make this nicer
+    if (isEmpty(search) && currentDashboardId && sortedDashboards[0].id !== currentDashboardId) {
+      const currentDashboard = (await findDashboardsService.findByIds([currentDashboardId]))[0];
+      if (currentDashboard.status === 'success') {
+        sortedDashboards.pop();
+        sortedDashboards.unshift({
+          id: currentDashboardId,
+          attributes: currentDashboard.attributes,
+        });
+      }
+    }
 
     batch(() => {
       this.dispatch.setDashboardList(sortedDashboards);
       this.dispatch.setDashboardCount(responses.total);
     });
 
-    return responses.hits;
+    return sortedDashboards;
   }
 
   public async reload() {

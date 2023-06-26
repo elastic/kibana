@@ -6,10 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
+import { v4 as uuidv4 } from 'uuid';
+
 import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
-import { DashboardLink, NavigationEmbeddableReduxState } from './types';
+import {
+  DashboardItem,
+  DashboardLink,
+  ExternalLink,
+  NavigationEmbeddableComponentState,
+  NavigationEmbeddableReduxState,
+} from './types';
 
 export const navigationEmbeddableReducers = {
   setLoading: (
@@ -36,19 +43,35 @@ export const navigationEmbeddableReducers = {
   ) => {
     state.componentState.totalDashboards = action.payload;
   },
-  setDashboardLinks: (
+  setLinks: (
     state: WritableDraft<NavigationEmbeddableReduxState>,
-    action: PayloadAction<DashboardLink[]>
+    action: PayloadAction<NavigationEmbeddableComponentState['links']>
   ) => {
-    state.componentState.dashboardLinks = action.payload;
+    state.componentState.links = action.payload;
   },
-  addLink: (
+  addDashboardLink: (
     state: WritableDraft<NavigationEmbeddableReduxState>,
     action: PayloadAction<DashboardLink>
   ) => {
-    if (!state.explicitInput.dashboardLinks) {
-      state.explicitInput.dashboardLinks = [];
+    if (!state.explicitInput.links) {
+      state.explicitInput.links = {};
     }
-    state.explicitInput.dashboardLinks.push({ id: action.payload.id, label: action.payload.label });
+    state.explicitInput.links[uuidv4()] = {
+      id: action.payload.id,
+      label: action.payload.label,
+      order: Object.keys(state.explicitInput.links).length + 1,
+    };
+  },
+  addExternalLink: (
+    state: WritableDraft<NavigationEmbeddableReduxState>,
+    action: PayloadAction<ExternalLink>
+  ) => {
+    if (!state.explicitInput.links) {
+      state.explicitInput.links = {};
+    }
+    state.explicitInput.links[uuidv4()] = {
+      ...action.payload,
+      order: Object.keys(state.explicitInput.links).length + 1,
+    };
   },
 };

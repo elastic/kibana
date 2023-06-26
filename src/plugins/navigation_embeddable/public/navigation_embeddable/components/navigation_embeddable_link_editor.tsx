@@ -17,10 +17,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 import { NavigationEmbeddableDashboardList } from './navigation_embeddable_dashboard_list';
+import { DashboardItem } from '../types';
 
 export const NavigationEmbeddableLinkEditor = ({
   setIsPopoverOpen,
@@ -29,23 +29,27 @@ export const NavigationEmbeddableLinkEditor = ({
 }) => {
   const navEmbeddable = useNavigationEmbeddable();
 
+  const [linkLabel, setLinkLabel] = useState<string>('');
+  const [selectedUrl, setSelectedUrl] = useState<string>();
   const [selectedDashboard, setSelectedDashboard] = useState<DashboardItem | undefined>();
-  const [dashboardLabel, setDashboardLabel] = useState<string>('');
 
   return (
     <>
       <EuiForm component="form">
         <EuiFormRow label="Choose destination">
-          <NavigationEmbeddableDashboardList onDashboardSelected={setSelectedDashboard} />
+          <NavigationEmbeddableDashboardList
+            onUrlSelected={setSelectedUrl}
+            onDashboardSelected={setSelectedDashboard}
+          />
         </EuiFormRow>
         <EuiFormRow label="Text">
           <EuiFieldText
             placeholder={
               selectedDashboard ? selectedDashboard.attributes.title : 'Enter text for link'
             }
-            value={dashboardLabel}
+            value={linkLabel}
             onChange={(e) => {
-              setDashboardLabel(e.target.value);
+              setLinkLabel(e.target.value);
             }}
             aria-label="Use aria labels when no actual label is in use"
           />
@@ -58,14 +62,16 @@ export const NavigationEmbeddableLinkEditor = ({
               size="s"
               onClick={() => {
                 if (selectedDashboard) {
-                  navEmbeddable.dispatch.addLink({
-                    label: dashboardLabel,
+                  navEmbeddable.dispatch.addDashboardLink({
+                    label: linkLabel,
                     id: selectedDashboard.id,
                     title: selectedDashboard.attributes.title,
                     description: selectedDashboard.attributes.description,
                   });
+                } else if (selectedUrl) {
+                  navEmbeddable.dispatch.addExternalLink({ url: selectedUrl, label: linkLabel });
                 }
-                setDashboardLabel('');
+                setLinkLabel('');
                 setIsPopoverOpen(false);
               }}
             >

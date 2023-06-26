@@ -16,15 +16,16 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 
+import { isDashboardLink } from '../types';
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
+import { NavigationEmbeddableLinkEditor } from './navigation_embeddable_link_editor';
 
 import './navigation_embeddable.scss';
-import { NavigationEmbeddableLinkEditor } from './navigation_embeddable_link_editor';
 
 export const NavigationEmbeddableComponent = () => {
   const navEmbeddable = useNavigationEmbeddable();
 
-  const selectedDashboards = navEmbeddable.select((state) => state.componentState.dashboardLinks);
+  const links = navEmbeddable.select((state) => state.componentState.links);
   const currentDashboardId = navEmbeddable.select(
     (state) => state.componentState.currentDashboardId
   );
@@ -36,22 +37,30 @@ export const NavigationEmbeddableComponent = () => {
 
   useEffect(() => {
     setDashboardListGroupItems(
-      (selectedDashboards ?? []).map((dashboard) => {
+      (links ?? []).map((link) => {
+        if (isDashboardLink(link)) {
+          return {
+            label: link.label || link.title,
+            iconType: 'dashboardApp',
+            ...(link.id === currentDashboardId
+              ? {
+                  color: 'text',
+                }
+              : {
+                  color: 'primary',
+                  onClick: () => {}, // TODO: connect to drilldown
+                }),
+          };
+        }
         return {
-          label: dashboard.label || dashboard.title,
-          iconType: 'dashboardApp',
-          ...(dashboard.id === currentDashboardId
-            ? {
-                color: 'text',
-              }
-            : {
-                color: 'primary',
-                onClick: () => {}, // TODO: connect to drilldown
-              }),
+          label: link.label || link.url,
+          iconType: 'link',
+          color: 'primary',
+          onClick: () => {}, // TODO: connect to drilldown
         };
       })
     );
-  }, [selectedDashboards, currentDashboardId]);
+  }, [links, currentDashboardId]);
 
   const onButtonClick = useCallback(() => setIsEditPopoverOpen((isOpen) => !isOpen), []);
 
