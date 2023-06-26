@@ -1497,6 +1497,31 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug('> Ingest pipeline deleted');
     },
 
+    async assureMlStatsIndexToExist(timeout: number = 60 * 1000) {
+      const params = {
+        index: '.ml-stats-000001',
+        id: 'random-test-id',
+        body: {
+          type: 'analytics_memory_usage',
+          job_id: 'noop_job',
+          timestamp: 1687437633705,
+          peak_usage_bytes: 148148,
+          status: 'ok',
+        },
+        refresh: 'wait_for',
+      } as const;
+      await es.index(params);
+
+      await retry.waitForWithTimeout(`Stats index to exist`, timeout, async () => {
+        const statsIndices = await es.cat.indices({ format: 'json', index: '.ml-stats*' });
+        if (statsIndices[0]?.health === 'green') {
+          return true;
+        } else {
+          throw new Error(`expected stats index to exist`);
+        }
+      });
+    },
+
     async setupModule(
       moduleId: string,
       body: TypeOf<typeof setupModuleBodySchema>,
