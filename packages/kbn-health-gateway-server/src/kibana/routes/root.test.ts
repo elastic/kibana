@@ -250,7 +250,7 @@ describe('RootRoute', () => {
       );
     });
 
-    it('should calls the host with the correct path', async () => {
+    it('should call the host with the correct path', async () => {
       kibanaConfig.hosts.splice(0, kibanaConfig.hosts.length);
       kibanaConfig.hosts.push('http://localhost:5601', 'http://localhost:5602');
 
