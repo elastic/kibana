@@ -8,8 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiButtonEmpty, useEuiTheme, euiCanAnimate } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { cx, css } from '@emotion/css';
 
 import { useBoolean } from '../../../../../hooks/use_boolean';
 
@@ -36,25 +35,31 @@ export const FilterAction = ({ selectedItemsCount, filterSelectedHosts }: Filter
   };
 
   return (
-    <Container>
+    <div
+      css={css`
+        position: relative;
+        height: ${euiTheme.size.l};
+      `}
+    >
       <EuiPopover
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         data-test-subj="bulkAction"
         panelPaddingSize="s"
-        className={selectedItemsCount === 0 ? '' : 'is-visible'}
-        css={css`
-          position: absolute;
-          opacity: 0;
-          visibility: hidden;
-          &:is(.is-visible) {
+        className={cx({
+          [css`
+            position: absolute;
+            opacity: 0;
+            visibility: hidden;
+          `]: true,
+          [css`
             opacity: 1;
             ${euiCanAnimate} {
               transition: opacity ${euiTheme.animation.extraFast} ease-in;
             }
             visibility: visible;
-          }
-        `}
+          `]: selectedItemsCount > 0,
+        })}
         button={
           <EuiButtonEmpty
             data-test-subj="hostsViewTableSelectHostsFilterButton"
@@ -77,11 +82,6 @@ export const FilterAction = ({ selectedItemsCount, filterSelectedHosts }: Filter
           })}
         </EuiButtonEmpty>
       </EuiPopover>
-    </Container>
+    </div>
   );
 };
-
-const Container = euiStyled.div`
-  position: relative;
-  height:  ${({ theme }) => theme.eui.euiSizeL};
-`;
