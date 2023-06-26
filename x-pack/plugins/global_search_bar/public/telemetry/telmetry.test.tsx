@@ -45,7 +45,6 @@ const createResult = (result: Result): GlobalSearchResult => {
 const createBatch = (...results: Result[]): GlobalSearchBatchedResults => ({
   results: results.map(createResult),
 });
-jest.useFakeTimers({ legacyFakeTimers: true });
 
 describe('SearchBar', () => {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
@@ -58,6 +57,14 @@ describe('SearchBar', () => {
   let mockReportEvent: typeof core.analytics.reportEvent;
   let eventReporter: EventReporter;
   let chromeStyle$ = of<ChromeStyle>('classic');
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
   beforeEach(() => {
     applications = applicationServiceMock.createStartContract();
