@@ -96,7 +96,7 @@ export class PolicyWatcher {
         );
         return;
       }
-      let updatedPolicyIds: string[];
+      const updatedPolicyIds: string[] = [];
       for (const policy of response.items as AgentPolicy[]) {
         let updatePolicy = pick(policy, ['is_protected']) as Partial<AgentPolicy>;
 

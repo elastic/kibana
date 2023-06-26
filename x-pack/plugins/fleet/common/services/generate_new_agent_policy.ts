@@ -34,7 +34,9 @@ export function agentPolicyWithSupportedFeatures(
   };
 }
 
-export function agentPolicyWithoutPaidFeatures(agentPolicy: AgentPolicy): AgentPolicy {
+export function agentPolicyWithoutPaidFeatures(
+  agentPolicy: Partial<AgentPolicy>
+): Partial<AgentPolicy> {
   return {
     ...agentPolicy,
     is_protected: false,

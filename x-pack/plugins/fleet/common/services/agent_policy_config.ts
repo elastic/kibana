@@ -49,7 +49,7 @@ export const isAgentPolicyValidForLicense = (
 export const unsetAgentPolicyAccordingToLicenseLevel = (
   policy: Partial<AgentPolicy>,
   license: ILicense | null
-): AgentPolicy => {
+): Partial<AgentPolicy> => {
   if (hasAtLeast(license, 'platinum')) {
     return agentPolicyWithSupportedFeatures(policy);
   }
