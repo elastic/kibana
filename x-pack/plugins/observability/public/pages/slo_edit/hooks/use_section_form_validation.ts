@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { CreateSLOInput, MetricCustomIndicator } from '@kbn/slo-schema';
+import { MetricCustomIndicator } from '@kbn/slo-schema';
 import { FormState, UseFormGetFieldState, UseFormGetValues, UseFormWatch } from 'react-hook-form';
 import { isObject } from 'lodash';
+import { CreateSLOForm } from '../types';
 
 interface Props {
-  getFieldState: UseFormGetFieldState<CreateSLOInput>;
-  getValues: UseFormGetValues<CreateSLOInput>;
-  formState: FormState<CreateSLOInput>;
-  watch: UseFormWatch<CreateSLOInput>;
+  getFieldState: UseFormGetFieldState<CreateSLOForm>;
+  getValues: UseFormGetValues<CreateSLOForm>;
+  formState: FormState<CreateSLOForm>;
+  watch: UseFormWatch<CreateSLOForm>;
 }
 
 export function useSectionFormValidation({ getFieldState, getValues, formState, watch }: Props) {
@@ -59,7 +60,6 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
           [
             'indicator.params.index',
             'indicator.params.filter',
-
             'indicator.params.total',
             'indicator.params.timestampField',
           ] as const

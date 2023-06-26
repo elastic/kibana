@@ -7,9 +7,8 @@
  */
 
 import React, { FunctionComponent, useMemo } from 'react';
-// eslint-disable-next-line no-restricted-imports
-import { RouteComponentProps, Router, Route, Switch } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { RouteComponentProps } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import { EMPTY, Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
@@ -56,62 +55,60 @@ export const AppRouter: FunctionComponent<Props> = ({
 
   return (
     <Router history={history}>
-      <CompatRouter>
-        <Switch>
-          {[...mounters].map(([appId, mounter]) => (
-            <Route
-              key={mounter.appRoute}
-              path={mounter.appRoute}
-              exact={mounter.exactRoute}
-              render={({ match: { path } }) => (
-                <AppContainer
-                  appPath={path}
-                  appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
-                  createScopedHistory={createScopedHistory}
-                  {...{
-                    appId,
-                    mounter,
-                    setAppLeaveHandler,
-                    setAppActionMenu,
-                    setIsMounting,
-                    theme$,
-                    showPlainSpinner,
-                  }}
-                />
-              )}
-            />
-          ))}
-          {/* handler for legacy apps and used as a catch-all to display 404 page on not existing /app/appId apps*/}
+      <Routes>
+        {[...mounters].map(([appId, mounter]) => (
           <Route
-            path="/app/:appId"
-            render={({
-              match: {
-                params: { appId },
-                url,
-              },
-            }: RouteComponentProps<Params>) => {
-              // the id/mounter retrieval can be removed once #76348 is addressed
-              const [id, mounter] = mounters.has(appId) ? [appId, mounters.get(appId)] : [];
-              return (
-                <AppContainer
-                  appPath={url}
-                  appId={id ?? appId}
-                  appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
-                  createScopedHistory={createScopedHistory}
-                  {...{
-                    mounter,
-                    setAppLeaveHandler,
-                    setAppActionMenu,
-                    setIsMounting,
-                    theme$,
-                    showPlainSpinner,
-                  }}
-                />
-              );
-            }}
+            key={mounter.appRoute}
+            path={mounter.appRoute}
+            exact={mounter.exactRoute}
+            render={({ match: { path } }) => (
+              <AppContainer
+                appPath={path}
+                appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
+                createScopedHistory={createScopedHistory}
+                {...{
+                  appId,
+                  mounter,
+                  setAppLeaveHandler,
+                  setAppActionMenu,
+                  setIsMounting,
+                  theme$,
+                  showPlainSpinner,
+                }}
+              />
+            )}
           />
-        </Switch>
-      </CompatRouter>
+        ))}
+        {/* handler for legacy apps and used as a catch-all to display 404 page on not existing /app/appId apps*/}
+        <Route
+          path="/app/:appId"
+          render={({
+            match: {
+              params: { appId },
+              url,
+            },
+          }: RouteComponentProps<Params>) => {
+            // the id/mounter retrieval can be removed once #76348 is addressed
+            const [id, mounter] = mounters.has(appId) ? [appId, mounters.get(appId)] : [];
+            return (
+              <AppContainer
+                appPath={url}
+                appId={id ?? appId}
+                appStatus={appStatuses.get(appId) ?? AppStatus.inaccessible}
+                createScopedHistory={createScopedHistory}
+                {...{
+                  mounter,
+                  setAppLeaveHandler,
+                  setAppActionMenu,
+                  setIsMounting,
+                  theme$,
+                  showPlainSpinner,
+                }}
+              />
+            );
+          }}
+        />
+      </Routes>
     </Router>
   );
 };

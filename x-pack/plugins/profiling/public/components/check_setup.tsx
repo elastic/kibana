@@ -17,13 +17,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { AsyncStatus, useAsync } from '../hooks/use_async';
 import { useAutoAbortedHttpClient } from '../hooks/use_auto_aborted_http_client';
+import { useProfilingRouter } from '../hooks/use_profiling_router';
+import { NoDataTabs } from '../views/no_data_view';
 import { useLicenseContext } from './contexts/license/use_license_context';
 import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
-import { NoDataView } from '../views/no_data_view';
-import { ProfilingAppPageTemplate } from './profiling_app_page_template';
 import { LicensePrompt } from './license_prompt';
+import { ProfilingAppPageTemplate } from './profiling_app_page_template';
 
 export function CheckSetup({ children }: { children: React.ReactElement }) {
   const {
@@ -31,6 +33,8 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     services: { fetchHasSetup, postSetupResources },
   } = useProfilingDependencies();
   const license = useLicenseContext();
+  const router = useProfilingRouter();
+  const history = useHistory();
 
   const { docLinks, notifications } = core;
 
@@ -56,10 +60,13 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
   const displaySetupScreen =
     (status === AsyncStatus.Settled && data?.has_setup !== true) || !!error;
 
-  const displayNoDataScreen =
+  const displayAddDataInstructions =
     status === AsyncStatus.Settled && data?.has_setup === true && data?.has_data === false;
 
-  const displayUi = data?.has_data === true;
+  const displayUi =
+    // Display UI if there's data or if the user is opening the add data instruction page.
+    // does not use profiling router because that breaks as at this point the route might not have all required params
+    data?.has_data === true || history.location.pathname === '/add-data-instructions';
 
   const displayLoadingScreen = status !== AsyncStatus.Settled;
 
@@ -86,14 +93,13 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     return children;
   }
 
-  if (displayNoDataScreen) {
-    return (
-      <NoDataView
-        subTitle={i18n.translate('xpack.profiling.noDataPage.introduction', {
-          defaultMessage: `You're almost there! Follow the instructions below to add data.`,
-        })}
-      />
-    );
+  if (displayAddDataInstructions) {
+    // when there's no data redirect the user to the add data instructions page
+    router.push('/add-data-instructions', {
+      path: {},
+      query: { selectedTab: NoDataTabs.Kubernetes },
+    });
+    return null;
   }
 
   if (displaySetupScreen) {
