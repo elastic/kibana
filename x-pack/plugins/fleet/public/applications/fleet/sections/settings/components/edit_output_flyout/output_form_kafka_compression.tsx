@@ -106,6 +106,13 @@ export const OutputFormKafkaCompression: React.FunctionComponent<{
       <EuiSpacer size="m" />
       <EuiSwitch
         {...inputs.kafkaCompressionInput.props}
+        onChange={(e) => {
+          if (!e.target.checked) {
+            // Reset compression codec, if compression is disabled. In Api there is no compression state, only codec and level.
+            inputs.kafkaCompressionCodecInput.setValue(kafkaCompressionType.None);
+          }
+          inputs.kafkaCompressionInput.setValue(e.target.checked);
+        }}
         label={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.kafkaCompressionSwitchLabel"

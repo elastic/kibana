@@ -85,7 +85,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
               )}
               multiline={true}
               sortable={false}
-              {...inputs.sslCertificateAuthoritiesInput.props}
+              {...inputs.kafkaSslCertificateAuthoritiesInput.props}
             />
             <EuiFormRow
               fullWidth
@@ -95,12 +95,12 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   defaultMessage="Client SSL certificate"
                 />
               }
-              {...inputs.sslCertificateInput.formRowProps}
+              {...inputs.kafkaSslCertificateInput.formRowProps}
             >
               <EuiTextArea
                 fullWidth
                 rows={5}
-                {...inputs.sslCertificateInput.props}
+                {...inputs.kafkaSslCertificateInput.props}
                 placeholder={i18n.translate(
                   'xpack.fleet.settings.editOutputFlyout.sslCertificateInputPlaceholder',
                   {
@@ -117,7 +117,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   defaultMessage="Client SSL certificate key"
                 />
               }
-              {...inputs.sslKeyInput.formRowProps}
+              {...inputs.kafkaSslKeyInput.formRowProps}
             >
               <EuiTextArea
                 fullWidth

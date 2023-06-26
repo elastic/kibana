@@ -30,11 +30,6 @@ export const LICENCE_FOR_PER_POLICY_OUTPUT = 'platinum';
 /**
  * Kafka constants
  */
-export const kafkaBrokerAckReliability = {
-  Commit: 'commit',
-  Replicas: 'replicas',
-  NoWait: 'nowait',
-};
 
 export const kafkaCompressionType = {
   None: 'none',

@@ -9,7 +9,7 @@ import { EuiFormRow, EuiPanel, EuiSelect, EuiSpacer, EuiTitle } from '@elastic/e
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
-import { kafkaBrokerAckReliability } from '../../../../../../../common/constants';
+import { kafkaAcknowledgeReliabilityLevel } from '../../../../../../../common/constants';
 
 import type { OutputFormInputsType } from './use_output_form';
 
@@ -35,20 +35,20 @@ export const OutputFormKafkaBroker: React.FunctionComponent<{ inputs: OutputForm
       })),
     []
   );
-  const kafkaBrokerAckReliabilityOptions = [
-    {
-      text: kafkaBrokerAckReliability.Commit,
-      label: 'Wait for local commit',
-    },
-    {
-      text: kafkaBrokerAckReliability.Replicas,
-      label: 'Wait for all replicas to commit',
-    },
-    {
-      text: kafkaBrokerAckReliability.NoWait,
-      label: 'Do not wait',
-    },
-  ];
+  const kafkaBrokerAckReliabilityOptions = useMemo(
+    () =>
+      (
+        Object.keys(kafkaAcknowledgeReliabilityLevel) as Array<
+          keyof typeof kafkaAcknowledgeReliabilityLevel
+        >
+      ).map((key) => {
+        return {
+          text: kafkaAcknowledgeReliabilityLevel[key],
+          label: kafkaAcknowledgeReliabilityLevel[key],
+        };
+      }),
+    []
+  );
 
   return (
     <EuiPanel
