@@ -15,6 +15,8 @@ import { ContentStream, ContentStreamEncoding, ContentStreamParameters } from '.
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FileDocument } from '../../../../file_client/file_metadata_client/adapters/es_index';
+import * as cborx from 'cbor-x';
+import { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 
 describe('ContentStream', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -406,6 +408,16 @@ describe('ContentStream', () => {
       const [[deleteRequest]] = client.deleteByQuery.mock.calls;
 
       expect(deleteRequest).toHaveProperty('query.bool.must.match.bid', 'something');
+    });
+
+    it('should write @timestamp if `indexIsAlias` is true', async () => {
+      stream = new ContentStream(client, undefined, 'somewhere', logger, undefined, true);
+      stream.end('some data');
+      await new Promise((resolve) => stream.once('finish', resolve));
+      const docBuffer = (client.index.mock.calls[0][0] as IndexRequest).document as Buffer;
+      const docData = cborx.decode(docBuffer);
+
+      expect(docData).toHaveProperty('@timestamp');
     });
   });
 });
