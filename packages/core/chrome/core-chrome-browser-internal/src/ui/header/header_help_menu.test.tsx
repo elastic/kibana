@@ -26,14 +26,47 @@ describe('HeaderHelpMenu', () => {
         helpSupportUrl$={helpSupportUrl$}
         kibanaVersion={'version'}
         kibanaDocLink={''}
+        isCloudEnabled={false}
       />
     );
 
     expect(component.find('EuiButtonEmpty').length).toBe(1); // only the toggle view on/off button
     component.find('EuiButtonEmpty').simulate('click');
 
-    // 4 default links + the toggle button
-    expect(component.find('EuiButtonEmpty').length).toBe(5);
+    const buttons = component.find('EuiButtonEmpty');
+    const buttonTexts = buttons.map((button) => button.text()).filter((text) => text.trim() !== '');
+
+    expect(buttonTexts).toEqual([
+      'Kibana documentation',
+      'Ask Elastic',
+      'Give feedback',
+      'Open an issue in GitHub',
+    ]);
+  });
+
+  test('it only renders the default content (on Cloud)', () => {
+    const application = applicationServiceMock.createInternalStartContract();
+    const helpExtension$ = new BehaviorSubject(undefined);
+    const helpSupportUrl$ = new BehaviorSubject('');
+
+    const component = mountWithIntl(
+      <HeaderHelpMenu
+        navigateToUrl={application.navigateToUrl}
+        globalHelpExtensionMenuLinks$={of([])}
+        helpExtension$={helpExtension$}
+        helpSupportUrl$={helpSupportUrl$}
+        kibanaVersion={'version'}
+        kibanaDocLink={''}
+        isCloudEnabled
+      />
+    );
+
+    component.find('EuiButtonEmpty').simulate('click');
+
+    const buttons = component.find('EuiButtonEmpty');
+    const buttonTexts = buttons.map((button) => button.text()).filter((text) => text.trim() !== '');
+
+    expect(buttonTexts).toEqual(['Documentation', 'Support', 'Give feedback']);
   });
 
   test('it renders the global custom content + the default content', () => {
@@ -63,6 +96,7 @@ describe('HeaderHelpMenu', () => {
         helpSupportUrl$={helpSupportUrl$}
         kibanaVersion={'version'}
         kibanaDocLink={''}
+        isCloudEnabled={false}
       />
     );
 
