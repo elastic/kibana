@@ -33,7 +33,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async clickSelectedHostsAddFilterButton() {
-      return testSubjects.click('infraHostsTableAddFilterButton');
+      return testSubjects.click('hostsViewTableAddFilterButton');
     },
 
     async clickCloseFlyoutButton() {
