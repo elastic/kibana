@@ -103,7 +103,7 @@ export function fetchAll(
          * So it takes too long, a bad user experience, also a potential flakniess in tests
          */
         const fetchStatus =
-          useSql && (!prevQuery || !isEqual(query, prevQuery))
+          useTextbased && (!prevQuery || !isEqual(query, prevQuery))
             ? FetchStatus.PARTIAL
             : FetchStatus.COMPLETE;
 
