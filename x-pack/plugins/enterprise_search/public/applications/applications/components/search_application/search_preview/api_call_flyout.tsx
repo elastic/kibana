@@ -51,7 +51,7 @@ export const APICallFlyout: React.FC<APICallFlyoutProps> = ({
         <EuiTitle>
           <h2>
             <FormattedMessage
-              id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.apiCallFlyout.title"
+              id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.apiCallFlyout.title"
               defaultMessage="API Call"
             />
           </h2>
@@ -65,13 +65,13 @@ export const APICallFlyout: React.FC<APICallFlyoutProps> = ({
           <EuiTabs bottomBorder={false}>
             <EuiTab isSelected={tab === 'request'} onClick={() => setTab('request')}>
               <FormattedMessage
-                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.apiCallFlyout.requestTab"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.apiCallFlyout.requestTab"
                 defaultMessage="Request"
               />
             </EuiTab>
             <EuiTab isSelected={tab === 'response'} onClick={() => setTab('response')}>
               <FormattedMessage
-                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.apiCallFlyout.responseTab"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.apiCallFlyout.responseTab"
                 defaultMessage="Response"
               />
             </EuiTab>
@@ -85,7 +85,7 @@ export const APICallFlyout: React.FC<APICallFlyoutProps> = ({
             target="_blank"
           >
             <FormattedMessage
-              id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.apiCallFlyout.searchEndpointLink"
+              id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.apiCallFlyout.searchEndpointLink"
               defaultMessage="Search endpoint"
             />
           </EuiLinkTo>

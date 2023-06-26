@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { Redirect, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import * as i18n from './translations';
@@ -61,7 +61,7 @@ const RulesContainerComponent: React.FC = () => {
   return (
     <PluginTemplateWrapper>
       <TrackApplicationView viewId={SecurityPageName.rules}>
-        <Switch>
+        <Routes>
           <Route // Redirect to first tab if none specified
             path="/rules/id/:detailName"
             exact
@@ -94,7 +94,7 @@ const RulesContainerComponent: React.FC = () => {
           ))}
           <Route component={NotFoundPage} />
           <SpyRoute pageName={SecurityPageName.rules} />
-        </Switch>
+        </Routes>
       </TrackApplicationView>
     </PluginTemplateWrapper>
   );
