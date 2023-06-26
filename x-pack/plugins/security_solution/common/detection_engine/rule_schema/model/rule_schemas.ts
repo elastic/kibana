@@ -259,7 +259,7 @@ export const EqlPatchParams = eqlSchema.patch;
 // -------------------------------------------------------------------------------------------------
 // ESQL rule schema
 
-export type EsqlQueryLanguage = t.TypeOf<typeof EqlQueryLanguage>;
+export type EsqlQueryLanguage = t.TypeOf<typeof EsqlQueryLanguage>;
 export const EsqlQueryLanguage = t.literal('esql');
 
 const esqlSchema = buildRuleSchemas({

@@ -85,6 +85,10 @@ const applyBulkActionEditToRuleParams = (
         ruleParams.type !== 'machine_learning',
         "Index patterns can't be added. Machine learning rule doesn't have index patterns property"
       );
+      invariant(
+        ruleParams.type !== 'esql',
+        "Index patterns can't be added. Esql rule doesn't have index patterns property"
+      );
 
       if (shouldSkipIndexPatternsBulkAction(ruleParams.index, ruleParams.dataViewId, action)) {
         isActionSkipped = true;
@@ -102,6 +106,10 @@ const applyBulkActionEditToRuleParams = (
       invariant(
         ruleParams.type !== 'machine_learning',
         "Index patterns can't be deleted. Machine learning rule doesn't have index patterns property"
+      );
+      invariant(
+        ruleParams.type !== 'esql',
+        "Index patterns can't be deleted. Esql rule doesn't have index patterns property"
       );
 
       if (
@@ -125,6 +133,10 @@ const applyBulkActionEditToRuleParams = (
       invariant(
         ruleParams.type !== 'machine_learning',
         "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
+      );
+      invariant(
+        ruleParams.type !== 'esql',
+        "Index patterns can't be overwritten. Esql rule doesn't have index patterns property"
       );
 
       if (shouldSkipIndexPatternsBulkAction(ruleParams.index, ruleParams.dataViewId, action)) {

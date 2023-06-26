@@ -17,7 +17,7 @@ import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 const convertToQueryType = (query: Query | AggregateQuery): Query => {
-  if ((query as AggregateQuery)?.esql) {
+  if ('esql' in query) {
     return {
       query: query.esql,
       language: 'esql',
