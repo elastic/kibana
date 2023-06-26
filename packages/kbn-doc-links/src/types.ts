@@ -120,6 +120,8 @@ export interface DocLinks {
     readonly connectorsClients: string;
     readonly connectorsConfluence: string;
     readonly connectorsContentExtraction: string;
+    readonly connectorsDropbox: string;
+    readonly connectorsGithub: string;
     readonly connectorsGoogleCloudStorage: string;
     readonly connectorsJira: string;
     readonly connectorsMicrosoftSQL: string;
@@ -130,6 +132,7 @@ export interface DocLinks {
     readonly connectorsOracle: string;
     readonly connectorsPostgreSQL: string;
     readonly connectorsS3: string;
+    readonly connectorsServiceNow: string;
     readonly connectorsSharepoint: string;
     readonly connectorsSharepointOnline: string;
     readonly connectorsWorkplaceSearch: string;
