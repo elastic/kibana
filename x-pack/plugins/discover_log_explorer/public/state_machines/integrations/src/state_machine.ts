@@ -7,7 +7,7 @@
 
 import { assign, createMachine } from 'xstate';
 import { isEmpty, omitBy } from 'lodash';
-import { EntityList } from '../../../../common/entity_list';
+import { createComparatorByField } from '../../../utils/comparator_by_field';
 import { Dataset, Integration } from '../../../../common/datasets';
 import { FindIntegrationsResponse } from '../../../../common/latest';
 import { IDatasetsClient } from '../../../services/datasets';
@@ -201,13 +201,12 @@ const searchIntegrationStreams = (
       return integration;
     }
 
-    return {
+    return Integration.create({
       ...integration,
       // Filter and sort the datasets by the search criteria
-      dataStreams: new EntityList<Dataset>(integration.datasets)
-        .filterBy((stream) => Boolean(stream.title?.includes(nameQuery ?? '')))
-        .sortBy('name', sortOrder)
-        .build(),
-    };
+      dataStreams: integration.datasets
+        .filter((stream) => Boolean(stream.title?.includes(nameQuery ?? '')))
+        .sort(createComparatorByField<Dataset>('name', sortOrder)),
+    });
   });
 };
