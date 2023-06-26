@@ -39,7 +39,7 @@ const FLUSH = true;
 
 export function createBuffer<T extends Entity>(
   bulkOperation: BulkOperation<T>,
-  { bufferMaxDuration = 0, bufferMaxOperations = Number.MAX_VALUE, logger }: BufferOptions = {}
+  { bufferMaxDuration = 0, bufferMaxOperations = Number.MAX_VALUE, logger }: BufferOptions
 ): Operation<T> {
   const flushBuffer = new Subject<void>();
 

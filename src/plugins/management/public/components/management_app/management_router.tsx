@@ -7,8 +7,8 @@
  */
 
 import React, { memo } from 'react';
-import { Router, Switch, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { ManagementAppWrapper } from '../management_app_wrapper';
 import { ManagementLandingPage } from '../landing';
@@ -25,7 +25,7 @@ interface ManagementRouterProps {
 export const ManagementRouter = memo(
   ({ history, setBreadcrumbs, onAppMounted, sections, theme$ }: ManagementRouterProps) => (
     <Router history={history}>
-      <Switch>
+      <Routes>
         {sections.map((section) =>
           section
             .getAppsEnabled()
@@ -56,7 +56,7 @@ export const ManagementRouter = memo(
             <ManagementLandingPage setBreadcrumbs={setBreadcrumbs} onAppMounted={onAppMounted} />
           )}
         />
-      </Switch>
+      </Routes>
     </Router>
   )
 );
