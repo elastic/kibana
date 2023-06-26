@@ -45,7 +45,7 @@ async function getObservabilityOnboardingApiClient({
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
-type ObservabilityOnboardingApiClientKey =
+export type ObservabilityOnboardingApiClientKey =
   | 'noAccessUser'
   | 'readUser'
   | 'adminUser'
