@@ -287,7 +287,9 @@ describe('ContentStream', () => {
       stream.end('data');
       const error = await new Promise((resolve) => stream.once('error', resolve));
 
-      expect(error.toString()).toEqual('FilesPluginError: ContentStream.indexChunk(): some error');
+      expect((error as Error).toString()).toEqual(
+        'FilesPluginError: ContentStream.indexChunk(): some error'
+      );
     });
 
     it('should remove all previous chunks before writing', async () => {
