@@ -24,7 +24,7 @@ import {
 } from '@kbn/visualization-ui-components/public';
 import type { FieldOptionValue } from '@kbn/visualization-ui-components/public';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { useExistingFieldsReader } from '@kbn/unified-field-list-plugin/public';
+import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import moment from 'moment';
 import { htmlIdGenerator } from '@elastic/eui';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '../..';

@@ -9,6 +9,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/kibana-react-plugin"
+    "@kbn/kibana-react-plugin",
+    "@kbn/shared-ux-router"
   ]
 }
