@@ -20,6 +20,7 @@ import {
   HttpStart,
   NotificationsStart,
   ApplicationStart,
+  AnalyticsServiceStart,
 } from '@kbn/core/public';
 import {
   FilterManager,
@@ -66,6 +67,7 @@ export interface HistoryLocationState {
 export interface DiscoverServices {
   application: ApplicationStart;
   addBasePath: (path: string) => string;
+  analytics: AnalyticsServiceStart;
   capabilities: Capabilities;
   chrome: ChromeStart;
   core: CoreStart;
@@ -121,6 +123,7 @@ export const buildServices = memoize(function (
   return {
     application: core.application,
     addBasePath: core.http.basePath.prepend,
+    analytics: core.analytics,
     capabilities: core.application.capabilities,
     chrome: core.chrome,
     core,
