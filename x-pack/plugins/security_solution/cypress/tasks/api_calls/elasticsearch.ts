@@ -16,6 +16,54 @@ export const deleteIndex = (index: string) => {
   });
 };
 
+export const createIndex = (indexName: string, properties: Record<string, unknown>) =>
+  cy.request({
+    method: 'PUT',
+    url: `${Cypress.env('ELASTICSEARCH_URL')}/${indexName}`,
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    body: {
+      mappings: {
+        properties,
+      },
+    },
+  });
+
+export const indexDocument = (indexName: string, document: Record<string, unknown> = {}) =>
+  cy.request({
+    method: 'POST',
+    url: `${Cypress.env('ELASTICSEARCH_URL')}/${indexName}/_doc`,
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    body: document,
+  });
+
+export const waitForRulesToFinishExecution = (ruleIds: string[]) => {
+  return cy.waitUntil(
+    () =>
+      rootRequest<{ hits: { hits: unknown[] } }>({
+        method: 'GET',
+        url: `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_alerting_cases/_search`,
+        headers: { 'kbn-xsrf': 'cypress-creds' },
+        failOnStatusCode: false,
+        body: {
+          query: {
+            terms: {
+              'alert.params.ruleId': ruleIds,
+            },
+          },
+        },
+      }).then((response) => {
+        const areAllRulesFinished = ruleIds.every((ruleId) => {
+          return response.body.hits.hits.some((ruleExecution) => {
+            const executionRuleId = ruleExecution._source?.alert?.params?.ruleId as string;
+            return executionRuleId === ruleId;
+          });
+        });
+        return areAllRulesFinished;
+      }),
+    { interval: 500, timeout: 12000 }
+  );
+};
+
 export const waitForNewDocumentToBeIndexed = (index: string, initialNumberOfDocuments: number) => {
   cy.waitUntil(
     () =>
