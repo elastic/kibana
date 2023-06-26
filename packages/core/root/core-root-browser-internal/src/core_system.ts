@@ -236,6 +236,7 @@ export class CoreSystem {
         fatalErrors: this.fatalErrorsSetup,
         executionContext,
       });
+      this.chrome.setup({ analytics });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const settings = this.settings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });

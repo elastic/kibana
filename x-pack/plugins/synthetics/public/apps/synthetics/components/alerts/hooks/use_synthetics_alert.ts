@@ -6,18 +6,20 @@
  */
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { setAlertFlyoutVisible } from '../../../state';
+import { SYNTHETICS_TLS_RULE } from '../../../../../../common/constants/synthetics_alerts';
+import { selectAlertFlyoutVisibility, setAlertFlyoutVisible } from '../../../state';
 import { enableDefaultAlertingAPI } from '../../../state/alert_rules/api';
 import { ClientPluginsStart } from '../../../../../plugin';
 
 export const useSyntheticsAlert = (isOpen: boolean) => {
   const dispatch = useDispatch();
 
-  const [alert, setAlert] = useState<Rule | null>(null);
+  const [defaultRules, setAlert] = useState<{ statusRule: Rule; tlsRule: Rule } | null>(null);
+  const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
 
   const { data, loading } = useFetcher(() => {
     if (isOpen) {
@@ -34,15 +36,16 @@ export const useSyntheticsAlert = (isOpen: boolean) => {
   const { triggersActionsUi } = useKibana<ClientPluginsStart>().services;
 
   const EditAlertFlyout = useMemo(() => {
-    if (!alert) {
+    if (!defaultRules) {
       return null;
     }
     return triggersActionsUi.getEditRuleFlyout({
-      onClose: () => dispatch(setAlertFlyoutVisible(false)),
+      onClose: () => dispatch(setAlertFlyoutVisible(null)),
       hideInterval: true,
-      initialRule: alert,
+      initialRule:
+        alertFlyoutVisible === SYNTHETICS_TLS_RULE ? defaultRules.tlsRule : defaultRules.statusRule,
     });
-  }, [alert, dispatch, triggersActionsUi]);
+  }, [defaultRules, dispatch, triggersActionsUi, alertFlyoutVisible]);
 
   return useMemo(() => ({ loading, EditAlertFlyout }), [EditAlertFlyout, loading]);
 };

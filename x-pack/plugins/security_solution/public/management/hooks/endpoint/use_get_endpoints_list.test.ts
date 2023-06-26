@@ -48,6 +48,7 @@ describe('useGetEndpointsList hook', () => {
     expect(apiMocks.responseProvider.metadataList).toHaveBeenCalledWith({
       path: HOST_METADATA_LIST_ROUTE,
       query: { page: 0, pageSize: 50, kuery: 'united.endpoint.host.hostname:*' },
+      version: '2023-10-31',
     });
   });
 
@@ -57,6 +58,7 @@ describe('useGetEndpointsList hook', () => {
     expect(apiMocks.responseProvider.metadataList).toHaveBeenCalledWith({
       path: HOST_METADATA_LIST_ROUTE,
       query: { page: 0, pageSize: 50, kuery: 'united.endpoint.host.hostname:*xyz*' },
+      version: '2023-10-31',
     });
   });
 
@@ -73,6 +75,7 @@ describe('useGetEndpointsList hook', () => {
         kuery:
           'united.endpoint.agent.id:"agent-a" or united.endpoint.agent.id:"agent-b" or united.endpoint.host.hostname:*',
       },
+      version: '2023-10-31',
     });
   });
 
@@ -89,6 +92,7 @@ describe('useGetEndpointsList hook', () => {
         kuery:
           'united.endpoint.agent.id:"agent-a" or united.endpoint.agent.id:"agent-b" or united.endpoint.host.hostname:*xyz*',
       },
+      version: '2023-10-31',
     });
   });
 
