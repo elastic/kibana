@@ -194,6 +194,7 @@ export function Chart({
     histogramCss,
     breakdownFieldSelectorGroupCss,
     breakdownFieldSelectorItemCss,
+    suggestionsdSelectorItemCss,
     chartToolButtonCss,
   } = useChartStyles(chartVisible);
 
@@ -316,7 +317,7 @@ export function Chart({
                   </EuiFlexItem>
                 )}
                 {chartVisible && currentSuggestion && allSuggestions && allSuggestions?.length > 1 && (
-                  <EuiFlexItem css={breakdownFieldSelectorItemCss}>
+                  <EuiFlexItem css={suggestionsdSelectorItemCss}>
                     <SuggestionSelector
                       suggestions={allSuggestions}
                       activeSuggestion={currentSuggestion}
