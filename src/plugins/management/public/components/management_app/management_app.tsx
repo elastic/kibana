@@ -27,7 +27,7 @@ import {
 } from '../../utils';
 import { ManagementRouter } from './management_router';
 import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
-import { SectionsServiceStart } from '../../types';
+import { SectionsServiceStart, NavigationCardsSubject } from '../../types';
 
 interface ManagementAppProps {
   appBasePath: string;
@@ -42,7 +42,7 @@ export interface ManagementAppDependencies {
   coreStart: CoreStart;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   isSidebarEnabled$: BehaviorSubject<boolean>;
-  isCardsNavigationEnabled$: BehaviorSubject<{ enabled: boolean; disabledApps?: string[] }>;
+  cardsNavigationConfig$: BehaviorSubject<NavigationCardsSubject>;
 }
 
 export const ManagementApp = ({
@@ -51,11 +51,11 @@ export const ManagementApp = ({
   theme$,
   appBasePath,
 }: ManagementAppProps) => {
-  const { setBreadcrumbs, isSidebarEnabled$, isCardsNavigationEnabled$, coreStart } = dependencies;
+  const { setBreadcrumbs, isSidebarEnabled$, cardsNavigationConfig$ } = dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
   const isSidebarEnabled = useObservable(isSidebarEnabled$);
-  const isCardsNavigationEnabled = useObservable(isCardsNavigationEnabled$);
+  const cardsNavigationConfig = useObservable(cardsNavigationConfig$);
 
   const onAppMounted = useCallback((id: string) => {
     setSelectedId(id);
@@ -109,7 +109,7 @@ export const ManagementApp = ({
   const contextDependencies = {
     appBasePath,
     sections,
-    isCardsNavigationEnabled,
+    cardsNavigationConfig,
     kibanaVersion: dependencies.kibanaVersion,
   };
 

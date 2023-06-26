@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { CardsNavigationProps, CardsNavigationComponentProps } from './src';
+export type { AppId, CardsNavigationComponentProps } from './src';
 
 export { CardsNavigation } from './src';

@@ -10,18 +10,21 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 
-export const appIds = {
-  INGEST_PIPELINES: 'ingest_pipelines',
-  PIPELINES: 'pipelines',
-  INDEX_MANAGEMENT: 'index_management',
-  TRANSFORM: 'transform',
-  ML: 'jobsListLink',
-  DATA_VIEW: 'data_view',
-  SAVED_OBJECTS: 'objects',
-  TAGS: 'tags',
-  FILES_MANAGEMENT: 'filesManagement',
-  API_KEYS: 'api_keys',
-};
+export enum appIds {
+  INGEST_PIPELINES = 'ingest_pipelines',
+  PIPELINES = 'pipelines',
+  INDEX_MANAGEMENT = 'index_management',
+  TRANSFORM = 'transform',
+  ML = 'jobsListLink',
+  DATA_VIEW = 'data_view',
+  SAVED_OBJECTS = 'objects',
+  TAGS = 'tags',
+  FILES_MANAGEMENT = 'filesManagement',
+  API_KEYS = 'api_keys',
+}
+
+// Create new type that is a union of all the appId values
+export type AppId = `${appIds}`;
 
 export const appCategories = {
   DATA: 'data',
@@ -29,7 +32,14 @@ export const appCategories = {
   OTHER: 'other',
 };
 
-export const appDefinitions = {
+export const appDefinitions: Record<
+  AppId,
+  {
+    category: string;
+    description: string;
+    icon: React.ReactElement;
+  }
+> = {
   [appIds.INGEST_PIPELINES]: {
     category: appCategories.DATA,
     description: i18n.translate(
@@ -115,7 +125,8 @@ export const appDefinitions = {
 
 // Compose a list of app ids that belong to a given category
 export const getAppIdsByCategory = (category: string) => {
-  return Object.keys(appDefinitions).filter((appId) => {
+  const appKeys = Object.keys(appDefinitions) as AppId[];
+  return appKeys.filter((appId: AppId) => {
     return appDefinitions[appId].category === category;
   });
 };

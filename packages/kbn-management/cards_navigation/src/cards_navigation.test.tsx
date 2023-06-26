@@ -26,7 +26,7 @@ describe('ProjectSwitcher', () => {
     });
   });
 
-  describe('With providers', () => {
+  describe('States', () => {
     beforeEach(() => {
       cleanup();
     });
@@ -56,6 +56,18 @@ describe('ProjectSwitcher', () => {
       const dataCategory = screen.queryByTestId('category-data');
 
       expect(dataCategory).toBeNull();
+    });
+
+    test('it allows to disable certain apps', () => {
+      renderCardsNavigationComponent({
+        sections: sectionsMock,
+        appBasePath: APP_BASE_PATH,
+        disabledApps: ['pipelines'],
+      });
+
+      const dataPipelinesApp = screen.queryByTestId('app-card-pipelines');
+
+      expect(dataPipelinesApp).toBeNull();
     });
   });
 });

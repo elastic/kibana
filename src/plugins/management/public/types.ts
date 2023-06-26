@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 import { ScopedHistory, Capabilities } from '@kbn/core/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ChromeBreadcrumb, CoreTheme } from '@kbn/core/public';
+import type { AppId } from '@kbn/management-cards-navigation';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import type { ManagementAppLocatorParams } from '../common/locator';
 
@@ -29,13 +30,7 @@ export interface DefinedSections {
 
 export interface ManagementStart {
   setIsSidebarEnabled: (enabled: boolean) => void;
-  setIsCardsNavigationEnabled: ({
-    enabled,
-    disabledApps,
-  }: {
-    enabled: boolean;
-    disabledApps?: string[];
-  }) => void;
+  setupCardsNavigation: ({ enabled, disabledApps }: NavigationCardsSubject) => void;
 }
 
 export interface ManagementSectionsStartPrivate {
@@ -86,9 +81,14 @@ export interface CreateManagementItemArgs {
   redirectFrom?: string; // redirects from an old app id to the current app id
 }
 
+export interface NavigationCardsSubject {
+  enabled: boolean;
+  disabledApps?: AppId[];
+}
+
 export interface AppDependencies {
   appBasePath: string;
   kibanaVersion: string;
   sections: ManagementSection[];
-  isCardsNavigationEnabled?: { enabled: boolean; disabledApps?: string[] };
+  cardsNavigationConfig?: NavigationCardsSubject;
 }

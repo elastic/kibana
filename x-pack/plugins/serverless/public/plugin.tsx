@@ -61,10 +61,9 @@ export class ServerlessPlugin
 
     core.chrome.setChromeStyle('project');
     management.setIsSidebarEnabled(false);
-    // management.setIsCardsNavigationEnabled(true, ['ingest_pipelines', 'api_keys']);
-    management.setIsCardsNavigationEnabled({
+    management.setupCardsNavigation({
       enabled: true,
-      disabledApps: ['ingest_pipelines', 'api_keys']
+      // disabledApps: ['ingest_pipelines', 'api_keys']
     });
 
     // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.

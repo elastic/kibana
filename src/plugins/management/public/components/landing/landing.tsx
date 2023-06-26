@@ -23,20 +23,20 @@ export const ManagementLandingPage = ({
   setBreadcrumbs,
   onAppMounted,
 }: ManagementLandingPageProps) => {
-  const { appBasePath, sections, kibanaVersion, isCardsNavigationEnabled } = useAppContext();
+  const { appBasePath, sections, kibanaVersion, cardsNavigationConfig } = useAppContext();
   setBreadcrumbs();
 
   useEffect(() => {
     onAppMounted('');
   }, [onAppMounted]);
 
-  if (isCardsNavigationEnabled?.enabled) {
+  if (cardsNavigationConfig?.enabled) {
     return (
       <EuiPageBody restrictWidth={true}>
         <CardsNavigation
           sections={sections}
           appBasePath={appBasePath}
-          disabledApps={isCardsNavigationEnabled?.disabledApps}
+          disabledApps={cardsNavigationConfig?.disabledApps}
         />
       </EuiPageBody>
     );

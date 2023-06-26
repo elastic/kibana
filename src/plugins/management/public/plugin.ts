@@ -22,7 +22,7 @@ import {
   AppNavLinkStatus,
   AppDeepLink,
 } from '@kbn/core/public';
-import { ManagementSetup, ManagementStart } from './types';
+import { ManagementSetup, ManagementStart, NavigationCardsSubject } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
 import { ManagementAppLocatorDefinition } from '../common/locator';
@@ -72,10 +72,10 @@ export class ManagementPlugin
   private hasAnyEnabledApps = true;
 
   private isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
-  private isCardsNavigationEnabled$ = new BehaviorSubject<{
-    enabled: boolean;
-    disabledApps?: string[];
-  }>({ enabled: false, disabledApps: [] });
+  private cardsNavigationConfig$ = new BehaviorSubject<NavigationCardsSubject>({
+    enabled: false,
+    disabledApps: [],
+  });
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -123,7 +123,7 @@ export class ManagementPlugin
           coreStart,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
-          isCardsNavigationEnabled$: managementPlugin.isCardsNavigationEnabled$,
+          cardsNavigationConfig$: managementPlugin.cardsNavigationConfig$,
         });
       },
     });
@@ -152,8 +152,8 @@ export class ManagementPlugin
     return {
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),
-      setIsCardsNavigationEnabled: ({ enabled, disabledApps }) =>
-        this.isCardsNavigationEnabled$.next({ enabled, disabledApps }),
+      setupCardsNavigation: ({ enabled, disabledApps }) =>
+        this.cardsNavigationConfig$.next({ enabled, disabledApps }),
     };
   }
 }

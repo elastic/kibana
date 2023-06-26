@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { CardsNavigationComponentProps, AppRegistrySections, Application } from './types';
 import { appCategories, appDefinitions, getAppIdsByCategory } from './consts';
+import type { AppId } from './consts';
 
 // Retrieve the data we need from a given app from the management app registry
 const getDataFromManagementApp = (app: Application) => {
@@ -34,7 +35,7 @@ const getDataFromManagementApp = (app: Application) => {
 // Given a category and a list of apps, build an array of apps that belong to that category
 const getAppsForCategory = (category: string, filteredApps: { [key: string]: Application }) => {
   return getAppIdsByCategory(category)
-    .map((appId: string) => {
+    .map((appId: AppId) => {
       if (!filteredApps[appId]) {
         return null;
       }
