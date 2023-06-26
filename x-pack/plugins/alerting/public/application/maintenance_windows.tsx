@@ -7,9 +7,8 @@
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Route } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -33,7 +32,7 @@ const App = React.memo(() => {
   const hasLicense = isAtLeastPlatinum();
 
   return (
-    <Switch>
+    <Routes>
       {hasLicense ? (
         <Route
           key={MAINTENANCE_WINDOW_PATHS.alerting.maintenanceWindowsCreate}
@@ -61,7 +60,7 @@ const App = React.memo(() => {
           <MaintenanceWindowsLazy />
         </Suspense>
       </Route>
-    </Switch>
+    </Routes>
   );
 });
 App.displayName = 'App';

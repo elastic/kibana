@@ -18,7 +18,6 @@ import {
 } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
 
-import { LandingPage } from './pages/landing';
 import { StatefulOverview } from './pages/overview';
 import { DataQuality } from './pages/data_quality';
 import { DetectionResponse } from './pages/detection_response';
@@ -26,6 +25,7 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { EntityAnalyticsPage } from './pages/entity_analytics';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { CoverageOverview } from '../detection_engine/rule_management_ui/pages/coverage_overview';
+import { LandingPage } from './pages/landing';
 
 const OverviewRoutes = () => (
   <PluginTemplateWrapper>
@@ -44,9 +44,11 @@ const DetectionResponseRoutes = () => (
 );
 
 const LandingRoutes = () => (
-  <TrackApplicationView viewId={SecurityPageName.landing}>
-    <LandingPage />
-  </TrackApplicationView>
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.landing}>
+      <LandingPage />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
 );
 
 const EntityAnalyticsRoutes = () => (
