@@ -128,6 +128,10 @@ export const useBulkAddToCaseActions = ({
             onClick: (alerts?: TimelineItem[]) => {
               selectCaseModal.open({
                 getAttachments: ({ theCase }) => {
+                  if (theCase == null) {
+                    return alerts ? casesService?.helpers.groupAlertsByRule(alerts) ?? [] : [];
+                  }
+
                   return getCaseAttachments({
                     alerts,
                     caseId: theCase.id,
