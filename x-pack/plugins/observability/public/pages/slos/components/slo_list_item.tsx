@@ -30,8 +30,8 @@ import { SloSummary } from './slo_summary';
 import { SloDeleteConfirmationModal } from './slo_delete_confirmation_modal';
 import { SloBadges } from './badges/slo_badges';
 import {
-  transformSloResponseToCreateSloInput,
-  transformValuesToCreateSLOInput,
+  transformSloResponseToCreateSloForm,
+  transformCreateSLOFormToCreateSLOInput,
 } from '../../slo_edit/helpers/process_slo_form_values';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { rulesLocatorID, sloFeatureId } from '../../../../common';
@@ -111,8 +111,8 @@ export function SloListItem({
   };
 
   const handleClone = () => {
-    const newSlo = transformValuesToCreateSLOInput(
-      transformSloResponseToCreateSloInput({ ...slo, name: `[Copy] ${slo.name}` })!
+    const newSlo = transformCreateSLOFormToCreateSLOInput(
+      transformSloResponseToCreateSloForm({ ...slo, name: `[Copy] ${slo.name}` })!
     );
 
     cloneSlo({ slo: newSlo, originalSloId: slo.id });
