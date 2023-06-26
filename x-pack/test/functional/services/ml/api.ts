@@ -1497,10 +1497,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug('> Ingest pipeline deleted');
     },
 
-    async assureMlStatsIndexToExist(timeout: number = 60 * 1000) {
+    async assureMlStatsIndexExists(timeout: number = 60 * 1000) {
       const params = {
         index: '.ml-stats-000001',
-        id: 'random-test-id',
+        id: 'noop_job_test_id',
         body: {
           type: 'analytics_memory_usage',
           job_id: 'noop_job',

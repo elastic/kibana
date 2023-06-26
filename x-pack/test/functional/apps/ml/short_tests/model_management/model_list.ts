@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.createTestTrainedModels('regression', 15);
 
       // Make sure the .ml-stats index is created in advance, see https://github.com/elastic/elasticsearch/issues/65846
-      await ml.api.assureMlStatsIndexToExist();
+      await ml.api.assureMlStatsIndexExists();
     });
 
     after(async () => {
