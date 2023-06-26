@@ -93,6 +93,7 @@ export interface ManifestManagerContext {
   packagePolicyService: PackagePolicyClient;
   logger: Logger;
   experimentalFeatures: ExperimentalFeatures;
+  packagerTaskPackagePolicyUpdateConcurrency: number;
 }
 
 const getArtifactIds = (manifest: ManifestSchema) =>
@@ -112,6 +113,7 @@ export class ManifestManager {
   protected schemaVersion: ManifestSchemaVersion;
   protected experimentalFeatures: ExperimentalFeatures;
   protected cachedExceptionsListsByOs: Map<string, ExceptionListItemSchema[]>;
+  protected packagerTaskPackagePolicyUpdateConcurrency: number;
 
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
@@ -122,6 +124,8 @@ export class ManifestManager {
     this.schemaVersion = 'v1';
     this.experimentalFeatures = context.experimentalFeatures;
     this.cachedExceptionsListsByOs = new Map();
+    this.packagerTaskPackagePolicyUpdateConcurrency =
+      context.packagerTaskPackagePolicyUpdateConcurrency;
   }
 
   /**
@@ -622,7 +626,7 @@ export class ManifestManager {
         }
       },
       {
-        concurrency: 10,
+        concurrency: this.packagerTaskPackagePolicyUpdateConcurrency,
         /** When set to false, instead of stopping when a promise rejects, it will wait for all the promises to
          * settle and then reject with an aggregated error containing all the errors from the rejected promises. */
         stopOnError: false,
