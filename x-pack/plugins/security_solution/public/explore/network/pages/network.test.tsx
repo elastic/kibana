@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { waitFor } from '@testing-library/react';
 import '../../../common/mock/match_media';
 import type { Filter } from '@kbn/es-query';

@@ -6,11 +6,10 @@
  */
 
 import { render } from '@testing-library/react';
+import { LandingPage } from './landing';
+import { Router } from '@kbn/shared-ux-router';
 import { createBrowserHistory } from 'history';
 import React from 'react';
-import { Router } from 'react-router-dom';
-
-import { LandingPage } from './landing';
 
 jest.mock('../../common/components/landing_page');
 jest.mock('../../common/components/page_wrapper', () => ({
