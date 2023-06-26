@@ -8,7 +8,6 @@
 import React from 'react';
 import { waitFor, within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import '../../common/mock/match_media';
@@ -209,40 +208,6 @@ for (let i = 0; i < 50; i++) {
       expect(await screen.findByTestId('case-view-status-dropdown')).toHaveTextContent('Closed');
     });
 
-    it('should update status', async () => {
-      appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-      const dropdown = await screen.findByTestId('case-view-status-dropdown');
-
-      userEvent.click(dropdown.querySelector('button')!);
-      await waitForEuiPopoverOpen();
-
-      userEvent.click(screen.getByTestId('case-view-status-dropdown-closed'));
-      const updateObject = updateCaseProperty.mock.calls[0][0];
-
-      await waitFor(() => {
-        expect(updateCaseProperty).toHaveBeenCalledTimes(1);
-        expect(updateObject.updateKey).toEqual('status');
-        expect(updateObject.updateValue).toEqual('closed');
-      });
-    });
-
-    it('should update title', async () => {
-      appMockRenderer.render(<CaseViewPage {...caseProps} />);
-      const newTitle = 'The new title';
-
-      userEvent.click(await screen.findByTestId('editable-title-edit-icon'));
-      userEvent.clear(screen.getByTestId('editable-title-input-field'));
-      userEvent.type(screen.getByTestId('editable-title-input-field'), newTitle);
-      userEvent.click(screen.getByTestId('editable-title-submit-btn'));
-
-      const updateObject = updateCaseProperty.mock.calls[0][0];
-      await waitFor(() => {
-        expect(updateObject.updateKey).toEqual('title');
-        expect(updateObject.updateValue).toEqual(newTitle);
-      });
-    });
-
     it('should push updates on button click', async () => {
       useGetCaseConnectorsMock.mockImplementation(() => ({
         isLoading: false,
@@ -330,9 +295,9 @@ for (let i = 0; i < 50; i++) {
 
       userEvent.click(await screen.findByTestId('sync-alerts-switch'));
 
-      const updateObject = updateCaseProperty.mock.calls[0][0];
-
       await waitFor(() => {
+        const updateObject = updateCaseProperty.mock.calls[0][0];
+
         expect(updateObject.updateKey).toEqual('settings');
         expect(updateObject.updateValue).toEqual({ syncAlerts: false });
       });
