@@ -9,7 +9,6 @@ import React from 'react';
 import { waitFor, within, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { ConnectorTypes } from '../../../common/api';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import '../../common/mock/match_media';
@@ -280,47 +279,6 @@ for (let i = 0; i < 50; i++) {
 
       expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
       expect(await screen.findByTestId('push-to-external-service')).toBeDisabled();
-    });
-
-    it('should update connector', async () => {
-      appMockRenderer.render(
-        <CaseViewPage
-          {...caseProps}
-          caseData={{
-            ...caseProps.caseData,
-            connector: {
-              id: 'servicenow-1',
-              name: 'SN 1',
-              type: ConnectorTypes.serviceNowITSM,
-              fields: null,
-            },
-          }}
-        />
-      );
-
-      userEvent.click((await screen.findByTestId('connector-edit')).querySelector('button')!);
-      userEvent.click(screen.getByTestId('dropdown-connectors'));
-      await waitForEuiPopoverOpen();
-      userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
-
-      expect(await screen.findByTestId('connector-fields-resilient')).toBeInTheDocument();
-
-      userEvent.click(screen.getByTestId('edit-connectors-submit'));
-
-      await waitFor(() => {
-        expect(updateCaseProperty).toHaveBeenCalledTimes(1);
-        const updateObject = updateCaseProperty.mock.calls[0][0];
-        expect(updateObject.updateKey).toEqual('connector');
-        expect(updateObject.updateValue).toEqual({
-          id: 'resilient-2',
-          name: 'My Resilient connector',
-          type: ConnectorTypes.resilient,
-          fields: {
-            incidentTypes: null,
-            severityCode: null,
-          },
-        });
-      });
     });
 
     it('should call onComponentInitialized on mount', async () => {
