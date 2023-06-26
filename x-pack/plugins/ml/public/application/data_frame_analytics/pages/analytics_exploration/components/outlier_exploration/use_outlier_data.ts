@@ -170,9 +170,11 @@ export const useOutlierData = (
       // This is the recommended use of setCellProps: https://github.com/elastic/eui/blob/main/src/components/datagrid/data_grid_types.ts#L521-L525
       // eslint-disable-next-line react-hooks/rules-of-hooks
       useEffect(() => {
-        setCellProps({
-          style: { backgroundColor: String(backgroundColor ?? '#ffffff') },
-        });
+        if (backgroundColor) {
+          setCellProps({
+            style: { backgroundColor: String(backgroundColor) },
+          });
+        }
       }, [backgroundColor, setCellProps]);
     }
   );
