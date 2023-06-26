@@ -16,5 +16,8 @@ export const INTEGRATIONS_URL = EPM_API_ROUTES.INSTALLED_LIST_PATTERN;
 /**
  * Common types
  */
-export const sortOrderRT = rt.union([rt.literal('asc'), rt.literal('desc')]);
+export const sortOrderRT = rt.keyof({
+  asc: null,
+  desc: null,
+});
 export type SortOrder = rt.TypeOf<typeof sortOrderRT>;

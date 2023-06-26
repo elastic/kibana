@@ -6,6 +6,7 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
+import { Integration } from '../../../common/datasets';
 import {
   FindDatasetsRequestQuery,
   FindDatasetsResponse,
@@ -23,7 +24,11 @@ export interface DatasetsServiceStartDeps {
   http: HttpStart;
 }
 
+export interface FindIntegrationsValue extends Omit<FindIntegrationsResponse, 'items'> {
+  items: Integration[];
+}
+
 export interface IDatasetsClient {
   findDatasets(params?: FindDatasetsRequestQuery): Promise<FindDatasetsResponse>;
-  findIntegrations(params?: FindIntegrationsRequestQuery): Promise<FindIntegrationsResponse>;
+  findIntegrations(params?: FindIntegrationsRequestQuery): Promise<FindIntegrationsValue>;
 }

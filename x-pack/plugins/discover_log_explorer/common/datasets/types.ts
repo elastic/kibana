@@ -19,11 +19,11 @@ export const datasetRT = rt.exact(
   ])
 );
 
-const integrationStatusRT = rt.union([
-  rt.literal('installed'),
-  rt.literal('installing'),
-  rt.literal('install_failed'),
-]);
+const integrationStatusRT = rt.keyof({
+  installed: null,
+  installing: null,
+  install_failed: null,
+});
 
 export const integrationRT = rt.type({
   name: rt.string,
