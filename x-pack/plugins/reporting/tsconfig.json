@@ -40,7 +40,6 @@
     "@kbn/reporting-common",
     "@kbn/saved-search-plugin",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-lifecycle-server",
   ],
   "exclude": [
     "target/**/*",
