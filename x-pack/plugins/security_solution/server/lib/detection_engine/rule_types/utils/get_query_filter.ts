@@ -39,7 +39,7 @@ export const getQueryFilter = ({
       fields?: DataViewFieldBase[];
     }): ESBoolQuery => {
   const indexPattern: DataViewBase = {
-    fields,
+    fields: fields ?? [],
     title: (index ?? []).join(),
   };
 

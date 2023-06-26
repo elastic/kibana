@@ -124,21 +124,26 @@ const isEsqlPreviewDisabled = ({
 };
 
 const isThreatMatchPreviewDisabled = ({
-  isQueryBarValid,
-  queryBar,
+  isThreatQueryBarValid,
+  threatIndex,
+  threatMapping,
 }: {
   threatIndex: string[];
   threatMapping: ThreatMapping;
   isThreatQueryBarValid: boolean;
 }): boolean => {
-  if (!isThreatQueryBarValid || !threatIndex.length || !threatMapping) return true;
-  if (
+  if (!isThreatQueryBarValid || !threatIndex.length || !threatMapping) {
+    return true;
+  } else if (
     !threatMapping.length ||
     !threatMapping[0].entries?.length ||
     !threatMapping[0].entries[0].field ||
     !threatMapping[0].entries[0].value
-  )
+  ) {
     return true;
+  }
+
+  return false;
 };
 
 export const getIsRulePreviewDisabled = ({
