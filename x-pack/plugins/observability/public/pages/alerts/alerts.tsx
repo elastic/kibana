@@ -20,7 +20,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { useToasts } from '../../hooks/use_toast';
 import { LoadingObservability } from '../../components/loading_observability';
-import { renderRuleStats, RuleStatsState } from './components/rule_stats';
+import { RuleStats, Stats } from './components/rule_stats';
 import { ObservabilityAlertSearchBar } from '../../components/alert_search_bar/alert_search_bar';
 import {
   alertSearchBarStateContainer,
@@ -75,7 +75,7 @@ function InternalAlertsPage() {
     onBrushEnd,
   };
   const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
-  const [ruleStats, setRuleStats] = useState<RuleStatsState>({
+  const [ruleStats, setRuleStats] = useState<Stats>({
     total: 0,
     disabled: 0,
     muted: 0,
@@ -158,8 +158,6 @@ function InternalAlertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
-
   if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
   }
@@ -172,7 +170,7 @@ function InternalAlertsPage() {
           pageTitle: (
             <>{i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })} </>
           ),
-          rightSideItems: renderRuleStats(ruleStats, manageRulesHref, ruleStatsLoading),
+          rightSideItems: [<RuleStats ruleStats={ruleStats} isLoading={ruleStatsLoading} />],
         }}
       >
         <EuiFlexGroup direction="column" gutterSize="m">
