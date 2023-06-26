@@ -77,7 +77,7 @@ const significantFieldValuesRt = t.array(
     field: t.string,
     value: t.union([t.string, t.number]),
     docCount: t.number,
-    pValue: t.number,
+    pValue: t.union([t.number, t.null]),
   })
 );
 
