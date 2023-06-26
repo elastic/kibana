@@ -9,9 +9,11 @@
     "browser": true,
     "configPath": ["xpack", "ess", "security"],
     "requiredPlugins": [
-      "securitySolution",
+      "securitySolution"
     ],
-    "optionalPlugins": [],
-    "requiredBundles": []
+    "optionalPlugins": [
+      "cloudExperiments",
+    ],
+    "requiredBundles": [ "kibanaReact"]
   }
 }
