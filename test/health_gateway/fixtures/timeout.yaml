@@ -4,7 +4,7 @@ server:
 
 kibana:
   hosts:
-    - ${KIBANA_URL}/api/status/slow
+    - ${KIBANA_URL}/health/slow
   requestTimeout: 2s
 
 logging:
