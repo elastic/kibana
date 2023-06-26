@@ -6,16 +6,18 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
 
+import { schema } from '@kbn/config-schema';
 import {
   ElasticsearchClient,
   KibanaResponseFactory,
   RequestHandler,
   RequestHandlerContext,
 } from '@kbn/core/server';
+import type { DataViewsService, RuntimeField } from '@kbn/data-views-plugin/common';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import { DataViewsService } from '@kbn/data-views-plugin/common';
-import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import { generateTransformSecondaryAuthHeaders } from '../../../common/utils/transform_api_key';
 import {
   reauthorizeTransformsRequestSchema,
@@ -268,14 +270,22 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
           request: {
             params: transformIdParamSchema,
             body: putTransformsRequestSchema,
+            query: schema.object({
+              create_data_view: schema.boolean({ defaultValue: false }),
+              time_field_name: schema.maybe(schema.string()),
+            }),
           },
         },
       },
       license.guardApiRoute<TransformIdParamSchema, undefined, PutTransformsRequestSchema>(
         async (ctx, req, res) => {
           const { transformId } = req.params;
+          const createDataView = req.query?.create_data_view;
+          const timeFieldName = req.query?.time_field_name;
 
           const response: PutTransformsResponseSchema = {
+            dataViewsCreated: [],
+            dataViewsErrors: [],
             transformsCreated: [],
             errors: [],
           };
@@ -296,6 +306,44 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
                 error: wrapEsError(e),
               })
             );
+
+          if (createDataView) {
+            const { savedObjects, elasticsearch } = coreStart;
+            const dataViewsService = await dataViews.dataViewsServiceFactory(
+              savedObjects.getScopedClient(req),
+              elasticsearch.client.asScoped(req).asCurrentUser,
+              req
+            );
+
+            const dataViewName = req.body.dest.index;
+            const runtimeMappings = req.body.source.runtime_mappings as Record<
+              string,
+              RuntimeField
+            >;
+
+            try {
+              const dataViewsResp = await dataViewsService.createAndSave(
+                {
+                  title: dataViewName,
+                  timeFieldName,
+                  ...(isPopulatedObject(runtimeMappings) && isLatestTransform(req.body)
+                    ? { runtimeFieldMap: runtimeMappings }
+                    : {}),
+                  allowNoIndex: true,
+                },
+                false,
+                true
+              );
+
+              if (dataViewsResp.id) {
+                response.dataViewsCreated = [{ id: dataViewsResp.id }];
+              }
+            } catch (error) {
+              // For the error id we use the transform id
+              // because in case of an error we don't get a data view id.
+              response.dataViewsErrors = [{ id: transformId, error }];
+            }
+          }
 
           return res.ok({ body: response });
         }

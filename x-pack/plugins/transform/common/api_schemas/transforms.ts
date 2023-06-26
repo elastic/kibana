@@ -151,13 +151,19 @@ export type PutTransformsLatestRequestSchema = Omit<PutTransformsRequestSchema, 
 interface TransformCreated {
   transform: TransformId;
 }
-interface TransformCreatedError {
-  id: TransformId;
+interface DataViewCreated {
+  id: string;
+}
+interface CreatedError {
+  id: string;
   error: any;
 }
+
 export interface PutTransformsResponseSchema {
   transformsCreated: TransformCreated[];
-  errors: TransformCreatedError[];
+  dataViewsCreated: DataViewCreated[];
+  dataViewsErrors: CreatedError[];
+  errors: CreatedError[];
 }
 
 // POST transforms/_preview
