@@ -9,6 +9,7 @@ import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../t
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { findRuleRowInTable } from '../../tasks/rule_snoozing';
+import { expectRulesWithExecutionStatus, filterByExecutionStatus } from '../../tasks/rule_filters';
 
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 
@@ -25,20 +26,6 @@ import {
 } from '../../tasks/api_calls/elasticsearch';
 
 import { getNewRule } from '../../objects/rule';
-
-export const expectRulesWithExecutionStatus = (status: string, expectedCount: number) => {
-  cy.get(`[data-test-subj="ruleExecutionStatus"]:contains("${status}")`).should(
-    'have.length',
-    expectedCount
-  );
-};
-
-export const filterByExecutionStatus = (status: string) => {
-  cy.get('[data-test-subj="executionStatusFilterButton"]').click();
-  cy.get(`[data-test-subj="executionStatusFilterOption"]:contains("${status}")`).click();
-  cy.get('[data-test-subj="ruleName"]').should('have.length', 1);
-  expectRulesWithExecutionStatus(status, 1);
-};
 
 describe('Rule management filters', () => {
   before(() => {

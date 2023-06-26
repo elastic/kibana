@@ -166,7 +166,7 @@ const useRuleExecutionStatusColumn = ({
       render: (value: RuleExecutionSummary['last_execution']['status'] | undefined, item: Rule) => {
         return (
           <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false} data-test-subj="tableRow-ruleExecutionStatus">
+            <EuiFlexItem grow={false}>
               <RuleStatusBadge
                 status={value}
                 message={item.execution_summary?.last_execution.message}
