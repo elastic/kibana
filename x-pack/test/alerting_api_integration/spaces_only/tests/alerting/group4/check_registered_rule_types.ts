@@ -36,6 +36,7 @@ export default function createRegisteredRuleTypeTests({ getService }: FtrProvide
         'xpack.uptime.alerts.durationAnomaly',
         'xpack.uptime.alerts.tls',
         'siem.eqlRule',
+        'siem.esqlRule',
         'siem.savedQueryRule',
         'siem.indicatorRule',
         'siem.mlRule',

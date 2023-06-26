@@ -119,7 +119,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
     const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
 
     const query = useMemo(() => {
-      if (filterQuery.language === 'esql') {
+      if (filterQuery?.language === 'esql') {
         return { esql: filterQuery.query as string };
       }
       return filterQuery;

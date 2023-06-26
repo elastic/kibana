@@ -125,6 +125,14 @@ describe('rule helpers', () => {
         newTermsFields: ['host.name'],
         historyWindowSize: '7d',
         suppressionMissingFields: expect.any(String),
+        esqlOptions: {
+          groupByFields: [],
+          suppressionDuration: {
+            unit: 'm',
+            value: 5,
+          },
+          suppressionMode: 'per-rule-execution',
+        },
       };
 
       const aboutRuleStepData: AboutStepRule = {
