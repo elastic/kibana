@@ -155,7 +155,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should return existing html when available', async () => {
+    it('should return an error when sending html via execute endpoint', async () => {
       await supertest
         .post(`/api/actions/connector/${createdActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
@@ -170,13 +170,9 @@ export default function emailTest({ getService }: FtrProviderContext) {
         })
         .expect(200)
         .then((resp: any) => {
-          const { text, html } = resp.body.data.message;
-          expect(text).to.eql(
-            '_italic_ **bold** https://elastic.co link\n\n---\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).'
-          );
-          expect(html).to.eql(
-            `<html><body><a href="https://elastic.co" style="font-weight: bold; font-style: italic">View at Elastic</a></body></html>`
-          );
+          const { status, message } = resp.body;
+          expect(status).to.eql('error');
+          expect(message).to.eql('HTML email can only be sent via notifications');
         });
     });
 
