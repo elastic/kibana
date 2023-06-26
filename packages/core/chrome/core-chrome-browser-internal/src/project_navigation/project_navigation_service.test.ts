@@ -6,16 +6,46 @@
  * Side Public License, v 1.
  */
 
-import { firstValueFrom } from 'rxjs';
-import { ProjectNavigationService } from './project_navigation_service';
+import { History } from 'history';
+import { firstValueFrom, lastValueFrom, take } from 'rxjs';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import type { ChromeNavLinks } from '@kbn/core-chrome-browser';
+import { ProjectNavigationService } from './project_navigation_service';
 
-const setup = () => {
+const createHistoryMock = ({
+  locationPathName = '/',
+}: { locationPathName?: string } = {}): jest.Mocked<History> => {
+  return {
+    block: jest.fn(),
+    createHref: jest.fn(),
+    go: jest.fn(),
+    goBack: jest.fn(),
+    goForward: jest.fn(),
+    listen: jest.fn(),
+    push: jest.fn(),
+    replace: jest.fn(),
+    action: 'PUSH',
+    length: 1,
+    location: {
+      pathname: locationPathName,
+      search: '',
+      hash: '',
+      key: '',
+      state: undefined,
+    },
+  };
+};
+
+const setup = ({ locationPathName = '/' }: { locationPathName?: string } = {}) => {
   const projectNavigationService = new ProjectNavigationService();
   const projectNavigation = projectNavigationService.start({
-    application: applicationServiceMock.createInternalStartContract(),
+    application: {
+      ...applicationServiceMock.createInternalStartContract(),
+      history: createHistoryMock({ locationPathName }),
+    },
     navLinks: {} as unknown as ChromeNavLinks,
+    http: httpServiceMock.createStartContract(),
   });
 
   return { projectNavigation };
@@ -87,5 +117,110 @@ describe('breadcrumbs', () => {
         },
       ]
     `);
+  });
+});
+
+describe('getActiveNodes$()', () => {
+  test('should set the active nodes from history location', async () => {
+    const currentLocationPathName = '/foo/item1';
+    const { projectNavigation } = setup({ locationPathName: currentLocationPathName });
+
+    let activeNodes = await lastValueFrom(projectNavigation.getActiveNodes$().pipe(take(1)));
+    expect(activeNodes).toEqual([]);
+
+    projectNavigation.setProjectNavigation({
+      navigationTree: [
+        {
+          id: 'root',
+          title: 'Root',
+          path: ['root'],
+          children: [
+            {
+              id: 'item1',
+              title: 'Item 1',
+              path: ['root', 'item1'],
+              deepLink: {
+                id: 'item1',
+                title: 'Item 1',
+                url: '/foo/item1',
+                baseUrl: '',
+                href: '',
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    activeNodes = await lastValueFrom(projectNavigation.getActiveNodes$().pipe(take(1)));
+
+    expect(activeNodes).toEqual([
+      [
+        {
+          id: 'root',
+          title: 'Root',
+          isActive: true,
+          path: ['root'],
+        },
+        {
+          id: 'item1',
+          title: 'Item 1',
+          isActive: true,
+          path: ['root', 'item1'],
+          deepLink: {
+            id: 'item1',
+            title: 'Item 1',
+            url: '/foo/item1',
+            baseUrl: '',
+            href: '',
+          },
+        },
+      ],
+    ]);
+  });
+
+  test('should set the active nodes from getIsActive() handler', async () => {
+    const { projectNavigation } = setup();
+
+    let activeNodes = await lastValueFrom(projectNavigation.getActiveNodes$().pipe(take(1)));
+    expect(activeNodes).toEqual([]);
+
+    projectNavigation.setProjectNavigation({
+      navigationTree: [
+        {
+          id: 'root',
+          title: 'Root',
+          path: ['root'],
+          children: [
+            {
+              id: 'item1',
+              title: 'Item 1',
+              path: ['root', 'item1'],
+              getIsActive: () => true,
+            },
+          ],
+        },
+      ],
+    });
+
+    activeNodes = await lastValueFrom(projectNavigation.getActiveNodes$().pipe(take(1)));
+
+    expect(activeNodes).toEqual([
+      [
+        {
+          id: 'root',
+          title: 'Root',
+          isActive: true,
+          path: ['root'],
+        },
+        {
+          id: 'item1',
+          title: 'Item 1',
+          isActive: true,
+          path: ['root', 'item1'],
+          getIsActive: expect.any(Function),
+        },
+      ],
+    ]);
   });
 });

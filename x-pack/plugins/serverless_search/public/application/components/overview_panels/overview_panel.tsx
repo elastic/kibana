@@ -18,9 +18,9 @@ import React from 'react';
 import { LEARN_MORE_LABEL } from '../../../../common/i18n_string';
 
 interface OverviewPanelProps {
-  description: React.ReactNode | string;
+  description?: React.ReactNode | string;
   leftPanelContent: React.ReactNode;
-  links: Array<{ label: string; href: string }>;
+  links?: Array<{ label: string; href: string }>;
   title: string;
 }
 
@@ -42,9 +42,9 @@ export const OverviewPanel: React.FC<OverviewPanelProps> = ({
               <h2>{title}</h2>
             </EuiTitle>
             <EuiSpacer />
-            <EuiText>{description}</EuiText>
+            {description && <EuiText>{description}</EuiText>}
             {children}
-            {links.length > 0 ? (
+            {links && links.length > 0 ? (
               <>
                 <EuiSpacer />
                 <EuiTitle size="xxs">
