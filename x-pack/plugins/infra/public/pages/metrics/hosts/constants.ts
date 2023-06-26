@@ -59,3 +59,4 @@ export const ALERT_STATUS_QUERY = {
 };
 
 export const HOST_LIMIT_OPTIONS = [10, 20, 50, 100, 500] as const;
+export const HOST_METRICS_DOC_HREF = 'https://ela.st/docs-infra-host-metrics';

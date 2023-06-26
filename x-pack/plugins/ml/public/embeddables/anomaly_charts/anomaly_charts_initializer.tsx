@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AnomalyChartsEmbeddableInput } from '..';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
 
-export const MAX_ANOMALY_CHARTS_ALLOWED = 48;
+export const MAX_ANOMALY_CHARTS_ALLOWED = 50;
 export interface AnomalyChartsInitializerProps {
   defaultTitle: string;
   initialInput?: Partial<Pick<AnomalyChartsEmbeddableInput, 'jobIds' | 'maxSeriesToPlot'>>;
@@ -43,8 +43,10 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
   );
 
   const isPanelTitleValid = panelTitle.length > 0;
+  const isMaxSeriesToPlotValid =
+    maxSeriesToPlot >= 1 && maxSeriesToPlot <= MAX_ANOMALY_CHARTS_ALLOWED;
+  const isFormValid = isPanelTitleValid && isMaxSeriesToPlotValid;
 
-  const isFormValid = isPanelTitleValid && maxSeriesToPlot > 0;
   return (
     <EuiModal
       initialFocus="[name=panelTitle]"
@@ -82,6 +84,15 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
           </EuiFormRow>
 
           <EuiFormRow
+            isInvalid={!isMaxSeriesToPlotValid}
+            error={
+              !isMaxSeriesToPlotValid ? (
+                <FormattedMessage
+                  id="xpack.ml.anomalyChartsEmbeddable.maxSeriesToPlotError"
+                  defaultMessage="Maximum number of series to plot must be between 1 and 50."
+                />
+              ) : undefined
+            }
             label={
               <FormattedMessage
                 id="xpack.ml.anomalyChartsEmbeddable.maxSeriesToPlotLabel"
@@ -95,7 +106,7 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
               name="selectMaxSeriesToPlot"
               value={maxSeriesToPlot}
               onChange={(e) => setMaxSeriesToPlot(parseInt(e.target.value, 10))}
-              min={0}
+              min={1}
               max={MAX_ANOMALY_CHARTS_ALLOWED}
             />
           </EuiFormRow>

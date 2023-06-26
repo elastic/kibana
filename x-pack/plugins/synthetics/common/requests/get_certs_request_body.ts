@@ -31,6 +31,7 @@ function absoluteDate(relativeDate: string) {
 }
 
 export const getCertsRequestBody = ({
+  monitorIds,
   pageIndex,
   search,
   notValidBefore,
@@ -46,7 +47,7 @@ export const getCertsRequestBody = ({
 
   const searchRequest = createEsQuery({
     body: {
-      from: pageIndex * size,
+      from: (pageIndex ?? 0) * size,
       size,
       sort: asMutableArray([
         {
@@ -79,6 +80,9 @@ export const getCertsRequestBody = ({
             : {}),
           filter: [
             ...(filters ? [filters] : []),
+            ...(monitorIds && monitorIds.length > 0
+              ? [{ terms: { 'monitor.id': monitorIds } }]
+              : []),
             {
               exists: {
                 field: 'tls.server.hash.sha256',
@@ -129,6 +133,9 @@ export const getCertsRequestBody = ({
       _source: [
         'monitor.id',
         'monitor.name',
+        'monitor.type',
+        'url.full',
+        'observer.geo.name',
         'tls.server.x509.issuer.common_name',
         'tls.server.x509.subject.common_name',
         'tls.server.hash.sha1',
@@ -193,6 +200,10 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
       not_after: notAfter,
       not_before: notBefore,
       common_name: commonName,
+      monitorName: ping?.monitor?.name,
+      monitorUrl: ping?.url?.full,
+      monitorType: ping?.monitor?.type,
+      locationName: ping?.observer?.geo?.name,
     };
   });
   const total = result.aggregations?.total?.value ?? 0;
