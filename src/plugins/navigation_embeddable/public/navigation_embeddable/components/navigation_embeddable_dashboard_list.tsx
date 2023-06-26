@@ -10,7 +10,6 @@ import classNames from 'classnames';
 import useAsync from 'react-use/lib/useAsync';
 import React, { useEffect, useState } from 'react';
 
-// import { isValidUrl } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   EuiSpacer,
   EuiHighlight,
@@ -18,11 +17,13 @@ import {
   EuiFieldSearch,
   EuiSelectableOption,
 } from '@elastic/eui';
-import { createValidateUrl } from '@kbn/image-embeddable-plugin/public';
 
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 import { DashboardItem } from '../types';
-import { coreServices } from '../services/navigation_embeddable_services';
+
+// TODO: As part of https://github.com/elastic/kibana/issues/154381, replace this regex URL check with more robost url validation
+const isValidUrl =
+  /^https?:\/\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
 
 interface Props {
   onUrlSelected: (url: string) => void;
@@ -68,8 +69,7 @@ export const NavigationEmbeddableDashboardList = ({
         isClearable={true}
         placeholder={'Search for a dashboard or enter external URL'}
         onSearch={(value) => {
-          const validateUrl = createValidateUrl(coreServices.http.externalUrl);
-          if (validateUrl(value).isValid) {
+          if (isValidUrl.test(value)) {
             setSearchString('');
             onUrlSelected(value);
           } else {

@@ -10,7 +10,6 @@
     "@kbn/dashboard-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/kibana-react-plugin",
-    "@kbn/image-embeddable-plugin",
     "@kbn/presentation-util-plugin",
     "@kbn/triggers-actions-ui-plugin"
   ],

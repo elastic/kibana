@@ -48,7 +48,7 @@ export const NavigationEmbeddableComponent = () => {
                 }
               : {
                   color: 'primary',
-                  onClick: () => {}, // TODO: connect to drilldown
+                  onClick: () => {}, // TODO: As part of https://github.com/elastic/kibana/issues/154381, connect to drilldown
                 }),
           };
         }
@@ -56,7 +56,7 @@ export const NavigationEmbeddableComponent = () => {
           label: link.label || link.url,
           iconType: 'link',
           color: 'primary',
-          onClick: () => {}, // TODO: connect to drilldown
+          onClick: () => {}, // TODO: As part of https://github.com/elastic/kibana/issues/154381, connect to drilldown
         };
       })
     );
@@ -70,7 +70,7 @@ export const NavigationEmbeddableComponent = () => {
     </EuiButtonEmpty>
   );
 
-  // TODO: horizontal VS vertical layout rather than `EuiListGroup`
+  // TODO: As part of https://github.com/elastic/kibana/issues/154357, replace `EuiListGroup` with horizontal VS vertical layout
   return (
     <EuiPanel className="eui-yScroll">
       <EuiListGroup flush listItems={dashboardListGroupItems} size="s" />

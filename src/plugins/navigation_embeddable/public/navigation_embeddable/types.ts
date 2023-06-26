@@ -21,24 +21,17 @@ export interface DashboardLink {
   description?: string;
 }
 
-export type IExternalLink = ExternalLink & { order: number };
-export type IDashboardLink = Pick<DashboardLink, 'id' | 'label'> & { order: number };
-
 export interface DashboardItem {
   id: string;
   attributes: DashboardAttributes;
 }
 
-export interface NavigationEmbeddableInput extends EmbeddableInput {
-  links?: { [id: string]: IExternalLink | IDashboardLink };
-}
+/**
+ * Explicit Input
+ */
+export type IExternalLink = ExternalLink & { order: number };
 
-export interface NavigationEmbeddableComponentState {
-  totalDashboards?: number;
-  currentDashboardId?: string;
-  dashboardList?: DashboardItem[];
-  links?: Array<DashboardLink | ExternalLink>;
-}
+export type IDashboardLink = Pick<DashboardLink, 'id' | 'label'> & { order: number };
 
 export const isDashboardLink = (
   link: DashboardLink | ExternalLink
@@ -46,9 +39,19 @@ export const isDashboardLink = (
   return Boolean((link as IDashboardLink).id);
 };
 
-// export const isExternalLink = (link: DashboardLink | ExternalLink): link is ExternalLink => {
-//   return Boolean((link as ExternalLink).url);
-// };
+export interface NavigationEmbeddableInput extends EmbeddableInput {
+  links?: { [id: string]: IExternalLink | IDashboardLink };
+}
+
+/**
+ * Redux state
+ */
+export interface NavigationEmbeddableComponentState {
+  totalDashboards?: number;
+  currentDashboardId?: string;
+  dashboardList?: DashboardItem[];
+  links?: Array<DashboardLink | ExternalLink>;
+}
 
 export type NavigationEmbeddableReduxState = ReduxEmbeddableState<
   NavigationEmbeddableInput,
