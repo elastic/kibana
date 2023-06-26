@@ -70,15 +70,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('edit-category-submit');
 
         // validate category was added
-        await testSubjects.existOrFail('category-' + category);
+        await testSubjects.existOrFail('category-viewer-' + category);
 
         // validate user action
         await find.byCssSelector('[data-test-subj*="category-update-action"]');
       });
 
       it('deletes a category from a case', async () => {
+        await find.byCssSelector('[data-test-subj*="category-viewer-"]');
+
         await testSubjects.click('category-remove-button');
 
+        await testSubjects.existOrFail('no-categories');
         // validate user action
         await find.byCssSelector('[data-test-subj*="category-delete-action"]');
       });
@@ -104,7 +107,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('edit-tags-submit');
 
         // validate user action
-        await testSubjects.existOrFail('no-categories');
         await find.byCssSelector('[data-test-subj*="tags-delete-action"]');
       });
 

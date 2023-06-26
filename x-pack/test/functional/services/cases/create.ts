@@ -61,7 +61,6 @@ export function CasesCreateViewServiceProvider(
       await this.setTitle(title);
       await this.setDescription(description);
       await this.setTags(tag);
-      await this.setCategory(category);
 
       if (severity !== CaseSeverity.LOW) {
         await this.setSeverity(severity);
@@ -69,6 +68,10 @@ export function CasesCreateViewServiceProvider(
 
       if (owner) {
         await this.setSolution(owner);
+      }
+
+      if (category) {
+        await this.setCategory(category);
       }
 
       await this.submitCase();
