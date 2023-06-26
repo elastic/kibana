@@ -266,6 +266,21 @@
     "misc": [
       {
         "parentPluginId": "discover",
+        "id": "def-public.SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID",
+        "description": [],
+        "signature": [
+          "\"SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID\""
+        ],
+        "path": "src/plugins/discover/public/embeddable/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
         "id": "def-public.SEARCH_EMBEDDABLE_TYPE",
         "type": "string",
         "tags": [],
