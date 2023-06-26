@@ -69,7 +69,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             endpoint:
               'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
             params: {
-              path: { serviceName: 'opbeans-node', serviceNodeName: serviceNodeIds[0] },
+              path: { serviceName: 'opbeans-java', serviceNodeName: serviceNodeIds[0] },
               query: {
                 start,
                 end,
