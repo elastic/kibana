@@ -20,7 +20,7 @@ const validate = {
   }),
 };
 
-export function registerSetManyRoute(router: InternalUiSettingsRouter) {
+export function registerSetManyRoute(router: InternalUiSettingsRouter, publicApiEnabled: boolean) {
   const setManyFromRequest = async (
     uiSettingsClient: IUiSettingsClient,
     context: InternalUiSettingsRequestHandlerContext,
@@ -52,13 +52,33 @@ export function registerSetManyRoute(router: InternalUiSettingsRouter) {
       throw error;
     }
   };
-  router.post({ path: '/api/kibana/settings', validate }, async (context, request, response) => {
-    const uiSettingsClient = (await context.core).uiSettings.client;
-    return await setManyFromRequest(uiSettingsClient, context, request, response);
-  });
+  if (publicApiEnabled) {
+    router.post({ path: '/api/kibana/settings', validate }, async (context, request, response) => {
+      const uiSettingsClient = (await context.core).uiSettings.client;
+      return await setManyFromRequest(uiSettingsClient, context, request, response);
+    });
+  }
+
+  if (publicApiEnabled) {
+    router.post(
+      { path: '/api/kibana/global_settings', validate },
+      async (context, request, response) => {
+        const uiSettingsClient = (await context.core).uiSettings.globalClient;
+        return await setManyFromRequest(uiSettingsClient, context, request, response);
+      }
+    );
+  }
 
   router.post(
-    { path: '/api/kibana/global_settings', validate },
+    { path: '/internal/kibana/settings', validate, options: { access: 'internal' } },
+    async (context, request, response) => {
+      const uiSettingsClient = (await context.core).uiSettings.client;
+      return await setManyFromRequest(uiSettingsClient, context, request, response);
+    }
+  );
+
+  router.post(
+    { path: '/internal/kibana/global_settings', validate, options: { access: 'internal' } },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
       return await setManyFromRequest(uiSettingsClient, context, request, response);

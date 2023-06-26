@@ -12,9 +12,9 @@ import { registerGetRoute } from './get';
 import { registerSetManyRoute } from './set_many';
 import { registerSetRoute } from './set';
 
-export function registerRoutes(router: InternalUiSettingsRouter) {
-  registerGetRoute(router);
-  registerDeleteRoute(router);
-  registerSetRoute(router);
-  registerSetManyRoute(router);
+export function registerRoutes(router: InternalUiSettingsRouter, publicApiEnabled: boolean = true) {
+  registerGetRoute(router, publicApiEnabled);
+  registerDeleteRoute(router, publicApiEnabled);
+  registerSetRoute(router, publicApiEnabled);
+  registerSetManyRoute(router, publicApiEnabled);
 }

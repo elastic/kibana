@@ -21,7 +21,7 @@ const validate = {
   }),
 };
 
-export function registerDeleteRoute(router: InternalUiSettingsRouter) {
+export function registerDeleteRoute(router: InternalUiSettingsRouter, publicApiEnabled: boolean) {
   const deleteFromRequest = async (
     uiSettingsClient: IUiSettingsClient,
     context: InternalUiSettingsRequestHandlerContext,
@@ -51,15 +51,33 @@ export function registerDeleteRoute(router: InternalUiSettingsRouter) {
       throw error;
     }
   };
+  if (publicApiEnabled) {
+    router.delete(
+      { path: '/api/kibana/settings/{key}', validate },
+      async (context, request, response) => {
+        const uiSettingsClient = (await context.core).uiSettings.client;
+        return await deleteFromRequest(uiSettingsClient, context, request, response);
+      }
+    );
+  }
+  if (publicApiEnabled) {
+    router.delete(
+      { path: '/api/kibana/global_settings/{key}', validate },
+      async (context, request, response) => {
+        const uiSettingsClient = (await context.core).uiSettings.globalClient;
+        return await deleteFromRequest(uiSettingsClient, context, request, response);
+      }
+    );
+  }
   router.delete(
-    { path: '/api/kibana/settings/{key}', validate },
+    { path: '/internal/kibana/settings/{key}', validate, options: { access: 'internal' } },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.client;
       return await deleteFromRequest(uiSettingsClient, context, request, response);
     }
   );
   router.delete(
-    { path: '/api/kibana/global_settings/{key}', validate },
+    { path: '/internal/kibana/global_settings/{key}', validate, options: { access: 'internal' } },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
       return await deleteFromRequest(uiSettingsClient, context, request, response);

@@ -78,12 +78,19 @@ export class UiSettingsService
   public async setup({ http, savedObjects }: SetupDeps): Promise<InternalUiSettingsServiceSetup> {
     this.log.debug('Setting up ui settings service');
 
-    savedObjects.registerType(uiSettingsType);
-    savedObjects.registerType(uiSettingsGlobalType);
-    registerRoutes(http.createRouter<InternalUiSettingsRequestHandlerContext>(''));
-
     const config = await firstValueFrom(this.config$);
     this.overrides = config.overrides;
+    savedObjects.registerType(uiSettingsType);
+    savedObjects.registerType(uiSettingsGlobalType);
+
+    if (config.hasOwnProperty('publicApiEnabled')) {
+      registerRoutes(
+        http.createRouter<InternalUiSettingsRequestHandlerContext>(''),
+        config.publicApiEnabled
+      );
+    } else {
+      registerRoutes(http.createRouter<InternalUiSettingsRequestHandlerContext>(''));
+    }
 
     return {
       register: this.register,
