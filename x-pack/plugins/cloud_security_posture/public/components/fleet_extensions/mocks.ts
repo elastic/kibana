@@ -92,6 +92,16 @@ const getPolicyMock = (
     shared_credential_file: { type: 'text' },
     credential_profile_name: { type: 'text' },
     role_arn: { type: 'text' },
+    'aws.credentials.type': { value: 'cloud_formation', type: 'text' },
+  };
+
+  const eksVarsMock = {
+    access_key_id: { type: 'text' },
+    secret_access_key: { type: 'text' },
+    session_token: { type: 'text' },
+    shared_credential_file: { type: 'text' },
+    credential_profile_name: { type: 'text' },
+    role_arn: { type: 'text' },
     'aws.credentials.type': { value: 'assume_role', type: 'text' },
   };
 
@@ -123,7 +133,7 @@ const getPolicyMock = (
         type: CLOUDBEAT_EKS,
         policy_template: 'kspm',
         enabled: type === CLOUDBEAT_EKS,
-        streams: [{ enabled: type === CLOUDBEAT_EKS, data_stream: dataStream, vars: awsVarsMock }],
+        streams: [{ enabled: type === CLOUDBEAT_EKS, data_stream: dataStream, vars: eksVarsMock }],
       },
       {
         type: CLOUDBEAT_AWS,
