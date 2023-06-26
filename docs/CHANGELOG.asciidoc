@@ -49,6 +49,28 @@ Review important information about the {kib} 8.x releases.
 Review the following information about the {kib} 8.8.1 release.
 
 [float]
+[[known-issues-8.8.1]]
+=== Known issues
+
+// tag::known-issue-159807[]
+[discrete]
+.Memory leak in Fleet audit logging.
+[%collapsible]
+====
+*Details* +
+Fleet introduced audit logging for various CRUD (create, read, update, and delete) operations in 8.8.0.
+
+This audit logging is not enabled by default. Users must set `xpack.security.audit.enabled: true` in the `kibana.yml` to enable it.
+
+We have identified an off-heap memory leak in Fleet audit logging that can result in Kibana instances getting terminated by the operating system kernel's `oom-killer`.
+
+*Impact* +
+The 8.8.2 release includes in {kibana-pull}159807[a fix] for this problem. Customers using Fleet integrations
+and Kibana audit logging in 8.8.0 and 8.8.1 should upgrade to 8.8.2 or above to obtain the fix.
+====
+// end::known-issue-159807[]
+
+[float]
 [[breaking-changes-8.8.1]]
 === Breaking changes
 
@@ -138,6 +160,24 @@ This can result in a loss of saved objects during the upgrade. This can also lea
 The 8.8.1 release includes in {kibana-pull}158940[a fix] for this problem. Customers affected by a failed 8.8.0 upgrade should contact Elastic support. For more information, see the {kibana-issue}158733[related issue].
 ====
 // end::known-issue-158940[]
+
+// tag::known-issue-159807[]
+[discrete]
+.Memory leak in Fleet audit logging.
+[%collapsible]
+====
+*Details* +
+Fleet introduced audit logging for various CRUD (create, read, update, and delete) operations in 8.8.0.
+
+This audit logging is not enabled by default. Users must set `xpack.security.audit.enabled: true` in the `kibana.yml` to enable it.
+
+We have identified an off-heap memory leak in Fleet audit logging that can result in Kibana instances getting terminated by the operating system kernel's `oom-killer`.
+
+*Impact* +
+The 8.8.2 release includes in {kibana-pull}159807[a fix] for this problem. Customers using Fleet integrations
+and Kibana audit logging in 8.8.0 and 8.8.1 should upgrade to 8.8.2 or above to obtain the fix.
+====
+// end::known-issue-159807[]
 
 // tag::known-issue-155203[]
 [discrete]
