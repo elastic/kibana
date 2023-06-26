@@ -35,6 +35,4 @@ export const SecuritySolutionBottomBarProps: EuiBottomBarProps & {
 } = {
   className: BOTTOM_BAR_CLASSNAME,
   'data-test-subj': 'timeline-bottom-bar-container',
-  paddingSize: 'none',
-  restrictWidth: false,
 };

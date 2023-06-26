@@ -26,8 +26,15 @@ export const GetStartedComponent: React.FC = () => {
       restrictWidth={false}
       contentBorder={false}
       grow={true}
+      /* this is the only page without padding in Security Solution,
+       **  ignoring main page wrapper padding using absolute positioning
+       */
       css={css`
-        margin: -${euiTheme.size.l};
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        position: absolute;
       `}
     >
       <KibanaPageTemplate.Header

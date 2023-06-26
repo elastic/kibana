@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { Chat } from '@kbn/cloud-chat-plugin/public';
+import { css } from '@emotion/react';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../common/constants';
 import { LandingPageComponent } from '../../common/components/landing_page';
