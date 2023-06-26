@@ -2,7 +2,7 @@
 [[logs]]
 === Logs
 
-The *Logs* tab shows contextual logs for the selected APM Service.
+The *Logs* tab shows contextual logs for the selected service.
 To learn how to correlate your logs with your instrumented services,
 see {observability-guide}/log-correlation.html[log correlation]
 

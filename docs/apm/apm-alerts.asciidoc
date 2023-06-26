@@ -104,7 +104,7 @@ Alerts can be viewed within the context of any service.
 After selecting a service, go to the **Alerts** tab to view any alerts that are active for the selected service.
 
 [role="screenshot"]
-image::apm/images/active-alert-status.png[View active alerts by service]
+image::apm/images/active-alert-service.png[View active alerts by service]
 
 [float]
 [[apm-alert-view-group]]
