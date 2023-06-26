@@ -144,10 +144,9 @@ export function useTextBasedQueryLanguage({
             viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
           }),
         };
-        if (Object.keys(nextState).length !== 0) {
-          await stateContainer.appState.replaceUrlState(nextState);
-          sendComplete();
-        }
+        await stateContainer.appState.replaceUrlState(nextState);
+        sendComplete();
+        // }
       } else {
         // cleanup for a "regular" query
         cleanup();
