@@ -6,7 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { InferSearchResponseOf } from '@kbn/es-types';
 import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { AlertCpuUsageNodeStats } from '../../../common/types/alerts';
@@ -20,6 +20,7 @@ interface Options {
   startMs: number;
   endMs: number;
   filterQuery?: QueryDslQueryContainer;
+  logger: Logger;
 }
 
 export async function fetchCpuUsageNodeStats(
@@ -27,9 +28,11 @@ export async function fetchCpuUsageNodeStats(
   config: MonitoringConfig
 ): Promise<AlertCpuUsageNodeStats[]> {
   if (config.ui.container.elasticsearch.enabled) {
+    options.logger.debug('CPU usage rule: Computing usage for containerized clusters');
     return fetchContainerStats(options, config);
   }
 
+  options.logger.debug('CPU usage rule: Computing usage for non-containerized clusters');
   return fetchNonContainerStats(options, config);
 }
 
@@ -115,8 +118,13 @@ async function fetchContainerStats(
                   field: 'node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods',
                 },
               },
-              quota_micros: {
+              quota_micros_max: {
                 max: {
+                  field: 'node_stats.os.cgroup.cpu.cfs_quota_micros',
+                },
+              },
+              quota_micros_min: {
+                min: {
                   field: 'node_stats.os.cgroup.cpu.cfs_quota_micros',
                 },
               },
@@ -142,6 +150,10 @@ async function fetchContainerStats(
 
   return response.aggregations.clusters.buckets.flatMap((cluster) => {
     return cluster.nodes.buckets.map((node) => {
+      if (node.quota_micros_min.value !== node.quota_micros_max.value) {
+        throw new Error('CPU limits changed during rule lookback period');
+      }
+
       let nodeName;
       if (node.name.buckets.length) {
         nodeName = node.name.buckets[0].key as string;
@@ -158,7 +170,7 @@ async function fetchContainerStats(
         node.min_usage_nanos.value === null ||
         node.max_periods.value === null ||
         node.min_periods.value === null ||
-        node.quota_micros.value === null
+        node.quota_micros_max.value === null
       ) {
         return {
           clusterUuid: cluster.key as string,
@@ -172,7 +184,7 @@ async function fetchContainerStats(
       const usageNanos = node.max_usage_nanos.value - node.min_usage_nanos.value;
       const periods = node.max_periods.value - node.min_periods.value;
 
-      const cpuUsage = (usageNanos / (node.quota_micros.value * periods * 1000)) * 100;
+      const cpuUsage = (usageNanos / (node.quota_micros_max.value * periods * 1000)) * 100;
 
       return {
         clusterUuid: cluster.key as string,

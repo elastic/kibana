@@ -74,15 +74,19 @@ export class CpuUsageRule extends BaseRule {
         startMs,
         endMs,
         filterQuery,
+        logger: this.scopedLogger,
       },
       Globals.app.config
     );
 
     return stats.map((stat) => {
+      if (stat.cpuUsage === undefined) {
+        throw new Error(`Failed to compute CPU usage for ${stat.nodeId} in CPU usage rule`);
+      }
+
       return {
         clusterUuid: stat.clusterUuid,
-        // Should we throw if we failed to compute the cpuUsage?
-        shouldFire: stat.cpuUsage ? stat.cpuUsage > params.threshold! : false,
+        shouldFire: stat.cpuUsage > params.threshold!,
         severity: AlertSeverity.Danger,
         meta: stat,
         ccs: stat.ccs,
