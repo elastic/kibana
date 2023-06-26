@@ -16,7 +16,8 @@ describe('CertMonitors', () => {
     { name: '', id: 'extended-validation', url: 'https://extended-validation.badssl.com/' },
   ];
   it('shallow renders expected elements for valid props', () => {
-    expect(shallowWithRouter(<CertMonitors monitors={certMons} />)).toMatchSnapshot();
+    // dive() removes all unnecessary React-Router wrapping elements
+    expect(shallowWithRouter(<CertMonitors monitors={certMons} />).dive()).toMatchSnapshot();
   });
 
   it('renders expected elements for valid props', () => {

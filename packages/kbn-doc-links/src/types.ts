@@ -159,7 +159,9 @@ export interface DocLinks {
     readonly mailService: string;
     readonly mlDocumentEnrichment: string;
     readonly searchApplicationsTemplates: string;
+    readonly searchApplicationsSearchApi: string;
     readonly searchApplications: string;
+    readonly searchApplicationsGettingStarted: string;
     readonly searchTemplates: string;
     readonly start: string;
     readonly supportedNlpModels: string;
