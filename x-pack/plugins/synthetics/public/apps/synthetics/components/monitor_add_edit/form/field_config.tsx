@@ -445,7 +445,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
               content={
                 option.isInvalid
                   ? i18n.translate('xpack.synthetics.monitorConfig.locations.attachedPolicy', {
-                      defaultMessage: 'Attached agent policy has been already deleted.',
+                      defaultMessage: 'The attached agent policy for this location has been deleted.',
                     })
                   : ''
               }
