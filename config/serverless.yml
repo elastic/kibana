@@ -6,6 +6,13 @@ xpack.fleet.internal.fleetServerStandalone: true
 xpack.fleet.internal.disableILMPolicies: true
 xpack.fleet.internal.disableProxies: true
 
+# Enable ZDT migration algorithm
+migrations.algorithm: zdt
+
+migrations.zdt:
+  metaPickupSyncDelaySec: 5
+  runOnRoles: ["ui"]
+
 # Ess plugins
 xpack.ess.security.enabled: false
 
