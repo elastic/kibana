@@ -233,13 +233,14 @@ export const links: LinkItem = {
       description: i18n.translate(
         'xpack.securitySolution.appLinks.entityAnalyticsManagementDescription',
         {
-          defaultMessage: '----- entityAnalyticsManagementDescription ----',
+          defaultMessage: 'Entity Analytics management.',
         }
       ),
       landingIcon: IconActionHistory,
       path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
       skipUrlState: true,
       hideTimeline: true,
+      experimentalKey: 'riskScoringRoutesEnabled',
     },
     {
       id: SecurityPageName.responseActionsHistory,

@@ -448,7 +448,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       rules: subPlugins.rules.start(storage),
       threatIntelligence: subPlugins.threatIntelligence.start(),
       timelines: subPlugins.timelines.start(),
-      entityAnalytics: subPlugins.entityAnalytics.start(),
+      entityAnalytics: subPlugins.entityAnalytics.start(
+        this.experimentalFeatures.riskScoringRoutesEnabled
+      ),
     };
   }
   /**

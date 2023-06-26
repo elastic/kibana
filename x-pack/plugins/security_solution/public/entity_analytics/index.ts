@@ -11,9 +11,9 @@ import { routes } from './routes';
 export class EntityAnalytics {
   public setup() {}
 
-  public start(): SecuritySubPlugin {
+  public start(isEnabled = false): SecuritySubPlugin {
     return {
-      routes,
+      routes: isEnabled ? routes : [],
     };
   }
 }
