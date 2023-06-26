@@ -7,13 +7,8 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  // eslint-disable-next-line no-restricted-imports
-  Route as ReactRouterRoute,
-  RouteComponentProps,
-  RouteProps,
-  useRouteMatch,
-} from 'react-router-dom';
+import { RouteComponentProps, RouteProps, useRouteMatch } from 'react-router-dom';
+import { CompatRoute } from 'react-router-dom-v5-compat';
 import { useKibanaSharedUX } from './services';
 import { useSharedUXExecutionContext } from './use_execution_context';
 
@@ -42,12 +37,12 @@ export const Route = <T extends {}>({
   }, [Component]);
 
   if (component) {
-    return <ReactRouterRoute {...rest} component={component} />;
+    return <CompatRoute {...rest} component={component} />;
   }
   if (render || typeof children === 'function') {
     const renderFunction = typeof children === 'function' ? children : render;
     return (
-      <ReactRouterRoute
+      <CompatRoute
         {...rest}
         render={(props) => (
           <>
@@ -60,10 +55,10 @@ export const Route = <T extends {}>({
     );
   }
   return (
-    <ReactRouterRoute {...rest}>
+    <CompatRoute {...rest}>
       <MatchPropagator />
       {children}
-    </ReactRouterRoute>
+    </CompatRoute>
   );
 };
 

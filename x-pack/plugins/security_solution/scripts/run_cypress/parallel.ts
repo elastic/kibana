@@ -89,7 +89,13 @@ export const cli = () => {
       const kibanaPorts: number[] = [5601, 5620];
       const fleetServerPorts: number[] = [8220];
 
+      const isOpen = argv._[0] === 'open';
+
       const getEsPort = <T>(): T | number => {
+        if (isOpen) {
+          return 9220;
+        }
+
         const esPort = parseInt(`92${Math.floor(Math.random() * 89) + 10}`, 10);
         if (esPorts.includes(esPort)) {
           return getEsPort();
@@ -99,6 +105,10 @@ export const cli = () => {
       };
 
       const getKibanaPort = <T>(): T | number => {
+        if (isOpen) {
+          return 5620;
+        }
+
         const kibanaPort = parseInt(`56${Math.floor(Math.random() * 89) + 10}`, 10);
         if (kibanaPorts.includes(kibanaPort)) {
           return getKibanaPort();
@@ -108,6 +118,10 @@ export const cli = () => {
       };
 
       const getFleetServerPort = <T>(): T | number => {
+        if (isOpen) {
+          return 8220;
+        }
+
         const fleetServerPort = parseInt(`82${Math.floor(Math.random() * 89) + 10}`, 10);
         if (fleetServerPorts.includes(fleetServerPort)) {
           return getFleetServerPort();
@@ -199,8 +213,6 @@ export const cli = () => {
 
       const hostRealIp = getLocalhostRealIp();
 
-      const isOpen = argv._[0] === 'open';
-
       await pMap(
         files,
         async (filePath) => {
@@ -228,7 +240,7 @@ export const cli = () => {
               {
                 servers: {
                   elasticsearch: {
-                    port: esPort,
+                    // port: esPort,
                   },
                   kibana: {
                     port: kibanaPort,
@@ -324,7 +336,7 @@ export const cli = () => {
               installDir: options?.installDir,
               extraKbnOpts:
                 options?.installDir || options?.ci || !isOpen
-                  ? []
+                  ? ['--server.host=0.0.0.0']
                   : ['--dev', '--no-dev-config', '--no-dev-credentials'],
               onEarlyExit,
             });
@@ -373,7 +385,7 @@ export const cli = () => {
             }
 
             await procs.stop('kibana');
-            shutdownEs();
+            await shutdownEs();
             cleanupServerPorts({ esPort, kibanaPort, fleetServerPort });
 
             return result;

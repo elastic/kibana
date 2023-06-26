@@ -173,7 +173,7 @@ class AppComponent extends Component<AppProps, AppState> {
           <Route exact path="/auto_follow_patterns/edit/:id" component={AutoFollowPatternEdit} />
           <Route exact path="/follower_indices/add" component={FollowerIndexAdd} />
           <Route exact path="/follower_indices/edit/:id" component={FollowerIndexEdit} />
-          <Route exact path={['/:section']} component={CrossClusterReplicationHome} />
+          <Route exact path={'/:section'} component={CrossClusterReplicationHome} />
         </Routes>
       </Router>
     );

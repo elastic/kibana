@@ -82,7 +82,7 @@ export const usersManagementApp = Object.freeze({
               href="/"
             >
               <Routes>
-                <Route path={['/', '']} exact>
+                <Route path={'/'} exact>
                   <UsersGridPage
                     notifications={coreStart.notifications}
                     userAPIClient={new UserAPIClient(coreStart.http)}

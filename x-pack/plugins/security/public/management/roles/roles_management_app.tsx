@@ -130,7 +130,7 @@ export const rolesManagementApp = Object.freeze({
                     onChange={createBreadcrumbsChangeHandler(chrome, setBreadcrumbs)}
                   >
                     <Breadcrumb text={title} href="/">
-                      <Route path={['/', '']} exact={true}>
+                      <Route path={'/'} exact={true}>
                         <RolesGridPage
                           notifications={notifications}
                           rolesAPIClient={rolesAPIClient}

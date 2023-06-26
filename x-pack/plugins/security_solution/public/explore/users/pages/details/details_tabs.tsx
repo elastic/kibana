@@ -45,20 +45,20 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
 
     return (
       <Routes>
-        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.authentications})`}>
+        <Route path={`${usersDetailsPagePath}/${UsersTableType.authentications}`}>
           <AuthenticationsQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.anomalies})`}>
+        <Route path={`${usersDetailsPagePath}/${UsersTableType.anomalies}`}>
           <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesUserTable} />
         </Route>
-        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.events})`}>
+        <Route path={`${usersDetailsPagePath}/${UsersTableType.events}`}>
           <EventsQueryTabBody
             additionalFilters={userDetailFilter}
             tableId={TableId.usersPageEvents}
             {...tabProps}
           />
         </Route>
-        <Route path={`${usersDetailsPagePath}/:tabName(${UsersTableType.risk})`}>
+        <Route path={`${usersDetailsPagePath}/${UsersTableType.risk}`}>
           <RiskDetailsTabBody
             {...tabProps}
             riskEntity={RiskScoreEntity.user}

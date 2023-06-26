@@ -103,7 +103,7 @@ export const App = ({
     <EuiPageBody>
       <Routes>
         <Route path={`/${UPLOAD_LICENSE_ROUTE}`} component={withTelemetry(UploadLicense)} />
-        <Route path={['/']} component={withTelemetry(LicenseDashboard)} />
+        <Route path={'/'} component={withTelemetry(LicenseDashboard)} />
       </Routes>
     </EuiPageBody>
   );

@@ -56,15 +56,15 @@ export const runFleetServerIfNeeded = async (): Promise<
   log.info(`Setting up fleet server (if necessary)`);
   log.indent(4);
 
-  const currentFleetServerUrl = await fetchFleetServerUrl(kbnClient);
+  // const currentFleetServerUrl = await fetchFleetServerUrl(kbnClient);
 
-  if (currentFleetServerUrl) {
-    log.info(
-      `Fleet server is already enrolled with Fleet - URL:\n${currentFleetServerUrl}\nNothing to do.`
-    );
-    log.indent(-4);
-    return;
-  }
+  // if (currentFleetServerUrl) {
+  //   log.info(
+  //     `Fleet server is already enrolled with Fleet - URL:\n${currentFleetServerUrl}\nNothing to do.`
+  //   );
+  //   log.indent(-4);
+  //   return;
+  // }
 
   try {
     fleetServerAgentPolicyId = await getOrCreateFleetServerAgentPolicyId();

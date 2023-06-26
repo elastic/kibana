@@ -72,10 +72,10 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
 
     return (
       <Routes>
-        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.dns})`}>
+        <Route path={`${NETWORK_PATH}/${NetworkRouteType.dns}`}>
           <DnsQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.flows})`}>
+        <Route path={`${NETWORK_PATH}/${NetworkRouteType.flows}`}>
           <>
             <ConditionalFlexGroup direction="column">
               <EuiFlexItem>
@@ -101,19 +101,19 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
             </ConditionalFlexGroup>
           </>
         </Route>
-        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.http})`}>
+        <Route path={`${NETWORK_PATH}/${NetworkRouteType.http}`}>
           <HttpQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.tls})`}>
+        <Route path={`${NETWORK_PATH}/${NetworkRouteType.tls}`}>
           <TlsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
         </Route>
-        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.anomalies})`}>
+        <Route path={`${NETWORK_PATH}/${NetworkRouteType.anomalies}`}>
           <AnomaliesQueryTabBody
             {...anomaliesProps}
             AnomaliesTableComponent={AnomaliesNetworkTable}
           />
         </Route>
-        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.events})`}>
+        <Route path={`${NETWORK_PATH}/${NetworkRouteType.events}`}>
           <EventsQueryTabBody
             additionalFilters={sourceOrDestinationIpExistsFilter}
             tableId={TableId.networkPageEvents}

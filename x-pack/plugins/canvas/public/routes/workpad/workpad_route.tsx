@@ -30,13 +30,22 @@ const { workpadRoutes: strings } = ErrorStrings;
 
 export const WorkpadRoute = () => {
   return (
-    <Route
-      path={['/workpad/:id/page/:pageNumber', '/workpad/:id']}
-      exact={false}
-      children={(route: WorkpadRouteProps) => {
-        return <WorkpadRouteComponent route={route} />;
-      }}
-    />
+    <>
+      <Route
+        path={'/workpad/:id/page/:pageNumber'}
+        exact={false}
+        children={(route: WorkpadRouteProps) => {
+          return <WorkpadRouteComponent route={route} />;
+        }}
+      />
+      <Route
+        path={'/workpad/:id'}
+        exact={false}
+        children={(route: WorkpadRouteProps) => {
+          return <WorkpadRouteComponent route={route} />;
+        }}
+      />
+    </>
   );
 };
 

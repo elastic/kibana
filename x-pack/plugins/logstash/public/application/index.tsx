@@ -46,7 +46,7 @@ export const renderApp = async (
         <Router history={history}>
           <Routes>
             <Route
-              path={['/', '']}
+              path={'/'}
               exact
               render={() => {
                 setBreadcrumbs(Breadcrumbs.getPipelineListBreadcrumbs());

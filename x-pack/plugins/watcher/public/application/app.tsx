@@ -81,7 +81,7 @@ export const AppWithoutRouter = () => (
     <Route exact path="/watches" component={WatchListPage} />
     <Route exact path="/watches/watch/:id/status" component={WatchStatusPage} />
     <Route exact path="/watches/watch/:id/edit" component={WatchEditPage} />
-    <Route exact path="/watches/new-watch/:type(json|threshold)" component={WatchEditPage} />
+    <Route exact path="/watches/new-watch/:type" component={WatchEditPage} />
     <Redirect exact from="/" to="/watches" />
     <Redirect exact from="" to="/watches" />
   </Routes>

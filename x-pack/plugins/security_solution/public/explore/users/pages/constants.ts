@@ -6,10 +6,9 @@
  */
 
 import { USERS_PATH } from '../../../../common/constants';
-import { UsersTableType } from '../store/model';
 
 export const usersDetailsPagePath = `${USERS_PATH}/name/:detailName`;
 
-export const usersTabPath = `${USERS_PATH}/:tabName(${UsersTableType.allUsers}|${UsersTableType.authentications}|${UsersTableType.anomalies}|${UsersTableType.risk}|${UsersTableType.events}|)`;
+export const usersTabPath = `${USERS_PATH}/:tabName`;
 
-export const usersDetailsTabPath = `${usersDetailsPagePath}/:tabName(${UsersTableType.authentications}|${UsersTableType.anomalies}|${UsersTableType.events}|${UsersTableType.risk})`;
+export const usersDetailsTabPath = `${usersDetailsPagePath}/:tabName`;

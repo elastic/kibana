@@ -88,17 +88,20 @@ export async function mountManagementSection(
         <I18nProvider>
           <Router history={params.history}>
             <Routes>
-              <Route path={['/create']}>
+              <Route path={'/create'}>
                 <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
               </Route>
-              <Route path={['/dataView/:id/field/:fieldName', '/dataView/:id/create-field/']}>
+              <Route path={'/dataView/:id/field/:fieldName'}>
                 <CreateEditFieldContainer />
               </Route>
-              <Route path={['/dataView/:id']}>
+              <Route path={'/dataView/:id/create-field/'}>
+                <CreateEditFieldContainer />
+              </Route>
+              <Route path={'/dataView/:id'}>
                 <EditIndexPatternContainer />
               </Route>
               <Redirect path={'/patterns*'} to={'dataView*'} />
-              <Route path={['/']}>
+              <Route path={'/'}>
                 <IndexPatternTableWithRouter canSave={canSave} />
               </Route>
             </Routes>

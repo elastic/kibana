@@ -25,17 +25,15 @@ import { getPolicyDetailPath } from '../../common/routing';
 export const PolicyContainer = memo(() => {
   return (
     <Routes>
-      <Route
-        path={[
-          MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
-          MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
-          MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
-          MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
-          MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
-        ]}
-        exact
-        component={PolicyDetails}
-      />
+      {[
+        MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,
+        MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
+        MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
+        MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
+        MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+      ].map((path) => (
+        <Route path={path} exact component={PolicyDetails} />
+      ))}
       <Route
         path={MANAGEMENT_ROUTING_POLICY_DETAILS_PATH_OLD}
         exact

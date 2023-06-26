@@ -71,17 +71,18 @@ export const App: React.FunctionComponent = () => {
               <Route exact path="/edit_repository/:name*" component={RepositoryEdit} />
               <Route
                 exact
-                path={`/:section(${sectionsRegex})/:repositoryName?/:snapshotId*`}
+                path={`/:section/:repositoryName/:snapshotId*`}
                 component={SnapshotRestoreHome}
               />
               <Redirect exact from="/restore/:repositoryName" to="/snapshots" />
               <Route
                 exact
-                path="/restore/:repositoryName/:snapshotId*"
+                path="/restore/:repositoryName/:snapshotId"
                 component={RestoreSnapshot}
               />
               {slmUi.enabled && <Route exact path="/add_policy" component={PolicyAdd} />}
-              {slmUi.enabled && <Route exact path="/edit_policy/:name*" component={PolicyEdit} />}
+              {slmUi.enabled && <Route exact path="/edit_policy/:name" component={PolicyEdit} />}
+              <Route exact path={`/:section/*`} component={SnapshotRestoreHome} />
               <Redirect from="/" to={`/${DEFAULT_SECTION}`} />
               <Redirect from="" to={`/${DEFAULT_SECTION}`} />
             </Routes>

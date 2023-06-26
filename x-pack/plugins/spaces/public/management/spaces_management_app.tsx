@@ -119,7 +119,7 @@ export const spacesManagementApp = Object.freeze({
                 <RedirectAppLinks coreStart={coreStart}>
                   <Router history={history}>
                     <Routes>
-                      <Route path={['', '/']} exact>
+                      <Route path={'/'} exact>
                         <SpacesGridPageWithBreadcrumbs />
                       </Route>
                       <Route path="/create">

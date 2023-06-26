@@ -118,25 +118,17 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
       <EuiSpacer size="l" />
 
       <Routes>
-        <Route
-          exact
-          path={[`/${Section.DataStreams}`, `/${Section.DataStreams}/:dataStreamName?`]}
-          component={DataStreamList}
-        />
+        <Route exact path={`/${Section.DataStreams}/:dataStreamName`} component={DataStreamList} />
+        <Route exact path={`/${Section.DataStreams}`} component={DataStreamList} />
         <Route exact path={`/${Section.Indices}`} component={IndexList} />
+        <Route exact path={`/${Section.IndexTemplates}/:templateName`} component={TemplateList} />
+        <Route exact path={`/${Section.IndexTemplates}`} component={TemplateList} />
         <Route
           exact
-          path={[`/${Section.IndexTemplates}`, `/${Section.IndexTemplates}/:templateName?`]}
-          component={TemplateList}
-        />
-        <Route
-          exact
-          path={[
-            `/${Section.ComponentTemplates}`,
-            `/${Section.ComponentTemplates}/:componentTemplateName?`,
-          ]}
+          path={`/${Section.ComponentTemplates}/:componentTemplateName`}
           component={ComponentTemplateList}
         />
+        <Route exact path={`/${Section.ComponentTemplates}`} component={ComponentTemplateList} />
       </Routes>
     </>
   );
