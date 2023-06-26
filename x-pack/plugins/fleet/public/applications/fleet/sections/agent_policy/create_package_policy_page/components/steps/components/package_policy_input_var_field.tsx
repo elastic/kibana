@@ -28,6 +28,8 @@ import styled from 'styled-components';
 
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
+import { ExperimentalFeaturesService } from '../../../../../../services';
+
 import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
 import type { DataStream, RegistryVarsEntry } from '../../../../../../types';
@@ -83,9 +85,11 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     // Boolean cannot be optional by default set to false
     const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);
 
+    const { secretsStorage: secretsStorageEnabled } = ExperimentalFeaturesService.get();
+
     let field: JSX.Element;
 
-    if (varDef.secret) {
+    if (secretsStorageEnabled && varDef.secret) {
       field = (
         <SecretInputField
           varDef={varDef}
