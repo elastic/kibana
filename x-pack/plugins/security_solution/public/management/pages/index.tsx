@@ -18,7 +18,6 @@ import {
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_BLOCKLIST_PATH,
   MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH,
-  MANAGEMENT_ROUTING_ENTITY_ANALYTICS,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
@@ -32,7 +31,6 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
 import { BlocklistContainer } from './blocklist';
 import { ResponseActionsContainer } from './response_actions';
-import { EntityAnalyticsContainer } from './entity_analytics';
 
 import { PrivilegedRoute } from '../components/privileged_route';
 
@@ -75,14 +73,6 @@ const ResponseActionsTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.responseActionsHistory}>
     <ResponseActionsContainer />
     <SpyRoute pageName={SecurityPageName.responseActionsHistory} />
-  </TrackApplicationView>
-);
-
-
-const EntityAnalyticsTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.entityAnalyticsManagement}>
-    <EntityAnalyticsContainer />
-    <SpyRoute pageName={SecurityPageName.entityAnalyticsManagement} />
   </TrackApplicationView>
 );
 
@@ -142,24 +132,18 @@ export const ManagementContainer = memo(() => {
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
-        component={ResponseActionsTelemetry} hasPrivilege={canReadActionsLogManagement}
+        component={ResponseActionsTelemetry}
+        hasPrivilege={canReadActionsLogManagement}
       />
 
-      <PrivilegedRoute
-        path={MANAGEMENT_ROUTING_ENTITY_ANALYTICS}
-        component={EntityAnalyticsTelemetry}
-        hasPrivilege={true} 
-      />
-
-        {canReadEndpointList && (
-          <Route path={MANAGEMENT_PATH} exact>
-            <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
-          </Route>
-        )}
-      <Route path='*' component={NotFoundPage} />
+      {canReadEndpointList && (
+        <Route path={MANAGEMENT_PATH} exact>
+          <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
+        </Route>
+      )}
+      <Route path="*" component={NotFoundPage} />
     </Switch>
   );
-
 });
 
 ManagementContainer.displayName = 'ManagementContainer';

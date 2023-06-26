@@ -13,7 +13,6 @@ import {
   HOST_ISOLATION_EXCEPTIONS,
   BLOCKLIST,
   RESPONSE_ACTIONS_HISTORY,
-  ENTITY_ANALYTICS_MANAGEMENT
 } from '../../app/translations';
 
 const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
@@ -24,7 +23,6 @@ const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
   [AdministrationSubTab.hostIsolationExceptions]: HOST_ISOLATION_EXCEPTIONS,
   [AdministrationSubTab.blocklist]: BLOCKLIST,
   [AdministrationSubTab.responseActionsHistory]: RESPONSE_ACTIONS_HISTORY,
-  [AdministrationSubTab.entityAnalytics]: ENTITY_ANALYTICS_MANAGEMENT,
 };
 
 export function getTrailingBreadcrumbs(params: AdministrationRouteSpyState): ChromeBreadcrumb[] {

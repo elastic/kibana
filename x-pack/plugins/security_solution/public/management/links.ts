@@ -9,7 +9,10 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 import { checkArtifactHasData } from './services/exceptions_list/check_artifact_has_data';
-import { calculateEndpointAuthz, getEndpointAuthzInitialState } from '../../common/endpoint/service/authz';
+import {
+  calculateEndpointAuthz,
+  getEndpointAuthzInitialState,
+} from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
   ENDPOINTS_PATH,
@@ -32,7 +35,6 @@ import {
   BLOCKLIST,
   CREATE_NEW_RULE,
   ENDPOINTS,
-  ENTITY_ANALYTICS_MANAGEMENT,
   EVENT_FILTERS,
   EXCEPTIONS,
   HOST_ISOLATION_EXCEPTIONS,
@@ -41,6 +43,7 @@ import {
   RESPONSE_ACTIONS_HISTORY,
   RULES,
   TRUSTED_APPLICATIONS,
+  ENTITY_ANALYTICS_MANAGEMENT,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -66,7 +69,11 @@ const categories = [
     label: i18n.translate('xpack.securitySolution.appLinks.category.siem', {
       defaultMessage: 'SIEM',
     }),
-    linkIds: [SecurityPageName.rules, SecurityPageName.exceptions, SecurityPageName.entityAnalyticsManagement],
+    linkIds: [
+      SecurityPageName.rules,
+      SecurityPageName.exceptions,
+      SecurityPageName.entityAnalyticsManagement,
+    ],
   },
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
@@ -223,9 +230,12 @@ export const links: LinkItem = {
     {
       id: SecurityPageName.entityAnalyticsManagement,
       title: ENTITY_ANALYTICS_MANAGEMENT,
-      description: i18n.translate('xpack.securitySolution.appLinks.entityAnalyticsManagementDescription', {
-        defaultMessage: '----- entityAnalyticsManagementDescription ----',
-      }),
+      description: i18n.translate(
+        'xpack.securitySolution.appLinks.entityAnalyticsManagementDescription',
+        {
+          defaultMessage: '----- entityAnalyticsManagementDescription ----',
+        }
+      ),
       landingIcon: IconActionHistory,
       path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
       skipUrlState: true,

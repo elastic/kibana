@@ -6,19 +6,19 @@
  */
 
 import React from 'react';
-import { ENTITY_ANALYTICS_MANAGEMENT } from '../../app/translations';
-import { AdministrationListPage } from '../../management/components/administration_list_page';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeader } from '@elastic/eui';
 
 import { RiskScorePreviewSection } from '../components/risk_score_preview_section';
 import { RiskScoreEnableSection } from '../components/risk_score_enable_section';
+import { MissingPrivilegesCallOut } from '../../detections/components/callouts/missing_privileges_callout';
+import { ENTITY_ANALYTICS_MANAGEMENT } from '../../app/translations';
 
 export const EntityAnalyticsManagementPage = () => {
   return (
-    <AdministrationListPage
-      data-test-subj="responseActionsPage"
-      title={ENTITY_ANALYTICS_MANAGEMENT}
-    >
+    <>
+      <MissingPrivilegesCallOut />
+      <EuiPageHeader pageTitle={ENTITY_ANALYTICS_MANAGEMENT} />
+
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem grow={3}>
           <RiskScoreEnableSection />
@@ -27,7 +27,7 @@ export const EntityAnalyticsManagementPage = () => {
           <RiskScorePreviewSection />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </AdministrationListPage>
+    </>
   );
 };
 
