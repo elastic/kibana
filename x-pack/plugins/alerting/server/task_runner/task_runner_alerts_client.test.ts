@@ -109,11 +109,6 @@ const ruleTypeWithAlerts: jest.Mocked<UntypedNormalizedRuleType> = {
 
 describe('Task Runner', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
-  const requeueInvalidTasksConfig = {
-    delay: 3000,
-    enabled: false,
-    max_attempts: 20,
-  };
 
   beforeAll(() => {
     fakeTimer = sinon.useFakeTimers();
@@ -254,7 +249,6 @@ describe('Task Runner', () => {
           previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
         },
       },
-      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -347,7 +341,6 @@ describe('Task Runner', () => {
           previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
         },
       },
-      requeueInvalidTasksConfig,
       context: {
         ...taskRunnerFactoryInitializerParams,
         alertsService,
@@ -458,7 +451,6 @@ describe('Task Runner', () => {
     const taskRunner = new TaskRunner({
       ruleType: ruleTypeWithAlerts,
       taskInstance: mockedTaskInstance,
-      requeueInvalidTasksConfig,
       context: {
         ...taskRunnerFactoryInitializerParams,
         alertsService,
@@ -558,7 +550,6 @@ describe('Task Runner', () => {
           previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
         },
       },
-      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -642,7 +633,6 @@ describe('Task Runner', () => {
           previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
         },
       },
-      requeueInvalidTasksConfig,
       context: { ...taskRunnerFactoryInitializerParams, alertsService: null },
       inMemoryMetrics,
     });

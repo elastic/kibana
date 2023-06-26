@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
 import { ObjectType } from '@kbn/config-schema';
+import { Logger } from '@kbn/core/server';
 import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
 

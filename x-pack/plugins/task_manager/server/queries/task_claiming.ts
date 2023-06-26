@@ -223,7 +223,6 @@ export class TaskClaiming {
                 stats.tasksConflicted,
                 initialCapacity
               );
-
               return { stats, docs, timing: stopTaskTimer() };
             })
           );
