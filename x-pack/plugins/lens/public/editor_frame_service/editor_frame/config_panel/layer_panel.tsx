@@ -146,7 +146,16 @@ export function LayerPanel(
 
   const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerId];
   const datasourceId = datasourcePublicAPI?.datasourceId;
-  const layerDatasourceState = datasourceId ? datasourceStates?.[datasourceId]?.state : undefined;
+  let layerDatasourceState = datasourceId ? datasourceStates?.[datasourceId]?.state : undefined;
+  // try again with aliases
+  if (!layerDatasourceState && datasourcePublicAPI?.datasourceAliasIds && datasourceStates) {
+    const aliasId = datasourcePublicAPI.datasourceAliasIds.find(
+      (id) => datasourceStates?.[id]?.state
+    );
+    if (aliasId) {
+      layerDatasourceState = datasourceStates[aliasId].state;
+    }
+  }
   const layerDatasource = datasourceId ? props.datasourceMap[datasourceId] : undefined;
 
   const layerDatasourceConfigProps = {
@@ -162,7 +171,10 @@ export function LayerPanel(
   const columnLabelMap =
     !layerDatasource && activeVisualization.getUniqueLabels
       ? activeVisualization.getUniqueLabels(props.visualizationState)
-      : layerDatasource?.uniqueLabels?.(layerDatasourceConfigProps?.state);
+      : layerDatasource?.uniqueLabels?.(
+          layerDatasourceConfigProps?.state,
+          framePublicAPI.dataViews.indexPatterns
+        );
 
   const isEmptyLayer = !dimensionGroups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;

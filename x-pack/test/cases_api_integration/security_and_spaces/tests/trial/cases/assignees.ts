@@ -189,6 +189,30 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('filters cases using an assignee uid with a colon in it', async () => {
+        await createCase(supertest, postCaseReq);
+
+        const assigneeUid = 'abc:uid:123';
+        const caseWithColonAssignee = await createCase(
+          supertest,
+          getPostCaseRequest({
+            assignees: [{ uid: 'abc:uid:123' }],
+          })
+        );
+
+        const cases = await findCases({
+          supertest,
+          query: { assignees: [assigneeUid] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 1,
+          cases: [caseWithColonAssignee],
+          count_open_cases: 1,
+        });
+      });
+
       it("filters cases using the assigned users by constructing an or'd filter", async () => {
         const profileUidsToFilter = await suggestUserProfiles({
           supertest: supertestWithoutAuth,

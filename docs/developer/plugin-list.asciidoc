@@ -332,10 +332,6 @@ In general this plugin provides:
 |Registers commercially licensed generic actions like per panel time range and contains some code that supports drilldown work.
 
 
-|{kib-repo}blob/{branch}/src/plugins/unified_field_list/README.md[unifiedFieldList]
-|This Kibana plugin contains components and services for field list UI (as in fields sidebar on Discover and Lens pages).
-
-
 |{kib-repo}blob/{branch}/src/plugins/unified_histogram/README.md[unifiedHistogram]
 |Unified Histogram is a UX Building Block including a layout with a resizable histogram and a main display.
 It manages its own state and data fetching, and can easily be dropped into pages with minimal setup.
@@ -674,7 +670,7 @@ Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/profiling/README.md[profiling]
-|undefined
+|Universal Profiling provides fleet-wide, whole-system, continuous profiling with zero instrumentation. Get a comprehensive understanding of what lines of code are consuming compute resources throughout your entire fleet by visualizing your data in Kibana using the flamegraph, stacktraces, and top functions views.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/remote_clusters/README.md[remoteClusters]
@@ -802,6 +798,11 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 
 |{kib-repo}blob/{branch}/x-pack/plugins/upgrade_assistant/README.md[upgradeAssistant]
 |Upgrade Assistant helps users prepare their Stack for being upgraded to the next version of the Elastic stack.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/uptime/README.md[uptime]
+|The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
+in their infrastructure.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]

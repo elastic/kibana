@@ -10,7 +10,7 @@ import { useBulkActions, useBulkAddToCaseActions } from './use_bulk_actions';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { createCasesServiceMock } from '../index.mock';
 
-jest.mock('./api');
+jest.mock('./apis/bulk_get_cases');
 jest.mock('../../../../common/lib/kibana');
 
 const mockCaseService = createCasesServiceMock();
@@ -43,9 +43,11 @@ describe('bulk action hooks', () => {
   const refresh = jest.fn();
   const clearSelection = jest.fn();
   const openNewCase = jest.fn();
+
   const openExistingCase = jest.fn().mockImplementation(({ getAttachments }) => {
     getAttachments({ theCase: { id: caseId } });
   });
+
   mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
   mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(() => 'Cases context');
 
@@ -122,6 +124,55 @@ describe('bulk action hooks', () => {
 
       expect(mockCaseService.helpers.groupAlertsByRule).toHaveBeenCalled();
       expect(openExistingCase).toHaveBeenCalled();
+    });
+
+    it('should open the flyout from the case modal', async () => {
+      openExistingCase.mockImplementationOnce(({ getAttachments }) => {
+        getAttachments({ theCase: undefined });
+      });
+
+      const alerts = [
+        {
+          _id: 'alert0',
+          _index: 'idx0',
+          data: [
+            {
+              field: 'kibana.alert.case_ids',
+              value: [caseId],
+            },
+          ],
+          ecs: {
+            _id: 'alert0',
+            _index: 'idx0',
+          },
+        },
+        {
+          _id: 'alert1',
+          _index: 'idx1',
+          data: [
+            {
+              field: 'kibana.alert.case_ids',
+              value: ['test-case-2'],
+            },
+          ],
+          ecs: {
+            _id: 'alert1',
+            _index: 'idx1',
+          },
+        },
+      ];
+
+      const { result } = renderHook(
+        () => useBulkAddToCaseActions({ casesConfig, refresh, clearSelection }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      // @ts-expect-error: cases do not need all arguments
+      result.current[1].onClick(alerts);
+
+      expect(mockCaseService.helpers.groupAlertsByRule).toHaveBeenCalledWith(alerts);
     });
 
     it('should remove alerts that are already attached to the case', async () => {
@@ -262,20 +313,25 @@ describe('bulk action hooks', () => {
       expect(result.current.bulkActions).toMatchInlineSnapshot(`
         Array [
           Object {
-            "data-test-subj": "attach-new-case",
-            "disableOnQuery": true,
-            "disabledLabel": "Add to new case",
-            "key": "attach-new-case",
-            "label": "Add to new case",
-            "onClick": [Function],
-          },
-          Object {
-            "data-test-subj": "attach-existing-case",
-            "disableOnQuery": true,
-            "disabledLabel": "Add to existing case",
-            "key": "attach-existing-case",
-            "label": "Add to existing case",
-            "onClick": [Function],
+            "id": 0,
+            "items": Array [
+              Object {
+                "data-test-subj": "attach-new-case",
+                "disableOnQuery": true,
+                "disabledLabel": "Add to new case",
+                "key": "attach-new-case",
+                "label": "Add to new case",
+                "onClick": [Function],
+              },
+              Object {
+                "data-test-subj": "attach-existing-case",
+                "disableOnQuery": true,
+                "disabledLabel": "Add to existing case",
+                "key": "attach-existing-case",
+                "label": "Add to existing case",
+                "onClick": [Function],
+              },
+            ],
           },
         ]
       `);

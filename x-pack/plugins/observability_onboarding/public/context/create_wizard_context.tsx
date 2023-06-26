@@ -19,7 +19,7 @@ export interface WizardContext<T, StepKey extends string> {
   goToStep: (step: StepKey) => void;
   goBack: () => void;
   getState: () => T;
-  setState: (state: T) => void;
+  setState: (state: T | ((prevState: T) => T)) => void;
   getPath: () => StepKey[];
   getUsage: () => {
     timeSinceStart: number;
@@ -144,7 +144,7 @@ export function createWizardContext<
             }
           },
           getState: () => state as T,
-          setState: (_state: T) => {
+          setState: (_state: T | ((prevState: T) => T)) => {
             setState(_state);
           },
           getPath: () => [...pathRef.current],

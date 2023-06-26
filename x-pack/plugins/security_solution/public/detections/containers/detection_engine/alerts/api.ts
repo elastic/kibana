@@ -226,5 +226,5 @@ export const getHostMetadata = async ({
 }): Promise<HostInfo> =>
   KibanaServices.get().http.fetch<HostInfo>(
     resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId }),
-    { method: 'GET', signal }
+    { method: 'GET', signal, version: '2023-10-31' }
   );
