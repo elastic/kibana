@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ddToMGRS, mgrsToDD, ddToUTM, utmToDD } from './utils';
+import { ddToMGRS, mgrsToDD, ddToUTM, utmToDD } from './geo_utils';
 
 describe('MGRS', () => {
   test('ddToMGRS should convert lat lon to MGRS', () => {
