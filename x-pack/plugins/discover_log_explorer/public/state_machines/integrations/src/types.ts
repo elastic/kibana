@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { DoneInvokeEvent } from 'xstate';
-import type { IImmutableCache } from '../../../../common/immutable_cache';
+import type { IHashedCache } from '../../../../common/immutable_cache';
 import { FindIntegrationsResponse, SortOrder, SearchAfter } from '../../../../common/latest';
 import { Integration } from '../../../../common/datasets';
 
@@ -17,7 +17,7 @@ export interface IntegrationsSearchParams {
 }
 
 export interface WithCache {
-  cache: IImmutableCache<IntegrationsSearchParams, FindIntegrationsResponse>;
+  cache: IHashedCache<IntegrationsSearchParams, FindIntegrationsResponse>;
 }
 
 export interface WithSearch {

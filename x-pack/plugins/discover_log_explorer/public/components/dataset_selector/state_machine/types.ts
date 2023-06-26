@@ -11,13 +11,13 @@ import {
   ReloadIntegrations,
   SearchIntegrations,
 } from '../../../hooks/use_integrations';
-import type { IImmutableCache } from '../../../../common/immutable_cache';
+import type { IHashedCache } from '../../../../common/immutable_cache';
 import { DatasetSelectionHandler, DatasetsSelectorSearchParams, PanelId } from '../types';
 
 export interface DefaultDatasetsSelectorContext {
   selected?: Dataset;
   panelId: PanelId;
-  searchCache: IImmutableCache<PanelId, DatasetsSelectorSearchParams>;
+  searchCache: IHashedCache<PanelId, DatasetsSelectorSearchParams>;
   search: DatasetsSelectorSearchParams;
 }
 

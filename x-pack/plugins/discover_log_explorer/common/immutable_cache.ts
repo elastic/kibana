@@ -6,14 +6,14 @@
  */
 import LRUCache from 'lru-cache';
 import hash from 'object-hash';
-export interface IImmutableCache<KeyType, ValueType> {
+export interface IHashedCache<KeyType, ValueType> {
   get(key: KeyType): ValueType | undefined;
   set(key: KeyType, value: ValueType): boolean;
   has(key: KeyType): boolean;
   reset(): void;
 }
 
-export class ImmutableCache<KeyType, ValueType> {
+export class HashedCache<KeyType, ValueType> {
   private cache: LRUCache<string, ValueType>;
 
   constructor(options: LRUCache.Options<string, ValueType> = { max: 500 }) {

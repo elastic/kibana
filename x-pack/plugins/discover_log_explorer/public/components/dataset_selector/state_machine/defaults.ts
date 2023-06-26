@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ImmutableCache } from '../../../../common/immutable_cache';
+import { HashedCache } from '../../../../common/immutable_cache';
 import { INTEGRATION_PANEL_ID } from '../constants';
 import { DatasetsSelectorSearchParams } from '../types';
 import { DefaultDatasetsSelectorContext } from './types';
@@ -16,7 +16,7 @@ export const defaultSearch: DatasetsSelectorSearchParams = {
 };
 
 export const DEFAULT_CONTEXT: DefaultDatasetsSelectorContext = {
-  searchCache: new ImmutableCache(),
+  searchCache: new HashedCache(),
   panelId: INTEGRATION_PANEL_ID,
   search: defaultSearch,
 };

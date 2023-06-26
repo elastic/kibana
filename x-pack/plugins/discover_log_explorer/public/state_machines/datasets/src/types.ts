@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { DoneInvokeEvent } from 'xstate';
-import type { IImmutableCache } from '../../../../common/immutable_cache';
+import type { IHashedCache } from '../../../../common/immutable_cache';
 import { FindDatasetsResponse, SortOrder } from '../../../../common/latest';
 import { Dataset } from '../../../../common/datasets';
 
@@ -15,7 +15,7 @@ export interface DatasetsSearchParams {
 }
 
 export interface WithCache {
-  cache: IImmutableCache<DatasetsSearchParams, FindDatasetsResponse>;
+  cache: IHashedCache<DatasetsSearchParams, FindDatasetsResponse>;
 }
 
 export interface WithSearch {

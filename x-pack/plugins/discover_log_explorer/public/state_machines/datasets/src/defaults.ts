@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ImmutableCache } from '../../../../common/immutable_cache';
+import { HashedCache } from '../../../../common/immutable_cache';
 import { DefaultDatasetsContext } from './types';
 
 export const DEFAULT_CONTEXT: DefaultDatasetsContext = {
-  cache: new ImmutableCache(),
+  cache: new HashedCache(),
   datasets: null,
   error: null,
   search: {
