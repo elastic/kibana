@@ -16,6 +16,8 @@ describe('Category viewer ', () => {
   it('renders category', () => {
     render(<CategoryViewer category={sampleCategory} />);
 
-    expect(screen.getByTestId(`category-viewer-${sampleCategory}`)).toHaveTextContent(sampleCategory);
+    expect(screen.getByTestId(`category-viewer-${sampleCategory}`)).toHaveTextContent(
+      sampleCategory
+    );
   });
 });
