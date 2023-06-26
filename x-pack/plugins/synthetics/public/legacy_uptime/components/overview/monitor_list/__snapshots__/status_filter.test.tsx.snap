@@ -155,7 +155,9 @@ exports[`StatusFilterComponent shallow renders without errors for valid props 1`
       }
     }
   >
-    <StatusFilter />
+    <CompatRouter>
+      <StatusFilter />
+    </CompatRouter>
   </ContextProvider>
 </ContextProvider>
 `;

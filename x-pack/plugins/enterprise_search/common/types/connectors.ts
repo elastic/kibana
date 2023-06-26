@@ -38,6 +38,11 @@ export interface ConnectorConfigCategoryProperties {
   type: 'category';
 }
 
+export interface Validation {
+  constraint: string | number;
+  type: string;
+}
+
 export interface ConnectorConfigProperties {
   category?: string;
   default_value: string | number | boolean | null;
@@ -49,10 +54,10 @@ export interface ConnectorConfigProperties {
   placeholder?: string;
   required: boolean;
   sensitive: boolean;
-  tooltip: string;
+  tooltip: string | null;
   type: FieldType;
   ui_restrictions: string[];
-  validations: string[];
+  validations: Validation[];
   value: string | number | boolean | null;
 }
 
