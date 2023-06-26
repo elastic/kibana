@@ -16,6 +16,7 @@ import {
 } from '@kbn/shared-ux-page-analytics-no-data';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { useUrl } from './hooks/use_url';
 import { useSingleton } from './hooks/use_singleton';
 import { MainHistoryLocationState } from '../../../common/locator';
@@ -127,6 +128,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
 
   const loadSavedSearch = useCallback(
     async (nextDataView?: DataView) => {
+      const loadSavedSearchStartTime = window.performance.now();
       setLoading(true);
       if (!nextDataView && !(await checkData())) {
         setLoading(false);
@@ -159,6 +161,13 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
         );
 
         setLoading(false);
+        if (services.analytics) {
+          const loadSavedSearchDuration = window.performance.now() - loadSavedSearchStartTime;
+          reportPerformanceMetricEvent(services.analytics, {
+            eventName: 'discoverLoadSavedSearch',
+            duration: loadSavedSearchDuration,
+          });
+        }
       } catch (e) {
         if (e instanceof SavedObjectNotFound) {
           redirectWhenMissing({
