@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { RootRoute } from './root';
+export { StatusHandler } from './status';

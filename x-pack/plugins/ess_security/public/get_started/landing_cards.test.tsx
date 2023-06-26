@@ -7,49 +7,39 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { useVariationMock } from '../utils.mocks';
-import { TestProviders } from '../../mock';
-import { LandingCards } from '.';
-import { ADD_DATA_PATH } from '../../../../common/constants';
+import { LandingCards } from './landing_cards';
+import { ADD_DATA_PATH } from '@kbn/security-solution-plugin/common';
+import { useVariation } from '../common/hooks/use_variation';
+
+jest.mock('../common/hooks/use_variation');
+jest.mock('../services');
 
 describe('LandingCards component', () => {
   beforeEach(() => {
-    useVariationMock.mockReset();
+    (useVariation as jest.Mock).mockReset();
   });
 
   it('has add data links', () => {
-    const { getAllByText } = render(
-      <TestProviders>
-        <LandingCards />
-      </TestProviders>
-    );
+    const { getAllByText } = render(<LandingCards />);
     expect(getAllByText('Add security integrations')).toHaveLength(2);
   });
 
   describe.each(['header', 'footer'])('URLs at the %s', (place) => {
     it('points to the default Add data URL', () => {
-      const { queryByTestId } = render(
-        <TestProviders>
-          <LandingCards />
-        </TestProviders>
-      );
+      const { queryByTestId } = render(<LandingCards />);
       const link = queryByTestId(`add-integrations-${place}`);
       expect(link?.getAttribute('href')).toBe(ADD_DATA_PATH);
     });
 
     it('points to the resolved Add data URL by useVariation', () => {
       const customResolvedUrl = '/test/url';
-      useVariationMock.mockImplementationOnce(
+      (useVariation as jest.Mock).mockImplementationOnce(
         (cloudExperiments, featureFlagName, defaultValue, setter) => {
           setter(customResolvedUrl);
         }
       );
 
-      const { queryByTestId } = render(
-        <TestProviders>
-          <LandingCards />
-        </TestProviders>
-      );
+      const { queryByTestId } = render(<LandingCards />);
       const link = queryByTestId(`add-integrations-${place}`);
       expect(link?.getAttribute('href')).toBe(customResolvedUrl);
     });
