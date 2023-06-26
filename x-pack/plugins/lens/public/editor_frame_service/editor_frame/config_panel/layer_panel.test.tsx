@@ -268,8 +268,8 @@ describe('LayerPanel', () => {
             dimensionsTooMany: 1,
           },
           {
-            groupLabel: 'A',
-            groupId: 'a',
+            groupLabel: 'C',
+            groupId: 'c',
             accessors: [{ columnId: 'x' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
