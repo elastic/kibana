@@ -42,6 +42,7 @@
     "@kbn/core-analytics-browser-mocks",
     "@kbn/core-analytics-browser",
     "@kbn/shared-ux-router",
+    "@kbn/shared-ux-link-redirect-app",
   ],
   "exclude": [
     "target/**/*",
