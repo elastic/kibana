@@ -38,6 +38,11 @@ export interface ConnectorConfigCategoryProperties {
   type: 'category';
 }
 
+export interface Validation {
+  constraint: string | number;
+  type: string;
+}
+
 export interface ConnectorConfigProperties {
   category?: string;
   default_value: string | number | boolean | null;
@@ -49,10 +54,10 @@ export interface ConnectorConfigProperties {
   placeholder?: string;
   required: boolean;
   sensitive: boolean;
-  tooltip: string;
+  tooltip: string | null;
   type: FieldType;
   ui_restrictions: string[];
-  validations: string[];
+  validations: Validation[];
   value: string | number | boolean | null;
 }
 
@@ -61,6 +66,7 @@ export type ConnectorConfiguration = Record<
   ConnectorConfigProperties | ConnectorConfigCategoryProperties | null
 > & {
   extract_full_html?: { label: string; value: boolean }; // This only exists for Crawler
+  use_text_extraction_service?: ConnectorConfigProperties; // This only exists for SharePoint Online
 };
 
 export interface ConnectorSyncConfigProperties {

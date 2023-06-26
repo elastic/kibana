@@ -292,6 +292,9 @@ describe('mappingFromFieldMap', () => {
                 workflow_status: {
                   type: 'keyword',
                 },
+                workflow_tags: {
+                  type: 'keyword',
+                },
               },
             },
             space_ids: {

@@ -86,7 +86,8 @@ describe('useUrlParams', () => {
     const getUrlParamsButton = component.find('#getUrlParams');
     getUrlParamsButton.simulate('click');
 
-    expect(component).toMatchSnapshot();
+    // removes all unnecessary React-Router wrapping elements
+    expect(component.find('MountWithReduxProvider')).toMatchSnapshot();
   });
 
   it('deletes keys that do not have truthy values', () => {
@@ -115,7 +116,8 @@ describe('useUrlParams', () => {
 
     component.update();
 
-    expect(component).toMatchSnapshot();
+    // removes all unnecessary React-Router wrapping elements
+    expect(component.find('MountWithReduxProvider')).toMatchSnapshot();
 
     const setUrlParamsButton = component.find('#setUrlParams');
     setUrlParamsButton.simulate('click');

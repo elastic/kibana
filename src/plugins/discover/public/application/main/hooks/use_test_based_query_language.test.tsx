@@ -38,7 +38,7 @@ function getHookProps(
 
   const msgLoading = {
     recordRawType: RecordRawType.PLAIN,
-    fetchStatus: FetchStatus.LOADING,
+    fetchStatus: FetchStatus.PARTIAL,
     query,
   };
   stateContainer.dataState.data$.documents$.next(msgLoading);
@@ -53,7 +53,7 @@ function getHookProps(
 const query = { sql: 'SELECT * from the-data-view-title' };
 const msgComplete = {
   recordRawType: RecordRawType.PLAIN,
-  fetchStatus: FetchStatus.COMPLETE,
+  fetchStatus: FetchStatus.PARTIAL,
   result: [
     {
       id: '1',
@@ -137,7 +137,7 @@ describe('useTextBasedQueryLanguage', () => {
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
-      fetchStatus: FetchStatus.COMPLETE,
+      fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
           id: '1',
@@ -167,7 +167,7 @@ describe('useTextBasedQueryLanguage', () => {
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
-      fetchStatus: FetchStatus.COMPLETE,
+      fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
           id: '1',
@@ -182,7 +182,7 @@ describe('useTextBasedQueryLanguage', () => {
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
-      fetchStatus: FetchStatus.COMPLETE,
+      fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
           id: '1',
@@ -205,7 +205,7 @@ describe('useTextBasedQueryLanguage', () => {
 
     documents$.next({
       recordRawType: RecordRawType.DOCUMENT,
-      fetchStatus: FetchStatus.COMPLETE,
+      fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
           id: '1',
@@ -217,7 +217,7 @@ describe('useTextBasedQueryLanguage', () => {
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
-      fetchStatus: FetchStatus.COMPLETE,
+      fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
           id: '1',
@@ -245,7 +245,7 @@ describe('useTextBasedQueryLanguage', () => {
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
-      fetchStatus: FetchStatus.COMPLETE,
+      fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
           id: '1',
@@ -258,7 +258,7 @@ describe('useTextBasedQueryLanguage', () => {
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
-      fetchStatus: FetchStatus.COMPLETE,
+      fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
           id: '1',
@@ -268,7 +268,7 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { sql: 'SELECT field1 from the-data-view-title' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(3));
     expect(replaceUrlState).toHaveBeenCalledWith({
       columns: ['field1', 'field2'],
     });
@@ -286,10 +286,10 @@ describe('useTextBasedQueryLanguage', () => {
       fetchStatus: FetchStatus.LOADING,
       query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
-      fetchStatus: FetchStatus.COMPLETE,
+      fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
           id: '1',
@@ -299,7 +299,7 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
     });
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(2));
     stateContainer.appState.getState = jest.fn(() => {
       return { columns: ['field1', 'field2'], index: 'the-data-view-id' };
     });
@@ -324,7 +324,7 @@ describe('useTextBasedQueryLanguage', () => {
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
-      fetchStatus: FetchStatus.COMPLETE,
+      fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
           id: '1',
@@ -355,7 +355,7 @@ describe('useTextBasedQueryLanguage', () => {
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
-      fetchStatus: FetchStatus.COMPLETE,
+      fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
           id: '1',

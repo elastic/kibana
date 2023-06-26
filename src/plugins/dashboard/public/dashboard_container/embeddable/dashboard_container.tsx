@@ -175,6 +175,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
           ...DEFAULT_DASHBOARD_INPUT,
           id: initialInput.id,
         },
+        isEmbeddedExternally: creationOptions?.isEmbeddedExternally,
         animatePanelTransforms: false, // set panel transforms to false initially to avoid panels animating on initial render.
         hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
         lastSavedId: savedObjectId,
