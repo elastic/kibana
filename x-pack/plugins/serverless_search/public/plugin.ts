@@ -6,6 +6,7 @@
  */
 
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { createServerlessSearchSideNavComponent as createComponent } from './layout/nav';
 import { docLinks } from '../common/doc_links';
 import type {
