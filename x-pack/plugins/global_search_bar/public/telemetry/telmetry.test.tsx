@@ -220,7 +220,7 @@ describe('SearchBar', () => {
       expect(mockReportEvent).toHaveBeenCalledTimes(2);
     });
 
-    it('tracks errors', async () => {
+    it('errors', async () => {
       searchService.find.mockReturnValueOnce(throwError(() => new Error('service unavailable :(')));
 
       render(
@@ -282,7 +282,7 @@ describe('SearchBar', () => {
         expect(mockReportUiCounter).toHaveBeenCalledTimes(2);
       });
 
-      it('supports show/hide', async () => {
+      it('show/hide', async () => {
         render(
           <IntlProvider locale="en">
             <SearchBar
