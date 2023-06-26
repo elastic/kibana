@@ -18,60 +18,56 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { CSPM_POLICY_TEMPLATE } from '../../../common/constants';
-import { PosturePolicyTemplate } from '../../../common/types';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from './utils';
-import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
 
-interface AWSSetupInfoContentProps {
-  policyTemplate: PosturePolicyTemplate | undefined;
-}
-
-const AWSSetupInfoContent = ({ policyTemplate }: AWSSetupInfoContentProps) => {
-  const { cspm, kspm } = cspIntegrationDocsNavigation;
-  const integrationLink =
-    !policyTemplate || policyTemplate === CSPM_POLICY_TEMPLATE
-      ? cspm.getStartedPath
-      : kspm.getStartedPath;
-
-  return (
-    <>
-      <EuiSpacer size="l" />
-      <EuiTitle size="s">
-        <h2>
-          <FormattedMessage
-            id="xpack.csp.awsIntegration.setupInfoContentTitle"
-            defaultMessage="Setup Access"
-          />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="l" />
-      <EuiText color={'subdued'} size="s">
+const AWSSetupInfoContent = () => (
+  <>
+    <EuiSpacer size="l" />
+    <EuiTitle size="s">
+      <h2>
         <FormattedMessage
-          id="xpack.csp.awsIntegration.setupInfoContent"
-          defaultMessage="The integration will require certain read-only AWS permissions to detect security misconfigurations. Select your preferred method of providing the AWS credentials this integration will use. You can follow these {stepByStepInstructionsLink} to generate the necessary credentials."
-          values={{
-            stepByStepInstructionsLink: (
-              <EuiLink href={integrationLink} target="_blank">
-                <FormattedMessage
-                  id="xpack.csp.awsIntegration.setupInfoContentLink"
-                  defaultMessage="step-by-step instructions"
-                />
-              </EuiLink>
-            ),
-          }}
+          id="xpack.csp.eksIntegration.setupInfoContentTitle"
+          defaultMessage="Setup Access"
         />
-      </EuiText>
-    </>
-  );
-};
+      </h2>
+    </EuiTitle>
+    <EuiSpacer size="l" />
+    <EuiText color={'subdued'} size="s">
+      <FormattedMessage
+        id="xpack.csp.eksIntegration.setupInfoContent"
+        defaultMessage="The integration will need elevated access to run some CIS benchmark rules. Select your preferred
+    method of providing the AWS credentials this integration will use. You can follow these
+    step-by-step instructions to generate the necessary credentials."
+      />
+    </EuiText>
+  </>
+);
+
+const DocsLink = (
+  <EuiText color={'subdued'} size="s">
+    <FormattedMessage
+      id="xpack.csp.eksIntegration.docsLink"
+      defaultMessage="Read the {docs} for more details"
+      values={{
+        docs: (
+          <EuiLink
+            href="https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html"
+            external
+          >
+            documentation
+          </EuiLink>
+        ),
+      }}
+    />
+  </EuiText>
+);
 
 const AssumeRoleDescription = (
   <div>
     <EuiText color={'subdued'} size="s">
       <FormattedMessage
-        id="xpack.csp.awsIntegration.assumeRoleDescription"
+        id="xpack.csp.eksIntegration.assumeRoleDescription"
         defaultMessage="An IAM role Amazon Resource Name (ARN) is an IAM identity that you can create in your AWS
       account. When creating an IAM role, users can define the role’s permissions. Roles do not have
       standard long-term credentials such as passwords or access keys."
@@ -84,7 +80,7 @@ const DirectAccessKeysDescription = (
   <div>
     <EuiText color={'subdued'} size="s">
       <FormattedMessage
-        id="xpack.csp.awsIntegration.directAccessKeysDescription"
+        id="xpack.csp.eksIntegration.directAccessKeysDescription"
         defaultMessage="Access keys are long-term credentials for an IAM user or the AWS account root user."
       />
     </EuiText>
@@ -95,7 +91,7 @@ const TemporaryKeysDescription = (
   <div>
     <EuiText color={'subdued'} size="s">
       <FormattedMessage
-        id="xpack.csp.awsIntegration.temporaryKeysDescription"
+        id="xpack.csp.eksIntegration.temporaryKeysDescription"
         defaultMessage="You can configure temporary security credentials in AWS to last for a specified duration. They
       consist of an access key ID, a secret access key, and a security token, which is typically
       found using GetSessionToken."
@@ -108,7 +104,7 @@ const SharedCredentialsDescription = (
   <div>
     <EuiText color={'subdued'} size="s">
       <FormattedMessage
-        id="xpack.csp.awsIntegration.sharedCredentialsDescription"
+        id="xpack.csp.eksIntegration.sharedCredentialsDescription"
         defaultMessage="If you use different AWS credentials for different tools or applications, you can use profiles
       to define multiple access keys in the same configuration file."
       />
@@ -117,10 +113,10 @@ const SharedCredentialsDescription = (
 );
 
 const AWS_FIELD_LABEL = {
-  access_key_id: i18n.translate('xpack.csp.awsIntegration.accessKeyIdLabel', {
+  access_key_id: i18n.translate('xpack.csp.eksIntegration.accessKeyIdLabel', {
     defaultMessage: 'Access Key ID',
   }),
-  secret_access_key: i18n.translate('xpack.csp.awsIntegration.secretAccessKeyLabel', {
+  secret_access_key: i18n.translate('xpack.csp.eksIntegration.secretAccessKeyLabel', {
     defaultMessage: 'Secret Access Key',
   }),
 };
@@ -136,20 +132,20 @@ type AwsOptions = Record<
 
 const options: AwsOptions = {
   assume_role: {
-    label: i18n.translate('xpack.csp.awsIntegration.assumeRoleLabel', {
+    label: i18n.translate('xpack.csp.eksIntegration.assumeRoleLabel', {
       defaultMessage: 'Assume role',
     }),
     info: AssumeRoleDescription,
     fields: {
       role_arn: {
-        label: i18n.translate('xpack.csp.awsIntegration.roleArnLabel', {
+        label: i18n.translate('xpack.csp.eksIntegration.roleArnLabel', {
           defaultMessage: 'Role ARN',
         }),
       },
     },
   },
   direct_access_keys: {
-    label: i18n.translate('xpack.csp.awsIntegration.directAccessKeyLabel', {
+    label: i18n.translate('xpack.csp.eksIntegration.directAccessKeyLabel', {
       defaultMessage: 'Direct access keys',
     }),
     info: DirectAccessKeysDescription,
@@ -160,32 +156,32 @@ const options: AwsOptions = {
   },
   temporary_keys: {
     info: TemporaryKeysDescription,
-    label: i18n.translate('xpack.csp.awsIntegration.temporaryKeysLabel', {
+    label: i18n.translate('xpack.csp.eksIntegration.temporaryKeysLabel', {
       defaultMessage: 'Temporary keys',
     }),
     fields: {
       access_key_id: { label: AWS_FIELD_LABEL.access_key_id },
       secret_access_key: { label: AWS_FIELD_LABEL.secret_access_key, type: 'password' },
       session_token: {
-        label: i18n.translate('xpack.csp.awsIntegration.sessionTokenLabel', {
+        label: i18n.translate('xpack.csp.eksIntegration.sessionTokenLabel', {
           defaultMessage: 'Session Token',
         }),
       },
     },
   },
   shared_credentials: {
-    label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialLabel', {
+    label: i18n.translate('xpack.csp.eksIntegration.sharedCredentialLabel', {
       defaultMessage: 'Shared credentials',
     }),
     info: SharedCredentialsDescription,
     fields: {
       shared_credential_file: {
-        label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialFileLabel', {
+        label: i18n.translate('xpack.csp.eksIntegration.sharedCredentialFileLabel', {
           defaultMessage: 'Shared Credential File',
         }),
       },
       credential_profile_name: {
-        label: i18n.translate('xpack.csp.awsIntegration.credentialProfileNameLabel', {
+        label: i18n.translate('xpack.csp.eksIntegration.credentialProfileNameLabel', {
           defaultMessage: 'Credential Profile Name',
         }),
       },
@@ -194,7 +190,7 @@ const options: AwsOptions = {
 };
 
 export type AwsCredentialsType = keyof typeof options;
-export const DEFAULT_AWS_VARS_GROUP: AwsCredentialsType = 'assume_role';
+export const DEFAULT_EKS_VARS_GROUP: AwsCredentialsType = 'assume_role';
 const AWS_CREDENTIALS_OPTIONS = Object.keys(options).map((value) => ({
   id: value as AwsCredentialsType,
   label: options[value as keyof typeof options].label,
@@ -225,7 +221,7 @@ const getInputVarsFields = (
 const getAwsCredentialsType = (input: Props['input']): AwsCredentialsType | undefined =>
   input.streams[0].vars?.['aws.credentials.type'].value;
 
-export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) => {
+export const EksCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) => {
   // We only have a value for 'aws.credentials.type' once the form has mounted.
   // On initial render we don't have that value so we default to the first option.
   const awsCredentialsType = getAwsCredentialsType(input) || AWS_CREDENTIALS_OPTIONS[0].id;
@@ -234,7 +230,7 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
 
   return (
     <>
-      <AWSSetupInfoContent policyTemplate={input.policy_template} />
+      <AWSSetupInfoContent />
       <EuiSpacer size="l" />
       <AwsCredentialTypeSelector
         type={awsCredentialsType}
@@ -248,7 +244,9 @@ export const AwsCredentialsForm = ({ input, newPolicy, updatePolicy }: Props) =>
       />
       <EuiSpacer size="m" />
       {group.info}
-      <EuiSpacer size="l" />
+      <EuiSpacer size="s" />
+      {DocsLink}
+      <EuiSpacer />
       <AwsInputVarFields
         fields={fields}
         onChange={(key, value) =>
