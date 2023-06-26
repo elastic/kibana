@@ -1,25 +1,6 @@
 {
   "type": "_doc",
   "value": {
-    "id": "space:default",
-    "index": ".kibana",
-    "source": {
-      "space": {
-        "_reserved": true,
-        "description": "This is the default space",
-        "disabledFeatures": [],
-        "name": "Default Space"
-      },
-      "type": "space",
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "_doc"
-  }
-}
-
-{
-  "type": "_doc",
-  "value": {
     "id": "space:space_1",
     "index": ".kibana",
     "source": {
@@ -29,7 +10,11 @@
         "name": "Space 1"
       },
       "type": "space",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "6.6.0",
+      "managed": false,
+      "references": []
     },
     "type": "_doc"
   }
@@ -47,7 +32,11 @@
         "name": "Space 2"
       },
       "type": "space",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "6.6.0",
+      "managed": false,
+      "references": []
     },
     "type": "_doc"
   }
@@ -120,9 +109,7 @@
       }],
       "type": "dashboard",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["default"],
-      "coreMigrationVersion": "8.8.0",
-      "typeMigrationVersion": "8.7.0"
+      "namespaces": ["default"]
     },
     "type": "_doc"
   }
@@ -151,9 +138,7 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["default"],
-      "coreMigrationVersion": "8.8.0",
-      "typeMigrationVersion": "8.5.0"
+      "namespaces": ["default"]
     },
     "type": "_doc"
   }
@@ -182,9 +167,7 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["default"],
-      "coreMigrationVersion": "8.8.0",
-      "typeMigrationVersion": "8.5.0"
+      "namespaces": ["default"]
     },
     "type": "_doc"
   }
@@ -214,9 +197,7 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["default"],
-      "coreMigrationVersion": "8.8.0",
-      "typeMigrationVersion": "8.5.0"
+      "namespaces": ["default"]
     },
     "type": "_doc"
   }
@@ -252,9 +233,7 @@
       ],
       "type": "dashboard",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["space_1"],
-      "coreMigrationVersion": "8.8.0",
-      "typeMigrationVersion": "8.7.0"
+      "namespaces": ["space_1"]
     },
     "type": "_doc"
   }
@@ -283,9 +262,7 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["space_1"],
-      "coreMigrationVersion": "8.8.0",
-      "typeMigrationVersion": "8.5.0"
+      "namespaces": ["space_1"]
     },
     "type": "_doc"
   }
@@ -314,9 +291,7 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["space_1"],
-      "coreMigrationVersion": "8.8.0",
-      "typeMigrationVersion": "8.5.0"
+      "namespaces": ["space_1"]
     },
     "type": "_doc"
   }
@@ -346,9 +321,7 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["space_1"],
-      "coreMigrationVersion": "8.8.0",
-      "typeMigrationVersion": "8.5.0"
+      "namespaces": ["space_1"]
     },
     "type": "_doc"
   }
@@ -367,9 +340,7 @@
       "references": [],
       "type": "index-pattern",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["default"],
-      "coreMigrationVersion": "8.8.0",
-      "typeMigrationVersion": "8.0.0"
+      "namespaces": ["default"]
     },
     "type": "_doc"
   }
@@ -388,9 +359,7 @@
       "references": [],
       "type": "index-pattern",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["space_1"],
-      "coreMigrationVersion": "8.8.0",
-      "typeMigrationVersion": "8.0.0"
+      "namespaces": ["space_1"]
     },
     "type": "_doc"
   }
