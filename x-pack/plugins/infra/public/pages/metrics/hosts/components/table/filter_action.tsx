@@ -38,7 +38,7 @@ export const FilterAction = ({ selectedItemsCount, filterSelectedHosts }: Filter
     <div
       css={css`
         position: relative;
-        height: ${euiTheme.size.l};
+        height: ${euiTheme.size.m};
       `}
     >
       <EuiPopover
@@ -48,6 +48,7 @@ export const FilterAction = ({ selectedItemsCount, filterSelectedHosts }: Filter
         panelPaddingSize="s"
         className={cx({
           [css`
+            top: -${euiTheme.size.s};
             position: absolute;
             opacity: 0;
             visibility: hidden;
