@@ -7,9 +7,8 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { Link, Router, Switch, useLocation } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
-import { Route } from '@kbn/shared-ux-router';
+import { Link, useLocation } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import {
   EuiButton,
@@ -186,59 +185,57 @@ export const TodoAppPage: React.FC<{
 
   return (
     <Router history={props.history}>
-      <CompatRouter>
-        <EuiPageBody>
-          <EuiPageHeader>
-            <EuiPageHeaderSection>
-              <EuiTitle size="l">
-                <h1>{props.appTitle}</h1>
-              </EuiTitle>
-              <EuiSpacer />
-              <EuiText>
-                <p>
-                  This is a simple TODO app that uses state containers and state syncing utils. It
-                  stores state in the URL similar like Discover or Dashboard apps do. <br />
-                  Play with the app and see how the state is persisted in the URL.
-                  <br /> Undo/Redo with browser history also works.
-                </p>
-              </EuiText>
-            </EuiPageHeaderSection>
-          </EuiPageHeader>
-          <EuiPageContent>
-            <EuiPageContentBody>
-              <Switch>
-                <Route path={'/completed'}>
-                  <TodoApp filter={'completed'} stateContainer={stateContainer} />
-                </Route>
-                <Route path={'/not-completed'}>
-                  <TodoApp filter={'not-completed'} stateContainer={stateContainer} />
-                </Route>
-                <Route path={'/'}>
-                  <TodoApp filter={null} stateContainer={stateContainer} />
-                </Route>
-              </Switch>
-              <EuiSpacer size={'xxl'} />
-              <EuiText size={'s'}>
-                <p>Most of kibana apps persist state in the URL in two ways:</p>
-                <ol>
-                  <li>Expanded state in rison format</li>
-                  <li>
-                    Just a state hash. <br />
-                    In the URL only the hash from the state is stored. The state itself is stored in
-                    the sessionStorage. See `state:storeInSessionStorage` advanced option for more
-                    context.
-                  </li>
-                </ol>
-                <p>You can switch between these two mods:</p>
-              </EuiText>
-              <EuiSpacer />
-              <EuiButton onClick={() => setUseHashedUrl(!useHashedUrl)}>
-                {useHashedUrl ? 'Use Expanded State' : 'Use Hashed State'}
-              </EuiButton>
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </CompatRouter>
+      <EuiPageBody>
+        <EuiPageHeader>
+          <EuiPageHeaderSection>
+            <EuiTitle size="l">
+              <h1>{props.appTitle}</h1>
+            </EuiTitle>
+            <EuiSpacer />
+            <EuiText>
+              <p>
+                This is a simple TODO app that uses state containers and state syncing utils. It
+                stores state in the URL similar like Discover or Dashboard apps do. <br />
+                Play with the app and see how the state is persisted in the URL.
+                <br /> Undo/Redo with browser history also works.
+              </p>
+            </EuiText>
+          </EuiPageHeaderSection>
+        </EuiPageHeader>
+        <EuiPageContent>
+          <EuiPageContentBody>
+            <Routes>
+              <Route path={'/completed'}>
+                <TodoApp filter={'completed'} stateContainer={stateContainer} />
+              </Route>
+              <Route path={'/not-completed'}>
+                <TodoApp filter={'not-completed'} stateContainer={stateContainer} />
+              </Route>
+              <Route path={'/'}>
+                <TodoApp filter={null} stateContainer={stateContainer} />
+              </Route>
+            </Routes>
+            <EuiSpacer size={'xxl'} />
+            <EuiText size={'s'}>
+              <p>Most of kibana apps persist state in the URL in two ways:</p>
+              <ol>
+                <li>Expanded state in rison format</li>
+                <li>
+                  Just a state hash. <br />
+                  In the URL only the hash from the state is stored. The state itself is stored in
+                  the sessionStorage. See `state:storeInSessionStorage` advanced option for more
+                  context.
+                </li>
+              </ol>
+              <p>You can switch between these two mods:</p>
+            </EuiText>
+            <EuiSpacer />
+            <EuiButton onClick={() => setUseHashedUrl(!useHashedUrl)}>
+              {useHashedUrl ? 'Use Expanded State' : 'Use Hashed State'}
+            </EuiButton>
+          </EuiPageContentBody>
+        </EuiPageContent>
+      </EuiPageBody>
     </Router>
   );
 };
