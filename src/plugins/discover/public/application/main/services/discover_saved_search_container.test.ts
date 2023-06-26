@@ -12,7 +12,7 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { dataViewComplexMock } from '../../../__mocks__/data_view_complex';
-import type { Filter, FilterStateStore } from '@kbn/es-query';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 
 describe('DiscoverSavedSearchContainer', () => {
   const savedSearch = savedSearchMock;
