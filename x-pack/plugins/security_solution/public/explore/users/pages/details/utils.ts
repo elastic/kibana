@@ -8,7 +8,6 @@
 import { get } from 'lodash/fp';
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
-import { usersModel } from '../../store';
 import { UsersTableType } from '../../store/model';
 import { getUsersDetailsUrl } from '../../../../common/components/link_to/redirect_to_users';
 
@@ -16,8 +15,6 @@ import * as i18n from '../translations';
 import type { UsersRouteSpyState } from '../../../../common/utils/route/types';
 import { SecurityPageName } from '../../../../app/types';
 import type { GetSecuritySolutionUrl } from '../../../../common/components/link_to';
-
-export const type = usersModel.UsersType.details;
 
 const TabNameMappedToI18nKey: Record<UsersTableType, string> = {
   [UsersTableType.allUsers]: i18n.NAVIGATION_ALL_USERS_TITLE,

@@ -7,7 +7,7 @@
 
 import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
-import { getBreadcrumbsForRoute, useBreadcrumbs } from '.';
+import { getBreadcrumbsForRoute, useBreadcrumbs } from './use_breadcrumbs_nav';
 import { HostsTableType } from '../../../../explore/hosts/store/model';
 import type { RouteSpyState } from '../../../utils/route/types';
 import { NetworkRouteType } from '../../../../explore/network/pages/navigation/types';
