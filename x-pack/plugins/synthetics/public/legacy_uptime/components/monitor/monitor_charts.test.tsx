@@ -25,6 +25,7 @@ describe('MonitorCharts component', () => {
 
   it('renders the component without errors', () => {
     const component = shallowWithRouter(<MonitorCharts monitorId="something" />);
-    expect(component).toMatchSnapshot();
+    // dive() removes all unnecessary React-Router wrapping elements
+    expect(component.dive()).toMatchSnapshot();
   });
 });
