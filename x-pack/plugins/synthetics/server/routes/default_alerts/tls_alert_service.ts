@@ -8,11 +8,10 @@
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { FindActionResult } from '@kbn/actions-plugin/server';
 import { TLSParams } from '../../../common/runtime_types/alerts/tls';
-import { savedObjectsAdapter } from '../../legacy_uptime/lib/saved_objects';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
+import { savedObjectsAdapter } from '../../saved_objects';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
 import { TlsTranslations } from '../../../common/rules/synthetics/translations';
-import { UptimeRequestHandlerContext } from '../../types';
+import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../../types';
 import {
   ACTION_GROUP_DEFINITIONS,
   SYNTHETICS_ALERT_RULE_TYPES,
@@ -24,11 +23,11 @@ const TLS_DEFAULT_ALERT_ID = '7a532181-ff1d-4317-9367-7ca789133920';
 export class TLSAlertService {
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
-  server: UptimeServerSetup;
+  server: SyntheticsServerSetup;
 
   constructor(
     context: UptimeRequestHandlerContext,
-    server: UptimeServerSetup,
+    server: SyntheticsServerSetup,
     soClient: SavedObjectsClientContract
   ) {
     this.context = context;

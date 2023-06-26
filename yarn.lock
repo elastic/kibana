@@ -5736,6 +5736,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/uptime-plugin@link:x-pack/plugins/uptime":
+  version "0.0.0"
+  uid ""
+
 "@kbn/url-drilldown-plugin@link:x-pack/plugins/drilldowns/url_drilldown":
   version "0.0.0"
   uid ""

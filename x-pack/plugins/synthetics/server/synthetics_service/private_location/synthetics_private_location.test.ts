@@ -6,7 +6,6 @@
  */
 import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import {
   DataStream,
   MonitorFields,
@@ -19,6 +18,7 @@ import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { SyntheticsServerSetup } from '../../types';
 
 describe('SyntheticsPrivateLocation', () => {
   const mockPrivateLocation: PrivateLocation = {
@@ -53,7 +53,7 @@ describe('SyntheticsPrivateLocation', () => {
     username: '',
   } as unknown as HeartbeatConfig;
 
-  const serverMock: UptimeServerSetup = {
+  const serverMock: SyntheticsServerSetup = {
     uptimeEsClient: { search: jest.fn() },
     logger: loggerMock.create(),
     config: {
@@ -77,7 +77,7 @@ describe('SyntheticsPrivateLocation', () => {
     coreStart: {
       savedObjects: savedObjectsServiceMock.createStartContract(),
     },
-  } as unknown as UptimeServerSetup;
+  } as unknown as SyntheticsServerSetup;
 
   it.each([['Unable to create Synthetics package policy template for private location']])(
     'throws errors for create monitor',
