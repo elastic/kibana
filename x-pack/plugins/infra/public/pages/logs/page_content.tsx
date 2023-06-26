@@ -8,8 +8,7 @@
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
@@ -86,7 +85,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
         </HeaderMenuPortal>
       )}
 
-      <Switch>
+      <Routes>
         <Route path={streamTab.pathname} component={StreamPage} />
         <Route path={anomaliesTab.pathname} component={LogEntryRatePage} />
         <Route path={logCategoriesTab.pathname} component={LogEntryCategoriesPage} />
@@ -98,7 +97,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <RedirectWithQueryParams from={'/log-rate'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/'} to={streamTab.pathname} exact />
         <Route render={() => <NotFoundPage title="Logs" />} />
-      </Switch>
+      </Routes>
     </>
   );
 };
