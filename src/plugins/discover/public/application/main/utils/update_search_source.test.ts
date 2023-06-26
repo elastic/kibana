@@ -12,6 +12,7 @@ import { dataViewMock } from '../../../__mocks__/data_view';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { FilterStateStore, RangeFilter } from '@kbn/es-query';
 
 const getUiSettingsMock = (value: boolean) => {
   return {
@@ -67,5 +68,33 @@ describe('updateVolatileSearchSource', () => {
     });
     expect(volatileSearchSourceMock.getField('fields')).toEqual(undefined);
     expect(volatileSearchSourceMock.getField('fieldsFromSource')).toBe(undefined);
+  });
+
+  it('should add global filters and time filter to the search source', () => {
+    const searchSource = createSearchSourceMock({});
+    const filterManager = discoverServiceMock.data.query.filterManager;
+    const timefilter = discoverServiceMock.data.query.timefilter.timefilter;
+    const timeFilter = { foo: 'bar' } as unknown as RangeFilter;
+    const globalFilter = {
+      meta: {},
+      query: {
+        match_phrase: {
+          extension: {
+            query: 'png',
+            type: 'phrase',
+          },
+        },
+      },
+      $state: {
+        store: FilterStateStore.GLOBAL_STATE,
+      },
+    };
+    jest.spyOn(filterManager, 'getGlobalFilters').mockReturnValue([globalFilter]);
+    jest.spyOn(timefilter, 'createFilter').mockReturnValue(timeFilter);
+    updateVolatileSearchSource(searchSource, {
+      dataView: dataViewMock,
+      services: discoverServiceMock,
+    });
+    expect(searchSource.getField('filter')).toEqual([globalFilter, timeFilter]);
   });
 });
