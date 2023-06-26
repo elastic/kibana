@@ -72,6 +72,10 @@ export class ManagementPlugin
   private hasAnyEnabledApps = true;
 
   private isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
+  private isCardsNavigationEnabled$ = new BehaviorSubject<{
+    enabled: boolean;
+    disabledApps?: string[];
+  }>({ enabled: false, disabledApps: [] });
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -116,8 +120,10 @@ export class ManagementPlugin
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),
           kibanaVersion,
+          coreStart,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
+          isCardsNavigationEnabled$: managementPlugin.isCardsNavigationEnabled$,
         });
       },
     });
@@ -146,6 +152,8 @@ export class ManagementPlugin
     return {
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),
+      setIsCardsNavigationEnabled: ({ enabled, disabledApps }) =>
+        this.isCardsNavigationEnabled$.next({ enabled, disabledApps }),
     };
   }
 }

@@ -29,6 +29,13 @@ export interface DefinedSections {
 
 export interface ManagementStart {
   setIsSidebarEnabled: (enabled: boolean) => void;
+  setIsCardsNavigationEnabled: ({
+    enabled,
+    disabledApps,
+  }: {
+    enabled: boolean;
+    disabledApps?: string[];
+  }) => void;
 }
 
 export interface ManagementSectionsStartPrivate {
@@ -77,4 +84,11 @@ export interface CreateManagementItemArgs {
   icon?: string; // URL to image file; fallback if no `euiIconType`
   capabilitiesId?: string; // overrides app id
   redirectFrom?: string; // redirects from an old app id to the current app id
+}
+
+export interface AppDependencies {
+  appBasePath: string;
+  kibanaVersion: string;
+  sections: ManagementSection[];
+  isCardsNavigationEnabled?: { enabled: boolean; disabledApps?: string[] };
 }

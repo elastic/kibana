@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { CardsNavigationComponent as Component } from './cards_navigation.component';
+import { CardsNavigation as Component } from './cards_navigation';
 import { mockProps } from '../mocks/storybook.mock';
 
 import mdx from '../README.mdx';
@@ -29,4 +29,8 @@ export const CardsNavigationWillAllLinks = () => {
 
 export const CardsNavigationWithSomeLinks = () => {
   return <Component {...mockProps} sections={[{ apps: mockProps.sections[1].apps }]} />;
+};
+
+export const CardsNavigationWithDisabledLinks = () => {
+  return <Component {...mockProps} disabledApps={['api_keys']} />;
 };

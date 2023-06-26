@@ -9,24 +9,19 @@
 import React from 'react';
 import { render, screen, cleanup } from '@testing-library/react';
 
-import { coreMock } from '@kbn/core/public/mocks';
-
 import { APP_BASE_PATH, sectionsMock } from '../mocks/mocks';
 import { CardsNavigation } from './cards_navigation';
-import { CardsNavigationComponent } from './cards_navigation.component';
 import { CardsNavigationComponentProps } from './types';
 
-const coreStartMock = coreMock.createStart({ basePath: '/mock/app' });
-
 const renderCardsNavigationComponent = (props: CardsNavigationComponentProps) => {
-  return [render(<CardsNavigation {...props} coreStart={coreStartMock} />)];
+  return [render(<CardsNavigation {...props} />)];
 };
 
 describe('ProjectSwitcher', () => {
   describe('Component', () => {
     test('is rendered', () => {
       expect(() =>
-        render(<CardsNavigationComponent appBasePath={APP_BASE_PATH} sections={sectionsMock} />)
+        render(<CardsNavigation appBasePath={APP_BASE_PATH} sections={sectionsMock} />)
       ).not.toThrowError();
     });
   });

@@ -24,6 +24,7 @@ export interface CardsNavigationComponentProps {
   sections: AppRegistrySections[];
   appBasePath: string;
   onCardClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  disabledApps?: string[];
 }
 
 export interface CardsNavigationProps extends CardsNavigationComponentProps {
