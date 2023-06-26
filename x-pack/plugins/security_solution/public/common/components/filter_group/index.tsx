@@ -6,11 +6,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import type {
-  ControlInputTransform,
-  ControlPanelState,
-  OptionsListEmbeddableInput,
-} from '@kbn/controls-plugin/common';
+import type { ControlInputTransform } from '@kbn/controls-plugin/common';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-plugin/common';
 import type {
   ControlGroupInput,
@@ -26,7 +22,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Subscription } from 'rxjs';
 import styled from 'styled-components';
-import { cloneDeep, debounce, isEqual } from 'lodash';
+import { debounce, isEqual } from 'lodash';
 import type {
   ControlGroupCreationOptions,
   FieldFilterPredicate,
@@ -43,7 +39,11 @@ import { useControlGroupSyncToLocalStorage } from './hooks/use_control_group_syn
 import { useViewEditMode } from './hooks/use_view_edit_mode';
 import { FilterGroupContextMenu } from './context_menu';
 import { AddControl, SaveControls } from './buttons';
-import { getFilterItemObjListFromControlInput } from './utils';
+import {
+  getFilterItemObjListFromControlInput,
+  mergeControls,
+  reorderControlsWithDefaultControls,
+} from './utils';
 import { FiltersChangedBanner } from './filters_changed_banner';
 import { FilterGroupContext } from './filter_group_context';
 import { NUM_OF_CONTROLS } from './config';
@@ -78,6 +78,15 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const filterChangedSubscription = useRef<Subscription>();
   const inputChangedSubscription = useRef<Subscription>();
+
+  const initialControlsObj = useMemo(
+    () =>
+      initialControls.reduce<Record<string, typeof initialControls[0]>>((prev, current) => {
+        prev[current.fieldName] = current;
+        return prev;
+      }, {}),
+    [initialControls]
+  );
 
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
 
@@ -255,54 +264,35 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
      *
      * */
 
-    const localInitialControls = cloneDeep(initialControls).filter(
-      (control) => control.persist === true
-    );
-    let resultControls = [] as FilterItemObj[];
-
-    let overridingControls = initialUrlParam;
-    if (!initialUrlParam || initialUrlParam.length === 0) {
-      // if nothing is found in URL Param.. read from local storage
-      const storedControlGroupInput = getStoredControlInput();
-      if (storedControlGroupInput) {
-        const urlParamsFromLocalStorage: FilterItemObj[] =
-          getFilterItemObjListFromControlInput(storedControlGroupInput);
-
-        overridingControls = urlParamsFromLocalStorage;
-      }
+    const controlsFromURL = initialUrlParam ?? [];
+    let controlsFromLocalStorage: FilterItemObj[] = [];
+    const storedControlGroupInput = getStoredControlInput();
+    if (storedControlGroupInput) {
+      controlsFromLocalStorage = getFilterItemObjListFromControlInput(storedControlGroupInput);
     }
+    let overridingControls = mergeControls({
+      controlsWithPriority: [controlsFromURL, controlsFromLocalStorage],
+      defaultControlsObj: initialControlsObj,
+    });
 
     if (!overridingControls || overridingControls.length === 0) return initialControls;
 
-    // if initialUrlParam Exists... replace localInitialControls with what was provided in the Url
-    if (overridingControls && !urlDataApplied.current) {
-      if (localInitialControls.length > 0) {
-        localInitialControls.forEach((persistControl) => {
-          const doesPersistControlAlreadyExist = overridingControls?.some(
-            (control) => control.fieldName === persistControl.fieldName
-          );
+    overridingControls = overridingControls.map((item) => {
+      return {
+        // give default value to params which are coming from the URL
+        fieldName: item.fieldName,
+        title: item.title,
+        selectedOptions: item.selectedOptions ?? [],
+        existsSelected: item.existsSelected ?? false,
+        exclude: item.exclude,
+      };
+    });
 
-          if (!doesPersistControlAlreadyExist) {
-            resultControls.push(persistControl);
-          }
-        });
-      }
-
-      resultControls = [
-        ...resultControls,
-        ...overridingControls.map((item) => ({
-          fieldName: item.fieldName,
-          title: item.title,
-          selectedOptions: item.selectedOptions ?? [],
-          existsSelected: item.existsSelected ?? false,
-          exclude: item.exclude,
-          hideActionBar: item.hideActionBar,
-        })),
-      ];
-    }
-
-    return resultControls;
-  }, [initialUrlParam, initialControls, getStoredControlInput]);
+    return reorderControlsWithDefaultControls({
+      controls: overridingControls,
+      defaultControls: initialControls,
+    });
+  }, [initialUrlParam, initialControls, getStoredControlInput, initialControlsObj]);
 
   const fieldFilterPredicate: FieldFilterPredicate = useCallback((f) => f.type !== 'number', []);
 
@@ -376,52 +366,74 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   }, [controlGroup, switchToViewMode, getStoredControlInput, hasPendingChanges]);
 
   const upsertPersistableControls = useCallback(async () => {
-    const persistableControls = initialControls.filter((control) => control.persist === true);
-    const persistableFieldNames = persistableControls.map((p) => p.fieldName);
-    if (persistableControls.length > 0) {
-      const currentPanels = Object.values(controlGroup?.getInput().panels ?? []) as Array<
-        ControlPanelState<OptionsListEmbeddableInput>
-      >;
-      const orderedPanels = currentPanels.sort((a, b) => a.order - b.order);
-      let filterControlsDeleted = false;
-      for (const persistableControl of persistableControls) {
-        const persistableControlInExistingPanels = currentPanels.find(
-          (currControl) => persistableControl.fieldName === currControl.explicitInput.fieldName
-        );
-        // delete current controls
-        if (!filterControlsDeleted) {
-          controlGroup?.updateInput({ panels: {}, filters: [] });
-          filterControlsDeleted = true;
-        }
+    if (!controlGroup) return;
+    const currentPanels = getFilterItemObjListFromControlInput(controlGroup.getInput());
 
-        // add persitable controls
-        await controlGroup?.addOptionsListControl({
-          title: persistableControl.title,
-          ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
-          // option List controls will handle an invalid dataview
-          // & display an appropriate message
-          dataViewId: dataViewId ?? '',
-          selectedOptions: persistableControl.selectedOptions,
-          ...persistableControl,
-          // restore actual values
-          ...persistableControlInExistingPanels?.explicitInput,
-        });
-      }
+    const reorderedControls = reorderControlsWithDefaultControls({
+      controls: currentPanels,
+      defaultControls: initialControls,
+    });
 
-      for (const panel of orderedPanels) {
-        // add rest of the ordered panels
-        if (
-          panel.explicitInput.fieldName &&
-          !persistableFieldNames.includes(panel.explicitInput.fieldName)
-        )
-          await controlGroup?.addOptionsListControl({
-            selectedOptions: [],
-            fieldName: panel.explicitInput.fieldName,
-            dataViewId: dataViewId ?? '',
-            ...panel.explicitInput,
-          });
-      }
+    controlGroup?.updateInput({ panels: {} });
+
+    for (const control of reorderedControls) {
+      await controlGroup?.addOptionsListControl({
+        title: control.title,
+        ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
+        // option List controls will handle an invalid dataview
+        // & display an appropriate message
+        dataViewId: dataViewId ?? '',
+        selectedOptions: control.selectedOptions,
+        ...control,
+      });
     }
+
+    // const persistableControls = initialControls.filter((control) => control.persist === true);
+    // const persistableFieldNames = persistableControls.map((p) => p.fieldName);
+    // if (persistableControls.length > 0) {
+    //   const currentPanels = Object.values(controlGroup?.getInput().panels ?? []) as Array<
+    //     ControlPanelState<OptionsListEmbeddableInput>
+    //   >;
+    //   const orderedPanels = currentPanels.sort((a, b) => a.order - b.order);
+    //   let filterControlsDeleted = false;
+    //   for (const persistableControl of persistableControls) {
+    //     const persistableControlInExistingPanels = currentPanels.find(
+    //       (currControl) => persistableControl.fieldName === currControl.explicitInput.fieldName
+    //     );
+    //     // delete current controls
+    //     if (!filterControlsDeleted) {
+    //       controlGroup?.updateInput({ panels: {}, filters: [] });
+    //       filterControlsDeleted = true;
+    //     }
+    //
+    //     // add persitable controls
+    //     await controlGroup?.addOptionsListControl({
+    //       title: persistableControl.title,
+    //       ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
+    //       // option List controls will handle an invalid dataview
+    //       // & display an appropriate message
+    //       dataViewId: dataViewId ?? '',
+    //       selectedOptions: persistableControl.selectedOptions,
+    //       ...persistableControl,
+    //       // restore actual values
+    //       ...persistableControlInExistingPanels?.explicitInput,
+    //     });
+    //   }
+    //
+    //   for (const panel of orderedPanels) {
+    //     // add rest of the ordered panels
+    //     if (
+    //       panel.explicitInput.fieldName &&
+    //       !persistableFieldNames.includes(panel.explicitInput.fieldName)
+    //     )
+    //       await controlGroup?.addOptionsListControl({
+    //         selectedOptions: [],
+    //         fieldName: panel.explicitInput.fieldName,
+    //         dataViewId: dataViewId ?? '',
+    //         ...panel.explicitInput,
+    //       });
+    //   }
+    // }
   }, [controlGroup, dataViewId, initialControls]);
 
   const saveChangesHandler = useCallback(async () => {

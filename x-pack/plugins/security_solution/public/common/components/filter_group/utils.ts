@@ -11,6 +11,9 @@ import type {
   OptionsListEmbeddableInput,
 } from '@kbn/controls-plugin/common';
 
+import { isEmpty } from 'lodash';
+import type { FilterItemObj } from './types';
+
 export const getPanelsInOrderFromControlsInput = (controlInput: ControlGroupInput) => {
   const panels = controlInput.panels;
 
@@ -33,4 +36,92 @@ export const getFilterItemObjListFromControlInput = (controlInput: ControlGroupI
       hideActionBar: hideActionBar ?? false,
     };
   });
+};
+
+interface MergableControlsArgs {
+  /*
+   * Set of controls that need be merged with priority
+   * Set of controls with lower index take priority over the next one.
+   *
+   * Final set of controls is merged with the defaulControls
+   *
+   */
+  controlsWithPriority: FilterItemObj[][];
+  defaultControlsObj: Record<string, FilterItemObj>;
+}
+
+/*
+ * mergeControls merges controls based on priority with the default controls
+ *
+ * @return undefined if all provided controls are empty
+ * */
+export const mergeControls = ({
+  controlsWithPriority,
+  defaultControlsObj,
+}: MergableControlsArgs) => {
+  const highestPriorityControlSet = controlsWithPriority.find((control) => !isEmpty(control));
+
+  return highestPriorityControlSet?.map((singleControl) => {
+    if (singleControl.fieldName in defaultControlsObj) {
+      return {
+        ...defaultControlsObj[singleControl.fieldName],
+        ...singleControl,
+      };
+    }
+    return singleControl;
+  });
+};
+
+interface ReorderControlsArgs {
+  /*
+   * Ordered Controls
+   *
+   * */
+  controls: FilterItemObj[];
+  /*
+   * default controls in order
+   * */
+  defaultControls: FilterItemObj[];
+}
+
+/**
+ * reorderControlsWithPersistentControls reorders the controls such that controls which
+ * are persistent in default controls should be upserted in given order
+ *
+ * */
+export const reorderControlsWithDefaultControls = (args: ReorderControlsArgs) => {
+  const { controls, defaultControls } = args;
+  const controlsObject = controls.reduce((prev, current) => {
+    prev[current.fieldName] = current;
+    return prev;
+  }, {} as Record<string, FilterItemObj>);
+
+  const defaultControlsObj = defaultControls.reduce((prev, current) => {
+    prev[current.fieldName] = current;
+    return prev;
+  }, {} as Record<string, FilterItemObj>);
+
+  const resultDefaultControls: FilterItemObj[] = defaultControls
+    .filter((defaultControl) => defaultControl.persist)
+    .map((defaultControl) => {
+      return {
+        ...defaultControl,
+        ...(controlsObject[defaultControl.fieldName] ?? {}),
+      };
+    });
+
+  const resultNonPersitantControls = controls
+    .filter(
+      // filter out persisting controls since we have already taken
+      // in account above
+      (control) => !defaultControlsObj[control.fieldName]?.persist
+    )
+    .map((control) => ({
+      // insert some default properties from default controls
+      // irrespective of whether they are persistent or not.
+      ...(defaultControlsObj[control.fieldName] ?? {}),
+      ...control,
+    }));
+
+  return [...resultDefaultControls, ...resultNonPersitantControls];
 };

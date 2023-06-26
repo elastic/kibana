@@ -331,8 +331,10 @@ describe(' Filter Group Component ', () => {
 
         // check if upsert was called correctly
         expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(1);
+        // field id is not required to be passed  when creating a control
+        const { id, ...expectedInputData } = initialInputData.panels['0'].explicitInput;
         expect(controlGroupMock.addOptionsListControl.mock.calls[0][0]).toMatchObject({
-          ...initialInputData.panels['0'].explicitInput,
+          ...expectedInputData,
         });
       });
     });
@@ -363,14 +365,18 @@ describe(' Filter Group Component ', () => {
       await waitFor(() => {
         // edit model gone
         expect(screen.queryAllByTestId(TEST_IDS.SAVE_CONTROL)).toHaveLength(0);
-        // check if upsert was called correctely
+        // check if upsert was called correctly
         expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(2);
         expect(controlGroupMock.addOptionsListControl.mock.calls[0][0]).toMatchObject({
           ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
           ...DEFAULT_DETECTION_PAGE_FILTERS[0],
         });
+
+        // field id is not required to be passed  when creating a control
+        const { id, ...expectedInputData } = initialInputData.panels['3'].explicitInput;
+
         expect(controlGroupMock.addOptionsListControl.mock.calls[1][0]).toMatchObject({
-          ...initialInputData.panels['3'].explicitInput,
+          ...expectedInputData,
         });
       });
     });
