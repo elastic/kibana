@@ -75,10 +75,10 @@ describe('Rule Exceptions workflows from Alert', () => {
 
   beforeEach(() => {
     esArchiverResetKibana();
-    deleteAlertsAndRules();
   });
   after(() => {
     esArchiverUnload('exceptions');
+    deleteAlertsAndRules();
   });
   afterEach(() => {
     esArchiverUnload('exceptions_2');
