@@ -2,7 +2,45 @@
   "id": "stackAlerts",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "stackAlerts",
+        "id": "def-public.DataViewSelectPopover",
+        "type": "Function",
+        "tags": [],
+        "label": "DataViewSelectPopover",
+        "description": [],
+        "signature": [
+          "({ dependencies: { dataViews, dataViewEditor }, metadata, dataView, onSelectDataView, onChangeMetaData, }: React.PropsWithChildren<",
+          "DataViewSelectPopoverProps",
+          ">) => JSX.Element | null"
+        ],
+        "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "stackAlerts",
+            "id": "def-public.DataViewSelectPopover.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  dependencies: { dataViews, dataViewEditor },\n  metadata = { adHocDataViewList: [], isManagementPage: true },\n  dataView,\n  onSelectDataView,\n  onChangeMetaData,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "DataViewSelectPopoverProps",
+              ">"
+            ],
+            "path": "x-pack/plugins/stack_alerts/public/rule_types/components/data_view_select_popover.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],

@@ -1323,4 +1323,81 @@ describe('Enterprise Search Managed Indices', () => {
       });
     });
   });
+
+  describe('GET /internal/enterprise_search/pipelines/ml_inference/pipeline_processors/{pipelineName}', () => {
+    const pipelineName = 'my-pipeline';
+    const pipelineBody = {
+      description: 'Some pipeline',
+      processors: [
+        {
+          set: {
+            field: 'some_field',
+            value: 'some value',
+          },
+        },
+      ],
+    };
+
+    beforeEach(() => {
+      const context = {
+        core: Promise.resolve(mockCore),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
+      mockRouter = new MockRouter({
+        context,
+        method: 'get',
+        path: '/internal/enterprise_search/pipelines/{pipelineName}',
+      });
+
+      registerIndexRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('fails validation without pipelineName', () => {
+      const request = {
+        params: {},
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('returns error if pipeline does not exist', async () => {
+      const request = {
+        params: { pipelineName },
+      };
+
+      mockClient.asCurrentUser.ingest.getPipeline.mockRejectedValue({
+        name: 'ResponseError',
+        meta: {
+          statusCode: 404,
+        },
+      });
+
+      await mockRouter.callRoute(request);
+
+      expect(mockClient.asCurrentUser.ingest.getPipeline).toHaveBeenCalledWith({
+        id: pipelineName,
+      });
+      expect(mockRouter.response.ok).toHaveBeenCalledTimes(0);
+      expect(mockRouter.response.customError).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns pipeline if it does exist', async () => {
+      const request = {
+        params: { pipelineName },
+      };
+      mockClient.asCurrentUser.ingest.getPipeline.mockResolvedValueOnce({
+        [pipelineName]: pipelineBody,
+      });
+
+      await mockRouter.callRoute(request);
+
+      expect(mockClient.asCurrentUser.ingest.getPipeline).toHaveBeenCalledWith({
+        id: pipelineName,
+      });
+      expect(mockRouter.response.ok).toHaveBeenCalledTimes(1);
+      expect(mockRouter.response.customError).toHaveBeenCalledTimes(0);
+    });
+  });
 });

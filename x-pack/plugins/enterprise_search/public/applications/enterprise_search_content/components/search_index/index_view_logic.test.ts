@@ -27,6 +27,10 @@ import { indexToViewIndex } from '../../utils/indices';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 
+jest.mock('../../../shared/kibana/kibana_logic', () => ({
+  KibanaLogic: { values: { productAccess: { hasDocumentLevelSecurityEnabled: true } } },
+}));
+
 // We can't test fetchTimeOutId because this will get set whenever the logic is created
 // And the timeoutId is non-deterministic. We use expect.object.containing throughout this test file
 const DEFAULT_VALUES = {
@@ -38,7 +42,9 @@ const DEFAULT_VALUES = {
   fetchIndexApiStatus: Status.SUCCESS,
   hasAdvancedFilteringFeature: false,
   hasBasicFilteringFeature: false,
+  hasDocumentLevelSecurityFeature: false,
   hasFilteringFeature: false,
+  hasIncrementalSyncFeature: false,
   htmlExtraction: undefined,
   index: {
     ingestionMethod: IngestionMethod.API,

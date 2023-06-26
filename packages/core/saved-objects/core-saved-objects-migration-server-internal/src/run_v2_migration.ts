@@ -30,8 +30,6 @@ import {
 } from './kibana_migrator_utils';
 import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
-import type { AliasAction } from './actions/update_aliases';
-import { updateAliases } from './actions';
 
 export interface RunV2MigrationOpts {
   /** The current Kibana version */
@@ -102,14 +100,7 @@ export const runV2Migration = async (options: RunV2MigrationOpts): Promise<Migra
   // C) both
   const readyToReindexWaitGroupMap = createWaitGroupMap(indicesWithRelocatingTypes);
   const doneReindexingWaitGroupMap = createWaitGroupMap(indicesWithRelocatingTypes);
-  const updateAliasesWaitGroupMap = createWaitGroupMap<AliasAction[], Promise<any>>(
-    indicesWithRelocatingTypes,
-    (allAliasActions) =>
-      updateAliases({
-        client: options.elasticsearchClient,
-        aliasActions: allAliasActions.flat(),
-      })()
-  );
+  const updateAliasesWaitGroupMap = createWaitGroupMap(indicesWithRelocatingTypes);
 
   // build a list of all migrators that must be started
   const migratorIndices = new Set(Object.keys(indexMap));

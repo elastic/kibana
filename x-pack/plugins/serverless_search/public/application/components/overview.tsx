@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { docLinks } from '../../../common/doc_links';
 import { PLUGIN_ID } from '../../../common';
-import { decodeCloudId } from '../../../common/services/decode_cloud_id';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { CodeBox } from './code_box';
 import { javascriptDefinition } from './languages/javascript';
@@ -49,12 +48,9 @@ export const ElasticsearchOverview = () => {
     http,
     userProfile,
   } = useKibanaServices();
-  const cloudId = cloud.cloudId ?? '';
   const elasticsearchURL = useMemo(() => {
-    if (cloudId.length === 0) return ELASTICSEARCH_URL_PLACEHOLDER;
-    const decodedCloudId = decodeCloudId(cloudId);
-    return decodedCloudId?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
-  }, [cloudId]);
+    return cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
+  }, [cloud]);
   const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/`);
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchURL,

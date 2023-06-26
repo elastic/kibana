@@ -16,7 +16,10 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
-import type { CellValueElementProps, TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type {
+  DeprecatedCellValueElementProps,
+  TimelineNonEcsData,
+} from '@kbn/timelines-plugin/common';
 
 import { asDuration } from '../../../common/utils/formatters';
 import { AlertSeverityBadge } from '../alert_severity_badge';
@@ -67,7 +70,7 @@ export const getRenderCellValue = ({
   setFlyoutAlert: (data: TopAlert) => void;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }) => {
-  return ({ columnId, data }: CellValueElementProps) => {
+  return ({ columnId, data }: DeprecatedCellValueElementProps) => {
     if (!data) return null;
     const mappedNonEcsValue = getMappedNonEcsValue({
       data,

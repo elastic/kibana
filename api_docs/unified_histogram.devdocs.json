@@ -671,10 +671,10 @@
               },
               "<Context>; readonly registerTrigger: (trigger: ",
               {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Trigger",
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.Trigger",
                 "text": "Trigger"
               },
               ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
@@ -821,6 +821,26 @@
                 "docId": "kibExpressionsPluginApi",
                 "section": "def-public.ExpressionsStart",
                 "text": "ExpressionsStart"
+              }
+            ],
+            "path": "src/plugins/unified_histogram/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedHistogram",
+            "id": "def-public.UnifiedHistogramServices.capabilities",
+            "type": "Object",
+            "tags": [],
+            "label": "capabilities",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-capabilities-common",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
+                "section": "def-common.Capabilities",
+                "text": "Capabilities"
               }
             ],
             "path": "src/plugins/unified_histogram/public/types.ts",

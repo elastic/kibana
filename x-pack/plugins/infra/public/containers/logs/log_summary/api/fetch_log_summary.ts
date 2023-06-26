@@ -22,6 +22,7 @@ export const fetchLogSummary = async (
   const response = await fetch(LOG_ENTRIES_SUMMARY_PATH, {
     method: 'POST',
     body: JSON.stringify(logEntriesSummaryRequestRT.encode(requestArgs)),
+    version: '1',
   });
 
   return decodeOrThrow(logEntriesSummaryResponseRT)(response);

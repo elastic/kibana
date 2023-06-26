@@ -23,7 +23,7 @@ import type {
   CaseSettings,
   CaseSeverity,
   CaseStatuses,
-  CaseUserActionAttributesWithoutConnectorId,
+  CaseUserActionWithoutReferenceIds,
   CommentRequest,
   CommentUserAction,
   ConnectorUserAction,
@@ -89,6 +89,9 @@ export interface BuilderParameters {
   };
   delete_case: {
     parameters: { payload: {} };
+  };
+  category: {
+    parameters: { payload: { category: string | null } };
   };
 }
 
@@ -174,7 +177,7 @@ export interface PushInfo {
 }
 
 export interface UserActionItem {
-  attributes: CaseUserActionAttributesWithoutConnectorId;
+  attributes: CaseUserActionWithoutReferenceIds;
   references: SavedObjectReference[];
 }
 

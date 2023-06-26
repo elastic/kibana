@@ -5,37 +5,38 @@
  * 2.0.
  */
 
-import { Switch, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import React, { memo } from 'react';
-import { ENDPOINTS_PATH, SecurityPageName } from '../../../../common/constants';
+import { SecurityPageName } from '../../../../common/constants';
 import { useLinkExists } from '../../../common/links/links';
 import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
 import { HostIsolationExceptionsList } from './view/host_isolation_exceptions_list';
+import { NoPrivilegesPage } from '../../../common/components/no_privileges';
 
 /**
  * Provides the routing container for the hosts related views
  */
 export const HostIsolationExceptionsContainer = memo(() => {
-  // TODO: Probably should not silently redirect here
   const canAccessHostIsolationExceptionsLink = useLinkExists(
     SecurityPageName.hostIsolationExceptions
   );
-
   if (!canAccessHostIsolationExceptionsLink) {
-    return <Redirect to={ENDPOINTS_PATH} />;
+    // TODO: Render a license/productType upsell page
+    return (
+      <NoPrivilegesPage docLinkSelector={({ securitySolution }) => securitySolution.privileges} />
+    );
   }
 
   return (
-    <Switch>
+    <Routes>
       <Route
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         exact
         component={HostIsolationExceptionsList}
       />
       <Route path="*" component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 });
 

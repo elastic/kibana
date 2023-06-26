@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 import { ConfigKey, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
-import { API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
@@ -17,7 +17,8 @@ import { Spaces } from '../../../alerting_api_integration/spaces_only/scenarios'
 import { ObjectRemover } from '../../../alerting_api_integration/common/lib';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('EnableDefaultAlerting', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/158408
+  describe.skip('EnableDefaultAlerting', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
@@ -94,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
       const newMonitor = httpMonitorJson;
 
       const apiResponse = await supertest
-        .post(API_URLS.SYNTHETICS_MONITORS)
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 

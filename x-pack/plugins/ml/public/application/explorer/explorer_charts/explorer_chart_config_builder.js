@@ -11,11 +11,10 @@
  */
 
 import { parseInterval } from '../../../../common/util/parse_interval';
-import { getEntityFieldList } from '@kbn/ml-anomaly-utils';
+import { getEntityFieldList, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import { buildConfigFromDetector } from '../../util/chart_config_builder';
 import { mlJobService } from '../../services/job_service';
 import { mlFunctionToESAggregation } from '../../../../common/util/job_utils';
-import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 
 // Builds the chart configuration for the provided anomaly record, returning
 // an object with properties used for the display (series function and field, aggregation interval etc),

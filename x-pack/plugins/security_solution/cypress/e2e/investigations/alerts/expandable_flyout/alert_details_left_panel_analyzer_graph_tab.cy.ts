@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { ANALYZER_NODE } from '../../../../screens/alerts';
-import { DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT } from '../../../../screens/document_expandable_flyout';
 import {
-  expandFirstAlertExpandableFlyout,
-  openGraphAnalyzer,
-  expandDocumentDetailsExpandableFlyoutLeftSection,
-} from '../../../../tasks/document_expandable_flyout';
+  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT,
+} from '../../../../screens/expandable_flyout/alert_details_left_panel_analyzer_graph_tab';
+import {
+  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB,
+  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP,
+} from '../../../../screens/expandable_flyout/alert_details_left_panel';
+import { openGraphAnalyzerTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_analyzer_graph_tab';
+import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
+import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { ANALYZER_NODE } from '../../../../screens/alerts';
 import { cleanKibana } from '../../../../tasks/common';
 import { login, visit } from '../../../../tasks/login';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -19,13 +24,11 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-// Skipping these for now as the feature is protected behind a feature flag set to false by default
-// To run the tests locally, add 'securityFlyoutEnabled' in the Cypress config.ts here https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/config.ts#L50
-describe.skip(
+describe(
   'Alert details expandable flyout left panel analyzer graph',
   { env: { ftrConfig: { enableExperimental: ['securityFlyoutEnabled'] } } },
   () => {
-    before(() => {
+    beforeEach(() => {
       cleanKibana();
       login();
       createRule(getNewRule());
@@ -33,10 +36,20 @@ describe.skip(
       waitForAlertsToPopulate();
       expandFirstAlertExpandableFlyout();
       expandDocumentDetailsExpandableFlyoutLeftSection();
-      openGraphAnalyzer();
+      openGraphAnalyzerTab();
     });
 
-    it('should display analyzer graph and node list', () => {
+    it('should display analyzer graph and node list under visualize', () => {
+      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB)
+        .should('be.visible')
+        .and('have.text', 'Visualize');
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_BUTTON_GROUP).should('be.visible');
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON)
+        .should('be.visible')
+        .and('have.text', 'Analyzer Graph');
+
       cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT).should('be.visible');
       cy.get(ANALYZER_NODE).first().should('be.visible');
     });

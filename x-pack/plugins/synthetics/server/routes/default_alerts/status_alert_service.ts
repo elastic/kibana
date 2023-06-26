@@ -7,11 +7,10 @@
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { FindActionResult } from '@kbn/actions-plugin/server';
-import { savedObjectsAdapter } from '../../legacy_uptime/lib/saved_objects';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
+import { savedObjectsAdapter } from '../../saved_objects';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
 import { SyntheticsMonitorStatusTranslations } from '../../../common/rules/synthetics/translations';
-import { UptimeRequestHandlerContext } from '../../types';
+import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../../types';
 import {
   ACTION_GROUP_DEFINITIONS,
   SYNTHETICS_ALERT_RULE_TYPES,
@@ -20,11 +19,11 @@ import {
 export class StatusAlertService {
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
-  server: UptimeServerSetup;
+  server: SyntheticsServerSetup;
 
   constructor(
     context: UptimeRequestHandlerContext,
-    server: UptimeServerSetup,
+    server: SyntheticsServerSetup,
     soClient: SavedObjectsClientContract
   ) {
     this.context = context;
@@ -66,7 +65,6 @@ export class StatusAlertService {
         consumer: 'uptime',
         alertTypeId: SYNTHETICS_ALERT_RULE_TYPES.MONITOR_STATUS,
         schedule: { interval: '1m' },
-        notifyWhen: 'onActionGroupChange',
         tags: ['SYNTHETICS_DEFAULT_ALERT'],
         name: `Synthetics internal alert`,
         enabled: true,

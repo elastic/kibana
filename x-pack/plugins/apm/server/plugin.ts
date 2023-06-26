@@ -55,7 +55,7 @@ import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/
 import { scheduleSourceMapMigration } from './routes/source_maps/schedule_source_map_migration';
 import { createApmSourceMapIndexTemplate } from './routes/source_maps/create_apm_source_map_index_template';
 import { addApiKeysToEveryPackagePolicyIfMissing } from './routes/fleet/api_keys/add_api_keys_to_policies_if_missing';
-import { getApmFeatureFlags } from '../common/apm_feature_flags';
+import { apmTutorialCustomIntegration } from '../common/tutorial/tutorials';
 
 export class APMPlugin
   implements
@@ -68,6 +68,7 @@ export class APMPlugin
 {
   private currentConfig?: APMConfig;
   private logger?: Logger;
+
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
   }
@@ -148,16 +149,26 @@ export class APMPlugin
       });
     };
 
-    boundGetApmIndices().then((indices) => {
-      plugins.home?.tutorials.registerTutorial(
-        tutorialProvider({
-          apmConfig: currentConfig,
-          apmIndices: indices,
-          cloud: plugins.cloud,
-          isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
-        })
+    // This if else block will go away in favour of removing Home Tutorial Integration
+    // Ideally we will directly register a custom integration and pass the configs
+    // for cloud, onPrem and Serverless so that the actual component can take
+    // care of rendering
+    if (currentConfig.serverlessOnboarding && plugins.customIntegrations) {
+      plugins.customIntegrations?.registerCustomIntegration(
+        apmTutorialCustomIntegration
       );
-    });
+    } else {
+      boundGetApmIndices().then((indices) => {
+        plugins.home?.tutorials.registerTutorial(
+          tutorialProvider({
+            apmConfig: currentConfig,
+            apmIndices: indices,
+            cloud: plugins.cloud,
+            isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
+          })
+        );
+      });
+    }
 
     const telemetryUsageCounter =
       resourcePlugins.usageCollection?.setup.createUsageCounter(
@@ -171,7 +182,7 @@ export class APMPlugin
       },
       logger: this.logger,
       config: currentConfig,
-      featureFlags: getApmFeatureFlags(),
+      featureFlags: currentConfig.featureFlags,
       repository: getGlobalApmServerRouteRepository(),
       ruleDataClient,
       plugins: resourcePlugins,

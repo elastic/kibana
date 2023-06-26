@@ -7,7 +7,11 @@
 
 import { mockGlobalState, mockSourcererState } from '../../mock';
 import { SourcererScopeName } from './model';
-import { getScopePatternListSelection, validateSelectedPatterns } from './helpers';
+import {
+  checkIfIndicesExist,
+  getScopePatternListSelection,
+  validateSelectedPatterns,
+} from './helpers';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 
 const signalIndexName = mockGlobalState.sourcerer.signalIndexName;
@@ -276,5 +280,95 @@ describe('sourcerer store helpers', () => {
         },
       });
     });
+  });
+});
+
+describe('checkIfIndicesExist', () => {
+  it('should return true when scopeId is "detections" and patternList includes signalIndexName', () => {
+    const result = checkIfIndicesExist({
+      patternList: ['index1', 'index2', 'signalIndex'],
+      scopeId: SourcererScopeName.detections,
+      signalIndexName: 'signalIndex',
+      isDefaultDataViewSelected: false,
+    });
+
+    expect(result).toBe(true);
+  });
+
+  it('should return false when scopeId is "detections" and patternList does not include signalIndexName', () => {
+    const result = checkIfIndicesExist({
+      patternList: ['index1', 'index2'],
+      scopeId: SourcererScopeName.detections,
+      signalIndexName: 'signalIndex',
+      isDefaultDataViewSelected: false,
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it('should return true when scopeId is "default" and isDefaultDataViewSelected is true and patternList has elements other than signalIndexName', () => {
+    const result = checkIfIndicesExist({
+      patternList: ['index1', 'index2', 'index3'],
+      scopeId: SourcererScopeName.default,
+      signalIndexName: 'signalIndex',
+      isDefaultDataViewSelected: true,
+    });
+
+    expect(result).toBe(true);
+  });
+
+  it('should return false when scopeId is "default" and isDefaultDataViewSelected is true and patternList only contains signalIndexName', () => {
+    const result = checkIfIndicesExist({
+      patternList: ['signalIndex'],
+      scopeId: SourcererScopeName.default,
+      signalIndexName: 'signalIndex',
+      isDefaultDataViewSelected: true,
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it('should return true when scopeId is "default" and isDefaultDataViewSelected is false and patternList has elements', () => {
+    const result = checkIfIndicesExist({
+      patternList: ['index1', 'index2'],
+      scopeId: SourcererScopeName.default,
+      signalIndexName: 'signalIndex',
+      isDefaultDataViewSelected: false,
+    });
+
+    expect(result).toBe(true);
+  });
+
+  it('should return false when scopeId is "default" and isDefaultDataViewSelected is false and patternList is empty', () => {
+    const result = checkIfIndicesExist({
+      patternList: [],
+      scopeId: SourcererScopeName.default,
+      signalIndexName: 'signalIndex',
+      isDefaultDataViewSelected: false,
+    });
+
+    expect(result).toBe(false);
+  });
+
+  it('should return true when scopeId is not "detections" or "default" and patternList has elements', () => {
+    const result = checkIfIndicesExist({
+      patternList: ['index1', 'index2'],
+      scopeId: 'other' as SourcererScopeName,
+      signalIndexName: 'signalIndex',
+      isDefaultDataViewSelected: false,
+    });
+
+    expect(result).toBe(true);
+  });
+
+  it('should return false when scopeId is not "detections" or "default" and patternList is empty', () => {
+    const result = checkIfIndicesExist({
+      patternList: [],
+      scopeId: 'other' as SourcererScopeName,
+      signalIndexName: 'signalIndex',
+      isDefaultDataViewSelected: false,
+    });
+
+    expect(result).toBe(false);
   });
 });

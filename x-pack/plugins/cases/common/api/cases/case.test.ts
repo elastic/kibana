@@ -86,6 +86,7 @@ const basicCase = {
   },
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+  category: null,
 };
 
 describe('Case', () => {
@@ -227,6 +228,7 @@ describe('Case', () => {
       external_service: null,
       updated_at: '2020-02-20T15:02:57.995Z',
       updated_by: null,
+      category: null,
     };
 
     it('has expected attributes in request', () => {

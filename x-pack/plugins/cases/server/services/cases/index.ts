@@ -69,9 +69,12 @@ import type {
   PostCaseArgs,
   PatchCaseArgs,
   PatchCasesArgs,
+  GetCategoryArgs,
 } from './types';
 import type { AttachmentTransformedAttributes } from '../../common/types/attachments';
 import { bulkDecodeSOAttributes } from '../utils';
+
+const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
 
 export class CasesService {
   private readonly log: Logger;
@@ -555,6 +558,36 @@ export class CasesService {
     }
   }
 
+  public async getCategories({ filter }: GetCategoryArgs): Promise<string[]> {
+    try {
+      this.log.debug(`Attempting to GET all categories`);
+
+      const results = await this.unsecuredSavedObjectsClient.find<
+        unknown,
+        { categories: { buckets: Array<{ key: string }> } }
+      >({
+        type: CASE_SAVED_OBJECT,
+        page: 1,
+        perPage: 1,
+        filter,
+        aggs: {
+          categories: {
+            terms: {
+              field: `${CASE_SAVED_OBJECT}.attributes.category`,
+              size: MAX_DOCS_PER_PAGE,
+              order: { _key: 'asc' },
+            },
+          },
+        },
+      });
+
+      return results?.aggregations?.categories?.buckets.map(({ key }) => key) ?? [];
+    } catch (error) {
+      this.log.error(`Error on GET categories: ${error}`);
+      throw error;
+    }
+  }
+
   public async postNewCase({
     attributes,
     id,
@@ -562,7 +595,9 @@ export class CasesService {
   }: PostCaseArgs): Promise<CaseSavedObjectTransformed> {
     try {
       this.log.debug(`Attempting to POST a new case`);
-      const transformedAttributes = transformAttributesToESModel(attributes);
+
+      const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
+      const transformedAttributes = transformAttributesToESModel(decodedAttributes);
 
       transformedAttributes.attributes.total_alerts = -1;
       transformedAttributes.attributes.total_comments = -1;
@@ -592,7 +627,11 @@ export class CasesService {
   }: PatchCaseArgs): Promise<SavedObjectsUpdateResponse<CaseTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
-      const transformedAttributes = transformAttributesToESModel(updatedAttributes);
+
+      const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
+        updatedAttributes
+      );
+      const transformedAttributes = transformAttributesToESModel(decodedAttributes);
 
       const updatedCase = await this.unsecuredSavedObjectsClient.update<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
@@ -606,7 +645,7 @@ export class CasesService {
       );
 
       const res = transformUpdateResponseToExternalModel(updatedCase);
-      const decodeRes = decodeOrThrow(getPartialCaseTransformedAttributesRt())(res.attributes);
+      const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(res.attributes);
 
       return {
         ...res,
@@ -626,7 +665,11 @@ export class CasesService {
       this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
 
       const bulkUpdate = cases.map(({ caseId, updatedAttributes, version, originalCase }) => {
-        const { attributes, referenceHandler } = transformAttributesToESModel(updatedAttributes);
+        const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
+          updatedAttributes
+        );
+
+        const { attributes, referenceHandler } = transformAttributesToESModel(decodedAttributes);
         return {
           type: CASE_SAVED_OBJECT,
           id: caseId,
@@ -648,7 +691,7 @@ export class CasesService {
         }
 
         const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));
-        const decodeRes = decodeOrThrow(getPartialCaseTransformedAttributesRt())(so.attributes);
+        const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(so.attributes);
         const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
 
         acc.push(soWithDecodedRes);

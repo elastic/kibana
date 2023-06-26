@@ -159,7 +159,9 @@
     "@kbn/ecs",
     "@kbn/url-state",
     "@kbn/ml-anomaly-utils",
+    "@kbn/discover-plugin",
     "@kbn/field-formats-plugin",
-    "@kbn/dev-proc-runner"
+    "@kbn/dev-proc-runner",
+    "@kbn/cloud-chat-plugin"
   ]
 }

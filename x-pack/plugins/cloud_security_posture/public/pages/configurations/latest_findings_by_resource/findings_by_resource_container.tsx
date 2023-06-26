@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
@@ -41,7 +40,7 @@ const getDefaultQuery = ({
 });
 
 export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => (
-  <Switch>
+  <Routes>
     <Route
       exact
       path={findingsNavigation.findings_by_resource.path}
@@ -59,7 +58,7 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
         </TrackApplicationView>
       )}
     />
-  </Switch>
+  </Routes>
 );
 
 const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
@@ -112,11 +111,14 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
         loading={findingsGroupByResource.isFetching}
       />
       <EuiSpacer size="m" />
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false} style={{ width: 400 }}>
-          {!error && <FindingsGroupBySelector type="resource" />}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {!error && (
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false} style={{ width: 188 }}>
+            <FindingsGroupBySelector type="resource" />
+            <EuiSpacer size="m" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       {error && <ErrorCallout error={error} />}
       {!error && (
         <>

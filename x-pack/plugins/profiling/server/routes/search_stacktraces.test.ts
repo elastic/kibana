@@ -12,6 +12,7 @@ describe('Stack trace response operations', () => {
   test('empty stack trace response', () => {
     const original: StackTraceResponse = {
       total_frames: 0,
+      sampling_rate: 1.0,
     };
 
     const expected = {
@@ -72,6 +73,7 @@ describe('Stack trace response operations', () => {
         def: 'def.c',
       },
       total_frames: 1,
+      sampling_rate: 1.0,
     };
 
     const expected = {
@@ -121,6 +123,7 @@ describe('Stack trace response operations', () => {
         ['def', { FileName: 'def.c' }],
       ]),
       totalFrames: 1,
+      samplingRate: 1.0,
     };
 
     const decoded = decodeStackTraceResponse(original);
@@ -146,6 +149,7 @@ describe('Stack trace response operations', () => {
       stack_trace_events: {
         a: 1,
       },
+      sampling_rate: 1.0,
       stack_traces: {
         a: {
           file_ids: ['abc'],

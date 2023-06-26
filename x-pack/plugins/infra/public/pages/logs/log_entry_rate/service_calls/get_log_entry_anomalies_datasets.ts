@@ -12,7 +12,7 @@ import {
   getLogEntryAnomaliesDatasetsRequestPayloadRT,
   getLogEntryAnomaliesDatasetsSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH,
-} from '../../../../../common/http_api/log_analysis';
+} from '../../../../../common/http_api';
 
 interface RequestArgs {
   logViewReference: PersistedLogViewReference;
@@ -38,6 +38,7 @@ export const callGetLogEntryAnomaliesDatasetsAPI = async (
         },
       })
     ),
+    version: '1',
   });
 
   return decodeOrThrow(getLogEntryAnomaliesDatasetsSuccessReponsePayloadRT)(response);

@@ -38,9 +38,27 @@ describe('synchronizeMigrators', () => {
       migratorsWaitGroups.forEach((waitGroup) => expect(waitGroup.reject).not.toHaveBeenCalled());
 
       expect(res).toEqual([
-        { _tag: 'Right', right: 'synchronized_successfully' },
-        { _tag: 'Right', right: 'synchronized_successfully' },
-        { _tag: 'Right', right: 'synchronized_successfully' },
+        {
+          _tag: 'Right',
+          right: {
+            data: [undefined, undefined, undefined],
+            type: 'synchronization_successful',
+          },
+        },
+        {
+          _tag: 'Right',
+          right: {
+            data: [undefined, undefined, undefined],
+            type: 'synchronization_successful',
+          },
+        },
+        {
+          _tag: 'Right',
+          right: {
+            data: [undefined, undefined, undefined],
+            type: 'synchronization_successful',
+          },
+        },
       ]);
     });
 

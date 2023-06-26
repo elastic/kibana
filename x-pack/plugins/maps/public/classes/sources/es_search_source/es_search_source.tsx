@@ -47,7 +47,6 @@ import { getSourceFields } from '../../../index_pattern_util';
 import { loadIndexSettings } from './util/load_index_settings';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ESDocField } from '../../fields/es_doc_field';
-import { registerSource } from '../source_registry';
 import {
   DataRequestMeta,
   ESSearchSourceDescriptor,
@@ -1021,8 +1020,3 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       : [];
   }
 }
-
-registerSource({
-  ConstructorFunction: ESSearchSource,
-  type: SOURCE_TYPES.ES_SEARCH,
-});

@@ -22,7 +22,7 @@ import { persistNote } from '../../saved_object/notes';
 
 export const persistNoteRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
+  _: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.patch(

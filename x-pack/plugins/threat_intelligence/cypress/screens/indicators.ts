@@ -105,3 +105,4 @@ export const INSPECTOR_BUTTON = `[data-test-subj="${INSPECT_BUTTON_TEST_ID}"]`;
 export const INSPECTOR_PANEL = `[data-test-subj="inspectorPanel"]`;
 export const ADD_INTEGRATIONS_BUTTON = `[data-test-subj="add-data"]`;
 export const REFRESH_BUTTON = `[data-test-subj="querySubmitButton"]`;
+export const ADDED_TO_TIMELINE_TOAST = `[data-test-subj="add-to-timeline-toast-success"]`;

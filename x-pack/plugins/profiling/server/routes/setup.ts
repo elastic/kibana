@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { RouteRegisterParameters } from '.';
 import { getClient } from './compat';
 import { installLatestApmPackage, isApmPackageInstalled } from '../lib/setup/apm_package';
@@ -45,6 +46,7 @@ export function registerSetupRoute({
   router.get(
     {
       path: paths.HasSetupESResources,
+      options: { tags: ['access:profiling'] },
       validate: false,
     },
     async (context, request, response) => {
@@ -56,16 +58,17 @@ export function registerSetupRoute({
           request,
           useDefaultAuth: true,
         });
+
         const setupOptions: ProfilingSetupOptions = {
           client: clientWithDefaultAuth,
           logger,
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: core.savedObjects.client,
-          spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
+          spaceId:
+            dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
+          config: dependencies.config,
         };
-
-        logger.info('Checking if Elasticsearch and Fleet are setup for Universal Profiling');
 
         const state = createDefaultSetupState();
         state.cloud.available = dependencies.setup.cloud.isCloudEnabled;
@@ -81,8 +84,17 @@ export function registerSetupRoute({
           });
         }
 
+        state.data.available = await hasProfilingData(setupOptions);
+        if (state.data.available) {
+          return response.ok({
+            body: {
+              has_setup: true,
+              has_data: state.data.available,
+            },
+          });
+        }
+
         const verifyFunctions = [
-          hasProfilingData,
           isApmPackageInstalled,
           validateApmPolicy,
           validateCollectorPackagePolicy,
@@ -101,7 +113,12 @@ export function registerSetupRoute({
           },
         });
       } catch (error) {
-        return handleRouteHandlerError({ error, logger, response });
+        return handleRouteHandlerError({
+          error,
+          logger,
+          response,
+          message: 'Error while checking plugin setup',
+        });
       }
     }
   );
@@ -109,7 +126,8 @@ export function registerSetupRoute({
   router.post(
     {
       path: paths.HasSetupESResources,
-      validate: {},
+      options: { tags: ['access:profiling'] },
+      validate: false,
     },
     async (context, request, response) => {
       try {
@@ -125,11 +143,11 @@ export function registerSetupRoute({
           logger,
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: core.savedObjects.client,
-          spaceId: dependencies.setup.spaces.spacesService.getSpaceId(request),
+          spaceId:
+            dependencies.setup.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID,
           isCloudEnabled: dependencies.setup.cloud.isCloudEnabled,
+          config: dependencies.config,
         };
-
-        logger.info('Setting up Elasticsearch and Fleet for Universal Profiling');
 
         const state = createDefaultSetupState();
         state.cloud.available = dependencies.setup.cloud.isCloudEnabled;
@@ -177,7 +195,12 @@ export function registerSetupRoute({
         // and is not guaranteed to complete before Kibana sends a response.
         return response.accepted();
       } catch (error) {
-        return handleRouteHandlerError({ error, logger, response });
+        return handleRouteHandlerError({
+          error,
+          logger,
+          response,
+          message: 'Error while setting up Universal Profiling',
+        });
       }
     }
   );
@@ -185,18 +208,26 @@ export function registerSetupRoute({
   router.get(
     {
       path: paths.SetupDataCollectionInstructions,
+      options: { tags: ['access:profiling'] },
       validate: false,
     },
     async (context, request, response) => {
       try {
+        const apmServerHost = dependencies.setup.cloud?.apm?.url;
         const setupInstructions = await getSetupInstructions({
           packagePolicyClient: dependencies.start.fleet.packagePolicyService,
           soClient: (await context.core).savedObjects.client,
+          apmServerHost,
         });
 
         return response.ok({ body: setupInstructions });
       } catch (error) {
-        return handleRouteHandlerError({ error, logger, response });
+        return handleRouteHandlerError({
+          error,
+          logger,
+          response,
+          message: 'Error while fetching Universal Profiling instructions',
+        });
       }
     }
   );

@@ -17,8 +17,17 @@ import {
   CaseSeverity,
   decodeWithExcessOrThrow,
 } from '../../../common/api';
-import { MAX_ASSIGNEES_PER_CASE, MAX_TITLE_LENGTH } from '../../../common/constants';
-import { isInvalidTag, areTotalAssigneesInvalid } from '../../../common/utils/validators';
+import {
+  MAX_ASSIGNEES_PER_CASE,
+  MAX_CATEGORY_LENGTH,
+  MAX_TITLE_LENGTH,
+} from '../../../common/constants';
+import {
+  isInvalidTag,
+  areTotalAssigneesInvalid,
+  isCategoryFieldTooLong,
+  isCategoryFieldInvalidString,
+} from '../../../common/utils/validators';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -26,6 +35,18 @@ import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+
+function validateCategory(category?: string | null) {
+  if (isCategoryFieldTooLong(category)) {
+    throw Boom.badRequest(
+      `The length of the category is too long. The maximum length is ${MAX_CATEGORY_LENGTH}`
+    );
+  }
+
+  if (isCategoryFieldInvalidString(category)) {
+    throw Boom.badRequest('The category cannot be an empty string.');
+  }
+}
 
 /**
  * Creates a new case.
@@ -52,6 +73,8 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
     if (query.tags.some(isInvalidTag)) {
       throw Boom.badRequest('A tag must contain at least one non-space character');
     }
+
+    validateCategory(query.category);
 
     const savedObjectID = SavedObjectsUtils.generateId();
 
@@ -99,6 +122,7 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
         ...query,
         severity: query.severity ?? CaseSeverity.LOW,
         assignees: query.assignees ?? [],
+        category: query.category ?? null,
       },
       owner: newCase.attributes.owner,
     });

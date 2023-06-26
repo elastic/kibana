@@ -10,7 +10,6 @@ import { PublicContract } from '@kbn/utility-types';
 import { HttpSetup } from '@kbn/core/public';
 import type {
   SavedObject,
-  SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
@@ -24,6 +23,9 @@ export interface SessionsClientDeps {
   http: HttpSetup;
 }
 
+const version = '1';
+const options = { version };
+
 /**
  * CRUD Search Session SO
  */
@@ -35,7 +37,7 @@ export class SessionsClient {
   }
 
   public get(sessionId: string): Promise<SearchSessionSavedObject> {
-    return this.http.get(`/internal/session/${encodeURIComponent(sessionId)}`);
+    return this.http.get(`/internal/session/${encodeURIComponent(sessionId)}`, options);
   }
 
   public create({
@@ -54,6 +56,7 @@ export class SessionsClient {
     sessionId: string;
   }): Promise<SearchSessionSavedObject> {
     return this.http.post(`/internal/session`, {
+      version,
       body: JSON.stringify({
         name,
         appId,
@@ -65,9 +68,10 @@ export class SessionsClient {
     });
   }
 
-  public find(options: Omit<SavedObjectsFindOptions, 'type'>): Promise<SearchSessionsFindResponse> {
+  public find(opts: Omit<SavedObjectsFindOptions, 'type'>): Promise<SearchSessionsFindResponse> {
     return this.http!.post(`/internal/session/_find`, {
-      body: JSON.stringify(options),
+      version,
+      body: JSON.stringify(opts),
     });
   }
 
@@ -76,27 +80,23 @@ export class SessionsClient {
     attributes: unknown
   ): Promise<SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>> {
     return this.http!.put(`/internal/session/${encodeURIComponent(sessionId)}`, {
+      version,
       body: JSON.stringify(attributes),
     });
   }
 
-  public rename(
-    sessionId: string,
-    newName: string
-  ): Promise<SavedObjectsUpdateResponse<Pick<SearchSessionSavedObjectAttributes, 'name'>>> {
-    return this.update(sessionId, { name: newName });
+  public async rename(sessionId: string, newName: string): Promise<void> {
+    await this.update(sessionId, { name: newName });
   }
 
-  public extend(
-    sessionId: string,
-    expires: string
-  ): Promise<SavedObjectsFindResponse<SearchSessionSavedObjectAttributes>> {
-    return this.http!.post(`/internal/session/${encodeURIComponent(sessionId)}/_extend`, {
+  public async extend(sessionId: string, expires: string): Promise<void> {
+    await this.http!.post(`/internal/session/${encodeURIComponent(sessionId)}/_extend`, {
+      version,
       body: JSON.stringify({ expires }),
     });
   }
 
   public delete(sessionId: string): Promise<void> {
-    return this.http!.delete(`/internal/session/${encodeURIComponent(sessionId)}`);
+    return this.http!.delete(`/internal/session/${encodeURIComponent(sessionId)}`, options);
   }
 }
