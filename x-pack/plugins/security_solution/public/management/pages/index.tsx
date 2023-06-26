@@ -31,7 +31,6 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
 import { BlocklistContainer } from './blocklist';
 import { ResponseActionsContainer } from './response_actions';
-
 import { PrivilegedRoute } from '../components/privileged_route';
 
 const EndpointTelemetry = () => (
@@ -124,11 +123,6 @@ export const ManagementContainer = memo(() => {
         path={MANAGEMENT_ROUTING_BLOCKLIST_PATH}
         component={BlocklistContainer}
         hasPrivilege={canReadBlocklist}
-      />
-      <PrivilegedRoute
-        path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
-        component={ResponseActionsTelemetry}
-        hasPrivilege={canReadActionsLogManagement}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
