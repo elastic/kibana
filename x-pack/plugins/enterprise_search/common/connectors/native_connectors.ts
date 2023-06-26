@@ -1626,6 +1626,32 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      use_document_level_security: {
+        default_value: false,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.useDocumentLevelSecurityLabel',
+          {
+            defaultMessage: 'Use document level security',
+          }
+        ),
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.useDocumentLevelSecurityTooltip',
+          {
+            defaultMessage:
+              'This will add access control data to content documents and will also sync identities with their corresponding access control to a separate index .search-acl-filter-index-name',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: ['advanced'],
+        validations: [],
+        value: false,
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
