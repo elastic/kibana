@@ -126,7 +126,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         className={'ml-app'}
         data-test-subj={'mlApp'}
         restrictWidth={false}
-        // forcing the background to white when in serverless
+        // forcing the background to white navigation is disabled
         css={pageDeps.navMenuEnabled ? {} : { background: '#FFF' }}
         solutionNav={
           pageDeps.navMenuEnabled
