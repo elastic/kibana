@@ -42,7 +42,11 @@ export const readPackRoute = (router: IRouter) => {
       return response.ok({
         body: {
           data: {
-            ...rest,
+            type: rest.type,
+            namespaces: rest.namespaces,
+            migrationVersion: rest.migrationVersion,
+            managed: rest.managed,
+            coreMigrationVersion: rest.coreMigrationVersion,
             name: attributes.name,
             description: attributes.description,
             version: attributes.version,
