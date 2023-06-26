@@ -11,7 +11,6 @@ export enum OpenAIProvider {
 }
 
 export enum CoPilotPromptId {
-  ProfilingExplainFunction = 'profilingExplainFunction',
   ProfilingOptimizeFunction = 'profilingOptimizeFunction',
   ApmExplainError = 'apmExplainError',
   LogsExplainMessage = 'logsExplainMessage',

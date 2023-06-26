@@ -108,7 +108,7 @@ const trackRoute = createObservabilityServerRoute({
 
     const feedbackBody = {
       cluster_id: info.cluster_uuid,
-      // cluster_name: info.cluster_name,
+      cluster_name: info.cluster_name,
       prompt_name: params.path.promptId,
       feedback_action: params.body.feedbackAction,
       model:
