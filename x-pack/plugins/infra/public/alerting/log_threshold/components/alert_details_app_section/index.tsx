@@ -44,7 +44,7 @@ const AlertDetailsAppSection = ({
   alert,
   setAlertSummaryFields,
 }: AlertDetailsAppSectionProps) => {
-  const { observability, data, http, logViews } = useKibanaContextForPlugin().services;
+  const { observability, logViews } = useKibanaContextForPlugin().services;
   const theme = useTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
