@@ -17,7 +17,6 @@ import { withSpan } from '@kbn/apm-utils';
 import { identity } from 'lodash';
 import { Logger, ExecutionContextStart } from '@kbn/core/server';
 
-import { RequeueInvalidTasksConfig } from '../config';
 import { Middleware } from '../lib/middleware';
 import { asOk, asErr, eitherAsync, Result } from '../lib/result_type';
 import {
@@ -60,7 +59,6 @@ type Opts = {
   instance: EphemeralTaskInstance;
   onTaskEvent?: (event: TaskRun | TaskMarkRunning) => void;
   executionContext: ExecutionContextStart;
-  requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
 } & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
 
 // ephemeral tasks cannot be rescheduled or scheduled to run again in the future
@@ -83,7 +81,6 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
   private onTaskEvent: (event: TaskRun | TaskMarkRunning) => void;
   private uuid: string;
   private readonly executionContext: ExecutionContextStart;
-  private readonly requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
 
   /**
    * Creates an instance of EphemeralTaskManagerRunner.
@@ -102,7 +99,6 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     beforeMarkRunning,
     onTaskEvent = identity,
     executionContext,
-    requeueInvalidTasksConfig,
   }: Opts) {
     this.instance = asPending(asConcreteInstance(sanitizeInstance(instance)));
     this.definitions = definitions;
@@ -112,7 +108,6 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     this.onTaskEvent = onTaskEvent;
     this.executionContext = executionContext;
     this.uuid = uuidv4();
-    this.requeueInvalidTasksConfig = requeueInvalidTasksConfig;
   }
 
   /**
@@ -229,7 +224,6 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
 
     const modifiedContext = await this.beforeRun({
       taskInstance: asConcreteInstance(this.instance.task),
-      requeueInvalidTasksConfig: this.requeueInvalidTasksConfig,
     });
     const stopTaskTimer = startTaskTimer();
     try {
@@ -295,7 +289,6 @@ export class EphemeralTaskManagerRunner implements TaskRunner {
     try {
       const { taskInstance } = await this.beforeMarkRunning({
         taskInstance: asConcreteInstance(this.instance.task),
-        requeueInvalidTasksConfig: this.requeueInvalidTasksConfig,
       });
 
       this.instance = asReadyToRun({
