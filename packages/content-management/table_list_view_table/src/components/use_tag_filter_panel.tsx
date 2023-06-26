@@ -5,12 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import type { MouseEvent } from 'react';
 import { Query, EuiFlexGroup, EuiFlexItem, EuiText, EuiHealth, EuiBadge } from '@elastic/eui';
 import type { FieldValueOptionType } from '@elastic/eui';
 
 import type { Tag } from '../types';
+import { SavedObjectsReference } from '../services';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -34,18 +35,18 @@ export interface Params {
   query: Query | null;
   tagsToTableItemMap: { [tagId: string]: string[] };
   getTagList: () => Tag[];
-  fixedTag?: string;
   addOrRemoveIncludeTagFilter: (tag: Tag) => void;
   addOrRemoveExcludeTagFilter: (tag: Tag) => void;
+  tagReferences?: SavedObjectsReference[] | undefined;
 }
 
 export const useTagFilterPanel = ({
   query,
   tagsToTableItemMap,
   getTagList,
-  fixedTag = 'Security Solution',
   addOrRemoveExcludeTagFilter,
   addOrRemoveIncludeTagFilter,
+  tagReferences,
 }: Params) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   // When the panel is "in use" it means that it is opened and the user is interacting with it.
@@ -55,9 +56,25 @@ export const useTagFilterPanel = ({
   const [isInUse, setIsInUse] = useState(false);
   const [options, setOptions] = useState<TagOptionItem[]>([]);
   const [tagSelection, setTagSelection] = useState<TagSelection>(
-    fixedTag ? { [fixedTag]: 'include' } : {}
+    tagReferences
+      ? tagReferences.reduce((acc, obj) => {
+          acc[obj.name] = 'include';
+          return acc;
+        }, {} as TagSelection)
+      : {}
   );
-  const totalActiveFilters = Object.keys(tagSelection).length;
+  const totalActiveFilters = useMemo(
+    () =>
+      Object.keys(tagSelection).reduce((acc, currentOption) => {
+        const inTagReferences = tagReferences?.find((ref) => ref.name === currentOption);
+        acc +=
+          inTagReferences != null
+            ? tagReferences?.filter((ref) => ref.name === currentOption).length ?? 0
+            : 1;
+        return acc;
+      }, 0),
+    [tagReferences, tagSelection]
+  );
 
   const onSelectChange = useCallback(
     (updatedOptions: TagOptionItem[]) => {
@@ -72,9 +89,6 @@ export const useTagFilterPanel = ({
 
   const onOptionClick = useCallback(
     (tag: Tag) => (e: MouseEvent) => {
-      if (fixedTag) {
-        return;
-      }
       const withModifierKey = (isMac && e.metaKey) || (!isMac && e.ctrlKey);
 
       if (withModifierKey) {
@@ -83,7 +97,7 @@ export const useTagFilterPanel = ({
         addOrRemoveIncludeTagFilter(tag);
       }
     },
-    [fixedTag, addOrRemoveExcludeTagFilter, addOrRemoveIncludeTagFilter]
+    [addOrRemoveExcludeTagFilter, addOrRemoveIncludeTagFilter]
   );
 
   const updateTagList = useCallback(() => {
@@ -136,9 +150,6 @@ export const useTagFilterPanel = ({
   }, []);
 
   useEffect(() => {
-    if (fixedTag) {
-      return;
-    }
     /**
      * Data flow for tag filter panel state:
      * When we click (or Ctrl + click) on a tag in the filter panel:
@@ -170,7 +181,7 @@ export const useTagFilterPanel = ({
 
       setTagSelection(updatedTagSelection);
     }
-  }, [fixedTag, query]);
+  }, [query]);
 
   useEffect(() => {
     if (isPopoverOpen) {

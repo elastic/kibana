@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useServices } from '../services';
+import { SavedObjectsReference, useServices } from '../services';
 import type { Action } from '../actions';
 import type {
   State as TableListViewState,
@@ -61,6 +61,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
   onTableSearchChange: (arg: { query: Query | null; queryText: string }) => void;
   clearTagSelection: () => void;
+  tagReferences?: SavedObjectsReference[] | undefined;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -86,7 +87,7 @@ export function Table<T extends UserContentCommonSchema>({
   addOrRemoveExcludeTagFilter,
   addOrRemoveIncludeTagFilter,
   clearTagSelection,
-  fixedTag = 'Security Solution',
+  tagReferences,
 }: Props<T>) {
   const { getTagList } = useServices();
 
@@ -152,13 +153,11 @@ export function Table<T extends UserContentCommonSchema>({
   } = useTagFilterPanel({
     query: searchQuery.query,
     getTagList: useCallback(() => {
-      let tags = getTagList();
-      if (fixedTag) {
-        tags = tags.filter((tag) => tag.name === fixedTag) ?? [];
-      }
+      const tags = getTagList();
+
       return tags;
-    }, [fixedTag, getTagList]),
-    fixedTag: 'Security Solution',
+    }, [getTagList]),
+    tagReferences,
     tagsToTableItemMap,
     addOrRemoveExcludeTagFilter,
     addOrRemoveIncludeTagFilter,
@@ -183,7 +182,6 @@ export function Table<T extends UserContentCommonSchema>({
     return {
       type: 'custom_component',
       component: () => {
-        const disableActions = fixedTag != null;
         return (
           <TagFilterPanel
             isPopoverOpen={isPopoverOpen}
@@ -194,7 +192,6 @@ export function Table<T extends UserContentCommonSchema>({
             onFilterButtonClick={onFilterButtonClick}
             onSelectChange={onSelectChange}
             clearTagSelection={clearTagSelection}
-            disableActions={disableActions}
           />
         );
       },
@@ -208,7 +205,6 @@ export function Table<T extends UserContentCommonSchema>({
     onFilterButtonClick,
     onSelectChange,
     clearTagSelection,
-    fixedTag,
   ]);
 
   const searchFilters = useMemo(() => {

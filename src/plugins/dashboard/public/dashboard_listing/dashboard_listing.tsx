@@ -21,6 +21,7 @@ import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
 import { EuiPaddingSize } from '@elastic/eui';
+import { SavedObjectsReference } from '@kbn/content-management-table-list-view-table/src/services';
 import {
   DASHBOARD_CONTENT_ID,
   SAVED_OBJECT_DELETE_TIME,
@@ -77,8 +78,8 @@ export type DashboardListingProps = PropsWithChildren<{
   withPageTemplateHeader?: boolean;
   restrictPageSectionWidth?: boolean;
   pageSectionPadding?: EuiPaddingSize;
-  tagReferences?: SavedObjectsFindOptionsReference[] | undefined;
-  fixedTag?: string
+  tagReferences?: SavedObjectsReference[] | undefined;
+  urlStateEnabled?: boolean;
 }>;
 
 export const DashboardListing = ({
@@ -91,7 +92,7 @@ export const DashboardListing = ({
   restrictPageSectionWidth = true,
   pageSectionPadding = 'm',
   tagReferences,
-  fixedTag
+  urlStateEnabled,
 }: DashboardListingProps) => {
   const {
     application,
@@ -257,7 +258,7 @@ export const DashboardListing = ({
           withPageTemplateHeader={withPageTemplateHeader}
           restrictPageSectionWidth={restrictPageSectionWidth}
           pageSectionPadding={pageSectionPadding}
-          fixedTag={fixedTag}
+          urlStateEnabled={urlStateEnabled}
         >
           <>
             {children}

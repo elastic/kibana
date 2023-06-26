@@ -13,6 +13,8 @@ import {
   type TableListViewTableProps,
   type UserContentCommonSchema,
 } from '@kbn/content-management-table-list-view-table';
+import { EuiPaddingSize } from '@elastic/eui';
+import { SavedObjectsReference } from '@kbn/content-management-content-editor/src/services';
 
 export type TableListViewProps<T extends UserContentCommonSchema = UserContentCommonSchema> = Pick<
   TableListViewTableProps<T>,
@@ -46,6 +48,10 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
    */
   additionalRightSideActions?: ReactNode[];
   children?: ReactNode | undefined;
+  tagReferences?: SavedObjectsReference[] | undefined;
+  withPageTemplateHeader?: boolean;
+  restrictPageSectionWidth?: boolean;
+  pageSectionPadding?: EuiPaddingSize;
 };
 
 export const TableListView = <T extends UserContentCommonSchema>({
@@ -73,6 +79,10 @@ export const TableListView = <T extends UserContentCommonSchema>({
   titleColumnName,
   additionalRightSideActions,
   withoutPageTemplateWrapper,
+  tagReferences,
+  withPageTemplateHeader,
+  restrictPageSectionWidth,
+  pageSectionPadding,
 }: TableListViewProps<T>) => {
   const PageTemplate = withoutPageTemplateWrapper
     ? (React.Fragment as unknown as typeof KibanaPageTemplate)
@@ -83,13 +93,19 @@ export const TableListView = <T extends UserContentCommonSchema>({
 
   return (
     <PageTemplate panelled data-test-subj={pageDataTestSubject}>
-      <KibanaPageTemplate.Header
-        pageTitle={<span id={headingId}>{title}</span>}
-        description={description}
-        rightSideItems={additionalRightSideActions?.slice(0, 2)}
-        data-test-subj="top-nav"
-      />
-      <KibanaPageTemplate.Section aria-labelledby={hasInitialFetchReturned ? headingId : undefined}>
+      {withPageTemplateHeader && (
+        <KibanaPageTemplate.Header
+          pageTitle={<span id={headingId}>{title}</span>}
+          description={description}
+          rightSideItems={additionalRightSideActions?.slice(0, 2)}
+          data-test-subj="top-nav"
+        />
+      )}
+      <KibanaPageTemplate.Section
+        aria-labelledby={hasInitialFetchReturned ? headingId : undefined}
+        restrictWidth={restrictPageSectionWidth}
+        paddingSize={pageSectionPadding}
+      >
         {/* Any children passed to the component */}
         {children}
 
@@ -121,6 +137,7 @@ export const TableListView = <T extends UserContentCommonSchema>({
             }
           }}
           setPageDataTestSubject={setPageDataTestSubject}
+          tagReferences={tagReferences}
         />
       </KibanaPageTemplate.Section>
     </PageTemplate>

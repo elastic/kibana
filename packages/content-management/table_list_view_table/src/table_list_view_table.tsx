@@ -92,7 +92,7 @@ export interface TableListViewTableProps<
    */
   editItem?(item: T): void;
   /**
-   * Handler to set edit action visiblity per item.
+   * Handler to set edit action visibility per item.
    */
   showEditActionForItem?(item: T): boolean;
   /**
@@ -115,8 +115,7 @@ export interface TableListViewTableProps<
   setPageDataTestSubject: (subject: string) => void;
   restrictPageSectionWidth?: boolean;
   pageSectionPadding?: EuiPaddingSize;
-  tagReferences?: SavedObjectsFindOptionsReference[] | undefined;
-  fixedTag?: string;
+  tagReferences?: SavedObjectsReference[] | undefined;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -190,7 +189,7 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
     }
   });
 
-  // For backward compability with the Dashboard app we will support both "s" and "title" passed
+  // For backward compatibility with the Dashboard app we will support both "s" and "title" passed
   // in the query params. We might want to stop supporting both in a future release (v9.0?)
   stateFromURL.s = sanitizedParams.s ?? sanitizedParams.title;
 
@@ -248,6 +247,35 @@ const tableColumnMetadata = {
   },
 } as const;
 
+const appendQuery = (q: Query, tagName: string) => {
+  return q.addOrFieldValue('tag', tagName, true, 'eq');
+};
+
+const getDefaultQuery = (
+  initialQuery: string,
+  tagReferences: SavedObjectsReference[] | null | undefined
+) => {
+  const query = new Query(Ast.create([]), undefined, initialQuery);
+  const uniqueQueryArray = tagReferences?.reduce<string[]>((acc, { name }) => {
+    if (name && acc.indexOf(name) === -1) {
+      acc.push(name);
+    }
+    return acc;
+  }, []);
+  return (
+    uniqueQueryArray?.reduce((q, ref) => {
+      return appendQuery(q, ref);
+    }, query) ?? query
+  );
+};
+
+const getFindItemReference = (
+  references: SavedObjectsFindOptionsReference[] | undefined,
+  tagReferences?: SavedObjectsReference[] | undefined
+): SavedObjectsFindOptionsReference[] | undefined => {
+  return [...(references ?? []), ...(tagReferences?.map(({ id, type }) => ({ id, type })) ?? [])];
+};
+
 function TableListViewTableComp<T extends UserContentCommonSchema>({
   tableCaption,
   entityName,
@@ -274,10 +302,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   onFetchSuccess,
   refreshListBouncer,
   setPageDataTestSubject,
-  withPageTemplateHeader = true,
-  restrictPageSectionWidth = true,
-  pageSectionPadding = 'm',
-  fixedTag,
   tagReferences,
 }: TableListViewTableProps<T>) {
   useEffect(() => {
@@ -316,12 +340,10 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   } = useServices();
 
   const getTagListing = useCallback(() => {
-    let tags = getTagList();
-    if (fixedTag) {
-      tags = tags.filter((tag) => tag.name === fixedTag) ?? [];
-    }
+    const tags = getTagList();
+
     return tags;
-  }, [fixedTag, getTagList]);
+  }, [getTagList]);
 
   const openContentEditor = useOpenContentEditor();
 
@@ -354,7 +376,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       selectedIds: [],
       searchQuery:
         initialQuery !== undefined
-          ? { text: initialQuery, query: new Query(Ast.create([]), undefined, initialQuery) }
+          ? { text: initialQuery, query: getDefaultQuery(initialQuery, tagReferences) }
           : { text: '', query: new Query(Ast.create([]), undefined, '') },
       pagination: {
         pageIndex: 0,
@@ -367,7 +389,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         direction: 'asc',
       },
     }),
-    [initialPageSize, initialQuery]
+    [initialPageSize, initialQuery, tagReferences]
   );
 
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -411,7 +433,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           };
 
       const response = await findItems(searchQueryParsed, {
-        references: tagReferences ?? references,
+        references: getFindItemReference(references, tagReferences),
         referencesToExclude,
       });
 
@@ -997,6 +1019,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
           addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
           clearTagSelection={clearTagSelection}
+          tagReferences={tagReferences}
         />
 
         {/* Delete modal */}
