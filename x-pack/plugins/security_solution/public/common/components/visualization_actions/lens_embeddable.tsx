@@ -37,17 +37,12 @@ const LensComponentWrapper = styled.div<{
 }>`
   height: ${({ $height }) => ($height ? `${$height}px` : 'auto')};
   width: ${({ width }) => width ?? 'auto'};
-  > div {
-    background-color: transparent;
-    ${({ $addHoverActionsPadding }) =>
-      $addHoverActionsPadding ? `padding: ${HOVER_ACTIONS_PADDING}px 0 0 0;` : ``}
-  }
-  .lnsExpressionRenderer .echLegend {
-    ${({ $height, $addHoverActionsPadding }) =>
-      $height && $height > HOVER_ACTIONS_PADDING && $addHoverActionsPadding
-        ? `height: ${$height - HOVER_ACTIONS_PADDING * 1.5}px;`
-        : ''}
-  }
+
+  ${({ $addHoverActionsPadding }) =>
+    $addHoverActionsPadding
+      ? `.embPanel__header--floater { top: ${HOVER_ACTIONS_PADDING * -1}px; }`
+      : ''}
+
   .expExpressionRenderer__expression {
     padding: 2px 0 0 0 !important;
   }

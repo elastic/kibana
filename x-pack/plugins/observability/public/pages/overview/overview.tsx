@@ -9,11 +9,11 @@ import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs, useFetcher } from '@kbn/observability-shared-plugin/public';
+import { Chat } from '@kbn/cloud-chat-plugin/public';
 
-import type { ObservabilityAppServices } from '../../application/types';
+import { useKibana } from '../../utils/kibana_react';
 import { LoadingObservability } from '../../components/loading_observability';
 import { HeaderActions } from './components/header_actions/header_actions';
 import { DataAssistantFlyout } from './components/data_assistant_flyout';
@@ -52,7 +52,7 @@ export function OverviewPage() {
       getAlertSummaryWidget: AlertSummaryWidget,
     },
     kibanaVersion,
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
 
@@ -241,6 +241,8 @@ export function OverviewPage() {
       {isDataAssistantFlyoutVisible ? (
         <DataAssistantFlyout onClose={() => setIsDataAssistantFlyoutVisible(false)} />
       ) : null}
+
+      <Chat />
     </ObservabilityPageTemplate>
   );
 }

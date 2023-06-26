@@ -9,11 +9,9 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
-import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
+import { createPath, MlRoute, PageLoader } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
 import { DatavisualizerSelector } from '../../../datavisualizer';
-import { checkBasicLicense } from '../../../license';
-import { checkFindFileStructurePrivilegeResolver } from '../../../capabilities/check_capabilities';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 export const selectorRouteFactory = (
@@ -25,28 +23,16 @@ export const selectorRouteFactory = (
   title: i18n.translate('xpack.ml.dataVisualizer.docTitle', {
     defaultMessage: 'Data Visualizer',
   }),
-  render: (props, deps) => <PageWrapper {...props} deps={deps} />,
+  render: () => <PageWrapper />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB'),
   ],
 });
 
-const PageWrapper: FC<PageProps> = ({ location, deps }) => {
-  const { redirectToMlAccessDeniedPage } = deps;
+const PageWrapper: FC = () => {
+  const { context } = useRouteResolver('basic', ['canFindFileStructure']);
 
-  const { context } = useResolver(
-    undefined,
-    undefined,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
-    {
-      checkBasicLicense,
-      checkFindFileStructurePrivilege: () =>
-        checkFindFileStructurePrivilegeResolver(redirectToMlAccessDeniedPage),
-    }
-  );
   return (
     <PageLoader context={context}>
       <DatavisualizerSelector />

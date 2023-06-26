@@ -13,14 +13,13 @@ import { EuiButtonEmpty, EuiTabbedContent } from '@elastic/eui';
 
 import { Optional } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { stringHash } from '@kbn/ml-string-hash';
-
 import { isDefined } from '@kbn/ml-is-defined';
 
 import { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
 import { TransformListRow } from '../../../../common';
-import { useAppDependencies } from '../../../../app_dependencies';
 
 import { ExpandedRowDetailsPane, SectionConfig, SectionItem } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
@@ -47,9 +46,6 @@ interface Props {
 type StateValues = Optional<TransformListRow['stats'], 'stats' | 'checkpointing'>;
 
 export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
-  const {
-    ml: { formatHumanReadableDateTimeSeconds },
-  } = useAppDependencies();
   const stateValues: StateValues = { ...item.stats };
   delete stateValues.stats;
   delete stateValues.checkpointing;

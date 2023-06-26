@@ -228,13 +228,6 @@ export function getDiscoverStateContainer({
    */
   const internalStateContainer = getInternalStateContainer();
 
-  const dataStateContainer = getDataStateContainer({
-    services,
-    searchSessionManager,
-    getAppState: appStateContainer.getState,
-    getSavedSearch: savedSearchContainer.getState,
-  });
-
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
       const state = stateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY);
@@ -247,12 +240,19 @@ export function getDiscoverStateContainer({
       }
     }
   };
-
   const setDataView = (dataView: DataView) => {
     internalStateContainer.transitions.setDataView(dataView);
     pauseAutoRefreshInterval(dataView);
     savedSearchContainer.getState().searchSource.setField('index', dataView);
   };
+
+  const dataStateContainer = getDataStateContainer({
+    services,
+    searchSessionManager,
+    getAppState: appStateContainer.getState,
+    getSavedSearch: savedSearchContainer.getState,
+    setDataView,
+  });
 
   const loadDataViewList = async () => {
     const dataViewList = await services.dataViews.getIdsWithTitle(true);
@@ -287,7 +287,9 @@ export function getDiscoverStateContainer({
       await undoSavedSearchChanges();
     } else {
       addLog('[discoverState] onOpenSavedSearch open view URL');
-      history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
+      services.locator.navigate({
+        savedSearchId: newSavedSearchId,
+      });
     }
   };
 
@@ -349,10 +351,7 @@ export function getDiscoverStateContainer({
     const unsubscribeData = dataStateContainer.subscribe();
 
     // updates saved search when query or filters change, triggers data fetching
-    const filterUnsubscribe = merge(
-      services.data.query.queryString.getUpdates$(),
-      services.filterManager.getFetches$()
-    ).subscribe(async () => {
+    const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(async () => {
       await savedSearchContainer.update({
         nextDataView: internalStateContainer.getState().dataView,
         nextState: appStateContainer.getState(),

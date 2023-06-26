@@ -6,16 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
 
 import { partition } from 'lodash';
 import { MAX_BULK_GET_ATTACHMENTS } from '../../../common/constants';
 import type { BulkGetAttachmentsResponse, CommentAttributes } from '../../../common/api';
 import {
-  excess,
-  throwErrors,
+  decodeWithExcessOrThrow,
   BulkGetAttachmentsResponseRt,
   BulkGetAttachmentsRequestRt,
 } from '../../../common/api';
@@ -28,6 +24,7 @@ import type { BulkOptionalAttributes, OptionalAttributes } from '../../services/
 import type { CasesClient } from '../client';
 import type { AttachmentSavedObject, SOWithErrors } from '../../common/types';
 import { partitionByCaseAssociation } from '../../common/partitioning';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 type AttachmentSavedObjectWithErrors = Array<SOWithErrors<CommentAttributes>>;
 
@@ -46,10 +43,7 @@ export async function bulkGet(
   } = clientArgs;
 
   try {
-    const request = pipe(
-      excess(BulkGetAttachmentsRequestRt).decode({ ids: attachmentIDs }),
-      fold(throwErrors(Boom.badRequest), identity)
-    );
+    const request = decodeWithExcessOrThrow(BulkGetAttachmentsRequestRt)({ ids: attachmentIDs });
 
     throwErrorIfIdsExceedTheLimit(request.ids);
 
@@ -74,10 +68,12 @@ export async function bulkGet(
       caseId: caseID,
     });
 
-    return BulkGetAttachmentsResponseRt.encode({
+    const res = {
       attachments: flattenCommentSavedObjects(authorizedAttachments),
       errors,
-    });
+    };
+
+    return decodeOrThrow(BulkGetAttachmentsResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to bulk get attachments for case id: ${caseID}: ${error}`,

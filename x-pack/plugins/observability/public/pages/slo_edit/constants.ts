@@ -6,7 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BudgetingMethod, CreateSLOInput } from '@kbn/slo-schema';
+import {
+  APMTransactionDurationIndicator,
+  APMTransactionErrorRateIndicator,
+  BudgetingMethod,
+  IndicatorType,
+  KQLCustomIndicator,
+  MetricCustomIndicator,
+  TimeWindow,
+} from '@kbn/slo-schema';
 import {
   BUDGETING_METHOD_OCCURRENCES,
   BUDGETING_METHOD_TIMESLICES,
@@ -15,9 +23,10 @@ import {
   INDICATOR_CUSTOM_KQL,
   INDICATOR_CUSTOM_METRIC,
 } from '../../utils/slo/labels';
+import { CreateSLOForm } from './types';
 
 export const SLI_OPTIONS: Array<{
-  value: CreateSLOInput['indicator']['type'];
+  value: IndicatorType;
   text: string;
 }> = [
   {
@@ -49,31 +58,98 @@ export const BUDGETING_METHOD_OPTIONS: Array<{ value: BudgetingMethod; text: str
   },
 ];
 
-export const TIMEWINDOW_OPTIONS = [90, 30, 7].map((number) => ({
+export const TIMEWINDOW_TYPE_OPTIONS: Array<{ value: TimeWindow; text: string }> = [
+  {
+    value: 'rolling',
+    text: i18n.translate('xpack.observability.slo.sloEdit.timeWindow.rolling', {
+      defaultMessage: 'Rolling',
+    }),
+  },
+  {
+    value: 'calendarAligned',
+    text: i18n.translate('xpack.observability.slo.sloEdit.timeWindow.calendarAligned', {
+      defaultMessage: 'Calendar aligned',
+    }),
+  },
+];
+
+export const CALENDARALIGNED_TIMEWINDOW_OPTIONS = [
+  {
+    value: '1w',
+    text: i18n.translate('xpack.observability.slo.sloEdit.calendarTimeWindow.weekly', {
+      defaultMessage: 'Weekly',
+    }),
+  },
+  {
+    value: '1M',
+    text: i18n.translate('xpack.observability.slo.sloEdit.calendarTimeWindow.monthly', {
+      defaultMessage: 'Monthly',
+    }),
+  },
+];
+
+export const ROLLING_TIMEWINDOW_OPTIONS = [90, 30, 7].map((number) => ({
   value: `${number}d`,
-  text: i18n.translate('xpack.observability.slo.sloEdit.timeWindow.days', {
+  text: i18n.translate('xpack.observability.slo.sloEdit.rollingTimeWindow.days', {
     defaultMessage: '{number} days',
     values: { number },
   }),
 }));
 
-export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOInput = {
+export const CUSTOM_KQL_DEFAULT_VALUES: KQLCustomIndicator = {
+  type: 'sli.kql.custom' as const,
+  params: {
+    index: '',
+    filter: '',
+    good: '',
+    total: '',
+    timestampField: '',
+  },
+};
+
+export const CUSTOM_METRIC_DEFAULT_VALUES: MetricCustomIndicator = {
+  type: 'sli.metric.custom' as const,
+  params: {
+    index: '',
+    filter: '',
+    good: { metrics: [{ name: 'A', aggregation: 'sum' as const, field: '' }], equation: 'A' },
+    total: { metrics: [{ name: 'A', aggregation: 'sum' as const, field: '' }], equation: 'A' },
+    timestampField: '',
+  },
+};
+
+export const APM_LATENCY_DEFAULT_VALUES: APMTransactionDurationIndicator = {
+  type: 'sli.apm.transactionDuration' as const,
+  params: {
+    service: '',
+    environment: '',
+    transactionType: '',
+    transactionName: '',
+    threshold: 250,
+    filter: '',
+    index: '',
+  },
+};
+
+export const APM_AVAILABILITY_DEFAULT_VALUES: APMTransactionErrorRateIndicator = {
+  type: 'sli.apm.transactionErrorRate' as const,
+  params: {
+    service: '',
+    environment: '',
+    transactionType: '',
+    transactionName: '',
+    filter: '',
+    index: '',
+  },
+};
+
+export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOForm = {
   name: '',
   description: '',
-  indicator: {
-    type: 'sli.kql.custom',
-    params: {
-      index: '',
-      filter: '',
-      good: '',
-      total: '',
-      timestampField: '',
-    },
-  },
+  indicator: CUSTOM_KQL_DEFAULT_VALUES,
   timeWindow: {
-    duration:
-      TIMEWINDOW_OPTIONS[TIMEWINDOW_OPTIONS.findIndex((option) => option.value === '30d')].value,
-    isRolling: true,
+    duration: ROLLING_TIMEWINDOW_OPTIONS[1].value,
+    type: 'rolling',
   },
   tags: [],
   budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,
@@ -82,23 +158,13 @@ export const SLO_EDIT_FORM_DEFAULT_VALUES: CreateSLOInput = {
   },
 };
 
-export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOInput = {
+export const SLO_EDIT_FORM_DEFAULT_VALUES_CUSTOM_METRIC: CreateSLOForm = {
   name: '',
   description: '',
-  indicator: {
-    type: 'sli.metric.custom',
-    params: {
-      index: '',
-      filter: '',
-      good: { metrics: [{ name: 'A', aggregation: 'sum', field: '' }], equation: 'A' },
-      total: { metrics: [{ name: 'A', aggregation: 'sum', field: '' }], equation: 'A' },
-      timestampField: '',
-    },
-  },
+  indicator: CUSTOM_METRIC_DEFAULT_VALUES,
   timeWindow: {
-    duration:
-      TIMEWINDOW_OPTIONS[TIMEWINDOW_OPTIONS.findIndex((option) => option.value === '30d')].value,
-    isRolling: true,
+    duration: ROLLING_TIMEWINDOW_OPTIONS[1].value,
+    type: 'rolling',
   },
   tags: [],
   budgetingMethod: BUDGETING_METHOD_OPTIONS[0].value,

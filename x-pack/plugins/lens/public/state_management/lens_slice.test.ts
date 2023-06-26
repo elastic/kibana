@@ -362,6 +362,7 @@ describe('lensSlice', () => {
           addLayer({
             layerId: 'foo',
             layerType: LayerTypes.DATA,
+            extraArg: 'some arg',
           })
         );
         const state = customStore.getState().lens;
@@ -405,6 +406,7 @@ describe('lensSlice', () => {
           addLayer({
             layerId: 'foo',
             layerType: layerTypes.DATA,
+            extraArg: undefined,
           })
         );
 

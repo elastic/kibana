@@ -21,7 +21,6 @@ export const allowedExperimentalValues = Object.freeze({
   showIntegrationsSubcategories: true,
   agentFqdnMode: true,
   showExperimentalShipperOptions: false,
-  fleetServerStandalone: false,
   agentTamperProtectionEnabled: false,
   secretsStorage: false,
 });

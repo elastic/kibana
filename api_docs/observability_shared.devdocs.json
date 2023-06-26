@@ -93,7 +93,17 @@
               "ObservabilitySharedStart",
               ") => { navigation: { PageTemplate: (pageTemplateProps: ",
               "WrappedPageTemplateProps",
-              ") => JSX.Element; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
+              ") => JSX.Element; registerSections: (sections$: ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "observabilityShared",
+                "scope": "public",
+                "docId": "kibObservabilitySharedPluginApi",
+                "section": "def-public.NavigationSection",
+                "text": "NavigationSection"
+              },
+              "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
               {
                 "pluginId": "@kbn/core-application-browser",
                 "scope": "common",
@@ -101,7 +111,7 @@
                 "section": "def-common.AppDeepLink",
                 "text": "AppDeepLink"
               },
-              "[]; updater$: ",
+              "<string>[]; updater$: ",
               "Subject",
               "<",
               {
@@ -343,10 +353,10 @@
                   },
                   "<Context>; readonly registerTrigger: (trigger: ",
                   {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.Trigger",
+                    "pluginId": "@kbn/ui-actions-browser",
+                    "scope": "common",
+                    "docId": "kibKbnUiActionsBrowserPluginApi",
+                    "section": "def-common.Trigger",
                     "text": "Trigger"
                   },
                   ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
@@ -2381,7 +2391,17 @@
         "signature": [
           "{ navigation: { PageTemplate: (pageTemplateProps: ",
           "WrappedPageTemplateProps",
-          ") => JSX.Element; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
+          ") => JSX.Element; registerSections: (sections$: ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "observabilityShared",
+            "scope": "public",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-public.NavigationSection",
+            "text": "NavigationSection"
+          },
+          "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
           {
             "pluginId": "@kbn/core-application-browser",
             "scope": "common",
@@ -2389,7 +2409,7 @@
             "section": "def-common.AppDeepLink",
             "text": "AppDeepLink"
           },
-          "[]; updater$: ",
+          "<string>[]; updater$: ",
           "Subject",
           "<",
           {

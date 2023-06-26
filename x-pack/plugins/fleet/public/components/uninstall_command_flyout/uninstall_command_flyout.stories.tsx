@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
+
+import React, { useState } from 'react';
+import type { Meta } from '@storybook/react';
+
+import { EuiButton } from '@elastic/eui';
+
 import type { UninstallCommandFlyoutProps } from './uninstall_command_flyout';
 import { UNINSTALL_COMMAND_TARGETS } from './types';
 import { UninstallCommandFlyout } from './uninstall_command_flyout';
@@ -18,10 +25,25 @@ export default {
       control: { type: 'radio' },
     },
   },
-  args: {
-    onClose: () => {},
-  },
-};
+  decorators: [
+    (StoryComponent, { args }) => {
+      const [isOpen, setIsOpen] = useState(false);
+
+      useEffect(() => {
+        // delayed automatic opening, so Fleet Storybook Context has time to setup httpClient
+        setIsOpen(true);
+      }, []);
+
+      return (
+        <div>
+          <EuiButton onClick={() => setIsOpen(true)}>Show flyout</EuiButton>
+
+          {isOpen && <StoryComponent args={{ ...args, onClose: () => setIsOpen(false) }} />}
+        </div>
+      );
+    },
+  ],
+} as Meta<{}>;
 
 interface Story {
   args: Partial<UninstallCommandFlyoutProps>;
@@ -38,5 +60,12 @@ export const ForEndpoint: Story = {
   args: {
     target: 'endpoint',
     policyId: 'policy-id-2',
+  },
+};
+
+export const ErrorInFetch: Story = {
+  args: {
+    target: 'agent',
+    policyId: 'missing-policy',
   },
 };

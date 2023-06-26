@@ -6,14 +6,36 @@
  * Side Public License, v 1.
  */
 
+import { CoreStart } from '@kbn/core/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { EventAnnotationServiceType } from './types';
 
 export class EventAnnotationService {
   private eventAnnotationService?: EventAnnotationServiceType;
+
+  private core: CoreStart;
+  private savedObjectsManagement: SavedObjectsManagementPluginStart;
+  private contentManagement: ContentManagementPublicStart;
+
+  constructor(
+    core: CoreStart,
+    contentManagement: ContentManagementPublicStart,
+    savedObjectsManagement: SavedObjectsManagementPluginStart
+  ) {
+    this.core = core;
+    this.contentManagement = contentManagement;
+    this.savedObjectsManagement = savedObjectsManagement;
+  }
+
   public async getService() {
     if (!this.eventAnnotationService) {
       const { getEventAnnotationService } = await import('./service');
-      this.eventAnnotationService = getEventAnnotationService();
+      this.eventAnnotationService = getEventAnnotationService(
+        this.core,
+        this.contentManagement,
+        this.savedObjectsManagement
+      );
     }
     return this.eventAnnotationService;
   }

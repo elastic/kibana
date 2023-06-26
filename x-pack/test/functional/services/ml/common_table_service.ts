@@ -67,7 +67,12 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
 
     public async waitForTableToStartLoading() {
       await testSubjects.existOrFail(`~${this.tableTestSubj}`, { timeout: 60 * 1000 });
-      await testSubjects.existOrFail(`${this.tableTestSubj} loading`, { timeout: 30 * 1000 });
+
+      // After invoking an action that caused the table to start loading, the loading
+      // should start quickly after the table exists. Sometimes it is even so quick that
+      // the loading is already done when we try to check for it, so we're not failing
+      // in that case and just move on.
+      await testSubjects.exists(`${this.tableTestSubj} loading`, { timeout: 3 * 1000 });
     }
 
     public async waitForTableToLoad() {

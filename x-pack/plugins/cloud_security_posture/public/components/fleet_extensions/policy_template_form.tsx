@@ -257,6 +257,7 @@ const useEnsureDefaultNamespace = ({
     updatePolicy(policy);
   }, [newPolicy, input, updatePolicy]);
 };
+
 const usePolicyTemplateInitialName = ({
   isEditPage,
   isLoading,
@@ -286,11 +287,14 @@ const usePolicyTemplateInitialName = ({
     if (newPolicy.name === currentIntegrationName) {
       return;
     }
+
     updatePolicy({
       ...newPolicy,
       name: currentIntegrationName,
     });
-  }, [isLoading, integration, isEditPage, packagePolicyList, newPolicy, updatePolicy]);
+    // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading, integration, isEditPage, packagePolicyList]);
 };
 
 const getSelectedOption = (

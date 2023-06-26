@@ -29,7 +29,7 @@ import aksLogo from '../assets/icons/cis_aks_logo.svg';
 import gkeLogo from '../assets/icons/cis_gke_logo.svg';
 
 export const statusColors = {
-  passed: euiThemeVars.euiColorVis0,
+  passed: euiThemeVars.euiColorSuccess,
   failed: euiThemeVars.euiColorVis9,
 };
 

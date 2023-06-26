@@ -63,16 +63,16 @@ describe('ALL - Packs', () => {
   describe('Create and edit a pack', () => {
     before(() => {
       loadSavedQuery().then((data) => {
-        savedQueryId = data.id;
-        savedQueryName = data.attributes.id;
+        savedQueryId = data.saved_object_id;
+        savedQueryName = data.id;
       });
       loadSavedQuery({
         ecs_mapping: {},
         interval: '3600',
         query: 'select * from uptime;',
       }).then((data) => {
-        nomappingSavedQueryId = data.id;
-        nomappingSavedQueryName = data.attributes.id;
+        nomappingSavedQueryId = data.saved_object_id;
+        nomappingSavedQueryName = data.id;
       });
       loadSavedQuery({
         ecs_mapping: {
@@ -83,8 +83,8 @@ describe('ALL - Packs', () => {
         interval: '3600',
         query: 'select * from uptime;',
       }).then((data) => {
-        oneMappingSavedQueryId = data.id;
-        oneMappingSavedQueryName = data.attributes.id;
+        oneMappingSavedQueryId = data.saved_object_id;
+        oneMappingSavedQueryName = data.id;
       });
       loadSavedQuery({
         ecs_mapping: {
@@ -101,8 +101,8 @@ describe('ALL - Packs', () => {
         interval: '3600',
         query: 'select * from uptime;',
       }).then((data) => {
-        multipleMappingsSavedQueryId = data.id;
-        multipleMappingsSavedQueryName = data.attributes.id;
+        multipleMappingsSavedQueryId = data.saved_object_id;
+        multipleMappingsSavedQueryName = data.id;
       });
     });
 
@@ -290,8 +290,8 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packId = pack.id;
-          packName = pack.attributes.name;
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
       });
 
@@ -332,8 +332,8 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packId = pack.id;
-          packName = pack.attributes.name;
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
       });
 
@@ -365,8 +365,8 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packId = pack.id;
-          packName = pack.attributes.name;
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
       });
 
@@ -408,8 +408,8 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packId = pack.id;
-          packName = pack.attributes.name;
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
       });
 
@@ -452,8 +452,8 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packId = pack.id;
-          packName = pack.attributes.name;
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
       });
 
@@ -479,8 +479,8 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 60, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packId = pack.id;
-          packName = pack.attributes.name;
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
       });
 
@@ -537,8 +537,8 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packId = pack.id;
-          packName = pack.attributes.name;
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
       });
 
@@ -574,8 +574,8 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packId = pack.id;
-          packName = pack.attributes.name;
+          packId = pack.saved_object_id;
+          packName = pack.name;
         });
       });
 
@@ -631,7 +631,7 @@ describe('ALL - Packs', () => {
             [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
-          packName = pack.attributes.name;
+          packName = pack.name;
         });
       });
 

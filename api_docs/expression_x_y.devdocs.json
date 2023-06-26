@@ -52,6 +52,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-public.XYCurveTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "XYCurveTypes",
+        "description": [],
+        "signature": [
+          "{ readonly LINEAR: \"LINEAR\"; readonly CURVE_MONOTONE_X: \"CURVE_MONOTONE_X\"; readonly CURVE_STEP_AFTER: \"CURVE_STEP_AFTER\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ]
   },
@@ -3621,6 +3636,21 @@
         "description": [],
         "signature": [
           "{ readonly DATA: \"data\"; readonly REFERENCELINE: \"referenceLine\"; readonly ANNOTATIONS: \"annotations\"; }"
+        ],
+        "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionXY",
+        "id": "def-common.XYCurveTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "XYCurveTypes",
+        "description": [],
+        "signature": [
+          "{ readonly LINEAR: \"LINEAR\"; readonly CURVE_MONOTONE_X: \"CURVE_MONOTONE_X\"; readonly CURVE_STEP_AFTER: \"CURVE_STEP_AFTER\"; }"
         ],
         "path": "src/plugins/chart_expressions/expression_xy/common/constants.ts",
         "deprecated": false,

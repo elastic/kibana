@@ -8,12 +8,11 @@
 import * as rt from 'io-ts';
 import { CaseConnectorRt } from '../connectors/connector';
 import { ConnectorMappingsRt } from '../connectors/mappings';
-
 import { UserRt } from '../user';
 
 const ClosureTypeRt = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
 
-export const ConfigurationBasicWithoutOwnerRt = rt.type({
+export const ConfigurationBasicWithoutOwnerRt = rt.strict({
   /**
    * The external connector
    */
@@ -26,7 +25,7 @@ export const ConfigurationBasicWithoutOwnerRt = rt.type({
 
 const CasesConfigureBasicRt = rt.intersection([
   ConfigurationBasicWithoutOwnerRt,
-  rt.type({
+  rt.strict({
     /**
      * The plugin owner that manages this configuration
      */
@@ -36,11 +35,11 @@ const CasesConfigureBasicRt = rt.intersection([
 
 export const ConfigurationRequestRt = CasesConfigureBasicRt;
 export const ConfigurationPatchRequestRt = rt.intersection([
-  rt.partial(ConfigurationBasicWithoutOwnerRt.props),
-  rt.type({ version: rt.string }),
+  rt.exact(rt.partial(ConfigurationBasicWithoutOwnerRt.type.props)),
+  rt.strict({ version: rt.string }),
 ]);
 
-export const ConfigurationActivityFieldsRt = rt.type({
+export const ConfigurationActivityFieldsRt = rt.strict({
   created_at: rt.string,
   created_by: UserRt,
   updated_at: rt.union([rt.string, rt.null]),
@@ -54,24 +53,26 @@ export const ConfigurationAttributesRt = rt.intersection([
 
 export const ConfigurationRt = rt.intersection([
   ConfigurationAttributesRt,
-  ConnectorMappingsRt,
-  rt.type({
+  rt.strict({
     id: rt.string,
     version: rt.string,
     error: rt.union([rt.string, rt.null]),
     owner: rt.string,
+    mappings: ConnectorMappingsRt,
   }),
 ]);
 
-export const GetConfigurationFindRequestRt = rt.partial({
-  /**
-   * The configuration plugin owner to filter the search by. If this is left empty the results will include all configurations
-   * that the user has permissions to access
-   */
-  owner: rt.union([rt.array(rt.string), rt.string]),
-});
+export const GetConfigurationFindRequestRt = rt.exact(
+  rt.partial({
+    /**
+     * The configuration plugin owner to filter the search by. If this is left empty the results will include all configurations
+     * that the user has permissions to access
+     */
+    owner: rt.union([rt.array(rt.string), rt.string]),
+  })
+);
 
-export const CaseConfigureRequestParamsRt = rt.type({
+export const CaseConfigureRequestParamsRt = rt.strict({
   configuration_id: rt.string,
 });
 

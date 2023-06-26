@@ -471,8 +471,28 @@ export async function ensureFileUploadWriteIndices(opts: {
 
   return Promise.all(
     integrationsWithFileUpload.flatMap((integrationName) => {
-      const indexName = FILE_STORAGE_INTEGRATION_INDEX_NAMES[integrationName];
-      return [ensure(getFileDataIndexName(indexName)), ensure(getFileMetadataIndexName(indexName))];
+      const {
+        name: indexName,
+        fromHost,
+        toHost,
+      } = FILE_STORAGE_INTEGRATION_INDEX_NAMES[integrationName];
+      const indexCreateRequests: Array<Promise<void>> = [];
+
+      if (fromHost) {
+        indexCreateRequests.push(
+          ensure(getFileDataIndexName(indexName)),
+          ensure(getFileMetadataIndexName(indexName))
+        );
+      }
+
+      if (toHost) {
+        indexCreateRequests.push(
+          ensure(getFileDataIndexName(indexName, true)),
+          ensure(getFileMetadataIndexName(indexName, true))
+        );
+      }
+
+      return indexCreateRequests;
     })
   );
 }
@@ -529,6 +549,8 @@ export async function ensureAliasHasWriteIndex(opts: {
   );
 
   if (!existingIndex) {
+    logger.info(`Creating write index [${writeIndexName}], alias [${aliasName}]`);
+
     await retryTransientEsErrors(
       () => esClient.indices.create({ index: writeIndexName, ...body }, { ignore: [404] }),
       {
@@ -549,11 +571,12 @@ export function prepareTemplate({
 }): { componentTemplates: TemplateMap; indexTemplate: IndexTemplateEntry } {
   const { name: packageName, version: packageVersion } = pkg;
   const fields = loadFieldsFromYaml(pkg, dataStream.path);
-  const validFields = processFields(fields);
 
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
     experimentalDataStreamFeature?.features.tsdb;
+
+  const validFields = processFields(fields);
 
   const mappings = generateMappings(validFields);
   const templateName = generateTemplateName(dataStream);
@@ -614,7 +637,6 @@ async function installTemplate({
     name: template.templateName,
     body: template.indexTemplate,
   };
-
   await retryTransientEsErrors(
     () => esClient.indices.putIndexTemplate(esClientParams, { ignore: [404] }),
     { logger }

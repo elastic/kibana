@@ -27,6 +27,7 @@ import type {
   PackageUsageStats,
   Installable,
   PackageDataStreamTypes,
+  PackageList,
 } from '../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type {
@@ -49,6 +50,8 @@ import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
 
 import { auditLoggingService } from '../../audit_logging';
+
+import { getFilteredSearchPackages } from '../filtered_packages';
 
 import { createInstallableFrom } from '.';
 
@@ -113,6 +116,7 @@ export async function getPackages(
     { concurrency: 10 }
   );
 
+  const filteredPackages = getFilteredSearchPackages();
   const packageList = registryItems
     .map((item) =>
       createInstallableFrom(
@@ -121,6 +125,7 @@ export async function getPackages(
       )
     )
     .concat(uploadedPackagesNotInRegistry as Installable<any>)
+    .filter((item) => !filteredPackages.includes(item.id))
     .sort(sortByName);
 
   for (const pkg of packageList) {
@@ -146,7 +151,7 @@ export async function getPackages(
     return newPkg;
   });
 
-  return packageListWithoutStatus;
+  return packageListWithoutStatus as PackageList;
 }
 
 interface GetInstalledPackagesOptions {

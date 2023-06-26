@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 
 import { CONNECTORS_INDEX } from '../..';
 
-import { ConnectorDocument, ConnectorScheduling } from '../../../common/types/connectors';
+import { ConnectorDocument, SchedulingConfiguraton } from '../../../common/types/connectors';
 
 export const updateConnectorScheduling = async (
   client: IScopedClusterClient,
   connectorId: string,
-  scheduling: ConnectorScheduling
+  scheduling: SchedulingConfiguraton
 ) => {
   const connectorResult = await client.asCurrentUser.get<ConnectorDocument>({
     id: connectorId,

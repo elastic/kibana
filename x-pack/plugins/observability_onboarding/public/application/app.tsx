@@ -8,8 +8,8 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import { Theme, ThemeProvider } from '@emotion/react';
 import {
-  APP_WRAPPER_CLASS,
   AppMountParameters,
+  APP_WRAPPER_CLASS,
   CoreStart,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -19,16 +19,13 @@ import {
   RedirectAppLinks,
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
-import { Route } from '@kbn/shared-ux-router';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  Router,
-  Switch,
-  RouteComponentProps,
-  RouteProps,
-} from 'react-router-dom';
+import { RouteComponentProps, RouteProps } from 'react-router-dom';
+import { ObservabilityOnboardingHeaderActionMenu } from '../components/app/header_action_menu';
 import {
   ObservabilityOnboardingPluginSetupDeps,
   ObservabilityOnboardingPluginStartDeps,
@@ -60,7 +57,7 @@ export const breadcrumbsApp = {
 function App() {
   return (
     <>
-      <Switch>
+      <Routes>
         {Object.keys(routes).map((key) => {
           const path = key as keyof typeof routes;
           const { handler, exact } = routes[path];
@@ -71,7 +68,7 @@ function App() {
             <Route key={path} path={path} exact={exact} component={Wrapper} />
           );
         })}
-      </Switch>
+      </Routes>
     </>
   );
 }
@@ -105,7 +102,7 @@ export function ObservabilityOnboardingAppRoot({
   deps: ObservabilityOnboardingPluginSetupDeps;
   corePlugins: ObservabilityOnboardingPluginStartDeps;
 }) {
-  const { history } = appMountParameters;
+  const { history, setHeaderActionMenu, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
   const plugins = { ...deps };
 
@@ -123,7 +120,7 @@ export function ObservabilityOnboardingAppRoot({
         }}
       >
         <KibanaThemeProvider
-          theme$={appMountParameters.theme$}
+          theme$={theme$}
           modify={{
             breakpoint: {
               xxl: 1600,
@@ -134,6 +131,12 @@ export function ObservabilityOnboardingAppRoot({
           <i18nCore.Context>
             <Router history={history}>
               <EuiErrorBoundary>
+                <HeaderMenuPortal
+                  setHeaderActionMenu={setHeaderActionMenu}
+                  theme$={theme$}
+                >
+                  <ObservabilityOnboardingHeaderActionMenu />
+                </HeaderMenuPortal>
                 <ObservabilityOnboardingApp />
               </EuiErrorBoundary>
             </Router>

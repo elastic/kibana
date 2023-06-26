@@ -41,8 +41,9 @@ import {
   ALERT_NEW_TERMS,
   ALERT_RULE_INDICES,
 } from '../../../../common/field_maps/field_names';
-import type { TimelineResult } from '../../../../common/types/timeline';
-import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import type { TimelineResult } from '../../../../common/types/timeline/api';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../common/types/timeline/api';
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
 import type {
   SendAlertToTimelineActionProps,

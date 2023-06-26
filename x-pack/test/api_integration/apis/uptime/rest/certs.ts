@@ -13,6 +13,7 @@ import {
   processCertsResult,
   getCertsRequestBody,
 } from '@kbn/synthetics-plugin/common/requests/get_certs_request_body';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus } from './helper/make_checks';
 
@@ -26,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns empty array for no data', async () => {
         const apiResponse = await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'true')
           .send({
             params: {
@@ -82,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('retrieves expected cert data', async () => {
         const { body } = await supertest
           .post(`/internal/search/ese`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'true')
           .send({
             params: {

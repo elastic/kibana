@@ -32,6 +32,9 @@ export interface IndexedEndpointAndFleetActionsForHostResponse {
   endpointActionResponsesIndex: string;
 }
 
+export interface IndexEndpointAndFleetActionsForHostOptions {
+  numResponseActions?: number;
+}
 /**
  * Indexes a random number of Endpoint (via Fleet) Actions for a given host
  * (NOTE: ensure that fleet is setup first before calling this loading function)
@@ -43,11 +46,13 @@ export interface IndexedEndpointAndFleetActionsForHostResponse {
 export const indexEndpointAndFleetActionsForHost = async (
   esClient: Client,
   endpointHost: HostMetadata,
-  fleetActionGenerator: FleetActionGenerator = defaultFleetActionGenerator
+  fleetActionGenerator: FleetActionGenerator = defaultFleetActionGenerator,
+  options: IndexEndpointAndFleetActionsForHostOptions = {}
 ): Promise<IndexedEndpointAndFleetActionsForHostResponse> => {
   const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
   const agentId = endpointHost.elastic.agent.id;
-  const total = fleetActionGenerator.randomN(5) + 1; // generate at least one
+  const actionsCount = options.numResponseActions ?? 1;
+  const total = fleetActionGenerator.randomN(5) + actionsCount;
   const response: IndexedEndpointAndFleetActionsForHostResponse = {
     actions: [],
     actionResponses: [],

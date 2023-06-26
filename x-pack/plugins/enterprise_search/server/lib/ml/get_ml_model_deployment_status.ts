@@ -27,10 +27,7 @@ export const getMlModelDeploymentStatus = async (
     throw new Error('Machine Learning is not enabled');
   }
 
-  // TODO: the ts-expect-error below should be removed once the correct typings are
-  // available in Kibana
   const modelDetailsRequest: MlGetTrainedModelsRequest = {
-    // @ts-expect-error @elastic-elasticsearch getTrainedModels types incorrect
     include: 'definition_status',
     model_id: modelName,
   };
@@ -43,8 +40,6 @@ export const getMlModelDeploymentStatus = async (
       return getDefaultStatusReturn(MlModelDeploymentState.NotDeployed, modelName);
     }
 
-    // TODO - we can remove this cast to the extension once the new types are available
-    // in kibana that includes the fully_defined field
     const firstTrainedModelConfig = modelDetailsResponse.trained_model_configs
       ? (modelDetailsResponse.trained_model_configs[0] as MlTrainedModelConfigWithDefined)
       : (undefined as unknown as MlTrainedModelConfigWithDefined);

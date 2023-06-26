@@ -104,7 +104,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             id: {
               type: 'text',
-              value: id,
+              value: JSON.stringify(id),
             },
             ipv4: {
               type: 'bool',
@@ -120,7 +120,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             location_name: {
               type: 'text',
-              value: 'Test private location 0',
+              value: '"Test private location 0"',
             },
             max_redirects: {
               type: 'integer',
@@ -132,15 +132,15 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             'monitor.project.id': {
               type: 'text',
-              value: projectId,
+              value: JSON.stringify(projectId),
             },
             'monitor.project.name': {
               type: 'text',
-              value: projectId,
+              value: JSON.stringify(projectId),
             },
             name: {
               type: 'text',
-              value: name,
+              value: JSON.stringify(name),
             },
             origin: {
               type: 'text',
@@ -148,7 +148,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             password: {
               type: 'password',
-              value: '',
+              value: null,
             },
             proxy_headers: {
               type: 'yaml',
@@ -156,7 +156,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             proxy_url: {
               type: 'text',
-              value: 'testGlobalParamOverwrite',
+              value: JSON.stringify('testGlobalParamOverwrite'),
             },
             'response.include_body': {
               type: 'text',
@@ -180,7 +180,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             'service.name': {
               type: 'text',
-              value: '',
+              value: null,
             },
             'ssl.certificate': {
               type: 'yaml',
@@ -220,11 +220,11 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             urls: {
               type: 'text',
-              value: 'http://localhost:9200',
+              value: '"http://localhost:9200"',
             },
             username: {
               type: 'text',
-              value: '',
+              value: null,
             },
           },
           compiled_stream: {
@@ -701,9 +701,9 @@ export const getTestProjectSyntheticsPolicy = (
             },
             enabled: { value: true, type: 'bool' },
             type: { value: 'browser', type: 'text' },
-            name: { value: 'check if title is present', type: 'text' },
+            name: { value: '"check if title is present"', type: 'text' },
             schedule: { value: '"@every 10m"', type: 'text' },
-            'service.name': { value: '', type: 'text' },
+            'service.name': { value: null, type: 'text' },
             timeout: { value: null, type: 'text' },
             tags: { value: null, type: 'yaml' },
             'source.zip_url.url': { type: 'text' },
@@ -747,8 +747,8 @@ export const getTestProjectSyntheticsPolicy = (
             config_id: { value: configId, type: 'text' },
             run_once: { value: false, type: 'bool' },
             origin: { value: 'project', type: 'text' },
-            'monitor.project.id': { value: projectId, type: 'text' },
-            'monitor.project.name': { value: projectId, type: 'text' },
+            'monitor.project.id': { value: JSON.stringify(projectId), type: 'text' },
+            'monitor.project.name': { value: JSON.stringify(projectId), type: 'text' },
             ...inputs,
           },
           id: `synthetics/browser-browser-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,

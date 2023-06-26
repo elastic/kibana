@@ -8,8 +8,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-// eslint-disable-next-line no-restricted-imports
-import { Router, Switch, Route, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -52,7 +52,7 @@ export const renderApp = (
           </EuiPageTemplate.Sidebar>
 
           <EuiPageTemplate.Section>
-            <Switch>
+            <Routes>
               <Redirect from="/" to="/todos" exact />
               <Route path="/todos">
                 <TodoApp contentClient={contentManagement.client} />
@@ -64,7 +64,7 @@ export const renderApp = (
                   savedObjectsTagging={savedObjectsTaggingOss}
                 />
               </Route>
-            </Switch>
+            </Routes>
           </EuiPageTemplate.Section>
         </EuiPageTemplate>
       </RedirectAppLinks>

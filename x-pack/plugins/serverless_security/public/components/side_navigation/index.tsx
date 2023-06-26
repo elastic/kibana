@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
+
 import type {
   SideNavComponent,
   SideNavCompProps,

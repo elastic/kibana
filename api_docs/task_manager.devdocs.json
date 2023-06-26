@@ -96,6 +96,22 @@
           },
           {
             "parentPluginId": "taskManager",
+            "id": "def-server.TaskManagerPlugin.isNodeBackgroundTasksOnly",
+            "type": "Function",
+            "tags": [],
+            "label": "isNodeBackgroundTasksOnly",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/task_manager/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskManagerPlugin.setup",
             "type": "Function",
             "tags": [],
@@ -965,6 +981,20 @@
           },
           {
             "parentPluginId": "taskManager",
+            "id": "def-server.TaskInstance.stateVersion",
+            "type": "number",
+            "tags": [],
+            "label": "stateVersion",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
             "id": "def-server.TaskInstance.traceparent",
             "type": "string",
             "tags": [],
@@ -1182,6 +1212,28 @@
             ],
             "signature": [
               "number | undefined"
+            ],
+            "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskRegisterDefinition.stateSchemaByVersion",
+            "type": "Object",
+            "tags": [],
+            "label": "stateSchemaByVersion",
+            "description": [],
+            "signature": [
+              "Record<number, { schema: ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ObjectType",
+                "text": "ObjectType"
+              },
+              "<any>; up: (state: Record<string, unknown>) => Record<string, unknown>; }> | undefined"
             ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
             "deprecated": false,

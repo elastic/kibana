@@ -17,7 +17,6 @@
     "@kbn/logging",
     "@kbn/logging-mocks",
     "@kbn/core-base-server-internal",
-    "@kbn/repo-info",
   ],
   "exclude": [
     "target/**/*",

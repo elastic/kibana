@@ -58,7 +58,19 @@ describe('Add endpoint exception from rule details', () => {
     login();
     deleteAlertsAndRules();
     // create rule with exception
-    createEndpointExceptionList().then((response) => {
+    createEndpointExceptionList<{
+      id: string;
+      list_id: string;
+      type:
+        | 'detection'
+        | 'rule_default'
+        | 'endpoint'
+        | 'endpoint_trusted_apps'
+        | 'endpoint_events'
+        | 'endpoint_host_isolation_exceptions'
+        | 'endpoint_blocklists';
+      namespace_type: 'agnostic' | 'single';
+    }>().then((response) => {
       createRule(
         getNewRule({
           query: 'event.code:*',
@@ -78,6 +90,7 @@ describe('Add endpoint exception from rule details', () => {
   });
 
   beforeEach(() => {
+    login();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     goToEndpointExceptionsTab();
@@ -93,6 +106,9 @@ describe('Add endpoint exception from rule details', () => {
 
     // open add exception modal
     openExceptionFlyoutFromEmptyViewerPrompt();
+
+    // submit button is disabled if no paramerters were added
+    cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
 
     // for endpoint exceptions, must specify OS
     selectOs('windows');

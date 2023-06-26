@@ -81,11 +81,11 @@ export const PacksComboBoxField = ({
   const packOptions = useMemo<Array<EuiComboBoxOptionOption<PackOption>>>(
     () =>
       fieldProps?.packsData?.map((packSO) => ({
-        label: packSO.attributes.name ?? '',
+        label: packSO.name ?? '',
         value: {
-          id: packSO.id,
-          name: packSO.attributes.name,
-          description: packSO.attributes.description,
+          id: packSO.saved_object_id,
+          name: packSO.name,
+          description: packSO.description,
         },
       })) ?? [],
     [fieldProps?.packsData]

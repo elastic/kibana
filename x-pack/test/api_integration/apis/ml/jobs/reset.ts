@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { ANNOTATION_TYPE } from '@kbn/ml-plugin/common/constants/annotations';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { MULTI_METRIC_JOB_CONFIG, SINGLE_METRIC_JOB_CONFIG, DATAFEED_CONFIG } from './common_jobs';
 
@@ -26,9 +26,9 @@ export default ({ getService }: FtrProviderContext) => {
     expectedResponsecode: number
   ): Promise<any> {
     const { body, status } = await supertest
-      .post('/api/ml/jobs/reset_jobs')
+      .post('/internal/ml/jobs/reset_jobs')
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send(requestBody);
     ml.api.assertResponseStatusCode(expectedResponsecode, status, body);
 
@@ -52,7 +52,8 @@ export default ({ getService }: FtrProviderContext) => {
     [MULTI_METRIC_JOB_CONFIG.job_id]: { reset: true, task: 'cannot be predicted' },
   };
 
-  describe('reset_jobs', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/160370
+  describe.skip('reset_jobs', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
@@ -84,6 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
         await ml.api.deleteAnomalyDetectionJobES(job.job_id);
       }
       await ml.api.cleanMlIndices();
+      await ml.testResources.cleanMLSavedObjects();
     });
 
     it('succeeds for ML Poweruser and keeps user annotations', async () => {

@@ -8721,6 +8721,21 @@
       },
       {
         "parentPluginId": "@kbn/mapbox-gl",
+        "id": "def-common.SourceSpecification",
+        "type": "Type",
+        "tags": [],
+        "label": "SourceSpecification",
+        "description": [],
+        "signature": [
+          "maplibregl.VectorSourceSpecification | maplibregl.RasterSourceSpecification | maplibregl.RasterDEMSourceSpecification | maplibregl.GeoJSONSourceSpecification | maplibregl.VideoSourceSpecification | maplibregl.ImageSourceSpecification"
+        ],
+        "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mapbox-gl",
         "id": "def-common.StyleSpecification",
         "type": "Type",
         "tags": [],

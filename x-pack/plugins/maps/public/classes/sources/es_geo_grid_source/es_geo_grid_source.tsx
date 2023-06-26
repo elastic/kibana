@@ -25,7 +25,6 @@ import {
   ES_GEO_FIELD_TYPE,
   GEOCENTROID_AGG_NAME,
   GEOTILE_GRID_AGG_NAME,
-  GIS_API_PATH,
   GRID_RESOLUTION,
   MVT_GETGRIDTILE_API_PATH,
   RENDER_AS,
@@ -38,7 +37,6 @@ import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_ge
 import { buildGeoGridFilter } from '../../../../common/elasticsearch_util';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
-import { registerSource } from '../source_registry';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
@@ -574,7 +572,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     searchSource.setField('aggs', this.getValueAggsDsl(dataView));
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
-      `/${GIS_API_PATH}/${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
+      `${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
     const tileUrlParams = getTileUrlParams({
@@ -654,8 +652,3 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     ];
   }
 }
-
-registerSource({
-  ConstructorFunction: ESGeoGridSource,
-  type: SOURCE_TYPES.ES_GEO_GRID,
-});

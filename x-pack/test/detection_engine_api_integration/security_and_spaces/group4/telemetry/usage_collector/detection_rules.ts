@@ -21,7 +21,7 @@ import {
   createRule,
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getEqlRuleForSignalTesting,
   getRule,
   getRuleForSignalTesting,
@@ -62,12 +62,13 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
       await deleteAllEventLogExecutionEvents(es, log);
     });
 
-    describe('"kql" rule type', () => {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/160297
+    describe.skip('"kql" rule type', () => {
       it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "disabled"/"in-active" rule that does not have any actions', async () => {
         const rule = getRuleForSignalTesting(['telemetry'], 'rule-1', false);
         await createRule(supertest, log, rule);
