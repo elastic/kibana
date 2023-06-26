@@ -22,6 +22,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   EuiDataGridRefProps,
+  EuiDataGridInMemory,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -226,7 +227,6 @@ export interface DiscoverGridProps {
     toastNotifications: ToastsStart;
   };
 }
-
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
 const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
@@ -582,6 +582,10 @@ export const DiscoverGrid = ({
     [onUpdateRowHeight]
   );
 
+  const inMemory = useMemo(() => {
+    return isPlainRecord ? ({ level: 'sorting' } as EuiDataGridInMemory) : undefined;
+  }, [isPlainRecord]);
+
   const toolbarVisibility = useMemo(
     () =>
       defaultColumns
@@ -684,7 +688,7 @@ export const DiscoverGrid = ({
             sorting={sorting as EuiDataGridSorting}
             toolbarVisibility={toolbarVisibility}
             rowHeightsOptions={rowHeightsOptions}
-            inMemory={isPlainRecord ? { level: 'sorting' } : undefined}
+            inMemory={inMemory}
             gridStyle={GRID_STYLE}
           />
         </div>
