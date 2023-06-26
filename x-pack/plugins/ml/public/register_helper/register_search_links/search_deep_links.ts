@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import type { LinkId } from '@kbn/deeplinks-ml';
 
-import { AppDeepLink, AppNavLinkStatus } from '@kbn/core/public';
+import { type AppDeepLink, AppNavLinkStatus } from '@kbn/core/public';
 import { ML_PAGES } from '../../../common/constants/locator';
-import { MlCapabilities } from '../../shared';
+import type { MlCapabilities } from '../../shared';
 
 function getOverviewLinkDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
   return {

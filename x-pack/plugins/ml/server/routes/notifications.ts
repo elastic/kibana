@@ -12,7 +12,7 @@ import {
   getNotificationsQuerySchema,
 } from './schemas/notifications_schema';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 
 export function notificationsRoutes({ router, routeGuard, enabledFeatures }: RouteInitialization) {
   /**
