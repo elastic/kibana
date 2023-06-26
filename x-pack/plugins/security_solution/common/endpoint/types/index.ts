@@ -556,7 +556,10 @@ export interface HostMetadataInterface {
   data_stream: DataStream;
 }
 
-export type UnitedAgentMetadata = Immutable<{
+/**
+ * The persisted data (to the index) for both endpoint and agent data.
+ * */
+export type UnitedAgentMetadataPersistedData = Immutable<{
   agent: {
     id: string;
   };

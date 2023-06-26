@@ -10,6 +10,7 @@ import type { FilterManager } from '@kbn/data-plugin/public';
 import { createFilter, isEmptyFilterValue } from './create_filter';
 import { FILTER_CELL_ACTION_TYPE } from '../../constants';
 import { createCellActionFactory } from '../factory';
+import { CellActionFieldValue } from '../../types';
 
 const ICON = 'minusInCircle';
 const FILTER_OUT = i18n.translate('cellActions.actions.filterOut', {
@@ -22,12 +23,22 @@ export const createFilterOutActionFactory = createCellActionFactory(
     getIconType: () => ICON,
     getDisplayName: () => FILTER_OUT,
     getDisplayNameTooltip: () => FILTER_OUT,
-    isCompatible: async ({ field }) => !!field.name,
-    execute: async ({ field }) => {
+    isCompatible: async ({ data }) => {
+      const field = data[0]?.field;
+
+      return (
+        data.length === 1 && // TODO Add support for multiple values
+        !!field.name
+      );
+    },
+    execute: async ({ data }) => {
+      const field = data[0]?.field;
+      const value = data[0]?.value;
+
       addFilterOut({
         filterManager,
         fieldName: field.name,
-        value: field.value,
+        value,
       });
     },
   })
@@ -40,7 +51,7 @@ export const addFilterOut = ({
 }: {
   filterManager: FilterManager | undefined;
   fieldName: string;
-  value: string[] | string | null | undefined;
+  value: CellActionFieldValue;
 }) => {
   if (filterManager != null) {
     const filter = createFilter({
