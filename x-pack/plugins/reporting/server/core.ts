@@ -120,7 +120,7 @@ export class ReportingCore {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
 
-    this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context, this);
+    this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.pdfExport);
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
@@ -130,6 +130,8 @@ export class ReportingCore {
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
       registerExportTypes: (id) => id,
+      getScreenshots: this.getScreenshots,
+      getSpaceId: this.getSpaceId,
     });
 
     this.executing = new Set();
@@ -161,7 +163,7 @@ export class ReportingCore {
   public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
-    this.pdfExport.start(startDeps);
+    this.pdfExport.start({ ...startDeps, reporting: this.getContract() });
 
     await this.assertKibanaIsAvailable();
 

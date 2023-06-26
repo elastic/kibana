@@ -24,8 +24,8 @@ import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { ReportingConfigType } from '../../config';
-import { ReportingCore, ReportingServerInfo } from '../../core';
-import { CreateJobFn, RunTaskFn } from '../../types';
+import { ReportingServerInfo } from '../../core';
+import { CreateJobFn, ReportingStart, RunTaskFn } from '../../types';
 
 /**
  * @TODO move to be within @kbn-reporting-export-types
@@ -39,6 +39,7 @@ export interface ExportTypeStartDeps {
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   screenshotting: ScreenshottingStart;
+  reporting: ReportingStart;
 }
 
 export abstract class ExportType<
@@ -65,8 +66,7 @@ export abstract class ExportType<
     core: CoreSetup,
     public config: ReportingConfigType,
     public logger: Logger,
-    public context: PluginInitializerContext<ReportingConfigType>,
-    public reporting: ReportingCore
+    public context: PluginInitializerContext<ReportingConfigType>
   ) {
     this.http = core.http;
   }
@@ -91,7 +91,7 @@ export abstract class ExportType<
 
   public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
     const spacesService = this.setupDeps.spaces?.spacesService;
-    const spaceId = this.reporting.getSpaceId(request, logger);
+    const spaceId = this.startDeps.reporting.getSpaceId(request, logger);
 
     if (spacesService && spaceId) {
       logger.info(`Creating UI Settings Client for space: ${spaceId}`);

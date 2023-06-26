@@ -109,7 +109,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
           this.config,
           this.getServerInfo(),
           () =>
-            this.reporting.getScreenshots({
+            this.startDeps.reporting.getScreenshots({
               format: 'pdf',
               title,
               logo,

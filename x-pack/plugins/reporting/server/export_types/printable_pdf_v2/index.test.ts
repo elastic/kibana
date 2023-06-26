@@ -52,13 +52,7 @@ beforeEach(async () => {
   const mockCoreStart = coreMock.createStart();
   const mockReportingCore = await createMockReportingCore(createMockConfigSchema());
 
-  mockPdfExportType = new PdfExportType(
-    mockCoreSetup,
-    configType,
-    mockLogger,
-    context,
-    mockReportingCore
-  );
+  mockPdfExportType = new PdfExportType(mockCoreSetup, configType, mockLogger, context);
 
   mockPdfExportType.setup({
     basePath: { set: jest.fn() },
@@ -67,6 +61,7 @@ beforeEach(async () => {
     savedObjects: mockCoreStart.savedObjects,
     uiSettings: mockCoreStart.uiSettings,
     screenshotting: {} as unknown as ScreenshottingStart,
+    reporting: mockReportingCore.getContract(),
   });
 });
 
