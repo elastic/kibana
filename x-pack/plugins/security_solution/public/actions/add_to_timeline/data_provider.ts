@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CellActionFieldValue } from '@kbn/cell-actions/src/types';
+import type { DefaultActionsSupportedValue } from '@kbn/cell-actions/src/actions/types';
 import { escapeDataProviderId } from '@kbn/securitysolution-t-grid';
 import type { Serializable } from '@kbn/utility-types';
 
@@ -61,7 +61,7 @@ export interface CreateDataProviderParams {
   field?: string;
   fieldFormat?: string;
   fieldType?: string;
-  values: CellActionFieldValue;
+  values: DefaultActionsSupportedValue;
   sourceParamType?: Serializable;
   negate?: boolean;
 }

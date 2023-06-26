@@ -10,8 +10,12 @@ import copy from 'copy-to-clipboard';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
 import { isString } from 'lodash/fp';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { COPY_CELL_ACTION_TYPE } from '../../constants';
 import { createCellActionFactory } from '../factory';
+import { isTypeSupportedByDefaultActions, isValueSupportedByDefaultActions } from '../utils';
+import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '../translations';
+import { DefaultActionsSupportedValue } from '../types';
 
 const ICON = 'copyClipboard';
 const COPY_TO_CLIPBOARD = i18n.translate('cellActions.actions.copyToClipboard.displayName', {
@@ -37,12 +41,21 @@ export const createCopyToClipboardActionFactory = createCellActionFactory(
 
       return (
         data.length === 1 && // TODO Add support for multiple values
-        field.name != null
+        field.name != null &&
+        isTypeSupportedByDefaultActions(field.type as KBN_FIELD_TYPES)
       );
     },
     execute: async ({ data }) => {
       const field = data[0]?.field;
-      const value = data[0]?.value;
+      const rawValue = data[0]?.value;
+
+      if (!isValueSupportedByDefaultActions(rawValue)) {
+        notifications.toasts.addWarning({
+          title: ACTION_INCOMPATIBLE_VALUE_WARNING,
+        });
+        return;
+      }
+      const value = rawValue as DefaultActionsSupportedValue;
 
       let textValue: undefined | string;
       if (value != null) {

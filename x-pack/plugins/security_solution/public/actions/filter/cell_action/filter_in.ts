@@ -6,6 +6,13 @@
  */
 
 import { addFilterIn, addFilterOut, createFilterInActionFactory } from '@kbn/cell-actions';
+import {
+  isTypeSupportedByDefaultActions,
+  isValueSupportedByDefaultActions,
+} from '@kbn/cell-actions/src/actions/utils';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
+import type { DefaultActionsSupportedValue } from '@kbn/cell-actions/src/actions/types';
 import type { SecurityAppStore } from '../../../common/store';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { fieldHasCellActions } from '../../utils';
@@ -25,7 +32,11 @@ export const createFilterInCellActionFactory = ({
   const getTimelineById = timelineSelectors.getTimelineByIdSelector();
 
   const { filterManager } = services.data.query;
-  const genericFilterInActionFactory = createFilterInActionFactory({ filterManager });
+  const { notifications } = services;
+  const genericFilterInActionFactory = createFilterInActionFactory({
+    filterManager,
+    notifications,
+  });
 
   return genericFilterInActionFactory.combine<SecurityCellAction>({
     type: SecurityCellActionType.FILTER,
@@ -34,14 +45,24 @@ export const createFilterInCellActionFactory = ({
 
       return (
         data.length === 1 && // TODO Add support for multiple values
-        fieldHasCellActions(field.name)
+        fieldHasCellActions(field.name) &&
+        isTypeSupportedByDefaultActions(field.type as KBN_FIELD_TYPES)
       );
     },
     execute: async ({ data, metadata }) => {
       const field = data[0]?.field;
-      const value = data[0]?.value;
+      const rawValue = data[0]?.value;
+
+      if (!isValueSupportedByDefaultActions(rawValue)) {
+        notifications.toasts.addWarning({
+          title: ACTION_INCOMPATIBLE_VALUE_WARNING,
+        });
+        return;
+      }
 
       if (!field) return;
+
+      const value = rawValue as DefaultActionsSupportedValue;
 
       // if negateFilters is true we have to perform the opposite operation, we can just execute filterOut with the same params
       const addFilter = metadata?.negateFilters === true ? addFilterOut : addFilterIn;

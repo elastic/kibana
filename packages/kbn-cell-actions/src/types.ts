@@ -11,6 +11,7 @@ import type {
   UiActionsService,
 } from '@kbn/ui-actions-plugin/public';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import { Serializable } from '@kbn/utility-types';
 import type { CellActionsMode } from './constants';
 
 export interface CellActionsProviderProps {
@@ -23,15 +24,7 @@ export interface CellActionsProviderProps {
 
 type Metadata = Record<string, unknown>;
 
-export type CellActionFieldValue =
-  | string
-  | number
-  | boolean
-  | string[]
-  | number[]
-  | boolean[]
-  | null
-  | undefined;
+export type CellActionFieldValue = Serializable;
 
 export interface CellActionsData {
   /**

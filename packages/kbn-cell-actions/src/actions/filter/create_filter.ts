@@ -14,10 +14,10 @@ import {
   type Filter,
 } from '@kbn/es-query';
 import { isArray } from 'lodash/fp';
-import { CellActionFieldValue } from '../../types';
+import { DefaultActionsSupportedValue, NonNullablePrimitiveValue } from '../types';
 
 export const isEmptyFilterValue = (
-  value: CellActionFieldValue
+  value: DefaultActionsSupportedValue
 ): value is null | undefined | never[] =>
   value == null || value === '' || (isArray(value) && value.length === 0);
 
@@ -31,7 +31,7 @@ const createPhraseFilter = ({
   negate,
   value,
 }: {
-  value: string | number | boolean;
+  value: NonNullablePrimitiveValue;
   key: string;
   negate?: boolean;
 }): PhraseFilter => ({
@@ -49,7 +49,7 @@ const createCombinedFilter = ({
   key,
   negate,
 }: {
-  values: string[] | number[] | boolean[];
+  values: NonNullablePrimitiveValue[];
   key: string;
   negate: boolean;
 }): CombinedFilter => ({
@@ -68,7 +68,7 @@ export const createFilter = ({
   negate,
 }: {
   key: string;
-  value: CellActionFieldValue;
+  value: DefaultActionsSupportedValue;
   negate: boolean;
 }): Filter => {
   if (isEmptyFilterValue(value)) {

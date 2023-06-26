@@ -8,6 +8,7 @@
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { createFilterOutActionFactory } from './filter_out';
 import { makeActionContext } from '../../mocks/helpers';
+import { NotificationsStart } from '@kbn/core-notifications-browser';
 
 const mockFilterManager = { addFilters: jest.fn() } as unknown as FilterManager;
 
@@ -21,12 +22,15 @@ const fieldName = 'user.name';
 const value = 'the value';
 
 describe('createFilterOutAction', () => {
-  const filterOutActionFactory = createFilterOutActionFactory({ filterManager: mockFilterManager });
+  const filterOutActionFactory = createFilterOutActionFactory({
+    filterManager: mockFilterManager,
+    notifications: { toasts: { addWarning: jest.fn() } } as unknown as NotificationsStart,
+  });
   const filterOutAction = filterOutActionFactory({ id: 'testAction' });
   const context = makeActionContext({
     data: [
       {
-        field: { name: fieldName, type: 'text', searchable: true, aggregatable: true },
+        field: { name: fieldName, type: 'string', searchable: true, aggregatable: true },
         value,
       },
     ],

@@ -23,7 +23,7 @@ describe('Default createCopyToClipboardActionFactory', () => {
   const context = {
     data: [
       {
-        field: { name: 'user.name', type: 'text' },
+        field: { name: 'user.name', type: 'string' },
         value: 'the value',
       },
     ],

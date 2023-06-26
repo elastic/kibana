@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-export const FILTER_CELL_ACTION_TYPE = 'cellAction-filter';
-export const COPY_CELL_ACTION_TYPE = 'cellAction-copy';
+export type NullablePrimitiveValue = null | undefined;
+export type NonNullablePrimitiveValue = string | number | boolean;
 
-export enum CellActionsMode {
-  HOVER_DOWN = 'hover-down',
-  HOVER_RIGHT = 'hover-right',
-  INLINE = 'inline',
-}
+export type DefaultActionsPrimitiveValue = NullablePrimitiveValue | NonNullablePrimitiveValue;
+
+export type DefaultActionsSupportedValue =
+  | DefaultActionsPrimitiveValue
+  | NonNullablePrimitiveValue[];
