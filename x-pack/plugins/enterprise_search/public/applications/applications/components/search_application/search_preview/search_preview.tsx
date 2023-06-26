@@ -63,25 +63,28 @@ import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_temp
 import { SearchApplicationIndicesLogic } from '../search_application_indices_logic';
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
+import { APICallData, APICallFlyout } from './api_call_flyout';
+
 import { DocumentProvider } from './document_context';
 import { DocumentFlyout } from './document_flyout';
 import { SearchApplicationSearchPreviewLogic } from './search_preview_logic';
 
 import {
-  InputView,
   PagingInfoView,
   RESULTS_PER_PAGE_OPTIONS,
   ResultView,
   ResultsPerPageView,
   ResultsView,
   Sorting,
+  SearchBar,
 } from './search_ui_components';
 import '../search_application_layout.scss';
 
 class InternalSearchApplicationTransporter implements Transporter {
   constructor(
     private http: HttpSetup,
-    private searchApplicationName: string // uncomment and add setLastAPICall to constructor when view this API call is needed // private setLastAPICall?: (apiCallData: APICallData) => void
+    private searchApplicationName: string,
+    private setLastAPICall: (apiCallData: APICallData) => void
   ) {}
 
   async performRequest(request: SearchRequest) {
@@ -91,7 +94,7 @@ class InternalSearchApplicationTransporter implements Transporter {
       body: JSON.stringify(request),
     });
 
-    // this.setLastAPICall({ request, response }); Uncomment when view this API call is needed
+    this.setLastAPICall({ request, response });
 
     const withUniqueIds = {
       ...response,
@@ -198,7 +201,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
                 onClick={setCloseConfiguration}
               >
                 {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.buttonTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.buttonTitle',
                   {
                     defaultMessage: 'Configuration',
                   }
@@ -213,7 +216,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiTitle size="xxxs">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.contentTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.contentTitle',
                   {
                     defaultMessage: 'Content',
                   }
@@ -236,7 +239,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             }
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.content.Indices',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.content.Indices',
               {
                 defaultMessage: 'Indices',
               }
@@ -256,13 +259,13 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
           >
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <FormattedMessage
-                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.content.schema"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.content.schema"
                 defaultMessage="Schema"
               />
               {hasSchemaConflicts && (
                 <EuiText size="s" color="danger">
                   <FormattedMessage
-                    id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.content.schemaConflict"
+                    id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.content.schemaConflict"
                     defaultMessage="Conflict"
                   />
                 </EuiText>
@@ -274,7 +277,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiTitle size="xxxs">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.connectTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.connectTitle',
                   {
                     defaultMessage: 'Connect',
                   }
@@ -296,7 +299,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             }
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.connect.Api',
+              'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.connect.Api',
               {
                 defaultMessage: 'API',
               }
@@ -307,7 +310,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiTitle size="xxxs">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.settingsTitle',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.settingsTitle',
                   {
                     defaultMessage: 'Settings',
                   }
@@ -332,7 +335,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             <EuiTextColor color="danger">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.configuration.settings.delete',
+                  'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.configuration.settings.delete',
                   {
                     defaultMessage: 'Delete this app',
                   }
@@ -347,9 +350,9 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
 };
 export const SearchApplicationSearchPreview: React.FC = () => {
   const { http } = useValues(HttpLogic);
-  // const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);    Uncomment when view this API call is needed
+  const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);
   const [showConfigurationPopover, setShowConfigurationPopover] = useState<boolean>(false);
-  // const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null); Uncomment when view this API call is needed
+  const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null);
   const { searchApplicationName, isLoadingSearchApplication, hasSchemaConflicts } = useValues(
     SearchApplicationViewLogic
   );
@@ -357,7 +360,11 @@ export const SearchApplicationSearchPreview: React.FC = () => {
   const { searchApplicationData } = useValues(SearchApplicationIndicesLogic);
 
   const config: SearchDriverOptions = useMemo(() => {
-    const transporter = new InternalSearchApplicationTransporter(http, searchApplicationName);
+    const transporter = new InternalSearchApplicationTransporter(
+      http,
+      searchApplicationName,
+      setLastAPICall
+    );
     const connector = new EnginesAPIConnector(transporter);
 
     return {
@@ -368,7 +375,7 @@ export const SearchApplicationSearchPreview: React.FC = () => {
         result_fields: resultFields,
       },
     };
-  }, [http, searchApplicationName, resultFields]);
+  }, [http, searchApplicationName, setLastAPICall, resultFields]);
 
   if (!searchApplicationData) return null;
 
@@ -377,7 +384,7 @@ export const SearchApplicationSearchPreview: React.FC = () => {
       pageChrome={[
         searchApplicationName,
         i18n.translate(
-          'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.pageChrome',
+          'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.pageChrome',
           {
             defaultMessage: 'Search Preview',
           }
@@ -407,7 +414,31 @@ export const SearchApplicationSearchPreview: React.FC = () => {
         <SearchProvider config={config}>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <SearchBox inputView={InputView} />
+              <SearchBox
+                inputView={({ getInputProps }) => (
+                  <SearchBar
+                    additionalInputProps={getInputProps({
+                      append: (
+                        <EuiButtonEmpty
+                          color="primary"
+                          iconType="eye"
+                          onClick={() => setShowAPICallFlyout(true)}
+                          isLoading={lastAPICall == null}
+                        >
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.inputView.appendButtonLabel',
+                            { defaultMessage: 'View API call' }
+                          )}
+                        </EuiButtonEmpty>
+                      ),
+                      placeholder: i18n.translate(
+                        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.inputView.placeholder',
+                        { defaultMessage: 'Search' }
+                      ),
+                    })}
+                  />
+                )}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
@@ -419,7 +450,7 @@ export const SearchApplicationSearchPreview: React.FC = () => {
               <EuiSpacer size="m" />
               <EuiLink href={docLinks.searchTemplates} target="_blank">
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.improveResultsLink"
+                  id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.improveResultsLink"
                   defaultMessage="Improve these results"
                 />
               </EuiLink>
@@ -432,9 +463,6 @@ export const SearchApplicationSearchPreview: React.FC = () => {
           </EuiFlexGroup>
         </SearchProvider>
         <DocumentFlyout />
-        {/*
-        Uncomment when view this API call needed
-
         {showAPICallFlyout && lastAPICall && (
           <APICallFlyout
             onClose={() => setShowAPICallFlyout(false)}
@@ -442,7 +470,6 @@ export const SearchApplicationSearchPreview: React.FC = () => {
             searchApplicationName={searchApplicationName}
           />
         )}
-        */}
       </DocumentProvider>
     </EnterpriseSearchApplicationsPageTemplate>
   );

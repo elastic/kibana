@@ -402,6 +402,7 @@ packages/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/
 packages/kbn-ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
 x-pack/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
 packages/kbn-generate @elastic/kibana-operations
+packages/kbn-generate-console-definitions @elastic/platform-deployment-management
 packages/kbn-generate-csv @elastic/appex-sharedux
 packages/kbn-generate-csv-types @elastic/appex-sharedux
 packages/kbn-get-repo-files @elastic/kibana-operations
@@ -1261,6 +1262,9 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
 # Changes to translation files should not ping code reviewers
 x-pack/plugins/translations/translations
+
+# Profiling api integration testing
+x-pack/test/profiling_api_integration @elastic/profiling-ui
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
