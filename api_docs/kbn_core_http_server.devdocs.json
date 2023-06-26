@@ -5825,11 +5825,11 @@
               },
               {
                 "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/fleet_server_policy_config/index.ts"
+                "path": "x-pack/plugins/fleet/server/routes/fleet_server_hosts/index.ts"
               },
               {
                 "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/fleet_server_policy_config/index.ts"
+                "path": "x-pack/plugins/fleet/server/routes/fleet_server_hosts/index.ts"
               },
               {
                 "plugin": "fleet",
@@ -8371,7 +8371,7 @@
               },
               {
                 "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/fleet_server_policy_config/index.ts"
+                "path": "x-pack/plugins/fleet/server/routes/fleet_server_hosts/index.ts"
               },
               {
                 "plugin": "fleet",
@@ -9245,7 +9245,7 @@
               },
               {
                 "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/fleet_server_policy_config/index.ts"
+                "path": "x-pack/plugins/fleet/server/routes/fleet_server_hosts/index.ts"
               },
               {
                 "plugin": "fleet",
@@ -10289,7 +10289,7 @@
               },
               {
                 "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/fleet_server_policy_config/index.ts"
+                "path": "x-pack/plugins/fleet/server/routes/fleet_server_hosts/index.ts"
               },
               {
                 "plugin": "fleet",
