@@ -6,8 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import type {
   CustomIntegration,
@@ -161,7 +160,7 @@ export const EPMHomePage: React.FC = () => {
     manage: unverifiedPackageCount + upgradeablePackageCount,
   };
   return (
-    <Switch>
+    <Routes>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
         <DefaultLayout section="manage" notificationsBySection={notificationsBySection}>
           <InstalledPackages installedPackages={installedPackages} isLoading={isLoading} />
@@ -172,6 +171,6 @@ export const EPMHomePage: React.FC = () => {
           <AvailablePackages setPrereleaseEnabled={setPrereleaseEnabled} />
         </DefaultLayout>
       </Route>
-    </Switch>
+    </Routes>
   );
 };
