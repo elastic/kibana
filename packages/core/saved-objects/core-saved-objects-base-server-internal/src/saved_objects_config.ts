@@ -47,11 +47,12 @@ const migrationSchema = schema.object({
      */
     metaPickupSyncDelaySec: schema.number({ min: 1, defaultValue: 120 }),
     /**
-     * The document migration phase will be run from instances having either of the specific roles.
-     * Defaults to ["migrator"]
+     * The document migration phase will be run from instances having any of the specified roles.
      *
      * This is mostly used for testing environments and integration tests were
      * we have full control over a single node Kibana deployment.
+     *
+     * Defaults to ["migrator"]
      */
     runOnRoles: schema.arrayOf(schema.string(), { defaultValue: ['migrator'] }),
   }),
