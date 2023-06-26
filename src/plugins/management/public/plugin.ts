@@ -74,7 +74,7 @@ export class ManagementPlugin
   private isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
   private cardsNavigationConfig$ = new BehaviorSubject<NavigationCardsSubject>({
     enabled: false,
-    disabledApps: [],
+    hideLinksTo: [],
   });
 
   constructor(private initializerContext: PluginInitializerContext) {}
@@ -152,8 +152,8 @@ export class ManagementPlugin
     return {
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),
-      setupCardsNavigation: ({ enabled, disabledApps }) =>
-        this.cardsNavigationConfig$.next({ enabled, disabledApps }),
+      setupCardsNavigation: ({ enabled, hideLinksTo }) =>
+        this.cardsNavigationConfig$.next({ enabled, hideLinksTo }),
     };
   }
 }

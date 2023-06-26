@@ -31,6 +31,6 @@ export const CardsNavigationWithSomeLinks = () => {
   return <Component {...mockProps} sections={[{ apps: mockProps.sections[1].apps }]} />;
 };
 
-export const CardsNavigationWithDisabledLinks = () => {
-  return <Component {...mockProps} disabledApps={['api_keys']} />;
+export const CardsNavigationWithHiddenLinks = () => {
+  return <Component {...mockProps} hideLinksTo={['api_keys']} />;
 };

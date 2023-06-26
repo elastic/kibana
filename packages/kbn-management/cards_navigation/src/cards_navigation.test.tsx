@@ -62,7 +62,7 @@ describe('ProjectSwitcher', () => {
       renderCardsNavigationComponent({
         sections: sectionsMock,
         appBasePath: APP_BASE_PATH,
-        disabledApps: ['pipelines'],
+        hideLinksTo: ['pipelines'],
       });
 
       const dataPipelinesApp = screen.queryByTestId('app-card-pipelines');

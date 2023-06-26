@@ -48,11 +48,11 @@ const getAppsForCategory = (category: string, filteredApps: { [key: string]: App
     .filter(Boolean);
 };
 
-const getEnabledAppsByCategory = (sections: AppRegistrySections[], disabledApps: string[]) => {
+const getEnabledAppsByCategory = (sections: AppRegistrySections[], hideLinksTo: string[]) => {
   // Flatten all apps into a single array
   const flattenApps = flatMap(sections, (section) => section.apps)
     // Remove all apps that the consumer wants to disable.
-    .filter((app) => !disabledApps.includes(app.id));
+    .filter((app) => !hideLinksTo.includes(app.id));
   // Filter out apps that are not enabled and create an object with the
   // app id as the key so we can easily do app look up by id.
   const filteredApps: { [key: string]: Application } = flattenApps.reduce(
@@ -93,9 +93,9 @@ export const CardsNavigation = ({
   sections,
   appBasePath,
   onCardClick,
-  disabledApps = [],
+  hideLinksTo = [],
 }: CardsNavigationComponentProps) => {
-  const appsByCategory = getEnabledAppsByCategory(sections, disabledApps);
+  const appsByCategory = getEnabledAppsByCategory(sections, hideLinksTo);
 
   return (
     <EuiPageSection color="transparent" paddingSize="none">

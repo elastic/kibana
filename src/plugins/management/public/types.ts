@@ -30,7 +30,7 @@ export interface DefinedSections {
 
 export interface ManagementStart {
   setIsSidebarEnabled: (enabled: boolean) => void;
-  setupCardsNavigation: ({ enabled, disabledApps }: NavigationCardsSubject) => void;
+  setupCardsNavigation: ({ enabled, hideLinksTo }: NavigationCardsSubject) => void;
 }
 
 export interface ManagementSectionsStartPrivate {
@@ -83,7 +83,7 @@ export interface CreateManagementItemArgs {
 
 export interface NavigationCardsSubject {
   enabled: boolean;
-  disabledApps?: AppId[];
+  hideLinksTo?: AppId[];
 }
 
 export interface AppDependencies {
