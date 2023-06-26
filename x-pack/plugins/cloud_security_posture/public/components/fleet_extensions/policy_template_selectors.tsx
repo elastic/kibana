@@ -18,7 +18,7 @@ import {
 import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
 import { RadioGroup } from './csp_boxed_radio_group';
-import { AwsCredentialsForm } from './aws_credentials_form';
+import { AwsCredentialsForm } from './aws_credentials_form/aws_credentials_form';
 import { EksCredentialsForm } from './eks_credentials_form';
 
 interface PolicyTemplateSelectorProps {

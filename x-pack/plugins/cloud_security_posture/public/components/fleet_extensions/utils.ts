@@ -26,7 +26,7 @@ import {
   KSPM_POLICY_TEMPLATE,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../common/constants';
-import { getDefaultAwsVarsGroup } from './aws_credentials_form';
+import { getDefaultAwsVarsGroup } from './aws_credentials_form/aws_credentials_form';
 import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
 import { cloudPostureIntegrations } from '../../common/constants';
 import { DEFAULT_EKS_VARS_GROUP } from './eks_credentials_form';
@@ -189,9 +189,11 @@ export const getCspmCloudFormationDefaultValue = (packageInfo: PackageInfo): str
 export const getPostureInputHiddenVars = (inputType: PostureInput, packageInfo: PackageInfo) => {
   switch (inputType) {
     case 'cloudbeat/cis_aws':
-      return { 'aws.credentials.type': { value: getDefaultAwsVarsGroup(packageInfo) } };
+      return {
+        'aws.credentials.type': { value: getDefaultAwsVarsGroup(packageInfo), type: 'text' },
+      };
     case 'cloudbeat/cis_eks':
-      return { 'aws.credentials.type': { value: DEFAULT_EKS_VARS_GROUP } };
+      return { 'aws.credentials.type': { value: DEFAULT_EKS_VARS_GROUP, type: 'text' } };
     default:
       return undefined;
   }
