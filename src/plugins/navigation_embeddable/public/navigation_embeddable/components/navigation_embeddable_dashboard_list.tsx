@@ -39,6 +39,7 @@ export const NavigationEmbeddableDashboardList = ({
   const currentDashboardId = navEmbeddable.select(
     (state) => state.componentState.currentDashboardId
   );
+  const isLoading = navEmbeddable.select((state) => state.output.loading);
 
   const [searchString, setSearchString] = useState<string>('');
   const [dashboardListOptions, setDashboardListOptions] = useState<EuiSelectableOption[]>([]);
@@ -52,7 +53,7 @@ export const NavigationEmbeddableDashboardList = ({
       dashboardList?.map((dashboard: DashboardItem) => {
         const isCurrentDashboard = dashboard.id === currentDashboardId;
         return {
-          data: dashboard, // TODO: just store the ID here - that's all that is necessary
+          data: dashboard,
           className: classNames({
             'navEmbeddable-currentDashboard': isCurrentDashboard,
           }),
@@ -81,7 +82,7 @@ export const NavigationEmbeddableDashboardList = ({
       <EuiSelectable
         singleSelection={true}
         options={dashboardListOptions}
-        isLoading={loadingDashboardList}
+        isLoading={isLoading || loadingDashboardList}
         onChange={(newOptions, _, selected) => {
           onDashboardSelected(selected.data as DashboardItem);
           setDashboardListOptions(newOptions);
