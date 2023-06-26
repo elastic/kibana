@@ -72,7 +72,7 @@ export const NavigationEmbeddableComponent = () => {
 
   // TODO: horizontal VS vertical layout rather than `EuiListGroup`
   return (
-    <EuiPanel>
+    <EuiPanel className="eui-yScroll">
       <EuiListGroup flush listItems={dashboardListGroupItems} size="s" />
       <EuiPopover
         button={addLinkButton}
