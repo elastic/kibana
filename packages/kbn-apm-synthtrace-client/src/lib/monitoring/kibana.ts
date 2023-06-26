@@ -16,7 +16,7 @@ interface KibanaDocument extends Fields {
   'kibana_stats.kibana.index': string;
 }
 
-class Kibana extends Entity<KibanaDocument> {
+export class Kibana extends Entity<KibanaDocument> {
   stats() {
     return kibanaStats(
       this.fields.cluster_uuid,

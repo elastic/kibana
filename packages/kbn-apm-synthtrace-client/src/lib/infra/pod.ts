@@ -17,7 +17,7 @@ interface PodDocument extends Fields {
   'kubernetes.node.name': string;
 }
 
-class Pod extends Entity<PodDocument> {
+export class Pod extends Entity<PodDocument> {
   metrics() {
     return new PodMetrics({
       ...this.fields,

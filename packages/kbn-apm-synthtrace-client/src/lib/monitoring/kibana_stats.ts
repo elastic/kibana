@@ -22,7 +22,7 @@ export interface KibanaStatsDocument extends Fields {
   'kibana_stats.requests.total'?: number;
 }
 
-class KibanaStats extends Serializable<KibanaStatsDocument> {
+export class KibanaStats extends Serializable<KibanaStatsDocument> {
   timestamp(timestamp: number) {
     super.timestamp(timestamp);
     this.fields['kibana_stats.timestamp'] = new Date(timestamp).toISOString();

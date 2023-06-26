@@ -28,12 +28,15 @@ export interface ApmSynthtraceEsClientOptions extends Omit<SynthtraceEsClientOpt
 }
 
 export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields> {
+  private version: string;
+
   constructor(options: { client: Client; logger: Logger } & ApmSynthtraceEsClientOptions) {
     super({
       ...options,
       pipeline: apmPipeline(options.logger, options.version),
     });
     this.dataStreams = ['traces-apm*', 'metrics-apm*', 'logs-apm*'];
+    this.version = options.version;
   }
 
   async updateComponentTemplate(
@@ -60,5 +63,9 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields> {
     );
 
     this.logger.info(`Updated component template: ${name}`);
+  }
+
+  getDefaultPipeline(includeSerialization: boolean = true) {
+    return apmPipeline(this.logger, this.version, includeSerialization);
   }
 }

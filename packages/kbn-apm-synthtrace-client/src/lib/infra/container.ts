@@ -17,7 +17,7 @@ interface ContainerDocument extends Fields {
   'kubernetes.node.name': string;
 }
 
-class Container extends Entity<ContainerDocument> {
+export class Container extends Entity<ContainerDocument> {
   metrics() {
     return new ContainerMetrics({
       ...this.fields,

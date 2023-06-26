@@ -18,7 +18,7 @@ export interface ClusterStatsDocument extends Fields {
   'cluster_stats.indices.count'?: number;
 }
 
-class ClusterStats extends Serializable<ClusterStatsDocument> {
+export class ClusterStats extends Serializable<ClusterStatsDocument> {
   constructor(fields: ClusterStatsDocument) {
     super(fields);
 
