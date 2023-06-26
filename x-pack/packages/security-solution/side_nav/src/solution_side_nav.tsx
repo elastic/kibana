@@ -21,12 +21,17 @@ import {
 import partition from 'lodash/fp/partition';
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { i18n } from '@kbn/i18n';
 import { SolutionSideNavPanel } from './solution_side_nav_panel';
 import { LinkCategories, SeparatorLinkCategory, SolutionSideNavItemPosition } from './types';
 import type { SolutionSideNavItem, Tracker } from './types';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { TelemetryContextProvider, useTelemetryContext } from './telemetry/telemetry_context';
 import { SolutionSideNavItemStyles } from './solution_side_nav.styles';
+
+export const TOGGLE_PANEL_LABEL = i18n.translate('securitySolutionPackages.sideNav.togglePanel', {
+  defaultMessage: 'Toggle panel nav',
+});
 
 export interface SolutionSideNavProps {
   /** All the items to display in the side navigation */
@@ -299,7 +304,7 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
                 onClick={onButtonClick}
                 iconType="spaces"
                 iconSize="m"
-                aria-label="Toggle panel nav"
+                aria-label={TOGGLE_PANEL_LABEL}
                 data-test-subj={`solutionSideNavItemButton-${id}`}
               />
             </EuiFlexItem>
@@ -319,17 +324,9 @@ interface SolutionSideNavPanelsProps {
   bottomOffset?: string;
   topOffset?: string;
 }
-type NavItemsById = Record<
-  string,
-  {
-    title: string;
-    panelItems: SolutionSideNavItem[];
-    categories?: LinkCategories;
-  }
->;
 /**
  * The Solution side navigation panels component.
- * Renders the proper the secondary panel according to the `activePanelNavId` received.
+ * Renders the secondary panel according to the `activePanelNavId` received.
  */
 const SolutionSideNavPanels: React.FC<SolutionSideNavPanelsProps> = React.memo(
   function SolutionSideNavPanels({
@@ -340,32 +337,22 @@ const SolutionSideNavPanels: React.FC<SolutionSideNavPanelsProps> = React.memo(
     bottomOffset,
     topOffset,
   }) {
-    const navItemsById = useMemo<NavItemsById>(
-      () =>
-        items.reduce<NavItemsById>((acc, navItem) => {
-          if (navItem.items?.length) {
-            acc[navItem.id] = {
-              title: navItem.label,
-              panelItems: navItem.items,
-              categories: navItem.categories,
-            };
-          }
-          return acc;
-        }, {}),
-      [items]
+    const activePanelNavItem = useMemo<SolutionSideNavItem | undefined>(
+      () => items.find(({ id }) => id === activePanelNavId),
+      [items, activePanelNavId]
     );
 
-    if (activePanelNavId == null || !navItemsById[activePanelNavId]) {
+    if (activePanelNavItem == null || !activePanelNavItem.items?.length) {
       return null;
     }
-    const { panelItems, title, categories } = navItemsById[activePanelNavId];
+
     return (
       <SolutionSideNavPanel
         onClose={onClose}
         onOutsideClick={onOutsideClick}
-        items={panelItems}
-        title={title}
-        categories={categories}
+        items={activePanelNavItem.items}
+        title={activePanelNavItem.label}
+        categories={activePanelNavItem.categories}
         bottomOffset={bottomOffset}
         topOffset={topOffset}
       />
