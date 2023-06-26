@@ -59,13 +59,13 @@ whereCommand
     ;
 
 whereBooleanExpression
-    : NOT booleanExpression
+    : NOT whereBooleanExpression
     | valueExpression
     | regexBooleanExpression
-    | left=booleanExpression operator=AND right=booleanExpression
-    | left=booleanExpression operator=OR right=booleanExpression
+    | left=whereBooleanExpression operator=AND right=whereBooleanExpression
+    | left=whereBooleanExpression operator=OR right=whereBooleanExpression
     | valueExpression (NOT)? IN LP valueExpression (COMMA valueExpression)* RP
-    | WHERE_FUNCTIONS LP qualifiedName ((COMMA functionExpressionArgument)*)? RP
+    | (NOT)? WHERE_FUNCTIONS LP qualifiedName ((COMMA functionExpressionArgument)*)? RP
     ;
 
 booleanExpression
@@ -234,7 +234,7 @@ dropCommand
     ;
 
 renameVariable
-   :  identifier
+   :  identifier (DOT identifier)*
    ;
 
 renameCommand
