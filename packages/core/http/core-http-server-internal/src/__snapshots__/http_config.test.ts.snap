@@ -126,6 +126,10 @@ Object {
     ],
     "truststore": Object {},
   },
+  "versioned": Object {
+    "strictClientVersionCheck": true,
+    "versionResolution": "oldest",
+  },
   "xsrf": Object {
     "allowlist": Array [],
     "disableProtection": false,

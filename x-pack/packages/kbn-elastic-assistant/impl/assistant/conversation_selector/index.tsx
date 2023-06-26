@@ -5,19 +5,34 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFormRow, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiHighlight,
+  EuiToolTip,
+} from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import { Conversation } from '../../..';
 import { useAssistantContext } from '../../assistant_context';
 import * as i18n from './translations';
 import { DEFAULT_CONVERSATION_TITLE } from '../use_conversation/translations';
+import { useConversation } from '../use_conversation';
+import { SystemPromptSelectorOption } from '../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 interface Props {
   conversationId?: string;
+  defaultConnectorId?: string;
+  defaultProvider?: OpenAiProviderType;
   onSelectionChange?: (value: string) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
@@ -29,28 +44,104 @@ const getPreviousConversationId = (conversationIds: string[], selectedConversati
     : conversationIds[conversationIds.indexOf(selectedConversationId) - 1];
 };
 
-function getNextConversationId(conversationIds: string[], selectedConversationId: string) {
+const getNextConversationId = (conversationIds: string[], selectedConversationId: string) => {
   return conversationIds.indexOf(selectedConversationId) + 1 >= conversationIds.length
     ? conversationIds[0]
     : conversationIds[conversationIds.indexOf(selectedConversationId) + 1];
-}
+};
+
+export type ConversationSelectorOption = EuiComboBoxOptionOption<{
+  isDefault: boolean;
+}>;
 
 export const ConversationSelector: React.FC<Props> = React.memo(
   ({
     conversationId = DEFAULT_CONVERSATION_TITLE,
+    defaultConnectorId,
+    defaultProvider,
     onSelectionChange,
     shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
   }) => {
+    const { allSystemPrompts } = useAssistantContext();
+
+    const { deleteConversation, setConversation } = useConversation();
     const [selectedConversationId, setSelectedConversationId] = useState<string>(conversationId);
 
     const { conversations } = useAssistantContext();
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
-    const conversationOptions = conversationIds.map((id) => ({ value: id, inputDisplay: id }));
+    const conversationOptions = useMemo<ConversationSelectorOption[]>(() => {
+      return Object.values(conversations).map((conversation) => ({
+        value: { isDefault: conversation.isDefault ?? false },
+        label: conversation.id,
+      }));
+    }, [conversations]);
 
-    const onChange = useCallback((value: string) => {
-      setSelectedConversationId(value ?? DEFAULT_CONVERSATION_TITLE);
-    }, []);
+    const [selectedOptions, setSelectedOptions] = useState<ConversationSelectorOption[]>(() => {
+      return conversationOptions.filter((c) => c.label === selectedConversationId) ?? [];
+    });
+
+    // Callback for when user types to create a new system prompt
+    const onCreateOption = useCallback(
+      (searchValue, flattenedOptions = []) => {
+        if (!searchValue || !searchValue.trim().toLowerCase()) {
+          return;
+        }
+
+        const normalizedSearchValue = searchValue.trim().toLowerCase();
+        const defaultSystemPrompt = allSystemPrompts.find(
+          (systemPrompt) => systemPrompt.isNewConversationDefault
+        );
+        const optionExists =
+          flattenedOptions.findIndex(
+            (option: SystemPromptSelectorOption) =>
+              option.label.trim().toLowerCase() === normalizedSearchValue
+          ) !== -1;
+
+        if (!optionExists) {
+          const newConversation: Conversation = {
+            id: searchValue,
+            messages: [],
+            apiConfig: {
+              connectorId: defaultConnectorId,
+              provider: defaultProvider,
+              defaultSystemPrompt,
+            },
+          };
+          setConversation({ conversation: newConversation });
+        }
+        setSelectedConversationId(searchValue);
+      },
+      [allSystemPrompts, defaultConnectorId, defaultProvider, setConversation]
+    );
+
+    // Callback for when user deletes a conversation
+    const onDelete = useCallback(
+      (cId: string) => {
+        if (selectedConversationId === cId) {
+          setSelectedConversationId(getPreviousConversationId(conversationIds, cId));
+        }
+        setTimeout(() => {
+          deleteConversation(cId);
+        }, 0);
+        // onSystemPromptDeleted(cId);
+      },
+      [conversationIds, deleteConversation, selectedConversationId]
+    );
+
+    const onChange = useCallback(
+      (newOptions: ConversationSelectorOption[]) => {
+        if (newOptions.length === 0) {
+          setSelectedOptions([]);
+          // handleSelectionChange([]);
+        } else if (conversationOptions.findIndex((o) => o.label === newOptions?.[0].label) !== -1) {
+          setSelectedConversationId(newOptions?.[0].label);
+        }
+        // setSelectedConversationId(value ?? DEFAULT_CONVERSATION_TITLE);
+      },
+      [conversationOptions]
+    );
+
     const onLeftArrowClick = useCallback(() => {
       const prevId = getPreviousConversationId(conversationIds, selectedConversationId);
       setSelectedConversationId(prevId);
@@ -96,7 +187,57 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
     useEffect(() => {
       onSelectionChange?.(selectedConversationId);
-    }, [onSelectionChange, selectedConversationId]);
+      setSelectedOptions(conversationOptions.filter((c) => c.label === selectedConversationId));
+    }, [conversationOptions, onSelectionChange, selectedConversationId]);
+
+    const renderOption: (
+      option: ConversationSelectorOption,
+      searchValue: string,
+      OPTION_CONTENT_CLASSNAME: string
+    ) => React.ReactNode = (option, searchValue, contentClassName) => {
+      const { label, value } = option;
+      return (
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          component={'span'}
+          className={'parentFlexGroup'}
+        >
+          <EuiFlexItem grow={false} component={'span'} css={css``}>
+            <EuiHighlight
+              search={searchValue}
+              css={css`
+                overflow: hidden;
+                text-overflow: ellipsis;
+              `}
+            >
+              {label}
+            </EuiHighlight>
+          </EuiFlexItem>
+          {!value?.isDefault && (
+            <EuiFlexItem grow={false} component={'span'}>
+              <EuiToolTip position="right" content={i18n.DELETE_CONVERSATION}>
+                <EuiButtonIcon
+                  iconType="cross"
+                  aria-label={i18n.DELETE_CONVERSATION}
+                  color="danger"
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    onDelete(label);
+                  }}
+                  css={css`
+                    visibility: hidden;
+                    .parentFlexGroup:hover & {
+                      visibility: visible;
+                    }
+                  `}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      );
+    };
 
     return (
       <EuiFormRow
@@ -106,13 +247,18 @@ export const ConversationSelector: React.FC<Props> = React.memo(
           min-width: 300px;
         `}
       >
-        <EuiSuperSelect
-          options={conversationOptions}
-          valueOfSelected={selectedConversationId}
-          onChange={onChange}
-          compressed={true}
-          disabled={isDisabled}
+        <EuiComboBox
           aria-label={i18n.CONVERSATION_SELECTOR_ARIA_LABEL}
+          customOptionText={`${i18n.CONVERSATION_SELECTOR_CUSTOM_OPTION_TEXT} {searchValue}`}
+          placeholder={i18n.CONVERSATION_SELECTOR_PLACE_HOLDER}
+          singleSelection={{ asPlainText: true }}
+          options={conversationOptions}
+          selectedOptions={selectedOptions}
+          onChange={onChange}
+          onCreateOption={onCreateOption}
+          renderOption={renderOption}
+          compressed={true}
+          isDisabled={isDisabled}
           prepend={
             <EuiToolTip content={`${i18n.PREVIOUS_CONVERSATION_TITLE} (⌘ + ←)`} display="block">
               <EuiButtonIcon

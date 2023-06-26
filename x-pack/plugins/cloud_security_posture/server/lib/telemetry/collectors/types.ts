@@ -12,6 +12,7 @@ export interface CspmUsage {
   resources_stats: CspmResourcesStats[];
   accounts_stats: CspmAccountsStats[];
   rules_stats: CspmRulesStats[];
+  installation_stats: CloudSecurityInstallationStats[];
 }
 
 export interface PackageSetupStatus {
@@ -75,4 +76,14 @@ export interface CspmRulesStats {
   benchmark_version: string;
   passed_findings_count: number;
   failed_findings_count: number;
+}
+
+export interface CloudSecurityInstallationStats {
+  package_policy_id: string;
+  feature: string;
+  package_version: string;
+  agent_policy_id: string;
+  deployment_mode: string;
+  created_at: string;
+  agent_count: number;
 }

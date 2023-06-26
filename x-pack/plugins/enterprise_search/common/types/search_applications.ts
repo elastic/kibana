@@ -22,6 +22,13 @@ export interface EnterpriseSearchApplication {
 export interface EnterpriseSearchApplicationDetails {
   indices: EnterpriseSearchApplicationIndex[];
   name: string;
+  template: {
+    script: {
+      lang: string;
+      params: unknown;
+      source: string;
+    };
+  };
   updated_at_millis: number;
 }
 

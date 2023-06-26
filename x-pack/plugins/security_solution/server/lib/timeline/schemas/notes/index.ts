@@ -7,14 +7,14 @@
 
 import * as runtimeTypes from 'io-ts';
 import { unionWithNullType } from '../../../../../common/utility_types';
-import { NoteServerRepresentation } from '../../../../../common/types/timeline/note';
+import { BareNoteSchema } from '../../../../../common/types/timeline/note/api';
 
-export const eventNotes = unionWithNullType(runtimeTypes.array(NoteServerRepresentation));
-export const globalNotes = unionWithNullType(runtimeTypes.array(NoteServerRepresentation));
+export const eventNotes = unionWithNullType(runtimeTypes.array(BareNoteSchema));
+export const globalNotes = unionWithNullType(runtimeTypes.array(BareNoteSchema));
 
 export const persistNoteSchema = runtimeTypes.intersection([
   runtimeTypes.type({
-    note: NoteServerRepresentation,
+    note: BareNoteSchema,
   }),
   runtimeTypes.partial({
     overrideOwner: unionWithNullType(runtimeTypes.boolean),

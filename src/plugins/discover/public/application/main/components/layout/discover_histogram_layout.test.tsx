@@ -21,7 +21,8 @@ import {
 } from '../../services/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { DiscoverHistogramLayout, DiscoverHistogramLayoutProps } from './discover_histogram_layout';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
@@ -42,6 +43,8 @@ function getStateContainer(savedSearch?: SavedSearch) {
     interval: 'auto',
     hideChart: false,
   });
+
+  stateContainer.internalState.transitions.setDataView(dataViewMock);
 
   return stateContainer;
 }
@@ -139,7 +142,9 @@ const mountComponent = async ({
 
   // wait for lazy modules
   await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-  component.update();
+  await act(async () => {
+    component.update();
+  });
 
   return { component, stateContainer };
 };

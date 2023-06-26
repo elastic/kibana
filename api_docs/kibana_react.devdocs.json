@@ -1503,43 +1503,6 @@
       },
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.Route",
-        "type": "Function",
-        "tags": [],
-        "label": "Route",
-        "description": [
-          "\nIt's a wrapper around the react-router-dom Route component that inserts\nMatchPropagator in every application route. It helps track all route changes\nand send them to the execution context, later used to enrich APM\n'route-change' transactions."
-        ],
-        "signature": [
-          "({ children, component: Component, render, ...rest }: ",
-          "RouteProps",
-          ") => JSX.Element"
-        ],
-        "path": "src/plugins/kibana_react/public/router/router.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.Route.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ children, component: Component, render, ...rest }",
-            "description": [],
-            "signature": [
-              "RouteProps"
-            ],
-            "path": "src/plugins/kibana_react/public/router/router.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
         "id": "def-public.toMountPoint",
         "type": "Function",
         "tags": [],
@@ -3386,6 +3349,21 @@
           "\"hjson\""
         ],
         "path": "src/plugins/kibana_react/public/code_editor/languages/hjson/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaReact",
+        "id": "def-public.LANG",
+        "type": "string",
+        "tags": [],
+        "label": "LANG",
+        "description": [],
+        "signature": [
+          "\"grok\""
+        ],
+        "path": "src/plugins/kibana_react/public/code_editor/languages/grok/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

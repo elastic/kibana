@@ -9,11 +9,12 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
-import { flatMap, map, takeUntil } from 'rxjs/operators';
+import { mergeMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
@@ -40,6 +41,7 @@ import { NavLinksService } from './nav_links';
 import { ProjectNavigationService } from './project_navigation';
 import { RecentlyAccessedService } from './recently_accessed';
 import { Header, ProjectHeader, ProjectSideNavigation } from './ui';
+import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeStart } from './types';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
@@ -48,6 +50,10 @@ const SNAPSHOT_REGEX = /-snapshot/i;
 interface ConstructorParams {
   browserSupportsCsp: boolean;
   kibanaVersion: string;
+}
+
+export interface SetupDeps {
+  analytics: AnalyticsServiceSetup;
 }
 
 export interface StartDeps {
@@ -89,7 +95,7 @@ export class ChromeService {
       // in the sense that the chrome UI should not be displayed until a non-chromeless app is mounting or mounted
       of(true),
       application.currentAppId$.pipe(
-        flatMap((appId) =>
+        mergeMap((appId) =>
           application.applications$.pipe(
             map((applications) => {
               return !!appId && applications.has(appId) && !!applications.get(appId)!.chromeless;
@@ -102,6 +108,11 @@ export class ChromeService {
       map(([appHidden, forceHidden]) => !appHidden && !forceHidden),
       takeUntil(this.stop$)
     );
+  }
+
+  public setup({ analytics }: SetupDeps) {
+    const docTitle = this.docTitle.setup({ document: window.document });
+    registerAnalyticsContextProvider(analytics, docTitle.title$);
   }
 
   public async start({
@@ -153,9 +164,9 @@ export class ChromeService {
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
-    const projectNavigation = this.projectNavigation.start({ application, navLinks });
+    const projectNavigation = this.projectNavigation.start({ application, navLinks, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
-    const docTitle = this.docTitle.start({ document: window.document });
+    const docTitle = this.docTitle.start();
     const { customBranding$ } = customBranding;
 
     // erase chrome fields from a previous app while switching to a next app
@@ -177,25 +188,23 @@ export class ChromeService {
       chromeStyle$.next(style);
     };
 
-    const setProjectSideNavComponent = (component: ISideNavComponent | null) => {
+    const validateChromeStyle = () => {
       const chromeStyle = chromeStyle$.getValue();
       if (chromeStyle !== 'project') {
         // Helps ensure callers go through the serverless plugin to get here.
         throw new Error(
-          `Invalid ChromeStyle value of "${chromeStyle}". setProjectSideNavComponent requires ChromeStyle set to "project".`
+          `Invalid ChromeStyle value of "${chromeStyle}". This method requires ChromeStyle set to "project".`
         );
       }
+    };
+
+    const setProjectSideNavComponent = (component: ISideNavComponent | null) => {
+      validateChromeStyle();
       projectNavigation.setProjectSideNavComponent(component);
     };
 
     const setProjectNavigation = (config: ChromeProjectNavigation) => {
-      const chromeStyle = chromeStyle$.getValue();
-      if (chromeStyle !== 'project') {
-        // Helps ensure callers go through the serverless plugin to get here.
-        throw new Error(
-          `Invalid ChromeStyle value of "${chromeStyle}". setProjectNavigation requires ChromeStyle set to "project".`
-        );
-      }
+      validateChromeStyle();
       projectNavigation.setProjectNavigation(config);
     };
 
@@ -204,6 +213,11 @@ export class ChromeService {
       params?: ChromeSetProjectBreadcrumbsParams
     ) => {
       projectNavigation.setProjectBreadcrumbs(breadcrumbs, params);
+    };
+
+    const setProjectHome = (homeHref: string) => {
+      validateChromeStyle();
+      projectNavigation.setProjectHome(homeHref);
     };
 
     const isIE = () => {
@@ -248,18 +262,24 @@ export class ChromeService {
 
     const getHeaderComponent = () => {
       if (chromeStyle$.getValue() === 'project') {
-        // const projectNavigationConfig = projectNavigation.getProjectNavigation$();
-        // TODO: Uncommented when we support the project navigation config
-        // if (!projectNavigationConfig) {
-        //   throw new Erorr(`Project navigation config must be provided for project.`);
-        // }
-
         const projectNavigationComponent$ = projectNavigation.getProjectSideNavComponent$();
-        // const projectNavigation$ = projectNavigation.getProjectNavigation$();
+        const projectNavigation$ = projectNavigation
+          .getProjectNavigation$()
+          .pipe(takeUntil(this.stop$));
+        const projectBreadcrumbs$ = projectNavigation
+          .getProjectBreadcrumbs$()
+          .pipe(takeUntil(this.stop$));
+        const activeNodes$ = projectNavigation.getActiveNodes$();
 
         const ProjectHeaderWithNavigation = () => {
           const CustomSideNavComponent = useObservable(projectNavigationComponent$, undefined);
-          // const projectNavigationConfig = useObservable(projectNavigation$, undefined);
+          const activeNodes = useObservable(activeNodes$, []);
+
+          const currentProjectNavigation = useObservable(projectNavigation$, undefined);
+          // TODO: remove this switch once security sets project navigation tree
+          const currentProjectBreadcrumbs$ = currentProjectNavigation
+            ? projectBreadcrumbs$
+            : breadcrumbs$;
 
           let SideNavComponent: ISideNavComponent = () => null;
 
@@ -271,13 +291,6 @@ export class ChromeService {
                 : ProjectSideNavigation;
           }
 
-          // if projectNavigation wasn't set fallback to the default breadcrumbs
-          // TODO: Uncommented when we support the project navigation config
-          // const projectBreadcrumbs$ = projectNavigationConfig
-          //   ? projectNavigation.getProjectBreadcrumbs$()
-          //   : breadcrumbs$;
-          const projectBreadcrumbs$ = breadcrumbs$;
-
           return (
             <ProjectHeader
               {...{
@@ -285,15 +298,19 @@ export class ChromeService {
                 globalHelpExtensionMenuLinks$,
               }}
               actionMenu$={application.currentActionMenu$}
-              breadcrumbs$={projectBreadcrumbs$.pipe(takeUntil(this.stop$))}
+              breadcrumbs$={currentProjectBreadcrumbs$}
               helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
               helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
+              navControlsLeft$={navControls.getLeft$()}
+              navControlsCenter$={navControls.getCenter$()}
               navControlsRight$={navControls.getRight$()}
+              loadingCount$={http.getLoadingCount$()}
+              homeHref$={projectNavigation.getProjectHome$()}
               kibanaDocLink={docLinks.links.kibana.guide}
               kibanaVersion={injectedMetadata.getKibanaVersion()}
+              prependBasePath={http.basePath.prepend}
             >
-              {/* TODO: pass down the SideNavCompProps once they are defined  */}
-              <SideNavComponent />
+              <SideNavComponent activeNodes={activeNodes} />
             </ProjectHeader>
           );
         };
@@ -405,15 +422,18 @@ export class ChromeService {
       setChromeStyle,
       getChromeStyle$: () => chromeStyle$.pipe(takeUntil(this.stop$)),
       project: {
+        setHome: setProjectHome,
         setNavigation: setProjectNavigation,
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
+        getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
       },
     };
   }
 
   public stop() {
     this.navLinks.stop();
+    this.projectNavigation.stop();
     this.stop$.next();
   }
 }

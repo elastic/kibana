@@ -12,7 +12,7 @@ import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 import { OMIT_FIELDS } from '@kbn/ml-anomaly-utils';
 import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
-import { SavedSearchQuery } from '../../../contexts/ml';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexPatternTitle } from '../../../../../common/types/kibana';
 
 import { ml } from '../../../services/ml_api_service';
@@ -35,7 +35,7 @@ export class DataLoader {
 
   async loadFieldHistograms(
     fields: FieldHistogramRequestConfig[],
-    query: string | SavedSearchQuery,
+    query: string | estypes.QueryDslQueryContainer,
     samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE,
     editorRuntimeMappings?: RuntimeMappings
   ): Promise<any[]> {

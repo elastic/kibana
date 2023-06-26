@@ -228,6 +228,13 @@ function getExpressionForLayer(
           {
             ...col,
             id: colId,
+            label: col.customLabel
+              ? col.label
+              : operationDefinitionMap[col.operationType].getDefaultLabel(
+                  col,
+                  indexPattern,
+                  layer.columns
+                ),
           },
         ];
 
@@ -337,6 +344,14 @@ function getExpressionForLayer(
             format?.params && 'suffix' in format.params && format.params.suffix
               ? [format.params.suffix]
               : [],
+          compact:
+            format?.params && 'compact' in format.params && format.params.compact
+              ? [format.params.compact]
+              : [],
+          pattern:
+            format?.params && 'pattern' in format.params && format.params.pattern
+              ? [format.params.pattern]
+              : [],
           parentFormat: parentFormat ? [JSON.stringify(parentFormat)] : [],
         },
       };
@@ -360,7 +375,15 @@ function getExpressionForLayer(
             dateColumnId: firstDateHistogramColumn?.length ? [firstDateHistogramColumn[0]] : [],
             inputColumnId: [id],
             outputColumnId: [id],
-            outputColumnName: [col.label],
+            outputColumnName: [
+              col.customLabel
+                ? col.label
+                : operationDefinitionMap[col.operationType].getDefaultLabel(
+                    col,
+                    indexPattern,
+                    layer.columns
+                  ),
+            ],
             targetUnit: [col.timeScale!],
             reducedTimeRange: col.reducedTimeRange ? [col.reducedTimeRange] : [],
           },

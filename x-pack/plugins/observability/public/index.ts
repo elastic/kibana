@@ -33,6 +33,7 @@ export const plugin: PluginInitializer<
 };
 
 export {
+  enableLegacyUptimeApp,
   syntheticsThrottlingEnabled,
   enableInspectEsQueries,
   enableComparisonByDefault,

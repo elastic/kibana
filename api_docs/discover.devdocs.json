@@ -266,6 +266,21 @@
     "misc": [
       {
         "parentPluginId": "discover",
+        "id": "def-public.SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID",
+        "description": [],
+        "signature": [
+          "\"SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID\""
+        ],
+        "path": "src/plugins/discover/public/embeddable/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
         "id": "def-public.SEARCH_EMBEDDABLE_TYPE",
         "type": "string",
         "tags": [],
@@ -370,6 +385,55 @@
           "path": "src/plugins/discover/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "discover",
+          "id": "def-public.DiscoverStart.customize",
+          "type": "Function",
+          "tags": [],
+          "label": "customize",
+          "description": [],
+          "signature": [
+            "(profileName: string, callback: ",
+            "CustomizationCallback",
+            ") => void"
+          ],
+          "path": "src/plugins/discover/public/plugin.tsx",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "discover",
+              "id": "def-public.DiscoverStart.customize.$1",
+              "type": "string",
+              "tags": [],
+              "label": "profileName",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "src/plugins/discover/public/plugin.tsx",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "discover",
+              "id": "def-public.DiscoverStart.customize.$2",
+              "type": "Function",
+              "tags": [],
+              "label": "callback",
+              "description": [],
+              "signature": [
+                "CustomizationCallback"
+              ],
+              "path": "src/plugins/discover/public/plugin.tsx",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -1229,6 +1293,22 @@
             ],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/discover/common/locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-common.DiscoverAppLocatorParams.profile",
+            "type": "string",
+            "tags": [],
+            "label": "profile",
+            "description": [
+              "\nThe Discover profile to use"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/discover/common/locator.ts",
             "deprecated": false,

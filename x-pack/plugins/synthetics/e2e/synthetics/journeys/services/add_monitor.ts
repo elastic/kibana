@@ -6,6 +6,7 @@
  */
 
 import axios from 'axios';
+import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import {
   privateLocationsSavedObjectId,
   privateLocationsSavedObjectName,
@@ -13,7 +14,7 @@ import {
 
 export const enableMonitorManagedViaApi = async (kibanaUrl: string) => {
   try {
-    await axios.post(kibanaUrl + '/internal/uptime/service/enablement', undefined, {
+    await axios.put(kibanaUrl + SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT, undefined, {
       auth: { username: 'elastic', password: 'changeme' },
       headers: { 'kbn-xsrf': 'true' },
     });
@@ -35,7 +36,7 @@ export const addTestMonitor = async (
     name,
   };
   try {
-    await axios.post(kibanaUrl + '/internal/uptime/service/monitors', testData, {
+    await axios.post(kibanaUrl + SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, testData, {
       auth: { username: 'elastic', password: 'changeme' },
       headers: { 'kbn-xsrf': 'true' },
     });

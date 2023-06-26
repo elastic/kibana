@@ -9,7 +9,7 @@ We recommend that you kick-start your plugin by generating it with the {kib-repo
 
 ["source","shell"]
 -----------
-node scripts/generate_plugin my_plugin_name # replace "my_plugin_name" with your desired plugin name
+node scripts/generate_plugin
 -----------
 
 [discrete]

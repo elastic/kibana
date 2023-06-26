@@ -87,7 +87,8 @@ const withCore = makeDecorator({
         },
         thresholdRule: { enabled: false },
       },
-      coPilot: {
+      compositeSlo: { enabled: false },
+      aiAssistant: {
         enabled: false,
       },
     };

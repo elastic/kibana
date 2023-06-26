@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { TelemetryService } from '../services';
 import type { TelemetryConstants } from '..';
+import { PATH_TO_ADVANCED_SETTINGS } from '../../common/constants';
 
 export interface OptInMessageProps {
   telemetryConstants: TelemetryConstants;
@@ -94,7 +95,7 @@ function renderTelemetryEnabledOrDisabledText(
 
   return (
     /* eslint-disable-next-line @elastic/eui/href-or-on-click */
-    <EuiLink href={addBasePath('management/kibana/settings')} onClick={onClick}>
+    <EuiLink href={addBasePath(PATH_TO_ADVANCED_SETTINGS)} onClick={onClick}>
       {actionMessage}
     </EuiLink>
   );
