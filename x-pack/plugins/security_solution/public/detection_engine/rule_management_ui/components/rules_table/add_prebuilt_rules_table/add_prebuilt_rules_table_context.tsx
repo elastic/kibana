@@ -111,7 +111,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     isLoading,
     isRefetching,
   } = usePrebuiltRulesInstallReview({
-    refetchInterval: 10000, // Refetch available rules for installation every minute
+    refetchInterval: 60000, // Refetch available rules for installation every minute
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
   });
 
