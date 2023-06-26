@@ -43,11 +43,6 @@ import { combineAuthorizedAndOwnerFilter } from '../utils';
 import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
-import type {
-  ICasesConfigurePatch,
-  ICasesConfigureRequest,
-  ICasesConfigureResponse,
-} from '../typedoc_interfaces';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
@@ -68,7 +63,7 @@ export interface ConfigureSubClient {
   /**
    * Retrieves the external connector configuration for a particular case owner.
    */
-  get(params: GetConfigurationFindRequest): Promise<ICasesConfigureResponse | {}>;
+  get(params: GetConfigurationFindRequest): Promise<Configuration | {}>;
   /**
    * Retrieves the valid external connectors supported by the cases plugin.
    */
@@ -82,13 +77,13 @@ export interface ConfigureSubClient {
    */
   update(
     configurationId: string,
-    configurations: ICasesConfigurePatch
-  ): Promise<ICasesConfigureResponse>;
+    configurations: ConfigurationPatchRequest
+  ): Promise<Configuration>;
 
   /**
    * Creates a configuration if one does not already exist. If one exists it is deleted and a new one is created.
    */
-  create(configuration: ICasesConfigureRequest): Promise<ICasesConfigureResponse>;
+  create(configuration: ConfigurationRequest): Promise<Configuration>;
 }
 
 /**

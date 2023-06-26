@@ -724,4 +724,122 @@ describe('transformSummaryActionParams', () => {
     expect(dateVariable).toBeGreaterThanOrEqual(dateBefore);
     expect(dateVariable).toBeLessThanOrEqual(dateAfter);
   });
+
+  test('renders alertId', () => {
+    const actionParams = {
+      message: 'Value: {{alertId}}',
+    };
+
+    const result = transformSummaryActionParams({ ...params, actionParams });
+    expect(result).toMatchInlineSnapshot(`
+        Object {
+          "message": "Value: 1",
+        }
+    `);
+  });
+
+  test('renders alertName', () => {
+    const actionParams = {
+      message: 'Value: {{alertName}}',
+    };
+
+    const result = transformSummaryActionParams({ ...params, actionParams });
+    expect(result).toMatchInlineSnapshot(`
+        Object {
+          "message": "Value: test-rule",
+        }
+    `);
+  });
+
+  test('renders spaceId', () => {
+    const actionParams = {
+      message: 'Value: {{spaceId}}',
+    };
+
+    const result = transformSummaryActionParams({ ...params, actionParams });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "message": "Value: space-id",
+      }
+    `);
+  });
+
+  test('renders tags', () => {
+    const actionParams = {
+      message: 'Value: {{tags}}',
+    };
+
+    const result = transformSummaryActionParams({ ...params, actionParams });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "message": "Value: test-tag",
+      }
+    `);
+  });
+
+  test('renders params', () => {
+    const actionParams = {
+      message: 'Value: {{params}}',
+    };
+
+    const result = transformSummaryActionParams({ ...params, actionParams });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "message": "Value: {\\"foo\\":\\"bar\\",\\"fooBar\\":true}",
+      }
+    `);
+  });
+
+  test('renders alertInstanceId', () => {
+    const actionParams = {
+      message: 'Value: {{alertInstanceId}}',
+    };
+
+    const result = transformSummaryActionParams({ ...params, actionParams });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "message": "Value: 1",
+      }
+    `);
+  });
+
+  test('renders alertActionGroup', () => {
+    const actionParams = {
+      message: 'Value: {{alertActionGroup}}',
+    };
+
+    const result = transformSummaryActionParams({ ...params, actionParams });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "message": "Value: default",
+      }
+    `);
+  });
+
+  test('renders alertActionGroupName', () => {
+    const actionParams = {
+      message: 'Value: {{alertActionGroupName}}',
+    };
+
+    const result = transformSummaryActionParams({ ...params, actionParams });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "message": "Value: Default",
+      }
+    `);
+  });
+
+  test('renders alert values', () => {
+    const actionParams = {
+      message:
+        'Value "{{alert.id}}", "{{alert.uuid}}", "{{alert.actionGroup}}", "{{alert.actionGroupName}}", and "{{alert.flapping}}" exist',
+    };
+
+    const result = transformSummaryActionParams({ ...params, actionParams });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "message": "Value \\"1\\", \\"1\\", \\"default\\", \\"Default\\", and \\"false\\" exist",
+      }
+    `);
+  });
 });

@@ -6,8 +6,7 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -174,7 +173,7 @@ export const PageRouter: FC = () => {
   apiService.addInspectorRequest = addInspectorRequest;
 
   return (
-    <Switch>
+    <Routes>
       {routes.map(
         ({
           title,
@@ -199,6 +198,6 @@ export const PageRouter: FC = () => {
         )
       )}
       <Route component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 };
