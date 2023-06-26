@@ -248,6 +248,7 @@ export class ActionExecutor {
             taskInfo,
             configurationUtilities,
             logger,
+            source,
           });
         } catch (err) {
           rawResult = {
