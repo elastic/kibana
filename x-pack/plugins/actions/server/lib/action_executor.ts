@@ -13,14 +13,12 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { RequeueInvalidTasksConfig } from '@kbn/task-manager-plugin/server/config';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import {
   validateParams,
   validateConfig,
   validateSecrets,
   validateConnector,
-  validateRawAction,
 } from './validate_with_schema';
 import {
   ActionType,
@@ -66,10 +64,10 @@ export interface ExecuteOptions<Source = unknown> {
   params: Record<string, unknown>;
   source?: ActionExecutionSource<Source>;
   taskInfo?: TaskInfo;
+  actionInfo?: ActionInfo;
   executionId?: string;
   consumer?: string;
   relatedSavedObjects?: RelatedSavedObjects;
-  requeueInvalidTasksConfig?: RequeueInvalidTasksConfig;
 }
 
 export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
@@ -100,11 +98,11 @@ export class ActionExecutor {
     source,
     isEphemeral,
     taskInfo,
+    actionInfo: actionInfoFromTaskRunner,
     executionId,
     consumer,
     relatedSavedObjects,
     actionExecutionId,
-    requeueInvalidTasksConfig,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
@@ -132,15 +130,21 @@ export class ActionExecutor {
         const spaceId = spaces && spaces.getSpaceId(request);
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
-        const actionInfo = await getActionInfoInternal(
-          this.isESOCanEncrypt,
-          encryptedSavedObjectsClient,
-          preconfiguredActions,
-          actionId,
-          namespace.namespace
-        );
+        let actionInfo;
 
-        const { actionTypeId, name, config, secrets, rawAction, isPreconfigured } = actionInfo;
+        if (actionInfoFromTaskRunner) {
+          actionInfo = actionInfoFromTaskRunner;
+        } else {
+          actionInfo = await getActionInfoInternal(
+            this.isESOCanEncrypt,
+            encryptedSavedObjectsClient,
+            preconfiguredActions,
+            actionId,
+            namespace.namespace
+          );
+        }
+
+        const { actionTypeId, name, config, secrets } = actionInfo;
 
         if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
           this.actionInfo = actionInfo;
@@ -163,9 +167,6 @@ export class ActionExecutor {
               params,
               config,
               secrets,
-              rawAction,
-              isPreconfigured,
-              shouldValidateRawAction: requeueInvalidTasksConfig?.enabled,
               taskInfo,
             },
             { configurationUtilities }
@@ -408,9 +409,16 @@ export class ActionExecutor {
 
     eventLogger.logEvent(event);
   }
+
+  public getContext() {
+    return this.actionExecutorContext;
+  }
+  public getIsESOCanEncrypt() {
+    return this.isESOCanEncrypt;
+  }
 }
 
-interface ActionInfo {
+export interface ActionInfo {
   actionTypeId: string;
   name: string;
   config: unknown;
@@ -420,7 +428,7 @@ interface ActionInfo {
   rawAction: RawAction;
 }
 
-async function getActionInfoInternal(
+export async function getActionInfoInternal(
   isESOCanEncrypt: boolean,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   preconfiguredActions: PreConfiguredAction[],
@@ -493,24 +501,11 @@ interface ValidateActionOpts {
   params: Record<string, unknown>;
   config: unknown;
   secrets: unknown;
-  rawAction: RawAction;
-  isPreconfigured?: boolean;
-  shouldValidateRawAction?: boolean;
   taskInfo?: TaskInfo;
 }
 
 function validateAction(
-  {
-    actionId,
-    actionType,
-    params,
-    config,
-    secrets,
-    rawAction,
-    isPreconfigured = false,
-    shouldValidateRawAction = false,
-    taskInfo,
-  }: ValidateActionOpts,
+  { actionId, actionType, params, config, secrets, taskInfo }: ValidateActionOpts,
   validatorServices: ValidatorServices
 ) {
   let validatedParams: Record<string, unknown>;
@@ -526,9 +521,6 @@ function validateAction(
         config,
         secrets,
       });
-    }
-    if (shouldValidateRawAction) {
-      validateRawAction({ isPreconfigured, rawAction });
     }
 
     return { validatedParams, validatedConfig, validatedSecrets };

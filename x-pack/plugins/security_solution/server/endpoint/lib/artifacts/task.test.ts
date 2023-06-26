@@ -73,10 +73,7 @@ describe('task', () => {
       const createTaskRunner =
         mockTaskManager.registerTaskDefinitions.mock.calls[0][0][ManifestTaskConstants.TYPE]
           .createTaskRunner;
-      const taskRunner = createTaskRunner({
-        taskInstance: MOCK_TASK_INSTANCE,
-        requeueInvalidTasksConfig: { enabled: false, delay: 3000, max_attempts: 20 },
-      });
+      const taskRunner = createTaskRunner({ taskInstance: MOCK_TASK_INSTANCE });
       await taskRunner.run();
       expect(mockManifestTask.runTask).toHaveBeenCalled();
     });
@@ -99,10 +96,7 @@ describe('task', () => {
       const createTaskRunner =
         mockTaskManager.registerTaskDefinitions.mock.calls[0][0][ManifestTaskConstants.TYPE]
           .createTaskRunner;
-      const taskRunner = createTaskRunner({
-        taskInstance: MOCK_TASK_INSTANCE,
-        requeueInvalidTasksConfig: { enabled: false, delay: 3000, max_attempts: 20 },
-      });
+      const taskRunner = createTaskRunner({ taskInstance: MOCK_TASK_INSTANCE });
       await taskRunner.run();
     };
 

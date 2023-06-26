@@ -71,17 +71,18 @@ describe('actionTypeRegistry', () => {
       });
       expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
-      expect(mockTaskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "actions:my-action-type": Object {
-            "createTaskRunner": [Function],
-            "maxAttempts": 3,
-            "title": "My action type",
+      expect(mockTaskManager.registerTaskDefinitions.mock.calls[0]).toEqual(
+        expect.objectContaining([
+          {
+            'actions:my-action-type': {
+              createTaskRunner: expect.any(Function),
+              maxAttempts: 3,
+              title: 'My action type',
+              indirectParamsSchema: expect.any(Object),
+            },
           },
-        },
-      ]
-    `);
+        ])
+      );
       expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
         'Connector: My action type',
         'gold'

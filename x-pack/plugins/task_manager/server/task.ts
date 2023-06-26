@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { schema, TypeOf, ObjectType } from '@kbn/config-schema';
-import { RequeueInvalidTasksConfig } from './config';
-import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
 import { isErr, tryAsResult } from './lib/result_type';
+import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 
 /*
  * Type definitions and validations for tasks.
@@ -36,7 +35,6 @@ export interface RunContext {
    * The document describing the task instance, its params, state, id, etc.
    */
   taskInstance: ConcreteTaskInstance;
-  requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
 }
 
 /**
@@ -89,15 +87,28 @@ export interface FailedTaskResult {
   status: TaskStatus.Failed | TaskStatus.DeadLetter;
 }
 
+export type BeforeRunResult<T = Record<string, unknown>> =
+  | {
+      data: T;
+      error?: never;
+    }
+  | {
+      data?: never;
+      error: Error;
+    };
+export type BeforeRunFunction = () => Promise<BeforeRunResult>;
 export type RunFunction = () => Promise<RunResult | undefined | void>;
 export type CancelFunction = () => Promise<RunResult | undefined | void>;
-export interface CancellableTask {
+export interface CancellableTask<T = never> {
+  beforeRun?: BeforeRunFunction;
   run: RunFunction;
   cancel?: CancelFunction;
   cleanup?: () => Promise<void>;
 }
 
-export type TaskRunCreatorFunction = (context: RunContext) => CancellableTask;
+export type TaskRunCreatorFunction = (
+  context: RunContext
+) => CancellableTask<RunContext['taskInstance']>;
 
 export const taskDefinitionSchema = schema.object(
   {
@@ -152,6 +163,7 @@ export const taskDefinitionSchema = schema.object(
     ),
 
     paramsSchema: schema.maybe(schema.any()),
+    indirectParamsSchema: schema.maybe(schema.any()),
   },
   {
     validate({ timeout }) {
@@ -180,6 +192,7 @@ export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSc
     }
   >;
   paramsSchema?: ObjectType;
+  indirectParamsSchema?: ObjectType;
 };
 
 export enum TaskStatus {

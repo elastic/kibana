@@ -9,31 +9,31 @@ import { v4 as uuidv4 } from 'uuid';
 import { pick } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import {
-  Logger,
   CoreKibanaRequest,
-  IBasePath,
-  SavedObject,
-  Headers,
   FakeRawRequest,
-  SavedObjectReference,
+  Headers,
+  IBasePath,
   ISavedObjectsRepository,
+  Logger,
+  SavedObject,
+  SavedObjectReference,
 } from '@kbn/core/server';
 import {
+  BeforeRunResult,
   RunContext,
-  createSkipError,
-  throwUnrecoverableError,
   throwRetryableError,
+  throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { validationErrorPrefix } from './validate_with_schema';
-import { ActionExecutorContract } from './action_executor';
+import { ActionExecutorContract, ActionInfo, getActionInfoInternal } from './action_executor';
 import {
-  ActionTaskParams,
-  ActionTypeRegistryContract,
-  SpaceIdToNamespaceFunction,
-  ActionTypeExecutorResult,
   ActionTaskExecutorParams,
+  ActionTaskParams,
+  ActionTypeExecutorResult,
+  ActionTypeRegistryContract,
   isPersistedActionTask,
+  RawAction,
+  SpaceIdToNamespaceFunction,
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import {
@@ -74,7 +74,7 @@ export class TaskRunnerFactory {
     this.taskRunnerContext = taskRunnerContext;
   }
 
-  public create({ taskInstance, requeueInvalidTasksConfig }: RunContext) {
+  public create({ taskInstance }: RunContext) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
     }
@@ -96,21 +96,42 @@ export class TaskRunnerFactory {
     const actionExecutionId = uuidv4();
     const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
 
-    const shouldSkip = ({ status, message }: ActionTypeExecutorResult<unknown>) => {
-      const { enabled, max_attempts: maxAttempts } = requeueInvalidTasksConfig;
-      const attempts = taskInstance.numSkippedRuns || 0;
-      return !!(
-        enabled &&
-        status === 'error' &&
-        attempts < maxAttempts &&
-        message?.includes(validationErrorPrefix)
-      );
-    };
+    let actionInfo: ActionInfo;
+    let taskParams: Omit<SavedObject<ActionTaskParams>, 'id' | 'type'>;
 
     return {
-      async run() {
-        const { spaceId } = actionTaskExecutorParams;
+      async beforeRun(): Promise<BeforeRunResult<RawAction>> {
+        try {
+          const { preconfiguredActions, spaces } = actionExecutor.getContext()!;
+          const isESOCanEncrypt = actionExecutor.getIsESOCanEncrypt()!;
+          taskParams = await getActionTaskParams(
+            actionTaskExecutorParams,
+            encryptedSavedObjectsClient,
+            spaceIdToNamespace
+          );
 
+          const request = getFakeRequest(taskParams.attributes.apiKey);
+          const spaceId = spaces && spaces.getSpaceId(request);
+          const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
+
+          actionInfo = await getActionInfoInternal(
+            isESOCanEncrypt,
+            encryptedSavedObjectsClient,
+            preconfiguredActions,
+            taskParams.attributes.actionId,
+            namespace.namespace
+          );
+
+          return { data: actionInfo.rawAction };
+        } catch (error) {
+          return { error };
+        }
+      },
+      async run() {
+        if (!actionInfo) {
+          await this.beforeRun();
+        }
+        const { spaceId } = actionTaskExecutorParams;
         const {
           attributes: {
             actionId,
@@ -122,11 +143,8 @@ export class TaskRunnerFactory {
             relatedSavedObjects,
           },
           references,
-        } = await getActionTaskParams(
-          actionTaskExecutorParams,
-          encryptedSavedObjectsClient,
-          spaceIdToNamespace
-        );
+        } = taskParams!;
+
         const path = addSpaceIdToPath('/', spaceId);
 
         const request = getFakeRequest(apiKey);
@@ -140,12 +158,12 @@ export class TaskRunnerFactory {
             isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
             request,
             taskInfo,
+            actionInfo,
             executionId,
             consumer,
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
             actionExecutionId,
             ...getSource(references, source),
-            requeueInvalidTasksConfig,
           });
         } catch (e) {
           logger.error(`Action '${actionId}' failed: ${e.message}`);
@@ -154,13 +172,6 @@ export class TaskRunnerFactory {
             throwUnrecoverableError(e);
           }
           throw e;
-        }
-
-        if (shouldSkip(executorResult)) {
-          return {
-            state: taskInstance.state,
-            error: createSkipError(new Error(executorResult.message)),
-          };
         }
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
@@ -243,9 +254,7 @@ function getFakeRequest(apiKey?: string) {
 
   // Since we're using API keys and accessing elasticsearch can only be done
   // via a request, we're faking one with the proper authorization headers.
-  const fakeRequest = CoreKibanaRequest.from(fakeRawRequest);
-
-  return fakeRequest;
+  return CoreKibanaRequest.from(fakeRawRequest);
 }
 
 async function getActionTaskParams(
@@ -262,7 +271,6 @@ async function getActionTaskParams(
         executorParams.actionTaskParamsId,
         { namespace }
       );
-
     const {
       attributes: { relatedSavedObjects },
       references,

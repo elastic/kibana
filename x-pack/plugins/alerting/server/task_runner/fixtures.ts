@@ -14,6 +14,7 @@ import {
   RuleMonitoring,
   RuleLastRunOutcomeOrderMap,
   RuleLastRunOutcomes,
+  SanitizedRule,
 } from '../../common';
 import { getDefaultMonitoring } from '../lib/monitoring';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -261,6 +262,27 @@ export const mockedRawRuleSO: SavedObject<RawRule> = {
     monitoring: getDefaultMonitoring('2020-08-20T19:23:38Z'),
     revision: 0,
   },
+};
+
+export const mockedRule: SanitizedRule<typeof mockedRawRuleSO.attributes.params> = {
+  id: mockedRawRuleSO.id,
+  ...mockedRawRuleSO.attributes,
+  nextRun: undefined,
+  createdAt: new Date(mockedRawRuleSO.attributes.createdAt),
+  updatedAt: new Date(mockedRawRuleSO.attributes.updatedAt),
+  executionStatus: {
+    ...mockedRawRuleSO.attributes.executionStatus,
+    lastExecutionDate: new Date(mockedRawRuleSO.attributes.executionStatus.lastExecutionDate),
+    error: undefined,
+    warning: undefined,
+  },
+  actions: mockedRawRuleSO.attributes.actions.map((action) => {
+    return {
+      ...action,
+      id: action.uuid,
+    };
+  }),
+  isSnoozedUntil: undefined,
 };
 
 export const mockTaskInstance = () => ({

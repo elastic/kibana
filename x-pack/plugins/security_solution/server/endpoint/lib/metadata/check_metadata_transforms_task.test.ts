@@ -105,10 +105,7 @@ describe('check metadata transforms task', () => {
       await mockTask.start({ taskManager: mockTaskManagerStart });
       const createTaskRunner =
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
-      const taskRunner = createTaskRunner({
-        taskInstance,
-        requeueInvalidTasksConfig: { enabled: false, delay: 3000, max_attempts: 20 },
-      });
+      const taskRunner = createTaskRunner({ taskInstance });
       return taskRunner.run();
     };
 

@@ -106,10 +106,7 @@ describe('test security telemetry task', () => {
     const createTaskRunner =
       mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][testType].createTaskRunner;
 
-    const taskRunner = createTaskRunner({
-      taskInstance: mockTaskInstance,
-      requeueInvalidTasksConfig: { enabled: false, delay: 3000, max_attempts: 20 },
-    });
+    const taskRunner = createTaskRunner({ taskInstance: mockTaskInstance });
     const testResult = (await taskRunner.run()) as SuccessfulRunResult;
 
     expect(mockTelemetryTaskConfig.getLastExecutionTime).toHaveBeenCalled();

@@ -439,6 +439,7 @@ describe('Create Lifecycle', () => {
           'alerting:test': {
             createTaskRunner: expect.any(Function),
             paramsSchema: expect.any(Object),
+            indirectParamsSchema: expect.any(Object),
             timeout: '20m',
             title: 'Test',
           },

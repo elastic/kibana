@@ -80,11 +80,6 @@ const alertsService = alertsServiceMock.create();
 
 describe('Task Runner Cancel', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
-  const requeueInvalidTasksConfig = {
-    enabled: false,
-    delay: 3000,
-    max_attempts: 20,
-  };
   let alertingEventLoggerInitializer: RuleContextOpts;
 
   beforeAll(() => {
@@ -200,7 +195,6 @@ describe('Task Runner Cancel', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -296,7 +290,6 @@ describe('Task Runner Cancel', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      requeueInvalidTasksConfig,
       context: {
         ...taskRunnerFactoryInitializerParams,
         cancelAlertsOnRuleTimeout: false,
@@ -365,7 +358,6 @@ describe('Task Runner Cancel', () => {
     const taskRunner = new TaskRunner({
       ruleType: updatedRuleType,
       taskInstance: mockedTaskInstance,
-      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });
@@ -427,7 +419,6 @@ describe('Task Runner Cancel', () => {
     const taskRunner = new TaskRunner({
       ruleType,
       taskInstance: mockedTaskInstance,
-      requeueInvalidTasksConfig,
       context: taskRunnerFactoryInitializerParams,
       inMemoryMetrics,
     });

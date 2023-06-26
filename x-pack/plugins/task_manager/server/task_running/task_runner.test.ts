@@ -1537,7 +1537,7 @@ describe('TaskManagerRunner', () => {
                 },
               }),
               paramsSchema: schema.object({
-                nonExisting: schema.string(),
+                baz: schema.string(), // { foo: 'bar' } is valid
               }),
             },
           },
@@ -1563,7 +1563,7 @@ describe('TaskManagerRunner', () => {
         expect(result).toEqual(
           asErr({
             error: createSkipError(
-              new Error('[nonExisting]: expected value of type [string] but got [undefined]')
+              new Error('[baz]: expected value of type [string] but got [undefined]')
             ),
             state: {
               existingStatePAram: 'foo',
@@ -1575,7 +1575,7 @@ describe('TaskManagerRunner', () => {
         );
       });
 
-      test('skips task.run when the task run returns a SkipError ', async () => {
+      test('skips task.run when the task has invalid indirect params e.g. rule', async () => {
         const mockTaskInstance: Partial<ConcreteTaskInstance> = {
           schedule: { interval: '10m' },
           status: TaskStatus.Running,
@@ -1584,8 +1584,6 @@ describe('TaskManagerRunner', () => {
           state: { existingStatePAram: 'foo' },
           runAt: new Date(),
         };
-        const skipError = createSkipError(new Error('test'));
-
         const { runner, store, logger } = await readyToRunStageSetup({
           instance: mockTaskInstance,
           requeueInvalidTasksConfig: {
@@ -1597,9 +1595,15 @@ describe('TaskManagerRunner', () => {
             bar: {
               title: 'Bar!',
               createTaskRunner: () => ({
-                async run() {
-                  return { state: {}, error: skipError };
+                async beforeRun() {
+                  return { data: { foo: 'bar' } };
                 },
+                async run() {
+                  return { state: {} };
+                },
+              }),
+              indirectParamsSchema: schema.object({
+                baz: schema.string(), // { foo: 'bar' } is valid
               }),
             },
           },
@@ -1620,7 +1624,14 @@ describe('TaskManagerRunner', () => {
         expect(logger.warn).toHaveBeenCalledWith(
           'Task Manager has skipped executing the Task (bar/foo) 1 times as it has invalid params.'
         );
-        expect(result).toEqual(asErr({ state: {}, error: skipError }));
+        expect(result).toEqual(
+          asErr({
+            state: mockTaskInstance.state,
+            error: createSkipError(
+              new Error('[baz]: expected value of type [string] but got [undefined]')
+            ),
+          })
+        );
       });
 
       test('does not skip when disabled (recurring task)', async () => {
@@ -1634,17 +1645,26 @@ describe('TaskManagerRunner', () => {
           runAt: new Date(),
           numSkippedRuns: mockRequeueInvalidTasksConfig.max_attempts,
         };
-        const skipError = createSkipError(new Error('test'));
-
         const { runner, store, logger } = await readyToRunStageSetup({
           instance: mockTaskInstance,
+          requeueInvalidTasksConfig: {
+            delay: 3000,
+            enabled: false,
+            max_attempts: 20,
+          },
           definitions: {
             bar: {
               title: 'Bar!',
               createTaskRunner: () => ({
-                async run() {
-                  return { state: { new: 'foo' }, error: skipError };
+                async beforeRun() {
+                  return { data: { foo: 'bar' } };
                 },
+                async run() {
+                  return { state: { new: 'foo' } };
+                },
+              }),
+              indirectParamsSchema: schema.object({
+                baz: schema.string(), // { foo: 'bar' } is valid
               }),
             },
           },
@@ -1658,10 +1678,10 @@ describe('TaskManagerRunner', () => {
         expect(instance.runAt.getTime()).toBeGreaterThan(mockTaskInstance.runAt!.getTime()); // reschedule attempt
         expect(instance.state).toEqual({ new: 'foo' });
         expect(instance.schedule).toEqual(mockTaskInstance.schedule);
-        expect(instance.attempts).toBe(mockTaskInstance.attempts);
-        expect(instance.numSkippedRuns).toBe(20);
+        expect(instance.attempts).toBe(0);
+        expect(instance.numSkippedRuns).toBe(0);
         expect(logger.warn).not.toHaveBeenCalled();
-        expect(result).toEqual(asErr({ state: { new: 'foo' }, error: skipError }));
+        expect(result).toEqual(asOk({ state: { new: 'foo' } }));
       });
 
       test('does not skip when disabled (non-recurring task)', async () => {
@@ -1674,17 +1694,27 @@ describe('TaskManagerRunner', () => {
           runAt: new Date(),
           numSkippedRuns: 0,
         };
-        const skipError = createSkipError(new Error('test'));
 
         const { runner, store, logger } = await readyToRunStageSetup({
           instance: mockTaskInstance,
+          requeueInvalidTasksConfig: {
+            delay: 3000,
+            enabled: false,
+            max_attempts: 20,
+          },
           definitions: {
             bar: {
               title: 'Bar!',
               createTaskRunner: () => ({
-                async run() {
-                  return { state: { new: 'foo' }, error: skipError };
+                async beforeRun() {
+                  return { data: { foo: 'bar' } };
                 },
+                async run() {
+                  return { state: { new: 'foo' } };
+                },
+              }),
+              indirectParamsSchema: schema.object({
+                baz: schema.string(), // { foo: 'bar' } is valid
               }),
             },
           },
@@ -1705,7 +1735,7 @@ describe('TaskManagerRunner', () => {
           enabled: true,
           state: { existingStateParam: 'foo' },
           runAt: new Date(),
-          numSkippedRuns: 10,
+          numSkippedRuns: 20,
         };
 
         const { runner, store, logger } = await readyToRunStageSetup({
@@ -1715,7 +1745,7 @@ describe('TaskManagerRunner', () => {
               title: 'Bar!',
               createTaskRunner: () => ({
                 async run() {
-                  return { state: {} }; // no skip error
+                  return { state: {} };
                 },
               }),
             },
@@ -1741,7 +1771,7 @@ describe('TaskManagerRunner', () => {
           enabled: true,
           state: { existingStateParam: 'foo' },
           runAt: new Date(),
-          numSkippedRuns: 10,
+          numSkippedRuns: 20,
         };
 
         const { runner, store, logger } = await readyToRunStageSetup({
