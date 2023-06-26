@@ -53,7 +53,7 @@ docker pull {es-docker-image}
 [source,sh,subs="attributes"]
 ----
 wget https://artifacts.elastic.co/cosign.pub
-cosign verify --key cosign.pub {docker-repo}:{version}
+cosign verify --key cosign.pub {es-docker-image}
 ----
 +
 For details about this step, refer to {ref}/docker.html#docker-verify-signature[Verify the {es} Docker image signature] in the {es} documentation.
