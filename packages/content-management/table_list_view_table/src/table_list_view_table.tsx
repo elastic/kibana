@@ -43,7 +43,7 @@ import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
-import { RowActions, TableItemsRowActions } from './types';
+import { RowActions, TableItemsRowActions, Tag, TagReference } from './types';
 
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
@@ -115,7 +115,7 @@ export interface TableListViewTableProps<
   setPageDataTestSubject: (subject: string) => void;
   restrictPageSectionWidth?: boolean;
   pageSectionPadding?: EuiPaddingSize;
-  tagReferences?: SavedObjectsReference[] | undefined;
+  tagReferences?: TagReference[] | undefined;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -251,10 +251,7 @@ const appendQuery = (q: Query, tagName: string) => {
   return q.addOrFieldValue('tag', tagName, true, 'eq');
 };
 
-const getDefaultQuery = (
-  initialQuery: string,
-  tagReferences: SavedObjectsReference[] | null | undefined
-) => {
+const getDefaultQuery = (initialQuery: string, tagReferences: Tag[] | null | undefined) => {
   const query = new Query(Ast.create([]), undefined, initialQuery);
   const uniqueQueryArray = tagReferences?.reduce<string[]>((acc, { name }) => {
     if (name && acc.indexOf(name) === -1) {
@@ -271,7 +268,7 @@ const getDefaultQuery = (
 
 const getFindItemReference = (
   references: SavedObjectsFindOptionsReference[] | undefined,
-  tagReferences?: SavedObjectsReference[] | undefined
+  tagReferences?: TagReference[] | undefined
 ): SavedObjectsFindOptionsReference[] | undefined => {
   return [...(references ?? []), ...(tagReferences?.map(({ id, type }) => ({ id, type })) ?? [])];
 };
@@ -338,12 +335,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     DateFormatterComp,
     getTagList,
   } = useServices();
-
-  const getTagListing = useCallback(() => {
-    const tags = getTagList();
-
-    return tags;
-  }, [getTagList]);
 
   const openContentEditor = useOpenContentEditor();
 
@@ -873,7 +864,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         termMatch = searchTerm;
 
         if (references?.length || referencesToExclude?.length) {
-          const allTags = getTagListing();
+          const allTags = getTagList();
 
           if (references?.length) {
             references.forEach(({ id: refId }) => {
@@ -929,7 +920,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
 
     updateQueryFromURL(urlState.s);
     updateSortFromURL(urlState.sort);
-  }, [urlState, searchQueryParser, getTagListing, urlStateEnabled]);
+  }, [urlState, searchQueryParser, getTagList, urlStateEnabled]);
 
   useEffect(() => {
     isMounted.current = true;

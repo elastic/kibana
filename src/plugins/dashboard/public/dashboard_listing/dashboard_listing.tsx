@@ -80,10 +80,12 @@ export type DashboardListingProps = PropsWithChildren<{
   pageSectionPadding?: EuiPaddingSize;
   tagReferences?: SavedObjectsReference[] | undefined;
   urlStateEnabled?: boolean;
+  disableCreateDashboardButton?: boolean;
 }>;
 
 export const DashboardListing = ({
   children,
+  disableCreateDashboardButton,
   initialFilter,
   goToDashboard,
   getDashboardUrl,
@@ -209,6 +211,7 @@ export const DashboardListing = ({
   const emptyPrompt = (
     <DashboardListingEmptyPrompt
       createItem={createItem}
+      disableCreateDashboardButton={disableCreateDashboardButton}
       goToDashboard={goToDashboard}
       unsavedDashboardIds={unsavedDashboardIds}
       setUnsavedDashboardIds={setUnsavedDashboardIds}

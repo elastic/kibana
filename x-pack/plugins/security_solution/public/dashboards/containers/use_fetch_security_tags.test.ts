@@ -14,6 +14,7 @@ import {
 } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
 import { useFetchSecurityTags } from './use_fetch_security_tags';
+import { DEFAULT_TAGS_RESPONSE } from '../../common/containers/tags/__mocks__/api';
 
 jest.mock('../../common/lib/kibana');
 
@@ -66,11 +67,16 @@ describe('useFetchSecurityTags', () => {
   });
 
   test('should return Security Solution tags', async () => {
-    const mockFoundTags = [{ id: 'tagId', name: 'Security Solution', description: '', color: '' }];
-    mockGet.mockResolvedValue(mockFoundTags);
+    mockGet.mockResolvedValue(DEFAULT_TAGS_RESPONSE);
+
+    const expected = DEFAULT_TAGS_RESPONSE.map((tag) => ({
+      id: tag.id,
+      type: 'tag',
+      ...tag.attributes,
+    }));
     const { result } = await asyncRenderUseCreateSecurityDashboardLink();
 
     expect(mockPut).not.toHaveBeenCalled();
-    expect(result.current.tags).toEqual(expect.objectContaining(mockFoundTags));
+    expect(result.current.tags).toEqual(expect.objectContaining(expected));
   });
 });

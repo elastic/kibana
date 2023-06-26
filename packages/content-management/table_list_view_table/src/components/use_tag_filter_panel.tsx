@@ -10,8 +10,7 @@ import type { MouseEvent } from 'react';
 import { Query, EuiFlexGroup, EuiFlexItem, EuiText, EuiHealth, EuiBadge } from '@elastic/eui';
 import type { FieldValueOptionType } from '@elastic/eui';
 
-import type { Tag } from '../types';
-import { SavedObjectsReference } from '../services';
+import type { Tag, TagReference } from '../types';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -37,7 +36,7 @@ export interface Params {
   getTagList: () => Tag[];
   addOrRemoveIncludeTagFilter: (tag: Tag) => void;
   addOrRemoveExcludeTagFilter: (tag: Tag) => void;
-  tagReferences?: SavedObjectsReference[] | undefined;
+  tagReferences?: TagReference[] | undefined;
 }
 
 export const useTagFilterPanel = ({

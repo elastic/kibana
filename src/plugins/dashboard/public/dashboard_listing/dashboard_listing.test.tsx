@@ -73,6 +73,88 @@ test('initial filter is passed through', async () => {
   );
 });
 
+test('tagReferences is passed through', async () => {
+  pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
+
+  let component: ReactWrapper;
+  const tagReferences = [
+    { id: 'mockTagId', name: 'mockTagName', description: '', color: '', type: 'tag' },
+  ];
+
+  await act(async () => {
+    ({ component } = mountWith({ props: { tagReferences } }));
+  });
+  component!.update();
+  expect(TableListView).toHaveBeenCalledWith(
+    expect.objectContaining({ tagReferences }),
+    expect.any(Object) // react context
+  );
+});
+
+test('withPageTemplateHeader is passed through', async () => {
+  pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
+
+  let component: ReactWrapper;
+  const withPageTemplateHeader = false;
+
+  await act(async () => {
+    ({ component } = mountWith({ props: { withPageTemplateHeader } }));
+  });
+  component!.update();
+  expect(TableListView).toHaveBeenCalledWith(
+    expect.objectContaining({ withPageTemplateHeader }),
+    expect.any(Object) // react context
+  );
+});
+
+test('restrictPageSectionWidth is passed through', async () => {
+  pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
+
+  let component: ReactWrapper;
+  const restrictPageSectionWidth = false;
+
+  await act(async () => {
+    ({ component } = mountWith({ props: { restrictPageSectionWidth } }));
+  });
+  component!.update();
+  expect(TableListView).toHaveBeenCalledWith(
+    expect.objectContaining({ restrictPageSectionWidth }),
+    expect.any(Object) // react context
+  );
+});
+
+test('pageSectionPadding is passed through', async () => {
+  pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
+
+  let component: ReactWrapper;
+  const pageSectionPadding = 'none';
+
+  await act(async () => {
+    ({ component } = mountWith({ props: { pageSectionPadding } }));
+  });
+  component!.update();
+  expect(TableListView).toHaveBeenCalledWith(
+    expect.objectContaining({ pageSectionPadding }),
+    expect.any(Object) // react context
+  );
+});
+
+test('urlStateEnabled is passed through', async () => {
+  pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
+
+  let component: ReactWrapper;
+  const urlStateEnabled = false;
+
+  await act(async () => {
+    ({ component } = mountWith({ props: { urlStateEnabled } }));
+  });
+  component!.update();
+  expect(TableListView).toHaveBeenCalledWith(
+    expect.objectContaining({ urlStateEnabled }),
+    expect.any(Object) // react context
+  );
+});
+
 test('when showWriteControls is true, table list view is passed editing functions', async () => {
   pluginServices.getServices().dashboardCapabilities.showWriteControls = true;
 

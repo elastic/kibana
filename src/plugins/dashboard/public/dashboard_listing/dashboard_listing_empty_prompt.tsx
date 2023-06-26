@@ -29,6 +29,7 @@ import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_session_stora
 
 export interface DashboardListingEmptyPromptProps {
   createItem: () => void;
+  disableCreateDashboardButton?: boolean;
   unsavedDashboardIds: string[];
   goToDashboard: DashboardListingProps['goToDashboard'];
   setUnsavedDashboardIds: React.Dispatch<React.SetStateAction<string[]>>;
@@ -41,6 +42,7 @@ export const DashboardListingEmptyPrompt = ({
   unsavedDashboardIds,
   goToDashboard,
   createItem,
+  disableCreateDashboardButton,
 }: DashboardListingEmptyPromptProps) => {
   const {
     application,
@@ -56,7 +58,13 @@ export const DashboardListingEmptyPrompt = ({
   const getEmptyAction = useCallback(() => {
     if (!isEditingFirstDashboard) {
       return (
-        <EuiButton onClick={createItem} fill iconType="plusInCircle" data-test-subj="newItemButton">
+        <EuiButton
+          onClick={createItem}
+          fill
+          iconType="plusInCircle"
+          data-test-subj="newItemButton"
+          disabled={disableCreateDashboardButton}
+        >
           {noItemsStrings.getCreateNewDashboardText()}
         </EuiButton>
       );
@@ -94,11 +102,12 @@ export const DashboardListingEmptyPrompt = ({
       </EuiFlexGroup>
     );
   }, [
-    dashboardSessionStorage,
     isEditingFirstDashboard,
+    createItem,
+    disableCreateDashboardButton,
+    dashboardSessionStorage,
     setUnsavedDashboardIds,
     goToDashboard,
-    createItem,
   ]);
 
   if (!showWriteControls) {
