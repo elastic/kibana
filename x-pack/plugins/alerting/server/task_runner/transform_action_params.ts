@@ -142,6 +142,21 @@ export function transformSummaryActionParams({
   ruleUrl?: string;
 }): RuleActionParams {
   const variables = {
+    alertId: rule.id,
+    alertName: rule.name,
+    spaceId,
+    tags: rule.tags,
+    params: rule.params,
+    alertInstanceId: rule.id,
+    alertActionGroup: 'default',
+    alertActionGroupName: 'Default',
+    alert: {
+      id: rule.id,
+      uuid: rule.id,
+      actionGroup: 'default',
+      actionGroupName: 'Default',
+      flapping: false,
+    },
     kibanaBaseUrl,
     date: new Date().toISOString(),
     // For backwards compatibility with security solutions rules

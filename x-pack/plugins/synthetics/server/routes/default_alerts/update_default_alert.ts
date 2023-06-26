@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TLSAlertService } from './tls_alert_service';
 import { StatusAlertService } from './status_alert_service';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -16,7 +17,11 @@ export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
   writeAccess: true,
   handler: async ({ context, server, savedObjectsClient }): Promise<any> => {
     const statusAlertService = new StatusAlertService(context, server, savedObjectsClient);
+    const tlsAlertService = new TLSAlertService(context, server, savedObjectsClient);
 
-    return await statusAlertService.updateDefaultAlert();
+    return Promise.allSettled([
+      statusAlertService.updateDefaultAlert(),
+      tlsAlertService.updateDefaultAlert(),
+    ]);
   },
 });

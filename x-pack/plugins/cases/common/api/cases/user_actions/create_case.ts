@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 import { AssigneesUserActionPayloadRt } from './assignees';
+import { CategoryUserActionPayloadRt } from './category';
 import type { UserActionWithAttributes } from './common';
 import { ActionTypes } from './common';
 import {
@@ -33,20 +34,28 @@ const CommonPayloadAttributesRt = rt.strict({
   owner: rt.string,
 });
 
+const OptionalPayloadAttributesRt = rt.exact(
+  rt.partial({
+    category: CategoryUserActionPayloadRt.type.props.category,
+  })
+);
+
+const PayloadAttributesRt = rt.intersection([
+  CommonPayloadAttributesRt,
+  OptionalPayloadAttributesRt,
+]);
+
 export const CreateCaseUserActionRt = rt.intersection([
   CommonFieldsRt,
   rt.strict({
-    payload: rt.intersection([ConnectorUserActionPayloadRt, CommonPayloadAttributesRt]),
+    payload: rt.intersection([ConnectorUserActionPayloadRt, PayloadAttributesRt]),
   }),
 ]);
 
 export const CreateCaseUserActionWithoutConnectorIdRt = rt.intersection([
   CommonFieldsRt,
   rt.strict({
-    payload: rt.intersection([
-      ConnectorUserActionPayloadWithoutConnectorIdRt,
-      CommonPayloadAttributesRt,
-    ]),
+    payload: rt.intersection([ConnectorUserActionPayloadWithoutConnectorIdRt, PayloadAttributesRt]),
   }),
 ]);
 

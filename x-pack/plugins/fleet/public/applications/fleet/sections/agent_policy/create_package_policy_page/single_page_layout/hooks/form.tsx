@@ -234,10 +234,10 @@ export function useOnSubmit({
     queryParamsPolicyId,
   });
 
-  const navigateAddAgent = (policy?: PackagePolicy) =>
+  const navigateAddAgent = (policy: PackagePolicy) =>
     onSaveNavigate(policy, ['openEnrollmentFlyout']);
 
-  const navigateAddAgentHelp = (policy?: PackagePolicy) =>
+  const navigateAddAgentHelp = (policy: PackagePolicy) =>
     onSaveNavigate(policy, ['showAddAgentHelp']);
 
   const onSubmit = useCallback(
