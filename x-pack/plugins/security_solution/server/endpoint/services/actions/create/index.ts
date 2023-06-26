@@ -13,6 +13,7 @@ import type { ResponseActionsApiCommandNames } from '../../../../../common/endpo
 import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
+  HostMetadata,
 } from '../../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../../types';
 import type { FeatureKeys } from '../../feature_usage';
@@ -76,7 +77,12 @@ export const actionCreateService = (
 
   return {
     createAction,
-    createActionFromAlert: (payload, agents) =>
-      createAction(payload, agents, { minimumLicenseRequired: 'enterprise' }),
+    createActionFromAlert: async (payload) => {
+      const endpointData = await endpointContext.service
+        .getEndpointMetadataService()
+        .getMetadataForEndpoints(esClient, [...new Set(payload.endpoint_ids)]);
+      const agentIds = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
+      return createAction(payload, agentIds, { minimumLicenseRequired: 'enterprise' });
+    },
   };
 };
