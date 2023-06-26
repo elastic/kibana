@@ -97,30 +97,30 @@ A list of available variables can be accessed by selecting the
 Click **Save**. The alert has been created and is now active!
 
 [float]
+[[apm-alert-view-active]]
+=== View active alerts
+
+Active alerts are displayed and grouped in multiple ways in the APM app.
+
+[float]
+[[apm-alert-view-group]]
+==== View alerts by service group
+
+If you're using the <<service-groups,service groups>> feature, you can view alerts by service group.
+From the service group overview page, click the red alert indicator to open the **Alerts** tab with a predefined filter that matches the filter used when creating the service group.
+
+[role="screenshot"]
+image::apm/images/apm-service-group.png[Example view of service group in the APM app in Kibana]
+
+[float]
 [[apm-alert-view-service]]
-=== View alerts by service
+==== View alerts by service
 
 Alerts can be viewed within the context of any service.
 After selecting a service, go to the **Alerts** tab to view any alerts that are active for the selected service.
 
 [role="screenshot"]
 image::apm/images/active-alert-service.png[View active alerts by service]
-
-[float]
-[[apm-alert-view-group]]
-=== View alerts by service group
-
-If you're using the <<service-groups,service groups>> feature, you can view alerts by service group.
-From the service group overview page, click the red alert indicator to open the alerts page with a predefined filter that matches the filter used when creating the service group.
-
-[role="screenshot"]
-image::apm/images/apm-service-group.png[Example view of service group in the APM app in Kibana]
-
-Alerts can be viewed within the context of any service.
-After selecting a service, go to the **Alerts** tab to view any alerts that are active for the selected service.
-
-[role="screenshot"]
-image::apm/images/active-alert-status.png[View active alerts by service]
 
 [float]
 [[apm-alert-manage]]
