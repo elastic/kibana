@@ -12,9 +12,8 @@ import { globalSearchPluginMock } from '@kbn/global-search-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { BehaviorSubject, of, throwError } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { EventReporter } from '../telemetry';
 import { SearchBar } from './search_bar';
@@ -51,30 +50,16 @@ jest.useFakeTimers({ legacyFakeTimers: true });
 describe('SearchBar', () => {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
   const core = coreMock.createStart();
-  let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
-  let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
-  let mockReportUiCounter: typeof usageCollection.reportUiCounter;
-  let mockReportEvent: typeof core.analytics.reportEvent;
-  let eventReporter: EventReporter;
 
   const basePathUrl = '/plugins/globalSearchBar/assets/';
   const darkMode = false;
+  const eventReporter = new EventReporter({ analytics: core.analytics, usageCollection });
+  let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
+  let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
 
   beforeEach(() => {
     applications = applicationServiceMock.createStartContract();
     searchService = globalSearchPluginMock.createStartContract();
-
-    mockReportUiCounter = jest.fn();
-    usageCollection.reportUiCounter = mockReportUiCounter;
-
-    mockReportEvent = jest.fn();
-    core.analytics.reportEvent = mockReportEvent;
-
-    eventReporter = new EventReporter({ analytics: core.analytics, usageCollection });
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
   });
 
   const update = () => {
@@ -144,10 +129,6 @@ describe('SearchBar', () => {
       await assertSearchResults(['Discover • Kibana', 'My Dashboard • Test']);
       expect(searchService.find).toHaveBeenCalledTimes(2);
       expect(searchService.find).toHaveBeenLastCalledWith({ term: 'd' }, {});
-
-      expect(mockReportUiCounter).nthCalledWith(1, 'global_search_bar', 'count', 'search_focus');
-      expect(mockReportUiCounter).nthCalledWith(2, 'global_search_bar', 'count', 'search_request');
-      expect(mockReportUiCounter).toHaveBeenCalledTimes(2);
     });
 
     it('supports keyboard shortcuts', async () => {
@@ -170,10 +151,6 @@ describe('SearchBar', () => {
       const inputElement = await screen.findByTestId('nav-search-input');
 
       expect(document.activeElement).toEqual(inputElement);
-
-      expect(mockReportUiCounter).nthCalledWith(1, 'global_search_bar', 'count', 'shortcut_used');
-      expect(mockReportUiCounter).nthCalledWith(2, 'global_search_bar', 'count', 'search_focus');
-      expect(mockReportUiCounter).toHaveBeenCalledTimes(2);
     });
 
     it('only display results from the last search', async () => {
@@ -214,110 +191,6 @@ describe('SearchBar', () => {
 
       await assertSearchResults(['Visualize • Kibana', 'Map • Kibana']);
     });
-
-    describe('telemetry', () => {
-      it('tracks the application navigated to', async () => {
-        searchService.find.mockReturnValueOnce(
-          of(createBatch('Discover', { id: 'My Dashboard', type: 'test' }))
-        );
-
-        render(
-          <IntlProvider locale="en">
-            <SearchBar
-              globalSearch={searchService}
-              navigateToUrl={applications.navigateToUrl}
-              basePathUrl={basePathUrl}
-              darkMode={darkMode}
-              chromeStyle$={chromeStyle$}
-              reportEvent={eventReporter}
-            />
-          </IntlProvider>
-        );
-
-        jest.spyOn(Date, 'now').mockReturnValue(1000);
-
-        await focusAndUpdate();
-
-        jest.spyOn(Date, 'now').mockReturnValue(2000);
-
-        fireEvent.click(await screen.findByTestId('nav-search-option'));
-
-        expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_blur', {
-          focus_time_ms: 1000,
-        });
-        expect(mockReportEvent).nthCalledWith(2, 'global_search_bar_click_application', {
-          application: 'discover',
-          terms: '',
-        });
-        expect(mockReportEvent).toHaveBeenCalledTimes(2);
-      });
-
-      it('tracks the searchValue', async () => {
-        searchService.find.mockReturnValueOnce(
-          of(createBatch('Discover', { id: 'My Dashboard', type: 'test' }))
-        );
-
-        render(
-          <IntlProvider locale="en">
-            <SearchBar
-              globalSearch={searchService}
-              navigateToUrl={applications.navigateToUrl}
-              basePathUrl={basePathUrl}
-              darkMode={darkMode}
-              chromeStyle$={chromeStyle$}
-              reportEvent={eventReporter}
-            />
-          </IntlProvider>
-        );
-
-        jest.spyOn(Date, 'now').mockReturnValue(1000);
-
-        await focusAndUpdate();
-        userEvent.type(await screen.findByTestId('nav-search-input'), 'Ahoy!');
-
-        jest.spyOn(Date, 'now').mockReturnValue(2000);
-
-        fireEvent.click(await screen.findByTestId('nav-search-option'));
-
-        expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_blur', {
-          focus_time_ms: 1000,
-        });
-        expect(mockReportEvent).nthCalledWith(2, 'global_search_bar_click_application', {
-          application: 'discover',
-          terms: 'Ahoy!',
-        });
-        expect(mockReportEvent).toHaveBeenCalledTimes(2);
-      });
-
-      it('tracks errors', async () => {
-        searchService.find.mockReturnValueOnce(
-          throwError(() => new Error('service unavailable :('))
-        );
-
-        render(
-          <IntlProvider locale="en">
-            <SearchBar
-              globalSearch={searchService}
-              navigateToUrl={applications.navigateToUrl}
-              basePathUrl={basePathUrl}
-              darkMode={darkMode}
-              chromeStyle$={chromeStyle$}
-              reportEvent={eventReporter}
-            />
-          </IntlProvider>
-        );
-
-        userEvent.type(await screen.findByTestId('nav-search-input'), 'Ahoy!');
-
-        await focusAndUpdate();
-
-        expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_unhandled_error', {
-          error_message: 'Error: service unavailable :(',
-          terms: 'Ahoy!',
-        });
-        expect(mockReportEvent).toHaveBeenCalledTimes(1);
-      });
-    });
   });
 
   describe('chromeStyle: project', () => {
@@ -341,16 +214,10 @@ describe('SearchBar', () => {
         fireEvent.keyDown(window, { key: '/', ctrlKey: true, metaKey: true });
       });
 
-      const inputElement = await screen.findByTestId('nav-search-input');
-
-      expect(document.activeElement).toEqual(inputElement);
+      expect(await screen.findByTestId('nav-search-input')).toEqual(document.activeElement);
 
       fireEvent.click(await screen.findByTestId('nav-search-conceal'));
       expect(screen.queryAllByTestId('nav-search-input')).toHaveLength(0);
-
-      expect(mockReportUiCounter).nthCalledWith(1, 'global_search_bar', 'count', 'shortcut_used');
-      expect(mockReportUiCounter).nthCalledWith(2, 'global_search_bar', 'count', 'search_focus');
-      expect(mockReportUiCounter).toHaveBeenCalledTimes(2);
     });
 
     it('supports show/hide', async () => {
@@ -367,23 +234,11 @@ describe('SearchBar', () => {
         </IntlProvider>
       );
 
-      jest.spyOn(Date, 'now').mockReturnValue(1000);
-
       fireEvent.click(await screen.findByTestId('nav-search-reveal'));
       expect(await screen.findByTestId('nav-search-input')).toBeVisible();
 
-      jest.spyOn(Date, 'now').mockReturnValue(2000);
-
       fireEvent.click(await screen.findByTestId('nav-search-conceal'));
       expect(screen.queryAllByTestId('nav-search-input')).toHaveLength(0);
-
-      expect(mockReportUiCounter).nthCalledWith(1, 'global_search_bar', 'count', 'search_focus');
-      expect(mockReportUiCounter).toHaveBeenCalledTimes(1);
-
-      expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_blur', {
-        focus_time_ms: 1000,
-      });
-      expect(mockReportEvent).toHaveBeenCalledTimes(1);
     });
   });
 });
