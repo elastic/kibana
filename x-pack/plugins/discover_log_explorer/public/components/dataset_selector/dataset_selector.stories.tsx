@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Meta, Story } from '@storybook/react';
 import { IndexPattern } from '@kbn/io-ts-utils';
-import { Dataset, Integration } from '../../../common/datasets';
+import { Dataset, Integration, IntegrationType } from '../../../common/datasets';
 import { DatasetSelector } from './dataset_selector';
 import {
   DatasetSelectionHandler,
@@ -37,9 +37,7 @@ const meta: Meta<typeof DatasetSelector> = {
 export default meta;
 
 const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
-  const [selected, setSelected] = useState<Dataset>(() =>
-    Dataset.create(mockIntegrations[0].dataStreams[0], mockIntegrations[0])
-  );
+  const [selected, setSelected] = useState<Dataset>(() => mockIntegrations[0].datasets[0]);
 
   const [search, setSearch] = useState<DatasetsSelectorSearchParams>({
     sortOrder: 'asc',

@@ -13,21 +13,21 @@ export class Integration {
   name: IntegrationType['name'];
   status: IntegrationType['status'];
   version: IntegrationType['version'];
-  dataStreams: Dataset[];
+  datasets: Dataset[];
 
   private constructor(integration: Integration) {
     this.id = integration.id;
     this.name = integration.name;
     this.status = integration.status;
     this.version = integration.version;
-    this.dataStreams = integration.dataStreams;
+    this.datasets = integration.datasets;
   }
 
   public static create(integration: IntegrationType) {
     return {
       ...integration,
       id: `integration-${integration.name}-${integration.version}` as IntegrationId,
-      dataStreams: integration.dataStreams.map((dataset) => Dataset.create(dataset, integration)),
+      datasets: integration.dataStreams.map((dataset) => Dataset.create(dataset, integration)),
     };
   }
 }

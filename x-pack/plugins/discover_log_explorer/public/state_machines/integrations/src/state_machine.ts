@@ -199,7 +199,7 @@ const searchIntegrationStreams = (
     return {
       ...integration,
       // Filter and sort the datasets by the search criteria
-      dataStreams: new EntityList<Dataset>(integration.dataStreams)
+      dataStreams: new EntityList<Dataset>(integration.datasets)
         .filterBy((stream) => Boolean(stream.title?.includes(nameQuery ?? '')))
         .sortBy('name', sortOrder)
         .build(),

@@ -40,7 +40,7 @@ export const buildIntegrationsTree = ({
 }: IntegrationsTreeParams) => {
   return integrations.reduce(
     (res: IntegrationsTree, integration) => {
-      const { name, version, dataStreams } = integration;
+      const { name, version, datasets } = integration;
 
       res.items.push({
         name,
@@ -52,7 +52,7 @@ export const buildIntegrationsTree = ({
         id: integration.id,
         title: name,
         width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
-        items: dataStreams.map((dataset) => ({
+        items: datasets.map((dataset) => ({
           name: dataset.title,
           onClick: () => onDatasetSelected(dataset),
         })),
