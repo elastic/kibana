@@ -67,6 +67,7 @@ export interface StartDeps {
 
 /** @internal */
 export class ChromeService {
+  private isCloudEnabled: boolean = false;
   private isVisible$!: Observable<boolean>;
   private isForceHidden$!: BehaviorSubject<boolean>;
   private readonly stop$ = new ReplaySubject<void>(1);
@@ -306,7 +307,7 @@ export class ChromeService {
               navControlsRight$={navControls.getRight$()}
               loadingCount$={http.getLoadingCount$()}
               homeHref$={projectNavigation.getProjectHome$()}
-              kibanaDocLink={docLinks.links.kibana.guide}
+              kibanaDocLink={docLinks.links.elasticStackGetStarted}
               kibanaVersion={injectedMetadata.getKibanaVersion()}
               prependBasePath={http.basePath.prepend}
             >
@@ -328,13 +329,18 @@ export class ChromeService {
           breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
           breadcrumbsAppendExtension$={breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$))}
           customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
-          kibanaDocLink={docLinks.links.kibana.guide}
+          kibanaDocLink={
+            this.isCloudEnabled
+              ? docLinks.links.elasticStackGetStarted
+              : docLinks.links.kibana.guide
+          }
           forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
           globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
           helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
           helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
           homeHref={http.basePath.prepend('/app/home')}
           isVisible$={this.isVisible$}
+          isCloudEnabled={this.isCloudEnabled}
           kibanaVersion={injectedMetadata.getKibanaVersion()}
           navLinks$={navLinks.getNavLinks$()}
           recentlyAccessed$={recentlyAccessed.get$()}

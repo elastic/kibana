@@ -58,6 +58,7 @@ export interface HeaderProps {
   customNavLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
   isVisible$: Observable<boolean>;
+  isCloudEnabled: boolean;
   kibanaDocLink: string;
   navLinks$: Observable<ChromeNavLink[]>;
   recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
@@ -83,6 +84,7 @@ export function Header({
   basePath,
   onIsLockedUpdate,
   homeHref,
+  isCloudEnabled,
   breadcrumbsAppendExtension$,
   globalHelpExtensionMenuLinks$,
   customBranding$,
@@ -166,6 +168,7 @@ export function Header({
                     kibanaDocLink={kibanaDocLink}
                     kibanaVersion={kibanaVersion}
                     navigateToUrl={application.navigateToUrl}
+                    isCloudEnabled={isCloudEnabled}
                   />,
                   <HeaderNavControls navControls$={observables.navControlsRight$} />,
                 ],

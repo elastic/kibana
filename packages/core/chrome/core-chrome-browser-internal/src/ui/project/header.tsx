@@ -242,6 +242,7 @@ export const ProjectHeader = ({
               kibanaDocLink={kibanaDocLink}
               kibanaVersion={kibanaVersion}
               navigateToUrl={application.navigateToUrl}
+              isCloudEnabled={true}
             />
           </EuiHeaderSectionItem>
         </EuiHeaderSection>

@@ -40,6 +40,10 @@ interface Props {
   helpSupportUrl$: Observable<string>;
   kibanaVersion: string;
   kibanaDocLink: string;
+  /**
+   * `true` when Kibana is running on Elastic Cloud.
+   */
+  isCloudEnabled: boolean;
 }
 
 interface State {
@@ -137,33 +141,51 @@ export class HeaderHelpMenu extends Component<Props, State> {
         <div style={{ maxWidth: 240 }}>
           {globalCustomContent}
           {defaultContent}
-          {(defaultContent || customContent) && <EuiHorizontalRule margin="m" />}
-          {customContent}
+          {customContent && (
+            <>
+              <EuiHorizontalRule margin="m" />
+              {customContent}
+            </>
+          )}
         </div>
       </EuiPopover>
     );
   }
 
   private renderDefaultContent() {
-    const { kibanaDocLink } = this.props;
+    const { kibanaDocLink, isCloudEnabled } = this.props;
     const { helpSupportUrl } = this.state;
 
     return (
       <Fragment>
         <EuiButtonEmpty href={kibanaDocLink} target="_blank" size="s" flush="left">
-          <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
-            defaultMessage="Kibana documentation"
-          />
+          {isCloudEnabled ? (
+            <FormattedMessage
+              id="core.ui.chrome.headerGlobalNav.helpMenuDocumentationTitle"
+              defaultMessage="Documentation"
+            />
+          ) : (
+            <FormattedMessage
+              id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
+              defaultMessage="Kibana documentation"
+            />
+          )}
         </EuiButtonEmpty>
 
         <EuiSpacer size="xs" />
 
         <EuiButtonEmpty href={helpSupportUrl} target="_blank" size="s" flush="left">
-          <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
-            defaultMessage="Ask Elastic"
-          />
+          {isCloudEnabled ? (
+            <FormattedMessage
+              id="core.ui.chrome.headerGlobalNav.helpMenuSupportTitle"
+              defaultMessage="Support"
+            />
+          ) : (
+            <FormattedMessage
+              id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
+              defaultMessage="Ask Elastic"
+            />
+          )}
         </EuiButtonEmpty>
 
         <EuiSpacer size="xs" />
@@ -177,18 +199,20 @@ export class HeaderHelpMenu extends Component<Props, State> {
 
         <EuiSpacer size="xs" />
 
-        <EuiButtonEmpty
-          href={GITHUB_CREATE_ISSUE_LINK}
-          target="_blank"
-          size="s"
-          iconType="logoGithub"
-          flush="left"
-        >
-          <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle"
-            defaultMessage="Open an issue in GitHub"
-          />
-        </EuiButtonEmpty>
+        {!isCloudEnabled && (
+          <EuiButtonEmpty
+            href={GITHUB_CREATE_ISSUE_LINK}
+            target="_blank"
+            size="s"
+            iconType="logoGithub"
+            flush="left"
+          >
+            <FormattedMessage
+              id="core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle"
+              defaultMessage="Open an issue in GitHub"
+            />
+          </EuiButtonEmpty>
+        )}
       </Fragment>
     );
   }
