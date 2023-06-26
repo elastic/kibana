@@ -53,6 +53,11 @@ export class ProjectNavigationService {
     this.onHistoryLocationChange(application.history.location);
     this.unlistenHistory = application.history.listen(this.onHistoryLocationChange.bind(this));
 
+    this.activeNodes$.pipe(takeUntil(this.stop$)).subscribe(() => {
+      // reset the breadcrumbs when the active nodes change
+      this.projectBreadcrumbs$.next({ breadcrumbs: [], params: { absolute: false } });
+    });
+
     return {
       setProjectHome: (homeHref: string) => {
         this.projectHome$.next(homeHref);
@@ -87,19 +92,33 @@ export class ProjectNavigationService {
         });
       },
       getProjectBreadcrumbs$: (): Observable<ChromeProjectBreadcrumb[]> => {
-        return combineLatest([this.projectBreadcrumbs$, this.projectNavigation$]).pipe(
-          map(([breadcrumbs, projectNavigation]) => {
-            /* TODO: point home breadcrumb to the correct place */
-            const homeBreadcrumb = createHomeBreadcrumb({ homeHref: '/' });
+        return combineLatest([
+          this.projectBreadcrumbs$,
+          this.activeNodes$,
+          this.projectHome$.pipe(map((homeHref) => homeHref ?? '/')),
+        ]).pipe(
+          map(([breadcrumbs, activeNodes, homeHref]) => {
+            const homeBreadcrumb = createHomeBreadcrumb({
+              homeHref: this.http?.basePath.prepend?.(homeHref) ?? homeHref,
+            });
 
             if (breadcrumbs.params.absolute) {
               return [homeBreadcrumb, ...breadcrumbs.breadcrumbs];
             } else {
-              return [
-                homeBreadcrumb,
-                /* TODO: insert nav breadcrumbs based on projectNavigation and application path */
-                ...breadcrumbs.breadcrumbs,
-              ];
+              // breadcrumbs take the first active path
+              const activePath: ChromeProjectNavigationNode[] = activeNodes[0] ?? [];
+              const navBreadcrumbs = activePath
+                .filter((n) => Boolean(n.title) && n.breadcrumbStatus !== 'hidden')
+                .map(
+                  (node): ChromeProjectBreadcrumb => ({
+                    href: node.deepLink?.url ?? node.href,
+                    text: node.title,
+                  })
+                );
+
+              const result = [homeBreadcrumb, ...navBreadcrumbs, ...breadcrumbs.breadcrumbs];
+
+              return result;
             }
           })
         );

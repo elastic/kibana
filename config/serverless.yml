@@ -4,6 +4,7 @@ xpack.security.showNavLinks: false
 xpack.serverless.plugin.enabled: true
 xpack.fleet.internal.fleetServerStandalone: true
 xpack.fleet.internal.disableILMPolicies: true
+xpack.fleet.internal.disableProxies: true
 
 # Ess plugins
 xpack.ess.security.enabled: false

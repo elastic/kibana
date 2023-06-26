@@ -30,20 +30,35 @@ export function SloEditPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
 
   const { sloId } = useParams<{ sloId: string | undefined }>();
-
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
+  const { slo, isInitialLoading } = useFetchSloDetails({ sloId });
 
   useBreadcrumbs([
     {
       href: basePath.prepend(paths.observability.slos),
-      text: i18n.translate('xpack.observability.breadcrumbs.sloEditLinkText', {
+      text: i18n.translate('xpack.observability.breadcrumbs.sloLabel', {
         defaultMessage: 'SLOs',
       }),
     },
+    ...(!!slo
+      ? [
+          {
+            href: basePath.prepend(paths.observability.sloDetails(slo!.id)),
+            text: slo!.name,
+          },
+        ]
+      : []),
+    {
+      text: slo
+        ? i18n.translate('xpack.observability.breadcrumbs.sloEditLabel', {
+            defaultMessage: 'Edit',
+          })
+        : i18n.translate('xpack.observability.breadcrumbs.sloCreateLabel', {
+            defaultMessage: 'Create',
+          }),
+    },
   ]);
-
-  const { slo, isInitialLoading } = useFetchSloDetails({ sloId });
 
   if (hasRightLicense === false || !hasWriteCapabilities || hasErrorInGlobalDiagnosis) {
     navigateToUrl(basePath.prepend(paths.observability.slos));
