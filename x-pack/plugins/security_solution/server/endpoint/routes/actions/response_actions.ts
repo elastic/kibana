@@ -216,18 +216,25 @@ export function registerResponseActionRoutes(
       )
     );
 
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: EXECUTE_ROUTE,
-      validate: ExecuteActionRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canWriteExecuteOperations'] },
-      logger,
-      responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: ExecuteActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteExecuteOperations'] },
+        logger,
+        responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'execute')
+      )
+    );
 
   registerActionFileUploadRoute(router, endpointContext);
 }

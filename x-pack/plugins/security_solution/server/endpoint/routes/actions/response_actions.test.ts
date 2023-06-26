@@ -489,6 +489,7 @@ describe('Response actions', () => {
     it('sends the `execute` command payload from the execute route', async () => {
       await callRoute(EXECUTE_ROUTE, {
         body: { endpoint_ids: ['XYZ'], parameters: { command: 'ls -al' } },
+        version: '2023-10-31',
       });
 
       await expect(
@@ -728,6 +729,7 @@ describe('Response actions', () => {
           EXECUTE_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'], parameters: { command: 'ls -al', timeout: 1000 } },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
@@ -765,6 +767,7 @@ describe('Response actions', () => {
           EXECUTE_ROUTE,
           {
             body: { endpoint_ids: ['XYZ'], parameters: { command: 'ls -al' } },
+            version: '2023-10-31',
           },
           { endpointDsExists: true }
         );
@@ -919,6 +922,7 @@ describe('Response actions', () => {
         await callRoute(EXECUTE_ROUTE, {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canWriteExecuteOperations: false },
+          version: '2023-10-31',
         });
         expect(mockResponse.forbidden).toBeCalled();
       });
