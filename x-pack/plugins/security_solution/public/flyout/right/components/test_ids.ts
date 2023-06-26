@@ -129,5 +129,10 @@ export const VISUALIZATIONS_SECTION_HEADER_TEST_ID =
   'securitySolutionDocumentDetailsVisualizationsTitleHeader';
 export const ANALYZER_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerPreview';
 export const ANALYZER_TREE_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerTree';
+export const ANALYZER_TREE_VIEW_DETAILS_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsAnalayzerTreeViewDetailsButton';
 export const ANALYZER_TREE_LOADING_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerTreeLoading';
 export const ANALYZER_TREE_ERROR_TEST_ID = 'securitySolutionDocumentDetailsAnalayzerTreeError';
+export const SESSION_PREVIEW_TEST_ID = 'securitySolutionDocumentDetailsSessionPreview';
+export const SESSION_PREVIEW_VIEW_DETAILS_BUTTON_TEST_ID =
+  'securitySolutionDocumentDetailsSessionPreviewViewDetailsButton';

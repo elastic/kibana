@@ -6,21 +6,24 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { pick } from 'lodash';
+import { pick, orderBy } from 'lodash';
 import moment from 'moment';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { ExplainLogRateSpikesContent } from '@kbn/aiops-plugin/public';
-
+import {
+  ExplainLogRateSpikesContent,
+  type ExplainLogRateSpikesAnalysisResults,
+} from '@kbn/aiops-plugin/public';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { CoPilotPrompt, TopAlert, useCoPilot } from '@kbn/observability-plugin/public';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { CoPilotPromptId } from '@kbn/observability-plugin/common';
 import { ALERT_END } from '@kbn/rule-data-utils';
+import { Color, colorTransformer } from '../../../../../../common/color_palette';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import {
   Comparator,
@@ -38,6 +41,13 @@ export interface AlertDetailsExplainLogRateSpikesSectionProps {
   alert: TopAlert<Record<string, any>>;
 }
 
+interface SignificantFieldValue {
+  field: string;
+  value: string | number;
+  docCount: number;
+  pValue: number | null;
+}
+
 export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionProps> = ({
   rule,
   alert,
@@ -46,6 +56,9 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   const { dataViews, logViews } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
+  const [logSpikeParams, setLogSpikeParams] = useState<
+    { significantFieldValues: SignificantFieldValue[] } | undefined
+  >();
 
   useEffect(() => {
     const getDataView = async () => {
@@ -83,26 +96,64 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
     }
   }, [rule, alert, dataViews, logViews]);
 
+  // Identify `intervalFactor` to adjust time ranges based on alert settings.
+  // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.
+  // If an alert would have a `5m` lookback, this would result in a factor of `5`.
+  const lookbackDuration =
+    alert.fields['kibana.alert.rule.parameters'] &&
+    alert.fields['kibana.alert.rule.parameters'].timeSize &&
+    alert.fields['kibana.alert.rule.parameters'].timeUnit
+      ? moment.duration(
+          alert.fields['kibana.alert.rule.parameters'].timeSize as number,
+          alert.fields['kibana.alert.rule.parameters'].timeUnit as any
+        )
+      : moment.duration(1, 'm');
+  const intervalFactor = Math.max(1, lookbackDuration.asSeconds() / 60);
+
   const alertStart = moment(alert.start);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : undefined;
 
   const timeRange = {
-    min: alertStart.clone().subtract(20, 'minutes'),
-    max: alertEnd ? alertEnd.clone().add(5, 'minutes') : moment(new Date()),
+    min: alertStart.clone().subtract(15 * intervalFactor, 'minutes'),
+    max: alertEnd ? alertEnd.clone().add(1 * intervalFactor, 'minutes') : moment(new Date()),
   };
+
+  function getDeviationMax() {
+    if (alertEnd) {
+      return alertEnd
+        .clone()
+        .subtract(1 * intervalFactor, 'minutes')
+        .valueOf();
+    } else if (
+      alertStart
+        .clone()
+        .add(10 * intervalFactor, 'minutes')
+        .isAfter(moment(new Date()))
+    ) {
+      return moment(new Date()).valueOf();
+    } else {
+      return alertStart
+        .clone()
+        .add(10 * intervalFactor, 'minutes')
+        .valueOf();
+    }
+  }
 
   const initialAnalysisStart = {
-    baselineMin: alertStart.clone().subtract(10, 'minutes').valueOf(),
-    baselineMax: alertStart.clone().subtract(1, 'minutes').valueOf(),
-    deviationMin: alertStart.valueOf(),
-    deviationMax: alertStart.clone().add(10, 'minutes').isAfter(moment(new Date()))
-      ? moment(new Date()).valueOf()
-      : alertStart.clone().add(10, 'minutes').valueOf(),
+    baselineMin: alertStart
+      .clone()
+      .subtract(13 * intervalFactor, 'minutes')
+      .valueOf(),
+    baselineMax: alertStart
+      .clone()
+      .subtract(2 * intervalFactor, 'minutes')
+      .valueOf(),
+    deviationMin: alertStart
+      .clone()
+      .subtract(1 * intervalFactor, 'minutes')
+      .valueOf(),
+    deviationMax: getDeviationMax(),
   };
-
-  const coPilotService = useCoPilot();
-
-  const explainLogSpikeParams = undefined;
 
   const explainLogSpikeTitle = i18n.translate(
     'xpack.infra.logs.alertDetails.explainLogSpikeTitle',
@@ -110,6 +161,25 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
       defaultMessage: 'Possible causes and remediations',
     }
   );
+
+  const onAnalysisCompleted = (
+    analysisResults: ExplainLogRateSpikesAnalysisResults | undefined
+  ) => {
+    const significantFieldValues = orderBy(
+      analysisResults?.significantTerms?.map((item) => ({
+        field: item.fieldName,
+        value: item.fieldValue,
+        docCount: item.doc_count,
+        pValue: item.pValue,
+      })),
+      ['pValue', 'docCount'],
+      ['asc', 'asc']
+    ).slice(0, 50);
+    setLogSpikeParams(significantFieldValues ? { significantFieldValues } : undefined);
+  };
+
+  const coPilotService = useCoPilot();
+  const hasLogSpikeParams = logSpikeParams && logSpikeParams.significantFieldValues?.length > 0;
 
   if (!dataView || !esSearchQuery) return null;
 
@@ -132,6 +202,9 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
             timeRange={timeRange}
             esSearchQuery={esSearchQuery}
             initialAnalysisStart={initialAnalysisStart}
+            barColorOverride={colorTransformer(Color.color0)}
+            barHighlightColorOverride={colorTransformer(Color.color1)}
+            onAnalysisCompleted={onAnalysisCompleted}
             appDependencies={pick(services, [
               'application',
               'data',
@@ -151,12 +224,12 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup direction="column" gutterSize="m">
-        {coPilotService?.isEnabled() && explainLogSpikeParams ? (
+        {coPilotService?.isEnabled() && hasLogSpikeParams ? (
           <EuiFlexItem grow={false}>
             <CoPilotPrompt
               coPilot={coPilotService}
               title={explainLogSpikeTitle}
-              params={explainLogSpikeParams}
+              params={logSpikeParams}
               promptId={CoPilotPromptId.ExplainLogSpike}
             />
           </EuiFlexItem>

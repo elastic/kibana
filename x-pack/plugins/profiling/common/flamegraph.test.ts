@@ -12,8 +12,8 @@ import { createBaseFlameGraph, createFlameGraph } from './flamegraph';
 import { events, stackTraces, stackFrames, executables } from './__fixtures__/stacktraces';
 
 const totalFrames = sum([...stackTraces.values()].map((trace) => trace.FrameIDs.length));
-const tree = createCalleeTree(events, stackTraces, stackFrames, executables, totalFrames);
-const baseFlamegraph = createBaseFlameGraph(tree, 60);
+const tree = createCalleeTree(events, stackTraces, stackFrames, executables, totalFrames, 1.0);
+const baseFlamegraph = createBaseFlameGraph(tree, 1.0, 60);
 const flamegraph = createFlameGraph(baseFlamegraph);
 
 describe('Flamegraph operations', () => {

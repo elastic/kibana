@@ -21,6 +21,7 @@ import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_fr
 import type { BuilderDeps } from './types';
 import { AssigneesUserActionBuilder } from './builders/assignees';
 import { NoopUserActionBuilder } from './builders/noop';
+import { CategoryUserActionBuilder } from './builders/category';
 
 const builderMap = {
   assignees: AssigneesUserActionBuilder,
@@ -32,6 +33,7 @@ const builderMap = {
   pushed: PushedUserActionBuilder,
   tags: TagsUserActionBuilder,
   status: StatusUserActionBuilder,
+  category: CategoryUserActionBuilder,
   severity: SeverityUserActionBuilder,
   settings: SettingsUserActionBuilder,
   delete_case: NoopUserActionBuilder,

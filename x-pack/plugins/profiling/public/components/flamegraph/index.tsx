@@ -176,6 +176,7 @@ export function FlameGraph({
           frame={selected}
           totalSeconds={primaryFlamegraph?.TotalSeconds ?? 0}
           totalSamples={totalSamples}
+          samplingRate={primaryFlamegraph?.SamplingRate ?? 1.0}
         />
       )}
     </>

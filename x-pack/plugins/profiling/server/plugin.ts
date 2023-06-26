@@ -35,7 +35,6 @@ export class ProfilingPlugin
   }
 
   public setup(core: CoreSetup<ProfilingPluginStartDeps>, deps: ProfilingPluginSetupDeps) {
-    this.logger.debug('profiling: Setup');
     const router = core.http.createRouter<ProfilingRequestHandlerContext>();
 
     deps.features.registerKibanaFeature(PROFILING_FEATURE);
@@ -80,7 +79,6 @@ export class ProfilingPlugin
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('profiling: Started');
     return {};
   }
 
