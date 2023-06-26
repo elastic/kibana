@@ -2297,7 +2297,20 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.KibanaSavedObjectType",
+        "type": "Enum",
+        "tags": [],
+        "label": "KibanaSavedObjectType",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "fleet",
@@ -4314,6 +4327,46 @@
           "trackAdoption": false,
           "children": [],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "fleet",
+          "id": "def-public.FleetStart.hooks",
+          "type": "Object",
+          "tags": [],
+          "label": "hooks",
+          "description": [],
+          "signature": [
+            "{ epm: { getBulkAssets: (body: { assetIds: ",
+            {
+              "pluginId": "fleet",
+              "scope": "common",
+              "docId": "kibFleetPluginApi",
+              "section": "def-common.AssetSOObject",
+              "text": "AssetSOObject"
+            },
+            "[]; }) => Promise<",
+            {
+              "pluginId": "esUiShared",
+              "scope": "public",
+              "docId": "kibEsUiSharedPluginApi",
+              "section": "def-public.SendRequestResponse",
+              "text": "SendRequestResponse"
+            },
+            "<",
+            {
+              "pluginId": "fleet",
+              "scope": "common",
+              "docId": "kibFleetPluginApi",
+              "section": "def-common.GetBulkAssetsResponse",
+              "text": "GetBulkAssetsResponse"
+            },
+            ", ",
+            "RequestError",
+            ">>; }; }"
+          ],
+          "path": "x-pack/plugins/fleet/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",

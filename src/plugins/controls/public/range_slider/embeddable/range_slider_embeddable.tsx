@@ -23,8 +23,8 @@ import {
   Filter,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
@@ -36,6 +36,7 @@ import {
 } from '../..';
 import { pluginServices } from '../../services';
 import { RangeSliderReduxState } from '../types';
+import { IClearableControl } from '../../types';
 import { ControlsDataService } from '../../services/data/types';
 import { RangeSliderControl } from '../components/range_slider_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
@@ -83,7 +84,10 @@ type RangeSliderReduxEmbeddableTools = ReduxEmbeddableTools<
   typeof rangeSliderReducers
 >;
 
-export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput, ControlOutput> {
+export class RangeSliderEmbeddable
+  extends Embeddable<RangeSliderEmbeddableInput, ControlOutput>
+  implements IClearableControl
+{
   public readonly type = RANGE_SLIDER_CONTROL;
   public deferEmbeddableLoad = true;
 
@@ -420,6 +424,10 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
       this.dispatch.setErrorMessage(undefined);
     });
   };
+
+  public clearSelections() {
+    this.dispatch.setSelectedRange(['', '']);
+  }
 
   public reload = async () => {
     try {

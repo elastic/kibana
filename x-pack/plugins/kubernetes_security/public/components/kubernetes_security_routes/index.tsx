@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiBetaBadge,
@@ -96,7 +95,7 @@ const KubernetesSecurityRoutesComponent = ({
   }, [setShouldHideCharts, shouldHideCharts]);
 
   return (
-    <Switch>
+    <Routes>
       <Route strict exact path={KUBERNETES_PATH}>
         {filter}
         <EuiFlexGroup gutterSize="none" css={styles.titleSection}>
@@ -287,7 +286,7 @@ const KubernetesSecurityRoutesComponent = ({
           indexPattern={indexPattern}
         />
       </Route>
-    </Switch>
+    </Routes>
   );
 };
 

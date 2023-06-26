@@ -26,7 +26,6 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const ref = useRef<HTMLDivElement>(null);
-
   const timeline = useMemo(
     () => (
       <StatefulTimeline
