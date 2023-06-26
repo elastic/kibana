@@ -62,16 +62,16 @@ export function CasesCreateViewServiceProvider(
       await this.setDescription(description);
       await this.setTags(tag);
 
+      if (category) {
+        await this.setCategory(category);
+      }
+
       if (severity !== CaseSeverity.LOW) {
         await this.setSeverity(severity);
       }
 
       if (owner) {
         await this.setSolution(owner);
-      }
-
-      if (category) {
-        await this.setCategory(category);
       }
 
       await this.submitCase();
@@ -91,10 +91,8 @@ export function CasesCreateViewServiceProvider(
       await comboBox.setCustom('caseTags', tag);
     },
 
-    async setCategory(category: string | undefined) {
-      if (category) {
-        await comboBox.setCustom('categories-list', category);
-      }
+    async setCategory(category: string) {
+      await comboBox.setCustom('categories-list', category);
     },
 
     async setSolution(owner: string) {
