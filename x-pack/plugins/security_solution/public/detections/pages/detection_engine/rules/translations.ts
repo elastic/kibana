@@ -672,6 +672,13 @@ export const NO_TAGS_AVAILABLE = i18n.translate(
   }
 );
 
+export const RULE_EXECTION_STATUS_FILTER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.filters.ruleExecutionStatusFilter',
+  {
+    defaultMessage: 'Select rule execution status to filter by',
+  }
+);
+
 export const NO_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.filters.noRulesTitle',
   {
@@ -1146,13 +1153,6 @@ export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (
         '{failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}} failed to update. {skippedRulesCount, plural, =0 {} =1 { # rule was skipped.} other { # rules were skipped.}}',
     }
   );
-
-export const RULE_PREVIEW_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
-  {
-    defaultMessage: 'Rule preview',
-  }
-);
 
 export const CANCEL_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel',

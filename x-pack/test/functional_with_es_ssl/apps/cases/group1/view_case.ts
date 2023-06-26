@@ -63,6 +63,29 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
       });
 
+      it('adds a category to a case', async () => {
+        const category = uuidv4();
+        await testSubjects.click('category-edit-button');
+        await comboBox.setCustom('comboBoxInput', category);
+        await testSubjects.click('edit-category-submit');
+
+        // validate category was added
+        await testSubjects.existOrFail('category-viewer-' + category);
+
+        // validate user action
+        await find.byCssSelector('[data-test-subj*="category-update-action"]');
+      });
+
+      it('deletes a category from a case', async () => {
+        await find.byCssSelector('[data-test-subj*="category-viewer-"]');
+
+        await testSubjects.click('category-remove-button');
+
+        await testSubjects.existOrFail('no-categories');
+        // validate user action
+        await find.byCssSelector('[data-test-subj*="category-delete-action"]');
+      });
+
       it('adds a tag to a case', async () => {
         const tag = uuidv4();
         await testSubjects.click('tag-list-edit-button');
@@ -596,11 +619,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         it('shows the unknown assignee', async () => {
-          await testSubjects.existOrFail('user-profile-assigned-user-group-abc');
+          await testSubjects.existOrFail('user-profile-assigned-user-abc-remove-group');
         });
 
         it('removes the unknown assignee when selecting the remove all users in the popover', async () => {
-          await testSubjects.existOrFail('user-profile-assigned-user-group-abc');
+          await testSubjects.existOrFail('user-profile-assigned-user-abc-remove-group');
 
           await cases.singleCase.openAssigneesPopover();
           await cases.common.setSearchTextInAssigneesPopover('case');
@@ -608,7 +631,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           await (await find.byButtonText('Remove all assignees')).click();
           await cases.singleCase.closeAssigneesPopover();
-          await testSubjects.missingOrFail('user-profile-assigned-user-group-abc');
+          await testSubjects.missingOrFail('user-profile-assigned-user-abc-remove-group');
         });
       });
 
@@ -627,7 +650,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('assigns the case to the current user when clicking the assign to self link', async () => {
           await testSubjects.click('case-view-assign-yourself-link');
           await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
+          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
         });
       });
 
@@ -652,7 +675,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await cases.common.selectFirstRowInAssigneesPopover();
           await cases.singleCase.closeAssigneesPopover();
           await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
+          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
         });
 
         it('assigns multiple users', async () => {
@@ -662,8 +685,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           await cases.singleCase.closeAssigneesPopover();
           await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
-          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user2');
+          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
+          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user2-remove-group');
         });
       });
 
@@ -678,17 +701,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           // navigate out of the modal
           await cases.singleCase.closeAssigneesPopover();
           await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
+          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
 
           // hover over the assigned user
           await (
             await find.byCssSelector(
-              '[data-test-subj="user-profile-assigned-user-group-cases_all_user"]'
+              '[data-test-subj="user-profile-assigned-user-cases_all_user-remove-group"]'
             )
           ).moveMouseTo();
 
           // delete the user
-          await testSubjects.click('user-profile-assigned-user-cross-cases_all_user');
+          await testSubjects.click('user-profile-assigned-user-cases_all_user-remove-button');
 
           await testSubjects.existOrFail('case-view-assign-yourself-link');
         });

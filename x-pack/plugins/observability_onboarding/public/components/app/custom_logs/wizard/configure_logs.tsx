@@ -56,14 +56,14 @@ export function ConfigureLogs() {
   }
 
   function onContinue() {
-    setState({
-      ...getState(),
+    setState((state) => ({
+      ...state,
       datasetName,
       serviceName,
       logFilePaths: logFilePaths.filter((filepath) => !!filepath),
       namespace,
       customConfigurations,
-    });
+    }));
     goToStep('installElasticAgent');
   }
 
@@ -258,7 +258,7 @@ export function ConfigureLogs() {
             direction="column"
             gutterSize="xs"
           >
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem style={{ width: '100%' }}>
               <EuiAccordion
                 id="advancedSettingsAccordion"
                 css={{

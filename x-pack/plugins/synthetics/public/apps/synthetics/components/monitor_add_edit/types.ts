@@ -38,6 +38,7 @@ export interface FormLocation {
   id: string;
   isServiceManaged: boolean;
   label: string;
+  isInvalid?: boolean;
 }
 
 export type FormConfig = MonitorFields & {
@@ -45,6 +46,7 @@ export type FormConfig = MonitorFields & {
   ['schedule.number']: string;
   ['source.inline']: string;
   [AlertConfigKey.STATUS_ENABLED]: boolean;
+  [AlertConfigKey.TLS_ENABLED]: boolean;
   [ConfigKey.LOCATIONS]: FormLocation[];
 
   /* Dot notation keys must have a type configuration both for their flattened and nested
@@ -127,6 +129,7 @@ export interface FieldMap {
   [ConfigKey.SCREENSHOTS]: FieldMeta<ConfigKey.SCREENSHOTS>;
   [ConfigKey.ENABLED]: FieldMeta<ConfigKey.ENABLED>;
   [AlertConfigKey.STATUS_ENABLED]: FieldMeta<AlertConfigKey.STATUS_ENABLED>;
+  [AlertConfigKey.TLS_ENABLED]: FieldMeta<AlertConfigKey.TLS_ENABLED>;
   [ConfigKey.NAMESPACE]: FieldMeta<ConfigKey.NAMESPACE>;
   [ConfigKey.TIMEOUT]: FieldMeta<ConfigKey.TIMEOUT>;
   [ConfigKey.MAX_REDIRECTS]: FieldMeta<ConfigKey.MAX_REDIRECTS>;

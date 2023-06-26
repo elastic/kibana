@@ -19,6 +19,8 @@ import { TransactionCharts } from '../../shared/charts/transaction_charts';
 import { replace } from '../../shared/links/url_helpers';
 import { TransactionDetailsTabs } from './transaction_details_tabs';
 import { isServerlessAgent } from '../../../../common/agent_name';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
+import { SloCallout } from '../../shared/slo_callout';
 
 export function TransactionDetails() {
   const { path, query } = useAnyOfApmParams(
@@ -32,6 +34,7 @@ export function TransactionDetails() {
     transactionType: transactionTypeFromUrl,
     comparisonEnabled,
     offset,
+    environment,
   } = query;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const apmRouter = useApmRouter();
@@ -61,9 +64,24 @@ export function TransactionDetails() {
   );
 
   const isServerless = isServerlessAgent(serverlessType);
+  const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
+    'apm.sloCalloutDismissed',
+    false
+  );
 
   return (
     <>
+      {!sloCalloutDismissed && (
+        <SloCallout
+          dismissCallout={() => {
+            setSloCalloutDismissed(true);
+          }}
+          serviceName={serviceName}
+          environment={environment}
+          transactionType={transactionType}
+          transactionName={transactionName}
+        />
+      )}
       {fallbackToTransactions && <AggregatedTransactionsBadge />}
       <EuiSpacer size="s" />
 
