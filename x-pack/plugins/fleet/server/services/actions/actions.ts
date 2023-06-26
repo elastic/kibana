@@ -33,7 +33,7 @@ export const createAction = async (
   action: FleetActionRequest
 ): Promise<FleetActionRequest> => {
   try {
-    const body = {
+    const document = {
       ...action,
       action_id: action.action_id || uuidV4(),
       '@timestamp': action['@timestamp'] || new Date().toISOString(),
@@ -42,8 +42,8 @@ export const createAction = async (
       {
         index: AGENT_ACTIONS_INDEX,
         // doc id is same as action_id
-        id: body.action_id,
-        body,
+        id: document.action_id,
+        document,
         refresh: 'wait_for',
       },
       {
@@ -55,7 +55,7 @@ export const createAction = async (
       message: `User created Fleet action [id=${action.action_id}, user_id=${action.user_id}, input_type=${action.input_type}]`,
     });
 
-    return body;
+    return document;
   } catch (createActionError) {
     throw new FleetActionsError(
       `Error creating action: ${createActionError.message}`,
@@ -87,7 +87,7 @@ export const bulkCreateActions = async (
   _actions: FleetActionRequest[]
 ): Promise<BulkCreateResponse> => {
   const actions: FleetActionRequest[] = [];
-  const bulkCreateActionsBody = _actions.reduce<BulkCreate>((acc, action) => {
+  const bulkCreateActionsOperations = _actions.reduce<BulkCreate>((acc, action) => {
     // doc id is same as action_id
     const actionId = action.action_id || uuidV4();
     acc.push({ create: { _index: AGENT_ACTIONS_INDEX, _id: actionId } });
@@ -104,7 +104,7 @@ export const bulkCreateActions = async (
 
   try {
     const bulkCreateActionsResponse = (await esClient.bulk({
-      body: bulkCreateActionsBody,
+      operations: bulkCreateActionsOperations,
       refresh: 'wait_for',
     })) as unknown as estypes.BulkResponse;
 

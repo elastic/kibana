@@ -91,7 +91,7 @@ export const writeActionToIndices = async ({
     const logsEndpointActionsResult = await esClient.index<LogsEndpointAction>(
       {
         index: ENDPOINT_ACTIONS_INDEX,
-        body: {
+        document: {
           ...doc,
           agent: {
             id: payload.endpoint_ids,
@@ -166,7 +166,7 @@ const createFailedActionResponseEntry = async ({
   try {
     await esClient.index<LogsEndpointActionResponse>({
       index: `${ENDPOINT_ACTION_RESPONSES_DS}-default`,
-      body: {
+      document: {
         ...doc,
         error: {
           code: failedFleetActionErrorCode,

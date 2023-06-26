@@ -505,12 +505,12 @@ describe('Response actions', () => {
         );
 
         const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [{ index: string; body?: LogsEndpointAction }] = [
+        const actionDocs: [{ index: string; document?: LogsEndpointAction }] = [
           indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
         ];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
-        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('unisolate');
+        expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('unisolate');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
@@ -539,12 +539,12 @@ describe('Response actions', () => {
         );
 
         const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [{ index: string; body?: LogsEndpointAction }] = [
+        const actionDocs: [{ index: string; document?: LogsEndpointAction }] = [
           indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
         ];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
-        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('isolate');
+        expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('isolate');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
@@ -576,12 +576,12 @@ describe('Response actions', () => {
         );
 
         const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [{ index: string; body?: LogsEndpointAction }] = [
+        const actionDocs: [{ index: string; document?: LogsEndpointAction }] = [
           indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
         ];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
-        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('kill-process');
+        expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('kill-process');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
@@ -613,12 +613,12 @@ describe('Response actions', () => {
         );
 
         const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [{ index: string; body?: LogsEndpointAction }] = [
+        const actionDocs: [{ index: string; document?: LogsEndpointAction }] = [
           indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
         ];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
-        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('suspend-process');
+        expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('suspend-process');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
@@ -647,12 +647,12 @@ describe('Response actions', () => {
         );
 
         const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [{ index: string; body?: LogsEndpointAction }] = [
+        const actionDocs: [{ index: string; document?: LogsEndpointAction }] = [
           indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
         ];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
-        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('running-processes');
+        expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('running-processes');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
@@ -683,12 +683,12 @@ describe('Response actions', () => {
         );
 
         const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [{ index: string; body?: LogsEndpointAction }] = [
+        const actionDocs: [{ index: string; document?: LogsEndpointAction }] = [
           indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
         ];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
-        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('get-file');
+        expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('get-file');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
@@ -721,11 +721,11 @@ describe('Response actions', () => {
         );
 
         const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [{ index: string; body?: LogsEndpointAction }] = [
+        const actionDocs: [{ index: string; document?: LogsEndpointAction }] = [
           indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
         ];
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
-        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('execute');
+        expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('execute');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
@@ -759,12 +759,12 @@ describe('Response actions', () => {
 
         // logs-endpoint indexed doc
         const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
-        const actionDocs: [{ index: string; body?: LogsEndpointAction }] = [
+        const actionDocs: [{ index: string; document?: LogsEndpointAction }] = [
           indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
         ];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
-        expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('execute');
+        expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('execute');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
