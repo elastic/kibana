@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { UptimeServerSetup } from '../../../legacy_uptime/lib/adapters';
-import { SyntheticsRestApiRouteFactory } from '../../../legacy_uptime/routes';
+import { SyntheticsServerSetup } from '../../../types';
+import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 
 export const getAgentPoliciesRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -18,7 +18,7 @@ export const getAgentPoliciesRoute: SyntheticsRestApiRouteFactory = () => ({
   },
 });
 
-export const getAgentPoliciesAsInternalUser = async (server: UptimeServerSetup) => {
+export const getAgentPoliciesAsInternalUser = async (server: SyntheticsServerSetup) => {
   const soClient = server.coreStart.savedObjects.createInternalRepository();
   const esClient = server.coreStart.elasticsearch.client.asInternalUser;
 
@@ -29,5 +29,6 @@ export const getAgentPoliciesAsInternalUser = async (server: UptimeServerSetup) 
     sortOrder: 'asc',
     kuery: 'ingest-agent-policies.is_managed : false',
     esClient,
+    withAgentCount: true,
   });
 };

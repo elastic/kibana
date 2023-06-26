@@ -10,6 +10,7 @@ import { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/packag
 import { cloneDeep } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
+import { SyntheticsServerSetup } from '../../types';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import {
   ConfigKey,
@@ -18,7 +19,6 @@ import {
   PrivateLocation,
   SourceType,
 } from '../../../common/runtime_types';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 
 export interface PrivateConfig {
@@ -33,9 +33,9 @@ export interface FailedPolicyUpdate {
 }
 
 export class SyntheticsPrivateLocation {
-  private readonly server: UptimeServerSetup;
+  private readonly server: SyntheticsServerSetup;
 
-  constructor(_server: UptimeServerSetup) {
+  constructor(_server: SyntheticsServerSetup) {
     this.server = _server;
   }
 

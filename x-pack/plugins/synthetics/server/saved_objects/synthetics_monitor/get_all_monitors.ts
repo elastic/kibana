@@ -12,9 +12,9 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import pMap from 'p-map';
 import { intersection } from 'lodash';
+import { SyntheticsServerSetup } from '../../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { periodToMs } from '../../routes/overview_status/overview_status';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
 import {
   ConfigKey,
@@ -61,7 +61,7 @@ export const getAllMonitors = async ({
 
 export const processMonitors = async (
   allMonitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>>,
-  server: UptimeServerSetup,
+  server: SyntheticsServerSetup,
   soClient: SavedObjectsClientContract,
   syntheticsMonitorClient: SyntheticsMonitorClient,
   queryLocations?: string[] | string
