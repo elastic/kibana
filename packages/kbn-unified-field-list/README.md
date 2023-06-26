@@ -39,7 +39,8 @@ Include the building block into your application:
 ```
 <UnifiedFieldListSidebarContainer
   ref={unifiedFieldListContainerRef}
-  variant="responsive"
+  // `responsive` is to show the list for desktop view and a button which triggers a flyout with the list for mobile view
+  variant="responsive" // can be also `list-always` and `button-and-flyout-always`
   getCreationOptions={getCreationOptions}
   services={services}
   dataView={dataView}
