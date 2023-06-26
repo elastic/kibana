@@ -351,6 +351,7 @@ describe('callAPI', () => {
         options: {
           rejectUnauthorized: true,
           path: null,
+          noDelay: true,
           cert: 'test-certificate',
           key: 'test-key',
         },
@@ -404,6 +405,7 @@ describe('callAPI', () => {
         options: {
           rejectUnauthorized: true,
           path: null,
+          noDelay: true,
           cert: 'test-certificate',
           key: 'test-key',
         },
@@ -463,6 +465,7 @@ describe('callAPI', () => {
         options: {
           rejectUnauthorized: true,
           path: null,
+          noDelay: true,
           cert: 'test-certificate',
           key: 'test-key',
         },
