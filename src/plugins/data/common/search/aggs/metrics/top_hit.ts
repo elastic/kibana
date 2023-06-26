@@ -9,6 +9,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { buildPhraseFilter } from '@kbn/es-query';
 import { aggTopHitFnName } from './top_hit_fn';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
@@ -255,6 +256,12 @@ export const getTopHitMetricAgg = () => {
         }
       }
       return values;
+    },
+    createFilter: (agg, key) => {
+      const field = agg.getField();
+      if (field) {
+        return buildPhraseFilter(field, key, agg.getIndexPattern());
+      }
     },
   });
 };

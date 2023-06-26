@@ -402,5 +402,11 @@ describe('Top hit metric', () => {
         });
       });
     });
+    it('returns phrase filter', () => {
+      expect(getTopHitMetricAgg().createFilter!(aggConfig, '10')).toEqual({
+        meta: { index: '1234' },
+        query: { match_phrase: { bytes: 10 } },
+      });
+    });
   });
 });

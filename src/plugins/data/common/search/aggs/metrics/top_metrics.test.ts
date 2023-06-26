@@ -191,5 +191,11 @@ describe('Top metrics metric', () => {
       init({ fieldName: 'bytes' });
       expect(getTopMetricsMetricAgg().getValue(aggConfig, bucket)).toEqual([1024, 512, 256]);
     });
+    it('returns phrase filter', () => {
+      expect(getTopMetricsMetricAgg().createFilter!(aggConfig, '10')).toEqual({
+        meta: { index: '1234' },
+        query: { match_phrase: { bytes: 10 } },
+      });
+    });
   });
 });

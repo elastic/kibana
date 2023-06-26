@@ -9,6 +9,7 @@
 import _ from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
+import { buildPhraseFilter } from '@kbn/es-query';
 import { aggTopMetricsFnName } from './top_metrics_fn';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
@@ -161,6 +162,12 @@ export const getTopMetricsMetricAgg = () => {
       if (results.length === 0) return null;
       if (results.length === 1) return results[0];
       return results;
+    },
+    createFilter: (agg, key) => {
+      const field = agg.getField();
+      if (field) {
+        return buildPhraseFilter(field, key, agg.getIndexPattern());
+      }
     },
   });
 };
