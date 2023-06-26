@@ -65,6 +65,7 @@ export const FilterAction = ({ selectedItemsCount, filterSelectedHosts }: Filter
           <EuiButtonEmpty
             data-test-subj="hostsViewTableSelectHostsFilterButton"
             size="xs"
+            flush="left"
             iconSide="right"
             iconType="arrowDown"
             onClick={togglePopover}
