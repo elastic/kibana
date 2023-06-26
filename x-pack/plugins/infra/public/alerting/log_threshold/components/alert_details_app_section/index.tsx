@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { LIGHT_THEME } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
@@ -34,8 +34,6 @@ import { Threshold } from '../../../common/components/threshold';
 import { ExplainLogRateSpikes } from './components/explain_log_rate_spike';
 import { LogThresholdCountChart, LogThresholdRatioChart } from './components/threhsold_chart';
 import { useLogView } from '../../../../hooks/use_log_view';
-import { LogViewsClient } from '../../../../services/log_views';
-import { defaultLogViewsStaticConfig } from '../../../../../common/log_views';
 import { useLicense } from '../../../../hooks/use_license';
 
 const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
@@ -46,7 +44,7 @@ const AlertDetailsAppSection = ({
   alert,
   setAlertSummaryFields,
 }: AlertDetailsAppSectionProps) => {
-  const { observability, data, http } = useKibanaContextForPlugin().services;
+  const { observability, data, http, logViews } = useKibanaContextForPlugin().services;
   const theme = useTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
@@ -66,14 +64,9 @@ const AlertDetailsAppSection = ({
         .join(' AND ')
     : '';
 
-  const logViews = useMemo(
-    () => new LogViewsClient(data.dataViews, http, data.search.search, defaultLogViewsStaticConfig),
-    [data.dataViews, data.search.search, http]
-  );
-
   const { derivedDataView } = useLogView({
     initialLogViewReference: rule.params.logView,
-    logViews,
+    logViews: logViews.client,
   });
 
   const { hasAtLeast } = useLicense();
