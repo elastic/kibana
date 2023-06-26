@@ -28,6 +28,7 @@ import {
   EuiButtonGroupProps,
   EuiHighlight,
   EuiBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import {
   PROFILE_OPTIONS,
@@ -409,13 +410,16 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           label: locations?.find((loc) => location.id === loc.id)?.label || '',
           id: location.id || '',
           isServiceManaged: location.isServiceManaged || false,
+          isInvalid: location.isInvalid,
+          disabled: location.isInvalid,
         })),
         selectedOptions: Object.values(field?.value || {}).map((location) => ({
-          color: locations.some((s) => s.id === location.id)
-            ? location.isServiceManaged
+          color:
+            location.isInvalid || !locations.some((s) => s.id === location.id)
+              ? 'danger'
+              : location.isServiceManaged
               ? 'default'
-              : 'primary'
-            : 'danger',
+              : 'primary',
           label: locations?.find((loc) => location.id === loc.id)?.label ?? location.id,
           id: location.id || '',
           isServiceManaged: location.isServiceManaged || false,
@@ -434,16 +438,42 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         isDisabled: readOnly,
         renderOption: (option: FormLocation, searchValue: string) => {
           return (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem>
-                <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-              </EuiFlexItem>
-              {!option.isServiceManaged && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="primary">Private</EuiBadge>
+            <EuiToolTip
+              anchorProps={{
+                style: { width: '100%' },
+              }}
+              content={
+                option.isInvalid
+                  ? i18n.translate('xpack.synthetics.monitorConfig.locations.attachedPolicy', {
+                      defaultMessage: 'Attached agent policy has been already deleted.',
+                    })
+                  : ''
+              }
+            >
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem>
+                  <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+                {option.isInvalid && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="danger">
+                      {i18n.translate('xpack.synthetics.monitorConfig.locations.invalid', {
+                        defaultMessage: 'Invalid',
+                      })}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                )}
+                {!option.isServiceManaged && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="primary">
+                      {i18n.translate('xpack.synthetics.monitorConfig.locations.private', {
+                        defaultMessage: 'Private',
+                      })}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiToolTip>
           );
         },
       };
