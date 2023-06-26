@@ -52,11 +52,6 @@ const getMockConcreteTaskInstance = () => {
 };
 const getMockRunContext = (runTask: ConcreteTaskInstance) => ({
   taskInstance: runTask,
-  requeueInvalidTasksConfig: {
-    enabled: false,
-    delay: 3000,
-    max_attempts: 20,
-  },
   kbnServer: {},
 });
 
@@ -164,11 +159,6 @@ describe('addMiddlewareToChain', () => {
             "m1": true,
             "m2": true,
             "m3": true,
-            "requeueInvalidTasksConfig": Object {
-              "delay": 3000,
-              "enabled": false,
-              "max_attempts": 20,
-            },
             "taskInstance": Object {
               "attempts": 0,
               "id": "hy8o99o83",
