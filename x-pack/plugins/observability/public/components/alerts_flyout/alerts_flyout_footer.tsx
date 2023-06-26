@@ -6,10 +6,10 @@
  */
 import React from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
-import { translations } from '../../config/translations';
 import { paths } from '../../config/paths';
 import type { TopAlert } from '../../typings/alerts';
 
@@ -37,7 +37,9 @@ export function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { isInApp: 
           data-test-subj="alertsFlyoutAlertDetailsButton"
           fill
         >
-          {translations.alertsFlyout.alertDetailsButtonText}
+          {i18n.translate('xpack.observability.alertsFlyout.alertsDetailsButtonText', {
+            defaultMessage: 'Alert details',
+          })}
         </EuiButton>
       </EuiFlexItem>
     );
@@ -52,7 +54,9 @@ export function AlertsFlyoutFooter({ alert, isInApp }: FlyoutProps & { isInApp: 
           data-test-subj="alertsFlyoutViewInAppButton"
           fill
         >
-          {translations.alertsFlyout.viewInAppButtonText}
+          {i18n.translate('xpack.observability.alertsFlyout.viewInAppButtonText', {
+            defaultMessage: 'View in app',
+          })}
         </EuiButton>
       </EuiFlexItem>
     );
