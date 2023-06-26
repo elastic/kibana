@@ -70,7 +70,7 @@ const fieldSubTypeSchema = schema.object({
 });
 
 const FieldDescriptorSchema = schema.object({
-  // aggregatable: schema.boolean(),
+  aggregatable: schema.boolean(),
   name: schema.string(),
   readFromDocValues: schema.boolean(),
   searchable: schema.boolean(),
@@ -89,6 +89,9 @@ const FieldDescriptorSchema = schema.object({
     ])
   ),
   timeSeriesDimension: schema.maybe(schema.boolean()),
+  conflictDescriptions: schema.maybe(
+    schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
+  ),
 });
 
 const validate: FullValidationConfig<any, any, any> = {
@@ -99,13 +102,10 @@ const validate: FullValidationConfig<any, any, any> = {
   },
   response: {
     200: {
-      body: schema.object(
-        {
-          // fields: schema.arrayOf(FieldDescriptorSchema),
-          // indices: schema.arrayOf(schema.string()),
-        },
-        { unknowns: 'forbid' }
-      ),
+      body: schema.object({
+        fields: schema.arrayOf(FieldDescriptorSchema),
+        indices: schema.arrayOf(schema.string()),
+      }),
     },
   },
 };
@@ -188,5 +188,8 @@ export const registerFieldForWildcard = (
   router.versioned.post({ path, access }).addVersion({ version, validate }, handler);
   router.versioned
     .get({ path, access })
-    .addVersion({ version, validate: { request: { query: querySchema } } }, handler);
+    .addVersion(
+      { version, validate: { request: { query: querySchema }, response: validate.response } },
+      handler
+    );
 };

@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded(
         'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
       );
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
@@ -34,6 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload(
         'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
       );
+
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     describe('can open and close editor', function () {
@@ -58,6 +61,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await new Promise((e) => setTimeout(e, 500));
         await (await PageObjects.settings.getSaveDataViewButtonActive()).click();
         await PageObjects.settings.removeIndexPattern();
+      });
+
+      it('correctly validates timestamp after index pattern changes', async function () {
+        await PageObjects.settings.setIndexPatternField('log*');
+        // todo
       });
     });
 
