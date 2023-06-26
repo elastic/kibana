@@ -55,15 +55,21 @@ describe('maybeAddCloudLinks', () => {
           Object {
             "href": "profile-url",
             "iconType": "user",
-            "label": "Edit profile",
+            "label": "Profile",
             "order": 100,
             "setAsProfile": true,
           },
           Object {
+            "href": "billing-url",
+            "iconType": "visGauge",
+            "label": "Billing",
+            "order": 200,
+          },
+          Object {
             "href": "organization-url",
             "iconType": "gear",
-            "label": "Account & Billing",
-            "order": 200,
+            "label": "Organization",
+            "order": 300,
           },
         ],
       ]
@@ -99,15 +105,21 @@ describe('maybeAddCloudLinks', () => {
           Object {
             "href": "profile-url",
             "iconType": "user",
-            "label": "Edit profile",
+            "label": "Profile",
             "order": 100,
             "setAsProfile": true,
           },
           Object {
+            "href": "billing-url",
+            "iconType": "visGauge",
+            "label": "Billing",
+            "order": 200,
+          },
+          Object {
             "href": "organization-url",
             "iconType": "gear",
-            "label": "Account & Billing",
-            "order": 200,
+            "label": "Organization",
+            "order": 300,
           },
         ],
       ]

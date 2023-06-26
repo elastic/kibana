@@ -44,7 +44,7 @@ export const createUserMenuLinks = (cloud: CloudStart): UserMenuLink[] => {
       }),
       iconType: 'gear',
       href: organizationUrl,
-      order: 200,
+      order: 300,
     });
   }
 
