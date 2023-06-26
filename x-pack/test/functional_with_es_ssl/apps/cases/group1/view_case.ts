@@ -345,7 +345,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('description-unsaved-draft');
       });
 
-      it('should persist the draft of new comment while description is updated', async () => {
+      /**
+       * There is this bug https://github.com/elastic/kibana/issues/157280
+       * where this test randomly reproduces thus making the test flaky.
+       * Skipping for now until we fix it.
+       */
+      it.skip('should persist the draft of new comment while description is updated', async () => {
         let commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
         );
