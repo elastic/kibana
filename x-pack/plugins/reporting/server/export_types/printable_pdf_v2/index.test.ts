@@ -16,8 +16,8 @@ import { PdfExportType } from '.';
 import type { LocatorParams } from '../../../common';
 import type { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
 import { cryptoFactory } from '../../lib';
-import { createMockConfigSchema } from '../../test_helpers';
 import { generatePdfObservable } from './lib/generate_pdf';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 
 let content: string;
 let mockPdfExportType: PdfExportType;
@@ -50,8 +50,15 @@ beforeEach(async () => {
 
   const mockCoreSetup = coreMock.createSetup();
   const mockCoreStart = coreMock.createStart();
+  const mockReportingCore = await createMockReportingCore(createMockConfigSchema());
 
-  mockPdfExportType = new PdfExportType(mockCoreSetup, configType, mockLogger, context);
+  mockPdfExportType = new PdfExportType(
+    mockCoreSetup,
+    configType,
+    mockLogger,
+    context,
+    mockReportingCore
+  );
 
   mockPdfExportType.setup({
     basePath: { set: jest.fn() },

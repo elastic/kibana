@@ -75,7 +75,7 @@ export class RequestHandler {
       objectType: jobParams.objectType,
       browserTimezone: jobParams.browserTimezone,
       version: jobParams.version,
-      spaceId: exportType.getSpaceId(req, logger),
+      spaceId: reporting.getSpaceId(req, logger),
     };
 
     // 4. Add the report to ReportingStore to show as pending

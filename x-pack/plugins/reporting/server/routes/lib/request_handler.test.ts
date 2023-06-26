@@ -7,9 +7,9 @@
 
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
 import { ReportingCore } from '../..';
 import { JobParamsPDFDeprecated } from '../../export_types/printable_pdf/types';
-import { TaskPayloadPDFV2 } from '../../export_types/printable_pdf_v2';
 import { Report, ReportingStore } from '../../lib/store';
 import { ReportApiJSON } from '../../lib/store/report';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
@@ -145,7 +145,7 @@ describe('Handle request to generate', () => {
       `);
     });
 
-    xtest('provides a default kibana version field for older POST URLs', async () => {
+    test('provides a default kibana version field for older POST URLs', async () => {
       // how do we handle the printable_pdf endpoint that isn't migrating to the class instance of export types?
       (mockJobParams as unknown as { version?: string }).version = undefined;
       const report = await requestHandler.enqueueJob('printablePdf', mockJobParams);

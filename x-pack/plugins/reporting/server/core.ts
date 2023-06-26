@@ -31,6 +31,7 @@ import {
   ScreenshottingStart,
 } from '@kbn/screenshotting-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -119,7 +120,7 @@ export class ReportingCore {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
 
-    this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
+    this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context, this);
     this.exportTypesRegistry.register(this.pdfExport);
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
@@ -357,6 +358,20 @@ export class ReportingCore {
   public async getEsClient() {
     const startDeps = await this.getPluginStartDeps();
     return startDeps.esClient;
+  }
+
+  public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
+    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
+    if (spacesService) {
+      const spaceId = spacesService?.getSpaceId(request);
+
+      if (spaceId !== DEFAULT_SPACE_ID) {
+        logger.info(`Request uses Space ID: ${spaceId}`);
+        return spaceId;
+      } else {
+        logger.debug(`Request uses default Space`);
+      }
+    }
   }
 
   public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;

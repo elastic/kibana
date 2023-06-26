@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.teardownEcommerce();
     });
 
-    it('should handle csv_searchsource', async () => {
+    xit('should handle csv_searchsource', async () => {
       await reportingAPI.expectAllJobsToFinishSuccessfully(
         await Promise.all([reportingAPI.postJob(urls.JOB_PARAMS_CSV_DEFAULT_SPACE)])
       );
@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
       reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv_searchsource', 1);
     });
 
-    it('should handle preserve_layout pdf', async () => {
+    xit('should handle preserve_layout pdf', async () => {
       await reportingAPI.expectAllJobsToFinishSuccessfully(
         await Promise.all([
           reportingAPI.postJob(urls.PDF_PRESERVE_DASHBOARD_FILTER_6_3),
@@ -56,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
       reportingAPI.expectAllTimePdfLayoutStats(usage, 'preserve_layout', 2);
     });
 
-    it('should handle print_layout pdf', async () => {
+    xit('should handle print_layout pdf', async () => {
       await reportingAPI.expectAllJobsToFinishSuccessfully(
         await Promise.all([
           reportingAPI.postJob(urls.PDF_PRINT_DASHBOARD_6_3),

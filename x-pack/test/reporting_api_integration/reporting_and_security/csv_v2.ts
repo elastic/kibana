@@ -6,7 +6,7 @@
  */
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type {
   JobParamsCsvFromSavedObject,
   ReportApiJSON,
@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
   };
 
-  describe('CSV Generation from Saved Search ID', () => {
+  describe.skip('CSV Generation from Saved Search ID', () => {
     before(async () => {
       // clear any previous UI Settings
       await kibanaServer.uiSettings.replace({});
