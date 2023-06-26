@@ -54,13 +54,6 @@ export function useCloneSlo() {
         // Optimistically update to the new value
         queryClient.setQueryData(queryKey ?? sloKeys.lists(), optimisticUpdate);
 
-        toasts.addSuccess(
-          i18n.translate('xpack.observability.slo.clone.successNotification', {
-            defaultMessage: 'Successfully created {name}',
-            values: { name: slo.name },
-          })
-        );
-
         // Return a context object with the snapshotted value
         return { previousSloList: data };
       },
@@ -76,7 +69,13 @@ export function useCloneSlo() {
           })
         );
       },
-      onSuccess: () => {
+      onSuccess: (_data, { slo }) => {
+        toasts.addSuccess(
+          i18n.translate('xpack.observability.slo.clone.successNotification', {
+            defaultMessage: 'Successfully created {name}',
+            values: { name: slo.name },
+          })
+        );
         queryClient.invalidateQueries(sloKeys.lists());
       },
     }

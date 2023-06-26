@@ -4,8 +4,8 @@ server:
 
 kibana:
   hosts:
-    - ${KIBANA_URL}/api/status/ok
-    - ${KIBANA_URL}/api/status/not-found
+    - ${KIBANA_URL}/health/ok
+    - ${KIBANA_URL}/health/not-found
 
 logging:
   root:

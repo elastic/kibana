@@ -38,7 +38,8 @@ describe('SSL Certificate component', () => {
       certificate_not_valid_before: '2019-04-24T11:41:38.200Z',
     };
     const component = shallowWithRouter(<MonitorSSLCertificate tls={monitorTls1} />);
-    expect(component).toMatchSnapshot();
+    // dive() removes all unnecessary React-Router wrapping elements
+    expect(component.dive()).toMatchSnapshot();
   });
 
   it('renders', () => {

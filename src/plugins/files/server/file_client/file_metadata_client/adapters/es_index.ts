@@ -76,7 +76,7 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
       index: this.index,
       id,
       document: { file: metadata },
-      refresh: true,
+      refresh: 'wait_for',
     });
     return {
       id: result._id,
@@ -145,7 +145,12 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
   }
 
   async update({ id, metadata }: UpdateArgs<M>): Promise<FileDescriptor<M>> {
-    await this.esClient.update({ index: this.index, id, doc: { file: metadata }, refresh: true });
+    await this.esClient.update({
+      index: this.index,
+      id,
+      doc: { file: metadata },
+      refresh: 'wait_for',
+    });
     return this.get({ id });
   }
 
