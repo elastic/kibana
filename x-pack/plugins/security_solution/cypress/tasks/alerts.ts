@@ -92,9 +92,7 @@ export const openAddEndpointExceptionFromFirstAlert = () => {
   cy.get(FIELD_INPUT).should('be.visible');
 };
 
-export const openAddRuleExceptionFromAlertDetails = () => {
-  cy.get(EXPAND_ALERT_BTN).first().click({ force: true });
-
+export const openAddRuleExceptionFromAlertActionButton = () => {
   cy.get(TAKE_ACTION_BTN).click();
   cy.get(TAKE_ACTION_MENU).should('be.visible');
 
@@ -102,9 +100,7 @@ export const openAddRuleExceptionFromAlertDetails = () => {
   cy.get(ADD_EXCEPTION_BTN).should('not.be.visible');
 };
 
-export const openAddEndpointExceptionFromAlertDetails = () => {
-  cy.get(EXPAND_ALERT_BTN).first().click({ force: true });
-
+export const openAddEndpointExceptionFromAlertActionButton = () => {
   cy.get(TAKE_ACTION_BTN).click();
   cy.get(TAKE_ACTION_MENU).should('be.visible');
 

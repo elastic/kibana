@@ -7,9 +7,10 @@
 
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
+  expandFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
-  openAddEndpointExceptionFromAlertDetails,
+  openAddEndpointExceptionFromAlertActionButton,
   openAddEndpointExceptionFromFirstAlert,
 } from '../../../tasks/alerts';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
@@ -113,8 +114,11 @@ describe('Endpoint Exceptions workflows from Alert', () => {
   });
 
   it('Should be able to create Endpoint exception from Alerts take action button, and change multiple exception items without resetting to initial auto-prefilled entries', () => {
+    // Open first Alert Summary
+    expandFirstAlert();
+
     // The Endpoint should populated with predefined fields
-    openAddEndpointExceptionFromAlertDetails();
+    openAddEndpointExceptionFromAlertActionButton();
 
     // As the endpoint.alerts-* is used to trigger the alert the
     // file.Ext.code_signature will be auto-populated

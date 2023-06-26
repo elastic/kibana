@@ -12,9 +12,10 @@ import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
   addExceptionFromFirstAlert,
+  expandFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
-  openAddRuleExceptionFromAlertDetails,
+  openAddRuleExceptionFromAlertActionButton,
 } from '../../../tasks/alerts';
 import {
   addExceptionEntryFieldValue,
@@ -179,8 +180,11 @@ describe('Rule Exceptions workflows from Alert', () => {
 
     cy.get(LOADING_INDICATOR).should('not.exist');
 
+    // Open first Alert Summary
+    expandFirstAlert();
+
     // The Rule exception should populated with highlighted fields
-    openAddRuleExceptionFromAlertDetails();
+    openAddRuleExceptionFromAlertActionButton();
 
     const highlightedFieldsBasedOnAlertDoc = [
       'host.name',
@@ -234,8 +238,11 @@ describe('Rule Exceptions workflows from Alert', () => {
 
     cy.get(LOADING_INDICATOR).should('not.exist');
 
+    // Open first Alert Summary
+    expandFirstAlert();
+
     // The Rule exception should populated with highlighted fields
-    openAddRuleExceptionFromAlertDetails();
+    openAddRuleExceptionFromAlertActionButton();
 
     const highlightedFieldsBasedOnAlertDoc = [
       'host.name',
