@@ -61,7 +61,7 @@
     "serverless-security": "node scripts/kibana --dev --serverless=security",
     "spec_to_console": "node scripts/spec_to_console",
     "start": "node scripts/kibana --dev",
-    "storybook": "node --openssl-legacy-provider scripts/storybook",
+    "storybook": "node scripts/storybook",
     "test:ftr": "node scripts/functional_tests",
     "test:ftr:runner": "node scripts/functional_test_runner",
     "test:ftr:server": "node scripts/functional_tests_server",

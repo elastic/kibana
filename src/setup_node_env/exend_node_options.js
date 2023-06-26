@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-// The following require statements MUST be executed before any others - BEGIN
-require('./exit_on_warning');
-require('./harden');
-// The following require statements MUST be executed before any others - END
-
-require('./exend_node_options');
-
-require('symbol-observable');
-require('source-map-support').install();
-require('./node_version_validator');
+if (process.env.NODE_OPTIONS) {
+  process.env.NODE_OPTIONS = process.env.NODE_OPTIONS + ' --openssl-legacy-provider';
+} else {
+  process.env.NODE_OPTIONS = '--openssl-legacy-provider';
+}
