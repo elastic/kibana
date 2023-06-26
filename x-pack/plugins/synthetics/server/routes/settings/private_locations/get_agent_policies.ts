@@ -23,6 +23,7 @@ export const getAgentPoliciesRoute: SyntheticsRestApiRouteFactory = () => ({
       sortOrder: 'asc',
       kuery: 'ingest-agent-policies.is_managed : false',
       esClient,
+      withAgentCount: true,
     });
   },
 });
