@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { rootRequest } from '../common';
 
 export const deleteIndex = (index: string) => {
@@ -39,7 +38,9 @@ export const indexDocument = (indexName: string, document: Record<string, unknow
 export const waitForRulesToFinishExecution = (ruleIds: string[]) => {
   return cy.waitUntil(
     () =>
-      rootRequest<{ hits: { hits: unknown[] } }>({
+      rootRequest<{
+        hits: { hits: Array<{ _source: { alert: { params: { ruleId: string } } } }> };
+      }>({
         method: 'GET',
         url: `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_alerting_cases/_search`,
         headers: { 'kbn-xsrf': 'cypress-creds' },
@@ -52,12 +53,11 @@ export const waitForRulesToFinishExecution = (ruleIds: string[]) => {
           },
         },
       }).then((response) => {
-        const areAllRulesFinished = ruleIds.every((ruleId) => {
-          return response.body.hits.hits.some((ruleExecution) => {
-            const executionRuleId = ruleExecution._source?.alert?.params?.ruleId as string;
-            return executionRuleId === ruleId;
-          });
-        });
+        const areAllRulesFinished = ruleIds.every((ruleId) =>
+          response.body.hits.hits.some(
+            (ruleExecution) => ruleExecution._source.alert.params.ruleId === ruleId
+          )
+        );
         return areAllRulesFinished;
       }),
     { interval: 500, timeout: 12000 }
