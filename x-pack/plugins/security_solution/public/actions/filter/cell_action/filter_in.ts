@@ -29,8 +29,20 @@ export const createFilterInCellActionFactory = ({
 
   return genericFilterInActionFactory.combine<SecurityCellAction>({
     type: SecurityCellActionType.FILTER,
-    isCompatible: async ({ field }) => fieldHasCellActions(field.name),
-    execute: async ({ field, metadata }) => {
+    isCompatible: async ({ data }) => {
+      const field = data[0]?.field;
+
+      return (
+        data.length === 1 && // TODO Add support for multiple values
+        fieldHasCellActions(field.name)
+      );
+    },
+    execute: async ({ data, metadata }) => {
+      const field = data[0]?.field;
+      const value = data[0]?.value;
+
+      if (!field) return;
+
       // if negateFilters is true we have to perform the opposite operation, we can just execute filterOut with the same params
       const addFilter = metadata?.negateFilters === true ? addFilterOut : addFilterIn;
 
@@ -43,13 +55,13 @@ export const createFilterInCellActionFactory = ({
         addFilter({
           filterManager: timelineFilterManager,
           fieldName: field.name,
-          value: field.value,
+          value,
         });
       } else {
         addFilter({
           filterManager,
           fieldName: field.name,
-          value: field.value,
+          value,
         });
       }
     },
