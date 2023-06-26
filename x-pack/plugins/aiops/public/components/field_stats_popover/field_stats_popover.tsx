@@ -10,11 +10,13 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
 import {
-  FieldPopover,
-  FieldPopoverHeader,
   FieldStatsServices,
   FieldStatsProps,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list/src/components/field_stats';
+import {
+  FieldPopover,
+  FieldPopoverHeader,
+} from '@kbn/unified-field-list/src/components/field_popover';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { useEuiTheme } from '../../hooks/use_eui_theme';

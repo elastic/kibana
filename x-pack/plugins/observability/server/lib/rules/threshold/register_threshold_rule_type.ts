@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
@@ -16,10 +17,11 @@ import {
   IRuleDataClient,
 } from '@kbn/rule-registry-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
-import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
+import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
 import { observabilityFeatureId } from '../../../../common';
 import { Comparator } from '../../../../common/threshold_rule/types';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '../../../../common/constants';
+import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
   alertDetailUrlActionVariableDescription,
@@ -38,7 +40,6 @@ import {
   thresholdActionVariableDescription,
   timestampActionVariableDescription,
   valueActionVariableDescription,
-  viewInAppUrlActionVariableDescription,
 } from './messages';
 import {
   getAlertDetailsPageEnabledForApp,
@@ -135,7 +136,7 @@ export function thresholdRuleType(
   return {
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     name: i18n.translate('xpack.observability.threshold.ruleName', {
-      defaultMessage: 'Threshold',
+      defaultMessage: 'Threshold (Technical Preview)',
     }),
     validate: {
       params: schema.object(
@@ -149,7 +150,6 @@ export function thresholdRuleType(
               validate: validateIsStringElasticsearchJSONFilter,
             })
           ),
-          sourceId: schema.string(),
           alertOnNoData: schema.maybe(schema.boolean()),
           alertOnGroupDisappear: schema.maybe(schema.boolean()),
         },
@@ -183,11 +183,6 @@ export function thresholdRuleType(
         { name: 'value', description: valueActionVariableDescription },
         { name: 'metric', description: metricActionVariableDescription },
         { name: 'threshold', description: thresholdActionVariableDescription },
-        {
-          name: 'viewInAppUrl',
-          description: viewInAppUrlActionVariableDescription,
-          usesPublicBaseUrl: true,
-        },
         { name: 'cloud', description: cloudActionVariableDescription },
         { name: 'host', description: hostActionVariableDescription },
         { name: 'container', description: containerActionVariableDescription },
@@ -208,6 +203,21 @@ export function thresholdRuleType(
           description: originalAlertStateWasActionVariableDescription,
         },
       ],
+    },
+    useSavedObjectReferences: {
+      // TODO revisit types https://github.com/elastic/kibana/issues/159714
+      extractReferences: (params: any) => {
+        const [searchConfiguration, references] = extractReferences(params.searchConfiguration);
+        const newParams = { ...params, searchConfiguration } as EsQueryRuleParamsExtractedParams;
+
+        return { params: newParams, references };
+      },
+      injectReferences: (params: any, references: any) => {
+        return {
+          ...params,
+          searchConfiguration: injectReferences(params.searchConfiguration, references),
+        };
+      },
     },
     producer: observabilityFeatureId,
     getSummarizedAlerts: getSummarizedAlerts(),
