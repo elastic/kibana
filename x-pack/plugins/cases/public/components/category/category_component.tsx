@@ -65,6 +65,7 @@ export const CategoryComponent: React.FC<CategoryComponentProps> = React.memo(
         aria-label="categories-list"
         isClearable
         customOptionText={ADD_CATEGORY_CUSTOM_OPTION_LABEL_COMBO_BOX}
+        isCaseSensitive
       />
     );
   }

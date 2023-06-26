@@ -104,6 +104,7 @@ export const MAX_DOCS_PER_PAGE = 10000 as const;
 export const MAX_BULK_GET_ATTACHMENTS = MAX_DOCS_PER_PAGE;
 export const MAX_CONCURRENT_SEARCHES = 10 as const;
 export const MAX_BULK_GET_CASES = 1000 as const;
+export const MAX_COMMENTS_PER_PAGE = 100 as const;
 export const MAX_CATEGORY_FILTER_LENGTH = 100 as const;
 
 /**

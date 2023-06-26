@@ -707,7 +707,8 @@ describe('AlertsTableState', () => {
     });
   });
 
-  describe('field browser', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/160091
+  describe.skip('field browser', () => {
     const browserFields: BrowserFields = {
       kibana: {
         fields: {

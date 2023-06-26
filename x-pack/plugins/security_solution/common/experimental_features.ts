@@ -118,6 +118,11 @@ export const allowedExperimentalValues = Object.freeze({
   detectionsCoverageOverview: false,
 
   /**
+   * Enable risk engine client and initialisation of datastream, component templates and mappings
+   */
+  riskScoringPersistence: false,
+
+  /**
    * Enables experimental Entity Analytics HTTP endpoints
    */
   riskScoringRoutesEnabled: false,
