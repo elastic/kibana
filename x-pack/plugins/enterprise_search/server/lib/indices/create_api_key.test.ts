@@ -42,25 +42,7 @@ describe('createApiKey lib function', () => {
           cluster: [],
           index: [
             {
-              names: [indexName, `.search-acl-filter-my-index`],
-              privileges: ['all'],
-            },
-          ],
-        },
-      },
-    });
-  });
-
-  it('works with search-* prefixed indices', async () => {
-    await createApiKey(request, security, 'search-test', keyName);
-    expect(security.authc.apiKeys.create).toHaveBeenCalledWith(request, {
-      name: keyName,
-      role_descriptors: {
-        ['search-test-key-role']: {
-          cluster: [],
-          index: [
-            {
-              names: ['search-test', `.search-acl-filter-test`],
+              names: [indexName],
               privileges: ['all'],
             },
           ],

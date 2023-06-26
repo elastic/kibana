@@ -63,6 +63,29 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
       });
 
+      it('adds a category to a case', async () => {
+        const category = uuidv4();
+        await testSubjects.click('category-edit-button');
+        await comboBox.setCustom('comboBoxInput', category);
+        await testSubjects.click('edit-category-submit');
+
+        // validate category was added
+        await testSubjects.existOrFail('category-viewer-' + category);
+
+        // validate user action
+        await find.byCssSelector('[data-test-subj*="category-update-action"]');
+      });
+
+      it('deletes a category from a case', async () => {
+        await find.byCssSelector('[data-test-subj*="category-viewer-"]');
+
+        await testSubjects.click('category-remove-button');
+
+        await testSubjects.existOrFail('no-categories');
+        // validate user action
+        await find.byCssSelector('[data-test-subj*="category-delete-action"]');
+      });
+
       it('adds a tag to a case', async () => {
         const tag = uuidv4();
         await testSubjects.click('tag-list-edit-button');

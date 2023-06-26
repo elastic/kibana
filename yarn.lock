@@ -4428,6 +4428,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/generate-console-definitions@link:packages/kbn-generate-console-definitions":
+  version "0.0.0"
+  uid ""
+
 "@kbn/generate-csv-types@link:packages/kbn-generate-csv-types":
   version "0.0.0"
   uid ""
@@ -5725,6 +5729,10 @@
   uid ""
 
 "@kbn/upgrade-assistant-plugin@link:x-pack/plugins/upgrade_assistant":
+  version "0.0.0"
+  uid ""
+
+"@kbn/uptime-plugin@link:x-pack/plugins/uptime":
   version "0.0.0"
   uid ""
 
