@@ -9,7 +9,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, withRouter, RouteComponentProps } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
 import { Route } from '@kbn/shared-ux-router';
 import { EuiPage, EuiPageSideBar_Deprecated as EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 
@@ -127,14 +126,12 @@ const EmbeddableExplorerApp = ({
 
   return (
     <Router basename={basename}>
-      <CompatRouter>
-        <EuiPage>
-          <EuiPageSideBar>
-            <Nav navigateToApp={navigateToApp} pages={pages} />
-          </EuiPageSideBar>
-          {routes}
-        </EuiPage>
-      </CompatRouter>
+      <EuiPage>
+        <EuiPageSideBar>
+          <Nav navigateToApp={navigateToApp} pages={pages} />
+        </EuiPageSideBar>
+        {routes}
+      </EuiPage>
     </Router>
   );
 };
