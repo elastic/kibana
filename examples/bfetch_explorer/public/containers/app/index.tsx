@@ -7,9 +7,8 @@
  */
 
 import React from 'react';
-import { BrowserRouter as Router, Redirect, Switch } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from '@kbn/shared-ux-router';
 import { EuiPage } from '@elastic/eui';
 import { useDeps } from '../../hooks/use_deps';
 import { Sidebar } from './sidebar';
@@ -27,15 +26,13 @@ export const App: React.FC = () => {
 
   return (
     <Router basename={appBasePath}>
-      <CompatRouter>
-        <EuiPage>
-          <Sidebar />
-          <Switch>
-            {routeElements}
-            <Redirect to="/count-until" />
-          </Switch>
-        </EuiPage>
-      </CompatRouter>
+      <EuiPage>
+        <Sidebar />
+        <Routes>
+          {routeElements}
+          <Redirect to="/count-until" />
+        </Routes>
+      </EuiPage>
     </Router>
   );
 };

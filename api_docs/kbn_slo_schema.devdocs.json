@@ -415,10 +415,10 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
-        "id": "def-common.APMTransactionDurationIndicatorSchema",
+        "id": "def-common.APMTransactionDurationIndicator",
         "type": "Type",
         "tags": [],
-        "label": "APMTransactionDurationIndicatorSchema",
+        "label": "APMTransactionDurationIndicator",
         "description": [],
         "signature": [
           "{ type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; }"
@@ -430,10 +430,10 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
-        "id": "def-common.APMTransactionErrorRateIndicatorSchema",
+        "id": "def-common.APMTransactionErrorRateIndicator",
         "type": "Type",
         "tags": [],
-        "label": "APMTransactionErrorRateIndicatorSchema",
+        "label": "APMTransactionErrorRateIndicator",
         "description": [],
         "signature": [
           "{ type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; }"
@@ -740,7 +740,7 @@
         "label": "GetPreviewDataResponse",
         "description": [],
         "signature": [
-          "{ date: Date; sliValue: number; }[]"
+          "{ date: string; sliValue: number; }[]"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -801,6 +801,21 @@
         "description": [],
         "signature": [
           "{ type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.IndicatorType",
+        "type": "Type",
+        "tags": [],
+        "label": "IndicatorType",
+        "description": [],
+        "signature": [
+          "\"sli.apm.transactionDuration\" | \"sli.apm.transactionErrorRate\" | \"sli.kql.custom\" | \"sli.metric.custom\""
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,

@@ -175,14 +175,16 @@ exports[`SSL Certificate component shallow renders 1`] = `
       }
     }
   >
-    <MonitorSSLCertificate
-      tls={
-        Object {
-          "certificate_not_valid_after": "2020-04-24T11:41:38.200Z",
-          "certificate_not_valid_before": "2019-04-24T11:41:38.200Z",
+    <CompatRouter>
+      <MonitorSSLCertificate
+        tls={
+          Object {
+            "certificate_not_valid_after": "2020-04-24T11:41:38.200Z",
+            "certificate_not_valid_before": "2019-04-24T11:41:38.200Z",
+          }
         }
-      }
-    />
+      />
+    </CompatRouter>
   </ContextProvider>
 </ContextProvider>
 `;

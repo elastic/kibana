@@ -74,6 +74,7 @@
     "xpack.serverlessObservability": "plugins/serverless_observability",
     "xpack.serverlessSecurity": "plugins/serverless_security",
     "xpack.securitySolution": "plugins/security_solution",
+    "xpack.securitySolutionEss": "plugins/ess_security",
     "xpack.sessionView": "plugins/session_view",
     "xpack.snapshotRestore": "plugins/snapshot_restore",
     "xpack.spaces": "plugins/spaces",
