@@ -82,8 +82,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   const suggestions = convertArrayToObject(messageVariables?.map(({ name }) => name));
   const [matches, setMatches] = useState<string[]>([]);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
-  const parentRef = useRef<any>(null);
-  const [caretPosition, setCaretPosition] = useState({ top: 0, left: 0, height: 0 });
+  const [caretPosition, setCaretPosition] = useState({ top: 0, left: 0, height: 0, width: 0 });
   const [isListOpen, setListOpen] = useState(false);
 
   const optionsToShow: EuiSelectableOption[] = useMemo(() => {
@@ -105,13 +104,21 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
       textAreaRef.current.selectionStart
     );
 
-    const parentTop = parentRef.current?.getBoundingClientRect().top;
-    const top = textAreaRef.current?.getBoundingClientRect().top;
-
+    const borderWidth = 2;
+    const marginTextArea = 12 * 2; // window.getComputedStyle(_textAreaRef$current).getPropertyValue("padding")
+    const overflowOffset = document.getElementsByClassName('euiFlyoutBody__overflow')[0].offsetTop;
+    const textAreaClientRect = textAreaRef.current?.getBoundingClientRect();
+    const top = textAreaClientRect.top;
+    const width = textAreaClientRect.width;
     setCaretPosition({
-      top: top + newCaretPosition?.top + newCaretPosition.height - parentTop,
+      top:
+        top -
+        (overflowOffset + borderWidth + marginTextArea + textAreaRef.current.scrollTop) +
+        newCaretPosition?.top +
+        newCaretPosition.height,
       left: newCaretPosition.left,
       height: newCaretPosition.height,
+      width,
     });
 
     const lastCloseBracketIndex = value.slice(0, selectionStart).lastIndexOf(' ');
@@ -158,14 +165,14 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   };
 
   return (
-    <div style={{ position: 'relative' }} ref={parentRef}>
-      <EuiFormRow
-        fullWidth
-        error={errors}
-        isDisabled={isDisabled}
-        isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
-        label={label}
-      >
+    <EuiFormRow
+      fullWidth
+      error={errors}
+      isDisabled={isDisabled}
+      isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
+      label={label}
+    >
+      <>
         <EuiTextArea
           disabled={isDisabled}
           inputRef={textAreaRef}
@@ -191,23 +198,23 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
             }
           }}
         />
-      </EuiFormRow>
-      {matches.length > 0 && isListOpen && (
-        <EuiSelectable
-          style={{
-            position: 'absolute',
-            top: caretPosition.top,
-            width: '100%',
-            border: '1px solid rgb(211, 218, 230)',
-            background: '#fbfcfd',
-          }}
-          options={optionsToShow}
-          onChange={onOptionPick}
-          singleSelection
-        >
-          {(list) => list}
-        </EuiSelectable>
-      )}
-    </div>
+        {matches.length > 0 && isListOpen && (
+          <EuiSelectable
+            style={{
+              position: 'absolute',
+              top: caretPosition.top,
+              width: caretPosition.width,
+              border: '1px solid rgb(211, 218, 230)',
+              background: '#fbfcfd',
+            }}
+            options={optionsToShow}
+            onChange={onOptionPick}
+            singleSelection
+          >
+            {(list) => list}
+          </EuiSelectable>
+        )}
+      </>
+    </EuiFormRow>
   );
 };
