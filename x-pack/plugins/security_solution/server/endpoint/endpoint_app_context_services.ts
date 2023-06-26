@@ -16,6 +16,7 @@ import type {
 } from '@kbn/fleet-plugin/server';
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
@@ -49,6 +50,7 @@ export interface EndpointAppContextServiceSetupContract {
 export interface EndpointAppContextServiceStartContract {
   fleetAuthzService?: FleetStartContract['authz'];
   createFleetFilesClient: FleetStartContract['createFilesClient'];
+  createFleetActionsClient: FleetStartContract['createFleetActionsClient'];
   logger: Logger;
   endpointMetadataService: EndpointMetadataService;
   endpointFleetServicesFactory: EndpointFleetServicesFactoryInterface;
@@ -251,5 +253,13 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.createFleetFilesClient.fromHost('endpoint');
+  }
+
+  public async getFleetActionsClient(): Promise<FleetActionsClientInterface> {
+    if (!this.startDependencies?.createFleetActionsClient) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.createFleetActionsClient('endpoint');
   }
 }

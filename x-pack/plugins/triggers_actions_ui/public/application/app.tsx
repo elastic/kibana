@@ -6,8 +6,8 @@
  */
 
 import React, { lazy } from 'react';
-import { Switch, Redirect, Router } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -112,7 +112,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
 
   return (
     <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
-      <Switch>
+      <Routes>
         <Route
           path={`/:section(${sectionsRegex})`}
           component={suspendedComponentWithProps(TriggersActionsUIHome, 'xl')}
@@ -137,7 +137,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
 
         <Redirect from={'/'} to="rules" />
         <Redirect from={'/alerts'} to="rules" />
-      </Switch>
+      </Routes>
     </ConnectorProvider>
   );
 };
