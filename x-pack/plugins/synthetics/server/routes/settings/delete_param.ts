@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsParamType } from '../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { DeleteParamsResponse } from '../../../common/runtime_types';
 
 export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'DELETE',
@@ -19,7 +20,7 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => 
     }),
   },
   writeAccess: true,
-  handler: async ({ savedObjectsClient, request }): Promise<any> => {
+  handler: async ({ savedObjectsClient, request }): Promise<DeleteParamsResponse[]> => {
     const { ids } = request.query as { ids: string };
     const parsedIds = JSON.parse(ids) as string[];
 
@@ -27,7 +28,6 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => 
       parsedIds.map((id) => ({ type: syntheticsParamType, id })),
       { force: true }
     );
-
-    return { data: result };
+    return result.statuses.map(({ id, success }) => ({ id, deleted: success }));
   },
 });

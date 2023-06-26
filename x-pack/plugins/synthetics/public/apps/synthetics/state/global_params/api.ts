@@ -8,6 +8,7 @@
 import { SavedObject } from '@kbn/core-saved-objects-common';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
+  DeleteParamsResponse,
   SyntheticsParamRequest,
   SyntheticsParams,
   SyntheticsParamsCodec,
@@ -44,7 +45,11 @@ export const editGlobalParam = async ({
   );
 };
 
-export const deleteGlobalParams = async ({ ids }: { ids: string[] }): Promise<SyntheticsParams> => {
+export const deleteGlobalParams = async ({
+  ids,
+}: {
+  ids: string[];
+}): Promise<DeleteParamsResponse[]> => {
   return apiService.delete(SYNTHETICS_API_URLS.PARAMS, {
     ids: JSON.stringify(ids),
   });

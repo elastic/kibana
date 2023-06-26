@@ -20,7 +20,15 @@ export const SyntheticsParamsCodec = t.intersection([
 ]);
 
 export type SyntheticsParams = t.TypeOf<typeof SyntheticsParamsCodec>;
+
 export type SyntheticsParamSOAttributes = t.TypeOf<typeof SyntheticsParamsCodec>;
+
+export const DeleteParamsResponseCodec = t.interface({
+  id: t.string,
+  deleted: t.boolean,
+});
+
+export type DeleteParamsResponse = t.TypeOf<typeof DeleteParamsResponseCodec>;
 
 export const SyntheticsParamRequestCodec = t.intersection([
   t.interface({
