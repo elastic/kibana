@@ -130,8 +130,8 @@ export class ReportingCore {
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
       registerExportTypes: (id) => id,
-      getScreenshots: this.getScreenshots,
-      getSpaceId: this.getSpaceId,
+      getScreenshots: (options) => this.getScreenshots(options),
+      getSpaceId: (request) => this.getSpaceId(request),
     });
 
     this.executing = new Set();
