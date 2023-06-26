@@ -17,7 +17,10 @@ export default function ({ getService }: FtrProviderContext) {
     describe('When status.allowAnonymous is true', () => {
       describe('when requesting extended stats', () => {
         it('returns extended stats payload for authenticated requests', async () => {
-          const { body } = await supertest.get('/api/stats?extended=true').set('kbn-xsrf', 'kibana').expect(200);
+          const { body } = await supertest
+            .get('/api/stats?extended=true')
+            .set('kbn-xsrf', 'kibana')
+            .expect(200);
 
           expect(body.cluster_uuid).to.be.a('string');
           expect(body.usage).to.be.an('object');
