@@ -216,11 +216,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                       }
                     },
                   },
-                  {
-                    label: apmStorageExplorerTitle,
-                    app: 'apm',
-                    path: '/storage-explorer',
-                  },
                 ],
               },
             ];
