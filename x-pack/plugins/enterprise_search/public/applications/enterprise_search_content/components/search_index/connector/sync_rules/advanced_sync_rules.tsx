@@ -40,7 +40,7 @@ export const AdvancedSyncRules: React.FC = () => {
       }
       fullWidth
     >
-      <CodeEditor // TODO theme is provided in context by x-pack/plugins/enterprise_search/public/applications/index.tsx
+      <CodeEditor
         isCopyable
         languageId="json"
         options={{
