@@ -30,7 +30,7 @@ export class AutomatedActionGenerator extends FleetActionGenerator {
         data: {
           command: 'isolate',
           comment: this.randomString(15),
-          parameter: undefined,
+          parameters: undefined,
           output: undefined,
         },
       },

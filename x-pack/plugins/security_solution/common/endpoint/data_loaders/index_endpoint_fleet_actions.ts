@@ -53,10 +53,7 @@ export const indexEndpointAndFleetActionsForHost = async (
   const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
   const agentId = endpointHost.elastic.agent.id;
   const actionsCount = options.numResponseActions ?? 1;
-  const total =
-    options.numResponseActions === 1
-      ? actionsCount
-      : fleetActionGenerator.randomN(5) + actionsCount;
+  const total = actionsCount === 1 ? actionsCount : fleetActionGenerator.randomN(5) + actionsCount;
   const response: IndexedEndpointAndFleetActionsForHostResponse = {
     actions: [],
     actionResponses: [],
@@ -99,7 +96,7 @@ export const indexEndpointAndFleetActionsForHost = async (
         user_id: undefined,
         data: {
           ...action.data,
-          ...(options.alertIds ? { alert_id: options.alertIds } : {}),
+          alert_id: options.alertIds,
         },
       },
       agent: {
@@ -109,7 +106,7 @@ export const indexEndpointAndFleetActionsForHost = async (
       user: {
         id: action.user_id,
       },
-      ...(action.rule ? { rule: action.rule } : {}),
+      rule: action.rule,
     };
 
     await Promise.all([

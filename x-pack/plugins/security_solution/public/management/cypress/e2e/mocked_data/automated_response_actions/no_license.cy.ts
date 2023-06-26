@@ -39,7 +39,7 @@ describe('No License', { env: { ftrConfig: { license: 'basic' } } }, () => {
     const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
     before(() => {
       login();
-      return indexEndpointRuleAlerts({
+      indexEndpointRuleAlerts({
         endpointAgentId,
         endpointHostname,
         endpointIsolated: false,
@@ -67,7 +67,7 @@ describe('No License', { env: { ftrConfig: { license: 'basic' } } }, () => {
         alertData = undefined;
       }
     });
-    it('render the permission denied screense', () => {
+    it('show the permission denied callout', () => {
       cy.visit(APP_ALERTS_PATH);
       closeAllToasts();
       cy.getByTestSubj('expand-event').first().click();

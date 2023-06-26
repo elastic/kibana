@@ -12,7 +12,7 @@ import { indexEndpointRuleAlerts } from '../../../tasks/index_endpoint_rule_aler
 
 import { login, ROLE } from '../../../tasks/login';
 
-describe('History Log', () => {
+describe('Response actions history page', () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
   let endpointDataWithAutomated: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
   let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;

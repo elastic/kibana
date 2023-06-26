@@ -20,7 +20,7 @@ describe('Results', () => {
   const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
 
   before(() => {
-    return indexEndpointRuleAlerts({
+    indexEndpointRuleAlerts({
       endpointAgentId,
       endpointHostname,
       endpointIsolated: false,
@@ -49,7 +49,7 @@ describe('Results', () => {
     }
   });
 
-  describe('see results when RBAC is correct', () => {
+  describe('see results when has RBAC', () => {
     before(() => {
       login(ROLE.endpoint_response_actions_access);
     });
@@ -64,12 +64,12 @@ describe('Results', () => {
       cy.contains(/isolate is pending|isolate completed successfully/g);
     });
   });
-  describe('do not see results results when RBAC is correct', () => {
+  describe('do not see results results when does not have RBAC', () => {
     before(() => {
       login(ROLE.endpoint_response_actions_no_access);
     });
 
-    it('see permission denied', () => {
+    it('show the permission denied callout', () => {
       cy.visit(APP_ALERTS_PATH);
       closeAllToasts();
 
