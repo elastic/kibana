@@ -8,7 +8,7 @@
 import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { cloneDeep } from 'lodash';
-import { isFilterPinned } from '@kbn/es-query';
+import { AggregateQuery, Filter, isFilterPinned, Query } from '@kbn/es-query';
 import { isTextBasedQuery } from './is_text_based_query';
 import { DiscoverAppState } from '../services/discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
@@ -35,34 +35,26 @@ export function updateSavedSearch(
     state?: DiscoverAppState;
     services: DiscoverServices;
   },
-  {
-    useFilterAndQueryServices,
-    excludeGlobalFilters = true,
-  }: { useFilterAndQueryServices?: boolean; excludeGlobalFilters?: boolean } = {
-    excludeGlobalFilters: true,
-  }
+  useFilterAndQueryServices: boolean = false
 ) {
   if (dataView) {
     savedSearch.searchSource.setField('index', dataView);
     savedSearch.usesAdHocDataView = !dataView.isPersisted();
   }
+
+  let query: Query | AggregateQuery | undefined;
+  let filters: Filter[] | undefined;
+
   if (useFilterAndQueryServices) {
-    const filters = excludeGlobalFilters
-      ? services.data.query.filterManager.getAppFilters()
-      : services.data.query.filterManager.getFilters();
-
-    savedSearch.searchSource
-      .setField('query', services.data.query.queryString.getQuery())
-      .setField('filter', filters);
+    query = services.data.query.queryString.getQuery();
+    filters = services.data.query.filterManager.getAppFilters();
   } else if (state) {
-    const filters = excludeGlobalFilters
-      ? state.filters?.filter((filter) => !isFilterPinned(filter))
-      : state.filters;
-
-    savedSearch.searchSource
-      .setField('query', state.query ?? undefined)
-      .setField('filter', cloneDeep(filters ?? []));
+    query = state.query;
+    filters = state.filters?.filter((filter) => !isFilterPinned(filter));
   }
+
+  savedSearch.searchSource.setField('query', query).setField('filter', cloneDeep(filters ?? []));
+
   if (state) {
     savedSearch.columns = state.columns || [];
     savedSearch.sort = (state.sort as SortOrder[]) || [];

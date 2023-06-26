@@ -12,6 +12,7 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { dataViewComplexMock } from '../../../__mocks__/data_view_complex';
+import type { Filter, FilterStateStore } from '@kbn/es-query';
 
 describe('DiscoverSavedSearchContainer', () => {
   const savedSearch = savedSearchMock;
@@ -170,10 +171,9 @@ describe('DiscoverSavedSearchContainer', () => {
     });
 
     it('Error thrown on persistence layer bubbling up, no changes to the initial saved search ', async () => {
-      discoverServiceMock.savedSearch.save = jest.fn().mockImplementation(() => {
+      jest.spyOn(discoverServiceMock.savedSearch, 'save').mockImplementationOnce(() => {
         throw new Error('oh-noes');
       });
-
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
       });
@@ -189,6 +189,58 @@ describe('DiscoverSavedSearchContainer', () => {
       expect(savedSearchContainer.getInitial$().getValue().title).not.toBe(
         'My updated saved search'
       );
+    });
+
+    it('should exclude global filters from saved search', async () => {
+      const savedSearchContainer = getSavedSearchContainer({
+        services: discoverServiceMock,
+      });
+      const appFilter: Filter = {
+        meta: {},
+        query: {
+          match_phrase: {
+            extension: {
+              query: 'jpg',
+              type: 'phrase',
+            },
+          },
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+      };
+      const globalFilter: Filter = {
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: false,
+        },
+        query: {
+          match_phrase: {
+            extension: {
+              query: 'png',
+              type: 'phrase',
+            },
+          },
+        },
+        $state: {
+          store: FilterStateStore.GLOBAL_STATE,
+        },
+      };
+      jest
+        .spyOn(discoverServiceMock.data.query.filterManager, 'getAppFilters')
+        .mockReturnValueOnce([appFilter]);
+      const savedSearchToPersist = {
+        ...savedSearchMock,
+        searchSource: savedSearchMock.searchSource.createCopy(),
+      };
+      savedSearchToPersist.searchSource.setField('filter', [appFilter, globalFilter]);
+      expect(savedSearchToPersist.searchSource.getField('filter')).toEqual([
+        appFilter,
+        globalFilter,
+      ]);
+      await savedSearchContainer.persist(savedSearchToPersist, saveOptions);
+      expect(savedSearchToPersist.searchSource.getField('filter')).toEqual([appFilter]);
     });
   });
 
