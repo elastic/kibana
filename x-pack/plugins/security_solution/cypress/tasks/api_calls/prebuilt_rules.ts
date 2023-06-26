@@ -25,6 +25,11 @@ export const SAMPLE_PREBUILT_RULE = createRuleAssetSavedObject({
   enabled: true,
 });
 
+/* Install all prebuilt rules available as security-rule saved objects
+ * Use in combination with `preventPrebuiltRulesPackageInstallation` and
+ * `createNewRuleAsset` to create mocked prebuilt rules and install only those
+ * instead of all rules available in the `security_detection_engine` package
+ */
 export const installAllPrebuiltRulesRequest = () => {
   return cy.request({
     method: 'POST',
@@ -110,17 +115,8 @@ export const getRuleAssets = (index: string | undefined = '.kibana_security_solu
   });
 };
 
-export const installAvailableRules = () => {
-  return cy.request({
-    method: 'PUT',
-    url: 'api/detection_engine/rules/prepackaged',
-    headers: { 'kbn-xsrf': 'cypress-creds', 'Content-Type': 'application/json' },
-    failOnStatusCode: false,
-  });
-};
-
 /* Prevent the installation of the `security_detection_engine` package from Fleet
-/* by intercepting the request and returning a mockempty object as response
+/* by intercepting the request and returning a mock empty object as response
 /* Used primarily to prevent the unwanted installation of "real" prebuilt rules
 /* during e2e tests, and allow for manual installation of mock rules instead. */
 export const preventPrebuiltRulesPackageInstallation = () => {

@@ -23,7 +23,7 @@ import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules'
 import {
   createNewRuleAsset,
   getRuleAssets,
-  installAvailableRules,
+  installAllPrebuiltRulesRequest,
   preventPrebuiltRulesPackageInstallation,
 } from '../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/common';
@@ -148,7 +148,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       preventPrebuiltRulesPackageInstallation();
       /* Create a new rule and install it */
       createNewRuleAsset({ rule: OUTDATED_RULE });
-      installAvailableRules();
+      installAllPrebuiltRulesRequest();
       /* Create a second version of the rule, making it available for update */
       createNewRuleAsset({ rule: UPDATED_RULE });
       waitForRulesTableToBeLoaded();
