@@ -58,7 +58,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(request.status).to.be(200);
         expect(request.body.apiKeyEncoded).to.not.empty();
-        expect(request.body.id).to.not.empty();
+        expect(request.body.onboardingId).to.not.empty();
       });
 
       it('saves the expected state', async () => {
@@ -73,7 +73,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         const savedState = await kibanaServer.savedObjects.get({
           type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-          id: request.body.id,
+          id: request.body.onboardingId,
         });
 
         expect(savedState.attributes).to.be.eql({ state });
