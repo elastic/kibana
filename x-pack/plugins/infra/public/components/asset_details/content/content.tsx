@@ -36,7 +36,15 @@ export const Content = ({
         <Anomalies nodeName={node.name} onClose={overrides?.anomalies?.onClose} />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.LOGS}>
-        <Logs nodeId={node.id} nodeType={nodeType} currentTime={currentTimeRange.to} />
+        <Logs
+          nodeName={node.name}
+          nodeType={nodeType}
+          currentTime={currentTimeRange.to}
+          logViewReference={overrides?.logs?.logView?.reference}
+          logViewLoading={overrides?.logs?.logView?.loading}
+          search={overrides?.logs?.query}
+          onSearchChange={(query) => onChange({ logs: { query } })}
+        />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.METADATA}>
         <Metadata
@@ -66,7 +74,7 @@ export const Content = ({
           nodeName={node.name}
           nodeType={nodeType}
           currentTime={currentTimeRange.to}
-          searchFilter={overrides?.processes?.query}
+          search={overrides?.processes?.query}
           onSearchFilterChange={(query) => onChange({ processes: { query } })}
         />
       </TabPanel>

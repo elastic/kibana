@@ -3504,6 +3504,23 @@
           "trackAdoption": false,
           "children": [],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginSetupContract.getActionsConfigurationUtilities",
+          "type": "Function",
+          "tags": [],
+          "label": "getActionsConfigurationUtilities",
+          "description": [],
+          "signature": [
+            "() => ",
+            "ActionsConfigurationUtilities"
+          ],
+          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",

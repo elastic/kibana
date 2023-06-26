@@ -14,13 +14,13 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CreateSLOInput } from '@kbn/slo-schema';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import {
   Field,
   useFetchIndexPatternFields,
 } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
 import { IndexSelection } from '../custom_common/index_selection';
@@ -31,10 +31,10 @@ interface Option {
 }
 
 export function CustomKqlIndicatorTypeForm() {
-  const { control, watch, getFieldState } = useFormContext<CreateSLOInput>();
-  const { isLoading, data: indexFields } = useFetchIndexPatternFields(
-    watch('indicator.params.index')
-  );
+  const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
+
+  const index = watch('indicator.params.index');
+  const { isLoading, data: indexFields } = useFetchIndexPatternFields(index);
   const timestampFields = (indexFields ?? []).filter((field) => field.type === 'date');
 
   return (
@@ -53,7 +53,6 @@ export function CustomKqlIndicatorTypeForm() {
           >
             <Controller
               name="indicator.params.timestampField"
-              shouldUnregister
               defaultValue=""
               rules={{ required: true }}
               control={control}
@@ -71,9 +70,9 @@ export function CustomKqlIndicatorTypeForm() {
                   )}
                   data-test-subj="customKqlIndicatorFormTimestampFieldSelect"
                   isClearable
-                  isDisabled={!watch('indicator.params.index')}
+                  isDisabled={!index}
                   isInvalid={fieldState.invalid}
-                  isLoading={!!watch('indicator.params.index') && isLoading}
+                  isLoading={!!index && isLoading}
                   onChange={(selected: EuiComboBoxOptionOption[]) => {
                     if (selected.length) {
                       return field.onChange(selected[0].value);
@@ -83,7 +82,7 @@ export function CustomKqlIndicatorTypeForm() {
                   }}
                   options={createOptions(timestampFields)}
                   selectedOptions={
-                    !!watch('indicator.params.index') &&
+                    !!index &&
                     !!field.value &&
                     timestampFields.some((timestampField) => timestampField.name === field.value)
                       ? [{ value: field.value, label: field.value }]

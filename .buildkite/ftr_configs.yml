@@ -196,6 +196,7 @@ enabled:
   - x-pack/test/api_integration/apis/security/config.ts
   - x-pack/test/api_integration/apis/security_solution/config.ts
   - x-pack/test/api_integration/apis/spaces/config.ts
+  - x-pack/test/api_integration/apis/status/config.ts
   - x-pack/test/api_integration/apis/synthetics/config.ts
   - x-pack/test/api_integration/apis/telemetry/config.ts
   - x-pack/test/api_integration/apis/transform/config.ts
@@ -398,3 +399,4 @@ enabled:
   - x-pack/performance/journeys/dashboard_listing_page.ts
   - x-pack/performance/journeys/cloud_security_dashboard.ts
   - x-pack/test/custom_branding/config.ts
+  - x-pack/test/profiling_api_integration/cloud/config.ts

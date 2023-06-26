@@ -429,8 +429,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
       } else if (!compatibleWithCurrentField) {
         label = (
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs }}>
-              {label}
+            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs, minWidth: 0 }}>
+              <span
+                css={css`
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                `}
+              >
+                {label}
+              </span>
             </EuiFlexItem>
             {shouldDisplayDots && (
               <EuiFlexItem grow={false}>
@@ -502,6 +510,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                           helpPopoverContainer.current = null;
                         }
                       }}
+                      theme={props.core.theme}
                     >
                       <HelpComponent />
                     </WrappingHelpPopover>
