@@ -224,6 +224,7 @@ export class MlServerPlugin
         coreSetup.getStartServices
       ),
       mlLicense: this.mlLicense,
+      enabledFeatures: this.enabledFeatures,
     };
 
     annotationRoutes(routeInit, plugins.security);

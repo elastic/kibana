@@ -266,10 +266,7 @@ function getNotificationsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<L
       defaultMessage: 'Notifications',
     }),
     path: `/${ML_PAGES.NOTIFICATIONS}`,
-    navLinkStatus:
-      mlCapabilities.isADEnabled && mlCapabilities.isDFAEnabled && mlCapabilities.isNLPEnabled
-        ? AppNavLinkStatus.visible
-        : AppNavLinkStatus.hidden,
+    navLinkStatus: AppNavLinkStatus.visible,
   };
 }
 
