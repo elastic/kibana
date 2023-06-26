@@ -9,7 +9,8 @@ import { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { DiscoverAppState } from '../services/discover_app_state_container';
+import { isEqual } from 'lodash';
+import type { DiscoverAppState } from '../services/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import { getRawRecordType } from './get_raw_record_type';
 import {
@@ -56,6 +57,7 @@ export function fetchAll(
   try {
     const dataView = searchSource.getField('index')!;
     const query = getAppState().query;
+    const prevQuery = dataSubjects.documents$.getValue().query;
     const recordRawType = getRawRecordType(query);
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus, recordRawType);
@@ -103,9 +105,20 @@ export function fetchAll(
             recordRawType,
           });
         }
+        /**
+         * The partial state for text based query languages is necessary in case the query has changed
+         * In the follow up useTextBasedQueryLanguage hook in this case new columns are added to AppState
+         * So the data table shows the new columns of the table. The partial state was introduced to prevent
+         * To frequent change of state causing the table to re-render to often, which causes race conditions
+         * So it takes too long, a bad user experience, also a potential flakniess in tests
+         */
+        const fetchStatus =
+          useSql && (!prevQuery || !isEqual(query, prevQuery))
+            ? FetchStatus.PARTIAL
+            : FetchStatus.COMPLETE;
 
         dataSubjects.documents$.next({
-          fetchStatus: FetchStatus.COMPLETE,
+          fetchStatus,
           result: records,
           textBasedQueryColumns,
           recordRawType,

@@ -6,11 +6,11 @@
  */
 
 import React, { useEffect, useLayoutEffect } from 'react';
-import { useParams, Redirect, Switch } from 'react-router-dom';
+import { useParams, Redirect } from 'react-router-dom';
 
 import { useValues, useActions } from 'kea';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { Status } from '../../../../../common/types/api';
 
@@ -88,7 +88,7 @@ export const SearchApplicationView: React.FC = () => {
           onClose={closeDeleteSearchApplicationModal}
         />
       ) : null}
-      <Switch>
+      <Routes>
         <Route
           exact
           path={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.PREVIEW}`}
@@ -120,7 +120,7 @@ export const SearchApplicationView: React.FC = () => {
             <SearchApplicationError notFound />
           </EnterpriseSearchApplicationsPageTemplate>
         </Route>
-      </Switch>
+      </Routes>
     </>
   );
 };

@@ -9,7 +9,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
 import { QueryClientProvider } from '@tanstack/react-query';
