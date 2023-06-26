@@ -360,6 +360,6 @@ export function updateActionDoc<T = unknown>(esClient: Client, id: string, doc: 
     index: AGENT_ACTIONS_INDEX,
     id,
     doc,
-    refresh: true,
+    refresh: 'wait_for',
   });
 }

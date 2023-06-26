@@ -8,12 +8,19 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
+  const svlObltOnboardingPage = getPageObject('svlObltOnboardingPage');
   const svlObltOverviewPage = getPageObject('svlObltOverviewPage');
   const svlObltNavigation = getService('svlObltNavigation');
 
   describe('landing page', function () {
-    it('has alerts section', async () => {
+    it('has button to skip onboarding', async () => {
       await svlObltNavigation.navigateToLandingPage();
+      await svlObltOnboardingPage.assertSkipButtonExists();
+    });
+
+    it('skips onboarding', async () => {
+      await svlObltOnboardingPage.skipOnboarding();
+      await svlObltOverviewPage.assertPageHeaderExists();
       await svlObltOverviewPage.assertAlertsSectionExists();
     });
   });

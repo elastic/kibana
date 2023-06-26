@@ -14,7 +14,7 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
  * known as "advanced settings") and a setter to change that setting:
  *
  * ```
- * const [darkMode, setDarkMode] = useKibanaUiSetting('theme:darkMode');
+ * const [quickRanges, setQuickRanges] = useKibanaUiSetting('timepicker:quickRanges');
  * ```
  *
  * This is not just a static consumption of the value, but will reactively

@@ -31,6 +31,7 @@ const config = new Config(
     buildNumber: 1234,
     buildSha: 'abcd1234',
     buildVersion: '8.0.0',
+    buildDate: '2023-05-15T23:12:09+0000',
   },
   false,
   false,

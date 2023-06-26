@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { SavedObjectsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
-import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 import { getSavedSearch } from './get_saved_searches';
@@ -16,42 +16,24 @@ import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/pu
 
 describe('getSavedSearch', () => {
   let search: DataPublicPluginStart['search'];
-  let savedObjectsClient: SavedObjectsStart['client'];
+  let cmClient: ContentManagementPublicStart['client'];
 
   beforeEach(() => {
-    savedObjectsClient = savedObjectsServiceMock.createStartContract().client;
+    cmClient = contentManagementMock.createStartContract().client;
     search = dataPluginMock.createStartContract().search;
-  });
-
-  test('should return empty saved search in case of no id', async () => {
-    const savedSearch = await getSavedSearch(undefined, {
-      savedObjectsClient,
-      search,
-    });
-
-    expect(search.searchSource.createEmpty).toHaveBeenCalled();
-    expect(savedSearch).toHaveProperty('searchSource');
   });
 
   test('should throw an error if so not found', async () => {
     let errorMessage = 'No error thrown.';
-    savedObjectsClient.resolve = jest.fn().mockReturnValue({
-      saved_object: {
-        attributes: {},
-        error: {
-          statusCode: 404,
-          error: 'Not Found',
-          message: 'Saved object [search/ccf1af80-2297-11ec-86e0-1155ffb9c7a7] not found',
-        },
-        id: 'ccf1af80-2297-11ec-86e0-1155ffb9c7a7',
-        type: 'search',
-        references: [],
-      },
+    cmClient.get = jest.fn().mockReturnValue({
+      statusCode: 404,
+      error: 'Not Found',
+      message: 'Saved object [ccf1af80-2297-11ec-86e0-1155ffb9c7a7] not found',
     });
 
     try {
       await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
-        savedObjectsClient,
+        contentManagement: cmClient,
         search,
       });
     } catch (error) {
@@ -64,8 +46,8 @@ describe('getSavedSearch', () => {
   });
 
   test('should find saved search', async () => {
-    savedObjectsClient.resolve = jest.fn().mockReturnValue({
-      saved_object: {
+    cmClient.get = jest.fn().mockReturnValue({
+      item: {
         attributes: {
           kibanaSavedObjectMeta: {
             searchSourceJSON:
@@ -89,15 +71,17 @@ describe('getSavedSearch', () => {
         ],
         namespaces: ['default'],
       },
-      outcome: 'exactMatch',
+      meta: {
+        outcome: 'exactMatch',
+      },
     });
 
     const savedSearch = await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
-      savedObjectsClient,
+      contentManagement: cmClient,
       search,
     });
 
-    expect(savedObjectsClient.resolve).toHaveBeenCalled();
+    expect(cmClient.get).toHaveBeenCalled();
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
@@ -110,6 +94,13 @@ describe('getSavedSearch', () => {
         "hideChart": false,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
         "isTextBasedQuery": undefined,
+        "references": Array [
+          Object {
+            "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+            "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+            "type": "index-pattern",
+          },
+        ],
         "refreshInterval": undefined,
         "rowHeight": undefined,
         "rowsPerPage": undefined,
@@ -140,9 +131,6 @@ describe('getSavedSearch', () => {
           "toExpressionAst": [MockFunction],
         },
         "sharingSavedObjectProps": Object {
-          "aliasPurpose": undefined,
-          "aliasTargetId": undefined,
-          "errorJSON": undefined,
           "outcome": "exactMatch",
         },
         "sort": Array [
@@ -162,8 +150,8 @@ describe('getSavedSearch', () => {
   });
 
   test('should find saved search with sql mode', async () => {
-    savedObjectsClient.resolve = jest.fn().mockReturnValue({
-      saved_object: {
+    cmClient.get = jest.fn().mockReturnValue({
+      item: {
         attributes: {
           kibanaSavedObjectMeta: {
             searchSourceJSON:
@@ -188,15 +176,17 @@ describe('getSavedSearch', () => {
         ],
         namespaces: ['default'],
       },
-      outcome: 'exactMatch',
+      meta: {
+        outcome: 'exactMatch',
+      },
     });
 
     const savedSearch = await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
-      savedObjectsClient,
+      contentManagement: cmClient,
       search,
     });
 
-    expect(savedObjectsClient.resolve).toHaveBeenCalled();
+    expect(cmClient.get).toHaveBeenCalled();
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
         "breakdownField": undefined,
@@ -209,6 +199,13 @@ describe('getSavedSearch', () => {
         "hideChart": true,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
         "isTextBasedQuery": true,
+        "references": Array [
+          Object {
+            "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+            "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+            "type": "index-pattern",
+          },
+        ],
         "refreshInterval": undefined,
         "rowHeight": undefined,
         "rowsPerPage": undefined,
@@ -239,9 +236,6 @@ describe('getSavedSearch', () => {
           "toExpressionAst": [MockFunction],
         },
         "sharingSavedObjectProps": Object {
-          "aliasPurpose": undefined,
-          "aliasTargetId": undefined,
-          "errorJSON": undefined,
           "outcome": "exactMatch",
         },
         "sort": Array [
@@ -261,8 +255,8 @@ describe('getSavedSearch', () => {
   });
 
   it('should call savedObjectsTagging.ui.getTagIdsFromReferences', async () => {
-    savedObjectsClient.resolve = jest.fn().mockReturnValue({
-      saved_object: {
+    cmClient.get = jest.fn().mockReturnValue({
+      item: {
         attributes: {
           kibanaSavedObjectMeta: {
             searchSourceJSON:
@@ -292,7 +286,9 @@ describe('getSavedSearch', () => {
         ],
         namespaces: ['default'],
       },
-      outcome: 'exactMatch',
+      meta: {
+        outcome: 'exactMatch',
+      },
     });
     const savedObjectsTagging = {
       ui: {
@@ -300,7 +296,7 @@ describe('getSavedSearch', () => {
       },
     } as unknown as SavedObjectsTaggingApi;
     await getSavedSearch('ccf1af80-2297-11ec-86e0-1155ffb9c7a7', {
-      savedObjectsClient,
+      contentManagement: cmClient,
       search,
       savedObjectsTagging,
     });

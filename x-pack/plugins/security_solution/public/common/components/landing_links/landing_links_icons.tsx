@@ -10,11 +10,11 @@ import styled from 'styled-components';
 
 import { NavItemBetaBadge } from '../navigation/nav_item_beta_badge';
 import { SecuritySolutionLinkAnchor, withSecuritySolutionLink } from '../links';
-import type { NavLinkItem } from '../navigation/types';
+import type { NavigationLink } from '../../links/types';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../lib/telemetry';
 
 interface LandingLinksImagesProps {
-  items: NavLinkItem[];
+  items: NavigationLink[];
 }
 
 const Link = styled.a`

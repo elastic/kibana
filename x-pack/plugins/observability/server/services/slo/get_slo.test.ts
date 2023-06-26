@@ -62,7 +62,7 @@ describe('GetSLO', () => {
         },
         timeWindow: {
           duration: '7d',
-          isRolling: true,
+          type: 'rolling',
         },
         settings: {
           syncDelay: '1m',

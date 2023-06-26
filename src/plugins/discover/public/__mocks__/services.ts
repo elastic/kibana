@@ -9,7 +9,9 @@ import { Observable, of } from 'rxjs';
 import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import { chromeServiceMock, coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 import {
   CONTEXT_STEP_SETTING,
@@ -119,6 +121,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     inspector: {
       open: jest.fn(),
     },
+    uiActions: uiActionsPluginMock.createStartContract(),
     uiSettings: {
       get: jest.fn((key: string) => {
         if (key === 'fields:popularLimit') {
@@ -190,6 +193,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
         updateTagsReferences: jest.fn(),
       },
     },
+    savedSearch: savedSearchPluginMock.createStartContract(),
     dataViews: dataPlugin.dataViews,
     timefilter: dataPlugin.query.timefilter.timefilter,
     lens: {

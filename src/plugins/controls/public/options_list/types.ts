@@ -33,6 +33,7 @@ export interface OptionsListComponentState {
   totalCardinality?: number;
   popoverOpen: boolean;
   field?: FieldSpec;
+  error?: string;
 }
 
 // public only - redux embeddable state type

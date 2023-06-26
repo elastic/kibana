@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-export const ResilientFieldsRT = rt.type({
+export const ResilientFieldsRT = rt.strict({
   incidentTypes: rt.union([rt.array(rt.string), rt.null]),
   severityCode: rt.union([rt.string, rt.null]),
 });

@@ -32,10 +32,10 @@ describe('Rule actions during detection rule creation', () => {
 
   before(() => {
     cleanKibana();
-    login();
   });
 
   beforeEach(() => {
+    login();
     deleteAlertsAndRules();
     deleteConnectors();
     deleteIndex(indexConnector.index);

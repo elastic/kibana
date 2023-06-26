@@ -59,7 +59,7 @@ export const useDashboardTable = () => {
     debounce(async (query?: string) => {
       try {
         const response = await dashboardService.fetchDashboards(query);
-        const items: DashboardItem[] = response.savedObjects.map((savedObject) => {
+        const items: DashboardItem[] = response.map((savedObject) => {
           return {
             id: savedObject.id,
             title: savedObject.attributes.title,

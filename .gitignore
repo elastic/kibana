@@ -92,6 +92,7 @@ npm-debug.log*
 
 ## @cypress/snapshot from apm plugin
 /snapshots.js
+x-pack/plugins/apm/scripts/apm-diagnostics*.json
 
 # transpiled cypress config
 x-pack/plugins/fleet/cypress.config.d.ts
@@ -130,3 +131,4 @@ fleet-server.yml
 **/.synthetics/
 **/.journeys/
 x-pack/test/security_api_integration/plugins/audit_log/audit.log
+

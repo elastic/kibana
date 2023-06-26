@@ -36,6 +36,7 @@ import {
   RuleTypeParams,
   RuleTypeState,
   SanitizedRule,
+  RuleAlertData,
 } from '../../common';
 import {
   generateActionHash,
@@ -64,7 +65,8 @@ export class ExecutionHandler<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
 > {
   private logger: Logger;
   private alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
@@ -76,7 +78,8 @@ export class ExecutionHandler<
     State,
     Context,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >;
   private taskRunnerContext: TaskRunnerContext;
   private taskInstance: RuleTaskInstance;
@@ -116,7 +119,8 @@ export class ExecutionHandler<
     State,
     Context,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >) {
     this.logger = logger;
     this.alertingEventLogger = alertingEventLogger;
@@ -440,8 +444,12 @@ export class ExecutionHandler<
       : `${triggersActionsRoute}${getRuleDetailsRoute(this.rule.id)}`;
 
     try {
+      const basePathname = new URL(this.taskRunnerContext.kibanaBaseUrl).pathname;
+      const basePathnamePrefix = basePathname !== '/' ? `${basePathname}` : '';
+      const spaceIdSegment = spaceId !== 'default' ? `/s/${spaceId}` : '';
+
       const ruleUrl = new URL(
-        `${spaceId !== 'default' ? `/s/${spaceId}` : ''}${relativePath}`,
+        [basePathnamePrefix, spaceIdSegment, relativePath].join(''),
         this.taskRunnerContext.kibanaBaseUrl
       );
 

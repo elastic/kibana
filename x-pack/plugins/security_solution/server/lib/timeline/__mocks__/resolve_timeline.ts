@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ResolvedTimelineWithOutcomeSavedObject } from '../../../../common/types/timeline';
-import { TimelineStatus, TimelineType } from '../../../../common/types/timeline';
+import type { ResolvedTimelineWithOutcomeSavedObject } from '../../../../common/types/timeline/api';
+import { TimelineStatus, TimelineType } from '../../../../common/types/timeline/api';
 
 export const mockResolvedSavedObject = {
   saved_object: {

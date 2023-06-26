@@ -56,7 +56,7 @@ import {
   escapeDoubleQuotes,
   OverallSwimlaneData,
   AppStateSelectedCells,
-  getSourceIndicesWithGeoFields,
+  getDataViewsAndIndicesWithGeoFields,
   SourceIndicesWithGeoFields,
 } from './explorer_utils';
 import { AnomalyTimeline } from './anomaly_timeline';
@@ -76,7 +76,6 @@ import type { ExplorerState } from './reducers';
 import type { TimeBuckets } from '../util/time_buckets';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { useMlKibana, useMlLocator } from '../contexts/kibana';
-import { useMlContext } from '../contexts/ml';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { ML_ANOMALY_EXPLORER_PANELS } from '../../../common/types/storage';
 
@@ -89,6 +88,7 @@ interface ExplorerPageProps {
   indexPattern?: DataView;
   queryString?: string;
   updateLanguage?: (language: string) => void;
+  dataViews?: DataView[];
 }
 
 const ExplorerPage: FC<ExplorerPageProps> = ({
@@ -99,6 +99,7 @@ const ExplorerPage: FC<ExplorerPageProps> = ({
   filterActive,
   filterPlaceHolder,
   indexPattern,
+  dataViews,
   queryString,
   updateLanguage,
 }) => (
@@ -113,6 +114,7 @@ const ExplorerPage: FC<ExplorerPageProps> = ({
               filterActive={!!filterActive}
               filterPlaceHolder={filterPlaceHolder}
               indexPattern={indexPattern}
+              dataViews={dataViews}
               queryString={queryString}
               updateLanguage={updateLanguage}
             />
@@ -269,6 +271,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const [language, updateLanguage] = useState<string>(DEFAULT_QUERY_LANG);
   const [sourceIndicesWithGeoFields, setSourceIndicesWithGeoFields] =
     useState<SourceIndicesWithGeoFields>({});
+  const [dataViews, setDataViews] = useState<DataView[] | undefined>();
 
   const filterSettings = useObservable(
     anomalyExplorerCommonStateService.getFilterSettings$(),
@@ -355,12 +358,13 @@ export const Explorer: FC<ExplorerUIProps> = ({
   }, []);
 
   const {
-    services: { charts: chartsService },
+    services: {
+      charts: chartsService,
+      data: { dataViews: dataViewsService },
+    },
   } = useMlKibana();
   const { euiTheme } = useEuiTheme();
   const mlLocator = useMlLocator();
-  const context = useMlContext();
-  const dataViewsService = context.dataViewsContract;
 
   const {
     annotations,
@@ -433,10 +437,11 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
   useEffect(() => {
     if (!noJobsSelected) {
-      getSourceIndicesWithGeoFields(selectedJobs, dataViewsService)
-        .then((sourceIndicesWithGeoFieldsMap) =>
-          setSourceIndicesWithGeoFields(sourceIndicesWithGeoFieldsMap)
-        )
+      getDataViewsAndIndicesWithGeoFields(selectedJobs, dataViewsService)
+        .then(({ sourceIndicesWithGeoFieldsMap, dataViews: dv }) => {
+          setSourceIndicesWithGeoFields(sourceIndicesWithGeoFieldsMap);
+          setDataViews(dv);
+        })
         .catch(console.error); // eslint-disable-line no-console
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -444,7 +449,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
   if (noJobsSelected && !loading) {
     return (
-      <ExplorerPage jobSelectorProps={jobSelectorProps}>
+      <ExplorerPage dataViews={dataViews} jobSelectorProps={jobSelectorProps}>
         <ExplorerNoJobsSelected />
       </ExplorerPage>
     );
@@ -452,7 +457,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
   if (!hasResultsWithAnomalies && !isDataLoading && !hasActiveFilter) {
     return (
-      <ExplorerPage jobSelectorProps={jobSelectorProps}>
+      <ExplorerPage dataViews={dataViews} jobSelectorProps={jobSelectorProps}>
         <ExplorerNoResultsFound hasResults={hasResults} selectedJobsRunning={selectedJobsRunning} />
       </ExplorerPage>
     );
@@ -619,6 +624,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
   return (
     <ExplorerPage
+      dataViews={dataViews}
       jobSelectorProps={jobSelectorProps}
       noInfluencersConfigured={noInfluencersConfigured}
       influencers={influencers}

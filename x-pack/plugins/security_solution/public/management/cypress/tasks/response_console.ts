@@ -6,7 +6,7 @@
  */
 
 import type { ConsoleResponseActionCommands } from '../../../../common/endpoint/service/response_actions/constants';
-import { closeAllToasts } from './close_all_toasts';
+import { closeAllToasts } from './toasts';
 import { APP_ENDPOINTS_PATH } from '../../../../common/constants';
 import Chainable = Cypress.Chainable;
 

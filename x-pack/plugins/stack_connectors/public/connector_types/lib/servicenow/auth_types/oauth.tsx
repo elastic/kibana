@@ -8,8 +8,11 @@
 import React, { memo } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { TextAreaField, TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { PasswordField } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  TextAreaField,
+  TextField,
+  PasswordField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 import * as i18n from '../translations';
 
 interface Props {
@@ -83,13 +86,25 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' 
           },
         }}
       />
-      <PasswordField
+      <UseField
         path={`${pathPrefix}secrets.clientSecret`}
-        label={i18n.CLIENTSECRET_LABEL}
-        readOnly={readOnly}
-        data-test-subj="connector-servicenow-client-secret-form-input"
-        isLoading={isLoading}
-        disabled={readOnly || isLoading}
+        config={{
+          label: i18n.CLIENTSECRET_LABEL,
+          validations: [
+            {
+              validator: emptyField(i18n.CLIENTSECRET_REQUIRED),
+            },
+          ],
+        }}
+        component={PasswordField}
+        componentProps={{
+          euiFieldProps: {
+            'data-test-subj': 'connector-servicenow-client-secret-form-input',
+            isLoading,
+            readOnly,
+            disabled: readOnly || isLoading,
+          },
+        }}
       />
       <UseField
         path="secrets.privateKey"
@@ -110,15 +125,22 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' 
           },
         }}
       />
-      <PasswordField
+      <UseField
         path={`${pathPrefix}secrets.privateKeyPassword`}
-        label={i18n.PRIVATE_KEY_PASSWORD_LABEL}
-        helpText={i18n.PRIVATE_KEY_PASSWORD_HELPER_TEXT}
-        validate={false}
-        data-test-subj="connector-servicenow-private-key-password-form-input"
-        readOnly={readOnly}
-        isLoading={isLoading}
-        disabled={readOnly || isLoading}
+        config={{
+          label: i18n.PRIVATE_KEY_PASSWORD_LABEL,
+          validations: [],
+          helpText: i18n.PRIVATE_KEY_PASSWORD_HELPER_TEXT,
+        }}
+        component={PasswordField}
+        componentProps={{
+          euiFieldProps: {
+            'data-test-subj': 'connector-servicenow-private-key-password-form-input',
+            isLoading,
+            readOnly,
+            disabled: readOnly || isLoading,
+          },
+        }}
       />
     </>
   );

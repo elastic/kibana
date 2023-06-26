@@ -9,9 +9,9 @@ import { isEmpty, isEqual, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
-import type { BrowserField, BrowserFields, IndexField } from '@kbn/timelines-plugin/common';
-import type { DataView, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
-import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
+import type { BrowserField, BrowserFields } from '@kbn/timelines-plugin/common';
+import type { IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
@@ -42,11 +42,7 @@ export const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 export const getIndexFields = memoizeOne(
-  (
-    title: string,
-    fields: IIndexPatternFieldList,
-    _includeUnmapped: boolean = false
-  ): DataViewBase =>
+  (title: string, fields: IIndexPatternFieldList): DataViewBase =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
@@ -66,38 +62,6 @@ export const getIndexFields = memoizeOne(
           title,
         }
       : { fields: [], title },
-  (newArgs, lastArgs) =>
-    newArgs[0] === lastArgs[0] &&
-    newArgs[1].length === lastArgs[1].length &&
-    newArgs[2] === lastArgs[2]
-);
-
-/**
- * HOT Code path where the fields can be 16087 in length or larger. This is
- * VERY mutatious on purpose to improve the performance of the transform.
- */
-export const getBrowserFields = memoizeOne(
-  (_title: string, fields: IndexField[]): BrowserFields => {
-    // Adds two dangerous casts to allow for mutations within this function
-    type DangerCastForMutation = Record<string, {}>;
-    type DangerCastForBrowserFieldsMutation = Record<
-      string,
-      Omit<BrowserField, 'fields'> & { fields: Record<string, BrowserField> }
-    >;
-
-    // We mutate this instead of using lodash/set to keep this as fast as possible
-    return fields.reduce<DangerCastForBrowserFieldsMutation>((accumulator, field) => {
-      const category = getCategory(field.name);
-      if (accumulator[category] == null) {
-        (accumulator as DangerCastForMutation)[category] = {};
-      }
-      if (accumulator[category].fields == null) {
-        accumulator[category].fields = {};
-      }
-      accumulator[category].fields[field.name] = field as unknown as BrowserField;
-      return accumulator;
-    }, {});
-  },
   (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 
@@ -115,7 +79,7 @@ interface FetchIndexReturn {
   indexes: string[];
   indexExists: boolean;
   indexPatterns: DataViewBase;
-  dataView: DataView | undefined;
+  dataView: DataViewSpec | undefined;
 }
 
 /**
@@ -125,8 +89,7 @@ interface FetchIndexReturn {
 export const useFetchIndex = (
   indexNames: string[],
   onlyCheckIfIndicesExist: boolean = false,
-  strategy: 'indexFields' | 'dataView' | typeof ENDPOINT_FIELDS_SEARCH_STRATEGY = 'indexFields',
-  includeUnmapped: boolean = false
+  strategy: 'indexFields' | 'dataView' | typeof ENDPOINT_FIELDS_SEARCH_STRATEGY = 'indexFields'
 ): [boolean, FetchIndexReturn] => {
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
@@ -149,21 +112,18 @@ export const useFetchIndex = (
           setState({ ...state, loading: true });
           abortCtrl.current = new AbortController();
           const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
-          const { browserFields } = getDataViewStateFromIndexFields(
-            iNames,
-            dv.fields,
-            includeUnmapped
-          );
+          const dataView = dv.toSpec();
+          const { browserFields } = getDataViewStateFromIndexFields(iNames, dataView.fields);
 
           previousIndexesName.current = dv.getIndexPattern().split(',');
 
           setState({
             loading: false,
-            dataView: dv,
+            dataView,
             browserFields,
             indexes: dv.getIndexPattern().split(','),
             indexExists: dv.getIndexPattern().split(',').length > 0,
-            indexPatterns: getIndexFields(dv.getIndexPattern(), dv.fields, includeUnmapped),
+            indexPatterns: getIndexFields(dv.getIndexPattern(), dv.fields),
           });
         } catch (exc) {
           setState({
@@ -180,7 +140,7 @@ export const useFetchIndex = (
 
       asyncSearch();
     },
-    [addError, data.dataViews, includeUnmapped, indexNames, state]
+    [addError, data.dataViews, indexNames, state]
   );
 
   useEffect(() => {

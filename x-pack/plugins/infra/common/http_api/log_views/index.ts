@@ -6,5 +6,3 @@
  */
 
 export { getLogViewUrl, LOG_VIEW_URL } from './common';
-export * from './get_log_view';
-export * from './put_log_view';

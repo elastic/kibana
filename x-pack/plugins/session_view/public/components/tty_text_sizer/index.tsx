@@ -12,7 +12,7 @@ import {
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
-import { Teletype } from '../../../common/types/process_tree';
+import type { Teletype } from '../../../common';
 import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
 import { ZOOM_IN, ZOOM_FIT, ZOOM_OUT } from './translations';
 import { useStyles } from './styles';

@@ -14,15 +14,15 @@ import { AlertDetails } from './alerts/details';
 import { Actions } from './actions';
 import { Connectors } from './connectors';
 import { Lifespan } from './lifespan';
-import type { MetricsHandler } from './types';
+import type { GetCaseMetricsParams, MetricsHandler } from './types';
 import { MTTR } from './all_cases/mttr';
 
 const isSingleCaseMetrics = (
-  params: SingleCaseMetricsRequest | CasesMetricsRequest
-): params is SingleCaseMetricsRequest => (params as SingleCaseMetricsRequest).caseId != null;
+  params: GetCaseMetricsParams | CasesMetricsRequest
+): params is GetCaseMetricsParams => (params as GetCaseMetricsParams).caseId != null;
 
 export const buildHandlers = (
-  params: SingleCaseMetricsRequest | CasesMetricsRequest,
+  params: GetCaseMetricsParams | CasesMetricsRequest,
   casesClient: CasesClient,
   clientArgs: CasesClientArgs
 ): Set<MetricsHandler<unknown>> => {

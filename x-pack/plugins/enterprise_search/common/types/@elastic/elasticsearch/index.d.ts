@@ -17,4 +17,10 @@ declare module '@elastic/elasticsearch/lib/api/types' {
     copy_from?: string;
     description?: string;
   }
+  export interface SecurityRoleDescriptor {
+    restriction?: SecurityWorkflow;
+  }
+  export interface SecurityWorkflow {
+    workflows: string[];
+  }
 }

@@ -41,6 +41,7 @@ export interface Props {
     groupByField1: string;
   };
   ilmPhases: string[];
+  isAssistantEnabled: boolean;
   openCreateCaseFlyout: ({
     comments,
     headerContent,
@@ -69,6 +70,7 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
   formatNumber,
   getGroupByFieldsOnClick,
   ilmPhases,
+  isAssistantEnabled,
   openCreateCaseFlyout,
   patternIndexNames,
   patternRollups,
@@ -105,6 +107,7 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
         formatNumber={formatNumber}
         getGroupByFieldsOnClick={getGroupByFieldsOnClick}
         ilmPhases={ilmPhases}
+        isAssistantEnabled={isAssistantEnabled}
         openCreateCaseFlyout={openCreateCaseFlyout}
         patterns={patterns}
         theme={theme}

@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 
+import { FetchPipelineResponse } from '../../../../api/pipelines/fetch_pipeline';
+
 import { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
 
 const VALID_PIPELINE_NAME_REGEX = /^[\w\-]+$/;
@@ -26,6 +28,12 @@ const FIELD_REQUIRED_ERROR = i18n.translate(
   'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.emptyValueError',
   {
     defaultMessage: 'Field is required.',
+  }
+);
+const PIPELINE_NAME_EXISTS_ERROR = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.pipelineNameExistsError',
+  {
+    defaultMessage: 'Name already used by another pipeline.',
   }
 );
 
@@ -48,6 +56,16 @@ export const validateInferencePipelineConfiguration = (
     errors.modelID = FIELD_REQUIRED_ERROR;
   }
 
+  return errors;
+};
+
+export const validatePipelineNameIsAvailable = (
+  existingPipeline: FetchPipelineResponse | undefined
+) => {
+  const errors: AddInferencePipelineFormErrors = {};
+  if (existingPipeline !== undefined) {
+    errors.pipelineName = PIPELINE_NAME_EXISTS_ERROR;
+  }
   return errors;
 };
 

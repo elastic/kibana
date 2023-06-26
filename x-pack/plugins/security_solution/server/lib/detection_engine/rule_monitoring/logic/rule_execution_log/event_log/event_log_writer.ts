@@ -19,7 +19,10 @@ import {
   RuleExecutionEventType,
   ruleExecutionStatusToNumber,
 } from '../../../../../../../common/detection_engine/rule_monitoring';
-import { RULE_SAVED_OBJECT_TYPE, RULE_EXECUTION_LOG_PROVIDER } from './constants';
+import {
+  RULE_SAVED_OBJECT_TYPE,
+  RULE_EXECUTION_LOG_PROVIDER,
+} from '../../event_log/event_log_constants';
 
 export interface IEventLogWriter {
   logMessage(args: MessageArgs): void;

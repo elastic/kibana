@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getUptimeESMockClient } from './test_helpers';
 import { getNetworkEvents, secondsToMillis } from './get_network_events';
+import { getUptimeESMockClient } from './test_helpers';
 
 describe('getNetworkEvents', () => {
   describe('secondsToMillis conversion', () => {
@@ -213,7 +213,7 @@ describe('getNetworkEvents', () => {
               "size": 1000,
               "track_total_hits": true,
             },
-            "index": "heartbeat-8*,heartbeat-7*,synthetics-*",
+            "index": "heartbeat-8*,heartbeat-7*",
           },
           Object {
             "meta": true,

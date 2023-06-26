@@ -171,3 +171,8 @@ export const isDeprecatedConnector = (connector?: CaseActionConnector): boolean 
 export const removeItemFromSessionStorage = (key: string) => {
   window.sessionStorage.removeItem(key);
 };
+
+export const stringifyToURL = (parsedParams: Record<string, string>) =>
+  new URLSearchParams(parsedParams).toString();
+export const parseURL = (queryString: string) =>
+  Object.fromEntries(new URLSearchParams(queryString));

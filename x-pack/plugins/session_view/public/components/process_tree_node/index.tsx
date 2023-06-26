@@ -24,11 +24,7 @@ import { EuiButton, EuiIcon, EuiToolTip, formatDate, EuiButtonIcon } from '@elas
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { chain } from 'lodash';
-import {
-  AlertTypeCount,
-  Process,
-  ProcessEventAlertCategory,
-} from '../../../common/types/process_tree';
+import type { AlertTypeCount, Process, ProcessEventAlertCategory } from '../../../common';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { useVisible } from '../../hooks/use_visible';
 import { ProcessTreeAlerts } from '../process_tree_alerts';

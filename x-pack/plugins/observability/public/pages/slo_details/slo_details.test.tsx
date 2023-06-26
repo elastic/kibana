@@ -234,10 +234,10 @@ describe('SLO Details Page', () => {
 
     fireEvent.click(button!);
 
-    const { id, createdAt, enabled, revision, summary, updatedAt, ...newSlo } = slo;
+    const { id, createdAt, enabled, revision, summary, settings, updatedAt, ...newSlo } = slo;
 
     expect(mockClone).toBeCalledWith({
-      idToCopyFrom: slo.id,
+      originalSloId: slo.id,
       slo: {
         ...newSlo,
         name: `[Copy] ${newSlo.name}`,

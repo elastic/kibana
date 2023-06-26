@@ -8,18 +8,17 @@
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { HttpSetup } from '@kbn/core/public';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
+import { useKibana } from '../../../../../utils/kibana_react';
 import { paths } from '../../../../../config/paths';
-import { ObservabilityAppServices } from '../../../../../application/types';
 import { useHasData } from '../../../../../hooks/use_has_data';
 import { EmptySection, Section } from './empty_section';
 
 export function EmptySections() {
-  const { http } = useKibana<ObservabilityAppServices>().services;
+  const { http } = useKibana().services;
   const theme = useContext(ThemeContext);
   const { hasDataMap } = useHasData();
 
