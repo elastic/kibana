@@ -8,7 +8,6 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 
-import { schema } from '@kbn/config-schema';
 import {
   ElasticsearchClient,
   KibanaResponseFactory,
@@ -63,8 +62,10 @@ import {
   postTransformsPreviewRequestSchema,
   PostTransformsPreviewRequestSchema,
   putTransformsRequestSchema,
+  putTransformsQuerySchema,
   PutTransformsRequestSchema,
   PutTransformsResponseSchema,
+  PutTransformsQuerySchema,
 } from '../../../common/api_schemas/transforms';
 
 import { RouteDependencies } from '../../types';
@@ -263,91 +264,87 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       path: addInternalBasePath('transforms/{transformId}'),
       access: 'internal',
     })
-    .addVersion<TransformIdParamSchema, undefined, PutTransformsRequestSchema>(
+    .addVersion<TransformIdParamSchema, PutTransformsQuerySchema, PutTransformsRequestSchema>(
       {
         version: '1',
         validate: {
           request: {
             params: transformIdParamSchema,
             body: putTransformsRequestSchema,
-            query: schema.object({
-              create_data_view: schema.boolean({ defaultValue: false }),
-              time_field_name: schema.maybe(schema.string()),
-            }),
+            query: putTransformsQuerySchema,
           },
         },
       },
-      license.guardApiRoute<TransformIdParamSchema, undefined, PutTransformsRequestSchema>(
-        async (ctx, req, res) => {
-          const { transformId } = req.params;
-          const createDataView = req.query?.create_data_view;
-          const timeFieldName = req.query?.time_field_name;
+      license.guardApiRoute<
+        TransformIdParamSchema,
+        PutTransformsQuerySchema,
+        PutTransformsRequestSchema
+      >(async (ctx, req, res) => {
+        const { transformId } = req.params;
+        const createDataView = req.query?.create_data_view;
+        const timeFieldName = req.query?.time_field_name;
 
-          const response: PutTransformsResponseSchema = {
-            dataViewsCreated: [],
-            dataViewsErrors: [],
-            transformsCreated: [],
-            errors: [],
-          };
+        const response: PutTransformsResponseSchema = {
+          dataViewsCreated: [],
+          dataViewsErrors: [],
+          transformsCreated: [],
+          errors: [],
+        };
 
-          const esClient = (await ctx.core).elasticsearch.client;
-          await esClient.asCurrentUser.transform
-            .putTransform({
-              // @ts-expect-error @elastic/elasticsearch group_by is expected to be optional in TransformPivot
-              body: req.body,
-              transform_id: transformId,
+        const esClient = (await ctx.core).elasticsearch.client;
+        await esClient.asCurrentUser.transform
+          .putTransform({
+            // @ts-expect-error @elastic/elasticsearch group_by is expected to be optional in TransformPivot
+            body: req.body,
+            transform_id: transformId,
+          })
+          .then(() => {
+            response.transformsCreated.push({ transform: transformId });
+          })
+          .catch((e) =>
+            response.errors.push({
+              id: transformId,
+              error: wrapEsError(e),
             })
-            .then(() => {
-              response.transformsCreated.push({ transform: transformId });
-            })
-            .catch((e) =>
-              response.errors.push({
-                id: transformId,
-                error: wrapEsError(e),
-              })
+          );
+
+        if (createDataView) {
+          const { savedObjects, elasticsearch } = coreStart;
+          const dataViewsService = await dataViews.dataViewsServiceFactory(
+            savedObjects.getScopedClient(req),
+            elasticsearch.client.asScoped(req).asCurrentUser,
+            req
+          );
+
+          const dataViewName = req.body.dest.index;
+          const runtimeMappings = req.body.source.runtime_mappings as Record<string, RuntimeField>;
+
+          try {
+            const dataViewsResp = await dataViewsService.createAndSave(
+              {
+                title: dataViewName,
+                timeFieldName,
+                ...(isPopulatedObject(runtimeMappings) && isLatestTransform(req.body)
+                  ? { runtimeFieldMap: runtimeMappings }
+                  : {}),
+                allowNoIndex: true,
+              },
+              false,
+              true
             );
 
-          if (createDataView) {
-            const { savedObjects, elasticsearch } = coreStart;
-            const dataViewsService = await dataViews.dataViewsServiceFactory(
-              savedObjects.getScopedClient(req),
-              elasticsearch.client.asScoped(req).asCurrentUser,
-              req
-            );
-
-            const dataViewName = req.body.dest.index;
-            const runtimeMappings = req.body.source.runtime_mappings as Record<
-              string,
-              RuntimeField
-            >;
-
-            try {
-              const dataViewsResp = await dataViewsService.createAndSave(
-                {
-                  title: dataViewName,
-                  timeFieldName,
-                  ...(isPopulatedObject(runtimeMappings) && isLatestTransform(req.body)
-                    ? { runtimeFieldMap: runtimeMappings }
-                    : {}),
-                  allowNoIndex: true,
-                },
-                false,
-                true
-              );
-
-              if (dataViewsResp.id) {
-                response.dataViewsCreated = [{ id: dataViewsResp.id }];
-              }
-            } catch (error) {
-              // For the error id we use the transform id
-              // because in case of an error we don't get a data view id.
-              response.dataViewsErrors = [{ id: transformId, error }];
+            if (dataViewsResp.id) {
+              response.dataViewsCreated = [{ id: dataViewsResp.id }];
             }
+          } catch (error) {
+            // For the error id we use the transform id
+            // because in case of an error we don't get a data view id.
+            response.dataViewsErrors = [{ id: transformId, error }];
           }
-
-          return res.ok({ body: response });
         }
-      )
+
+        return res.ok({ body: response });
+      })
     );
 
   /**
