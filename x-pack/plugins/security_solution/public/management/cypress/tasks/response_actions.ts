@@ -51,7 +51,7 @@ export const visitRuleActions = (ruleId: string) => {
   cy.visit(`app/security/rules/id/${ruleId}/edit`);
   cy.getByTestSubj('edit-rule-actions-tab').should('exist');
   cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
-  cy.getByTestSubj('edit-rule-actions-tab').click();
+  cy.getByTestSubj('stepPanelProgress').should('not.exist');
 };
 export const tryAddingDisabledResponseAction = (itemNumber = 0) => {
   cy.getByTestSubj('response-actions-wrapper').within(() => {
