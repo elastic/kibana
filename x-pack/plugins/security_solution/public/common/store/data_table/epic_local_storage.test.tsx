@@ -66,7 +66,7 @@ describe('epicLocalStorage', () => {
     testProps = {
       defaultModel: eventsDefaultModel,
       end: to,
-      entityType: EntityType.ALERTS,
+      entityType: EntityType.EVENTS,
       tableId: TableId.test,
       leadingControlColumns: getDefaultControlColumn(ACTION_BUTTON_COUNT),
       renderCellValue: DefaultCellRenderer,

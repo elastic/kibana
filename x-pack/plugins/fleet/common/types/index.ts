@@ -47,6 +47,7 @@ export interface FleetConfigType {
   };
   internal?: {
     disableILMPolicies: boolean;
+    disableProxies: boolean;
     fleetServerStandalone: boolean;
   };
   createArtifactsBulkBatchSize?: number;
