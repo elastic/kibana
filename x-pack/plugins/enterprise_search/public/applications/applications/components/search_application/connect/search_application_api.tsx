@@ -238,7 +238,7 @@ export const SearchApplicationAPI = () => {
             searchApiDocumentation: (
               <EuiLink
                 data-test-subj="search-documentation-link"
-                href="#" // replace with search api doc link
+                href={docLinks.searchApplicationsSearchApi}
                 data-telemetry-id="entSearchApplications-searchApi-documentation-viewDocumentaion"
               >
                 {i18n.translate(
@@ -273,7 +273,7 @@ export const SearchApplicationAPI = () => {
             searchApiDocumentation: (
               <EuiLink
                 data-test-subj="search-documentation-link"
-                href="#" // replace with search api doc link
+                href={docLinks.searchApplicationsSearchApi}
                 target="_blank"
                 data-telemetry-id="entSearchApplications-searchApi-learnMoreDocumentation-viewDocumentaion"
               >
