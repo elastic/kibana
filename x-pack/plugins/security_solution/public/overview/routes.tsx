@@ -24,7 +24,7 @@ import { DetectionResponse } from './pages/detection_response';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { EntityAnalyticsPage } from './pages/entity_analytics';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
-import { CoverageOverview } from '../detection_engine/rule_management_ui/pages/coverage_overview';
+import { CoverageOverviewPage } from '../detection_engine/rule_management_ui/pages/coverage_overview';
 import { LandingPage } from './pages/landing';
 
 const OverviewRoutes = () => (
@@ -70,7 +70,7 @@ const DataQualityRoutes = () => (
 const coverageOverviewRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.coverageOverview}>
-      <CoverageOverview />
+      <CoverageOverviewPage />
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );
