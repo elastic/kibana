@@ -34,12 +34,19 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
       },
     },
   },
-  [FieldType.DID_NAVIGATE]: {
-    [FieldType.DID_NAVIGATE]: {
-      type: 'boolean',
+  [FieldType.SELECTED_RANK]: {
+    [FieldType.SELECTED_RANK]: {
+      type: 'short',
       _meta: {
-        description:
-          'A flag to specify whether the user selected an option before closing the search panel.',
+        description: 'The ranking of placement of the selected option in the results list.',
+      },
+    },
+  },
+  [FieldType.SELECTED_LABEL]: {
+    [FieldType.SELECTED_LABEL]: {
+      type: 'keyword',
+      _meta: {
+        description: 'The text of the selected option in the results list.',
       },
     },
   },
@@ -69,22 +76,33 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
 export const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
   {
     eventType: EventMetric.CLICK_APPLICATION,
-    schema: { ...fields[FieldType.APPLICATION], ...fields[FieldType.TERMS] },
+    schema: {
+      ...fields[FieldType.APPLICATION],
+      ...fields[FieldType.TERMS],
+      ...fields[FieldType.SELECTED_RANK],
+      ...fields[FieldType.SELECTED_LABEL],
+    },
   },
   {
     eventType: EventMetric.CLICK_SAVED_OBJECT,
-    schema: { ...fields[FieldType.SAVED_OBJECT_TYPE], ...fields[FieldType.TERMS] },
-  },
-  {
-    eventType: EventMetric.ERROR,
-    schema: { ...fields[FieldType.ERROR_MESSAGE], ...fields[FieldType.TERMS] },
+    schema: {
+      ...fields[FieldType.SAVED_OBJECT_TYPE],
+      ...fields[FieldType.TERMS],
+      ...fields[FieldType.SELECTED_RANK],
+      ...fields[FieldType.SELECTED_LABEL],
+    },
   },
   {
     eventType: EventMetric.SEARCH_BLUR,
-    schema: { ...fields[FieldType.FOCUS_TIME] },
+    schema: {
+      ...fields[FieldType.FOCUS_TIME],
+    },
   },
   {
-    eventType: EventMetric.SEARCH_CLOSE,
-    schema: { ...fields[FieldType.VISIBLE_TIME] },
+    eventType: EventMetric.ERROR,
+    schema: {
+      ...fields[FieldType.ERROR_MESSAGE],
+      ...fields[FieldType.TERMS],
+    },
   },
 ];

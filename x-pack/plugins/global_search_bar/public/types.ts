@@ -35,7 +35,6 @@ export enum FieldType {
   APPLICATION = 'application',
   SAVED_OBJECT_TYPE = 'saved_object_type',
   FOCUS_TIME = 'focus_time_ms',
-  DID_NAVIGATE = 'did_navigate',
   SELECTED_LABEL = 'selected_term',
   SELECTED_RANK = 'selected_rank',
   VISIBLE_TIME = 'visible_time_ms',

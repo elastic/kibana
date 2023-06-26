@@ -22,7 +22,6 @@ import {
 export class EventReporter {
   private reportEvent: AnalyticsServiceStart['reportEvent'];
   private trackUiMetric: TrackUiMetricFn;
-  private didNavigate = false;
   private focusStart = Infinity;
 
   constructor({
@@ -32,7 +31,10 @@ export class EventReporter {
     analytics: AnalyticsServiceStart;
     usageCollection: UsageCollectionSetup | undefined;
   }) {
-    this.reportEvent = analytics.reportEvent;
+    this.reportEvent = (...args: Parameters<AnalyticsServiceStart['reportEvent']>) => {
+      // add debug logging if needed
+      analytics.reportEvent(...args);
+    };
 
     if (usageCollection) {
       this.trackUiMetric = (metricType, eventName, context) => {
@@ -70,11 +72,11 @@ export class EventReporter {
     if (focusTime > 0) {
       this.reportEvent(EventMetric.SEARCH_BLUR, {
         [FieldType.FOCUS_TIME]: focusTime,
-        [FieldType.DID_NAVIGATE]: this.didNavigate,
       });
-      this.focusStart = Infinity;
-      this.didNavigate = false; // reset
     }
+
+    // reset internal states
+    this.focusStart = Infinity;
   }
 
   /**
@@ -95,39 +97,37 @@ export class EventReporter {
    * Called when the users selects an application in their search results
    */
   public navigateToApplication(context: TrackedApplicationClick) {
-    this.didNavigate = true;
-
     this.searchBlur();
 
     const application = context?.application ?? 'unknown';
 
     this.trackUiMetric(METRIC_TYPE.CLICK, ClickMetric.USER_NAVIGATED_TO_APPLICATION, application);
 
-    const terms = context?.searchValue ?? null;
+    const terms = context?.searchValue ?? '';
     this.reportEvent(EventMetric.CLICK_APPLICATION, {
       [FieldType.TERMS]: terms,
       [FieldType.APPLICATION]: application,
-      [FieldType.DID_NAVIGATE]: true,
+      [FieldType.SELECTED_RANK]: context.selectedRank,
+      [FieldType.SELECTED_LABEL]: context.selectedLabel,
     });
   }
 
   /**
    * Called when the users selects Saved Object in their search results
    */
-  public navigateToSavedObject(context: TrackedSavedObjectClick | undefined) {
-    this.didNavigate = true;
-
+  public navigateToSavedObject(context: TrackedSavedObjectClick) {
     this.searchBlur();
 
     const type = context?.type ?? 'unknown';
 
     this.trackUiMetric(METRIC_TYPE.CLICK, ClickMetric.USER_NAVIGATED_TO_SAVED_OBJECT, type);
 
-    const terms = context?.searchValue ?? null;
+    const terms = context?.searchValue ?? '';
     this.reportEvent(EventMetric.CLICK_SAVED_OBJECT, {
       [FieldType.TERMS]: terms,
       [FieldType.SAVED_OBJECT_TYPE]: type,
-      [FieldType.DID_NAVIGATE]: true,
+      [FieldType.SELECTED_RANK]: context.selectedRank,
+      [FieldType.SELECTED_LABEL]: context.selectedLabel,
     });
   }
 
@@ -138,7 +138,7 @@ export class EventReporter {
     this.trackUiMetric(METRIC_TYPE.COUNT, CountMetric.UNHANDLED_ERROR);
 
     const message = context?.message.toString() ?? 'unknown';
-    const terms = context?.searchValue ?? null;
+    const terms = context?.searchValue ?? '';
     this.reportEvent(EventMetric.ERROR, {
       [FieldType.TERMS]: terms,
       [FieldType.ERROR_MESSAGE]: message,
