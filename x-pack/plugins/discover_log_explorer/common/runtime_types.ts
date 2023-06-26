@@ -62,5 +62,5 @@ export const removeEmptyStringPropsRT = <Codec extends rt.Mixed>(codec: Codec) =
       const sanitizedInput = omitBy(input, isEmpty) as rt.TypeOf<Codec>;
       return codec.validate(sanitizedInput, context);
     },
-    (input) => omitBy(input, isEmpty) as rt.TypeOf<Codec>
+    (input) => omitBy(codec.encode(input), isEmpty) as rt.TypeOf<Codec>
   );
