@@ -28,7 +28,7 @@ const PrePackagedRulesPromptComponent = () => {
           <EuiFlexItem grow={false}>
             <AddElasticRulesButton
               fill={true}
-              data-test-subj="load-prebuilt-rules"
+              data-test-subj="add-elastc-rules-empty-empty-prompt-button"
               showBadge={false}
             />
           </EuiFlexItem>

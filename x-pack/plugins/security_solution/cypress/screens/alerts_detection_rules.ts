@@ -61,6 +61,9 @@ export const INTEGRATIONS_POPOVER_TITLE = '[data-test-subj="IntegrationsPopoverT
 
 export const ADD_ELASTIC_RULES_BTN = '[data-test-subj="addElasticRulesButton"]';
 
+export const ADD_ELASTIC_RULES_EMPTY_PROMPT_BTN =
+  '[data-test-subj="add-elastc-rules-empty-empty-prompt-button"]';
+
 export const INSTALL_ALL_RULES_BUTTON = '[data-test-subj="installAllRulesButton"]';
 
 export const INSTALL_SELECTED_RULES_BUTTON = '[data-test-subj="installSelectedRulesButton"]';

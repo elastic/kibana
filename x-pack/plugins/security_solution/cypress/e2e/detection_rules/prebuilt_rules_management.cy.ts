@@ -25,7 +25,6 @@ import {
   enableSelectedRules,
   selectAllRules,
   selectNumberOfRules,
-  waitForPrebuiltDetectionRulesToBeLoaded,
   waitForRuleToUpdate,
 } from '../../tasks/alerts_detection_rules';
 import {
@@ -47,7 +46,6 @@ describe('Prebuilt rules', () => {
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     excessivelyInstallAllPrebuiltRules();
     cy.reload();
-    waitForPrebuiltDetectionRulesToBeLoaded();
   });
 
   describe('Alerts rules, prebuilt rules', () => {

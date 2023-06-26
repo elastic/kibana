@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { createRuleAssetSavedObject } from '../../helpers/rules';
 import {
   SELECTED_RULES_NUMBER_LABEL,
   SELECT_ALL_RULES_BTN,
@@ -15,18 +16,32 @@ import {
   waitForPrebuiltDetectionRulesToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
 import {
+  createNewRuleAsset,
   excessivelyInstallAllPrebuiltRules,
   getAvailablePrebuiltRulesCount,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
-// TODO: See https://github.com/elastic/kibana/issues/154694
-describe.skip('Rules selection', () => {
+const RULE_1 = createRuleAssetSavedObject({
+  name: 'Test rule 1',
+  rule_id: 'rule_1',
+});
+const RULE_2 = createRuleAssetSavedObject({
+  name: 'Test rule 2',
+  rule_id: 'rule_2',
+});
+
+describe('Rules selection', () => {
   beforeEach(() => {
     cleanKibana();
     login();
+    preventPrebuiltRulesPackageInstallation();
+    /* Create two mock rules */
+    createNewRuleAsset({ rule: RULE_1 });
+    createNewRuleAsset({ rule: RULE_2 });
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
   });
 
