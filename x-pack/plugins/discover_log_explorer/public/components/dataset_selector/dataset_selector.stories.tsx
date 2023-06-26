@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Meta, Story } from '@storybook/react';
 import { IndexPattern } from '@kbn/io-ts-utils';
-import { Dataset, Integration, IntegrationType } from '../../../common/datasets';
+import { Dataset, Integration } from '../../../common/datasets';
 import { DatasetSelector } from './dataset_selector';
 import {
   DatasetSelectionHandler,
