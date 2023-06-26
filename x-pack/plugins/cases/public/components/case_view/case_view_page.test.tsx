@@ -42,6 +42,7 @@ import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
 import { useGetCaseUserActionsStats } from '../../containers/use_get_case_user_actions_stats';
 import { createQueryWithMarkup } from '../../common/test_utils';
+import { useCasesFeatures } from '../../common/use_cases_features';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
@@ -56,6 +57,7 @@ jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/use_get_case_connectors');
 jest.mock('../../containers/use_get_case_users');
 jest.mock('../../containers/user_profiles/use_bulk_get_user_profiles');
+jest.mock('../../common/use_cases_features');
 jest.mock('../user_actions/timestamp', () => ({
   UserActionTimestamp: () => <></>,
 }));
@@ -77,6 +79,7 @@ const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
 const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
 const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
+const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
 
 const mockGetCase = (props: Partial<UseGetCase> = {}) => {
   const data = {
@@ -113,7 +116,6 @@ for (let i = 0; i < 50; i++) {
   describe('CaseViewPage', () => {
     const updateCaseProperty = defaultUpdateCaseState.mutate;
     const pushCaseToExternalService = jest.fn();
-    const getAlertsStateTableMock = jest.fn();
     const caseConnectors = getCaseConnectorsMockResponse();
     const caseUsers = getCaseUsersMockResponse();
 
@@ -176,15 +178,25 @@ for (let i = 0; i < 50; i++) {
       useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
       useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
       useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
+      useCasesFeaturesMock.mockReturnValue({
+        metricsFeatures: ['alerts.count'],
+        pushToServiceAuthorized: true,
+        caseAssignmentAuthorized: true,
+        isAlertsEnabled: true,
+        isSyncAlertsEnabled: true,
+      });
 
       appMockRenderer = createAppMockRenderer({ license: platinumLicense });
-
-      appMockRenderer.coreStart.triggersActionsUi.getAlertsStateTable =
-        getAlertsStateTableMock.mockReturnValue(<div data-test-subj="alerts-table" />);
     });
 
     afterAll(() => {
       Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+    });
+
+    it('shows the metrics section', async () => {
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      expect(await screen.findByTestId('case-view-metrics-panel')).toBeInTheDocument();
     });
 
     it('should show closed indicators in header when case is closed', async () => {
@@ -412,7 +424,7 @@ for (let i = 0; i < 50; i++) {
       it('renders tabs correctly', async () => {
         appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-        expect(await screen.getByRole('tablist')).toBeInTheDocument();
+        expect(await screen.findByRole('tablist')).toBeInTheDocument();
 
         expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
         expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
