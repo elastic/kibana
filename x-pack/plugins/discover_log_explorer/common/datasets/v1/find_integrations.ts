@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { HttpFetchQuery } from '@kbn/core-http-browser';
+import { jsonRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
+import { removeEmptyStringPropsRT } from '../../runtime_types';
 import { integrationRT } from '../types';
-import { formatSearch, sortOrderRT } from './common';
+import { sortOrderRT } from './common';
 
 const searchAfterRT = rt.array(rt.union([rt.number, rt.string]));
 
@@ -24,25 +25,16 @@ export const findIntegrationsResponseRT = rt.exact(
   ])
 );
 
-export const findIntegrationsRequestQueryRT = rt.exact(
-  rt.partial({
-    nameQuery: rt.string,
-    perPage: rt.number,
-    dataStreamType: rt.literal('logs'),
-    searchAfter: searchAfterRT,
-    sortOrder: sortOrderRT,
-  })
-);
-
-export const findIntegrationsRequestHttpFetchQueryRT = new rt.Type<
-  FindIntegrationsRequestQuery,
-  HttpFetchQuery,
-  unknown
->(
-  'FindIntegrationsRequestHttpQuery',
-  findIntegrationsRequestQueryRT.is,
-  findIntegrationsRequestQueryRT.decode,
-  formatSearch
+export const findIntegrationsRequestQueryRT = removeEmptyStringPropsRT(
+  rt.exact(
+    rt.partial({
+      nameQuery: rt.string,
+      perPage: rt.number,
+      dataStreamType: rt.literal('logs'),
+      searchAfter: jsonRt.pipe(searchAfterRT),
+      sortOrder: sortOrderRT,
+    })
+  )
 );
 
 export type SearchAfter = rt.TypeOf<typeof searchAfterRT>;

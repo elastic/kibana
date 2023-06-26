@@ -9,12 +9,12 @@ import { HttpStart } from '@kbn/core/public';
 import { Dataset, Integration } from '../../../common/datasets';
 import {
   DATASETS_URL,
-  findDatasetsRequestHttpFetchQueryRT,
   FindDatasetsRequestQuery,
+  findDatasetsRequestQueryRT,
   FindDatasetsResponse,
   findDatasetsResponseRT,
-  findIntegrationsRequestHttpFetchQueryRT,
   FindIntegrationsRequestQuery,
+  findIntegrationsRequestQueryRT,
   FindIntegrationsResponse,
   findIntegrationsResponseRT,
   INTEGRATIONS_URL,
@@ -40,7 +40,7 @@ export class DatasetsClient implements IDatasetsClient {
   ): Promise<FindIntegrationsResponse> {
     const search = { ...params, ...defaultIntegrationsParams };
 
-    const query = findIntegrationsRequestHttpFetchQueryRT.encode(search);
+    const query = findIntegrationsRequestQueryRT.encode(search);
 
     const response = await this.http.get(INTEGRATIONS_URL, { query }).catch((error) => {
       throw new FindIntegrationsError(`Failed to fetch integrations": ${error}`);
@@ -58,7 +58,7 @@ export class DatasetsClient implements IDatasetsClient {
   public async findDatasets(params: FindDatasetsRequestQuery = {}): Promise<FindDatasetsResponse> {
     const search = { ...params, ...defaultDatasetsParams };
 
-    const query = findDatasetsRequestHttpFetchQueryRT.encode(search);
+    const query = findDatasetsRequestQueryRT.encode(search);
 
     const response = await this.http.get(DATASETS_URL, { query }).catch((error) => {
       throw new FindDatasetsError(`Failed to fetch data streams": ${error}`);

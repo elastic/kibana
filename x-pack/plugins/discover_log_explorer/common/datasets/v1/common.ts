@@ -6,9 +6,6 @@
  */
 import { EPM_API_ROUTES } from '@kbn/fleet-plugin/common';
 import * as rt from 'io-ts';
-import { isEmpty, mapValues, omitBy } from 'lodash';
-import { FindDatasetsRequestQuery } from './find_datasets';
-import { FindIntegrationsRequestQuery } from './find_integrations';
 
 /**
  * Constants
@@ -21,20 +18,3 @@ export const INTEGRATIONS_URL = EPM_API_ROUTES.INSTALLED_LIST_PATTERN;
  */
 export const sortOrderRT = rt.union([rt.literal('asc'), rt.literal('desc')]);
 export type SortOrder = rt.TypeOf<typeof sortOrderRT>;
-
-/**
- * Utils
- */
-function stringifyByProp(
-  obj: FindIntegrationsRequestQuery | FindDatasetsRequestQuery,
-  props: string[]
-) {
-  return mapValues(obj, (val, key) => (props.includes(key) ? JSON.stringify(val) : val));
-}
-
-/**
- * Format the integrations and data streams search request into the required API format
- */
-export const formatSearch = (search: FindIntegrationsRequestQuery | FindDatasetsRequestQuery) => {
-  return stringifyByProp(omitBy(search, isEmpty), ['searchAfter']);
-};

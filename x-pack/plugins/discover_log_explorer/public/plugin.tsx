@@ -7,7 +7,7 @@
 
 import { CoreStart, Plugin } from '@kbn/core/public';
 import { LOG_EXPLORER_PROFILE_ID } from '../common/constants';
-import { createLazyCustomDatasetSelector } from './customizations';
+import { createLogExplorerProfileCustomizations } from './customizations/log_explorer_profile';
 import {
   DiscoverLogExplorerPluginSetup,
   DiscoverLogExplorerPluginStart,
@@ -22,34 +22,6 @@ export class DiscoverLogExplorerPlugin
   public start(core: CoreStart, plugins: DiscoverLogExplorerStartDeps) {
     const { discover } = plugins;
 
-    discover.customize(LOG_EXPLORER_PROFILE_ID, async ({ customizations, stateContainer }) => {
-      const { DatasetsService } = await import('./services/datasets');
-      const datasetsService = new DatasetsService().start({
-        http: core.http,
-      });
-
-      /**
-       * Replace the DataViewPicker with a custom `DatasetSelector` to pick integrations streams
-       */
-      customizations.set({
-        id: 'search_bar',
-        CustomDataViewPicker: createLazyCustomDatasetSelector({
-          datasetsClient: datasetsService.client,
-          stateContainer,
-        }),
-      });
-
-      /**
-       * Hide New, Open and Save settings to prevent working with saved views.
-       */
-      customizations.set({
-        id: 'top_nav',
-        defaultMenu: {
-          newItem: { disabled: true },
-          openItem: { disabled: true },
-          saveItem: { disabled: true },
-        },
-      });
-    });
+    discover.customize(LOG_EXPLORER_PROFILE_ID, createLogExplorerProfileCustomizations({ core }));
   }
 }
