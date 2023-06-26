@@ -64,6 +64,7 @@ export const useCasesAddToExistingCaseModal = (props: AddToExistingCaseModalProp
       getAttachments?: ({ theCase }: { theCase?: Case }) => CaseAttachmentsWithoutOwner
     ) => {
       const attachments = getAttachments?.({ theCase }) ?? [];
+
       // when the case is undefined in the modal
       // the user clicked "create new case"
       if (theCase === undefined) {
