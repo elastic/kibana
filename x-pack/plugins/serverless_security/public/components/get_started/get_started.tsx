@@ -22,7 +22,21 @@ export const GetStartedComponent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <KibanaPageTemplate restrictWidth={false} contentBorder={false}>
+    <KibanaPageTemplate
+      restrictWidth={false}
+      contentBorder={false}
+      grow={true}
+      /* this is the only page without padding in Security Solution,
+       **  ignoring main page wrapper padding using absolute positioning
+       */
+      css={css`
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        position: absolute;
+      `}
+    >
       <KibanaPageTemplate.Header
         css={css`
           padding: 0 ${euiTheme.base * 2.25}px;

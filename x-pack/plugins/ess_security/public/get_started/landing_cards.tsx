@@ -6,15 +6,23 @@
  */
 
 import React, { memo, useMemo, useState } from 'react';
-import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiPageHeader } from '@elastic/eui';
-import styled from 'styled-components';
-import { useVariation } from '../utils';
+import {
+  EuiButton,
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageHeader,
+  EuiThemeComputed,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { ADD_DATA_PATH } from '@kbn/security-solution-plugin/common';
+import { useVariation } from '../common/hooks/use_variation';
 import * as i18n from './translations';
-import endpointSvg from '../../images/endpoint1.svg';
-import cloudSvg from '../../images/cloud1.svg';
-import siemSvg from '../../images/siem1.svg';
-import { ADD_DATA_PATH } from '../../../../common/constants';
-import { useKibana } from '../../lib/kibana';
+import endpointSvg from './images/endpoint1.svg';
+import cloudSvg from './images/cloud1.svg';
+import siemSvg from './images/siem1.svg';
+import { useKibana } from '../services';
 
 const imgUrls = {
   cloud: cloudSvg,
@@ -22,13 +30,32 @@ const imgUrls = {
   endpoint: endpointSvg,
 };
 
-const StyledEuiCard = styled(EuiCard)`
+const headerCardStyles = css`
   span.euiTitle {
     font-size: 36px;
     line-height: 100%;
   }
 `;
-const StyledEuiCardTop = styled(EuiCard)`
+
+const pageHeaderStyles = css`
+  h1 {
+    font-size: 18px;
+  }
+`;
+
+const getFlexItemStyles = (euiTheme: EuiThemeComputed) => css`
+  background: ${euiTheme.colors.lightestShade};
+  padding: 20px;
+`;
+
+const cardStyles = css`
+  img {
+    margin-top: 20px;
+    max-width: 400px;
+  }
+`;
+
+const footerStyles = css`
   span.euiTitle {
     font-size: 36px;
     line-height: 100%;
@@ -36,24 +63,6 @@ const StyledEuiCardTop = styled(EuiCard)`
   max-width: 600px;
   display: block;
   margin: 20px auto 0;
-`;
-const StyledEuiPageHeader = styled(EuiPageHeader)`
-  h1 {
-    font-size: 18px;
-  }
-`;
-
-const StyledImgEuiCard = styled(EuiCard)`
-  img {
-    margin-top: 20px;
-    max-width: 400px;
-  }
-`;
-
-const StyledEuiFlexItem = styled(EuiFlexItem)`
-  background: ${({ theme }) => theme.eui.euiColorLightestShade};
-  padding: 20px;
-  margin: -12px !important;
 `;
 
 export const LandingCards = memo(() => {
@@ -64,6 +73,7 @@ export const LandingCards = memo(() => {
     cloudExperiments,
   } = useKibana().services;
 
+  const { euiTheme } = useEuiTheme();
   const [addIntegrationsUrl, setAddIntegrationsUrl] = useState(ADD_DATA_PATH);
   useVariation(
     cloudExperiments,
@@ -73,13 +83,18 @@ export const LandingCards = memo(() => {
   );
 
   const href = useMemo(() => prepend(addIntegrationsUrl), [prepend, addIntegrationsUrl]);
+
   return (
-    <EuiFlexGroup data-test-subj="siem-landing-page" direction="column" gutterSize="l">
-      <EuiFlexItem>
+    <EuiFlexGroup data-test-subj="siem-landing-page" direction="column" gutterSize="m">
+      <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="l">
           <EuiFlexItem>
-            <StyledEuiPageHeader pageTitle={i18n.SIEM_HEADER} iconType="logoSecurity" />
-            <StyledEuiCard
+            <EuiPageHeader
+              pageTitle={i18n.SIEM_HEADER}
+              iconType="logoSecurity"
+              css={pageHeaderStyles}
+            />
+            <EuiCard
               display="plain"
               description={i18n.SIEM_DESCRIPTION}
               textAlign="left"
@@ -89,6 +104,7 @@ export const LandingCards = memo(() => {
                   {i18n.SIEM_CTA}
                 </EuiButton>
               }
+              css={headerCardStyles}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -107,39 +123,42 @@ export const LandingCards = memo(() => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <StyledEuiFlexItem>
+      <EuiFlexItem css={getFlexItemStyles(euiTheme)}>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
-            <StyledImgEuiCard
+            <EuiCard
               hasBorder
               description={i18n.SIEM_CARD_DESCRIPTION}
               image={imgUrls.siem}
               textAlign="center"
               title={i18n.SIEM_CARD_TITLE}
+              css={cardStyles}
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <StyledImgEuiCard
+            <EuiCard
               hasBorder
               description={i18n.ENDPOINT_DESCRIPTION}
               image={imgUrls.endpoint}
               textAlign="center"
               title={i18n.ENDPOINT_TITLE}
+              css={cardStyles}
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <StyledImgEuiCard
+            <EuiCard
               hasBorder
               description={i18n.CLOUD_CARD_DESCRIPTION}
               image={imgUrls.cloud}
               textAlign="center"
               title={i18n.CLOUD_CARD_TITLE}
+              css={cardStyles}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </StyledEuiFlexItem>
+      </EuiFlexItem>
       <EuiFlexItem>
-        <StyledEuiCardTop
+        <EuiCard
           display="plain"
           description={i18n.UNIFY_DESCRIPTION}
           paddingSize="l"
@@ -150,9 +169,13 @@ export const LandingCards = memo(() => {
               {i18n.SIEM_CTA}
             </EuiButton>
           }
+          css={footerStyles}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 });
 LandingCards.displayName = 'LandingCards';
+
+// eslint-disable-next-line import/no-default-export
+export default LandingCards;
