@@ -44,8 +44,8 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
       isFetched,
       isLoading,
       selectedRules,
-      isFetchingRules,
-      isFetchingRulesPackage,
+      isRefetching,
+      isUpgradingSecurityPackages,
     },
     actions: { selectRules },
   } = upgradeRulesTableContext;
@@ -53,9 +53,11 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
 
   const isTableEmpty = isFetched && rules.length === 0;
 
+  const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
+
   return (
     <>
-      {isFetchingRulesPackage && (
+      {shouldShowProgress && (
         <EuiProgress
           data-test-subj="loadingRulesInfoProgress"
           size="xs"
@@ -64,7 +66,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
         />
       )}
       <EuiSkeletonLoading
-        isLoading={isLoading || isFetchingRules}
+        isLoading={isLoading}
         loadingContent={
           <>
             <EuiSkeletonTitle />

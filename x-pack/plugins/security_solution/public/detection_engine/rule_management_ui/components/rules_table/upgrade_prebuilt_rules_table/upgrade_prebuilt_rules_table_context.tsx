@@ -51,14 +51,14 @@ export interface UpgradePrebuiltRulesTableState {
    */
   isFetched: boolean;
   /**
-   * Is true when doing an initial fetch of rules to upgrade
+   * Is true whenever a background refetch is in-flight, which does not include initial loading
    */
-  isFetchingRules: boolean;
+  isRefetching: boolean;
   /**
-   * Is true when installing security_detection_rules package in background
-   * or refetching rules to upgrade
+   * Is true when installing security_detection_rules
+   * package in background
    */
-  isFetchingRulesPackage: boolean;
+  isUpgradingSecurityPackages: boolean;
   /**
    * List of rule IDs that are currently being upgraded
    */
@@ -222,13 +222,10 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         isFetched,
         isLoading: isLoading && loadingJobs,
         isRefetching,
-        isFetchingRules,
-        isFetchingRulesPackage,
+        isUpgradingSecurityPackages,
         selectedRules,
         loadingRules,
         lastUpdated: dataUpdatedAt,
-        legacyJobsInstalled,
-        isUpgradeModalVisible,
       },
       actions,
     };
@@ -241,13 +238,10 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     isLoading,
     loadingJobs,
     isRefetching,
-    isFetchingRules,
-    isFetchingRulesPackage,
+    isUpgradingSecurityPackages,
     selectedRules,
     loadingRules,
     dataUpdatedAt,
-    legacyJobsInstalled,
-    isUpgradeModalVisible,
     actions,
   ]);
 

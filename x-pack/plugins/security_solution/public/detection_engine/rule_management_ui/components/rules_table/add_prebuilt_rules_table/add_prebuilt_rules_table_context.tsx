@@ -45,10 +45,14 @@ export interface AddPrebuiltRulesTableState {
    */
   isFetched: boolean;
   /**
-   * Is true when installing security_detection_rules package
-   *  in background or refetching rules available to install
+   * Is true whenever a background refetch is in-flight, which does not include initial loading
    */
-  isRefreshingTable: boolean;
+  isRefetching: boolean;
+  /**
+   * Is true when installing security_detection_rules
+   * package in background
+   */
+  isUpgradingSecurityPackages: boolean;
   /**
    * List of rule IDs that are currently being upgraded
    */
@@ -113,7 +117,6 @@ export const AddPrebuiltRulesTableContextProvider = ({
 
   const { mutateAsync: installAllRulesRequest } = usePerformInstallAllRules();
   const { mutateAsync: installSpecificRulesRequest } = usePerformInstallSpecificRules();
-  const isRefreshingTable = isRefetching || isUpgradingSecurityPackages;
 
   const installOneRule = useCallback(
     async (ruleId: RuleSignatureId) => {
@@ -180,7 +183,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
         isLoading,
         loadingRules,
         isRefetching,
-        isRefreshingTable,
+        isUpgradingSecurityPackages,
         selectedRules,
         lastUpdated: dataUpdatedAt,
       },
@@ -195,7 +198,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     isLoading,
     loadingRules,
     isRefetching,
-    isRefreshingTable,
+    isUpgradingSecurityPackages,
     selectedRules,
     dataUpdatedAt,
     actions,

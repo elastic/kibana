@@ -27,18 +27,27 @@ export const AddPrebuiltRulesTable = React.memo(() => {
   const addRulesTableContext = useAddPrebuiltRulesTableContext();
 
   const {
-    state: { rules, filteredRules, isFetched, isLoading, selectedRules, isRefreshingTable },
+    state: {
+      rules,
+      filteredRules,
+      isFetched,
+      isLoading,
+      isRefetching,
+      selectedRules,
+      isUpgradingSecurityPackages,
+    },
     actions: { selectRules },
   } = addRulesTableContext;
   const rulesColumns = useAddPrebuiltRulesTableColumns();
 
   const isTableEmpty = isFetched && rules.length === 0;
 
-  const isInstallingPackageForFirstTime = isRefreshingTable && rules.length === 0;
+  const isInstallingPackageForFirstTime = isUpgradingSecurityPackages && rules.length === 0;
+  const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
 
   return (
     <>
-      {isRefreshingTable && (
+      {shouldShowProgress && (
         <EuiProgress
           data-test-subj="loadingRulesInfoProgress"
           size="xs"

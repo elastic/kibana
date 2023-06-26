@@ -112,9 +112,11 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
-    state: { loadingRules, isRefreshingTable },
+    state: { loadingRules, isRefetching, isUpgradingSecurityPackages },
     actions: { installOneRule },
   } = useAddPrebuiltRulesTableContext();
+
+  const isDisabled = isRefetching || isUpgradingSecurityPackages;
 
   return useMemo(
     () => [
@@ -142,9 +144,9 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
         width: '12%',
       },
       ...(hasCRUDPermissions
-        ? [createInstallButtonColumn(installOneRule, loadingRules, isRefreshingTable)]
+        ? [createInstallButtonColumn(installOneRule, loadingRules, isDisabled)]
         : []),
     ],
-    [hasCRUDPermissions, installOneRule, loadingRules, isRefreshingTable, showRelatedIntegrations]
+    [hasCRUDPermissions, installOneRule, loadingRules, isDisabled, showRelatedIntegrations]
   );
 };
