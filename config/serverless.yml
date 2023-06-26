@@ -9,6 +9,7 @@ xpack.fleet.internal.disableProxies: true
 # Enable ZDT migration algorithm
 migrations.algorithm: zdt
 
+# temporarily allow to run the migration on UI nodes
 migrations.zdt:
   metaPickupSyncDelaySec: 5
   runOnRoles: ["ui"]
