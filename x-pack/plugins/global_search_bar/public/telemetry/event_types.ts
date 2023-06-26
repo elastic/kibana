@@ -34,6 +34,15 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
       },
     },
   },
+  [FieldType.DID_NAVIGATE]: {
+    [FieldType.DID_NAVIGATE]: {
+      type: 'boolean',
+      _meta: {
+        description:
+          'A flag to specify whether the user selected an option before closing the search panel.',
+      },
+    },
+  },
   [FieldType.VISIBLE_TIME]: {
     [FieldType.VISIBLE_TIME]: {
       type: 'long',

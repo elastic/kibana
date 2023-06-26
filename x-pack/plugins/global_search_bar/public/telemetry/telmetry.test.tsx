@@ -181,10 +181,12 @@ describe('SearchBar', () => {
       fireEvent.click(await screen.findByTestId('nav-search-option'));
 
       expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_blur', {
+        did_navigate: true,
         focus_time_ms: 1000,
       });
       expect(mockReportEvent).nthCalledWith(2, 'global_search_bar_click_application', {
         application: 'discover',
+        did_navigate: true,
         terms: '',
       });
       expect(mockReportEvent).toHaveBeenCalledTimes(2);
@@ -218,10 +220,12 @@ describe('SearchBar', () => {
       fireEvent.click(await screen.findByTestId('nav-search-option'));
 
       expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_blur', {
+        did_navigate: true,
         focus_time_ms: 1000,
       });
       expect(mockReportEvent).nthCalledWith(2, 'global_search_bar_click_application', {
         application: 'discover',
+        did_navigate: true,
         terms: 'Ahoy!',
       });
       expect(mockReportEvent).toHaveBeenCalledTimes(2);
@@ -317,6 +321,7 @@ describe('SearchBar', () => {
         expect(mockReportUiCounter).toHaveBeenCalledTimes(1);
 
         expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_blur', {
+          did_navigate: false,
           focus_time_ms: 1000,
         });
         expect(mockReportEvent).toHaveBeenCalledTimes(1);

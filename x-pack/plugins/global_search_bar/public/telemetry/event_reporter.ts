@@ -22,6 +22,7 @@ import {
 export class EventReporter {
   private reportEvent: AnalyticsServiceStart['reportEvent'];
   private trackUiMetric: TrackUiMetricFn;
+  private didNavigate = false;
   private focusStart = Infinity;
 
   constructor({
@@ -69,8 +70,10 @@ export class EventReporter {
     if (focusTime > 0) {
       this.reportEvent(EventMetric.SEARCH_BLUR, {
         [FieldType.FOCUS_TIME]: focusTime,
+        [FieldType.DID_NAVIGATE]: this.didNavigate,
       });
       this.focusStart = Infinity;
+      this.didNavigate = false; // reset
     }
   }
 
@@ -92,6 +95,8 @@ export class EventReporter {
    * Called when the users selects an application in their search results
    */
   public navigateToApplication(context: TrackedApplicationClick) {
+    this.didNavigate = true;
+
     this.searchBlur();
 
     const application = context?.application ?? 'unknown';
@@ -102,6 +107,7 @@ export class EventReporter {
     this.reportEvent(EventMetric.CLICK_APPLICATION, {
       [FieldType.TERMS]: terms,
       [FieldType.APPLICATION]: application,
+      [FieldType.DID_NAVIGATE]: true,
     });
   }
 
@@ -109,6 +115,8 @@ export class EventReporter {
    * Called when the users selects Saved Object in their search results
    */
   public navigateToSavedObject(context: TrackedSavedObjectClick | undefined) {
+    this.didNavigate = true;
+
     this.searchBlur();
 
     const type = context?.type ?? 'unknown';
@@ -119,6 +127,7 @@ export class EventReporter {
     this.reportEvent(EventMetric.CLICK_SAVED_OBJECT, {
       [FieldType.TERMS]: terms,
       [FieldType.SAVED_OBJECT_TYPE]: type,
+      [FieldType.DID_NAVIGATE]: true,
     });
   }
 
