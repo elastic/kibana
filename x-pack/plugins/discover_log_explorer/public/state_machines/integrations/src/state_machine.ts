@@ -142,9 +142,11 @@ export const createPureIntegrationsStateMachine = (
           }
           return {};
         }),
-        storeInCache: assign((context, event) =>
-          'data' in event ? { cache: context.cache.set(context.search, event.data) } : {}
-        ),
+        storeInCache: (context, event) => {
+          if ('data' in event) {
+            context.cache.set(context.search, event.data);
+          }
+        },
         appendIntegrations: assign((context, event) =>
           'data' in event
             ? {
@@ -155,7 +157,9 @@ export const createPureIntegrationsStateMachine = (
             : {}
         ),
         storeError: assign((_context, event) => ('data' in event ? { error: event.data } : {})),
-        clearCache: assign((context) => ({ cache: context.cache.clear() })),
+        clearCache: (context) => {
+          context.cache.reset();
+        },
         clearData: assign((_context) => ({ integrationsSource: null, integrations: null })),
         clearError: assign((_context) => ({ error: null })),
       },

@@ -109,9 +109,10 @@ export const createPureDatasetsSelectorStateMachine = (
         ),
         storeSearch: assign((context, event) => {
           if ('search' in event) {
+            context.searchCache.set(context.panelId, event.search);
+
             return {
               search: event.search,
-              searchCache: context.searchCache.set(context.panelId, event.search),
             };
           }
           return {};

@@ -81,11 +81,15 @@ export const createPureDatasetsStateMachine = (
         storeDatasets: assign((_context, event) =>
           'data' in event ? { datasets: event.data.items } : {}
         ),
-        storeInCache: assign((context, event) =>
-          'data' in event ? { cache: context.cache.set(context.search, event.data) } : {}
-        ),
+        storeInCache: (context, event) => {
+          if ('data' in event) {
+            context.cache.set(context.search, event.data);
+          }
+        },
         storeError: assign((_context, event) => ('data' in event ? { error: event.data } : {})),
-        clearCache: assign((context) => ({ cache: context.cache.clear() })),
+        clearCache: (context) => {
+          context.cache.reset();
+        },
         clearData: assign((_context) => ({ datasets: null })),
         clearError: assign((_context) => ({ error: null })),
       },
