@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { useEuiTheme } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import {
   createLensDefinitionForCountChart,
@@ -38,8 +39,10 @@ export function LogThresholdCountChart({
   const {
     lens: { EmbeddableComponent },
   } = useKibanaContextForPlugin().services;
+  const { euiTheme } = useEuiTheme();
   const lensDef = createLensDefinitionForCountChart(
     index,
+    euiTheme,
     kql,
     threshold,
     alertRange,

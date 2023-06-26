@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { EuiThemeComputed, transparentize } from '@elastic/eui';
 
 export interface IndexPattern {
   pattern: string;
@@ -25,6 +26,7 @@ export interface Timerange {
 
 function createBaseLensDefinition<D extends {}>(
   index: IndexPattern,
+  euiTheme: EuiThemeComputed,
   threshold: Threshold,
   alertRange: Timerange,
   layerDef: D,
@@ -93,7 +95,7 @@ function createBaseLensDefinition<D extends {}>(
                   timestamp: moment(alertRange.from).toISOString(),
                 },
                 lineWidth: 3,
-                color: '#e7664c',
+                color: euiTheme.colors.danger,
                 icon: 'alert',
               },
               {
@@ -105,7 +107,7 @@ function createBaseLensDefinition<D extends {}>(
                   endTimestamp: moment(alertRange.to).toISOString(),
                 },
                 id: '07d15b13-4b6c-4d82-b45d-9d58ced1c2a8',
-                color: '#e7664c33',
+                color: transparentize(euiTheme.colors.danger, 0.2),
               },
             ],
             ignoreGlobalFilters: true,
@@ -119,7 +121,7 @@ function createBaseLensDefinition<D extends {}>(
               {
                 forAccessor: '7fb02af1-0823-4787-a316-3b05a4539d2c',
                 axisMode: 'left',
-                color: '#e7664c',
+                color: euiTheme.colors.danger,
                 lineWidth: 2,
                 fill: threshold.fill,
               },
@@ -203,6 +205,7 @@ function createBaseLensDefinition<D extends {}>(
 
 export function createLensDefinitionForRatioChart(
   index: IndexPattern,
+  euiTheme: EuiThemeComputed,
   numeratorKql: string,
   denominatorKql: string,
   threshold: Threshold,
@@ -310,6 +313,7 @@ export function createLensDefinitionForRatioChart(
   };
   return createBaseLensDefinition(
     index,
+    euiTheme,
     threshold,
     alertRange,
     layerDef,
@@ -319,6 +323,7 @@ export function createLensDefinitionForRatioChart(
 
 export function createLensDefinitionForCountChart(
   index: IndexPattern,
+  euiTheme: EuiThemeComputed,
   kql: string,
   threshold: Threshold,
   alertRange: Timerange,
@@ -381,6 +386,7 @@ export function createLensDefinitionForCountChart(
 
   return createBaseLensDefinition(
     index,
+    euiTheme,
     threshold,
     alertRange,
     layerDef,

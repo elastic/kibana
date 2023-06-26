@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { useEuiTheme } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import {
   createLensDefinitionForRatioChart,
@@ -40,8 +41,10 @@ export function LogThresholdRatioChart({
   const {
     lens: { EmbeddableComponent },
   } = useKibanaContextForPlugin().services;
+  const { euiTheme } = useEuiTheme();
   const lensDef = createLensDefinitionForRatioChart(
     index,
+    euiTheme,
     numeratorKql,
     denominatorKql,
     threshold,
