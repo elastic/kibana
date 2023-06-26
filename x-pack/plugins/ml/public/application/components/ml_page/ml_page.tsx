@@ -7,11 +7,9 @@
 
 import React, { createContext, FC, useEffect, useMemo, useState } from 'react';
 import { createHtmlPortalNode, HtmlPortalNode } from 'react-reverse-portal';
-import { Redirect, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
-
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { Subscription } from 'rxjs';
-
 import { EuiPageSection } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -175,7 +173,7 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, ro
      * avoiding full page reload **/
     <RedirectAppLinks coreStart={{ application }}>
       <EuiPageSection restrictWidth={false}>
-        <Switch>
+        <Routes>
           {routeList.map((route) => {
             return (
               <Route
@@ -194,7 +192,7 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, ro
             );
           })}
           <Redirect to="/overview" />
-        </Switch>
+        </Routes>
       </EuiPageSection>
     </RedirectAppLinks>
   );

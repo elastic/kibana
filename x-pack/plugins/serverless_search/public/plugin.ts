@@ -30,10 +30,29 @@ export class ServerlessSearchPlugin
   ): ServerlessSearchPluginSetup {
     core.application.register({
       id: 'serverlessElasticsearch',
-      title: 'Elasticsearch',
+      title: i18n.translate('xpack.serverlessSearch.app.elasticsearch.title', {
+        defaultMessage: 'Elasticsearch',
+      }),
       appRoute: '/app/elasticsearch',
       async mount({ element }: AppMountParameters) {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application/elasticsearch');
+        const [coreStart, services] = await core.getStartServices();
+        const { security } = services;
+        docLinks.setDocLinks(coreStart.docLinks.links);
+
+        const userProfile = await security.userProfiles.getCurrent();
+
+        return await renderApp(element, coreStart, { userProfile, ...services });
+      },
+    });
+    core.application.register({
+      id: 'serverlessIndexingApi',
+      title: i18n.translate('xpack.serverlessSearch.app.indexingApi.title', {
+        defaultMessage: 'Indexing API',
+      }),
+      appRoute: '/app/indexing_api',
+      async mount({ element }: AppMountParameters) {
+        const { renderApp } = await import('./application/indexing_api');
         const [coreStart, services] = await core.getStartServices();
         const { security } = services;
         docLinks.setDocLinks(coreStart.docLinks.links);
