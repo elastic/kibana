@@ -132,6 +132,7 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
           parameters: {
             maxChunkSize: this.chunkSize,
           },
+          indexIsAlias: this.indexIsAlias,
         });
 
         const start = performance.now();
@@ -192,6 +193,7 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
         client: this.esClient,
         index: this.index,
         logger: this.logger.get('content-stream-delete'),
+        indexIsAlias: this.indexIsAlias,
       });
       /** @note Overwriting existing content with an empty buffer to remove all the chunks. */
       await promisify(dest.end.bind(dest, '', 'utf8'))();
