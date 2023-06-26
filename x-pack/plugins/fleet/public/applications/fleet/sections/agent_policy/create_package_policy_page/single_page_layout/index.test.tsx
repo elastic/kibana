@@ -87,6 +87,7 @@ jest.mock('react-router-dom', () => ({
   useLocation: jest.fn().mockReturnValue({ search: '' }),
   useHistory: jest.fn().mockReturnValue({
     push: jest.fn(),
+    listen: jest.fn(),
     location: {
       search: '',
     },
