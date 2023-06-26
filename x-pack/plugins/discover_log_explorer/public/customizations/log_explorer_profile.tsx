@@ -8,7 +8,7 @@
 import { CoreStart } from '@kbn/core/public';
 import { CustomizationCallback } from '@kbn/discover-plugin/public';
 import React from 'react';
-import { dynamic } from '../../common/dynamic';
+import { dynamic } from '../utils/dynamic';
 
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
 import { EuiContextMenu, EuiHorizontalRule } from '@elastic/eui';
-import { dynamic } from '../../../common/dynamic';
+import React, { useMemo } from 'react';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
+import { dynamic } from '../../utils/dynamic';
 import {
   contextMenuStyles,
   DATA_VIEW_POPOVER_CONTENT_WIDTH,
