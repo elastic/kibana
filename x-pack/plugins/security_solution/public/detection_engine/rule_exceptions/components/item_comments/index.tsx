@@ -96,7 +96,7 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
     } else {
       return null;
     }
-  }, [shouldShowComments, exceptionItemComments]);
+  }, [exceptionItemComments, shouldShowComments]);
 
   const formattedComments = useMemo((): EuiCommentProps[] => {
     if (exceptionItemComments && exceptionItemComments.length > 0) {
@@ -105,11 +105,15 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
       return [];
     }
   }, [exceptionItemComments]);
+  const isInitiallyOpened = useMemo(
+    () => initialIsOpen && !!newCommentValue,
+    [initialIsOpen, newCommentValue]
+  );
 
   return (
     <div>
       <CommentAccordion
-        initialIsOpen={initialIsOpen}
+        initialIsOpen={isInitiallyOpened}
         id={'add-exception-comments-accordion'}
         buttonClassName={COMMENT_ACCORDION_BUTTON_CLASS_NAME}
         buttonContent={accordionTitle ?? commentsAccordionTitle}
