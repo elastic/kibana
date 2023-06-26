@@ -76,9 +76,9 @@ export type AwsCredentialsType =
   | 'shared_credentials'
   | 'cloud_formation';
 
-type AwsCredentialsFields = Record<string, { label: string; type?: 'password' | 'text' }>;
+export type AwsCredentialsFields = Record<string, { label: string; type?: 'password' | 'text' }>;
 
-interface AwsOptionValue {
+export interface AwsOptionValue {
   label: string;
   info: React.ReactNode;
   fields: AwsCredentialsFields;
