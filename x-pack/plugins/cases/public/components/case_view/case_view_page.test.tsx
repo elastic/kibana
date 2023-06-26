@@ -36,15 +36,12 @@ import {
   defaultUseFindCaseUserActions,
 } from './mocks';
 import type { CaseViewPageProps } from './types';
-import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
 import { useGetCaseUserActionsStats } from '../../containers/use_get_case_user_actions_stats';
 import { createQueryWithMarkup } from '../../common/test_utils';
-
-const mockSetTitle = jest.fn();
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
@@ -65,21 +62,7 @@ jest.mock('../user_actions/timestamp', () => ({
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/hooks');
 jest.mock('../connectors/resilient/api');
-jest.mock('../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../common/lib/kibana');
-  return {
-    ...originalModule,
-    useKibana: () => {
-      const { services } = originalModule.useKibana();
-      return {
-        services: {
-          ...services,
-          chrome: { setBreadcrumbs: jest.fn(), docTitle: { change: mockSetTitle } },
-        },
-      };
-    },
-  };
-});
+jest.mock('../../common/lib/kibana');
 
 const useFetchCaseMock = useGetCase as jest.Mock;
 const useUrlParamsMock = useUrlParams as jest.Mock;
@@ -100,6 +83,7 @@ const mockGetCase = (props: Partial<UseGetCase> = {}) => {
     ...defaultGetCase.data,
     ...props.data,
   };
+
   useFetchCaseMock.mockReturnValue({
     ...defaultGetCase,
     ...props,
@@ -129,10 +113,11 @@ for (let i = 0; i < 50; i++) {
   describe('CaseViewPage', () => {
     const updateCaseProperty = defaultUpdateCaseState.mutate;
     const pushCaseToExternalService = jest.fn();
-    const data = caseProps.caseData;
-    let appMockRenderer: AppMockRenderer;
+    const getAlertsStateTableMock = jest.fn();
     const caseConnectors = getCaseConnectorsMockResponse();
     const caseUsers = getCaseUsersMockResponse();
+
+    let appMockRenderer: AppMockRenderer;
 
     // eslint-disable-next-line prefer-object-spread
     const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
@@ -193,54 +178,13 @@ for (let i = 0; i < 50; i++) {
       useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
 
       appMockRenderer = createAppMockRenderer({ license: platinumLicense });
+
+      appMockRenderer.coreStart.triggersActionsUi.getAlertsStateTable =
+        getAlertsStateTableMock.mockReturnValue(<div data-test-subj="alerts-table" />);
     });
 
     afterAll(() => {
       Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
-    });
-
-    it('should render CaseViewPage', async () => {
-      const damagedRaccoonUser = userProfiles[0].user;
-      const caseDataWithDamagedRaccoon = {
-        ...caseData,
-        createdBy: {
-          profileUid: userProfiles[0].uid,
-          username: damagedRaccoonUser.username,
-          fullName: damagedRaccoonUser.full_name,
-          email: damagedRaccoonUser.email,
-        },
-      };
-
-      const props = { ...caseProps, caseData: caseDataWithDamagedRaccoon };
-
-      appMockRenderer = createAppMockRenderer({
-        features: { metrics: ['alerts.count'] },
-        license: platinumLicense,
-      });
-
-      appMockRenderer.render(<CaseViewPage {...props} />);
-
-      expect(await screen.findByTestId('header-page-title')).toHaveTextContent(data.title);
-      expect(screen.getByTestId('case-view-metrics-panel')).toBeInTheDocument();
-      expect(await screen.findByTestId('case-view-status-dropdown')).toHaveTextContent('Open');
-
-      expect(
-        within(screen.getByTestId('case-view-tag-list')).getByTestId('tag-coke')
-      ).toHaveTextContent(data.tags[0]);
-
-      expect(
-        within(screen.getByTestId('case-view-tag-list')).getByTestId('tag-pepsi')
-      ).toHaveTextContent(data.tags[1]);
-
-      expect(screen.getAllByText(data.createdBy.fullName!)[0]).toBeInTheDocument();
-
-      expect(
-        within(screen.getByTestId('description')).getByTestId('scrollable-markdown')
-      ).toHaveTextContent(data.description);
-
-      expect(screen.getByTestId('case-view-status-action-button')).toHaveTextContent(
-        'Mark in progress'
-      );
     });
 
     it('should show closed indicators in header when case is closed', async () => {
@@ -461,12 +405,8 @@ for (let i = 0; i < 50; i++) {
     });
 
     describe('Tabs', () => {
-      const getAlertsStateTableMock = jest.fn();
-
       beforeEach(() => {
         jest.clearAllMocks();
-        appMockRenderer.coreStart.triggersActionsUi.getAlertsStateTable =
-          getAlertsStateTableMock.mockReturnValue(<div data-test-subj="alerts-table" />);
       });
 
       it('renders tabs correctly', async () => {

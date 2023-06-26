@@ -28,6 +28,29 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const browser = getService('browser');
 
   describe('View case', () => {
+    describe('page', () => {
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+
+      it('should show the case view page correctly', async () => {
+        await testSubjects.existOrFail('case-view-title');
+        await testSubjects.existOrFail('header-page-supplements');
+
+        await testSubjects.existOrFail('case-view-tab-title-activity');
+        await testSubjects.existOrFail('case-view-tab-title-files');
+        await testSubjects.existOrFail('description');
+
+        await testSubjects.existOrFail('case-view-activity');
+
+        await testSubjects.existOrFail('case-view-assignees');
+        await testSubjects.existOrFail('sidebar-severity');
+        await testSubjects.existOrFail('case-view-user-list-reporter');
+        await testSubjects.existOrFail('case-view-user-list-participants');
+        await testSubjects.existOrFail('case-view-tag-list');
+        await testSubjects.existOrFail('cases-categories');
+        await testSubjects.existOrFail('sidebar-connectors');
+      });
+    });
+
     describe('properties', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
