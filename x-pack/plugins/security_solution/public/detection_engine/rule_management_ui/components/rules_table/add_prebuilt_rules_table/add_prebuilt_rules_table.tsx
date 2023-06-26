@@ -27,26 +27,18 @@ export const AddPrebuiltRulesTable = React.memo(() => {
   const addRulesTableContext = useAddPrebuiltRulesTableContext();
 
   const {
-    state: {
-      rules,
-      filteredRules,
-      isFetched,
-      isLoading,
-      selectedRules,
-      isFetchingRules,
-      isFetchingRulesPackage,
-    },
+    state: { rules, filteredRules, isFetched, isLoading, selectedRules, isRefreshingTable },
     actions: { selectRules },
   } = addRulesTableContext;
   const rulesColumns = useAddPrebuiltRulesTableColumns();
 
   const isTableEmpty = isFetched && rules.length === 0;
 
-  const isInstallingPackageForFirstTime = isFetchingRulesPackage && rules.length === 0;
+  const isInstallingPackageForFirstTime = isRefreshingTable && rules.length === 0;
 
   return (
     <>
-      {isFetchingRulesPackage && (
+      {isRefreshingTable && (
         <EuiProgress
           data-test-subj="loadingRulesInfoProgress"
           size="xs"
@@ -55,7 +47,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
         />
       )}
       <EuiSkeletonLoading
-        isLoading={isLoading || isFetchingRules || isInstallingPackageForFirstTime}
+        isLoading={isLoading || isInstallingPackageForFirstTime}
         loadingContent={
           <>
             <EuiSkeletonTitle />

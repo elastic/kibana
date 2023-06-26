@@ -86,13 +86,13 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 const createInstallButtonColumn = (
   installOneRule: AddPrebuiltRulesTableActions['installOneRule'],
   loadingRules: RuleSignatureId[],
-  isFetchingRulesPackage: boolean
+  isDisabled: boolean
 ): TableColumn => ({
   field: 'rule_id',
   name: '',
   render: (ruleId: RuleSignatureId) => {
     const isRuleInstalling = loadingRules.includes(ruleId);
-    const isInstallButtonDisabled = isRuleInstalling || isFetchingRulesPackage;
+    const isInstallButtonDisabled = isRuleInstalling || isDisabled;
     return (
       <EuiButtonEmpty
         size="s"
@@ -112,7 +112,7 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
   const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
   const {
-    state: { loadingRules, isFetchingRulesPackage },
+    state: { loadingRules, isRefreshingTable },
     actions: { installOneRule },
   } = useAddPrebuiltRulesTableContext();
 
@@ -142,15 +142,9 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
         width: '12%',
       },
       ...(hasCRUDPermissions
-        ? [createInstallButtonColumn(installOneRule, loadingRules, isFetchingRulesPackage)]
+        ? [createInstallButtonColumn(installOneRule, loadingRules, isRefreshingTable)]
         : []),
     ],
-    [
-      hasCRUDPermissions,
-      installOneRule,
-      loadingRules,
-      isFetchingRulesPackage,
-      showRelatedIntegrations,
-    ]
+    [hasCRUDPermissions, installOneRule, loadingRules, isRefreshingTable, showRelatedIntegrations]
   );
 };

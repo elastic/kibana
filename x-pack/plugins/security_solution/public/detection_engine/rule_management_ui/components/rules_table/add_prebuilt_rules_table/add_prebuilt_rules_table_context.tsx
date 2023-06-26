@@ -45,14 +45,10 @@ export interface AddPrebuiltRulesTableState {
    */
   isFetched: boolean;
   /**
-   * Is true when doing an initial fetch of rules to install
+   * Is true when installing security_detection_rules package
+   *  in background or refetching rules available to install
    */
-  isFetchingRules: boolean;
-  /**
-   * Is true when installing security_detection_rules package in background
-   * or refetching rules to install rules
-   */
-  isFetchingRulesPackage: boolean;
+  isRefreshingTable: boolean;
   /**
    * List of rule IDs that are currently being upgraded
    */
@@ -111,15 +107,13 @@ export const AddPrebuiltRulesTableContextProvider = ({
     isLoading,
     isRefetching,
   } = usePrebuiltRulesInstallReview({
-    refetchInterval: 60000, // Refetch available rules for installation every minute
+    refetchInterval: 10000, // Refetch available rules for installation every minute
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
   });
 
   const { mutateAsync: installAllRulesRequest } = usePerformInstallAllRules();
   const { mutateAsync: installSpecificRulesRequest } = usePerformInstallSpecificRules();
-
-  const isFetchingRules = !isFetched && isRefetching;
-  const isFetchingRulesPackage = (isFetched && isRefetching) || isUpgradingSecurityPackages;
+  const isRefreshingTable = isRefetching || isUpgradingSecurityPackages;
 
   const installOneRule = useCallback(
     async (ruleId: RuleSignatureId) => {
@@ -186,8 +180,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
         isLoading,
         loadingRules,
         isRefetching,
-        isFetchingRules,
-        isFetchingRulesPackage,
+        isRefreshingTable,
         selectedRules,
         lastUpdated: dataUpdatedAt,
       },
@@ -202,8 +195,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     isLoading,
     loadingRules,
     isRefetching,
-    isFetchingRules,
-    isFetchingRulesPackage,
+    isRefreshingTable,
     selectedRules,
     dataUpdatedAt,
     actions,
