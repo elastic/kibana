@@ -19,8 +19,7 @@ const getTourConfig = (packageKey: string, tourType: TourType) => {
         defaultMessage: 'Add Elastic Defend',
       }),
       description: i18n.translate('xpack.fleet.guidedOnboardingTour.endpointButton.description', {
-        defaultMessage:
-          `In this workflow, we'll be using Elastic Defend only to collect data for SIEM. Installing this will not conflict with existing endpoint security products.`,
+        defaultMessage: `In this workflow, we'll be using Elastic Defend only to collect data for SIEM. Installing this will not conflict with existing endpoint security products.`,
       }),
     };
   }
