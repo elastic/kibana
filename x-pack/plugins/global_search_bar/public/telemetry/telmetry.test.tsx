@@ -185,6 +185,8 @@ describe('SearchBar', () => {
         focus_time_ms: 1000,
       });
       expect(mockReportEvent).nthCalledWith(2, 'global_search_bar_click_application', {
+        selected_rank: 1,
+        selected_term: 'Discover',
         application: 'discover',
         did_navigate: true,
         terms: '',
@@ -224,6 +226,8 @@ describe('SearchBar', () => {
         focus_time_ms: 1000,
       });
       expect(mockReportEvent).nthCalledWith(2, 'global_search_bar_click_application', {
+        selected_rank: 1,
+        selected_term: 'Discover',
         application: 'discover',
         did_navigate: true,
         terms: 'Ahoy!',

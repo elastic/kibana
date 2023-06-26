@@ -36,6 +36,8 @@ export enum FieldType {
   SAVED_OBJECT_TYPE = 'saved_object_type',
   FOCUS_TIME = 'focus_time_ms',
   DID_NAVIGATE = 'did_navigate',
+  SELECTED_LABEL = 'selected_term',
+  SELECTED_RANK = 'selected_rank',
   VISIBLE_TIME = 'visible_time_ms',
   ERROR_MESSAGE = 'error_message',
   TERMS = 'terms',
@@ -51,12 +53,16 @@ export type TrackUiMetricFn = (
 /* @internal */
 export interface TrackedApplicationClick {
   application: string;
-  searchValue?: string;
+  searchValue: string;
+  selectedLabel: string | null;
+  selectedRank: number | null;
 }
 /* @internal */
 export interface TrackedSavedObjectClick {
   type: string;
-  searchValue?: string;
+  searchValue: string;
+  selectedLabel: string | null;
+  selectedRank: number | null;
 }
 /* @internal */
 export interface TrackedError {

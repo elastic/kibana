@@ -196,10 +196,20 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   const onChange = useCallback(
     (selection: EuiSelectableTemplateSitewideOption[]) => {
-      const selected = selection.find(({ checked }) => checked === 'on');
+      let selectedRank: number | null = null;
+      const selected = selection.find(({ checked }, rank) => {
+        const isChecked = checked === 'on';
+        if (isChecked) {
+          selectedRank = rank + 1;
+        }
+        return isChecked;
+      });
+
       if (!selected) {
         return;
       }
+
+      const selectedLabel = selected.label ?? null;
 
       // @ts-ignore - ts error is "union type is too complex to express"
       const { url, type, suggestion } = selected;
@@ -211,18 +221,22 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         return;
       }
 
-      // errors in tracking should not prevent selection behavior
-      try {
-        if (type === 'application') {
-          const key = selected.key ?? 'unknown';
-          const application = `${key.toLowerCase().replaceAll(' ', '_')}`;
-          reportEvent.navigateToApplication({ application, searchValue });
-        } else {
-          reportEvent.navigateToSavedObject({ type, searchValue });
-        }
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('Error trying to track searchbar metrics', e);
+      if (type === 'application') {
+        const key = selected.key ?? 'unknown';
+        const application = `${key.toLowerCase().replaceAll(' ', '_')}`;
+        reportEvent.navigateToApplication({
+          application,
+          searchValue,
+          selectedLabel,
+          selectedRank,
+        });
+      } else {
+        reportEvent.navigateToSavedObject({
+          type,
+          searchValue,
+          selectedLabel,
+          selectedRank,
+        });
       }
 
       navigateToUrl(url);
