@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import type { OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiFormRow,
@@ -13,12 +14,11 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
   EuiTitle,
-  OnTimeChangeProps,
 } from '@elastic/eui';
 import { RiskScoreEntity } from '../../../common/risk_engine/types';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
 import * as i18n from '../translations';
-import { RiskScore } from '../../../server/lib/risk_engine/types';
+import type { RiskScore } from '../../../server/lib/risk_engine/types';
 import { useRiskScorePreview } from '../api/hooks/use_preview_risk_scores';
 
 interface IRiskScorePreviewPanel {

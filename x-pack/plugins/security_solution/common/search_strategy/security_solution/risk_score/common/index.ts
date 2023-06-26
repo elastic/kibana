@@ -44,4 +44,4 @@ export enum RiskQueries {
   kpiRiskScore = 'kpiRiskScore',
 }
 
-export { RiskScoreEntity as RiskScoreEntity };
+export { RiskScoreEntity };

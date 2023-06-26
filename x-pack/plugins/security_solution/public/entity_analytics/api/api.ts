@@ -8,8 +8,8 @@
 import { RISK_SCORE_PREVIEW_URL } from '../../../common/constants';
 
 import { KibanaServices } from '../../common/lib/kibana';
-import { GetScoresResponse } from '../../../server/lib/risk_engine/types';
-import { RiskScorePreviewRequestSchema } from '../../../common/risk_engine/risk_score_preview/request_schema';
+import type { GetScoresResponse } from '../../../server/lib/risk_engine/types';
+import type { RiskScorePreviewRequestSchema } from '../../../common/risk_engine/risk_score_preview/request_schema';
 /**
  * Fetches preview risks scores
  */

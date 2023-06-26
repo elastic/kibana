@@ -14,7 +14,6 @@ import {
 
 import { login, visit } from '../../tasks/login';
 import { OVERVIEW_URL } from '../../urls/navigation';
-import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 describe('CTI Link Panel', () => {
   beforeEach(() => {

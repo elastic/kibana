@@ -7,7 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 import dateMath from '@kbn/datemath';
 import { fetchPreviewRiskScore } from '../api';
-import { RiskScorePreviewRequestSchema } from '../../../../common/risk_engine/risk_score_preview/request_schema';
+import type { RiskScorePreviewRequestSchema } from '../../../../common/risk_engine/risk_score_preview/request_schema';
 /**
  *
  */
