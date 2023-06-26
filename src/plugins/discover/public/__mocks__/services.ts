@@ -8,6 +8,7 @@
 import { Observable, of } from 'rxjs';
 import { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import { chromeServiceMock, coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
@@ -126,6 +127,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     inspector: {
       open: jest.fn(),
     },
+    uiActions: uiActionsPluginMock.createStartContract(),
     uiSettings: {
       get: jest.fn((key: string) => {
         if (key === 'fields:popularLimit') {
