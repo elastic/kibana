@@ -360,6 +360,10 @@ export class ChromeService {
 
       setIsVisible: (isVisible: boolean) => this.isForceHidden$.next(!isVisible),
 
+      setIsCloudEnabled: (isCloudEnabled: boolean) => {
+        this.isCloudEnabled = isCloudEnabled;
+      },
+
       getBadge$: () => badge$.pipe(takeUntil(this.stop$)),
 
       setBadge: (badge: ChromeBadge) => {

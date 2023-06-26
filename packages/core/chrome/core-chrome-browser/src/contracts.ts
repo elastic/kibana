@@ -161,4 +161,11 @@ export interface ChromeStart {
    * Get an observable of the current style type of the chrome.
    */
   getChromeStyle$(): Observable<ChromeStyle>;
+
+  /**
+   * Set the flag to indicate if Kibana is running on Elastic Cloud.
+   *
+   * @param isEnabled Flag to indicate if Kibana is running on Elastic Cloud.
+   */
+  setIsCloudEnabled(isEnabled: boolean): void;
 }
