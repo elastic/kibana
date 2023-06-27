@@ -494,7 +494,17 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async assertConvertToAdvancedJobExists() {
-      await testSubjects.existOrFail('mlJobWizardButtonCreateJob');
+      await testSubjects.existOrFail('mlJobWizardButtonConvertToAdvancedJob');
+    },
+
+    async convertToAdvancedJobWizard() {
+      await this.assertConvertToAdvancedJobExists();
+
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('mlJobWizardButtonConvertToAdvancedJob');
+        await headerPage.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('mlPageJobWizardHeader-advanced');
+      });
     },
 
     async assertDateRangeSelectionExists() {
