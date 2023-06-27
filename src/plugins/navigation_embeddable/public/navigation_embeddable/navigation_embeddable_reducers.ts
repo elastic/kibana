@@ -7,9 +7,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { WritableDraft } from 'immer/dist/types/types-external';
 
 import { PayloadAction } from '@reduxjs/toolkit';
-import { WritableDraft } from 'immer/dist/types/types-external';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+
 import {
   DashboardItem,
   DashboardLink,
@@ -24,6 +26,12 @@ export const navigationEmbeddableReducers = {
     action: PayloadAction<boolean>
   ) => {
     state.output.loading = action.payload;
+  },
+  setViewMode: (
+    state: WritableDraft<NavigationEmbeddableReduxState>,
+    action: PayloadAction<ViewMode | undefined>
+  ) => {
+    state.componentState.viewMode = action.payload;
   },
   setDashboardList: (
     state: WritableDraft<NavigationEmbeddableReduxState>,

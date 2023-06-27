@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
-import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
+import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
+import { EmbeddableInput, EmbeddableOutput, ViewMode } from '@kbn/embeddable-plugin/public';
 
 export interface ExternalLink {
   url: string;
@@ -47,6 +47,7 @@ export interface NavigationEmbeddableInput extends EmbeddableInput {
  * Redux state
  */
 export interface NavigationEmbeddableComponentState {
+  viewMode?: ViewMode;
   totalDashboards?: number;
   dashboardList?: DashboardItem[];
   currentDashboard?: DashboardLink;

@@ -113,6 +113,15 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
         })
     );
 
+    /** Keep the component state view mode in sync with the input view mode so that we can toggle the add button */
+    this.subscriptions.add(
+      this.getInput$()
+        .pipe(distinctUntilChanged((a, b) => a.viewMode === b.viewMode))
+        .subscribe(async ({ viewMode }) => {
+          this.dispatch.setViewMode(viewMode);
+        })
+    );
+
     /**
      * If this embeddable is contained in a parent dashboard, it should refetch its parent's saved object info in response
      * to changes to its parent's id (which means the parent dashboard was cloned/"saved as"), title, and/or description

@@ -15,6 +15,7 @@ import {
   EuiPanel,
   EuiPopover,
 } from '@elastic/eui';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { isDashboardLink } from '../types';
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
@@ -26,6 +27,7 @@ export const NavigationEmbeddableComponent = () => {
   const navEmbeddable = useNavigationEmbeddable();
 
   const links = navEmbeddable.select((state) => state.componentState.links);
+  const viewMode = navEmbeddable.select((state) => state.componentState.viewMode);
   const currentDashboard = navEmbeddable.select((state) => state.componentState.currentDashboard);
 
   const [isEditPopoverOpen, setIsEditPopoverOpen] = useState(false);
@@ -72,15 +74,17 @@ export const NavigationEmbeddableComponent = () => {
   return (
     <EuiPanel className="eui-yScroll">
       <EuiListGroup flush listItems={dashboardListGroupItems} size="s" />
-      <EuiPopover
-        button={addLinkButton}
-        panelStyle={{ width: 400 }}
-        isOpen={isEditPopoverOpen}
-        panelPaddingSize="s"
-        closePopover={() => setIsEditPopoverOpen(false)}
-      >
-        <NavigationEmbeddableLinkEditor setIsPopoverOpen={setIsEditPopoverOpen} />
-      </EuiPopover>
+      {viewMode === ViewMode.EDIT && (
+        <EuiPopover
+          button={addLinkButton}
+          panelStyle={{ width: 400 }}
+          isOpen={isEditPopoverOpen}
+          panelPaddingSize="s"
+          closePopover={() => setIsEditPopoverOpen(false)}
+        >
+          <NavigationEmbeddableLinkEditor setIsPopoverOpen={setIsEditPopoverOpen} />
+        </EuiPopover>
+      )}
     </EuiPanel>
   );
 };

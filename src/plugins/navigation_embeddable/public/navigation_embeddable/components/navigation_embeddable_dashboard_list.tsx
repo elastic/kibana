@@ -10,16 +10,14 @@ import useAsync from 'react-use/lib/useAsync';
 import React, { useEffect, useState } from 'react';
 
 import {
+  EuiBadge,
   EuiSpacer,
+  EuiFlexItem,
+  EuiFlexGroup,
   EuiHighlight,
   EuiSelectable,
   EuiFieldSearch,
   EuiSelectableOption,
-  EuiSelectableProps,
-  EuiText,
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
