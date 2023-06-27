@@ -11,7 +11,6 @@ import { MlPluginSetup, MlPluginStart } from './plugin';
 const createSetupContract = (): jest.Mocked<MlPluginSetup> => {
   return {
     locator: sharePluginMock.createLocator(),
-    setNavMenuEnabled: jest.fn(),
   };
 };
 
