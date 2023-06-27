@@ -5,16 +5,46 @@
  * 2.0.
  */
 
+import {
+  // TimeRangeType,
+  TIME_RANGE_TYPE,
+  // URL_TYPE,
+} from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
 import type { FieldStatsType } from '../common/types';
+import {
+  type DiscoverUrlConfig,
+  type DashboardUrlConfig,
+  type OtherUrlConfig,
+} from '../../../services/ml/data_frame_analytics_edit';
+
+const testDiscoverCustomUrl: DiscoverUrlConfig = {
+  label: 'Show data',
+  indexPattern: 'ft_farequote',
+  queryEntityFieldNames: ['airline'],
+  timeRange: TIME_RANGE_TYPE.AUTO,
+};
+
+const testDashboardCustomUrl: DashboardUrlConfig = {
+  label: 'Show dashboard',
+  dashboardName: 'ML Test',
+  queryEntityFieldNames: ['airline'],
+  timeRange: TIME_RANGE_TYPE.INTERVAL,
+  timeRangeInterval: '1h',
+};
+
+const testOtherCustomUrl: OtherUrlConfig = {
+  label: 'elastic.co',
+  url: 'https://www.elastic.co/',
+};
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  describe('outlier detection creation', function () {
+  describe.only('outlier detection creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier');
@@ -336,6 +366,11 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
+        it('adds custom urls to the analytics job', async () => {
+          await ml.testExecution.logTestStep('add discover custom url for the analytics job');
+          ml.dataFrameAnalyticsEdit.addDiscoverCustomUrl(testData.jobId, testDiscoverCustomUrl);
+        });
+        // HERE
         it('edits the analytics job and displays it correctly in the job list', async () => {
           await ml.testExecution.logTestStep(
             'should open the edit form for the created job in the analytics table'
