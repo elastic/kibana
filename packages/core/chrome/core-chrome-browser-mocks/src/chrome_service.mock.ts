@@ -43,6 +43,7 @@ const createStartContractMock = () => {
       getExtension$: jest.fn(),
     },
     setIsVisible: jest.fn(),
+    setIsCloudEnabled: jest.fn(),
     getIsVisible$: jest.fn(),
     getBadge$: jest.fn(),
     setBadge: jest.fn(),
