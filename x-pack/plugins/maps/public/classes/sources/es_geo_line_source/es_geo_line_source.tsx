@@ -48,7 +48,10 @@ import {
 } from './constants';
 
 type ESGeoLineSourceSyncMeta = ESAggsSourceSyncMeta &
-  Pick<ESGeoLineSourceDescriptor, 'groupByTimeseries' | 'lineSimplificationSize' | 'splitField' | 'sortField'>;
+  Pick<
+    ESGeoLineSourceDescriptor,
+    'groupByTimeseries' | 'lineSimplificationSize' | 'splitField' | 'sortField'
+  >;
 
 export const geoLineTitle = i18n.translate('xpack.maps.source.esGeoLineTitle', {
   defaultMessage: 'Tracks',
