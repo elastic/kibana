@@ -96,17 +96,22 @@ export interface TrackedAlerts<
   recovered: Record<string, LegacyAlert<State, Context>>;
 }
 
+// allows Partial on nested objects
+export type RecursivePartial<T> = {
+  [P in keyof T]?: RecursivePartial<T[P]>;
+};
+
 export interface PublicAlertsClient<
   AlertData extends RuleAlertData,
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string
 > {
-  report(alert: ReportedAlert<AlertData, State, Context, ActionGroupIds>): void;
+  report(alert: ReportedAlert<AlertData, State, Context, ActionGroupIds>): ReportedAlertData;
   setAlertData(alert: UpdateableAlert<AlertData, State, Context, ActionGroupIds>): void;
   getAlertLimitValue: () => number;
   setAlertLimitReached: (reached: boolean) => void;
-  getRecoveredAlerts: () => Array<LegacyAlert<State, Context, ActionGroupIds>>;
+  getRecoveredAlerts: () => Array<RecoveredAlertData<AlertData, State, Context, ActionGroupIds>>;
 }
 
 export interface ReportedAlert<
@@ -119,7 +124,22 @@ export interface ReportedAlert<
   actionGroup: ActionGroupIds;
   state?: State;
   context?: Context;
-  payload?: AlertData;
+  payload?: RecursivePartial<AlertData>;
+}
+
+export interface RecoveredAlertData<
+  AlertData extends RuleAlertData,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
+> {
+  alert: LegacyAlert<State, Context, ActionGroupIds>;
+  hit?: AlertData;
+}
+
+export interface ReportedAlertData {
+  uuid: string;
+  start: string | null;
 }
 
 export type UpdateableAlert<

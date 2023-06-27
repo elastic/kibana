@@ -6,11 +6,11 @@
  */
 
 import { omit } from 'lodash';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_WORKFLOW_STATUS, TAGS } from '@kbn/rule-data-utils';
 import { alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { RuleAlertData } from '../../types';
 
-const allowedFrameworkFields = new Set<string>([ALERT_REASON]);
+const allowedFrameworkFields = new Set<string>([ALERT_REASON, ALERT_WORKFLOW_STATUS, TAGS]);
 
 /**
  * Remove framework fields from the alert payload reported by
@@ -19,8 +19,12 @@ const allowedFrameworkFields = new Set<string>([ALERT_REASON]);
  * set by the alerting framework during rule execution.
  */
 export const stripFrameworkFields = <AlertData extends RuleAlertData>(
-  payload: AlertData
+  payload?: AlertData
 ): AlertData => {
+  if (!payload) {
+    return {} as AlertData;
+  }
+
   const keysToStrip = Object.keys(alertFieldMap).filter(
     (key: string) => !allowedFrameworkFields.has(key)
   );
