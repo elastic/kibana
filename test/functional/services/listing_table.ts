@@ -256,6 +256,12 @@ export class ListingTableService extends FtrService {
     await this.testSubjects.click('newItemButton');
   }
 
+  public async isShowingEmptyPrompt(): Promise<void> {
+    await this.testSubjects.exists('newItemButton', {
+      timeout: 5000,
+    });
+  }
+
   public async onListingPage(appName: AppName) {
     return await this.testSubjects.exists(`${appName}LandingPage`, {
       timeout: 5000,
