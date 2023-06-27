@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { parse, stringify } from 'query-string';
 import { useLocation, useHistory } from 'react-router-dom';
 import { SyntheticsUrlParams, getSupportedUrlParams } from '../utils/url_params';
@@ -25,7 +25,9 @@ export type SyntheticsUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
 export const useGetUrlParams: GetUrlParams = () => {
   const { search } = useLocation();
 
-  return getSupportedUrlParams(getParsedParams(search));
+  return useMemo(() => {
+    return getSupportedUrlParams(getParsedParams(search));
+  }, [search]);
 };
 
 export const useUrlParams: SyntheticsUrlParamsHook = () => {

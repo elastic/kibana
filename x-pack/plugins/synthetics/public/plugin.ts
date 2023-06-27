@@ -24,7 +24,7 @@ import type {
   ExploratoryViewPublicSetup,
   ExploratoryViewPublicStart,
 } from '@kbn/exploratory-view-plugin/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { EmbeddableStart, EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -49,6 +49,9 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+
+import { kibanaService } from './utils/kibana_service';
+import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import { locators } from './apps/locators';
@@ -64,6 +67,7 @@ export interface ClientPluginsSetup {
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cloud?: CloudSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface ClientPluginsStart {
@@ -107,12 +111,25 @@ export class UptimePlugin
 {
   constructor(private readonly initContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
+  public setup(
+    coreSetup: CoreSetup<ClientPluginsStart, unknown>,
+    plugins: ClientPluginsSetup
+  ): void {
     locators.forEach((locator) => {
       plugins.share.url.locators.create(locator);
     });
 
-    registerSyntheticsRoutesWithNavigation(core, plugins);
+    registerSyntheticsRoutesWithNavigation(coreSetup, plugins);
+
+    coreSetup.getStartServices().then(([coreStart, clientPluginsStart]) => {
+      kibanaService.init(
+        coreSetup,
+        plugins,
+        coreStart,
+        clientPluginsStart,
+        this.initContext.env.mode.dev
+      );
+    });
 
     const appKeywords = [
       'Synthetics',
@@ -133,7 +150,7 @@ export class UptimePlugin
     ];
 
     // Register the Synthetics UI plugin
-    core.application.register({
+    coreSetup.application.register({
       id: 'synthetics',
       euiIconType: 'logoObservability',
       order: 8400,
@@ -142,16 +159,20 @@ export class UptimePlugin
       keywords: appKeywords,
       deepLinks: [],
       mount: async (params: AppMountParameters) => {
-        const [coreStart, corePlugins] = await core.getStartServices();
-
+        kibanaService.appMountParameters = params;
         const { renderApp } = await import('./apps/synthetics/render_app');
-        return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
+        await coreSetup.getStartServices();
+
+        return renderApp(params);
       },
     });
+
+    registerSyntheticsEmbeddables(coreSetup, plugins);
   }
 
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
     const { triggersActionsUi } = pluginsStart;
+    setStartServices(coreStart);
 
     setStartServices(coreStart);
 

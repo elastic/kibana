@@ -8,7 +8,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n as i18nFormatter } from '@kbn/i18n';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { AppMountParameters } from '@kbn/core-application-browser';
+import { kibanaService } from '../../utils/kibana_service';
 import { SyntheticsAppProps } from './contexts';
 import { getIntegratedAppAvailability } from './utils/adapters';
 import {
@@ -17,22 +18,17 @@ import {
   INTEGRATED_SOLUTIONS,
 } from '../../../common/constants';
 import { SyntheticsApp } from './synthetics_app';
-import { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
 
-export function renderApp(
-  core: CoreStart,
-  plugins: ClientPluginsSetup,
-  startPlugins: ClientPluginsStart,
-  appMountParameters: AppMountParameters,
-  isDev: boolean
-) {
+export const getSyntheticsAppProps = (): SyntheticsAppProps => {
+  const { isDev, coreStart, startPlugins, setupPlugins, appMountParameters } = kibanaService;
+
   const {
     application: { capabilities },
     chrome: { setBadge, setHelpExtension },
     docLinks,
     http: { basePath },
     i18n,
-  } = core;
+  } = kibanaService.coreStart;
 
   const { apm, infrastructure, logs } = getIntegratedAppAvailability(
     capabilities,
@@ -41,24 +37,22 @@ export function renderApp(
 
   const canSave = (capabilities.uptime.save ?? false) as boolean; // TODO: Determine for synthetics
 
-  const props: SyntheticsAppProps = {
+  return {
     isDev,
-    plugins,
+    setupPlugins,
     canSave,
-    core,
+    coreStart,
     i18n,
     startPlugins,
     basePath: basePath.get(),
-    darkMode: core.uiSettings.get(DEFAULT_DARK_MODE),
-    commonlyUsedRanges: core.uiSettings.get(DEFAULT_TIMEPICKER_QUICK_RANGES),
+    darkMode: coreStart.uiSettings.get(DEFAULT_DARK_MODE),
+    commonlyUsedRanges: coreStart.uiSettings.get(DEFAULT_TIMEPICKER_QUICK_RANGES),
     isApmAvailable: apm,
     isInfraAvailable: infrastructure,
     isLogsAvailable: logs,
     renderGlobalHelpControls: () =>
       setHelpExtension({
-        appName: i18nFormatter.translate('xpack.synthetics.header.appName', {
-          defaultMessage: 'Synthetics',
-        }),
+        appName: SYNTHETICS_APP_NAME,
         links: [
           {
             linkType: 'documentation',
@@ -72,13 +66,21 @@ export function renderApp(
       }),
     setBadge,
     appMountParameters,
-    setBreadcrumbs: core.chrome.setBreadcrumbs,
+    setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
   };
+};
+
+export function renderApp(appMountParameters: AppMountParameters) {
+  const props: SyntheticsAppProps = getSyntheticsAppProps();
 
   ReactDOM.render(<SyntheticsApp {...props} />, appMountParameters.element);
 
   return () => {
-    startPlugins.data.search.session.clear();
+    props.startPlugins.data.search.session.clear();
     ReactDOM.unmountComponentAtNode(appMountParameters.element);
   };
 }
+
+const SYNTHETICS_APP_NAME = i18nFormatter.translate('xpack.synthetics.header.appName', {
+  defaultMessage: 'Synthetics',
+});
