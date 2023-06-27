@@ -12,7 +12,7 @@ import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { RuleActionFrequency, RuleAction } from '@kbn/alerting-plugin/common';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getTimeTypeValue } from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
+import { getTimeTypeValue } from '../../../../../common/utils/time_type_value';
 import * as i18n from './translations';
 
 const DescriptionLine = ({ children }: { children: React.ReactNode }) => (
