@@ -339,6 +339,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
         );
+        
         await common.navigateToApp('dashboard');
         await dashboard.preserveCrossAppState();
         await dashboard.clickNewDashboard();
@@ -366,6 +367,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('adds lens visualization to a new case from dashboard', async () => {
         const caseTitle = 'case created from my dashboard with lens visualization';
+
+        await common.navigateToApp('dashboard');
+        await dashboard.preserveCrossAppState();
+        await dashboard.loadSavedDashboard(myDashboardName);
 
         await testSubjects.click('embeddablePanelToggleMenuIcon');
         await testSubjects.click('embeddablePanelMore-mainMenu');
