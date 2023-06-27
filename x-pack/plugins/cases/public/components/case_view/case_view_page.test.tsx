@@ -110,378 +110,374 @@ const userActionsStats = {
   totalOtherActions: 11,
 };
 
-for (let i = 0; i < 25; i++) {
-  describe('CaseViewPage', () => {
-    const updateCaseProperty = defaultUpdateCaseState.mutate;
-    const pushCaseToExternalService = jest.fn();
-    const caseConnectors = getCaseConnectorsMockResponse();
-    const caseUsers = getCaseUsersMockResponse();
+describe('CaseViewPage', () => {
+  const updateCaseProperty = defaultUpdateCaseState.mutate;
+  const pushCaseToExternalService = jest.fn();
+  const caseConnectors = getCaseConnectorsMockResponse();
+  const caseUsers = getCaseUsersMockResponse();
 
-    let appMockRenderer: AppMockRenderer;
+  let appMockRenderer: AppMockRenderer;
 
-    // eslint-disable-next-line prefer-object-spread
-    const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+  // eslint-disable-next-line prefer-object-spread
+  const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
 
-    const platinumLicense = licensingMock.createLicense({
-      license: { type: 'platinum' },
+  const platinumLicense = licensingMock.createLicense({
+    license: { type: 'platinum' },
+  });
+
+  beforeAll(() => {
+    // The JSDOM implementation is too slow
+    // Especially for dropdowns that try to position themselves
+    // perf issue - https://github.com/jsdom/jsdom/issues/3234
+    Object.defineProperty(window, 'getComputedStyle', {
+      value: (el: HTMLElement) => {
+        /**
+         * This is based on the jsdom implementation of getComputedStyle
+         * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+         *
+         * It is missing global style parsing and will only return styles applied directly to an element.
+         * Will not return styles that are global or from emotion
+         */
+        const declaration = new CSSStyleDeclaration();
+        const { style } = el;
+
+        Array.prototype.forEach.call(style, (property: string) => {
+          declaration.setProperty(
+            property,
+            style.getPropertyValue(property),
+            style.getPropertyPriority(property)
+          );
+        });
+
+        return declaration;
+      },
+      configurable: true,
+      writable: true,
+    });
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetCase();
+    useUpdateCaseMock.mockReturnValue(defaultUpdateCaseState);
+    useGetCaseMetricsMock.mockReturnValue(defaultGetCaseMetrics);
+    useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
+    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+    useGetCaseUserActionsStatsMock.mockReturnValue({ data: userActionsStats, isLoading: false });
+    usePostPushToServiceMock.mockReturnValue({
+      isLoading: false,
+      mutateAsync: pushCaseToExternalService,
+    });
+    useGetCaseConnectorsMock.mockReturnValue({
+      isLoading: false,
+      data: caseConnectors,
+    });
+    useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
+    useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
+    useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
+    useCasesFeaturesMock.mockReturnValue({
+      metricsFeatures: ['alerts.count'],
+      pushToServiceAuthorized: true,
+      caseAssignmentAuthorized: true,
+      isAlertsEnabled: true,
+      isSyncAlertsEnabled: true,
     });
 
-    beforeAll(() => {
-      // The JSDOM implementation is too slow
-      // Especially for dropdowns that try to position themselves
-      // perf issue - https://github.com/jsdom/jsdom/issues/3234
-      Object.defineProperty(window, 'getComputedStyle', {
-        value: (el: HTMLElement) => {
-          /**
-           * This is based on the jsdom implementation of getComputedStyle
-           * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
-           *
-           * It is missing global style parsing and will only return styles applied directly to an element.
-           * Will not return styles that are global or from emotion
-           */
-          const declaration = new CSSStyleDeclaration();
-          const { style } = el;
+    appMockRenderer = createAppMockRenderer({ license: platinumLicense });
+  });
 
-          Array.prototype.forEach.call(style, (property: string) => {
-            declaration.setProperty(
-              property,
-              style.getPropertyValue(property),
-              style.getPropertyPriority(property)
-            );
-          });
+  afterAll(() => {
+    Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+  });
 
-          return declaration;
+  it('shows the metrics section', async () => {
+    appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+    expect(await screen.findByTestId('case-view-metrics-panel')).toBeInTheDocument();
+  });
+
+  it('should show closed indicators in header when case is closed', async () => {
+    useUpdateCaseMock.mockImplementation(() => ({
+      ...defaultUpdateCaseState,
+      caseData: basicCaseClosed,
+    }));
+
+    appMockRenderer.render(<CaseViewPage {...caseClosedProps} />);
+
+    expect(await screen.findByTestId('case-view-status-dropdown')).toHaveTextContent('Closed');
+  });
+
+  it('should push updates on button click', async () => {
+    useGetCaseConnectorsMock.mockImplementation(() => ({
+      isLoading: false,
+      data: {
+        ...caseConnectors,
+        'resilient-2': {
+          ...caseConnectors['resilient-2'],
+          push: { ...caseConnectors['resilient-2'].push, needsToBePushed: true },
         },
-        configurable: true,
-        writable: true,
-      });
+      },
+    }));
+
+    appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+    expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
+    expect(await screen.findByTestId('push-to-external-service')).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId('push-to-external-service'));
+
+    await waitFor(() => {
+      expect(pushCaseToExternalService).toHaveBeenCalled();
+    });
+  });
+
+  it('should disable the push button when connector is invalid', async () => {
+    appMockRenderer.render(
+      <CaseViewPage
+        {...{
+          ...caseProps,
+          caseData: { ...caseProps.caseData, connectorId: 'not-exist' },
+        }}
+      />
+    );
+
+    expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
+    expect(await screen.findByTestId('push-to-external-service')).toBeDisabled();
+  });
+
+  it('should call onComponentInitialized on mount', async () => {
+    const onComponentInitialized = jest.fn();
+    appMockRenderer.render(
+      <CaseViewPage {...caseProps} onComponentInitialized={onComponentInitialized} />
+    );
+
+    await waitFor(() => {
+      expect(onComponentInitialized).toHaveBeenCalled();
+    });
+  });
+
+  it('should show loading content when loading user actions stats', async () => {
+    const useFetchAlertData = jest.fn().mockReturnValue([true]);
+    useGetCaseUserActionsStatsMock.mockReturnValue({ isLoading: true });
+
+    appMockRenderer.render(<CaseViewPage {...caseProps} useFetchAlertData={useFetchAlertData} />);
+
+    expect(await screen.findByTestId('case-view-loading-content')).toBeInTheDocument();
+    expect(screen.queryByTestId('user-actions-list')).not.toBeInTheDocument();
+  });
+
+  it('should call show alert details with expected arguments', async () => {
+    const showAlertDetails = jest.fn();
+    appMockRenderer.render(<CaseViewPage {...caseProps} showAlertDetails={showAlertDetails} />);
+
+    userEvent.click((await screen.findAllByTestId('comment-action-show-alert-alert-action-id'))[1]);
+
+    await waitFor(() => {
+      expect(showAlertDetails).toHaveBeenCalledWith('alert-id-1', 'alert-index-1');
+    });
+  });
+
+  it('should show the rule name', async () => {
+    appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+    expect(
+      (
+        await screen.findAllByTestId('user-action-alert-comment-create-action-alert-action-id')
+      )[1].querySelector('.euiCommentEvent__headerEvent')
+    ).toHaveTextContent('added an alert from Awesome rule');
+  });
+
+  it('should update settings', async () => {
+    appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+    userEvent.click(await screen.findByTestId('sync-alerts-switch'));
+
+    await waitFor(() => {
+      const updateObject = updateCaseProperty.mock.calls[0][0];
+
+      expect(updateObject.updateKey).toEqual('settings');
+      expect(updateObject.updateValue).toEqual({ syncAlerts: false });
+    });
+  });
+
+  it('should show the correct connector name on the push button', async () => {
+    useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
+
+    appMockRenderer.render(
+      <CaseViewPage {...{ ...caseProps, connector: { ...caseProps, name: 'old-name' } }} />
+    );
+
+    expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
+    expect(await screen.findByText('Update My Resilient connector incident')).toBeInTheDocument();
+  });
+
+  describe('Callouts', () => {
+    const errorText =
+      'The connector used to send updates to the external service has been deleted or you do not have the appropriate licenseExternal link(opens in a new tab or window) to use it. To update cases in external systems, select a different connector or create a new one.';
+
+    it('it shows the danger callout when a connector has been deleted', async () => {
+      useGetConnectorsMock.mockImplementation(() => ({ data: [], isLoading: false }));
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
+
+      const getByText = createQueryWithMarkup(screen.getByText);
+      expect(getByText(errorText)).toBeInTheDocument();
     });
 
+    it('it does NOT shows the danger callout when connectors are loading', async () => {
+      useGetConnectorsMock.mockImplementation(() => ({ data: [], isLoading: true }));
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('case-callout-a25a5b368b6409b179ef4b6c5168244f')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Tabs', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      mockGetCase();
-      useUpdateCaseMock.mockReturnValue(defaultUpdateCaseState);
-      useGetCaseMetricsMock.mockReturnValue(defaultGetCaseMetrics);
-      useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
-      useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
-      useGetCaseUserActionsStatsMock.mockReturnValue({ data: userActionsStats, isLoading: false });
-      usePostPushToServiceMock.mockReturnValue({
-        isLoading: false,
-        mutateAsync: pushCaseToExternalService,
-      });
-      useGetCaseConnectorsMock.mockReturnValue({
-        isLoading: false,
-        data: caseConnectors,
-      });
-      useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
-      useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
-      useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
-      useCasesFeaturesMock.mockReturnValue({
-        metricsFeatures: ['alerts.count'],
-        pushToServiceAuthorized: true,
-        caseAssignmentAuthorized: true,
-        isAlertsEnabled: true,
-        isSyncAlertsEnabled: true,
-      });
-
-      appMockRenderer = createAppMockRenderer({ license: platinumLicense });
     });
 
-    afterAll(() => {
-      Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
-    });
-
-    it('shows the metrics section', async () => {
+    it('renders tabs correctly', async () => {
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-      expect(await screen.findByTestId('case-view-metrics-panel')).toBeInTheDocument();
+      expect(await screen.findByRole('tablist')).toBeInTheDocument();
+
+      expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
+      expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
+      expect(await screen.findByTestId('case-view-tab-title-files')).toBeInTheDocument();
     });
 
-    it('should show closed indicators in header when case is closed', async () => {
-      useUpdateCaseMock.mockImplementation(() => ({
-        ...defaultUpdateCaseState,
-        caseData: basicCaseClosed,
-      }));
-
-      appMockRenderer.render(<CaseViewPage {...caseClosedProps} />);
-
-      expect(await screen.findByTestId('case-view-status-dropdown')).toHaveTextContent('Closed');
+    it('renders the activity tab by default', async () => {
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+      expect(await screen.findByTestId('case-view-tab-content-activity')).toBeInTheDocument();
     });
 
-    it('should push updates on button click', async () => {
-      useGetCaseConnectorsMock.mockImplementation(() => ({
-        isLoading: false,
-        data: {
-          ...caseConnectors,
-          'resilient-2': {
-            ...caseConnectors['resilient-2'],
-            push: { ...caseConnectors['resilient-2'].push, needsToBePushed: true },
-          },
+    it('renders the alerts tab when the query parameter tabId has alerts', async () => {
+      useUrlParamsMock.mockReturnValue({
+        urlParams: {
+          tabId: CASE_VIEW_PAGE_TABS.ALERTS,
         },
-      }));
+      });
 
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-      expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
-      expect(await screen.findByTestId('push-to-external-service')).toBeInTheDocument();
+      expect(await screen.findByTestId('case-view-tab-content-alerts')).toBeInTheDocument();
+      expect(await screen.findByTestId('alerts-table')).toBeInTheDocument();
+    });
 
-      userEvent.click(screen.getByTestId('push-to-external-service'));
+    it('renders the activity tab when the query parameter tabId has activity', async () => {
+      useUrlParamsMock.mockReturnValue({
+        urlParams: {
+          tabId: CASE_VIEW_PAGE_TABS.ACTIVITY,
+        },
+      });
+
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      expect(await screen.findByTestId('case-view-tab-content-activity')).toBeInTheDocument();
+    });
+
+    it('renders the activity tab when the query parameter tabId has an unknown value', async () => {
+      useUrlParamsMock.mockReturnValue({
+        urlParams: {
+          tabId: 'what-is-love',
+        },
+      });
+
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      expect(await screen.findByTestId('case-view-tab-content-activity')).toBeInTheDocument();
+      expect(screen.queryByTestId('case-view-tab-content-alerts')).not.toBeInTheDocument();
+    });
+
+    it('navigates to the activity tab when the activity tab is clicked', async () => {
+      const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
+
+      userEvent.click(await screen.findByTestId('case-view-tab-title-activity'));
 
       await waitFor(() => {
-        expect(pushCaseToExternalService).toHaveBeenCalled();
+        expect(navigateToCaseViewMock).toHaveBeenCalledWith({
+          detailName: caseData.id,
+          tabId: CASE_VIEW_PAGE_TABS.ACTIVITY,
+        });
       });
     });
 
-    it('should disable the push button when connector is invalid', async () => {
-      appMockRenderer.render(
-        <CaseViewPage
-          {...{
-            ...caseProps,
-            caseData: { ...caseProps.caseData, connectorId: 'not-exist' },
-          }}
-        />
-      );
+    it('navigates to the alerts tab when the alerts tab is clicked', async () => {
+      const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-      expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
-      expect(await screen.findByTestId('push-to-external-service')).toBeDisabled();
-    });
+      userEvent.click(await screen.findByTestId('case-view-tab-title-alerts'));
 
-    it('should call onComponentInitialized on mount', async () => {
-      const onComponentInitialized = jest.fn();
-      appMockRenderer.render(
-        <CaseViewPage {...caseProps} onComponentInitialized={onComponentInitialized} />
-      );
-
-      await waitFor(() => {
-        expect(onComponentInitialized).toHaveBeenCalled();
+      await waitFor(async () => {
+        expect(navigateToCaseViewMock).toHaveBeenCalledWith({
+          detailName: caseData.id,
+          tabId: CASE_VIEW_PAGE_TABS.ALERTS,
+        });
       });
     });
 
-    it('should show loading content when loading user actions stats', async () => {
-      const useFetchAlertData = jest.fn().mockReturnValue([true]);
-      useGetCaseUserActionsStatsMock.mockReturnValue({ isLoading: true });
+    it('should display the alerts tab when the feature is enabled', async () => {
+      appMockRenderer = createAppMockRenderer({ features: { alerts: { enabled: true } } });
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-      appMockRenderer.render(<CaseViewPage {...caseProps} useFetchAlertData={useFetchAlertData} />);
-
-      expect(await screen.findByTestId('case-view-loading-content')).toBeInTheDocument();
-      expect(screen.queryByTestId('user-actions-list')).not.toBeInTheDocument();
+      expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
+      expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
     });
 
-    it('should call show alert details with expected arguments', async () => {
-      const showAlertDetails = jest.fn();
-      appMockRenderer.render(<CaseViewPage {...caseProps} showAlertDetails={showAlertDetails} />);
+    it('should not display the alerts tab when the feature is disabled', async () => {
+      appMockRenderer = createAppMockRenderer({ features: { alerts: { enabled: false } } });
+      appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-      userEvent.click(
-        (await screen.findAllByTestId('comment-action-show-alert-alert-action-id'))[1]
-      );
+      expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
+      expect(screen.queryByTestId('case-view-tab-title-alerts')).not.toBeInTheDocument();
+    });
 
-      await waitFor(() => {
-        expect(showAlertDetails).toHaveBeenCalledWith('alert-id-1', 'alert-index-1');
+    it('should not show the experimental badge on the alerts table', async () => {
+      appMockRenderer = createAppMockRenderer({
+        features: { alerts: { isExperimental: false } },
       });
-    });
-
-    it('should show the rule name', async () => {
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
       expect(
-        (
-          await screen.findAllByTestId('user-action-alert-comment-create-action-alert-action-id')
-        )[1].querySelector('.euiCommentEvent__headerEvent')
-      ).toHaveTextContent('added an alert from Awesome rule');
+        screen.queryByTestId('case-view-alerts-table-experimental-badge')
+      ).not.toBeInTheDocument();
     });
 
-    it('should update settings', async () => {
+    it('should show the experimental badge on the alerts table', async () => {
+      appMockRenderer = createAppMockRenderer({ features: { alerts: { isExperimental: true } } });
       appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-      userEvent.click(await screen.findByTestId('sync-alerts-switch'));
-
-      await waitFor(() => {
-        const updateObject = updateCaseProperty.mock.calls[0][0];
-
-        expect(updateObject.updateKey).toEqual('settings');
-        expect(updateObject.updateValue).toEqual({ syncAlerts: false });
-      });
+      expect(
+        await screen.findByTestId('case-view-alerts-table-experimental-badge')
+      ).toBeInTheDocument();
     });
 
-    it('should show the correct connector name on the push button', async () => {
-      useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
-
-      appMockRenderer.render(
-        <CaseViewPage {...{ ...caseProps, connector: { ...caseProps, name: 'old-name' } }} />
-      );
-
-      expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
-      expect(await screen.findByText('Update My Resilient connector incident')).toBeInTheDocument();
-    });
-
-    describe('Callouts', () => {
-      const errorText =
-        'The connector used to send updates to the external service has been deleted or you do not have the appropriate licenseExternal link(opens in a new tab or window) to use it. To update cases in external systems, select a different connector or create a new one.';
-
-      it('it shows the danger callout when a connector has been deleted', async () => {
-        useGetConnectorsMock.mockImplementation(() => ({ data: [], isLoading: false }));
+    describe('description', () => {
+      it('renders the description correctly', async () => {
         appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-        expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
+        const description = within(await screen.findByTestId('description'));
 
-        const getByText = createQueryWithMarkup(screen.getByText);
-        expect(getByText(errorText)).toBeInTheDocument();
+        expect(await description.findByText(caseData.description)).toBeInTheDocument();
       });
 
-      it('it does NOT shows the danger callout when connectors are loading', async () => {
-        useGetConnectorsMock.mockImplementation(() => ({ data: [], isLoading: true }));
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        expect(await screen.findByTestId('edit-connectors')).toBeInTheDocument();
-        expect(
-          screen.queryByTestId('case-callout-a25a5b368b6409b179ef4b6c5168244f')
-        ).not.toBeInTheDocument();
-      });
-    });
-
-    describe('Tabs', () => {
-      beforeEach(() => {
-        jest.clearAllMocks();
-      });
-
-      it('renders tabs correctly', async () => {
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        expect(await screen.findByRole('tablist')).toBeInTheDocument();
-
-        expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
-        expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
-        expect(await screen.findByTestId('case-view-tab-title-files')).toBeInTheDocument();
-      });
-
-      it('renders the activity tab by default', async () => {
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-        expect(await screen.findByTestId('case-view-tab-content-activity')).toBeInTheDocument();
-      });
-
-      it('renders the alerts tab when the query parameter tabId has alerts', async () => {
-        useUrlParamsMock.mockReturnValue({
-          urlParams: {
-            tabId: CASE_VIEW_PAGE_TABS.ALERTS,
-          },
-        });
+      it('should display description when case is loading', async () => {
+        useUpdateCaseMock.mockImplementation(() => ({
+          ...defaultUpdateCaseState,
+          isLoading: true,
+          updateKey: 'description',
+        }));
 
         appMockRenderer.render(<CaseViewPage {...caseProps} />);
 
-        expect(await screen.findByTestId('case-view-tab-content-alerts')).toBeInTheDocument();
-        expect(await screen.findByTestId('alerts-table')).toBeInTheDocument();
-      });
-
-      it('renders the activity tab when the query parameter tabId has activity', async () => {
-        useUrlParamsMock.mockReturnValue({
-          urlParams: {
-            tabId: CASE_VIEW_PAGE_TABS.ACTIVITY,
-          },
-        });
-
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        expect(await screen.findByTestId('case-view-tab-content-activity')).toBeInTheDocument();
-      });
-
-      it('renders the activity tab when the query parameter tabId has an unknown value', async () => {
-        useUrlParamsMock.mockReturnValue({
-          urlParams: {
-            tabId: 'what-is-love',
-          },
-        });
-
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        expect(await screen.findByTestId('case-view-tab-content-activity')).toBeInTheDocument();
-        expect(screen.queryByTestId('case-view-tab-content-alerts')).not.toBeInTheDocument();
-      });
-
-      it('navigates to the activity tab when the activity tab is clicked', async () => {
-        const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        userEvent.click(await screen.findByTestId('case-view-tab-title-activity'));
-
-        await waitFor(() => {
-          expect(navigateToCaseViewMock).toHaveBeenCalledWith({
-            detailName: caseData.id,
-            tabId: CASE_VIEW_PAGE_TABS.ACTIVITY,
-          });
-        });
-      });
-
-      it('navigates to the alerts tab when the alerts tab is clicked', async () => {
-        const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        userEvent.click(await screen.findByTestId('case-view-tab-title-alerts'));
-
-        await waitFor(async () => {
-          expect(navigateToCaseViewMock).toHaveBeenCalledWith({
-            detailName: caseData.id,
-            tabId: CASE_VIEW_PAGE_TABS.ALERTS,
-          });
-        });
-      });
-
-      it('should display the alerts tab when the feature is enabled', async () => {
-        appMockRenderer = createAppMockRenderer({ features: { alerts: { enabled: true } } });
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
-        expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
-      });
-
-      it('should not display the alerts tab when the feature is disabled', async () => {
-        appMockRenderer = createAppMockRenderer({ features: { alerts: { enabled: false } } });
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
-        expect(screen.queryByTestId('case-view-tab-title-alerts')).not.toBeInTheDocument();
-      });
-
-      it('should not show the experimental badge on the alerts table', async () => {
-        appMockRenderer = createAppMockRenderer({
-          features: { alerts: { isExperimental: false } },
-        });
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        expect(
-          screen.queryByTestId('case-view-alerts-table-experimental-badge')
-        ).not.toBeInTheDocument();
-      });
-
-      it('should show the experimental badge on the alerts table', async () => {
-        appMockRenderer = createAppMockRenderer({ features: { alerts: { isExperimental: true } } });
-        appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-        expect(
-          await screen.findByTestId('case-view-alerts-table-experimental-badge')
-        ).toBeInTheDocument();
-      });
-
-      describe('description', () => {
-        it('renders the description correctly', async () => {
-          appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-          const description = within(await screen.findByTestId('description'));
-
-          expect(await description.findByText(caseData.description)).toBeInTheDocument();
-        });
-
-        it('should display description when case is loading', async () => {
-          useUpdateCaseMock.mockImplementation(() => ({
-            ...defaultUpdateCaseState,
-            isLoading: true,
-            updateKey: 'description',
-          }));
-
-          appMockRenderer.render(<CaseViewPage {...caseProps} />);
-
-          expect(await screen.findByTestId('description')).toBeInTheDocument();
-        });
+        expect(await screen.findByTestId('description')).toBeInTheDocument();
       });
     });
   });
-}
+});
