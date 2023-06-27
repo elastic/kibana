@@ -15,8 +15,6 @@ import {
   EuiSelectable,
   EuiFieldSearch,
   EuiSelectableOption,
-  EuiSelectableProps,
-  EuiText,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
