@@ -236,58 +236,62 @@ export const RuleQuickEditButtons: React.FunctionComponent<ComponentOpts> = ({
       gutterSize="none"
       data-test-subj="ruleQuickEditButton"
     >
-      <EuiFlexItem>
-        <EuiButtonEmpty
-          onClick={onSnoozeAllClick}
-          isLoading={isBulkEditing && bulkEditAction === 'snooze'}
-          isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
-          data-test-subj="bulkSnooze"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.snoozeAllTitle"
-            defaultMessage="Snooze now"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiButtonEmpty
-          onClick={onUnsnoozeAllClick}
-          isLoading={isBulkEditing && bulkEditAction === 'unsnooze'}
-          isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
-          data-test-subj="bulkUnsnooze"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.unsnoozeAllTitle"
-            defaultMessage="Unsnooze now"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiButtonEmpty
-          onClick={onScheduleAllClick}
-          isLoading={isBulkEditing && bulkEditAction === 'schedule'}
-          isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
-          data-test-subj="bulkSnoozeSchedule"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.snoozeScheduleAllTitle"
-            defaultMessage="Schedule snooze"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiButtonEmpty
-          onClick={onUnscheduleAllClick}
-          isLoading={isBulkEditing && bulkEditAction === 'unschedule'}
-          isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
-          data-test-subj="bulkRemoveSnoozeSchedule"
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.removeSnoozeScheduleAllTitle"
-            defaultMessage="Unschedule snooze"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
+      {!isAllSelected && (
+        <>
+          <EuiFlexItem>
+            <EuiButtonEmpty
+              onClick={onSnoozeAllClick}
+              isLoading={isBulkEditing && bulkEditAction === 'snooze'}
+              isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
+              data-test-subj="bulkSnooze"
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.snoozeAllTitle"
+                defaultMessage="Snooze now"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButtonEmpty
+              onClick={onUnsnoozeAllClick}
+              isLoading={isBulkEditing && bulkEditAction === 'unsnooze'}
+              isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
+              data-test-subj="bulkUnsnooze"
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.unsnoozeAllTitle"
+                defaultMessage="Unsnooze now"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButtonEmpty
+              onClick={onScheduleAllClick}
+              isLoading={isBulkEditing && bulkEditAction === 'schedule'}
+              isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
+              data-test-subj="bulkSnoozeSchedule"
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.snoozeScheduleAllTitle"
+                defaultMessage="Schedule snooze"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButtonEmpty
+              onClick={onUnscheduleAllClick}
+              isLoading={isBulkEditing && bulkEditAction === 'unschedule'}
+              isDisabled={isPerformingAction || hasDisabledByLicenseRuleTypes}
+              data-test-subj="bulkRemoveSnoozeSchedule"
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.rulesList.bulkActionPopover.removeSnoozeScheduleAllTitle"
+                defaultMessage="Unschedule snooze"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </>
+      )}
       <EuiFlexItem>
         <EuiButtonEmpty
           onClick={onEnable}

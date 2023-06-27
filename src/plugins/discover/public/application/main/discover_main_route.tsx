@@ -16,6 +16,7 @@ import {
 } from '@kbn/shared-ux-page-analytics-no-data';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { useUrl } from './hooks/use_url';
 import { useSingleton } from './hooks/use_singleton';
 import { MainHistoryLocationState } from '../../../common/locator';
@@ -28,6 +29,11 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './services/discover_state_provider';
+import {
+  CustomizationCallback,
+  DiscoverCustomizationProvider,
+  useDiscoverCustomizationService,
+} from '../../customizations';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -35,14 +41,14 @@ interface DiscoverLandingParams {
   id: string;
 }
 
-interface Props {
+export interface MainRouteProps {
+  customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
 }
 
-export function DiscoverMainRoute(props: Props) {
+export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRouteProps) {
   const history = useHistory();
   const services = useDiscoverServices();
-  const { isDev } = props;
   const {
     core,
     chrome,
@@ -58,6 +64,10 @@ export function DiscoverMainRoute(props: Props) {
       services,
     })
   );
+  const customizationService = useDiscoverCustomizationService({
+    customizationCallbacks,
+    stateContainer,
+  });
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(true);
   const [hasESData, setHasESData] = useState(false);
@@ -118,6 +128,7 @@ export function DiscoverMainRoute(props: Props) {
 
   const loadSavedSearch = useCallback(
     async (nextDataView?: DataView) => {
+      const loadSavedSearchStartTime = window.performance.now();
       setLoading(true);
       if (!nextDataView && !(await checkData())) {
         setLoading(false);
@@ -145,11 +156,18 @@ export function DiscoverMainRoute(props: Props) {
 
         chrome.setBreadcrumbs(
           currentSavedSearch && currentSavedSearch.title
-            ? getSavedSearchBreadcrumbs(currentSavedSearch.title)
-            : getRootBreadcrumbs()
+            ? getSavedSearchBreadcrumbs({ id: currentSavedSearch.title, services })
+            : getRootBreadcrumbs({ services })
         );
 
         setLoading(false);
+        if (services.analytics) {
+          const loadSavedSearchDuration = window.performance.now() - loadSavedSearchStartTime;
+          reportPerformanceMetricEvent(services.analytics, {
+            eventName: 'discoverLoadSavedSearch',
+            duration: loadSavedSearchDuration,
+          });
+        }
       } catch (e) {
         if (e instanceof SavedObjectNotFound) {
           redirectWhenMissing({
@@ -180,6 +198,7 @@ export function DiscoverMainRoute(props: Props) {
       savedSearchId,
       historyLocationState?.dataViewSpec,
       chrome,
+      services,
       history,
       core.application.navigateToApp,
       core.theme,
@@ -245,13 +264,15 @@ export function DiscoverMainRoute(props: Props) {
     return <DiscoverError error={error} />;
   }
 
-  if (loading) {
+  if (loading || !customizationService) {
     return <LoadingIndicator type={hasCustomBranding ? 'spinner' : 'elastic'} />;
   }
 
   return (
-    <DiscoverMainProvider value={stateContainer}>
-      <DiscoverMainAppMemoized stateContainer={stateContainer} />
-    </DiscoverMainProvider>
+    <DiscoverCustomizationProvider value={customizationService}>
+      <DiscoverMainProvider value={stateContainer}>
+        <DiscoverMainAppMemoized stateContainer={stateContainer} />
+      </DiscoverMainProvider>
+    </DiscoverCustomizationProvider>
   );
 }

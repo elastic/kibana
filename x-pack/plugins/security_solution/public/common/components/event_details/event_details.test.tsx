@@ -28,7 +28,9 @@ import { TimelineTabs } from '../../../../common/types/timeline';
 import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
 import { useGetUserCasesPermissions, useKibana } from '../../lib/kibana';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
+jest.mock('../../hooks/use_experimental_features');
 jest.mock('../../../timelines/components/timeline/body/renderers', () => {
   return {
     defaultRowRenderers: [
@@ -198,6 +200,18 @@ describe('EventDetails', () => {
   });
 
   describe('osquery tab', () => {
+    let featureFlags: { endpointResponseActionsEnabled: boolean; responseActionsEnabled: boolean };
+
+    beforeEach(() => {
+      featureFlags = { endpointResponseActionsEnabled: false, responseActionsEnabled: true };
+
+      const useIsExperimentalFeatureEnabledMock = (feature: keyof typeof featureFlags) =>
+        featureFlags[feature];
+
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+        useIsExperimentalFeatureEnabledMock
+      );
+    });
     it('should not be rendered if not provided with specific raw data', () => {
       expect(alertsWrapper.find('[data-test-subj="osqueryViewTab"]').exists()).toEqual(false);
     });

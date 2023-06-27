@@ -26,9 +26,11 @@ import { AvailableFields$, DataDocuments$ } from '../../services/discover_data_s
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
-import * as ExistingFieldsHookApi from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
-import { ExistenceFetchStatus } from '@kbn/unified-field-list-plugin/public';
+import * as ExistingFieldsHookApi from '@kbn/unified-field-list/src/hooks/use_existing_fields';
+import { ExistenceFetchStatus } from '@kbn/unified-field-list/src/types';
 import { getDataViewFieldList } from './lib/get_field_list';
+import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
+import type { SearchBarCustomization } from '../../../../customizations';
 
 const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
   () => Promise.resolve([])
@@ -39,6 +41,29 @@ jest.spyOn(ExistingFieldsHookApi, 'useExistingFieldsReader');
 jest.mock('../../../../kibana_services', () => ({
   getUiActions: () => ({
     getTriggerCompatibleActions: mockGetActions,
+  }),
+}));
+
+const mockSearchBarCustomization: SearchBarCustomization = {
+  id: 'search_bar',
+  CustomDataViewPicker: jest.fn(() => <div data-test-subj="custom-data-view-picker" />),
+};
+
+let mockUseCustomizations = false;
+
+jest.mock('../../../../customizations', () => ({
+  ...jest.requireActual('../../../../customizations'),
+  useDiscoverCustomization: jest.fn((id: DiscoverCustomizationId) => {
+    if (!mockUseCustomizations) {
+      return undefined;
+    }
+
+    switch (id) {
+      case 'search_bar':
+        return mockSearchBarCustomization;
+      default:
+        throw new Error(`Unknown customization id: ${id}`);
+    }
   }),
 }));
 
@@ -151,6 +176,7 @@ describe('discover sidebar', function () {
 
   beforeEach(async () => {
     props = getCompProps();
+    mockUseCustomizations = false;
   });
 
   it('should hide field list', async function () {
@@ -261,5 +287,13 @@ describe('discover sidebar', function () {
     expect(addFieldButtonInDataViewPicker.length).toBe(0);
     const createDataViewButton = findTestSubject(compWithPickerInViewerMode, 'dataview-create-new');
     expect(createDataViewButton.length).toBe(0);
+  });
+
+  describe('search bar customization', () => {
+    it('should render CustomDataViewPicker', async () => {
+      mockUseCustomizations = true;
+      const comp = await mountComponent({ ...props, showDataViewPicker: true });
+      expect(comp.find('[data-test-subj="custom-data-view-picker"]').length).toBe(1);
+    });
   });
 });

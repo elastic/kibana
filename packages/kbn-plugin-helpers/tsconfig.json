@@ -20,6 +20,7 @@
     "@kbn/jest-serializers",
     "@kbn/repo-packages",
     "@kbn/stdio-dev-helpers",
+    "@kbn/bazel-runner",
   ],
   "exclude": [
     "target/**/*",

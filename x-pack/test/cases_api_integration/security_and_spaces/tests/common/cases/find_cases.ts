@@ -8,7 +8,7 @@
 import { v1 as uuidv1 } from 'uuid';
 
 import expect from '@kbn/expect';
-import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { CASES_URL, MAX_CATEGORY_FILTER_LENGTH } from '@kbn/cases-plugin/common/constants';
 import { Case, CaseSeverity, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -89,6 +89,29 @@ export default ({ getService }: FtrProviderContext): void => {
           total: 1,
           cases: [postedCase],
           count_open_cases: 1,
+        });
+      });
+
+      it('can filter by reserved kql characters in tags', async () => {
+        const tagsColon = ['super:bad:case'];
+        const tagsSlashQuote = ['awesome\\"'];
+
+        const postedCase1 = await createCase(supertest, { ...postCaseReq, tags: tagsSlashQuote });
+        const postedCase2 = await createCase(supertest, {
+          ...postCaseReq,
+          tags: tagsColon,
+        });
+
+        const cases = await findCases({
+          supertest,
+          query: { tags: [...tagsColon, ...tagsSlashQuote] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 2,
+          cases: [postedCase1, postedCase2],
+          count_open_cases: 2,
         });
       });
 
@@ -324,6 +347,12 @@ export default ({ getService }: FtrProviderContext): void => {
           cases: [case1, case2, case3, case4],
           count_open_cases: 4,
         });
+      });
+
+      it('unhappy path - 400s when more than the maximum category fields are supplied', async () => {
+        const category = Array(MAX_CATEGORY_FILTER_LENGTH + 1).fill('foobar');
+
+        await findCases({ supertest, query: { category }, expectedHttpCode: 400 });
       });
 
       describe('search and searchField', () => {

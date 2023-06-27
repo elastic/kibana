@@ -27,7 +27,12 @@ import {
   quietFetchMonitorListAction,
   fetchMonitorFiltersAction,
 } from './actions';
-import { fetchMonitorManagementList, fetchUpsertMonitor, fetchMonitorFilters } from './api';
+import {
+  fetchMonitorManagementList,
+  fetchUpsertMonitor,
+  fetchMonitorFilters,
+  UpsertMonitorResponse,
+} from './api';
 import { toastTitle } from './toast_title';
 import { UpsertMonitorRequest } from './models';
 
@@ -49,7 +54,7 @@ export function* enableMonitorAlertEffect() {
     function* (action: PayloadAction<UpsertMonitorRequest>): Generator {
       try {
         const response = yield call(fetchUpsertMonitor, action.payload);
-        yield put(enableMonitorAlertAction.success(response as SavedObject<SyntheticsMonitor>));
+        yield put(enableMonitorAlertAction.success(response as UpsertMonitorResponse));
         sendSuccessToast(action.payload.success);
         if (
           (response as SavedObject<SyntheticsMonitor>).attributes[ConfigKey.ALERT_CONFIG]?.status

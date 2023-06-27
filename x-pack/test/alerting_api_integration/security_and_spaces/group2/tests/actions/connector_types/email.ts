@@ -155,6 +155,27 @@ export default function emailTest({ getService }: FtrProviderContext) {
         });
     });
 
+    it('should return an error when sending html via execute endpoint', async () => {
+      await supertest
+        .post(`/api/actions/connector/${createdActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: ['kibana-action-test@elastic.co'],
+            subject: 'HTML message check',
+            message: '_italic_ **bold** https://elastic.co link',
+            messageHTML:
+              '<html><body><a href="https://elastic.co" style="font-weight: bold; font-style: italic">View at Elastic</a></body></html>',
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          const { status, message } = resp.body;
+          expect(status).to.eql('error');
+          expect(message).to.eql('HTML email can only be sent via notifications');
+        });
+    });
+
     it('should allow customizing the kibana footer link', async () => {
       await supertest
         .post(`/api/actions/connector/${createdActionId}/_execute`)

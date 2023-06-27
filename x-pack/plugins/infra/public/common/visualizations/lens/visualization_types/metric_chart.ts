@@ -21,7 +21,12 @@ import {
   getHistogramColumn,
 } from '../utils';
 
-import type { VisualizationAttributes, LensChartConfig, MetricChartOptions } from '../../types';
+import type {
+  VisualizationAttributes,
+  LensChartConfig,
+  MetricChartOptions,
+  Formula,
+} from '../../types';
 
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'trendline_layer';
@@ -43,7 +48,7 @@ export class MetricChart implements VisualizationAttributes<MetricVisualizationS
   getTrendLineLayer(baseLayer: PersistedIndexPatternLayer): FormBasedPersistedState['layers'] {
     const trendLineLayer = this.formulaAPI.insertOrReplaceFormulaColumn(
       TRENDLINE_ACCESSOR,
-      this.chartConfig.formula,
+      this.getFormulaWithOverride(),
       baseLayer,
       this.dataView
     );
@@ -57,6 +62,26 @@ export class MetricChart implements VisualizationAttributes<MetricVisualizationS
         linkToLayers: [DEFAULT_LAYER_ID],
         ...trendLineLayer,
       },
+    };
+  }
+
+  getFormulaWithOverride(): Formula {
+    const { formula } = this.chartConfig;
+    const { decimals = formula.format?.params?.decimals, title = this.chartConfig.title } =
+      this.options ?? {};
+    return {
+      ...this.chartConfig.formula,
+      ...(formula.format && decimals
+        ? {
+            format: {
+              ...formula.format,
+              params: {
+                decimals,
+              },
+            },
+          }
+        : {}),
+      label: title,
     };
   }
 
@@ -79,10 +104,7 @@ export class MetricChart implements VisualizationAttributes<MetricVisualizationS
 
     const baseLayerDetails = this.formulaAPI.insertOrReplaceFormulaColumn(
       ACCESSOR,
-      {
-        ...this.chartConfig.formula,
-        label: this.options?.title ?? this.chartConfig.title,
-      },
+      this.getFormulaWithOverride(),
       { columnOrder: [], columns: {} },
       this.dataView
     );

@@ -5659,6 +5659,34 @@
               }
             }
           }
+        },
+        "installation_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "package_policy_id": {
+                "type": "keyword"
+              },
+              "feature": {
+                "type": "keyword"
+              },
+              "package_version": {
+                "type": "keyword"
+              },
+              "agent_policy_id": {
+                "type": "keyword"
+              },
+              "deployment_mode": {
+                "type": "keyword"
+              },
+              "created_at": {
+                "type": "date"
+              },
+              "agent_count": {
+                "type": "long"
+              }
+            }
+          }
         }
       }
     },
@@ -14395,6 +14423,40 @@
         },
         "capacity": {
           "type": "long"
+        }
+      }
+    },
+    "transform": {
+      "properties": {
+        "alertRules": {
+          "properties": {
+            "transform_health": {
+              "properties": {
+                "count_by_check_type": {
+                  "properties": {
+                    "notStarted": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the not started health check"
+                      }
+                    },
+                    "errorMessages": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the error message health check"
+                      }
+                    },
+                    "healthCheck": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "total number of alerting rules performing the health check with the stats API"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
