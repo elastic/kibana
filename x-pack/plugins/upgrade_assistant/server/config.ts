@@ -15,7 +15,12 @@ const configSchema = schema.object({
   /**
    * Disables the plugin.
    */
-  enabled: schema.boolean({ defaultValue: true }),
+  enabled: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.boolean({ defaultValue: true }),
+    schema.never()
+  ),
 
   featureSet: schema.object({
     /**

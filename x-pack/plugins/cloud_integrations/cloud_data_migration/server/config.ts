@@ -9,7 +9,12 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
+  enabled: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.boolean({ defaultValue: true }),
+    schema.never()
+  ),
 });
 
 export type CloudDataMigrationConfig = TypeOf<typeof configSchema>;

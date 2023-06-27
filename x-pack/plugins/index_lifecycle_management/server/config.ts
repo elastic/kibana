@@ -28,7 +28,12 @@ const schemaLatest = schema.object(
      * Disables the plugin.
      * Added back in 8.8.
      */
-    enabled: schema.boolean({ defaultValue: true }),
+    enabled: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.boolean({ defaultValue: true }),
+      schema.never()
+    ),
   },
   { defaultValue: undefined }
 );
