@@ -40,9 +40,7 @@ const params = t.type({
       refreshPaused: t.union([t.literal('true'), t.literal('false')]),
       refreshInterval: t.string,
       kuery: t.string,
-      // comparisonEnabled: toBooleanRt,
     }),
-    // offsetRt,
   ]),
 });
 

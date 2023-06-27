@@ -19,11 +19,14 @@ import { getIndicesAndIngestPipelines } from './bundle/get_indices';
 import { getIndicesStates } from './bundle/get_indices_states';
 import { getApmEvents } from './bundle/get_apm_events';
 
+const DEFEAULT_START = Date.now() - 60 * 5 * 1000; // 5 minutes
+const DEFAULT_END = Date.now();
+
 export async function getDiagnosticsBundle({
   esClient,
   apmIndices,
-  start = Date.now() - 60 * 1 * 1000,
-  end = Date.now(),
+  start = DEFEAULT_START,
+  end = DEFAULT_END,
   kuery,
 }: {
   esClient: ElasticsearchClient;
