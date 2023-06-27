@@ -129,11 +129,14 @@ describe(`Detections : Page Filters`, () => {
     assertFilterControlsWithFilterObject();
   });
 
-  context('Alert Page Filters Customization ', () => {
+  context.only('Alert Page Filters Customization ', () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);
       waitForAlerts();
+    });
+
+    afterEach(() => {
       resetFilters();
     });
 
