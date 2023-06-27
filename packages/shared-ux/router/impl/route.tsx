@@ -54,7 +54,7 @@ export const Route = <T extends {}>({
     return (
       <ReactRouterRouteComponent
         {...rest}
-        render={(props) => (
+        render={(props: RouteComponentProps) => (
           <>
             <MatchPropagator />
             {/* @ts-ignore  else condition exists if renderFunction is undefined*/}

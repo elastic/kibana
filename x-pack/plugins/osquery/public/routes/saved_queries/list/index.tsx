@@ -19,7 +19,7 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useNavigate } from 'react-router-dom-v5-compat';
+import { useHistory } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { Direction } from '../../../../common/search_strategy';
@@ -45,21 +45,19 @@ interface PlayButtonProps {
 }
 
 const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, savedQuery }) => {
-  const navigate = useNavigate();
+  const { push } = useHistory();
 
   // TODO: Add href
   const handlePlayClick = useCallback(
     () =>
-      navigate('/live_queries/new', {
-        state: {
-          form: {
-            savedQueryId: savedQuery.id,
-            query: savedQuery.query,
-            ecs_mapping: savedQuery.ecs_mapping,
-          },
+      push('/live_queries/new', {
+        form: {
+          savedQueryId: savedQuery.id,
+          query: savedQuery.query,
+          ecs_mapping: savedQuery.ecs_mapping,
         },
       }),
-    [navigate, savedQuery]
+    [push, savedQuery]
   );
 
   const playText = useMemo(

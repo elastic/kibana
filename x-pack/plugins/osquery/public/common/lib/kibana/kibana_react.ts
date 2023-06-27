@@ -7,6 +7,7 @@
 
 import type React from 'react';
 import type { Path } from 'react-router-dom-v5-compat';
+import { useHistory } from 'react-router-dom';
 import { useNavigate, useHref, parsePath } from 'react-router-dom-v5-compat';
 import { FieldIcon } from '@kbn/react-field';
 import type { KibanaReactContextValue, reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -38,11 +39,11 @@ const useRouterNavigate = (
   to: Path | string,
   onClickCallback?: Parameters<typeof reactRouterNavigate>[2]
 ) => {
-  const navigate = useNavigate();
+  const history = useHistory();
 
   return {
     href: useHref(toLocationObject(to)),
-    onClick: reactRouterOnClickHandler(navigate, toLocationObject(to), onClickCallback),
+    onClick: reactRouterOnClickHandler(history.push, toLocationObject(to), onClickCallback),
   };
 };
 

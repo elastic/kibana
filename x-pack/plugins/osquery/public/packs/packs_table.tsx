@@ -21,7 +21,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
-import { useNavigate } from 'react-router-dom-v5-compat';
+import { useHistory } from 'react-router-dom';
 import { useKibana, useRouterNavigate } from '../common/lib/kibana';
 import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
@@ -83,7 +83,7 @@ export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?:
 
 const PacksTableComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
-  const navigate = useNavigate();
+  const { push } = useHistory();
   const { data, isLoading } = usePacks({});
 
   const renderAgentPolicy = useCallback(
@@ -114,14 +114,12 @@ const PacksTableComponent = () => {
 
   const handlePlayClick = useCallback<(item: PackSavedObject) => () => void>(
     (item) => () =>
-      navigate('/live_queries/new', {
-        state: {
-          form: {
-            packId: item.saved_object_id,
-          },
+      push('/live_queries/new', {
+        form: {
+          packId: item.saved_object_id,
         },
       }),
-    [navigate]
+    [push]
   );
 
   const renderPlayAction = useCallback(
