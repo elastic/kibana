@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, FC, useEffect, useMemo, useState } from 'react';
-import { createHtmlPortalNode, HtmlPortalNode } from 'react-reverse-portal';
+import { createHtmlPortalNode, type HtmlPortalNode } from 'react-reverse-portal';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Subscription } from 'rxjs';
@@ -20,8 +20,8 @@ import { DatePickerWrapper } from '@kbn/ml-date-picker';
 
 import * as routes from '../../routing/routes';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
-import { useCurrentThemeVars, useMlKibana, useNavigateToPath } from '../../contexts/kibana';
-import { MlRoute, PageDependencies } from '../../routing/router';
+import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
+import type { MlRoute, PageDependencies } from '../../routing/router';
 import { useActiveRoute } from '../../routing/use_active_route';
 import { useDocTitle } from '../../routing/use_doc_title';
 
@@ -56,7 +56,6 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
       mlServices: { httpService },
     },
   } = useMlKibana();
-  const { euiTheme } = useCurrentThemeVars();
 
   const headerPortalNode = useMemo(() => createHtmlPortalNode(), []);
   const [isHeaderMounted, setIsHeaderMounted] = useState(false);
@@ -138,8 +137,6 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         className={'ml-app'}
         data-test-subj={'mlApp'}
         restrictWidth={false}
-        // forcing the background color when navigation is disabled
-        css={navMenuEnabled ? {} : { background: euiTheme.euiColorEmptyShade }}
         solutionNav={
           navMenuEnabled
             ? {
