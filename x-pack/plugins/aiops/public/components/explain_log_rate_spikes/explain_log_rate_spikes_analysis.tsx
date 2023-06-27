@@ -170,7 +170,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       timeFieldName: dataView.timeFieldName ?? '',
       index: dataView.getIndexPattern(),
       grouping: true,
-      flushFix: true,
+      flushFix: false,
       ...windowParameters,
       overrides,
       sampleProbability,
