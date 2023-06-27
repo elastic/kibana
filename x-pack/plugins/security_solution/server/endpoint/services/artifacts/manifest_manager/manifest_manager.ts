@@ -69,18 +69,19 @@ const iterateArtifactsBuildResult = (
 };
 
 const iterateAllListItems = async <T>(
-  pageSupplier: (page: number) => Promise<ListResult<T>>,
+  pageSupplier: (page: number, perPage: number) => Promise<ListResult<T>>,
   itemCallback: (items: T[]) => void
 ) => {
   let paging = true;
   let page = 1;
+  const perPage = 1000;
 
   while (paging) {
-    const { items, total } = await pageSupplier(page);
+    const { items, total } = await pageSupplier(page, perPage);
 
     itemCallback(items);
 
-    paging = (page - 1) * 1000 + items.length < total;
+    paging = (page - 1) * perPage + items.length < total;
     page++;
   }
 };
@@ -561,7 +562,7 @@ export class ManifestManager {
   public async tryDispatch(manifest: Manifest): Promise<Error[]> {
     const allPackagePolicies: PackagePolicy[] = [];
     await iterateAllListItems(
-      (page) => this.listEndpointPolicies(page),
+      (page, perPage) => this.listEndpointPolicies(page, perPage),
       (packagePoliciesBatch) => {
         allPackagePolicies.push(...packagePoliciesBatch);
       }
@@ -663,10 +664,10 @@ export class ManifestManager {
     this.logger.info(`Committed manifest ${manifest.getSemanticVersion()}`);
   }
 
-  private async listEndpointPolicies(page: number) {
+  private async listEndpointPolicies(page: number, perPage: number) {
     return this.packagePolicyService.list(this.savedObjectsClient, {
       page,
-      perPage: 1000,
+      perPage,
       kuery: 'ingest-package-policies.package.name:endpoint',
     });
   }
@@ -674,10 +675,10 @@ export class ManifestManager {
   private async listEndpointPolicyIds() {
     const allPolicyIds: string[] = [];
     await iterateAllListItems(
-      (page) => {
+      (page, perPage) => {
         return this.packagePolicyService.listIds(this.savedObjectsClient, {
           page,
-          perPage: 1000,
+          perPage,
           kuery: 'ingest-package-policies.package.name:endpoint',
         });
       },
