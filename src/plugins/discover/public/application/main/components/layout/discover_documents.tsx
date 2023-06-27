@@ -251,13 +251,13 @@ function DiscoverDocumentsComponent({
               onFilter={onAddFilter as DocViewFilterFn}
               onRemoveColumn={onRemoveColumn}
               onSetColumns={onSetColumns}
-                onSort={!isTextBasedQuery ? onSort : undefined}
+              onSort={!isTextBasedQuery ? onSort : undefined}
               onResize={onResizeDataGrid}
               useNewFieldsApi={useNewFieldsApi}
               rowHeightState={rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}
               isSortEnabled={true}
-                isPlainRecord={isTextBasedQuery}
+              isPlainRecord={isTextBasedQuery}
               query={query}
               rowsPerPageState={rowsPerPage}
               onUpdateRowsPerPage={onUpdateRowsPerPage}
