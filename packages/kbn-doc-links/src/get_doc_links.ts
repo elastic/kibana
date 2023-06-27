@@ -137,7 +137,6 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       connectorsConfluence: `${ENTERPRISE_SEARCH_DOCS}connectors-confluence.html`,
       connectorsDropbox: `${ENTERPRISE_SEARCH_DOCS}connectors-dropbox.html`,
       connectorsContentExtraction: `${ENTERPRISE_SEARCH_DOCS}connectors-content-extraction.html`,
-      connectorsGithub: `${ENTERPRISE_SEARCH_DOCS}connectors-github.html`,
       connectorsGoogleCloudStorage: `${ENTERPRISE_SEARCH_DOCS}connectors-google-cloud.html`,
       connectorsJira: `${ENTERPRISE_SEARCH_DOCS}connectors-jira.html`,
       connectorsMicrosoftSQL: `${ENTERPRISE_SEARCH_DOCS}connectors-ms-sql.html`,

@@ -144,6 +144,36 @@ const workplaceSearchIntegrations: WorkplaceSearchIntegration[] = [
     ),
     categories: ['enterprise_search', 'workplace_search', 'workplace_search_content_source'],
   },
+  {
+    id: 'github',
+    title: i18n.translate('xpack.enterpriseSearch.workplaceSearch.integrations.githubName', {
+      defaultMessage: 'GitHub',
+    }),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.githubDescription',
+      {
+        defaultMessage: 'Search over your projects and repos on GitHub with Workplace Search.',
+      }
+    ),
+    categories: ['enterprise_search', 'workplace_search', 'content_source'],
+  },
+  {
+    id: 'github_enterprise_server',
+    title: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.githubEnterpriseServerName',
+      {
+        defaultMessage: 'GitHub Enterprise Server',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.enterpriseSearch.workplaceSearch.integrations.githubEnterpriseServerDescription',
+      {
+        defaultMessage:
+          'Search over your projects and repos on GitHub Enterprise Server with Workplace Search.',
+      }
+    ),
+    categories: ['enterprise_search', 'workplace_search', 'content_source'],
+  },
 ];
 
 export const registerEnterpriseSearchIntegrations = (
@@ -266,52 +296,54 @@ export const registerEnterpriseSearchIntegrations = (
       isBeta: false,
     });
 
-    customIntegrations.registerCustomIntegration({
-      id: 'github',
-      title: i18n.translate('xpack.enterpriseSearch.content.integrations.github', {
-        defaultMessage: 'GitHub',
-      }),
-      description: i18n.translate('xpack.enterpriseSearch.content.integrations.githubDescription', {
-        defaultMessage: 'Search over your projects and repos on GitHub with Enterprise Search.',
-      }),
-      categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
-      uiInternalPath:
-        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=github',
-      icons: [
-        {
-          type: 'svg',
-          src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/github.svg'),
-        },
-      ],
-      shipper: 'enterprise_search',
-      isBeta: false,
-    });
+    // TODO: Review around BC 2/3 whether github is ready
 
-    customIntegrations.registerCustomIntegration({
-      id: 'github_server',
-      title: i18n.translate('xpack.enterpriseSearch.content.integrations.githubServer', {
-        defaultMessage: 'GitHub Enterprise Server',
-      }),
-      description: i18n.translate(
-        'xpack.enterpriseSearch.content.integrations.githubServerDescription',
-        {
-          defaultMessage: 'Search over your projects and repos on GitHub with Enterprise Search.',
-        }
-      ),
-      categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
-      uiInternalPath:
-        '/app/enterprise_search/content/search_indices/new_index/connector?service_type=github',
-      icons: [
-        {
-          type: 'svg',
-          src: http.basePath.prepend(
-            '/plugins/enterpriseSearch/assets/source_icons/github_enterprise_server.svg'
-          ),
-        },
-      ],
-      shipper: 'enterprise_search',
-      isBeta: false,
-    });
+    // customIntegrations.registerCustomIntegration({
+    //   id: 'github',
+    //   title: i18n.translate('xpack.enterpriseSearch.content.integrations.github', {
+    //     defaultMessage: 'GitHub',
+    //   }),
+    //   description: i18n.translate('xpack.enterpriseSearch.content.integrations.githubDescription', {
+    //     defaultMessage: 'Search over your projects and repos on GitHub with Enterprise Search.',
+    //   }),
+    //   categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+    //   uiInternalPath:
+    //     '/app/enterprise_search/content/search_indices/new_index/connector?service_type=github',
+    //   icons: [
+    //     {
+    //       type: 'svg',
+    //       src: http.basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/github.svg'),
+    //     },
+    //   ],
+    //   shipper: 'enterprise_search',
+    //   isBeta: false,
+    // });
+
+    // customIntegrations.registerCustomIntegration({
+    //   id: 'github_server',
+    //   title: i18n.translate('xpack.enterpriseSearch.content.integrations.githubServer', {
+    //     defaultMessage: 'GitHub Enterprise Server',
+    //   }),
+    //   description: i18n.translate(
+    //     'xpack.enterpriseSearch.content.integrations.githubServerDescription',
+    //     {
+    //       defaultMessage: 'Search over your projects and repos on GitHub with Enterprise Search.',
+    //     }
+    //   ),
+    //   categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+    //   uiInternalPath:
+    //     '/app/enterprise_search/content/search_indices/new_index/connector?service_type=github',
+    //   icons: [
+    //     {
+    //       type: 'svg',
+    //       src: http.basePath.prepend(
+    //         '/plugins/enterpriseSearch/assets/source_icons/github_enterprise_server.svg'
+    //       ),
+    //     },
+    //   ],
+    //   shipper: 'enterprise_search',
+    //   isBeta: false,
+    // });
 
     customIntegrations.registerCustomIntegration({
       id: 'mongodb',
