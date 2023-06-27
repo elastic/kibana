@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-require('@kbn/babel-register').install();
-require('./diagnostics_bundle/main');
+export { EventReporter } from './event_reporter';
+export { eventTypes } from './event_types';

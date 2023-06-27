@@ -30,6 +30,7 @@ interface StartServiceArgs {
 
 export const createStartServicesMock = ({ license }: StartServiceArgs = {}): StartServices => {
   const licensingPluginMock = licensingMock.createStart();
+  const triggersActionsUi = triggersActionsUiMock.createStart();
 
   const services = {
     ...coreMock.createStart(),
@@ -39,7 +40,11 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
       navigateToPrefilledEditor: jest.fn(),
     },
     security: securityMock.createStart(),
-    triggersActionsUi: triggersActionsUiMock.createStart(),
+    triggersActionsUi: {
+      actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+      alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
+      getAlertsStateTable: jest.fn().mockReturnValue(<div data-test-subj="alerts-table" />),
+    },
     spaces: spacesPluginMock.createStartContract(),
     licensing:
       license != null

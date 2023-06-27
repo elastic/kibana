@@ -23,6 +23,7 @@ import {
   ESCalendarIntervalUnit,
   PartialTheme,
   SettingsProps,
+  Tooltip,
 } from '@elastic/charts';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
@@ -615,6 +616,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               splitColumnAccessor={splitChartColumnAccessor}
               splitRowAccessor={splitChartRowAccessor}
             />
+            <Tooltip {...tooltip} />
             <Settings
               onRenderChange={onRenderChange}
               noResults={
@@ -630,7 +632,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               legendSize={LegendSizeToPixels[args.legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
               legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
               debugState={window._echDebugStateFlag ?? false}
-              tooltip={tooltip}
               theme={[
                 themeOverrides,
                 chartTheme,

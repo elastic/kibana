@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '../../utils/test_helper';
+import { render } from '../../../../../../utils/test_helper';
 import { CoreVitalItem } from './core_vital_item';
 import {
   NO_DATA,
