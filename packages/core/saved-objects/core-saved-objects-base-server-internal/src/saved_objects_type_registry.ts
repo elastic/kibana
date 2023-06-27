@@ -85,7 +85,7 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
 
   /** {@inheritDoc ISavedObjectTypeRegistry.isHiddenFromHttpApi} */
   public isHiddenFromHttpApis(type: string) {
-    return !!this.types.get(type)?.hiddenFromHttpApis;
+    return this.types.get(type)?.hiddenFromHttpApis ?? true;
   }
 
   /** {@inheritDoc ISavedObjectTypeRegistry.getType} */
