@@ -14,7 +14,7 @@ export const converter = new usng.Converter();
 export function withinRange(value: string | number, min: number, max: number) {
   const isInvalid = value === '' || value > max || value < min;
   const error = isInvalid
-    ? i18n.translate('xpack.maps.setViewControl.outOfRangeErrorMsg', {
+    ? i18n.translate('fieldFormats.geo_utils.outOfRangeErrorMsg', {
         defaultMessage: `Must be between {min} and {max}`,
         values: { min, max },
       })
