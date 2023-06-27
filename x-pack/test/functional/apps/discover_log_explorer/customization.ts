@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.unset('doc_table:legacy');
     });
 
-    describe('when Discover is load with the log-explorer profile', () => {
+    describe('when Discover is loaded with the log-explorer profile', () => {
       it('DatasetSelector should replace the DataViewPicker', async () => {
         // Assert does not render on discover app
         await PageObjects.common.navigateToApp('discover');
