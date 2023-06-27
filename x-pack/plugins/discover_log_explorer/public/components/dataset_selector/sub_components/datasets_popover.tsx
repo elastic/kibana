@@ -43,6 +43,7 @@ export const DatasetsPopover = ({
   return (
     <EuiPopover
       id={POPOVER_ID}
+      data-test-subj={POPOVER_ID}
       button={
         <EuiButton
           css={buttonStyles}

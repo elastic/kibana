@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const POPOVER_ID = 'data-stream-selector-popover';
+export const POPOVER_ID = 'dataset-selector-popover';
 export const INTEGRATION_PANEL_ID = 'integrations_panel';
 export const UNMANAGED_STREAMS_PANEL_ID = 'unmanaged_streams_panel';
 
