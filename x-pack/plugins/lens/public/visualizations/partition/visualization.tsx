@@ -81,7 +81,8 @@ export const isCollapsed = (columnId: string, layer: PieLayerState) =>
 
 export const hasNonCollapsedSliceBy = (l: PieLayerState) => {
   const sliceByLength = l.primaryGroups.length;
-  const collapsedGroupsLength = (l.collapseFns && Object.keys(l.collapseFns).length) ?? 0;
+  const collapsedGroupsLength =
+    (l.collapseFns && Object.values(l.collapseFns).filter(Boolean).length) ?? 0;
   return sliceByLength - collapsedGroupsLength > 0;
 };
 
