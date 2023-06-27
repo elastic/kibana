@@ -44,6 +44,7 @@ import { usersModel } from '../../explore/users/store';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 import { initialGroupingState } from '../store/grouping/reducer';
 import type { SourcererState } from '../store/sourcerer';
+import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
 
 const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
   mockIndexFields.map((field) => [field.name, field])
@@ -419,6 +420,14 @@ export const mockGlobalState: State = {
     },
   },
   groups: initialGroupingState,
+  analyzer: {
+    analyzerById: {
+      [TableId.test]: EMPTY_RESOLVER,
+      [TimelineId.test]: EMPTY_RESOLVER,
+      [TimelineId.active]: EMPTY_RESOLVER,
+      flyout: EMPTY_RESOLVER,
+    },
+  },
   sourcerer: {
     ...mockSourcererState,
     defaultDataView: {
