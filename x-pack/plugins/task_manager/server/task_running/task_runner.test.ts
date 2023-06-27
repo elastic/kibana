@@ -1740,13 +1740,24 @@ describe('TaskManagerRunner', () => {
 
         const { runner, store, logger } = await readyToRunStageSetup({
           instance: mockTaskInstance,
+          requeueInvalidTasksConfig: {
+            enabled: true,
+            delay: 3000,
+            max_attempts: 20,
+          },
           definitions: {
             bar: {
               title: 'Bar!',
               createTaskRunner: () => ({
+                async beforeRun() {
+                  return { data: { foo: 'bar' } };
+                },
                 async run() {
                   return { state: {} };
                 },
+              }),
+              indirectParamsSchema: schema.object({
+                foo: schema.string(),
               }),
             },
           },
@@ -1776,14 +1787,25 @@ describe('TaskManagerRunner', () => {
 
         const { runner, store, logger } = await readyToRunStageSetup({
           instance: mockTaskInstance,
+          requeueInvalidTasksConfig: {
+            enabled: true,
+            delay: 3000,
+            max_attempts: 20,
+          },
           definitions: {
             bar: {
               title: 'Bar!',
               createTaskRunner: () => ({
+                async beforeRun() {
+                  return { data: { foo: 'bar' } };
+                },
                 async run() {
-                  return { state: {} }; // no skip, no hasError
+                  return { state: {} };
                 },
                 cleanup: cleanupFn,
+              }),
+              indirectParamsSchema: schema.object({
+                foo: schema.string(),
               }),
             },
           },
@@ -1806,18 +1828,29 @@ describe('TaskManagerRunner', () => {
           enabled: true,
           state: { existingStateParam: 'foo' },
           runAt: new Date(),
-          numSkippedRuns: 10,
+          numSkippedRuns: 20,
         };
 
         const { runner, store, logger } = await readyToRunStageSetup({
           instance: mockTaskInstance,
+          requeueInvalidTasksConfig: {
+            enabled: true,
+            delay: 3000,
+            max_attempts: 20,
+          },
           definitions: {
             bar: {
               title: 'Bar!',
               createTaskRunner: () => ({
+                async beforeRun() {
+                  return { data: { foo: 'bar' } };
+                },
                 async run() {
                   return { state: {}, hasError: true };
                 },
+              }),
+              indirectParamsSchema: schema.object({
+                foo: schema.string(),
               }),
             },
           },
@@ -1847,13 +1880,24 @@ describe('TaskManagerRunner', () => {
 
         const { runner, store, logger } = await readyToRunStageSetup({
           instance: mockTaskInstance,
+          requeueInvalidTasksConfig: {
+            enabled: true,
+            delay: 3000,
+            max_attempts: 20,
+          },
           definitions: {
             bar: {
               title: 'Bar!',
               createTaskRunner: () => ({
+                async beforeRun() {
+                  return { data: { foo: 'bar' } };
+                },
                 async run() {
                   return { state: {}, error };
                 },
+              }),
+              indirectParamsSchema: schema.object({
+                foo: schema.string(),
               }),
             },
           },
@@ -1898,9 +1942,15 @@ describe('TaskManagerRunner', () => {
             bar: {
               title: 'Bar!',
               createTaskRunner: () => ({
+                async beforeRun() {
+                  return { data: { foo: 'bar' } };
+                },
                 async run() {
                   return { state: {}, error };
                 },
+              }),
+              indirectParamsSchema: schema.object({
+                baz: schema.string(),
               }),
             },
           },

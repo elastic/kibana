@@ -31,13 +31,13 @@ export default function ({ getService }: FtrProviderContext) {
       return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
     });
 
-    it('Skips recurring tasks that returns a SkipError', async () => {
+    it('Skips recurring tasks that has invalid indirect param', async () => {
       const createdTask = await supertest
         .post('/api/sample_tasks/schedule')
         .set('kbn-xsrf', 'xxx')
         .send({
           task: {
-            taskType: 'sampleRecurringTaskSkipError',
+            taskType: 'sampleRecurringTaskWithInvalidIndirectParam',
             params: {},
           },
         })
@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         const task = await currentTask(createdTask.id);
         lastRunAt = task.runAt;
-        // skips 3 times
+        // skips 2 times
         expect(task.numSkippedRuns).to.eql(2);
       });
 
@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({
           task: {
-            taskType: 'sampleOneTimeTaskSkipError',
+            taskType: 'sampleOneTimeTaskWithInvalidIndirectParam',
             params: {},
           },
         })

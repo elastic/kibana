@@ -7,7 +7,7 @@
 
 import { random } from 'lodash';
 import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
-import { createSkipError, throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
+import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';
 import {
@@ -16,10 +16,7 @@ import {
   ConcreteTaskInstance,
   EphemeralTask,
 } from '@kbn/task-manager-plugin/server';
-import {
-  DEFAULT_MAX_WORKERS,
-  RequeueInvalidTasksConfig,
-} from '@kbn/task-manager-plugin/server/config';
+import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
 import { schema } from '@kbn/config-schema';
 import { initRoutes } from './init_routes';
 
@@ -158,44 +155,37 @@ export class SampleTaskManagerFixturePlugin
           },
         }),
       },
-      sampleRecurringTaskSkipError: {
-        title: 'Sample Recurring Task that returns SkipError',
-        description:
-          'A sample task that returns a SkipError as much as requeueInvalidTasksConfig.max_attempts then success',
+      sampleRecurringTaskWithInvalidIndirectParam: {
+        title: 'Sample Recurring Task that has invalid indirect params',
+        description: 'A sample task that returns invalid params in beforeRun all the time',
         maxAttempts: 1,
-        createTaskRunner: ({
-          taskInstance,
-          requeueInvalidTasksConfig,
-        }: {
-          taskInstance: ConcreteTaskInstance;
-          requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
-        }) => ({
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async beforeRun() {
+            return { data: { baz: 'foo' } }; // invalid
+          },
           async run() {
-            if ((taskInstance.numSkippedRuns || 0) < requeueInvalidTasksConfig.max_attempts) {
-              return { state: {}, error: createSkipError(new Error('Skip')) };
-            }
             return { state: {}, schedule: { interval: '1s' }, hasError: true };
           },
         }),
+        indirectParamsSchema: schema.object({
+          param: schema.string(),
+        }),
       },
-      sampleOneTimeTaskSkipError: {
-        title: 'Sample One Time Task that returns SkipError',
+      sampleOneTimeTaskWithInvalidIndirectParam: {
+        title: 'Sample One Time Task that has invalid indirect params',
         description:
-          'A sample task that returns a SkipError as much as requeueInvalidTasksConfig.max_attempts then retryable error',
+          'A sample task that returns invalid params in beforeRun all the time and throws error in the run method',
         maxAttempts: 1,
-        createTaskRunner: ({
-          taskInstance,
-          requeueInvalidTasksConfig,
-        }: {
-          taskInstance: ConcreteTaskInstance;
-          requeueInvalidTasksConfig: RequeueInvalidTasksConfig;
-        }) => ({
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async beforeRun() {
+            return { data: { baz: 'foo' } }; // invalid
+          },
           async run() {
-            if ((taskInstance.numSkippedRuns || 0) < requeueInvalidTasksConfig.max_attempts) {
-              return { state: {}, error: createSkipError(new Error('Skip')) };
-            }
             throwRetryableError(new Error('Retry'), true);
           },
+          indirectParamsSchema: schema.object({
+            param: schema.string(),
+          }),
         }),
       },
       sampleTaskWithParamsSchema: {

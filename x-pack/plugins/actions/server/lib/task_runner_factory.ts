@@ -25,7 +25,7 @@ import {
   throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { ActionExecutorContract, ActionInfo, getActionInfoInternal } from './action_executor';
+import { ActionExecutorContract, ActionInfo } from './action_executor';
 import {
   ActionTaskExecutorParams,
   ActionTaskParams,
@@ -54,6 +54,8 @@ export interface TaskRunnerContext {
   basePathService: IBasePath;
   savedObjectsRepository: ISavedObjectsRepository;
 }
+
+type TaskParams = Omit<SavedObject<ActionTaskParams>, 'id' | 'type'>;
 
 export class TaskRunnerFactory {
   private isInitialized = false;
@@ -97,13 +99,11 @@ export class TaskRunnerFactory {
     const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
 
     let actionInfo: ActionInfo;
-    let taskParams: Omit<SavedObject<ActionTaskParams>, 'id' | 'type'>;
+    let taskParams: TaskParams;
 
     return {
       async beforeRun(): Promise<BeforeRunResult<RawAction>> {
         try {
-          const { preconfiguredActions, spaces } = actionExecutor.getContext()!;
-          const isESOCanEncrypt = actionExecutor.getIsESOCanEncrypt()!;
           taskParams = await getActionTaskParams(
             actionTaskExecutorParams,
             encryptedSavedObjectsClient,
@@ -111,15 +111,9 @@ export class TaskRunnerFactory {
           );
 
           const request = getFakeRequest(taskParams.attributes.apiKey);
-          const spaceId = spaces && spaces.getSpaceId(request);
-          const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
-
-          actionInfo = await getActionInfoInternal(
-            isESOCanEncrypt,
-            encryptedSavedObjectsClient,
-            preconfiguredActions,
+          actionInfo = await actionExecutor.getActionInfoInternal(
             taskParams.attributes.actionId,
-            namespace.namespace
+            request
           );
 
           return { data: actionInfo.rawAction };
@@ -261,7 +255,7 @@ async function getActionTaskParams(
   executorParams: ActionTaskExecutorParams,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   spaceIdToNamespace: SpaceIdToNamespaceFunction
-): Promise<Omit<SavedObject<ActionTaskParams>, 'id' | 'type'>> {
+): Promise<TaskParams> {
   const { spaceId } = executorParams;
   const namespace = spaceIdToNamespace(spaceId);
   if (isPersistedActionTask(executorParams)) {

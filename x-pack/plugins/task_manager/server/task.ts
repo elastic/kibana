@@ -163,6 +163,7 @@ export const taskDefinitionSchema = schema.object(
     ),
 
     paramsSchema: schema.maybe(schema.any()),
+    // schema of the data fetched by the task runner (in beforeRun) e.g. rule, action etc.
     indirectParamsSchema: schema.maybe(schema.any()),
   },
   {

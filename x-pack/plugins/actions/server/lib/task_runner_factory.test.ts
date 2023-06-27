@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { ActionExecutor, ActionExecutorContext } from './action_executor';
+import { ActionExecutor } from './action_executor';
 import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerFactory } from './task_runner_factory';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
@@ -28,7 +28,7 @@ import {
   isRetryableError,
   isUnrecoverableError,
 } from '@kbn/task-manager-plugin/server/task_running';
-import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
+import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 
 const executeParamsFields = [
   'actionId',
@@ -66,6 +66,15 @@ const mockAction = {
     isMissingSecrets: false,
   },
   references: [],
+};
+
+const mockActionInfo = {
+  actionTypeId: mockAction.attributes.actionTypeId,
+  name: mockAction.attributes.name,
+  config: mockAction.attributes.config,
+  secrets: mockAction.attributes.secrets,
+  actionId: mockAction.id,
+  rawAction: mockAction.attributes,
 };
 
 beforeAll(() => {
@@ -119,11 +128,6 @@ beforeEach(() => {
   jest.resetAllMocks();
   jest.clearAllMocks();
   actionExecutorInitializerParams.getServices.mockReturnValue(services);
-  mockedActionExecutor.getContext.mockReturnValue({
-    preconfiguredActions: [],
-    spaces: spacesServiceMock.createStartContract(),
-  } as unknown as ActionExecutorContext);
-  mockedActionExecutor.getIsESOCanEncrypt.mockReturnValue(true);
 });
 
 test(`throws an error if factory isn't initialized`, () => {
@@ -1052,25 +1056,22 @@ test('beforeRun fetches taskParams and actionInfo and returns the rawAction', as
       },
     ],
   });
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(mockAction);
+  mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
   const result = await taskRunner.beforeRun!();
 
-  expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
-  expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenNthCalledWith(
-    1,
+  expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
+  expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
     'action_task_params',
     '3',
     { namespace: 'namespace-test' }
   );
-  expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenNthCalledWith(
-    2,
-    'action',
+  expect(mockedActionExecutor.getActionInfoInternal).toHaveBeenCalledWith(
     '9',
-    { namespace: undefined }
+    expect.any(CoreKibanaRequest)
   );
 
-  expect(result).toEqual({ data: mockAction.attributes });
+  expect(result).toEqual({ data: mockActionInfo.rawAction });
 });
 
 test("beforeRun returns error when it can't fetch the actionInfo", async () => {
@@ -1096,10 +1097,11 @@ test("beforeRun returns error when it can't fetch the actionInfo", async () => {
       },
     ],
   });
-  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(error);
+  mockedActionExecutor.getActionInfoInternal.mockRejectedValueOnce(error);
 
   const result = await taskRunner.beforeRun!();
 
-  expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
+  expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
+  expect(mockedActionExecutor.getActionInfoInternal).toHaveBeenCalledTimes(1);
   expect(result).toEqual({ error });
 });

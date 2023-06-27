@@ -12,8 +12,7 @@ const createActionExecutorMock = () => {
     initialize: jest.fn(),
     execute: jest.fn().mockResolvedValue({ status: 'ok', actionId: '' }),
     logCancellation: jest.fn(),
-    getIsESOCanEncrypt: jest.fn().mockReturnValue(true),
-    getContext: jest.fn(),
+    getActionInfoInternal: jest.fn(),
   };
   return mocked;
 };

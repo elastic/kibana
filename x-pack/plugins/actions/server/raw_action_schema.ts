@@ -14,8 +14,18 @@ export const rawActionSchema = schema.object({
   config: schema.recordOf(schema.string(), schema.any()),
   secrets: schema.recordOf(schema.string(), schema.any()),
   // PreconfiguredAction ---
-  id: schema.maybe(schema.string()),
   isPreconfigured: schema.maybe(schema.boolean()),
-  isDeprecated: schema.maybe(schema.boolean()),
+  id: schema.conditional(
+    schema.siblingRef('isPreconfigured'),
+    true,
+    schema.string(),
+    schema.never()
+  ),
+  isDeprecated: schema.conditional(
+    schema.siblingRef('isPreconfigured'),
+    true,
+    schema.boolean(),
+    schema.never()
+  ),
   // --- PreconfiguredAction
 });

@@ -362,7 +362,8 @@ export class TaskManagerRunner implements TaskRunner {
 
   private validateTaskParams() {
     let error;
-    const { state, taskType, params, id } = this.instance.task;
+    const { state, taskType, params, id, numSkippedRuns = 0 } = this.instance.task;
+    const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
 
     try {
       const paramsSchema = this.definition.paramsSchema;
@@ -371,7 +372,11 @@ export class TaskManagerRunner implements TaskRunner {
       }
     } catch (err) {
       this.logger.warn(`Task (${taskType}/${id}) has a validation error: ${err.message}`);
-      error = createSkipError(err);
+      if (numSkippedRuns < maxAttempts) {
+        error = createSkipError(err);
+      } else {
+        error = err;
+      }
     }
 
     return { ...(error ? { error } : {}), state };
@@ -379,7 +384,8 @@ export class TaskManagerRunner implements TaskRunner {
 
   private async validateIndirectTaskParams() {
     let error;
-    const { state, taskType, id } = this.instance.task;
+    const { state, taskType, id, numSkippedRuns = 0 } = this.instance.task;
+    const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
 
     if (this.task?.beforeRun) {
       const { data } = await this.task.beforeRun();
@@ -391,7 +397,9 @@ export class TaskManagerRunner implements TaskRunner {
           this.logger.warn(
             `Task (${taskType}/${id}) has a validation error in its indirect params: ${err.message}`
           );
-          error = createSkipError(err);
+          if (numSkippedRuns < maxAttempts) {
+            error = createSkipError(err);
+          }
         }
       }
     }
@@ -573,8 +581,7 @@ export class TaskManagerRunner implements TaskRunner {
     const { max_attempts: maxSkipAttempts, enabled, delay } = this.requeueInvalidTasksConfig;
     let skipAttempts = this.instance.task.numSkippedRuns ?? 0;
 
-    // skipAttempts and enabled are also checked in where the SkipError is created as well.
-    if (isSkipError(error) && skipAttempts < maxSkipAttempts && enabled) {
+    if (isSkipError(error)) {
       skipAttempts = skipAttempts + 1;
       const { taskType, id } = this.instance.task;
       this.logger.warn(

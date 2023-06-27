@@ -36,11 +36,6 @@ const executeParams = {
   executionId: '123abc',
   request: {} as KibanaRequest,
   actionExecutionId: '2',
-  requeueInvalidTasksConfig: {
-    enabled: false,
-    delay: 3000,
-    max_attempts: 20,
-  },
 };
 
 const spacesMock = spacesServiceMock.createStartContract();
