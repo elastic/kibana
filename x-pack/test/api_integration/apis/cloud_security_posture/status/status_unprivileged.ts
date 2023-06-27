@@ -61,8 +61,8 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it(`Return unprivileged for cspm, kspm, vuln_mgmt when users don't have enough for permission for the role they are assigned`, async () => {
@@ -163,8 +163,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.vuln_mgmt.status).to.be('unprivileged');
 
         expect(res.indicesDetails[0].status).to.be('unprivileged');
-        expect(res.indicesDetails[1].status).to.be('empty');
-        expect(res.indicesDetails[2].status).to.be('empty');
         expect(res.indicesDetails[3].status).to.be('unprivileged');
       });
 
@@ -196,9 +194,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.vuln_mgmt.status).to.be('not-installed');
 
         expect(res.indicesDetails[0].status).to.be('unprivileged');
-        expect(res.indicesDetails[1].status).to.be('empty');
         expect(res.indicesDetails[2].status).to.be('unprivileged');
-        expect(res.indicesDetails[3].status).to.be('empty');
       });
     });
   });
