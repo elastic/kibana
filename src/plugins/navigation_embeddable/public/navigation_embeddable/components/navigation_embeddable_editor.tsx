@@ -7,7 +7,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   EuiForm,
@@ -30,6 +30,8 @@ import { DashboardItem } from '../types';
 const isValidUrl =
   /^https?:\/\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
 
+type LinkType = 'dashboardLink' | 'externalLink';
+
 export const NavigationEmbeddableEditor = ({
   setIsPopoverOpen,
 }: {
@@ -38,7 +40,8 @@ export const NavigationEmbeddableEditor = ({
   const navEmbeddable = useNavigationEmbeddable();
 
   const [linkLabel, setLinkLabel] = useState<string>('');
-  const [selectedLinkType, setSelectedLinkType] = useState('dashboardLink');
+  const [selectedLinkType, setSelectedLinkType] = useState<LinkType>('dashboardLink');
+  const [isDashboardEditorSelected, setIsDashboardEditorSelected] = useState<boolean>(true);
 
   /** external URL link state */
   const [validUrl, setValidUrl] = useState<boolean>(true);
@@ -48,30 +51,40 @@ export const NavigationEmbeddableEditor = ({
   const [selectedDashboard, setSelectedDashboard] = useState<DashboardItem | undefined>();
   const savedDashboardSelection = useRef<DashboardItem | undefined>(undefined);
 
-  const linkTypes: EuiRadioGroupOption[] = [
-    {
-      label: (
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={'dashboardApp'} color="text" />
-          </EuiFlexItem>
-          <EuiFlexItem>Dashboard</EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      id: 'dashboardLink',
-    },
-    {
-      label: (
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={'link'} color="text" />
-          </EuiFlexItem>
-          <EuiFlexItem>URL</EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      id: 'externalLink',
-    },
-  ];
+  const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
+    return [
+      {
+        label: (
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={'dashboardApp'} color="text" />
+            </EuiFlexItem>
+            <EuiFlexItem>Dashboard</EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        id: 'dashboardLink' as LinkType,
+      },
+      {
+        label: (
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={'link'} color="text" />
+            </EuiFlexItem>
+            <EuiFlexItem>URL</EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        id: 'externalLink' as LinkType,
+      },
+    ];
+  }, []);
+
+  useEffect(() => {
+    /**
+     * A boolean check is faster than comparing strings so, since this is such a common check in this component,
+     * storing this value as a boolean is (in theory) marginally more efficient
+     */
+    setIsDashboardEditorSelected(selectedLinkType === 'dashboardLink');
+  }, [selectedLinkType]);
 
   return (
     <>
@@ -81,7 +94,7 @@ export const NavigationEmbeddableEditor = ({
             options={linkTypes}
             idSelected={selectedLinkType}
             onChange={(id) => {
-              setSelectedLinkType(id);
+              setSelectedLinkType(id as LinkType);
               if (selectedDashboard) {
                 savedDashboardSelection.current = selectedDashboard;
               }
@@ -90,7 +103,7 @@ export const NavigationEmbeddableEditor = ({
           />
         </EuiFormRow>
         <EuiFormRow label="Choose destination">
-          {selectedLinkType === 'dashboardLink' ? (
+          {isDashboardEditorSelected ? (
             <NavigationEmbeddableDashboardList
               initialSelection={savedDashboardSelection.current}
               onDashboardSelected={setSelectedDashboard}
@@ -114,7 +127,7 @@ export const NavigationEmbeddableEditor = ({
         <EuiFormRow label="Text">
           <EuiFieldText
             placeholder={
-              selectedLinkType === 'dashboardLink' && selectedDashboard
+              isDashboardEditorSelected && selectedDashboard
                 ? selectedDashboard.attributes.title
                 : 'Enter text for link'
             }
@@ -139,18 +152,19 @@ export const NavigationEmbeddableEditor = ({
             <EuiButtonEmpty
               size="s"
               disabled={
-                (selectedLinkType === 'dashboardLink' && !selectedDashboard) ||
-                (selectedLinkType === 'externalLink' && (!validUrl || isEmpty(selectedUrl)))
+                (isDashboardEditorSelected && !selectedDashboard) ||
+                !validUrl ||
+                isEmpty(selectedUrl)
               }
               onClick={() => {
-                if (selectedLinkType === 'dashboardLink' && selectedDashboard) {
+                if (isDashboardEditorSelected && selectedDashboard) {
                   navEmbeddable.dispatch.addDashboardLink({
                     label: linkLabel,
                     id: selectedDashboard.id,
                     title: selectedDashboard.attributes.title,
                     description: selectedDashboard.attributes.description,
                   });
-                } else if (selectedLinkType === 'externalLink' && validUrl && selectedUrl) {
+                } else if (validUrl && selectedUrl) {
                   navEmbeddable.dispatch.addExternalLink({ url: selectedUrl, label: linkLabel });
                 }
                 setLinkLabel('');
