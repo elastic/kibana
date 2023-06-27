@@ -229,7 +229,7 @@ export function createLensDefinitionForRatioChart(
         },
       },
       '607b2253-ed20-4f0a-bf62-07a1f846cca4X0': {
-        label: 'Part of Logs',
+        label: 'Part of ratio',
         dataType: 'number',
         operationType: 'count',
         isBucketed: false,
@@ -245,7 +245,7 @@ export function createLensDefinitionForRatioChart(
         customLabel: true,
       },
       '607b2253-ed20-4f0a-bf62-07a1f846cca4X1': {
-        label: 'Part of Logs',
+        label: 'Part of ratio',
         dataType: 'number',
         operationType: 'count',
         isBucketed: false,
@@ -261,7 +261,7 @@ export function createLensDefinitionForRatioChart(
         customLabel: true,
       },
       '607b2253-ed20-4f0a-bf62-07a1f846cca4X2': {
-        label: 'Part of Logs',
+        label: 'Part of ratio',
         dataType: 'number',
         operationType: 'math',
         isBucketed: false,
@@ -288,7 +288,7 @@ export function createLensDefinitionForRatioChart(
         customLabel: true,
       },
       '607b2253-ed20-4f0a-bf62-07a1f846cca4': {
-        label: 'Logs',
+        label: 'ratio',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
@@ -362,7 +362,7 @@ export function createLensDefinitionForCountChart(
         customLabel: true,
       },
       '607b2253-ed20-4f0a-bf62-07a1f846cca4': {
-        label: 'Logs',
+        label: 'document count',
         dataType: 'number',
         operationType: 'formula',
         isBucketed: false,
