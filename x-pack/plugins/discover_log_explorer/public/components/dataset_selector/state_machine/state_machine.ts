@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { actions, assign, createMachine, send } from 'xstate';
+import { actions, assign, createMachine, raise } from 'xstate';
 import { UNMANAGED_STREAMS_PANEL_ID } from '../constants';
 import { defaultSearch, DEFAULT_CONTEXT } from './defaults';
 import {
@@ -19,7 +19,7 @@ import {
 export const createPureDatasetsSelectorStateMachine = (
   initialContext: Partial<DefaultDatasetsSelectorContext> = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtrFmADZgDG6A9rgHSVk2yQDEAKgPIDiPAMgFEA2gAYAuolAAHFgEt0cmgDspIAB6IAjAGYA7AA56AFgOjjANgN6ArABoQAT0Smd9AJzmrtgL4+HaJg4+EQk5FS0DDTSYMqcvAIiEmqysApKqkga2qJ6WvQWpsb69k4u7gBMHlrulVrWNn4BGNh4BMSkFNR09NGx9GRysIrKUACSyuhgULgYGbBsAMIAEgCCAHI8ggD6AAobgvxiklmp6SpqmghaesYFNhYVpc4INgZuFe7ejf4gga0hDrhbpRGLKAZDEbjSbTWaKFQLFYbLZ7A5HLQnGTyeGZUBXCpaO7GG5fBoOF7E-LuYx1BpNP4tYLtMJdSK9MEQ4ZyUYTKYzOYIthYRYAJS4-H42242zG6w4gh4ItWHDGXHWWG2ACEuBxuABZY4pbEZS6IAC0T3yelEOi0T3JiAqBncHi+oncJXp-yZoU6ER6fXBgy5PJh-JxCywglWIpWWoAmtt1qs9UlMSAzjjTQgzTcqmZcgY7c9EDYbHp6DZC8WvYy2r7gWzA5yobzYQLlJGuCKOAntt3kIIRYbTsaLlkrmbbRZ6LZDMWHQhjMZRJXiSvHj9mkF60DWQGOcHW2G4RkfcQlmtNjt9utDiOsWksxPHRU3BY8mSyggKqZ6GZLDpX5vV3Fl-VBfoj25aE+VPFRz0jQ5BEWXssA4EVowNZJRyfE0X2uUQnnoGobFte1vwqCpRFrHdATAkF2UgyFoLbcMz1AoVo1jZY+2TVMHwzMdcWyBBrRsDwaQJL8XjMYigO3AFmT9Bjmyg0NYI7BChW7XtNUTAchwEzM8LxFwbhMAwDCdBdv1k+pfGAus6OUptD2Y0YAFVlEIVBlFQGAIC0pFr1RO8jmwx9zmE-E3wKT9bEXPQLHErRClETcaMUht9wgoN3KgLyfL8gKtKjIQUO2NCMJTIyhOzLRCJS9xSJsl5bjcHRRAMGwPQchSEJcg8mJDArvN8-zIFKri4z0pMUzTI1cPHUzROMfM8ndEpF2sKpfwsTa+oZWilMbIa8pGwrxpKjisB0vsDOHCLBKW6KXF-ExjBa8iZL0XbLAOn5fmUGgIDgNQQOc07cEWqLszNYkqjnItvvNVKqhuctka3I6sr3cDGGYVgIBh58VuLd94pLJd3g8Lx5JxgaocY4TjOWkSp0KWdMda81bji7mnkyxmcuZ+gAAtIRJkz2ZuCstBsN9igS787X-X8pMOiGTpF1T8tYuDOyltnJy0GoCiKLbvx0ZriLSjLHOO7L8d1kb9c00Cjde15OsrCw7ZR65anoTrAM1pztedtyLrG4rJo9nDYfwstxOMJKHgD36qgsXRrMFvwfCAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVsztgZTABswBjdAewCcA6Ew87CAYgBUB5AcQ4BkBRAbQAMAXUSgADgwCW6KeQB2YkAA9EAVgBMAGhABPRAA4AjNTUBfMzrSZsuAsTJVq5cWHmtOPASKWTYMuUUkFUQjIwAWA2oANgB2AE5otWj4gw1wjSN4nX0EZJNBaI01AGZBNSNYtVjjCysMLBx8IlIKGhc3akIpWFl5KABJeXQwKEoMQNgmAGEACQBBADkOXgB9AAUl3m4hUWC-AIUlVQRw8JMDErV4kqqcxHia6lu1QTKKqpqjOpBrRrsWo52q55F0en1BsNRuNZAopnMlisNlsdkY9hJpLCgqATmcLlcbnc9OoUtRCsV3pVqrVLL8GrZmg42s4QWDelJ+kMRmMJnCmHhpgAlNjcbirdirAaLFi8DiC+YsAZsRZ4VYAITYLHYAFldr5MYFjoZYvcEDVwjFYllyh9qd9aX8GfZWk4OqDuuzOVCeVipnhePNBXN1QBNVaLeba7zokAHLFGhBGNQWlIRclqU3RaImDRJJJqW1fH6OprOoEszoeiFc6G8+R+tiClih1aN5C8QV6-YGo7BE5GIrUS4aN5GYqm0qxIfXcI2qlFh300uA5lutnV70wwJ4dCUMCoAC28IWyzWm0W2y7GP88b7iGiV2oWVKY4zxLyRiiyQp5XnNPqNjLkyrqslWHKQtyW4KDue6Hn62y8NMzbIAq8z+iwV6xj22IhImERRHEiTJKk6SZNk77ZiY36lL+nz-nSgEAsBwKVuC4E1j6267vuR78gGQazC2EZRphcaGneCAGK81C5gW8RnGkGRZKaJTyU+34GLRdrFkuTEuix7psV6kF1jBPENk2LZth2onYQmUlRIIbwGJ8JSkcp74aLEgjUFUOmMYy+kVoZnpQAAqvIB6oPIqAwBAZlwTMJ5Iuel4+N2N7iTi96Ps+JSvqa8ReUOVRvFpC4Af8gXlmuYH9BFUUxXFCW8f6fBIasKEsGhvAYel16HDh-b4ZaREpIpZGFWc1BKfEc50falVOiuIGsaFDXRbFkAtfBgbBmqYbCdG+qZb22WSdJghJjOkTueRuSaSUM3RC5mmFvRJZ6TVoFGeFkWbc13GJXgjbNgdraCu2nb9Vhp1DYY1RDiOGjGCRs2ZppZJFDR732rS8jkBAcBKJ91VtCdg0JgAtPdiBU9E-lVWWzJ0AwkAU7e51GFcT3PijWQTR5uTJFE8SvpSC2M8tzHBRzWW4appqfk9xRS0BQVrgAFuCctnbhRiFKY2OmuEsTRNO8nzdSgixGrX2rj9oUcVB9a6-DiaG9RpoGAY5uvmVuN22Tq0hRuJlYjtbv2ZU1CJC5WS3ej76aBoRs-oHi4BczIfruBG1NdtQNHlHEnGFOcdWvJgu0wgNwXKVEvaRYZhAA */
   createMachine<DatasetsSelectorContext, DatasetsSelectorEvent, DatasetsSelectorTypestate>(
     {
       context: { ...DEFAULT_CONTEXT, ...initialContext },
@@ -44,7 +44,7 @@ export const createPureDatasetsSelectorStateMachine = (
               type: 'history',
             },
             listingIntegrations: {
-              entry: ['storePanelId', 'retrieveSearchFromCache', maybeRestoreSearchResult],
+              entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
               on: {
                 CHANGE_PANEL: [
                   {
@@ -67,7 +67,7 @@ export const createPureDatasetsSelectorStateMachine = (
               },
             },
             listingIntegrationStreams: {
-              entry: ['storePanelId', 'retrieveSearchFromCache', maybeRestoreSearchResult],
+              entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
               on: {
                 CHANGE_PANEL: 'listingIntegrations',
                 SELECT_DATASET: {
@@ -83,7 +83,7 @@ export const createPureDatasetsSelectorStateMachine = (
               },
             },
             listingUnmanagedStreams: {
-              entry: ['storePanelId', 'retrieveSearchFromCache', maybeRestoreSearchResult],
+              entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
               on: {
                 CHANGE_PANEL: 'listingIntegrations',
                 SELECT_DATASET: {
@@ -125,6 +125,11 @@ export const createPureDatasetsSelectorStateMachine = (
             ? { search: context.searchCache.get(event.panelId) ?? defaultSearch }
             : {}
         ),
+        maybeRestoreSearchResult: actions.pure((context, event) => {
+          if (event.type === 'CHANGE_PANEL' && context.searchCache.has(event.panelId)) {
+            return raise({ type: 'SORT_BY_ORDER', search: context.search });
+          }
+        }),
       },
       guards: {
         isUnmanagedStreamsId: (_context, event) => {
@@ -133,21 +138,6 @@ export const createPureDatasetsSelectorStateMachine = (
       },
     }
   );
-
-// Define a conditional action to restore a panel search result when a cached search exists
-const maybeRestoreSearchResult = actions.choose<
-  DefaultDatasetsSelectorContext,
-  DatasetsSelectorEvent
->([
-  {
-    cond: (context, event) => {
-      if (event.type !== 'CHANGE_PANEL') return false;
-
-      return context.searchCache.has(event.panelId);
-    },
-    actions: send((context) => ({ type: 'SORT_BY_ORDER', search: context.search })),
-  },
-]);
 
 export const createDatasetsSelectorStateMachine = ({
   initialContext,
