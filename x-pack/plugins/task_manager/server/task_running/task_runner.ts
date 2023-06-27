@@ -52,7 +52,13 @@ import {
   TaskStatus,
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { createSkipError, isRetryableError, isSkipError, isUnrecoverableError } from './errors';
+import {
+  createRetryableError,
+  createSkipError,
+  isRetryableError,
+  isSkipError,
+  isUnrecoverableError,
+} from './errors';
 import type { EventLoopDelayConfig, RequeueInvalidTasksConfig } from '../config';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
@@ -375,7 +381,7 @@ export class TaskManagerRunner implements TaskRunner {
       if (numSkippedRuns < maxAttempts) {
         error = createSkipError(err);
       } else {
-        error = err;
+        error = createRetryableError(err, true);
       }
     }
 

@@ -1931,7 +1931,7 @@ describe('TaskManagerRunner', () => {
         };
         const error = new Error('test');
 
-        const { runner, store, logger } = await readyToRunStageSetup({
+        const { runner, store } = await readyToRunStageSetup({
           instance: mockTaskInstance,
           requeueInvalidTasksConfig: {
             delay: 3000,
@@ -1968,7 +1968,6 @@ describe('TaskManagerRunner', () => {
           { validate: true }
         );
         expect(store.remove).not.toHaveBeenCalled();
-        expect(logger.warn).not.toHaveBeenCalled();
         expect(result).toEqual(asErr({ state: {}, error }));
       });
     });
