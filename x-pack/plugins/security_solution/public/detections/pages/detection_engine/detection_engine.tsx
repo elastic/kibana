@@ -88,6 +88,8 @@ import { DetectionPageFilterSet } from '../../components/detection_page_filters'
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
 const StyledFullHeightContainer = styled.div`
+  height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;

@@ -143,6 +143,8 @@ import { DataSourceType } from '../../../../detections/pages/detection_engine/ru
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
 const StyledFullHeightContainer = styled.div`
+  height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
@@ -153,6 +155,9 @@ const StyledFullHeightContainer = styled.div`
  */
 const StyledMinHeightTabContainer = styled.div`
   min-height: 800px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 `;
 
 export enum RuleDetailTabs {
@@ -832,15 +837,17 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               <Routes>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts})`}>
                   <>
-                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                      <EuiFlexItem grow={false}>
-                        <AlertsTableFilterGroup
-                          status={filterGroup}
-                          onFilterGroupChanged={onFilterGroupChangedCallback}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>{updatedAtValue}</EuiFlexItem>
-                    </EuiFlexGroup>
+                    <div>
+                      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                        <EuiFlexItem grow={false}>
+                          <AlertsTableFilterGroup
+                            status={filterGroup}
+                            onFilterGroupChanged={onFilterGroupChangedCallback}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>{updatedAtValue}</EuiFlexItem>
+                      </EuiFlexGroup>
+                    </div>
                     <EuiSpacer size="l" />
                     <Display show={!globalFullScreen}>
                       <AlertsHistogramPanel
