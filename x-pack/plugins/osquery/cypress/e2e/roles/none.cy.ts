@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { request } from '../../tasks/common';
 import { ROLE, login } from '../../tasks/login';
 import { NAV_SEARCH_INPUT_OSQUERY_RESULTS } from '../../tasks/navigation';
 import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
@@ -24,21 +25,33 @@ describe('None', () => {
   });
 
   it('should get 403 forbidden response when trying to GET osquery', () => {
-    cy.request({
+    request({
+      method: 'GET',
       url: '/app/osquery/live_queries',
       failOnStatusCode: false,
+      headers: {
+        'Elastic-Api-Version': '2023-10-31',
+      },
     }).then((resp) => {
       expect(resp.status).to.eq(403);
     });
-    cy.request({
+    request({
+      method: 'GET',
       url: '/app/osquery/saved_queries',
       failOnStatusCode: false,
+      headers: {
+        'Elastic-Api-Version': '2023-10-31',
+      },
     }).then((resp) => {
       expect(resp.status).to.eq(403);
     });
-    cy.request({
+    request({
+      method: 'GET',
       url: '/app/osquery/packs',
       failOnStatusCode: false,
+      headers: {
+        'Elastic-Api-Version': '2023-10-31',
+      },
     }).then((resp) => {
       expect(resp.status).to.eq(403);
     });
