@@ -20,10 +20,10 @@ import type {
   User,
   CaseAttributes,
   CaseAssignees,
-  ConnectorMappingsAttributes,
   CaseField,
   ThirdPartyField,
   CaseUserActionsDeprecatedResponse,
+  ConnectorMappings,
 } from '../../../common/api';
 import { CommentType, ActionTypes, CaseStatuses } from '../../../common/api';
 import type { CasesClientGetAlertsResponse } from '../alerts/types';
@@ -211,7 +211,7 @@ export const createIncident = async ({
 
 export const mapCaseFieldsToExternalSystemFields = (
   caseFields: Record<Exclude<CaseField, 'comments' | 'tags'>, unknown>,
-  mapping: ConnectorMappingsAttributes[]
+  mapping: ConnectorMappings
 ): Record<ThirdPartyField, unknown> => {
   const mappedCaseFields: Record<ThirdPartyField, unknown> = {};
 

@@ -10,12 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
-import { checkFullLicense } from '../../../license';
-import {
-  checkGetJobsCapabilitiesResolver,
-  checkPermission,
-} from '../../../capabilities/check_capabilities';
+import { useRouteResolver } from '../../use_resolver';
+import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { NewCalendar } from '../../../settings/calendars';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { ML_PAGES } from '../../../../../common/constants/locator';
@@ -73,32 +69,21 @@ export const editCalendarRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<NewCalendarPageProps> = ({ location, mode, deps }) => {
+const PageWrapper: FC<NewCalendarPageProps> = ({ location, mode }) => {
   let calendarId: string | undefined;
   if (mode === MODE.EDIT) {
     const pathMatch: string[] | null = location.pathname.match(/.+\/(.+)$/);
     calendarId = pathMatch && pathMatch.length > 1 ? pathMatch[1] : undefined;
   }
-  const { redirectToMlAccessDeniedPage } = deps;
 
-  const { context } = useResolver(
-    undefined,
-    undefined,
-    deps.config,
-    deps.dataViewsContract,
-    deps.getSavedSearchDeps,
-    {
-      checkFullLicense,
-      checkGetJobsCapabilities: () =>
-        checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-      getMlNodeCount,
-    }
-  );
+  const { context } = useRouteResolver('full', ['canGetJobs'], { getMlNodeCount });
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
-  const canCreateCalendar = checkPermission('canCreateCalendar');
-  const canDeleteCalendar = checkPermission('canDeleteCalendar');
+  const [canCreateCalendar, canDeleteCalendar] = usePermissionCheck([
+    'canCreateCalendar',
+    'canDeleteCalendar',
+  ]);
 
   return (
     <PageLoader context={context}>

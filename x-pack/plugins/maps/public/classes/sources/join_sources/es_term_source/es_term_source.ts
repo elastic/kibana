@@ -34,6 +34,7 @@ import { ITermJoinSource } from '../types';
 import type { IESAggSource } from '../../es_agg_source';
 import { IField } from '../../../fields/field';
 import { mergeExecutionContext } from '../../execution_context_utils';
+import { isTermSourceComplete } from './is_term_source_complete';
 
 const TERMS_AGG_NAME = 'join';
 const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
@@ -83,7 +84,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
   }
 
   hasCompleteConfig(): boolean {
-    return this._descriptor.indexPatternId !== undefined && this._descriptor.term !== undefined;
+    return isTermSourceComplete(this._descriptor);
   }
 
   getTermField(): ESDocField {
@@ -149,14 +150,17 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
 
     const rawEsData = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: `${indexPattern.getName()}.${this._termField.getName()}`,
+      requestName: i18n.translate('xpack.maps.termSource.requestName', {
+        defaultMessage: '{leftSourceName} term join request',
+        values: { leftSourceName },
+      }),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.source.esJoin.joinDescription', {
-        defaultMessage: `Elasticsearch terms aggregation request, left source: {leftSource}, right source: {rightSource}`,
+      requestDescription: i18n.translate('xpack.maps.termSource.requestDescription', {
+        defaultMessage: 'Get metrics from data view: {dataViewName}, term field: {termFieldName}',
         values: {
-          leftSource: `${leftSourceName}:${leftFieldName}`,
-          rightSource: `${indexPattern.getName()}:${this._termField.getName()}`,
+          dataViewName: indexPattern.getName(),
+          termFieldName: this._termField.getName(),
         },
       }),
       searchSessionId: requestMeta.searchSessionId,

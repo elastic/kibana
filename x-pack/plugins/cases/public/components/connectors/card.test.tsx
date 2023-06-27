@@ -26,7 +26,7 @@ describe('ConnectorCard ', () => {
     ).not.toThrowError();
   });
 
-  it('shows the loading spinner if loading', () => {
+  it('shows the loading skeleton if loading', () => {
     render(
       <ConnectorCard
         connectorType={ConnectorTypes.none}

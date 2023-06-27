@@ -43,7 +43,7 @@ import {
 import { getCanAccessEmsFonts, getGlyphs, getKibanaFontsGlyphUrl } from './glyphs';
 import { syncLayerOrder } from './sort_layers';
 
-import { removeOrphanedSourcesAndLayers } from './utils';
+import { removeOrphanedSourcesAndLayers } from './remove_orphaned';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { TileStatusTracker } from './tile_status_tracker';
 import { DrawFeatureControl } from './draw_control/draw_feature_control';
@@ -51,6 +51,7 @@ import type { MapExtentState } from '../../reducers/map/types';
 import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../classes/styles/vector/symbol_utils';
 import { MAKI_ICONS } from '../../classes/styles/vector/maki_icons';
 import { KeydownScrollZoom } from './keydown_scroll_zoom/keydown_scroll_zoom';
+import { transformRequest } from './transform_request';
 
 export interface Props {
   isMapReady: boolean;
@@ -171,6 +172,7 @@ export class MbMap extends Component<Props, State> {
         preserveDrawingBuffer: getPreserveDrawingBuffer(),
         maxZoom: this.props.settings.maxZoom,
         minZoom: this.props.settings.minZoom,
+        transformRequest,
       };
       if (initialView) {
         options.zoom = initialView.zoom;

@@ -11,7 +11,7 @@ import type {
   SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
-import { isBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/internal_bulk_resolve';
+import { isBulkResolveError } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/internals/internal_bulk_resolve';
 import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -1212,7 +1212,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       types: new Set(typesAndSpaces.keys()),
       spaces: spacesToAuthorize,
       enforceMap: typesAndSpaces,
-      auditOptions: { useSuccessOutcome: true },
+      auditOptions: { objects: auditableObjects, useSuccessOutcome: true },
     });
 
     return objects.map((result) => {

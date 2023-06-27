@@ -47,6 +47,7 @@ import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks
 import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { of } from 'rxjs';
+import { UpsellingService } from '../upsellings';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -97,6 +98,7 @@ export const createStartServicesMock = (
   core: ReturnType<typeof coreMock.createStart> = coreMock.createStart()
 ): StartServices => {
   core.uiSettings.get.mockImplementation(createUseUiSettingMock());
+  core.settings.client.get.mockImplementation(createUseUiSettingMock());
   const { storage } = createSecuritySolutionStorageMock();
   const apm = mockApm();
   const data = dataPluginMock.createStartContract();
@@ -190,6 +192,7 @@ export const createStartServicesMock = (
     cloudExperiments,
     guidedOnboarding,
     isSidebarEnabled$: of(true),
+    upselling: new UpsellingService(),
   } as unknown as StartServices;
 };
 

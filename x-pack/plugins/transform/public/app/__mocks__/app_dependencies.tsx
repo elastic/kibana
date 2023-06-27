@@ -24,11 +24,13 @@ import { SharePluginStart } from '@kbn/share-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 
 import type { AppDependencies } from '../app_dependencies';
 import { MlSharedContext } from './shared_context';
 import type { GetMlSharedImportsReturnType } from '../../shared_imports';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 const coreSetup = coreMock.createSetup();
 const coreStart = coreMock.createStart();
@@ -91,6 +93,8 @@ const appDependencies: AppDependencies = {
   triggersActionsUi: {} as jest.Mocked<TriggersAndActionsUIPublicPluginStart>,
   unifiedSearch: {} as jest.Mocked<UnifiedSearchPublicPluginStart>,
   savedObjectsManagement: {} as jest.Mocked<SavedObjectsManagementPluginStart>,
+  settings: settingsServiceMock.createStartContract(),
+  savedSearch: savedSearchPluginMock.createStartContract(),
 };
 
 export const useAppDependencies = () => {

@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import type { Headers, Logger } from '@kbn/core/server';
+import type { Headers, IUiSettingsClient } from '@kbn/core/server';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from '@kbn/reporting-common';
-import { ReportingCore } from '../..';
 
-export const getCustomLogo = async (
-  reporting: ReportingCore,
-  headers: Headers,
-  spaceId: string | undefined,
-  logger: Logger
-) => {
-  const fakeRequest = reporting.getFakeRequest(headers, spaceId, logger);
-  const uiSettingsClient = await reporting.getUiSettingsClient(fakeRequest, logger);
+export const getCustomLogo = async (uiSettingsClient: IUiSettingsClient, headers: Headers) => {
   const logo: string = await uiSettingsClient.get(UI_SETTINGS_CUSTOM_PDF_LOGO);
 
   // continue the pipeline

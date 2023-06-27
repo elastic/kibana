@@ -11,11 +11,11 @@ import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { ALERT_RULE_CATEGORY, ALERT_RULE_TYPE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import { PageTitle, pageTitleContent } from './components/page_title';
 import { HeaderActions } from './components/header_actions';
@@ -26,7 +26,7 @@ import { getTimeZone } from '../../utils/get_time_zone';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
 import { observabilityFeatureId } from '../../../common';
 import { paths } from '../../config/paths';
-import type { ObservabilityAppServices } from '../../application/types';
+import { FeedbackButton } from './components/feedback_button';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -37,6 +37,10 @@ const defaultBreadcrumb = i18n.translate('xpack.observability.breadcrumbs.alertD
   defaultMessage: 'Alert details',
 });
 
+export const LOG_DOCUMENT_COUNT_RULE_TYPE_ID = 'logs.alert.document.count';
+export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
+export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';
+
 export function AlertDetails() {
   const {
     cases: {
@@ -46,7 +50,7 @@ export function AlertDetails() {
     http,
     triggersActionsUi: { ruleTypeRegistry },
     uiSettings,
-  } = useKibana<ObservabilityAppServices>().services;
+  } = useKibana().services;
 
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
@@ -111,6 +115,11 @@ export function AlertDetails() {
     );
   const AlertDetailsAppSection = ruleTypeModel ? ruleTypeModel.alertDetailsAppSection : null;
   const timeZone = getTimeZone(uiSettings);
+
+  const showFeedbackButton = alert?.fields[ALERT_RULE_TYPE_ID] === LOG_DOCUMENT_COUNT_RULE_TYPE_ID;
+
+  const feedbackButton = showFeedbackButton ? <FeedbackButton /> : null;
+
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -123,6 +132,7 @@ export function AlertDetails() {
           >
             <HeaderActions alert={alert} />
           </CasesContext>,
+          feedbackButton,
         ],
         bottomBorder: true,
       }}

@@ -26,6 +26,7 @@ export interface CalleeTree {
 
   FileID: string[];
   FrameType: number[];
+  Inline: boolean[];
   ExeFilename: string[];
   AddressOrLine: number[];
   FunctionName: string[];
@@ -42,13 +43,15 @@ export function createCalleeTree(
   stackTraces: Map<StackTraceID, StackTrace>,
   stackFrames: Map<StackFrameID, StackFrame>,
   executables: Map<FileID, Executable>,
-  totalFrames: number
+  totalFrames: number,
+  samplingRate: number
 ): CalleeTree {
   const tree: CalleeTree = {
     Size: 1,
     Edges: new Array(totalFrames),
     FileID: new Array(totalFrames),
     FrameType: new Array(totalFrames),
+    Inline: new Array(totalFrames),
     ExeFilename: new Array(totalFrames),
     AddressOrLine: new Array(totalFrames),
     FunctionName: new Array(totalFrames),
@@ -60,10 +63,14 @@ export function createCalleeTree(
     CountExclusive: new Array(totalFrames),
   };
 
+  // The inverse of the sampling rate is the number with which to multiply the number of
+  // samples to get an estimate of the actual number of samples the backend received.
+  const scalingFactor = 1.0 / samplingRate;
   tree.Edges[0] = new Map<FrameGroupID, NodeID>();
 
   tree.FileID[0] = '';
   tree.FrameType[0] = 0;
+  tree.Inline[0] = false;
   tree.ExeFilename[0] = '';
   tree.AddressOrLine[0] = 0;
   tree.FunctionName[0] = '';
@@ -94,10 +101,12 @@ export function createCalleeTree(
     // e.g. when stopping the host agent or on network errors.
     const stackTrace = stackTraces.get(stackTraceID) ?? emptyStackTrace;
     const lenStackTrace = stackTrace.FrameIDs.length;
-    const samples = events.get(stackTraceID) ?? 0;
+    const samples = Math.floor((events.get(stackTraceID) ?? 0) * scalingFactor);
 
     let currentNode = 0;
 
+    // Increment the count by the number of samples observed, multiplied with the inverse of the
+    // samplingrate (this essentially means scaling up the total samples). It would incur
     tree.CountInclusive[currentNode] += samples;
     tree.CountExclusive[currentNode] = 0;
 
@@ -129,6 +138,7 @@ export function createCalleeTree(
         tree.FunctionOffset[node] = frame.FunctionOffset;
         tree.SourceLine[node] = frame.LineNumber;
         tree.SourceFilename[node] = frame.FileName;
+        tree.Inline[node] = frame.Inline;
         tree.CountInclusive[node] = samples;
         tree.CountExclusive[node] = 0;
 

@@ -7,6 +7,9 @@
  */
 
 // Please also add new aliases to test/scripts/jenkins_storybook.sh
+//
+// If you wish for your Storybook to be built and included in CI, also add your
+// alias to .buildkite/scripts/steps/storybooks/build_and_upload.ts
 export const storybookAliases = {
   apm: 'x-pack/plugins/apm/.storybook',
   canvas: 'x-pack/plugins/canvas/storybook',
@@ -45,6 +48,7 @@ export const storybookAliases = {
   observability: 'x-pack/plugins/observability/.storybook',
   presentation: 'src/plugins/presentation_util/storybook',
   random_sampling: 'x-pack/packages/kbn-random-sampling/.storybook',
+  text_based_editor: 'packages/kbn-text-based-editor/.storybook',
   security_solution: 'x-pack/plugins/security_solution/.storybook',
   security_solution_packages: 'x-pack/packages/security-solution/storybook/config',
   serverless: 'packages/serverless/storybook/config',

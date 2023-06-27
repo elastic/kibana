@@ -54,14 +54,14 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     isNative: true,
     keywords: ['postgresql', 'sql', 'database', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.postgresql.name', {
-      defaultMessage: 'Postgresql',
+      defaultMessage: 'PostgreSQL',
     }),
     serviceType: 'postgresql',
   },
   {
     iconPath: 'azure_blob_storage.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     keywords: ['cloud', 'azure', 'blob', 's3', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.azureBlob.name', {
       defaultMessage: 'Azure Blob Storage',
@@ -71,7 +71,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'confluence_cloud.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     keywords: ['confluence', 'cloud', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.confluence.name', {
       defaultMessage: 'Confluence Cloud & Server',
@@ -91,7 +91,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'jira_cloud.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     keywords: ['jira', 'cloud', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.jira.name', {
       defaultMessage: 'Jira Cloud & Server',
@@ -101,7 +101,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'network_drive.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     keywords: ['network', 'drive', 'file', 'directory', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.networkDrive.name', {
       defaultMessage: 'Network drive',
@@ -129,15 +129,26 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 's3',
   },
   {
-    iconPath: 'sharepoint_online.svg',
-    isBeta: false,
+    iconPath: 'sharepoint.svg',
+    isBeta: true,
     isNative: false,
-    isTechPreview: true,
+    isTechPreview: false,
     keywords: ['sharepoint', 'cloud', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.sharepoint.name', {
-      defaultMessage: 'Sharepoint Online & Server',
+      defaultMessage: 'Sharepoint Server',
     }),
-    serviceType: 'sharepoint',
+    serviceType: 'sharepoint_server',
+  },
+  {
+    iconPath: 'sharepoint_online.svg',
+    isBeta: false,
+    isNative: true,
+    isTechPreview: false,
+    keywords: ['sharepoint', 'office365', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.sharepoint_online.name', {
+      defaultMessage: 'Sharepoint Online',
+    }),
+    serviceType: 'sharepoint_online',
   },
   {
     iconPath: 'custom.svg',

@@ -10,32 +10,32 @@ import { useEffect, useMemo } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-
-import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
-
 import {
-  useColorRange,
-  COLOR_RANGE,
-  COLOR_RANGE_SCALE,
-} from '../../../../../components/color_range_legend';
+  sortExplorationResultsFields,
+  ML__ID_COPY,
+  ML__INCREMENTAL_ID,
+  DEFAULT_RESULTS_FIELD,
+  FEATURE_INFLUENCE,
+  type DataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
 import {
   getFieldType,
   getDataGridSchemasFromFieldTypes,
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
-  UseIndexDataReturnType,
-} from '../../../../../components/data_grid';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
+  type UseIndexDataReturnType,
+} from '@kbn/ml-data-grid';
+
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
+import {
+  useColorRange,
+  COLOR_RANGE,
+  COLOR_RANGE_SCALE,
+} from '../../../../../components/color_range_legend';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
-import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
-import { FEATURE_INFLUENCE } from '../../../../common/constants';
-import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
-import {
-  sortExplorationResultsFields,
-  ML__ID_COPY,
-  ML__INCREMENTAL_ID,
-} from '../../../../common/fields';
+import { getIndexData, getIndexFields } from '../../../../common';
 
 import { getFeatureCount, getOutlierScoreFieldName } from './common';
 import { useExplorationDataGrid } from '../exploration_results_table/use_exploration_data_grid';
@@ -43,7 +43,7 @@ import { useExplorationDataGrid } from '../exploration_results_table/use_explora
 export const useOutlierData = (
   indexPattern: DataView | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
-  searchQuery: SavedSearchQuery
+  searchQuery: estypes.QueryDslQueryContainer
 ): UseIndexDataReturnType => {
   const needsDestIndexFields =
     indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];

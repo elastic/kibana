@@ -20,7 +20,7 @@ import type {
   SingleTimelineResponse,
   SingleTimelineResolveResponse,
   GetTimelinesArgs,
-} from '../../../common/types/timeline';
+} from '../../../common/types/timeline/api';
 import {
   TimelineResponseType,
   TimelineStatus,
@@ -31,7 +31,7 @@ import {
   SingleTimelineResponseType,
   TimelineType,
   ResolvedSingleTimelineResponseType,
-} from '../../../common/types/timeline';
+} from '../../../common/types/timeline/api';
 import {
   TIMELINE_URL,
   TIMELINE_DRAFT_URL,

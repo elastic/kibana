@@ -42,7 +42,7 @@ import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
-import { HeaderActionMenu } from './header_action_menu';
+import { HeaderActionMenu, useHeaderActionMenuMounter } from './header_action_menu';
 import { HeaderExtension } from './header_extension';
 import { HeaderTopBanner } from './header_top_banner';
 import { HeaderMenuButton } from './header_menu_button';
@@ -92,6 +92,7 @@ export function Header({
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [navId] = useState(htmlIdGenerator()());
   const breadcrumbsAppendExtension = useObservable(breadcrumbsAppendExtension$);
+  const headerActionMenuMounter = useHeaderActionMenuMounter(application.currentActionMenu$);
 
   if (!isVisible) {
     return (
@@ -235,7 +236,7 @@ export function Header({
 
             <EuiHeaderSection side="right">
               <EuiHeaderSectionItem border="none">
-                <HeaderActionMenu actionMenu$={application.currentActionMenu$} />
+                <HeaderActionMenu mounter={headerActionMenuMounter} />
               </EuiHeaderSectionItem>
             </EuiHeaderSection>
           </EuiHeader>

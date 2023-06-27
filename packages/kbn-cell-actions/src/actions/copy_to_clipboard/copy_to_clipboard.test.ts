@@ -21,7 +21,12 @@ describe('Default createCopyToClipboardActionFactory', () => {
   });
   const copyToClipboardAction = copyToClipboardActionFactory({ id: 'testAction' });
   const context = {
-    field: { name: 'user.name', value: 'the value', type: 'text' },
+    data: [
+      {
+        field: { name: 'user.name', type: 'text' },
+        value: 'the value',
+      },
+    ],
   } as CellActionExecutionContext;
 
   beforeEach(() => {
@@ -46,6 +51,64 @@ describe('Default createCopyToClipboardActionFactory', () => {
     it('should execute normally', async () => {
       await copyToClipboardAction.execute(context);
       expect(mockCopy).toHaveBeenCalledWith('user.name: "the value"');
+      expect(mockSuccessToast).toHaveBeenCalled();
+    });
+
+    it('should escape value', async () => {
+      await copyToClipboardAction.execute({
+        ...context,
+        data: [
+          {
+            ...context.data[0],
+            value: 'the "value"',
+          },
+        ],
+      });
+      expect(mockCopy).toHaveBeenCalledWith('user.name: "the \\"value\\""');
+      expect(mockSuccessToast).toHaveBeenCalled();
+    });
+
+    it('should support multiple values', async () => {
+      await copyToClipboardAction.execute({
+        ...context,
+        data: [
+          {
+            ...context.data[0],
+            value: ['the "value"', 'another value', 'last value'],
+          },
+        ],
+      });
+      expect(mockCopy).toHaveBeenCalledWith(
+        'user.name: "the \\"value\\"" AND "another value" AND "last value"'
+      );
+      expect(mockSuccessToast).toHaveBeenCalled();
+    });
+
+    it('should support numbers', async () => {
+      await copyToClipboardAction.execute({
+        ...context,
+        data: [
+          {
+            ...context.data[0],
+            value: [1, 2, 3],
+          },
+        ],
+      });
+      expect(mockCopy).toHaveBeenCalledWith('user.name: 1 AND 2 AND 3');
+      expect(mockSuccessToast).toHaveBeenCalled();
+    });
+
+    it('should support booleans', async () => {
+      await copyToClipboardAction.execute({
+        ...context,
+        data: [
+          {
+            ...context.data[0],
+            value: [true, false, true],
+          },
+        ],
+      });
+      expect(mockCopy).toHaveBeenCalledWith('user.name: true AND false AND true');
       expect(mockSuccessToast).toHaveBeenCalled();
     });
   });

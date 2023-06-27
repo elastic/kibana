@@ -5,24 +5,20 @@
  * 2.0.
  */
 
-import {
-  ProcessEvent,
-  ProcessEventAlertCategory,
-  ProcessEventIPAddress,
-} from '../../common/types/process_tree';
+import type { ProcessEvent, ProcessEventIPAddress } from '../../common';
 import { dataOrDash } from './data_or_dash';
 
-export const getAlertCategoryDisplayText = (alert: ProcessEvent, category: string | undefined) => {
+export const getAlertCategoryDisplayText = (alert: ProcessEvent, category?: string) => {
   const destination = alert?.destination;
   const filePath = alert?.file?.path;
 
-  if (filePath && category === ProcessEventAlertCategory.file) return dataOrDash(filePath);
-  if (destination?.address && category === ProcessEventAlertCategory.network)
+  if (filePath && category === 'file') return dataOrDash(filePath);
+  if (destination?.address && category === 'network')
     return dataOrDash(getAlertNetworkDisplay(destination));
   return '';
 };
 
-export const getAlertNetworkDisplay = (destination: ProcessEventIPAddress) => {
+export const getAlertNetworkDisplay = (destination?: ProcessEventIPAddress) => {
   const hasIpAddressPort = !!destination?.address && !!destination?.port;
   const ipAddressPort = `${destination?.address}:${destination?.port}`;
   return `${hasIpAddressPort ? ipAddressPort : destination?.address}`;

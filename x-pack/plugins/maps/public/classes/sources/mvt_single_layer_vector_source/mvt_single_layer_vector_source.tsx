@@ -23,7 +23,6 @@ import {
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import {
   MapExtent,
@@ -233,16 +232,8 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     return false;
   }
 
-  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
-    return {};
-  }
-
-  showJoinEditor(): boolean {
+  supportsJoins(): boolean {
     return false;
-  }
-
-  getJoinsDisabledReason(): string | null {
-    return null;
   }
 
   getFeatureActions(args: GetFeatureActionsArgs): TooltipFeatureAction[] {
@@ -250,8 +241,3 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     return [];
   }
 }
-
-registerSource({
-  ConstructorFunction: MVTSingleLayerVectorSource,
-  type: SOURCE_TYPES.MVT_SINGLE_LAYER,
-});

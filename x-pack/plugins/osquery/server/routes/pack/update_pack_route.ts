@@ -30,7 +30,7 @@ import {
 } from './utils';
 
 import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
-import type { PackSavedObjectAttributes } from '../../common/types';
+import type { PackSavedObject } from '../../common/types';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.put(
@@ -100,7 +100,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       );
 
       if (name) {
-        const conflictingEntries = await savedObjectsClient.find<PackSavedObjectAttributes>({
+        const conflictingEntries = await savedObjectsClient.find<PackSavedObject>({
           type: packSavedObjectType,
           filter: `${packSavedObjectType}.attributes.name: "${name}"`,
         });
@@ -159,7 +159,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
       const references = getUpdatedReferences();
 
-      await savedObjectsClient.update<PackSavedObjectAttributes>(
+      await savedObjectsClient.update<PackSavedObject>(
         packSavedObjectType,
         request.params.id,
         {
@@ -349,7 +349,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
       }
 
-      return response.ok({ body: { data: updatedPackSO } });
+      return response.ok({
+        body: { data: { ...updatedPackSO.attributes, saved_object_id: updatedPackSO.id } },
+      });
     }
   );
 };

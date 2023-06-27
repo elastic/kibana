@@ -8,13 +8,17 @@
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useStateSelector } from '../../state_utils';
+import { PreviewState } from './types';
 
 import { useFieldPreviewContext } from './field_preview_context';
 
+const fetchDocErrorSelector = (state: PreviewState) => state.fetchDocError;
+
 export const FieldPreviewError = () => {
-  const {
-    documents: { fetchDocError },
-  } = useFieldPreviewContext();
+  const { controller } = useFieldPreviewContext();
+
+  const fetchDocError = useStateSelector(controller.state$, fetchDocErrorSelector);
 
   if (fetchDocError === null) {
     return null;

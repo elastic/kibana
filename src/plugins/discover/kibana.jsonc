@@ -20,10 +20,10 @@
       "savedObjects",
       "savedObjectsFinder",
       "savedObjectsManagement",
+      "savedSearch",
       "dataViewFieldEditor",
       "dataViewEditor",
       "expressions",
-      "unifiedFieldList",
       "unifiedSearch",
       "unifiedHistogram"
     ],
@@ -39,8 +39,7 @@
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
-      "unifiedSearch",
-      "savedSearch"
+      "unifiedSearch"
     ],
     "extraPublicDirs": [
       "common"

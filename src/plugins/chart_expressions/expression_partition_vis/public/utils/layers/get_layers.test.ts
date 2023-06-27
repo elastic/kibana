@@ -111,4 +111,57 @@ describe('getLayers', () => {
       ]
     `);
   });
+
+  it('should handle empty slices with default label', () => {
+    const visData = createMockVisData();
+    const visDataWithNullValues = {
+      ...visData,
+      rows: [
+        {
+          'col-0-2': 'Null Airways',
+          'col-1-1': null,
+          'col-2-3': null,
+          'col-3-1': null,
+        },
+      ],
+    };
+
+    const columns: BucketColumns[] = [
+      {
+        id: 'col-0-0',
+        name: 'Normal column',
+        meta: { type: 'murmur3' },
+      },
+      {
+        id: 'col-0-0',
+        name: 'multi-metric column',
+        meta: {
+          type: 'number',
+          sourceParams: {
+            consolidatedMetricsColumn: true,
+          },
+        },
+      },
+    ];
+    const visParams = createMockPieParams();
+    const layers = getLayers(
+      ChartTypes.PIE,
+      columns,
+      visParams,
+      visDataWithNullValues,
+      {},
+      [],
+      getPaletteRegistry(),
+      {},
+      fieldFormatsMock,
+      false,
+      false
+    );
+
+    for (const layer of layers) {
+      expect(layer.groupByRollup(visDataWithNullValues.rows[0], 0)).toEqual('(empty)');
+      expect(layer.showAccessor?.(visDataWithNullValues.rows[0]['col-0-2'])).toEqual(true);
+      expect(layer.nodeLabel?.(visDataWithNullValues.rows[0]['col-0-2'])).toEqual('Null Airways');
+    }
+  });
 });

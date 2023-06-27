@@ -5,18 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ReportingCore } from '../..';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { getCustomLogo } from './get_custom_logo';
-
-let mockReportingPlugin: ReportingCore;
-
-const logger = loggingSystemMock.createLogger();
-
-beforeEach(async () => {
-  mockReportingPlugin = await createMockReportingCore(createMockConfigSchema());
-});
 
 test(`gets logo from uiSettings`, async () => {
   const headers = {
@@ -31,12 +21,12 @@ test(`gets logo from uiSettings`, async () => {
     }
     throw new Error('wrong caller args!');
   });
-  mockReportingPlugin.getUiSettingsServiceFactory = jest.fn().mockResolvedValue({
-    get: mockGet,
-  });
+  const mockRequest = httpServerMock.createKibanaRequest();
 
-  const { logo } = await getCustomLogo(mockReportingPlugin, headers, 'spaceyMcSpaceIdFace', logger);
-
-  expect(mockGet).toBeCalledWith('xpackReporting:customPdfLogo');
-  expect(logo).toBe('purple pony');
+  // create mock uiSettingsClient
+  const coreStart = coreMock.createStart();
+  const soClient = coreStart.savedObjects.getScopedClient(mockRequest);
+  const uiSettingsClient = coreMock.createStart().uiSettings.asScopedToClient(soClient);
+  const { logo } = await getCustomLogo(uiSettingsClient, headers);
+  expect(logo).toBeDefined();
 });

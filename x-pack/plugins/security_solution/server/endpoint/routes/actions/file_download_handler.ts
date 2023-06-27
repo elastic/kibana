@@ -6,7 +6,8 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import { validateActionId, getFileDownloadStream, validateActionFileId } from '../../services';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { validateActionId } from '../../services';
 import { errorHandler } from '../error_handler';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import type { EndpointActionFileDownloadParams } from '../../../../common/endpoint/schema/actions';
@@ -24,6 +25,10 @@ export const registerActionFileDownloadRoutes = (
 ) => {
   const logger = endpointContext.logFactory.get('actionFileDownload');
 
+  // NOTE:
+  // This API (as of today - 2023-06-21) can not be versioned because it is used
+  // to download files from the UI, where its used as part of a `<a>` anchor, which
+  // has no way to define the version header.
   router.get(
     {
       path: ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
@@ -49,14 +54,22 @@ export const getActionFileDownloadRouteHandler = (
   const logger = endpointContext.logFactory.get('actionFileDownload');
 
   return async (context, req, res) => {
-    const { action_id: actionId, file_id: fileId } = req.params;
+    const fleetFiles = await endpointContext.service.getFleetFromHostFilesClient();
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    const { action_id: actionId, file_id: fileId } = req.params;
 
     try {
       await validateActionId(esClient, actionId);
-      await validateActionFileId(esClient, logger, fileId, actionId);
+      const file = await fleetFiles.get(fileId);
 
-      const { stream, fileName } = await getFileDownloadStream(esClient, logger, fileId);
+      if (file.id !== fileId) {
+        throw new CustomHttpRequestError(
+          `Invalid file id [${fileId}] for action [${actionId}]`,
+          400
+        );
+      }
+
+      const { stream, fileName } = await fleetFiles.download(fileId);
 
       return res.ok({
         body: stream,

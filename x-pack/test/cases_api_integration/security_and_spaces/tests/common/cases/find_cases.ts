@@ -8,7 +8,7 @@
 import { v1 as uuidv1 } from 'uuid';
 
 import expect from '@kbn/expect';
-import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import { CASES_URL, MAX_CATEGORY_FILTER_LENGTH } from '@kbn/cases-plugin/common/constants';
 import { Case, CaseSeverity, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -92,6 +92,29 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('can filter by reserved kql characters in tags', async () => {
+        const tagsColon = ['super:bad:case'];
+        const tagsSlashQuote = ['awesome\\"'];
+
+        const postedCase1 = await createCase(supertest, { ...postCaseReq, tags: tagsSlashQuote });
+        const postedCase2 = await createCase(supertest, {
+          ...postCaseReq,
+          tags: tagsColon,
+        });
+
+        const cases = await findCases({
+          supertest,
+          query: { tags: [...tagsColon, ...tagsSlashQuote] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 2,
+          cases: [postedCase1, postedCase2],
+          count_open_cases: 2,
+        });
+      });
+
       it('filters by status', async () => {
         await createCase(supertest, postCaseReq);
         const toCloseCase = await createCase(supertest, postCaseReq);
@@ -156,6 +179,38 @@ export default ({ getService }: FtrProviderContext): void => {
           ...findCasesResp,
           total: 0,
           cases: [],
+        });
+      });
+
+      it('filters by a single category', async () => {
+        await createCase(supertest, postCaseReq);
+        const foobarCategory = await createCase(supertest, { ...postCaseReq, category: 'foobar' });
+
+        const cases = await findCases({ supertest, query: { category: ['foobar'] } });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 1,
+          cases: [foobarCategory],
+          count_open_cases: 1,
+        });
+      });
+
+      it('filters by multiple categories', async () => {
+        await createCase(supertest, postCaseReq);
+        const foobarCategory = await createCase(supertest, { ...postCaseReq, category: 'foobar' });
+        const otherCategory = await createCase(supertest, { ...postCaseReq, category: 'other' });
+
+        const cases = await findCases({
+          supertest,
+          query: { category: ['foobar', 'other'] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 2,
+          cases: [foobarCategory, otherCategory],
+          count_open_cases: 2,
         });
       });
 
@@ -234,50 +289,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(cases.count_in_progress_cases).to.eql(1);
       });
 
-      it('returns the correct fields', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        // all fields that contain the UserRt definition must be included here (aka created_by, closed_by, and updated_by)
-        // see https://github.com/elastic/kibana/issues/139503
-        const queryFields: Array<keyof Case | Array<keyof Case>> = [
-          ['title', 'created_by', 'closed_by', 'updated_by'],
-          ['title', 'description', 'created_by', 'closed_by', 'updated_by'],
-        ];
-
-        for (const fields of queryFields) {
-          const cases = await findCases({ supertest, query: { fields } });
-          const fieldsAsArray = Array.isArray(fields) ? fields : [fields];
-
-          const expectedValues = fieldsAsArray.reduce(
-            (theCase, field) => ({
-              ...theCase,
-              [field]: postedCase[field],
-            }),
-            {}
-          );
-
-          expect(cases).to.eql({
-            ...findCasesResp,
-            total: 1,
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                external_service: postedCase.external_service,
-                owner: postedCase.owner,
-                connector: postedCase.connector,
-                severity: postedCase.severity,
-                status: postedCase.status,
-                comments: [],
-                totalAlerts: 0,
-                totalComment: 0,
-                ...expectedValues,
-              },
-            ],
-            count_open_cases: 1,
-          });
-        }
-      });
-
       it('sorts by title', async () => {
         const case3 = await createCase(supertest, { ...postCaseReq, title: 'c' });
         const case2 = await createCase(supertest, { ...postCaseReq, title: 'b' });
@@ -336,6 +347,12 @@ export default ({ getService }: FtrProviderContext): void => {
           cases: [case1, case2, case3, case4],
           count_open_cases: 4,
         });
+      });
+
+      it('unhappy path - 400s when more than the maximum category fields are supplied', async () => {
+        const category = Array(MAX_CATEGORY_FILTER_LENGTH + 1).fill('foobar');
+
+        await findCases({ supertest, query: { category }, expectedHttpCode: 400 });
       });
 
       describe('search and searchField', () => {
@@ -810,45 +827,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       }
 
-      it('should return the correct cases when trying to exploit RBAC through the search query parameter', async () => {
-        await Promise.all([
-          // super user creates a case with owner securitySolutionFixture
-          createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
-            200,
-            {
-              user: superUser,
-              space: 'space1',
-            }
-          ),
-          // super user creates a case with owner observabilityFixture
-          createCase(
-            supertestWithoutAuth,
-            getPostCaseRequest({ owner: 'observabilityFixture' }),
-            200,
-            {
-              user: superUser,
-              space: 'space1',
-            }
-          ),
-        ]);
-
-        const res = await findCases({
-          supertest: supertestWithoutAuth,
-          query: {
-            search: 'securitySolutionFixture observabilityFixture',
-            searchFields: 'owner',
-          },
-          auth: {
-            user: secOnly,
-            space: 'space1',
-          },
-        });
-
-        ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
-      });
-
       // This test is to prevent a future developer to add the filter attribute without taking into consideration
       // the authorizationFilter produced by the cases authorization class
       it('should NOT allow to pass a filter query parameter', async () => {
@@ -859,6 +837,14 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send()
           .expect(400);
+      });
+
+      it('should NOT allow to pass non-valid fields query parameter', async () => {
+        await findCases({
+          supertest,
+          query: { searchFields: ['foobar'], search: 'some search string*' },
+          expectedHttpCode: 400,
+        });
       });
 
       // This test ensures that the user is not allowed to define the namespaces query param
@@ -911,7 +897,6 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest: supertestWithoutAuth,
           query: {
             owner: 'securitySolutionFixture',
-            searchFields: 'owner',
           },
           auth: {
             user: obsSec,

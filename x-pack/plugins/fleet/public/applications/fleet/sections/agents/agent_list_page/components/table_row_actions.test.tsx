@@ -38,7 +38,8 @@ function renderTableRowActions({
       onReassignClick={jest.fn()}
       onRequestDiagnosticsClick={jest.fn()}
       onUnenrollClick={jest.fn()}
-      onUpgradeClick={jest.fn}
+      onUpgradeClick={jest.fn()}
+      onGetUninstallCommandClick={jest.fn()}
     />
   );
 

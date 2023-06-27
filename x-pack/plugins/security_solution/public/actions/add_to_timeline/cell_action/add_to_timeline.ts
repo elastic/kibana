@@ -38,24 +38,52 @@ export const createAddToTimelineCellActionFactory = createCellActionFactory(
       getIconType: () => ADD_TO_TIMELINE_ICON,
       getDisplayName: () => ADD_TO_TIMELINE,
       getDisplayNameTooltip: () => ADD_TO_TIMELINE,
-      isCompatible: async ({ field }) =>
-        fieldHasCellActions(field.name) && isValidDataProviderField(field.name, field.type),
-      execute: async ({ field, metadata }) => {
-        const dataProviders =
+      isCompatible: async ({ data }) => {
+        const field = data[0]?.field;
+
+        return (
+          data.length === 1 && // TODO Add support for multiple values
+          fieldHasCellActions(field.name) &&
+          isValidDataProviderField(field.name, field.type)
+        );
+      },
+      execute: async ({ data, metadata }) => {
+        const { name, type } = data[0]?.field;
+        const value = data[0]?.value;
+
+        const values = Array.isArray(value) ? value : [value];
+        const [firstValue, ...andValues] = values;
+        const [dataProvider] =
           createDataProviders({
             contextId: TimelineId.active,
-            fieldType: field.type,
-            values: field.value,
-            field: field.name,
+            fieldType: type,
+            values: firstValue,
+            field: name,
             negate: metadata?.negateFilters === true,
           }) ?? [];
 
-        if (dataProviders.length > 0) {
-          store.dispatch(addProvider({ id: TimelineId.active, providers: dataProviders }));
+        if (dataProvider) {
+          andValues.forEach((andValue) => {
+            const [andDataProvider] =
+              createDataProviders({
+                contextId: TimelineId.active,
+                fieldType: type,
+                values: andValue,
+                field: name,
+                negate: metadata?.negateFilters === true,
+              }) ?? [];
+            if (andDataProvider) {
+              dataProvider.and.push(andDataProvider);
+            }
+          });
+        }
+
+        if (dataProvider) {
+          store.dispatch(addProvider({ id: TimelineId.active, providers: [dataProvider] }));
 
           let messageValue = '';
-          if (field.value != null) {
-            messageValue = Array.isArray(field.value) ? field.value.join(', ') : field.value;
+          if (value != null) {
+            messageValue = Array.isArray(value) ? value.join(', ') : value.toString();
           }
           notificationsService.toasts.addSuccess({
             title: ADD_TO_TIMELINE_SUCCESS_TITLE(messageValue),

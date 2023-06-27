@@ -10,29 +10,31 @@ import { createFilter } from './create_filter';
 
 const field = 'field.name';
 const value = 'the-value';
+const numberValue = 123;
+const booleanValue = true;
 
 describe('createFilter', () => {
   it.each([
     { caseName: 'string', caseValue: value },
-    { caseName: 'array', caseValue: [value] },
-  ])('should return filter with $caseName value', ({ caseValue }) => {
+    { caseName: 'string array', caseValue: [value] },
+    { caseName: 'number', caseValue: numberValue, query: numberValue.toString() },
+    { caseName: 'number array', caseValue: [numberValue], query: numberValue.toString() },
+    { caseName: 'boolean', caseValue: booleanValue, query: booleanValue.toString() },
+    { caseName: 'boolean array', caseValue: [booleanValue], query: booleanValue.toString() },
+  ])('should return filter with $caseName value', ({ caseValue, query = value }) => {
     expect(createFilter({ key: field, value: caseValue, negate: false })).toEqual({
       meta: {
-        alias: null,
-        disabled: false,
         type: 'phrase',
         key: field,
         negate: false,
-        value,
         params: {
-          query: value,
+          query,
         },
       },
       query: {
-        match: {
+        match_phrase: {
           [field]: {
-            query: value,
-            type: 'phrase',
+            query,
           },
         },
       },
@@ -41,27 +43,52 @@ describe('createFilter', () => {
 
   it.each([
     { caseName: 'string', caseValue: value },
-    { caseName: 'array', caseValue: [value] },
-  ])('should return negate filter with $caseName value', ({ caseValue }) => {
+    { caseName: 'string array', caseValue: [value] },
+    { caseName: 'number', caseValue: numberValue, query: numberValue.toString() },
+    { caseName: 'number array', caseValue: [numberValue], query: numberValue.toString() },
+    { caseName: 'boolean', caseValue: booleanValue, query: booleanValue.toString() },
+    { caseName: 'boolean array', caseValue: [booleanValue], query: booleanValue.toString() },
+  ])('should return negate filter with $caseName value', ({ caseValue, query = value }) => {
     expect(createFilter({ key: field, value: caseValue, negate: true })).toEqual({
       meta: {
-        alias: null,
-        disabled: false,
         type: 'phrase',
         key: field,
         negate: true,
-        value,
         params: {
-          query: value,
+          query,
         },
       },
       query: {
-        match: {
+        match_phrase: {
           [field]: {
-            query: value,
-            type: 'phrase',
+            query,
           },
         },
+      },
+    });
+  });
+
+  it.each([
+    { caseName: 'non-negated', negate: false },
+    { caseName: 'negated', negate: true },
+  ])('should return combined filter with multiple $caseName values', ({ negate }) => {
+    const value2 = 'the-value2';
+    expect(createFilter({ key: field, value: [value, value2], negate })).toEqual({
+      meta: {
+        type: 'combined',
+        relation: 'AND',
+        key: field,
+        negate,
+        params: [
+          {
+            meta: { type: 'phrase', key: field, params: { query: value } },
+            query: { match_phrase: { [field]: { query: value } } },
+          },
+          {
+            meta: { type: 'phrase', key: field, params: { query: value2 } },
+            query: { match_phrase: { [field]: { query: value2 } } },
+          },
+        ],
       },
     });
   });
@@ -79,8 +106,6 @@ describe('createFilter', () => {
         },
       },
       meta: {
-        alias: null,
-        disabled: false,
         key: field,
         negate: false,
         type: 'exists',
@@ -102,8 +127,6 @@ describe('createFilter', () => {
         },
       },
       meta: {
-        alias: null,
-        disabled: false,
         key: field,
         negate: true,
         type: 'exists',

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { rootRequest } from '../common';
+
 const kibanaSettings = (body: Cypress.RequestBody) => {
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: 'api/kibana/settings',
     body,

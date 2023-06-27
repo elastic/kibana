@@ -6,10 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
+import type { PieConfig } from '../config';
+
+interface PluginSetupDependencies {
+  visualizations: VisualizationsServerSetup;
+}
 
 export class VisTypePieServerPlugin implements Plugin<object, object> {
-  public setup(core: CoreSetup) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.initializerContext = initializerContext;
+  }
+
+  public setup(core: CoreSetup, plugins: PluginSetupDependencies) {
+    const { readOnly } = this.initializerContext.config.get<PieConfig>();
+    if (readOnly) {
+      plugins.visualizations.registerReadOnlyVisType('pie');
+    }
+
     return {};
   }
 

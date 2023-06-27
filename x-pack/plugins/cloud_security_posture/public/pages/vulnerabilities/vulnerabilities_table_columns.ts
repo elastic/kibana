@@ -15,7 +15,8 @@ export const vulnerabilitiesColumns = {
   cvss: 'vulnerability.score.base',
   resource: 'resource.name',
   severity: 'vulnerability.severity',
-  package_version: 'vulnerability.package.name',
+  package: 'vulnerability.package.name',
+  version: 'vulnerability.package.version',
   fix_version: 'vulnerability.package.fixed_version',
 };
 
@@ -78,9 +79,17 @@ export const getVulnerabilitiesColumnsGrid = (
   },
   {
     ...defaultColumnProps(),
-    id: vulnerabilitiesColumns.package_version,
-    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.packageAndVersion', {
-      defaultMessage: 'Package and Version',
+    id: vulnerabilitiesColumns.package,
+    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.package', {
+      defaultMessage: 'Package',
+    }),
+    cellActions,
+  },
+  {
+    ...defaultColumnProps(),
+    id: vulnerabilitiesColumns.version,
+    displayAsText: i18n.translate('xpack.csp.vulnerabilityTable.column.version', {
+      defaultMessage: 'Version',
     }),
     cellActions,
   },

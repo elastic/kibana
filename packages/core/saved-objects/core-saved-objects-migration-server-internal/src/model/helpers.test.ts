@@ -18,6 +18,8 @@ import {
   MigrationType,
   getTempIndexName,
   createBulkIndexOperationTuple,
+  hasLaterVersionAlias,
+  aliasVersion,
 } from './helpers';
 
 describe('addExcludedTypesToBoolQuery', () => {
@@ -183,6 +185,24 @@ describe('addMustNotClausesToBoolQuery', () => {
   });
 });
 
+describe('aliasVersion', () => {
+  test('empty', () => {
+    expect(aliasVersion(undefined)).toEqual(undefined);
+  });
+
+  test('not a version alias', () => {
+    expect(aliasVersion('.kibana')).toEqual(undefined);
+  });
+
+  test('supports arbitrary names and versions', () => {
+    expect(aliasVersion('.kibana_task_manager_7.17.0')).toEqual('7.17.0');
+  });
+
+  test('supports index names too', () => {
+    expect(aliasVersion('.kibana_8.8.0_001')).toEqual('8.8.0');
+  });
+});
+
 describe('getAliases', () => {
   it('returns a right record of alias to index name pairs', () => {
     const indices: FetchIndexResponse = {
@@ -270,6 +290,76 @@ describe('versionMigrationCompleted', () => {
   });
   it('returns false if neither the version or current alias exists', () => {
     expect(versionMigrationCompleted('.current-alias', '.version-alias', {})).toBe(false);
+  });
+});
+
+describe('hasLaterVersionAlias', () => {
+  test('undefined', () => {
+    expect(hasLaterVersionAlias('8.8.0', undefined)).toEqual(undefined);
+  });
+
+  test('empty', () => {
+    expect(hasLaterVersionAlias('8.8.0', {})).toEqual(undefined);
+  });
+
+  test('only previous version alias', () => {
+    expect(
+      hasLaterVersionAlias('8.8.0', {
+        '.kibana_7.17.0': '.kibana_7.17.0_001',
+        '.kibana_8.6.0': '.kibana_8.6.0_001',
+        '.kibana_8.7.2': '.kibana_8.7.2_001',
+      })
+    ).toEqual(undefined);
+  });
+
+  test('current version alias', () => {
+    expect(
+      hasLaterVersionAlias('8.8.0', {
+        '.kibana_7.17.0': '.kibana_7.17.0_001',
+        '.kibana_8.6.0': '.kibana_8.6.0_001',
+        '.kibana_8.7.2': '.kibana_8.7.2_001',
+        '.kibana_8.8.0': '.kibana_8.8.0_001',
+      })
+    ).toEqual(undefined);
+  });
+
+  test('next build alias', () => {
+    expect(
+      hasLaterVersionAlias('8.8.0', {
+        '.kibana_7.17.0': '.kibana_7.17.0_001',
+        '.kibana_8.6.0': '.kibana_8.6.0_001',
+        '.kibana_8.7.2': '.kibana_8.7.2_001',
+        '.kibana_8.8.0': '.kibana_8.8.0_001',
+        '.kibana_8.8.1': '.kibana_8.8.0_001',
+      })
+    ).toEqual('.kibana_8.8.1');
+  });
+
+  test('next minor alias', () => {
+    expect(
+      hasLaterVersionAlias('8.8.1', {
+        '.kibana_8.9.0': '.kibana_8.9.0_001',
+        '.kibana_7.17.0': '.kibana_7.17.0_001',
+        '.kibana_8.6.0': '.kibana_8.6.0_001',
+        '.kibana_8.7.2': '.kibana_8.7.2_001',
+        '.kibana_8.8.0': '.kibana_8.8.0_001',
+        '.kibana_8.8.1': '.kibana_8.8.0_001',
+      })
+    ).toEqual('.kibana_8.9.0');
+  });
+
+  test('multiple future versions, return most recent alias', () => {
+    expect(
+      hasLaterVersionAlias('7.17.0', {
+        '.kibana_8.9.0': '.kibana_8.9.0_001',
+        '.kibana_8.9.1': '.kibana_8.9.0_001',
+        '.kibana_7.17.0': '.kibana_7.17.0_001',
+        '.kibana_8.6.0': '.kibana_8.6.0_001',
+        '.kibana_8.7.2': '.kibana_8.7.2_001',
+        '.kibana_8.8.0': '.kibana_8.8.0_001',
+        '.kibana_8.8.1': '.kibana_8.8.0_001',
+      })
+    ).toEqual('.kibana_8.9.1');
   });
 });
 

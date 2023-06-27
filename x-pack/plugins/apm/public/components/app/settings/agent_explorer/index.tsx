@@ -143,15 +143,6 @@ export function AgentExplorer() {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiText color="subdued">
-          {i18n.translate('xpack.apm.settings.agentExplorer.descriptionText', {
-            defaultMessage:
-              'Agent Explorer provides an inventory and details of deployed Agents.',
-          })}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiSpacer size="s" />
-      <EuiFlexItem grow={false}>
         <EuiTitle>
           <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -166,6 +157,15 @@ export function AgentExplorer() {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiTitle>
+      </EuiFlexItem>
+      <EuiSpacer size="s" />
+      <EuiFlexItem grow={false}>
+        <EuiText color="subdued">
+          {i18n.translate('xpack.apm.settings.agentExplorer.descriptionText', {
+            defaultMessage:
+              'Agent Explorer Technical Preview provides an inventory and details of deployed Agents.',
+          })}
+        </EuiText>
       </EuiFlexItem>
       <EuiSpacer />
       <EuiFlexItem grow={false}>

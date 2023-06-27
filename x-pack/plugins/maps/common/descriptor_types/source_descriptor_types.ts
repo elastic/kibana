@@ -111,9 +111,18 @@ export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
   destGeoField: string;
 };
 
-export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
-  term: string; // term field name
+export type AbstractESJoinSourceDescriptor = AbstractESAggSourceDescriptor & {
   whereQuery?: Query;
+};
+
+export type ESDistanceSourceDescriptor = AbstractESJoinSourceDescriptor & {
+  distance: number; // km
+  geoField: string;
+  type: SOURCE_TYPES.ES_DISTANCE_SOURCE;
+};
+
+export type ESTermSourceDescriptor = AbstractESJoinSourceDescriptor & {
+  term: string; // term field name
   size?: number;
   type: SOURCE_TYPES.ES_TERM_SOURCE;
 };
@@ -183,4 +192,7 @@ export type TableSourceDescriptor = {
   term: string;
 };
 
-export type JoinSourceDescriptor = ESTermSourceDescriptor | TableSourceDescriptor;
+export type JoinSourceDescriptor =
+  | ESDistanceSourceDescriptor
+  | ESTermSourceDescriptor
+  | TableSourceDescriptor;

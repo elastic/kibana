@@ -52,7 +52,8 @@ const ruleType: NormalizedRuleType<
   AlertInstanceState,
   AlertInstanceContext,
   'default' | 'other-group',
-  'recovered'
+  'recovered',
+  {}
 > = {
   id: 'test',
   name: 'Test',
@@ -1646,6 +1647,24 @@ describe('Execution Handler', () => {
           },
         ]
       `);
+    });
+
+    it('populates the rule.url in the action params when the base url contains pathname', async () => {
+      const execParams = {
+        ...defaultExecutionParams,
+        rule: ruleWithUrl,
+        taskRunnerContext: {
+          ...defaultExecutionParams.taskRunnerContext,
+          kibanaBaseUrl: 'http://localhost:12345/kbn',
+        },
+      };
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
+      await executionHandler.run(generateAlert({ id: 1 }));
+
+      expect(injectActionParamsMock.mock.calls[0][0].actionParams).toEqual({
+        val: 'rule url: http://localhost:12345/kbn/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1',
+      });
     });
 
     it('populates the rule.url with start and stop time when available', async () => {

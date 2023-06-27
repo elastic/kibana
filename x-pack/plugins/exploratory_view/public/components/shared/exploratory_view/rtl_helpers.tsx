@@ -14,8 +14,7 @@ import {
   RenderOptions,
   MatcherFunction,
 } from '@testing-library/react';
-import { Router } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Router, Route } from '@kbn/shared-ux-router';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -30,6 +29,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { rumFieldFormats } from './configurations/rum/field_formats';
 import { ExploratoryViewPublicPluginsStart } from '../../../plugin';
 import * as useAppDataViewHook from './hooks/use_app_data_view';
@@ -127,6 +127,14 @@ export const mockCore: () => Partial<CoreStart & ExploratoryViewPublicPluginsSta
       ...defaultCore.uiSettings,
       get: getSetting,
       get$: setSetting$,
+    },
+    settings: {
+      ...settingsServiceMock.createStartContract(),
+      client: {
+        ...settingsServiceMock.createStartContract().client,
+        get: getSetting,
+        get$: setSetting$,
+      },
     },
     lens: lensPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),

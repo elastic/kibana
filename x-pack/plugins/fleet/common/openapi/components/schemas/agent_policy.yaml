@@ -33,7 +33,7 @@ properties:
   inactivity_timeout:
     type: number
   package_policies:
-    description: This field is present only when retrieving a single agent policy, or when retrieving a list of agent policy with the ?full=true parameter
+    description: This field is present only when retrieving a single agent policy, or when retrieving a list of agent policies with the ?full=true parameter
     type: array
     items:
       $ref: ./package_policy.yaml
@@ -58,6 +58,13 @@ properties:
       required:
         - name
         - enabled
+  is_protected:
+    description: Indicates whether the agent policy has tamper protection enabled. Default false.
+    type: boolean
+  overrides:
+    type: object
+    description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
+    nullable: true
 required:
   - id
   - status

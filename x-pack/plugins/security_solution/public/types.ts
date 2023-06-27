@@ -10,6 +10,7 @@ import type { BehaviorSubject, Observable } from 'rxjs';
 import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { NewsfeedPublicPluginStart } from '@kbn/newsfeed-plugin/public';
@@ -59,7 +60,6 @@ import type { Overview } from './overview';
 import type { Rules } from './rules';
 import type { Timelines } from './timelines';
 import type { Management } from './management';
-import type { LandingPages } from './landing_pages';
 import type { CloudSecurityPosture } from './cloud_security_posture';
 import type { CloudDefend } from './cloud_defend';
 import type { ThreatIntelligence } from './threat_intelligence';
@@ -69,6 +69,7 @@ import type { NavigationLink } from './common/links';
 
 import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
+import type { UpsellingService } from './common/lib/upsellings';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -80,6 +81,15 @@ export interface SetupPlugins {
   ml?: MlPluginSetup;
 }
 
+/**
+ * IMPORTANT - PLEASE READ: When adding new plugins to the
+ * security solution, please ensure you add that plugin
+ * name to the kibana.jsonc file located in ../kibana.jsonc
+ *
+ * Without adding the plugin name there, the plugin will not
+ * fulfill at runtime, despite the types showing up correctly
+ * in the code.
+ */
 export interface StartPlugins {
   cases: CasesUiStart;
   data: DataPublicPluginStart;
@@ -109,6 +119,7 @@ export interface StartPlugins {
   threatIntelligence: ThreatIntelligencePluginStart;
   cloudExperiments?: CloudExperimentsPluginStart;
   dataViews: DataViewsServicePublic;
+  fieldFormats: FieldFormatsStartCommon;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -133,16 +144,20 @@ export type StartServices = CoreStart &
     };
     savedObjectsManagement: SavedObjectsManagementPluginStart;
     isSidebarEnabled$: BehaviorSubject<boolean>;
+    getStartedComponent$: BehaviorSubject<React.ComponentType | null>;
+    upselling: UpsellingService;
     telemetry: TelemetryClientStart;
   };
 
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
+  upselling: UpsellingService;
 }
 
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
+  setGetStartedPage: (getStartedComponent: React.ComponentType) => void;
 }
 
 export interface AppObservableLibs {
@@ -161,7 +176,6 @@ export interface SubPlugins {
   exceptions: Exceptions;
   explore: Explore;
   kubernetes: Kubernetes;
-  landingPages: LandingPages;
   management: Management;
   overview: Overview;
   rules: Rules;
@@ -179,7 +193,6 @@ export interface StartedSubPlugins {
   exceptions: ReturnType<Exceptions['start']>;
   explore: ReturnType<Explore['start']>;
   kubernetes: ReturnType<Kubernetes['start']>;
-  landingPages: ReturnType<LandingPages['start']>;
   management: ReturnType<Management['start']>;
   overview: ReturnType<Overview['start']>;
   rules: ReturnType<Rules['start']>;

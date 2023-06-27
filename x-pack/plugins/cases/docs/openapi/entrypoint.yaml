@@ -39,6 +39,8 @@ paths:
     $ref: 'paths/s@{spaceid}@api@cases@{caseid}@alerts.yaml'
   '/s/{spaceId}/api/cases/{caseId}/comments':
     $ref: 'paths/s@{spaceid}@api@cases@{caseid}@comments.yaml'
+  '/s/{spaceId}/api/cases/{caseId}/comments/_find':
+    $ref: 'paths/s@{spaceid}@api@cases@{caseid}@comments@_find.yaml'
   '/s/{spaceId}/api/cases/{caseId}/comments/{commentId}':
     $ref: 'paths/s@{spaceid}@api@cases@{caseid}@comments@{commentid}.yaml'
   '/s/{spaceId}/api/cases/{caseId}/connector/{connectorId}/_push':

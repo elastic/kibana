@@ -110,9 +110,13 @@ export interface ResolvedCase {
   aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
 }
 
+export type SortOrder = 'asc' | 'desc';
+
+export const SORT_ORDER_VALUES: SortOrder[] = ['asc', 'desc'];
+
 export interface SortingParams {
   sortField: SortFieldCase;
-  sortOrder: 'asc' | 'desc';
+  sortOrder: SortOrder;
 }
 
 export interface QueryParams extends SortingParams {
@@ -141,6 +145,7 @@ export interface FilterOptions {
   assignees: Array<string | null> | null;
   reporters: User[];
   owner: string[];
+  category: string[];
 }
 export type PartialFilterOptions = Partial<FilterOptions>;
 
@@ -160,6 +165,7 @@ export enum SortFieldCase {
   severity = 'severity',
   status = 'status',
   title = 'title',
+  category = 'category',
 }
 
 export type CaseUser = SnakeToCamelCase<User>;
@@ -170,7 +176,7 @@ export interface FetchCasesProps extends ApiProps {
 }
 
 export interface ApiProps {
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export interface ActionLicense {
@@ -188,7 +194,15 @@ export interface FieldMappings {
 
 export type UpdateKey = keyof Pick<
   CasePatchRequest,
-  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings' | 'severity' | 'assignees'
+  | 'connector'
+  | 'description'
+  | 'status'
+  | 'tags'
+  | 'title'
+  | 'settings'
+  | 'severity'
+  | 'assignees'
+  | 'category'
 >;
 
 export interface UpdateByKey {

@@ -15,8 +15,15 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   return {
-    clickSavedViewsButton() {
-      return testSubjects.click('savedViews-openPopover');
+    async clickSavedViewsButton() {
+      const button = await testSubjects.find('savedViews-openPopover');
+
+      await retry.waitFor('Wait for button to be enabled', async () => {
+        const isDisabled = Boolean(await button.getAttribute('disabled'));
+        return !isDisabled;
+      });
+
+      return button.click();
     },
     pressEsc() {
       return browser.pressKeys([Key.ESCAPE]);
@@ -32,7 +39,6 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
     },
 
     async getManageViewsEntries() {
-      await this.clickSavedViewsButton();
       await this.clickManageViewsButton();
       return testSubjects.findAll('infraRenderNameButton');
     },
@@ -52,13 +58,11 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
     },
 
     async createView(name: string) {
-      await this.clickSavedViewsButton();
       await this.clickSaveNewViewButton();
       await this.createNewSavedView(name);
     },
 
     async updateView(name: string) {
-      await this.clickSavedViewsButton();
       await this.clickUpdateViewButton();
       await this.createNewSavedView(name);
     },

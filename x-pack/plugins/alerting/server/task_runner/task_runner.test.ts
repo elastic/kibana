@@ -280,6 +280,7 @@ describe('Task Runner', () => {
     expect(call.rule.ruleTypeName).toBe('My test rule');
     expect(call.rule.actions).toEqual(RULE_ACTIONS);
     expect(call.services.alertFactory.create).toBeTruthy();
+    expect(call.services.alertsClient).toBe(null);
     expect(call.services.scopedClusterClient).toBeTruthy();
     expect(call.services).toBeTruthy();
 
@@ -318,35 +319,6 @@ describe('Task Runner', () => {
     expect(
       jest.requireMock('../lib/wrap_scoped_cluster_client').createWrappedScopedClusterClientFactory
     ).toHaveBeenCalled();
-  });
-
-  test('checks alertsService context initialized if rule type has registered alerts with framework', async () => {
-    const ruleTypeWithAlerts = {
-      ...ruleType,
-      alerts: { context: 'test', mappings: { fieldMap: {} } },
-    };
-    ruleTypeRegistry.get.mockReturnValue(ruleTypeWithAlerts);
-    const taskRunner = new TaskRunner(
-      ruleTypeWithAlerts,
-      {
-        ...mockedTaskInstance,
-        state: {
-          ...mockedTaskInstance.state,
-          previousStartedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-        },
-      },
-      taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
-    );
-    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
-
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
-    const runnerResult = await taskRunner.run();
-    expect(runnerResult).toEqual(generateRunnerResult({ state: true, history: [true] }));
-
-    expect(ruleType.executor).toHaveBeenCalledTimes(1);
-    expect(alertsService.getContextInitializationPromise).toHaveBeenCalledWith('test', 'default');
   });
 
   test.each(ephemeralTestParams)(
@@ -3139,6 +3111,7 @@ describe('Task Runner', () => {
         },
         timings: {
           claim_to_start_duration_ms: 0,
+          persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,
@@ -3171,6 +3144,7 @@ describe('Task Runner', () => {
         },
         timings: {
           claim_to_start_duration_ms: 0,
+          persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,
@@ -3199,6 +3173,7 @@ describe('Task Runner', () => {
         },
         timings: {
           claim_to_start_duration_ms: 0,
+          persist_alerts_duration_ms: 0,
           prepare_rule_duration_ms: 0,
           process_alerts_duration_ms: 0,
           process_rule_duration_ms: 0,

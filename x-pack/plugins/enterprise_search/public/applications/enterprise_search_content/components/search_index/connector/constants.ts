@@ -90,7 +90,15 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     docsUrl: docLinks.connectorsSharepoint,
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.sharepoint,
+    platinumOnly: true,
+  },
+  sharepoint_online: {
+    docsUrl: docLinks.connectorsSharepointOnline,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
     icon: CONNECTOR_ICONS.sharepoint_online,
+    platinumOnly: true,
   },
 };
 
@@ -104,3 +112,5 @@ export const CONNECTORS = CONNECTOR_DEFINITIONS.map((connector) => ({
 export const CUSTOM_CONNECTORS = CONNECTORS.filter(({ isNative }) => !isNative);
 
 export const NATIVE_CONNECTORS = CONNECTORS.filter(({ isNative }) => isNative);
+
+export const BETA_CONNECTORS = CONNECTORS.filter(({ isBeta }) => isBeta);

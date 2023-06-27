@@ -7,50 +7,108 @@
 
 import { CoreStart } from '@kbn/core/public';
 import {
-  ChromeNavigationNodeViewModel,
-  Navigation,
+  DefaultNavigation,
   NavigationKibanaProvider,
+  NavigationTreeDefinition,
+  getPresets,
 } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 
-const navItems: ChromeNavigationNodeViewModel[] = [
-  {
-    title: '',
-    id: 'root',
-    items: [
-      { id: 'overview', title: 'Overview', href: '/app/enterprise_search/overview' },
-      { id: 'indices', title: 'Indices', href: '/app/enterprise_search/content/search_indices' },
-      { id: 'engines', title: 'Engines', href: '/app/enterprise_search/content/engines' },
-      { id: 'api_keys', title: 'API keys', href: '/app/management/security/api_keys' },
-      {
-        id: 'ingest_pipelines',
-        title: 'Ingest pipelines',
-        href: '/app/management/ingest/ingest_pipelines',
-      },
-    ],
-  },
-];
-
-export const createServerlessSearchSideNavComponent = (core: CoreStart) => () => {
-  // Currently, this allows the "Search" section of the side nav to render as pre-expanded.
-  // This will soon be powered from state received from core.chrome
-  const activeNavItemId = 'search_project_nav.root';
-
-  return (
-    <NavigationKibanaProvider core={core}>
-      <Navigation
-        navigationTree={[
-          {
-            id: 'search_project_nav',
-            items: navItems,
-            title: 'Search',
-            icon: 'logoEnterpriseSearch',
-          },
-        ]}
-        activeNavItemId={activeNavItemId}
-        homeHref="/app/enterprise_search/content/setup_guide"
-        linkToCloud="projects"
-      />
-    </NavigationKibanaProvider>
-  );
+const navigationTree: NavigationTreeDefinition = {
+  body: [
+    { type: 'recentlyAccessed' },
+    {
+      type: 'navGroup',
+      id: 'search_project_nav',
+      title: 'Elasticsearch',
+      icon: 'logoElasticsearch',
+      defaultIsCollapsed: false,
+      breadcrumbStatus: 'hidden',
+      children: [
+        {
+          id: 'search_getting_started',
+          title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
+            defaultMessage: 'Getting started',
+          }),
+          link: 'serverlessElasticsearch',
+        },
+        {
+          id: 'dev_tools',
+          title: i18n.translate('xpack.serverlessSearch.nav.devTools', {
+            defaultMessage: 'Dev Tools',
+          }),
+          children: getPresets('devtools').children[0].children,
+        },
+        {
+          id: 'explore',
+          title: i18n.translate('xpack.serverlessSearch.nav.explore', {
+            defaultMessage: 'Explore',
+          }),
+          children: [
+            {
+              link: 'discover',
+            },
+            {
+              link: 'dashboards',
+            },
+            {
+              link: 'visualize',
+            },
+          ],
+        },
+        {
+          id: 'content',
+          title: i18n.translate('xpack.serverlessSearch.nav.content', {
+            defaultMessage: 'Content',
+          }),
+          children: [
+            {
+              title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
+                defaultMessage: 'Indices',
+              }),
+              // TODO: this will be updated to a new Indices page
+              link: 'management:index_management',
+            },
+            {
+              title: i18n.translate('xpack.serverlessSearch.nav.content.pipelines', {
+                defaultMessage: 'Pipelines',
+              }),
+              // TODO: this will be updated to a new Pipelines page
+              link: 'management:ingest_pipelines',
+            },
+            {
+              id: 'content_indexing_api',
+              link: 'serverlessIndexingApi',
+              title: i18n.translate('xpack.serverlessSearch.nav.content.indexingApi', {
+                defaultMessage: 'Indexing API',
+              }),
+            },
+          ],
+        },
+        {
+          id: 'security',
+          title: i18n.translate('xpack.serverlessSearch.nav.security', {
+            defaultMessage: 'Security',
+          }),
+          children: [
+            {
+              link: 'management:api_keys',
+            },
+          ],
+        },
+      ],
+    },
+  ],
 };
+
+export const createServerlessSearchSideNavComponent =
+  (core: CoreStart, { serverless }: { serverless: ServerlessPluginStart }) =>
+  () => {
+    return (
+      <NavigationKibanaProvider core={core} serverless={serverless}>
+        <DefaultNavigation navigationTree={navigationTree} dataTestSubj="svlSearchSideNav" />
+      </NavigationKibanaProvider>
+    );
+  };

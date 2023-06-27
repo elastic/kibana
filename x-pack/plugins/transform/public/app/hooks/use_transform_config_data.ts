@@ -14,19 +14,25 @@ import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
 
 import { difference } from 'lodash';
+
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
+import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
+import {
+  getDataGridSchemaFromESFieldType,
+  multiColumnSortFactory,
+  getNestedOrEscapedVal,
+  useDataGrid,
+  type RenderCellValue,
+  type UseIndexDataReturnType,
+  INDEX_STATUS,
+} from '@kbn/ml-data-grid';
 
 import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
 import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schemas/type_guards';
 
-import {
-  RenderCellValue,
-  UseIndexDataReturnType,
-  ES_CLIENT_TOTAL_HITS_RELATION,
-} from '../../shared_imports';
 import { getErrorMessage } from '../../../common/utils/errors';
 
-import { useAppDependencies } from '../app_dependencies';
 import { getPreviewTransformRequestBody, type TransformConfigQuery } from '../common';
 
 import { SearchItems } from './use_search_items';
@@ -106,16 +112,6 @@ export const useTransformConfigData = (
   const [previewMappingsProperties, setPreviewMappingsProperties] =
     useState<PreviewMappingsProperties>({});
   const api = useApi();
-  const {
-    ml: {
-      getDataGridSchemaFromESFieldType,
-      formatHumanReadableDateTimeSeconds,
-      multiColumnSortFactory,
-      getNestedOrEscapedVal,
-      useDataGrid,
-      INDEX_STATUS,
-    },
-  } = useAppDependencies();
 
   // Filters mapping properties of type `object`, which get returned for nested field parents.
   const columnKeys = Object.keys(previewMappingsProperties).filter(
@@ -246,11 +242,17 @@ export const useTransformConfigData = (
   ]);
 
   if (sortingColumns.length > 0) {
-    const sortingColumnsWithTypes = sortingColumns.map((c) => ({
-      ...c,
+    const sortingColumnsWithTypes = sortingColumns.map((c) => {
       // Since items might contain undefined/null values, we want to accurate find the data type
-      type: typeof tableItems.find((item) => getNestedOrEscapedVal(item, c.id) !== undefined),
-    }));
+      const populatedItem = tableItems.find(
+        (item) => getNestedOrEscapedVal(item, c.id) !== undefined
+      );
+
+      return {
+        ...c,
+        type: typeof getNestedOrEscapedVal(populatedItem, c.id),
+      };
+    });
     tableItems.sort(multiColumnSortFactory(sortingColumnsWithTypes));
   }
 

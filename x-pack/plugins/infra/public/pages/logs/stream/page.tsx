@@ -6,7 +6,7 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';

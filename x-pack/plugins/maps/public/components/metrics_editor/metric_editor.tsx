@@ -20,6 +20,7 @@ import { getTermsFields } from '../../index_pattern_util';
 import { ValidatedNumberInput } from '../validated_number_input';
 import { getMaskI18nLabel } from '../../classes/layers/vector_layer/mask';
 import { MaskExpression } from './mask_expression';
+import { inputStrings } from '../../connected_components/input_strings';
 
 function filterFieldsForAgg(fields: DataViewField[], aggType: AGG_TYPE) {
   if (!fields) {
@@ -141,9 +142,7 @@ export function MetricEditor({
         })}
       >
         <SingleFieldSelect
-          placeholder={i18n.translate('xpack.maps.metricsEditor.selectFieldPlaceholder', {
-            defaultMessage: 'Select field',
-          })}
+          placeholder={inputStrings.fieldSelectPlaceholder}
           value={metric.field ? metric.field : null}
           onChange={onFieldChange}
           fields={filterFieldsForAgg(fields, metric.type)}

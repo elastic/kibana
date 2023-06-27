@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Axis, Chart, niceTimeFormatter, Position, Settings, TooltipValue } from '@elastic/charts';
+import { Axis, Chart, niceTimeFormatter, Position, Settings, Tooltip } from '@elastic/charts';
 import {
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -16,10 +16,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useMemo } from 'react';
+import { useIsDarkMode } from '../../../../../../../hooks/use_is_dark_mode';
 import { Color } from '../../../../../../../../common/color_palette';
 import { createFormatter } from '../../../../../../../../common/formatters';
 import { MetricsExplorerAggregation } from '../../../../../../../../common/http_api';
@@ -79,7 +79,7 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
     aggregation: 'avg' as MetricsExplorerAggregation,
     label,
   };
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const isDarkMode = useIsDarkMode();
 
   const dateFormatter = useMemo(() => {
     if (!timeseries) return () => '';
@@ -94,11 +94,6 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
   }, [timeseries]);
 
   const yAxisFormatter = createFormatter('percent');
-
-  const tooltipProps = {
-    headerFormatter: (tooltipValue: TooltipValue) =>
-      moment(tooltipValue.value).format('Y-MM-DD HH:mm:ss.SSS'),
-  };
 
   const dataDomain = calculateDomain(timeseries, [chartMetric], false);
   const domain = dataDomain
@@ -130,9 +125,10 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
           tickFormat={yAxisFormatter}
           domain={domain}
           ticks={6}
-          showGridLines
+          gridLine={{ visible: true }}
         />
-        <Settings tooltip={tooltipProps} theme={getChartTheme(isDarkMode)} />
+        <Tooltip headerFormatter={({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS')} />
+        <Settings theme={getChartTheme(isDarkMode)} />
       </Chart>
     </ChartContainer>
   );

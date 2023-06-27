@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiTitle, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LoadWhenInView } from '@kbn/observability-plugin/public';
+import { LoadWhenInView } from '@kbn/observability-shared-plugin/public';
 import { useTestFlyoutOpen } from '../../test_now_mode/hooks/use_test_flyout_open';
 
 import { useMonitorDetailsPage } from '../use_monitor_details_page';

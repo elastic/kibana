@@ -123,4 +123,5 @@ export {
   PROFILE_INUSE_SPACE,
 } from './elasticsearch_fieldnames';
 
+export { ObservabilityTriggerId } from './trigger_ids';
 export { getInspectResponse } from './utils/get_inspect_response';

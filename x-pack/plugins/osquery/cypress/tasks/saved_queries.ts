@@ -94,7 +94,7 @@ export const getSavedQueriesComplexTest = () =>
         navigateTo('/app/osquery/saved_queries');
         cy.contains(savedQueryId);
         cy.react('PlayButtonComponent', {
-          props: { savedQuery: { attributes: { id: savedQueryId } } },
+          props: { savedQuery: { id: savedQueryId } },
         }).click();
         selectAllAgents();
         submitQuery();
@@ -103,7 +103,7 @@ export const getSavedQueriesComplexTest = () =>
         cy.contains('Saved queries').click();
         cy.contains(savedQueryId);
         cy.react('CustomItemAction', {
-          props: { index: 1, item: { attributes: { id: savedQueryId } } },
+          props: { index: 1, item: { id: savedQueryId } },
         }).click();
         findFormFieldByRowsLabelAndType('Description (optional)', ' Edited');
         // Run in test configuration
@@ -114,11 +114,13 @@ export const getSavedQueriesComplexTest = () =>
 
         // Disabled submit button in test configuration
         cy.contains('Submit').should('not.be.disabled');
-        // this clears the input
-        inputQuery('{selectall}{backspace}{selectall}{backspace}');
-        cy.contains('Submit').should('be.disabled');
-        inputQuery(BIG_QUERY);
-        cy.contains('Submit').should('not.be.disabled');
+        cy.getBySel('osquery-save-query-flyout').within(() => {
+          cy.contains('Query is a required field').should('not.exist');
+          // this clears the input
+          inputQuery('{selectall}{backspace}{selectall}{backspace}');
+          cy.contains('Query is a required field');
+          inputQuery(BIG_QUERY);
+        });
 
         // Save edited
         cy.react('EuiButton').contains('Update query').click();
@@ -127,7 +129,7 @@ export const getSavedQueriesComplexTest = () =>
         // delete saved query
         cy.contains(savedQueryId);
         cy.react('CustomItemAction', {
-          props: { index: 1, item: { attributes: { id: savedQueryId } } },
+          props: { index: 1, item: { id: savedQueryId } },
         }).click();
         deleteAndConfirm('query');
         cy.contains(savedQueryId).should('exist');

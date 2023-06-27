@@ -20,7 +20,7 @@ import {
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
   FieldPopoverFooter,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list';
 import { DragDrop } from '@kbn/dom-drag-drop';
 import { DiscoverFieldStats } from './discover_field_stats';
 import { PLUGIN_ID } from '../../../../../common';
@@ -39,30 +39,25 @@ function getCommonFieldItemButtonProps({
 }: GetCommonFieldItemButtonPropsParams): {
   field: FieldItemButtonProps<DataViewField>['field'];
   isSelected: FieldItemButtonProps<DataViewField>['isSelected'];
-  dataTestSubj: FieldItemButtonProps<DataViewField>['dataTestSubj'];
   buttonAddFieldToWorkspaceProps: FieldItemButtonProps<DataViewField>['buttonAddFieldToWorkspaceProps'];
   buttonRemoveFieldFromWorkspaceProps: FieldItemButtonProps<DataViewField>['buttonRemoveFieldFromWorkspaceProps'];
   onAddFieldToWorkspace: FieldItemButtonProps<DataViewField>['onAddFieldToWorkspace'];
   onRemoveFieldFromWorkspace: FieldItemButtonProps<DataViewField>['onRemoveFieldFromWorkspace'];
 } {
-  const dataTestSubj = `fieldToggle-${field.name}`;
   const handler =
     field.name === '_source' ? undefined : (f: DataViewField) => toggleDisplay(f, isSelected);
   return {
     field,
     isSelected,
-    dataTestSubj: `field-${field.name}-showDetails`,
     buttonAddFieldToWorkspaceProps: {
       'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
         defaultMessage: 'Add field as column',
       }),
-      'data-test-subj': dataTestSubj,
     },
     buttonRemoveFieldFromWorkspaceProps: {
       'aria-label': i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
         defaultMessage: 'Remove field from table',
       }),
-      'data-test-subj': dataTestSubj,
     },
     onAddFieldToWorkspace: handler,
     onRemoveFieldFromWorkspace: handler,

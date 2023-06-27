@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { NodeDataDefinition } from 'cytoscape';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { ContentsProps } from '.';

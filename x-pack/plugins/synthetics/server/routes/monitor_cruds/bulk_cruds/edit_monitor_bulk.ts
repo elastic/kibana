@@ -6,8 +6,9 @@
  */
 import { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { RouteContext } from '../../types';
+import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { FailedPolicyUpdate } from '../../../synthetics_service/private_location/synthetics_private_location';
-import { RouteContext } from '../../../legacy_uptime/routes';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitor,
@@ -17,7 +18,6 @@ import {
   SyntheticsMonitor,
   SyntheticsMonitorWithSecrets,
 } from '../../../../common/runtime_types';
-import { syntheticsMonitorType } from '../../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import {
   formatTelemetryUpdateEvent,
   sendTelemetryEvents,

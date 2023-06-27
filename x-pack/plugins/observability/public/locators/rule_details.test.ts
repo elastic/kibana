@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ACTIVE_ALERTS } from '../components/shared/alert_search_bar/constants';
+import { ACTIVE_ALERTS } from '../components/alert_search_bar/constants';
 import { EXECUTION_TAB, ALERTS_TAB } from '../pages/rule_details/constants';
 import { getRuleDetailsPath, RuleDetailsLocatorDefinition } from './rule_details';
 

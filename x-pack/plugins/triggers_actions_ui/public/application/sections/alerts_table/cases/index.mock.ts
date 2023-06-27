@@ -6,7 +6,7 @@
  */
 
 import { CaseStatuses } from '@kbn/cases-components';
-import { Case } from '../hooks/api';
+import { Case } from '../hooks/apis/bulk_get_cases';
 
 export const theCase: Case = {
   id: 'test-id',
@@ -15,7 +15,7 @@ export const theCase: Case = {
   description: 'Test description',
   status: CaseStatuses.open,
   title: 'Test case',
-  totalComments: 1,
+  totalComment: 1,
   version: 'WzQ3LDFd',
   owner: 'cases',
 };

@@ -11,7 +11,7 @@ import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-serve
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../../routes/api';
 import { defaultSortField } from '../../../common/utils';
 import type { ActionTypeValues, FindTypeField } from '../../../../common/api';
-import { Actions, ActionTypes, CommentType } from '../../../../common/api';
+import { Actions, ActionTypes, CommentType, decodeOrThrow } from '../../../../common/api';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -26,6 +26,8 @@ import type {
   UserActionSavedObjectTransformed,
   UserActionTransformedAttributes,
 } from '../../../common/types/user_actions';
+import { bulkDecodeSOAttributes } from '../../utils';
+import { UserActionTransformedAttributesRt } from '../../../common/types/user_actions';
 
 export class UserActionFinder {
   constructor(private readonly context: ServiceContext) {}
@@ -54,10 +56,23 @@ export class UserActionFinder {
           filter: finalFilter,
         });
 
-      return transformFindResponseToExternalModel(
+      const res = transformFindResponseToExternalModel(
         userActions,
         this.context.persistableStateAttachmentTypeRegistry
       );
+
+      const decodeRes = bulkDecodeSOAttributes(
+        res.saved_objects,
+        UserActionTransformedAttributesRt
+      );
+
+      return {
+        ...res,
+        saved_objects: res.saved_objects.map((so) => ({
+          ...so,
+          attributes: decodeRes.get(so.id) as UserActionTransformedAttributes,
+        })),
+      };
     } catch (error) {
       this.context.log.error(`Error finding user actions for case id: ${caseId}: ${error}`);
       throw error;
@@ -200,11 +215,22 @@ export class UserActionFinder {
         );
 
       let userActions: UserActionSavedObjectTransformed[] = [];
+
       for await (const findResults of finder.find()) {
         userActions = userActions.concat(
-          findResults.saved_objects.map((so) =>
-            transformToExternalModel(so, this.context.persistableStateAttachmentTypeRegistry)
-          )
+          findResults.saved_objects.map((so) => {
+            const res = transformToExternalModel(
+              so,
+              this.context.persistableStateAttachmentTypeRegistry
+            );
+
+            const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
+
+            return {
+              ...res,
+              attributes: decodeRes,
+            };
+          })
         );
       }
 

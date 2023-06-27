@@ -481,7 +481,7 @@ export function alertingServiceProvider(
     }
 
     const maxBucket = resolveMaxTimeInterval(
-      jobsResponse.map((v) => v.analysis_config.bucket_span)
+      jobsResponse.map((v) => v.analysis_config.bucket_span!)
     );
 
     if (maxBucket === undefined) {
@@ -620,7 +620,7 @@ export function alertingServiceProvider(
     const datafeeds = await datafeedsService.getDatafeedByJobId(jobIds);
 
     const maxBucketInSeconds = resolveMaxTimeInterval(
-      jobsResponse.map((v) => v.analysis_config.bucket_span)
+      jobsResponse.map((v) => v.analysis_config.bucket_span!)
     );
 
     if (maxBucketInSeconds === undefined) {

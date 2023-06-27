@@ -5,7 +5,12 @@ Some settings are sensitive, and relying on filesystem permissions to protect
 their values is not sufficient. For this use case, Kibana provides a
 keystore, and the `kibana-keystore` tool to manage the settings in the keystore.
 
-NOTE: All commands here should be run as the user which will run Kibana.
+[NOTE]
+====
+* Run all commands as the user who runs {kib}.
+* Only the settings with the `(Secure)` qualifier should be stored in the keystore.
+   Unsupported, extraneous or invalid JSON-string settings cause {kib} to fail to start up.
+====
 
 [float]
 [[creating-keystore]]
@@ -36,7 +41,8 @@ bin/kibana-keystore list
 [[add-string-to-keystore]]
 === Add string settings
 
-NOTE: Your input will be JSON-parsed to allow for object/array input configurations. To enforce string values, use "double quotes" around your input.
+NOTE: Your input will be JSON-parsed to allow for object/array input configurations. 
+      To enforce string values, use "double quotes" around your input.
 
 Sensitive string settings, like authentication credentials for Elasticsearch
 can be added using the `add` command:
@@ -74,4 +80,15 @@ To remove a setting from the keystore, use the `remove` command:
 [source,sh]
 ----------------------------------------------------------------
 bin/kibana-keystore remove the.setting.name.to.remove
+----------------------------------------------------------------
+
+[float]
+[[read-settings]]
+=== Read settings
+
+To display the configured setting values, use the `show` command:
+
+[source, sh]
+----------------------------------------------------------------
+bin/kibana-keystore show setting.key
 ----------------------------------------------------------------

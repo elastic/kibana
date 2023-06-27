@@ -44,10 +44,10 @@ import type {
 } from '@kbn/observability-shared-plugin/public';
 import {
   FetchDataParams,
-  METRIC_TYPE,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
+import { METRIC_TYPE } from '@kbn/observability-shared-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -58,6 +58,13 @@ import { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
+import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import {
+  DiscoverStart,
+  DiscoverSetup,
+} from '@kbn/discover-plugin/public/plugin';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
   getApmEnrollmentFlyoutData,
@@ -77,22 +84,26 @@ export type ApmPluginStart = void;
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
+  discover?: DiscoverSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
+  licenseManagement?: LicenseManagementUIPluginSetup;
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   share: SharePluginSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
   charts?: ChartsPluginStart;
   data: DataPublicPluginStart;
+  discover?: DiscoverStart;
   embeddable: EmbeddableStart;
   home: void;
   inspector: InspectorPluginStart;
@@ -106,11 +117,12 @@ export interface ApmPluginStartDeps {
   fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  infra?: InfraClientStartExports;
+  infra: InfraClientStartExports;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   storage: IStorageWrapper;
   lens: LensPublicStart;
+  uiActions: UiActionsStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
@@ -266,6 +278,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       'TutorialConfigAgentRumScript',
       () => import('./tutorial/config_agent/rum_script')
     );
+
+    pluginSetupDeps.uiActions.registerTrigger({
+      id: ObservabilityTriggerId.ApmTransactionContextMenu,
+    });
+
+    pluginSetupDeps.uiActions.registerTrigger({
+      id: ObservabilityTriggerId.ApmErrorContextMenu,
+    });
 
     plugins.observability.dashboard.register({
       appName: 'apm',
