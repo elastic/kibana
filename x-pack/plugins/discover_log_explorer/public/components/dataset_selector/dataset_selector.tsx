@@ -98,7 +98,7 @@ export function DatasetSelector({
       ),
     });
 
-    if (!integrations) {
+    if (!integrations || integrations.length === 0) {
       return {
         items: [datasetsItem, createIntegrationStatusItem()],
         panels: [],
@@ -110,8 +110,6 @@ export function DatasetSelector({
       onDatasetSelected: selectDataset,
       spyRef: setSpyRef,
     });
-
-    if (items.length === 0) items.push(createIntegrationStatusItem());
 
     return {
       items: [datasetsItem, ...items],

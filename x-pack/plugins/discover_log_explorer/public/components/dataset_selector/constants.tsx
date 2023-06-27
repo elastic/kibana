@@ -43,8 +43,7 @@ export const noDatasetsLabel = i18n.translate(
 export const noDatasetsDescriptionLabel = i18n.translate(
   'xpack.discoverLogExplorer.datasetSelector.noDatasetsDescription',
   {
-    defaultMessage:
-      "Looks like you don't have data stream or your search does not match any of them.",
+    defaultMessage: 'No datasets or search results found.',
   }
 );
 
@@ -56,8 +55,7 @@ export const noIntegrationsLabel = i18n.translate(
 export const noIntegrationsDescriptionLabel = i18n.translate(
   'xpack.discoverLogExplorer.datasetSelector.noIntegrationsDescription',
   {
-    defaultMessage:
-      "Looks like you don't have integrations or your search does not match any of them.",
+    defaultMessage: 'No integrations or search results found.',
   }
 );
 
