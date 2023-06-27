@@ -11,6 +11,14 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/reporting-plugin",
+    "@kbn/reporting-common",
+    "@kbn/discover-plugin",
+    "@kbn/data-plugin",
+    "@kbn/screenshotting-plugin",
+    "@kbn/generate-csv",
+    "@kbn/licensing-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/utility-types",
   ],
   "exclude": ["target/**/*"]
 }
