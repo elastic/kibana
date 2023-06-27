@@ -13,6 +13,7 @@ import type { IRouter } from '@kbn/core/server';
 import { packSavedObjectType } from '../../../common/types';
 import { PLUGIN_ID } from '../../../common';
 import type { PackSavedObject } from '../../common/types';
+import type { PackSOResponseData } from './types';
 
 export const findPackRoute = (router: IRouter) => {
   router.get(
@@ -43,7 +44,7 @@ export const findPackRoute = (router: IRouter) => {
         sortOrder: request.query.sortOrder ?? 'desc',
       });
 
-      const packSavedObjects = map(soClientResponse.saved_objects, (pack) => {
+      const packSavedObjects: PackSOResponseData[] = map(soClientResponse.saved_objects, (pack) => {
         const policyIds = map(
           filter(pack.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]),
           'id'

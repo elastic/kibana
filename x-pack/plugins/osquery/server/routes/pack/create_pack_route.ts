@@ -28,6 +28,7 @@ import {
 } from './utils';
 import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
 import type { PackSavedObject } from '../../common/types';
+import type { PackSOResponseData } from './types';
 
 type PackSavedObjectLimited = Omit<PackSavedObject, 'saved_object_id' | 'references'>;
 
@@ -176,22 +177,24 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
       const { attributes } = packSO;
 
+      const data: PackSOResponseData = {
+        name: attributes.name,
+        description: attributes.description,
+        queries: attributes.queries,
+        version: attributes.version,
+        enabled: attributes.enabled,
+        created_at: attributes.created_at,
+        created_by: attributes.created_by,
+        updated_at: attributes.updated_at,
+        updated_by: attributes.updated_by,
+        policy_ids: attributes.policy_ids,
+        shards: attributes.shards,
+        saved_object_id: packSO.id,
+      };
+
       return response.ok({
         body: {
-          data: {
-            name: attributes.name,
-            description: attributes.description,
-            queries: attributes.queries,
-            version: attributes.version,
-            enabled: attributes.enabled,
-            created_at: attributes.created_at,
-            created_by: attributes.created_by,
-            updated_at: attributes.updated_at,
-            updated_by: attributes.updated_by,
-            policy_ids: attributes.policy_ids,
-            shards,
-            saved_object_id: packSO.id,
-          },
+          data,
         },
       });
     }

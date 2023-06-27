@@ -31,6 +31,7 @@ import {
 
 import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
 import type { PackSavedObject } from '../../common/types';
+import type { PackSOResponseData } from './types';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.put(
@@ -351,23 +352,23 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
       const { attributes } = updatedPackSO;
 
+      const data: PackSOResponseData = {
+        name: attributes.name,
+        description: attributes.description,
+        queries: attributes.queries,
+        version: attributes.version,
+        enabled: attributes.enabled,
+        created_at: attributes.created_at,
+        created_by: attributes.created_by,
+        updated_at: attributes.updated_at,
+        updated_by: attributes.updated_by,
+        policy_ids: attributes.policy_ids,
+        shards: attributes.shards,
+        saved_object_id: updatedPackSO.id,
+      };
+
       return response.ok({
-        body: {
-          data: {
-            name: attributes.name,
-            description: attributes.description,
-            queries: attributes.queries,
-            version: attributes.version,
-            enabled: attributes.enabled,
-            created_at: attributes.created_at,
-            created_by: attributes.created_by,
-            updated_at: attributes.updated_at,
-            updated_by: attributes.updated_by,
-            policy_ids: attributes.policy_ids,
-            shards,
-            saved_object_id: updatedPackSO.id,
-          },
-        },
+        body: { data },
       });
     }
   );
