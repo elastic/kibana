@@ -11,7 +11,6 @@ import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs, useFetcher } from '@kbn/observability-shared-plugin/public';
-import { Chat } from '@kbn/cloud-chat-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
 import { LoadingObservability } from '../../components/loading_observability';
@@ -241,8 +240,6 @@ export function OverviewPage() {
       {isDataAssistantFlyoutVisible ? (
         <DataAssistantFlyout onClose={() => setIsDataAssistantFlyoutVisible(false)} />
       ) : null}
-
-      <Chat />
     </ObservabilityPageTemplate>
   );
 }
