@@ -1632,6 +1632,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         advanced: { enabled: true },
         basic: { enabled: true },
       },
+      [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
+      },
     },
     name: i18n.translate('xpack.enterpriseSearch.nativeConnectors.sharepoint_online.name', {
       defaultMessage: 'Sharepoint Online',
