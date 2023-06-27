@@ -226,6 +226,7 @@ export function Chart({
     dataView,
     lensTablesAdapter,
     currentSuggestion,
+    isFlyoutVisible,
     setIsFlyoutVisible,
     isPlainRecord,
     query: originalQuery,

@@ -21,6 +21,7 @@ export function useChartConfigPanel({
   dataView,
   lensTablesAdapter,
   currentSuggestion,
+  isFlyoutVisible,
   setIsFlyoutVisible,
   isPlainRecord,
   query,
@@ -29,6 +30,7 @@ export function useChartConfigPanel({
   services: UnifiedHistogramServices;
   lensAttributesContext: LensAttributesContext;
   dataView: DataView;
+  isFlyoutVisible: boolean;
   setIsFlyoutVisible: (flag: boolean) => void;
   lensTablesAdapter?: Record<string, Datatable>;
   currentSuggestion?: Suggestion;
@@ -73,7 +75,7 @@ export function useChartConfigPanel({
     const suggestionHasChanged = currentSuggestion?.title !== previousSuggestion?.current?.title;
     // rerender the component if the data has changed or the suggestion
     // as I can have different suggestions for the same data
-    if (isPlainRecord && (dataHasChanged || suggestionHasChanged)) {
+    if (isPlainRecord && (dataHasChanged || suggestionHasChanged || !isFlyoutVisible)) {
       fetchLensConfigComponent();
     }
   }, [
@@ -84,6 +86,7 @@ export function useChartConfigPanel({
     isPlainRecord,
     currentSuggestion,
     query,
+    isFlyoutVisible,
     lensTablesAdapter,
     setIsFlyoutVisible,
   ]);
