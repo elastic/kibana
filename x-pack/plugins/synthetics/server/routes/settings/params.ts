@@ -5,17 +5,26 @@
  * 2.0.
  */
 
+import { IKibanaResponse } from '@kbn/core/server';
 import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsParamType } from '../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { SyntheticsParams, SyntheticsParamsReadonly } from '../../../common/runtime_types';
 
 export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.PARAMS,
   validate: {},
-  handler: async ({ savedObjectsClient, request, response, server }): Promise<any> => {
+  handler: async ({
+    savedObjectsClient,
+    request,
+    response,
+    server,
+  }): Promise<
+    IKibanaResponse<SyntheticsParams[]> | IKibanaResponse<SyntheticsParamsReadonly[]>
+  > => {
     try {
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
@@ -28,25 +37,42 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
 
       if (canSave) {
         const finder =
-          await encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser({
+          await encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<
+            SyntheticsParams,
+            unknown
+          >({
             type: syntheticsParamType,
             perPage: 1000,
             namespaces: [spaceId],
           });
 
-        const hits: SavedObjectsFindResult[] = [];
+        const hits: Array<SavedObjectsFindResult<SyntheticsParams>> = [];
         for await (const result of finder.find()) {
           hits.push(...result.saved_objects);
         }
 
-        return { data: hits };
+        return response.ok({
+          body: hits.map(({ id, attributes: { key, value, description }, namespaces }) => ({
+            id,
+            key,
+            value,
+            description,
+            namespaces,
+          })),
+        });
       } else {
-        const data = await savedObjectsClient.find({
+        const data = await savedObjectsClient.find<SyntheticsParamsReadonly, unknown>({
           type: syntheticsParamType,
           perPage: 10000,
         });
-
-        return { data: data.saved_objects };
+        return response.ok({
+          body: data.saved_objects.map(({ id, attributes: { key, description }, namespaces }) => ({
+            id,
+            key,
+            description,
+            namespaces,
+          })),
+        });
       }
     } catch (error) {
       if (error.output?.statusCode === 404) {

@@ -47,6 +47,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
 
       const { value } = data;
       const {
+        id: responseId,
         attributes: { key, tags, description },
         namespaces,
       } = (await savedObjectsClient.update(
@@ -55,7 +56,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
         data
       )) as SavedObject<SyntheticsParams>;
 
-      return response.ok({ body: { key, tags, description, namespaces, value } });
+      return response.ok({ body: { id: responseId, key, tags, description, namespaces, value } });
     } catch (error) {
       if (error.output?.statusCode === 404) {
         const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;

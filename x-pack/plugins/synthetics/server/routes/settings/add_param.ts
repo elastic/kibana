@@ -44,19 +44,20 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
       const { share_across_spaces: shareAcrossSpaces, ...data } =
         request.body as SyntheticsParamRequest;
 
-      const result = await savedObjectsClient.create<SyntheticsParamSOAttributes>(
+      const {
+        attributes: { key, tags, description },
+        id,
+        namespaces,
+      } = await savedObjectsClient.create<Omit<SyntheticsParamSOAttributes, 'id'>>(
         syntheticsParamType,
         data,
         {
           initialNamespaces: shareAcrossSpaces ? [ALL_SPACES_ID] : [spaceId],
         }
       );
-      const {
-        attributes: { key, tags, description },
-        namespaces,
-      } = result;
       return response.ok({
         body: {
+          id,
           description,
           key,
           namespaces,
