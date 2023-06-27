@@ -22,7 +22,11 @@ class KibanaService {
   public startPlugins!: ClientPluginsStart;
 
   public get core() {
-    return this.coreSetup;
+    return this.coreStart;
+  }
+
+  public set core(coreStart: CoreStart) {
+    this.coreStart = coreStart;
   }
 
   public init(
