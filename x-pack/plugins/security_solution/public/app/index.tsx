@@ -9,7 +9,6 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { NotFoundPage } from './404';
 import { SecurityApp } from './app';
 import type { RenderAppProps } from './types';
 
@@ -40,9 +39,6 @@ export const renderApp = ({
           {subPluginRoutes.map((route, index) => {
             return <Route key={`route-${index}`} {...route} />;
           })}
-          <Route>
-            <NotFoundPage />
-          </Route>
         </Routes>
       </ApplicationUsageTrackingProvider>
     </SecurityApp>,

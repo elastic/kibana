@@ -104,7 +104,7 @@ export const SearchApplicationView: React.FC = () => {
           from={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONNECT}`}
           to={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONNECT}/${SearchApplicationConnectTabs.SEARCHAPI}`}
         />
-        <Route>
+        <Route path="">
           <EnterpriseSearchApplicationsPageTemplate
             isEmptyState
             pageChrome={[searchApplicationName]}

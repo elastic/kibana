@@ -4,13 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { Route } from '@kbn/shared-ux-router';
 
-import { HomeApp } from '../../components/home_app';
-
-export const HomeRoute = () => (
-  <Route path="/">
-    <HomeApp />
-  </Route>
-);
+export { HomeApp } from '../../components/home_app';

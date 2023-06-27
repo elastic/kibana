@@ -53,14 +53,14 @@ export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
       <Route exact path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
-      <Route>{showView()}</Route>
+      <Route path="">{showView()}</Route>
     </Routes>
   );
 };
 
 export const EnterpriseSearchContentUnconfigured: React.FC = () => (
   <Routes>
-    <Route>
+    <Route path="">
       <Redirect to={SETUP_GUIDE_PATH} />
     </Route>
   </Routes>
@@ -76,7 +76,7 @@ export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData
       <Route path={SETTINGS_PATH}>
         <Settings />
       </Route>
-      <Route>
+      <Route path="">
         <NotFound />
       </Route>
     </Routes>

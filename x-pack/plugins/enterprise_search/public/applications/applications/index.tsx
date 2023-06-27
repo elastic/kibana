@@ -21,7 +21,7 @@ export const Applications = () => {
       <Route path={SEARCH_APPLICATIONS_PATH}>
         <SearchApplicationsRouter />
       </Route>
-      <Route>
+      <Route path="">
         <NotFound />
       </Route>
     </Routes>
