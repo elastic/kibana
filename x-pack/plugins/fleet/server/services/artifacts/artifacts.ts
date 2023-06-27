@@ -207,11 +207,9 @@ export const bulkDeleteArtifacts = async (
   ids: string[]
 ): Promise<Error[]> => {
   try {
-    const body = ids.flatMap((id) => [
-      {
-        delete: { _index: FLEET_SERVER_ARTIFACTS_INDEX, _id: id },
-      },
-    ]);
+    const body = ids.map((id) => ({
+      delete: { _index: FLEET_SERVER_ARTIFACTS_INDEX, _id: id },
+    }));
 
     const res = await withPackageSpan(`Bulk delete fleet artifacts`, () =>
       esClient.bulk({
