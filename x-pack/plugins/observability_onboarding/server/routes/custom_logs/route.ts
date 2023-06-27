@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { ObservabilityOnboardingState } from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
@@ -167,10 +168,9 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       });
 
     if (!savedObservabilityOnboardingState) {
-      return {
-        message:
-          'Unable to report setup progress - onboarding session not found.',
-      };
+      throw Boom.notFound(
+        'Unable to report setup progress - onboarding session not found.'
+      );
     }
 
     const {
