@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { UptimeServerSetup } from '../../../legacy_uptime/lib/adapters';
 import { SyntheticsRestApiRouteFactory } from '../../../legacy_uptime/routes';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 
@@ -12,18 +13,22 @@ export const getAgentPoliciesRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.AGENT_POLICIES,
   validate: {},
-  handler: async ({ server, context, uptimeEsClient }): Promise<any> => {
-    const soClient = server.coreStart.savedObjects.createInternalRepository();
-    const esClient = server.coreStart.elasticsearch.client.asInternalUser;
-
-    return server.fleet?.agentPolicyService.list(soClient, {
-      page: 1,
-      perPage: 10000,
-      sortField: 'name',
-      sortOrder: 'asc',
-      kuery: 'ingest-agent-policies.is_managed : false',
-      esClient,
-      withAgentCount: true,
-    });
+  handler: async ({ server }): Promise<any> => {
+    return getAgentPoliciesAsInternalUser(server);
   },
 });
+
+export const getAgentPoliciesAsInternalUser = async (server: UptimeServerSetup) => {
+  const soClient = server.coreStart.savedObjects.createInternalRepository();
+  const esClient = server.coreStart.elasticsearch.client.asInternalUser;
+
+  return server.fleet?.agentPolicyService.list(soClient, {
+    page: 1,
+    perPage: 10000,
+    sortField: 'name',
+    sortOrder: 'asc',
+    kuery: 'ingest-agent-policies.is_managed : false',
+    esClient,
+    withAgentCount: true,
+  });
+};
