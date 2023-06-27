@@ -17,7 +17,11 @@ import type {
 
 import { nodeBuilder } from '@kbn/es-query';
 
-import { areTotalAssigneesInvalid } from '../../../common/utils/validators';
+import {
+  areTotalAssigneesInvalid,
+  isCategoryFieldInvalidString,
+  isCategoryFieldTooLong,
+} from '../../../common/utils/validators';
 import type {
   CaseAssignees,
   CaseAttributes,
@@ -39,6 +43,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_ASSIGNEES_PER_CASE,
+  MAX_CATEGORY_LENGTH,
   MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 
@@ -59,6 +64,7 @@ import { dedupAssignees, getClosedInfoForUpdate, getDurationForUpdate } from './
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -113,6 +119,40 @@ function throwIfUpdateAssigneesWithoutValidLicense(
         ', '
       )}]`
     );
+  }
+}
+
+/**
+ * Throws an error if any of the requests tries to update the category and
+ * the length is > MAX_CATEGORY_LENGTH.
+ */
+function throwIfCategoryLengthIsInvalid(requests: UpdateRequestWithOriginalCase[]) {
+  const requestsInvalidCategory = requests.filter(({ updateReq }) =>
+    isCategoryFieldTooLong(updateReq.category)
+  );
+
+  if (requestsInvalidCategory.length > 0) {
+    const ids = requestsInvalidCategory.map(({ updateReq }) => updateReq.id);
+    throw Boom.badRequest(
+      `The length of the category is too long. The maximum length is ${MAX_CATEGORY_LENGTH}, ids: [${ids.join(
+        ', '
+      )}]`
+    );
+  }
+}
+
+/**
+ * Throws an error if any of the requests tries to update the category and
+ * the new value is an empty string.
+ */
+function throwIfCategoryIsInvalidString(requests: UpdateRequestWithOriginalCase[]) {
+  const requestsInvalidCategory = requests.filter(({ updateReq }) =>
+    isCategoryFieldInvalidString(updateReq.category)
+  );
+
+  if (requestsInvalidCategory.length > 0) {
+    const ids = requestsInvalidCategory.map(({ updateReq }) => updateReq.id);
+    throw Boom.badRequest(`The category cannot be an empty string. Ids: [${ids.join(', ')}]`);
   }
 }
 
@@ -313,9 +353,9 @@ export const update = async (
     authorization,
   } = clientArgs;
 
-  const query = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
-
   try {
+    const query = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
+
     const myCases = await caseService.getCases({
       caseIds: query.cases.map((q) => q.id),
     });
@@ -385,6 +425,8 @@ export const update = async (
 
     throwIfUpdateOwner(casesToUpdate);
     throwIfTitleIsInvalid(casesToUpdate);
+    throwIfCategoryLengthIsInvalid(casesToUpdate);
+    throwIfCategoryIsInvalidString(casesToUpdate);
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
     throwIfTotalAssigneesAreInvalid(casesToUpdate);
 
@@ -451,7 +493,7 @@ export const update = async (
 
     await notificationService.bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment);
 
-    return CasesRt.encode(returnUpdatedCase);
+    return decodeOrThrow(CasesRt)(returnUpdatedCase);
   } catch (error) {
     const idVersions = cases.cases.map((caseInfo) => ({
       id: caseInfo.id,

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { InfraAssetMetricType } from '../../../common/http_api';
+import type { LogViewReference } from '../../../common/log_views';
+import type { InventoryItemType } from '../../../common/inventory_models/types';
+import type { InfraAssetMetricType, SnapshotCustomMetricInput } from '../../../common/http_api';
 
 export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
 type HostMetrics = Record<InfraAssetMetricType, number | null>;
@@ -21,3 +23,81 @@ export type HostNodeRow = HostMetadata &
   HostMetrics & {
     name: string;
   };
+
+export enum FlyoutTabIds {
+  METRICS = 'metrics',
+  METADATA = 'metadata',
+  PROCESSES = 'processes',
+  ANOMALIES = 'anomalies',
+  OSQUERY = 'osquery',
+  LOGS = 'logs',
+  LINK_TO_APM = 'linkToApm',
+  LINK_TO_UPTIME = 'linkToUptime',
+}
+
+export type TabIds = `${FlyoutTabIds}`;
+
+export interface TabState {
+  metadata?: {
+    query?: string;
+    showActionsColumn?: boolean;
+  };
+  processes?: {
+    query?: string;
+  };
+  anomalies?: {
+    onClose?: () => void;
+  };
+  metrics?: {
+    accountId?: string;
+    region?: string;
+    customMetrics?: SnapshotCustomMetricInput[];
+  };
+  alertRule?: {
+    onCreateRuleClick?: () => void;
+  };
+  logs?: {
+    query?: string;
+    logView?: {
+      reference?: LogViewReference | null;
+      loading?: boolean;
+    };
+  };
+}
+
+export interface FlyoutProps {
+  closeFlyout: () => void;
+  showInFlyout: true;
+}
+
+export interface FullPageProps {
+  showInFlyout: false;
+}
+
+export type RenderMode = FlyoutProps | FullPageProps;
+
+export interface Tab {
+  id: FlyoutTabIds;
+  name: string;
+  'data-test-subj': string;
+}
+
+export type LinkOptions = 'alertRule' | 'nodeDetails' | 'apmServices' | 'uptime';
+
+export interface AssetDetailsProps {
+  node: HostNodeRow;
+  nodeType: InventoryItemType;
+  currentTimeRange: {
+    interval: string;
+    from: number;
+    to: number;
+  };
+  tabs: Tab[];
+  activeTabId?: TabIds;
+  overrides?: TabState;
+  renderMode?: RenderMode;
+  onTabsStateChange?: TabsStateChangeFn;
+  links?: LinkOptions[];
+}
+
+export type TabsStateChangeFn = (state: TabState & { activeTabId?: TabIds }) => void;

@@ -767,11 +767,13 @@ async function handleTransformInstall({
         { logger, additionalResponseStatuses: [400] }
       );
       if (Array.isArray(transformStats.transforms) && transformStats.transforms.length === 1) {
-        // @ts-expect-error TransformGetTransformStatsTransformStats should have 'health'
         const transformHealth = transformStats.transforms[0].health;
         if (
+          transformHealth &&
           transformHealth.status === 'red' &&
+          // @ts-expect-error TransformGetTransformStatsTransformStatsHealth should have 'issues'
           Array.isArray(transformHealth.issues) &&
+          // @ts-expect-error TransformGetTransformStatsTransformStatsHealth should have 'issues'
           transformHealth.issues.find(
             (i: { issue: string }) => i.issue === 'Privileges check failed'
           )

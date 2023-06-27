@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from '@kbn/core/server';
 import { differenceBy, intersectionBy } from 'lodash';
+import * as rt from 'io-ts';
+import {
+  dateRt,
+  inRangeFromStringRt,
+  datemathStringRt,
+  createRouteValidationFunction,
+  createLiteralValueFromUndefinedRT,
+} from '@kbn/io-ts-utils';
 import { debug } from '../../common/debug_log';
 import { AssetType, assetTypeRT, relationRT } from '../../common/types_api';
 import { ASSET_MANAGER_API_BASE } from '../constants';
@@ -16,47 +23,61 @@ import { getAllRelatedAssets } from '../lib/get_all_related_assets';
 import { SetupRouteOptions } from './types';
 import { getEsClientFromContext } from './utils';
 import { AssetNotFoundError } from '../lib/errors';
-import { toArray } from '../lib/utils';
+import { isValidRange, toArray } from '../lib/utils';
 
-const assetType = schema.oneOf([
-  schema.literal('k8s.pod'),
-  schema.literal('k8s.cluster'),
-  schema.literal('k8s.node'),
-]);
+const sizeRT = rt.union([inRangeFromStringRt(1, 100), createLiteralValueFromUndefinedRT(10)]);
+const assetDateRT = rt.union([dateRt, datemathStringRt]);
+const getAssetsQueryOptionsRT = rt.exact(
+  rt.partial({
+    from: assetDateRT,
+    to: assetDateRT,
+    type: rt.union([rt.array(assetTypeRT), assetTypeRT]),
+    ean: rt.union([rt.array(rt.string), rt.string]),
+    size: sizeRT,
+  })
+);
 
-const getAssetsQueryOptions = schema.object({
-  from: schema.maybe(schema.string()),
-  to: schema.maybe(schema.string()),
-  type: schema.maybe(schema.oneOf([schema.arrayOf(assetTypeRT), assetTypeRT])),
-  ean: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
-  size: schema.maybe(schema.number()),
-});
+const getAssetsDiffQueryOptionsRT = rt.exact(
+  rt.intersection([
+    rt.type({
+      aFrom: assetDateRT,
+      aTo: assetDateRT,
+      bFrom: assetDateRT,
+      bTo: assetDateRT,
+    }),
+    rt.partial({
+      type: rt.union([rt.array(assetTypeRT), assetTypeRT]),
+    }),
+  ])
+);
 
-const getAssetsDiffQueryOptions = schema.object({
-  aFrom: schema.string(),
-  aTo: schema.string(),
-  bFrom: schema.string(),
-  bTo: schema.string(),
-  type: schema.maybe(schema.oneOf([schema.arrayOf(assetType), assetType])),
-});
+const getRelatedAssetsQueryOptionsRT = rt.exact(
+  rt.intersection([
+    rt.type({
+      from: assetDateRT,
+      ean: rt.string,
+      relation: relationRT,
+      size: sizeRT,
+      maxDistance: rt.union([inRangeFromStringRt(1, 5), createLiteralValueFromUndefinedRT(1)]),
+    }),
+    rt.partial({
+      to: assetDateRT,
+      type: rt.union([rt.array(assetTypeRT), assetTypeRT]),
+    }),
+  ])
+);
 
-const getRelatedAssetsQueryOptions = schema.object({
-  from: schema.string(), // ISO timestamp or ES datemath
-  to: schema.maybe(schema.string()), // ISO timestamp or ES datemath
-  ean: schema.string(),
-  relation: relationRT,
-  type: schema.maybe(schema.oneOf([assetTypeRT, schema.arrayOf(assetTypeRT)])),
-  maxDistance: schema.maybe(schema.number()),
-  size: schema.maybe(schema.number()),
-});
+export type GetAssetsQueryOptions = rt.TypeOf<typeof getAssetsQueryOptionsRT>;
+export type GetRelatedAssetsQueryOptions = rt.TypeOf<typeof getRelatedAssetsQueryOptionsRT>;
+export type GetAssetsDiffQueryOptions = rt.TypeOf<typeof getAssetsDiffQueryOptionsRT>;
 
 export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupRouteOptions<T>) {
   // GET /assets
-  router.get<unknown, typeof getAssetsQueryOptions.type, unknown>(
+  router.get<unknown, GetAssetsQueryOptions, unknown>(
     {
       path: `${ASSET_MANAGER_API_BASE}/assets`,
       validate: {
-        query: getAssetsQueryOptions,
+        query: createRouteValidationFunction(getAssetsQueryOptionsRT),
       },
     },
     async (context, req, res) => {
@@ -81,24 +102,26 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
   );
 
   // GET assets/related
-  router.get<unknown, typeof getRelatedAssetsQueryOptions.type, unknown>(
+  router.get<unknown, GetRelatedAssetsQueryOptions, unknown>(
     {
       path: `${ASSET_MANAGER_API_BASE}/assets/related`,
       validate: {
-        query: getRelatedAssetsQueryOptions,
+        query: createRouteValidationFunction(getRelatedAssetsQueryOptionsRT),
       },
     },
     async (context, req, res) => {
       // Add references into sample data and write integration tests
 
-      const { from, to, ean, relation } = req.query || {};
+      const { from, to, ean, relation, maxDistance, size } = req.query || {};
       const esClient = await getEsClientFromContext(context);
 
-      // What if maxDistance is below 1?
-      const maxDistance = req.query.maxDistance ? Math.min(req.query.maxDistance, 5) : 1; // Validate maxDistance not larger than 5
-      const size = req.query.size ? Math.min(req.query.size, 100) : 10; // Do we need pagination and sorting? Yes.
       const type = toArray<AssetType>(req.query.type);
-      // Validate from and to to be ISO string only. Or use io-ts to coerce.
+
+      if (to && !isValidRange(from, to)) {
+        return res.badRequest({
+          body: `Time range cannot move backwards in time. "to" (${to}) is before "from" (${from}).`,
+        });
+      }
 
       try {
         return res.ok({
@@ -125,24 +148,24 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
   );
 
   // GET /assets/diff
-  router.get<unknown, typeof getAssetsDiffQueryOptions.type, unknown>(
+  router.get<unknown, GetAssetsDiffQueryOptions, unknown>(
     {
       path: `${ASSET_MANAGER_API_BASE}/assets/diff`,
       validate: {
-        query: getAssetsDiffQueryOptions,
+        query: createRouteValidationFunction(getAssetsDiffQueryOptionsRT),
       },
     },
     async (context, req, res) => {
       const { aFrom, aTo, bFrom, bTo } = req.query;
       const type = toArray<AssetType>(req.query.type);
 
-      if (new Date(aFrom) > new Date(aTo)) {
+      if (!isValidRange(aFrom, aTo)) {
         return res.badRequest({
           body: `Time range cannot move backwards in time. "aTo" (${aTo}) is before "aFrom" (${aFrom}).`,
         });
       }
 
-      if (new Date(bFrom) > new Date(bTo)) {
+      if (!isValidRange(bFrom, bTo)) {
         return res.badRequest({
           body: `Time range cannot move backwards in time. "bTo" (${bTo}) is before "bFrom" (${bFrom}).`,
         });

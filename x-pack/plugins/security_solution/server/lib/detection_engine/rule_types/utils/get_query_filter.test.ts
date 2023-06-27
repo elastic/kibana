@@ -319,6 +319,113 @@ describe('get_filter', () => {
           },
         });
       });
+
+      test('should work with wildcard in field name and fields', () => {
+        const queryFilter = getQueryFilter({
+          query: 'agent*: linux',
+          language: 'kuery',
+          filters: [],
+          index: ['auditbeat-*'],
+          exceptionFilter: undefined,
+          fields: [
+            {
+              name: 'agent.id',
+              type: 'string',
+              esTypes: ['keyword'],
+            },
+            {
+              name: 'agent.name',
+              type: 'string',
+              esTypes: ['keyword'],
+            },
+            {
+              name: 'event.dataset',
+              type: 'string',
+              esTypes: ['keyword'],
+            },
+          ],
+        });
+        expect(queryFilter).toEqual({
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      term: {
+                        'agent.id': {
+                          value: 'linux',
+                        },
+                      },
+                    },
+                    {
+                      term: {
+                        'agent.name': {
+                          value: 'linux',
+                        },
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+            should: [],
+            must_not: [],
+          },
+        });
+      });
+
+      test('should work when fields supplied but query is not wildcard field name', () => {
+        const queryFilter = getQueryFilter({
+          query: 'agent.name: linux',
+          language: 'kuery',
+          filters: [],
+          index: ['auditbeat-*'],
+          exceptionFilter: undefined,
+          fields: [
+            {
+              name: 'agent.id',
+              type: 'string',
+              esTypes: ['keyword'],
+            },
+            {
+              name: 'agent.name',
+              type: 'string',
+              esTypes: ['keyword'],
+            },
+            {
+              name: 'event.dataset',
+              type: 'string',
+              esTypes: ['keyword'],
+            },
+          ],
+        });
+        expect(queryFilter).toEqual({
+          bool: {
+            must: [],
+            filter: [
+              {
+                bool: {
+                  should: [
+                    {
+                      term: {
+                        'agent.name': {
+                          value: 'linux',
+                        },
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+            should: [],
+            must_not: [],
+          },
+        });
+      });
     });
 
     describe('lucene', () => {

@@ -35,14 +35,14 @@ export default function ({ getPageObjects, getService }) {
         mapboxStyle = await PageObjects.maps.getMapboxStyle();
       });
 
-      it('should request tiles from /api/maps/mvt/getTile', async () => {
+      it('should request tiles from /internal/maps/mvt/getTile', async () => {
         const tileUrl = new URL(
           mapboxStyle.sources[VECTOR_SOURCE_ID].tiles[0],
           'http://absolute_path'
         );
         const searchParams = Object.fromEntries(tileUrl.searchParams);
 
-        expect(tileUrl.pathname).to.equal('/api/maps/mvt/getTile/%7Bz%7D/%7Bx%7D/%7By%7D.pbf');
+        expect(tileUrl.pathname).to.equal('/internal/maps/mvt/getTile/%7Bz%7D/%7Bx%7D/%7By%7D.pbf');
 
         // token is an unique id that changes between runs
         expect(typeof searchParams.token).to.equal('string');

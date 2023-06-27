@@ -11,6 +11,8 @@ import {
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
+  ESRE_PLUGIN,
+  VECTOR_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 
 /**
@@ -47,3 +49,8 @@ export const workplaceSearchTitle = (page: Title = []) =>
 
 export const searchExperiencesTitle = (page: Title = []) =>
   generateTitle([...page, SEARCH_EXPERIENCES_PLUGIN.NAME]);
+
+export const esreTitle = (page: Title = []) => generateTitle([...page, ESRE_PLUGIN.NAME]);
+
+export const vectorSearchTitle = (page: Title = []) =>
+  generateTitle([...page, VECTOR_SEARCH_PLUGIN.NAME]);

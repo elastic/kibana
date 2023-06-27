@@ -86,11 +86,34 @@ describe('create', () => {
       jest.clearAllMocks();
     });
 
-    it('should throw an error with an excess field exists', async () => {
+    it('should throw an error when an excess field exists', async () => {
       await expect(
         // @ts-expect-error foo is an invalid field
         create({ ...theCase, foo: 'bar' }, clientArgs)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"foo\\""`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to create case: Error: invalid keys \\"foo\\""`
+      );
+    });
+
+    it('should throw an error if the category length is too long', async () => {
+      await expect(
+        create(
+          { ...theCase, category: 'A very long category with more than fifty characters!' },
+          clientArgs
+        )
+      ).rejects.toThrow('Failed to create case: Error: The length of the category is too long.');
+    });
+
+    it('should throw an error if the category is an empty string', async () => {
+      await expect(create({ ...theCase, category: '' }, clientArgs)).rejects.toThrow(
+        'Failed to create case: Error: The category cannot be an empty string.'
+      );
+    });
+
+    it('should throw an error if the category is a string with empty characters', async () => {
+      await expect(create({ ...theCase, category: '   ' }, clientArgs)).rejects.toThrow(
+        'Failed to create case: Error: The category cannot be an empty string.'
+      );
     });
   });
 });

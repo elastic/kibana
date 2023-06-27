@@ -29,6 +29,11 @@ import {
 } from '@elastic/eui';
 
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
+import {
+  DATA_FRAME_TASK_STATE,
+  type DataFrameAnalyticsConfig,
+  type UpdateDataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
 
 import { useMlKibana, useMlApiContext } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
@@ -37,12 +42,7 @@ import {
   memoryInputValidator,
   MemoryInputValidatorResult,
 } from '../../../../../../../common/util/validators';
-import { DATA_FRAME_TASK_STATE } from '../analytics_list/common';
 import { useRefreshAnalyticsList } from '../../../../common/analytics';
-import {
-  UpdateDataFrameAnalyticsConfig,
-  type DataFrameAnalyticsConfig,
-} from '../../../../../../../common/types/data_frame_analytics';
 
 import { EditAction } from './use_edit_action';
 import { CustomUrlsWrapper, isValidCustomUrls } from '../../../../../components/custom_urls';

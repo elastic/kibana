@@ -37,79 +37,147 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       controlId = (await dashboardControls.getAllControlIds())[0];
       await dashboard.clickQuickSave();
       await header.waitUntilLoadingHasFinished();
-
-      await dashboardControls.optionsListOpenPopover(controlId);
     });
 
     after(async () => {
-      await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
       await dashboardControls.deleteAllControls();
       await dashboard.clickQuickSave();
     });
 
-    it('sort alphabetically - descending', async () => {
-      await dashboardControls.optionsListPopoverSetSort({ by: '_key', direction: 'desc' });
-      const sortedSuggestions = Object.keys(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS)
-        .sort()
-        .reverse()
-        .reduce((result, key) => {
-          return { ...result, [key]: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS[key] };
-        }, {});
-      await dashboardControls.ensureAvailableOptionsEqual(
-        controlId,
-        { suggestions: sortedSuggestions, invalidSelections: [] },
-        true
-      );
+    describe('sorting', () => {
+      before(async () => {
+        await dashboardControls.optionsListOpenPopover(controlId);
+      });
+
+      after(async () => {
+        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+      });
+
+      it('sort alphabetically - descending', async () => {
+        await dashboardControls.optionsListPopoverSetSort({ by: '_key', direction: 'desc' });
+        const sortedSuggestions = Object.keys(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS)
+          .sort()
+          .reverse()
+          .reduce((result, key) => {
+            return { ...result, [key]: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS[key] };
+          }, {});
+        await dashboardControls.ensureAvailableOptionsEqual(
+          controlId,
+          { suggestions: sortedSuggestions, invalidSelections: [] },
+          true
+        );
+      });
+
+      it('sort alphabetically - ascending', async () => {
+        await dashboardControls.optionsListPopoverSetSort({ by: '_key', direction: 'asc' });
+        const sortedSuggestions = Object.keys(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS)
+          .sort()
+          .reduce((result, key) => {
+            return { ...result, [key]: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS[key] };
+          }, {});
+        await dashboardControls.ensureAvailableOptionsEqual(
+          controlId,
+          { suggestions: sortedSuggestions, invalidSelections: [] },
+          true
+        );
+      });
+
+      it('sort by document count - descending', async () => {
+        await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'desc' });
+        await dashboardControls.ensureAvailableOptionsEqual(
+          controlId,
+          {
+            suggestions: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, // keys are already sorted descending by doc count
+            invalidSelections: [],
+          },
+          true
+        );
+      });
+
+      it('sort by document count - ascending', async () => {
+        await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'asc' });
+        const sortedSuggestions = Object.entries(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS)
+          .sort(([, docCountA], [, docCountB]) => {
+            return docCountB - docCountA;
+          })
+          .reduce((result, [key, docCount]) => {
+            return { ...result, [key]: docCount };
+          }, {});
+        await dashboardControls.ensureAvailableOptionsEqual(
+          controlId,
+          { suggestions: sortedSuggestions, invalidSelections: [] },
+          true
+        );
+      });
+
+      it('non-default sort value should cause unsaved changes', async () => {
+        await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+      });
+
+      it('returning to default sort value should remove unsaved changes', async () => {
+        await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'desc' });
+        await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      });
     });
 
-    it('sort alphabetically - ascending', async () => {
-      await dashboardControls.optionsListPopoverSetSort({ by: '_key', direction: 'asc' });
-      const sortedSuggestions = Object.keys(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS)
-        .sort()
-        .reduce((result, key) => {
-          return { ...result, [key]: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS[key] };
-        }, {});
-      await dashboardControls.ensureAvailableOptionsEqual(
-        controlId,
-        { suggestions: sortedSuggestions, invalidSelections: [] },
-        true
-      );
+    describe('searching', () => {
+      it('prefix searching works as expected', async () => {
+        await dashboardControls.optionsListOpenPopover(controlId);
+        await dashboardControls.optionsListPopoverSearchForOption('G');
+
+        const startsWithG = Object.entries(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS).reduce(
+          (result, [key, docCount]) => {
+            if (key[0] === 'g') return { ...result, [key]: docCount };
+            return { ...result };
+          },
+          {}
+        );
+        await dashboardControls.ensureAvailableOptionsEqual(
+          controlId,
+          {
+            suggestions: startsWithG,
+            invalidSelections: [],
+          },
+          true
+        );
+        await dashboardControls.optionsListPopoverClearSearch();
+        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+      });
     });
 
-    it('sort by document count - descending', async () => {
-      await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'desc' });
+    it('wildcard searching causes unsaved changes', async () => {
+      await dashboardControls.editExistingControl(controlId);
+      await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'wildcard' });
+      await dashboardControls.controlEditorSave();
+      await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+    });
+
+    it('wildcard searching works as expected', async () => {
+      await dashboardControls.optionsListOpenPopover(controlId);
+      await dashboardControls.optionsListPopoverSearchForOption('r');
+      const containsR = Object.entries(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS).reduce(
+        (result, [key, docCount]) => {
+          if (key.includes('r')) return { ...result, [key]: docCount };
+          return { ...result };
+        },
+        {}
+      );
       await dashboardControls.ensureAvailableOptionsEqual(
         controlId,
         {
-          suggestions: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, // keys are already sorted descending by doc count
+          suggestions: containsR,
           invalidSelections: [],
         },
         true
       );
+      await dashboardControls.optionsListPopoverClearSearch();
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
     });
 
-    it('sort by document count - ascending', async () => {
-      await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'asc' });
-      const sortedSuggestions = Object.entries(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS)
-        .sort(([, docCountA], [, docCountB]) => {
-          return docCountB - docCountA;
-        })
-        .reduce((result, [key, docCount]) => {
-          return { ...result, [key]: docCount };
-        }, {});
-      await dashboardControls.ensureAvailableOptionsEqual(
-        controlId,
-        { suggestions: sortedSuggestions, invalidSelections: [] },
-        true
-      );
-    });
-
-    it('non-default sort value should cause unsaved changes', async () => {
-      await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
-    });
-
-    it('returning to default sort value should remove unsaved changes', async () => {
-      await dashboardControls.optionsListPopoverSetSort({ by: '_count', direction: 'desc' });
+    it('returning to default search technqiue should remove unsaved changes', async () => {
+      await dashboardControls.editExistingControl(controlId);
+      await dashboardControls.optionsListSetAdditionalSettings({ searchTechnique: 'prefix' });
+      await dashboardControls.controlEditorSave();
       await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
     });
   });

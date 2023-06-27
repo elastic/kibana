@@ -95,6 +95,20 @@ export const CaseConnectorRt = rt.intersection([
   CaseUserActionConnectorRt,
 ]);
 
+const ActionConnectorResultRt = rt.intersection([
+  rt.strict({
+    id: rt.string,
+    actionTypeId: rt.string,
+    name: rt.string,
+    isDeprecated: rt.boolean,
+    isPreconfigured: rt.boolean,
+    referencedByCount: rt.number,
+  }),
+  rt.exact(rt.partial({ config: rt.record(rt.string, rt.unknown), isMissingSecrets: rt.boolean })),
+]);
+
+export const FindActionConnectorResponseRt = rt.array(ActionConnectorResultRt);
+
 export type CaseUserActionConnector = rt.TypeOf<typeof CaseUserActionConnectorRt>;
 export type CaseConnector = rt.TypeOf<typeof CaseConnectorRt>;
 export type ConnectorTypeFields = rt.TypeOf<typeof ConnectorTypeFieldsRt>;

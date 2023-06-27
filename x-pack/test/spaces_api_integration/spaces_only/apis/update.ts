@@ -17,7 +17,9 @@ export default function updateSpaceTestSuite({ getService }: FtrProviderContext)
   const { updateTest, expectAlreadyExistsResult, expectDefaultSpaceResult, expectNotFound } =
     updateTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/156130
+  // FLAKY: https://github.com/elastic/kibana/issues/156130, https://github.com/elastic/kibana/issues/156074
+  // Also, https://github.com/elastic/kibana/issues/158918
+  // esArchiver fails with no_shard_available_action_exception after deleting indexes
   describe.skip('update', () => {
     [
       {

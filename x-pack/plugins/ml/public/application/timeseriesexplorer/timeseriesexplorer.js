@@ -87,7 +87,7 @@ import { isMetricDetector } from './get_function_description';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
 import { TimeseriesexplorerChartDataError } from './components/timeseriesexplorer_chart_data_error';
 import { ExplorerNoJobsSelected } from '../explorer/components';
-import { getSourceIndicesWithGeoFields } from '../explorer/explorer_utils';
+import { getDataViewsAndIndicesWithGeoFields } from '../explorer/explorer_utils';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -849,8 +849,8 @@ export class TimeSeriesExplorer extends React.Component {
     if (previousProps === undefined || previousProps.selectedJobId !== this.props.selectedJobId) {
       const selectedJob = mlJobService.getJob(this.props.selectedJobId);
       this.contextChartSelectedInitCallDone = false;
-      getSourceIndicesWithGeoFields([selectedJob], this.props.dataViewsService)
-        .then((getSourceIndicesWithGeoFieldsResp) =>
+      getDataViewsAndIndicesWithGeoFields([selectedJob], this.props.dataViewsService)
+        .then(({ getSourceIndicesWithGeoFieldsResp }) =>
           this.setState(
             {
               fullRefresh: false,

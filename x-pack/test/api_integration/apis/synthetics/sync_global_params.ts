@@ -9,7 +9,7 @@ import {
   HTTPFields,
   SyntheticsParamSO,
 } from '@kbn/synthetics-plugin/common/runtime_types';
-import { API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { omit } from 'lodash';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -63,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('add a test private location', async () => {
       await testPrivateLocations.setTestLocations([testFleetPolicyID]);
 
-      const apiResponse = await supertestAPI.get(API_URLS.SERVICE_LOCATIONS);
+      const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
 
       expect(apiResponse.body.locations).eql([
         {
@@ -100,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       const apiResponse = await supertestAPI
-        .post(API_URLS.SYNTHETICS_MONITORS)
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 
@@ -207,7 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
       newMonitor.proxy_url = '${test}';
 
       const apiResponse = await supertestAPI
-        .post(API_URLS.SYNTHETICS_MONITORS)
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 

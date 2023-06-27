@@ -9,7 +9,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import { EuiSelectable } from '@elastic/eui';
+import { EuiHighlight, EuiSelectable } from '@elastic/eui';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
@@ -159,6 +159,13 @@ export const OptionsListPopoverSuggestions = ({
       <div ref={listRef}>
         <EuiSelectable
           options={selectableOptions}
+          renderOption={(option) => {
+            return (
+              <EuiHighlight search={option.key === 'exists-option' ? '' : searchString.value}>
+                {option.label}
+              </EuiHighlight>
+            );
+          }}
           listProps={{ onFocusBadge: false }}
           aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(
             fieldName,

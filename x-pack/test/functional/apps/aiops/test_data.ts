@@ -208,18 +208,18 @@ export const artificialLogDataViewTestData: TestData = {
     ],
     analysisTable: [
       {
-        fieldName: 'response_code',
-        fieldValue: '500',
-        logRate: 'Chart type:bar chart',
-        pValue: '3.61e-12',
-        impact: 'High',
-      },
-      {
         fieldName: 'url',
         fieldValue: 'home.php',
         impact: 'Low',
         logRate: 'Chart type:bar chart',
         pValue: '0.00974',
+      },
+      {
+        fieldName: 'user',
+        fieldValue: 'Peter',
+        impact: 'High',
+        logRate: 'Chart type:bar chart',
+        pValue: '2.63e-21',
       },
     ],
     fieldSelectorPopover: ['response_code', 'url', 'user'],

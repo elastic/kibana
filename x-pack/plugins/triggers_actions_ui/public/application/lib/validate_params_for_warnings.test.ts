@@ -51,4 +51,8 @@ describe('validateParamsForWarnings', () => {
   test('does not returns warnings when publicUrl is not set and the value is not a string', () => {
     expect(validateParamsForWarnings(10, undefined, actionVariables)).toBeFalsy();
   });
+
+  test('does not throw an error when passing in invalid mustache', () => {
+    expect(() => validateParamsForWarnings('{{', undefined, actionVariables)).not.toThrowError();
+  });
 });

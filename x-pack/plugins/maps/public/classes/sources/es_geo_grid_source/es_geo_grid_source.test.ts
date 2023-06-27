@@ -313,7 +313,7 @@ describe('ESGeoGridSource', () => {
       const tileUrl = await mvtGeogridSource.getTileUrl(vectorSourceRequestMeta, '1234', false, 5);
 
       const urlParts = tileUrl.split('?');
-      expect(urlParts[0]).toEqual('rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf');
+      expect(urlParts[0]).toEqual('rootdir/internal/maps/mvt/getGridTile/{z}/{x}/{y}.pbf');
 
       const params = new URLSearchParams(urlParts[1]);
       expect(Object.fromEntries(params)).toEqual({

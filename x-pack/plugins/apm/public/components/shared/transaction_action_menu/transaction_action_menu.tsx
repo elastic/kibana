@@ -89,7 +89,11 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
 }
 
 function ActionMenuSections({ transaction }: { transaction?: Transaction }) {
-  const { core, uiActions } = useApmPluginContext();
+  const {
+    core,
+    uiActions,
+    infra: { locators },
+  } = useApmPluginContext();
   const location = useLocation();
   const apmRouter = useApmRouter();
 
@@ -102,6 +106,7 @@ function ActionMenuSections({ transaction }: { transaction?: Transaction }) {
     basePath: core.http.basePath,
     location,
     apmRouter,
+    infraLocators: locators,
     infraLinksAvailable,
   });
 

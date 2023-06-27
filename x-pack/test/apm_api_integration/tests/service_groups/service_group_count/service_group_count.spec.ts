@@ -33,8 +33,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       params: {
         serviceName: 'synth-go',
         transactionType: undefined,
-        windowSize: 99,
-        windowUnit: 'y',
+        windowSize: 5,
+        windowUnit: 'h',
         threshold: 100,
         aggregationType: AggregationType.Avg,
         environment: 'testing',

@@ -10,16 +10,9 @@ import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { ErrorCode } from '../../../common/types/error_codes';
 import { isResourceNotFoundException } from '../../utils/identify_exceptions';
 
-interface CollectionsDeleteResponse {
-  acknowledged: boolean;
-}
-
 export const deleteAnalyticsCollectionById = async (client: IScopedClusterClient, name: string) => {
   try {
-    await client.asCurrentUser.transport.request<CollectionsDeleteResponse>({
-      method: 'DELETE',
-      path: `/_application/analytics/${name}`,
-    });
+    await client.asCurrentUser.searchApplication.deleteBehavioralAnalytics({ name });
   } catch (error) {
     if (isResourceNotFoundException(error)) {
       throw new Error(ErrorCode.ANALYTICS_COLLECTION_NOT_FOUND);

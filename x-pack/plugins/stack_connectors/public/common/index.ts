@@ -7,5 +7,5 @@
 
 import GenAiLogo from '../connector_types/gen_ai/logo';
 
-export { GEN_AI_CONNECTOR_ID } from '../../common/gen_ai/constants';
+export { GEN_AI_CONNECTOR_ID, OpenAiProviderType } from '../../common/gen_ai/constants';
 export { GenAiLogo };

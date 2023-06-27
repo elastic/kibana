@@ -60,6 +60,11 @@ import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
+import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import {
+  DiscoverStart,
+  DiscoverSetup,
+} from '@kbn/discover-plugin/public/plugin';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
   getApmEnrollmentFlyoutData,
@@ -79,11 +84,13 @@ export type ApmPluginStart = void;
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
+  discover?: DiscoverSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
+  licenseManagement?: LicenseManagementUIPluginSetup;
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
@@ -96,6 +103,7 @@ export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
   charts?: ChartsPluginStart;
   data: DataPublicPluginStart;
+  discover?: DiscoverStart;
   embeddable: EmbeddableStart;
   home: void;
   inspector: InspectorPluginStart;
@@ -109,7 +117,7 @@ export interface ApmPluginStartDeps {
   fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  infra?: InfraClientStartExports;
+  infra: InfraClientStartExports;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   storage: IStorageWrapper;

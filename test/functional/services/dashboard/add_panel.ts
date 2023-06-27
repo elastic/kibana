@@ -94,7 +94,7 @@ export class DashboardAddPanelService extends FtrService {
           continue;
         }
         await button.click();
-        await this.common.closeToast();
+        await this.common.closeToastIfExists();
         embeddableList.push(name);
       }
     });
@@ -149,7 +149,7 @@ export class DashboardAddPanelService extends FtrService {
   }
 
   async closeAddPanel() {
-    await this.flyout.ensureClosed('dashboardAddPanel');
+    await this.flyout.ensureAllClosed();
   }
 
   async filterEmbeddableNames(name: string) {

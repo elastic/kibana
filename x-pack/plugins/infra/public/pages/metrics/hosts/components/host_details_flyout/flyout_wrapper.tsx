@@ -8,12 +8,11 @@
 import React, { useMemo } from 'react';
 import type { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import { useLazyRef } from '../../../../../hooks/use_lazy_ref';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
-import type { Tab } from '../../../../../components/asset_details/asset_details';
-import { useHostFlyoutOpen } from '../../hooks/use_host_flyout_open_url_state';
+import { HostFlyout, useHostFlyoutUrlState } from '../../hooks/use_host_flyout_url_state';
 import { AssetDetails } from '../../../../../components/asset_details/asset_details';
-import { metadataTab, processesTab } from './tabs';
+import { orderedFlyoutTabs } from './tabs';
+import { useLogViewReference } from '../../hooks/use_log_view_reference';
 
 export interface Props {
   node: HostNodeRow;
@@ -24,6 +23,9 @@ const NODE_TYPE = 'host' as InventoryItemType;
 
 export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
+  const { logViewReference, loading } = useLogViewReference({
+    id: 'hosts-flyout-logs-view',
+  });
   const currentTimeRange = useMemo(
     () => ({
       ...getDateRangeAsTimestamp(),
@@ -32,31 +34,44 @@ export const FlyoutWrapper = ({ node, closeFlyout }: Props) => {
     [getDateRangeAsTimestamp]
   );
 
-  const [hostFlyoutOpen, setHostFlyoutOpen] = useHostFlyoutOpen();
-
-  // This map allow to keep track of which tabs content have been rendered the first time.
-  // We need it in order to load a tab content only if it gets clicked, and then keep it in the DOM for performance improvement.
-  const renderedTabsSet = useLazyRef(() => new Set([hostFlyoutOpen?.selectedTabId]));
-
-  const onTabClick = (tab: Tab) => {
-    renderedTabsSet.current.add(tab.id); // On a tab click, mark the tab content as allowed to be rendered
-    setHostFlyoutOpen({ selectedTabId: tab.id });
-  };
+  const [hostFlyoutState, setHostFlyoutState] = useHostFlyoutUrlState();
 
   return (
     <AssetDetails
       node={node}
-      closeFlyout={closeFlyout}
-      onTabClick={onTabClick}
-      currentTimeRange={currentTimeRange}
-      hostFlyoutOpen={hostFlyoutOpen}
-      setHostFlyoutState={setHostFlyoutOpen}
-      showActionsColumn
-      showInFlyout
-      renderedTabsSet={renderedTabsSet}
-      tabs={[metadataTab, processesTab]}
-      links={['apmServices', 'uptime']}
       nodeType={NODE_TYPE}
+      currentTimeRange={currentTimeRange}
+      activeTabId={hostFlyoutState?.tabId}
+      overrides={{
+        metadata: {
+          query: hostFlyoutState?.metadataSearch,
+          showActionsColumn: true,
+        },
+        processes: {
+          query: hostFlyoutState?.processSearch,
+        },
+        logs: {
+          query: hostFlyoutState?.logsSearch,
+          logView: {
+            reference: logViewReference,
+            loading,
+          },
+        },
+      }}
+      onTabsStateChange={(state) =>
+        setHostFlyoutState({
+          metadataSearch: state.metadata?.query,
+          processSearch: state.processes?.query,
+          logsSearch: state.logs?.query,
+          tabId: state.activeTabId as HostFlyout['tabId'],
+        })
+      }
+      tabs={orderedFlyoutTabs}
+      links={['apmServices', 'uptime']}
+      renderMode={{
+        showInFlyout: true,
+        closeFlyout,
+      }}
     />
   );
 };

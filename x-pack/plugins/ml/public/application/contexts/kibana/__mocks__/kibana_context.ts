@@ -9,6 +9,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { mlApiServicesMock } from '../../../services/__mocks__/ml_api_services';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 export const chartsServiceMock = {
   theme: {
@@ -37,13 +38,24 @@ export const kibanaContextMock = {
   services: {
     uiSettings: { get: jest.fn() },
     chrome: { recentlyAccessed: { add: jest.fn() } },
-    application: { navigateToApp: jest.fn() },
+    application: { navigateToApp: jest.fn(), navigateToUrl: jest.fn() },
     http: {
       basePath: {
         get: jest.fn(),
       },
     },
     share: {
+      url: {
+        locators: {
+          get: jest.fn(() => {
+            return {
+              getUrl: jest.fn(() => {
+                return Promise.resolve('mock-url');
+              }),
+            };
+          }),
+        },
+      },
       urlGenerators: { getUrlGenerator: jest.fn() },
     },
     data: dataPluginMock.createStartContract(),
@@ -51,7 +63,11 @@ export const kibanaContextMock = {
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     mlServices: {
       mlApiServices: mlApiServicesMock,
+      mlCapabilities: {
+        refreshCapabilities: jest.fn(),
+      },
     },
+    notifications: notificationServiceMock.createStartContract(),
   },
 };
 

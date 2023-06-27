@@ -8,20 +8,13 @@
 
 export type { SortOrder } from '../common/types';
 export type { SavedSearch, SaveSavedSearchOptions } from './services/saved_searches';
-export {
-  getSavedSearch,
-  getSavedSearchFullPathUrl,
-  getSavedSearchUrl,
-  getSavedSearchUrlConflictMessage,
-  throwErrorOnSavedSearchUrlConflict,
-  saveSavedSearch,
-  getNewSavedSearch,
-} from './services/saved_searches';
+
+export { getSavedSearchFullPathUrl, getSavedSearchUrl } from './services/saved_searches';
+
 export { VIEW_MODE } from '../common';
+import { SavedSearchPublicPlugin } from './plugin';
+export type { SavedSearchPublicPluginStart } from './plugin';
 
 export function plugin() {
-  return {
-    setup: () => {},
-    start: () => {},
-  };
+  return new SavedSearchPublicPlugin();
 }

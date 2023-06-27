@@ -125,6 +125,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           },
         },
         is_protected: { type: 'boolean' },
+        overrides: { type: 'flattened', index: false },
       },
     },
     migrations: {
@@ -409,7 +410,6 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     mappings: {
       dynamic: false,
       properties: {
-        created_at: { type: 'date' },
         policy_id: { type: 'keyword' },
         token_plain: { type: 'keyword' },
       },

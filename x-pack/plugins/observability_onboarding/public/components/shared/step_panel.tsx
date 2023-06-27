@@ -13,6 +13,7 @@ import {
   EuiPanelProps,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 
 interface StepPanelProps {
@@ -57,8 +58,10 @@ interface StepPanelFooterProps {
 }
 export function StepPanelFooter(props: StepPanelFooterProps) {
   const { items = [], children } = props;
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem grow={false} style={{ marginBottom: euiTheme.size.l }}>
       {children}
       {items && (
         <EuiFlexGroup justifyContent="spaceBetween">

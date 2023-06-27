@@ -10,7 +10,6 @@ import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import {
   ParsedTechnicalFields,
@@ -110,15 +109,6 @@ export const createScopedLogger = (
   };
 };
 
-export const getAlertDetailsPageEnabledForApp = (
-  config: ObservabilityConfig['unsafe']['alertDetails'] | null,
-  appName: keyof ObservabilityConfig['unsafe']['alertDetails']
-): boolean => {
-  if (!config) return false;
-
-  return config[appName].enabled;
-};
-
 export const getViewInInventoryAppUrl = ({
   basePath,
   criteria,
@@ -152,12 +142,6 @@ export const getViewInInventoryAppUrl = ({
 
 export const getViewInMetricsAppUrl = (basePath: IBasePath, spaceId: string) =>
   addSpaceIdToPath(basePath.publicBaseUrl, spaceId, LINK_TO_METRICS_EXPLORER);
-
-export const getAlertDetailsUrl = (
-  basePath: IBasePath,
-  spaceId: string,
-  alertUuid: string | null
-) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
 
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 export const NUMBER_OF_DOCUMENTS = 10;

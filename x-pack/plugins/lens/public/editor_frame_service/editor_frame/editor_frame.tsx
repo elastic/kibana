@@ -142,6 +142,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 visualizationMap={visualizationMap}
                 framePublicAPI={framePublicAPI}
                 uiActions={props.plugins.uiActions}
+                dataViews={props.plugins.dataViews}
                 indexPatternService={props.indexPatternService}
                 getUserMessages={props.getUserMessages}
               />
@@ -177,6 +178,7 @@ export function EditorFrame(props: EditorFrameProps) {
                 visualizationMap={visualizationMap}
                 frame={framePublicAPI}
                 getUserMessages={props.getUserMessages}
+                nowProvider={props.plugins.data.nowProvider}
               />
             </ErrorBoundary>
           )

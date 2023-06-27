@@ -34,7 +34,11 @@ export const performGet = async <T>(
     extensions = {},
   }: ApiExecutionContext
 ): Promise<SavedObject<T>> => {
-  const { common: commonHelper, encryption: encryptionHelper } = helpers;
+  const {
+    common: commonHelper,
+    encryption: encryptionHelper,
+    migration: migrationHelper,
+  } = helpers;
   const { securityExtension } = extensions;
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
@@ -82,7 +86,7 @@ export const performGet = async <T>(
 
   let migrated: SavedObject<T>;
   try {
-    migrated = migrator.migrateDocument(document) as SavedObject<T>;
+    migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
   } catch (error) {
     throw SavedObjectsErrorHelpers.decorateGeneralError(
       error,

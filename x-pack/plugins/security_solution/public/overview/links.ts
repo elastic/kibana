@@ -55,6 +55,7 @@ export const gettingStartedLinks: LinkItem = {
       defaultMessage: 'Getting started',
     }),
   ],
+  sideNavIcon: 'launch',
   skipUrlState: true,
   hideTimeline: true,
 };
@@ -85,7 +86,7 @@ export const entityAnalyticsLinks: LinkItem = {
       'Entity analytics, anomalies, and threats to narrow down the monitoring surface area.',
   }),
   path: ENTITY_ANALYTICS_PATH,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [`${SERVER_APP_ID}.entity-analytics`],
   isBeta: false,
   globalSearchKeywords: [ENTITY_ANALYTICS],
 };

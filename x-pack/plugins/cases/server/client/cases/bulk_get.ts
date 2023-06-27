@@ -25,6 +25,7 @@ import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { SOWithErrors } from '../../common/types';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 type CaseSavedObjectWithErrors = Array<SOWithErrors<CaseAttributes>>;
 
@@ -77,8 +78,9 @@ export const bulkGet = async (
     });
 
     const errors = constructErrors(soBulkGetErrors, unauthorizedCases);
+    const res = { cases: flattenedCases, errors };
 
-    return CasesBulkGetResponseRt.encode({ cases: flattenedCases, errors });
+    return decodeOrThrow(CasesBulkGetResponseRt)(res);
   } catch (error) {
     const ids = params.ids ?? [];
     throw createCaseError({

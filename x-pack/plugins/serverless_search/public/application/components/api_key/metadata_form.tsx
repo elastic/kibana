@@ -5,20 +5,11 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiText,
-  EuiLink,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { docLinks } from '../../../../common/doc_links';
-import { OPTIONAL_LABEL } from '../../../../common/i18n_string';
 
 interface MetadataFormProps {
   metadata: string;
@@ -33,28 +24,6 @@ export const MetadataForm: React.FC<MetadataFormProps> = ({
 }) => {
   return (
     <>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.serverlessSearch.apiKey.metadataTitle', {
-                defaultMessage: 'Add Metadata',
-              })}
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge>{OPTIONAL_LABEL}</EuiBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiText>
-        {i18n.translate('xpack.serverlessSearch.apiKey.metadataDescription', {
-          defaultMessage:
-            'Use configurable key-value pairs to add information about the API key or customize Elasticsearch resource access.',
-        })}
-      </EuiText>
-      <EuiSpacer />
       <EuiLink href={docLinks.metadata} target="_blank">
         {i18n.translate('xpack.serverlessSearch.apiKey.metadataLinkLabel', {
           defaultMessage: 'Learn how to structure role metadata',

@@ -47,11 +47,17 @@
     "allowSyncToPrerelease": true
   },
   {
+    "name": "profiler_collector",
+    "version": "8.9.0-preview",
+    "forceAlignStackVersion": true,
+    "allowSyncToPrerelease": true
+  },
+  {
     "name": "synthetics",
     "version": "1.0.1"
   },
   {
     "name": "security_detection_engine",
-    "version": "8.8.1"
+    "version": "8.8.2"
   }
 ]

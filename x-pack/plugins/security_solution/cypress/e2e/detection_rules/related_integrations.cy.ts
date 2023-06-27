@@ -54,8 +54,8 @@ Note that the rule we are using for testing purposes has the following character
 
 describe('Related integrations', () => {
   before(() => {
-    login();
     cleanKibana();
+    login();
     importRule('related_integrations.ndjson');
   });
 
@@ -71,6 +71,7 @@ describe('Related integrations', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(DETECTIONS_RULE_MANAGEMENT_URL);
       waitForRulesTableToShow();
     });
@@ -132,6 +133,7 @@ describe('Related integrations', () => {
       });
 
       beforeEach(() => {
+        login();
         visit(DETECTIONS_RULE_MANAGEMENT_URL);
         waitForRulesTableToShow();
       });
@@ -216,6 +218,7 @@ describe('Related integrations', () => {
     });
 
     beforeEach(() => {
+      login();
       visit(DETECTIONS_RULE_MANAGEMENT_URL);
       waitForRulesTableToShow();
     });

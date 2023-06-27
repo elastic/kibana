@@ -62,17 +62,45 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
             values={Object {}}
           />
         }
+        labelAppend={
+          <EuiText
+            color="subdued"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="Optional"
+              id="savedObjects.saveModal.optional"
+              values={Object {}}
+            />
+          </EuiText>
+        }
         labelType="label"
       >
         <EuiTextArea
           data-test-subj="viewDescription"
+          fullWidth={true}
           onChange={[Function]}
           value=""
         />
       </EuiFormRow>
     </EuiForm>
   </EuiModalBody>
-  <EuiModalFooter>
+  <EuiModalFooter
+    css={
+      Object {
+        "map": undefined,
+        "name": "fy4vru",
+        "next": undefined,
+        "styles": "
+            align-items: center;
+          ",
+        "toString": [Function],
+      }
+    }
+  >
+    <EuiFlexItem
+      grow={true}
+    />
     <EuiButtonEmpty
       data-test-subj="saveCancelButton"
       onClick={[Function]}
@@ -88,7 +116,6 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
       data-test-subj="confirmSaveSavedObjectButton"
       fill={true}
       form="generated-id_form"
-      isDisabled={false}
       isLoading={false}
       size="m"
       type="submit"
@@ -161,17 +188,45 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
             values={Object {}}
           />
         }
+        labelAppend={
+          <EuiText
+            color="subdued"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="Optional"
+              id="savedObjects.saveModal.optional"
+              values={Object {}}
+            />
+          </EuiText>
+        }
         labelType="label"
       >
         <EuiTextArea
           data-test-subj="viewDescription"
+          fullWidth={true}
           onChange={[Function]}
           value=""
         />
       </EuiFormRow>
     </EuiForm>
   </EuiModalBody>
-  <EuiModalFooter>
+  <EuiModalFooter
+    css={
+      Object {
+        "map": undefined,
+        "name": "fy4vru",
+        "next": undefined,
+        "styles": "
+            align-items: center;
+          ",
+        "toString": [Function],
+      }
+    }
+  >
+    <EuiFlexItem
+      grow={true}
+    />
     <EuiButtonEmpty
       data-test-subj="saveCancelButton"
       onClick={[Function]}
@@ -187,7 +242,6 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       data-test-subj="confirmSaveSavedObjectButton"
       fill={true}
       form="generated-id_form"
-      isDisabled={true}
       isLoading={false}
       size="m"
       type="submit"
@@ -260,17 +314,45 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
             values={Object {}}
           />
         }
+        labelAppend={
+          <EuiText
+            color="subdued"
+            size="xs"
+          >
+            <FormattedMessage
+              defaultMessage="Optional"
+              id="savedObjects.saveModal.optional"
+              values={Object {}}
+            />
+          </EuiText>
+        }
         labelType="label"
       >
         <EuiTextArea
           data-test-subj="viewDescription"
+          fullWidth={true}
           onChange={[Function]}
           value=""
         />
       </EuiFormRow>
     </EuiForm>
   </EuiModalBody>
-  <EuiModalFooter>
+  <EuiModalFooter
+    css={
+      Object {
+        "map": undefined,
+        "name": "fy4vru",
+        "next": undefined,
+        "styles": "
+            align-items: center;
+          ",
+        "toString": [Function],
+      }
+    }
+  >
+    <EuiFlexItem
+      grow={true}
+    />
     <EuiButtonEmpty
       data-test-subj="saveCancelButton"
       onClick={[Function]}
@@ -286,7 +368,6 @@ exports[`SavedObjectSaveModal should render matching snapshot when custom isVali
       data-test-subj="confirmSaveSavedObjectButton"
       fill={true}
       form="generated-id_form"
-      isDisabled={false}
       isLoading={false}
       size="m"
       type="submit"
@@ -363,10 +444,23 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
                 values={Object {}}
               />
             }
+            labelAppend={
+              <EuiText
+                color="subdued"
+                size="xs"
+              >
+                <FormattedMessage
+                  defaultMessage="Optional"
+                  id="savedObjects.saveModal.optional"
+                  values={Object {}}
+                />
+              </EuiText>
+            }
             labelType="label"
           >
             <EuiTextArea
               data-test-subj="viewDescription"
+              fullWidth={true}
               onChange={[Function]}
               value=""
             />
@@ -383,7 +477,22 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
       </EuiFlexGroup>
     </EuiForm>
   </EuiModalBody>
-  <EuiModalFooter>
+  <EuiModalFooter
+    css={
+      Object {
+        "map": undefined,
+        "name": "fy4vru",
+        "next": undefined,
+        "styles": "
+            align-items: center;
+          ",
+        "toString": [Function],
+      }
+    }
+  >
+    <EuiFlexItem
+      grow={true}
+    />
     <EuiButtonEmpty
       data-test-subj="saveCancelButton"
       onClick={[Function]}
@@ -399,7 +508,6 @@ exports[`SavedObjectSaveModal should render matching snapshot when given options
       data-test-subj="confirmSaveSavedObjectButton"
       fill={true}
       form="generated-id_form"
-      isDisabled={false}
       isLoading={false}
       size="m"
       type="submit"

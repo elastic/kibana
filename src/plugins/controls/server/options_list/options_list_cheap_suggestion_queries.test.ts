@@ -53,7 +53,6 @@ describe('options list cheap queries', () => {
             "suggestions": Object {
               "terms": Object {
                 "field": "coolTestField.keyword",
-                "include": ".*",
                 "order": Object {
                   "_count": "asc",
                 },

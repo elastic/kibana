@@ -19,14 +19,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { docLinks } from '../../../common/doc_links';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { CodeBox } from './code_box';
 import { javascriptDefinition } from './languages/javascript';
 import { languageDefinitions } from './languages/languages';
-import { LanguageDefinition } from './languages/types';
+import { LanguageDefinition, LanguageDefinitionSnippetArguments } from './languages/types';
 import { InstallClientPanel } from './overview_panels/install_client';
 import { OverviewPanel } from './overview_panels/overview_panel';
 import './overview.scss';
@@ -35,15 +35,27 @@ import { SelectClientPanel } from './overview_panels/select_client';
 import { ApiKeyPanel } from './api_key/api_key';
 import { LanguageClientPanel } from './overview_panels/language_client_panel';
 
+const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';
+const API_KEY_PLACEHOLDER = 'your_api_key';
+
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] =
     useState<LanguageDefinition>(javascriptDefinition);
+  const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
   const {
+    application: { navigateToApp },
+    cloud,
     http,
     userProfile,
-    application: { navigateToApp },
   } = useKibanaServices();
+  const elasticsearchURL = useMemo(() => {
+    return cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER;
+  }, [cloud]);
   const assetBasePath = http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets/`);
+  const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
+    url: elasticsearchURL,
+    apiKey: clientApiKey,
+  };
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
@@ -104,7 +116,11 @@ export const ElasticsearchOverview = () => {
       </EuiPageTemplate.Section>
 
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
-        <InstallClientPanel language={selectedLanguage} setSelectedLanguage={setSelectedLanguage} />
+        <InstallClientPanel
+          codeArguments={codeSnippetArguments}
+          language={selectedLanguage}
+          setSelectedLanguage={setSelectedLanguage}
+        />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <OverviewPanel
@@ -112,7 +128,7 @@ export const ElasticsearchOverview = () => {
             defaultMessage:
               "You'll need these unique identifiers to securely connect to your Elasticsearch project.",
           })}
-          leftPanelContent={<ApiKeyPanel />}
+          leftPanelContent={<ApiKeyPanel setClientApiKey={setClientApiKey} />}
           links={[
             {
               href: docLinks.securityApis,
@@ -134,6 +150,7 @@ export const ElasticsearchOverview = () => {
           leftPanelContent={
             <CodeBox
               code="configureClient"
+              codeArgs={codeSnippetArguments}
               languages={languageDefinitions}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
@@ -181,6 +198,7 @@ export const ElasticsearchOverview = () => {
           leftPanelContent={
             <CodeBox
               code="testConnection"
+              codeArgs={codeSnippetArguments}
               languages={languageDefinitions}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}
@@ -193,7 +211,11 @@ export const ElasticsearchOverview = () => {
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
-        <IngestData selectedLanguage={selectedLanguage} setSelectedLanguage={setSelectedLanguage} />
+        <IngestData
+          codeArguments={codeSnippetArguments}
+          selectedLanguage={selectedLanguage}
+          setSelectedLanguage={setSelectedLanguage}
+        />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section color="subdued" bottomBorder="extended">
         <OverviewPanel
@@ -204,6 +226,7 @@ export const ElasticsearchOverview = () => {
           leftPanelContent={
             <CodeBox
               code="buildSearchQuery"
+              codeArgs={codeSnippetArguments}
               languages={languageDefinitions}
               selectedLanguage={selectedLanguage}
               setSelectedLanguage={setSelectedLanguage}

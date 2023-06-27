@@ -9,6 +9,7 @@
 import { valid } from 'semver';
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import buffer from 'buffer';
 
 const migrationSchema = schema.object({
   algorithm: schema.oneOf([schema.literal('v2'), schema.literal('zdt')], {
@@ -16,6 +17,10 @@ const migrationSchema = schema.object({
   }),
   batchSize: schema.number({ defaultValue: 1_000 }),
   maxBatchSizeBytes: schema.byteSize({ defaultValue: '100mb' }), // 100mb is the default http.max_content_length Elasticsearch config value
+  maxReadBatchSizeBytes: schema.byteSize({
+    defaultValue: buffer.constants.MAX_STRING_LENGTH,
+    max: buffer.constants.MAX_STRING_LENGTH,
+  }),
   discardUnknownObjects: schema.maybe(
     schema.string({
       validate: (value: string) =>
@@ -42,13 +47,14 @@ const migrationSchema = schema.object({
      */
     metaPickupSyncDelaySec: schema.number({ min: 1, defaultValue: 120 }),
     /**
-     * If set to true, the document migration phase will be run even if the
-     * instance does not have the `migrator` role.
+     * The document migration phase will be run from instances with any of the specified roles.
      *
      * This is mostly used for testing environments and integration tests were
      * we have full control over a single node Kibana deployment.
+     *
+     * Defaults to ["migrator"]
      */
-    runOnNonMigratorNodes: schema.boolean({ defaultValue: false }),
+    runOnRoles: schema.arrayOf(schema.string(), { defaultValue: ['migrator'] }),
   }),
 });
 

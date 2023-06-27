@@ -5,54 +5,113 @@
  * 2.0.
  */
 
-import { ConnectorMappingsRt } from './mappings';
+import { ConnectorMappingsAttributesPartialRt } from '../../../server/common/types/connector_mappings';
+import { decodeOrThrow } from '../runtime_types';
+import { ConnectorMappingsAttributesRt, ConnectorMappingsRt } from './mappings';
 
-describe('Mappings', () => {
+describe('mappings', () => {
+  const mappings = [
+    {
+      action_type: 'overwrite',
+      source: 'title',
+      target: 'unknown',
+    },
+    {
+      action_type: 'append',
+      source: 'description',
+      target: 'not_mapped',
+    },
+  ];
+
+  const attributes = {
+    mappings: [
+      {
+        action_type: 'overwrite',
+        source: 'title',
+        target: 'unknown',
+      },
+      {
+        action_type: 'append',
+        source: 'description',
+        target: 'not_mapped',
+      },
+    ],
+    owner: 'cases',
+  };
+
   describe('ConnectorMappingsRt', () => {
-    const defaultRequest = {
-      mappings: [
-        {
-          action_type: 'overwrite',
-          source: 'title',
-          target: 'unknown',
-        },
-        {
-          action_type: 'append',
-          source: 'description',
-          target: 'not_mapped',
-        },
-      ],
-      owner: 'cases',
-    };
-
     it('has expected attributes in request', () => {
-      const query = ConnectorMappingsRt.decode(defaultRequest);
+      const query = ConnectorMappingsRt.decode(mappings);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = ConnectorMappingsRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
+        right: mappings,
       });
     });
 
     it('removes foo:bar attributes from mappings', () => {
-      const query = ConnectorMappingsRt.decode({
-        ...defaultRequest,
-        mappings: [{ ...defaultRequest.mappings[0], foo: 'bar' }],
+      const query = ConnectorMappingsRt.decode([
+        { ...mappings[0] },
+        {
+          action_type: 'append',
+          source: 'description',
+          target: 'not_mapped',
+          foo: 'bar',
+        },
+      ]);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: mappings,
+      });
+    });
+  });
+
+  describe('ConnectorMappingsAttributesRt', () => {
+    it('has expected attributes in request', () => {
+      const query = ConnectorMappingsAttributesRt.decode(attributes);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: attributes,
+      });
+    });
+
+    it('removes foo:bar attributes from request', () => {
+      const query = ConnectorMappingsAttributesRt.decode({ ...attributes, foo: 'bar' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: attributes,
+      });
+    });
+
+    it('removes foo:bar attributes from mappings', () => {
+      const query = ConnectorMappingsAttributesRt.decode({
+        ...attributes,
+        mappings: [{ ...attributes.mappings[0], foo: 'bar' }],
       });
 
       expect(query).toStrictEqual({
         _tag: 'Right',
-        right: { ...defaultRequest, mappings: [{ ...defaultRequest.mappings[0] }] },
+        right: { ...attributes, mappings: [{ ...attributes.mappings[0] }] },
       });
+    });
+  });
+
+  describe('ConnectorMappingsAttributesPartialRt', () => {
+    it('strips excess fields from the object', () => {
+      const res = decodeOrThrow(ConnectorMappingsAttributesPartialRt)({
+        bananas: 'yes',
+        owner: 'hi',
+      });
+      expect(res).toMatchObject({
+        owner: 'hi',
+      });
+    });
+
+    it('does not throw when the object is empty', () => {
+      expect(() => decodeOrThrow(ConnectorMappingsAttributesPartialRt)({})).not.toThrow();
     });
   });
 });

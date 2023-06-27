@@ -38,6 +38,13 @@ export const RISK_SCORE_TITLE = i18n.translate(
   }
 );
 
+export const VIEW_RULE_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.viewRuleText',
+  {
+    defaultMessage: 'View rule',
+  }
+);
+
 /* Description section */
 
 export const DESCRIPTION_TITLE = i18n.translate(
@@ -121,6 +128,11 @@ export const INSIGHTS_TITLE = i18n.translate(
 export const CORRELATIONS_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.correlationsTitle',
   { defaultMessage: 'Correlations' }
+);
+
+export const PREVALENCE_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.prevalenceTitle',
+  { defaultMessage: 'Prevalence' }
 );
 
 export const TECHNICAL_PREVIEW_TITLE = i18n.translate(
@@ -238,6 +250,20 @@ export const CORRELATIONS_RELATED_CASES = i18n.translate(
   }
 );
 
+export const PREVALENCE_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.prevalenceText',
+  {
+    defaultMessage: 'fields of prevalence',
+  }
+);
+
+export const PREVALENCE_ROW_UNCOMMON = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.overviewTab.prevalenceRowText',
+  {
+    defaultMessage: 'is uncommon',
+  }
+);
+
 export const VIEW_ALL = (text: string) =>
   i18n.translate('xpack.securitySolution.flyout.documentDetails.overviewTab.viewAllButton', {
     values: { text },
@@ -260,9 +286,48 @@ export const ANALYZER_PREVIEW_TEXT = i18n.translate(
   }
 );
 
+export const SHARE = i18n.translate('xpack.securitySolution.flyout.documentDetails.share', {
+  defaultMessage: 'Share Alert',
+});
+
 export const INVESTIGATION_GUIDE_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.investigationGuideText',
   {
     defaultMessage: 'Investigation guide',
+  }
+);
+
+export const SESSION_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.title',
+  {
+    defaultMessage: 'Session viewer preview',
+  }
+);
+
+export const SESSION_PREVIEW_PROCESS_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.processText',
+  {
+    defaultMessage: 'started',
+  }
+);
+
+export const SESSION_PREVIEW_TIME_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.timeText',
+  {
+    defaultMessage: 'at',
+  }
+);
+
+export const SESSION_PREVIEW_RULE_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.ruleText',
+  {
+    defaultMessage: 'with rule',
+  }
+);
+
+export const SESSION_PREVIEW_COMMAND_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.commandText',
+  {
+    defaultMessage: 'by',
   }
 );

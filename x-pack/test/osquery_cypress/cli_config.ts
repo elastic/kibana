@@ -7,13 +7,13 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 
-import { OsqueryCypressCliTestRunner } from './runner';
+import { startOsqueryCypress } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const osqueryCypressConfig = await readConfigFile(require.resolve('./config.ts'));
   return {
     ...osqueryCypressConfig.getAll(),
 
-    testRunner: OsqueryCypressCliTestRunner,
+    testRunner: startOsqueryCypress,
   };
 }

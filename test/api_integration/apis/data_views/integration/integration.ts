@@ -112,7 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
       const recreatedIndexPattern = response6.body.index_pattern;
 
       expect(_.omit(recreatedIndexPattern, 'version', 'namespaces')).to.eql(
-        _.omit(resultIndexPattern, 'version')
+        _.omit(resultIndexPattern, 'version', 'namespaces')
       );
     });
   });
