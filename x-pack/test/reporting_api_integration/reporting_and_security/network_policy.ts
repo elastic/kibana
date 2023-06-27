@@ -37,7 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
         body = (await supertest.get(downloadPath).expect(500)).body;
       });
 
-      expect(body.message).to.match(
+      expect(body.message).contain(
         /Reporting generation failed: ReportingError\(code: disallowed_outgoing_url_error\)/
       );
     });
