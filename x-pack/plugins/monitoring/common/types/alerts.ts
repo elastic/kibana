@@ -170,6 +170,8 @@ export interface AlertNodeStats {
 
 export interface AlertCpuUsageNodeStats extends AlertNodeStats {
   cpuUsage?: number;
+  limitsChanged?: boolean;
+  missingLimits?: boolean;
 }
 
 export interface AlertThreadPoolRejectionsStats {

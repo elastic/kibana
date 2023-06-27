@@ -14,6 +14,14 @@ import { MonitoringConfig } from '../../config';
 import { getElasticsearchDataset, getIndexPatterns } from '../cluster/get_index_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 
+interface CpuUsageFieldsWithValues {
+  'max of node_stats.os.cgroup.cpu.cfs_quota_micros': number | null;
+  'max of node_stats.os.cgroup.cpuacct.usage_nanos': number | null;
+  'min of node_stats.os.cgroup.cpuacct.usage_nanos': number | null;
+  'max of node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods': number | null;
+  'min of node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods': number | null;
+}
+
 interface Options {
   esClient: ElasticsearchClient;
   clusterUuids: string[];
@@ -37,7 +45,7 @@ export async function fetchCpuUsageNodeStats(
 }
 
 async function fetchContainerStats(
-  { esClient, startMs, endMs, clusterUuids, filterQuery }: Options,
+  { esClient, startMs, endMs, clusterUuids, filterQuery, logger }: Options,
   config: MonitoringConfig
 ) {
   const indexPatterns = getIndexPatterns({
@@ -98,6 +106,24 @@ async function fetchContainerStats(
                   size: 1,
                 },
               },
+              // Fallback value in case container limits are not specified
+              average_cpu_usage_percent: {
+                avg: {
+                  field: 'node_stats.process.cpu.percent',
+                },
+              },
+              // Container limit min and max, to calculate usage and detect config changes
+              quota_micros_max: {
+                max: {
+                  field: 'node_stats.os.cgroup.cpu.cfs_quota_micros',
+                },
+              },
+              quota_micros_min: {
+                min: {
+                  field: 'node_stats.os.cgroup.cpu.cfs_quota_micros',
+                },
+              },
+              // Usage to calculate delta
               max_usage_nanos: {
                 max: {
                   field: 'node_stats.os.cgroup.cpuacct.usage_nanos',
@@ -108,6 +134,7 @@ async function fetchContainerStats(
                   field: 'node_stats.os.cgroup.cpuacct.usage_nanos',
                 },
               },
+              // Periods to calculate delta
               max_periods: {
                 max: {
                   field: 'node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods',
@@ -116,16 +143,6 @@ async function fetchContainerStats(
               min_periods: {
                 min: {
                   field: 'node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods',
-                },
-              },
-              quota_micros_max: {
-                max: {
-                  field: 'node_stats.os.cgroup.cpu.cfs_quota_micros',
-                },
-              },
-              quota_micros_min: {
-                min: {
-                  field: 'node_stats.os.cgroup.cpu.cfs_quota_micros',
                 },
               },
             },
@@ -149,11 +166,7 @@ async function fetchContainerStats(
   }
 
   return response.aggregations.clusters.buckets.flatMap((cluster) => {
-    return cluster.nodes.buckets.map((node) => {
-      if (node.quota_micros_min.value !== node.quota_micros_max.value) {
-        throw new Error('CPU limits changed during rule lookback period');
-      }
-
+    return cluster.nodes.buckets.map((node): AlertCpuUsageNodeStats => {
       let nodeName;
       if (node.name.buckets.length) {
         nodeName = node.name.buckets[0].key as string;
@@ -165,6 +178,36 @@ async function fetchContainerStats(
         ccs = index.includes(':') ? index.split(':')[0] : undefined;
       }
 
+      if (node.quota_micros_max.value === -1 && node.quota_micros_min.value === -1) {
+        logger.info(
+          `CPU usage rule: Configured for container workload but node ${nodeName} does not have limits set, using \`node_stats.process.cpu.percent\` as fallback field`
+        );
+
+        return {
+          clusterUuid: cluster.key as string,
+          nodeId: node.key as string,
+          cpuUsage: node.average_cpu_usage_percent.value ?? undefined,
+          nodeName,
+          ccs,
+          missingLimits: true,
+        };
+      }
+
+      if (node.quota_micros_min.value !== node.quota_micros_max.value) {
+        logger.warn(
+          `CPU usage rule: Container limits changed for node ${nodeName}, usage cannot be established at this time`
+        );
+
+        return {
+          clusterUuid: cluster.key as string,
+          nodeId: node.key as string,
+          cpuUsage: undefined,
+          nodeName,
+          ccs,
+          limitsChanged: true,
+        };
+      }
+
       if (
         node.max_usage_nanos.value === null ||
         node.min_usage_nanos.value === null ||
@@ -172,6 +215,20 @@ async function fetchContainerStats(
         node.min_periods.value === null ||
         node.quota_micros_max.value === null
       ) {
+        logger.warn(
+          `CPU usage rule: Some aggregated values needed for container CPU usage calculation was empty: ${findEmptyValues(
+            {
+              'max of node_stats.os.cgroup.cpu.cfs_quota_micros': node.quota_micros_max.value,
+              'max of node_stats.os.cgroup.cpuacct.usage_nanos': node.max_usage_nanos.value,
+              'min of node_stats.os.cgroup.cpuacct.usage_nanos': node.min_usage_nanos.value,
+              'max of node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods':
+                node.max_periods.value,
+              'min of node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods':
+                node.min_periods.value,
+            }
+          )}`
+        );
+
         return {
           clusterUuid: cluster.key as string,
           nodeId: node.key as string,
@@ -195,6 +252,14 @@ async function fetchContainerStats(
       };
     });
   });
+}
+
+function findEmptyValues(fieldsWithValues: CpuUsageFieldsWithValues): string {
+  const entries: Array<[string, number | null]> = Object.entries(fieldsWithValues);
+  return entries
+    .filter(([, value]) => value === null)
+    .map(([key]) => key)
+    .join(', ');
 }
 
 async function fetchNonContainerStats(
@@ -285,7 +350,7 @@ async function fetchNonContainerStats(
   }
 
   return response.aggregations.clusters.buckets.flatMap((cluster) => {
-    return cluster.nodes.buckets.map((node) => {
+    return cluster.nodes.buckets.map((node): AlertCpuUsageNodeStats => {
       let nodeName;
       if (node.name.buckets.length) {
         nodeName = node.name.buckets[0].key as string;
