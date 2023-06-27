@@ -13,12 +13,12 @@ import {
   tryAddingDisabledResponseAction,
   validateAvailableCommands,
   visitRuleActions,
-} from '../../tasks/response_actions';
-import { cleanupRule, generateRandomStringName, loadRule } from '../../tasks/api_fixtures';
-import { RESPONSE_ACTION_TYPES } from '../../../../../common/detection_engine/rule_response_actions/schemas';
-import { loginWithRole, ROLE } from '../../tasks/login';
+} from '../../../tasks/response_actions';
+import { cleanupRule, generateRandomStringName, loadRule } from '../../../tasks/api_fixtures';
+import { RESPONSE_ACTION_TYPES } from '../../../../../../common/detection_engine/rule_response_actions/schemas';
+import { loginWithRole, ROLE } from '../../../tasks/login';
 
-describe('Response actions', () => {
+describe('Form', () => {
   describe('User with no access can not create an endpoint response action', () => {
     before(() => {
       loginWithRole(ROLE.endpoint_response_actions_no_access);
@@ -139,6 +139,23 @@ describe('Response actions', () => {
         expect(request.body.response_actions).to.be.equal(undefined);
       });
       cy.contains(`${ruleName} was saved`).should('exist');
+    });
+  });
+
+  describe('User should not see endpoint action when no rbac', () => {
+    const [ruleName, ruleDescription] = generateRandomStringName(2);
+
+    before(() => {
+      loginWithRole(ROLE.endpoint_response_actions_no_access);
+    });
+
+    it('response actions are disabled', () => {
+      fillUpNewRule(ruleName, ruleDescription);
+      cy.getByTestSubj('response-actions-wrapper').within(() => {
+        cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
+          'be.disabled'
+        );
+      });
     });
   });
 
