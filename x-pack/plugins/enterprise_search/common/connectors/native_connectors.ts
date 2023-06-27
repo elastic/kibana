@@ -1633,7 +1633,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.useDocumentLevelSecurityLabel',
           {
-            defaultMessage: 'Use document level security',
+            defaultMessage: 'Enable document level security',
           }
         ),
         options: [],
