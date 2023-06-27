@@ -19,10 +19,10 @@ const OsqueryAppRoutesComponent = () => {
 
   return (
     <Routes legacySwitch={false}>
-      <Route path={`/packs/*`} element={<Packs />} />
-      <Route path={`/saved_queries/*`} element={<SavedQueries />} />
-      <Route path="/live_queries/*" element={<LiveQueries />} />
-      <Route index element={<Navigate to="/live_queries" replace />} />
+      <Route path="packs/*" element={<Packs />} />
+      <Route path="saved_queries/*" element={<SavedQueries />} />
+      <Route path="live_queries/*" element={<LiveQueries />} />
+      <Route index element={<Navigate to="live_queries" replace />} />
     </Routes>
   );
 };

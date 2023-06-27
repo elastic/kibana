@@ -33,7 +33,7 @@ interface ActionTableResultsButtonProps {
 }
 
 const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ actionId }) => {
-  const navProps = useRouterNavigate(`live_queries/${actionId}`);
+  const navProps = useRouterNavigate(`/live_queries/${actionId}`);
 
   const detailsText = i18n.translate(
     'xpack.osquery.liveQueryActions.table.viewDetailsActionButton',

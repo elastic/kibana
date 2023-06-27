@@ -6,22 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { replace } from 'lodash';
 import React, { Children } from 'react';
 import {
   // eslint-disable-next-line no-restricted-imports
   Switch,
-  useRouteMatch,
   Redirect as LegacyRedirect,
   RedirectProps as LegacyRedirectProps,
 } from 'react-router-dom';
-import {
-  Routes as ReactRouterRoutes,
-  CompatRoute,
-  Route,
-  Navigate,
-} from 'react-router-dom-v5-compat';
-import { Route as LegacyRoute, MatchPropagator } from './route';
+import { Routes as ReactRouterRoutes, Route, Navigate } from 'react-router-dom-v5-compat';
+import { Route as LegacyRoute, MatchPropagatorV6 } from './route';
 
 export const Routes = ({
   legacySwitch = true,
@@ -32,18 +25,16 @@ export const Routes = ({
   compat?: boolean;
   children: React.ReactNode;
 }) => {
-  const match = useRouteMatch();
-
   return legacySwitch ? (
     <Switch>
-      {compat
-        ? Children.map(children, (child) => {
-            if (React.isValidElement(child) && child.type === LegacyRoute) {
-              return <CompatRoute {...child.props} />;
-            }
-            return child;
-          })
-        : children}
+      {Children.map(children, (child) => {
+        if (React.isValidElement(child) && child.type === LegacyRoute) {
+          // @ts-expect-error
+          return React.cloneElement(child, { compat });
+        }
+
+        return child;
+      })}
     </Switch>
   ) : (
     <ReactRouterRoutes>
@@ -56,7 +47,7 @@ export const Routes = ({
                 {...child.props}
                 element={
                   <>
-                    <MatchPropagator />
+                    <MatchPropagatorV6 />
                     {child.props.element}
                   </>
                 }
@@ -66,7 +57,7 @@ export const Routes = ({
 
           // backwards compatibility for v5 routes
           if (child.type === LegacyRoute && !child.props.element) {
-            const path = replace(child?.props.path, match.url, '');
+            // const path = replace(child?.props.path, match.url, '');
             const renderFunction =
               typeof child?.props.children === 'function'
                 ? child?.props.children
@@ -74,10 +65,10 @@ export const Routes = ({
 
             return (
               <Route
-                path={path}
-                {...(child?.props.path === match.url
-                  ? { index: child?.props.path === match.url }
-                  : { path })}
+                path={child?.props.path}
+                // {...(child?.props.path === match.url
+                //   ? { index: child?.props.path === match.url }
+                //   : { path })}
                 element={
                   <>
                     {(child?.props?.component && <child.props.component />) ||

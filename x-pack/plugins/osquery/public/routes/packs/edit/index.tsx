@@ -30,11 +30,11 @@ import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 
 const EditPackPageComponent = () => {
   const { packId } = useParams<{ packId: string }>();
-  const queryDetailsLinkProps = useRouterNavigate(`packs/${packId}`);
+  const queryDetailsLinkProps = useRouterNavigate(`/packs/${packId}`);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
   const { isLoading, data } = usePack({ packId });
-  const deletePackMutation = useDeletePack({ packId, withRedirect: true });
+  const deletePackMutation = useDeletePack({ packId: packId as string, withRedirect: true });
   const isReadOnly = useMemo(() => !!data?.read_only, [data]);
 
   useBreadcrumbs('pack_edit', {

@@ -9,7 +9,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { Router } from '@kbn/shared-ux-router';
+import { BrowserRouter } from 'react-router-dom-v5-compat';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -44,7 +44,7 @@ const OsqueryAppContext = () => {
 export const renderApp = (
   core: CoreStart,
   services: AppPluginStartDependencies,
-  { element, history, theme$ }: AppMountParameters,
+  { element, appBasePath, theme$ }: AppMountParameters,
   storage: Storage,
   kibanaVersion: string
 ) => {
@@ -61,14 +61,14 @@ export const renderApp = (
         }}
       >
         <EuiErrorBoundary>
-          <Router history={history}>
+          <BrowserRouter basename={appBasePath}>
             <I18nProvider>
               <QueryClientProvider client={queryClient}>
                 <OsqueryAppContext />
                 <ReactQueryDevtools initialIsOpen={false} />
               </QueryClientProvider>
             </I18nProvider>
-          </Router>
+          </BrowserRouter>
         </EuiErrorBoundary>
       </KibanaContextProvider>
     </KibanaThemeProvider>,
