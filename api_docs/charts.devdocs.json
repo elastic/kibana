@@ -3386,9 +3386,7 @@
         "label": "AllowedSettingsOverrides",
         "description": [],
         "signature": [
-          "{ settings?: { tooltip?: ",
-          "TooltipSettings",
-          " | undefined; debug?: boolean | undefined; theme?: ",
+          "{ settings?: { debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",

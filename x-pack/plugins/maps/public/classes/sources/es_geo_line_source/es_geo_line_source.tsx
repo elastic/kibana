@@ -20,12 +20,13 @@ import {
 } from '../../../../common/constants';
 import { getField, addFieldToDSL } from '../../../../common/elasticsearch_util';
 import {
+  DataFilters,
   ESGeoLineSourceDescriptor,
   ESGeoLineSourceResponseMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
-import { AbstractESAggSource } from '../es_agg_source';
+import { AbstractESAggSource, ESAggsSourceSyncMeta } from '../es_agg_source';
 import { DataRequest } from '../../util/data_request';
 import { convertToGeoJson } from './convert_to_geojson';
 import { ESDocField } from '../../fields/es_doc_field';
@@ -46,10 +47,8 @@ import {
   TIME_SERIES_ID_FIELD_NAME,
 } from './constants';
 
-type ESGeoLineSourceSyncMeta = Pick<
-  ESGeoLineSourceDescriptor,
-  'groupByTimeseries' | 'lineSimplificationSize' | 'splitField' | 'sortField'
->;
+type ESGeoLineSourceSyncMeta = ESAggsSourceSyncMeta &
+  Pick<ESGeoLineSourceDescriptor, 'groupByTimeseries' | 'lineSimplificationSize' | 'splitField' | 'sortField'>;
 
 export const geoLineTitle = i18n.translate('xpack.maps.source.esGeoLineTitle', {
   defaultMessage: 'Tracks',
@@ -123,8 +122,9 @@ export class ESGeoLineSource extends AbstractESAggSource {
     );
   }
 
-  getSyncMeta(): ESGeoLineSourceSyncMeta {
+  getSyncMeta(dataFilters: DataFilters): ESGeoLineSourceSyncMeta {
     return {
+      ...super.getSyncMeta(dataFilters),
       groupByTimeseries: this._descriptor.groupByTimeseries,
       lineSimplificationSize: this._descriptor.lineSimplificationSize,
       splitField: this._descriptor.splitField,
@@ -169,10 +169,6 @@ export class ESGeoLineSource extends AbstractESAggSource {
       origin: FIELD_ORIGIN.SOURCE,
       dataType: 'string',
     });
-  }
-
-  getFieldNames() {
-    return [...this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName())];
   }
 
   async getFields(): Promise<IField[]> {
