@@ -13,7 +13,7 @@ import { MlPageControlsContext } from '../ml_page/ml_page';
 /**
  * Component for setting the page header content.
  */
-export const MlPageHeader: FC = ({ children }) => {
+export const MlPageHeader: FC = ({ children, ...restProps }) => {
   const { headerPortal, setIsHeaderMounted } = useContext(MlPageControlsContext);
 
   useEffect(() => {
@@ -24,7 +24,11 @@ export const MlPageHeader: FC = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <InPortal node={headerPortal}>{children}</InPortal>;
+  return (
+    <InPortal node={headerPortal} {...restProps}>
+      {children}
+    </InPortal>
+  );
 };
 
 /**

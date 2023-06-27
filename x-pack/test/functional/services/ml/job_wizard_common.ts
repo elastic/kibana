@@ -17,7 +17,7 @@ export interface SectionOptions {
 }
 
 export function MachineLearningJobWizardCommonProvider(
-  { getService }: FtrProviderContext,
+  { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
   customUrls: MlCustomUrls,
   mlCommonFieldStatsFlyout: MlCommonFieldStatsFlyout
@@ -25,6 +25,7 @@ export function MachineLearningJobWizardCommonProvider(
   const comboBox = getService('comboBox');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const headerPage = getPageObject('header');
 
   function advancedSectionSelector(subSelector?: string) {
     const subj = 'mlJobWizardAdvancedSection';
@@ -492,6 +493,10 @@ export function MachineLearningJobWizardCommonProvider(
       await testSubjects.existOrFail('mlJobWizardButtonCreateJob');
     },
 
+    async assertConvertToAdvancedJobExists() {
+      await testSubjects.existOrFail('mlJobWizardButtonCreateJob');
+    },
+
     async assertDateRangeSelectionExists() {
       await testSubjects.existOrFail('mlJobWizardDateRange');
     },
@@ -558,6 +563,12 @@ export function MachineLearningJobWizardCommonProvider(
       await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
     },
 
+    async assertCustomUrlLabel(expectedIndex: number, customUrl: { label: string }) {
+      await this.ensureAdditionalSettingsSectionOpen();
+
+      await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
+    },
+
     async ensureAdvancedSectionOpen() {
       await retry.tryForTime(5000, async () => {
         if ((await testSubjects.exists(advancedSectionSelector())) === false) {
@@ -575,6 +586,34 @@ export function MachineLearningJobWizardCommonProvider(
     async createJobWithoutDatafeedStart() {
       await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobWizardButtonCreateJob');
       await testSubjects.existOrFail('mlPageJobManagement');
+    },
+
+    async assertConvertToMultiMetricButtonExist(bucketSpan: string) {
+      await testSubjects.existOrFail('mlJobWizardConvertToMultiMetricButton', {
+        timeout: 2 * 60 * 1000,
+      });
+    },
+
+    async clickConvertToMultiMetricButton() {
+      await retry.tryForTime(30 * 1000 * 5, async () => {
+        await testSubjects.click('mlJobWizardConvertToMultiMetricButton');
+        await headerPage.waitUntilLoadingHasFinished();
+
+        await testSubjects.existOrFail('mlPageJobWizardHeader-multi_metric', {
+          timeout: 30 * 1000,
+        });
+      });
+    },
+
+    async navigateToPreviousJobWizardPage(expectedSelector: string) {
+      await retry.tryForTime(30 * 1000 * 5, async () => {
+        await testSubjects.click('mlJobWizardNavButtonPrevious');
+        await headerPage.waitUntilLoadingHasFinished();
+
+        await testSubjects.existOrFail(expectedSelector, {
+          timeout: 30 * 1000,
+        });
+      });
     },
   };
 }
