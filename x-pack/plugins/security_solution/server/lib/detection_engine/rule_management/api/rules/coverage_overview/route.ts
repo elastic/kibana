@@ -28,13 +28,11 @@ export const getCoverageOverviewRoute = (router: SecuritySolutionPluginRouter) =
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const responseData = await handleCoverageOverviewRequest({
-          resolveParameters: () => request.body,
-          resolveDependencies: async () => {
-            const ctx = await context.resolve(['alerting']);
+        const ctx = await context.resolve(['alerting']);
 
-            return { rulesClient: ctx.alerting.getRulesClient() };
-          },
+        const responseData = await handleCoverageOverviewRequest({
+          params: request.body,
+          deps: { rulesClient: ctx.alerting.getRulesClient() },
         });
 
         return response.ok({

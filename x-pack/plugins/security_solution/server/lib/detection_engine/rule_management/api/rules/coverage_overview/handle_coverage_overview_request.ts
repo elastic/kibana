@@ -24,17 +24,15 @@ interface CoverageOverviewRouteDependencies {
 }
 
 interface HandleCoverageOverviewRequestArgs {
-  resolveParameters: () => CoverageOverviewRequestBody;
-  resolveDependencies: () => Promise<CoverageOverviewRouteDependencies>;
+  params: CoverageOverviewRequestBody;
+  deps: CoverageOverviewRouteDependencies;
 }
 
 export async function handleCoverageOverviewRequest({
-  resolveParameters,
-  resolveDependencies,
+  params: { filter },
+  deps: { rulesClient },
 }: HandleCoverageOverviewRequestArgs): Promise<CoverageOverviewResponse> {
-  const { filter } = resolveParameters();
   const kqlFilter = filter ? convertFilterToKQL(filter) : undefined;
-  const { rulesClient } = await resolveDependencies();
 
   return processRulesByPages(rulesClient, kqlFilter, RULES_CHUNK_SIZE);
 }
