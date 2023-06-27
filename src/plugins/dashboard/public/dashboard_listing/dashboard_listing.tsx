@@ -13,9 +13,12 @@ import {
   type TableListViewKibanaDependencies,
   TableListViewKibanaProvider,
   type UserContentCommonSchema,
+  TableListViewTable,
+  TableListViewTableProps,
 } from '@kbn/content-management-table-list-view-table';
-import { TableListView } from '@kbn/content-management-table-list-view';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -46,7 +49,7 @@ type TableListViewApplicationService = DashboardApplicationService & {
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
-
+const HEADING_ID = 'dashboardListingHeading';
 interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
   attributes: {
     title: string;
@@ -54,6 +57,9 @@ interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
     timeRestore: boolean;
   };
 }
+
+type GetDetailViewLink =
+  TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
 
 const toTableListViewSavedObject = (hit: DashboardItem): DashboardSavedObjectUserContent => {
   const { title, description, timeRestore } = hit.attributes;
@@ -81,6 +87,7 @@ export type DashboardListingProps = PropsWithChildren<{
   tagReferences?: TagReference[] | undefined;
   urlStateEnabled?: boolean;
   disableCreateDashboardButton?: boolean;
+  withoutPageTemplateWrapper?: boolean;
 }>;
 
 export const DashboardListing = ({
@@ -95,6 +102,7 @@ export const DashboardListing = ({
   pageSectionPadding = 'm',
   tagReferences,
   urlStateEnabled,
+  withoutPageTemplateWrapper,
 }: DashboardListingProps) => {
   const {
     application,
@@ -113,6 +121,12 @@ export const DashboardListing = ({
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
     dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
   );
+  const PageTemplate = withoutPageTemplateWrapper
+    ? (React.Fragment as unknown as typeof KibanaPageTemplate)
+    : KibanaPageTemplate;
+
+  const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
+  const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
 
   useExecutionContext(executionContext, {
     type: 'application',
@@ -218,9 +232,12 @@ export const DashboardListing = ({
       useSessionStorageIntegration={useSessionStorageIntegration}
     />
   );
-
+  const getDetailViewLink: GetDetailViewLink = useCallback(
+    ({ id, attributes: { timeRestore } }) => getDashboardUrl(id, timeRestore),
+    [getDashboardUrl]
+  );
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
-
+  const title = getTableListTitle();
   return (
     <I18nProvider>
       <TableListViewKibanaProvider
@@ -240,40 +257,57 @@ export const DashboardListing = ({
           FormattedRelative,
         }}
       >
-        <TableListView<DashboardSavedObjectUserContent>
-          getDetailViewLink={({ id, attributes: { timeRestore } }) =>
-            getDashboardUrl(id, timeRestore)
-          }
-          deleteItems={!showWriteControls ? undefined : deleteItems}
-          createItem={!showWriteControls ? undefined : createItem}
-          editItem={!showWriteControls ? undefined : editItem}
-          entityNamePlural={getEntityNamePlural()}
-          title={getTableListTitle()}
-          headingId="dashboardListingHeading"
-          initialPageSize={initialPageSize}
-          initialFilter={initialFilter}
-          entityName={getEntityName()}
-          listingLimit={listingLimit}
-          emptyPrompt={emptyPrompt}
-          findItems={fetchItems}
-          tagReferences={tagReferences}
-          id="dashboard"
-          withPageTemplateHeader={withPageTemplateHeader}
-          restrictPageSectionWidth={restrictPageSectionWidth}
-          pageSectionPadding={pageSectionPadding}
-          urlStateEnabled={urlStateEnabled}
-        >
-          <>
-            {children}
-            <DashboardUnsavedListing
-              goToDashboard={goToDashboard}
-              unsavedDashboardIds={unsavedDashboardIds}
-              refreshUnsavedDashboards={() =>
-                setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges())
-              }
+        <PageTemplate panelled data-test-subj={pageDataTestSubject}>
+          {withPageTemplateHeader && (
+            <KibanaPageTemplate.Header
+              pageTitle={<span id={HEADING_ID}>{title}</span>}
+              data-test-subj="top-nav"
             />
-          </>
-        </TableListView>
+          )}
+          <KibanaPageTemplate.Section
+            aria-labelledby={hasInitialFetchReturned ? HEADING_ID : undefined}
+            restrictWidth={restrictPageSectionWidth}
+            paddingSize={pageSectionPadding}
+            data-test-subj="dashboard-section"
+          >
+            <>
+              {children}
+              <DashboardUnsavedListing
+                goToDashboard={goToDashboard}
+                unsavedDashboardIds={unsavedDashboardIds}
+                refreshUnsavedDashboards={() =>
+                  setUnsavedDashboardIds(
+                    dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
+                  )
+                }
+              />
+              <TableListViewTable
+                tableCaption={title}
+                getDetailViewLink={getDetailViewLink}
+                deleteItems={!showWriteControls ? undefined : deleteItems}
+                createItem={!showWriteControls ? undefined : createItem}
+                editItem={!showWriteControls ? undefined : editItem}
+                entityNamePlural={getEntityNamePlural()}
+                headingId="dashboardListingHeading"
+                initialPageSize={initialPageSize}
+                initialFilter={initialFilter}
+                entityName={getEntityName()}
+                listingLimit={listingLimit}
+                emptyPrompt={emptyPrompt}
+                findItems={fetchItems}
+                tagReferences={tagReferences}
+                id="dashboard"
+                urlStateEnabled={urlStateEnabled}
+                onFetchSuccess={() => {
+                  if (!hasInitialFetchReturned) {
+                    setHasInitialFetchReturned(true);
+                  }
+                }}
+                setPageDataTestSubject={setPageDataTestSubject}
+              />
+            </>
+          </KibanaPageTemplate.Section>
+        </PageTemplate>
       </TableListViewKibanaProvider>
     </I18nProvider>
   );

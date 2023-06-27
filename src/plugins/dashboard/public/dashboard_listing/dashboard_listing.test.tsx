@@ -19,7 +19,7 @@ import { DashboardListing, DashboardListingProps } from './dashboard_listing';
  * need to ensure we're passing down the correct props, but the table list view itself doesn't need to be rendered
  * in our tests because it is covered in its package.
  */
-import { TableListView } from '@kbn/content-management-table-list-view';
+import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
 // import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view';
 jest.mock('@kbn/content-management-table-list-view-table', () => {
   const originalModule = jest.requireActual('@kbn/content-management-table-list-view-table');
@@ -29,14 +29,7 @@ jest.mock('@kbn/content-management-table-list-view-table', () => {
     TableListViewKibanaProvider: jest.fn().mockImplementation(({ children }) => {
       return <>{children}</>;
     }),
-  };
-});
-jest.mock('@kbn/content-management-table-list-view', () => {
-  const originalModule = jest.requireActual('@kbn/content-management-table-list-view-table');
-  return {
-    __esModule: true,
-    ...originalModule,
-    TableListView: jest.fn().mockReturnValue(null),
+    TableListViewTable: jest.fn().mockReturnValue(null),
   };
 });
 
@@ -67,7 +60,7 @@ test('initial filter is passed through', async () => {
     ({ component } = mountWith({ props: { initialFilter: 'kibanana' } }));
   });
   component!.update();
-  expect(TableListView).toHaveBeenCalledWith(
+  expect(TableListViewTable).toHaveBeenCalledWith(
     expect.objectContaining({ initialFilter: 'kibanana' }),
     expect.any(Object) // react context
   );
@@ -85,7 +78,7 @@ test('tagReferences is passed through', async () => {
     ({ component } = mountWith({ props: { tagReferences } }));
   });
   component!.update();
-  expect(TableListView).toHaveBeenCalledWith(
+  expect(TableListViewTable).toHaveBeenCalledWith(
     expect.objectContaining({ tagReferences }),
     expect.any(Object) // react context
   );
@@ -95,16 +88,13 @@ test('withPageTemplateHeader is passed through', async () => {
   pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
 
   let component: ReactWrapper;
-  const withPageTemplateHeader = false;
+  const withPageTemplateHeader = true;
 
   await act(async () => {
     ({ component } = mountWith({ props: { withPageTemplateHeader } }));
   });
   component!.update();
-  expect(TableListView).toHaveBeenCalledWith(
-    expect.objectContaining({ withPageTemplateHeader }),
-    expect.any(Object) // react context
-  );
+  expect(component!.find("[data-test-subj='top-nav']").exists()).toBeTruthy();
 });
 
 test('restrictPageSectionWidth is passed through', async () => {
@@ -117,10 +107,9 @@ test('restrictPageSectionWidth is passed through', async () => {
     ({ component } = mountWith({ props: { restrictPageSectionWidth } }));
   });
   component!.update();
-  expect(TableListView).toHaveBeenCalledWith(
-    expect.objectContaining({ restrictPageSectionWidth }),
-    expect.any(Object) // react context
-  );
+  expect(
+    component!.find("[data-test-subj='dashboard-section']").first().prop('restrictWidth')
+  ).toEqual(restrictPageSectionWidth);
 });
 
 test('pageSectionPadding is passed through', async () => {
@@ -133,10 +122,9 @@ test('pageSectionPadding is passed through', async () => {
     ({ component } = mountWith({ props: { pageSectionPadding } }));
   });
   component!.update();
-  expect(TableListView).toHaveBeenCalledWith(
-    expect.objectContaining({ pageSectionPadding }),
-    expect.any(Object) // react context
-  );
+  expect(
+    component!.find("[data-test-subj='dashboard-section']").first().prop('paddingSize')
+  ).toEqual(pageSectionPadding);
 });
 
 test('urlStateEnabled is passed through', async () => {
@@ -149,7 +137,7 @@ test('urlStateEnabled is passed through', async () => {
     ({ component } = mountWith({ props: { urlStateEnabled } }));
   });
   component!.update();
-  expect(TableListView).toHaveBeenCalledWith(
+  expect(TableListViewTable).toHaveBeenCalledWith(
     expect.objectContaining({ urlStateEnabled }),
     expect.any(Object) // react context
   );
@@ -164,7 +152,7 @@ test('when showWriteControls is true, table list view is passed editing function
     ({ component } = mountWith({}));
   });
   component!.update();
-  expect(TableListView).toHaveBeenCalledWith(
+  expect(TableListViewTable).toHaveBeenCalledWith(
     expect.objectContaining({
       createItem: expect.any(Function),
       deleteItems: expect.any(Function),
@@ -183,7 +171,7 @@ test('when showWriteControls is false, table list view is not passed editing fun
     ({ component } = mountWith({}));
   });
   component!.update();
-  expect(TableListView).toHaveBeenCalledWith(
+  expect(TableListViewTable).toHaveBeenCalledWith(
     expect.objectContaining({
       createItem: undefined,
       deleteItems: undefined,

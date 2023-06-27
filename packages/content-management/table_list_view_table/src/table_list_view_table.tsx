@@ -20,7 +20,6 @@ import {
   CriteriaWithPagination,
   Query,
   Ast,
-  EuiPaddingSize,
 } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -113,8 +112,6 @@ export interface TableListViewTableProps<
   refreshListBouncer?: boolean;
   onFetchSuccess: () => void;
   setPageDataTestSubject: (subject: string) => void;
-  restrictPageSectionWidth?: boolean;
-  pageSectionPadding?: EuiPaddingSize;
   tagReferences?: TagReference[] | undefined;
 }
 
