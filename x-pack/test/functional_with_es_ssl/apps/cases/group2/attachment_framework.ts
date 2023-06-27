@@ -355,14 +355,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await kibanaServer.importExport.unload(
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
         );
+
         await common.navigateToApp('dashboard');
         await dashboard.preserveCrossAppState();
+
         await listingTable.searchForItemWithName(myDashboardName);
         await listingTable.checkListingSelectAllCheckbox();
         await listingTable.clickDeleteSelected();
       });
 
-      it('adds lens visualization to a new case created from dashboard', async () => {
+      it('adds lens visualization to a new case from dashboard', async () => {
         const caseTitle = 'case created from my dashboard with lens visualization';
 
         await testSubjects.click('embeddablePanelToggleMenuIcon');
@@ -385,7 +387,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('comment-persistableState-.lens');
       });
 
-      it('adds lens visualization to existing case from dashboard', async () => {
+      it('adds lens visualization to an existing case from dashboard', async () => {
         const theCaseTitle = 'case already exists!!';
         const theCase = await cases.api.createCase({
           title: theCaseTitle,
