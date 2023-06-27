@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { useParams } from 'react-router-dom-v5-compat';
 import { withMetricPageProviders } from './page_providers';
 import { useMetadata } from '../../../components/asset_details/hooks/use_metadata';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
@@ -24,18 +25,14 @@ import { inventoryTitle } from '../../../translations';
 
 interface Props {
   theme: EuiTheme | undefined;
-  match: {
-    params: {
-      type: string;
-      node: string;
-    };
-  };
 }
 
 export const MetricDetail = withMetricPageProviders(
-  withTheme(({ match }: Props) => {
-    const nodeId = match.params.node;
-    const nodeType = match.params.type as InventoryItemType;
+  withTheme(({ theme: _theme }: Props) => {
+    const { node: nodeId = '', type: nodeType = 'host' } = useParams<{
+      type: InventoryItemType;
+      node: string;
+    }>();
     const inventoryModel = findInventoryModel(nodeType);
     const { sourceId, metricIndicesExist } = useSourceContext();
 

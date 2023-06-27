@@ -6,32 +6,17 @@
  */
 
 import React from 'react';
-import { match as RouteMatch, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { RedirectToNodeDetail } from './redirect_to_node_detail';
 import { RedirectToHostDetailViaIP } from './redirect_to_host_detail_via_ip';
-import { RedirectToInventory } from './redirect_to_inventory';
-import { inventoryModels } from '../../../common/inventory_models';
 
-interface LinkToPageProps {
-  match: RouteMatch<{}>;
-}
-
-const ITEM_TYPES = inventoryModels.map((m) => m.id).join('|');
-
-export const LinkToMetricsPage: React.FC<LinkToPageProps> = (props) => {
+export const LinkToMetricsPage = () => {
   return (
-    <Routes>
-      <Route
-        path={`${props.match.url}/:nodeType(${ITEM_TYPES})-detail/:nodeId`}
-        component={RedirectToNodeDetail}
-      />
-      <Route
-        path={`${props.match.url}/host-detail-via-ip/:hostIp`}
-        component={RedirectToHostDetailViaIP}
-      />
-      <Route path={`${props.match.url}/inventory`} component={RedirectToInventory} />
+    <Routes legacySwitch={false}>
+      <Route path={`:nodeType-detail/:nodeId`} element={<RedirectToNodeDetail />} />
+      <Route path={`host-detail-via-ip/:hostIp`} element={<RedirectToHostDetailViaIP />} />
       <Redirect to="/" />
     </Routes>
   );

@@ -16,10 +16,10 @@ import '../index.scss';
 import { LinkToMetricsPage } from '../pages/link_to/link_to_metrics';
 import { InfrastructurePage } from '../pages/metrics';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
-import { RedirectWithQueryParams } from '../utils/redirect_with_query_params';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
 import { SourceProvider } from '../containers/metrics_source';
+import { RedirectWithQueryParams } from '../utils/redirect_with_query_params';
 
 export const METRICS_APP_DATA_TEST_SUBJ = 'infraMetricsPage';
 
@@ -75,19 +75,25 @@ const MetricsApp: React.FC<{
       >
         <SourceProvider sourceId="default">
           <Router history={history}>
-            <Routes>
-              <Route path="/link-to" component={LinkToMetricsPage} />
+            <Routes legacySwitch={false}>
+              <Route path="link-to/*" element={<LinkToMetricsPage />} />
+
               {uiCapabilities?.infrastructure?.show && (
-                <RedirectWithQueryParams from="/" exact={true} to="/inventory" />
+                <Route path="/" exact element={<RedirectWithQueryParams to="inventory" />} />
               )}
               {uiCapabilities?.infrastructure?.show && (
-                <RedirectWithQueryParams from="/snapshot" exact={true} to="/inventory" />
+                <Route path="snapshot" exact element={<RedirectWithQueryParams to="inventory" />} />
               )}
               {uiCapabilities?.infrastructure?.show && (
-                <RedirectWithQueryParams from="/metrics-explorer" exact={true} to="/explorer" />
+                <Route
+                  path="metrics-explorer"
+                  exact
+                  element={<RedirectWithQueryParams to="inventory" />}
+                />
               )}
+
               {uiCapabilities?.infrastructure?.show && (
-                <Route path="/" component={InfrastructurePage} />
+                <Route path="*" index element={<InfrastructurePage />} />
               )}
             </Routes>
           </Router>
