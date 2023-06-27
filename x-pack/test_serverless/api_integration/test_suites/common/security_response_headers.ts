@@ -13,24 +13,36 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('security response headers', function () {
-    it('reponse contains default security headers', async () => {
-      const defaultCSP = `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'`;
-      const defaultCOOP = 'same-origin';
-      const defaultPermissionsPolicy =
-        'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()';
-      const defaultStrictTransportSecurity = 'max-age=31536000; includeSubDomains';
-      const defaultReferrerPolicy = 'no-referrer-when-downgrade';
-      const defaultXContentTypeOptions = 'nosniff';
-      const defaultXFrameOptions = 'SAMEORIGIN';
+    const defaultCSP = `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'`;
+    const defaultCOOP = 'same-origin';
+    const defaultPermissionsPolicy =
+      'camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()';
+    const defaultStrictTransportSecurity = 'max-age=31536000; includeSubDomains';
+    const defaultReferrerPolicy = 'no-referrer-when-downgrade';
+    const defaultXContentTypeOptions = 'nosniff';
+    const defaultXFrameOptions = 'SAMEORIGIN';
 
+    it('API endpoint reponse contains default security headers', async () => {
       const { header } = await supertest
-        .post(`/api/spaces/space`)
+        .get(`/internal/security/me`)
         .set(svlCommonApi.getCommonRequestHeader())
-        .send({
-          id: 'custom',
-          name: 'Custom',
-          disabledFeatures: [],
-        });
+        .expect(200);
+
+      expect(header).toBeDefined();
+      expect(header['content-security-policy']).toEqual(defaultCSP);
+      expect(header['cross-origin-opener-policy']).toEqual(defaultCOOP);
+      expect(header['permissions-policy']).toEqual(defaultPermissionsPolicy);
+      expect(header['strict-transport-security']).toEqual(defaultStrictTransportSecurity);
+      expect(header['referrer-policy']).toEqual(defaultReferrerPolicy);
+      expect(header['x-content-type-options']).toEqual(defaultXContentTypeOptions);
+      expect(header['x-frame-options']).toEqual(defaultXFrameOptions);
+    });
+
+    it('redirect endpoint reponse contains default security headers', async () => {
+      const { header } = await supertest
+        .get(`/login`)
+        .set(svlCommonApi.getCommonRequestHeader())
+        .expect(302);
 
       expect(header).toBeDefined();
       expect(header['content-security-policy']).toEqual(defaultCSP);
