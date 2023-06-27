@@ -15,8 +15,185 @@ export default function ({ getService }: FtrProviderContext) {
 
   const calendarId = `wizard-test-calendar_${Date.now()}`;
 
-  describe('job conversion to to advanced job wizard', function () {
+  const assertConversionToAdvancedJobWizardRetainsSettingsAndRuns = async ({
+    testSuite,
+    testData,
+    previousJobGroups,
+    bucketSpan,
+    previousDetectors,
+    previousInfluencers,
+  }: {
+    testSuite: string;
+    testData: {
+      suiteTitle: string;
+      jobSource: string;
+      jobId: string;
+      jobDescription: string;
+      jobGroups: string[];
+      pickFieldsConfig: PickFieldsConfig;
+      datafeedConfig: DatafeedConfig;
+      categorizationFieldIdentifier?: string;
+    };
+    previousJobGroups: string[];
+    bucketSpan: string;
+    previousDetectors: Array<{ advancedJobIdentifier: string }>;
+    previousInfluencers: string[];
+  }) => {
+    it(`${testSuite} job wizard converts to advanced job and retains previous settings`, async () => {
+      await ml.testExecution.logTestStep(' converts to advanced job creation');
+      await ml.jobWizardCommon.assertCreateJobButtonExists();
+      await ml.jobWizardCommon.convertToAdvancedJobWizard();
+
+      await ml.testExecution.logTestStep('advanced job creation advances to the pick fields step');
+      await ml.jobWizardCommon.advanceToPickFieldsSection();
+
+      await ml.testExecution.logTestStep('advanced job creation selects the categorization field');
+      await ml.jobWizardAdvanced.assertCategorizationFieldSelection(
+        testData.categorizationFieldIdentifier ? [testData.categorizationFieldIdentifier] : []
+      );
+
+      await ml.testExecution.logTestStep('advanced job creation selects the summary count field');
+      await ml.jobWizardAdvanced.assertSummaryCountFieldInputExists();
+      if (testData.pickFieldsConfig.hasOwnProperty('summaryCountField')) {
+        await ml.jobWizardAdvanced.selectSummaryCountField(
+          testData.pickFieldsConfig.summaryCountField!
+        );
+      } else {
+        await ml.jobWizardAdvanced.assertSummaryCountFieldSelection([]);
+      }
+
+      await ml.testExecution.logTestStep(
+        'advanced job creation retains detectors from population job wizard'
+      );
+      for (const [index, detector] of previousDetectors.entries()) {
+        await ml.jobWizardAdvanced.assertDetectorEntryExists(index, detector.advancedJobIdentifier);
+      }
+
+      await ml.testExecution.logTestStep('advanced job creation adds additional detectors');
+      for (const detector of testData.pickFieldsConfig.detectors) {
+        await ml.jobWizardAdvanced.openCreateDetectorModal();
+        await ml.jobWizardAdvanced.assertDetectorFunctionInputExists();
+        await ml.jobWizardAdvanced.assertDetectorFunctionSelection([]);
+        await ml.jobWizardAdvanced.assertDetectorFieldInputExists();
+        await ml.jobWizardAdvanced.assertDetectorFieldSelection([]);
+        await ml.jobWizardAdvanced.assertDetectorByFieldInputExists();
+        await ml.jobWizardAdvanced.assertDetectorByFieldSelection([]);
+        await ml.jobWizardAdvanced.assertDetectorOverFieldInputExists();
+        await ml.jobWizardAdvanced.assertDetectorOverFieldSelection([]);
+        await ml.jobWizardAdvanced.assertDetectorPartitionFieldInputExists();
+        await ml.jobWizardAdvanced.assertDetectorPartitionFieldSelection([]);
+        await ml.jobWizardAdvanced.assertDetectorExcludeFrequentInputExists();
+        await ml.jobWizardAdvanced.assertDetectorExcludeFrequentSelection([]);
+        await ml.jobWizardAdvanced.assertDetectorDescriptionInputExists();
+        await ml.jobWizardAdvanced.assertDetectorDescriptionValue('');
+
+        await ml.jobWizardAdvanced.selectDetectorFunction(detector.function);
+        if (detector.hasOwnProperty('field')) {
+          await ml.jobWizardAdvanced.selectDetectorField(detector.field!);
+        }
+        if (detector.hasOwnProperty('byField')) {
+          await ml.jobWizardAdvanced.selectDetectorByField(detector.byField!);
+        }
+        if (detector.hasOwnProperty('overField')) {
+          await ml.jobWizardAdvanced.selectDetectorOverField(detector.overField!);
+        }
+        if (detector.hasOwnProperty('partitionField')) {
+          await ml.jobWizardAdvanced.selectDetectorPartitionField(detector.partitionField!);
+        }
+        if (detector.hasOwnProperty('excludeFrequent')) {
+          await ml.jobWizardAdvanced.selectDetectorExcludeFrequent(detector.excludeFrequent!);
+        }
+        if (detector.hasOwnProperty('description')) {
+          await ml.jobWizardAdvanced.setDetectorDescription(detector.description!);
+        }
+
+        await ml.jobWizardAdvanced.confirmAddDetectorModal();
+      }
+
+      await ml.testExecution.logTestStep('advanced job creation displays detector entries');
+      for (const [index, detector] of testData.pickFieldsConfig.detectors.entries()) {
+        await ml.jobWizardAdvanced.assertDetectorEntryExists(
+          index + previousDetectors.length,
+          detector.identifier,
+          detector.hasOwnProperty('description') ? detector.description! : undefined
+        );
+      }
+
+      await ml.testExecution.logTestStep('advanced job creation inputs the bucket span');
+      await ml.jobWizardCommon.assertBucketSpanInputExists();
+      await ml.jobWizardCommon.assertBucketSpanValue(bucketSpan);
+
+      await ml.testExecution.logTestStep('advanced job creation retains influencers');
+      await ml.jobWizardCommon.assertInfluencerInputExists();
+      await ml.jobWizardCommon.assertInfluencerSelection(previousInfluencers);
+      for (const influencer of testData.pickFieldsConfig.influencers) {
+        await ml.jobWizardCommon.addInfluencer(influencer);
+      }
+
+      await ml.testExecution.logTestStep('advanced job creation inputs the model memory limit');
+      await ml.jobWizardCommon.assertModelMemoryLimitInputExists({
+        withAdvancedSection: false,
+      });
+      await ml.jobWizardCommon.setModelMemoryLimit(testData.pickFieldsConfig.memoryLimit, {
+        withAdvancedSection: false,
+      });
+
+      await ml.testExecution.logTestStep('advanced job creation displays the job details step');
+      await ml.jobWizardCommon.advanceToJobDetailsSection();
+
+      await ml.testExecution.logTestStep('advanced job creation retains the job id');
+      await ml.jobWizardCommon.assertJobIdInputExists();
+      await ml.jobWizardCommon.assertJobIdValue(testData.jobId);
+
+      await ml.testExecution.logTestStep('advanced job creation retains the job description');
+      await ml.jobWizardCommon.assertJobDescriptionInputExists();
+      await ml.jobWizardCommon.assertJobDescriptionValue(testData.jobDescription);
+
+      await ml.testExecution.logTestStep(
+        'population job creation retains job groups and inputs new groups'
+      );
+      await ml.jobWizardCommon.assertJobGroupInputExists();
+      for (const jobGroup of testData.jobGroups) {
+        await ml.jobWizardCommon.addJobGroup(jobGroup);
+      }
+      await ml.jobWizardCommon.assertJobGroupSelection([
+        ...previousJobGroups,
+        ...testData.jobGroups,
+      ]);
+
+      await ml.testExecution.logTestStep(
+        'advanced job creation opens the additional settings section'
+      );
+      await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
+
+      await ml.testExecution.logTestStep('advanced job creation retains calendar and custom url');
+      await ml.jobWizardCommon.assertCalendarsSelection([calendarId]);
+      await ml.jobWizardCommon.assertCustomUrlLabel(0, { label: 'check-kibana-dashboard' });
+
+      await ml.testExecution.logTestStep('advanced job creation displays the validation step');
+      await ml.jobWizardCommon.advanceToValidationSection();
+
+      await ml.testExecution.logTestStep('population job creation displays the summary step');
+      await ml.jobWizardCommon.advanceToSummarySection();
+    });
+
+    it('advanced job creation runs the job and displays it correctly in the job list', async () => {
+      await ml.testExecution.logTestStep('advanced job creation the job and finishes processing');
+      await ml.jobWizardCommon.assertCreateJobButtonExists();
+      await ml.jobWizardAdvanced.createJob();
+      await ml.jobManagement.assertStartDatafeedModalExists();
+      await ml.jobManagement.confirmStartDatafeedModal();
+
+      await ml.testExecution.logTestStep(
+        'advanced job creation displays the created job in the job list'
+      );
+      await ml.jobTable.filterWithSearchString(testData.jobId, 1);
+    });
+  };
+
+  describe('conversion to advanced job wizard', function () {
     this.tags(['ml']);
+
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/categorization_small');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
@@ -35,7 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.deleteIndexPatternByTitle('ft_categorization_small');
     });
 
-    describe('population job conversion to advanced job wizard', function () {
+    describe('from population job creation wizard', function () {
       const jobId = `ec_population_to_advanced_1_${Date.now()}`;
       const jobDescription = 'advanced job from population wizard';
       const jobGroups = ['automated', 'ecommerce', 'population'];
@@ -67,9 +244,6 @@ export default function ({ getService }: FtrProviderContext) {
         suiteTitle: 'population job to advanced job wizard',
         jobSource: 'ft_ecommerce',
         jobId: `ec_population_to_advanced_1_${Date.now()}`,
-        get jobIdClone(): string {
-          return `${this.jobId}_clone`;
-        },
         jobDescription,
         jobGroups: ['advanced'],
         pickFieldsConfig: {
@@ -246,177 +420,17 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.jobWizardCommon.advanceToSummarySection();
       });
 
-      it('population job converts to advanced job and retains previous settings', async () => {
-        await ml.testExecution.logTestStep(
-          'population job creation converts to advanced job creation'
-        );
-        await ml.jobWizardCommon.assertCreateJobButtonExists();
-        await ml.jobWizardCommon.convertToAdvancedJobWizard();
-
-        await ml.testExecution.logTestStep(
-          'advanced job creation advances to the pick fields step'
-        );
-        await ml.jobWizardCommon.advanceToPickFieldsSection();
-
-        await ml.testExecution.logTestStep(
-          'advanced job creation selects the categorization field'
-        );
-        await ml.jobWizardAdvanced.assertCategorizationFieldSelection([]);
-
-        await ml.testExecution.logTestStep('advanced job creation selects the summary count field');
-        await ml.jobWizardAdvanced.assertSummaryCountFieldInputExists();
-        if (testData.pickFieldsConfig.hasOwnProperty('summaryCountField')) {
-          await ml.jobWizardAdvanced.selectSummaryCountField(
-            testData.pickFieldsConfig.summaryCountField!
-          );
-        } else {
-          await ml.jobWizardAdvanced.assertSummaryCountFieldSelection([]);
-        }
-
-        await ml.testExecution.logTestStep(
-          'advanced job creation retains detectors from population job wizard'
-        );
-        for (const [index, detector] of populationDetectors.entries()) {
-          await ml.jobWizardAdvanced.assertDetectorEntryExists(
-            index,
-            detector.advancedJobIdentifier
-          );
-        }
-
-        await ml.testExecution.logTestStep('advanced job creation adds additional detectors');
-        for (const detector of testData.pickFieldsConfig.detectors) {
-          await ml.jobWizardAdvanced.openCreateDetectorModal();
-          await ml.jobWizardAdvanced.assertDetectorFunctionInputExists();
-          await ml.jobWizardAdvanced.assertDetectorFunctionSelection([]);
-          await ml.jobWizardAdvanced.assertDetectorFieldInputExists();
-          await ml.jobWizardAdvanced.assertDetectorFieldSelection([]);
-          await ml.jobWizardAdvanced.assertDetectorByFieldInputExists();
-          await ml.jobWizardAdvanced.assertDetectorByFieldSelection([]);
-          await ml.jobWizardAdvanced.assertDetectorOverFieldInputExists();
-          await ml.jobWizardAdvanced.assertDetectorOverFieldSelection([]);
-          await ml.jobWizardAdvanced.assertDetectorPartitionFieldInputExists();
-          await ml.jobWizardAdvanced.assertDetectorPartitionFieldSelection([]);
-          await ml.jobWizardAdvanced.assertDetectorExcludeFrequentInputExists();
-          await ml.jobWizardAdvanced.assertDetectorExcludeFrequentSelection([]);
-          await ml.jobWizardAdvanced.assertDetectorDescriptionInputExists();
-          await ml.jobWizardAdvanced.assertDetectorDescriptionValue('');
-
-          await ml.jobWizardAdvanced.selectDetectorFunction(detector.function);
-          if (detector.hasOwnProperty('field')) {
-            await ml.jobWizardAdvanced.selectDetectorField(detector.field!);
-          }
-          if (detector.hasOwnProperty('byField')) {
-            await ml.jobWizardAdvanced.selectDetectorByField(detector.byField!);
-          }
-          if (detector.hasOwnProperty('overField')) {
-            await ml.jobWizardAdvanced.selectDetectorOverField(detector.overField!);
-          }
-          if (detector.hasOwnProperty('partitionField')) {
-            await ml.jobWizardAdvanced.selectDetectorPartitionField(detector.partitionField!);
-          }
-          if (detector.hasOwnProperty('excludeFrequent')) {
-            await ml.jobWizardAdvanced.selectDetectorExcludeFrequent(detector.excludeFrequent!);
-          }
-          if (detector.hasOwnProperty('description')) {
-            await ml.jobWizardAdvanced.setDetectorDescription(detector.description!);
-          }
-
-          await ml.jobWizardAdvanced.confirmAddDetectorModal();
-        }
-
-        await ml.testExecution.logTestStep('advanced job creation displays detector entries');
-        for (const [index, detector] of testData.pickFieldsConfig.detectors.entries()) {
-          await ml.jobWizardAdvanced.assertDetectorEntryExists(
-            index + populationDetectors.length,
-            detector.identifier,
-            detector.hasOwnProperty('description') ? detector.description! : undefined
-          );
-        }
-
-        await ml.testExecution.logTestStep('advanced job creation inputs the bucket span');
-        await ml.jobWizardCommon.assertBucketSpanInputExists();
-        await ml.jobWizardCommon.assertBucketSpanValue(bucketSpan);
-
-        await ml.testExecution.logTestStep('advanced job creation retains influencers');
-        await ml.jobWizardCommon.assertInfluencerInputExists();
-        await ml.jobWizardCommon.assertInfluencerSelection(populationInfluencers);
-        for (const influencer of testData.pickFieldsConfig.influencers) {
-          await ml.jobWizardCommon.addInfluencer(influencer);
-        }
-
-        await ml.testExecution.logTestStep('advanced job creation inputs the model memory limit');
-        await ml.jobWizardCommon.assertModelMemoryLimitInputExists({
-          withAdvancedSection: false,
-        });
-        await ml.jobWizardCommon.setModelMemoryLimit(testData.pickFieldsConfig.memoryLimit, {
-          withAdvancedSection: false,
-        });
-
-        await ml.testExecution.logTestStep('advanced job creation displays the job details step');
-        await ml.jobWizardCommon.advanceToJobDetailsSection();
-
-        await ml.testExecution.logTestStep('advanced job creation retains the job id');
-        await ml.jobWizardCommon.assertJobIdInputExists();
-        await ml.jobWizardCommon.assertJobIdValue(jobId);
-
-        await ml.testExecution.logTestStep('advanced job creation retains the job description');
-        await ml.jobWizardCommon.assertJobDescriptionInputExists();
-        await ml.jobWizardCommon.assertJobDescriptionValue(jobDescription);
-
-        await ml.testExecution.logTestStep(
-          'population job creation retains job groups and inputs new groups'
-        );
-        await ml.jobWizardCommon.assertJobGroupInputExists();
-        for (const jobGroup of testData.jobGroups) {
-          await ml.jobWizardCommon.addJobGroup(jobGroup);
-        }
-        await ml.jobWizardCommon.assertJobGroupSelection([...jobGroups, ...testData.jobGroups]);
-
-        await ml.testExecution.logTestStep(
-          'advanced job creation opens the additional settings section'
-        );
-        await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
-
-        await ml.testExecution.logTestStep('advanced job creation retains calendar and custom url');
-        await ml.jobWizardCommon.assertCalendarsSelection([calendarId]);
-        await ml.jobWizardCommon.assertCustomUrlLabel(0, { label: 'check-kibana-dashboard' });
-
-        await ml.testExecution.logTestStep('advanced job creation displays the validation step');
-        await ml.jobWizardCommon.advanceToValidationSection();
-
-        await ml.testExecution.logTestStep('population job creation displays the summary step');
-        await ml.jobWizardCommon.advanceToSummarySection();
-      });
-
-      it('advanced job creation runs the job and displays it correctly in the job list', async () => {
-        await ml.testExecution.logTestStep(
-          'advanced job creation creates the job and finishes processing'
-        );
-        await ml.jobWizardCommon.assertCreateJobButtonExists();
-        await ml.jobWizardAdvanced.createJob();
-        await ml.jobManagement.assertStartDatafeedModalExists();
-        await ml.jobManagement.confirmStartDatafeedModal();
-        await ml.jobManagement.waitForJobCompletion(testData.jobId);
-
-        await ml.testExecution.logTestStep('job creation displays the created job in the job list');
-        await ml.jobTable.filterWithSearchString(testData.jobId, 1);
-
-        await ml.testExecution.logTestStep(
-          'job creation displays details for the created job in the job list'
-        );
-
-        await ml.testExecution.logTestStep('job creation has detector results');
-        for (
-          let i = 0;
-          i < testData.pickFieldsConfig.detectors.length + populationDetectors.length;
-          i++
-        ) {
-          await ml.api.assertDetectorResultsExist(testData.jobId, i);
-        }
+      assertConversionToAdvancedJobWizardRetainsSettingsAndRuns({
+        testSuite: 'population',
+        testData,
+        bucketSpan,
+        previousInfluencers: populationInfluencers,
+        previousDetectors: populationDetectors,
+        previousJobGroups: jobGroups,
       });
     });
 
-    describe('categorization job conversion to advanced job wizard', function () {
+    describe('from categorization job creation wizard', function () {
       const jobId = `categorization_to_advanced_${Date.now()}`;
       const jobDescription = 'advanced job from categorization wizard';
       const jobGroups = ['automated', 'categorization'];
@@ -432,6 +446,7 @@ export default function ({ getService }: FtrProviderContext) {
         jobId,
         jobDescription,
         jobGroups: ['advanced'],
+        categorizationFieldIdentifier,
         pickFieldsConfig: {
           categorizationField: 'field1',
           detectors: [],
@@ -447,47 +462,65 @@ export default function ({ getService }: FtrProviderContext) {
       };
       const categorizationDetectors = [{ advancedJobIdentifier: 'rare by mlcategory' }];
 
-      it('job creation loads the categorization wizard for the source data', async () => {
-        await ml.testExecution.logTestStep('job creation loads the job management page');
+      it('categorization job creation loads the categorization wizard for the source data', async () => {
+        await ml.testExecution.logTestStep(
+          'categorization job creation loads the job management page'
+        );
         await ml.testExecution.logTestStep('');
         await ml.navigation.navigateToMl();
         await ml.navigation.navigateToJobManagement();
 
-        await ml.testExecution.logTestStep('job creation loads the new job source selection page');
+        await ml.testExecution.logTestStep(
+          'categorization job creation loads the new job source selection page'
+        );
         await ml.jobManagement.navigateToNewJobSourceSelection();
 
-        await ml.testExecution.logTestStep('job creation loads the job type selection page');
+        await ml.testExecution.logTestStep(
+          'categorization job creation loads the job type selection page'
+        );
         await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('ft_categorization_small');
 
-        await ml.testExecution.logTestStep('job creation loads the categorization job wizard page');
+        await ml.testExecution.logTestStep(
+          'categorization job creation loads the categorization job wizard page'
+        );
         await ml.jobTypeSelection.selectCategorizationJob();
       });
 
-      it('job creation navigates through the categorization wizard and sets all needed fields', async () => {
-        await ml.testExecution.logTestStep('job creation displays the time range step');
+      it('categorization job creation navigates through the categorization wizard and sets all needed fields', async () => {
+        await ml.testExecution.logTestStep(
+          'categorization job creation displays the time range step'
+        );
         await ml.jobWizardCommon.assertTimeRangeSectionExists();
 
-        await ml.testExecution.logTestStep('job creation sets the time range');
+        await ml.testExecution.logTestStep('categorization job creation sets the time range');
         await ml.jobWizardCommon.clickUseFullDataButton(
           'Apr 5, 2019 @ 11:25:35.770',
           'Nov 21, 2019 @ 00:01:13.923'
         );
 
-        await ml.testExecution.logTestStep('job creation displays the event rate chart');
+        await ml.testExecution.logTestStep(
+          'categorization job creation displays the event rate chart'
+        );
         await ml.jobWizardCommon.assertEventRateChartExists();
         await ml.jobWizardCommon.assertEventRateChartHasData();
 
-        await ml.testExecution.logTestStep('job creation displays the pick fields step');
+        await ml.testExecution.logTestStep(
+          'categorization job creation displays the pick fields step'
+        );
         await ml.jobWizardCommon.advanceToPickFieldsSection();
 
         await ml.testExecution.logTestStep(
-          `job creation selects ${detectorTypeIdentifier} detector type`
+          `categorization job creation selects ${detectorTypeIdentifier} detector type`
         );
         await ml.jobWizardCategorization.assertCategorizationDetectorTypeSelectionExists();
         await ml.jobWizardCategorization.selectCategorizationDetectorType(detectorTypeIdentifier);
 
-        await ml.testExecution.logTestStep(`job creation selects the categorization field`);
-        await ml.jobWizardCategorization.selectCategorizationField(categorizationFieldIdentifier);
+        await ml.testExecution.logTestStep(
+          `categorization job creation selects the categorization field`
+        );
+        await ml.jobWizardCategorization.selectCategorizationField(
+          testData.categorizationFieldIdentifier
+        );
         await ml.jobWizardCategorization.assertCategorizationExamplesCallout(
           CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID
         );
@@ -495,216 +528,83 @@ export default function ({ getService }: FtrProviderContext) {
           categorizationExampleCount
         );
 
-        await ml.testExecution.logTestStep('job creation inputs the bucket span');
+        await ml.testExecution.logTestStep('categorization job creation inputs the bucket span');
         await ml.jobWizardCommon.assertBucketSpanInputExists();
         await ml.jobWizardCommon.setBucketSpan(bucketSpan);
 
-        await ml.testExecution.logTestStep('job creation displays the job details step');
+        await ml.testExecution.logTestStep(
+          'categorization job creation displays the job details step'
+        );
         await ml.jobWizardCommon.advanceToJobDetailsSection();
 
-        await ml.testExecution.logTestStep('job creation inputs the job id');
+        await ml.testExecution.logTestStep('categorization job creation inputs the job id');
         await ml.jobWizardCommon.assertJobIdInputExists();
         await ml.jobWizardCommon.setJobId(jobId);
 
-        await ml.testExecution.logTestStep('job creation inputs the job description');
+        await ml.testExecution.logTestStep(
+          'categorization job creation inputs the job description'
+        );
         await ml.jobWizardCommon.assertJobDescriptionInputExists();
         await ml.jobWizardCommon.setJobDescription(jobDescription);
 
-        await ml.testExecution.logTestStep('job creation inputs job groups');
+        await ml.testExecution.logTestStep('categorization job creation inputs job groups');
         await ml.jobWizardCommon.assertJobGroupInputExists();
         for (const jobGroup of jobGroups) {
           await ml.jobWizardCommon.addJobGroup(jobGroup);
         }
         await ml.jobWizardCommon.assertJobGroupSelection(jobGroups);
 
-        await ml.testExecution.logTestStep('job creation opens the additional settings section');
+        await ml.testExecution.logTestStep(
+          'categorization job creation opens the additional settings section'
+        );
         await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
 
-        await ml.testExecution.logTestStep('job creation adds a new custom url');
+        await ml.testExecution.logTestStep('categorization job creation adds a new custom url');
         await ml.jobWizardCommon.addCustomUrl({ label: 'check-kibana-dashboard' });
 
-        await ml.testExecution.logTestStep('job creation assigns calendars');
+        await ml.testExecution.logTestStep('categorization job creation assigns calendars');
         await ml.jobWizardCommon.addCalendar(calendarId);
 
-        await ml.testExecution.logTestStep('job creation opens the advanced section');
+        await ml.testExecution.logTestStep(
+          'categorization job creation opens the advanced section'
+        );
         await ml.jobWizardCommon.ensureAdvancedSectionOpen();
 
-        await ml.testExecution.logTestStep('job creation displays the model plot switch');
+        await ml.testExecution.logTestStep(
+          'categorization job creation displays the model plot switch'
+        );
         await ml.jobWizardCommon.assertModelPlotSwitchExists();
         await ml.jobWizardCommon.assertModelPlotSwitchEnabled(false);
         await ml.jobWizardCommon.assertModelPlotSwitchCheckedState(false);
 
-        await ml.testExecution.logTestStep('job creation enables the dedicated index switch');
+        await ml.testExecution.logTestStep(
+          'categorization job creation enables the dedicated index switch'
+        );
         await ml.jobWizardCommon.assertDedicatedIndexSwitchExists();
         await ml.jobWizardCommon.activateDedicatedIndexSwitch();
 
-        await ml.testExecution.logTestStep('job creation inputs the model memory limit');
+        await ml.testExecution.logTestStep(
+          'categorization job creation inputs the model memory limit'
+        );
         await ml.jobWizardCommon.assertModelMemoryLimitInputExists();
         await ml.jobWizardCommon.setModelMemoryLimit(memoryLimit);
 
-        await ml.testExecution.logTestStep('job creation displays the validation step');
+        await ml.testExecution.logTestStep(
+          'categorization job creation displays the validation step'
+        );
         await ml.jobWizardCommon.advanceToValidationSection();
 
-        await ml.testExecution.logTestStep('job creation displays the summary step');
-        await ml.jobWizardCommon.advanceToSummarySection();
-
-        await ml.testExecution.logTestStep(
-          'population job creation converts to advanced job creation'
-        );
-        await ml.jobWizardCommon.assertCreateJobButtonExists();
-        await ml.jobWizardCommon.convertToAdvancedJobWizard();
-      });
-
-      it('advanced job retains previous settings and add new detectors', async () => {
-        await ml.testExecution.logTestStep(
-          'advanced job creation advances to the pick fields step'
-        );
-        await ml.jobWizardCommon.advanceToPickFieldsSection();
-
-        await ml.testExecution.logTestStep(
-          'advanced job creation selects the categorization field'
-        );
-        await ml.jobWizardAdvanced.assertCategorizationFieldInputExists();
-        if (testData.pickFieldsConfig.hasOwnProperty('categorizationField')) {
-          await ml.jobWizardAdvanced.selectCategorizationField(
-            testData.pickFieldsConfig.categorizationField!
-          );
-        }
-
-        await ml.testExecution.logTestStep('advanced job creation selects the summary count field');
-        await ml.jobWizardAdvanced.assertSummaryCountFieldInputExists();
-        if (testData.pickFieldsConfig.hasOwnProperty('summaryCountField')) {
-          await ml.jobWizardAdvanced.selectSummaryCountField(
-            testData.pickFieldsConfig.summaryCountField!
-          );
-        } else {
-          await ml.jobWizardAdvanced.assertSummaryCountFieldSelection([]);
-        }
-
-        await ml.testExecution.logTestStep(
-          'advanced job creation retains detectors from population job wizard'
-        );
-        for (const [index, detector] of categorizationDetectors.entries()) {
-          await ml.jobWizardAdvanced.assertDetectorEntryExists(
-            index,
-            detector.advancedJobIdentifier
-          );
-        }
-
-        await ml.testExecution.logTestStep('advanced job creation adds additional detectors');
-        for (const detector of testData.pickFieldsConfig.detectors) {
-          await ml.jobWizardAdvanced.openCreateDetectorModal();
-          await ml.jobWizardAdvanced.assertDetectorFunctionInputExists();
-          await ml.jobWizardAdvanced.assertDetectorFunctionSelection([]);
-          await ml.jobWizardAdvanced.assertDetectorFieldInputExists();
-          await ml.jobWizardAdvanced.assertDetectorFieldSelection([]);
-          await ml.jobWizardAdvanced.assertDetectorByFieldInputExists();
-          await ml.jobWizardAdvanced.assertDetectorByFieldSelection([]);
-          await ml.jobWizardAdvanced.assertDetectorOverFieldInputExists();
-          await ml.jobWizardAdvanced.assertDetectorOverFieldSelection([]);
-          await ml.jobWizardAdvanced.assertDetectorPartitionFieldInputExists();
-          await ml.jobWizardAdvanced.assertDetectorPartitionFieldSelection([]);
-          await ml.jobWizardAdvanced.assertDetectorExcludeFrequentInputExists();
-          await ml.jobWizardAdvanced.assertDetectorExcludeFrequentSelection([]);
-          await ml.jobWizardAdvanced.assertDetectorDescriptionInputExists();
-          await ml.jobWizardAdvanced.assertDetectorDescriptionValue('');
-
-          await ml.jobWizardAdvanced.selectDetectorFunction(detector.function);
-          if (detector.hasOwnProperty('field')) {
-            await ml.jobWizardAdvanced.selectDetectorField(detector.field!);
-          }
-          if (detector.hasOwnProperty('byField')) {
-            await ml.jobWizardAdvanced.selectDetectorByField(detector.byField!);
-          }
-          if (detector.hasOwnProperty('overField')) {
-            await ml.jobWizardAdvanced.selectDetectorOverField(detector.overField!);
-          }
-          if (detector.hasOwnProperty('partitionField')) {
-            await ml.jobWizardAdvanced.selectDetectorPartitionField(detector.partitionField!);
-          }
-          if (detector.hasOwnProperty('excludeFrequent')) {
-            await ml.jobWizardAdvanced.selectDetectorExcludeFrequent(detector.excludeFrequent!);
-          }
-          if (detector.hasOwnProperty('description')) {
-            await ml.jobWizardAdvanced.setDetectorDescription(detector.description!);
-          }
-
-          await ml.jobWizardAdvanced.confirmAddDetectorModal();
-        }
-
-        await ml.testExecution.logTestStep('advanced job creation displays detector entries');
-        for (const [index, detector] of testData.pickFieldsConfig.detectors.entries()) {
-          await ml.jobWizardAdvanced.assertDetectorEntryExists(
-            index + categorizationDetectors.length,
-            detector.identifier,
-            detector.hasOwnProperty('description') ? detector.description! : undefined
-          );
-        }
-
-        await ml.testExecution.logTestStep('advanced job creation inputs the bucket span');
-        await ml.jobWizardCommon.assertBucketSpanInputExists();
-        await ml.jobWizardCommon.assertBucketSpanValue(bucketSpan);
-
-        await ml.testExecution.logTestStep('advanced job creation retains influencers');
-        await ml.jobWizardCommon.assertInfluencerInputExists();
-        await ml.jobWizardCommon.assertInfluencerSelection(categorizationInfluencers);
-        for (const influencer of testData.pickFieldsConfig.influencers) {
-          await ml.jobWizardCommon.addInfluencer(influencer);
-        }
-
-        await ml.testExecution.logTestStep('advanced job creation inputs the model memory limit');
-        await ml.jobWizardCommon.assertModelMemoryLimitInputExists({
-          withAdvancedSection: false,
-        });
-        await ml.jobWizardCommon.setModelMemoryLimit(memoryLimit, {
-          withAdvancedSection: false,
-        });
-
-        await ml.testExecution.logTestStep('advanced job creation displays the job details step');
-        await ml.jobWizardCommon.advanceToJobDetailsSection();
-
-        await ml.testExecution.logTestStep('advanced job creation inputs the job id');
-        await ml.jobWizardCommon.assertJobIdInputExists();
-        await ml.jobWizardCommon.assertJobIdValue(testData.jobId);
-
-        await ml.testExecution.logTestStep('advanced job creation inputs the job description');
-        await ml.jobWizardCommon.assertJobDescriptionInputExists();
-        await ml.jobWizardCommon.assertJobDescriptionValue(testData.jobDescription);
-
-        await ml.testExecution.logTestStep('advanced job creation inputs job groups');
-        await ml.jobWizardCommon.assertJobGroupInputExists();
-        for (const jobGroup of testData.jobGroups) {
-          await ml.jobWizardCommon.addJobGroup(jobGroup);
-        }
-        await ml.jobWizardCommon.assertJobGroupSelection([...jobGroups, ...testData.jobGroups]);
-
-        await ml.testExecution.logTestStep(
-          'advanced job creation opens the additional settings section'
-        );
-        await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
-
-        await ml.testExecution.logTestStep('advanced job creation retains calendar and custom url');
-        await ml.jobWizardCommon.assertCalendarsSelection([calendarId]);
-        await ml.jobWizardCommon.assertCustomUrlLabel(0, { label: 'check-kibana-dashboard' });
-
-        await ml.testExecution.logTestStep('advanced job creation displays the validation step');
-        await ml.jobWizardCommon.advanceToValidationSection();
-
-        await ml.testExecution.logTestStep('advanced job creation displays the summary step');
+        await ml.testExecution.logTestStep('categorization job creation displays the summary step');
         await ml.jobWizardCommon.advanceToSummarySection();
       });
 
-      it('advanced job creation runs the job and displays it correctly in the job list', async () => {
-        await ml.testExecution.logTestStep('advanced job creation the job and finishes processing');
-        await ml.jobWizardCommon.assertCreateJobButtonExists();
-        await ml.jobWizardAdvanced.createJob();
-        await ml.jobManagement.assertStartDatafeedModalExists();
-        await ml.jobManagement.confirmStartDatafeedModal();
-
-        await ml.testExecution.logTestStep(
-          'advanced job creation displays the created job in the job list'
-        );
-        await ml.jobTable.filterWithSearchString(testData.jobId, 1);
+      assertConversionToAdvancedJobWizardRetainsSettingsAndRuns({
+        testSuite: 'categorization',
+        testData,
+        bucketSpan,
+        previousInfluencers: categorizationInfluencers,
+        previousDetectors: categorizationDetectors,
+        previousJobGroups: jobGroups,
       });
     });
   });
