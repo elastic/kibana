@@ -26,8 +26,7 @@ export enum EventMetric {
   CLICK_APPLICATION = 'global_search_bar_click_application',
   CLICK_SAVED_OBJECT = 'global_search_bar_click_saved_object',
   SEARCH_BLUR = 'global_search_bar_blur',
-  SEARCH_CLOSE = 'global_search_bar_close',
-  ERROR = 'global_search_bar_unhandled_error',
+  ERROR = 'global_search_bar_error',
 }
 
 /* @internal */
@@ -35,9 +34,8 @@ export enum FieldType {
   APPLICATION = 'application',
   SAVED_OBJECT_TYPE = 'saved_object_type',
   FOCUS_TIME = 'focus_time_ms',
-  SELECTED_LABEL = 'selected_term',
+  SELECTED_LABEL = 'selected_label',
   SELECTED_RANK = 'selected_rank',
-  VISIBLE_TIME = 'visible_time_ms',
   ERROR_MESSAGE = 'error_message',
   TERMS = 'terms',
 }

@@ -50,15 +50,6 @@ const fields: Record<FieldType, RootSchema<Record<string, unknown>>> = {
       },
     },
   },
-  [FieldType.VISIBLE_TIME]: {
-    [FieldType.VISIBLE_TIME]: {
-      type: 'long',
-      _meta: {
-        description:
-          'The length in milliseconds the search bar was visible before hidden by the user.',
-      },
-    },
-  },
   [FieldType.ERROR_MESSAGE]: {
     [FieldType.ERROR_MESSAGE]: {
       type: 'keyword',
