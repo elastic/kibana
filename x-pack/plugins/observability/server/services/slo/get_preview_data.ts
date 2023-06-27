@@ -93,6 +93,79 @@ export class GetPreviewData {
           throw new InvalidQueryError(`Invalid ES query`);
         }
 
+      case 'sli.apm.transactionErrorRate':
+        try {
+          const filter = [];
+          if (params.indicator.params.service !== ALL_VALUE)
+            filter.push({
+              match: { 'service.name': params.indicator.params.service },
+            });
+          if (params.indicator.params.environment !== ALL_VALUE)
+            filter.push({
+              match: { 'service.environment': params.indicator.params.environment },
+            });
+          if (params.indicator.params.transactionName !== ALL_VALUE)
+            filter.push({
+              match: { 'transaction.name': params.indicator.params.transactionName },
+            });
+          if (params.indicator.params.transactionType !== ALL_VALUE)
+            filter.push({
+              match: { 'transaction.type': params.indicator.params.transactionType },
+            });
+          if (!!params.indicator.params.filter)
+            filter.push(getElastichsearchQueryOrThrow(params.indicator.params.filter));
+
+          const result = await this.esClient.search({
+            index: params.indicator.params.index,
+            query: {
+              bool: {
+                filter: [
+                  { range: { '@timestamp': { gte: 'now-60m' } } },
+                  { terms: { 'processor.event': ['metric'] } },
+                  { term: { 'metricset.name': 'transaction' } },
+                  { exists: { field: 'transaction.duration.histogram' } },
+                  { exists: { field: 'transaction.result' } },
+                  ...filter,
+                ],
+              },
+            },
+            aggs: {
+              perMinute: {
+                date_histogram: {
+                  field: '@timestamp',
+                  fixed_interval: '1m',
+                },
+                aggs: {
+                  good: {
+                    filter: {
+                      bool: {
+                        should: {
+                          match: {
+                            'event.outcome': 'success',
+                          },
+                        },
+                      },
+                    },
+                  },
+                  total: {
+                    value_count: {
+                      field: 'transaction.duration.histogram',
+                    },
+                  },
+                },
+              },
+            },
+          });
+
+          // @ts-ignore buckets is not improperly typed
+          return result.aggregations?.perMinute.buckets.map((bucket) => ({
+            date: bucket.key_as_string,
+            sliValue: computeSLI(bucket.good.doc_count, bucket.total.value),
+          }));
+        } catch (err) {
+          throw new InvalidQueryError(`Invalid ES query`);
+        }
+
       case 'sli.kql.custom':
         try {
           const filterQuery = getElastichsearchQueryOrThrow(params.indicator.params.filter);
