@@ -4,11 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import useObservable from 'react-use/lib/useObservable';
-import { useKibana } from '../common/services';
-
-export const useNavLinks = () => {
-  const { projectNavLinks$ } = useKibana().services;
-  return useObservable(projectNavLinks$, []);
-};
+export { getProjectNavLinks$ } from './nav_links';
+export type { ProjectNavLinks, ProjectNavigationLink } from './types';

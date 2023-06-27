@@ -6,20 +6,19 @@
  */
 
 import { useEffect } from 'react';
-import { last } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { Dispatch } from 'redux';
-import { getTrailingBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../explore/hosts/pages/details/utils';
-import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../explore/network/pages/details/utils';
+import { getTrailingBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../explore/hosts/pages/details/breadcrumbs';
+import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../explore/network/pages/details/breadcrumbs';
 import { getTrailingBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/breadcrumbs';
-import { getTrailingBreadcrumbs as geExceptionsBreadcrumbs } from '../../../../exceptions/utils/pages.utils';
+import { getTrailingBreadcrumbs as geExceptionsBreadcrumbs } from '../../../../exceptions/utils/breadcrumbs';
 import { getTrailingBreadcrumbs as getCSPBreadcrumbs } from '../../../../cloud_security_posture/breadcrumbs';
-import { getTrailingBreadcrumbs as getUsersBreadcrumbs } from '../../../../explore/users/pages/details/utils';
+import { getTrailingBreadcrumbs as getUsersBreadcrumbs } from '../../../../explore/users/pages/details/breadcrumbs';
 import { getTrailingBreadcrumbs as getKubernetesBreadcrumbs } from '../../../../kubernetes/pages/utils/breadcrumbs';
 import { getTrailingBreadcrumbs as getAlertDetailBreadcrumbs } from '../../../../detections/pages/alert_details/utils/breadcrumbs';
-import { getTrailingBreadcrumbs as getDashboardBreadcrumbs } from '../../../../dashboards/pages/utils';
+import { getTrailingBreadcrumbs as getDashboardBreadcrumbs } from '../../../../dashboards/pages/breadcrumbs';
 import { SecurityPageName } from '../../../../app/types';
 import type { RouteSpyState } from '../../../utils/route/types';
 import { timelineActions } from '../../../../timelines/store/timeline';
@@ -44,34 +43,11 @@ export const useBreadcrumbsNav = () => {
     const trailingBreadcrumbs = getTrailingBreadcrumbs(routeProps, getSecuritySolutionUrl);
 
     updateBreadcrumbsNav({
-      leading: createOnClicks(leadingBreadcrumbs, dispatch, navigateTo),
-      trailing: createOnClicks(trailingBreadcrumbs, dispatch, navigateTo),
+      leading: addOnClicksHandlers(leadingBreadcrumbs, dispatch, navigateTo),
+      trailing: addOnClicksHandlers(trailingBreadcrumbs, dispatch, navigateTo),
     });
   }, [routeProps, getSecuritySolutionUrl, dispatch, navigateTo]);
 };
-
-const createOnClicks = (
-  breadcrumbs: ChromeBreadcrumb[],
-  dispatch: Dispatch,
-  navigateTo: NavigateTo
-): ChromeBreadcrumb[] =>
-  breadcrumbs.map((breadcrumb) => ({
-    ...breadcrumb,
-    ...(breadcrumb.href &&
-      !breadcrumb.onClick && {
-        onClick: createBreadcrumbOnClick(breadcrumb.href, dispatch, navigateTo),
-      }),
-  }));
-
-const createBreadcrumbOnClick =
-  (href: string, dispatch: Dispatch, navigateTo: NavigateTo): ChromeBreadcrumb['onClick'] =>
-  (ev) => {
-    ev.preventDefault();
-    const trackedPath = href.split('?')[0];
-    track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.BREADCRUMB}${trackedPath}`);
-    dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
-    navigateTo({ url: href });
-  };
 
 const getLeadingBreadcrumbs = (
   { pageName }: RouteSpyState,
@@ -126,16 +102,25 @@ const getTrailingBreadcrumbs = (
   return [];
 };
 
-const emptyLastBreadcrumbUrl = (breadcrumbs: ChromeBreadcrumb[]) => {
-  const lastBreadcrumb = last(breadcrumbs);
-  if (lastBreadcrumb) {
-    return [
-      ...breadcrumbs.slice(0, -1),
-      {
-        ...lastBreadcrumb,
-        href: '',
-      },
-    ];
-  }
-  return breadcrumbs;
-};
+const addOnClicksHandlers = (
+  breadcrumbs: ChromeBreadcrumb[],
+  dispatch: Dispatch,
+  navigateTo: NavigateTo
+): ChromeBreadcrumb[] =>
+  breadcrumbs.map((breadcrumb) => ({
+    ...breadcrumb,
+    ...(breadcrumb.href &&
+      !breadcrumb.onClick && {
+        onClick: createOnClickHandler(breadcrumb.href, dispatch, navigateTo),
+      }),
+  }));
+
+const createOnClickHandler =
+  (href: string, dispatch: Dispatch, navigateTo: NavigateTo): ChromeBreadcrumb['onClick'] =>
+  (ev) => {
+    ev.preventDefault();
+    const trackedPath = href.split('?')[0];
+    track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.BREADCRUMB}${trackedPath}`);
+    dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
+    navigateTo({ url: href });
+  };

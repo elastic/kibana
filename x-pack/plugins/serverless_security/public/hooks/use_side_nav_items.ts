@@ -10,7 +10,7 @@ import { matchPath, useLocation } from 'react-router-dom';
 import { partition } from 'lodash/fp';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import type { SolutionSideNavItem } from '@kbn/security-solution-side-nav';
-import { useKibana } from '../services';
+import { useKibana } from '../common/services';
 import { useGetLinkProps } from './use_link_props';
 import { useNavLinks } from './use_nav_links';
 

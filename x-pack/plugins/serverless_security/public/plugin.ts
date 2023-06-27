@@ -17,6 +17,9 @@ import {
   ServerlessSecurityPublicConfig,
 } from './types';
 import { registerUpsellings } from './components/upselling';
+import { createServices } from './common/services';
+import { subscribeNavigationTree } from './common/navigation/navigation_tree';
+import { subscribeBreadcrumbs } from './common/navigation/breadcrumbs';
 
 export class ServerlessSecurityPlugin
   implements
@@ -47,10 +50,16 @@ export class ServerlessSecurityPlugin
   ): ServerlessSecurityPluginStart {
     const { securitySolution, serverless } = startDeps;
 
+    const services = createServices(core, startDeps);
+
     securitySolution.setIsSidebarEnabled(false);
-    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(core, startDeps));
+    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services));
+
     serverless.setProjectHome('/app/security');
-    serverless.setSideNavComponent(getSecuritySideNavComponent(core, startDeps));
+    serverless.setSideNavComponent(getSecuritySideNavComponent(services));
+
+    subscribeNavigationTree(services);
+    subscribeBreadcrumbs(services);
 
     return {};
   }

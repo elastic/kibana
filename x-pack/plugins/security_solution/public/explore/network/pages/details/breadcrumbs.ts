@@ -10,7 +10,6 @@ import { get } from 'lodash/fp';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { decodeIpv6 } from '../../../../common/lib/helpers';
 import { getNetworkDetailsUrl } from '../../../../common/components/link_to/redirect_to_network';
-import { networkModel } from '../../store';
 import * as i18n from '../translations';
 import { NetworkDetailsRouteType } from './types';
 import type { NetworkRouteSpyState } from '../../../../common/utils/route/types';
@@ -18,7 +17,6 @@ import { SecurityPageName } from '../../../../app/types';
 import type { GetSecuritySolutionUrl } from '../../../../common/components/link_to';
 import { NetworkRouteType } from '../navigation/types';
 
-export const type = networkModel.NetworkType.details;
 const TabNameMappedToI18nKey: Record<NetworkDetailsRouteType | NetworkRouteType, string> = {
   [NetworkDetailsRouteType.events]: i18n.NAVIGATION_EVENTS_TITLE,
   [NetworkDetailsRouteType.anomalies]: i18n.NAVIGATION_ANOMALIES_TITLE,
