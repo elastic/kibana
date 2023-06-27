@@ -83,13 +83,13 @@ export abstract class ExportType<
     return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
   }
 
-  public getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
+  private getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
     const { uiSettings: uiSettingsService } = this.startDeps;
     const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
     return scopedUiSettingsService;
   }
 
-  public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
+  protected async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
     const spacesService = this.setupDeps.spaces?.spacesService;
     const spaceId = this.startDeps.reporting.getSpaceId(request, logger);
 
@@ -100,7 +100,7 @@ export abstract class ExportType<
     return this.getUiSettingsServiceFactory(savedObjectsClient);
   }
 
-  public getFakeRequest(
+  protected getFakeRequest(
     headers: Headers,
     spaceId: string | undefined,
     logger = this.logger
@@ -124,7 +124,7 @@ export abstract class ExportType<
   /*
    * Returns configurable server info
    */
-  public getServerInfo(): ReportingServerInfo {
+  protected getServerInfo(): ReportingServerInfo {
     const serverInfo = this.http.getServerInfo();
     return {
       basePath: this.http.basePath.serverBasePath,
