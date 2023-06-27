@@ -1633,7 +1633,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.useDocumentLevelSecurityLabel',
           {
-            defaultMessage: 'Use document level security',
+            defaultMessage: 'Enable document level security',
           }
         ),
         options: [],
@@ -1644,7 +1644,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.useDocumentLevelSecurityTooltip',
           {
             defaultMessage:
-              'This will add access control data to content documents and will also sync identities with their corresponding access control to a separate index .search-acl-filter-index-name',
+              'Document level security ensures identities and permissions set in Sharepoint Online are maintained in Elasticsearch. This metadata is added to your Elasticsearch documents, so you can control user and group read-access. Access control syncs ensure this metadata is kept up to date.',
           }
         ),
         type: FieldType.BOOLEAN,
