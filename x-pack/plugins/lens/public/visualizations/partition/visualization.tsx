@@ -79,6 +79,12 @@ const numberMetricOperations = (op: OperationMetadata) =>
 export const isCollapsed = (columnId: string, layer: PieLayerState) =>
   Boolean(layer.collapseFns?.[columnId]);
 
+export const hasNonCollapsedSliceBy = (l: PieLayerState) => {
+  const sliceByLength = l.primaryGroups.length;
+  const collapsedGroupsLength = (l.collapseFns && Object.keys(l.collapseFns).length) ?? 0;
+  return sliceByLength - collapsedGroupsLength > 0;
+};
+
 export const getDefaultColorForMultiMetricDimension = ({
   layer,
   columnId,
@@ -92,7 +98,6 @@ export const getDefaultColorForMultiMetricDimension = ({
 }) => {
   const columnToLabelMap = datasource ? getColumnToLabelMap(layer.metrics, datasource) : {};
   const sortedMetrics = getSortedAccessorsForGroup(datasource, layer, 'metrics');
-
   return paletteService.get('default').getCategoricalColor([
     {
       name: columnToLabelMap[columnId],
@@ -320,8 +325,6 @@ export const getPieVisualization = ({
     };
 
     const getMetricGroupConfig = (): VisualizationDimensionGroupConfig => {
-      const hasSliceBy = layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0);
-
       const accessors: AccessorConfig[] = getSortedAccessorsForGroup(
         datasource,
         layer,
@@ -329,7 +332,7 @@ export const getPieVisualization = ({
       ).map<AccessorConfig>((columnId) => ({
         columnId,
         ...(layer.allowMultipleMetrics
-          ? hasSliceBy
+          ? hasNonCollapsedSliceBy(layer)
             ? {
                 triggerIconType: 'disabled',
               }
@@ -674,7 +677,7 @@ export const getPieVisualization = ({
               })
           )
         );
-      } else if (!layer.primaryGroups?.length) {
+      } else if (!hasNonCollapsedSliceBy(layer)) {
         // This is a logic integrated in the renderer, here simulated
         // In the particular case of no color assigned (as no sliceBy dimension defined)
         // the color is generated on the fly from the default palette
@@ -733,7 +736,7 @@ export const getPieVisualization = ({
         });
       });
 
-      if (layer.primaryGroups.some((id) => !isCollapsed(id, layer))) {
+      if (hasNonCollapsedSliceBy(layer)) {
         palette.push(
           ...paletteService
             .get(state.palette?.name || 'default')

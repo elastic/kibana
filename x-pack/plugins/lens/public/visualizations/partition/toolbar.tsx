@@ -32,7 +32,11 @@ import { ToolbarPopover, LegendSettingsPopover, PalettePicker } from '../../shar
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { shouldShowValuesInLegend } from './render_helpers';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { getDefaultColorForMultiMetricDimension, isCollapsed } from './visualization';
+import {
+  getDefaultColorForMultiMetricDimension,
+  hasNonCollapsedSliceBy,
+  isCollapsed,
+} from './visualization';
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -352,7 +356,7 @@ function StaticColorControls({
     defaultMessage: 'Color',
   });
 
-  const disabledMessage = currentLayer.primaryGroups.length
+  const disabledMessage = hasNonCollapsedSliceBy(currentLayer)
     ? ['pie', 'donut'].includes(state.shape)
       ? i18n.translate('xpack.lens.pieChart.colorPicker.disabledBecauseSliceBy', {
           defaultMessage:
