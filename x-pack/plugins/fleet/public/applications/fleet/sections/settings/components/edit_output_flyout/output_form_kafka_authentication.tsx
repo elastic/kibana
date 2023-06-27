@@ -147,6 +147,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   defaultMessage="Username"
                 />
               }
+              {...inputs.kafkaAuthUsernameInput.formRowProps}
             >
               <EuiFieldText
                 data-test-subj="settingsOutputsFlyout.kafkaUsernameInput"
@@ -162,6 +163,7 @@ export const OutputFormKafkaAuthentication: React.FunctionComponent<{
                   defaultMessage="Password"
                 />
               }
+              {...inputs.kafkaAuthPasswordInput.formRowProps}
             >
               <EuiFieldText
                 data-test-subj="settingsOutputsFlyout.kafkaPasswordInput"

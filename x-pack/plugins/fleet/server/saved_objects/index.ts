@@ -211,6 +211,13 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             },
           },
         },
+        headers: {
+          dynamic: false,
+          properties: {
+            key: { type: 'text' },
+            value: { type: 'text' },
+          },
+        },
         timeout: { type: 'integer' },
         broker_timeout: { type: 'integer' },
         broker_ack_reliability: { type: 'text' },

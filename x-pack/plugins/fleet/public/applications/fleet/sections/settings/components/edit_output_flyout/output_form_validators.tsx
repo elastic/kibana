@@ -200,3 +200,60 @@ export function validateSSLKey(value: string) {
     ];
   }
 }
+
+export function validateKafkaHeaders(pairs: Array<{ key: string; value: string }>) {
+  const errors: Array<{
+    message: string;
+    index: number;
+    hasKeyError: boolean;
+    hasValueError: boolean;
+  }> = [];
+
+  const existingKeys: Set<string> = new Set();
+
+  pairs.forEach((pair, index) => {
+    const { key, value } = pair;
+
+    const hasKey = !!key;
+    const hasValue = !!value;
+
+    if (hasKey && !hasValue) {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.kafkaHeadersMissingKeyError', {
+          defaultMessage: 'Missing value for key "{key}"',
+          values: { key },
+        }),
+        index,
+        hasKeyError: true,
+        hasValueError: false,
+      });
+    } else if (!hasKey && hasValue) {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.kafkaHeadersMissingValueError', {
+          defaultMessage: 'Missing key for value "{value}"',
+          values: { value },
+        }),
+        index,
+        hasKeyError: false,
+        hasValueError: true,
+      });
+    } else if (hasKey && hasValue) {
+      if (existingKeys.has(key)) {
+        errors.push({
+          message: i18n.translate('xpack.fleet.settings.outputForm.kafkaHeadersMissingValueError', {
+            defaultMessage: 'Duplicate key "{key}"',
+            values: { key },
+          }),
+          index,
+          hasKeyError: true,
+          hasValueError: false,
+        });
+      } else {
+        existingKeys.add(key);
+      }
+    }
+  });
+  if (errors.length) {
+    return errors;
+  }
+}

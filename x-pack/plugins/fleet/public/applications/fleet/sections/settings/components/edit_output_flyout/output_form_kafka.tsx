@@ -16,6 +16,8 @@ import { kafkaSupportedVersions } from '../../../../../../../common/constants';
 
 import { MultiRowInput } from '../multi_row_input';
 
+import { OutputFormKafkaHeaders } from './output_form_kafka_headers';
+
 import { OutputFormKafkaBroker } from './output_form_kafka_broker';
 
 import { OutputFormKafkaCompression } from './output_form_kafka_compression';
@@ -98,23 +100,21 @@ export const OutputFormKafkaSection: React.FunctionComponent<Props> = (props) =>
         })}
         {...inputs.kafkaHostsInput.props}
       />
-
       <EuiSpacer size="m" />
 
       <OutputFormKafkaAuthentication inputs={inputs} />
-
       <EuiSpacer size="m" />
 
       <OutputFormKafkaPartitioning inputs={inputs} />
+      <EuiSpacer size="m" />
 
+      <OutputFormKafkaHeaders inputs={inputs} />
       <EuiSpacer size="m" />
 
       <OutputFormKafkaCompression inputs={inputs} />
-
       <EuiSpacer size="m" />
 
       <OutputFormKafkaBroker inputs={inputs} />
-
       <EuiSpacer size="m" />
 
       <EuiFormRow
@@ -138,6 +138,7 @@ export const OutputFormKafkaSection: React.FunctionComponent<Props> = (props) =>
           {...inputs.kafkaKeyInput.props}
         />
       </EuiFormRow>
+
       {/* <EuiPanel*/}
       {/*  borderRadius="m"*/}
       {/*  hasShadow={false}*/}
