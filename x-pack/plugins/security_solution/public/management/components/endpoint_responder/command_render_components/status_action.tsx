@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import { v4 as uuidV4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
@@ -237,13 +237,17 @@ export const EndpointStatusActionResult = memo<
         ),
         description: (
           <ConsoleCodeBlock>
-            <FormattedDate
-              fieldName={i18n.translate(
-                'xpack.securitySolution.endpointResponseActions.status.lastActive',
-                { defaultMessage: 'Last active' }
-              )}
-              value={endpointDetails.metadata['@timestamp']}
-            />
+            {endpointDetails.last_checkin ? (
+              <FormattedDate
+                fieldName={i18n.translate(
+                  'xpack.securitySolution.endpointResponseActions.status.lastActive',
+                  { defaultMessage: 'Last active' }
+                )}
+                value={endpointDetails.last_checkin}
+              />
+            ) : (
+              '-'
+            )}
           </ConsoleCodeBlock>
         ),
       },

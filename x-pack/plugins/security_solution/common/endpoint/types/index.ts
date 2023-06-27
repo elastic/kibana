@@ -494,6 +494,7 @@ export interface HostInfoInterface {
      */
     endpoint: PolicyInfo;
   };
+  last_checkin?: string;
 }
 
 export type HostInfo = Immutable<HostInfoInterface>;

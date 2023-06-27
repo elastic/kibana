@@ -12,7 +12,7 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 
-import type { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { Agent, AgentPolicy, AgentStatus, PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
@@ -32,9 +32,9 @@ import {
   FleetEndpointPackagePolicyNotFoundError,
 } from './errors';
 import {
+  buildUnitedIndexQuery,
   getESQueryHostMetadataByFleetAgentIds,
   getESQueryHostMetadataByID,
-  buildUnitedIndexQuery,
   getESQueryHostMetadataByIDs,
 } from '../../routes/metadata/query_builders';
 import {
@@ -176,7 +176,7 @@ export class EndpointMetadataService {
       }
     }
 
-    // If the agent is not longer active, then that means that the Agent/Endpoint have been un-enrolled from the host
+    // If the agent is no longer active, then that means that the Agent/Endpoint have been un-enrolled from the host
     if (fleetAgent && !fleetAgent.active) {
       throw new EndpointHostUnEnrolledError(
         `Endpoint with id ${endpointId} (Fleet agent id ${fleetAgentId}) is unenrolled`
@@ -294,6 +294,7 @@ export class EndpointMetadataService {
           id: endpointPackagePolicy?.id ?? '',
         },
       },
+      last_checkin: _fleetAgent?.last_checkin,
     };
   }
 
@@ -363,6 +364,8 @@ export class EndpointMetadataService {
    *
    * @param esClient
    * @param queryOptions
+   * @param soClient
+   * @param fleetServices
    *
    * @throws
    */
