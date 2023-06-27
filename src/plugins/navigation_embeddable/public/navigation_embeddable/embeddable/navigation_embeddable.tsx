@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import { isEmpty, isEqual } from 'lodash';
 import React, { createContext, useContext } from 'react';
-import { distinctUntilChanged, Subscription } from 'rxjs';
+import { distinctUntilChanged, skip, Subscription } from 'rxjs';
 
 import { Embeddable } from '@kbn/embeddable-plugin/public';
 import type { IContainer } from '@kbn/embeddable-plugin/public';
@@ -73,7 +73,7 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
   ) {
     super(initialInput, { editable: config.editable }, parent);
 
-    // build redux embeddable tools
+    /** Build redux embeddable tools */
     const reduxEmbeddableTools = reduxToolsPackage.createReduxEmbeddableTools<
       NavigationEmbeddableReduxState,
       typeof navigationEmbeddableReducers
@@ -93,88 +93,106 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
   }
 
   private async initialize() {
-    const parentDashboardId = (this.parent as DashboardContainer | undefined)?.getState()
-      .componentState.lastSavedId;
-    if (parentDashboardId) {
-      this.currentDashboardId = parentDashboardId;
-      const currentDashboard = await this.fetchCurrentDashboard();
-      this.dispatch.setCurrentDashboard(currentDashboard);
-    }
+    this.setupSubscriptions();
+
+    await this.updateParentDashboard();
     await this.updateDashboardLinks();
 
-    this.setupSubscriptions();
     this.setInitializationFinished();
   }
 
   private setupSubscriptions() {
-    /**
-     * when input dashboard links changes, update component state to match
-     **/
+    /** When this embeddable's dashboard links change in the explicit input, update component state to match */
     this.subscriptions.add(
       this.getInput$()
-        .pipe(distinctUntilChanged((a, b) => isEqual(a.links, b.links)))
+        .pipe(
+          skip(1),
+          distinctUntilChanged((a, b) => isEqual(a.links, b.links))
+        )
         .subscribe(async () => {
           await this.updateDashboardLinks();
         })
     );
+
+    /**
+     * If this embeddable is contained in a parent dashboard, it should refetch its parent's saved object info in response
+     * to changes to its parent's id (which means the parent dashboard was cloned/"saved as"), title, and/or description
+     **/
+    if (this.parent) {
+      this.subscriptions.add(
+        this.parent
+          .getInput$()
+          .pipe(
+            skip(1),
+            distinctUntilChanged(
+              (a, b) => a.id === b.id && a.title === b.title && a.description === b.description
+            )
+          )
+          .subscribe(async () => {
+            await this.updateParentDashboard();
+            await this.updateDashboardLinks();
+          })
+      );
+    }
   }
 
   private async updateDashboardLinks() {
-    const { links } = this.getInput();
+    const { links } = this.getState().explicitInput;
 
-    if (links) {
-      this.dispatch.setLoading(true);
+    if (!links) {
+      this.dispatch.setLinks([]);
+      return;
+    }
 
-      // Get all of the dashboard IDs that are referenced so we can fetch their saved objects
-      const uniqueDashboardIds = new Set<string>();
-      Object.keys(links).forEach((linkId) => {
+    this.dispatch.setLoading(true);
+
+    /** Get all of the dashboard IDs that are referenced so we can fetch their saved objects */
+    const uniqueDashboardIds = new Set<string>();
+    Object.keys(links).forEach((linkId) => {
+      const link = links[linkId];
+      if (isDashboardLink(link)) {
+        uniqueDashboardIds.add(link.id);
+      }
+    });
+
+    /** Fetch the dashboard saved objects from their IDs and store the attributes */
+    const dashboardAttributes: { [dashboardId: string]: DashboardAttributes } = {};
+    if (!isEmpty(uniqueDashboardIds)) {
+      const findDashboardsService = await dashboardServices.findDashboardsService();
+      const responses = await findDashboardsService.findByIds(Array.from(uniqueDashboardIds));
+      responses.forEach((response) => {
+        if (response.status === 'error') {
+          throw new Error('failure'); // TODO: better error handling
+        }
+        dashboardAttributes[response.id] = response.attributes;
+      });
+    }
+
+    /** Convert the explicit input `links` object to a sorted array for component state */
+    const sortedLinks = Object.keys(links)
+      .sort(function (a, b) {
+        return links[a].order - links[b].order;
+      })
+      .map((linkId) => {
         const link = links[linkId];
         if (isDashboardLink(link)) {
-          uniqueDashboardIds.add(link.id);
+          const dashboardId = link.id;
+          return {
+            id: dashboardId,
+            label: link.label,
+            order: link.order,
+            title: dashboardAttributes[dashboardId].title,
+            description: dashboardAttributes[dashboardId].description,
+          };
         }
+        return link;
       });
 
-      // Fetch the dashboard saved objects from their IDs and store the attributes
-      const dashboardAttributes: { [dashboardId: string]: DashboardAttributes } = {};
-      if (!isEmpty(uniqueDashboardIds)) {
-        const findDashboardsService = await dashboardServices.findDashboardsService();
-        const responses = await findDashboardsService.findByIds(Array.from(uniqueDashboardIds));
-        responses.forEach((response) => {
-          if (response.status === 'error') {
-            throw new Error('failure'); // TODO: better error handling
-          }
-          dashboardAttributes[response.id] = response.attributes;
-        });
-      }
-
-      // Convert the explicit input `links` object to a sorted array for component state
-      const sortedLinks = Object.keys(links)
-        .sort(function (a, b) {
-          return links[a].order - links[b].order;
-        })
-        .map((linkId) => {
-          const link = links[linkId];
-          if (isDashboardLink(link)) {
-            const dashboardId = link.id;
-            return {
-              id: dashboardId,
-              label: link.label,
-              order: link.order,
-              title: dashboardAttributes[dashboardId].title,
-              description: dashboardAttributes[dashboardId].description,
-            };
-          }
-          return link;
-        });
-
-      // Update component state to keep in sync with changes to explicit input
-      batch(() => {
-        this.dispatch.setLinks(sortedLinks);
-        this.dispatch.setLoading(false);
-      });
-    } else {
-      this.dispatch.setLinks([]);
-    }
+    /** Update component state to keep in sync with changes to explicit input */
+    batch(() => {
+      this.dispatch.setLinks(sortedLinks);
+      this.dispatch.setLoading(false);
+    });
   }
 
   private async fetchCurrentDashboard(): Promise<DashboardItem> {
@@ -203,9 +221,10 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
 
     let currentDashboard: DashboardItem | undefined;
     let dashboardList: DashboardItem[] = responses.hits;
-    if (isEmpty(search)) {
-      /** when there is no search string, force the current dashboard (if it is present in the original
-       * search results) to the top of the list */
+
+    /** When the parent dashboard has been saved (i.e. it has an ID) and there is no search string ... */
+    if (this.currentDashboardId && isEmpty(search)) {
+      /** ...force the current dashboard (if it is present in the original search results) to the top of the list */
       dashboardList = dashboardList.sort((dashboard) => {
         const isCurrentDashboard = dashboard.id === this.currentDashboardId;
         if (isCurrentDashboard) {
@@ -214,8 +233,10 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
         return isCurrentDashboard ? -1 : 1;
       });
 
-      /** if the current dashboard wasn't returned in the original search, perform another search to find it
-       * and force it to the top */
+      /**
+       * If the current dashboard wasn't returned in the original search, perform another search to find it and
+       * force it to the front of the list
+       */
       if (!currentDashboard) {
         currentDashboard = await this.fetchCurrentDashboard();
         dashboardList.pop(); // the result should still be of `size,` so remove the dashboard at the end of the list
@@ -223,7 +244,7 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
       }
     }
 
-    /** then, only return the parts of the dashboard object that we need */
+    /** Then, only return the parts of the dashboard object that we need */
     const simplifiedDashboardList = dashboardList.map((hit) => {
       return { id: hit.id, attributes: hit.attributes };
     });
@@ -231,10 +252,26 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
     batch(() => {
       this.dispatch.setDashboardList(simplifiedDashboardList);
       this.dispatch.setDashboardCount(responses.total); // TODO: Remove this if we don't actually need it
-      this.dispatch.setCurrentDashboard(currentDashboard);
+      if (currentDashboard) {
+        this.dispatch.setCurrentDashboard(currentDashboard);
+      }
     });
 
     return dashboardList;
+  }
+
+  private async updateParentDashboard() {
+    const parentDashboardId = (this.parent as DashboardContainer | undefined)?.getState()
+      .componentState.lastSavedId;
+    this.currentDashboardId = parentDashboardId;
+    if (this.currentDashboardId) {
+      /**
+       * if there is no `currentDashboardId`, the dashboard has never been saved so there is no "current
+       * dashboard" to reference in the dashboard list
+       */
+      const currentDashboard = await this.fetchCurrentDashboard();
+      this.dispatch.setCurrentDashboard(currentDashboard);
+    }
   }
 
   public async reload() {

@@ -16,6 +16,11 @@ import {
   EuiSelectable,
   EuiFieldSearch,
   EuiSelectableOption,
+  EuiSelectableProps,
+  EuiText,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
@@ -49,7 +54,7 @@ export const NavigationEmbeddableDashboardList = ({
 
   useEffect(() => {
     const dashboardOptions =
-      dashboardList?.map((dashboard: DashboardItem) => {
+      (dashboardList ?? []).map((dashboard: DashboardItem) => {
         return {
           data: dashboard,
           label: dashboard.attributes.title,
@@ -83,11 +88,24 @@ export const NavigationEmbeddableDashboardList = ({
         options={dashboardListOptions}
         isLoading={isLoading || loadingDashboardList}
         onChange={(newOptions, _, selected) => {
-          onDashboardSelected(selected.data);
+          onDashboardSelected(selected.data as DashboardItem);
           setDashboardListOptions(newOptions);
         }}
         listProps={{ onFocusBadge: false, bordered: true, isVirtualized: true }}
-        renderOption={(option) => <EuiHighlight search={searchString}>{option.label}</EuiHighlight>}
+        renderOption={(option) => {
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiHighlight search={searchString}>{option.label}</EuiHighlight>
+              </EuiFlexItem>
+              {option.id === currentDashboard?.id && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge>Current</EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          );
+        }}
       >
         {(list) => list}
       </EuiSelectable>
