@@ -7,16 +7,23 @@
 
 import * as t from 'io-ts';
 
-export const SyntheticsParamsCodec = t.intersection([
+export const SyntheticsParamsReadonlyCodec = t.intersection([
   t.interface({
+    id: t.string,
     key: t.string,
-    value: t.string,
   }),
   t.partial({
     description: t.string,
     tags: t.array(t.string),
     namespaces: t.array(t.string),
   }),
+]);
+
+export type SyntheticsParamsReadonly = t.TypeOf<typeof SyntheticsParamsReadonlyCodec>;
+
+export const SyntheticsParamsCodec = t.intersection([
+  SyntheticsParamsReadonlyCodec,
+  t.interface({ value: t.string }),
 ]);
 
 export type SyntheticsParams = t.TypeOf<typeof SyntheticsParamsCodec>;
