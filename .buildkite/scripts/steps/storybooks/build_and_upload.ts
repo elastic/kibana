@@ -44,6 +44,7 @@ const STORYBOOKS = [
   'observability',
   'presentation',
   'security_solution',
+  'security_solution_packages',
   'serverless',
   'shared_ux',
   'triggers_actions_ui',
