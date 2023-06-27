@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 
 import { omit } from 'lodash';
+import type { SavedQueryResponse } from './types';
 import type { SavedQuerySavedObject } from '../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { PLUGIN_ID } from '../../../common';
@@ -48,7 +49,7 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         const prebuiltSavedQueriesMap = await getInstalledSavedQueriesMap(
           osqueryContext.service.getPackageService()?.asInternalUser
         );
-        const savedObjects = savedQueries.saved_objects.map((savedObject) => {
+        const savedObjects: SavedQueryResponse[] = savedQueries.saved_objects.map((savedObject) => {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           const ecs_mapping = savedObject.attributes.ecs_mapping;
 

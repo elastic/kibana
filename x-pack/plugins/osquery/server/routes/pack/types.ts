@@ -16,7 +16,7 @@ interface PackQuery {
   ecs_mapping?: Record<string, unknown>;
 }
 
-export interface PackSOResponseData {
+export interface PackResponseData {
   saved_object_id: string;
   name: string;
   description: string | undefined;
@@ -31,7 +31,7 @@ export interface PackSOResponseData {
   shards?: SOShard;
 }
 
-export interface PackResponseData {
+export interface ReadPackResponseData {
   saved_object_id: string;
   name: string;
   description: string | undefined;

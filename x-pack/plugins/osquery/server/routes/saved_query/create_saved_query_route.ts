@@ -7,6 +7,7 @@
 
 import { isEmpty, pickBy, some, isBoolean } from 'lodash';
 import type { IRouter } from '@kbn/core/server';
+import type { SavedQueryResponse } from './types';
 import type { SavedQuerySavedObject } from '../../common/types';
 import { PLUGIN_ID } from '../../../common';
 import type { CreateSavedQueryRequestSchemaDecoded } from '../../../common/schemas/routes/saved_query/create_saved_query_request_schema';
@@ -83,27 +84,29 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
 
       const { attributes } = savedQuerySO;
 
+      const data: Partial<SavedQueryResponse> = pickBy(
+        {
+          created_at: attributes.created_at,
+          created_by: attributes.created_by,
+          description: attributes.description,
+          id: attributes.id,
+          removed: attributes.removed,
+          snapshot: attributes.snapshot,
+          version: attributes.version,
+          interval: attributes.interval,
+          platform: attributes.platform,
+          query: attributes.query,
+          updated_at: attributes.updated_at,
+          updated_by: attributes.updated_by,
+          saved_object_id: savedQuerySO.id,
+          ecs_mapping,
+        },
+        (value) => !isEmpty(value)
+      );
+
       return response.ok({
         body: {
-          data: pickBy(
-            {
-              created_at: attributes.created_at,
-              created_by: attributes.created_by,
-              description: attributes.description,
-              id: attributes.id,
-              removed: attributes.removed,
-              snapshot: attributes.snapshot,
-              version: attributes.version,
-              interval: attributes.interval,
-              platform: attributes.platform,
-              query: attributes.query,
-              updated_at: attributes.updated_at,
-              updated_by: attributes.updated_by,
-              saved_object_id: savedQuerySO.id,
-              ecs_mapping,
-            },
-            (value) => !isEmpty(value)
-          ),
+          data,
         },
       });
     }

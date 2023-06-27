@@ -31,7 +31,7 @@ import {
 
 import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
 import type { PackSavedObject } from '../../common/types';
-import type { PackSOResponseData } from './types';
+import type { PackResponseData } from './types';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.put(
@@ -352,7 +352,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
       const { attributes } = updatedPackSO;
 
-      const data: PackSOResponseData = {
+      const data: PackResponseData = {
         name: attributes.name,
         description: attributes.description,
         queries: attributes.queries,

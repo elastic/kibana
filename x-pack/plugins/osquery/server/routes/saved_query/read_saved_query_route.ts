@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import type { SavedQueryResponse } from './types';
 import type { SavedQuerySavedObject } from '../../common/types';
 import { isSavedQueryPrebuilt } from './utils';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -63,25 +64,27 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
         prebuilt,
       } = savedQuery.attributes;
 
+      const data: SavedQueryResponse = {
+        created_at: createdAt,
+        created_by: createdBy,
+        description,
+        id,
+        removed,
+        snapshot,
+        version,
+        ecs_mapping: ecsMapping,
+        interval,
+        platform,
+        query,
+        updated_at: updatedAt,
+        updated_by: updatedBy,
+        prebuilt,
+        saved_object_id: savedQuery.id,
+      };
+
       return response.ok({
         body: {
-          data: {
-            created_at: createdAt,
-            created_by: createdBy,
-            description,
-            id,
-            removed,
-            snapshot,
-            version,
-            ecs_mapping: ecsMapping,
-            interval,
-            platform,
-            query,
-            updated_at: updatedAt,
-            updated_by: updatedBy,
-            prebuilt,
-            saved_object_id: savedQuery.id,
-          },
+          data,
         },
       });
     }

@@ -16,7 +16,7 @@ import { packSavedObjectType } from '../../../common/types';
 import { convertSOQueriesToPack } from './utils';
 import { convertShardsToObject } from '../utils';
 import type { ReadPackRestResponseData } from './types';
-import type { PackResponseData } from './types';
+import type { ReadPackResponseData } from './types';
 
 export const readPackRoute = (router: IRouter) => {
   router.get(
@@ -41,7 +41,7 @@ export const readPackRoute = (router: IRouter) => {
       const policyIds = map(filter(references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]), 'id');
       const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset']);
 
-      const data: PackResponseData & ReadPackRestResponseData = {
+      const data: ReadPackResponseData & ReadPackRestResponseData = {
         type: rest.type,
         namespaces: rest.namespaces,
         migrationVersion: rest.migrationVersion,

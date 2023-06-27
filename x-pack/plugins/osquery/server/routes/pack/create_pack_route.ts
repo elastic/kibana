@@ -28,7 +28,7 @@ import {
 } from './utils';
 import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
 import type { PackSavedObject } from '../../common/types';
-import type { PackSOResponseData } from './types';
+import type { PackResponseData } from './types';
 
 type PackSavedObjectLimited = Omit<PackSavedObject, 'saved_object_id' | 'references'>;
 
@@ -177,7 +177,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
       const { attributes } = packSO;
 
-      const data: PackSOResponseData = {
+      const data: PackResponseData = {
         name: attributes.name,
         description: attributes.description,
         queries: attributes.queries,
