@@ -14,23 +14,20 @@ import { IconType, useEuiTheme } from '@elastic/eui';
 import {
   AddFromLibraryButton,
   IconButton,
-  IconButtonGroup,
   Toolbar,
   ToolbarButton,
 } from '@kbn/shared-ux-button-toolbar';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 
-import {
-  getCreateVisualizationButtonTitle,
-  getQuickCreateButtonGroupLegend,
-} from '../_dashboard_app_strings';
+import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { EditorMenu } from './editor_menu';
 import { useDashboardAPI } from '../dashboard_app';
 import { pluginServices } from '../../services/plugin_services';
 import { ControlsToolbarButton } from './controls_toolbar_button';
 import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
+import { AddPanelFlyout } from './add_panel_flyout';
 
 export function DashboardEditingToolbar() {
   const {
@@ -167,12 +164,11 @@ export function DashboardEditingToolbar() {
     }
   };
 
-  const quickButtons: IconButton[] = quickButtonVisTypes.reduce((accumulator, type) => {
-    const button = getVisTypeQuickButton(type);
-    return button ? [...accumulator, button] : accumulator;
-  }, [] as IconButton[]);
-
   const extraButtons = [
+    <AddPanelFlyout
+      createNewVisType={createNewVisType}
+      createNewEmbeddable={createNewEmbeddable}
+    />,
     <EditorMenu createNewVisType={createNewVisType} createNewEmbeddable={createNewEmbeddable} />,
     <AddFromLibraryButton
       onClick={() => dashboard.addFromLibrary()}
@@ -200,13 +196,6 @@ export function DashboardEditingToolbar() {
               onClick={createNewVisType(lensAlias)}
               label={getCreateVisualizationButtonTitle()}
               data-test-subj="dashboardAddNewPanelButton"
-            />
-          ),
-          iconButtonGroup: (
-            <IconButtonGroup
-              buttons={quickButtons}
-              legend={getQuickCreateButtonGroupLegend()}
-              buttonSize="s"
             />
           ),
           extraButtons,
