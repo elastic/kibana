@@ -205,6 +205,11 @@ export class Plugin
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
 
+    this.coPilotService = createCoPilotService({
+      enabled: !!config.aiAssistant?.enabled,
+      http: coreSetup.http,
+    });
+
     const rulesLocator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
 
     const ruleDetailsLocator = pluginsSetup.share.url.locators.create(
@@ -233,6 +238,7 @@ export class Plugin
         usageCollection: pluginsSetup.usageCollection,
         isDev: this.initContext.env.mode.dev,
         kibanaVersion,
+        getCoPilotService: () => this.coPilotService!,
       });
     };
 
@@ -328,11 +334,6 @@ export class Plugin
         })
       )
     );
-
-    this.coPilotService = createCoPilotService({
-      enabled: !!config.aiAssistant?.enabled,
-      http: coreSetup.http,
-    });
 
     return {
       dashboard: { register: registerDataHandler },

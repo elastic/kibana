@@ -77,6 +77,7 @@ export type AlertsTableStateProps = {
    * Allows to consumers of the table to decide to highlight a row based on the current alert.
    */
   shouldHighlightRow?: (alert: Alert) => boolean;
+  onAlertsLoaded?: (alerts: Alert[]) => void;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -163,6 +164,7 @@ const AlertsTableStateWithQueryProvider = ({
   showAlertStatusWithFlapping,
   toolbarVisibility,
   shouldHighlightRow,
+  onAlertsLoaded,
 }: AlertsTableStateProps) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
 
@@ -268,6 +270,11 @@ const AlertsTableStateWithQueryProvider = ({
       onUpdate({ isLoading, totalCount: alertsCount, refresh });
     }
   }, [isLoading, alertsCount, onUpdate, refresh]);
+
+  useEffect(() => {
+    if (onAlertsLoaded) onAlertsLoaded(alerts);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alerts]);
 
   const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
   const maintenanceWindowIds = useMemo(() => getMaintenanceWindowIdsFromAlerts(alerts), [alerts]);

@@ -7,13 +7,16 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { CoPilotContextProvider } from '../..';
+import { CoPilotPromptId } from '../../../common';
 
+import { CoPilotPrompt, useCoPilot } from '../..';
 import { useKibana } from '../../utils/kibana_react';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -39,8 +42,47 @@ const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
 const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 
+const mapCopilotParams = (alerts: any[], cases: any) => {
+  return Promise.all(
+    alerts.map(async (alert: any) => {
+      const caseIds = alert['kibana.alert.case_ids']
+        ? alert['kibana.alert.case_ids'].join(',')
+        : undefined;
+      const mappedData = {
+        id: alert['kibana.alert.uuid'].join(','),
+        reason: alert['kibana.alert.reason'].join(','),
+        start: alert['kibana.alert.start'].join(','),
+        caseIds,
+        cases: undefined,
+      };
+
+      if (caseIds) {
+        const caseData = await cases.api.cases.bulkGet({ ids: alert['kibana.alert.case_ids'] });
+        mappedData.cases = caseData.cases
+          ? caseData.cases.map((item: any) => ({
+              id: item.id,
+              status: item.status,
+              createdAt: item.created_at,
+              updatedAt: item.updated_at,
+              duration: item.duration,
+              severity: item.severity,
+              assignees: item.assignees.length,
+              totalAlerts: item.totalAlerts,
+              category: item.category,
+              tags: item.tags.join(','),
+              totalComment: item.totalComment,
+            }))
+          : undefined;
+      }
+
+      return mappedData;
+    })
+  );
+};
+
 function InternalAlertsPage() {
   const {
+    cases,
     charts,
     data: {
       query: {
@@ -56,6 +98,7 @@ function InternalAlertsPage() {
       getAlertSummaryWidget: AlertSummaryWidget,
     },
   } = useKibana().services;
+  const coPilotService = useCoPilot();
   const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
@@ -82,6 +125,7 @@ function InternalAlertsPage() {
     error: 0,
     snoozed: 0,
   });
+  const [alerts, setAlerts] = useState<any>();
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
   const timeBuckets = useTimeBuckets();
@@ -175,6 +219,19 @@ function InternalAlertsPage() {
           rightSideItems: renderRuleStats(ruleStats, manageRulesHref, ruleStatsLoading),
         }}
       >
+        {coPilotService?.isEnabled() ? (
+          <EuiFlexItem grow={false}>
+            <CoPilotPrompt
+              coPilot={coPilotService}
+              title={i18n.translate('xpack.observability.alerts.prioritizeAlerts.title', {
+                defaultMessage: 'Prioritized list of Alerts',
+              })}
+              params={alerts}
+              promptId={CoPilotPromptId.PrioritizeAlerts}
+            />
+            <EuiSpacer size="m" />
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem>
             <ObservabilityAlertSearchBar
@@ -205,6 +262,10 @@ function InternalAlertsPage() {
                 showExpandToDetails={false}
                 showAlertStatusWithFlapping
                 pageSize={ALERTS_PER_PAGE}
+                onAlertsLoaded={async (alertList) => {
+                  const alertCaseData = await mapCopilotParams(alertList, cases);
+                  setAlerts({ alertCaseData });
+                }}
               />
             )}
           </EuiFlexItem>
@@ -215,9 +276,12 @@ function InternalAlertsPage() {
 }
 
 export function AlertsPage() {
+  const { getCoPilotService } = useKibana().services;
   return (
-    <Provider value={alertSearchBarStateContainer}>
-      <InternalAlertsPage />
-    </Provider>
+    <CoPilotContextProvider value={getCoPilotService()}>
+      <Provider value={alertSearchBarStateContainer}>
+        <InternalAlertsPage />
+      </Provider>
+    </CoPilotContextProvider>
   );
 }

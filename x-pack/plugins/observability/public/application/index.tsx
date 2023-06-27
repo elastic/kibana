@@ -21,6 +21,7 @@ import {
 } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { CoPilotService } from '../typings/co_pilot';
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
 import { PluginContext } from '../context/plugin_context/plugin_context';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
@@ -55,6 +56,7 @@ export const renderApp = ({
   usageCollection,
   isDev,
   kibanaVersion,
+  getCoPilotService,
 }: {
   core: CoreStart;
   config: ConfigSchema;
@@ -65,6 +67,7 @@ export const renderApp = ({
   usageCollection: UsageCollectionSetup;
   isDev?: boolean;
   kibanaVersion: string;
+  getCoPilotService: () => CoPilotService;
 }) => {
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
@@ -98,6 +101,7 @@ export const renderApp = ({
                 storage: new Storage(localStorage),
                 isDev,
                 kibanaVersion,
+                getCoPilotService,
               }}
             >
               <PluginContext.Provider

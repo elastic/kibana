@@ -24,6 +24,7 @@ export enum CoPilotPromptId {
   LogsFindSimilar = 'logsFindSimilar',
   InfraExplainProcess = 'infraExplainProcess',
   ExplainLogSpike = 'explainLogSpike',
+  PrioritizeAlerts = 'prioritizeAlerts',
 }
 
 const PERF_GPT_SYSTEM_MESSAGE = {
@@ -79,6 +80,28 @@ const significantFieldValuesRt = t.array(
     docCount: t.number,
     pValue: t.union([t.number, t.null]),
   })
+);
+
+const alertCaseRt = t.array(
+  // t.type({
+  //   id: t.string,
+  //   reason: t.string,
+  //   start: t.string,
+  //   cases: t.type({
+  //     id: t.union([t.number, t.null]),
+  //     status: t.union([t.number, t.null]),
+  //     createdAt: t.union([t.number, t.null]),
+  //     updatedAt: t.union([t.number, t.null]),
+  //     duration: t.union([t.number, t.null]),
+  //     severity: t.union([t.number, t.null]),
+  //     assignees: t.union([t.number, t.null]),
+  //     totalAlerts: t.number,
+  //     category: t.union([t.string, t.null]),
+  //     tags: t.union([t.number, t.null]),
+  //     totalComment: t.number,
+  //   }),
+  // })
+  t.any
 );
 
 export const coPilotPrompts = {
@@ -327,6 +350,51 @@ export const coPilotPrompts = {
       Recommend concrete remediations to resolve the root cause (3 bullet points).
       Do not repeat the given instructions in your output.`;
 
+      return [
+        LOGS_SYSTEM_MESSAGE,
+        {
+          content,
+          role: 'user',
+        },
+      ];
+    },
+  }),
+  [CoPilotPromptId.PrioritizeAlerts]: prompt({
+    params: t.type({
+      alertCaseData: alertCaseRt,
+    }),
+    messages: ({ alertCaseData }) => {
+      const header = 'Alert uuid;Start time;Reason;Case ids';
+      const casesHeader =
+        'Case id;Case status;Case createdAt;Case updatedAt;Case duration;Case severity;Case assignees;Case totalAlerts;Case category;Case tags;Case totalComments';
+      const casesRowsArray: string[] = [];
+      const rows = alertCaseData
+        .map(({ id, reason, start, caseIds, cases }) => {
+          if (cases) {
+            cases.map((item: any) => casesRowsArray.push(Object.values(item).join(';')));
+          }
+          return `${id};${start};${reason};${caseIds}`;
+        })
+        .join('\n');
+      const casesRows = casesRowsArray.join('\n');
+
+      const content = `You are an observability manager, using Elastic Observability, and you are planning the prioritized tasks for your team, the current active alerts in the system are represented in the following <csv or json>. Prioritize the alerts for remediation, giving a brief summary for the alerts, indicating if they are already part of a case.
+        - If an alert is part of a case it will have less priority.
+        - Disregard those alerts that have been active for a long time.
+        - Give a brief remediation for each alert
+        - Group alerts with the same or similar reason
+        Summerize the alerts in different groups according to the priorization using bullet points.
+
+Alerts
+${header}
+${rows}
+
+Cases
+${casesHeader}
+${casesRows}
+        `;
+
+      console.log('content:', content);
       return [
         LOGS_SYSTEM_MESSAGE,
         {
