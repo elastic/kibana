@@ -22,9 +22,9 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.initLogs(); // includes a canvas worksheet with an offending image URL
     });
 
-    after(async () => {
-      await reportingAPI.teardownLogs();
-    });
+    // after(async () => {
+    //   await reportingAPI.teardownLogs();
+    // });
 
     it('should fail job when page violates the network policy', async () => {
       const downloadPath = await reportingAPI.postJob(
