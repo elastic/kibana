@@ -105,7 +105,13 @@ export const loadPack = (payload: Partial<PackItem> = {}, space = 'default') =>
   }).then((response) => response.body.data);
 
 export const cleanupPack = (id: string, space = 'default') => {
-  request({ method: 'DELETE', url: `/s/${space}/api/osquery/packs/${id}` });
+  request({
+    method: 'DELETE',
+    url: `/s/${space}/api/osquery/packs/${id}`,
+    headers: {
+      'Elastic-Api-Version': '2023-10-31',
+    },
+  });
 };
 
 export const loadLiveQuery = (
