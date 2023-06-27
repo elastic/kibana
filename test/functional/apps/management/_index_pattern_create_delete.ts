@@ -65,14 +65,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('correctly validates timestamp after index pattern changes', async function () {
         await PageObjects.settings.clickAddNewIndexPatternButton();
+        // setting the index pattern also sets the time field
         await PageObjects.settings.setIndexPatternField('log*');
         await new Promise((e) => setTimeout(e, 500));
+        // this won't have 'timestamp' field
         await PageObjects.settings.setIndexPatternField('kibana*');
         await new Promise((e) => setTimeout(e, 500));
         await (await PageObjects.settings.getSaveIndexPatternButton()).click();
+        // verify an error is displayed
         await find.byClassName('euiFormErrorText');
         await testSubjects.click('closeFlyoutButton');
-        // todo
       });
     });
 
