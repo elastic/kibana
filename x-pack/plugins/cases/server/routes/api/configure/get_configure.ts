@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { GetConfigurationFindRequest } from '../../../../common/types/api';
 import { CASE_CONFIGURE_URL } from '../../../../common/constants';
-import type { GetConfigurationFindRequest } from '../../../../common/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 

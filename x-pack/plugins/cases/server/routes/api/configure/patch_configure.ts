@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { ConfigurationPatchRequest } from '../../../../common/api';
-import { CaseConfigureRequestParamsRt, decodeWithExcessOrThrow } from '../../../../common/api';
+import type { ConfigurationPatchRequest } from '../../../../common/types/api';
+import { CaseConfigureRequestParamsRt } from '../../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../../common/api';
 import { CASE_CONFIGURE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';

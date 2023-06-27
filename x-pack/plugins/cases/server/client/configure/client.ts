@@ -14,24 +14,22 @@ import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type {
-  Configurations,
+  Configuration,
   ConfigurationAttributes,
+  Configurations,
+} from '../../../common/types/domain';
+import type {
   ConfigurationPatchRequest,
   ConfigurationRequest,
-  Configuration,
-  ConnectorMappings,
   GetConfigurationFindRequest,
-  ConnectorMappingResponse,
-} from '../../../common/api';
+} from '../../../common/types/api';
 import {
-  ConfigurationsRt,
   ConfigurationPatchRequestRt,
-  GetConfigurationFindRequestRt,
-  ConfigurationRt,
-  FindActionConnectorResponseRt,
-  decodeWithExcessOrThrow,
   ConfigurationRequestRt,
-} from '../../../common/api';
+  GetConfigurationFindRequestRt,
+} from '../../../common/types/api';
+import type { ConnectorMappings, ConnectorMappingResponse } from '../../../common/api';
+import { FindActionConnectorResponseRt, decodeWithExcessOrThrow } from '../../../common/api';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import type { CasesClientInternal } from '../client_internal';
@@ -44,6 +42,7 @@ import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './typ
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
 
 /**
  * Defines the internal helper functions.

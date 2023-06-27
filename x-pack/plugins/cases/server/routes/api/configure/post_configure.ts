@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ConfigurationRequestRt, decodeWithExcessOrThrow } from '../../../../common/api';
+import { ConfigurationRequestRt } from '../../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../../common/api';
 import { CASE_CONFIGURE_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
