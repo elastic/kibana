@@ -8,20 +8,17 @@
 import type {
   CoreSetup,
   DocLinksServiceSetup,
-  FakeRawRequest,
-  Headers,
   IBasePath,
   IClusterClient,
   KibanaRequest,
   Logger,
   PackageInfo,
   PluginInitializerContext,
-  SavedObjectsClientContract,
   SavedObjectsServiceStart,
   StatusServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
-import { CoreKibanaRequest, ServiceStatusLevels } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -34,7 +31,7 @@ import {
   ScreenshottingStart,
 } from '@kbn/screenshotting-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -46,7 +43,8 @@ import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
-import { checkLicense, getExportTypesRegistry } from './lib';
+import { PdfExportType } from './export_types/printable_pdf_v2';
+import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
@@ -102,11 +100,12 @@ export class ReportingCore {
   private readonly pluginSetup$ = new Rx.ReplaySubject<boolean>(); // observe async background setupDeps each are done
   private readonly pluginStart$ = new Rx.ReplaySubject<ReportingInternalStart>(); // observe async background startDeps
   private deprecatedAllowedRoles: string[] | false = false; // DEPRECATED. If `false`, the deprecated features have been disableed
-  private exportTypesRegistry = getExportTypesRegistry();
   private executeTask: ExecuteReportTask;
   private monitorTask: MonitorReportsTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
+  private pdfExport: PdfExportType;
+  private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
 
@@ -121,6 +120,9 @@ export class ReportingCore {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
 
+    this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
+    this.exportTypesRegistry.register(this.pdfExport);
+
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
     this.monitorTask = new MonitorReportsTask(this, config, this.logger);
@@ -128,6 +130,8 @@ export class ReportingCore {
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
       registerExportTypes: (id) => id,
+      getScreenshots: this.getScreenshots.bind(this),
+      getSpaceId: this.getSpaceId.bind(this),
     });
 
     this.executing = new Set();
@@ -144,6 +148,8 @@ export class ReportingCore {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
 
+    this.pdfExport.setup(setupDeps);
+
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
       [executeTask.TYPE]: executeTask.getTaskDefinition(),
@@ -157,6 +163,7 @@ export class ReportingCore {
   public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
+    this.pdfExport.start({ ...startDeps, reporting: this.getContract() });
 
     await this.assertKibanaIsAvailable();
 
@@ -335,63 +342,6 @@ export class ReportingCore {
     return this.pluginSetupDeps;
   }
 
-  private async getSavedObjectsClient(request: KibanaRequest) {
-    const { savedObjects } = await this.getPluginStartDeps();
-    return savedObjects.getScopedClient(request) as SavedObjectsClientContract;
-  }
-
-  public async getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
-    const { uiSettings: uiSettingsService } = await this.getPluginStartDeps();
-    const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
-    return scopedUiSettingsService;
-  }
-
-  public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
-    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
-    if (spacesService) {
-      const spaceId = spacesService?.getSpaceId(request);
-
-      if (spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Request uses Space ID: ${spaceId}`);
-        return spaceId;
-      } else {
-        logger.debug(`Request uses default Space`);
-      }
-    }
-  }
-
-  public getFakeRequest(
-    headers: Headers,
-    spaceId: string | undefined,
-    logger = this.logger
-  ): KibanaRequest {
-    const rawRequest: FakeRawRequest = {
-      headers,
-      path: '/',
-    };
-    const fakeRequest = CoreKibanaRequest.from(rawRequest);
-
-    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
-    if (spacesService) {
-      if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Generating request for space: ${spaceId}`);
-        this.getPluginSetupDeps().basePath.set(fakeRequest, `/s/${spaceId}`);
-      }
-    }
-
-    return fakeRequest;
-  }
-
-  public async getUiSettingsClient(request: KibanaRequest, logger = this.logger) {
-    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
-    const spaceId = this.getSpaceId(request, logger);
-    if (spacesService && spaceId) {
-      logger.info(`Creating UI Settings Client for space: ${spaceId}`);
-    }
-    const savedObjectsClient = await this.getSavedObjectsClient(request);
-    return await this.getUiSettingsServiceFactory(savedObjectsClient);
-  }
-
   public async getDataViewsService(request: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
     const savedObjectsClient = savedObjects.getScopedClient(request);
@@ -410,6 +360,20 @@ export class ReportingCore {
   public async getEsClient() {
     const startDeps = await this.getPluginStartDeps();
     return startDeps.esClient;
+  }
+
+  public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
+    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
+    if (spacesService) {
+      const spaceId = spacesService?.getSpaceId(request);
+
+      if (spaceId !== DEFAULT_SPACE_ID) {
+        logger.info(`Request uses Space ID: ${spaceId}`);
+        return spaceId;
+      } else {
+        logger.debug(`Request uses default Space`);
+      }
+    }
   }
 
   public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;
