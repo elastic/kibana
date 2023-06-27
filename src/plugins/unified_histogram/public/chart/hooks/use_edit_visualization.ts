@@ -35,7 +35,7 @@ export const useEditVisualization = ({
     if (!dataView.id || isPlainRecord) {
       return false;
     }
-    if (!isPlainRecord && (!dataView.isTimeBased() || !dataView.getTimeField().visualizable)) {
+    if (!dataView.isTimeBased() || !dataView.getTimeField().visualizable) {
       return false;
     }
 

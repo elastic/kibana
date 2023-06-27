@@ -140,7 +140,6 @@ export function Histogram({
     refetch$,
     attributesContext,
     onLoad,
-    isPlainRecord,
   });
 
   const { euiTheme } = useEuiTheme();
