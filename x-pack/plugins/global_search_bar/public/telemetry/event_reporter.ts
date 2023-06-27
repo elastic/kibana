@@ -31,10 +31,7 @@ export class EventReporter {
     analytics: AnalyticsServiceStart;
     usageCollection: UsageCollectionSetup | undefined;
   }) {
-    this.reportEvent = (...args: Parameters<AnalyticsServiceStart['reportEvent']>) => {
-      // add debug logging if needed
-      analytics.reportEvent(...args);
-    };
+    this.reportEvent = analytics.reportEvent;
 
     if (usageCollection) {
       this.trackUiMetric = (metricType, eventName, context) => {
