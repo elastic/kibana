@@ -16,6 +16,7 @@ import type {
   AutocompleteUrlParams,
   SpecificationTypes,
 } from './types';
+import { findTypeDefinition } from './utils';
 
 const generateMethods = (endpoint: SpecificationTypes.Endpoint): string[] => {
   // this array consists of arrays of strings
@@ -49,9 +50,7 @@ const generateParams = (
   if (!request) {
     return;
   }
-  const requestType = schema.types.find(
-    ({ name: { name, namespace } }) => name === request.name && namespace === request.namespace
-  );
+  const requestType = findTypeDefinition(schema, request);
   if (!requestType) {
     return;
   }
@@ -87,11 +86,12 @@ const generateDefinition = (
   const methods = generateMethods(endpoint);
   const patterns = generatePatterns(endpoint);
   const documentation = generateDocumentation(endpoint);
-  let definition: AutocompleteDefinition = { methods, patterns, documentation };
+  let definition: AutocompleteDefinition = {};
   const params = generateParams(endpoint, schema);
   if (params) {
     definition = addParams(definition, params);
   }
+  definition = { ...definition, methods, patterns, documentation };
 
   return definition;
 };

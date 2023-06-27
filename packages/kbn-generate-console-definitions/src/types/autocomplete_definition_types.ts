@@ -16,8 +16,8 @@ export interface AutocompleteBodyParams {
 
 export interface AutocompleteDefinition {
   documentation?: string;
-  methods: string[];
-  patterns: string[];
+  methods?: string[];
+  patterns?: string[];
   url_params?: AutocompleteUrlParams;
   data_autocomplete_rules?: AutocompleteBodyParams;
 }
