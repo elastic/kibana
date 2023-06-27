@@ -8,6 +8,8 @@
 import * as rt from 'io-ts';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { values } from 'lodash';
+
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { Color } from './color_palette';
 import { metricsExplorerMetricRT } from './metrics_explorer';
 
@@ -201,13 +203,14 @@ export interface MetricAnomalyParams {
 
 // Types for the executor
 
-export interface MetricThresholdParams {
+export interface ThresholdParams {
   criteria: MetricExpressionParams[];
   filterQuery?: string;
   filterQueryText?: string;
   sourceId?: string;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
+  searchConfiguration: SerializedSearchSourceFields;
 }
 
 interface BaseMetricExpressionParams {
@@ -249,9 +252,9 @@ export interface CustomMetricExpressionParams extends BaseMetricExpressionParams
 }
 
 export type MetricExpressionParams =
-  | NonCountMetricExpressionParams
   | CountMetricExpressionParams
-  | CustomMetricExpressionParams;
+  | CustomMetricExpressionParams
+  | NonCountMetricExpressionParams;
 
 export const QUERY_INVALID: unique symbol = Symbol('QUERY_INVALID');
 
