@@ -10,13 +10,13 @@ export const API_AUTH = {
   pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
 };
 
-export const API_HEADERS = { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': '2023-10-31' };
+export const API_HEADERS = { 'kbn-xsrf': 'cypress' };
 
 export const request = <T = unknown>(
   options: Partial<Cypress.RequestOptions>
 ): Cypress.Chainable<Cypress.Response<T>> =>
   cy.request<T>({
     auth: API_AUTH,
-    headers: API_HEADERS,
     ...options,
+    headers: { ...API_HEADERS, ...options.headers },
   });
