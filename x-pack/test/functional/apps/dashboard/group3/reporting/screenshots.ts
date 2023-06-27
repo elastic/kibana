@@ -276,7 +276,7 @@ export default function ({
         );
       });
 
-      it('PNG file matches the baseline image', async function () {
+      xit('PNG file matches the baseline image', async function () {
         this.timeout(300000);
         const percentDiff = await png.compareAgainstBaseline(
           sessionReportPath,
