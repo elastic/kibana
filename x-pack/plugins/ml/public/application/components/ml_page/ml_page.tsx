@@ -138,8 +138,8 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         className={'ml-app'}
         data-test-subj={'mlApp'}
         restrictWidth={false}
-        // forcing the background to white navigation is disabled
-        css={navMenuEnabled ? {} : { background: euiTheme.euiPageBackgroundColor }}
+        // forcing the background color when navigation is disabled
+        css={navMenuEnabled ? {} : { background: euiTheme.euiColorEmptyShade }}
         solutionNav={
           navMenuEnabled
             ? {
