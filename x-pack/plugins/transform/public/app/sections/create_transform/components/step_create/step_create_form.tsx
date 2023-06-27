@@ -124,7 +124,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       setLoading(true);
 
       createTransform(
-        { transformId, transformConfig, createDataView },
+        { transformId, transformConfig, createDataView, timeFieldName },
         {
           onError: () => setCreated(false),
           onSuccess: (resp) => {

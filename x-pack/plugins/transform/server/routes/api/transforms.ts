@@ -281,8 +281,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
         PutTransformsRequestSchema
       >(async (ctx, req, res) => {
         const { transformId } = req.params;
-        const createDataView = req.query?.create_data_view;
-        const timeFieldName = req.query?.time_field_name;
+        const { createDataView, timeFieldName } = req.query;
 
         const response: PutTransformsResponseSchema = {
           dataViewsCreated: [],

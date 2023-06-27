@@ -59,7 +59,7 @@ export const useCreateTransform = () => {
       return http.put<PutTransformsResponseSchema>(
         addInternalBasePath(`transforms/${transformId}`),
         {
-          query: { create_data_view: createDataView, time_field_name: timeFieldName },
+          query: { createDataView, timeFieldName },
           body: JSON.stringify(transformConfig),
           version: '1',
         }
