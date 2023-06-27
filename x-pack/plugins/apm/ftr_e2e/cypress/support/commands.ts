@@ -122,7 +122,7 @@ Cypress.Commands.add(
     cy.request({
       log: false,
       method: 'POST',
-      url: `${kibanaUrl}/api/kibana/settings`,
+      url: `${kibanaUrl}/internal/kibana/settings`,
       body: { changes: settings },
       headers: {
         'kbn-xsrf': 'e2e_test',

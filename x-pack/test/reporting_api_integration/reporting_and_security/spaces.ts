@@ -21,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const setSpaceConfig = async (spaceId: string, settings: object) => {
     return await kibanaServer.request({
-      path: `/s/${spaceId}/api/kibana/settings`,
+      path: `/s/${spaceId}/internal/kibana/settings`,
       method: 'POST',
       body: { changes: settings },
     });
