@@ -17,21 +17,6 @@ export default function ({ getService }: FtrProviderContext) {
   }));
 
   describe('trained models', function () {
-    before(async () => {
-      for (const model of trainedModels) {
-        await ml.api.importTrainedModel(model.id, model.name);
-      }
-
-      await ml.api.createTestTrainedModels('classification', 15, true);
-      await ml.api.createTestTrainedModels('regression', 15);
-    });
-
-    after(async () => {
-      await ml.api.stopAllTrainedModelDeploymentsES();
-      await ml.api.deleteAllTrainedModelsES();
-      await ml.api.cleanMlIndices();
-    });
-
     // 'Created at' will be different on each run,
     // so we will just assert that the value is in the expected timestamp format.
     const builtInModelData = {
@@ -51,6 +36,24 @@ export default function ({ getService }: FtrProviderContext) {
       description: '',
       modelTypes: ['regression', 'tree_ensemble'],
     };
+
+    before(async () => {
+      for (const model of trainedModels) {
+        await ml.api.importTrainedModel(model.id, model.name);
+      }
+
+      await ml.api.createTestTrainedModels('classification', 15, true);
+      await ml.api.createTestTrainedModels('regression', 15);
+
+      // Make sure the .ml-stats index is created in advance, see https://github.com/elastic/elasticsearch/issues/65846
+      await ml.api.assureMlStatsIndexExists();
+    });
+
+    after(async () => {
+      await ml.api.stopAllTrainedModelDeploymentsES();
+      await ml.api.deleteAllTrainedModelsES();
+      await ml.api.cleanMlIndices();
+    });
 
     describe('for ML user with read-only access', () => {
       before(async () => {
@@ -74,8 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/159283
-    describe.skip('for ML power user', () => {
+    describe('for ML power user', () => {
       before(async () => {
         await ml.securityUI.loginAsMlPowerUser();
         await ml.navigation.navigateToTrainedModels();
