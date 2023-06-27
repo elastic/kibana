@@ -328,6 +328,7 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                   isUpdateView
                   actionMessageParams={actionMessageParams}
                   summaryActionMessageParams={actionMessageParams}
+                  ruleScheduleInterval={scheduleStepData.interval}
                   ruleType={rule?.type}
                   form={actionsStepForm}
                   key="actionsStep"

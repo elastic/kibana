@@ -681,6 +681,7 @@ const CreateRulePageComponent: React.FC = () => {
             isLoading={isCreateRuleLoading || loading || isStartingJobs}
             actionMessageParams={actionMessageParams}
             summaryActionMessageParams={actionMessageParams}
+            ruleScheduleInterval={scheduleStepData.interval}
             ruleType={ruleType}
             form={actionsStepForm}
           />
@@ -734,6 +735,7 @@ const CreateRulePageComponent: React.FC = () => {
       isStartingJobs,
       loading,
       ruleType,
+      scheduleStepData.interval,
       submitRuleDisabled,
       submitRuleEnabled,
     ]
