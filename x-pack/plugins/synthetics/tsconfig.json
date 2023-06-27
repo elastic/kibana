@@ -75,6 +75,10 @@
     "@kbn/core-http-server",
     "@kbn/std",
     "@kbn/core-saved-objects-server-mocks",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/uptime-plugin",
+    "@kbn/core-application-browser",
   ],
   "exclude": [
     "target/**/*",
