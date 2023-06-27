@@ -80,7 +80,9 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                         <EuiHeaderLink color={'text'} {...settingsLinkProps}>
                           {settingsTabTitle}
                         </EuiHeaderLink>
-                        <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                        <Routes>
+                          <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
+                        </Routes>
                         <MetricsAlertDropdown />
                         <EuiHeaderLink
                           href={kibana.services?.application?.getUrlForApp('/integrations/browse')}

@@ -325,7 +325,7 @@ export const AppRoutes = memo(
       <>
         <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
 
-        <Routes>
+        <Routes compat={false}>
           <Route path={FLEET_ROUTING_PATHS.agents}>
             <AgentsApp />
           </Route>

@@ -15,6 +15,7 @@ import { Route as LegacyRoute, MatchPropagator } from './route';
 
 export const Routes = ({
   legacySwitch = true,
+  compat = true,
   children,
 }: {
   legacySwitch?: boolean;
@@ -23,7 +24,15 @@ export const Routes = ({
   const match = useRouteMatch();
 
   return legacySwitch ? (
-    <Switch>{children}</Switch>
+    <Switch>
+      {Children.map(children, (child) => {
+        if (React.isValidElement(child) && child.type === LegacyRoute) {
+          return React.cloneElement(child, { compat });
+        }
+
+        return child;
+      })}
+    </Switch>
   ) : (
     <ReactRouterRoutes>
       {Children.map(children, (child) => {

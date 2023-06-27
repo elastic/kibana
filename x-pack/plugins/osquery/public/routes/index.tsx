@@ -18,7 +18,7 @@ const OsqueryAppRoutesComponent = () => {
   useBreadcrumbs('base');
 
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route path={`/packs`}>
         <Packs />
       </Route>

@@ -7,7 +7,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { RouteComponentProps, RouteProps, useRouteMatch } from 'react-router-dom';
+import {
+  // eslint-disable-next-line no-restricted-imports
+  Route as ReactRouterRoute,
+  RouteComponentProps,
+  RouteProps,
+  useRouteMatch,
+} from 'react-router-dom';
 import { CompatRoute } from 'react-router-dom-v5-compat';
 import { useKibanaSharedUX } from './services';
 import { useSharedUXExecutionContext } from './use_execution_context';
@@ -22,8 +28,10 @@ export const Route = <T extends {}>({
   children,
   component: Component,
   render,
+  compat,
   ...rest
-}: RouteProps<string, { [K: string]: string } & T>) => {
+}: RouteProps<string, { [K: string]: string } & T> & { compat: boolean }) => {
+  const ReactRouterRouteComponent = compat ? CompatRoute : ReactRouterRoute;
   const component = useMemo(() => {
     if (!Component) {
       return undefined;
@@ -37,12 +45,12 @@ export const Route = <T extends {}>({
   }, [Component]);
 
   if (component) {
-    return <CompatRoute {...rest} component={component} />;
+    return <ReactRouterRouteComponent {...rest} component={component} />;
   }
   if (render || typeof children === 'function') {
     const renderFunction = typeof children === 'function' ? children : render;
     return (
-      <CompatRoute
+      <ReactRouterRouteComponent
         {...rest}
         render={(props) => (
           <>
@@ -55,10 +63,10 @@ export const Route = <T extends {}>({
     );
   }
   return (
-    <CompatRoute {...rest}>
+    <ReactRouterRouteComponent {...rest}>
       <MatchPropagator />
       {children}
-    </CompatRoute>
+    </ReactRouterRouteComponent>
   );
 };
 

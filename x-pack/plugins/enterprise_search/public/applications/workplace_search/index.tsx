@@ -98,7 +98,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
   }, [hasInitialized]);
 
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
@@ -109,7 +109,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
         <Overview />
       </Route>
       <Route path={PERSONAL_PATH}>
-        <Routes>
+        <Routes compat={false}>
           <Redirect exact from={PERSONAL_PATH} to={PRIVATE_SOURCES_PATH} />
           <Route path={PRIVATE_SOURCES_PATH}>
             <SourcesRouter />
@@ -123,7 +123,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
           <Route path={SEARCH_AUTHORIZE_PATH}>
             <SearchAuthorize />
           </Route>
-          <Route path="">
+          <Route>
             <NotFound isOrganization={false} />
           </Route>
         </Routes>
@@ -146,7 +146,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       <Route path={ORG_SETTINGS_PATH}>
         <SettingsRouter />
       </Route>
-      <Route path="">
+      <Route>
         <NotFound />
       </Route>
     </Routes>
@@ -154,11 +154,11 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
 };
 
 export const WorkplaceSearchUnconfigured: React.FC = () => (
-  <Routes>
+  <Routes compat={false}>
     <Route exact path={SETUP_GUIDE_PATH}>
       <SetupGuide />
     </Route>
-    <Route path="">
+    <Route>
       <Redirect to={SETUP_GUIDE_PATH} />
     </Route>
   </Routes>

@@ -88,7 +88,7 @@ export const SearchApplicationView: React.FC = () => {
           onClose={closeDeleteSearchApplicationModal}
         />
       ) : null}
-      <Routes>
+      <Routes compat={false}>
         <Route
           exact
           path={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.PREVIEW}`}
@@ -104,7 +104,7 @@ export const SearchApplicationView: React.FC = () => {
           from={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONNECT}`}
           to={`${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONNECT}/${SearchApplicationConnectTabs.SEARCHAPI}`}
         />
-        <Route path="">
+        <Route>
           <EnterpriseSearchApplicationsPageTemplate
             isEmptyState
             pageChrome={[searchApplicationName]}

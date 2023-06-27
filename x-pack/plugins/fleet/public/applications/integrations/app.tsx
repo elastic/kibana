@@ -130,7 +130,7 @@ export const AppRoutes = memo(() => {
 
   return (
     <>
-      <Routes>
+      <Routes compat={false}>
         <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
           <EPMApp />
         </Route>

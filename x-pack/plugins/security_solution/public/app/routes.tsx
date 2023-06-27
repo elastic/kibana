@@ -8,7 +8,7 @@
 import type { History } from 'history';
 import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
-import { Router } from '@kbn/shared-ux-router';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { useDispatch } from 'react-redux';
 import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 
@@ -17,6 +17,7 @@ import { RouteCapture } from '../common/components/endpoint/route_capture';
 import { useGetUserCasesPermissions, useKibana } from '../common/lib/kibana';
 import type { AppAction } from '../common/store/actions';
 import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';
+import { NotFoundPage } from './404';
 import { HomePage } from './home';
 
 interface RouterProps {
@@ -51,9 +52,16 @@ const PageRouterComponent: FC<RouterProps> = ({
     <ManageRoutesSpy>
       <Router history={history}>
         <RouteCapture>
-          <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
-            <HomePage setHeaderActionMenu={setHeaderActionMenu}>{children}</HomePage>
-          </CasesContext>
+          <Routes compat={false}>
+            <Route path="/">
+              <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
+                <HomePage setHeaderActionMenu={setHeaderActionMenu}>{children}</HomePage>
+              </CasesContext>
+            </Route>
+            <Route>
+              <NotFoundPage />
+            </Route>
+          </Routes>
         </RouteCapture>
       </Router>
     </ManageRoutesSpy>

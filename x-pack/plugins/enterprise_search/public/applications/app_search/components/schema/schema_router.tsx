@@ -21,11 +21,11 @@ export const SchemaRouter: React.FC = () => {
   const { isMetaEngine } = useValues(EngineLogic);
 
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route path={ENGINE_REINDEX_JOB_PATH}>
         <ReindexJob />
       </Route>
-      <Route path="">{isMetaEngine ? <MetaEngineSchema /> : <Schema />}</Route>
+      <Route>{isMetaEngine ? <MetaEngineSchema /> : <Schema />}</Route>
     </Routes>
   );
 };

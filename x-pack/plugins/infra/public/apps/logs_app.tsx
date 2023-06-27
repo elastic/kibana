@@ -74,7 +74,7 @@ const LogsApp: React.FC<{
             history={history}
             toastsService={core.notifications.toasts}
           >
-            <Routes>
+            <Routes compat={false}>
               <Route path="/link-to" component={LinkToLogsPage} />
               {uiCapabilities?.logs?.show && <Route path="/" component={LogsPage} />}
             </Routes>

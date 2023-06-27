@@ -53,7 +53,7 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   return (
     <>
       <ReactQueryDevtools initialIsOpen={false} />
-      <Routes>
+      <Routes compat={false}>
         <Route strict exact path={basePath}>
           <AllCases />
         </Route>

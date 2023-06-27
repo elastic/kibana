@@ -59,7 +59,7 @@ const RulesContainerComponent: React.FC = () => {
   return (
     <PluginTemplateWrapper>
       <TrackApplicationView viewId={SecurityPageName.rules}>
-        <Routes>
+        <Routes compat={false}>
           <Route // Redirect to first tab if none specified
             path="/rules/id/:detailName"
             exact

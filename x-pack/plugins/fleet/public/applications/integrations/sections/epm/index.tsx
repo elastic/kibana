@@ -22,7 +22,7 @@ export const EPMApp: React.FunctionComponent = () => {
   useBreadcrumbs('integrations');
 
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_policy_edit}>
         <Policy />
       </Route>

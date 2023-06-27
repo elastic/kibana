@@ -96,7 +96,7 @@ export const EngineRouter: React.FC = () => {
   if (isLoadingNewEngine || dataLoading) return <AppSearchPageTemplate isLoading />;
 
   return (
-    <Routes>
+    <Routes compat={false}>
       <Route exact path={ENGINE_PATH}>
         <EngineOverview />
       </Route>
@@ -160,7 +160,7 @@ export const EngineRouter: React.FC = () => {
           <ApiLogs />
         </Route>
       )}
-      <Route path="">
+      <Route>
         <NotFound pageChrome={getEngineBreadcrumbs()} />
       </Route>
     </Routes>

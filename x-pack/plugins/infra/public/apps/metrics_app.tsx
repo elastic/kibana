@@ -75,7 +75,7 @@ const MetricsApp: React.FC<{
       >
         <SourceProvider sourceId="default">
           <Router history={history}>
-            <Routes>
+            <Routes compat={false}>
               <Route path="/link-to" component={LinkToMetricsPage} />
               {uiCapabilities?.infrastructure?.show && (
                 <RedirectWithQueryParams from="/" exact={true} to="/inventory" />
