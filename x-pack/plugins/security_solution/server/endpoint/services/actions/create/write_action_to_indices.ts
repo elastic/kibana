@@ -7,9 +7,9 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
-import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import moment from 'moment';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions/types';
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   ENDPOINT_ACTIONS_DS,
@@ -91,7 +91,7 @@ export const writeActionToIndices = async ({
     const logsEndpointActionsResult = await esClient.index<LogsEndpointAction>(
       {
         index: ENDPOINT_ACTIONS_INDEX,
-        body: {
+        document: {
           ...doc,
           agent: {
             id: payload.endpoint_ids,
@@ -124,23 +124,11 @@ export const writeActionToIndices = async ({
         data: fleetActionDocSignature.data.toString('base64'),
         signature: fleetActionDocSignature.signature,
       },
-    };
+    } as unknown as FleetActionRequest;
     // write actions to .fleet-actions index
     try {
-      const fleetActionIndexResult = await esClient.index<EndpointAction>(
-        {
-          index: AGENT_ACTIONS_INDEX,
-          body: signedFleetActionDoc,
-          refresh: 'wait_for',
-        },
-        {
-          meta: true,
-        }
-      );
-
-      if (fleetActionIndexResult.statusCode !== 201) {
-        throw new Error(fleetActionIndexResult.body.result);
-      }
+      const fleetActionsClient = await endpointContext.service.getFleetActionsClient();
+      await fleetActionsClient.create(signedFleetActionDoc);
     } catch (e) {
       // create entry in .logs-endpoint.action.responses-default data stream
       // when writing to .fleet-actions fails
@@ -178,7 +166,7 @@ const createFailedActionResponseEntry = async ({
   try {
     await esClient.index<LogsEndpointActionResponse>({
       index: `${ENDPOINT_ACTION_RESPONSES_DS}-default`,
-      body: {
+      document: {
         ...doc,
         error: {
           code: failedFleetActionErrorCode,

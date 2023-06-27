@@ -74,7 +74,9 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
                 </EuiTitle>
               )}
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{rightSideItems}</EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ flexDirection: 'row', gap: euiTheme.size.s }}>
+              {rightSideItems}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem style={{ height: '100%' }}>{renderChart()}</EuiFlexItem>

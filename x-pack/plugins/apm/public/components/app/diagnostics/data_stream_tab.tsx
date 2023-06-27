@@ -63,7 +63,6 @@ function DataStreamsTable({ data }: { data?: DiagnosticsBundle }) {
 
   return (
     <EuiBasicTable
-      tableCaption="Demo of EuiBasicTable"
       items={data?.dataStreams ?? []}
       rowHeader="firstName"
       columns={columns}

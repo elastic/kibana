@@ -4,6 +4,16 @@ xpack.security.showNavLinks: false
 xpack.serverless.plugin.enabled: true
 xpack.fleet.internal.fleetServerStandalone: true
 xpack.fleet.internal.disableILMPolicies: true
+xpack.fleet.internal.disableProxies: true
+
+# Enable ZDT migration algorithm
+migrations.algorithm: zdt
+
+# temporarily allow to run the migration on UI nodes
+# until the controller is able to spawn the migrator job/pod
+migrations.zdt:
+  metaPickupSyncDelaySec: 5
+  runOnRoles: ["ui"]
 
 # Ess plugins
 xpack.ess.security.enabled: false
@@ -23,6 +33,7 @@ xpack.license_management.enabled: false
 xpack.reporting.enabled: false
 xpack.cloud_integrations.data_migration.enabled: false
 data.search.sessions.enabled: false
+advanced_settings.enabled: false
 
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
 # server.restrictInternalApis: true

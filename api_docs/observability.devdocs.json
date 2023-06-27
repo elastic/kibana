@@ -2502,6 +2502,26 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.dataViewEditor",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViewEditor",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViewEditor",
+                "scope": "public",
+                "docId": "kibDataViewEditorPluginApi",
+                "section": "def-public.PluginStart",
+                "text": "PluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.discover",
             "type": "Object",
             "tags": [],
@@ -7819,6 +7839,14 @@
           "StringC",
           ", ",
           "NumberC",
+          "]>; docCount: ",
+          "NumberC",
+          "; pValue: ",
+          "UnionC",
+          "<[",
+          "NumberC",
+          ", ",
+          "NullC",
           "]>; }>>; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
@@ -7827,7 +7855,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { body: { significantFieldValues: { field: string; value: string | number; }[]; }; }; }) => Promise<unknown>; } & ",
+          " & { params: { body: { significantFieldValues: { field: string; value: string | number; docCount: number; pValue: number | null; }[]; }; }; }) => Promise<unknown>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8307,7 +8335,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { body: { indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; }; }; }) => Promise<{ date: Date; sliValue: number; }[]>; } & ",
+          " & { params: { body: { indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; }; }; }) => Promise<{ date: string; sliValue: number; }[]>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9188,7 +9216,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly coPilot?: Readonly<{} & { enabled: boolean; provider: Readonly<{} & { openAI: Readonly<{} & { apiKey: string; model: string; }>; }> | Readonly<{} & { azureOpenAI: Readonly<{} & { apiKey: string; resourceName: string; deploymentId: string; }>; }>; }> | undefined; readonly enabled: boolean; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly thresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly compositeSlo: Readonly<{} & { enabled: boolean; }>; }"
+          "{ readonly aiAssistant?: Readonly<{} & { enabled: boolean; provider: Readonly<{} & { openAI: Readonly<{} & { apiKey: string; model: string; }>; }> | Readonly<{} & { azureOpenAI: Readonly<{} & { apiKey: string; resourceName: string; deploymentId: string; }>; }>; }> | undefined; readonly enabled: boolean; readonly annotations: Readonly<{} & { index: string; enabled: boolean; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; thresholdRule: Readonly<{} & { enabled: boolean; }>; }>; readonly thresholdRule: Readonly<{} & { groupByPageSize: number; }>; readonly compositeSlo: Readonly<{} & { enabled: boolean; }>; }"
         ],
         "path": "x-pack/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -9393,6 +9421,14 @@
           "StringC",
           ", ",
           "NumberC",
+          "]>; docCount: ",
+          "NumberC",
+          "; pValue: ",
+          "UnionC",
+          "<[",
+          "NumberC",
+          ", ",
+          "NullC",
           "]>; }>>; }>; }> | undefined; handler: ({}: ",
           {
             "pluginId": "observability",
@@ -9401,7 +9437,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { body: { significantFieldValues: { field: string; value: string | number; }[]; }; }; }) => Promise<unknown>; } & ",
+          " & { params: { body: { significantFieldValues: { field: string; value: string | number; docCount: number; pValue: number | null; }[]; }; }; }) => Promise<unknown>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -9881,7 +9917,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          " & { params: { body: { indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; }; }; }) => Promise<{ date: Date; sliValue: number; }[]>; } & ",
+          " & { params: { body: { indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }; }; }; }) => Promise<{ date: string; sliValue: number; }[]>; } & ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -14871,7 +14907,15 @@
               "StringC",
               ", ",
               "NumberC",
-              "]>; }>>; }>; messages: (params: { significantFieldValues: { field: string; value: string | number; }[]; }) => ",
+              "]>; docCount: ",
+              "NumberC",
+              "; pValue: ",
+              "UnionC",
+              "<[",
+              "NumberC",
+              ", ",
+              "NullC",
+              "]>; }>>; }>; messages: (params: { significantFieldValues: { field: string; value: string | number; docCount: number; pValue: number | null; }[]; }) => ",
               "ChatCompletionRequestMessage",
               "[]; }"
             ],

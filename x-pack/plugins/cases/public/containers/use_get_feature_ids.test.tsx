@@ -39,10 +39,10 @@ describe('useGetFeaturesIds', () => {
     await waitForNextUpdate();
 
     await waitFor(() => {
-      expect(spy).toHaveBeenCalledWith(
-        { registrationContext: ['context1'] },
-        expect.any(AbortSignal)
-      );
+      expect(spy).toHaveBeenCalledWith({
+        query: { registrationContext: ['context1'] },
+        signal: expect.any(AbortSignal),
+      });
     });
   });
 
@@ -60,10 +60,10 @@ describe('useGetFeaturesIds', () => {
     await waitForNextUpdate();
 
     await waitFor(() => {
-      expect(spy).toHaveBeenCalledWith(
-        { registrationContext: ['context1'] },
-        expect.any(AbortSignal)
-      );
+      expect(spy).toHaveBeenCalledWith({
+        query: { registrationContext: ['context1'] },
+        signal: expect.any(AbortSignal),
+      });
       expect(addError).toHaveBeenCalled();
     });
   });

@@ -36,7 +36,6 @@
       "expressionTagcloud",
       "eventAnnotation",
       "unifiedSearch",
-      "unifiedFieldList",
       "contentManagement"
     ],
     "optionalPlugins": [
