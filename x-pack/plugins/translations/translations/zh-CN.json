@@ -24026,7 +24026,6 @@
     "xpack.ml.navMenu.trainedModelsTabBetaLabel": "技术预览",
     "xpack.ml.navMenu.trainedModelsTabBetaTooltipContent": "此功能处于技术预览状态，在未来版本中可能会更改或完全移除。Elastic 将尽最大努力来修复任何问题，但处于技术预览状态的功能不受正式 GA 功能支持 SLA 的约束。",
     "xpack.ml.navMenu.trainedModelsText": "已训练模型",
-    "xpack.ml.newJob.fromGeo.createJob.error.noTimeRange": "未指定时间范围。",
     "xpack.ml.newJob.fromLens.createJob.error.colsNoSourceField": "某些列不包含源字段。",
     "xpack.ml.newJob.fromLens.createJob.error.colsUsingFilterTimeSift": "列包含与 ML 检测工具不兼容的设置，不支持时间偏移和筛选依据。",
     "xpack.ml.newJob.fromLens.createJob.error.incompatibleLayerType": "图层不兼容。只可以使用图表图层。",
