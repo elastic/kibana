@@ -397,6 +397,7 @@ export interface DocLinks {
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
+    sloBurnRateRule: string;
   }>;
   readonly alerting: Readonly<{
     guide: string;
