@@ -63,7 +63,7 @@ export const useLiveQueryDetails = ({
 
   return useQuery<{ data: LiveQueryDetailsItem }, Error, LiveQueryDetailsItem>(
     ['liveQueries', { actionId, filterQuery, queryIds }],
-    () => http.get(`/api/osquery/live_queries/${actionId}`, { version: '1' }),
+    () => http.get(`/api/osquery/live_queries/${actionId}`, { version: '2023-10-31' }),
     {
       enabled: !skip && !!actionId,
       refetchInterval: isLive ? 5000 : false,

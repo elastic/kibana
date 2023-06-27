@@ -34,7 +34,7 @@ export const useSavedQueries = ({
     [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortOrder }],
     () =>
       http.get('/api/osquery/saved_queries', {
-        version: '1',
+        version: '2023-10-31',
         query: { page: pageIndex + 1, pageSize, sort: sortField, sortOrder },
       }),
     {

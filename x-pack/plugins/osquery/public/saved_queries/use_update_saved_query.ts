@@ -31,7 +31,7 @@ export const useUpdateSavedQuery = ({ savedQueryId }: UseUpdateSavedQueryProps) 
   return useMutation(
     (payload) =>
       http.put(`/api/osquery/saved_queries/${savedQueryId}`, {
-        version: '1',
+        version: '2023-10-31',
         body: JSON.stringify(payload),
       }),
     {

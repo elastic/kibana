@@ -29,7 +29,7 @@ export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerConte
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: {
           request: {
             params: schema.object(

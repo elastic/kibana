@@ -24,7 +24,7 @@ export const findSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: {
           request: {
             query: schema.object({

@@ -40,7 +40,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: {
           request: {
             body: schema.object(

@@ -36,7 +36,7 @@ export const useCreateLiveQuery = ({ onSuccess }: UseLiveQueryProps) => {
       const response = await http.post<{ data: LiveQueryDetailsItem }>(
         '/api/osquery/live_queries',
         {
-          version: '1',
+          version: '2023-10-31',
           body: JSON.stringify({
             ...payload,
             agent_all: agentSelection.allAgentsSelected,

@@ -28,7 +28,7 @@ export const useDeleteSavedQuery = ({ savedQueryId }: UseDeleteSavedQueryProps) 
   const setErrorToast = useErrorToast();
 
   return useMutation(
-    () => http.delete(`/api/osquery/saved_queries/${savedQueryId}`, { version: '1' }),
+    () => http.delete(`/api/osquery/saved_queries/${savedQueryId}`, { version: '2023-10-31' }),
     {
       onError: (error: { body: { error: string; message: string } }) => {
         setErrorToast(error, {

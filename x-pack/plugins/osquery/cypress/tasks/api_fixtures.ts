@@ -73,7 +73,7 @@ export const loadSavedQuery = (payload: SavedQuerySOFormData = savedQueryFixture
       id: payload.id ?? generateRandomStringName(1)[0],
     },
     headers: {
-      'Elastic-Api-Version': '1',
+      'Elastic-Api-Version': '2023-10-31',
     },
     url: '/api/osquery/saved_queries',
   }).then((response) => response.body.data);
@@ -83,7 +83,7 @@ export const cleanupSavedQuery = (id: string) => {
     method: 'DELETE',
     url: `/api/osquery/saved_queries/${id}`,
     headers: {
-      'Elastic-Api-Version': '1',
+      'Elastic-Api-Version': '2023-10-31',
     },
   });
 };
@@ -99,7 +99,7 @@ export const loadPack = (payload: Partial<PackItem> = {}, space = 'default') =>
       enabled: payload.enabled || true,
     },
     headers: {
-      'Elastic-Api-Version': '1',
+      'Elastic-Api-Version': '2023-10-31',
     },
     url: `/s/${space}/api/osquery/packs`,
   }).then((response) => response.body.data);
@@ -121,7 +121,7 @@ export const loadLiveQuery = (
     body: payload,
     url: `/api/osquery/live_queries`,
     headers: {
-      'Elastic-Api-Version': '1',
+      'Elastic-Api-Version': '2023-10-31',
     },
   }).then((response) => response.body.data);
 
@@ -196,7 +196,7 @@ export const cleanupRule = (id: string) => {
     method: 'DELETE',
     url: `/api/detection_engine/rules?id=${id}`,
     headers: {
-      'Elastic-Api-Version': '1',
+      'Elastic-Api-Version': '2023-10-31',
     },
   });
 };
