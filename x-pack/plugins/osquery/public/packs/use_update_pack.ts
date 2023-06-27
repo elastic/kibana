@@ -41,6 +41,7 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
   >(
     ({ id, ...payload }) =>
       http.put(`/api/osquery/packs/${id}`, {
+        version: '2023-10-31',
         body: JSON.stringify(payload),
       }),
     {

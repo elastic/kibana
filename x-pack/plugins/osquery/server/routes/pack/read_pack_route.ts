@@ -17,41 +17,47 @@ import { convertSOQueriesToPack } from './utils';
 import { convertShardsToObject } from '../utils';
 
 export const readPackRoute = (router: IRouter) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
+
       path: '/api/osquery/packs/{id}',
-      validate: {
-        params: schema.object({
-          id: schema.string(),
-        }),
-      },
       options: { tags: [`access:${PLUGIN_ID}-readPacks`] },
-    },
-    async (context, request, response) => {
-      const coreContext = await context.core;
-      const savedObjectsClient = coreContext.savedObjects.client;
-
-      const { attributes, references, id, ...rest } = await savedObjectsClient.get<PackSavedObject>(
-        packSavedObjectType,
-        request.params.id
-      );
-
-      const policyIds = map(filter(references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]), 'id');
-      const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset']);
-
-      return response.ok({
-        body: {
-          data: {
-            ...rest,
-            ...attributes,
-            saved_object_id: id,
-            queries: convertSOQueriesToPack(attributes.queries),
-            shards: convertShardsToObject(attributes.shards),
-            policy_ids: policyIds,
-            read_only: attributes.version !== undefined && osqueryPackAssetReference,
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string(),
+            }),
           },
         },
-      });
-    }
-  );
+      },
+      async (context, request, response) => {
+        const coreContext = await context.core;
+        const savedObjectsClient = coreContext.savedObjects.client;
+
+        const { attributes, references, id, ...rest } =
+          await savedObjectsClient.get<PackSavedObject>(packSavedObjectType, request.params.id);
+
+        const policyIds = map(filter(references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]), 'id');
+        const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset']);
+
+        return response.ok({
+          body: {
+            data: {
+              ...rest,
+              ...attributes,
+              saved_object_id: id,
+              queries: convertSOQueriesToPack(attributes.queries),
+              shards: convertShardsToObject(attributes.shards),
+              policy_ids: policyIds,
+              read_only: attributes.version !== undefined && osqueryPackAssetReference,
+            },
+          },
+        });
+      }
+    );
 };

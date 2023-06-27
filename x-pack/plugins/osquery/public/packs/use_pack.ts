@@ -19,7 +19,7 @@ export const usePack = ({ packId, skip = false }: UsePack) => {
 
   return useQuery<{ data: PackItem }, unknown, PackItem>(
     ['pack', { packId }],
-    () => http.get(`/api/osquery/packs/${packId}`),
+    () => http.get(`/api/osquery/packs/${packId}`, { version: '2023-10-31' }),
     {
       select: (response) => response?.data,
       keepPreviousData: true,

@@ -29,6 +29,7 @@ export const usePacks = ({
     [PACKS_ID, { pageIndex, pageSize, sortField, sortOrder }],
     () =>
       http.get('/api/osquery/packs', {
+        version: '2023-10-31',
         query: { pageIndex, pageSize, sortField, sortOrder },
       }),
     {

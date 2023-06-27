@@ -28,24 +28,30 @@ export const useDeletePack = ({ packId, withRedirect }: UseDeletePackProps) => {
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation(() => http.delete(`/api/osquery/packs/${packId}`), {
-    onError: (error: { body: { error: string; message: string } }) => {
-      setErrorToast(error, {
-        title: error.body.error,
-        toastMessage: error.body.message,
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries([PACKS_ID]);
-      if (withRedirect) {
-        navigateToApp(PLUGIN_ID, { path: pagePathGetters.packs() });
-      }
+  return useMutation(
+    () =>
+      http.delete(`/api/osquery/packs/${packId}`, {
+        version: '2023-10-31',
+      }),
+    {
+      onError: (error: { body: { error: string; message: string } }) => {
+        setErrorToast(error, {
+          title: error.body.error,
+          toastMessage: error.body.message,
+        });
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries([PACKS_ID]);
+        if (withRedirect) {
+          navigateToApp(PLUGIN_ID, { path: pagePathGetters.packs() });
+        }
 
-      toasts.addSuccess(
-        i18n.translate('xpack.osquery.deletePack.successToastMessageText', {
-          defaultMessage: 'Successfully deleted pack',
-        })
-      );
-    },
-  });
+        toasts.addSuccess(
+          i18n.translate('xpack.osquery.deletePack.successToastMessageText', {
+            defaultMessage: 'Successfully deleted pack',
+          })
+        );
+      },
+    }
+  );
 };

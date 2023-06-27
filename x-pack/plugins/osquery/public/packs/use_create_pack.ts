@@ -35,6 +35,7 @@ export const useCreatePack = ({ withRedirect }: UseCreatePackProps) => {
   >(
     (payload) =>
       http.post('/api/osquery/packs', {
+        version: '2023-10-31',
         body: JSON.stringify(payload),
       }),
     {
