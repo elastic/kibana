@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { GetConfigurationFindRequest } from '../../../../common/types/api';
 import { CASE_CONFIGURE_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
+import type { configureApiV1 } from '../../../../common/types/api';
 
 export const getCaseConfigureRoute = createCasesRoute({
   method: 'get',
@@ -17,10 +17,12 @@ export const getCaseConfigureRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
-      const options = request.query as GetConfigurationFindRequest;
+      const options = request.query as configureApiV1.GetConfigurationFindRequest;
+
+      const res: configureApiV1.GetConfigureResponse = await client.configure.get({ ...options });
 
       return response.ok({
-        body: await client.configure.get({ ...options }),
+        body: res,
       });
     } catch (error) {
       throw createCaseError({

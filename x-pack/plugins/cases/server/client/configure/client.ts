@@ -62,7 +62,7 @@ export interface ConfigureSubClient {
   /**
    * Retrieves the external connector configuration for a particular case owner.
    */
-  get(params: GetConfigurationFindRequest): Promise<Configuration | {}>;
+  get(params: GetConfigurationFindRequest): Promise<Configurations>;
   /**
    * Retrieves the valid external connectors supported by the cases plugin.
    */

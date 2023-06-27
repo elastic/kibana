@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import type { Configurations, Configuration } from '../../domain/configure/v1';
 import { ConfigurationBasicWithoutOwnerRt, CasesConfigureBasicRt } from '../../domain/configure/v1';
 
 export const ConfigurationRequestRt = CasesConfigureBasicRt;
@@ -32,3 +33,6 @@ export const ConfigurationPatchRequestRt = rt.intersection([
 export type ConfigurationRequest = rt.TypeOf<typeof ConfigurationRequestRt>;
 export type ConfigurationPatchRequest = rt.TypeOf<typeof ConfigurationPatchRequestRt>;
 export type GetConfigurationFindRequest = rt.TypeOf<typeof GetConfigurationFindRequestRt>;
+export type GetConfigureResponse = Configurations;
+export type CreateConfigureResponse = Configuration;
+export type UpdateConfigureResponse = Configuration;
