@@ -89,7 +89,6 @@ export const cli = () => {
       const kibanaPorts: number[] = [5601, 5620];
       const fleetServerPorts: number[] = [8220];
 
-
       const getEsPort = <T>(): T | number => {
         const esPort = parseInt(`92${Math.floor(Math.random() * 89) + 10}`, 10);
         if (esPorts.includes(esPort)) {
