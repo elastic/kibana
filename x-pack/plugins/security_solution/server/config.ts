@@ -98,7 +98,7 @@ export const configSchema = schema.object({
   /**
    * Artifacts Configuration for package policy update concurrency
    */
-  packagerTaskPackagePolicyUpdateConcurrency: schema.number({ defaultValue: 10, max: 50, min: 1 }),
+  packagerTaskPackagePolicyUpdateBatchSize: schema.number({ defaultValue: 10, max: 50, min: 1 }),
 
   /**
    * For internal use. Specify which version of the Detection Rules fleet package to install

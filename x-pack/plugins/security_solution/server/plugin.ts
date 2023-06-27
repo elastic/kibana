@@ -459,8 +459,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         packagePolicyService: plugins.fleet.packagePolicyService,
         logger,
         experimentalFeatures: config.experimentalFeatures,
-        packagerTaskPackagePolicyUpdateConcurrency:
-          config.packagerTaskPackagePolicyUpdateConcurrency,
+        packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
       });
 
       // Migrate artifacts to fleet and then start the minifest task after that is done

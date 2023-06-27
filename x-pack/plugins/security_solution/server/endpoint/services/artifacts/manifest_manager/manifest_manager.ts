@@ -7,7 +7,7 @@
 
 import pMap from 'p-map';
 import semver from 'semver';
-import { isEqual, isEmpty } from 'lodash';
+import { isEqual, isEmpty, chunk } from 'lodash';
 import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -93,7 +93,7 @@ export interface ManifestManagerContext {
   packagePolicyService: PackagePolicyClient;
   logger: Logger;
   experimentalFeatures: ExperimentalFeatures;
-  packagerTaskPackagePolicyUpdateConcurrency: number;
+  packagerTaskPackagePolicyUpdateBatchSize: number;
 }
 
 const getArtifactIds = (manifest: ManifestSchema) =>
@@ -113,7 +113,7 @@ export class ManifestManager {
   protected schemaVersion: ManifestSchemaVersion;
   protected experimentalFeatures: ExperimentalFeatures;
   protected cachedExceptionsListsByOs: Map<string, ExceptionListItemSchema[]>;
-  protected packagerTaskPackagePolicyUpdateConcurrency: number;
+  protected packagerTaskPackagePolicyUpdateBatchSize: number;
 
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
@@ -124,8 +124,8 @@ export class ManifestManager {
     this.schemaVersion = 'v1';
     this.experimentalFeatures = context.experimentalFeatures;
     this.cachedExceptionsListsByOs = new Map();
-    this.packagerTaskPackagePolicyUpdateConcurrency =
-      context.packagerTaskPackagePolicyUpdateConcurrency;
+    this.packagerTaskPackagePolicyUpdateBatchSize =
+      context.packagerTaskPackagePolicyUpdateBatchSize;
   }
 
   /**
@@ -549,56 +549,6 @@ export class ManifestManager {
     return manifest;
   }
 
-  private async updatePackagePolicyIfNeeded(
-    manifest: Manifest,
-    packagePolicy: PackagePolicy
-  ): Promise<Error | undefined> {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { id, revision, updated_at, updated_by, ...newPackagePolicy } = packagePolicy;
-    if (newPackagePolicy.inputs.length > 0 && newPackagePolicy.inputs[0].config !== undefined) {
-      const oldManifest = newPackagePolicy.inputs[0].config.artifact_manifest ?? {
-        value: {},
-      };
-
-      const newManifestVersion = manifest.getSemanticVersion();
-      if (semver.gt(newManifestVersion, oldManifest.value.manifest_version)) {
-        const serializedManifest = manifest.toPackagePolicyManifest(packagePolicy.id);
-
-        if (!manifestDispatchSchema.is(serializedManifest)) {
-          return new EndpointError(
-            `Invalid manifest for policy ${packagePolicy.id}`,
-            serializedManifest
-          );
-        } else if (!manifestsEqual(serializedManifest, oldManifest.value)) {
-          newPackagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
-
-          try {
-            await this.packagePolicyService.update(
-              this.savedObjectsClient,
-              // @ts-expect-error TS2345
-              undefined,
-              id,
-              newPackagePolicy
-            );
-            this.logger.debug(
-              `Updated package policy ${id} with manifest version ${manifest.getSemanticVersion()}`
-            );
-          } catch (err) {
-            return err;
-          }
-        } else {
-          this.logger.debug(
-            `No change in manifest content for package policy: ${id}. Staying on old version`
-          );
-        }
-      } else {
-        this.logger.debug(`No change in manifest version for package policy: ${id}`);
-      }
-    } else {
-      return new EndpointError(`Package Policy ${id} has no 'inputs[0].config'`, newPackagePolicy);
-    }
-  }
-
   /**
    * Dispatches the manifest by writing it to the endpoint package policy, if different
    * from the manifest already in the config.
@@ -607,8 +557,6 @@ export class ManifestManager {
    * @returns {Promise<Error[]>} Any errors encountered.
    */
   public async tryDispatch(manifest: Manifest): Promise<Error[]> {
-    const errors: Error[] = [];
-
     const allPackagePolicies: PackagePolicy[] = [];
     await iterateAllListItems(
       (page) => this.listEndpointPolicies(page),
@@ -617,21 +565,75 @@ export class ManifestManager {
       }
     );
 
-    await pMap(
-      allPackagePolicies,
-      async (packagePolicy) => {
-        const error = await this.updatePackagePolicyIfNeeded(manifest, packagePolicy);
-        if (error) {
-          errors.push(error);
+    const packagePoliciesToUpdate: PackagePolicy[] = [];
+
+    const errors: Error[] = [];
+    allPackagePolicies.forEach((packagePolicy) => {
+      const { id } = packagePolicy;
+      if (packagePolicy.inputs.length > 0 && packagePolicy.inputs[0].config !== undefined) {
+        const oldManifest = packagePolicy.inputs[0].config.artifact_manifest ?? {
+          value: {},
+        };
+
+        const newManifestVersion = manifest.getSemanticVersion();
+        if (semver.gt(newManifestVersion, oldManifest.value.manifest_version)) {
+          const serializedManifest = manifest.toPackagePolicyManifest(id);
+
+          if (!manifestDispatchSchema.is(serializedManifest)) {
+            errors.push(new EndpointError(`Invalid manifest for policy ${id}`, serializedManifest));
+          } else if (!manifestsEqual(serializedManifest, oldManifest.value)) {
+            packagePolicy.inputs[0].config.artifact_manifest = { value: serializedManifest };
+            packagePoliciesToUpdate.push(packagePolicy);
+          } else {
+            this.logger.debug(
+              `No change in manifest content for package policy: ${id}. Staying on old version`
+            );
+          }
+        } else {
+          this.logger.debug(`No change in manifest version for package policy: ${id}`);
         }
-      },
-      {
-        concurrency: this.packagerTaskPackagePolicyUpdateConcurrency,
-        /** When set to false, instead of stopping when a promise rejects, it will wait for all the promises to
-         * settle and then reject with an aggregated error containing all the errors from the rejected promises. */
-        stopOnError: false,
+      } else {
+        errors.push(
+          new EndpointError(`Package Policy ${id} has no 'inputs[0].config'`, packagePolicy)
+        );
       }
+    });
+
+    // Split updates in batches with batch size: packagerTaskPackagePolicyUpdateBatchSize
+    const updateBatches = chunk(
+      packagePoliciesToUpdate,
+      this.packagerTaskPackagePolicyUpdateBatchSize
     );
+
+    for (const currentBatch of updateBatches) {
+      const response = await this.packagePolicyService.bulkUpdate(
+        this.savedObjectsClient,
+        // @ts-expect-error TS2345
+        undefined,
+        currentBatch
+      );
+
+      // Parse errors
+      if (!isEmpty(response.failedPolicies)) {
+        errors.push(
+          ...response.failedPolicies.map((failedPolicy) => {
+            if (failedPolicy.error instanceof Error) {
+              return failedPolicy.error;
+            } else {
+              return new Error(failedPolicy.error.message);
+            }
+          })
+        );
+      }
+      // Log success updates
+      for (const updatedPolicy of response.updatedPolicies || []) {
+        this.logger.debug(
+          `Updated package policy ${
+            updatedPolicy.id
+          } with manifest version ${manifest.getSemanticVersion()}`
+        );
+      }
+    }
 
     return errors;
   }

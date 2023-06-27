@@ -809,12 +809,6 @@ describe('ManifestManager', () => {
         total: items.length,
       });
 
-    const toNewPackagePolicy = (packagePolicy: PackagePolicy) => {
-      const { id, revision, updated_at: updatedAt, updated_by: updatedBy, ...rest } = packagePolicy;
-
-      return rest;
-    };
-
     test('Should not dispatch if no policies', async () => {
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
@@ -826,7 +820,7 @@ describe('ManifestManager', () => {
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
 
-      expect(context.packagePolicyService.update).toHaveBeenCalledTimes(0);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(0);
     });
 
     test('Should return errors if invalid config for package policy', async () => {
@@ -844,7 +838,7 @@ describe('ManifestManager', () => {
         new EndpointError(`Package Policy ${TEST_POLICY_ID_1} has no 'inputs[0].config'`),
       ]);
 
-      expect(context.packagePolicyService.update).toHaveBeenCalledTimes(0);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(0);
     });
 
     test('Should not dispatch if semantic version has not changed', async () => {
@@ -873,7 +867,7 @@ describe('ManifestManager', () => {
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
 
-      expect(context.packagePolicyService.update).toHaveBeenCalledTimes(0);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(0);
     });
 
     test('Should dispatch to only policies where list of artifacts changed', async () => {
@@ -917,17 +911,16 @@ describe('ManifestManager', () => {
           },
         }),
       ]);
-      context.packagePolicyService.update = jest.fn().mockResolvedValue({});
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({});
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
 
-      expect(context.packagePolicyService.update).toHaveBeenCalledTimes(1);
-      expect(context.packagePolicyService.update).toHaveBeenNthCalledWith(
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenNthCalledWith(
         1,
         expect.anything(),
         undefined,
-        TEST_POLICY_ID_1,
-        toNewPackagePolicy(
+        [
           createPackagePolicyWithConfigMock({
             id: TEST_POLICY_ID_1,
             config: {
@@ -941,8 +934,8 @@ describe('ManifestManager', () => {
                 },
               },
             },
-          })
-        )
+          }),
+        ]
       );
     });
 
@@ -989,17 +982,16 @@ describe('ManifestManager', () => {
           },
         }),
       ]);
-      context.packagePolicyService.update = jest.fn().mockResolvedValue({});
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({});
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
 
-      expect(context.packagePolicyService.update).toHaveBeenCalledTimes(1);
-      expect(context.packagePolicyService.update).toHaveBeenNthCalledWith(
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenNthCalledWith(
         1,
         expect.anything(),
         undefined,
-        TEST_POLICY_ID_1,
-        toNewPackagePolicy(
+        [
           createPackagePolicyWithConfigMock({
             id: TEST_POLICY_ID_1,
             config: {
@@ -1013,8 +1005,8 @@ describe('ManifestManager', () => {
                 },
               },
             },
-          })
-        )
+          }),
+        ]
       );
     });
 
@@ -1052,17 +1044,13 @@ describe('ManifestManager', () => {
           },
         }),
       ]);
-      context.packagePolicyService.update = jest.fn().mockImplementation(async (...args) => {
-        if (args[2] === TEST_POLICY_ID_2) {
-          throw error;
-        } else {
-          return {};
-        }
-      });
+      context.packagePolicyService.bulkUpdate = jest
+        .fn()
+        .mockResolvedValue({ updatedPolicies: [{}], failedPolicies: [{ error }] });
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([error]);
 
-      expect(context.packagePolicyService.update).toHaveBeenCalledTimes(2);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(1);
     });
   });
 

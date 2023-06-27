@@ -88,7 +88,7 @@ export const buildManifestManagerContextMock = (
     artifactClient: createEndpointArtifactClientMock(),
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
     experimentalFeatures: parseExperimentalConfigValue([]).features,
-    packagerTaskPackagePolicyUpdateConcurrency: 10,
+    packagerTaskPackagePolicyUpdateBatchSize: 10,
   };
 };
 
