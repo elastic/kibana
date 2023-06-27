@@ -14,6 +14,8 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
   EuiTitle,
+  EuiCallOut,
+  EuiButton,
 } from '@elastic/eui';
 import { RiskScoreEntity } from '../../../common/risk_engine/types';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
@@ -65,7 +67,7 @@ export const RiskScorePreviewSection = () => {
   const [start, setStart] = useState('now-24h');
   const [end, setEnd] = useState('now');
 
-  const { data, isLoading, refetch } = useRiskScorePreview({
+  const { data, isLoading, refetch, isError } = useRiskScorePreview({
     range: {
       start,
       end,
@@ -88,6 +90,26 @@ export const RiskScorePreviewSection = () => {
       ?.filter((item) => item?.identifierField === 'user.name')
       ?.sort((a, b) => b?.totalScoreNormalized - a?.totalScoreNormalized)
       ?.slice(0, 5) || [];
+
+  if (isError) {
+    return (
+      <EuiCallOut
+        data-test-subj="risk-preview-error"
+        title={i18n.PREVIEW_ERROR_TITLE}
+        color="danger"
+        iconType="error"
+      >
+        <p>{i18n.PREVIEW_ERROR_MESSAGE}</p>
+        <EuiButton
+          data-test-subj="risk-preview-error-button"
+          color="danger"
+          onClick={() => refetch()}
+        >
+          {i18n.PREVIEW_ERROR_TRY_AGAIN}
+        </EuiButton>
+      </EuiCallOut>
+    );
+  }
 
   return (
     <>

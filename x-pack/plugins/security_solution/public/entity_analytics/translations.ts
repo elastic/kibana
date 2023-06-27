@@ -77,3 +77,24 @@ export const EA_DOCS = i18n.translate('xpack.securitySolution.riskScore.riskScor
 export const PREVIEW = i18n.translate('xpack.securitySolution.riskScore.riskScorePreview.preview', {
   defaultMessage: 'Preview',
 });
+
+export const PREVIEW_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.errorTitle',
+  {
+    defaultMessage: 'Preview failed',
+  }
+);
+
+export const PREVIEW_ERROR_MESSAGE = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.errorMessage',
+  {
+    defaultMessage: 'Something went wrong when creating the preview. You can try again.',
+  }
+);
+
+export const PREVIEW_ERROR_TRY_AGAIN = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.tryAgain',
+  {
+    defaultMessage: 'Try again',
+  }
+);

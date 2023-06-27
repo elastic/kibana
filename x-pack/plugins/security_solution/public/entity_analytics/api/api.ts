@@ -24,7 +24,7 @@ export const fetchPreviewRiskScore = async ({
     ...params,
   };
 
-  return KibanaServices.get().http.fetch<any>(RISK_SCORE_PREVIEW_URL, {
+  return KibanaServices.get().http.fetch<GetScoresResponse>(RISK_SCORE_PREVIEW_URL, {
     method: 'POST',
     body: JSON.stringify(body),
     signal,

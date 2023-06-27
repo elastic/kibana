@@ -59,6 +59,9 @@ export const RiskScorePreviewTable = ({
 
   return (
     <EuiInMemoryTable<IRiskScore>
+      data-test-subj={
+        type === RiskScoreEntity.host ? 'host-risk-preview-table' : 'user-risk-preview-table'
+      }
       responsive={false}
       items={items}
       columns={columns}

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeader } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import { RiskScorePreviewSection } from '../components/risk_score_preview_section';
 import { RiskScoreEnableSection } from '../components/risk_score_enable_section';
@@ -17,8 +17,11 @@ export const EntityAnalyticsManagementPage = () => {
   return (
     <>
       <MissingPrivilegesCallOut />
-      <EuiPageHeader pageTitle={ENTITY_ANALYTICS_MANAGEMENT} />
-
+      <EuiPageHeader
+        data-test-subj="entityAnalyticsManagmentPageTitle"
+        pageTitle={ENTITY_ANALYTICS_MANAGEMENT}
+      />
+      <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem grow={3}>
           <RiskScoreEnableSection />
