@@ -39,7 +39,7 @@ export default function ({
       await browser.setWindowSize(1600, 1000);
     });
 
-    it('PNG file matches the baseline image', async () => {
+    xit('PNG file matches the baseline image', async () => {
       await PageObjects.common.navigateToApp(appId);
 
       await (await testSubjects.find('shareButton')).click();

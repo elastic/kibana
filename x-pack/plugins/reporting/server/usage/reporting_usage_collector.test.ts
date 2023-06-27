@@ -12,15 +12,12 @@ import {
   createCollectorFetchContextMock,
   usageCollectionPluginMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
-import { getExportTypesRegistry } from '../lib/export_types_registry';
 import { createMockConfigSchema, createMockReportingCore } from '../test_helpers';
 import { FeaturesAvailability } from '.';
 import {
   getReportingUsageCollector,
   registerReportingUsageCollector,
 } from './reporting_usage_collector';
-
-const exportTypesRegistry = getExportTypesRegistry();
 
 const getLicenseMock =
   (licenseType = 'gold') =>
@@ -45,6 +42,9 @@ describe('license checks', () => {
   describe('with a basic license', () => {
     let usageStats: any;
     beforeAll(async () => {
+      const mockReporting = await createMockReportingCore(createMockConfigSchema());
+      const exportTypesRegistry = mockReporting.getExportTypesRegistry();
+
       const collector = getReportingUsageCollector(
         usageCollectionSetup,
         getLicenseMock('basic'),
@@ -72,6 +72,9 @@ describe('license checks', () => {
   describe('with no license', () => {
     let usageStats: any;
     beforeAll(async () => {
+      const mockReporting = await createMockReportingCore(createMockConfigSchema());
+      const exportTypesRegistry = mockReporting.getExportTypesRegistry();
+
       const collector = getReportingUsageCollector(
         usageCollectionSetup,
         getLicenseMock('none'),
@@ -99,6 +102,9 @@ describe('license checks', () => {
   describe('with gold license', () => {
     let usageStats: any;
     beforeAll(async () => {
+      const mockReporting = await createMockReportingCore(createMockConfigSchema());
+      const exportTypesRegistry = mockReporting.getExportTypesRegistry();
+
       const collector = getReportingUsageCollector(
         usageCollectionSetup,
         getLicenseMock('gold'),
@@ -126,6 +132,9 @@ describe('license checks', () => {
   describe('with no usage data', () => {
     let usageStats: any;
     beforeAll(async () => {
+      const mockReporting = await createMockReportingCore(createMockConfigSchema());
+      const exportTypesRegistry = mockReporting.getExportTypesRegistry();
+
       const collector = getReportingUsageCollector(
         usageCollectionSetup,
         getLicenseMock('basic'),
@@ -149,6 +158,9 @@ describe('license checks', () => {
 
 describe('data modeling', () => {
   test('with usage data from the reporting/archived_reports es archive', async () => {
+    const mockReporting = await createMockReportingCore(createMockConfigSchema());
+    const exportTypesRegistry = mockReporting.getExportTypesRegistry();
+
     const collector = getReportingUsageCollector(
       usageCollectionSetup,
       getLicenseMock(),
@@ -347,6 +359,9 @@ describe('data modeling', () => {
   });
 
   test('usage data with meta.isDeprecated jobTypes', async () => {
+    const mockReporting = await createMockReportingCore(createMockConfigSchema());
+    const exportTypesRegistry = mockReporting.getExportTypesRegistry();
+
     const collector = getReportingUsageCollector(
       usageCollectionSetup,
       getLicenseMock(),
@@ -478,6 +493,9 @@ describe('data modeling', () => {
   });
 
   test('with sparse data', async () => {
+    const mockReporting = await createMockReportingCore(createMockConfigSchema());
+    const exportTypesRegistry = mockReporting.getExportTypesRegistry();
+
     const collector = getReportingUsageCollector(
       usageCollectionSetup,
       getLicenseMock(),
@@ -617,6 +635,9 @@ describe('data modeling', () => {
   });
 
   test('with empty data', async () => {
+    const mockReporting = await createMockReportingCore(createMockConfigSchema());
+    const exportTypesRegistry = mockReporting.getExportTypesRegistry();
+
     const collector = getReportingUsageCollector(
       usageCollectionSetup,
       getLicenseMock(),
@@ -664,6 +685,9 @@ describe('data modeling', () => {
   });
 
   test('with metrics and execution times in the data', async () => {
+    const mockReporting = await createMockReportingCore(createMockConfigSchema());
+    const exportTypesRegistry = mockReporting.getExportTypesRegistry();
+
     const collector = getReportingUsageCollector(
       usageCollectionSetup,
       getLicenseMock(),
