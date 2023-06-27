@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/es-query';
 import type { MapEmbeddable } from '@kbn/maps-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -57,15 +56,7 @@ export async function getJobsItemsFromEmbeddable(embeddable: MapEmbeddable) {
   // Get dashboard level query/filters
   const { filters, timeRange, ...input } = embeddable.getInput();
   const query = input.query === undefined ? { query: '', language: 'kuery' } : input.query;
-
-  if (timeRange === undefined) {
-    throw Error(
-      i18n.translate('xpack.ml.newJob.fromGeo.createJob.error.noTimeRange', {
-        defaultMessage: 'Time range not specified.',
-      })
-    );
-  }
-  const { to, from } = timeRange;
+  const { to, from } = timeRange ?? {};
   const dashboard = embeddable.parent?.type === 'dashboard' ? embeddable.parent : undefined;
 
   return {
