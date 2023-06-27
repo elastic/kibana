@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import React from 'react';
 import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
@@ -38,7 +38,7 @@ export const unifiedHistogramServicesMock = {
         suggestions: jest.fn(() => allSuggestionsMock),
       };
     }),
-    EditLensConfigPanelApi: jest.fn(() => null),
+    EditLensConfigPanelApi: jest.fn().mockResolvedValue(<span>Lens Config Panel Component</span>),
   },
   storage: {
     get: jest.fn(),
