@@ -177,15 +177,17 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
     }
   }
 
-  private async fetchCurrentDashboard(): Promise<DashboardItem | undefined> {
-    if (this.currentDashboardId) {
-      const findDashboardsService = await dashboardServices.findDashboardsService();
-      const response = (await findDashboardsService.findByIds([this.currentDashboardId]))[0];
-      if (response.status === 'error') {
-        throw new Error('failure'); // TODO: better error handling
-      }
-      return response;
+  private async fetchCurrentDashboard(): Promise<DashboardItem> {
+    if (!this.currentDashboardId) {
+      throw new Error('failure'); // TODO: better error handling
     }
+
+    const findDashboardsService = await dashboardServices.findDashboardsService();
+    const response = (await findDashboardsService.findByIds([this.currentDashboardId]))[0];
+    if (response.status === 'error') {
+      throw new Error('failure'); // TODO: better error handling
+    }
+    return response;
   }
 
   public async fetchDashboardList(
@@ -199,27 +201,35 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
       options: { onlyTitle: true },
     });
 
-    let currentDashboard: DashboardLink | undefined;
-    const dashboardList = responses.hits
-      /** filter out the current dashboard because it will be re-added in the component */
-      .filter((hit) => {
-        const isCurrentDashboard = hit.id === this.currentDashboardId;
+    let currentDashboard: DashboardItem | undefined;
+    let dashboardList: DashboardItem[] = responses.hits;
+    if (isEmpty(search)) {
+      /** when there is no search string, force the current dashboard (if it is present in the original
+       * search results) to the top of the list */
+      dashboardList = dashboardList.sort((dashboard) => {
+        const isCurrentDashboard = dashboard.id === this.currentDashboardId;
         if (isCurrentDashboard) {
-          currentDashboard = hit;
+          currentDashboard = dashboard;
         }
-        return !isCurrentDashboard;
-      })
-      /** then, only return the parts of the dashboard object that we need */
-      .map((hit) => {
-        return { id: hit.id, attributes: hit.attributes };
+        return isCurrentDashboard ? -1 : 1;
       });
 
-    if (!currentDashboard) {
-      currentDashboard = await this.fetchCurrentDashboard();
+      /** if the current dashboard wasn't returned in the original search, perform another search to find it
+       * and force it to the top */
+      if (!currentDashboard) {
+        currentDashboard = await this.fetchCurrentDashboard();
+        dashboardList.pop(); // the result should still be of `size,` so remove the dashboard at the end of the list
+        dashboardList.unshift(currentDashboard); // in order to force the current dashboard to the start of the list
+      }
     }
 
+    /** then, only return the parts of the dashboard object that we need */
+    const simplifiedDashboardList = dashboardList.map((hit) => {
+      return { id: hit.id, attributes: hit.attributes };
+    });
+
     batch(() => {
-      this.dispatch.setDashboardList(dashboardList);
+      this.dispatch.setDashboardList(simplifiedDashboardList);
       this.dispatch.setDashboardCount(responses.total); // TODO: Remove this if we don't actually need it
       this.dispatch.setCurrentDashboard(currentDashboard);
     });

@@ -55,15 +55,9 @@ export const NavigationEmbeddableDashboardList = ({
           label: dashboard.attributes.title,
         } as EuiSelectableOption;
       }) ?? [];
-    const currentDashboardOption = {
-      data: currentDashboard,
-      className: 'navEmbeddable-currentDashboard',
-      label: 'Current dashboard',
-    };
-    setDashboardListOptions(
-      currentDashboardOption ? [currentDashboardOption, ...dashboardOptions] : dashboardOptions
-    );
-  }, [dashboardList, currentDashboard, searchString, onDashboardSelected]);
+
+    setDashboardListOptions(dashboardOptions);
+  }, [dashboardList, searchString, onDashboardSelected]);
 
   // {...other} is needed so all inner elements are treated as part of the form
   return (
