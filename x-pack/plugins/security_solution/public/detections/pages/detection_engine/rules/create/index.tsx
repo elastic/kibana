@@ -74,16 +74,16 @@ const MyEuiPanel = styled(EuiPanel)<{
 
 MyEuiPanel.displayName = 'MyEuiPanel';
 
-const StepDefineRuleAccordion: StyledComponent<
-  typeof EuiAccordion,
-  any, // eslint-disable-line
-  { ref: React.MutableRefObject<EuiAccordion | null> },
-  never
-> = styled(EuiAccordion)`
+const StepDefineRuleAccordion = styled(EuiAccordion)`
   .euiAccordion__childWrapper {
     overflow: visible;
   }
-`;
+` as StyledComponent<
+  typeof EuiAccordion,
+any, // eslint-disable-line
+  { ref: React.MutableRefObject<EuiAccordion | null> },
+  never
+>;
 
 StepDefineRuleAccordion.displayName = 'StepDefineRuleAccordion';
 
