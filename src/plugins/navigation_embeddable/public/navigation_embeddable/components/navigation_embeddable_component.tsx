@@ -26,9 +26,7 @@ export const NavigationEmbeddableComponent = () => {
   const navEmbeddable = useNavigationEmbeddable();
 
   const links = navEmbeddable.select((state) => state.componentState.links);
-  const currentDashboardId = navEmbeddable.select(
-    (state) => state.componentState.currentDashboardId
-  );
+  const currentDashboard = navEmbeddable.select((state) => state.componentState.currentDashboard);
 
   const [isEditPopoverOpen, setIsEditPopoverOpen] = useState(false);
   const [dashboardListGroupItems, setDashboardListGroupItems] = useState<EuiListGroupItemProps[]>(
@@ -42,7 +40,7 @@ export const NavigationEmbeddableComponent = () => {
           return {
             label: link.label || link.title,
             iconType: 'dashboardApp',
-            ...(link.id === currentDashboardId
+            ...(link.id === currentDashboard?.id
               ? {
                   color: 'text',
                 }
@@ -60,7 +58,7 @@ export const NavigationEmbeddableComponent = () => {
         };
       })
     );
-  }, [links, currentDashboardId]);
+  }, [links, currentDashboard]);
 
   const onButtonClick = useCallback(() => setIsEditPopoverOpen((isOpen) => !isOpen), []);
 

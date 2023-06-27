@@ -27,7 +27,7 @@ const isValidUrl =
 
 interface Props {
   onUrlSelected: (url: string) => void;
-  onDashboardSelected: (selectedDashboard: DashboardItem) => void;
+  onDashboardSelected: (selectedDashboard: DashboardItem | undefined) => void;
 }
 
 export const NavigationEmbeddableDashboardList = ({
@@ -36,12 +36,11 @@ export const NavigationEmbeddableDashboardList = ({
   ...other
 }: Props) => {
   const navEmbeddable = useNavigationEmbeddable();
-  const currentDashboardId = navEmbeddable.select(
-    (state) => state.componentState.currentDashboardId
-  );
+  const currentDashboard = navEmbeddable.select((state) => state.componentState.currentDashboard);
   const isLoading = navEmbeddable.select((state) => state.output.loading);
 
   const [searchString, setSearchString] = useState<string>('');
+  const [hasValidUrl, setHasValidUrl] = useState<boolean>(false);
   const [dashboardListOptions, setDashboardListOptions] = useState<EuiSelectableOption[]>([]);
 
   const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
@@ -51,17 +50,20 @@ export const NavigationEmbeddableDashboardList = ({
   useEffect(() => {
     const dashboardOptions =
       dashboardList?.map((dashboard: DashboardItem) => {
-        const isCurrentDashboard = dashboard.id === currentDashboardId;
         return {
           data: dashboard,
-          className: classNames({
-            'navEmbeddable-currentDashboard': isCurrentDashboard,
-          }),
-          label: isCurrentDashboard ? 'Current' : dashboard.attributes.title,
+          label: dashboard.attributes.title,
         } as EuiSelectableOption;
       }) ?? [];
-    setDashboardListOptions(dashboardOptions);
-  }, [dashboardList, currentDashboardId, onDashboardSelected]);
+    const currentDashboardOption = {
+      data: currentDashboard,
+      className: 'navEmbeddable-currentDashboard',
+      label: 'Current dashboard',
+    };
+    setDashboardListOptions(
+      currentDashboardOption ? [currentDashboardOption, ...dashboardOptions] : dashboardOptions
+    );
+  }, [dashboardList, currentDashboard, searchString, onDashboardSelected]);
 
   // {...other} is needed so all inner elements are treated as part of the form
   return (
@@ -70,21 +72,24 @@ export const NavigationEmbeddableDashboardList = ({
         isClearable={true}
         placeholder={'Search for a dashboard or enter external URL'}
         onSearch={(value) => {
+          setSearchString(value);
           if (isValidUrl.test(value)) {
-            setSearchString('');
             onUrlSelected(value);
+            setHasValidUrl(true);
+            onDashboardSelected(undefined);
           } else {
-            setSearchString(value);
+            setHasValidUrl(false);
           }
         }}
       />
       <EuiSpacer size="s" />
       <EuiSelectable
         singleSelection={true}
+        emptyMessage={hasValidUrl ? 'Using external link' : 'No dashboards match'}
         options={dashboardListOptions}
         isLoading={isLoading || loadingDashboardList}
         onChange={(newOptions, _, selected) => {
-          onDashboardSelected(selected.data as DashboardItem);
+          onDashboardSelected(selected.data);
           setDashboardListOptions(newOptions);
         }}
         listProps={{ onFocusBadge: false, bordered: true, isVirtualized: true }}

@@ -31,11 +31,11 @@ export const navigationEmbeddableReducers = {
   ) => {
     state.componentState.dashboardList = action.payload;
   },
-  setCurrentDashboardId: (
+  setCurrentDashboard: (
     state: WritableDraft<NavigationEmbeddableReduxState>,
-    action: PayloadAction<string>
+    action: PayloadAction<DashboardLink | undefined>
   ) => {
-    state.componentState.currentDashboardId = action.payload;
+    state.componentState.currentDashboard = action.payload;
   },
   setDashboardCount: (
     state: WritableDraft<NavigationEmbeddableReduxState>,

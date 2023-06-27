@@ -65,11 +65,12 @@ export const dashboardContentManagementServiceFactory: DashboardContentManagemen
         dashboardSessionStorage,
       }),
     findDashboards: {
-      search: ({ hasReference, hasNoReference, search, size }) =>
+      search: ({ hasReference, hasNoReference, search, size, options }) =>
         searchDashboards({
           contentManagement,
           hasNoReference,
           hasReference,
+          options,
           search,
           size,
         }),

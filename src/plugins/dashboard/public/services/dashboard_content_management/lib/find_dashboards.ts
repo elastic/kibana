@@ -18,6 +18,7 @@ import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 
 export interface SearchDashboardsArgs {
   contentManagement: DashboardStartDependencies['contentManagement'];
+  options?: DashboardCrudTypes['SearchIn']['options'];
   hasNoReference?: SavedObjectsFindOptionsReference[];
   hasReference?: SavedObjectsFindOptionsReference[];
   search: string;
@@ -33,6 +34,7 @@ export async function searchDashboards({
   contentManagement,
   hasNoReference,
   hasReference,
+  options,
   search,
   size,
 }: SearchDashboardsArgs): Promise<SearchDashboardsResponse> {
@@ -52,6 +54,7 @@ export async function searchDashboards({
         excluded: (hasNoReference ?? []).map(({ id }) => id),
       },
     },
+    options,
   });
   return {
     total,

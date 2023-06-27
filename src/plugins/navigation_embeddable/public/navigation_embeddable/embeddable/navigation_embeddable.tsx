@@ -22,6 +22,7 @@ import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-
 import { navigationEmbeddableReducers } from '../navigation_embeddable_reducers';
 import {
   DashboardItem,
+  DashboardLink,
   isDashboardLink,
   NavigationEmbeddableInput,
   NavigationEmbeddableReduxState,
@@ -53,6 +54,7 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
   public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
 
   private node?: HTMLElement;
+  private currentDashboardId?: string;
   private subscriptions: Subscription = new Subscription();
 
   // state management
@@ -94,7 +96,9 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
     const parentDashboardId = (this.parent as DashboardContainer | undefined)?.getState()
       .componentState.lastSavedId;
     if (parentDashboardId) {
-      this.dispatch.setCurrentDashboardId(parentDashboardId);
+      this.currentDashboardId = parentDashboardId;
+      const currentDashboard = await this.fetchCurrentDashboard();
+      this.dispatch.setCurrentDashboard(currentDashboard);
     }
     await this.updateDashboardLinks();
 
@@ -173,6 +177,17 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
     }
   }
 
+  private async fetchCurrentDashboard(): Promise<DashboardItem | undefined> {
+    if (this.currentDashboardId) {
+      const findDashboardsService = await dashboardServices.findDashboardsService();
+      const response = (await findDashboardsService.findByIds([this.currentDashboardId]))[0];
+      if (response.status === 'error') {
+        throw new Error('failure'); // TODO: better error handling
+      }
+      return response;
+    }
+  }
+
   public async fetchDashboardList(
     search: string = '',
     size: number = 10
@@ -181,35 +196,35 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
     const responses = await findDashboardsService.search({
       search,
       size,
+      options: { onlyTitle: true },
     });
 
-    const { currentDashboardId } = this.getState().componentState;
-    const sortedDashboards = responses.hits
-      .sort((hit) => {
-        return hit.id === currentDashboardId ? -1 : 1; // force the current dashboard to the top of the list - we might not actually want this ¯\_(ツ)_/¯
+    let currentDashboard: DashboardLink | undefined;
+    const dashboardList = responses.hits
+      /** filter out the current dashboard because it will be re-added in the component */
+      .filter((hit) => {
+        const isCurrentDashboard = hit.id === this.currentDashboardId;
+        if (isCurrentDashboard) {
+          currentDashboard = hit;
+        }
+        return !isCurrentDashboard;
       })
+      /** then, only return the parts of the dashboard object that we need */
       .map((hit) => {
         return { id: hit.id, attributes: hit.attributes };
       });
 
-    // TODO: make this nicer
-    if (isEmpty(search) && currentDashboardId && sortedDashboards[0].id !== currentDashboardId) {
-      const currentDashboard = (await findDashboardsService.findByIds([currentDashboardId]))[0];
-      if (currentDashboard.status === 'success') {
-        sortedDashboards.pop();
-        sortedDashboards.unshift({
-          id: currentDashboardId,
-          attributes: currentDashboard.attributes,
-        });
-      }
+    if (!currentDashboard) {
+      currentDashboard = await this.fetchCurrentDashboard();
     }
 
     batch(() => {
-      this.dispatch.setDashboardList(sortedDashboards);
-      this.dispatch.setDashboardCount(responses.total);
+      this.dispatch.setDashboardList(dashboardList);
+      this.dispatch.setDashboardCount(responses.total); // TODO: Remove this if we don't actually need it
+      this.dispatch.setCurrentDashboard(currentDashboard);
     });
 
-    return sortedDashboards;
+    return dashboardList;
   }
 
   public async reload() {

@@ -48,8 +48,8 @@ export interface NavigationEmbeddableInput extends EmbeddableInput {
  */
 export interface NavigationEmbeddableComponentState {
   totalDashboards?: number;
-  currentDashboardId?: string;
   dashboardList?: DashboardItem[];
+  currentDashboard?: DashboardLink;
   links?: Array<DashboardLink | ExternalLink>;
 }
 
