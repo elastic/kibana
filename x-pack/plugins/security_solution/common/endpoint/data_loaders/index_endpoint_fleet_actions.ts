@@ -107,6 +107,7 @@ export const indexEndpointAndFleetActionsForHost = async (
         },
       },
       // to test automated actions in cypress
+      user: options.alertIds ? { id: 'unknown' } : logsEndpointAction.user,
       rule: options.alertIds
         ? {
             id: 'generated_rule_id',
