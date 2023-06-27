@@ -14,13 +14,21 @@ import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useKibana } from '../../../../utils/kibana_react';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
+import { useSectionFormValidation } from '../../hooks/use_section_form_validation';
 import { CreateSLOForm } from '../../types';
 
 export function DataPreviewChart() {
-  const { watch, getFieldState } = useFormContext<CreateSLOForm>();
+  const { watch, getFieldState, formState, getValues } = useFormContext<CreateSLOForm>();
   const { charts, uiSettings } = useKibana().services;
+  const { isIndicatorSectionValid } = useSectionFormValidation({
+    getFieldState,
+    getValues,
+    formState,
+    watch,
+  });
 
   const { data: previewData, isLoading: isPreviewLoading } = useDebouncedGetPreviewData(
+    isIndicatorSectionValid,
     watch('indicator')
   );
 
@@ -29,7 +37,7 @@ export function DataPreviewChart() {
   const dateFormat = uiSettings.get('dateFormat');
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
 
-  if (getFieldState('indicator').invalid) {
+  if (!isIndicatorSectionValid) {
     return null;
   }
 
