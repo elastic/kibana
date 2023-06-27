@@ -6,7 +6,7 @@
  */
 import { DoneInvokeEvent } from 'xstate';
 import type { IHashedCache } from '../../../../common/hashed_cache';
-import { FindDatasetsResponse, SortOrder } from '../../../../common/latest';
+import { FindDatasetValue, SortOrder } from '../../../../common/latest';
 import { Dataset } from '../../../../common/datasets';
 
 export interface DatasetsSearchParams {
@@ -15,7 +15,7 @@ export interface DatasetsSearchParams {
 }
 
 export interface WithCache {
-  cache: IHashedCache<DatasetsSearchParams, FindDatasetsResponse>;
+  cache: IHashedCache<DatasetsSearchParams, FindDatasetValue>;
 }
 
 export interface WithSearch {
@@ -88,4 +88,4 @@ export type DatasetsEvent =
       type: 'SORT_DATASETS';
       search: DatasetsSearchParams;
     }
-  | DoneInvokeEvent<any>;
+  | DoneInvokeEvent<FindDatasetValue | Error>;

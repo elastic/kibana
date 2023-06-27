@@ -11,16 +11,17 @@ import {
   DATASETS_URL,
   FindDatasetsRequestQuery,
   findDatasetsRequestQueryRT,
-  FindDatasetsResponse,
   findDatasetsResponseRT,
+  FindDatasetValue,
   FindIntegrationsRequestQuery,
   findIntegrationsRequestQueryRT,
   findIntegrationsResponseRT,
+  FindIntegrationsValue,
   INTEGRATIONS_URL,
 } from '../../../common/latest';
 import { FindDatasetsError, FindIntegrationsError } from '../../../common/datasets/errors';
 import { decodeOrThrow } from '../../../common/runtime_types';
-import { FindIntegrationsValue, IDatasetsClient } from './types';
+import { IDatasetsClient } from './types';
 
 const defaultIntegrationsParams: Pick<FindIntegrationsRequestQuery, 'dataStreamType'> = {
   dataStreamType: 'logs',
@@ -54,7 +55,7 @@ export class DatasetsClient implements IDatasetsClient {
     return { ...data, items: data.items.map(Integration.create) };
   }
 
-  public async findDatasets(params: FindDatasetsRequestQuery = {}): Promise<FindDatasetsResponse> {
+  public async findDatasets(params: FindDatasetsRequestQuery = {}): Promise<FindDatasetValue> {
     const search = { ...defaultDatasetsParams, ...params };
 
     const query = findDatasetsRequestQueryRT.encode(search);

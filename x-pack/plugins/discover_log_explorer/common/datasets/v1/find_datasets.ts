@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { Dataset } from '../models/dataset';
 import { datasetRT } from '../types';
 import { sortOrderRT } from './common';
 
@@ -24,3 +25,6 @@ export const findDatasetsRequestQueryRT = rt.exact(
 
 export type FindDatasetsRequestQuery = rt.TypeOf<typeof findDatasetsRequestQueryRT>;
 export type FindDatasetsResponse = rt.TypeOf<typeof findDatasetsResponseRT>;
+export interface FindDatasetValue {
+  items: Dataset[];
+}

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { isEmpty, omitBy } from 'lodash';
+import { isEmpty, isError, omitBy } from 'lodash';
 import { assign, createMachine } from 'xstate';
-import { FindDatasetsResponse } from '../../../../common/latest';
 import { IDatasetsClient } from '../../../services/datasets';
 import { DEFAULT_CONTEXT } from './defaults';
 import type {
@@ -79,14 +78,16 @@ export const createPureDatasetsStateMachine = (
           ...('search' in event && { search: event.search }),
         })),
         storeDatasets: assign((_context, event) =>
-          'data' in event ? { datasets: event.data.items } : {}
+          'data' in event && !isError(event.data) ? { datasets: event.data.items } : {}
         ),
         storeInCache: (context, event) => {
-          if ('data' in event) {
+          if ('data' in event && !isError(event.data)) {
             context.cache.set(context.search, event.data);
           }
         },
-        storeError: assign((_context, event) => ('data' in event ? { error: event.data } : {})),
+        storeError: assign((_context, event) =>
+          'data' in event && isError(event.data) ? { error: event.data } : {}
+        ),
         clearCache: (context) => {
           context.cache.reset();
         },
@@ -111,7 +112,7 @@ export const createDatasetsStateMachine = ({
         const searchParams = context.search;
 
         return context.cache.has(searchParams)
-          ? Promise.resolve(context.cache.get(searchParams) as FindDatasetsResponse)
+          ? Promise.resolve(context.cache.get(searchParams))
           : datasetsClient.findDatasets(omitBy(searchParams, isEmpty));
       },
     },

@@ -6,10 +6,9 @@
  */
 
 import { assign, createMachine } from 'xstate';
-import { isEmpty, omitBy } from 'lodash';
+import { isEmpty, isError, omitBy } from 'lodash';
 import { createComparatorByField } from '../../../utils/comparator_by_field';
 import { Dataset, Integration } from '../../../../common/datasets';
-import { FindIntegrationsResponse } from '../../../../common/latest';
 import { IDatasetsClient } from '../../../services/datasets';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
@@ -118,15 +117,16 @@ export const createPureIntegrationsStateMachine = (
           // Store search from search event
           ...('search' in event && { search: event.search }),
           // Store search from response
-          ...('data' in event && {
-            search: {
-              ...context.search,
-              searchAfter: event.data.searchAfter,
-            },
-          }),
+          ...('data' in event &&
+            !isError(event.data) && {
+              search: {
+                ...context.search,
+                searchAfter: event.data.searchAfter,
+              },
+            }),
         })),
         storeIntegrationsResponse: assign((_context, event) =>
-          'data' in event
+          'data' in event && !isError(event.data)
             ? {
                 integrationsSource: event.data.items,
                 integrations: event.data.items,
@@ -143,12 +143,12 @@ export const createPureIntegrationsStateMachine = (
           return {};
         }),
         storeInCache: (context, event) => {
-          if ('data' in event) {
+          if ('data' in event && !isError(event.data)) {
             context.cache.set(context.search, event.data);
           }
         },
         appendIntegrations: assign((context, event) =>
-          'data' in event
+          'data' in event && !isError(event.data)
             ? {
                 integrationsSource: context.integrations?.concat(event.data.items) ?? [],
                 integrations: context.integrations?.concat(event.data.items) ?? [],
@@ -156,7 +156,9 @@ export const createPureIntegrationsStateMachine = (
               }
             : {}
         ),
-        storeError: assign((_context, event) => ('data' in event ? { error: event.data } : {})),
+        storeError: assign((_context, event) =>
+          'data' in event && isError(event.data) ? { error: event.data } : {}
+        ),
         clearCache: (context) => {
           context.cache.reset();
         },
@@ -184,7 +186,7 @@ export const createIntegrationStateMachine = ({
         const searchParams = context.search;
 
         return context.cache.has(searchParams)
-          ? Promise.resolve(context.cache.get(searchParams) as FindIntegrationsResponse)
+          ? Promise.resolve(context.cache.get(searchParams))
           : datasetsClient.findIntegrations(omitBy(searchParams, isEmpty));
       },
     },

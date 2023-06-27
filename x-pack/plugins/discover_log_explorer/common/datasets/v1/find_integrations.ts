@@ -7,6 +7,7 @@
 
 import { jsonRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
+import { Integration } from '../models/integration';
 import { integrationRT } from '../types';
 import { sortOrderRT } from './common';
 
@@ -37,3 +38,6 @@ export const findIntegrationsRequestQueryRT = rt.exact(
 export type SearchAfter = rt.TypeOf<typeof searchAfterRT>;
 export type FindIntegrationsRequestQuery = rt.TypeOf<typeof findIntegrationsRequestQueryRT>;
 export type FindIntegrationsResponse = rt.TypeOf<typeof findIntegrationsResponseRT>;
+export interface FindIntegrationsValue extends Omit<FindIntegrationsResponse, 'items'> {
+  items: Integration[];
+}
