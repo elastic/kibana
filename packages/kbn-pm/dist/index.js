@@ -19944,7 +19944,7 @@ function patch (fs) {
         var backoff = 0;
         fs$rename(from, to, function CB (er) {
           if (er
-              && (er.code === "EACCES" || er.code === "EPERM")
+              && (er.code === "EACCES" || er.code === "EPERM" || er.code === "EBUSY")
               && Date.now() - start < 60000) {
             setTimeout(function() {
               fs.stat(to, function (stater, st) {
@@ -29874,6 +29874,8 @@ exports.createFileSystemAdapter = createFileSystemAdapter;
 "use strict";
 
 
+/* eslint-disable no-var */
+
 var reusify = __webpack_require__(328)
 
 function fastqueue (context, worker, concurrency) {
@@ -29883,10 +29885,15 @@ function fastqueue (context, worker, concurrency) {
     context = null
   }
 
+  if (concurrency < 1) {
+    throw new Error('fastqueue concurrency must be greater than 1')
+  }
+
   var cache = reusify(Task)
   var queueHead = null
   var queueTail = null
   var _running = 0
+  var errorHandler = null
 
   var self = {
     push: push,
@@ -29899,10 +29906,12 @@ function fastqueue (context, worker, concurrency) {
     resume: resume,
     idle: idle,
     length: length,
+    getQueue: getQueue,
     unshift: unshift,
     empty: noop,
     kill: kill,
-    killAndDrain: killAndDrain
+    killAndDrain: killAndDrain,
+    error: error
   }
 
   return self
@@ -29927,6 +29936,18 @@ function fastqueue (context, worker, concurrency) {
     return counter
   }
 
+  function getQueue () {
+    var current = queueHead
+    var tasks = []
+
+    while (current) {
+      tasks.push(current.value)
+      current = current.next
+    }
+
+    return tasks
+  }
+
   function resume () {
     if (!self.paused) return
     self.paused = false
@@ -29947,6 +29968,7 @@ function fastqueue (context, worker, concurrency) {
     current.release = release
     current.value = value
     current.callback = done || noop
+    current.errorHandler = errorHandler
 
     if (_running === self.concurrency || self.paused) {
       if (queueTail) {
@@ -30022,6 +30044,10 @@ function fastqueue (context, worker, concurrency) {
     self.drain()
     self.drain = noop
   }
+
+  function error (handler) {
+    errorHandler = handler
+  }
 }
 
 function noop () {}
@@ -30032,19 +30058,109 @@ function Task () {
   this.next = null
   this.release = noop
   this.context = null
+  this.errorHandler = null
 
   var self = this
 
   this.worked = function worked (err, result) {
     var callback = self.callback
+    var errorHandler = self.errorHandler
+    var val = self.value
     self.value = null
     self.callback = noop
+    if (self.errorHandler) {
+      errorHandler(err, val)
+    }
     callback.call(self.context, err, result)
     self.release(self)
   }
 }
 
+function queueAsPromised (context, worker, concurrency) {
+  if (typeof context === 'function') {
+    concurrency = worker
+    worker = context
+    context = null
+  }
+
+  function asyncWrapper (arg, cb) {
+    worker.call(this, arg)
+      .then(function (res) {
+        cb(null, res)
+      }, cb)
+  }
+
+  var queue = fastqueue(context, asyncWrapper, concurrency)
+
+  var pushCb = queue.push
+  var unshiftCb = queue.unshift
+
+  queue.push = push
+  queue.unshift = unshift
+  queue.drained = drained
+
+  return queue
+
+  function push (value) {
+    var p = new Promise(function (resolve, reject) {
+      pushCb(value, function (err, result) {
+        if (err) {
+          reject(err)
+          return
+        }
+        resolve(result)
+      })
+    })
+
+    // Let's fork the promise chain to
+    // make the error bubble up to the user but
+    // not lead to a unhandledRejection
+    p.catch(noop)
+
+    return p
+  }
+
+  function unshift (value) {
+    var p = new Promise(function (resolve, reject) {
+      unshiftCb(value, function (err, result) {
+        if (err) {
+          reject(err)
+          return
+        }
+        resolve(result)
+      })
+    })
+
+    // Let's fork the promise chain to
+    // make the error bubble up to the user but
+    // not lead to a unhandledRejection
+    p.catch(noop)
+
+    return p
+  }
+
+  function drained () {
+    if (queue.idle()) {
+      return new Promise(function (resolve) {
+        resolve()
+      })
+    }
+
+    var previousDrain = queue.drain
+
+    var p = new Promise(function (resolve) {
+      queue.drain = function () {
+        previousDrain()
+        resolve()
+      }
+    })
+
+    return p
+  }
+}
+
 module.exports = fastqueue
+module.exports.promise = queueAsPromised
 
 
 /***/ }),
