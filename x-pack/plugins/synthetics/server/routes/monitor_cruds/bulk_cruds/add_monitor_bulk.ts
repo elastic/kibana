@@ -10,11 +10,11 @@ import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import { v4 as uuidV4 } from 'uuid';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
-import { RouteContext } from '../../../legacy_uptime/routes';
+import { SyntheticsServerSetup } from '../../../types';
+import { RouteContext } from '../../types';
 import { deleteMonitorIfCreated } from '../add_monitor';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
 import { deleteMonitor } from '../delete_monitor';
-import { UptimeServerSetup } from '../../../legacy_uptime/lib/adapters';
 import { formatSecrets } from '../../../synthetics_service/utils';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import {
@@ -168,7 +168,7 @@ const rollBackNewMonitorBulk = async (
 };
 
 const sendNewMonitorTelemetry = (
-  server: UptimeServerSetup,
+  server: SyntheticsServerSetup,
   monitors: Array<SavedObject<EncryptedSyntheticsMonitor>>,
   errors?: ServiceLocationErrors | null
 ) => {
