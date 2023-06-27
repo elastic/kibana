@@ -302,6 +302,7 @@ x-pack/plugins/dashboard_enhanced @elastic/kibana-presentation
 src/plugins/dashboard @elastic/kibana-presentation
 src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
 test/plugin_functional/plugins/data_search @elastic/kibana-app-services
+packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/plugins/data_view_editor @elastic/kibana-data-discovery
 examples/data_view_field_editor_example @elastic/kibana-app-services
 src/plugins/data_view_field_editor @elastic/kibana-data-discovery
@@ -309,15 +310,15 @@ src/plugins/data_view_management @elastic/kibana-data-discovery
 src/plugins/data_views @elastic/kibana-data-discovery
 x-pack/plugins/data_visualizer @elastic/ml-ui
 packages/kbn-datemath @elastic/kibana-data-discovery
-packages/deeplinks/analytics @elastic/kibana-data-discovery
+packages/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 packages/deeplinks/devtools @elastic/platform-deployment-management
-packages/deeplinks/management @elastic/platform-deployment-management @elastic/kibana-data-discovery
+packages/deeplinks/management @elastic/platform-deployment-management
 packages/deeplinks/ml @elastic/ml-ui
 packages/deeplinks/observability @elastic/apm-ui
 packages/deeplinks/search @elastic/enterprise-search-frontend
-packages/default-nav/analytics @elastic/kibana-data-discovery
+packages/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 packages/default-nav/devtools @elastic/platform-deployment-management
-packages/default-nav/management @elastic/platform-deployment-management @elastic/kibana-data-discovery
+packages/default-nav/management @elastic/platform-deployment-management
 packages/default-nav/ml @elastic/ml-ui
 packages/kbn-dev-cli-errors @elastic/kibana-operations
 packages/kbn-dev-cli-runner @elastic/kibana-operations
@@ -328,7 +329,7 @@ examples/developer_examples @elastic/appex-sharedux
 examples/discover_customization_examples @elastic/kibana-data-discovery
 x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
 src/plugins/discover @elastic/kibana-data-discovery
-packages/kbn-doc-links @elastic/kibana-docs
+packages/kbn-doc-links @elastic/docs
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-ebt-tools @elastic/kibana-core
@@ -400,6 +401,7 @@ packages/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/
 packages/kbn-ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
 x-pack/test/functional_with_es_ssl/plugins/cases @elastic/response-ops
 packages/kbn-generate @elastic/kibana-operations
+packages/kbn-generate-console-definitions @elastic/platform-deployment-management
 packages/kbn-generate-csv @elastic/appex-sharedux
 packages/kbn-generate-csv-types @elastic/appex-sharedux
 packages/kbn-get-repo-files @elastic/kibana-operations
@@ -719,11 +721,12 @@ test/plugin_functional/plugins/ui_settings_plugin @elastic/kibana-core
 packages/kbn-ui-shared-deps-npm @elastic/kibana-operations
 packages/kbn-ui-shared-deps-src @elastic/kibana-operations
 packages/kbn-ui-theme @elastic/kibana-operations
+packages/kbn-unified-field-list @elastic/kibana-data-discovery
 examples/unified_field_list_examples @elastic/kibana-data-discovery
-src/plugins/unified_field_list @elastic/kibana-data-discovery
 src/plugins/unified_histogram @elastic/kibana-data-discovery
 src/plugins/unified_search @elastic/kibana-visualizations
 x-pack/plugins/upgrade_assistant @elastic/platform-deployment-management
+x-pack/plugins/uptime @elastic/uptime
 x-pack/plugins/drilldowns/url_drilldown @elastic/kibana-app-services
 src/plugins/url_forwarding @elastic/kibana-visualizations
 packages/kbn-url-state @elastic/security-threat-hunting-investigations
@@ -817,13 +820,13 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 #CC# /x-pack/plugins/reporting/ @elastic/appex-sharedux
 #CC# /x-pack/plugins/serverless_security/ @elastic/appex-sharedux
 
-### Observability packages
+### Observability Plugins
 
-# Observability App > Alert Details
+# Actionable observability
 x-pack/packages/observability/alert_details @elastic/actionable-observability
-
-# Observability App > Functional Tests
 x-pack/test/observability_functional @elastic/actionable-observability
+x-pack/plugins/infra/public/alerting @elastic/actionable-observability
+x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 
 # Observability robots
 /.github/workflows/deploy-my-kibana.yml @elastic/observablt-robots
@@ -1259,6 +1262,9 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
 # Changes to translation files should not ping code reviewers
 x-pack/plugins/translations/translations
+
+# Profiling api integration testing
+x-pack/test/profiling_api_integration @elastic/profiling-ui
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
