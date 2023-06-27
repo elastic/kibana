@@ -978,7 +978,6 @@ components:
         apiUrl:
           type: string
           description: The OpenAI API endpoint.
-      additionalProperties: true
     secrets_properties_genai:
       title: Connector secrets properties for a generative AI connector
       description: Defines secrets for connectors when type is `.gen-ai`.
@@ -987,7 +986,6 @@ components:
         apiKey:
           type: string
           description: The OpenAI API key.
-      additionalProperties: true
     create_connector_request_genai:
       title: Create generative AI connector request
       description: |
