@@ -18,6 +18,7 @@ import {
   createCSPOnlyRole,
   deleteRole,
   deleteUser,
+  deleteIndex,
 } from '../helper';
 
 const UNPRIVILEGED_ROLE = 'unprivileged_test_role';
@@ -28,6 +29,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
+  const es = getService('es');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
 
@@ -140,6 +142,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Return unprivileged when missing access to score index`, async () => {
+        await deleteIndex(es, [BENCHMARK_SCORE_INDEX_DEFAULT_NS]);
         await createCSPOnlyRole(security, UNPRIVILEGED_ROLE, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
         await createUser(security, UNPRIVILEGED_USERNAME, UNPRIVILEGED_ROLE);
 
@@ -163,6 +166,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.vuln_mgmt.status).to.be('unprivileged');
 
         expect(res.indicesDetails[0].status).to.be('unprivileged');
+        expect(res.indicesDetails[1].status).to.be('empty');
+        expect(res.indicesDetails[2].status).to.be('empty');
         expect(res.indicesDetails[3].status).to.be('unprivileged');
       });
 
@@ -194,7 +199,9 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.vuln_mgmt.status).to.be('not-installed');
 
         expect(res.indicesDetails[0].status).to.be('unprivileged');
+        expect(res.indicesDetails[1].status).to.be('empty');
         expect(res.indicesDetails[2].status).to.be('unprivileged');
+        expect(res.indicesDetails[3].status).to.be('empty');
       });
     });
   });
