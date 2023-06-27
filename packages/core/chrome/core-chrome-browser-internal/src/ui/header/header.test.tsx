@@ -87,6 +87,7 @@ describe('Header', () => {
         customNavLink$={customNavLink$}
         breadcrumbsAppendExtension$={breadcrumbsAppendExtension$}
         headerBanner$={headerBanner$}
+        isCloudEnabled={false}
       />
     );
     expect(component.find('EuiHeader').exists()).toBeFalsy();
