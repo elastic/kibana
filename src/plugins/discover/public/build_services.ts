@@ -75,7 +75,7 @@ export interface DiscoverServices {
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
   history: () => History<HistoryLocationState>;
-  theme: ChartsPluginStart['theme'];
+  theme: CoreStart['theme'];
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsContract;
@@ -130,7 +130,7 @@ export const buildServices = memoize(function (
     data: plugins.data,
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
-    theme: plugins.charts.theme,
+    theme: core.theme,
     fieldFormats: plugins.fieldFormats,
     filterManager: plugins.data.query.filterManager,
     history: getHistory,
