@@ -90,7 +90,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
    * Attachment types are being registered in
    * x-pack/test/functional_with_es_ssl/plugins/cases/public/plugin.ts
    */
-  describe.only('Attachment framework', () => {
+  describe('Attachment framework', () => {
     describe('External reference attachments', () => {
       let caseWithAttachment: Case;
       const externalReferenceAttachment = getExternalReferenceAttachment();
