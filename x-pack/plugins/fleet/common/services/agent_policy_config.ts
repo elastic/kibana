@@ -11,10 +11,7 @@ import type { AgentPolicy } from '../types';
 
 import { hasAtLeast } from './license';
 
-import {
-  agentPolicyWithSupportedFeatures,
-  agentPolicyWithoutPaidFeatures,
-} from './generate_new_agent_policy';
+import { agentPolicyWithoutPaidFeatures } from './generate_new_agent_policy';
 
 function isAgentTamperingPolicyValidForLicense(
   policy: Partial<AgentPolicy>,
@@ -51,7 +48,7 @@ export const unsetAgentPolicyAccordingToLicenseLevel = (
   license: ILicense | null
 ): Partial<AgentPolicy> => {
   if (hasAtLeast(license, 'platinum')) {
-    return agentPolicyWithSupportedFeatures(policy);
+    return policy;
   }
 
   // set any license-gated features back to the defaults
