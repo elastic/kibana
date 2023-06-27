@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useCallback } from 'react';
+import React, { type FC, useCallback, useMemo } from 'react';
 import { omit, pick } from 'lodash';
 import {
   EuiBadge,
@@ -140,15 +140,25 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
 
   const { analytics_config: analyticsConfig, ...restMetaData } = metadata ?? {};
 
-  const details = {
+  const details = useMemo(() => {
+    return {
+      description,
+      tags,
+      version,
+      estimated_operations,
+      estimated_heap_memory_usage_bytes,
+      default_field_map,
+      license_level,
+    };
+  }, [
+    default_field_map,
     description,
+    estimated_heap_memory_usage_bytes,
+    estimated_operations,
+    license_level,
     tags,
     version,
-    estimated_operations,
-    estimated_heap_memory_usage_bytes,
-    default_field_map,
-    license_level,
-  };
+  ]);
 
   const deploymentStatItems: AllocatedModel[] = useMemo<AllocatedModel[]>(() => {
     const deploymentStats = stats.deployment_stats;
@@ -185,46 +195,28 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     return items;
   }, [stats]);
 
-  const tabs: EuiTabbedContentTab[] = [
-    {
-      id: 'details',
-      'data-test-subj': 'mlTrainedModelDetails',
-      name: (
-        <FormattedMessage
-          id="xpack.ml.trainedModels.modelsList.expandedRow.detailsTabLabel"
-          defaultMessage="Details"
-        />
-      ),
-      content: (
-        <div data-test-subj={'mlTrainedModelDetailsContent'}>
-          <EuiSpacer size={'s'} />
-          <EuiFlexGrid columns={2} gutterSize={'m'}>
-            <EuiFlexItem>
-              <EuiPanel>
-                <EuiTitle size={'xs'}>
-                  <h5>
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.modelsList.expandedRow.detailsTitle"
-                      defaultMessage="Details"
-                    />
-                  </h5>
-                </EuiTitle>
-                <EuiSpacer size={'m'} />
-                <EuiDescriptionList
-                  compressed={true}
-                  type="column"
-                  listItems={formatToListItems(details)}
-                />
-              </EuiPanel>
-            </EuiFlexItem>
-            {isPopulatedObject(restMetaData) ? (
+  const tabs = useMemo<EuiTabbedContentTab[]>(() => {
+    return [
+      {
+        id: 'details',
+        'data-test-subj': 'mlTrainedModelDetails',
+        name: (
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.expandedRow.detailsTabLabel"
+            defaultMessage="Details"
+          />
+        ),
+        content: (
+          <div data-test-subj={'mlTrainedModelDetailsContent'}>
+            <EuiSpacer size={'s'} />
+            <EuiFlexGrid columns={2} gutterSize={'m'}>
               <EuiFlexItem>
                 <EuiPanel>
                   <EuiTitle size={'xs'}>
                     <h5>
                       <FormattedMessage
-                        id="xpack.ml.trainedModels.modelsList.expandedRow.metadataTitle"
-                        defaultMessage="Metadata"
+                        id="xpack.ml.trainedModels.modelsList.expandedRow.detailsTitle"
+                        defaultMessage="Details"
                       />
                     </h5>
                   </EuiTitle>
@@ -232,192 +224,224 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                   <EuiDescriptionList
                     compressed={true}
                     type="column"
-                    listItems={formatToListItems(restMetaData)}
+                    listItems={formatToListItems(details)}
                   />
                 </EuiPanel>
               </EuiFlexItem>
-            ) : null}
-          </EuiFlexGrid>
-        </div>
-      ),
-    },
-    ...(inferenceConfig
-      ? [
-          {
-            id: 'config',
-            'data-test-subj': 'mlTrainedModelInferenceConfig',
-            name: (
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.expandedRow.configTabLabel"
-                defaultMessage="Config"
-              />
-            ),
-            content: (
-              <div data-test-subj={'mlTrainedModelInferenceConfigContent'}>
-                <EuiSpacer size={'s'} />
-                <EuiFlexGrid columns={2} gutterSize={'m'}>
-                  <EuiFlexItem>
-                    <EuiPanel>
-                      <EuiTitle size={'xs'}>
-                        <h5>
-                          <FormattedMessage
-                            id="xpack.ml.trainedModels.modelsList.expandedRow.inferenceConfigTitle"
-                            defaultMessage="Inference configuration"
-                          />
-                        </h5>
-                      </EuiTitle>
-                      <EuiSpacer size={'m'} />
-                      <EuiDescriptionList
-                        compressed={true}
-                        type="column"
-                        listItems={formatToListItems(
-                          inferenceConfig[Object.keys(inferenceConfig)[0]]
-                        )}
-                      />
-                    </EuiPanel>
-                  </EuiFlexItem>
-                  {analyticsConfig && (
-                    <EuiFlexItem>
-                      <EuiPanel>
-                        <EuiTitle size={'xs'}>
-                          <h5>
-                            <FormattedMessage
-                              id="xpack.ml.trainedModels.modelsList.expandedRow.analyticsConfigTitle"
-                              defaultMessage="Analytics configuration"
-                            />
-                          </h5>
-                        </EuiTitle>
-                        <EuiSpacer size={'m'} />
-                        <EuiDescriptionList
-                          compressed={true}
-                          type="column"
-                          listItems={formatToListItems(analyticsConfig)}
+              {isPopulatedObject(restMetaData) ? (
+                <EuiFlexItem>
+                  <EuiPanel>
+                    <EuiTitle size={'xs'}>
+                      <h5>
+                        <FormattedMessage
+                          id="xpack.ml.trainedModels.modelsList.expandedRow.metadataTitle"
+                          defaultMessage="Metadata"
                         />
-                      </EuiPanel>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGrid>
-              </div>
-            ),
-          },
-        ]
-      : []),
-    ...(isPopulatedObject(omit(stats, ['pipeline_count', 'ingest']))
-      ? [
-          {
-            id: 'stats',
-            'data-test-subj': 'mlTrainedModelStats',
-            name: (
-              <FormattedMessage
-                id="xpack.ml.trainedModels.modelsList.expandedRow.statsTabLabel"
-                defaultMessage="Stats"
-              />
-            ),
-            content: (
-              <div data-test-subj={'mlTrainedModelStatsContent'}>
-                <EuiSpacer size={'s'} />
-
-                {!!deploymentStatItems?.length ? (
-                  <>
-                    <EuiPanel>
-                      <EuiTitle size={'xs'}>
-                        <h5>
-                          <FormattedMessage
-                            id="xpack.ml.trainedModels.modelsList.expandedRow.deploymentStatsTitle"
-                            defaultMessage="Deployment stats"
-                          />
-                        </h5>
-                      </EuiTitle>
-                      <EuiSpacer size={'m'} />
-                      <AllocatedModels models={deploymentStatItems} hideColumns={['model_id']} />
-                    </EuiPanel>
-                    <EuiSpacer size={'s'} />
-                  </>
-                ) : null}
-
-                <EuiFlexGrid columns={2} gutterSize={'m'}>
-                  {inferenceStats ? (
-                    <EuiFlexItem>
-                      <EuiPanel>
-                        <EuiTitle size={'xs'}>
-                          <h5>
-                            <FormattedMessage
-                              id="xpack.ml.trainedModels.modelsList.expandedRow.inferenceStatsTitle"
-                              defaultMessage="Inference stats"
-                            />
-                          </h5>
-                        </EuiTitle>
-                        <EuiSpacer size={'m'} />
-                        <EuiDescriptionList
-                          compressed={true}
-                          type="column"
-                          listItems={formatToListItems(inferenceStats)}
-                        />
-                      </EuiPanel>
-                    </EuiFlexItem>
-                  ) : null}
-                  {isPopulatedObject(stats.model_size_stats) &&
-                  !isPopulatedObject(inferenceStats) ? (
-                    <EuiFlexItem>
-                      <EuiPanel>
-                        <EuiTitle size={'xs'}>
-                          <h5>
-                            <FormattedMessage
-                              id="xpack.ml.trainedModels.modelsList.expandedRow.modelSizeStatsTitle"
-                              defaultMessage="Model size stats"
-                            />
-                          </h5>
-                        </EuiTitle>
-                        <EuiSpacer size={'m'} />
-                        <EuiDescriptionList
-                          compressed={true}
-                          type="column"
-                          listItems={formatToListItems(stats.model_size_stats)}
-                        />
-                      </EuiPanel>
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGrid>
-              </div>
-            ),
-          },
-        ]
-      : []),
-    ...((isPopulatedObject(pipelines) && Object.keys(pipelines).length > 0) || stats.ingest
-      ? [
-          {
-            id: 'pipelines',
-            'data-test-subj': 'mlTrainedModelPipelines',
-            name: (
-              <>
+                      </h5>
+                    </EuiTitle>
+                    <EuiSpacer size={'m'} />
+                    <EuiDescriptionList
+                      compressed={true}
+                      type="column"
+                      listItems={formatToListItems(restMetaData)}
+                    />
+                  </EuiPanel>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGrid>
+          </div>
+        ),
+      },
+      ...(inferenceConfig
+        ? [
+            {
+              id: 'config',
+              'data-test-subj': 'mlTrainedModelInferenceConfig',
+              name: (
                 <FormattedMessage
-                  id="xpack.ml.trainedModels.modelsList.expandedRow.pipelinesTabLabel"
-                  defaultMessage="Pipelines"
+                  id="xpack.ml.trainedModels.modelsList.expandedRow.configTabLabel"
+                  defaultMessage="Config"
                 />
-                {isPopulatedObject(pipelines) ? (
-                  <EuiNotificationBadge>{Object.keys(pipelines).length}</EuiNotificationBadge>
-                ) : null}
-              </>
-            ),
-            content: (
-              <div data-test-subj={'mlTrainedModelPipelinesContent'}>
-                <EuiSpacer size={'s'} />
-                <ModelPipelines pipelines={pipelines!} ingestStats={stats.ingest} />
-              </div>
-            ),
-          },
-        ]
-      : []),
-  ];
+              ),
+              content: (
+                <div data-test-subj={'mlTrainedModelInferenceConfigContent'}>
+                  <EuiSpacer size={'s'} />
+                  <EuiFlexGrid columns={2} gutterSize={'m'}>
+                    <EuiFlexItem>
+                      <EuiPanel>
+                        <EuiTitle size={'xs'}>
+                          <h5>
+                            <FormattedMessage
+                              id="xpack.ml.trainedModels.modelsList.expandedRow.inferenceConfigTitle"
+                              defaultMessage="Inference configuration"
+                            />
+                          </h5>
+                        </EuiTitle>
+                        <EuiSpacer size={'m'} />
+                        <EuiDescriptionList
+                          compressed={true}
+                          type="column"
+                          listItems={formatToListItems(
+                            inferenceConfig[Object.keys(inferenceConfig)[0]]
+                          )}
+                        />
+                      </EuiPanel>
+                    </EuiFlexItem>
+                    {analyticsConfig && (
+                      <EuiFlexItem>
+                        <EuiPanel>
+                          <EuiTitle size={'xs'}>
+                            <h5>
+                              <FormattedMessage
+                                id="xpack.ml.trainedModels.modelsList.expandedRow.analyticsConfigTitle"
+                                defaultMessage="Analytics configuration"
+                              />
+                            </h5>
+                          </EuiTitle>
+                          <EuiSpacer size={'m'} />
+                          <EuiDescriptionList
+                            compressed={true}
+                            type="column"
+                            listItems={formatToListItems(analyticsConfig)}
+                          />
+                        </EuiPanel>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGrid>
+                </div>
+              ),
+            },
+          ]
+        : []),
+      ...(isPopulatedObject(omit(stats, ['pipeline_count', 'ingest']))
+        ? [
+            {
+              id: 'stats',
+              'data-test-subj': 'mlTrainedModelStats',
+              name: (
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.modelsList.expandedRow.statsTabLabel"
+                  defaultMessage="Stats"
+                />
+              ),
+              content: (
+                <div data-test-subj={'mlTrainedModelStatsContent'}>
+                  <EuiSpacer size={'s'} />
+
+                  {!!deploymentStatItems?.length ? (
+                    <>
+                      <EuiPanel>
+                        <EuiTitle size={'xs'}>
+                          <h5>
+                            <FormattedMessage
+                              id="xpack.ml.trainedModels.modelsList.expandedRow.deploymentStatsTitle"
+                              defaultMessage="Deployment stats"
+                            />
+                          </h5>
+                        </EuiTitle>
+                        <EuiSpacer size={'m'} />
+                        <AllocatedModels models={deploymentStatItems} hideColumns={['model_id']} />
+                      </EuiPanel>
+                      <EuiSpacer size={'s'} />
+                    </>
+                  ) : null}
+
+                  <EuiFlexGrid columns={2} gutterSize={'m'}>
+                    {inferenceStats ? (
+                      <EuiFlexItem>
+                        <EuiPanel>
+                          <EuiTitle size={'xs'}>
+                            <h5>
+                              <FormattedMessage
+                                id="xpack.ml.trainedModels.modelsList.expandedRow.inferenceStatsTitle"
+                                defaultMessage="Inference stats"
+                              />
+                            </h5>
+                          </EuiTitle>
+                          <EuiSpacer size={'m'} />
+                          <EuiDescriptionList
+                            compressed={true}
+                            type="column"
+                            listItems={formatToListItems(inferenceStats)}
+                          />
+                        </EuiPanel>
+                      </EuiFlexItem>
+                    ) : null}
+                    {isPopulatedObject(stats.model_size_stats) &&
+                    !isPopulatedObject(inferenceStats) ? (
+                      <EuiFlexItem>
+                        <EuiPanel>
+                          <EuiTitle size={'xs'}>
+                            <h5>
+                              <FormattedMessage
+                                id="xpack.ml.trainedModels.modelsList.expandedRow.modelSizeStatsTitle"
+                                defaultMessage="Model size stats"
+                              />
+                            </h5>
+                          </EuiTitle>
+                          <EuiSpacer size={'m'} />
+                          <EuiDescriptionList
+                            compressed={true}
+                            type="column"
+                            listItems={formatToListItems(stats.model_size_stats)}
+                          />
+                        </EuiPanel>
+                      </EuiFlexItem>
+                    ) : null}
+                  </EuiFlexGrid>
+                </div>
+              ),
+            },
+          ]
+        : []),
+      ...((isPopulatedObject(pipelines) && Object.keys(pipelines).length > 0) || stats.ingest
+        ? [
+            {
+              id: 'pipelines',
+              'data-test-subj': 'mlTrainedModelPipelines',
+              name: (
+                <>
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.modelsList.expandedRow.pipelinesTabLabel"
+                    defaultMessage="Pipelines"
+                  />
+                  {isPopulatedObject(pipelines) ? (
+                    <EuiNotificationBadge>{Object.keys(pipelines).length}</EuiNotificationBadge>
+                  ) : null}
+                </>
+              ),
+              content: (
+                <div data-test-subj={'mlTrainedModelPipelinesContent'}>
+                  <EuiSpacer size={'s'} />
+                  <ModelPipelines pipelines={pipelines!} ingestStats={stats.ingest} />
+                </div>
+              ),
+            },
+          ]
+        : []),
+    ];
+  }, [
+    analyticsConfig,
+    deploymentStatItems,
+    details,
+    formatToListItems,
+    inferenceConfig,
+    inferenceStats,
+    pipelines,
+    restMetaData,
+    stats,
+  ]);
+
+  const initialSelectedTab =
+    item.state === 'started' ? tabs.find((t) => t.id === 'stats') : tabs[0];
 
   return (
     <EuiTabbedContent
       size="s"
-      style={{ width: '100%' }}
+      css={{ width: '100%' }}
       tabs={tabs}
-      initialSelectedTab={tabs[0]}
+      initialSelectedTab={initialSelectedTab}
       autoFocus="selected"
-      onTabClick={(tab) => {}}
       data-test-subj={'mlTrainedModelRowDetails'}
     />
   );
