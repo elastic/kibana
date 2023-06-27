@@ -18,6 +18,7 @@ import {
   FormMonitorType,
   MonitorFields,
   ResponseCheckJSON,
+  RequestBodyCheck,
 } from '../../../../../common/runtime_types/monitor_management';
 import { AlertConfigKey } from './constants';
 
@@ -37,12 +38,15 @@ export interface FormLocation {
   id: string;
   isServiceManaged: boolean;
   label: string;
+  isInvalid?: boolean;
 }
+
 export type FormConfig = MonitorFields & {
   isTLSEnabled: boolean;
   ['schedule.number']: string;
   ['source.inline']: string;
   [AlertConfigKey.STATUS_ENABLED]: boolean;
+  [AlertConfigKey.TLS_ENABLED]: boolean;
   [ConfigKey.LOCATIONS]: FormLocation[];
 
   /* Dot notation keys must have a type configuration both for their flattened and nested
@@ -57,6 +61,9 @@ export type FormConfig = MonitorFields & {
     supported_protocols: MonitorFields[ConfigKey.TLS_VERSION];
   };
   check: {
+    request: {
+      body: RequestBodyCheck;
+    };
     response: {
       json: ResponseCheckJSON[];
     };
@@ -122,6 +129,7 @@ export interface FieldMap {
   [ConfigKey.SCREENSHOTS]: FieldMeta<ConfigKey.SCREENSHOTS>;
   [ConfigKey.ENABLED]: FieldMeta<ConfigKey.ENABLED>;
   [AlertConfigKey.STATUS_ENABLED]: FieldMeta<AlertConfigKey.STATUS_ENABLED>;
+  [AlertConfigKey.TLS_ENABLED]: FieldMeta<AlertConfigKey.TLS_ENABLED>;
   [ConfigKey.NAMESPACE]: FieldMeta<ConfigKey.NAMESPACE>;
   [ConfigKey.TIMEOUT]: FieldMeta<ConfigKey.TIMEOUT>;
   [ConfigKey.MAX_REDIRECTS]: FieldMeta<ConfigKey.MAX_REDIRECTS>;

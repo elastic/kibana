@@ -3272,6 +3272,10 @@
                 "path": "packages/core/status/core-status-server-internal/src/routes/status.ts"
               },
               {
+                "plugin": "@kbn/core-status-server-internal",
+                "path": "packages/core/status/core-status-server-internal/src/routes/status_preboot.ts"
+              },
+              {
                 "plugin": "@kbn/core-rendering-server-internal",
                 "path": "packages/core/rendering/core-rendering-server-internal/src/bootstrap/register_bootstrap_route.ts"
               },
@@ -3489,14 +3493,6 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/server/scripts/route.ts"
               },
               {
@@ -3644,6 +3640,14 @@
                 "path": "x-pack/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
               {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/server/routes/health.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/server/routes/config.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_config.ts"
               },
@@ -3730,42 +3734,6 @@
               {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/routes/management/jobs.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/custom_elements/find.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/custom_elements/get.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/es_fields/es_fields.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/shareables/download.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/workpad/find.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/workpad/get.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/workpad/resolve.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/templates/list.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
               },
               {
                 "plugin": "cloudSecurityPosture",
@@ -4313,6 +4281,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_cluster_health/get_cluster_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.ts"
               },
               {
@@ -4469,26 +4445,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/policy/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/policy/index.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_info_handler.ts"
               },
               {
@@ -4498,14 +4454,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/details.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/status.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/state.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -4666,14 +4614,6 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
-              },
-              {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/server/routes/health.ts"
-              },
-              {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/server/routes/config.ts"
               },
               {
                 "plugin": "stackConnectors",
@@ -5528,42 +5468,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/get_maintenance_window.test.ts"
               },
               {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/custom_elements/find.test.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/custom_elements/get.test.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/es_fields/es_fields.test.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/functions/functions.test.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/shareables/download.test.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/templates/list.test.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/workpad/find.test.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/workpad/get.test.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/workpad/resolve.test.ts"
-              },
-              {
                 "plugin": "cloudChat",
                 "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/routes/chat.test.ts"
               },
@@ -5648,14 +5552,6 @@
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list_handler.test.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/state.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/status.test.ts"
-              },
-              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/external/get.test.ts"
               },
@@ -5738,10 +5634,6 @@
               {
                 "plugin": "@kbn/core-http-resources-server-internal",
                 "path": "packages/core/http/core-http-resources-server-internal/src/http_resources_service.test.ts"
-              },
-              {
-                "plugin": "@kbn/core-status-server-internal",
-                "path": "packages/core/status/core-status-server-internal/src/status_service.test.ts"
               },
               {
                 "plugin": "@kbn/core-status-server-internal",
@@ -5933,11 +5825,11 @@
               },
               {
                 "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/fleet_server_policy_config/index.ts"
+                "path": "x-pack/plugins/fleet/server/routes/fleet_server_hosts/index.ts"
               },
               {
                 "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/fleet_server_policy_config/index.ts"
+                "path": "x-pack/plugins/fleet/server/routes/fleet_server_hosts/index.ts"
               },
               {
                 "plugin": "fleet",
@@ -6078,50 +5970,6 @@
               {
                 "plugin": "snapshotRestore",
                 "path": "x-pack/plugins/snapshot_restore/server/test/helpers/router_mock.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/metadata.test.ts"
               },
               {
                 "plugin": "interactiveSetup",
@@ -6527,18 +6375,6 @@
               },
               {
                 "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
-                "plugin": "data",
                 "path": "src/plugins/data/server/kql_telemetry/route.ts"
               },
               {
@@ -6658,6 +6494,10 @@
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/finish_maintenance_window.ts"
               },
               {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/bulk_get_maintenance_windows.ts"
+              },
+              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/routes/update_alert_by_id.ts"
               },
@@ -6676,6 +6516,18 @@
               {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/time_series_query.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/fields.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/indices.ts"
               },
               {
                 "plugin": "ml",
@@ -6740,22 +6592,6 @@
               {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/routes/generate/generate_from_jobparams.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/custom_elements/create.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/shareables/zip.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/workpad/create.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/workpad/import.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -7234,6 +7070,10 @@
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/get_space_health/get_space_health_route.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/setup/setup_health_route.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/routes/live_query/create_live_query_route.ts"
               },
@@ -7379,6 +7219,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/set_alert_tags_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_score_preview_route.ts"
               },
               {
@@ -7420,10 +7264,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/suggestions/index.ts"
               },
               {
                 "plugin": "graph",
@@ -7558,16 +7398,8 @@
                 "path": "x-pack/plugins/snapshot_restore/server/routes/api/policy.ts"
               },
               {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/time_series_query.ts"
-              },
-              {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/fields.ts"
-              },
-              {
-                "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/server/data/routes/indices.ts"
+                "plugin": "stackConnectors",
+                "path": "x-pack/plugins/stack_connectors/server/routes/get_slack_api_channels.ts"
               },
               {
                 "plugin": "synthetics",
@@ -8227,6 +8059,22 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/bulk_get_maintenance_windows.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/bulk_get_maintenance_windows.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/bulk_get_maintenance_windows.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/maintenance_window/bulk_get_maintenance_windows.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/create_maintenance_window.test.ts"
               },
               {
@@ -8272,18 +8120,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/update_maintenance_window.test.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/custom_elements/create.test.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/shareables/zip.test.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/workpad/create.test.ts"
               },
               {
                 "plugin": "remoteClusters",
@@ -8308,10 +8144,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/suggestions/index.test.ts"
               },
               {
                 "plugin": "spaces",
@@ -8539,7 +8371,7 @@
               },
               {
                 "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/fleet_server_policy_config/index.ts"
+                "path": "x-pack/plugins/fleet/server/routes/fleet_server_hosts/index.ts"
               },
               {
                 "plugin": "fleet",
@@ -8864,10 +8696,6 @@
                 "path": "src/plugins/bfetch/server/plugin.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/legacy/update.ts"
               },
@@ -8898,22 +8726,6 @@
               {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/routes/deprecations/deprecations.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/custom_elements/update.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/workpad/update.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/workpad/update.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/workpad/update.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -9360,18 +9172,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/legacy/update.test.ts"
               },
               {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/custom_elements/update.test.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/workpad/update.test.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/workpad/update.test.ts"
-              },
-              {
                 "plugin": "remoteClusters",
                 "path": "x-pack/plugins/remote_clusters/server/routes/api/update_route.test.ts"
               },
@@ -9445,7 +9245,7 @@
               },
               {
                 "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/fleet_server_policy_config/index.ts"
+                "path": "x-pack/plugins/fleet/server/routes/fleet_server_hosts/index.ts"
               },
               {
                 "plugin": "fleet",
@@ -10040,10 +9840,6 @@
                 "path": "src/plugins/bfetch/server/plugin.ts"
               },
               {
-                "plugin": "data",
-                "path": "src/plugins/data/server/query/routes.ts"
-              },
-              {
                 "plugin": "share",
                 "path": "src/plugins/share/server/url_service/http/short_urls/register_delete_route.ts"
               },
@@ -10082,14 +9878,6 @@
               {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/routes/management/jobs.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/custom_elements/delete.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/workpad/delete.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -10448,14 +10236,6 @@
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/delete_maintenance_window.test.ts"
               },
               {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/custom_elements/delete.test.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/plugins/canvas/server/routes/workpad/delete.test.ts"
-              },
-              {
                 "plugin": "remoteClusters",
                 "path": "x-pack/plugins/remote_clusters/server/routes/api/delete_route.test.ts"
               },
@@ -10509,7 +10289,7 @@
               },
               {
                 "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/routes/fleet_server_policy_config/index.ts"
+                "path": "x-pack/plugins/fleet/server/routes/fleet_server_hosts/index.ts"
               },
               {
                 "plugin": "fleet",
@@ -14143,6 +13923,14 @@
                 "path": "src/plugins/data/server/search/routes/session.ts"
               },
               {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/json_schema.ts"
               },
@@ -14359,6 +14147,38 @@
                 "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/custom_elements/find.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/custom_elements/get.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/shareables/download.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/workpad/find.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/workpad/get.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/workpad/resolve.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/templates/list.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/functions/functions.ts"
+              },
+              {
                 "plugin": "cloudDefend",
                 "path": "x-pack/plugins/cloud_defend/server/routes/policies/policies.ts"
               },
@@ -14373,6 +14193,34 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/csp_rule_template/get_csp_rule_template.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/policy/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/policy/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/status.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/state.ts"
               },
               {
                 "plugin": "fileUpload",
@@ -14523,6 +14371,38 @@
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/custom_elements/find.test.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/custom_elements/get.test.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/functions/functions.test.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/shareables/download.test.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/templates/list.test.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/workpad/find.test.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/workpad/get.test.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/workpad/resolve.test.ts"
+              },
+              {
                 "plugin": "cloudDefend",
                 "path": "x-pack/plugins/cloud_defend/server/routes/policies/policies.test.ts"
               },
@@ -14635,6 +14515,10 @@
                 "path": "src/plugins/data/server/search/routes/session.ts"
               },
               {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/annotations.ts"
               },
@@ -14679,12 +14563,40 @@
                 "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/custom_elements/update.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/workpad/update.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/workpad/update.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/workpad/update.ts"
+              },
+              {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/custom_elements/update.test.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/workpad/update.test.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/workpad/update.test.ts"
               }
             ],
             "returnComment": [],
@@ -14813,6 +14725,18 @@
               {
                 "plugin": "data",
                 "path": "src/plugins/data/server/search/routes/search.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
               },
               {
                 "plugin": "aiops",
@@ -15119,8 +15043,28 @@
                 "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/custom_elements/create.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/shareables/zip.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/workpad/create.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/workpad/import.ts"
+              },
+              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/server/autocomplete/value_suggestions_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/suggestions/index.ts"
               },
               {
                 "plugin": "fileUpload",
@@ -15205,6 +15149,18 @@
               {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/custom_elements/create.test.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/shareables/zip.test.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/workpad/create.test.ts"
               }
             ],
             "returnComment": [],
@@ -15379,6 +15335,10 @@
                 "path": "src/plugins/data/server/search/routes/search.ts"
               },
               {
+                "plugin": "data",
+                "path": "src/plugins/data/server/query/routes.ts"
+              },
+              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/annotations.ts"
               },
@@ -15415,6 +15375,14 @@
                 "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/custom_elements/delete.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/workpad/delete.ts"
+              },
+              {
                 "plugin": "maps",
                 "path": "x-pack/plugins/maps/server/data_indexing/indexing_routes.ts"
               },
@@ -15425,6 +15393,14 @@
               {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/custom_elements/delete.test.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/server/routes/workpad/delete.test.ts"
               }
             ],
             "returnComment": [],

@@ -6,6 +6,7 @@
  */
 
 import type {
+  CategoryUserAction,
   CommentUserAction,
   ConnectorUserAction,
   CreateCaseUserAction,
@@ -71,3 +72,7 @@ export const isCreateCaseUserAction = (userAction: unknown): userAction is Creat
 
 export const isUserActionType = (field: string): field is UserActionTypes =>
   ActionTypes[field as UserActionTypes] != null;
+
+export const isCategoryUserAction = (userAction: unknown): userAction is CategoryUserAction =>
+  (userAction as CategoryUserAction)?.type === ActionTypes.category &&
+  (userAction as CategoryUserAction)?.payload?.category !== undefined;

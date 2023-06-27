@@ -176,7 +176,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('can clear out selections by clicking the reset button', async () => {
         const firstId = (await dashboardControls.getAllControlIds())[0];
-        await dashboardControls.rangeSliderClearSelection(firstId);
+        await dashboardControls.clearControlSelections(firstId);
+        await dashboardControls.rangeSliderOpenPopover(firstId);
         await dashboardControls.validateRange('value', firstId, '', '');
         await dashboardControls.rangeSliderEnsurePopoverIsClosed(firstId);
         await dashboard.clearUnsavedChanges();
