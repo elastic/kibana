@@ -11,6 +11,8 @@ import { generateAgent } from '../../../../fleet_api_integration/helpers';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createPackagePolicy } from '../helper';
 
+const currentTimeMinusNineMinutes = new Date(Date.now() - 300000).toISOString();
+
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
@@ -65,7 +67,7 @@ export default function (providerContext: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
 
-      it(`Should return waiting_for_result when installed kspm, has no findings and it has been more than 10 minutes since the installation`, async () => {
+      it(`Should return waiting_for_result when installed kspm, has no findings and it has been less than 10 minutes since the installation`, async () => {
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -74,6 +76,15 @@ export default function (providerContext: FtrProviderContext) {
           'vanilla',
           'kspm'
         );
+
+        await kibanaServer.savedObjects.update({
+          id: 'cloud_security_posture',
+          type: 'epm-packages',
+          attributes: {
+            install_started_at: currentTimeMinusNineMinutes,
+          },
+        });
+
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
           .set('kbn-xsrf', 'xxxx')
@@ -81,7 +92,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.kspm.status).to.be('waiting_for_results');
       });
 
-      it(`Should return waiting_for_result when installed cspm, has no findings and it has been more than 10 minutes since the installation`, async () => {
+      it(`Should return waiting_for_result when installed cspm, has no findings and it has been less than 10 minutes since the installation`, async () => {
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -90,6 +101,15 @@ export default function (providerContext: FtrProviderContext) {
           'aws',
           'cspm'
         );
+
+        await kibanaServer.savedObjects.update({
+          id: 'cloud_security_posture',
+          type: 'epm-packages',
+          attributes: {
+            install_started_at: currentTimeMinusNineMinutes,
+          },
+        });
+
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
           .set('kbn-xsrf', 'xxxx')
@@ -97,7 +117,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.cspm.status).to.be('waiting_for_results');
       });
 
-      it(`Should return waiting_for_result when installed cnvm, has no findings and it has been more than 4 hours minutes since the installation`, async () => {
+      it(`Should return waiting_for_result when installed cnvm, has no findings and it has been less than 4 hours minutes since the installation`, async () => {
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -106,6 +126,15 @@ export default function (providerContext: FtrProviderContext) {
           'aws',
           'vuln_mgmt'
         );
+
+        await kibanaServer.savedObjects.update({
+          id: 'cloud_security_posture',
+          type: 'epm-packages',
+          attributes: {
+            install_started_at: currentTimeMinusNineMinutes,
+          },
+        });
+
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
           .set('kbn-xsrf', 'xxxx')

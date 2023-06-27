@@ -24,6 +24,9 @@ const INDEX_ARRAY = [
   VULNERABILITIES_INDEX_DEFAULT_NS,
 ];
 
+const currentTimeMinusFourHours = new Date(Date.now() - 21600000).toISOString();
+const currentTimeMinusTenMinutes = new Date(Date.now() - 600000).toISOString();
+
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
@@ -83,7 +86,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Should return index-timeout when installed kspm, has findings only on logs-cloud_security_posture.findings-default* and it has been more than 10 minutes since the installation`, async () => {
-        const previousInstallDate = new Date(Date.now() - 600000).toISOString();
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -97,7 +99,7 @@ export default function (providerContext: FtrProviderContext) {
           id: 'cloud_security_posture',
           type: 'epm-packages',
           attributes: {
-            install_started_at: previousInstallDate,
+            install_started_at: currentTimeMinusTenMinutes,
           },
         });
 
@@ -110,7 +112,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it(`Should return index-timeout when installed cspm, has findings only on logs-cloud_security_posture.findings-default* and it has been more than 10 minutes since the installation`, async () => {
-        const previousInstallDate = new Date(Date.now() - 600000).toISOString();
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -124,7 +125,7 @@ export default function (providerContext: FtrProviderContext) {
           id: 'cloud_security_posture',
           type: 'epm-packages',
           attributes: {
-            install_started_at: previousInstallDate,
+            install_started_at: currentTimeMinusTenMinutes,
           },
         });
 
@@ -136,8 +137,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.cspm.status).to.be('index-timeout');
       });
 
-      it(`Should return index-timeout when installed cnvm, has findings only on logs-cloud_security_posture.findings-default* and it has been more than 4 hours minutes since the installation`, async () => {
-        const previousInstallDate = new Date(Date.now() - 21600000).toISOString();
+      it(`Should return index-timeout when installed cnvm, has findings only on logs-cloud_security_posture.vulnerabilities-default* and it has been more than 4 hours minutes since the installation`, async () => {
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -151,7 +151,7 @@ export default function (providerContext: FtrProviderContext) {
           id: 'cloud_security_posture',
           type: 'epm-packages',
           attributes: {
-            install_started_at: previousInstallDate,
+            install_started_at: currentTimeMinusFourHours,
           },
         });
 
