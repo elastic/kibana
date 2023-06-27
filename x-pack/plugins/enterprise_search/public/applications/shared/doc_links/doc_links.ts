@@ -66,6 +66,7 @@ class DocLinks {
   public connectorsClients: string;
   public connectorsConfluence: string;
   public connectorsContentExtraction: string;
+  public connectorsDropbox: string;
   public connectorsGoogleCloudStorage: string;
   public connectorsJira: string;
   public connectorsMicrosoftSQL: string;
@@ -76,6 +77,7 @@ class DocLinks {
   public connectorsOracle: string;
   public connectorsPostgreSQL: string;
   public connectorsS3: string;
+  public connectorsServiceNow: string;
   public connectorsSharepoint: string;
   public connectorsSharepointOnline: string;
   public connectorsWorkplaceSearch: string;
@@ -219,6 +221,7 @@ class DocLinks {
     this.connectorsConfluence = '';
     this.connectorsContentExtraction = '';
     this.connectorsClients = '';
+    this.connectorsDropbox = '';
     this.connectorsGoogleCloudStorage = '';
     this.connectorsJira = '';
     this.connectorsMicrosoftSQL = '';
@@ -229,6 +232,7 @@ class DocLinks {
     this.connectorsOracle = '';
     this.connectorsPostgreSQL = '';
     this.connectorsS3 = '';
+    this.connectorsServiceNow = '';
     this.connectorsSharepoint = '';
     this.connectorsSharepointOnline = '';
     this.connectorsWorkplaceSearch = '';
@@ -373,6 +377,7 @@ class DocLinks {
     this.connectorsConfluence = docLinks.links.enterpriseSearch.connectorsConfluence;
     this.connectorsContentExtraction = docLinks.links.enterpriseSearch.connectorsContentExtraction;
     this.connectorsClients = docLinks.links.enterpriseSearch.connectorsClients;
+    this.connectorsDropbox = docLinks.links.enterpriseSearch.connectorsDropbox;
     this.connectorsGoogleCloudStorage =
       docLinks.links.enterpriseSearch.connectorsGoogleCloudStorage;
     this.connectorsJira = docLinks.links.enterpriseSearch.connectorsJira;
@@ -384,6 +389,7 @@ class DocLinks {
     this.connectorsOracle = docLinks.links.enterpriseSearch.connectorsOracle;
     this.connectorsPostgreSQL = docLinks.links.enterpriseSearch.connectorsPostgreSQL;
     this.connectorsS3 = docLinks.links.enterpriseSearch.connectorsS3;
+    this.connectorsServiceNow = docLinks.links.enterpriseSearch.connectorsServiceNow;
     this.connectorsSharepoint = docLinks.links.enterpriseSearch.connectorsSharepoint;
     this.connectorsSharepointOnline = docLinks.links.enterpriseSearch.connectorsSharepointOnline;
     this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
