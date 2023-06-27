@@ -8,5 +8,3 @@ properties:
     apiUrl:
         type: string
         description: The OpenAI API endpoint.
-additionalProperties: true
-# TO-DO: Add the properties for this connector.
