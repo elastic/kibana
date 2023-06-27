@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  elasticsearchServiceMock,
+} from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
@@ -89,6 +93,7 @@ export const buildManifestManagerContextMock = (
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
     experimentalFeatures: parseExperimentalConfigValue([]).features,
     packagerTaskPackagePolicyUpdateBatchSize: 10,
+    esClient: elasticsearchServiceMock.createElasticsearchClient(),
   };
 };
 

@@ -919,7 +919,7 @@ describe('ManifestManager', () => {
       expect(context.packagePolicyService.bulkUpdate).toHaveBeenNthCalledWith(
         1,
         expect.anything(),
-        undefined,
+        context.esClient,
         [
           createPackagePolicyWithConfigMock({
             id: TEST_POLICY_ID_1,
@@ -990,7 +990,7 @@ describe('ManifestManager', () => {
       expect(context.packagePolicyService.bulkUpdate).toHaveBeenNthCalledWith(
         1,
         expect.anything(),
-        undefined,
+        context.esClient,
         [
           createPackagePolicyWithConfigMock({
             id: TEST_POLICY_ID_1,

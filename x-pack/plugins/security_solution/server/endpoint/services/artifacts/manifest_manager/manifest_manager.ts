@@ -8,6 +8,7 @@
 import pMap from 'p-map';
 import semver from 'semver';
 import { isEqual, isEmpty, chunk } from 'lodash';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
@@ -92,6 +93,7 @@ export interface ManifestManagerContext {
   logger: Logger;
   experimentalFeatures: ExperimentalFeatures;
   packagerTaskPackagePolicyUpdateBatchSize: number;
+  esClient: ElasticsearchClient;
 }
 
 const getArtifactIds = (manifest: ManifestSchema) =>
@@ -112,6 +114,7 @@ export class ManifestManager {
   protected experimentalFeatures: ExperimentalFeatures;
   protected cachedExceptionsListsByOs: Map<string, ExceptionListItemSchema[]>;
   protected packagerTaskPackagePolicyUpdateBatchSize: number;
+  protected esClient: ElasticsearchClient;
 
   constructor(context: ManifestManagerContext) {
     this.artifactClient = context.artifactClient;
@@ -124,6 +127,7 @@ export class ManifestManager {
     this.cachedExceptionsListsByOs = new Map();
     this.packagerTaskPackagePolicyUpdateBatchSize =
       context.packagerTaskPackagePolicyUpdateBatchSize;
+    this.esClient = context.esClient;
   }
 
   /**
@@ -606,8 +610,7 @@ export class ManifestManager {
     for (const currentBatch of updateBatches) {
       const response = await this.packagePolicyService.bulkUpdate(
         this.savedObjectsClient,
-        // @ts-expect-error TS2345
-        undefined,
+        this.esClient,
         currentBatch
       );
 
