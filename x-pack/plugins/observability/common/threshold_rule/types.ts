@@ -8,11 +8,9 @@
 import * as rt from 'io-ts';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { values } from 'lodash';
-
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { Color } from './color_palette';
 import { metricsExplorerMetricRT } from './metrics_explorer';
-
 import { TimeUnitChar } from '../utils/formatters/duration';
 import { SNAPSHOT_CUSTOM_AGGREGATIONS } from './constants';
 
@@ -252,9 +250,9 @@ export interface CustomMetricExpressionParams extends BaseMetricExpressionParams
 }
 
 export type MetricExpressionParams =
+  | NonCountMetricExpressionParams
   | CountMetricExpressionParams
-  | CustomMetricExpressionParams
-  | NonCountMetricExpressionParams;
+  | CustomMetricExpressionParams;
 
 export const QUERY_INVALID: unique symbol = Symbol('QUERY_INVALID');
 
