@@ -8,7 +8,7 @@
 import type React from 'react';
 import type { Path } from 'react-router-dom-v5-compat';
 import { useHistory } from 'react-router-dom';
-import { useNavigate, useHref, parsePath } from 'react-router-dom-v5-compat';
+import { useHref, parsePath } from 'react-router-dom-v5-compat';
 import { FieldIcon } from '@kbn/react-field';
 import type { KibanaReactContextValue, reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import {
