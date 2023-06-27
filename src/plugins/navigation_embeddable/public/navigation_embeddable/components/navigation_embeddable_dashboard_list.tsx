@@ -23,17 +23,13 @@ import {
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 import { DashboardItem } from '../types';
 
-// TODO: As part of https://github.com/elastic/kibana/issues/154381, replace this regex URL check with more robost url validation
-const isValidUrl =
-  /^https?:\/\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
-
 interface Props {
-  onUrlSelected: (url: string) => void;
+  initialSelection?: DashboardItem;
   onDashboardSelected: (selectedDashboard: DashboardItem | undefined) => void;
 }
 
 export const NavigationEmbeddableDashboardList = ({
-  onUrlSelected,
+  initialSelection,
   onDashboardSelected,
   ...other
 }: Props) => {
@@ -42,7 +38,6 @@ export const NavigationEmbeddableDashboardList = ({
   const isLoading = navEmbeddable.select((state) => state.output.loading);
 
   const [searchString, setSearchString] = useState<string>('');
-  const [hasValidUrl, setHasValidUrl] = useState<boolean>(false);
   const [dashboardListOptions, setDashboardListOptions] = useState<EuiSelectableOption[]>([]);
 
   const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
@@ -55,33 +50,26 @@ export const NavigationEmbeddableDashboardList = ({
         return {
           data: dashboard,
           label: dashboard.attributes.title,
+          checked: initialSelection && initialSelection.id === dashboard.id ? 'on' : undefined,
         } as EuiSelectableOption;
       }) ?? [];
 
     setDashboardListOptions(dashboardOptions);
-  }, [dashboardList, searchString, onDashboardSelected]);
+  }, [dashboardList, searchString, onDashboardSelected, initialSelection]);
 
   // {...other} is needed so all inner elements are treated as part of the form
   return (
     <div {...other}>
       <EuiFieldSearch
         isClearable={true}
-        placeholder={'Search for a dashboard or enter external URL'}
+        placeholder={'Search for a dashboard'}
         onSearch={(value) => {
           setSearchString(value);
-          if (isValidUrl.test(value)) {
-            onUrlSelected(value);
-            setHasValidUrl(true);
-            onDashboardSelected(undefined);
-          } else {
-            setHasValidUrl(false);
-          }
         }}
       />
       <EuiSpacer size="s" />
       <EuiSelectable
         singleSelection={true}
-        emptyMessage={hasValidUrl ? 'Using external link' : 'No dashboards match'}
         options={dashboardListOptions}
         isLoading={isLoading || loadingDashboardList}
         onChange={(newOptions, _, selected) => {

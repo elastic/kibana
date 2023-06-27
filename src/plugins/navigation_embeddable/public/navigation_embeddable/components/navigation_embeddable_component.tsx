@@ -19,7 +19,7 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { isDashboardLink } from '../types';
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
-import { NavigationEmbeddableLinkEditor } from './navigation_embeddable_link_editor';
+import { NavigationEmbeddableEditor } from './navigation_embeddable_editor';
 
 import './navigation_embeddable.scss';
 
@@ -79,10 +79,10 @@ export const NavigationEmbeddableComponent = () => {
           button={addLinkButton}
           panelStyle={{ width: 400 }}
           isOpen={isEditPopoverOpen}
-          panelPaddingSize="s"
+          panelPaddingSize="m"
           closePopover={() => setIsEditPopoverOpen(false)}
         >
-          <NavigationEmbeddableLinkEditor setIsPopoverOpen={setIsEditPopoverOpen} />
+          <NavigationEmbeddableEditor setIsPopoverOpen={setIsEditPopoverOpen} />
         </EuiPopover>
       )}
     </EuiPanel>
