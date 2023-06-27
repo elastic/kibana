@@ -99,7 +99,7 @@ export const EsQueryExpression: React.FC<
 
     if (index && index.length > 0) {
       setIndices(index);
-      await refreshEsFields();
+      await refreshEsFields(index);
     }
   };
 
@@ -108,14 +108,18 @@ export const EsQueryExpression: React.FC<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const refreshEsFields = async () => {
+  const refreshEsFields = async (indicesToSearch?: string[]) => {
     let runtimeMappings;
     try {
       runtimeMappings = get(JSON.parse(xJson), 'runtime_mappings');
     } catch (e) {
       // ignore error
     }
-    const currentEsFields = await getFields(http, indices, runtimeMappings);
+    const currentEsFields = await getFields(
+      http,
+      indicesToSearch ? indicesToSearch : indices,
+      runtimeMappings
+    );
     setEsFields(currentEsFields);
   };
 
@@ -223,7 +227,7 @@ export const EsQueryExpression: React.FC<
               excludeHitsFromPreviousRun: DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
             });
           } else {
-            await refreshEsFields();
+            await refreshEsFields(newIndices);
           }
         }}
         onTimeFieldChange={(updatedTimeField: string) => setParam('timeField', updatedTimeField)}
