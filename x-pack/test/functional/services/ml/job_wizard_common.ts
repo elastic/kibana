@@ -599,14 +599,14 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async assertConvertToMultiMetricButtonExist(bucketSpan: string) {
-      await testSubjects.existOrFail('mlJobWizardConvertToMultiMetricButton', {
+      await testSubjects.existOrFail('mlJobWizardButtonConvertToMultiMetric', {
         timeout: 2 * 60 * 1000,
       });
     },
 
-    async clickConvertToMultiMetricButton() {
+    async convertToMultiMetricJobWizard() {
       await retry.tryForTime(30 * 1000 * 5, async () => {
-        await testSubjects.click('mlJobWizardConvertToMultiMetricButton');
+        await testSubjects.click('mlJobWizardButtonConvertToMultiMetric');
         await headerPage.waitUntilLoadingHasFinished();
 
         await testSubjects.existOrFail('mlPageJobWizardHeader-multi_metric', {

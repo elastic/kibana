@@ -56,19 +56,6 @@ export default function ({ getService }: FtrProviderContext) {
       ];
       const splitField = 'airline';
 
-      function getExpectedRow(expectedJobId: string) {
-        return {
-          id: expectedJobId,
-          description: 'Create multi metric job fromsingle metric job',
-          jobGroups: ['automated', 'farequote', 'multi-metric'],
-          recordCount: '86,274',
-          memoryStatus: 'ok',
-          jobState: 'closed',
-          datafeedState: 'stopped',
-          latestTimestamp: '2016-02-11 23:59:54',
-        };
-      }
-
       it('job creation loads the single metric wizard for the source data', async () => {
         await ml.testExecution.logTestStep('job creation loads the job management page');
         await ml.navigation.navigateToMl();
@@ -148,9 +135,9 @@ export default function ({ getService }: FtrProviderContext) {
           'single metric job creation navigates to previous page and converts to multi-metric job wizard'
         );
         await ml.jobWizardCommon.navigateToPreviousJobWizardPage(
-          'mlJobWizardConvertToMultiMetricButton'
+          'mlJobWizardButtonConvertToMultiMetric'
         );
-        await ml.jobWizardCommon.clickConvertToMultiMetricButton();
+        await ml.jobWizardCommon.convertToMultiMetricJobWizard();
         await ml.jobWizardCommon.assertPickFieldsSectionExists();
 
         await ml.testExecution.logTestStep(

@@ -355,11 +355,11 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('advanced job creation displays the job details step');
         await ml.jobWizardCommon.advanceToJobDetailsSection();
 
-        await ml.testExecution.logTestStep('advanced job creation inputs the job id');
+        await ml.testExecution.logTestStep('advanced job creation retains the job id');
         await ml.jobWizardCommon.assertJobIdInputExists();
         await ml.jobWizardCommon.assertJobIdValue(jobId);
 
-        await ml.testExecution.logTestStep('advanced job creation inputs the job description');
+        await ml.testExecution.logTestStep('advanced job creation retains the job description');
         await ml.jobWizardCommon.assertJobDescriptionInputExists();
         await ml.jobWizardCommon.assertJobDescriptionValue(jobDescription);
 
