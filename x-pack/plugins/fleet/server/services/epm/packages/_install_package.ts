@@ -235,16 +235,6 @@ export async function _installPackage({
       logger.warn(`Error removing legacy templates: ${e.message}`);
     }
 
-    // FIXME:PT cleanup
-    // const { diagnosticFileUploadEnabled } = appContextService.getExperimentalFeatures();
-    // if (diagnosticFileUploadEnabled) {
-    //   await ensureFileUploadWriteIndices({
-    //     integrationNames: [packageInfo.name],
-    //     esClient,
-    //     logger,
-    //   });
-    // }
-
     // update current backing indices of each data stream
     await withPackageSpan('Update write indices', () =>
       updateCurrentWriteIndices(esClient, logger, indexTemplates)
