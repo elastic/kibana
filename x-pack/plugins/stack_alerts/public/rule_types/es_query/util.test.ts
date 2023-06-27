@@ -13,6 +13,24 @@ describe('convertFieldSpecToFieldOption', () => {
       convertFieldSpecToFieldOption([
         {
           count: 0,
+          name: 'day_of_week',
+          type: 'string',
+          esTypes: ['keyword'],
+          scripted: false,
+          searchable: true,
+          aggregatable: true,
+          readFromDocValues: false,
+          shortDotsEnable: false,
+          runtimeField: {
+            type: 'keyword',
+            script: {
+              source:
+                "emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",
+            },
+          },
+        },
+        {
+          count: 0,
           name: '@timestamp',
           type: 'date',
           esTypes: ['date'],
@@ -85,6 +103,13 @@ describe('convertFieldSpecToFieldOption', () => {
         },
       ])
     ).toEqual([
+      {
+        name: 'day_of_week',
+        type: 'keyword',
+        normalizedType: 'keyword',
+        aggregatable: true,
+        searchable: true,
+      },
       {
         name: '@timestamp',
         type: 'date',

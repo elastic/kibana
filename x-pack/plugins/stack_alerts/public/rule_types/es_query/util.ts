@@ -18,7 +18,7 @@ export const isSearchSourceRule = (
 
 export const convertFieldSpecToFieldOption = (fieldSpec: FieldSpec[]): FieldOption[] => {
   return (fieldSpec ?? [])
-    .filter((spec: FieldSpec) => spec.isMapped)
+    .filter((spec: FieldSpec) => spec.isMapped || spec.runtimeField)
     .map((spec: FieldSpec) => {
       const converted = {
         name: spec.name,
