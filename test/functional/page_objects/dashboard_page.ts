@@ -473,10 +473,9 @@ export class DashboardPageObject extends FtrService {
   public async saveDashboard(
     dashboardName: string,
     saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true },
-    clickMenuItem = true
   ) {
     await this.retry.try(async () => {
-      await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions, clickMenuItem);
+      await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions);
 
       if (saveOptions.needsConfirm) {
         await this.ensureDuplicateTitleCallout();
@@ -517,9 +516,11 @@ export class DashboardPageObject extends FtrService {
   public async enterDashboardTitleAndClickSave(
     dashboardTitle: string,
     saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true },
-    clickMenuItem = true
   ) {
-    if (clickMenuItem) {
+    const isSaveModalOpen = await this.testSubjects.exists('savedObjectSaveModal', {
+      timeout: 2000,
+    });
+    if (!isSaveModalOpen) {
       await this.testSubjects.click('dashboardSaveMenuItem');
     }
     const modalDialog = await this.testSubjects.find('savedObjectSaveModal');
