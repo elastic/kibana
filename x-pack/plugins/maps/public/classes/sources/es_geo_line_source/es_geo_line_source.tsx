@@ -551,7 +551,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     if (properties && typeof properties!.complete === 'boolean') {
       tooltipProperties.push(
         new TooltipProperty(
-          'kbn__track__complete',
+          '__kbn__track__complete',
           this._descriptor.groupByTimeseries
             ? i18n.translate('xpack.maps.source.esGeoLine.isTrackSimplifiedLabel', {
                 defaultMessage: 'track is simplified',
