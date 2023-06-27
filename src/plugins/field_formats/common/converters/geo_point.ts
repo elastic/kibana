@@ -40,7 +40,7 @@ const TRANSFORM_OPTIONS = [
   },
   {
     kind: 'mgrs',
-    text: i18n.translate('fieldFormats.geoPoint.transformOptions.multi', {
+    text: i18n.translate('fieldFormats.geoPoint.transformOptions.mgrs', {
       defaultMessage: 'Military Grid Reference System (MGRS)',
     }),
   },
