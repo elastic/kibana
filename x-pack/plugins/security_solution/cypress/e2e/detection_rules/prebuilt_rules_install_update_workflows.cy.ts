@@ -17,7 +17,6 @@ import {
   RULES_UPDATES_TABLE,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
   TOASTER,
-  UPGRADE_ALL_RULES_BUTTON,
 } from '../../screens/alerts_detection_rules';
 import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import {
@@ -30,7 +29,11 @@ import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/
 import { esArchiverLoad, esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
-import { addElasticRulessButtonClick, ruleUpdatesTabClick } from '../../tasks/prebuilt_rules';
+import {
+  addElasticRulessButtonClick,
+  assertRuleUpgradeAvailableAndUpgradeAll,
+  ruleUpdatesTabClick,
+} from '../../tasks/prebuilt_rules';
 
 describe('Detection rules, Prebuilt Rules Installation and Update workflow', () => {
   beforeEach(() => {
@@ -85,7 +88,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
             (hit: { _source: { ['security-rule']: Rule } }) => hit._source['security-rule'].rule_id
           );
 
-          const numberOfRulesToInstall = [...new Set(ruleIds)].length;
+          const numberOfRulesToInstall = new Set(ruleIds).size;
           addElasticRulessButtonClick();
 
           cy.get(INSTALL_ALL_RULES_BUTTON).click();
@@ -167,10 +170,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         'updatePrebuiltRules'
       );
       ruleUpdatesTabClick();
-      cy.get(RULES_UPDATES_TABLE).find(RULES_ROW).should('have.length', 1);
-      cy.get(RULES_UPDATES_TABLE).contains(OUTDATED_RULE['security-rule'].name);
-      cy.get(UPGRADE_ALL_RULES_BUTTON).click();
-      cy.wait('@updatePrebuiltRules');
+      assertRuleUpgradeAvailableAndUpgradeAll(OUTDATED_RULE);
       cy.get(TOASTER).should('be.visible').should('have.text', `1 rule updated successfully.`);
     });
 
@@ -180,10 +180,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         statusCode: 500,
       }).as('updatePrebuiltRules');
       ruleUpdatesTabClick();
-      cy.get(RULES_UPDATES_TABLE).find(RULES_ROW).should('have.length', 1);
-      cy.get(RULES_UPDATES_TABLE).contains(OUTDATED_RULE['security-rule'].name);
-      cy.get(UPGRADE_ALL_RULES_BUTTON).click();
-      cy.wait('@updatePrebuiltRules');
+      assertRuleUpgradeAvailableAndUpgradeAll(OUTDATED_RULE);
       cy.get(TOASTER).should('be.visible').should('have.text', 'Rule update failed');
 
       /* Assert that the rule has not been updated in the UI */

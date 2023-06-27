@@ -39,10 +39,10 @@ import { cleanKibana, deleteAlertsAndRules, deletePrebuiltRulesAssets } from '..
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
-const rules = [1, 2, 3, 4, 5].map((i) => {
+const rules = Array.from(Array(5)).map((_, i) => {
   return createRuleAssetSavedObject({
-    name: `Test rule ${i}`,
-    rule_id: `rule_${i}`,
+    name: `Test rule ${i + 1}`,
+    rule_id: `rule_${i + 1}`,
   });
 });
 
