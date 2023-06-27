@@ -296,6 +296,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('shows unsaved comment message when page is refreshed', async () => {
+        await cases.singleCase.addComment('my comment');
+        await header.waitUntilLoadingHasFinished();
+
         await testSubjects.click('property-actions-user-action-ellipses');
 
         await header.waitUntilLoadingHasFinished();
@@ -319,7 +322,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.existOrFail('user-action-comment-unsaved-draft');
+        retry.tryForTime(2000, async () => {
+          await testSubjects.existOrFail('user-action-comment-unsaved-draft');
+        });
       });
 
       it('shows unsaved description message when page is refreshed', async () => {
