@@ -141,7 +141,12 @@ describe('esArchiver: createCreateIndexStream()', () => {
         body: {
           settings: undefined,
           mappings: undefined,
-          aliases: { foo: {} },
+        },
+      });
+
+      sinon.assert.calledWith(client.indices.updateAliases as sinon.SinonSpy, {
+        body: {
+          actions: [{ add: { alias: 'foo', index: 'index' } }],
         },
       });
     });
