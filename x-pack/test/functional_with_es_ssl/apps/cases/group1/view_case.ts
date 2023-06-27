@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createUsersAndRoles,
@@ -77,6 +79,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
         await commentArea.focus();
         await commentArea.type('Test comment from automation');
+
         await testSubjects.click('submit-comment');
 
         // validate user action
@@ -208,7 +211,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('draft comments', () => {
-      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+      createOneCaseBeforeEachDeleteAllAfterEach(getPageObject, getService);
 
       it('persists new comment when status is updated in dropdown', async () => {
         const commentArea = await find.byCssSelector(
@@ -274,17 +277,34 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('persists new comment to the case when user goes to case list table and comes back to the case', async () => {
-        const commentArea = await find.byCssSelector(
+        const comment = 'Test comment from automation';
+
+        let commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
         );
         await commentArea.focus();
-        await commentArea.type('Test comment from automation');
+        await commentArea.type(comment);
+
+        /**
+         * We need to wait for some time to
+         * give the localStorage a change to persist
+         * the comment. Otherwise, the test navigates to
+         * fast to the cases table and the comment is not
+         * persisted
+         */
+        await setTimeoutAsync(2000);
 
         await testSubjects.click('backToCases');
 
-        const caseLink = await find.byCssSelector('[data-test-subj="case-details-link"');
+        await cases.casesTable.waitForCasesToBeListed();
+        await cases.casesTable.goToFirstListedCase();
+        await header.waitUntilLoadingHasFinished();
 
-        caseLink.click();
+        commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        expect(await commentArea.getVisibleText()).equal(comment);
 
         await testSubjects.click('submit-comment');
 
@@ -292,7 +312,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const newComment = await find.byCssSelector(
           '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
-        expect(await newComment.getVisibleText()).equal('Test comment from automation');
+
+        expect(await newComment.getVisibleText()).equal(comment);
       });
 
       it('shows unsaved comment message when page is refreshed', async () => {
@@ -312,6 +333,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await editCommentTextArea.focus();
         await editCommentTextArea.type('Edited comment');
+
+        /**
+         * We need to wait for some time to
+         * give the localStorage a change to persist
+         * the comment. Otherwise, the test navigates to
+         * fast to the cases table and the comment is not
+         * persisted
+         */
+        await setTimeoutAsync(2000);
 
         await header.waitUntilLoadingHasFinished();
         await browser.refresh();
@@ -334,6 +364,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await editCommentTextArea.focus();
         await editCommentTextArea.type('Edited description');
+
+        /**
+         * We need to wait for some time to
+         * give the localStorage a change to persist
+         * the comment. Otherwise, the test navigates to
+         * fast to the cases table and the comment is not
+         * persisted
+         */
+        await setTimeoutAsync(2000);
 
         await header.waitUntilLoadingHasFinished();
 
@@ -862,6 +901,21 @@ const createOneCaseBeforeDeleteAllAfter = (
   });
 
   after(async () => {
+    await cases.api.deleteAllCases();
+  });
+};
+
+const createOneCaseBeforeEachDeleteAllAfterEach = (
+  getPageObject: FtrProviderContext['getPageObject'],
+  getService: FtrProviderContext['getService']
+) => {
+  const cases = getService('cases');
+
+  beforeEach(async () => {
+    await createAndNavigateToCase(getPageObject, getService);
+  });
+
+  afterEach(async () => {
     await cases.api.deleteAllCases();
   });
 };
