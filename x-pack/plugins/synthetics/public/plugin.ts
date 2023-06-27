@@ -102,7 +102,6 @@ export interface ClientPluginsStart {
   docLinks: DocLinksStart;
   uiSettings: CoreStart['uiSettings'];
   usageCollection: UsageCollectionStart;
-  savedObjects: CoreStart['savedObjects'];
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {
@@ -335,6 +334,14 @@ function registerSyntheticsRoutesWithNavigation(
                   matchFullPath: true,
                   ignoreTrailingSlash: true,
                   isNewFeature: true,
+                },
+                {
+                  label: i18n.translate('xpack.synthetics.certificatesPage.heading', {
+                    defaultMessage: 'TLS Certificates',
+                  }),
+                  app: 'synthetics',
+                  path: '/certificates',
+                  matchFullPath: true,
                 },
               ],
             },

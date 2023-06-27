@@ -6,12 +6,12 @@
  */
 import { syntheticsServiceAPIKeySavedObject } from '../../legacy_uptime/lib/saved_objects/service_api_key';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { generateAndSaveServiceAPIKey } from '../../synthetics_service/get_api_key';
 
 export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = (libs) => ({
   method: 'PUT',
-  path: API_URLS.SYNTHETICS_ENABLEMENT,
+  path: SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT,
   validate: {},
   handler: async ({ savedObjectsClient, request, server }): Promise<any> => {
     try {
@@ -54,7 +54,7 @@ export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = (libs
 
 export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = (libs) => ({
   method: 'DELETE',
-  path: API_URLS.SYNTHETICS_ENABLEMENT,
+  path: SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT,
   validate: {},
   handler: async ({
     response,

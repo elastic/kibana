@@ -694,6 +694,55 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.AlertsClient.getAADFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getAADFields",
+            "description": [],
+            "signature": [
+              "({ ruleTypeId }: { ruleTypeId: string; }) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "server",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-server.FieldDescriptor",
+                "text": "FieldDescriptor"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.AlertsClient.getAADFields.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ ruleTypeId }",
+                "description": [],
+                "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.getAADFields.$1.ruleTypeId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "ruleTypeId",
+                    "description": [],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1993,7 +2042,7 @@
             "section": "def-server.IRuleTypeAlerts",
             "text": "IRuleTypeAlerts"
           },
-          " | undefined; actionGroups: ",
+          " | undefined; recoveryActionGroup?: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2001,7 +2050,7 @@
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
-          "<\"default\">[]; defaultActionGroupId: \"default\"; recoveryActionGroup?: ",
+          "<never> | undefined; actionGroups: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2009,7 +2058,7 @@
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
-          "<never> | undefined; actionVariables?: { context?: ",
+          "<\"default\">[]; defaultActionGroupId: \"default\"; actionVariables?: { context?: ",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -2051,7 +2100,7 @@
           },
           "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; doesSetRecoveryContext?: boolean | undefined; autoRecoverAlerts?: boolean | undefined; getViewInAppRelativeUrl?: ",
           "GetViewInAppRelativeUrlFn",
-          "<TParams> | undefined; }"
+          "<TParams> | undefined; fieldsForAAD?: string[] | undefined; }"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts",
         "deprecated": false,

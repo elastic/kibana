@@ -336,11 +336,28 @@ export class DashboardPageControls extends FtrService {
   }
 
   public async verifyControlType(controlId: string, expectedType: string) {
-    const controlButton = await this.find.byXPath(
-      `//div[@id='controlFrame--${controlId}']//button`
-    );
-    const testSubj = await controlButton.getAttribute('data-test-subj');
-    expect(testSubj).to.equal(`${expectedType}-${controlId}`);
+    let controlButton;
+    switch (expectedType) {
+      case OPTIONS_LIST_CONTROL: {
+        controlButton = await this.find.byXPath(`//div[@id='controlFrame--${controlId}']//button`);
+        break;
+      }
+      case RANGE_SLIDER_CONTROL: {
+        controlButton = await this.find.byXPath(
+          `//div[@id='controlFrame--${controlId}']//div[contains(@class, 'rangeSliderAnchor__button')]`
+        );
+        break;
+      }
+      default: {
+        this.log.error('An invalid control type was provided.');
+        break;
+      }
+    }
+
+    if (controlButton) {
+      const testSubj = await controlButton.getAttribute('data-test-subj');
+      expect(testSubj).to.equal(`${expectedType}-${controlId}`);
+    }
   }
 
   // Options list functions
@@ -636,10 +653,7 @@ export class DashboardPageControls extends FtrService {
       attribute
     );
   }
-  public async rangeSliderGetDualRangeAttribute(controlId: string, attribute: string) {
-    this.log.debug(`Getting range slider dual range ${attribute} for ${controlId}`);
-    return await this.testSubjects.getAttribute(`rangeSlider__slider`, attribute);
-  }
+
   public async rangeSliderSetLowerBound(controlId: string, value: string) {
     this.log.debug(`Setting range slider lower bound to ${value}`);
     await this.testSubjects.setValue(
@@ -665,7 +679,8 @@ export class DashboardPageControls extends FtrService {
 
   public async rangeSliderEnsurePopoverIsClosed(controlId: string) {
     this.log.debug(`Opening popover for Range Slider: ${controlId}`);
-    await this.testSubjects.click(`range-slider-control-${controlId}`);
+    const controlLabel = await this.find.byXPath(`//div[@data-control-id='${controlId}']//label`);
+    await controlLabel.click();
     await this.testSubjects.waitForDeleted(`rangeSlider-control-actions`);
   }
 
@@ -677,8 +692,10 @@ export class DashboardPageControls extends FtrService {
     });
   }
 
-  public async rangeSliderWaitForLoading() {
-    await this.testSubjects.waitForDeleted('range-slider-loading-spinner');
+  public async rangeSliderWaitForLoading(controlId: string) {
+    await this.find.waitForDeletedByCssSelector(
+      `[data-test-subj="range-slider-control-${controlId}"] .euiLoadingSpinner`
+    );
   }
 
   public async rangeSliderClearSelection(controlId: string) {

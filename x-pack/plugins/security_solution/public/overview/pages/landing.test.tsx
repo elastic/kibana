@@ -22,6 +22,8 @@ jest.mock('../../common/components/landing_page', () => ({
     .mockReturnValue(<div data-test-subj="default-get-started-page" />),
 }));
 
+jest.mock('react-use/lib/useObservable', () => jest.fn((fn) => fn()));
+
 describe('LandingPage', () => {
   const mockGetStartedComponent = jest.fn();
   const history = createBrowserHistory();
@@ -43,7 +45,7 @@ describe('LandingPage', () => {
         securityLayout: {
           getPluginWrapper: jest.fn().mockReturnValue(mockSecuritySolutionTemplateWrapper),
         },
-        getStartedComponent: mockGetStartedComponent,
+        getStartedComponent$: mockGetStartedComponent,
       },
     });
   });

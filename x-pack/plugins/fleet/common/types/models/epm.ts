@@ -421,7 +421,7 @@ export interface RegistryVarsEntry {
 // Deprecated as part of the removing public references to saved object schemas
 // See https://github.com/elastic/kibana/issues/149098
 /**
- * @deprecated
+ * @deprecated replaced with installationInfo
  */
 export interface InstallableSavedObject {
   type: string;
@@ -434,6 +434,21 @@ export interface InstallableSavedObject {
   coreMigrationVersion?: string;
   namespaces?: string[];
 }
+export type InstallationInfo = {
+  type: string;
+  created_at?: string;
+  updated_at?: string;
+  namespaces?: string[];
+} & Omit<
+  Installation,
+  | 'package_assets'
+  | 'es_index_patterns'
+  | 'install_version'
+  | 'install_started_at'
+  | 'keep_policies_up_to_date'
+  | 'internal'
+  | 'removable'
+>;
 
 // Deprecated as part of the removing public references to saved object schemas
 // See https://github.com/elastic/kibana/issues/149098
@@ -462,9 +477,12 @@ type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, key
 
 // Managers public HTTP response types
 export type PackageList = PackageListItem[];
+
+// Remove savedObject when addressing the deprecation
 export type PackageListItem = Installable<RegistrySearchResult> & {
   id: string;
   integration?: string;
+  installationInfo?: InstallationInfo;
   savedObject?: InstallableSavedObject;
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
@@ -504,14 +522,11 @@ export interface Installation {
   install_format_schema_version?: string;
   verification_status: PackageVerificationStatus;
   verification_key_id?: string | null;
-  // TypeScript doesn't like using the `ExperimentalDataStreamFeature` type defined above here
-  experimental_data_stream_features?: Array<{
-    data_stream: string;
-    features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
-  }>;
+  experimental_data_stream_features?: ExperimentalDataStreamFeature[];
   internal?: boolean;
   removable?: boolean;
 }
+
 export interface PackageUsageStats {
   agent_policy_count: number;
 }
@@ -530,11 +545,13 @@ export type InstallStatusExcluded<T = {}> = T & {
 export type InstalledRegistry<T = {}> = T & {
   status: InstallationStatus['Installed'];
   savedObject?: InstallableSavedObject;
+  installationInfo?: InstallationInfo;
 };
 
 export type Installing<T = {}> = T & {
   status: InstallationStatus['Installing'];
   savedObject?: InstallableSavedObject;
+  installationInfo?: InstallationInfo;
 };
 
 export type NotInstalled<T = {}> = T & {

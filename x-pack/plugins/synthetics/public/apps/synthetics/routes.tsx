@@ -18,6 +18,8 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
+import { CertificateTitle } from './components/certificates/certificate_title';
+import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
 import { useSyntheticsPrivileges } from './hooks/use_synthetics_priviliges';
 import { ClientPluginsStart } from '../../plugin';
 import { getMonitorsRoute } from './components/monitors_page/route_config';
@@ -36,6 +38,7 @@ import {
   MonitorTypePortalNode,
 } from './components/monitor_add_edit/portals';
 import {
+  CERTIFICATES_ROUTE,
   GETTING_STARTED_ROUTE,
   MONITOR_ADD_ROUTE,
   MONITOR_EDIT_ROUTE,
@@ -44,6 +47,7 @@ import {
 import { PLUGIN } from '../../../common/constants/plugin';
 import { apiService } from '../../utils/api_service';
 import { getErrorDetailsRouteConfig } from './components/error_details/route_config';
+import { CertificatesPage } from './components/certificates/certificates';
 
 export type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
@@ -163,6 +167,19 @@ const getRoutes = (
             defaultMessage="Test run details"
           />
         ),
+      },
+    },
+    {
+      title: i18n.translate('xpack.synthetics.certificatesRoute.title', {
+        defaultMessage: `Certificates | {baseTitle}`,
+        values: { baseTitle },
+      }),
+      path: CERTIFICATES_ROUTE,
+      component: CertificatesPage,
+      dataTestSubj: 'uptimeCertificatesPage',
+      pageHeader: {
+        pageTitle: <CertificateTitle />,
+        rightSideItems: [<CertRefreshBtn />],
       },
     },
   ];

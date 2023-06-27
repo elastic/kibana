@@ -28,7 +28,6 @@ import {
   patchRule,
   fetchRules,
   fetchRuleById,
-  createPrepackagedRules,
   importRules,
   exportRules,
   getPrePackagedRulesStatus,
@@ -432,34 +431,6 @@ describe('Detections Rules API', () => {
     test('happy path', async () => {
       const ruleResp = await fetchRuleById({ id: 'mySuperRuleId', signal: abortCtrl.signal });
       expect(ruleResp).toEqual(getRulesSchemaMock());
-    });
-  });
-
-  describe('createPrepackagedRules', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue({
-        rules_installed: 0,
-        rules_updated: 0,
-        timelines_installed: 0,
-        timelines_updated: 0,
-      });
-    });
-
-    test('check parameter url when creating pre-packaged rules', async () => {
-      await createPrepackagedRules();
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/prepackaged', {
-        method: 'PUT',
-      });
-    });
-    test('happy path', async () => {
-      const resp = await createPrepackagedRules();
-      expect(resp).toEqual({
-        rules_installed: 0,
-        rules_updated: 0,
-        timelines_installed: 0,
-        timelines_updated: 0,
-      });
     });
   });
 

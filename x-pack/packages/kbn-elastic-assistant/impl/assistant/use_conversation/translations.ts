@@ -20,15 +20,15 @@ export const DEFAULT_CONVERSATION_TITLE = i18n.translate(
   }
 );
 
-export const ELASTIC_SECURITY_ASSISTANT_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.useConversation.elasticSecurityAssistantTitle',
+export const ELASTIC_AI_ASSISTANT_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.useConversation.elasticAiAssistantTitle',
   {
-    defaultMessage: 'Elastic Security Assistant',
+    defaultMessage: 'Elastic AI Assistant',
   }
 );
 
-export const ELASTIC_SECURITY_ASSISTANT = i18n.translate(
-  'xpack.elasticAssistant.assistant.useConversation.elasticSecurityAssistantName',
+export const ELASTIC_AI_ASSISTANT = i18n.translate(
+  'xpack.elasticAssistant.assistant.useConversation.elasticAiAssistantName',
   {
     defaultMessage: 'Assistant',
   }

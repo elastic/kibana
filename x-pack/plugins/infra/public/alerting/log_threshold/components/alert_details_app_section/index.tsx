@@ -26,6 +26,7 @@ import {
 import { useEuiTheme } from '@elastic/eui';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { get } from 'lodash';
+import { CoPilotContextProvider } from '@kbn/observability-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { getChartGroupNames } from '../../../../../common/utils/get_chart_group_names';
 import {
@@ -38,6 +39,7 @@ import { CriterionPreview } from '../expression_editor/criterion_preview_chart';
 import { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
 import LogsRatioChart from './components/logs_ratio_chart';
+import { ExplainLogRateSpikes } from './components/explain_log_rate_spike';
 
 const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
 const formatThreshold = (threshold: number) => String(threshold);
@@ -48,7 +50,7 @@ const AlertDetailsAppSection = ({
   setAlertSummaryFields,
 }: AlertDetailsAppSectionProps) => {
   const [selectedSeries, setSelectedSeries] = useState<string>('');
-  const { uiSettings } = useKibanaContextForPlugin().services;
+  const { uiSettings, observability } = useKibanaContextForPlugin().services;
   const { euiTheme } = useEuiTheme();
   const theme = useTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
@@ -248,12 +250,19 @@ const AlertDetailsAppSection = ({
     );
   };
 
+  const getExplainLogRateSpikesSection = () => {
+    return <ExplainLogRateSpikes rule={rule} alert={alert} />;
+  };
+
   return (
-    <EuiFlexGroup direction="column" data-test-subj="logsThresholdAlertDetailsPage">
-      {getLogRatioChart()}
-      {getLogCountChart()}
-      {getLogsHistoryChart()}
-    </EuiFlexGroup>
+    <CoPilotContextProvider value={observability.getCoPilotService()}>
+      <EuiFlexGroup direction="column" data-test-subj="logsThresholdAlertDetailsPage">
+        {getLogRatioChart()}
+        {getLogCountChart()}
+        {getExplainLogRateSpikesSection()}
+        {getLogsHistoryChart()}
+      </EuiFlexGroup>
+    </CoPilotContextProvider>
   );
 };
 // eslint-disable-next-line import/no-default-export

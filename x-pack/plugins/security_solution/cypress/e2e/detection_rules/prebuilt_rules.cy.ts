@@ -15,6 +15,7 @@ import {
   RULES_MANAGEMENT_TABLE,
   RULE_SWITCH,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
+  INSTALL_ALL_RULES_BUTTON,
 } from '../../screens/alerts_detection_rules';
 import {
   confirmRulesDelete,
@@ -22,14 +23,15 @@ import {
   deleteSelectedRules,
   disableSelectedRules,
   enableSelectedRules,
-  loadPrebuiltDetectionRules,
-  reloadDeletedRules,
   selectAllRules,
   selectNumberOfRules,
   waitForPrebuiltDetectionRulesToBeLoaded,
   waitForRuleToUpdate,
 } from '../../tasks/alerts_detection_rules';
-import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_rules';
+import {
+  excessivelyInstallAllPrebuiltRules,
+  getAvailablePrebuiltRulesCount,
+} from '../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
@@ -43,7 +45,8 @@ describe('Prebuilt rules', () => {
     login();
     deleteAlertsAndRules();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    loadPrebuiltDetectionRules();
+    excessivelyInstallAllPrebuiltRules();
+    cy.reload();
     waitForPrebuiltDetectionRulesToBeLoaded();
   });
 
@@ -111,15 +114,19 @@ describe('Prebuilt rules', () => {
             'have.text',
             `Elastic rules (${expectedNumberOfRulesAfterDeletion})`
           );
-          cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('exist');
-          cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should(
-            'have.text',
-            'Install 1 Elastic prebuilt rule '
-          );
+          cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('have.text', `Add Elastic rules1`);
 
-          reloadDeletedRules();
+          // Navigate to the prebuilt rule installation page
+          cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).click();
 
-          cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('not.exist');
+          // Click the "Install all rules" button
+          cy.get(INSTALL_ALL_RULES_BUTTON).click();
+
+          // Wait for the rules to be installed
+          cy.get(INSTALL_ALL_RULES_BUTTON).should('be.disabled');
+
+          // Navigate back to the rules page
+          cy.go('back');
 
           cy.get(ELASTIC_RULES_BTN).should(
             'have.text',
@@ -137,20 +144,28 @@ describe('Prebuilt rules', () => {
           selectNumberOfRules(numberOfRulesToBeSelected);
           deleteSelectedRules();
 
-          cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('exist');
           cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should(
             'have.text',
-            `Install ${numberOfRulesToBeSelected} Elastic prebuilt rules `
+            `Add Elastic rules${numberOfRulesToBeSelected}`
           );
           cy.get(ELASTIC_RULES_BTN).should(
             'have.text',
             `Elastic rules (${expectedNumberOfRulesAfterDeletion})`
           );
 
-          reloadDeletedRules();
+          // Navigate to the prebuilt rule installation page
+          cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).click();
 
-          cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).should('not.exist');
+          // Click the "Install all rules" button
+          cy.get(INSTALL_ALL_RULES_BUTTON).click();
 
+          // Wait for the rules to be installed
+          cy.get(INSTALL_ALL_RULES_BUTTON).should('be.disabled');
+
+          // Navigate back to the rules page
+          cy.go('back');
+
+          // Check that the rules table contains all rules
           cy.get(ELASTIC_RULES_BTN).should(
             'have.text',
             `Elastic rules (${expectedNumberOfRulesAfterRecovering})`

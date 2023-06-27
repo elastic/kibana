@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { LeftFlyoutContext } from '../context';
+import { LeftPanelContext } from '../context';
 import { TestProviders } from '../../../common/mock';
 import { EntitiesDetails } from './entities_details';
 import { ENTITIES_DETAILS_TEST_ID, HOST_DETAILS_TEST_ID, USER_DETAILS_TEST_ID } from './test_ids';
@@ -35,9 +35,9 @@ describe('<EntitiesDetails />', () => {
   it('renders entities details correctly', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <LeftFlyoutContext.Provider value={mockContextValue}>
+        <LeftPanelContext.Provider value={mockContextValue}>
           <EntitiesDetails />
-        </LeftFlyoutContext.Provider>
+        </LeftPanelContext.Provider>
       </TestProviders>
     );
     expect(getByTestId(ENTITIES_DETAILS_TEST_ID)).toBeInTheDocument();
@@ -48,7 +48,7 @@ describe('<EntitiesDetails />', () => {
   it('does not render user and host details if user name and host name are not available', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <LeftFlyoutContext.Provider
+        <LeftPanelContext.Provider
           value={{
             ...mockContextValue,
             getFieldsData: (fieldName) =>
@@ -56,7 +56,7 @@ describe('<EntitiesDetails />', () => {
           }}
         >
           <EntitiesDetails />
-        </LeftFlyoutContext.Provider>
+        </LeftPanelContext.Provider>
       </TestProviders>
     );
     expect(queryByTestId(USER_DETAILS_TEST_ID)).not.toBeInTheDocument();
@@ -66,7 +66,7 @@ describe('<EntitiesDetails />', () => {
   it('does not render user and host details if @timestamp is not available', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <LeftFlyoutContext.Provider
+        <LeftPanelContext.Provider
           value={{
             ...mockContextValue,
             getFieldsData: (fieldName) => {
@@ -82,7 +82,7 @@ describe('<EntitiesDetails />', () => {
           }}
         >
           <EntitiesDetails />
-        </LeftFlyoutContext.Provider>
+        </LeftPanelContext.Provider>
       </TestProviders>
     );
     expect(queryByTestId(USER_DETAILS_TEST_ID)).not.toBeInTheDocument();

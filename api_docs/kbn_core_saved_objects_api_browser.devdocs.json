@@ -971,14 +971,6 @@
             "path": "src/plugins/visualizations/public/plugin.ts"
           },
           {
-            "plugin": "eventAnnotation",
-            "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
-          },
-          {
-            "plugin": "eventAnnotation",
-            "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
-          },
-          {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/util/dependency_cache.ts"
           },
@@ -1129,18 +1121,6 @@
               {
                 "plugin": "dashboard",
                 "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
-              },
-              {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
-              },
-              {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
-              },
-              {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
               },
               {
                 "plugin": "savedObjects",
@@ -1340,10 +1320,6 @@
               {
                 "plugin": "home",
                 "path": "src/plugins/home/public/application/components/home_app.js"
-              },
-              {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -1708,10 +1684,6 @@
                 "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/resolvers.ts"
               },
@@ -1828,10 +1800,6 @@
                 "path": "src/plugins/dashboard/public/dashboard_actions/clone_panel_action.tsx"
               },
               {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/components/custom_urls/custom_url_editor/utils.ts"
               },
@@ -1846,10 +1814,6 @@
               {
                 "plugin": "monitoring",
                 "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
-              },
-              {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
               },
               {
                 "plugin": "savedObjects",
@@ -2301,14 +2265,6 @@
               {
                 "plugin": "@kbn/core-saved-objects-browser-mocks",
                 "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/saved_objects_service.mock.ts"
-              },
-              {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
-              },
-              {
-                "plugin": "eventAnnotation",
-                "path": "src/plugins/event_annotation/public/event_annotation_service/service.test.ts"
               },
               {
                 "plugin": "savedObjects",
@@ -3771,7 +3727,7 @@
         "signature": [
           "{ type: string | string[]; search?: string | undefined; page?: number | undefined; filter?: any; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; namespaces?: string[] | undefined; fields?: string[] | undefined; sortField?: string | undefined; preference?: string | undefined; perPage?: number | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
+          "> | undefined; namespaces?: string[] | undefined; perPage?: number | undefined; fields?: string[] | undefined; sortField?: string | undefined; preference?: string | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; searchFields?: string[] | undefined; hasReference?: ",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
             "scope": "common",
@@ -3824,6 +3780,14 @@
           {
             "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
+          },
+          {
+            "plugin": "eventAnnotation",
+            "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
+          },
+          {
+            "plugin": "eventAnnotation",
+            "path": "src/plugins/event_annotation/public/event_annotation_service/service.tsx"
           }
         ],
         "initialIsOpen": false

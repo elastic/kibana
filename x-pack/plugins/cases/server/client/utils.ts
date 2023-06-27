@@ -149,47 +149,38 @@ export const getAlertIds = (comment: CommentRequest): string[] => {
   return [];
 };
 
-export const addStatusFilter = ({
-  status,
-  appendFilter,
-  type = CASE_SAVED_OBJECT,
-}: {
-  status: CaseStatuses;
-  appendFilter?: KueryNode;
-  type?: string;
-}): KueryNode => {
-  const filters: KueryNode[] = [];
-  filters.push(
-    nodeBuilder.is(`${type}.attributes.status`, `${STATUS_EXTERNAL_TO_ESMODEL[status]}`)
+const addStatusFilter = (status: CaseStatuses): KueryNode => {
+  return nodeBuilder.is(
+    `${CASE_SAVED_OBJECT}.attributes.status`,
+    `${STATUS_EXTERNAL_TO_ESMODEL[status]}`
   );
-
-  if (appendFilter) {
-    filters.push(appendFilter);
-  }
-
-  return filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
 };
 
-export const addSeverityFilter = ({
-  severity,
-  appendFilter,
-  type = CASE_SAVED_OBJECT,
-}: {
-  severity: CaseSeverity;
-  appendFilter?: KueryNode;
-  type?: string;
-}): KueryNode => {
-  const filters: KueryNode[] = [];
-
-  filters.push(
-    nodeBuilder.is(`${type}.attributes.severity`, `${SEVERITY_EXTERNAL_TO_ESMODEL[severity]}`)
+const addSeverityFilter = (severity: CaseSeverity): KueryNode => {
+  return nodeBuilder.is(
+    `${CASE_SAVED_OBJECT}.attributes.severity`,
+    `${SEVERITY_EXTERNAL_TO_ESMODEL[severity]}`
   );
+};
 
-  if (appendFilter) {
-    filters.push(appendFilter);
+const buildCategoryFilter = (
+  categories: CasesFindQueryParams['category']
+): KueryNode | undefined => {
+  if (categories === undefined) {
+    return;
   }
 
-  return filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
+  const categoriesAsArray = Array.isArray(categories) ? categories : [categories];
+
+  if (categoriesAsArray.length === 0) {
+    return;
+  }
+
+  const categoryFilters = categoriesAsArray.map((category) =>
+    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.category`, `${category}`)
+  );
+
+  return nodeBuilder.or(categoryFilters);
 };
 
 export const NodeBuilderOperators = {
@@ -399,16 +390,17 @@ export const constructQueryOptions = ({
   from,
   to,
   assignees,
+  category,
 }: CasesFindQueryParams): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = createReportersFilter(reporters);
   const sortField = convertSortField(sortByField);
   const ownerFilter = buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' });
-
-  const statusFilter = status != null ? addStatusFilter({ status }) : undefined;
-  const severityFilter = severity != null ? addSeverityFilter({ severity }) : undefined;
+  const statusFilter = status != null ? addStatusFilter(status) : undefined;
+  const severityFilter = severity != null ? addSeverityFilter(severity) : undefined;
   const rangeFilter = buildRangeFilter({ from, to });
   const assigneesFilter = buildAssigneesFilter({ assignees });
+  const categoryFilter = buildCategoryFilter(category);
 
   const filters = combineFilters([
     statusFilter,
@@ -418,6 +410,7 @@ export const constructQueryOptions = ({
     rangeFilter,
     ownerFilter,
     assigneesFilter,
+    categoryFilter,
   ]);
 
   return {
@@ -500,7 +493,7 @@ export const getCaseToUpdate = (
         if (!deepEqual(currentValue, value)) {
           acc[key] = value;
         }
-      } else if (currentValue != null && value !== currentValue) {
+      } else if (currentValue !== undefined && value !== currentValue) {
         acc[key] = value;
       }
       return acc;

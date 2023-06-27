@@ -534,19 +534,22 @@ const exampleInsight = `${insightPrefix}{
   ]
 }}`;
 
-export const plugin = {
-  name: 'insights',
-  button: {
-    label: 'Insights',
-    iconType: 'aggregate',
-  },
-  helpText: (
-    <div>
-      <EuiCodeBlock language="md" fontSize="l" paddingSize="s" isCopyable>
-        {exampleInsight}
-      </EuiCodeBlock>
-      <EuiSpacer size="s" />
-    </div>
-  ),
-  editor: InsightEditor,
+export const plugin = ({ licenseIsPlatinum }: { licenseIsPlatinum: boolean }) => {
+  return {
+    name: 'insights',
+    button: {
+      label: licenseIsPlatinum ? i18n.INVESTIGATE : i18n.INIGHT_UPSELL,
+      iconType: 'timelineWithArrow',
+      isDisabled: !licenseIsPlatinum,
+    },
+    helpText: (
+      <div>
+        <EuiCodeBlock language="md" fontSize="l" paddingSize="s" isCopyable>
+          {exampleInsight}
+        </EuiCodeBlock>
+        <EuiSpacer size="s" />
+      </div>
+    ),
+    editor: InsightEditor,
+  };
 };

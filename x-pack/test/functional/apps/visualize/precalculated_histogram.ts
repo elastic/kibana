@@ -40,7 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(rowData).to.contain('"values":[0.3,1,3,4.2,4.8]');
     });
 
-    describe('works in visualizations', () => {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/159615
+    describe.skip('works in visualizations', () => {
       before(async () => {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();

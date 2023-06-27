@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
-import { type Observable, of } from 'rxjs';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
-
+import { render } from '@testing-library/react';
+import React from 'react';
+import { of, type Observable } from 'rxjs';
 import {
   defaultAnalyticsNavGroup,
   defaultDevtoolsNavGroup,
@@ -30,14 +29,14 @@ describe('<Navigation />', () => {
 
       const { findByTestId } = render(
         <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <Navigation homeRef="https://elastic.co">
+          <Navigation>
             <Navigation.Group id="group1">
-              <Navigation.Item id="item1" title="Item 1" />
-              <Navigation.Item id="item2" title="Item 2" />
+              <Navigation.Item id="item1" title="Item 1" href="https://foo" />
+              <Navigation.Item id="item2" title="Item 2" href="https://foo" />
               <Navigation.Group id="group1A" title="Group1A">
-                <Navigation.Item id="item1" title="Group 1A Item 1" />
+                <Navigation.Item id="item1" title="Group 1A Item 1" href="https://foo" />
                 <Navigation.Group id="group1A_1" title="Group1A_1">
-                  <Navigation.Item id="item1" title="Group 1A_1 Item 1" />
+                  <Navigation.Item id="item1" title="Group 1A_1 Item 1" href="https://foo" />
                 </Navigation.Group>
               </Navigation.Group>
             </Navigation.Group>
@@ -62,7 +61,6 @@ describe('<Navigation />', () => {
       const [navTree] = lastCall;
 
       expect(navTree).toEqual({
-        homeRef: 'https://elastic.co',
         navigationTree: [
           {
             id: 'group1',
@@ -72,11 +70,13 @@ describe('<Navigation />', () => {
               {
                 id: 'item1',
                 title: 'Item 1',
+                href: 'https://foo',
                 path: ['group1', 'item1'],
               },
               {
                 id: 'item2',
                 title: 'Item 2',
+                href: 'https://foo',
                 path: ['group1', 'item2'],
               },
               {
@@ -86,6 +86,7 @@ describe('<Navigation />', () => {
                 children: [
                   {
                     id: 'item1',
+                    href: 'https://foo',
                     title: 'Group 1A Item 1',
                     path: ['group1', 'group1A', 'item1'],
                   },
@@ -97,6 +98,7 @@ describe('<Navigation />', () => {
                       {
                         id: 'item1',
                         title: 'Group 1A_1 Item 1',
+                        href: 'https://foo',
                         path: ['group1', 'group1A', 'group1A_1', 'item1'],
                       },
                     ],
@@ -128,12 +130,12 @@ describe('<Navigation />', () => {
           navLinks$={navLinks$}
           onProjectNavigationChange={onProjectNavigationChange}
         >
-          <Navigation homeRef="https://elastic.co">
+          <Navigation>
             <Navigation.Group id="root">
               <Navigation.Group id="group1">
                 {/* Title from deeplink */}
-                <Navigation.Item id="item1" link="item1" />
-                <Navigation.Item id="item2" link="item1" title="Overwrite deeplink title" />
+                <Navigation.Item<any> id="item1" link="item1" />
+                <Navigation.Item<any> id="item2" link="item1" title="Overwrite deeplink title" />
                 <Navigation.Item id="item3" title="Title in props" />
                 <Navigation.Item id="item4">Title in children</Navigation.Item>
               </Navigation.Group>
@@ -148,7 +150,6 @@ describe('<Navigation />', () => {
       const [navTree] = lastCall;
 
       expect(navTree).toEqual({
-        homeRef: 'https://elastic.co',
         navigationTree: [
           {
             id: 'root',
@@ -221,13 +222,13 @@ describe('<Navigation />', () => {
           navLinks$={navLinks$}
           onProjectNavigationChange={onProjectNavigationChange}
         >
-          <Navigation homeRef="https://elastic.co">
+          <Navigation>
             <Navigation.Group id="root">
               <Navigation.Group id="group1">
                 {/* Title from deeplink */}
-                <Navigation.Item id="item1" link="item1" />
+                <Navigation.Item<any> id="item1" link="item1" />
                 {/* Should not appear */}
-                <Navigation.Item id="unknownLink" link="unknown" title="Should NOT be there" />
+                <Navigation.Item<any> id="unknownLink" link="unknown" title="Should NOT be there" />
               </Navigation.Group>
             </Navigation.Group>
           </Navigation>
@@ -243,7 +244,6 @@ describe('<Navigation />', () => {
       const [navTree] = lastCall;
 
       expect(navTree).toEqual({
-        homeRef: 'https://elastic.co',
         navigationTree: [
           {
             id: 'root',
@@ -258,6 +258,82 @@ describe('<Navigation />', () => {
                   {
                     id: 'item1',
                     path: ['root', 'group1', 'item1'],
+                    title: 'Title from deeplink',
+                    deepLink: {
+                      id: 'item1',
+                      title: 'Title from deeplink',
+                      baseUrl: '',
+                      url: '',
+                      href: '',
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    test('should not render the group if it does not have children AND no href or deeplink', async () => {
+      const navLinks$: Observable<ChromeNavLink[]> = of([
+        {
+          id: 'item1',
+          title: 'Title from deeplink',
+          baseUrl: '',
+          url: '',
+          href: '',
+        },
+      ]);
+      const onProjectNavigationChange = jest.fn();
+
+      const { queryByTestId } = render(
+        <NavigationProvider
+          {...services}
+          navLinks$={navLinks$}
+          onProjectNavigationChange={onProjectNavigationChange}
+        >
+          <Navigation>
+            <Navigation.Group id="root">
+              <Navigation.Group id="group1">
+                <Navigation.Item<any> id="item1" link="notRegistered" />
+              </Navigation.Group>
+              <Navigation.Group id="group2">
+                <Navigation.Item<any> id="item1" link="item1" />
+              </Navigation.Group>
+            </Navigation.Group>
+          </Navigation>
+        </NavigationProvider>
+      );
+
+      expect(queryByTestId('nav-group-root.group1')).toBeNull();
+      expect(queryByTestId('nav-item-root.group2.item1')).toBeVisible();
+
+      expect(onProjectNavigationChange).toHaveBeenCalled();
+      const lastCall =
+        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+      const [navTree] = lastCall;
+
+      expect(navTree).toEqual({
+        navigationTree: [
+          {
+            id: 'root',
+            path: ['root'],
+            title: '',
+            children: [
+              {
+                id: 'group1',
+                path: ['root', 'group1'],
+                title: '',
+              },
+              {
+                id: 'group2',
+                path: ['root', 'group2'],
+                title: '',
+                children: [
+                  {
+                    id: 'item1',
+                    path: ['root', 'group2', 'item1'],
                     title: 'Title from deeplink',
                     deepLink: {
                       id: 'item1',
@@ -294,13 +370,13 @@ describe('<Navigation />', () => {
           navLinks$={navLinks$}
           onProjectNavigationChange={onProjectNavigationChange}
         >
-          <Navigation homeRef="https://elastic.co">
+          <Navigation>
             <Navigation.Group id="root">
               <Navigation.Group id="group1">
-                <Navigation.Item link="item1">
+                <Navigation.Item<any> link="item1">
                   <div data-test-subj="my-custom-element">Custom element</div>
                 </Navigation.Item>
-                <Navigation.Item id="item2" title="Children prop">
+                <Navigation.Item id="item2" title="Children prop" href="http://foo">
                   {(navNode) => <div data-test-subj="my-other-custom-element">{navNode.title}</div>}
                 </Navigation.Item>
               </Navigation.Group>
@@ -311,9 +387,7 @@ describe('<Navigation />', () => {
 
       expect(await findByTestId('my-custom-element')).toBeVisible();
       expect(await findByTestId('my-other-custom-element')).toBeVisible();
-      expect(await (await findByTestId('my-other-custom-element')).textContent).toBe(
-        'Children prop'
-      );
+      expect((await findByTestId('my-other-custom-element')).textContent).toBe('Children prop');
 
       expect(onProjectNavigationChange).toHaveBeenCalled();
       const lastCall =
@@ -321,7 +395,6 @@ describe('<Navigation />', () => {
       const [navTree] = lastCall;
 
       expect(navTree).toEqual({
-        homeRef: 'https://elastic.co',
         navigationTree: [
           {
             id: 'root',
@@ -348,6 +421,7 @@ describe('<Navigation />', () => {
                   },
                   {
                     id: 'item2',
+                    href: 'http://foo',
                     path: ['root', 'group1', 'item2'],
                     title: 'Children prop',
                     renderItem: expect.any(Function),
@@ -365,7 +439,7 @@ describe('<Navigation />', () => {
 
       render(
         <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <Navigation homeRef="https://elastic.co">
+          <Navigation>
             <Navigation.Group preset="analytics" />
             <Navigation.Group preset="ml" />
             <Navigation.Group preset="devtools" />
@@ -380,7 +454,6 @@ describe('<Navigation />', () => {
       const [navTreeGenerated] = lastCall;
 
       expect(navTreeGenerated).toEqual({
-        homeRef: 'https://elastic.co',
         navigationTree: expect.any(Array),
       });
 
@@ -397,31 +470,6 @@ describe('<Navigation />', () => {
       expect(navTreeGenerated.navigationTree[3]).toEqual(defaultManagementNavGroup);
     });
 
-    test('should render cloud link', async () => {
-      const onProjectNavigationChange = jest.fn();
-
-      const { findByTestId } = render(
-        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
-          <Navigation homeRef="https://elastic.co">
-            <Navigation.Group id="root">
-              <Navigation.Group id="group1">
-                <Navigation.CloudLink preset="deployments" />
-                <Navigation.CloudLink preset="projects" />
-                <Navigation.CloudLink href="https://foo.com" icon="myIcon" title="Custom link" />
-              </Navigation.Group>
-            </Navigation.Group>
-          </Navigation>
-        </NavigationProvider>
-      );
-
-      expect(await findByTestId('nav-header-link-to-projects')).toBeVisible();
-      expect(await findByTestId('nav-header-link-to-deployments')).toBeVisible();
-      expect(await findByTestId('nav-header-link-to-cloud')).toBeVisible();
-      expect(await (await findByTestId('nav-header-link-to-cloud')).textContent).toBe(
-        'Custom link'
-      );
-    });
-
     test('should render recently accessed items', async () => {
       const recentlyAccessed$ = of([
         { label: 'This is an example', link: '/app/example/39859', id: '39850' },
@@ -430,7 +478,7 @@ describe('<Navigation />', () => {
 
       const { findByTestId } = render(
         <NavigationProvider {...services} recentlyAccessed$={recentlyAccessed$}>
-          <Navigation homeRef="https://elastic.co">
+          <Navigation>
             <Navigation.Group id="root">
               <Navigation.Group id="group1">
                 <Navigation.RecentlyAccessed />
@@ -441,9 +489,74 @@ describe('<Navigation />', () => {
       );
 
       expect(await findByTestId('nav-bucket-recentlyAccessed')).toBeVisible();
-      expect(await (await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
+      expect((await findByTestId('nav-bucket-recentlyAccessed')).textContent).toBe(
         'RecentThis is an exampleAnother example'
       );
+    });
+
+    test('should allow href for absolute links', async () => {
+      const onProjectNavigationChange = jest.fn();
+
+      render(
+        <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+          <Navigation>
+            <Navigation.Group id="group1">
+              <Navigation.Item id="item1" title="Item 1" href="https://example.com" />
+            </Navigation.Group>
+          </Navigation>
+        </NavigationProvider>
+      );
+
+      expect(onProjectNavigationChange).toHaveBeenCalled();
+      const lastCall =
+        onProjectNavigationChange.mock.calls[onProjectNavigationChange.mock.calls.length - 1];
+      const [navTreeGenerated] = lastCall;
+
+      expect(navTreeGenerated).toEqual({
+        navigationTree: [
+          {
+            id: 'group1',
+            path: ['group1'],
+            title: '',
+            children: [
+              {
+                id: 'item1',
+                title: 'Item 1',
+                href: 'https://example.com',
+                path: ['group1', 'item1'],
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    test('should throw if href is not an absolute links', async () => {
+      // We'll mock the console.error to avoid dumping the (expected) error in the console
+      // source: https://github.com/jestjs/jest/pull/5267#issuecomment-356605468
+      jest.spyOn(console, 'error');
+      // @ts-expect-error we're mocking the console so "mockImplementation" exists
+      // eslint-disable-next-line no-console
+      console.error.mockImplementation(() => {});
+
+      const onProjectNavigationChange = jest.fn();
+
+      const expectToThrow = () => {
+        render(
+          <NavigationProvider {...services} onProjectNavigationChange={onProjectNavigationChange}>
+            <Navigation>
+              <Navigation.Group id="group1">
+                <Navigation.Item id="item1" title="Item 1" href="../dashboards" />
+              </Navigation.Group>
+            </Navigation>
+          </NavigationProvider>
+        );
+      };
+
+      expect(expectToThrow).toThrowError('href must be an absolute URL. Node id [item1].');
+      // @ts-expect-error we're mocking the console so "mockImplementation" exists
+      // eslint-disable-next-line no-console
+      console.error.mockRestore();
     });
   });
 });

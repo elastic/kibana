@@ -15,12 +15,12 @@ import {
   SyntheticsMonitorWithSecrets,
 } from '../../../common/runtime_types';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeSecrets } from '../../synthetics_service/utils/secrets';
 
 export const testNowMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
-  path: API_URLS.TRIGGER_MONITOR + '/{monitorId}',
+  path: SYNTHETICS_API_URLS.TRIGGER_MONITOR + '/{monitorId}',
   validate: {
     params: schema.object({
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),

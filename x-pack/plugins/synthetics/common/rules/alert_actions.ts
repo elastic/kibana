@@ -286,6 +286,7 @@ function getEmailActionParams(
     to: defaultEmail.to,
     subject: isRecovery ? defaultRecoverySubjectMessage : defaultSubjectMessage,
     message: isRecovery ? defaultRecoveryMessage : defaultActionMessage,
+    messageHTML: null,
     cc: defaultEmail.cc ?? [],
     bcc: defaultEmail.bcc ?? [],
     kibanaFooterLink: {

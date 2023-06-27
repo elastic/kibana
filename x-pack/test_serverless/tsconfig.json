@@ -23,5 +23,8 @@
     "@kbn/repo-info",
     "@kbn/cypress-config",
     "@kbn/dev-proc-runner",
+    "@kbn/telemetry-plugin",
+    "@kbn/telemetry-collection-xpack-plugin",
+    "@kbn/telemetry-tools",
   ]
 }

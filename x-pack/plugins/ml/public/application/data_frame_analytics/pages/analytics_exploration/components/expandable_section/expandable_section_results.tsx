@@ -40,11 +40,11 @@ import {
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { useColorRange, ColorRangeLegend } from '../../../../../components/color_range_legend';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 import { defaultSearchQuery, renderCellPopoverFactory, SEARCH_SIZE } from '../../../../common';
@@ -121,7 +121,7 @@ interface ExpandableSectionResultsProps {
   jobConfig?: DataFrameAnalyticsConfig;
   needsDestIndexPattern: boolean;
   resultsField?: string;
-  searchQuery: SavedSearchQuery;
+  searchQuery: estypes.QueryDslQueryContainer;
 }
 
 export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({

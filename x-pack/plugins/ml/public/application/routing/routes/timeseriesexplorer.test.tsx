@@ -8,8 +8,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { MlContext } from '../../contexts/ml';
-import { kibanaContextValueMock } from '../../contexts/ml/__mocks__/kibana_context_value';
 import { TimeSeriesExplorerUrlStateManager } from './timeseriesexplorer';
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplorer_page';
@@ -137,13 +135,11 @@ describe('TimeSeriesExplorerUrlStateManager', () => {
     };
 
     render(
-      <MlContext.Provider value={kibanaContextValueMock}>
-        <I18nProvider>
-          <DatePickerContextProvider {...getMockedDatePickerDependencies()}>
-            <TimeSeriesExplorerUrlStateManager {...props} />
-          </DatePickerContextProvider>
-        </I18nProvider>
-      </MlContext.Provider>
+      <I18nProvider>
+        <DatePickerContextProvider {...getMockedDatePickerDependencies()}>
+          <TimeSeriesExplorerUrlStateManager {...props} />
+        </DatePickerContextProvider>
+      </I18nProvider>
     );
 
     // assert

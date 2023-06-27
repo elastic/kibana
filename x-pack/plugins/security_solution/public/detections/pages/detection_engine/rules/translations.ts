@@ -686,6 +686,33 @@ export const NO_RULES_BODY = i18n.translate(
   }
 );
 
+export const NO_RULES_AVAILABLE_FOR_INSTALL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.addRules.noRulesTitle',
+  {
+    defaultMessage: 'All Elastic rules have been installed',
+  }
+);
+
+export const NO_RULES_AVAILABLE_FOR_INSTALL_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.addRules.noRulesBodyTitle',
+  {
+    defaultMessage: 'There are no prebuilt detection rules available for installation',
+  }
+);
+export const NO_RULES_AVAILABLE_FOR_UPGRADE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.noRulesTitle',
+  {
+    defaultMessage: 'All Elastic rules are up to date',
+  }
+);
+
+export const NO_RULES_AVAILABLE_FOR_UPGRADE_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.noRulesBodyTitle',
+  {
+    defaultMessage: 'There are currently no available updates to your installed Elastic rules.',
+  }
+);
+
 export const DEFINE_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.defineRuleTitle',
   {
@@ -1168,5 +1195,19 @@ export const RULE_MANAGEMENT_CONTEXT_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleManagement.ruleManagementContextTooltip',
   {
     defaultMessage: 'Add this alert as context',
+  }
+);
+
+export const INSTALL_RULE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.installRuleButton',
+  {
+    defaultMessage: 'Install rule',
+  }
+);
+
+export const UPDATE_RULE_BUTTON = i18n.translate(
+  'xpack.securitySolution.addRules.upgradeRuleButton',
+  {
+    defaultMessage: 'Update rule',
   }
 );

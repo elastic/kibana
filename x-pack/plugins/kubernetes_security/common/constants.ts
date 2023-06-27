@@ -10,10 +10,11 @@ export const KUBERNETES_TITLE = 'Kubernetes';
 export const LOCAL_STORAGE_HIDE_WIDGETS_KEY = 'kubernetesSecurity:shouldHideWidgets';
 export const LOCAL_STORAGE_TREE_NAV_KEY = 'kubernetesSecurity:treeNavSelection';
 
+export const CURRENT_API_VERSION = '1';
 export const AGGREGATE_ROUTE = '/internal/kubernetes_security/aggregate';
 export const COUNT_ROUTE = '/internal/kubernetes_security/count';
 export const MULTI_TERMS_AGGREGATE_ROUTE = '/internal/kubernetes_security/multi_terms_aggregate';
-export const AGENT_ID_ROUTE = '/internal/kubernetes_security/agent_id';
+
 export const AGGREGATE_PAGE_SIZE = 10;
 
 // so, bucket sort can only page through what we request at the top level agg, which means there is a ceiling to how many aggs we can page through.

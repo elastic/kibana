@@ -41,7 +41,7 @@ import {
 } from '../../../../../components/field_stats_flyout';
 import { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-import { useMlContext } from '../../../../../contexts/ml';
+import { useDataSource } from '../../../../../contexts/ml';
 
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
@@ -120,8 +120,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   state,
   setCurrentStep,
 }) => {
-  const mlContext = useMlContext();
-  const { currentDataView, selectedSavedSearch } = mlContext;
+  const { currentDataView, selectedSavedSearch } = useDataSource();
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
 
   const [fieldOptionsFetchFail, setFieldOptionsFetchFail] = useState<boolean>(false);

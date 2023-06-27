@@ -8,11 +8,16 @@
 
 import React, { Fragment, ReactElement, ReactNode, useEffect } from 'react';
 
+import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import type { ChromeProjectNavigationNodeEnhanced, NodeProps } from '../types';
 import { useInitNavNode } from '../hooks';
 import { useNavigation } from './navigation';
 
-export interface Props extends NodeProps {
+export interface Props<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends NodeProps<LinkId, Id, ChildrenId> {
   element?: string;
   unstyled?: boolean;
 }
@@ -21,7 +26,11 @@ function isReactElement(element: ReactNode): element is ReactElement {
   return React.isValidElement(element);
 }
 
-function NavigationItemComp(props: Props) {
+function NavigationItemComp<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+>(props: Props<LinkId, Id, ChildrenId>) {
   const navigationContext = useNavigation();
   const navNodeRef = React.useRef<ChromeProjectNavigationNodeEnhanced | null>(null);
 
@@ -57,4 +66,4 @@ function NavigationItemComp(props: Props) {
   return <Element>{navNode.title}</Element>;
 }
 
-export const NavigationItem = React.memo(NavigationItemComp);
+export const NavigationItem = React.memo(NavigationItemComp) as typeof NavigationItemComp;

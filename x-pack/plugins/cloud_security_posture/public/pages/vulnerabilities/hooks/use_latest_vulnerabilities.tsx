@@ -8,23 +8,27 @@ import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { number } from 'io-ts';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  getSafeVulnerabilitiesQueryFilter,
-  LATEST_VULNERABILITIES_INDEX_PATTERN,
-} from '../../../../common/constants';
+  SearchRequest,
+  SearchResponse,
+  AggregationsMultiBucketAggregateBase,
+  AggregationsStringRareTermsBucketKeys,
+  Sort,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../../common/constants';
+import { getSafeVulnerabilitiesQueryFilter } from '../../../../common/utils/get_safe_vulnerabilities_query_filter';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
 import { FindingsBaseEsQuery } from '../../../common/types';
-type LatestFindingsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
-type LatestFindingsResponse = IKibanaSearchResponse<estypes.SearchResponse<any, FindingsAggs>>;
+type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
+type LatestFindingsResponse = IKibanaSearchResponse<SearchResponse<any, FindingsAggs>>;
 
 interface FindingsAggs {
-  count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
+  count: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
 }
 
 interface VulnerabilitiesQuery extends FindingsBaseEsQuery {
-  sort: estypes.Sort;
+  sort: Sort;
   enabled: boolean;
   pageIndex: number;
   pageSize: number;

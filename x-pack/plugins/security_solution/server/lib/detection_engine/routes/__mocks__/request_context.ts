@@ -23,7 +23,7 @@ import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 
 import { siemMock } from '../../../../mocks';
 import { createMockConfig } from '../../../../config.mock';
-import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import { detectionEngineHealthClientMock, ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { requestMock } from './request';
 import { internalFrameworkRequest } from '../../../framework';
 
@@ -58,6 +58,8 @@ export const createMockClients = () => {
 
     config: createMockConfig(),
     appClient: siemMock.createClient(),
+
+    detectionEngineHealthClient: detectionEngineHealthClientMock.create(),
     ruleExecutionLog: ruleExecutionLogMock.forRoutes.create(),
   };
 };
@@ -130,6 +132,7 @@ const createSecuritySolutionRequestContextMock = (
     }),
     getSpaceId: jest.fn(() => 'default'),
     getRuleDataService: jest.fn(() => clients.ruleDataService),
+    getDetectionEngineHealthClient: jest.fn(() => clients.detectionEngineHealthClient),
     getRuleExecutionLog: jest.fn(() => clients.ruleExecutionLog),
     getExceptionListClient: jest.fn(() => clients.lists.exceptionListClient),
     getInternalFleetServices: jest.fn(() => {

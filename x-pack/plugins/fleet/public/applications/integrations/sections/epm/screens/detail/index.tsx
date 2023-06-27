@@ -175,9 +175,9 @@ export function Detail() {
 
   const updateAvailable =
     packageInfo &&
-    'savedObject' in packageInfo &&
-    packageInfo.savedObject &&
-    semverLt(packageInfo.savedObject.attributes.version, packageInfo.latestVersion);
+    'installationInfo' in packageInfo &&
+    packageInfo.installationInfo?.version &&
+    semverLt(packageInfo.installationInfo.version, packageInfo.latestVersion);
 
   const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
     boolean | undefined
@@ -256,8 +256,8 @@ export function Detail() {
 
       let installedVersion;
       const { name } = packageInfoData.item;
-      if ('savedObject' in packageInfoResponse) {
-        installedVersion = packageInfoResponse.savedObject?.attributes.version;
+      if ('installationInfo' in packageInfoResponse) {
+        installedVersion = packageInfoResponse.installationInfo?.version;
       }
       const status: InstallStatus = packageInfoResponse?.status as any;
       if (name) {

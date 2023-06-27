@@ -17,7 +17,7 @@ import { ML_INTERNAL_BASE_PATH } from '../../../../../../../common/constants/app
 import { WizardNav } from '../wizard_nav';
 import { StepProps, WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
-import { useMlContext } from '../../../../../contexts/ml';
+import { useDataSource } from '../../../../../contexts/ml';
 import { EventRateChart } from '../charts/event_rate_chart';
 import { LineChartPoint } from '../../../common/chart_loader';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
@@ -32,7 +32,7 @@ import {
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const timefilter = useTimefilter();
   const { services } = useMlKibana();
-  const mlContext = useMlContext();
+  const mlContext = useDataSource();
 
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, chartLoader, chartInterval } =
     useContext(JobCreatorContext);

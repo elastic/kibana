@@ -2174,6 +2174,100 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.PluginStartContract.getType",
+            "type": "Function",
+            "tags": [],
+            "label": "getType",
+            "description": [],
+            "signature": [
+              "<Params extends ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
+              },
+              " = ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
+              },
+              ", ExtractedParams extends ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
+              },
+              " = ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
+              },
+              ", State extends ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTypeState",
+                "text": "RuleTypeState"
+              },
+              " = ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleTypeState",
+                "text": "RuleTypeState"
+              },
+              ", InstanceState extends { [x: string]: unknown; } = { [x: string]: unknown; }, InstanceContext extends { [x: string]: unknown; } = { [x: string]: unknown; }, ActionGroupIds extends string = string, RecoveryActionGroupId extends string = string, AlertData extends ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleAlertData",
+                "text": "RuleAlertData"
+              },
+              " = ",
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.RuleAlertData",
+                "text": "RuleAlertData"
+              },
+              ">(id: string) => ",
+              "NormalizedRuleType",
+              "<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId, AlertData>"
+            ],
+            "path": "x-pack/plugins/alerting/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.PluginStartContract.getType.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "x-pack/plugins/alerting/server/rule_type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.PluginStartContract.getRulesClientWithRequest",
             "type": "Function",
             "tags": [],
@@ -3576,6 +3670,20 @@
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleType.fieldsForAAD",
+            "type": "Array",
+            "tags": [],
+            "label": "fieldsForAAD",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4318,7 +4426,9 @@
           "MuteOptions",
           ") => Promise<void>; runSoon: (options: { id: string; }) => Promise<any>; listRuleTypes: () => Promise<Set<",
           "RegistryAlertTypeWithAuth",
-          ">>; getSpaceId: () => string | undefined; getAlertFromRaw: (params: ",
+          ">>; getSpaceId: () => string | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<",
+          "GetTagsResult",
+          ">; getAlertFromRaw: (params: ",
           "GetAlertFromRawParams",
           ") => ",
           {

@@ -129,6 +129,13 @@ export default ({ getService }: FtrProviderContext): void => {
         );
       });
 
+      it('should post a case with default category', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest()); // category is undefined
+        const data = removeServerGeneratedPropertiesFromCase(postedCase);
+
+        expect(data.category).to.eql(null);
+      });
+
       it('should create a user action when creating a case', async () => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
         const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });

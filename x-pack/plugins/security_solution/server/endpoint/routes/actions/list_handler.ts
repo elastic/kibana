@@ -57,8 +57,7 @@ export const actionListHandler = (
         commands,
         statuses,
         withOutputs,
-        withAutomatedActions,
-        alertId,
+        types,
       },
     } = req;
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
@@ -76,8 +75,7 @@ export const actionListHandler = (
 
       const requestParams = {
         withOutputs: formatStringIds(withOutputs),
-        alertId: formatStringIds(alertId),
-        withAutomatedActions,
+        types: formatStringIds(types),
         commands: formatCommandValues(commands),
         esClient,
         elasticAgentIds: formatStringIds(elasticAgentIds),

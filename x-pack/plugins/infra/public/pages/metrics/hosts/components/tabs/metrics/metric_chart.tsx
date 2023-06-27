@@ -94,8 +94,8 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
       hasBorder
       paddingSize={error ? 'm' : 'none'}
       css={css`
-        min-height: calc(${MIN_HEIGHT} + ${euiTheme.size.l});
-        position: 'relative';
+        min-height: calc(${MIN_HEIGHT}px + ${euiTheme.size.l});
+        position: relative;
       `}
       data-test-subj={`hostsView-metricChart-${type}`}
     >

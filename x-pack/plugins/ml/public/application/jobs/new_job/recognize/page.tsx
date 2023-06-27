@@ -23,8 +23,8 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import { useDataSource } from '../../../contexts/ml';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
-import { useMlContext } from '../../../contexts/ml';
 import {
   DatafeedResponse,
   JobOverride,
@@ -92,7 +92,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const [jobsAwaitingNodeCount, setJobsAwaitingNodeCount] = useState(0);
   // #endregion
 
-  const { selectedSavedSearch, currentDataView: dataView, combinedQuery } = useMlContext();
+  const { selectedSavedSearch, currentDataView: dataView, combinedQuery } = useDataSource();
   const pageTitle = selectedSavedSearch
     ? i18n.translate('xpack.ml.newJob.recognize.savedSearchPageTitle', {
         defaultMessage: 'saved search {savedSearchTitle}',

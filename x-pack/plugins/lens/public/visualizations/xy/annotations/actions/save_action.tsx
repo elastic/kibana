@@ -11,13 +11,13 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import {
   OnSaveProps as SavedObjectOnSaveProps,
   SavedObjectSaveModal,
 } from '@kbn/saved-objects-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiLink } from '@elastic/eui';
 import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { LayerAction, StateSetter } from '../../../../types';
@@ -49,46 +49,48 @@ export const SaveModal = ({
   const closeModal = () => unmountComponentAtNode(domElement);
 
   return (
-    <SavedObjectSaveModal
-      onSave={async (props) => onSave({ ...props, closeModal, newTags: selectedTags })}
-      onClose={closeModal}
-      title={title}
-      description={description}
-      showCopyOnSave={showCopyOnSave}
-      objectType={i18n.translate(
-        'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.objectType',
-        { defaultMessage: 'group' }
-      )}
-      customModalTitle={i18n.translate(
-        'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.modalTitle',
-        {
-          defaultMessage: 'Save annotation group to library',
+    <I18nProvider>
+      <SavedObjectSaveModal
+        onSave={async (props) => onSave({ ...props, closeModal, newTags: selectedTags })}
+        onClose={closeModal}
+        title={title}
+        description={description}
+        showCopyOnSave={showCopyOnSave}
+        objectType={i18n.translate(
+          'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.objectType',
+          { defaultMessage: 'group' }
+        )}
+        customModalTitle={i18n.translate(
+          'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.modalTitle',
+          {
+            defaultMessage: 'Save annotation group to library',
+          }
+        )}
+        showDescription={true}
+        confirmButtonLabel={
+          <>
+            <div>
+              <EuiIcon type="save" />
+            </div>
+            <div>
+              {i18n.translate(
+                'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.confirmButton',
+                { defaultMessage: 'Save group' }
+              )}
+            </div>
+          </>
         }
-      )}
-      showDescription={true}
-      confirmButtonLabel={
-        <>
-          <div>
-            <EuiIcon type="save" />
-          </div>
-          <div>
-            {i18n.translate(
-              'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.confirmButton',
-              { defaultMessage: 'Save group' }
-            )}
-          </div>
-        </>
-      }
-      options={
-        savedObjectsTagging ? (
-          <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
-            initialSelection={selectedTags}
-            onTagsSelected={setSelectedTags}
-            markOptional
-          />
-        ) : undefined
-      }
-    />
+        options={
+          savedObjectsTagging ? (
+            <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+              initialSelection={selectedTags}
+              onTagsSelected={setSelectedTags}
+              markOptional
+            />
+          ) : undefined
+        }
+      />
+    </I18nProvider>
   );
 };
 
@@ -116,7 +118,7 @@ const saveAnnotationGroupToLibrary = async (
     title: newTitle,
     description: newDescription,
     tags: newTags,
-    dataViewSpec: dataView.isPersisted() ? undefined : dataView.toSpec(),
+    dataViewSpec: dataView.isPersisted() ? undefined : dataView.toSpec(false),
   };
 
   if (saveAsNew) {
@@ -140,6 +142,7 @@ export const onSave = async ({
   toasts,
   modalOnSaveProps: { newTitle, newDescription, newTags, closeModal, newCopyOnSave },
   dataViews,
+  goToAnnotationLibrary,
 }: {
   state: XYState;
   layer: XYAnnotationLayerConfig;
@@ -148,6 +151,7 @@ export const onSave = async ({
   toasts: ToastsStart;
   modalOnSaveProps: ModalOnSaveProps;
   dataViews: DataViewsContract;
+  goToAnnotationLibrary: () => Promise<void>;
 }) => {
   let savedInfo: Awaited<ReturnType<typeof saveAnnotationGroupToLibrary>>;
   try {
@@ -203,9 +207,21 @@ export const onSave = async ({
         <p>
           <FormattedMessage
             id="xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastBody"
-            defaultMessage="View or manage in the {link}"
+            defaultMessage="View or manage in the {link}."
             values={{
-              link: <a href="#">annotation library</a>,
+              link: (
+                <EuiLink
+                  data-test-subj="lnsAnnotationLibraryLink"
+                  onClick={() => goToAnnotationLibrary()}
+                >
+                  {i18n.translate(
+                    'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.annotationLibrary',
+                    {
+                      defaultMessage: 'annotation library',
+                    }
+                  )}
+                </EuiLink>
+              ),
             }}
           />
         </p>,
@@ -222,6 +238,7 @@ export const getSaveLayerAction = ({
   toasts,
   savedObjectsTagging,
   dataViews,
+  goToAnnotationLibrary,
 }: {
   state: XYState;
   layer: XYAnnotationLayerConfig;
@@ -230,6 +247,7 @@ export const getSaveLayerAction = ({
   toasts: ToastsStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   dataViews: DataViewsContract;
+  goToAnnotationLibrary: () => Promise<void>;
 }): LayerAction => {
   const neverSaved = !isByReferenceAnnotationsLayer(layer);
 
@@ -261,6 +279,7 @@ export const getSaveLayerAction = ({
                 toasts,
                 modalOnSaveProps: props,
                 dataViews,
+                goToAnnotationLibrary,
               });
             }}
             title={neverSaved ? '' : layer.__lastSaved.title}

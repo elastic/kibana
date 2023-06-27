@@ -76,6 +76,7 @@ class DocLinks {
   public connectorsPostgreSQL: string;
   public connectorsS3: string;
   public connectorsSharepoint: string;
+  public connectorsSharepointOnline: string;
   public connectorsWorkplaceSearch: string;
   public crawlerExtractionRules: string;
   public crawlerManaging: string;
@@ -103,10 +104,11 @@ class DocLinks {
   public mlDocumentEnrichment: string;
   public pluginsIngestAttachment: string;
   public queryDsl: string;
+  public searchApplications: string;
+  public searchApplicationsTemplates: string;
+  public searchTemplates: string;
   public searchUIAppSearch: string;
   public searchUIElasticsearch: string;
-  public searchApplications: string;
-  public searchTemplates: string;
   public start: string;
   public syncRules: string;
   public workplaceSearchApiKeys: string;
@@ -214,6 +216,7 @@ class DocLinks {
     this.connectorsPostgreSQL = '';
     this.connectorsS3 = '';
     this.connectorsSharepoint = '';
+    this.connectorsSharepointOnline = '';
     this.connectorsWorkplaceSearch = '';
     this.crawlerExtractionRules = '';
     this.crawlerManaging = '';
@@ -243,6 +246,7 @@ class DocLinks {
     this.queryDsl = '';
     this.searchUIAppSearch = '';
     this.searchUIElasticsearch = '';
+    this.searchApplicationsTemplates = '';
     this.searchApplications = '';
     this.searchTemplates = '';
     this.start = '';
@@ -354,6 +358,7 @@ class DocLinks {
     this.connectorsPostgreSQL = docLinks.links.enterpriseSearch.connectorsPostgreSQL;
     this.connectorsS3 = docLinks.links.enterpriseSearch.connectorsS3;
     this.connectorsSharepoint = docLinks.links.enterpriseSearch.connectorsSharepoint;
+    this.connectorsSharepointOnline = docLinks.links.enterpriseSearch.connectorsSharepointOnline;
     this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
     this.crawlerExtractionRules = docLinks.links.enterpriseSearch.crawlerExtractionRules;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
@@ -383,6 +388,7 @@ class DocLinks {
     this.queryDsl = docLinks.links.query.queryDsl;
     this.searchUIAppSearch = docLinks.links.searchUI.appSearch;
     this.searchUIElasticsearch = docLinks.links.searchUI.elasticsearch;
+    this.searchApplicationsTemplates = docLinks.links.enterpriseSearch.searchApplicationsTemplates;
     this.searchApplications = docLinks.links.enterpriseSearch.searchApplications;
     this.searchTemplates = docLinks.links.enterpriseSearch.searchTemplates;
     this.start = docLinks.links.enterpriseSearch.start;

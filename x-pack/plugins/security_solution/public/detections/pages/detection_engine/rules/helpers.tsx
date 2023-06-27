@@ -287,45 +287,6 @@ export type PrePackagedTimelineInstallationStatus =
   | 'timelineNeedUpdate'
   | 'unknown';
 
-export const getPrePackagedRuleInstallationStatus = (
-  rulesInstalled?: number,
-  rulesNotInstalled?: number,
-  rulesNotUpdated?: number
-): PrePackagedRuleInstallationStatus => {
-  if (
-    rulesNotInstalled != null &&
-    rulesInstalled === 0 &&
-    rulesNotInstalled > 0 &&
-    rulesNotUpdated === 0
-  ) {
-    return 'ruleNotInstalled';
-  } else if (
-    rulesInstalled != null &&
-    rulesInstalled > 0 &&
-    rulesNotInstalled === 0 &&
-    rulesNotUpdated === 0
-  ) {
-    return 'ruleInstalled';
-  } else if (
-    rulesInstalled != null &&
-    rulesNotInstalled != null &&
-    rulesInstalled > 0 &&
-    rulesNotInstalled > 0 &&
-    rulesNotUpdated === 0
-  ) {
-    return 'someRuleUninstall';
-  } else if (
-    rulesInstalled != null &&
-    rulesNotInstalled != null &&
-    rulesNotUpdated != null &&
-    rulesInstalled > 0 &&
-    rulesNotInstalled >= 0 &&
-    rulesNotUpdated > 0
-  ) {
-    return 'ruleNeedUpdate';
-  }
-  return 'unknown';
-};
 export const getPrePackagedTimelineInstallationStatus = (
   timelinesInstalled?: number,
   timelinesNotInstalled?: number,

@@ -43,10 +43,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }
 
   function createAgent(
-    body: APIClientRequestParamsOf<'PUT /api/apm/settings/agent-configuration 2023-05-22'>['params']['body']
+    body: APIClientRequestParamsOf<'PUT /api/apm/settings/agent-configuration 2023-10-31'>['params']['body']
   ) {
     return apmApiClient.writeUser({
-      endpoint: 'PUT /api/apm/settings/agent-configuration 2023-05-22',
+      endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
       params: {
         body,
       },
@@ -54,10 +54,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }
 
   function deleteAgent(
-    body: APIClientRequestParamsOf<'DELETE /api/apm/settings/agent-configuration 2023-05-22'>['params']['body']
+    body: APIClientRequestParamsOf<'DELETE /api/apm/settings/agent-configuration 2023-10-31'>['params']['body']
   ) {
     return apmApiClient.writeUser({
-      endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-05-22',
+      endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
       params: {
         body,
       },

@@ -32,13 +32,21 @@ export enum FieldType {
   BOOLEAN = 'bool',
 }
 
+export interface ConnectorConfigCategoryProperties {
+  label: string;
+  order: number;
+  type: 'category';
+}
+
 export interface ConnectorConfigProperties {
+  category?: string;
   default_value: string | number | boolean | null;
   depends_on: Dependency[];
   display: DisplayType;
   label: string;
   options: SelectOption[];
   order?: number | null;
+  placeholder?: string;
   required: boolean;
   sensitive: boolean;
   tooltip: string;
@@ -48,8 +56,11 @@ export interface ConnectorConfigProperties {
   value: string | number | boolean | null;
 }
 
-export type ConnectorConfiguration = Record<string, ConnectorConfigProperties | null> & {
-  extract_full_html?: { label: string; value: boolean };
+export type ConnectorConfiguration = Record<
+  string,
+  ConnectorConfigProperties | ConnectorConfigCategoryProperties | null
+> & {
+  extract_full_html?: { label: string; value: boolean }; // This only exists for Crawler
 };
 
 export interface ConnectorSyncConfigProperties {

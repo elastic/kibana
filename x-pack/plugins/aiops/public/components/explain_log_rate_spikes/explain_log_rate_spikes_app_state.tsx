@@ -38,12 +38,15 @@ export interface ExplainLogRateSpikesAppStateProps {
   savedSearch: SavedSearch | null;
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
+  /** Option to make main histogram sticky */
+  stickyHistogram?: boolean;
 }
 
 export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps> = ({
   dataView,
   savedSearch,
   appDependencies,
+  stickyHistogram,
 }) => {
   if (!dataView) return null;
 
@@ -80,7 +83,7 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
           <SpikeAnalysisTableRowStateProvider>
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <ExplainLogRateSpikesPage />
+                <ExplainLogRateSpikesPage stickyHistogram={stickyHistogram} />
               </DatePickerContextProvider>
             </StorageContextProvider>
           </SpikeAnalysisTableRowStateProvider>

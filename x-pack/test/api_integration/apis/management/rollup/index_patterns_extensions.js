@@ -7,10 +7,10 @@
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
+import { FIELDS_FOR_WILDCARD_PATH as BASE_URI } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
 import { stringify } from 'query-string';
 import { registerHelpers } from './rollup.test_helpers';
-import { INDEX_PATTERNS_EXTENSION_BASE_PATH } from './constants';
 import { getRandomString } from './lib';
 
 export default function ({ getService }) {
@@ -21,8 +21,6 @@ export default function ({ getService }) {
 
   describe('index patterns extension', () => {
     describe('Fields for wildcards', () => {
-      const BASE_URI = `${INDEX_PATTERNS_EXTENSION_BASE_PATH}/_fields_for_wildcard`;
-
       describe('query params validation', () => {
         let uri;
         let body;

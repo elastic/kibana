@@ -19,6 +19,7 @@ import {
   ELASTICSEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  ESRE_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
@@ -51,6 +52,16 @@ export const useEnterpriseSearchNav = () => {
           ...generateNavLink({
             shouldNotCreateHref: true,
             to: ELASTICSEARCH_PLUGIN.URL,
+          }),
+        },
+        {
+          id: 'esre',
+          name: i18n.translate('xpack.enterpriseSearch.nav.esreTitle', {
+            defaultMessage: 'ESRE',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: ESRE_PLUGIN.URL,
           }),
         },
         {

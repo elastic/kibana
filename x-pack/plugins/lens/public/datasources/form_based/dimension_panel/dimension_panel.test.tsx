@@ -669,7 +669,7 @@ describe('FormBasedDimensionEditor', () => {
 
     act(() => {
       wrapper
-        .find('input[data-test-subj="column-label-edit"]')
+        .find('input[data-test-subj="name-input"]')
         .simulate('change', { target: { value: 'New Label' } });
     });
 
@@ -773,7 +773,7 @@ describe('FormBasedDimensionEditor', () => {
 
     act(() => {
       wrapper
-        .find('input[data-test-subj="column-label-edit"]')
+        .find('input[data-test-subj="name-input"]')
         .simulate('change', { target: { value: 'Sum of bytes' } });
     });
 

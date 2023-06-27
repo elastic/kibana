@@ -10,6 +10,7 @@ import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
   EuiDataGridColumnCellAction,
+  EuiFlexItem,
   EuiProgress,
   EuiSpacer,
   EuiToolTip,
@@ -19,6 +20,8 @@ import { cx } from '@emotion/css';
 import { DataView } from '@kbn/data-views-plugin/common';
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY } from '../../common/constants';
 import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
 import { useLatestVulnerabilities } from './hooks/use_latest_vulnerabilities';
@@ -47,6 +50,10 @@ import {
   getCaseInsensitiveSortScript,
 } from './utils/custom_sort_script';
 import { useStyles } from './hooks/use_styles';
+import { FindingsGroupBySelector } from '../configurations/layout/findings_group_by_selector';
+import { vulnerabilitiesPathnameHandler } from './utils/vulnerabilities_pathname_handler';
+import { findingsNavigation } from '../../common/navigation/constants';
+import { VulnerabilitiesByResource } from './vulnerabilities_by_resource/vulnerabilities_by_resource';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
@@ -75,7 +82,19 @@ export const Vulnerabilities = () => {
     return defaultNoDataRenderer();
   }
 
-  return <VulnerabilitiesContent dataView={data} />;
+  return (
+    <Switch>
+      <Route
+        exact
+        path={findingsNavigation.vulnerabilities_by_resource.path}
+        render={() => <VulnerabilitiesByResource dataView={data} />}
+      />
+      <Route
+        path={findingsNavigation.vulnerabilities.path}
+        render={() => <VulnerabilitiesContent dataView={data} />}
+      />
+    </Switch>
+  );
 };
 
 const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
@@ -431,7 +450,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
         loading={isLoading}
         placeholder={SEARCH_BAR_PLACEHOLDER}
       />
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       {!isLoading && data.page.length === 0 ? (
         <EmptyState onResetFilters={onResetFilters} />
       ) : (
@@ -457,6 +476,7 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
               showColumnSelector: false,
               showDisplaySelector: false,
               showKeyboardShortcuts: false,
+              showFullScreenSelector: false,
               additionalControls: {
                 left: {
                   prepend: (
@@ -471,6 +491,14 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
                     </>
                   ),
                 },
+                right: (
+                  <EuiFlexItem grow={false} className={styles.groupBySelector}>
+                    <FindingsGroupBySelector
+                      type="default"
+                      pathnameHandler={vulnerabilitiesPathnameHandler}
+                    />
+                  </EuiFlexItem>
+                ),
               },
             }}
             gridStyle={{

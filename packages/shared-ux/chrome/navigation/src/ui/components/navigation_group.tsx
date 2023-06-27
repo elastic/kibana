@@ -8,11 +8,12 @@
 
 import React, { createContext, useCallback, useMemo, useContext } from 'react';
 
+import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import { useInitNavNode } from '../hooks';
 import type { NodeProps, RegisterFunction } from '../types';
 import { NavigationSectionUI } from './navigation_section_ui';
 import { useNavigation } from './navigation';
-import { NavigationBucket, Props as NavigationBucketProps } from './navigation_bucket';
+import { NavigationBucket, type Props as NavigationBucketProps } from './navigation_bucket';
 
 interface Context {
   register: RegisterFunction;
@@ -30,12 +31,20 @@ export function useNavigationGroup<T extends boolean = true>(
   return context as T extends true ? Context : Context | undefined;
 }
 
-export interface Props extends NodeProps {
+export interface Props<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends NodeProps<LinkId, Id, ChildrenId> {
   unstyled?: boolean;
   defaultIsCollapsed?: boolean;
 }
 
-function NavigationGroupInternalComp(props: Props) {
+function NavigationGroupInternalComp<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+>(props: Props<LinkId, Id, ChildrenId>) {
   const navigationContext = useNavigation();
   const { children, defaultIsCollapsed, ...node } = props;
   const { navNode, registerChildNode, path, childrenNodes } = useInitNavNode(node);
@@ -90,10 +99,19 @@ function NavigationGroupInternalComp(props: Props) {
   );
 }
 
-function NavigationGroupComp(props: Props & NavigationBucketProps) {
+function NavigationGroupComp<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+>(props: Props<LinkId, Id, ChildrenId> & NavigationBucketProps) {
   if (props.preset) {
-    const { id, title, link, icon, children, ...rest } = props;
-    return <NavigationBucket {...rest} />;
+    return (
+      <NavigationBucket
+        preset={props.preset}
+        nodeDefinition={props.nodeDefinition}
+        defaultIsCollapsed={props.defaultIsCollapsed}
+      />
+    );
   }
 
   const { preset, nodeDefinition, ...rest } = props;

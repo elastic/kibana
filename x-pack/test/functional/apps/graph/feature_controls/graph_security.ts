@@ -29,7 +29,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.security.forceLogout();
     });
 
-    describe('global graph all privileges', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/53204
+    describe.skip('global graph all privileges', () => {
       before(async () => {
         await security.role.create('global_graph_all_role', {
           elasticsearch: {

@@ -63,7 +63,7 @@ export const guideCards: GuideCardConstants[] = [
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.databaseSearch.title"
-        defaultMessage="Search across databases and {lineBreak} business systems"
+        defaultMessage="Search across databases {lineBreak} and business systems"
         values={{
           lineBreak: <br />,
         }}
@@ -172,7 +172,7 @@ export const guideCards: GuideCardConstants[] = [
     title: (
       <FormattedMessage
         id="guidedOnboardingPackage.gettingStarted.cards.cloudSecurity.title"
-        defaultMessage="Secure my cloud assets with {lineBreak} cloud security posture management (CSPM)"
+        defaultMessage="Secure my cloud assets with cloud {lineBreak} security posture management (CSPM)"
         values={{
           lineBreak: <br />,
         }}

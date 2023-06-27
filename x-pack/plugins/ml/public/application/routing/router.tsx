@@ -20,10 +20,10 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { EuiSkeletonText } from '@elastic/eui';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_context';
-import { MlContext, MlContextValue } from '../contexts/ml';
 
 import { MlPage } from '../components/ml_page';
 import { MlPages } from '../../locator';
+import { type RouteResolverContext } from './use_resolver';
 
 // custom RouteProps making location non-optional
 interface MlRouteProps extends RouteProps {
@@ -64,13 +64,18 @@ export interface PageDependencies {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   dataViewsContract: DataViewsContract;
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
-  redirectToMlAccessDeniedPage: () => Promise<void>;
 }
 
-export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {
+export const PageLoader: FC<{ context: RouteResolverContext }> = ({ context, children }) => {
+  const isLoading = !context.initialized;
+
+  if (context?.resolvedComponent) {
+    return context.resolvedComponent;
+  }
+
   return (
-    <EuiSkeletonText lines={10} isLoading={context === null}>
-      <MlContext.Provider value={context}>{children}</MlContext.Provider>
+    <EuiSkeletonText lines={10} isLoading={isLoading}>
+      {!isLoading ? children : null}
     </EuiSkeletonText>
   );
 };

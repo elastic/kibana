@@ -19,3 +19,4 @@ export {
   defaultManagementNavGroup,
   defaultMlNavGroup,
 } from './src/default_navigation.test.helpers';
+export { navLinksMock } from './src/navlinks';
