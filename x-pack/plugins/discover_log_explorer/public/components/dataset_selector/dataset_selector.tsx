@@ -22,7 +22,7 @@ import { DatasetsPopover } from './sub_components/datasets_popover';
 import { DatasetSkeleton } from './sub_components/datasets_skeleton';
 import { SearchControls } from './sub_components/search_controls';
 import { DatasetSelectorProps } from './types';
-import { buildIntegrationsTree, setIntegrationListSpy } from './utils';
+import { buildIntegrationsTree } from './utils';
 
 /**
  * Lazy load hidden components
