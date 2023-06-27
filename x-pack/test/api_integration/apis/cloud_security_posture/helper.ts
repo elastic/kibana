@@ -47,7 +47,7 @@ export async function createPackagePolicy(
   deployment: string,
   posture: string
 ) {
-  const version = posture === 'kspm' || posture === 'cspm' ? '1.2.8' : '1.3.0-preview2';
+  const version = '1.3.0';
   const title = 'Security Posture Management';
   const streams = [
     {
