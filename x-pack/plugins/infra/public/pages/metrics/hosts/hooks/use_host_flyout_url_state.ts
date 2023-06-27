@@ -45,6 +45,7 @@ export const useHostFlyoutUrlState = (): [HostFlyoutUrl, SetHostFlyoutState] => 
 };
 
 const FlyoutTabIdRT = rt.union([
+  rt.literal(FlyoutTabIds.OVERVIEW),
   rt.literal(FlyoutTabIds.METADATA),
   rt.literal(FlyoutTabIds.PROCESSES),
   rt.literal(FlyoutTabIds.LOGS),
