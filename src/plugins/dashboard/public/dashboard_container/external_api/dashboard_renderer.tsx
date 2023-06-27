@@ -20,8 +20,6 @@ import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
 import useUnmount from 'react-use/lib/useUnmount';
 
-import { i18n } from '@kbn/i18n';
-import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { ErrorEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
@@ -36,18 +34,21 @@ import {
   DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
 } from '../embeddable/dashboard_container_factory';
+import { DashboardRedirect } from '../types';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { DashboardContainerInput } from '../../../common';
 import type { DashboardContainer } from '../embeddable/dashboard_container';
+import { Dashboard404Page } from './dashboard_404';
 
 export interface DashboardRendererProps {
   savedObjectId?: string;
   showPlainSpinner?: boolean;
+  dashboardRedirect?: DashboardRedirect;
   getCreationOptions?: () => Promise<DashboardCreationOptions>;
 }
 
 export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRendererProps>(
-  ({ savedObjectId, getCreationOptions, showPlainSpinner }, ref) => {
+  ({ savedObjectId, getCreationOptions, dashboardRedirect, showPlainSpinner }, ref) => {
     const dashboardRoot = useRef(null);
     const [loading, setLoading] = useState(true);
     const [screenshotMode, setScreenshotMode] = useState(false);
@@ -161,19 +162,7 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
     );
 
     const renderDashboardContents = () => {
-      if (dashboardMissing) {
-        return (
-          <NotFoundPrompt
-            title={i18n.translate('dashboard.renderer.404Title', {
-              defaultMessage: 'Dashboard not found',
-            })}
-            body={i18n.translate('dashboard.renderer.404Body', {
-              defaultMessage:
-                "Sorry, the dashboard you're looking for can't be found. It might have been removed or renamed, or maybe it never existed at all.",
-            })}
-          />
-        );
-      }
+      if (dashboardMissing) return <Dashboard404Page dashboardRedirect={dashboardRedirect} />;
       if (fatalError) return fatalError.render();
       if (loading) return loadingSpinner;
       return <div ref={dashboardRoot} />;
