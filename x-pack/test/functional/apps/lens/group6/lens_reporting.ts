@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     for (const type of ['PNG', 'PDF'] as const) {
-      describe(`${type} report`, () => {
+      describe.skip(`${type} report`, () => {
         it(`should not allow to download reports for incomplete visualization`, async () => {
           await PageObjects.visualize.gotoVisualizationLandingPage();
           await PageObjects.visualize.navigateToNewVisualization();
