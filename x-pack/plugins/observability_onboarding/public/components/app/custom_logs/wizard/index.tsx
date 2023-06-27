@@ -13,6 +13,7 @@ import { Inspect } from './inspect';
 
 interface WizardState {
   datasetName: string;
+  serviceName: string;
   logFilePaths: string[];
   namespace: string;
   customConfigurations: string;
@@ -27,15 +28,20 @@ interface WizardState {
   uploadType?: 'log-file' | 'api-key';
   elasticAgentPlatform: 'linux-tar' | 'macos' | 'windows' | 'deb' | 'rpm';
   autoDownloadConfig: boolean;
+  apiKeyEncoded: string;
+  onboardingId: string;
 }
 
 const initialState: WizardState = {
   datasetName: '',
+  serviceName: '',
   logFilePaths: [''],
   namespace: 'default',
   customConfigurations: '',
   elasticAgentPlatform: 'linux-tar',
   autoDownloadConfig: false,
+  apiKeyEncoded: '',
+  onboardingId: '',
 };
 
 const { Provider, Step, useWizard } = createWizardContext({

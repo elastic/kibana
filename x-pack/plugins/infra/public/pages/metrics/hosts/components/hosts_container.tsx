@@ -13,6 +13,7 @@ import { useMetricsDataViewContext } from '../hooks/use_data_view';
 import { UnifiedSearchBar } from './search_bar/unified_search_bar';
 import { HostsContent } from './hosts_content';
 import { ErrorCallout } from './error_callout';
+import { UnifiedSearchProvider } from '../hooks/use_unified_search';
 
 export const HostContainer = () => {
   const { dataView, loading, error, metricAlias, loadDataView } = useMetricsDataViewContext();
@@ -45,10 +46,10 @@ export const HostContainer = () => {
       hasTryAgainButton
     />
   ) : (
-    <>
+    <UnifiedSearchProvider>
       <UnifiedSearchBar />
-      <EuiSpacer />
+      <EuiSpacer size="m" />
       <HostsContent />
-    </>
+    </UnifiedSearchProvider>
   );
 };

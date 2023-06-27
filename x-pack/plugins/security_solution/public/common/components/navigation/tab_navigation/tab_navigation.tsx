@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTab, EuiTabs, EuiBetaBadge } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiBadge } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -49,7 +49,7 @@ const TabNavigationItemComponent = ({
       isSelected={isSelected}
       href={appHref}
       onClick={handleClick}
-      append={isBeta && <EuiBetaBadge label={betaOptions?.text ?? BETA} size="s" />}
+      append={isBeta && <EuiBadge color={'#E0E5EE'}>{betaOptions?.text ?? BETA}</EuiBadge>}
     >
       {name}
     </EuiTab>

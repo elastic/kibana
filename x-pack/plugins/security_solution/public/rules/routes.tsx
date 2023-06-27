@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { Redirect, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import * as i18n from './translations';
@@ -23,6 +23,7 @@ import { useReadonlyHeader } from '../use_readonly_header';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { AllRulesTabs } from '../detection_engine/rule_management_ui/components/rules_table/rules_table_toolbar';
+import { AddRulesPage } from '../detection_engine/rule_management_ui/pages/add_rules';
 
 const RulesSubRoutes = [
   {
@@ -41,8 +42,13 @@ const RulesSubRoutes = [
     exact: true,
   },
   {
-    path: `/rules/:tabName(${AllRulesTabs.management}|${AllRulesTabs.monitoring})`,
+    path: `/rules/:tabName(${AllRulesTabs.management}|${AllRulesTabs.monitoring}|${AllRulesTabs.updates})`,
     main: RulesPage,
+    exact: true,
+  },
+  {
+    path: '/rules/add_rules',
+    main: AddRulesPage,
     exact: true,
   },
 ];
@@ -53,7 +59,7 @@ const RulesContainerComponent: React.FC = () => {
   return (
     <PluginTemplateWrapper>
       <TrackApplicationView viewId={SecurityPageName.rules}>
-        <Switch>
+        <Routes>
           <Route // Redirect to first tab if none specified
             path="/rules/id/:detailName"
             exact
@@ -86,7 +92,7 @@ const RulesContainerComponent: React.FC = () => {
           ))}
           <Route component={NotFoundPage} />
           <SpyRoute pageName={SecurityPageName.rules} />
-        </Switch>
+        </Routes>
       </TrackApplicationView>
     </PluginTemplateWrapper>
   );

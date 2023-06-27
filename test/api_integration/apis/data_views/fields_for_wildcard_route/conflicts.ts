@@ -8,6 +8,7 @@
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
+import { FIELDS_FOR_WILDCARD_PATH } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -25,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('flags fields with mismatched types as conflicting', () =>
       supertest
-        .get('/api/index_patterns/_fields_for_wildcard')
+        .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
         .query({ pattern: 'logs-*' })
         .expect(200)

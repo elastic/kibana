@@ -213,7 +213,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns bad request if payload is invalid for HTTP monitor', async () => {
-      const { id: monitorId, attributes: savedMonitor } = await saveMonitor(
+      const { id: monitorId, ...savedMonitor } = await saveMonitor(
         httpMonitorJson as MonitorFields
       );
 
@@ -229,7 +229,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns bad request if monitor type is invalid', async () => {
-      const { id: monitorId, attributes: savedMonitor } = await saveMonitor(
+      const { id: monitorId, ...savedMonitor } = await saveMonitor(
         httpMonitorJson as MonitorFields
       );
 
@@ -296,7 +296,7 @@ export default function ({ getService }: FtrProviderContext) {
           secretKeys
         )
       );
-      expect(editResponse.body.attributes).not.to.have.keys('unknownkey');
+      expect(editResponse.body).not.to.have.keys('unknownkey');
     });
 
     it('handles private location errors and does not update the monitor if integration policy is unable to be updated', async () => {
@@ -311,6 +311,7 @@ export default function ({ getService }: FtrProviderContext) {
             label: 'Europe West',
             isServiceManaged: true,
           },
+          { id: testPolicyId, label: 'Private location', isServiceManaged: false },
         ],
       };
 
@@ -344,10 +345,7 @@ export default function ({ getService }: FtrProviderContext) {
         monitorId = id;
         const toUpdate = {
           ...savedMonitor,
-          locations: [
-            ...savedMonitor.locations,
-            { id: testPolicyId, label: 'Private location', isServiceManaged: false },
-          ],
+          name: '!@#$%^&*()_++[\\-\\]- wow',
           urls: 'https://google.com',
         };
         await supertestWithoutAuth
@@ -360,8 +358,9 @@ export default function ({ getService }: FtrProviderContext) {
         const response = await monitorTestService.getMonitor(monitorId);
 
         // ensure monitor was not updated
-        expect(response.body.attributes.urls).eql(newMonitor.urls);
-        expect(response.body.attributes.locations).eql(newMonitor.locations);
+        expect(response.body.urls).not.eql(toUpdate.urls);
+        expect(response.body.urls).eql(newMonitor.urls);
+        expect(response.body.locations).eql(newMonitor.locations);
       } finally {
         await security.user.delete(username);
         await security.role.delete(roleName);
@@ -415,7 +414,7 @@ export default function ({ getService }: FtrProviderContext) {
         const updatedResponse = await monitorTestService.getMonitor(monitorId, true, SPACE_ID);
 
         // ensure monitor was updated
-        expect(updatedResponse.body.attributes.urls).eql(toUpdate.urls);
+        expect(updatedResponse.body.urls).eql(toUpdate.urls);
 
         // update a second time, ensures AAD was not corrupted
         const toUpdate2 = {
@@ -432,7 +431,7 @@ export default function ({ getService }: FtrProviderContext) {
         const updatedResponse2 = await monitorTestService.getMonitor(monitorId, true, SPACE_ID);
 
         // ensure monitor was updated
-        expect(updatedResponse2.body.attributes.urls).eql(toUpdate2.urls);
+        expect(updatedResponse2.body.urls).eql(toUpdate2.urls);
       } finally {
         await supertest
           .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)

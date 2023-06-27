@@ -7,9 +7,9 @@
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
-import { EuiButtonEmpty, EuiLink, useEuiTheme } from '@elastic/eui';
-import { Route } from '@kbn/shared-ux-router';
-import { Switch, useHistory, useLocation } from 'react-router-dom';
+import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { Routes, Route } from '@kbn/shared-ux-router';
+import { useHistory, useLocation } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -18,6 +18,8 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
+import { CertificateTitle } from './components/certificates/certificate_title';
+import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
 import { useSyntheticsPrivileges } from './hooks/use_synthetics_priviliges';
 import { ClientPluginsStart } from '../../plugin';
 import { getMonitorsRoute } from './components/monitors_page/route_config';
@@ -36,6 +38,7 @@ import {
   MonitorTypePortalNode,
 } from './components/monitor_add_edit/portals';
 import {
+  CERTIFICATES_ROUTE,
   GETTING_STARTED_ROUTE,
   MONITOR_ADD_ROUTE,
   MONITOR_EDIT_ROUTE,
@@ -44,6 +47,7 @@ import {
 import { PLUGIN } from '../../../common/constants/plugin';
 import { apiService } from '../../utils/api_service';
 import { getErrorDetailsRouteConfig } from './components/error_details/route_config';
+import { CertificatesPage } from './components/certificates/certificates';
 
 export type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
@@ -99,26 +103,6 @@ const getRoutes = (
           />
         ),
         rightSideItems: [<OutPortal node={InspectMonitorPortalNode} />],
-        children: (
-          <FormattedMessage
-            id="xpack.synthetics.addMonitor.pageHeader.description"
-            defaultMessage="For more information about available monitor types and other options, see our {docs}."
-            values={{
-              docs: (
-                <EuiLink
-                  data-test-subj="syntheticsGetRoutesDocumentationLink"
-                  target="_blank"
-                  href="https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html"
-                >
-                  <FormattedMessage
-                    id="xpack.synthetics.addMonitor.pageHeader.docsLink"
-                    defaultMessage="documentation"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        ),
       },
     },
     {
@@ -165,6 +149,19 @@ const getRoutes = (
         ),
       },
     },
+    {
+      title: i18n.translate('xpack.synthetics.certificatesRoute.title', {
+        defaultMessage: `Certificates | {baseTitle}`,
+        values: { baseTitle },
+      }),
+      path: CERTIFICATES_ROUTE,
+      component: CertificatesPage,
+      dataTestSubj: 'uptimeCertificatesPage',
+      pageHeader: {
+        pageTitle: <CertificateTitle />,
+        rightSideItems: [<CertRefreshBtn />],
+      },
+    },
   ];
 };
 
@@ -194,7 +191,7 @@ export const PageRouter: FC = () => {
   const isUnPrivileged = useSyntheticsPrivileges();
 
   return (
-    <Switch>
+    <Routes>
       {routes.map(
         ({
           title,
@@ -241,6 +238,6 @@ export const PageRouter: FC = () => {
           </SyntheticsPageTemplateComponent>
         )}
       />
-    </Switch>
+    </Routes>
   );
 };

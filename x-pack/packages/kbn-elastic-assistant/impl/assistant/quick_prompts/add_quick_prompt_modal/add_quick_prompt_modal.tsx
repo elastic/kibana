@@ -30,7 +30,11 @@ import { QuickPrompt } from '../types';
 import { QuickPromptSelector } from '../quick_prompt_selector/quick_prompt_selector';
 import { PromptContextSelector } from '../prompt_context_selector/prompt_context_selector';
 
-const StyledEuiModal = styled(EuiModal)``;
+const StyledEuiModal = styled(EuiModal)`
+  min-width: 400px;
+  max-width: 400px;
+  max-height: 80vh;
+`;
 
 const DEFAULT_COLOR = '#D36086';
 

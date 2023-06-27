@@ -11,7 +11,8 @@ import type { CoreStart } from '@kbn/core/public';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldStatsResponse, loadFieldStats } from '@kbn/unified-field-list-plugin/public';
+import { type FieldStatsResponse } from '@kbn/unified-field-list/src/types';
+import { loadFieldStats } from '@kbn/unified-field-list/src/services/field_stats';
 import { GenericIndexPatternColumn, operationDefinitionMap } from '..';
 import { defaultLabel } from '../filters';
 import { isReferenced } from '../../layer_helpers';
@@ -302,6 +303,7 @@ export function getFieldsByValidationState(
       newField &&
       supportedTypes.has(newField.type) &&
       newField.aggregatable &&
+      newField.timeSeriesMetric !== 'counter' &&
       (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms) &&
       (canAcceptScripted || !isScriptedField(newField));
 

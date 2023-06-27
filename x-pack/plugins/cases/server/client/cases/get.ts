@@ -11,6 +11,7 @@ import type {
   CaseResolveResponse,
   User,
   AllTagsFindRequest,
+  AllCategoriesFindRequest,
   AllReportersFindRequest,
   CasesByAlertIDRequest,
   CasesByAlertId,
@@ -18,18 +19,20 @@ import type {
   AttachmentTotals,
 } from '../../../common/api';
 import {
+  AllTagsFindRequestRt,
+  AllCategoriesFindRequestRt,
   CaseRt,
   CaseResolveResponseRt,
-  AllTagsFindRequestRt,
   decodeWithExcessOrThrow,
   AllReportersFindRequestRt,
   CasesByAlertIDRequestRt,
   CasesByAlertIdRt,
   GetTagsResponseRt,
   GetReportersResponseRt,
+  GetCategoriesResponseRt,
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
-import { countAlertsForID, flattenCaseSavedObject } from '../../common/utils';
+import { countAlertsForID, flattenCaseSavedObject, countUserAttachments } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
@@ -204,7 +207,7 @@ export const get = async (
     const res = flattenCaseSavedObject({
       savedObject: theCase,
       comments: theComments.saved_objects,
-      totalComment: theComments.total,
+      totalComment: countUserAttachments(theComments.saved_objects),
       totalAlerts: countAlertsForID({ comments: theComments, id }),
     });
 
@@ -299,7 +302,7 @@ export async function getTags(
     const queryParams = decodeWithExcessOrThrow(AllTagsFindRequestRt)(params);
 
     const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
-      Operations.findCases
+      Operations.getTags
     );
 
     const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
@@ -346,5 +349,39 @@ export async function getReporters(
     return decodeOrThrow(GetReportersResponseRt)(reporters);
   } catch (error) {
     throw createCaseError({ message: `Failed to get reporters: ${error}`, error, logger });
+  }
+}
+
+/**
+ * Retrieves the categories from all the cases.
+ */
+export async function getCategories(
+  params: AllCategoriesFindRequest,
+  clientArgs: CasesClientArgs
+): Promise<string[]> {
+  const {
+    unsecuredSavedObjectsClient,
+    services: { caseService },
+    logger,
+    authorization,
+  } = clientArgs;
+
+  try {
+    const queryParams = decodeWithExcessOrThrow(AllCategoriesFindRequestRt)(params);
+
+    const { filter: authorizationFilter } = await authorization.getAuthorizationFilter(
+      Operations.getCategories
+    );
+
+    const filter = combineAuthorizedAndOwnerFilter(queryParams.owner, authorizationFilter);
+
+    const categories = await caseService.getCategories({
+      unsecuredSavedObjectsClient,
+      filter,
+    });
+
+    return decodeOrThrow(GetCategoriesResponseRt)(categories);
+  } catch (error) {
+    throw createCaseError({ message: `Failed to get categories: ${error}`, error, logger });
   }
 }

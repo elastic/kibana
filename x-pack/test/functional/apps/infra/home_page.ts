@@ -21,9 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
 
-  // Failing: See https://github.com/elastic/kibana/issues/157713
-  // Fails on both Chrome and Firefox
-  describe.skip('Home page', function () {
+  describe('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -194,8 +192,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/157711
-    describe.skip('alerts flyouts', () => {
+    describe('alerts flyouts', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');
@@ -221,7 +218,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.clickAlertsAndRules();
         await pageObjects.infraHome.ensurePopoverOpened();
         await pageObjects.infraHome.clickAlertsAndRules();
-        await pageObjects.infraHome.ensurePopoverClosed();
+        await retry.try(async () => {
+          await pageObjects.infraHome.ensurePopoverClosed();
+        });
       });
     });
 
@@ -245,11 +244,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should create a new saved view and load it', async () => {
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
         await pageObjects.infraSavedViews.createView('view1');
         await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
       });
 
       it('should laod a clicked view from the manage views section', async () => {
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
         await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
         const views = await pageObjects.infraSavedViews.getManageViewsEntries();
         await views[0].click();
@@ -257,18 +258,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should update the current saved view and load it', async () => {
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
         let views = await pageObjects.infraSavedViews.getManageViewsEntries();
         expect(views.length).to.equal(2);
         await pageObjects.infraSavedViews.pressEsc();
 
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
         await pageObjects.infraSavedViews.createView('view2');
         await pageObjects.infraSavedViews.ensureViewIsLoaded('view2');
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
         views = await pageObjects.infraSavedViews.getManageViewsEntries();
         expect(views.length).to.equal(3);
         await pageObjects.infraSavedViews.pressEsc();
 
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
         await pageObjects.infraSavedViews.updateView('view3');
         await pageObjects.infraSavedViews.ensureViewIsLoaded('view3');
+        await pageObjects.infraSavedViews.clickSavedViewsButton();
         views = await pageObjects.infraSavedViews.getManageViewsEntries();
         expect(views.length).to.equal(3);
         await pageObjects.infraSavedViews.pressEsc();

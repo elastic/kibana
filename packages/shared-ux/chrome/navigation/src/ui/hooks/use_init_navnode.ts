@@ -6,11 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import {
+  AppDeepLinkId,
+  ChromeNavLink,
+  ChromeProjectNavigationNode,
+} from '@kbn/core-chrome-browser';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../services';
+import { isAbsoluteLink } from '../../utils';
+import { useNavigation } from '../components/navigation';
 import {
   ChromeProjectNavigationNodeEnhanced,
   NodeProps,
@@ -20,7 +26,11 @@ import {
 } from '../types';
 import { useRegisterTreeNode } from './use_register_tree_node';
 
-function getIdFromNavigationNode({ id: _id, link, title }: NodeProps): string {
+function getIdFromNavigationNode<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+>({ id: _id, link, title }: NodeProps<LinkId, Id, ChildrenId>): string {
   const id = _id ?? link;
 
   if (!id) {
@@ -35,21 +45,35 @@ function isNodeVisible({ link, deepLink }: { link?: string; deepLink?: ChromeNav
     // If a link is provided, but no deepLink is found, don't render anything
     return false;
   }
+
+  if (deepLink) {
+    return !deepLink.hidden;
+  }
+
   return true;
 }
 
-function createInternalNavNode(
+function createInternalNavNode<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+>(
   id: string,
-  _navNode: NodePropsEnhanced,
+  _navNode: NodePropsEnhanced<LinkId, Id, ChildrenId>,
   deepLinks: Readonly<ChromeNavLink[]>,
-  path: string[] | null
+  path: string[] | null,
+  isActive: boolean
 ): ChromeProjectNavigationNodeEnhanced | null {
-  const { children, link, ...navNode } = _navNode;
+  const { children, link, href, ...navNode } = _navNode;
   const deepLink = deepLinks.find((dl) => dl.id === link);
   const isVisible = isNodeVisible({ link, deepLink });
 
   const titleFromDeepLinkOrChildren = typeof children === 'string' ? children : deepLink?.title;
   const title = navNode.title ?? titleFromDeepLinkOrChildren;
+
+  if (href && !isAbsoluteLink(href)) {
+    throw new Error(`href must be an absolute URL. Node id [${id}].`);
+  }
 
   if (!isVisible) {
     return null;
@@ -61,10 +85,29 @@ function createInternalNavNode(
     path: path ?? [id],
     title: title ?? '',
     deepLink,
+    href,
+    isActive,
   };
 }
 
-export const useInitNavNode = (node: NodePropsEnhanced) => {
+function isSamePath(pathA: string[] | null, pathB: string[] | null) {
+  if (pathA === null || pathB === null) {
+    return false;
+  }
+  const pathAToString = pathA.join('.');
+  const pathBToString = pathB.join('.');
+  return pathAToString === pathBToString;
+}
+
+export const useInitNavNode = <
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+>(
+  node: NodePropsEnhanced<LinkId, Id, ChildrenId>
+) => {
+  const { isActive: isActiveControlled } = node;
+
   /**
    * Map of children nodes
    */
@@ -73,11 +116,6 @@ export const useInitNavNode = (node: NodePropsEnhanced) => {
   >({});
 
   const isMounted = useRef(false);
-
-  /**
-   * Flag to indicate if the current node has been registered
-   */
-  const isRegistered = useRef(false);
 
   /**
    * Reference to the unregister function
@@ -101,22 +139,19 @@ export const useInitNavNode = (node: NodePropsEnhanced) => {
    * the list of active routes based on current URL location (passed by the Chrome service)
    */
   const [nodePath, setNodePath] = useState<string[] | null>(null);
-
-  /**
-   * Whenever a child node is registered, we need to re-register the current node
-   * on the parent. This state keeps track when child node register.
-   */
-  const [childrenNodesUpdated, setChildrenNodesUpdated] = useState<string[]>([]);
+  const [isActiveState, setIsActive] = useState(false);
+  const isActive = isActiveControlled ?? isActiveState;
 
   const { navLinks$ } = useNavigationServices();
   const deepLinks = useObservable(navLinks$, []);
   const { register: registerNodeOnParent } = useRegisterTreeNode();
+  const { activeNodes } = useNavigation();
 
   const id = getIdFromNavigationNode(node);
 
   const internalNavNode = useMemo(
-    () => createInternalNavNode(id, node, deepLinks, nodePath),
-    [node, id, deepLinks, nodePath]
+    () => createInternalNavNode(id, node, deepLinks, nodePath, isActive),
+    [node, id, deepLinks, nodePath, isActive]
   );
 
   // Register the node on the parent whenever its properties change or whenever
@@ -126,30 +161,30 @@ export const useInitNavNode = (node: NodePropsEnhanced) => {
       return;
     }
 
-    if (!isRegistered.current || childrenNodesUpdated.length > 0) {
-      const children = Object.values(childrenNodes).sort((a, b) => {
-        const aOrder = orderChildrenRef.current[a.id];
-        const bOrder = orderChildrenRef.current[b.id];
-        return aOrder - bOrder;
-      });
+    const children = Object.values(childrenNodes).sort((a, b) => {
+      const aOrder = orderChildrenRef.current[a.id];
+      const bOrder = orderChildrenRef.current[b.id];
+      return aOrder - bOrder;
+    });
 
-      const { unregister, path } = registerNodeOnParent({
-        ...internalNavNode,
-        children: children.length ? children : undefined,
-      });
+    const { unregister, path } = registerNodeOnParent({
+      ...internalNavNode,
+      children: children.length ? children : undefined,
+    });
 
-      setNodePath(path);
-      setChildrenNodesUpdated([]);
+    setNodePath((prev) => {
+      if (!isSamePath(prev, path)) {
+        return path;
+      }
+      return prev;
+    });
 
-      unregisterRef.current = unregister;
-      isRegistered.current = true;
-    }
-  }, [internalNavNode, childrenNodesUpdated.length, childrenNodes, registerNodeOnParent]);
+    unregisterRef.current = unregister;
+  }, [internalNavNode, childrenNodes, registerNodeOnParent]);
 
   // Un-register from the parent. This will happen when the node is unmounted or if the deeplink
   // is not active anymore.
   const unregister = useCallback(() => {
-    isRegistered.current = false;
     if (unregisterRef.current) {
       unregisterRef.current(id);
       unregisterRef.current = undefined;
@@ -170,8 +205,9 @@ export const useInitNavNode = (node: NodePropsEnhanced) => {
         };
       });
 
-      orderChildrenRef.current[childNode.id] = idx.current++;
-      setChildrenNodesUpdated((prev) => [...prev, childNode.id]);
+      if (orderChildrenRef.current[childNode.id] === undefined) {
+        orderChildrenRef.current[childNode.id] = idx.current++;
+      }
 
       return {
         unregister: (childId: string) => {
@@ -186,6 +222,14 @@ export const useInitNavNode = (node: NodePropsEnhanced) => {
     },
     [nodePath]
   );
+
+  useEffect(() => {
+    const updatedIsActive = activeNodes.reduce((acc, nodesBranch) => {
+      return acc === true ? acc : nodesBranch.some((_node) => isSamePath(_node.path, nodePath));
+    }, false);
+
+    setIsActive(updatedIsActive);
+  }, [activeNodes, nodePath]);
 
   /** Register when mounting and whenever the internal nav node changes */
   useEffect(() => {
