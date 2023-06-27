@@ -66,24 +66,6 @@ test('initial filter is passed through', async () => {
   );
 });
 
-test('tagReferences is passed through', async () => {
-  pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
-
-  let component: ReactWrapper;
-  const tagReferences = [
-    { id: 'mockTagId', name: 'mockTagName', description: '', color: '', type: 'tag' },
-  ];
-
-  await act(async () => {
-    ({ component } = mountWith({ props: { tagReferences } }));
-  });
-  component!.update();
-  expect(TableListViewTable).toHaveBeenCalledWith(
-    expect.objectContaining({ tagReferences }),
-    expect.any(Object) // react context
-  );
-});
-
 test('withPageTemplateHeader is passed through', async () => {
   pluginServices.getServices().dashboardCapabilities.showWriteControls = false;
 

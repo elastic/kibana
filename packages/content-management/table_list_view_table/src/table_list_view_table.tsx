@@ -42,7 +42,7 @@ import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
 import { useInRouterContext, useUrlState } from './use_url_state';
-import { RowActions, TableItemsRowActions, Tag, TagReference } from './types';
+import { RowActions, TableItemsRowActions } from './types';
 
 interface ContentEditorConfig
   extends Pick<OpenContentEditorParams, 'isReadonly' | 'onSave' | 'customValidators'> {
@@ -112,7 +112,6 @@ export interface TableListViewTableProps<
   refreshListBouncer?: boolean;
   onFetchSuccess: () => void;
   setPageDataTestSubject: (subject: string) => void;
-  tagReferences?: TagReference[] | undefined;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -244,32 +243,6 @@ const tableColumnMetadata = {
   },
 } as const;
 
-const appendQuery = (q: Query, tagName: string) => {
-  return q.addOrFieldValue('tag', tagName, true, 'eq');
-};
-
-const getDefaultQuery = (initialQuery: string, tagReferences: Tag[] | null | undefined) => {
-  const query = new Query(Ast.create([]), undefined, initialQuery);
-  const uniqueQueryArray = tagReferences?.reduce<string[]>((acc, { name }) => {
-    if (name && acc.indexOf(name) === -1) {
-      acc.push(name);
-    }
-    return acc;
-  }, []);
-  return (
-    uniqueQueryArray?.reduce((q, ref) => {
-      return appendQuery(q, ref);
-    }, query) ?? query
-  );
-};
-
-const getFindItemReference = (
-  references: SavedObjectsFindOptionsReference[] | undefined,
-  tagReferences?: TagReference[] | undefined
-): SavedObjectsFindOptionsReference[] | undefined => {
-  return [...(references ?? []), ...(tagReferences?.map(({ id, type }) => ({ id, type })) ?? [])];
-};
-
 function TableListViewTableComp<T extends UserContentCommonSchema>({
   tableCaption,
   entityName,
@@ -296,7 +269,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   onFetchSuccess,
   refreshListBouncer,
   setPageDataTestSubject,
-  tagReferences,
 }: TableListViewTableProps<T>) {
   useEffect(() => {
     setPageDataTestSubject(`${entityName}LandingPage`);
@@ -364,7 +336,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       selectedIds: [],
       searchQuery:
         initialQuery !== undefined
-          ? { text: initialQuery, query: getDefaultQuery(initialQuery, tagReferences) }
+          ? { text: initialQuery, query: new Query(Ast.create([]), undefined, initialQuery) }
           : { text: '', query: new Query(Ast.create([]), undefined, '') },
       pagination: {
         pageIndex: 0,
@@ -377,7 +349,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         direction: 'asc',
       },
     }),
-    [initialPageSize, initialQuery, tagReferences]
+    [initialPageSize, initialQuery]
   );
 
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -414,16 +386,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         referencesToExclude,
       } = searchQueryParser
         ? await searchQueryParser(searchQuery.text)
-        : {
-            searchQuery: searchQuery.text,
-            references: tagReferences ?? undefined,
-            referencesToExclude: undefined,
-          };
+        : { searchQuery: searchQuery.text, references: undefined, referencesToExclude: undefined };
 
-      const response = await findItems(searchQueryParsed, {
-        references: getFindItemReference(references, tagReferences),
-        referencesToExclude,
-      });
+      const response = await findItems(searchQueryParsed, { references, referencesToExclude });
 
       if (!isMounted.current) {
         return;
@@ -445,7 +410,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         data: err,
       });
     }
-  }, [searchQueryParser, searchQuery.text, findItems, onFetchSuccess, tagReferences]);
+  }, [searchQueryParser, searchQuery.text, findItems, onFetchSuccess]);
 
   useEffect(() => {
     fetchItems();
@@ -480,9 +445,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const inspectItem = useCallback(
     (item: T) => {
       const tags = getTagIdsFromReferences(item.references).map((_id) => {
-        return item.references.find(({ id: refId }) => {
-          return refId === _id;
-        }) as SavedObjectsReference;
+        return item.references.find(({ id: refId }) => refId === _id) as SavedObjectsReference;
       });
 
       const close = openContentEditor({
@@ -1007,7 +970,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
           addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
           clearTagSelection={clearTagSelection}
-          tagReferences={tagReferences}
         />
 
         {/* Delete modal */}

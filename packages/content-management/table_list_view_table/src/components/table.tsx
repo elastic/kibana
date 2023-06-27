@@ -29,7 +29,7 @@ import type {
   TableListViewTableProps,
   UserContentCommonSchema,
 } from '../table_list_view_table';
-import type { TableItemsRowActions, TagReference } from '../types';
+import type { TableItemsRowActions } from '../types';
 import { TableSortSelect } from './table_sort_select';
 import { TagFilterPanel } from './tag_filter_panel';
 import { useTagFilterPanel } from './use_tag_filter_panel';
@@ -61,7 +61,6 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
   onTableSearchChange: (arg: { query: Query | null; queryText: string }) => void;
   clearTagSelection: () => void;
-  tagReferences?: TagReference[] | undefined;
 }
 
 export function Table<T extends UserContentCommonSchema>({
@@ -87,7 +86,6 @@ export function Table<T extends UserContentCommonSchema>({
   addOrRemoveExcludeTagFilter,
   addOrRemoveIncludeTagFilter,
   clearTagSelection,
-  tagReferences,
 }: Props<T>) {
   const { getTagList } = useServices();
 
@@ -152,17 +150,7 @@ export function Table<T extends UserContentCommonSchema>({
     totalActiveFilters,
   } = useTagFilterPanel({
     query: searchQuery.query,
-    getTagList: useCallback(() => {
-      const tags = getTagList();
-      // In some situation, tags are created after page load.
-      // Therefore the getTagList result is cached before tags created
-      // Do this check to make sure default selected tags are showed
-      if (tags.length === 0 && tagReferences != null) {
-        return tagReferences;
-      }
-      return tags;
-    }, [getTagList, tagReferences]),
-    tagReferences,
+    getTagList,
     tagsToTableItemMap,
     addOrRemoveExcludeTagFilter,
     addOrRemoveIncludeTagFilter,

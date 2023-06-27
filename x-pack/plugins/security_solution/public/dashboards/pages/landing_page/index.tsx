@@ -124,7 +124,6 @@ export const DashboardsLandingPage = () => {
             goToDashboard={goToDashboard}
             pageSectionPadding="none"
             restrictPageSectionWidth={false}
-            tagReferences={securityTags}
             withPageTemplateHeader={false}
             initialFilter={initialFilter}
             urlStateEnabled={false}

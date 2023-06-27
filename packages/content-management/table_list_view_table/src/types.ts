@@ -5,17 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Tag as SavedObjectTag } from '@kbn/saved-objects-tagging-plugin/common';
 
 export interface Tag {
   id?: string;
   name: string;
   description: string;
   color: string;
-}
-
-export interface TagReference extends SavedObjectTag {
-  type: string;
 }
 
 export type TableRowAction = 'delete';

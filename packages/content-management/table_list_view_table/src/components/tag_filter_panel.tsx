@@ -122,7 +122,6 @@ export const TagFilterPanel: FC<Props> = ({
         <EuiPopoverTitle paddingSize="m" css={popoverTitleCSS}>
           <EuiFlexGroup>
             <EuiFlexItem>Tags</EuiFlexItem>
-
             <EuiFlexItem grow={false}>
               {totalActiveFilters > 0 && (
                 <EuiButtonEmpty flush="both" onClick={clearTagSelection} css={clearSelectionBtnCSS}>
@@ -157,7 +156,6 @@ export const TagFilterPanel: FC<Props> = ({
             );
           }}
         </EuiSelectable>
-
         <EuiPopoverFooter paddingSize="m">
           <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
             <EuiFlexItem>

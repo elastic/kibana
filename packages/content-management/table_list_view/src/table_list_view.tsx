@@ -13,7 +13,6 @@ import {
   type TableListViewTableProps,
   type UserContentCommonSchema,
 } from '@kbn/content-management-table-list-view-table';
-import { TagReference } from '@kbn/content-management-table-list-view-table/src/types';
 
 export type TableListViewProps<T extends UserContentCommonSchema = UserContentCommonSchema> = Pick<
   TableListViewTableProps<T>,
@@ -47,7 +46,6 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
    */
   additionalRightSideActions?: ReactNode[];
   children?: ReactNode | undefined;
-  tagReferences?: TagReference[] | undefined;
 };
 
 export const TableListView = <T extends UserContentCommonSchema>({
@@ -75,7 +73,6 @@ export const TableListView = <T extends UserContentCommonSchema>({
   titleColumnName,
   additionalRightSideActions,
   withoutPageTemplateWrapper,
-  tagReferences,
 }: TableListViewProps<T>) => {
   const PageTemplate = withoutPageTemplateWrapper
     ? (React.Fragment as unknown as typeof KibanaPageTemplate)
@@ -124,7 +121,6 @@ export const TableListView = <T extends UserContentCommonSchema>({
             }
           }}
           setPageDataTestSubject={setPageDataTestSubject}
-          tagReferences={tagReferences}
         />
       </KibanaPageTemplate.Section>
     </PageTemplate>

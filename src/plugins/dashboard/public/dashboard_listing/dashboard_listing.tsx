@@ -24,7 +24,6 @@ import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
 import { EuiPaddingSize } from '@elastic/eui';
-import { TagReference } from '@kbn/content-management-table-list-view-table/src/types';
 import {
   DASHBOARD_CONTENT_ID,
   SAVED_OBJECT_DELETE_TIME,
@@ -84,7 +83,6 @@ export type DashboardListingProps = PropsWithChildren<{
   withPageTemplateHeader?: boolean;
   restrictPageSectionWidth?: boolean;
   pageSectionPadding?: EuiPaddingSize;
-  tagReferences?: TagReference[] | undefined;
   urlStateEnabled?: boolean;
   disableCreateDashboardButton?: boolean;
   withoutPageTemplateWrapper?: boolean;
@@ -100,7 +98,6 @@ export const DashboardListing = ({
   withPageTemplateHeader = true,
   restrictPageSectionWidth = true,
   pageSectionPadding = 'm',
-  tagReferences,
   urlStateEnabled,
   withoutPageTemplateWrapper,
 }: DashboardListingProps) => {
@@ -295,7 +292,6 @@ export const DashboardListing = ({
                 listingLimit={listingLimit}
                 emptyPrompt={emptyPrompt}
                 findItems={fetchItems}
-                tagReferences={tagReferences}
                 id="dashboard"
                 urlStateEnabled={urlStateEnabled}
                 onFetchSuccess={() => {

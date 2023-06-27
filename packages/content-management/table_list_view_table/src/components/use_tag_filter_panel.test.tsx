@@ -9,6 +9,7 @@ import { Query } from '@elastic/eui';
 import { renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
 import { useTagFilterPanel } from './use_tag_filter_panel';
+import { of } from 'rxjs';
 
 describe('useTagFilterPanel', () => {
   const query = {
@@ -34,25 +35,22 @@ describe('useTagFilterPanel', () => {
     tag3: ['table4'],
   };
 
-  const getTagList = jest.fn(() => [
-    { name: 'tag', id: 'tag1', description: 'Tag 1', color: 'blue' },
-    { name: 'tag', id: 'tag2', description: 'Tag 2', color: 'green' },
-    { name: 'tag3', id: 'tag3', description: 'Tag 3', color: 'red' },
-  ]);
+  const getTagList = jest.fn(() =>
+    of([
+      { name: 'tag', id: 'tag1', description: 'Tag 1', color: 'blue' },
+      { name: 'tag', id: 'tag2', description: 'Tag 2', color: 'green' },
+      { name: 'tag3', id: 'tag3', description: 'Tag 3', color: 'red' },
+    ])
+  );
 
   const addOrRemoveIncludeTagFilter = jest.fn();
   const addOrRemoveExcludeTagFilter = jest.fn();
-
-  const tagReferences = [
-    { name: 'tag', id: 'tag1', type: 'reference', description: 'Tag 1', color: 'blue' },
-    { name: 'tag', id: 'tag2', type: 'reference', description: 'Tag 2', color: 'green' },
-  ];
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should initialize with default state when no tagReferences', () => {
+  it('should initialize with default state', () => {
     const { result } = renderHook(() =>
       useTagFilterPanel({
         query: null,
@@ -67,24 +65,6 @@ describe('useTagFilterPanel', () => {
     expect(result.current.isInUse).toBe(false);
     expect(result.current.options).toEqual([]);
     expect(result.current.totalActiveFilters).toBe(0);
-  });
-
-  it('should initialize with default state', () => {
-    const { result } = renderHook(() =>
-      useTagFilterPanel({
-        query: null,
-        tagsToTableItemMap,
-        getTagList,
-        addOrRemoveIncludeTagFilter,
-        addOrRemoveExcludeTagFilter,
-        tagReferences,
-      })
-    );
-
-    expect(result.current.isPopoverOpen).toBe(false);
-    expect(result.current.isInUse).toBe(false);
-    expect(result.current.options).toEqual([]);
-    expect(result.current.totalActiveFilters).toBe(2);
   });
 
   it('should render options with query', async () => {
@@ -140,7 +120,6 @@ describe('useTagFilterPanel', () => {
         getTagList,
         addOrRemoveIncludeTagFilter,
         addOrRemoveExcludeTagFilter,
-        tagReferences,
       })
     );
 
