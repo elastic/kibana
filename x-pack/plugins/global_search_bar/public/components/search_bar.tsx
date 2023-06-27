@@ -221,22 +221,29 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         return;
       }
 
-      if (type === 'application') {
-        const key = selected.key ?? 'unknown';
-        const application = `${key.toLowerCase().replaceAll(' ', '_')}`;
-        reportEvent.navigateToApplication({
-          application,
-          searchValue,
-          selectedLabel,
-          selectedRank,
-        });
-      } else {
-        reportEvent.navigateToSavedObject({
-          type,
-          searchValue,
-          selectedLabel,
-          selectedRank,
-        });
+      // errors in tracking should not prevent selection behavior
+      try {
+        if (type === 'application') {
+          const key = selected.key ?? 'unknown';
+          const application = `${key.toLowerCase().replaceAll(' ', '_')}`;
+          reportEvent.navigateToApplication({
+            application,
+            searchValue,
+            selectedLabel,
+            selectedRank,
+          });
+        } else {
+          reportEvent.navigateToSavedObject({
+            type,
+            searchValue,
+            selectedLabel,
+            selectedRank,
+          });
+        }
+      } catch (err) {
+        reportEvent.error({ message: err, searchValue });
+        // eslint-disable-next-line no-console
+        console.log('Error trying to track searchbar metrics', err);
       }
 
       navigateToUrl(url);
