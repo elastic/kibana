@@ -19,6 +19,7 @@ export const getPopoverButtonStyles = ({ fullWidth }: { fullWidth?: boolean }) =
 interface IntegrationsTreeParams {
   integrations: Integration[];
   onDatasetSelected: DatasetSelectionHandler;
+  spyRef: RefCallback<HTMLButtonElement>;
 }
 
 interface IntegrationsTree {
@@ -37,18 +38,21 @@ interface IntegrationsTree {
 export const buildIntegrationsTree = ({
   integrations,
   onDatasetSelected,
+  spyRef,
 }: IntegrationsTreeParams) => {
   return integrations.reduce(
-    (res: IntegrationsTree, integration) => {
+    (integrationsTree: IntegrationsTree, integration, pos) => {
       const { name, version, datasets } = integration;
+      const isLastIntegration = pos === integrations.length - 1;
 
-      res.items.push({
+      integrationsTree.items.push({
         name,
         icon: <PackageIcon packageName={name} version={version} size="m" tryApi />,
         panel: integration.id,
+        ...(isLastIntegration && { buttonRef: spyRef }),
       });
 
-      res.panels.push({
+      integrationsTree.panels.push({
         id: integration.id,
         title: name,
         width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
@@ -58,22 +62,8 @@ export const buildIntegrationsTree = ({
         })),
       });
 
-      return res;
+      return integrationsTree;
     },
     { items: [], panels: [] }
   );
-};
-
-/**
- * Take a list of EuiContextMenuPanelItemDescriptor and, if exists,
- * attach the passed reference to the last item.
- */
-export const setIntegrationListSpy = (
-  items: EuiContextMenuPanelItemDescriptor[],
-  spyRef: RefCallback<HTMLButtonElement>
-) => {
-  const lastItem = items.at(-1);
-  if (lastItem) {
-    lastItem.buttonRef = spyRef;
-  }
 };

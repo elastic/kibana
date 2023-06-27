@@ -107,10 +107,8 @@ export function DatasetSelector({
     const { items, panels } = buildIntegrationsTree({
       integrations,
       onDatasetSelected: selectDataset,
+      spyRef: setSpyRef,
     });
-
-    // Set the last item to be a spy for infinite scroll loading
-    setIntegrationListSpy(items, setSpyRef);
 
     if (items.length === 0) items.push(createIntegrationStatusItem());
 
