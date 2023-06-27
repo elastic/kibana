@@ -125,7 +125,9 @@ async function createSetupSideEffects(
   logger.debug('Setting up Fleet Elasticsearch assets');
   await ensureFleetGlobalEsAssets(soClient, esClient);
 
-  await ensureFleetFileUploadIndices(soClient, esClient);
+  // FIXME:PT cleanup
+  // await ensureFleetFileUploadIndices(soClient, esClient);
+
   // Ensure that required packages are always installed even if they're left out of the config
   const preconfiguredPackageNames = new Set(packages.map((pkg) => pkg.name));
 
