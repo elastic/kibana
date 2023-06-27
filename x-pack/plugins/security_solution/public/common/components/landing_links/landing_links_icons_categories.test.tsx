@@ -7,10 +7,10 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { SecurityPageName } from '../../app/types';
-import { TestProviders } from '../../common/mock';
-import { ManagementCategories } from './landing';
-import type { NavigationLink } from '../../common/links';
+import { SecurityPageName } from '../../../../common';
+import { TestProviders } from '../../mock';
+import { LandingLinksIconsCategories } from './landing_links_icons_categories';
+import type { NavigationLink } from '../../links';
 
 const RULES_ITEM_LABEL = 'elastic rules!';
 const EXCEPTIONS_ITEM_LABEL = 'exceptional!';
@@ -35,27 +35,27 @@ const defaultAppManageLink: NavigationLink = {
       id: SecurityPageName.rules,
       title: RULES_ITEM_LABEL,
       description: '',
-      icon: 'testIcon1',
+      landingIcon: 'testIcon1',
     },
     {
       id: SecurityPageName.exceptions,
       title: EXCEPTIONS_ITEM_LABEL,
       description: '',
-      icon: 'testIcon2',
+      landingIcon: 'testIcon2',
     },
   ],
 };
 
 const mockAppManageLink = jest.fn(() => defaultAppManageLink);
-jest.mock('../../common/links/nav_links', () => ({
+jest.mock('../../links/nav_links', () => ({
   useRootNavLink: () => mockAppManageLink(),
 }));
 
-describe('ManagementCategories', () => {
+describe('LandingLinksIconsCategories', () => {
   it('should render items', () => {
     const { queryByText } = render(
       <TestProviders>
-        <ManagementCategories />
+        <LandingLinksIconsCategories pageName={defaultAppManageLink.id} />
       </TestProviders>
     );
 
@@ -75,7 +75,7 @@ describe('ManagementCategories', () => {
     });
     const { queryAllByTestId } = render(
       <TestProviders>
-        <ManagementCategories />
+        <LandingLinksIconsCategories pageName={defaultAppManageLink.id} />
       </TestProviders>
     );
 
@@ -99,13 +99,13 @@ describe('ManagementCategories', () => {
           id: SecurityPageName.rules,
           title: RULES_ITEM_LABEL,
           description: '',
-          icon: 'testIcon1',
+          landingIcon: 'testIcon1',
         },
       ],
     });
     const { queryAllByTestId } = render(
       <TestProviders>
-        <ManagementCategories />
+        <LandingLinksIconsCategories pageName={defaultAppManageLink.id} />
       </TestProviders>
     );
 
@@ -122,7 +122,7 @@ describe('ManagementCategories', () => {
     });
     const { queryByText } = render(
       <TestProviders>
-        <ManagementCategories />
+        <LandingLinksIconsCategories pageName={defaultAppManageLink.id} />
       </TestProviders>
     );
 

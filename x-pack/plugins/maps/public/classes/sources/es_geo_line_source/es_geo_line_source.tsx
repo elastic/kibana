@@ -20,12 +20,13 @@ import {
 } from '../../../../common/constants';
 import { getField, addFieldToDSL } from '../../../../common/elasticsearch_util';
 import {
+  DataFilters,
   ESGeoLineSourceDescriptor,
   ESGeoLineSourceResponseMeta,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
-import { AbstractESAggSource } from '../es_agg_source';
+import { AbstractESAggSource, ESAggsSourceSyncMeta } from '../es_agg_source';
 import { DataRequest } from '../../util/data_request';
 import { convertToGeoJson } from './convert_to_geojson';
 import { ESDocField } from '../../fields/es_doc_field';
@@ -39,7 +40,8 @@ import { getIsGoldPlus } from '../../../licensed_features';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 import { mergeExecutionContext } from '../execution_context_utils';
 
-type ESGeoLineSourceSyncMeta = Pick<ESGeoLineSourceDescriptor, 'splitField' | 'sortField'>;
+type ESGeoLineSourceSyncMeta = ESAggsSourceSyncMeta &
+  Pick<ESGeoLineSourceDescriptor, 'splitField' | 'sortField'>;
 
 const MAX_TRACKS = 250;
 
@@ -107,8 +109,9 @@ export class ESGeoLineSource extends AbstractESAggSource {
     );
   }
 
-  getSyncMeta(): ESGeoLineSourceSyncMeta {
+  getSyncMeta(dataFilters: DataFilters): ESGeoLineSourceSyncMeta {
     return {
+      ...super.getSyncMeta(dataFilters),
       splitField: this._descriptor.splitField,
       sortField: this._descriptor.sortField,
     };
@@ -139,14 +142,6 @@ export class ESGeoLineSource extends AbstractESAggSource {
       source: this,
       origin: FIELD_ORIGIN.SOURCE,
     });
-  }
-
-  getFieldNames() {
-    return [
-      ...this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName()),
-      this._descriptor.splitField,
-      this._descriptor.sortField,
-    ];
   }
 
   async getFields(): Promise<IField[]> {
