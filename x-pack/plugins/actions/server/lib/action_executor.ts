@@ -227,6 +227,7 @@ export class ActionExecutor {
             taskInfo,
             configurationUtilities,
             logger,
+            source,
           });
         } catch (err) {
           if (err.reason === ActionExecutionErrorReason.Validation) {

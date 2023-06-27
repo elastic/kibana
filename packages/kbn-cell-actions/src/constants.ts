@@ -21,5 +21,6 @@ export const SUPPORTED_KBN_TYPES = [
   KBN_FIELD_TYPES.DATE,
   KBN_FIELD_TYPES.IP,
   KBN_FIELD_TYPES.STRING,
-  KBN_FIELD_TYPES.NUMBER, // Currently supported by casting https://github.com/elastic/kibana/issues/159298
+  KBN_FIELD_TYPES.NUMBER,
+  KBN_FIELD_TYPES.BOOLEAN,
 ];

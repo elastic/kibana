@@ -17,6 +17,7 @@ import {
   Settings,
   RectAnnotation,
   LineAnnotation,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -330,7 +331,8 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
             tickFormat={yAxisFormatter}
             domain={chartDomain}
           />
-          <Settings tooltip={tooltipProps} theme={getChartTheme(isDarkMode)} />
+          <Settings theme={getChartTheme(isDarkMode)} />
+          <Tooltip {...tooltipProps} />
         </Chart>
       </ChartContainer>
       {!executionTimeRange && (
