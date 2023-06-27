@@ -796,13 +796,17 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   // ------------
   // Effects
   // ------------
-  useDebounce(() => {
-    // Do not call fetchItems on dependency changes when initial fetch does not load any items
-    // to avoid flashing between empty table and no items view
-    if (!hasNoItems) {
-      fetchItems();
-    }
-  }, 300, [fetchItems, refreshListBouncer]);
+  useDebounce(
+    () => {
+      // Do not call fetchItems on dependency changes when initial fetch does not load any items
+      // to avoid flashing between empty table and no items view
+      if (!hasNoItems) {
+        fetchItems();
+      }
+    },
+    300,
+    [fetchItems, refreshListBouncer]
+  );
 
   useEffect(() => {
     if (!urlStateEnabled) {

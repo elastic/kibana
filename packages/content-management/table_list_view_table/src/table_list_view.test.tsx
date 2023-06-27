@@ -1211,7 +1211,9 @@ describe('TableList', () => {
         references: [],
       },
     ];
-    const findItems = jest.fn().mockResolvedValue({ total: originalHits.length, hits: originalHits });
+    const findItems = jest
+      .fn()
+      .mockResolvedValue({ total: originalHits.length, hits: originalHits });
 
     await act(async () => {
       testBed = setup({ findItems });
