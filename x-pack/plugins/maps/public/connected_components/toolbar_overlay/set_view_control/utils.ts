@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-import {geoUtils} from '@kbn/field-formats-plugin/common'
+import { geoUtils } from '@kbn/field-formats-plugin/common';
 
-export const {mgrsToDD,mgrstoUSNG,utmToDD,withinRange,ddToMGRS,ddToUTM,converter} = geoUtils
+export const { mgrsToDD, mgrstoUSNG, utmToDD, withinRange, ddToMGRS, ddToUTM, converter } =
+  geoUtils;
