@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import classNames from 'classnames';
 import useAsync from 'react-use/lib/useAsync';
 import React, { useEffect, useState } from 'react';
 
@@ -88,7 +87,7 @@ export const NavigationEmbeddableDashboardList = ({
         options={dashboardListOptions}
         isLoading={isLoading || loadingDashboardList}
         onChange={(newOptions, _, selected) => {
-          onDashboardSelected(selected.data as DashboardItem);
+          onDashboardSelected(selected.checked ? (selected.data as DashboardItem) : undefined);
           setDashboardListOptions(newOptions);
         }}
         listProps={{ onFocusBadge: false, bordered: true, isVirtualized: true }}

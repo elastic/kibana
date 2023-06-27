@@ -22,7 +22,6 @@ import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-
 import { navigationEmbeddableReducers } from '../navigation_embeddable_reducers';
 import {
   DashboardItem,
-  DashboardLink,
   isDashboardLink,
   NavigationEmbeddableInput,
   NavigationEmbeddableReduxState,
