@@ -93,8 +93,9 @@ const configSchema = schema.object({
     enabled: schema.conditional(
       schema.contextRef('serverless'),
       true,
-      schema.boolean({ defaultValue: false }),
-      schema.never()
+      schema.literal(true),
+      schema.never(),
+      { defaultValue: schema.contextRef('serverless') }
     ),
   }),
 });
