@@ -35,7 +35,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/index_lifecycle_management'),
       // https://github.com/elastic/kibana/issues/153596
       // https://github.com/elastic/kibana/issues/153592
-      // require.resolve('./apps/ml'),
+      require.resolve('./apps/ml'),
       // require.resolve('./apps/transform'),
       require.resolve('./apps/lens'),
       require.resolve('./apps/upgrade_assistant'),
