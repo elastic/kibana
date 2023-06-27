@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 let router: any;
 export const registerRouter = (aRouter: any) => {
   router = aRouter;
