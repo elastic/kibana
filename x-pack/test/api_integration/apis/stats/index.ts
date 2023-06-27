@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-require('@kbn/babel-register').install();
-require('./diagnostics_bundle/main');
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Stats API', () => {
+    loadTestFile(require.resolve('./stats'));
+  });
+}
