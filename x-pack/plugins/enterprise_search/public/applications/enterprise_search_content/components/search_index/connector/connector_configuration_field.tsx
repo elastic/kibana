@@ -142,7 +142,7 @@ export const ConnectorConfigurationField: React.FC<ConnectorConfigurationFieldPr
       );
 
     case DisplayType.TOGGLE:
-      if (key === 'document_level_security') {
+      if (key === 'use_document_level_security') {
         return (
           <DocumentLevelSecurityPanel
             toggleSwitch={

@@ -116,7 +116,7 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
 
   const isGated = !hasPlatinumLicense && type === SyncJobType.ACCESS_CONTROL;
   const isDocumentLevelSecurityDisabled =
-    !index.connector.configuration.document_level_security?.value;
+    !index.connector.configuration.use_document_level_security?.value;
 
   return (
     <>
