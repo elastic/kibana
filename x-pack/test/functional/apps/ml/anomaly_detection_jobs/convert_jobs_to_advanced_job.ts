@@ -213,8 +213,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('from population job creation wizard', function () {
-      const jobId = `ec_population_to_advanced_1_${Date.now()}`;
-      const jobDescription = 'advanced job from population wizard';
       const jobGroups = ['automated', 'ecommerce', 'population'];
       const populationField = 'customer_id';
       const populationDetectors = [
@@ -244,7 +242,7 @@ export default function ({ getService }: FtrProviderContext) {
         suiteTitle: 'population job to advanced job wizard',
         jobSource: 'ft_ecommerce',
         jobId: `ec_population_to_advanced_1_${Date.now()}`,
-        jobDescription,
+        jobDescription: 'advanced job from population wizard',
         jobGroups: ['advanced'],
         pickFieldsConfig: {
           detectors: [
@@ -371,11 +369,11 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('population job creation inputs the job id');
         await ml.jobWizardCommon.assertJobIdInputExists();
-        await ml.jobWizardCommon.setJobId(jobId);
+        await ml.jobWizardCommon.setJobId(testData.jobId);
 
         await ml.testExecution.logTestStep('population job creation inputs the job description');
         await ml.jobWizardCommon.assertJobDescriptionInputExists();
-        await ml.jobWizardCommon.setJobDescription(jobDescription);
+        await ml.jobWizardCommon.setJobDescription(testData.jobDescription);
 
         await ml.testExecution.logTestStep('population job creation inputs job groups');
         await ml.jobWizardCommon.assertJobGroupInputExists();
@@ -431,8 +429,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('from categorization job creation wizard', function () {
-      const jobId = `categorization_to_advanced_${Date.now()}`;
-      const jobDescription = 'advanced job from categorization wizard';
       const jobGroups = ['automated', 'categorization'];
       const detectorTypeIdentifier = 'Rare';
       const categorizationFieldIdentifier = 'field1';
@@ -443,8 +439,8 @@ export default function ({ getService }: FtrProviderContext) {
       const testData = {
         suiteTitle: 'categorization job to advanced job wizard',
         jobSource: 'ft_ecommerce',
-        jobId,
-        jobDescription,
+        jobId: `categorization_to_advanced_${Date.now()}`,
+        jobDescription: 'advanced job from categorization wizard',
         jobGroups: ['advanced'],
         categorizationFieldIdentifier,
         pickFieldsConfig: {
@@ -539,13 +535,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         await ml.testExecution.logTestStep('categorization job creation inputs the job id');
         await ml.jobWizardCommon.assertJobIdInputExists();
-        await ml.jobWizardCommon.setJobId(jobId);
+        await ml.jobWizardCommon.setJobId(testData.jobId);
 
         await ml.testExecution.logTestStep(
           'categorization job creation inputs the job description'
         );
         await ml.jobWizardCommon.assertJobDescriptionInputExists();
-        await ml.jobWizardCommon.setJobDescription(jobDescription);
+        await ml.jobWizardCommon.setJobDescription(testData.jobDescription);
 
         await ml.testExecution.logTestStep('categorization job creation inputs job groups');
         await ml.jobWizardCommon.assertJobGroupInputExists();
