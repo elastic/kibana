@@ -19,7 +19,13 @@ interface Props {
   errorOptions?: string[];
 }
 
-export function MetricsExplorerGroupBy({ options, onChange, fields, errorOptions }: Props) {
+export function MetricsExplorerGroupBy({
+  options,
+  onChange,
+  fields,
+  errorOptions,
+  ...rest
+}: Props) {
   const handleChange = useCallback(
     (selectedOptions: Array<{ label: string }>) => {
       const groupBy = selectedOptions.map((option) => option.label);
@@ -59,6 +65,7 @@ export function MetricsExplorerGroupBy({ options, onChange, fields, errorOptions
         .map((f) => ({ label: f.name }))}
       onChange={handleChange}
       isClearable={true}
+      {...rest}
     />
   );
 }

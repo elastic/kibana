@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getUptimeESMockClient } from './test_helpers';
 import { getNetworkEvents, secondsToMillis } from './get_network_events';
+import { getUptimeESMockClient } from './test_helpers';
 
 describe('getNetworkEvents', () => {
   describe('secondsToMillis conversion', () => {

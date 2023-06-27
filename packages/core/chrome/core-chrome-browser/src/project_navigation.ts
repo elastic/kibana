@@ -70,6 +70,12 @@ export interface ChromeProjectNavigationNode {
    * Optional function to get the active state. This function is called whenever the location changes.
    */
   getIsActive?: (location: Location) => boolean;
+
+  /**
+   * Optional flag to indicate if the breadcrumb should be hidden when this node is active.
+   * @default 'visible'
+   */
+  breadcrumbStatus?: 'hidden' | 'visible';
 }
 
 /** @public */
@@ -129,6 +135,12 @@ export interface NodeDefinition<
    * Optional function to get the active state. This function is called whenever the location changes.
    */
   getIsActive?: (location: Location) => boolean;
+
+  /**
+   * Optional flag to indicate if the breadcrumb should be hidden when this node is active.
+   * @default 'visible'
+   */
+  breadcrumbStatus?: 'hidden' | 'visible';
 }
 
 /**
