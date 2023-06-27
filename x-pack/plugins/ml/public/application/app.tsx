@@ -46,7 +46,6 @@ interface AppProps {
   coreStart: CoreStart;
   deps: MlDependencies;
   appMountParams: AppMountParameters;
-  navMenuEnabled: boolean;
 }
 
 const localStorage = new Storage(window.localStorage);
@@ -80,12 +79,11 @@ export interface MlServicesContext {
 
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
-const App: FC<AppProps> = ({ coreStart, deps, appMountParams, navMenuEnabled }) => {
+const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
     setHeaderActionMenu: appMountParams.setHeaderActionMenu,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
-    navMenuEnabled,
   };
 
   const services = useMemo(() => {
@@ -165,8 +163,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, navMenuEnabled }) 
 export const renderApp = (
   coreStart: CoreStart,
   deps: MlDependencies,
-  appMountParams: AppMountParameters,
-  navMenuEnabled: boolean
+  appMountParams: AppMountParameters
 ) => {
   setDependencyCache({
     timefilter: deps.data.query.timefilter,
@@ -195,12 +192,7 @@ export const renderApp = (
   appMountParams.onAppLeave((actions) => actions.default());
 
   ReactDOM.render(
-    <App
-      coreStart={coreStart}
-      deps={deps}
-      appMountParams={appMountParams}
-      navMenuEnabled={navMenuEnabled}
-    />,
+    <App coreStart={coreStart} deps={deps} appMountParams={appMountParams} />,
     appMountParams.element
   );
 

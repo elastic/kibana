@@ -52,13 +52,14 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
   const {
     services: {
       http: { basePath },
-      mlServices: { httpService },
+      mlServices: { httpService, mlCapabilities },
     },
   } = useMlKibana();
 
   const headerPortalNode = useMemo(() => createHtmlPortalNode(), []);
   const [isHeaderMounted, setIsHeaderMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [navMenuEnabled, setNavMenuEnabled] = useState(true);
 
   useEffect(() => {
     const subscriptions = new Subscription();
@@ -66,6 +67,11 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
     subscriptions.add(
       httpService.getLoadingCount$.subscribe((v) => {
         setIsLoading(v !== 0);
+      })
+    );
+    subscriptions.add(
+      mlCapabilities.capabilities$.subscribe((v) => {
+        setNavMenuEnabled(v.isADEnabled && v.isDFAEnabled && v.isNLPEnabled);
       })
     );
 
@@ -127,9 +133,9 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         data-test-subj={'mlApp'}
         restrictWidth={false}
         // forcing the background to white navigation is disabled
-        css={pageDeps.navMenuEnabled ? {} : { background: '#FFF' }}
+        css={navMenuEnabled ? {} : { background: '#FFF' }}
         solutionNav={
-          pageDeps.navMenuEnabled
+          navMenuEnabled
             ? {
                 name: i18n.translate('xpack.ml.plugin.title', {
                   defaultMessage: 'Machine Learning',

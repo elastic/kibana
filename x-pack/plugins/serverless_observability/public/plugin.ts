@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { getObservabilitySideNavComponent } from './components/side_navigation';
-import type {
+import {
   ServerlessObservabilityPluginSetup,
   ServerlessObservabilityPluginStart,
   ServerlessObservabilityPluginSetupDependencies,
@@ -21,7 +21,6 @@ export class ServerlessObservabilityPlugin
     _core: CoreSetup,
     _setupDeps: ServerlessObservabilityPluginSetupDependencies
   ): ServerlessObservabilityPluginSetup {
-    _setupDeps.ml.setNavMenuEnabled(false);
     return {};
   }
 

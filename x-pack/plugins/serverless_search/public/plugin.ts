@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { createServerlessSearchSideNavComponent as createComponent } from './layout/nav';
 import { docLinks } from '../common/doc_links';
-import type {
+import {
   ServerlessSearchPluginSetup,
   ServerlessSearchPluginSetupDependencies,
   ServerlessSearchPluginStart,
@@ -63,7 +63,6 @@ export class ServerlessSearchPlugin
         return await renderApp(element, coreStart, { userProfile, ...services });
       },
     });
-    _setupDeps.ml.setNavMenuEnabled(false);
     return {};
   }
 

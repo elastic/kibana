@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
 import { getSecurityGetStartedComponent } from './components/get_started';
 import { getSecuritySideNavComponent } from './components/side_navigation';
-import type {
+import {
   ServerlessSecurityPluginSetup,
   ServerlessSecurityPluginStart,
   ServerlessSecurityPluginSetupDependencies,
@@ -38,8 +38,6 @@ export class ServerlessSecurityPlugin
     setupDeps: ServerlessSecurityPluginSetupDependencies
   ): ServerlessSecurityPluginSetup {
     registerUpsellings(setupDeps.securitySolution.upselling, this.config.productTypes);
-
-    setupDeps.ml.setNavMenuEnabled(false);
     return {};
   }
 

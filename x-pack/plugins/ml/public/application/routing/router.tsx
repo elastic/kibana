@@ -57,7 +57,6 @@ export interface PageDependencies {
   history: AppMountParameters['history'];
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
-  navMenuEnabled: boolean;
 }
 
 export const PageLoader: FC<{ context: RouteResolverContext }> = ({ context, children }) => {

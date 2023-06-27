@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { MlPluginSetup } from '@kbn/ml-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type {
   PluginSetup as SecuritySolutionPluginSetup,
@@ -24,7 +23,6 @@ export interface ServerlessSecurityPluginSetupDependencies {
   security: SecurityPluginSetup;
   securitySolution: SecuritySolutionPluginSetup;
   serverless: ServerlessPluginSetup;
-  ml: MlPluginSetup;
 }
 
 export interface ServerlessSecurityPluginStartDependencies {

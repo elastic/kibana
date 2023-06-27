@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import { CoreStart } from '@kbn/core/public';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
   DefaultNavigation,
   NavigationKibanaProvider,
-  type NavigationTreeDefinition,
+  NavigationTreeDefinition,
   getPresets,
 } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
