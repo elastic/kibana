@@ -42,7 +42,6 @@ export const AddPrebuiltRulesTable = React.memo(() => {
 
   const isTableEmpty = isFetched && rules.length === 0;
 
-  const isInstallingPackageForFirstTime = isUpgradingSecurityPackages && rules.length === 0;
   const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
 
   return (
@@ -56,7 +55,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
         />
       )}
       <EuiSkeletonLoading
-        isLoading={isLoading || isInstallingPackageForFirstTime}
+        isLoading={isLoading}
         loadingContent={
           <>
             <EuiSkeletonTitle />
