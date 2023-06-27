@@ -472,7 +472,7 @@ export class DashboardPageObject extends FtrService {
    */
   public async saveDashboard(
     dashboardName: string,
-    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true },
+    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true }
   ) {
     await this.retry.try(async () => {
       await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions);
@@ -515,7 +515,7 @@ export class DashboardPageObject extends FtrService {
    */
   public async enterDashboardTitleAndClickSave(
     dashboardTitle: string,
-    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true },
+    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true }
   ) {
     const isSaveModalOpen = await this.testSubjects.exists('savedObjectSaveModal', {
       timeout: 2000,
