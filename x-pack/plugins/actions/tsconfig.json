@@ -38,6 +38,7 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-elasticsearch-server",
+    "@kbn/core-http-router-server-internal",
   ],
   "exclude": [
     "target/**/*",
