@@ -20,11 +20,7 @@ export const useParamsList = () => {
 
   return useMemo(() => {
     return {
-      items:
-        listOfParams?.map(({ id, ...rest }) => ({
-          id,
-          ...rest,
-        })) ?? [],
+      items: listOfParams ?? [],
       isLoading,
     };
   }, [listOfParams, isLoading]);
