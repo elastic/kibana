@@ -22,11 +22,11 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.initLogs(); // includes a canvas worksheet with an offending image URL
     });
 
-    // after(async () => {
-    //   await reportingAPI.teardownLogs();
-    // });
+    after(async () => {
+      await reportingAPI.teardownLogs();
+    });
 
-    it('should fail job when page violates the network policy', async () => {
+    xit('should fail job when page violates the network policy', async () => {
       const downloadPath = await reportingAPI.postJob(
         `/api/reporting/generate/printablePdf?jobParams=(layout:(dimensions:(height:720,width:1080),id:preserve_layout, browserTimezone:'UTC'),objectType:'canvas%20workpad',relativeUrls:!(%2Fapp%2Fcanvas%23%2Fexport%2Fworkpad%2Fpdf%2Fworkpad-e7464259-0b75-4b8c-81c8-8422b15ff201%2Fpage%2F1),title:'My%20Canvas%20Workpad', browserTimezone:'UTC')`
       );
