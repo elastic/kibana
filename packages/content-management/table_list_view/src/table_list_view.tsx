@@ -14,7 +14,7 @@ import {
   type UserContentCommonSchema,
 } from '@kbn/content-management-table-list-view-table';
 import { EuiPaddingSize } from '@elastic/eui';
-import { SavedObjectsReference } from '@kbn/content-management-content-editor/src/services';
+import { TagReference } from '@kbn/content-management-table-list-view-table/src/types';
 
 export type TableListViewProps<T extends UserContentCommonSchema = UserContentCommonSchema> = Pick<
   TableListViewTableProps<T>,
@@ -48,7 +48,7 @@ export type TableListViewProps<T extends UserContentCommonSchema = UserContentCo
    */
   additionalRightSideActions?: ReactNode[];
   children?: ReactNode | undefined;
-  tagReferences?: SavedObjectsReference[] | undefined;
+  tagReferences?: TagReference[] | undefined;
   withPageTemplateHeader?: boolean;
   restrictPageSectionWidth?: boolean;
   pageSectionPadding?: EuiPaddingSize;

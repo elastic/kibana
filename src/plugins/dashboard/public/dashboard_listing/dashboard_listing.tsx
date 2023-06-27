@@ -21,7 +21,7 @@ import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
 import { EuiPaddingSize } from '@elastic/eui';
-import { SavedObjectsReference } from '@kbn/content-management-table-list-view-table/src/services';
+import { TagReference } from '@kbn/content-management-table-list-view-table/src/types';
 import {
   DASHBOARD_CONTENT_ID,
   SAVED_OBJECT_DELETE_TIME,
@@ -78,7 +78,7 @@ export type DashboardListingProps = PropsWithChildren<{
   withPageTemplateHeader?: boolean;
   restrictPageSectionWidth?: boolean;
   pageSectionPadding?: EuiPaddingSize;
-  tagReferences?: SavedObjectsReference[] | undefined;
+  tagReferences?: TagReference[] | undefined;
   urlStateEnabled?: boolean;
   disableCreateDashboardButton?: boolean;
 }>;
