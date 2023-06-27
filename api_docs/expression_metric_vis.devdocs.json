@@ -868,9 +868,7 @@
             "label": "overrides",
             "description": [],
             "signature": [
-              "Partial<Record<\"settings\", { tooltip?: ",
-              "TooltipSettings",
-              " | undefined; debug?: boolean | undefined; theme?: ",
+              "Partial<Record<\"settings\", { debug?: boolean | undefined; theme?: ",
               "MakeOverridesSerializable",
               "<",
               "RecursivePartial",

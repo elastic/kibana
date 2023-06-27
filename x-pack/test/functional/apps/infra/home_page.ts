@@ -192,8 +192,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/157711
-    describe.skip('alerts flyouts', () => {
+    describe('alerts flyouts', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');
@@ -219,12 +218,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.clickAlertsAndRules();
         await pageObjects.infraHome.ensurePopoverOpened();
         await pageObjects.infraHome.clickAlertsAndRules();
-        await pageObjects.infraHome.ensurePopoverClosed();
+        await retry.try(async () => {
+          await pageObjects.infraHome.ensurePopoverClosed();
+        });
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/157740
-    describe.skip('Saved Views', () => {
+    describe('Saved Views', () => {
       before(async () => {
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.common.navigateToApp('infraOps');

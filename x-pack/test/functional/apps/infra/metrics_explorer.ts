@@ -132,7 +132,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraSavedViews.ensureViewIsLoaded('view1');
       });
 
-      it('should laod a clicked view from the manage views section', async () => {
+      it('should load a clicked view from the manage views section', async () => {
         const views = await pageObjects.infraSavedViews.getManageViewsEntries();
         await views[0].click();
         await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');

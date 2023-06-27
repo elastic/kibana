@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -19,6 +20,7 @@ type DiagnosticsBundle = APIReturnType<'GET /internal/apm/diagnostics'>;
 export function DataStreamsStatus() {
   const { diagnosticsBundle, status } = useDiagnosticsContext();
   const router = useApmRouter();
+  const { query } = useApmParams('/diagnostics/*');
   const isLoading = status === FETCH_STATUS.LOADING;
   const tabStatus = getDataStreamTabStatus(diagnosticsBundle);
 
@@ -31,7 +33,7 @@ export function DataStreamsStatus() {
       Data streams
       <EuiLink
         data-test-subj="apmDataStreamsStatusSeeDetailsLink"
-        href={router.link('/diagnostics/data-streams')}
+        href={router.link('/diagnostics/data-streams', { query })}
       >
         See details
       </EuiLink>

@@ -4445,23 +4445,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_info_handler.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_download_handler.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/details.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/audit_log.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.ts"
               },
               {
                 "plugin": "indexLifecycleManagement",
@@ -4621,10 +4605,6 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/legacy_uptime/uptime_server.ts"
-              },
-              {
-                "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/server/server.ts"
               },
               {
@@ -4682,6 +4662,10 @@
               {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/server/routes/node_disk_space.ts"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "watcher",
@@ -5538,18 +5522,6 @@
               {
                 "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_privileges_route.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/audit_log.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list_handler.test.ts"
               },
               {
                 "plugin": "spaces",
@@ -7227,14 +7199,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_upload_handler.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
@@ -7403,10 +7367,6 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/legacy_uptime/uptime_server.ts"
-              },
-              {
-                "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/server/server.ts"
               },
               {
@@ -7436,6 +7396,10 @@
               {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/server/routes/cluster_settings.ts"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "watcher",
@@ -9025,15 +8989,15 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/legacy_uptime/uptime_server.ts"
-              },
-              {
-                "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/server/server.ts"
               },
               {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/server/routes/deprecation_logging.ts"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "watcher",
@@ -10101,10 +10065,6 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/server/legacy_uptime/uptime_server.ts"
-              },
-              {
-                "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/server/server.ts"
               },
               {
@@ -10114,6 +10074,10 @@
               {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/server/routes/ml_snapshots.ts"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/server/legacy_uptime/uptime_server.ts"
               },
               {
                 "plugin": "watcher",
@@ -14216,11 +14180,27 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_info_handler.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/details.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/status.ts"
               },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/state.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/audit_log.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.ts"
               },
               {
                 "plugin": "fileUpload",
@@ -15061,6 +15041,14 @@
               {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/server/autocomplete/value_suggestions_route.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/file_upload_handler.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
                 "plugin": "securitySolution",

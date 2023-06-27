@@ -35,7 +35,15 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
-          " | undefined; fieldName: string; value: string | string[] | null | undefined; }) => void"
+          " | undefined; fieldName: string; value: ",
+          {
+            "pluginId": "@kbn/cell-actions",
+            "scope": "common",
+            "docId": "kibKbnCellActionsPluginApi",
+            "section": "def-common.CellActionFieldValue",
+            "text": "CellActionFieldValue"
+          },
+          "; }) => void"
         ],
         "path": "packages/kbn-cell-actions/src/actions/filter/filter_in.ts",
         "deprecated": false,
@@ -92,7 +100,7 @@
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "string | string[] | null | undefined"
+                  "string | number | boolean | string[] | boolean[] | number[] | null | undefined"
                 ],
                 "path": "packages/kbn-cell-actions/src/actions/filter/filter_in.ts",
                 "deprecated": false,
@@ -120,7 +128,15 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
-          " | undefined; fieldName: string; value: string | string[] | null | undefined; }) => void"
+          " | undefined; fieldName: string; value: ",
+          {
+            "pluginId": "@kbn/cell-actions",
+            "scope": "common",
+            "docId": "kibKbnCellActionsPluginApi",
+            "section": "def-common.CellActionFieldValue",
+            "text": "CellActionFieldValue"
+          },
+          "; }) => void"
         ],
         "path": "packages/kbn-cell-actions/src/actions/filter/filter_out.ts",
         "deprecated": false,
@@ -177,7 +193,7 @@
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "string | string[] | null | undefined"
+                  "string | number | boolean | string[] | boolean[] | number[] | null | undefined"
                 ],
                 "path": "packages/kbn-cell-actions/src/actions/filter/filter_out.ts",
                 "deprecated": false,
@@ -1257,7 +1273,7 @@
         "label": "CellActionFieldValue",
         "description": [],
         "signature": [
-          "string | string[] | null | undefined"
+          "string | number | boolean | string[] | boolean[] | number[] | null | undefined"
         ],
         "path": "packages/kbn-cell-actions/src/types.ts",
         "deprecated": false,

@@ -17076,6 +17076,39 @@
           "path": "x-pack/plugins/fleet/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "fleet",
+          "id": "def-server.FleetStartContract.createFleetActionsClient",
+          "type": "Function",
+          "tags": [],
+          "label": "createFleetActionsClient",
+          "description": [],
+          "signature": [
+            "(packageName: string) => ",
+            "FleetActionsClientInterface"
+          ],
+          "path": "x-pack/plugins/fleet/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "fleet",
+              "id": "def-server.FleetStartContract.createFleetActionsClient.$1",
+              "type": "string",
+              "tags": [],
+              "label": "packageName",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/plugins/fleet/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

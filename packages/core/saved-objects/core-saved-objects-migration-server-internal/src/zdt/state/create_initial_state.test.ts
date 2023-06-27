@@ -24,17 +24,30 @@ describe('createInitialState', () => {
     const state = createInitialState(context);
     expect(state.skipDocumentMigration).toEqual(true);
   });
-  test('`skipDocumentMigration` is `false` if the node does not have the `migrator` role but `runOnNonMigratorNodes` is true', () => {
+  test('`skipDocumentMigration` is `false` if runOnRoles contains one of the node role', () => {
     const context = createContextMock({
       migrationConfig: createMigrationConfigMock({
         zdt: {
           metaPickupSyncDelaySec: 120,
-          runOnNonMigratorNodes: true,
+          runOnRoles: ['ui'],
         },
       }),
-      nodeRoles: { backgroundTasks: false, ui: false, migrator: false },
+      nodeRoles: { backgroundTasks: true, ui: true, migrator: false },
     });
     const state = createInitialState(context);
     expect(state.skipDocumentMigration).toEqual(false);
+  });
+  test('`skipDocumentMigration` is `true` if runOnRoles does not contain one of the node role', () => {
+    const context = createContextMock({
+      migrationConfig: createMigrationConfigMock({
+        zdt: {
+          metaPickupSyncDelaySec: 120,
+          runOnRoles: ['ui'],
+        },
+      }),
+      nodeRoles: { backgroundTasks: true, ui: false, migrator: false },
+    });
+    const state = createInitialState(context);
+    expect(state.skipDocumentMigration).toEqual(true);
   });
 });

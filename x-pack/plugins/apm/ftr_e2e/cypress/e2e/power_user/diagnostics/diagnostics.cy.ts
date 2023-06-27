@@ -45,7 +45,7 @@ describe('Diagnostics', () => {
       cy.loginAs({ username: 'elastic', password: 'changeme' });
       cy.visitKibana('/app/apm/diagnostics/import-export');
       cy.get('#file-picker').selectFile(
-        './cypress/e2e/power_user/diagnostics/apm_diagnostics_8.9.0_1685708312530.json'
+        './cypress/e2e/power_user/diagnostics/apm-diagnostics-8.8.0-1687436214804.json'
       );
     });
 
@@ -56,7 +56,7 @@ describe('Diagnostics', () => {
     });
 
     it('can display summary tab', () => {
-      cy.get('[href="/app/apm/diagnostics"]').click();
+      cy.get('[data-test-subj="summary-tab"]').click();
 
       // integration package
       cy.get('[data-test-subj="integrationPackageStatus_Badge"]').should(
@@ -66,7 +66,7 @@ describe('Diagnostics', () => {
 
       cy.get('[data-test-subj="integrationPackageStatus_Content"]').should(
         'have.text',
-        'APM integration (8.9.0-preview-1685091758)'
+        'APM integration (8.8.0)'
       );
 
       // data stream
@@ -89,26 +89,35 @@ describe('Diagnostics', () => {
     });
 
     it('can display index template tab', () => {
-      cy.get('[href="/app/apm/diagnostics/index-templates"]').click();
+      cy.get('[data-test-subj="index-templates-tab"]').click();
       cy.get('.euiTableRow').should('have.length', 19);
     });
 
     it('can display data streams tab', () => {
-      cy.get('[href="/app/apm/diagnostics/data-streams"]').click();
-      cy.get('.euiTableRow').should('have.length', 17);
+      cy.get('[data-test-subj="data-streams-tab"]').click();
+      cy.get('.euiTableRow').should('have.length', 8);
     });
 
     it('can display indices tab', () => {
-      cy.get('[href="/app/apm/diagnostics/indices"]').click();
+      cy.get('[data-test-subj="indices-tab"]').click();
 
       cy.get('[data-test-subj="indicedWithProblems"] .euiTableRow').should(
         'have.length',
-        18
+        138
       );
 
       cy.get('[data-test-subj="indicedWithoutProblems"] .euiTableRow').should(
         'have.length',
-        17
+        27
+      );
+    });
+
+    it('can display documents tab', () => {
+      cy.get('[data-test-subj="documents-tab"]').click();
+
+      cy.get('[data-test-subj="documents-table"] .euiTableRow').should(
+        'have.length',
+        10
       );
     });
   });

@@ -1394,30 +1394,6 @@
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/legacy_uptime/app/uptime_app.tsx"
-          },
-          {
-            "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/apps/synthetics/synthetics_app.tsx"
           },
           {
@@ -1443,6 +1419,30 @@
           {
             "plugin": "upgradeAssistant",
             "path": "x-pack/plugins/upgrade_assistant/public/application/app.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/app/uptime_app.tsx"
           },
           {
             "plugin": "ux",

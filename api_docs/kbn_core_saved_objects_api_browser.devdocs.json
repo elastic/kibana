@@ -3100,6 +3100,14 @@
             "path": "x-pack/plugins/synthetics/common/types/synthetics_monitor.ts"
           },
           {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/common/types/synthetics_monitor.ts"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/common/types/synthetics_monitor.ts"
+          },
+          {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/helpers/saved_objects_utils/find_object_by_title.test.ts"
           },

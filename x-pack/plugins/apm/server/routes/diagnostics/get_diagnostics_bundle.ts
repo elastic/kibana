@@ -17,11 +17,24 @@ import { getExistingApmIndexTemplates } from './bundle/get_existing_index_templa
 import { getFieldCaps } from './bundle/get_field_caps';
 import { getIndicesAndIngestPipelines } from './bundle/get_indices';
 import { getIndicesStates } from './bundle/get_indices_states';
+import { getApmEvents } from './bundle/get_apm_events';
 
-export async function getDiagnosticsBundle(
-  esClient: ElasticsearchClient,
-  apmIndices: ApmIndicesConfig
-) {
+const DEFEAULT_START = Date.now() - 60 * 5 * 1000; // 5 minutes
+const DEFAULT_END = Date.now();
+
+export async function getDiagnosticsBundle({
+  esClient,
+  apmIndices,
+  start = DEFEAULT_START,
+  end = DEFAULT_END,
+  kuery,
+}: {
+  esClient: ElasticsearchClient;
+  apmIndices: ApmIndicesConfig;
+  start: number | undefined;
+  end: number | undefined;
+  kuery: string | undefined;
+}) {
   const apmIndexTemplateNames = getApmIndexTemplateNames();
 
   const { indices, ingestPipelines } = await getIndicesAndIngestPipelines({
@@ -52,6 +65,14 @@ export async function getDiagnosticsBundle(
     ingestPipelines,
   });
 
+  const apmEvents = await getApmEvents({
+    esClient,
+    apmIndices,
+    start,
+    end,
+    kuery,
+  });
+
   return {
     created_at: new Date().toISOString(),
     elasticsearchVersion: await getElasticsearchVersion(esClient),
@@ -70,6 +91,8 @@ export async function getDiagnosticsBundle(
     indexTemplatesByIndexPattern,
     dataStreams,
     nonDataStreamIndices,
+    apmEvents,
+    params: { start, end, kuery },
   };
 }
 
