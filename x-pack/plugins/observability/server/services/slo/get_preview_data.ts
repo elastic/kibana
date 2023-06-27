@@ -87,12 +87,14 @@ export class GetPreviewData {
           // @ts-ignore buckets is not improperly typed
           return result.aggregations?.perMinute.buckets.map((bucket) => ({
             date: bucket.key_as_string,
-            sliValue: computeSLI(bucket.good.value, bucket.total.value),
+            sliValue:
+              !!bucket.good && !!bucket.total
+                ? computeSLI(bucket.good.value, bucket.total.value)
+                : null,
           }));
         } catch (err) {
           throw new InvalidQueryError(`Invalid ES query`);
         }
-
       case 'sli.apm.transactionErrorRate':
         try {
           const filter = [];
@@ -160,12 +162,14 @@ export class GetPreviewData {
           // @ts-ignore buckets is not improperly typed
           return result.aggregations?.perMinute.buckets.map((bucket) => ({
             date: bucket.key_as_string,
-            sliValue: computeSLI(bucket.good.doc_count, bucket.total.value),
+            sliValue:
+              !!bucket.good && !!bucket.total
+                ? computeSLI(bucket.good.doc_count, bucket.total.value)
+                : null,
           }));
         } catch (err) {
           throw new InvalidQueryError(`Invalid ES query`);
         }
-
       case 'sli.kql.custom':
         try {
           const filterQuery = getElastichsearchQueryOrThrow(params.indicator.params.filter);
@@ -196,7 +200,10 @@ export class GetPreviewData {
           // @ts-ignore buckets is not improperly typed
           return result.aggregations?.perMinute.buckets.map((bucket) => ({
             date: bucket.key_as_string,
-            sliValue: computeSLI(bucket.good.doc_count, bucket.total.doc_count),
+            sliValue:
+              !!bucket.good && !!bucket.total
+                ? computeSLI(bucket.good.doc_count, bucket.total.doc_count)
+                : null,
           }));
         } catch (err) {
           throw new InvalidQueryError(`Invalid ES query`);
