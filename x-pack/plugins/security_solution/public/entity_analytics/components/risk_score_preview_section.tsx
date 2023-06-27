@@ -31,6 +31,12 @@ interface IRiskScorePreviewPanel {
   type: RiskScoreEntity;
 }
 
+const getRiskiestScores = (scores: RiskScore[] = [], field: string) =>
+  scores
+    ?.filter((item) => item?.identifierField === field)
+    ?.sort((a, b) => b?.totalScoreNormalized - a?.totalScoreNormalized)
+    ?.slice(0, 5) || [];
+
 const RiskScorePreviewPanel = ({
   items,
   showMessage,
@@ -79,17 +85,8 @@ export const RiskScorePreviewSection = () => {
     setEnd(props.end);
   };
 
-  const hosts =
-    data?.scores
-      ?.filter((item) => item?.identifierField === 'host.name')
-      ?.sort((a, b) => b?.totalScoreNormalized - a?.totalScoreNormalized)
-      ?.slice(0, 5) || [];
-
-  const users =
-    data?.scores
-      ?.filter((item) => item?.identifierField === 'user.name')
-      ?.sort((a, b) => b?.totalScoreNormalized - a?.totalScoreNormalized)
-      ?.slice(0, 5) || [];
+  const hosts = getRiskiestScores(data?.scores, 'host.name');
+  const users = getRiskiestScores(data?.scores, 'user.name');
 
   if (isError) {
     return (
