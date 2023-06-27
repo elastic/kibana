@@ -168,7 +168,7 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
 interface ExpandableContentProps {
   values: string | string[] | undefined;
 }
-const ExpandableContent = (props: ExpandableContentProps) => {
+export const ExpandableContent = (props: ExpandableContentProps) => {
   const { values } = props;
   const [isExpanded, toggle] = useToggle(false);
 
