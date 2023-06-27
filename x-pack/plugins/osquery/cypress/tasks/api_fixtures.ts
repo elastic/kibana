@@ -72,11 +72,20 @@ export const loadSavedQuery = (payload: SavedQuerySOFormData = savedQueryFixture
       ...payload,
       id: payload.id ?? generateRandomStringName(1)[0],
     },
+    headers: {
+      'Elastic-Api-Version': '1',
+    },
     url: '/api/osquery/saved_queries',
   }).then((response) => response.body.data);
 
 export const cleanupSavedQuery = (id: string) => {
-  request({ method: 'DELETE', url: `/api/osquery/saved_queries/${id}` });
+  request({
+    method: 'DELETE',
+    url: `/api/osquery/saved_queries/${id}`,
+    headers: {
+      'Elastic-Api-Version': '1',
+    },
+  });
 };
 
 export const loadPack = (payload: Partial<PackItem> = {}, space = 'default') =>
@@ -88,6 +97,9 @@ export const loadPack = (payload: Partial<PackItem> = {}, space = 'default') =>
       shards: {},
       queries: payload.queries ?? {},
       enabled: payload.enabled || true,
+    },
+    headers: {
+      'Elastic-Api-Version': '1',
     },
     url: `/s/${space}/api/osquery/packs`,
   }).then((response) => response.body.data);
@@ -108,6 +120,9 @@ export const loadLiveQuery = (
     method: 'POST',
     body: payload,
     url: `/api/osquery/live_queries`,
+    headers: {
+      'Elastic-Api-Version': '1',
+    },
   }).then((response) => response.body.data);
 
 export const loadRule = (includeResponseActions = false) =>
@@ -177,7 +192,13 @@ export const loadRule = (includeResponseActions = false) =>
   }).then((response) => response.body);
 
 export const cleanupRule = (id: string) => {
-  request({ method: 'DELETE', url: `/api/detection_engine/rules?id=${id}` });
+  request({
+    method: 'DELETE',
+    url: `/api/detection_engine/rules?id=${id}`,
+    headers: {
+      'Elastic-Api-Version': '1',
+    },
+  });
 };
 
 export const loadCase = (owner: string) =>
@@ -197,7 +218,11 @@ export const loadCase = (owner: string) =>
   }).then((response) => response.body);
 
 export const cleanupCase = (id: string) => {
-  request({ method: 'DELETE', url: '/api/cases', qs: { ids: JSON.stringify([id]) } });
+  request({
+    method: 'DELETE',
+    url: '/api/cases',
+    qs: { ids: JSON.stringify([id]) },
+  });
 };
 
 export const loadSpace = () => {

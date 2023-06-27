@@ -36,7 +36,7 @@ export const useCreateSavedQuery = ({ withRedirect }: UseCreateSavedQueryProps) 
   >(
     (payload) =>
       http.post('/api/osquery/saved_queries', {
-        version: '2023-10-31',
+        version: '1',
         body: JSON.stringify(payload),
       }),
     {

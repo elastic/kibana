@@ -22,7 +22,7 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: '1',
         validate: {
           request: {
             params: schema.object({

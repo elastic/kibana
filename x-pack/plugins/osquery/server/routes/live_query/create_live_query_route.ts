@@ -28,7 +28,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: '1',
         validate: {
           request: {
             body: buildRouteValidation<

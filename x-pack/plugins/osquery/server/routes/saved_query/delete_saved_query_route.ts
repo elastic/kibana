@@ -21,7 +21,7 @@ export const deleteSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: '1',
         validate: {
           request: {
             params: schema.object({
