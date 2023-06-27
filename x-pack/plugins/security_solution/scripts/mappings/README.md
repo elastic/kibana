@@ -29,4 +29,8 @@ Available attributes:
 
 > `node mappings_loader.js --mappings-dir='test_unmapped' --es-url=http://username:password@localhost:9200 --kibana-url=http://username:password@localhost:5601/app`
 
+
 This script will go through each folder in the provided root folder (via `--mappings-dir`) and load each folder with mappings inside using `es_archiver` tool.
+
+
+**NOTE:** The path to `es_archiver` is adjusted for the call of this script using `x-pack/plugins/security_solution/package.json`. If you call this script directly, you will need to adjust it accordingly.
