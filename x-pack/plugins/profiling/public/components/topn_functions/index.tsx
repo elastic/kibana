@@ -45,36 +45,24 @@ interface Row {
   };
 }
 
-function getTotalSamplesLabel(samplingRate?: number) {
-  if (samplingRate === undefined) {
-    return i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel', {
-      defaultMessage: 'Total sample estimate:',
-    });
-  }
-  return i18n.translate('xpack.profiling.functionsView.totalSampleCountLabelWithSamplingRate', {
-    defaultMessage: 'Total sample (estimate sample rate: {samplingRate}):',
-    values: { samplingRate },
-  });
-}
-
 function TotalSamplesStat({
   totalSamples,
   newSamples,
-  samplingRateA,
-  samplingRateB,
 }: {
   totalSamples: number;
   newSamples: number | undefined;
-  samplingRateA: number;
-  samplingRateB: number | undefined;
 }) {
   const value = totalSamples.toLocaleString();
+
+  const sampleHeader = i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel', {
+    defaultMessage: ' Total sample estimate: ',
+  });
 
   if (newSamples === undefined || newSamples === 0) {
     return (
       <EuiStat
         title={<EuiText style={{ fontWeight: 'bold' }}>{value}</EuiText>}
-        description={getTotalSamplesLabel(samplingRateA)}
+        description={sampleHeader}
       />
     );
   }
@@ -87,10 +75,10 @@ function TotalSamplesStat({
       title={
         <EuiText style={{ fontWeight: 'bold' }}>
           {value}
-          <GetLabel value={percentDelta} prepend=" (" append=")" />
+          <GetLabel value={percentDelta} prepend="(" append=")" />
         </EuiText>
       }
-      description={getTotalSamplesLabel(samplingRateB)}
+      description={sampleHeader}
     />
   );
 }
@@ -418,8 +406,6 @@ export function TopNFunctionsTable({
       <TotalSamplesStat
         totalSamples={totalCount}
         newSamples={comparisonTopNFunctions?.TotalCount}
-        samplingRateA={topNFunctions?.SamplingRate ?? 1.0}
-        samplingRateB={comparisonTopNFunctions?.SamplingRate ?? 1.0}
       />
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
