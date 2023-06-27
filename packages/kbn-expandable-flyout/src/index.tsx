@@ -16,7 +16,7 @@ import { RightSection } from './components/right_section';
 import type { FlyoutPanel, Panel } from './types';
 import { LeftSection } from './components/left_section';
 
-export interface ExpandableFlyoutProps extends EuiFlyoutProps {
+export interface ExpandableFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
   /**
    * List of all registered panels available for render
    */
