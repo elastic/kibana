@@ -11,8 +11,6 @@ require('./exit_on_warning');
 require('./harden');
 // The following require statements MUST be executed before any others - END
 
-require('./exend_node_options');
-
 require('symbol-observable');
 require('source-map-support').install();
 require('./node_version_validator');
