@@ -1446,6 +1446,8 @@
       "@kbn/unified-search-plugin/*": ["src/plugins/unified_search/*"],
       "@kbn/upgrade-assistant-plugin": ["x-pack/plugins/upgrade_assistant"],
       "@kbn/upgrade-assistant-plugin/*": ["x-pack/plugins/upgrade_assistant/*"],
+      "@kbn/uptime-plugin": ["x-pack/plugins/uptime"],
+      "@kbn/uptime-plugin/*": ["x-pack/plugins/uptime/*"],
       "@kbn/url-drilldown-plugin": ["x-pack/plugins/drilldowns/url_drilldown"],
       "@kbn/url-drilldown-plugin/*": ["x-pack/plugins/drilldowns/url_drilldown/*"],
       "@kbn/url-forwarding-plugin": ["src/plugins/url_forwarding"],

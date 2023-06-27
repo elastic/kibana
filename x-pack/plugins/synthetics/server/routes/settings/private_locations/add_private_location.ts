@@ -6,12 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SyntheticsRestApiRouteFactory } from '../../types';
 import { getAllPrivateLocations } from './get_private_locations';
 import {
   privateLocationsSavedObjectId,
   privateLocationsSavedObjectName,
 } from '../../../../common/saved_objects/private_locations';
-import { SyntheticsRestApiRouteFactory } from '../../../legacy_uptime/routes';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { PrivateLocation } from '../../../../common/runtime_types';
 

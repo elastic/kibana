@@ -2652,6 +2652,21 @@
     "misc": [
       {
         "parentPluginId": "securitySolution",
+        "id": "def-common.ADD_DATA_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ADD_DATA_PATH",
+        "description": [],
+        "signature": [
+          "\"/app/integrations/browse/security\""
+        ],
+        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
         "id": "def-common.APP_ID",
         "type": "string",
         "tags": [],
