@@ -108,7 +108,7 @@ export async function getFilteredEndpointExceptionListRaw({
       listId,
       namespaceType: 'agnostic',
       filter,
-      perPage: 100,
+      perPage: 1000,
       page,
       sortField: 'created_at',
       sortOrder: 'desc',
@@ -117,7 +117,7 @@ export async function getFilteredEndpointExceptionListRaw({
     if (response?.data !== undefined) {
       exceptions = exceptions.concat(response.data);
 
-      paging = (page - 1) * 100 + response.data.length < response.total;
+      paging = (page - 1) * 1000 + response.data.length < response.total;
       page++;
     } else {
       break;
@@ -140,7 +140,7 @@ export async function getAllItemsFromEndpointExceptionList({
 
   return getFilteredEndpointExceptionListRaw({
     elClient,
-    filter: `${osFilter}`,
+    filter: osFilter,
     listId,
   });
 }

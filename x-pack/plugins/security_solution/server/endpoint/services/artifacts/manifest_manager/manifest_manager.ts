@@ -663,7 +663,7 @@ export class ManifestManager {
   private async listEndpointPolicies(page: number) {
     return this.packagePolicyService.list(this.savedObjectsClient, {
       page,
-      perPage: 100,
+      perPage: 1000,
       kuery: 'ingest-package-policies.package.name:endpoint',
     });
   }
@@ -677,13 +677,13 @@ export class ManifestManager {
     while (paging) {
       const { items, total } = await this.packagePolicyService.listIds(this.savedObjectsClient, {
         page,
-        perPage: 100,
+        perPage: 1000,
         kuery: 'ingest-package-policies.package.name:endpoint',
       });
 
       allPolicyIds.push(...items);
 
-      paging = (page - 1) * 20 + items.length < total;
+      paging = (page - 1) * 1000 + items.length < total;
       page++;
     }
     return allPolicyIds;
