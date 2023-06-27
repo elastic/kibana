@@ -32,7 +32,7 @@ export const ManagementLandingPage = ({
 
   if (cardsNavigationConfig?.enabled) {
     return (
-      <EuiPageBody restrictWidth={true}>
+      <EuiPageBody restrictWidth={true} data-test-subj="cards-navigation-page">
         <CardsNavigation
           sections={sections}
           appBasePath={appBasePath}
