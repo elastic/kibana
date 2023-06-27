@@ -51,6 +51,9 @@ export type DatasetsSelectorContext = DatasetsSelectorTypestate['context'];
 
 export type DatasetsSelectorEvent =
   | {
+      type: 'CLOSE';
+    }
+  | {
       type: 'TOGGLE';
     }
   | {

@@ -57,6 +57,7 @@ export function DatasetSelector({
     panelId,
     search,
     selected,
+    closePopover,
     changePanel,
     scrollToIntegrationsBottom,
     searchByName,
@@ -153,7 +154,7 @@ export function DatasetSelector({
     <DatasetsPopover
       selected={selected}
       isOpen={isOpen}
-      closePopover={togglePopover}
+      closePopover={closePopover}
       onClick={togglePopover}
     >
       <SearchControls

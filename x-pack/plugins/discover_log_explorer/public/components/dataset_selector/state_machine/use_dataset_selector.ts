@@ -80,6 +80,11 @@ export const useDatasetSelector = ({
     [datasetsSelectorStateService]
   );
 
+  const closePopover = useCallback(
+    () => datasetsSelectorStateService.send({ type: 'CLOSE' }),
+    [datasetsSelectorStateService]
+  );
+
   const togglePopover = useCallback(
     () => datasetsSelectorStateService.send({ type: 'TOGGLE' }),
     [datasetsSelectorStateService]
@@ -92,6 +97,7 @@ export const useDatasetSelector = ({
     search,
     selected,
     // Actions
+    closePopover,
     changePanel,
     scrollToIntegrationsBottom,
     searchByName,
