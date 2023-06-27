@@ -17,7 +17,9 @@ import { ROOT_PATH, SEARCH_APPLICATIONS_PATH } from './routes';
 export const Applications = () => {
   return (
     <Routes compat={false}>
-      <Redirect exact from={ROOT_PATH} to={SEARCH_APPLICATIONS_PATH} />
+      <Route exact from={ROOT_PATH}>
+        <Redirect to={SEARCH_APPLICATIONS_PATH} />
+      </Route>
       <Route path={SEARCH_APPLICATIONS_PATH}>
         <SearchApplicationsRouter />
       </Route>

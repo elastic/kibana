@@ -126,10 +126,6 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
     );
   };
 
-  const renderNoMatch = (routeProps: RouteComponentProps) => {
-    return <DashboardNoMatch history={routeProps.history} />;
-  };
-
   const hasEmbeddableIncoming = Boolean(
     embeddable.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, false)
   );
@@ -155,7 +151,9 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
               <Route exact path="/">
                 <Redirect to={LANDING_PAGE_PATH} />
               </Route>
-              <Route render={renderNoMatch} />
+              <Route>
+                <DashboardNoMatch />
+              </Route>
             </Routes>
           </HashRouter>
         </KibanaThemeProvider>

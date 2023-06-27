@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import {
   EuiPageBody,
@@ -19,14 +19,15 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-type PageProps = RouteComponentProps & {
+interface PageProps {
   title: string;
   children: React.ReactNode;
   crumb?: string;
   isHome?: boolean;
-};
+}
 
-export const Page = withRouter(({ title, crumb, children, isHome = false, history }: PageProps) => {
+export const Page = ({ title, crumb, children, isHome = false }: PageProps) => {
+  const history = useHistory();
   const breadcrumbs: Array<{
     text: string;
     onClick?: () => void;
@@ -59,4 +60,4 @@ export const Page = withRouter(({ title, crumb, children, isHome = false, histor
       </EuiPageContent>
     </EuiPageBody>
   );
-});
+};

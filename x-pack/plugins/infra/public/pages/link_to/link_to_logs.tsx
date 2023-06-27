@@ -36,7 +36,9 @@ export const LinkToLogsPage: React.FC<LinkToPageProps> = (props) => {
       />
       <Route path={`${props.match.url}/:logViewId?/logs`} component={RedirectToLogs} />
       <Route path={`${props.match.url}/:logViewId?`} component={RedirectToLogs} />
-      <Redirect to="/" />
+      <Route>
+        <Redirect to="/" />
+      </Route>
     </Routes>
   );
 };

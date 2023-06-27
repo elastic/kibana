@@ -100,7 +100,9 @@ export async function mountManagementSection(
               <Route path={'/dataView/:id'}>
                 <EditIndexPatternContainer />
               </Route>
-              <Redirect path={'/patterns*'} to={'dataView*'} />
+              <Route path={'/patterns*'}>
+                <Redirect to={'dataView*'} />
+              </Route>
               <Route path={'/'}>
                 <IndexPatternTableWithRouter canSave={canSave} />
               </Route>

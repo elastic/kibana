@@ -32,7 +32,9 @@ export const LinkToMetricsPage: React.FC<LinkToPageProps> = (props) => {
         component={RedirectToHostDetailViaIP}
       />
       <Route path={`${props.match.url}/inventory`} component={RedirectToInventory} />
-      <Redirect to="/" />
+      <Route>
+        <Redirect to="/" />
+      </Route>
     </Routes>
   );
 };

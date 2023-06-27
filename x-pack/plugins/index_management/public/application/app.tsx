@@ -54,6 +54,8 @@ export const AppWithoutRouter = () => (
     {homeSections.map((section) => (
       <Route path={`/${section}`} component={IndexManagementHome} />
     ))}
-    <Redirect from={`/`} to={`/indices`} />
+    <Route path="/">
+      <Redirect to={`/indices`} />
+    </Route>
   </Routes>
 );

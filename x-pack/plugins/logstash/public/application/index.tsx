@@ -67,19 +67,15 @@ export const renderApp = async (
                 );
               }}
             />
-            <Route
-              path="/pipeline/new-pipeline"
-              exact
-              render={() => (
-                <PipelineEditView
-                  history={history}
-                  setBreadcrumbs={setBreadcrumbs}
-                  logstashLicenseService={logstashLicenseService}
-                  pipelineService={pipelineService}
-                  toasts={core.notifications.toasts}
-                />
-              )}
-            />
+            <Route path="/pipeline/new-pipeline" exact>
+              <PipelineEditView
+                history={history}
+                setBreadcrumbs={setBreadcrumbs}
+                logstashLicenseService={logstashLicenseService}
+                pipelineService={pipelineService}
+                toasts={core.notifications.toasts}
+              />
+            </Route>
             <Route
               path="/pipeline/:id"
               exact

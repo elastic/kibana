@@ -41,23 +41,16 @@ const getDefaultQuery = ({
 
 export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => (
   <Routes>
-    <Route
-      exact
-      path={findingsNavigation.findings_by_resource.path}
-      render={() => (
-        <TrackApplicationView viewId={findingsNavigation.findings_by_resource.id}>
-          <LatestFindingsByResource dataView={dataView} />
-        </TrackApplicationView>
-      )}
-    />
-    <Route
-      path={findingsNavigation.resource_findings.path}
-      render={() => (
-        <TrackApplicationView viewId={findingsNavigation.resource_findings.id}>
-          <ResourceFindings dataView={dataView} />
-        </TrackApplicationView>
-      )}
-    />
+    <Route exact path={findingsNavigation.findings_by_resource.path}>
+      <TrackApplicationView viewId={findingsNavigation.findings_by_resource.id}>
+        <LatestFindingsByResource dataView={dataView} />
+      </TrackApplicationView>
+    </Route>
+    <Route path={findingsNavigation.resource_findings.path}>
+      <TrackApplicationView viewId={findingsNavigation.resource_findings.id}>
+        <ResourceFindings dataView={dataView} />
+      </TrackApplicationView>
+    </Route>
   </Routes>
 );
 

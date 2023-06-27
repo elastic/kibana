@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { Redirect, useParams } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
@@ -60,6 +60,37 @@ function setAppChrome() {
   });
 }
 
+const MapApp = () => {
+  const { savedMapId } = useParams();
+  const { embeddableId, originatingApp, valueInput, originatingPath } =
+    stateTransfer.getIncomingEditorState(APP_ID) || {};
+
+  let mapEmbeddableInput;
+  if (savedMapId) {
+    mapEmbeddableInput = {
+      savedObjectId: savedMapId,
+    } as MapByReferenceInput;
+  } else if (valueInput) {
+    mapEmbeddableInput = valueInput as MapByValueInput;
+  }
+
+  return (
+    <ExitFullScreenButtonKibanaProvider coreStart={getCore()}>
+      <MapPage
+        mapEmbeddableInput={mapEmbeddableInput}
+        embeddableId={embeddableId}
+        onAppLeave={onAppLeave}
+        setHeaderActionMenu={setHeaderActionMenu}
+        stateTransfer={stateTransfer}
+        originatingApp={originatingApp}
+        originatingPath={originatingPath}
+        history={history}
+        key={savedMapId ? savedMapId : 'new'}
+      />
+    </ExitFullScreenButtonKibanaProvider>
+  );
+};
+
 export async function renderApp(
   { element, history, onAppLeave, setHeaderActionMenu, theme$ }: AppMountParameters,
   {
@@ -77,36 +108,6 @@ export async function renderApp(
   registerLayerWizards();
   setAppChrome();
 
-  function renderMapApp(routeProps: RouteComponentProps<{ savedMapId?: string }>) {
-    const { embeddableId, originatingApp, valueInput, originatingPath } =
-      stateTransfer.getIncomingEditorState(APP_ID) || {};
-
-    let mapEmbeddableInput;
-    if (routeProps.match.params.savedMapId) {
-      mapEmbeddableInput = {
-        savedObjectId: routeProps.match.params.savedMapId,
-      } as MapByReferenceInput;
-    } else if (valueInput) {
-      mapEmbeddableInput = valueInput as MapByValueInput;
-    }
-
-    return (
-      <ExitFullScreenButtonKibanaProvider coreStart={getCore()}>
-        <MapPage
-          mapEmbeddableInput={mapEmbeddableInput}
-          embeddableId={embeddableId}
-          onAppLeave={onAppLeave}
-          setHeaderActionMenu={setHeaderActionMenu}
-          stateTransfer={stateTransfer}
-          originatingApp={originatingApp}
-          originatingPath={originatingPath}
-          history={history}
-          key={routeProps.match.params.savedMapId ? routeProps.match.params.savedMapId : 'new'}
-        />
-      </ExitFullScreenButtonKibanaProvider>
-    );
-  }
-
   const I18nContext = getCoreI18n().Context;
   render(
     <AppUsageTracker>
@@ -122,8 +123,12 @@ export async function renderApp(
           >
             <Router history={history}>
               <Routes>
-                <Route path={`/map/:savedMapId`} render={renderMapApp} />
-                <Route exact path={`/map`} render={renderMapApp} />
+                <Route path={`/map/:savedMapId`}>
+                  <MapApp />
+                </Route>
+                <Route exact path={`/map`}>
+                  <MapApp />
+                </Route>
                 // Redirect other routes to list, or if hash-containing, their non-hash equivalents
                 <Route
                   path={``}

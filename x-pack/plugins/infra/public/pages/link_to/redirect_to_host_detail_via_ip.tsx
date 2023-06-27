@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { Redirect, useLocation, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
 import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
@@ -16,16 +16,9 @@ import { LoadingPage } from '../../components/loading_page';
 import { Error } from '../error';
 import { useSourceContext } from '../../containers/metrics_source';
 
-type RedirectToHostDetailType = RouteComponentProps<{
-  hostIp: string;
-}>;
-
-export const RedirectToHostDetailViaIP = ({
-  match: {
-    params: { hostIp },
-  },
-  location,
-}: RedirectToHostDetailType) => {
+export const RedirectToHostDetailViaIP = () => {
+  const location = useLocation();
+  const { hostIp } = useParams<{ hostIp: string }>();
   const { source } = useSourceContext();
 
   const { error, name } = useHostIpToName(

@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
@@ -25,12 +25,9 @@ interface MatchParams {
   section: Section;
 }
 
-export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { section },
-  },
-  history,
-}) => {
+export const SnapshotRestoreHome: React.FunctionComponent = () => {
+  const history = useHistory();
+  const { section } = useParams();
   const { slm_ui: slmUi } = useConfig();
   const { docLinks } = useCore();
 

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
@@ -24,13 +24,10 @@ interface MatchParams {
   name: string;
 }
 
-export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { name },
-  },
-  location,
-  history,
-}) => {
+export const TemplateClone: React.FunctionComponent = () => {
+  const history = useHistory();
+  const { name } = useParams<MatchParams>();
+  const location = useLocation();
   const decodedTemplateName = attemptToURIDecode(name)!;
   const isLegacy = getIsLegacyFromQueryParams(location);
 

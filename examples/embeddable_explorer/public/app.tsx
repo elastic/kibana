@@ -8,7 +8,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { BrowserRouter as Router, Route } from '@kbn/shared-ux-router';
 import { EuiPage, EuiPageSideBar_Deprecated as EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 
@@ -34,12 +34,12 @@ interface PageDef {
   component: React.ReactNode;
 }
 
-type NavProps = RouteComponentProps & {
-  navigateToApp: CoreStart['application']['navigateToApp'];
+interface NavProps {
   pages: PageDef[];
-};
+}
 
-const Nav = withRouter(({ history, navigateToApp, pages }: NavProps) => {
+const Nav = ({ pages }: NavProps) => {
+  const history = useHistory();
   const navItems = pages.map((page) => ({
     id: page.id,
     name: page.title,
@@ -58,11 +58,10 @@ const Nav = withRouter(({ history, navigateToApp, pages }: NavProps) => {
       ]}
     />
   );
-});
+};
 
 interface Props {
   basename: string;
-  navigateToApp: CoreStart['application']['navigateToApp'];
   embeddableApi: EmbeddableStart;
   uiActionsApi: UiActionsStart;
   overlays: OverlayStart;
@@ -73,12 +72,7 @@ interface Props {
   embeddableExamples: EmbeddableExamplesStart;
 }
 
-const EmbeddableExplorerApp = ({
-  basename,
-  navigateToApp,
-  embeddableApi,
-  embeddableExamples,
-}: Props) => {
+const EmbeddableExplorerApp = ({ basename, embeddableApi, embeddableExamples }: Props) => {
   const pages: PageDef[] = [
     {
       title: 'Hello world embeddable',
@@ -128,7 +122,7 @@ const EmbeddableExplorerApp = ({
     <Router basename={basename}>
       <EuiPage>
         <EuiPageSideBar>
-          <Nav navigateToApp={navigateToApp} pages={pages} />
+          <Nav pages={pages} />
         </EuiPageSideBar>
         {routes}
       </EuiPage>

@@ -57,7 +57,11 @@ export const ManagementRouter = memo(
           section
             .getAppsEnabled()
             .filter((app) => app.redirectFrom)
-            .map((app) => <Redirect path={`/${app.redirectFrom}*`} to={`${app.basePath}*`} />)
+            .map((app) => (
+              <Route path={`/${app.redirectFrom}*`}>
+                <Redirect to={`${app.basePath}*`} />
+              </Route>
+            ))
         )}
         <Route
           path={'/'}

@@ -82,20 +82,15 @@ export const Vulnerabilities = () => {
 
   return (
     <Routes>
-      <Route
-        exact
-        path={findingsNavigation.resource_vulnerabilities.path}
-        render={() => <ResourceVulnerabilities dataView={data} />}
-      />
-      <Route
-        exact
-        path={findingsNavigation.vulnerabilities_by_resource.path}
-        render={() => <VulnerabilitiesByResource dataView={data} />}
-      />
-      <Route
-        path={findingsNavigation.vulnerabilities.path}
-        render={() => <VulnerabilitiesContent dataView={data} />}
-      />
+      <Route exact path={findingsNavigation.resource_vulnerabilities.path}>
+        <ResourceVulnerabilities dataView={data} />
+      </Route>
+      <Route exact path={findingsNavigation.vulnerabilities_by_resource.path}>
+        <VulnerabilitiesByResource dataView={data} />
+      </Route>
+      <Route path={findingsNavigation.vulnerabilities.path}>
+        <VulnerabilitiesContent dataView={data} />
+      </Route>
     </Routes>
   );
 };

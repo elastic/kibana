@@ -18,7 +18,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -62,7 +62,7 @@ const securityDataView = i18n.translate(
 
 const securitySolution = 'security-solution';
 
-interface Props extends RouteComponentProps {
+interface Props {
   canSave: boolean;
   showCreateDialog?: boolean;
 }
@@ -70,10 +70,10 @@ interface Props extends RouteComponentProps {
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const IndexPatternTable = ({
-  history,
   canSave,
   showCreateDialog: showCreateDialogProp = false,
 }: Props) => {
+  const history = useHistory();
   const {
     setBreadcrumbs,
     uiSettings,
@@ -378,4 +378,4 @@ export const IndexPatternTable = ({
   );
 };
 
-export const IndexPatternTableWithRouter = withRouter(IndexPatternTable);
+export const IndexPatternTableWithRouter = React.memo(IndexPatternTable);

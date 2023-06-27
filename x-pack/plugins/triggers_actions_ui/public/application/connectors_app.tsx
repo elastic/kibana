@@ -108,7 +108,9 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
           component={suspendedComponentWithProps(ActionsConnectorsHome, 'xl')}
         />
 
-        <Redirect from={'/'} to="connectors" />
+        <Route path="/">
+          <Redirect to="connectors" />
+        </Route>
       </Routes>
     </ConnectorProvider>
   );

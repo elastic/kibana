@@ -23,7 +23,9 @@ export const App = ({ history }: { history: ScopedHistory }) => {
   return (
     <Router history={history}>
       <Routes>
-        <Redirect exact from="/" to={ROUTES.list} />
+        <Route exact path="/">
+          <Redirect to={ROUTES.list} />
+        </Route>
         <Route exact path={ROUTES.list} component={PolicyList} />
         <Route path={ROUTES.edit} component={EditPolicy} />
       </Routes>

@@ -33,15 +33,11 @@ const AlertingExampleApp = ({
   return (
     <Router basename={basename}>
       <EuiPage>
-        <Route
-          path={`/`}
-          exact={true}
-          render={() => (
-            <Page title={`Home`} isHome={true}>
-              <DocumentationPage triggersActionsUi={triggersActionsUi} />
-            </Page>
-          )}
-        />
+        <Route path={`/`} exact={true}>
+          <Page title={`Home`} isHome={true}>
+            <DocumentationPage triggersActionsUi={triggersActionsUi} />
+          </Page>
+        </Route>
         <Route
           path={`/rule/:id`}
           render={(props) => {

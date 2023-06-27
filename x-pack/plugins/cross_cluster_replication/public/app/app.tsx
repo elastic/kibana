@@ -168,7 +168,9 @@ class AppComponent extends Component<AppProps, AppState> {
     return (
       <Router history={this.props.history}>
         <Routes>
-          <Redirect exact from="/" to="/follower_indices" />
+          <Route path="/" exact>
+            <Redirect to="/follower_indices" />
+          </Route>
           <Route exact path="/auto_follow_patterns/add" component={AutoFollowPatternAdd} />
           <Route exact path="/auto_follow_patterns/edit/:id" component={AutoFollowPatternEdit} />
           <Route exact path="/follower_indices/add" component={FollowerIndexAdd} />

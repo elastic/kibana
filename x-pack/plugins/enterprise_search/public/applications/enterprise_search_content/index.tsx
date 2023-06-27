@@ -69,7 +69,9 @@ export const EnterpriseSearchContentUnconfigured: React.FC = () => (
 export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData>> = () => {
   return (
     <Routes compat={false}>
-      <Redirect exact from={ROOT_PATH} to={SEARCH_INDICES_PATH} />
+      <Route exact from={ROOT_PATH}>
+        <Redirect to={SEARCH_INDICES_PATH} />
+      </Route>
       <Route path={SEARCH_INDICES_PATH}>
         <SearchIndicesRouter />
       </Route>

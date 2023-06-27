@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import {
   EuiCallOut,
@@ -29,9 +29,8 @@ interface MatchParams {
   name: string;
 }
 
-export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  history,
-}) => {
+export const RepositoryEdit: React.FunctionComponent = () => {
+  const history = useHistory();
   const { i18n } = useServices();
   const { name } = useDecodedParams<MatchParams>();
   const section = 'repositories' as Section;

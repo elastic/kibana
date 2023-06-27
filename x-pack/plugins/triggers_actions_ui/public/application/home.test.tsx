@@ -44,14 +44,6 @@ describe('home', () => {
         initialEntries: ['/rules'],
       }),
       location: createLocation('/rules'),
-      match: {
-        isExact: true,
-        path: `/rules`,
-        url: '',
-        params: {
-          section: 'rules',
-        },
-      },
     };
 
     render(
@@ -73,20 +65,11 @@ describe('home', () => {
     });
     const props: RouteComponentProps<MatchParams> = {
       history: createMemoryHistory(),
-      location: createLocation('/'),
-      match: {
-        isExact: true,
-        path: `/connectorss`,
-        url: '',
-        params: {
-          section: 'connectors',
-        },
-      },
     };
 
     let home = mountWithIntl(
       <Router history={props.history}>
-        <TriggersActionsUIHome {...props} />
+        <TriggersActionsUIHome />
       </Router>
     );
 
@@ -102,7 +85,7 @@ describe('home', () => {
 
     home = mountWithIntl(
       <Router history={props.history}>
-        <TriggersActionsUIHome {...props} />
+        <TriggersActionsUIHome />
       </Router>
     );
     // alerts now too!

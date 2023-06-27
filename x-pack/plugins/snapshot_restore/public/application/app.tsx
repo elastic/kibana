@@ -74,7 +74,9 @@ export const App: React.FunctionComponent = () => {
                 path={`/:section/:repositoryName/:snapshotId*`}
                 component={SnapshotRestoreHome}
               />
-              <Redirect exact from="/restore/:repositoryName" to="/snapshots" />
+              <Route exact path="/restore/:repositoryName">
+                <Redirect to="/snapshots" />
+              </Route>
               <Route
                 exact
                 path="/restore/:repositoryName/:snapshotId"
@@ -83,8 +85,12 @@ export const App: React.FunctionComponent = () => {
               {slmUi.enabled && <Route exact path="/add_policy" component={PolicyAdd} />}
               {slmUi.enabled && <Route exact path="/edit_policy/:name" component={PolicyEdit} />}
               <Route exact path={`/:section/*`} component={SnapshotRestoreHome} />
-              <Redirect from="/" to={`/${DEFAULT_SECTION}`} />
-              <Redirect from="" to={`/${DEFAULT_SECTION}`} />
+              <Route path="/">
+                <Redirect to={`/${DEFAULT_SECTION}`} />
+              </Route>
+              <Route path="">
+                <Redirect to={`/${DEFAULT_SECTION}`} />
+              </Route>
             </Routes>
           </div>
         ) : (

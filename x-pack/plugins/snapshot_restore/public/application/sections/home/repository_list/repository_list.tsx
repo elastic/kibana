@@ -7,7 +7,7 @@
 
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import {
   EuiPageContent_Deprecated as EuiPageContent,
   EuiButton,
@@ -31,9 +31,8 @@ interface MatchParams {
   repositoryName?: Repository['name'];
 }
 
-export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  history,
-}) => {
+export const RepositoryList: React.FunctionComponent = () => {
+  const history = useHistory();
   const { repositoryName } = useDecodedParams<MatchParams>();
   const {
     error,

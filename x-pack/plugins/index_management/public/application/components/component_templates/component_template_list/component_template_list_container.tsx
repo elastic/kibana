@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 
 import { useExecutionContext } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
@@ -18,14 +17,8 @@ interface MatchParams {
   componentTemplateName?: string;
 }
 
-export const ComponentTemplateListContainer: React.FunctionComponent<
-  RouteComponentProps<MatchParams>
-> = ({
-  match: {
-    params: { componentTemplateName },
-  },
-  history,
-}) => {
+export const ComponentTemplateListContainer: React.FunctionComponent = () => {
+  const { componentTemplateName } = useParams<{ componentTemplateName?: string }>();
   const { executionContext } = useComponentTemplatesContext();
 
   useExecutionContext(executionContext, {
@@ -36,7 +29,7 @@ export const ComponentTemplateListContainer: React.FunctionComponent<
   return (
     <ComponentTemplatesAuthProvider>
       <ComponentTemplatesWithPrivileges>
-        <ComponentTemplateList componentTemplateName={componentTemplateName} history={history} />
+        <ComponentTemplateList componentTemplateName={componentTemplateName} />
       </ComponentTemplatesWithPrivileges>
     </ComponentTemplatesAuthProvider>
   );

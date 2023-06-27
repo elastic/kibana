@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useContext } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
@@ -41,7 +40,7 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
   defaultMessage: 'Add data',
 });
 
-export const InfrastructurePage = ({ match }: RouteComponentProps) => {
+export const InfrastructurePage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 

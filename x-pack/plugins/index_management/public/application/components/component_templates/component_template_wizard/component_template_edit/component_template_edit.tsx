@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import {
@@ -14,7 +14,6 @@ import {
   EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
-import { History } from 'history';
 
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import {
@@ -35,7 +34,8 @@ interface MatchParams {
   name: string;
 }
 
-export function useStepFromQueryString(history: History) {
+export function useStepFromQueryString() {
+  const history = useHistory();
   const activeStep = useMemo(() => {
     const params = new URLSearchParams(history.location.search);
     if (params.has('step')) {
@@ -59,14 +59,11 @@ export function useStepFromQueryString(history: History) {
   return { activeStep, updateStep };
 }
 
-export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { name },
-  },
-  history,
-}) => {
+export const ComponentTemplateEdit: React.FunctionComponent = () => {
+  const { name } = useParams<MatchParams>();
+  const history = useHistory();
   const { api, breadcrumbs, overlays } = useComponentTemplatesContext();
-  const { activeStep: defaultActiveStep, updateStep } = useStepFromQueryString(history);
+  const { activeStep: defaultActiveStep, updateStep } = useStepFromQueryString();
   const redirectTo = useRedirectPath(history);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);

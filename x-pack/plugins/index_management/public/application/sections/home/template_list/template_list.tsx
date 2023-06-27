@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -61,13 +61,10 @@ function filterTemplates(templates: TemplateListItem[], types: string[]): Templa
   });
 }
 
-export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { templateName },
-  },
-  location,
-  history,
-}) => {
+export const TemplateList: React.FunctionComponent = () => {
+  const { templateName } = useParams<MatchParams>();
+  const location = useLocation();
+  const history = useHistory();
   const { uiMetricService } = useServices();
   const {
     core: { executionContext },

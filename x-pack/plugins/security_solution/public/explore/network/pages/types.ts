@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { RouteComponentProps } from 'react-router-dom';
-
-export type NetworkComponentProps = Partial<RouteComponentProps<{}>> & {
+export interface NetworkComponentProps {
   hasMlUserPermissions: boolean;
   capabilitiesFetched: boolean;
-};
+}

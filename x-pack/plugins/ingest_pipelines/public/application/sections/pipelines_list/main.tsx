@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Location } from 'history';
 import { parse } from 'query-string';
@@ -37,10 +37,9 @@ const getPipelineNameFromLocation = (location: Location) => {
   return pipeline;
 };
 
-export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
-  history,
-  location,
-}) => {
+export const PipelinesList: React.FunctionComponent = () => {
+  const history = useHistory();
+  const location = useLocation();
   const { services } = useKibana();
   const pipelineNameFromLocation = getPipelineNameFromLocation(location);
 

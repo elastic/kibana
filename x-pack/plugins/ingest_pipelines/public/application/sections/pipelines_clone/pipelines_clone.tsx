@@ -6,7 +6,7 @@
  */
 
 import React, { FunctionComponent, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,8 +23,8 @@ export interface ParamProps {
  * This section is a wrapper around the create section where we receive a pipeline name
  * to load and set as the source pipeline for the {@link PipelinesCreate} form.
  */
-export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> = (props) => {
-  const { sourceName } = props.match.params;
+export const PipelinesClone: FunctionComponent = () => {
+  const { sourceName } = useParams<ParamProps>();
   const { services } = useKibana();
 
   const decodedSourceName = attemptToURIDecode(sourceName)!;
@@ -62,6 +62,6 @@ export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> 
     // We still show the create form even if we were not able to load the
     // latest pipeline data.
     const sourcePipeline = pipeline ? { ...pipeline, name: `${pipeline.name}-copy` } : undefined;
-    return <PipelinesCreate {...props} sourcePipeline={sourcePipeline} />;
+    return <PipelinesCreate sourcePipeline={sourcePipeline} />;
   }
 };

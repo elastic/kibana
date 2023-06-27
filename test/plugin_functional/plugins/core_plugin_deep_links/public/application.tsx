@@ -9,7 +9,7 @@
 import { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { withRouter, RouteComponentProps, Redirect } from 'react-router-dom';
+import { Redirect, useHistory } from 'react-router-dom';
 import { Router, Route } from '@kbn/shared-ux-router';
 
 import {
@@ -94,49 +94,53 @@ const PageB = () => (
   </EuiPageBody>
 );
 
-type NavProps = RouteComponentProps & {
+interface NavProps {
   navigateToApp: CoreStart['application']['navigateToApp'];
+}
+
+const Nav = ({ navigateToApp }: NavProps) => {
+  const history = useHistory();
+  return (
+    <EuiSideNav
+      items={[
+        {
+          name: 'DeepLinks!',
+          id: 'deeplinks',
+          items: [
+            {
+              id: 'home',
+              name: 'DL Home',
+              onClick: () => history.push('/home'),
+              'data-test-subj': 'dlNavHome',
+            },
+            {
+              id: 'page-a',
+              name: 'DL page A',
+              onClick: () => history.push('/page-a'),
+              'data-test-subj': 'dlNavPageA',
+            },
+            {
+              id: 'navigateDeepByPath',
+              name: 'DL section 1 page B',
+              onClick: () => {
+                navigateToApp('deeplinks', { path: '/page-b' });
+              },
+              'data-test-subj': 'dlNavDeepPageB',
+            },
+            {
+              id: 'navigateDeepById',
+              name: 'DL page A deep link',
+              onClick: () => {
+                navigateToApp('deeplinks', { deepLinkId: 'pageA' });
+              },
+              'data-test-subj': 'dlNavDeepPageAById',
+            },
+          ],
+        },
+      ]}
+    />
+  );
 };
-const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
-  <EuiSideNav
-    items={[
-      {
-        name: 'DeepLinks!',
-        id: 'deeplinks',
-        items: [
-          {
-            id: 'home',
-            name: 'DL Home',
-            onClick: () => history.push('/home'),
-            'data-test-subj': 'dlNavHome',
-          },
-          {
-            id: 'page-a',
-            name: 'DL page A',
-            onClick: () => history.push('/page-a'),
-            'data-test-subj': 'dlNavPageA',
-          },
-          {
-            id: 'navigateDeepByPath',
-            name: 'DL section 1 page B',
-            onClick: () => {
-              navigateToApp('deeplinks', { path: '/page-b' });
-            },
-            'data-test-subj': 'dlNavDeepPageB',
-          },
-          {
-            id: 'navigateDeepById',
-            name: 'DL page A deep link',
-            onClick: () => {
-              navigateToApp('deeplinks', { deepLinkId: 'pageA' });
-            },
-            'data-test-subj': 'dlNavDeepPageAById',
-          },
-        ],
-      },
-    ]}
-  />
-));
 
 const DlApp = ({ history, coreStart }: { history: History; coreStart: CoreStart }) => (
   <Router history={history}>
@@ -144,7 +148,9 @@ const DlApp = ({ history, coreStart }: { history: History; coreStart: CoreStart 
       <EuiPageSideBar>
         <Nav navigateToApp={coreStart.application.navigateToApp} />
       </EuiPageSideBar>
-      <Route path="/" exact render={() => <Redirect to="/home" />} />
+      <Route path="/" exact>
+        <Redirect to="/home" />
+      </Route>
       <Route path="/home" exact component={Home} />
       <Route path="/page-a" component={PageA} />
       <Route path="/page-b" component={PageB} />

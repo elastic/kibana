@@ -7,7 +7,7 @@
 import CloudDefendRouter from './router';
 import React from 'react';
 import { render } from '@testing-library/react';
-import { Router } from '@kbn/shared-ux-router';
+import { Router, Routes } from '@kbn/shared-ux-router';
 import type { CloudDefendPage, CloudDefendPageNavigationItem } from '../common/navigation/types';
 import { CloudDefendSecuritySolutionContext } from '../types';
 import { createMemoryHistory, MemoryHistory } from 'history';
@@ -39,7 +39,9 @@ describe('CloudDefendRouter', () => {
   const renderCloudDefendRouter = () =>
     render(
       <Router history={history}>
-        <CloudDefendRouter securitySolutionContext={securityContext} />
+        <Routes>
+          <CloudDefendRouter securitySolutionContext={securityContext} />
+        </Routes>
       </Router>
     );
 

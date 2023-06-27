@@ -34,31 +34,25 @@ export const Configurations = () => {
   return (
     <CloudPosturePage query={dataViewQuery}>
       <Routes>
-        <Route
-          exact
-          path={cloudPosturePages.findings.path}
-          render={() => (
-            <Redirect
-              to={{
-                pathname: findingsNavigation.findings_default.path,
-                search: location.search,
-              }}
-            />
-          )}
-        />
-        <Route
-          path={findingsNavigation.findings_default.path}
-          render={() => (
-            <TrackApplicationView viewId={findingsNavigation.findings_default.id}>
-              <LatestFindingsContainer dataView={dataViewQuery.data!} />
-            </TrackApplicationView>
-          )}
-        />
-        <Route
-          path={findingsNavigation.findings_by_resource.path}
-          render={() => <FindingsByResourceContainer dataView={dataViewQuery.data!} />}
-        />
-        <Route path="*" render={() => <Redirect to={findingsNavigation.findings_default.path} />} />
+        <Route exact path={cloudPosturePages.findings.path}>
+          <Redirect
+            to={{
+              pathname: findingsNavigation.findings_default.path,
+              search: location.search,
+            }}
+          />
+        </Route>
+        <Route path={findingsNavigation.findings_default.path}>
+          <TrackApplicationView viewId={findingsNavigation.findings_default.id}>
+            <LatestFindingsContainer dataView={dataViewQuery.data!} />
+          </TrackApplicationView>
+        </Route>
+        <Route path={findingsNavigation.findings_by_resource.path}>
+          <FindingsByResourceContainer dataView={dataViewQuery.data!} />
+        </Route>
+        <Route path="*">
+          <Redirect to={findingsNavigation.findings_default.path} />
+        </Route>
       </Routes>
     </CloudPosturePage>
   );

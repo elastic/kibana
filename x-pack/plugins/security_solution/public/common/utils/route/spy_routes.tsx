@@ -7,8 +7,7 @@
 
 import type * as H from 'history';
 import { memo, useEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
-import type { RouteComponentProps } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
 
 import { omit } from 'lodash';
@@ -17,83 +16,75 @@ import type { FlowTarget } from '../../../../common/search_strategy';
 import { useRouteSpy } from './use_route_spy';
 import type { RouteSpyState } from './types';
 
-type SpyRouteProps = RouteComponentProps<{
-  detailName: string | undefined;
-  tabName?: string;
-  search: string;
-  flowTarget: FlowTarget | undefined;
-}> & {
+interface SpyRouteProps {
   location: H.Location;
   state?: Record<string, string | boolean | undefined>;
   pageName?: SecurityPageName;
-};
+}
 
-export const SpyRouteComponent = memo<SpyRouteProps>(
-  ({
-    location: { pathname, search },
-    history,
-    match: {
-      params: { detailName, tabName, flowTarget },
-    },
-    pageName,
-    state,
-  }) => {
-    const [isInitializing, setIsInitializing] = useState(true);
-    const [route, dispatch] = useRouteSpy();
+export const SpyRouteComponent: React.FC<SpyRouteProps> = ({ pageName, state }) => {
+  const { pathname, search } = useLocation();
+  const history = useHistory();
+  const { detailName, tabName, flowTarget } = useParams<{
+    detailName: string | undefined;
+    tabName?: string;
+    flowTarget: FlowTarget | undefined;
+  }>();
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [route, dispatch] = useRouteSpy();
 
-    useEffect(() => {
-      if (isInitializing && search !== '') {
-        dispatch({
-          type: 'updateSearch',
-          search,
-        });
-        setIsInitializing(false);
-      } else if (search !== '' && search !== route.search) {
-        dispatch({
-          type: 'updateSearch',
-          search,
-        });
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [search]);
-
-    useEffect(() => {
-      if (!pageName || (route.pathName === pathname && deepEqual(state, route.state))) {
-        return;
-      }
-
-      const newRouteState = {
-        detailName,
-        flowTarget,
-        history,
-        pageName,
-        pathName: pathname,
-        search,
-        state,
-        tabName,
-      } as RouteSpyState;
-
-      if (isInitializing && detailName == null) {
-        dispatch({
-          type: 'updateRouteWithOutSearch',
-          route: omit(newRouteState, 'search'),
-        });
-        setIsInitializing(false);
-
-        return;
-      }
-
+  useEffect(() => {
+    if (isInitializing && search !== '') {
       dispatch({
-        type: 'updateRoute',
-        route: newRouteState,
+        type: 'updateSearch',
+        search,
       });
+      setIsInitializing(false);
+    } else if (search !== '' && search !== route.search) {
+      dispatch({
+        type: 'updateSearch',
+        search,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pathname, search, pageName, detailName, tabName, flowTarget, state]);
-    return null;
-  }
-);
+  useEffect(() => {
+    if (!pageName || (route.pathName === pathname && deepEqual(state, route.state))) {
+      return;
+    }
+
+    const newRouteState = {
+      detailName,
+      flowTarget,
+      history,
+      pageName,
+      pathName: pathname,
+      search,
+      state,
+      tabName,
+    } as RouteSpyState;
+
+    if (isInitializing && detailName == null) {
+      dispatch({
+        type: 'updateRouteWithOutSearch',
+        route: omit(newRouteState, 'search'),
+      });
+      setIsInitializing(false);
+
+      return;
+    }
+
+    dispatch({
+      type: 'updateRoute',
+      route: newRouteState,
+    });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, search, pageName, detailName, tabName, flowTarget, state]);
+  return null;
+};
 
 SpyRouteComponent.displayName = 'SpyRouteComponent';
 
-export const SpyRoute = withRouter(SpyRouteComponent);
+export const SpyRoute = memo(SpyRouteComponent);

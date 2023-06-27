@@ -13,7 +13,7 @@ import { Redirect } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
-import { RouteComponentProps, RouteProps } from 'react-router-dom';
+import { RouteProps } from 'react-router-dom';
 import {
   AppMountParameters,
   CoreStart,
@@ -46,10 +46,7 @@ import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { useKibanaServices } from '../hooks/use_kibana_services';
 import { PluginContext } from '../context/plugin_context';
 
-export type BreadcrumbTitle<T = {}> =
-  | string
-  | ((props: RouteComponentProps<T>) => string)
-  | null;
+export type BreadcrumbTitle<T = {}> = string | (() => string) | null;
 
 export interface RouteDefinition<T = any> extends RouteProps {
   breadcrumb: BreadcrumbTitle<T>;
@@ -59,7 +56,7 @@ export const uxRoutes: RouteDefinition[] = [
   {
     exact: true,
     path: '/',
-    render: () => <Redirect to="/ux" />,
+    children: <Redirect to="/ux" />,
     breadcrumb: DASHBOARD_LABEL,
   },
 ];

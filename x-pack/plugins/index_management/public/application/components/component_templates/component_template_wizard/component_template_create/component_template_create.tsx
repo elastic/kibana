@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPageContentBody_Deprecated as EuiPageContentBody,
@@ -25,10 +25,10 @@ interface Props {
   sourceComponentTemplate?: any;
 }
 
-export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProps & Props> = ({
-  history,
+export const ComponentTemplateCreate: React.FunctionComponent<Props> = ({
   sourceComponentTemplate,
 }) => {
+  const history = useHistory();
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 

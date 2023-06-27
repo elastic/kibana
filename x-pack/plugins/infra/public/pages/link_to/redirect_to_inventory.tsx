@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { parse } from 'query-string';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
 
 // FIXME what would be the right way to build this query string?
 const QUERY_STRING_TEMPLATE =
   "?waffleFilter=(expression:'',kind:kuery)&waffleTime=(currentTime:{timestamp},isAutoReloading:!f)&waffleOptions=(accountId:'',autoBounds:!t,boundsOverride:(max:1,min:0),customMetrics:!({customMetric}),customOptions:!(),groupBy:!(),legend:(palette:cool,reverseColors:!f,steps:10),metric:{metric},nodeType:{nodeType},region:'',sort:(by:name,direction:desc),timelineOpen:!f,view:map)";
 
-export const RedirectToInventory: React.FC<RouteComponentProps> = ({ location }) => {
+export const RedirectToInventory: React.FC = () => {
+  const location = useLocation();
   const parsedQueryString = parseQueryString(location.search);
 
   const inventoryQueryString = QUERY_STRING_TEMPLATE.replace(

@@ -22,7 +22,7 @@ import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_OVERVIEW_PAGE_LOAD } from '../../lib/ui_metric';
@@ -34,7 +34,8 @@ import { getLogsStep } from './logs_step';
 
 type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'logs';
 
-export const Overview = withRouter(({ history }: RouteComponentProps) => {
+export const Overview = () => {
+  const history = useHistory();
   const {
     featureSet: { migrateSystemIndices },
     services: {
@@ -138,4 +139,4 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
       </EuiPageContentBody>
     </EuiPageBody>
   );
-});
+};

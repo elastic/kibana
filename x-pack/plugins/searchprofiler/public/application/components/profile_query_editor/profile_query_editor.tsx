@@ -39,12 +39,13 @@ const INITIAL_EDITOR_VALUE = `{
  * Drives state changes for mine via profiler action context.
  */
 export const ProfileQueryEditor = memo(() => {
+  const location = useLocation();
   const editorRef = useRef<EditorInstance>(null as any);
   const indexInputRef = useRef<HTMLInputElement>(null as any);
 
   const dispatch = useProfilerActionContext();
 
-  const { getLicenseStatus, notifications, location } = useAppContext();
+  const { getLicenseStatus, notifications } = useAppContext();
 
   const queryParams = new URLSearchParams(location.search);
   const indexName = queryParams.get('index');

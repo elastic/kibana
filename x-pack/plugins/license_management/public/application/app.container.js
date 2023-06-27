@@ -6,7 +6,6 @@
  */
 
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
 
 import { App as PresentationComponent } from './app';
 import {
@@ -28,4 +27,4 @@ const mapDispatchToProps = {
   loadPermissions,
 };
 
-export const App = withRouter(connect(mapStateToProps, mapDispatchToProps)(PresentationComponent));
+export const App = connect(mapStateToProps, mapDispatchToProps)(PresentationComponent);

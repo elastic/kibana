@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { parse } from 'query-string';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import {
@@ -37,10 +37,9 @@ interface MatchParams {
   snapshotId?: string;
 }
 
-export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  location: { search },
-  history,
-}) => {
+export const SnapshotList: React.FunctionComponent = () => {
+  const { search } = useLocation();
+  const history = useHistory();
   const { repositoryName, snapshotId } = useDecodedParams<MatchParams>();
   const [listParams, setListParams] = useState<SnapshotListParams>(DEFAULT_SNAPSHOT_LIST_PARAMS);
   const {
