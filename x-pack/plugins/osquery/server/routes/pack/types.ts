@@ -45,9 +45,6 @@ export interface ReadPackResponseData {
   policy_ids?: string[];
   shards: Record<string, number>;
   read_only?: boolean;
-}
-
-export interface ReadPackRestResponseData {
   type: string;
   namespaces?: string[];
   migrationVersion?: Record<string, string>;
