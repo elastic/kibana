@@ -612,7 +612,7 @@ describe('TableListView', () => {
       },
     ];
 
-    test('should have an "inpect" button if the content editor is enabled', async () => {
+    test('should have an "inspect" button if the content editor is enabled', async () => {
       let testBed: TestBed;
 
       await act(async () => {

@@ -804,7 +804,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   useDebounce(fetchItems, 300, [fetchItems]);
 
   useEffect(() => {
-    if (!urlStateEnabled) {
+    if (!urlStateEnabled && !initialQuery) {
       return;
     }
 
@@ -878,9 +878,15 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       });
     };
 
-    updateQueryFromURL(urlState.s);
-    updateSortFromURL(urlState.sort);
-  }, [urlState, searchQueryParser, getTagList, urlStateEnabled]);
+    if (urlStateEnabled) {
+      updateQueryFromURL(urlState.s);
+      updateSortFromURL(urlState.sort);
+    }
+
+    if (initialQuery) {
+      updateQueryFromURL(initialQuery);
+    }
+  }, [urlState, searchQueryParser, getTagList, urlStateEnabled, initialQuery]);
 
   useEffect(() => {
     isMounted.current = true;

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import type { MouseEvent } from 'react';
 import { Query, EuiFlexGroup, EuiFlexItem, EuiText, EuiHealth, EuiBadge } from '@elastic/eui';
 import type { FieldValueOptionType } from '@elastic/eui';
@@ -45,6 +45,8 @@ export const useTagFilterPanel = ({
   addOrRemoveExcludeTagFilter,
   addOrRemoveIncludeTagFilter,
 }: Params) => {
+  const tags = useMemo(() => getTagList(), [getTagList]);
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   // When the panel is "in use" it means that it is opened and the user is interacting with it.
   // When the user clicks on a tag to select it, the component is unmounted and mounted immediately, which
@@ -52,8 +54,34 @@ export const useTagFilterPanel = ({
   // "isInUse" state which disable the transition.
   const [isInUse, setIsInUse] = useState(false);
   const [options, setOptions] = useState<TagOptionItem[]>([]);
-  const [tagSelection, setTagSelection] = useState<TagSelection>({});
-  const totalActiveFilters = Object.keys(tagSelection).length;
+  const clauseInclude: string[] = useMemo(
+    () =>
+      query ? toArray(query.ast.getOrFieldClause('tag', undefined, true, 'eq')?.value ?? []) : [],
+    [query]
+  );
+  const clauseExclude: string[] = useMemo(
+    () =>
+      query ? toArray(query.ast.getOrFieldClause('tag', undefined, false, 'eq')?.value ?? []) : [],
+    [query]
+  );
+  const [tagSelection, setTagSelection] = useState<TagSelection>({
+    ...clauseInclude.reduce((acc, tagName) => {
+      acc[tagName] = 'include';
+      return acc;
+    }, {} as TagSelection),
+    ...clauseExclude.reduce((acc, tagName) => {
+      acc[tagName] = 'exclude';
+      return acc;
+    }, {} as TagSelection),
+  });
+
+  const totalActiveFilters = useMemo(
+    () =>
+      tags.filter((currentOption) =>
+        [...clauseInclude, ...clauseExclude].find((clauseName) => clauseName === currentOption.name)
+      ).length,
+    [clauseExclude, clauseInclude, tags]
+  );
 
   const onSelectChange = useCallback(
     (updatedOptions: TagOptionItem[]) => {
@@ -80,8 +108,6 @@ export const useTagFilterPanel = ({
   );
 
   const updateTagList = useCallback(() => {
-    const tags = getTagList();
-
     const tagsToSelectOptions = tags.map((tag) => {
       const { name, id, color } = tag;
       let checked: 'on' | 'off' | undefined;
@@ -118,7 +144,7 @@ export const useTagFilterPanel = ({
     });
 
     setOptions(tagsToSelectOptions);
-  }, [getTagList, tagSelection, onOptionClick, tagsToTableItemMap]);
+  }, [tags, tagSelection, onOptionClick, tagsToTableItemMap]);
 
   const onFilterButtonClick = useCallback(() => {
     setIsPopoverOpen((prev) => !prev);
@@ -141,26 +167,23 @@ export const useTagFilterPanel = ({
      * 7. Which updates the "options" state (which is then passed to the stateless <TagFilterPanel />)
      */
     if (query) {
-      const clauseInclude = query.ast.getOrFieldClause('tag', undefined, true, 'eq');
-      const clauseExclude = query.ast.getOrFieldClause('tag', undefined, false, 'eq');
-
       const updatedTagSelection: TagSelection = {};
 
       if (clauseInclude) {
-        toArray(clauseInclude.value).forEach((tagName) => {
+        clauseInclude.forEach((tagName) => {
           updatedTagSelection[tagName] = 'include';
         });
       }
 
       if (clauseExclude) {
-        toArray(clauseExclude.value).forEach((tagName) => {
+        clauseExclude.forEach((tagName) => {
           updatedTagSelection[tagName] = 'exclude';
         });
       }
 
       setTagSelection(updatedTagSelection);
     }
-  }, [query]);
+  }, [clauseExclude, clauseInclude, query]);
 
   useEffect(() => {
     if (isPopoverOpen) {

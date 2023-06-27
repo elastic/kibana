@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { isEqual } from 'lodash';
 import type { State, UserContentCommonSchema } from './table_list_view_table';
 import type { Action } from './actions';
 
@@ -63,7 +64,10 @@ export function getReducer<T extends UserContentCommonSchema>() {
         };
       }
       case 'onSearchQueryChange': {
-        if (action.data.text === state.searchQuery.text) {
+        const clause = state.searchQuery.query.ast.clauses;
+        const newClause = action.data.query.ast.clauses;
+
+        if (action.data.text === state.searchQuery.text && isEqual(clause, newClause)) {
           return state;
         }
 
