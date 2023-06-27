@@ -809,7 +809,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     }
 
     // Update our Query instance based on the URL "s" text
-    const updateQueryFromURL = async (text: string = '') => {
+    const updateQueryFilter = async (text: string = '') => {
       let ast = Ast.create([]);
       let termMatch = text;
 
@@ -879,12 +879,12 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     };
 
     if (urlStateEnabled) {
-      updateQueryFromURL(urlState.s);
+      updateQueryFilter(urlState.s);
       updateSortFromURL(urlState.sort);
     }
 
     if (initialQuery) {
-      updateQueryFromURL(initialQuery);
+      updateQueryFilter(initialQuery);
     }
   }, [urlState, searchQueryParser, getTagList, urlStateEnabled, initialQuery]);
 
