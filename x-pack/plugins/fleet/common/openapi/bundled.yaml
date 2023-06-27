@@ -2206,6 +2206,54 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
     parameters: []
+  /agent_policies/{agentPolicyId}/uninstall_tokens:
+    get:
+      summary: Uninstall tokens for agent policy
+      tags:
+        - Agent policies
+        - Uninstall tokens
+      operationId: uninstall-tokens-for-agent-policy
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        token:
+                          type: string
+                        policy_id:
+                          type: string
+                        created_at:
+                          type: string
+                      required:
+                        - id
+                        - token
+                        - policy_id
+                        - created_at
+                  total:
+                    type: number
+                required:
+                  - items
+                  - total
+        '400':
+          $ref: '#/components/responses/error'
+      parameters:
+        - name: agentPolicyId
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - basicAuth: []
   /data_streams:
     get:
       summary: List data streams
@@ -3369,6 +3417,100 @@ paths:
           name: enrolToken
           in: query
           required: false
+  /uninstall_tokens:
+    get:
+      summary: List metadata for latest uninstall tokens per agent policy
+      tags:
+        - Uninstall tokens
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        policy_id:
+                          type: string
+                        created_at:
+                          type: string
+                      required:
+                        - id
+                        - policy_id
+                        - created_at
+                  total:
+                    type: number
+                  page:
+                    type: number
+                  perPage:
+                    type: number
+                required:
+                  - items
+                  - total
+                  - page
+                  - perPage
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: get-uninstall-tokens
+      parameters:
+        - $ref: '#/components/parameters/page_size'
+        - $ref: '#/components/parameters/page_index'
+        - name: policyId
+          in: query
+          required: false
+          schema:
+            type: string
+      security:
+        - basicAuth: []
+  /uninstall_tokens/{uninstallTokenId}:
+    get:
+      summary: Get decrypted uninstall token
+      tags:
+        - Uninstall tokens
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  item:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      token:
+                        type: string
+                      policy_id:
+                        type: string
+                      created_at:
+                        type: string
+                    required:
+                      - id
+                      - token
+                      - policy_id
+                      - created_at
+                required:
+                  - item
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: get-uninstall-token
+      parameters:
+        - name: uninstallTokenId
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - basicAuth: []
 components:
   securitySchemes:
     basicAuth:

@@ -106,6 +106,8 @@ paths:
     $ref: paths/agent_policies@_bulk_get.yaml
   /agent_policies/delete:
     $ref: paths/agent_policies@delete.yaml
+  /agent_policies/{agentPolicyId}/uninstall_tokens:
+    $ref: 'paths/agent_policies@{agent_policy_id}@uninstall_tokens.yaml'
 
   # Data streams endpoints
   /data_streams:
@@ -167,7 +169,10 @@ paths:
 
   # Uninstall tokens
   /uninstall_tokens:
-   $ref: paths/uninstall_tokens.yaml
+    $ref: paths/uninstall_tokens.yaml
+  /uninstall_tokens/{uninstallTokenId}:
+    $ref: paths/uninstall_tokens@{uninstall_token_id}.yaml
+
 components:
   securitySchemes:
     basicAuth:
