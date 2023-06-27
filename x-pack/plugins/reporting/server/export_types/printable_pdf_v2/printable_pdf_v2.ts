@@ -92,15 +92,18 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
       }),
       mergeMap(({ logo, headers }) => {
         const { browserTimezone, layout, title, locatorParams } = payload;
-        const urls = locatorParams.map((locator) => [
-          getFullRedirectAppUrl(
-            this.config,
-            this.getServerInfo(),
-            payload.spaceId,
-            payload.forceNow
-          ),
-          locator,
-        ]) as unknown as UrlOrUrlLocatorTuple[];
+        let urls: UrlOrUrlLocatorTuple[];
+        if (locatorParams) {
+          urls = locatorParams.map((locator) => [
+            getFullRedirectAppUrl(
+              this.config,
+              this.getServerInfo(),
+              payload.spaceId,
+              payload.forceNow
+            ),
+            locator,
+          ]) as unknown as UrlOrUrlLocatorTuple[];
+        }
 
         apmGetAssets?.end();
 
