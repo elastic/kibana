@@ -147,7 +147,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
       })),
       catchError((err) => {
         jobLogger.error(err);
-        return Rx.throwError(err);
+        return Rx.throwError(() => err);
       })
     );
 
