@@ -14,6 +14,7 @@ import {
   Position,
   RectAnnotation,
   Settings,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -193,9 +194,9 @@ export const ExpressionChart: React.FC<Props> = ({
             tickFormat={createFormatterForMetric(metric)}
             domain={domain}
           />
+          <Tooltip {...tooltipProps} />
           <Settings
             onPointerUpdate={handleCursorUpdate}
-            tooltip={tooltipProps}
             externalPointerEvents={{
               tooltip: { visible: true },
             }}
