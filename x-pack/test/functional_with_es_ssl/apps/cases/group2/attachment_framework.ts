@@ -14,7 +14,6 @@ import {
   CommentRequest,
   CommentRequestExternalReferenceType,
   CommentRequestPersistableStateType,
-  CaseSeverity,
 } from '@kbn/cases-plugin/common/api';
 import { expect } from 'expect';
 import {
