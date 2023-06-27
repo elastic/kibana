@@ -43,7 +43,7 @@ describe('Automated Response Actions', () => {
 
   after(() => {
     if (createdHost) {
-      cy.task('destroyEndpointHost', createdHost).then(() => {});
+      cy.task('destroyEndpointHost', createdHost);
     }
 
     if (indexedPolicy) {
@@ -67,7 +67,7 @@ describe('Automated Response Actions', () => {
     let ruleName: string;
 
     before(() => {
-      loadRule({}, true).then((data) => {
+      loadRule().then((data) => {
         ruleId = data.id;
         ruleName = data.name;
       });

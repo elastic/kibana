@@ -40,7 +40,7 @@ describe('Isolate command', () => {
 
   before(() => {
     getEndpointIntegrationVersion().then((version) => {
-      createAgentPolicyTask(version, 'alerts test').then((data) => {
+      createAgentPolicyTask(version).then((data) => {
         indexedPolicy = data;
         policy = indexedPolicy.integrationPolicies[0];
 
@@ -58,7 +58,7 @@ describe('Isolate command', () => {
 
   after(() => {
     if (createdHost) {
-      cy.task('destroyEndpointHost', createdHost).then(() => {});
+      cy.task('destroyEndpointHost', createdHost);
     }
 
     if (indexedPolicy) {

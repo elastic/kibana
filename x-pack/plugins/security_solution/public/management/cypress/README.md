@@ -54,38 +54,63 @@ This is the configuration used by CI. It uses the FTR to spawn both a Kibana ins
 
 ### Test Execution: Examples
 
-#### FTR + Headless (Chrome)
+#### Cypress + Headless (Chrome)
 
 Since this is how tests are run on CI, this will likely be the configuration you want to reproduce failures locally, etc.
 
 ```shell
-# bootstrap kibana from the project root
-yarn kbn bootstrap
-
-# build the plugins/assets that cypress will execute against
-node scripts/build_kibana_platform_plugins
+# bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
+yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
 
 # launch the cypress test runner
 cd x-pack/plugins/security_solution
 yarn cypress:dw:run-as-ci
 ```
-#### FTR + Interactive
 
-This is the preferred mode for developing new tests.
+#### CYPRESS
+
+This is the preferred mode for developing new tests against mocked data
 
 ```shell
-# bootstrap kibana from the project root
-yarn kbn bootstrap
-
-# build the plugins/assets that cypress will execute against
-node scripts/build_kibana_platform_plugins
+# bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
+yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
 
 # launch the cypress test runner
 cd x-pack/plugins/security_solution
-yarn cypress:dw:open-as-ci
+yarn cypress:dw:open
+
+```
+
+For developing/debugging tests against real endpoint please use:
+
+Endpoint tests require [Multipass](https://multipass.run/) to be installed on your machine.
+
+```shell
+# bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
+yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
+
+# launch the cypress test runner with real endpoint
+cd x-pack/plugins/security_solution
+yarn cypress:dw:endpoint:open
 ```
 
 Note that you can select the browser you want to use on the top right side of the interactive runner.
+
+#### Cypress against REAL Endpoint + Headless (Chrome)
+
+Endpoint tests require [Multipass](https://multipass.run/) to be installed on your machine.
+
+Since this is how tests are run on CI, this will likely be the configuration you want to reproduce failures locally, etc.
+
+```shell
+# bootstrap kibana from the project root and build the plugins/assets that cypress will execute against
+yarn kbn bootstrap && node scripts/build_kibana_platform_plugins
+
+# launch the cypress test runner with real endpoint
+cd x-pack/plugins/security_solution
+yarn cypress:dw:endpoint:run
+```
+
 
 ## Folder Structure
 

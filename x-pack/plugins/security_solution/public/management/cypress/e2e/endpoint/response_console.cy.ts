@@ -55,7 +55,7 @@ describe('Response console', () => {
 
     after(() => {
       if (createdHost) {
-        cy.task('destroyEndpointHost', createdHost).then(() => {});
+        cy.task('destroyEndpointHost', createdHost);
       }
 
       if (indexedPolicy) {
@@ -118,7 +118,7 @@ describe('Response console', () => {
 
     after(() => {
       if (createdHost) {
-        cy.task('destroyEndpointHost', createdHost).then(() => {});
+        cy.task('destroyEndpointHost', createdHost);
       }
 
       if (indexedPolicy) {
@@ -216,7 +216,7 @@ describe('Response console', () => {
 
     after(() => {
       if (createdHost) {
-        cy.task('destroyEndpointHost', createdHost).then(() => {});
+        cy.task('destroyEndpointHost', createdHost);
       }
 
       if (indexedPolicy) {
@@ -296,7 +296,7 @@ describe('Response console', () => {
 
     after(() => {
       if (createdHost) {
-        cy.task('destroyEndpointHost', createdHost).then(() => {});
+        cy.task('destroyEndpointHost', createdHost);
       }
 
       if (indexedPolicy) {
