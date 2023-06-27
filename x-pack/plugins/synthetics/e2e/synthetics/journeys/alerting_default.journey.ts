@@ -152,4 +152,11 @@ journey('AlertingDefaults', async ({ page, params }) => {
     await page.isDisabled('button:has-text("Apply changes")');
     await page.isDisabled('button:has-text("Add connector")');
   });
+  step('go to homepage', async () => {
+    await page.goto('https://www.globant.com/');
+    if (await page.isVisible('text="Accept only necessary cookies"')) {
+      await page.click('Accept only necessary cookies');
+    }
+    await page.getByRole('link', { name: 'Contact Us' }).click();
+  });
 });

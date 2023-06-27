@@ -9,6 +9,8 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { useSelector } from 'react-redux';
 import { useEvent } from 'react-use';
 import moment from 'moment';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ClientPluginsStart } from '@kbn/uptime-plugin/public/plugin';
 import { selectRefreshInterval, selectRefreshPaused } from '../state';
 
 interface SyntheticsRefreshContext {
@@ -35,6 +37,15 @@ export const SyntheticsRefreshContextProvider: React.FC = ({ children }) => {
     const refreshTime = Date.now();
     setLastRefresh(refreshTime);
   }, [setLastRefresh]);
+
+  const timefilter = useKibana<ClientPluginsStart>().services.data.query.timefilter.timefilter;
+
+  useEffect(() => {
+    const sub = timefilter.getFetch$().subscribe(() => {
+      refreshApp();
+    });
+    return () => sub.unsubscribe();
+  }, [timefilter, refreshApp]);
 
   useEffect(() => {
     if (!refreshPaused) {
