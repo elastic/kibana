@@ -16,6 +16,7 @@ import {
   ScaleType,
   Settings,
   timeFormatter,
+  Tooltip,
 } from '@elastic/charts';
 import {
   EuiBadge,
@@ -218,12 +219,8 @@ export function SubChart({
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ position: 'relative' }}>
         <Chart size={{ height, width }}>
-          <Settings
-            showLegend={false}
-            tooltip={{ showNullValues: false }}
-            baseTheme={chartsBaseTheme}
-            theme={chartsTheme}
-          />
+          <Tooltip showNullValues={false} />
+          <Settings showLegend={false} baseTheme={chartsBaseTheme} theme={chartsTheme} />
           <AreaSeries
             id={category}
             name={category}
@@ -263,7 +260,7 @@ export function SubChart({
           <Axis
             id="left-axis"
             position="left"
-            showGridLines
+            gridLine={{ visible: true }}
             tickFormat={(d) => (showAxes ? Number(d).toFixed(0) : '')}
             style={
               showAxes

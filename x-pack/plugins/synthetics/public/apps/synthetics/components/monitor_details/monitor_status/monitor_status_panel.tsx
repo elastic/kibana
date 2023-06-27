@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 
 import { EuiPanel, useEuiTheme, EuiResizeObserver, EuiSpacer } from '@elastic/eui';
-import { Chart, Settings, Heatmap, ScaleType } from '@elastic/charts';
+import { Chart, Settings, Heatmap, ScaleType, Tooltip } from '@elastic/charts';
 
 import { MonitorStatusHeader } from './monitor_status_header';
 import { MonitorStatusCellTooltip } from './monitor_status_cell_tooltip';
@@ -59,14 +59,14 @@ export const MonitorStatusPanel = ({
                 height: 60,
               }}
             >
+              <Tooltip
+                customTooltip={({ values }) => (
+                  <MonitorStatusCellTooltip timeBin={getTimeBinByXValue(values?.[0]?.datum?.x)} />
+                )}
+              />
               <Settings
                 showLegend={false}
                 xDomain={xDomain}
-                tooltip={{
-                  customTooltip: ({ values }) => (
-                    <MonitorStatusCellTooltip timeBin={getTimeBinByXValue(values?.[0]?.datum?.x)} />
-                  ),
-                }}
                 theme={{ heatmap }}
                 onBrushEnd={(brushArea) => {
                   onBrushed?.(getBrushData(brushArea));

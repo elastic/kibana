@@ -28,18 +28,25 @@ export const registerActionDetailsRoutes = (
   endpointContext: EndpointAppContext
 ) => {
   // Details for a given action id
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: ACTION_DETAILS_ROUTE,
-      validate: ActionDetailsRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canReadSecuritySolution'] },
-      endpointContext.logFactory.get('hostIsolationDetails'),
-      getActionDetailsRequestHandler(endpointContext)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: ActionDetailsRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canReadSecuritySolution'] },
+        endpointContext.logFactory.get('hostIsolationDetails'),
+        getActionDetailsRequestHandler(endpointContext)
+      )
+    );
 };
 
 export const getActionDetailsRequestHandler = (
