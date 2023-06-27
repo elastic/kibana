@@ -47,7 +47,7 @@ const migrationSchema = schema.object({
      */
     metaPickupSyncDelaySec: schema.number({ min: 1, defaultValue: 120 }),
     /**
-     * The document migration phase will be run from instances having any of the specified roles.
+     * The document migration phase will be run from instances with any of the specified roles.
      *
      * This is mostly used for testing environments and integration tests were
      * we have full control over a single node Kibana deployment.

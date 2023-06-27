@@ -10,6 +10,7 @@ xpack.fleet.internal.disableProxies: true
 migrations.algorithm: zdt
 
 # temporarily allow to run the migration on UI nodes
+# until the controller is able to spawn the migrator job/pod
 migrations.zdt:
   metaPickupSyncDelaySec: 5
   runOnRoles: ["ui"]
