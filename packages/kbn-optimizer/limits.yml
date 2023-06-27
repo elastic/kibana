@@ -120,7 +120,7 @@ pageLoadAssetSize:
   serverless: 16573
   serverlessObservability: 68747
   serverlessSearch: 71995
-  serverlessSecurity: 70441
+  serverlessSecurity: 40000
   sessionView: 77750
   share: 71239
   snapshotRestore: 79032
@@ -137,10 +137,10 @@ pageLoadAssetSize:
   triggersActionsUi: 135613
   uiActions: 35121
   uiActionsEnhanced: 38494
-  unifiedFieldList: 65500
   unifiedHistogram: 19928
   unifiedSearch: 71059
   upgradeAssistant: 81241
+  uptime: 37842
   urlDrilldown: 30063
   urlForwarding: 32579
   usageCollection: 39762

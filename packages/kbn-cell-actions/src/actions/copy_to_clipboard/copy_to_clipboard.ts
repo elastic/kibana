@@ -9,6 +9,7 @@
 import copy from 'copy-to-clipboard';
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
+import { isString } from 'lodash/fp';
 import { COPY_CELL_ACTION_TYPE } from '../../constants';
 import { createCellActionFactory } from '../factory';
 
@@ -45,9 +46,8 @@ export const createCopyToClipboardActionFactory = createCellActionFactory(
 
       let textValue: undefined | string;
       if (value != null) {
-        textValue = Array.isArray(value)
-          ? value.map((v) => `"${escapeValue(v)}"`).join(' AND ')
-          : `"${escapeValue(value)}"`;
+        const valuesArray = Array.isArray(value) ? value : [value];
+        textValue = valuesArray.map((v) => (isString(v) ? `"${escapeValue(v)}"` : v)).join(' AND ');
       }
       const text = textValue ? `${field.name}: ${textValue}` : field.name;
       const isSuccess = copy(text, { debug: true });

@@ -9,6 +9,7 @@ import type {
   PluginSetup as SecuritySolutionPluginSetup,
   PluginStart as SecuritySolutionPluginStart,
 } from '@kbn/security-solution-plugin/public';
+import { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EssSecurityPluginSetup {}
@@ -22,4 +23,5 @@ export interface EssSecurityPluginSetupDependencies {
 
 export interface EssSecurityPluginStartDependencies {
   securitySolution: SecuritySolutionPluginStart;
+  cloudExperiments?: CloudExperimentsPluginStart;
 }
