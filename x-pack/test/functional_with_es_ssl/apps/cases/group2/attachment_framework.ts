@@ -339,7 +339,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
         );
-        
+
         await common.navigateToApp('dashboard');
         await dashboard.preserveCrossAppState();
         await dashboard.clickNewDashboard();
