@@ -94,35 +94,6 @@ export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {
           refresh: 'wait_for',
           body: bulkUpdateRequest,
         });
-        // const body = await esClient.updateByQuery({
-        //   index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
-        //   refresh: false,
-        //   body: {
-        //     script: {
-        //       params: { tagsToAdd, tagsToRemove },
-        //       source: `List newTagsArray = [];
-        //       if (ctx._source["kibana.alert.workflow_tags"] != null) {
-        //         for (tag in ctx._source["kibana.alert.workflow_tags"]) {
-        //           if (!params.tagsToRemove.contains(tag)) {
-        //             newTagsArray.add(tag);
-        //           }
-        //         }
-        //         for (tag in params.tagsToAdd) {
-        //           if (!newTagsArray.contains(tag)) {
-        //             newTagsArray.add(tag)
-        //           }
-        //         }
-        //         ctx._source["kibana.alert.workflow_tags"] = newTagsArray;
-        //       } else {
-        //         ctx._source["kibana.alert.workflow_tags"] = params.tagsToAdd;
-        //       }
-        //       `,
-        //       lang: 'painless',
-        //     },
-        //     query: queryObject,
-        //   },
-        //   ignore_unavailable: true,
-        // });
         return response.ok({ body });
       } catch (err) {
         const error = transformError(err);

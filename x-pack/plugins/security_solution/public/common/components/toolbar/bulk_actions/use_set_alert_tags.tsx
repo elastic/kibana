@@ -19,7 +19,7 @@ export type SetAlertTagsFunc = (
   onSuccess: () => void,
   setTableLoading: (param: boolean) => void
 ) => Promise<void>;
-export type ReturnSetAlertTags = [SetAlertTagsFunc | null];
+export type ReturnSetAlertTags = SetAlertTagsFunc | null;
 
 /**
  * Update alert tags by query
@@ -77,5 +77,5 @@ export const useSetAlertTags = (): ReturnSetAlertTags => {
     };
   }, [http, onUpdateFailure, onUpdateSuccess]);
 
-  return [setAlertTagsRef.current];
+  return setAlertTagsRef.current;
 };

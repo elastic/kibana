@@ -40,7 +40,9 @@ export const useAlertTagsActions = ({ closePopover, ecsRowData, scopeId, refetch
     ];
   }, [alertId, ecsRowData._index, ecsRowData?.kibana?.alert.workflow_tags]);
 
-  const { alertTagsItems, alertTagsPanels } = useBulkAlertTagsItems({ refetch });
+  const { alertTagsItems, alertTagsPanels } = useBulkAlertTagsItems({
+    refetch,
+  });
 
   const itemsToReturn: AlertTableContextMenuItem[] = useMemo(
     () =>

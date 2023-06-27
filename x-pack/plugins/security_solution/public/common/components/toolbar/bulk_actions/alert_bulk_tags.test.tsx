@@ -12,14 +12,8 @@ import { useUiSetting$ } from '../../../lib/kibana';
 
 import { BulkAlertTagsPanel } from './alert_bulk_tags';
 import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
-import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { useSetAlertTags } from './use_set_alert_tags';
-import { getUpdateAlertsQuery } from '../../../../detections/components/alerts_table/actions';
 
 jest.mock('../../../lib/kibana');
-jest.mock('../../../hooks/use_app_toasts');
-jest.mock('./use_set_alert_tags');
-jest.mock('../../../../detections/components/alerts_table/actions');
 
 const mockTagItems = [
   {
@@ -30,12 +24,6 @@ const mockTagItems = [
 ];
 
 (useUiSetting$ as jest.Mock).mockReturnValue(['default-test-tag']);
-(useAppToasts as jest.Mock).mockReturnValue({
-  addError: jest.fn(),
-  addSuccess: jest.fn(),
-});
-(useSetAlertTags as jest.Mock).mockReturnValue([false, jest.fn()]);
-(getUpdateAlertsQuery as jest.Mock).mockReturnValue({ query: {} });
 
 describe('BulkAlertTagsPanel', () => {
   test('it renders', () => {
@@ -43,8 +31,9 @@ describe('BulkAlertTagsPanel', () => {
       <TestProviders>
         <BulkAlertTagsPanel
           alertItems={mockTagItems}
-          setIsLoading={() => {}}
-          closePopoverMenu={() => {}}
+          setIsLoading={jest.fn()}
+          closePopoverMenu={jest.fn()}
+          onSubmit={jest.fn()}
         />
       </TestProviders>
     );

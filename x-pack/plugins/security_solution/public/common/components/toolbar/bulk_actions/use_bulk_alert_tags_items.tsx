@@ -6,15 +6,26 @@
  */
 
 import type { RenderContentPanelProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { BulkAlertTagsPanel } from './alert_bulk_tags';
 import * as i18n from './translations';
+import { useSetAlertTags } from './use_set_alert_tags';
 
 interface UseBulkAlertTagsItemsProps {
   refetch?: () => void;
 }
 
 export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) => {
+  const setAlertTags = useSetAlertTags();
+  const handleOnAlertTagsSubmit = useCallback(
+    async (tags, ids, onSuccess, setIsLoading) => {
+      if (setAlertTags) {
+        await setAlertTags(tags, ids, onSuccess, setIsLoading);
+      }
+    },
+    [setAlertTags]
+  );
+
   const alertTagsItems = [
     {
       key: 'manage-alert-tags',
@@ -44,6 +55,7 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
           setIsLoading={setIsBulkActionsLoading}
           clearSelection={clearSelection}
           closePopoverMenu={closePopoverMenu}
+          onSubmit={handleOnAlertTagsSubmit}
         />
       ),
     },

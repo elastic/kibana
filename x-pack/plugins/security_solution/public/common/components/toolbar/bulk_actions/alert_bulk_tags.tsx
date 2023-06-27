@@ -13,10 +13,10 @@ import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { DEFAULT_ALERT_TAGS_KEY } from '../../../../../common/constants';
 import { useUiSetting$ } from '../../../lib/kibana';
-import { useSetAlertTags } from './use_set_alert_tags';
 import * as i18n from './translations';
 import { createInitialTagsState } from './helpers';
 import { createAlertTagsReducer, initialState } from './reducer';
+import type { SetAlertTagsFunc } from './use_set_alert_tags';
 
 interface BulkAlertTagsPanelComponentProps {
   alertItems: TimelineItem[];
@@ -25,6 +25,7 @@ interface BulkAlertTagsPanelComponentProps {
   refresh?: () => void;
   clearSelection?: () => void;
   closePopoverMenu: () => void;
+  onSubmit: SetAlertTagsFunc;
 }
 const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = ({
   alertItems,
@@ -33,10 +34,10 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
   setIsLoading,
   clearSelection,
   closePopoverMenu,
+  onSubmit,
 }) => {
   const [defaultAlertTagOptions] = useUiSetting$<string[]>(DEFAULT_ALERT_TAGS_KEY);
 
-  const [setAlertTags] = useSetAlertTags();
   const existingTags = useMemo(
     () =>
       alertItems.map(
@@ -73,8 +74,7 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
     [dispatch]
   );
 
-  const onTagsUpdate = useCallback(() => {
-    closePopoverMenu();
+  const onTagsUpdate = useCallback(async () => {
     if (tagsToAdd.size === 0 && tagsToRemove.size === 0) {
       return;
     }
@@ -87,19 +87,20 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
       if (refresh) refresh();
       if (clearSelection) clearSelection();
     };
-    if (setAlertTags != null) {
-      setAlertTags(tags, ids, onSuccess, setIsLoading);
+    if (onSubmit != null) {
+      closePopoverMenu();
+      await onSubmit(tags, ids, onSuccess, setIsLoading);
     }
   }, [
     closePopoverMenu,
     tagsToAdd,
     tagsToRemove,
     alertItems,
-    setAlertTags,
     refetchQuery,
     refresh,
     clearSelection,
     setIsLoading,
+    onSubmit,
   ]);
 
   const handleTagsOnChange = useCallback(
