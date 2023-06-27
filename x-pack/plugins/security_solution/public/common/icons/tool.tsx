@@ -6,7 +6,7 @@
  */
 import type { SVGProps } from 'react';
 import React from 'react';
-export const IconEndpointPolicies: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) => (
+export const IconTool: React.FC<SVGProps<SVGSVGElement>> = ({ ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={16}
@@ -18,8 +18,9 @@ export const IconEndpointPolicies: React.FC<SVGProps<SVGSVGElement>> = ({ ...pro
     <path
       fillRule="evenodd"
       clipRule="evenodd"
-      d="M16 28.0001H14V19.5081L14.6 19.2461C17.88 17.8121 20 14.5751 20 11.0001C20 7.96306 18.471 5.17106 16 3.52106V11.0001H6V3.52106C3.529 5.17106 2 7.96306 2 11.0001C2 14.5751 4.12 17.8121 7.4 19.2461L8 19.5081V28.0001H6V20.7951C2.334 18.9241 0 15.1481 0 11.0001C0 6.63006 2.591 2.67406 6.6 0.922059L8 0.310059V9.00006H14V0.310059L15.4 0.922059C19.409 2.67406 22 6.63006 22 11.0001C22 15.1481 19.666 18.9241 16 20.7951V28.0001Z"
+      d="M16 28H14V19.508L14.6 19.246C17.88 17.812 20 14.575 20 11C20 7.963 18.471 5.171 16 3.521V11H6V3.521C3.529 5.171 2 7.963 2 11C2 14.575 4.12 17.812 7.4 19.246L8 19.508V28H6V20.795C2.334 18.924 0 15.148 0 11C0 6.63 2.591 2.674 6.6 0.921998L8 0.309998V9H14V0.309998L15.4 0.921998C19.409 2.674 22 6.63 22 11C22 15.148 19.666 18.924 16 20.795V28Z"
       fill="#535766"
     />
+    <path fillRule="evenodd" clipRule="evenodd" d="M6 32H16V30H6V32Z" fill="#00BFB3" />
   </svg>
 );
