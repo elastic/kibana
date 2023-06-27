@@ -27,7 +27,6 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
-import type { PartialBy } from '../../../common/types/common';
 import type { ModelItemFull } from './models_list';
 import { ModelPipelines } from './pipelines';
 import { AllocatedModels } from '../memory_usage/nodes_overview/allocated_models';
@@ -132,17 +131,11 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     description,
   } = item;
 
-  const inferenceStats = useMemo(() => {
-    if (!isPopulatedObject(stats.inference_stats)) return;
+  const inferenceStats = useMemo<TrainedModelStat['inference_stats']>(() => {
+    if (!isPopulatedObject(stats.inference_stats) || item.model_type === TRAINED_MODEL_TYPE.PYTORCH)
+      return;
 
-    const result = { ...stats.inference_stats } as PartialBy<
-      Exclude<TrainedModelStat['inference_stats'], undefined>,
-      'cache_miss_count'
-    >;
-    if (item.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
-      delete result.cache_miss_count;
-    }
-    return result;
+    return stats.inference_stats;
   }, [stats.inference_stats, item.model_type]);
 
   const { analytics_config: analyticsConfig, ...restMetaData } = metadata ?? {};
