@@ -11,10 +11,8 @@ import './_dashboard_app.scss';
 import React from 'react';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Switch, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
-import { Route } from '@kbn/shared-ux-router';
-
+import { HashRouter, RouteComponentProps, Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { AppMountParameters, CoreSetup } from '@kbn/core/public';
@@ -151,19 +149,17 @@ export async function mountApp({ core, element, appUnMounted, mountContext }: Da
       <DashboardMountContext.Provider value={mountContext}>
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <HashRouter>
-            <CompatRouter>
-              <Switch>
-                <Route
-                  path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}
-                  render={renderDashboard}
-                />
-                <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
-                <Route exact path="/">
-                  <Redirect to={LANDING_PAGE_PATH} />
-                </Route>
-                <Route render={renderNoMatch} />
-              </Switch>
-            </CompatRouter>
+            <Routes>
+              <Route
+                path={[CREATE_NEW_DASHBOARD_URL, `${VIEW_DASHBOARD_URL}/:id`]}
+                render={renderDashboard}
+              />
+              <Route exact path={LANDING_PAGE_PATH} render={renderListingPage} />
+              <Route exact path="/">
+                <Redirect to={LANDING_PAGE_PATH} />
+              </Route>
+              <Route render={renderNoMatch} />
+            </Routes>
           </HashRouter>
         </KibanaThemeProvider>
       </DashboardMountContext.Provider>

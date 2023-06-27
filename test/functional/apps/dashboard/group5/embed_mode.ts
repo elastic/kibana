@@ -25,6 +25,15 @@ export default function ({
   const log = getService('log');
 
   describe('embed mode', () => {
+    /*
+     * Note: The baseline images used in all of the screenshot tests in this test suite were taken directly from the CI environment
+     * in order to overcome a known issue with the pixel density of fonts being significantly different when running locally versus
+     * when running these tests as part of CI.
+     *
+     * This was done so that the screenshot tests can pass during CI; however, as a consequence, they may fail locally. Be careful
+     * when running this test suite with the --updateBaselines flag.
+     */
+
     const urlParamExtensions = [
       'show-top-menu=true',
       'show-query-input=true',
@@ -71,12 +80,7 @@ export default function ({
         await testSubjects.existOrFail('globalQueryBar');
       });
 
-      /**
-       * Skipping all render tests for now - there is a problem where the locally generated screenshots do not align with the
-       * CI screenshots due to (possibly) pixel density or something similar. This fix is super important to get in so we will
-       * have to resolve the issue with these new tests *after* FF for 8.9/8.8.2
-       */
-      it.skip('renders as expected', async () => {
+      it('renders as expected', async () => {
         await PageObjects.dashboard.waitForRenderComplete();
         const percentDifference = await screenshot.compareAgainstBaseline(
           'dashboard_embed_mode',
@@ -99,7 +103,7 @@ export default function ({
         await testSubjects.existOrFail('superDatePickerToggleQuickMenuButton');
       });
 
-      it.skip('renders as expected', async () => {
+      it('renders as expected', async () => {
         await PageObjects.dashboard.waitForRenderComplete();
         const percentDifference = await screenshot.compareAgainstBaseline(
           'dashboard_embed_mode_with_url_params',
@@ -108,7 +112,7 @@ export default function ({
         expect(percentDifference).to.be.lessThan(0.02);
       });
 
-      it.skip('renders as expected when scrolling', async () => {
+      it('renders as expected when scrolling', async () => {
         const panels = await PageObjects.dashboard.getDashboardPanels();
         const lastPanel = panels[panels.length - 1];
         const lastPanelHeight = -parseInt(await lastPanel.getComputedStyle('height'), 10);

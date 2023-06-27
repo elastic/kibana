@@ -13,7 +13,7 @@ interface CategoryViewerProps {
 }
 
 const CategoryViewerComponent: React.FC<CategoryViewerProps> = ({ category }) => (
-  <EuiText data-test-subj="category-viewer" key={category} size="s">
+  <EuiText data-test-subj={`category-viewer-${category}`} key={category} size="s">
     {category}
   </EuiText>
 );
