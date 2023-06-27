@@ -6,14 +6,13 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { SavedObject } from '@kbn/core-saved-objects-common';
 import { SyntheticsParams } from '../../../../../common/runtime_types';
 import { IHttpSerializedFetchError } from '..';
 import { addNewGlobalParamAction, editGlobalParamAction, getGlobalParamAction } from './actions';
 
 export interface GlobalParamsState {
   isLoading?: boolean;
-  listOfParams?: Array<SavedObject<SyntheticsParams>>;
+  listOfParams?: SyntheticsParams[];
   addError: IHttpSerializedFetchError | null;
   editError: IHttpSerializedFetchError | null;
   isSaving?: boolean;

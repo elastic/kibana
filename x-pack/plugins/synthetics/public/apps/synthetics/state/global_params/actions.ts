@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core-saved-objects-common';
 import { SyntheticsParamRequest, SyntheticsParams } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
-export const getGlobalParamAction = createAsyncAction<void, Array<SavedObject<SyntheticsParams>>>(
+export const getGlobalParamAction = createAsyncAction<void, SyntheticsParams[]>(
   'GET GLOBAL PARAMS'
 );
 
