@@ -47,7 +47,7 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
             body: schema.object({
               values: schema.oneOf([
                 // composite field
-                schema.recordOf(schema.string(), valueSchema),
+                schema.recordOf(schema.string(), schema.arrayOf(valueSchema)),
                 // primitive field
                 schema.arrayOf(valueSchema),
               ]),
