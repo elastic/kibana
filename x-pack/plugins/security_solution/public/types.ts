@@ -84,6 +84,15 @@ export interface SetupPlugins {
   ml?: MlPluginSetup;
 }
 
+/**
+ * IMPORTANT - PLEASE READ: When adding new plugins to the
+ * security solution, please ensure you add that plugin
+ * name to the kibana.jsonc file located in ../kibana.jsonc
+ *
+ * Without adding the plugin name there, the plugin will not
+ * fulfill at runtime, despite the types showing up correctly
+ * in the code.
+ */
 export interface StartPlugins {
   cases: CasesUiStart;
   data: DataPublicPluginStart;

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { ChromeStyle } from '@kbn/core-chrome-browser';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { GlobalSearchPluginStart } from '@kbn/global-search-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import { Observable } from 'rxjs';
 import { TrackUiMetricFn } from '../types';
 
 /* @internal */
@@ -18,4 +20,5 @@ export interface SearchBarProps {
   taggingApi?: SavedObjectTaggingPluginStart;
   basePathUrl: string;
   darkMode: boolean;
+  chromeStyle$: Observable<ChromeStyle>;
 }

@@ -26,10 +26,11 @@ export interface DiscoverMainProps {
    * Central state container
    */
   stateContainer: DiscoverStateContainer;
+  mode?: 'embedded' | 'standalone';
 }
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
-  const { stateContainer } = props;
+  const { stateContainer, mode = 'standalone' } = props;
   const savedSearch = useSavedSearchInitial();
   const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history } = services;
@@ -58,13 +59,15 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   }, [stateContainer]);
 
   /**
-   * SavedSearch dependend initializing
+   * SavedSearch dependent initializing
    */
   useEffect(() => {
-    const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
-    chrome.docTitle.change(`Discover${pageTitleSuffix}`);
-    setBreadcrumbsTitle({ title: savedSearch.title, services });
-  }, [chrome.docTitle, savedSearch.id, savedSearch.title, services]);
+    if (mode === 'standalone') {
+      const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
+      chrome.docTitle.change(`Discover${pageTitleSuffix}`);
+      setBreadcrumbsTitle({ title: savedSearch.title, services });
+    }
+  }, [mode, chrome.docTitle, savedSearch.id, savedSearch.title, services]);
 
   useEffect(() => {
     addHelpMenuToAppChrome(chrome, docLinks);

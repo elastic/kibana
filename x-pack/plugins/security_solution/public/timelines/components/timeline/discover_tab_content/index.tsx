@@ -63,6 +63,11 @@ export const DiscoverTabContent = () => {
         id: 'search_bar',
         CustomQueryBar: CustomStatefulTopMenu,
       });
+
+      customizations.set({
+        id: 'top_nav',
+        showBreadcrumbs: false,
+      });
     },
     [CustomStatefulTopMenu]
   );

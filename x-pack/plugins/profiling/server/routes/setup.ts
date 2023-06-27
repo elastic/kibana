@@ -84,8 +84,17 @@ export function registerSetupRoute({
           });
         }
 
+        state.data.available = await hasProfilingData(setupOptions);
+        if (state.data.available) {
+          return response.ok({
+            body: {
+              has_setup: true,
+              has_data: state.data.available,
+            },
+          });
+        }
+
         const verifyFunctions = [
-          hasProfilingData,
           isApmPackageInstalled,
           validateApmPolicy,
           validateCollectorPackagePolicy,

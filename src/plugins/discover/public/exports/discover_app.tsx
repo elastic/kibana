@@ -31,6 +31,7 @@ export const useDiscoverMainRouteInternal = ({ services }: UseDiscoverMainRouteI
             <DiscoverMainRoute
               isDev={props.isDev}
               customizationCallbacks={props.customizationCallbacks}
+              mode="embedded"
             />
           </Suspense>
         </ServicesContextProvider>

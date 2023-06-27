@@ -174,6 +174,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     showTimeline,
   }) => {
     const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
+    const isDiscoverInTimelineEnabled = useIsExperimentalFeatureEnabled('discoverInTimeline');
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -261,12 +262,14 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             />
           </HideShowContainer>
         )}
-        <HideShowContainer
-          $isVisible={TimelineTabs.discover === activeTimelineTab}
-          data-test-subj={`timeline-tab-content-${TimelineTabs.discover}`}
-        >
-          <DiscoverTab />
-        </HideShowContainer>
+        {isDiscoverInTimelineEnabled && (
+          <HideShowContainer
+            $isVisible={TimelineTabs.discover === activeTimelineTab}
+            data-test-subj={`timeline-tab-content-${TimelineTabs.discover}`}
+          >
+            <DiscoverTab />
+          </HideShowContainer>
+        )}
       </>
     );
   }
