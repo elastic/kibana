@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { pick } from 'lodash';
+import { pick, orderBy } from 'lodash';
 import moment from 'moment';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
@@ -41,9 +41,11 @@ export interface AlertDetailsExplainLogRateSpikesSectionProps {
   alert: TopAlert<Record<string, any>>;
 }
 
-interface FieldValuePair {
+interface SignificantFieldValue {
   field: string;
   value: string | number;
+  docCount: number;
+  pValue: number | null;
 }
 
 export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionProps> = ({
@@ -55,7 +57,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
   const [logSpikeParams, setLogSpikeParams] = useState<
-    { significantFieldValues: FieldValuePair[] } | undefined
+    { significantFieldValues: SignificantFieldValue[] } | undefined
   >();
 
   useEffect(() => {
@@ -163,13 +165,17 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   const onAnalysisCompleted = (
     analysisResults: ExplainLogRateSpikesAnalysisResults | undefined
   ) => {
-    const fieldValuePairs = analysisResults?.significantTerms?.map((term) => ({
-      field: term.fieldName,
-      value: term.fieldValue,
-    }));
-    setLogSpikeParams(
-      fieldValuePairs ? { significantFieldValues: fieldValuePairs?.slice(0, 2) } : undefined
-    );
+    const significantFieldValues = orderBy(
+      analysisResults?.significantTerms?.map((item) => ({
+        field: item.fieldName,
+        value: item.fieldValue,
+        docCount: item.doc_count,
+        pValue: item.pValue,
+      })),
+      ['pValue', 'docCount'],
+      ['asc', 'asc']
+    ).slice(0, 50);
+    setLogSpikeParams(significantFieldValues ? { significantFieldValues } : undefined);
   };
 
   const coPilotService = useCoPilot();

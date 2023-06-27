@@ -48,7 +48,6 @@ describe('show topN button', () => {
     ownFocus: false,
     showTopN: false,
     scopeId: TimelineId.active,
-    value: ['rule_name'],
   };
 
   describe('button', () => {
@@ -182,7 +181,6 @@ describe('show topN button', () => {
         </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="top-n"]').prop('field')).toEqual(testProps.field);
-      expect(wrapper.find('[data-test-subj="top-n"]').prop('value')).toEqual(testProps.value);
       expect(wrapper.find('[data-test-subj="top-n"]').prop('toggleTopN')).toEqual(
         testProps.onClick
       );

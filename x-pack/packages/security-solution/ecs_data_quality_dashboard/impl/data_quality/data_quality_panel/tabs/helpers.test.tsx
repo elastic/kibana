@@ -84,7 +84,7 @@ describe('helpers', () => {
           patternDocsCount: 57410,
           setSelectedTabId: jest.fn(),
           stats: mockStatsGreenIndex,
-          theme: DARK_THEME,
+          baseTheme: DARK_THEME,
         }).map((x) => omit(['append', 'content'], x))
       ).toEqual([
         {

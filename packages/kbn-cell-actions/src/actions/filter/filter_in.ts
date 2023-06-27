@@ -10,6 +10,7 @@ import type { FilterManager } from '@kbn/data-plugin/public';
 import { createFilter, isEmptyFilterValue } from './create_filter';
 import { FILTER_CELL_ACTION_TYPE } from '../../constants';
 import { createCellActionFactory } from '../factory';
+import { CellActionFieldValue } from '../../types';
 
 const ICON = 'plusInCircle';
 const FILTER_IN = i18n.translate('cellActions.actions.filterIn', {
@@ -45,7 +46,7 @@ export const addFilterIn = ({
 }: {
   filterManager: FilterManager | undefined;
   fieldName: string;
-  value: string[] | string | null | undefined;
+  value: CellActionFieldValue;
 }) => {
   if (filterManager != null) {
     const filter = createFilter({
