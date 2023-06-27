@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, FC } from 'react';
-import CSS from 'csstype';
+import React, { useCallback, FC, CSSProperties } from 'react';
 
 interface Props {
   render: (element: HTMLElement) => void;
-  style?: CSS.Properties;
+  style?: CSSProperties;
 }
 
 export const RenderToDom: FC<Props> = ({ render, style }) => {

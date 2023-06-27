@@ -7,7 +7,7 @@
 
 import { EuiAccordion, EuiAccordionProps } from '@elastic/eui';
 import { isEmpty } from 'lodash';
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { Margins } from '../../../../../shared/charts/Timeline';
 import { WaterfallItem } from './waterfall_item';
@@ -89,8 +89,6 @@ const WaterfallItemContainer = euiStyled.div`
 `;
 
 export function AccordionWaterfall(props: AccordionWaterfallProps) {
-  const [isOpen, setIsOpen] = useState(props.isOpen);
-
   const {
     item,
     level,
@@ -102,8 +100,12 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
     onClickWaterfallItem,
   } = props;
 
-  const nextLevel = level + 1;
-  setMaxLevel(nextLevel);
+  const [isOpen, setIsOpen] = useState(props.isOpen);
+  const [nextLevel] = useState(level + 1);
+
+  useEffect(() => {
+    setMaxLevel(nextLevel);
+  }, [nextLevel, setMaxLevel]);
 
   const children = waterfall.childrenByParentId[item.id] || [];
   const errorCount = waterfall.getErrorCount(item.id);

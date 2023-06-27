@@ -96,8 +96,9 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CleanExtraBinScripts);
     await run(Tasks.CleanNodeBuilds);
 
-    await run(Tasks.PathLength);
-    await run(Tasks.UuidVerification);
+    await run(Tasks.AssertFileTime);
+    await run(Tasks.AssertPathLength);
+    await run(Tasks.AssertNoUUID);
   }
 
   /**
