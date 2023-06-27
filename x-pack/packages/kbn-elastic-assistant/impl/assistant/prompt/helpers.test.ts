@@ -7,10 +7,21 @@
 
 import type { Message } from '../../assistant_context/types';
 import { getCombinedMessage, getSystemMessages } from './helpers';
+import { mockGetAnonymizedValue } from '../../mock/get_anonymized_value';
 import { mockSystemPrompt } from '../../mock/system_prompt';
-import { mockAlertPromptContext, mockEventPromptContext } from '../../mock/prompt_context';
+import { mockAlertPromptContext } from '../../mock/prompt_context';
+import type { SelectedPromptContext } from '../prompt_context/types';
+
+const mockSelectedAlertPromptContext: SelectedPromptContext = {
+  allow: [],
+  allowReplacement: [],
+  promptContextId: mockAlertPromptContext.id,
+  rawData: 'alert data',
+};
 
 describe('helpers', () => {
+  beforeEach(() => jest.clearAllMocks());
+
   describe('getSystemMessages', () => {
     it('should return an empty array if isNewChat is false', () => {
       const result = getSystemMessages({
@@ -51,17 +62,15 @@ describe('helpers', () => {
   });
 
   describe('getCombinedMessage', () => {
-    const mockPromptContexts = {
-      [mockAlertPromptContext.id]: mockAlertPromptContext,
-      [mockEventPromptContext.id]: mockEventPromptContext,
-    };
-
     it('returns correct content for a new chat with a system prompt', async () => {
       const message: Message = await getCombinedMessage({
+        currentReplacements: {},
         isNewChat: true,
-        promptContexts: mockPromptContexts,
+        onNewReplacements: jest.fn(),
         promptText: 'User prompt text',
-        selectedPromptContextIds: [mockAlertPromptContext.id],
+        selectedPromptContexts: {
+          [mockSelectedAlertPromptContext.promptContextId]: mockSelectedAlertPromptContext,
+        },
         selectedSystemPrompt: mockSystemPrompt,
       });
 
@@ -78,10 +87,13 @@ User prompt text`);
 
     it('returns correct content for a new chat WITHOUT a system prompt', async () => {
       const message: Message = await getCombinedMessage({
+        currentReplacements: {},
         isNewChat: true,
-        promptContexts: mockPromptContexts,
+        onNewReplacements: jest.fn(),
         promptText: 'User prompt text',
-        selectedPromptContextIds: [mockAlertPromptContext.id],
+        selectedPromptContexts: {
+          [mockSelectedAlertPromptContext.promptContextId]: mockSelectedAlertPromptContext,
+        },
         selectedSystemPrompt: undefined, // <-- no system prompt
       });
 
@@ -97,10 +109,13 @@ User prompt text`);
 
     it('returns the correct content for an existing chat', async () => {
       const message: Message = await getCombinedMessage({
+        currentReplacements: {},
         isNewChat: false,
-        promptContexts: mockPromptContexts,
+        onNewReplacements: jest.fn(),
         promptText: 'User prompt text',
-        selectedPromptContextIds: [mockAlertPromptContext.id],
+        selectedPromptContexts: {
+          [mockSelectedAlertPromptContext.promptContextId]: mockSelectedAlertPromptContext,
+        },
         selectedSystemPrompt: mockSystemPrompt,
       });
 
@@ -109,36 +124,89 @@ User prompt text`);
 alert data
 """
 
-CONTEXT:
-"""
-alert data
-"""
-
 User prompt text`);
     });
 
-    test('getCombinedMessage returns the expected role', async () => {
+    it('returns the expected role', async () => {
       const message: Message = await getCombinedMessage({
+        currentReplacements: {},
         isNewChat: true,
-        promptContexts: mockPromptContexts,
+        onNewReplacements: jest.fn(),
         promptText: 'User prompt text',
-        selectedPromptContextIds: [mockAlertPromptContext.id],
+        selectedPromptContexts: {
+          [mockSelectedAlertPromptContext.promptContextId]: mockSelectedAlertPromptContext,
+        },
         selectedSystemPrompt: mockSystemPrompt,
       });
 
       expect(message.role).toBe('user');
     });
 
-    test('getCombinedMessage returns a valid timestamp', async () => {
+    it('returns a valid timestamp', async () => {
       const message: Message = await getCombinedMessage({
+        currentReplacements: {},
         isNewChat: true,
-        promptContexts: mockPromptContexts,
+        onNewReplacements: jest.fn(),
         promptText: 'User prompt text',
-        selectedPromptContextIds: [mockAlertPromptContext.id],
+        selectedPromptContexts: {},
         selectedSystemPrompt: mockSystemPrompt,
       });
 
       expect(Date.parse(message.timestamp)).not.toBeNaN();
+    });
+
+    describe('when there is data to anonymize', () => {
+      const onNewReplacements = jest.fn();
+
+      const mockPromptContextWithDataToAnonymize: SelectedPromptContext = {
+        allow: ['field1', 'field2'],
+        allowReplacement: ['field1', 'field2'],
+        promptContextId: 'test-prompt-context-id',
+        rawData: {
+          field1: ['foo', 'bar', 'baz'],
+          field2: ['foozle'],
+        },
+      };
+
+      it('invokes `onNewReplacements` with the expected replacements', async () => {
+        await getCombinedMessage({
+          currentReplacements: {},
+          getAnonymizedValue: mockGetAnonymizedValue,
+          isNewChat: true,
+          onNewReplacements,
+          promptText: 'User prompt text',
+          selectedPromptContexts: {
+            [mockPromptContextWithDataToAnonymize.promptContextId]:
+              mockPromptContextWithDataToAnonymize,
+          },
+          selectedSystemPrompt: mockSystemPrompt,
+        });
+
+        expect(onNewReplacements).toBeCalledWith({
+          elzoof: 'foozle',
+          oof: 'foo',
+          rab: 'bar',
+          zab: 'baz',
+        });
+      });
+
+      it('returns the expected content when `isNewChat` is false', async () => {
+        const isNewChat = false; // <-- not a new chat
+
+        const message: Message = await getCombinedMessage({
+          currentReplacements: {},
+          getAnonymizedValue: mockGetAnonymizedValue,
+          isNewChat,
+          onNewReplacements: jest.fn(),
+          promptText: 'User prompt text',
+          selectedPromptContexts: {},
+          selectedSystemPrompt: mockSystemPrompt,
+        });
+
+        expect(message.content).toEqual(`
+
+User prompt text`);
+      });
     });
   });
 });

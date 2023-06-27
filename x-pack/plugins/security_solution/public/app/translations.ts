@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
-  defaultMessage: 'Elastic Security Assistant',
+  defaultMessage: 'Elastic AI Assistant',
 });
 
 export const OVERVIEW = i18n.translate('xpack.securitySolution.navigation.overview', {
@@ -62,6 +62,10 @@ export const KUBERNETES = i18n.translate('xpack.securitySolution.navigation.kube
 
 export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
   defaultMessage: 'Rules',
+});
+
+export const SIEM_RULES = i18n.translate('xpack.securitySolution.navigation.siemRules', {
+  defaultMessage: 'SIEM Rules',
 });
 
 export const ADD_RULES = i18n.translate('xpack.securitySolution.navigation.addRules', {
@@ -127,8 +131,8 @@ export const EXPLORE = i18n.translate('xpack.securitySolution.navigation.explore
 export const INVESTIGATE = i18n.translate('xpack.securitySolution.navigation.investigate', {
   defaultMessage: 'Investigate',
 });
-export const MANAGE = i18n.translate('xpack.securitySolution.navigation.manage', {
-  defaultMessage: 'Manage',
+export const SETTINGS = i18n.translate('xpack.securitySolution.navigation.settings', {
+  defaultMessage: 'Settings',
 });
 
 export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.blocklist', {

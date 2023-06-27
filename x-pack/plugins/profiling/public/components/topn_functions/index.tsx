@@ -87,12 +87,14 @@ function SampleStat({
   samples,
   diffSamples,
   totalSamples,
+  isSampled,
 }: {
   samples: number;
   diffSamples?: number;
   totalSamples: number;
+  isSampled: boolean;
 }) {
-  const samplesLabel = samples.toLocaleString();
+  const samplesLabel = `${isSampled ? '~ ' : ''}${samples.toLocaleString()}`;
 
   if (diffSamples === undefined || diffSamples === 0 || totalSamples === 0) {
     return <>{samplesLabel}</>;
@@ -114,7 +116,7 @@ function SampleStat({
   );
 }
 
-function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU?: number }) {
+function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU?: number; isSampled?: boolean }) {
   const cpuLabel = `${cpu.toFixed(2)}%`;
 
   if (diffCPU === undefined || diffCPU === 0) {
@@ -162,7 +164,7 @@ export function TopNFunctionsTable({
   comparisonScaleFactor,
 }: Props) {
   const [selectedRow, setSelectedRow] = useState<Row | undefined>();
-
+  const isEstimatedA = (topNFunctions?.SamplingRate ?? 1.0) !== 1.0;
   const totalCount: number = useMemo(() => {
     if (!topNFunctions || !topNFunctions.TotalCount) {
       return 0;
@@ -268,7 +270,12 @@ export function TopNFunctionsTable({
       }),
       render: (_, { samples, diff }) => {
         return (
-          <SampleStat samples={samples} diffSamples={diff?.samples} totalSamples={totalCount} />
+          <SampleStat
+            samples={samples}
+            diffSamples={diff?.samples}
+            totalSamples={totalCount}
+            isSampled={isEstimatedA}
+          />
         );
       },
       align: 'right',
@@ -394,7 +401,6 @@ export function TopNFunctionsTable({
     },
     [sortDirection]
   ).slice(0, 100);
-
   return (
     <>
       <TotalSamplesStat
@@ -439,6 +445,7 @@ export function TopNFunctionsTable({
           }}
           totalSeconds={totalSeconds ?? 0}
           totalSamples={selectedRow.samples}
+          samplingRate={topNFunctions?.SamplingRate ?? 1.0}
         />
       )}
     </>

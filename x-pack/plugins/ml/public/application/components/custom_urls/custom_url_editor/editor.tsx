@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiIconTip,
   EuiRadioGroup,
   EuiSelect,
   EuiSpacer,
@@ -29,6 +30,7 @@ import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+import type { DashboardItems } from '../../../services/dashboard_service';
 import { CustomUrlSettings, isValidCustomUrlSettingsTimeRange } from './utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
 import { type Job } from '../../../../../common/types/anomaly_detection_jobs';
@@ -37,6 +39,7 @@ import { TIME_RANGE_TYPE, TimeRangeType, URL_TYPE } from './constants';
 import { CustomTimeRangePicker } from './custom_time_range_picker';
 import { useMlKibana } from '../../../contexts/kibana';
 import { getDropDownOptions } from './get_dropdown_options';
+import { IntervalTimerangeSelector } from './interval_time_range_selector';
 
 function getLinkToOptions() {
   return [
@@ -65,9 +68,8 @@ interface CustomUrlEditorProps {
   customUrl: CustomUrlSettings | undefined;
   setEditCustomUrl: (url: CustomUrlSettings) => void;
   savedCustomUrls: MlUrlConfig[];
-  dashboards: Array<{ id: string; title: string }>;
+  dashboards: DashboardItems;
   dataViewListItems: DataViewListItem[];
-  showTimeRangeSelector?: boolean;
   showCustomTimeRangeSelector: boolean;
   job: Job | DataFrameAnalyticsConfig;
 }
@@ -81,12 +83,12 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   savedCustomUrls,
   dashboards,
   dataViewListItems,
-  showTimeRangeSelector,
   showCustomTimeRangeSelector,
   job,
 }) => {
   const [queryEntityFieldNames, setQueryEntityFieldNames] = useState<string[]>([]);
   const [hasTimefield, setHasTimefield] = useState<boolean>(false);
+  const [addIntervalTimerange, setAddIntervalTimerange] = useState<boolean>(false);
 
   const {
     services: {
@@ -122,6 +124,17 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
     }
   }, [dataViews, job, customUrl?.kibanaSettings?.discoverIndexPatternId]);
 
+  useEffect(() => {
+    if (addIntervalTimerange === false) {
+      // Reset timeRange when not using interval time range
+      setEditCustomUrl({
+        ...customUrl,
+        timeRange: { type: TIME_RANGE_TYPE.AUTO, interval: '' },
+      } as CustomUrlSettings);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addIntervalTimerange, setEditCustomUrl]);
+
   if (customUrl === undefined) {
     return null;
   }
@@ -140,10 +153,12 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
     });
   };
 
-  const onCustomTimeRangeChange = (timeRange?: { start: Moment; end: Moment }) => {
+  const onCustomTimeRangeChange = (customTimeRange?: { start: Moment; end: Moment }) => {
     setEditCustomUrl({
       ...customUrl,
-      customTimeRange: timeRange,
+      customTimeRange,
+      // Reset timeRange when using customTimeRange
+      timeRange: { type: TIME_RANGE_TYPE.AUTO, interval: '' },
     });
   };
 
@@ -204,20 +219,21 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
   };
 
   const onTimeRangeIntervalChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const timeRange = customUrl.timeRange;
     setEditCustomUrl({
       ...customUrl,
       timeRange: {
-        ...timeRange,
+        type: TIME_RANGE_TYPE.INTERVAL,
         interval: e.target.value,
       },
+      // Reset customTimeRange to undefined when using interval timeRange
+      customTimeRange: undefined,
     });
   };
 
   const { label, type, timeRange, kibanaSettings, otherUrlSettings } = customUrl;
 
   const dashboardOptions = dashboards.map((dashboard) => {
-    return { value: dashboard.id, text: dashboard.title };
+    return { value: dashboard.id, text: dashboard.attributes.title };
   });
 
   const dataViewOptions = dataViewListItems.map(({ id, title }) => {
@@ -360,30 +376,44 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
               />
             </EuiFormRow>
           )}
-        {type === URL_TYPE.KIBANA_DASHBOARD ||
-        (type === URL_TYPE.KIBANA_DISCOVER && showCustomTimeRangeSelector && hasTimefield) ? (
-          <CustomTimeRangePicker
-            onCustomTimeRangeChange={onCustomTimeRangeChange}
-            customTimeRange={customUrl?.customTimeRange}
-          />
-        ) : null}
 
-        {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) &&
-          showTimeRangeSelector && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow
-                    label={
-                      <FormattedMessage
-                        id="xpack.ml.customUrlsEditor.timeRangeLabel"
-                        defaultMessage="Time range"
-                      />
-                    }
-                    className="url-time-range"
-                    display="rowCompressed"
-                  >
+        {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) && hasTimefield && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow
+                  label={
+                    <EuiFlexGroup gutterSize={'none'} alignItems="center">
+                      <EuiFlexItem grow={false}>
+                        <FormattedMessage
+                          id="xpack.ml.customUrlsEditor.timeRangeLabel"
+                          defaultMessage="Time range"
+                        />
+                      </EuiFlexItem>
+                      {showCustomTimeRangeSelector ? (
+                        <EuiFlexItem grow={false}>
+                          <EuiIconTip
+                            content={i18n.translate('xpack.ml.customUrlsEditor.timeRangeTooltip', {
+                              defaultMessage: 'If not set, time range defaults to global settings.',
+                            })}
+                            position="top"
+                            type="iInCircle"
+                          />
+                        </EuiFlexItem>
+                      ) : null}
+                    </EuiFlexGroup>
+                  }
+                  className="url-time-range"
+                  display="rowCompressed"
+                >
+                  {showCustomTimeRangeSelector ? (
+                    <IntervalTimerangeSelector
+                      disabled={customUrl?.customTimeRange !== undefined}
+                      setAddIntervalTimerange={setAddIntervalTimerange}
+                      addIntervalTimerange={addIntervalTimerange}
+                    />
+                  ) : (
                     <EuiSelect
                       options={timeRangeOptions}
                       value={timeRange.type}
@@ -391,35 +421,49 @@ export const CustomUrlEditor: FC<CustomUrlEditorProps> = ({
                       data-test-subj="mlJobCustomUrlTimeRangeInput"
                       compressed
                     />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                {timeRange.type === TIME_RANGE_TYPE.INTERVAL && (
-                  <EuiFlexItem>
-                    <EuiFormRow
-                      label={
-                        <FormattedMessage
-                          id="xpack.ml.customUrlsEditor.intervalLabel"
-                          defaultMessage="Interval"
-                        />
-                      }
-                      className="url-time-range"
-                      error={invalidIntervalError}
-                      isInvalid={isInvalidTimeRange}
-                      display="rowCompressed"
-                    >
-                      <EuiFieldText
-                        value={timeRange.interval}
-                        onChange={onTimeRangeIntervalChange}
-                        isInvalid={isInvalidTimeRange}
-                        data-test-subj="mlJobCustomUrlTimeRangeIntervalInput"
-                        compressed
+                  )}
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {(showCustomTimeRangeSelector && addIntervalTimerange) ||
+                (!showCustomTimeRangeSelector && timeRange.type === TIME_RANGE_TYPE.INTERVAL) ? (
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="xpack.ml.customUrlsEditor.intervalLabel"
+                        defaultMessage="Interval"
                       />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </>
-          )}
+                    }
+                    className="url-time-range"
+                    error={invalidIntervalError}
+                    isInvalid={isInvalidTimeRange}
+                    display="rowCompressed"
+                  >
+                    <EuiFieldText
+                      value={timeRange.interval}
+                      onChange={onTimeRangeIntervalChange}
+                      isInvalid={isInvalidTimeRange}
+                      data-test-subj="mlJobCustomUrlTimeRangeIntervalInput"
+                      compressed
+                    />
+                  </EuiFormRow>
+                ) : null}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {(type === URL_TYPE.KIBANA_DASHBOARD || type === URL_TYPE.KIBANA_DISCOVER) &&
+            showCustomTimeRangeSelector &&
+            hasTimefield ? (
+              <>
+                <EuiSpacer />
+                <CustomTimeRangePicker
+                  disabled={addIntervalTimerange}
+                  onCustomTimeRangeChange={onCustomTimeRangeChange}
+                  customTimeRange={customUrl?.customTimeRange}
+                />
+              </>
+            ) : null}
+          </>
+        )}
 
         {type === URL_TYPE.OTHER && (
           <EuiFormRow

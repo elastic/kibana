@@ -1213,6 +1213,10 @@
             "trackAdoption": true,
             "references": [
               {
+                "plugin": "@kbn/core-application-browser-internal",
+                "path": "packages/core/application/core-application-browser-internal/src/register_analytics_context_provider.ts"
+              },
+              {
                 "plugin": "@kbn/core-analytics-browser-internal",
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.ts"
               },
@@ -1243,6 +1247,10 @@
               {
                 "plugin": "@kbn/core-execution-context-browser-internal",
                 "path": "packages/core/execution-context/core-execution-context-browser-internal/src/execution_context_service.ts"
+              },
+              {
+                "plugin": "@kbn/core-chrome-browser-internal",
+                "path": "packages/core/chrome/core-chrome-browser-internal/src/register_analytics_context_provider.ts"
               },
               {
                 "plugin": "@kbn/core-elasticsearch-server-internal",
@@ -1367,6 +1375,30 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-application-browser-internal",
+                "path": "packages/core/application/core-application-browser-internal/src/register_analytics_context_provider.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-application-browser-internal",
+                "path": "packages/core/application/core-application-browser-internal/src/register_analytics_context_provider.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-application-browser-internal",
+                "path": "packages/core/application/core-application-browser-internal/src/register_analytics_context_provider.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-chrome-browser-internal",
+                "path": "packages/core/chrome/core-chrome-browser-internal/src/register_analytics_context_provider.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-chrome-browser-internal",
+                "path": "packages/core/chrome/core-chrome-browser-internal/src/register_analytics_context_provider.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-chrome-browser-internal",
+                "path": "packages/core/chrome/core-chrome-browser-internal/src/register_analytics_context_provider.test.ts"
               },
               {
                 "plugin": "@kbn/core-execution-context-browser-internal",

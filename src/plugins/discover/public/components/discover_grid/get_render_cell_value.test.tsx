@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { of } from 'rxjs';
 import { shallow } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -28,7 +29,9 @@ const mockServices = {
   fieldFormats: {
     getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
   },
-  // TODO needs theme to provide theme$ observable, the required value here depends on how Discover services are changed
+  theme: {
+    theme$: of({ darkMode: false }),
+  },
 };
 
 jest.mock('../../hooks/use_discover_services', () => {

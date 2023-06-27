@@ -11,7 +11,7 @@ export const LOAD_ACTIONS_ERROR_MESSAGE = i18n.translate(
   'xpack.elasticAssistant.connectors.useLoadActionTypes.errorMessage',
   {
     defaultMessage:
-      'Welcome to your Elastic Assistant! I am your 100% open-source portal into your Elastic Life. ',
+      'Welcome to your Elastic AI Assistant! I am your 100% open-source portal into your Elastic Life. ',
   }
 );
 
@@ -19,7 +19,7 @@ export const LOAD_CONNECTORS_ERROR_MESSAGE = i18n.translate(
   'xpack.elasticAssistant.connectors.useLoadConnectors.errorMessage',
   {
     defaultMessage:
-      'Welcome to your Elastic Assistant! I am your 100% open-source portal into your Elastic Life. ',
+      'Welcome to your Elastic AI Assistant! I am your 100% open-source portal into your Elastic Life. ',
   }
 );
 
@@ -27,7 +27,7 @@ export const WELCOME_SECURITY = i18n.translate(
   'xpack.elasticAssistant.content.prompts.welcome.welcomeSecurityPrompt',
   {
     defaultMessage:
-      'Welcome to your Elastic Assistant! I am your 100% open-source portal into Elastic Security. ',
+      'Welcome to your Elastic AI Assistant! I am your 100% open-source portal into Elastic Security. ',
   }
 );
 

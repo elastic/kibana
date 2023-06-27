@@ -9,15 +9,7 @@
 import React, { FC, ComponentProps, Ref, useEffect, useState, useMemo } from 'react';
 import useMount from 'react-use/lib/useMount';
 
-import {
-  EuiPopoverTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiDualRange,
-  EuiToolTip,
-  EuiButtonIcon,
-  EuiText,
-} from '@elastic/eui';
+import { EuiPopoverTitle, EuiDualRange, EuiText } from '@elastic/eui';
 import type { EuiDualRangeClass } from '@elastic/eui/src/components/form/range/dual_range';
 
 import { pluginServices } from '../../services';
@@ -101,55 +93,34 @@ export const RangeSliderPopover: FC<{
   }, [min, max]);
 
   return (
-    <>
+    <div data-test-subj="rangeSlider__popover">
       <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
-      <EuiFlexGroup
-        className="rangeSlider__actions"
-        gutterSize="none"
-        data-test-subj="rangeSlider-control-actions"
-        responsive={false}
-      >
-        <EuiFlexItem>
-          {min !== -Infinity && max !== Infinity ? (
-            <EuiDualRange
-              id={id}
-              min={rangeSliderMin}
-              max={rangeSliderMax}
-              onChange={([minSelection, maxSelection]) => {
-                onChange([String(minSelection), String(maxSelection)]);
-              }}
-              value={value}
-              ticks={ticks}
-              levels={levels}
-              showTicks
-              fullWidth
-              ref={rangeRef}
-              data-test-subj="rangeSlider__slider"
-            />
-          ) : isInvalid ? (
-            <EuiText size="s" data-test-subj="rangeSlider__helpText">
-              {RangeSliderStrings.popover.getNoDataHelpText()}
-            </EuiText>
-          ) : (
-            <EuiText size="s" data-test-subj="rangeSlider__helpText">
-              {RangeSliderStrings.popover.getNoAvailableDataHelpText()}
-            </EuiText>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={RangeSliderStrings.popover.getClearRangeButtonTitle()}>
-            <EuiButtonIcon
-              iconType="eraser"
-              color="danger"
-              onClick={() => {
-                rangeSlider.dispatch.setSelectedRange(['', '']);
-              }}
-              aria-label={RangeSliderStrings.popover.getClearRangeButtonTitle()}
-              data-test-subj="rangeSlider__clearRangeButton"
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+
+      {min !== -Infinity && max !== Infinity ? (
+        <EuiDualRange
+          id={id}
+          min={rangeSliderMin}
+          max={rangeSliderMax}
+          onChange={([minSelection, maxSelection]) => {
+            onChange([String(minSelection), String(maxSelection)]);
+          }}
+          value={value}
+          ticks={ticks}
+          levels={levels}
+          showTicks
+          fullWidth
+          ref={rangeRef}
+          data-test-subj="rangeSlider__slider"
+        />
+      ) : isInvalid ? (
+        <EuiText size="s" data-test-subj="rangeSlider__helpText">
+          {RangeSliderStrings.popover.getNoDataHelpText()}
+        </EuiText>
+      ) : (
+        <EuiText size="s" data-test-subj="rangeSlider__helpText">
+          {RangeSliderStrings.popover.getNoAvailableDataHelpText()}
+        </EuiText>
+      )}
+    </div>
   );
 };
