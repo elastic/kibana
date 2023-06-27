@@ -300,11 +300,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await header.waitUntilLoadingHasFinished();
 
         await testSubjects.click('property-actions-user-action-ellipses');
-
         await header.waitUntilLoadingHasFinished();
-
         await testSubjects.click('property-actions-user-action-pencil');
-
         await header.waitUntilLoadingHasFinished();
 
         const editCommentTextArea = await find.byCssSelector(
@@ -317,14 +314,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await editCommentTextArea.type('Edited comment');
 
         await header.waitUntilLoadingHasFinished();
-
         await browser.refresh();
 
         await header.waitUntilLoadingHasFinished();
 
-        retry.tryForTime(2000, async () => {
-          await testSubjects.existOrFail('user-action-comment-unsaved-draft');
-        });
+        await testSubjects.existOrFail('user-action-comment-unsaved-draft');
       });
 
       it('shows unsaved description message when page is refreshed', async () => {
