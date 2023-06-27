@@ -256,7 +256,7 @@ export class ListingTableService extends FtrService {
     await this.testSubjects.click('newItemButton');
   }
 
-  public async isShowingEmptyPrompt(): Promise<void> {
+  public async isShowingEmptyPromptCreateNewButton(): Promise<void> {
     await this.testSubjects.exists('newItemButton', {
       timeout: 5000,
     });

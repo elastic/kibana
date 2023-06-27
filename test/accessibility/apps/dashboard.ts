@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await listingTable.clickDeleteSelected();
       await a11y.testAppSnapshot();
       await PageObjects.common.clickConfirmOnModal();
-      await listingTable.isShowingEmptyPrompt();
+      await listingTable.isShowingEmptyPromptCreateNewButton();
     });
   });
 }
