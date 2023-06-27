@@ -57,6 +57,7 @@ export const gettingStartedLinks: LinkItem = {
       defaultMessage: 'Getting started',
     }),
   ],
+  sideNavIcon: 'launch',
   skipUrlState: true,
   hideTimeline: true,
 };
