@@ -217,11 +217,7 @@ export async function gunzip(source: string, destination: string) {
 
   await Fsp.mkdir(dirname(destination), { recursive: true });
 
-  await pipeline(
-    fs.createReadStream(source),
-    createGunzip(),
-    fs.createWriteStream(destination)
-  );
+  await pipeline(fs.createReadStream(source), createGunzip(), fs.createWriteStream(destination));
 }
 
 interface CompressTarOptions {
