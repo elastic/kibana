@@ -69,7 +69,7 @@ const iterateArtifactsBuildResult = (
 
 const iterateAllListItems = async <T>(
   pageSupplier: (page: number) => Promise<ListResult<T>>,
-  itemCallback: (item: T) => void
+  itemCallback: (items: T[]) => void
 ) => {
   let paging = true;
   let page = 1;
@@ -77,11 +77,9 @@ const iterateAllListItems = async <T>(
   while (paging) {
     const { items, total } = await pageSupplier(page);
 
-    for (const item of items) {
-      await itemCallback(item);
-    }
+    itemCallback(items);
 
-    paging = (page - 1) * 20 + items.length < total;
+    paging = (page - 1) * 1000 + items.length < total;
     page++;
   }
 };
@@ -560,8 +558,8 @@ export class ManifestManager {
     const allPackagePolicies: PackagePolicy[] = [];
     await iterateAllListItems(
       (page) => this.listEndpointPolicies(page),
-      (packagePolicy) => {
-        allPackagePolicies.push(packagePolicy);
+      (packagePoliciesBatch) => {
+        allPackagePolicies.push(...packagePoliciesBatch);
       }
     );
 
@@ -672,22 +670,18 @@ export class ManifestManager {
 
   private async listEndpointPolicyIds() {
     const allPolicyIds: string[] = [];
-
-    let paging = true;
-    let page = 1;
-
-    while (paging) {
-      const { items, total } = await this.packagePolicyService.listIds(this.savedObjectsClient, {
-        page,
-        perPage: 1000,
-        kuery: 'ingest-package-policies.package.name:endpoint',
-      });
-
-      allPolicyIds.push(...items);
-
-      paging = (page - 1) * 1000 + items.length < total;
-      page++;
-    }
+    await iterateAllListItems(
+      (page) => {
+        return this.packagePolicyService.listIds(this.savedObjectsClient, {
+          page,
+          perPage: 1000,
+          kuery: 'ingest-package-policies.package.name:endpoint',
+        });
+      },
+      (packagePolicyIdsBatch) => {
+        allPolicyIds.push(...packagePolicyIdsBatch);
+      }
+    );
     return allPolicyIds;
   }
 
