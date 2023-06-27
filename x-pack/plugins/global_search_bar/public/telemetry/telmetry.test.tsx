@@ -180,14 +180,14 @@ describe('SearchBar', () => {
 
       fireEvent.click(await screen.findByTestId('nav-search-option'));
 
-      expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_blur', {
-        focus_time_ms: 1000,
-      });
-      expect(mockReportEvent).nthCalledWith(2, 'global_search_bar_click_application', {
+      expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_click_application', {
         selected_rank: 1,
-        selected_term: 'Discover',
+        selected_label: 'Discover',
         application: 'discover',
         terms: '',
+      });
+      expect(mockReportEvent).nthCalledWith(2, 'global_search_bar_blur', {
+        focus_time_ms: 1000,
       });
       expect(mockReportEvent).toHaveBeenCalledTimes(2);
     });
@@ -219,14 +219,14 @@ describe('SearchBar', () => {
 
       fireEvent.click(await screen.findByTestId('nav-search-option'));
 
-      expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_blur', {
-        focus_time_ms: 1000,
-      });
-      expect(mockReportEvent).nthCalledWith(2, 'global_search_bar_click_application', {
+      expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_click_application', {
         selected_rank: 1,
-        selected_term: 'Discover',
+        selected_label: 'Discover',
         application: 'discover',
         terms: 'Ahoy!',
+      });
+      expect(mockReportEvent).nthCalledWith(2, 'global_search_bar_blur', {
+        focus_time_ms: 1000,
       });
       expect(mockReportEvent).toHaveBeenCalledTimes(2);
     });
@@ -251,7 +251,7 @@ describe('SearchBar', () => {
 
       await focusAndUpdate();
 
-      expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_unhandled_error', {
+      expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_error', {
         error_message: 'Error: service unavailable :(',
         terms: 'Ahoy!',
       });

@@ -97,8 +97,6 @@ export class EventReporter {
    * Called when the users selects an application in their search results
    */
   public navigateToApplication(context: TrackedApplicationClick) {
-    this.searchBlur();
-
     const application = context?.application ?? 'unknown';
 
     this.trackUiMetric(METRIC_TYPE.CLICK, ClickMetric.USER_NAVIGATED_TO_APPLICATION, application);
@@ -116,8 +114,6 @@ export class EventReporter {
    * Called when the users selects Saved Object in their search results
    */
   public navigateToSavedObject(context: TrackedSavedObjectClick) {
-    this.searchBlur();
-
     const type = context?.type ?? 'unknown';
 
     this.trackUiMetric(METRIC_TYPE.CLICK, ClickMetric.USER_NAVIGATED_TO_SAVED_OBJECT, type);
