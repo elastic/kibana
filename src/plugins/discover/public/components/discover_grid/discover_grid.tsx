@@ -22,6 +22,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
   EuiDataGridRefProps,
+  EuiDataGridInMemory,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -60,7 +61,6 @@ import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
-import { convertCellActionValue } from './discover_grid_cell_actions';
 
 const themeDefault = { darkMode: false };
 
@@ -227,7 +227,6 @@ export interface DiscoverGridProps {
     toastNotifications: ToastsStart;
   };
 }
-
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
 const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
@@ -451,8 +450,8 @@ export const DiscoverGrid = ({
   );
 
   const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
-    (fieldName, rowIndex): CellActionFieldValue =>
-      convertCellActionValue(displayedRows[rowIndex % displayedRows.length].flattened[fieldName]),
+    (fieldName, rowIndex) =>
+      displayedRows[rowIndex % displayedRows.length].flattened[fieldName] as CellActionFieldValue,
     [displayedRows]
   );
 
@@ -583,6 +582,10 @@ export const DiscoverGrid = ({
     [onUpdateRowHeight]
   );
 
+  const inMemory = useMemo(() => {
+    return isPlainRecord ? ({ level: 'sorting' } as EuiDataGridInMemory) : undefined;
+  }, [isPlainRecord]);
+
   const toolbarVisibility = useMemo(
     () =>
       defaultColumns
@@ -685,7 +688,7 @@ export const DiscoverGrid = ({
             sorting={sorting as EuiDataGridSorting}
             toolbarVisibility={toolbarVisibility}
             rowHeightsOptions={rowHeightsOptions}
-            inMemory={isPlainRecord ? { level: 'sorting' } : undefined}
+            inMemory={inMemory}
             gridStyle={GRID_STYLE}
           />
         </div>

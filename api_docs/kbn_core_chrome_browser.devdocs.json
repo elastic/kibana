@@ -1547,6 +1547,24 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeProjectNavigationNode.breadcrumbStatus",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "breadcrumbStatus",
+            "description": [
+              "\nOptional flag to indicate if the breadcrumb should be hidden when this node is active."
+            ],
+            "signature": [
+              "\"hidden\" | \"visible\" | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2781,6 +2799,24 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.NodeDefinition.breadcrumbStatus",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "breadcrumbStatus",
+            "description": [
+              "\nOptional flag to indicate if the breadcrumb should be hidden when this node is active."
+            ],
+            "signature": [
+              "\"hidden\" | \"visible\" | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2862,7 +2898,15 @@
             "section": "def-common.DeepLinkId",
             "text": "DeepLinkId"
           },
-          " | \"serverlessElasticsearch\" | ",
+          " | ",
+          {
+            "pluginId": "@kbn/deeplinks-search",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksSearchPluginApi",
+            "section": "def-common.DeepLinkId",
+            "text": "DeepLinkId"
+          },
+          " | ",
           {
             "pluginId": "@kbn/deeplinks-observability",
             "scope": "common",

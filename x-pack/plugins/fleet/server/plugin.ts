@@ -125,6 +125,7 @@ import {
   UninstallTokenService,
   type UninstallTokenServiceInterface,
 } from './services/security/uninstall_token_service';
+import { FleetActionsClient, type FleetActionsClientInterface } from './services/actions';
 import type { FilesClientFactory } from './services/files/types';
 
 export interface FleetSetupDeps {
@@ -229,6 +230,7 @@ export interface FleetStartContract {
 
   messageSigningService: MessageSigningServiceInterface;
   uninstallTokenService: UninstallTokenServiceInterface;
+  createFleetActionsClient: (packageName: string) => FleetActionsClientInterface;
 }
 
 export class FleetPlugin
@@ -581,6 +583,9 @@ export class FleetPlugin
       ),
       messageSigningService,
       uninstallTokenService,
+      createFleetActionsClient(packageName: string) {
+        return new FleetActionsClient(core.elasticsearch.client.asInternalUser, packageName);
+      },
     };
   }
 

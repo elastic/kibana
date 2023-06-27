@@ -6,61 +6,75 @@
  * Side Public License, v 1.
  */
 
-import { History } from 'history';
+import { createMemoryHistory } from 'history';
 import { firstValueFrom, lastValueFrom, take } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import type { ChromeNavLinks } from '@kbn/core-chrome-browser';
 import { ProjectNavigationService } from './project_navigation_service';
 
-const createHistoryMock = ({
-  locationPathName = '/',
-}: { locationPathName?: string } = {}): jest.Mocked<History> => {
-  return {
-    block: jest.fn(),
-    createHref: jest.fn(),
-    go: jest.fn(),
-    goBack: jest.fn(),
-    goForward: jest.fn(),
-    listen: jest.fn(),
-    push: jest.fn(),
-    replace: jest.fn(),
-    action: 'PUSH',
-    length: 1,
-    location: {
-      pathname: locationPathName,
-      search: '',
-      hash: '',
-      key: '',
-      state: undefined,
-    },
-  };
-};
-
 const setup = ({ locationPathName = '/' }: { locationPathName?: string } = {}) => {
   const projectNavigationService = new ProjectNavigationService();
+  const history = createMemoryHistory();
+  history.replace(locationPathName);
   const projectNavigation = projectNavigationService.start({
     application: {
       ...applicationServiceMock.createInternalStartContract(),
-      history: createHistoryMock({ locationPathName }),
+      history,
     },
     navLinks: {} as unknown as ChromeNavLinks,
     http: httpServiceMock.createStartContract(),
   });
 
-  return { projectNavigation };
+  return { projectNavigation, history };
 };
 
 describe('breadcrumbs', () => {
-  test('should return list of breadcrumbs home / nav / custom', async () => {
-    const { projectNavigation } = setup();
+  const setupWithNavTree = () => {
+    const currentLocationPathName = '/foo/item1';
+    const { projectNavigation, history } = setup({ locationPathName: currentLocationPathName });
+
+    projectNavigation.setProjectNavigation({
+      navigationTree: [
+        {
+          id: 'root',
+          title: 'Root',
+          path: ['root'],
+          breadcrumbStatus: 'hidden',
+          children: [
+            {
+              id: 'subNav',
+              path: ['root', 'subNav'],
+              title: '', // intentionally empty to skip rendering
+              children: [
+                {
+                  id: 'navItem1',
+                  title: 'Nav Item 1',
+                  path: ['root', 'subNav', 'navItem1'],
+                  deepLink: {
+                    id: 'navItem1',
+                    title: 'Nav Item 1',
+                    url: '/foo/item1',
+                    baseUrl: '',
+                    href: '/foo/item1',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    return { projectNavigation, history };
+  };
+
+  test('should set breadcrumbs home / nav / custom', async () => {
+    const { projectNavigation } = setupWithNavTree();
 
     projectNavigation.setProjectBreadcrumbs([
       { text: 'custom1', href: '/custom1' },
       { text: 'custom2', href: '/custom1/custom2' },
     ]);
-
-    // TODO: add projectNavigation.setProjectNavigation() to test the part of breadcrumbs extracted from the nav tree
 
     const breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
     expect(breadcrumbs).toMatchInlineSnapshot(`
@@ -71,6 +85,10 @@ describe('breadcrumbs', () => {
             type="home"
           />,
           "title": "Home",
+        },
+        Object {
+          "href": "/foo/item1",
+          "text": "Nav Item 1",
         },
         Object {
           "href": "/custom1",
@@ -85,7 +103,7 @@ describe('breadcrumbs', () => {
   });
 
   test('should skip the default navigation from project navigation when absolute: true is used', async () => {
-    const { projectNavigation } = setup();
+    const { projectNavigation } = setupWithNavTree();
 
     projectNavigation.setProjectBreadcrumbs(
       [
@@ -94,8 +112,6 @@ describe('breadcrumbs', () => {
       ],
       { absolute: true }
     );
-
-    // TODO: add projectNavigation.setProjectNavigation() to test the part of breadcrumbs extracted from the nav tree
 
     const breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
     expect(breadcrumbs).toMatchInlineSnapshot(`
@@ -117,6 +133,20 @@ describe('breadcrumbs', () => {
         },
       ]
     `);
+  });
+
+  test('should reset custom breadcrumbs when active path changes', async () => {
+    const { projectNavigation, history } = setupWithNavTree();
+    projectNavigation.setProjectBreadcrumbs([
+      { text: 'custom1', href: '/custom1' },
+      { text: 'custom2', href: '/custom1/custom2' },
+    ]);
+
+    let breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
+    expect(breadcrumbs).toHaveLength(4);
+    history.push('/foo/item2');
+    breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
+    expect(breadcrumbs).toHaveLength(1); // only home is left
   });
 });
 
