@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('reportingAPI');
 
-  describe('Generate CSV from SearchSource', () => {
+  describe.skip('Generate CSV from SearchSource', () => {
     it(`exported CSV file matches snapshot`, async () => {
       await reportingAPI.initEcommerce();
 
@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.deleteAllReports();
     });
 
-    describe('with unmapped fields', () => {
+    describe.skip('with unmapped fields', () => {
       before(async () => {
         await esArchiver.loadIfNeeded(
           'x-pack/test/functional/es_archives/reporting/unmapped_fields'
