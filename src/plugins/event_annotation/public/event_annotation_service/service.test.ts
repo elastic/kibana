@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-browser';
 import { CoreStart, SimpleSavedObject } from '@kbn/core/public';
+import { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { EventAnnotationConfig, EventAnnotationGroupAttributes } from '../../common';
@@ -131,28 +131,35 @@ const annotationResolveMocks = {
   },
 };
 
+const contentClient = {
+  get: jest.fn(),
+  search: jest.fn(),
+  create: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
+} as unknown as ContentClient;
+
 let core: CoreStart;
 
 describe('Event Annotation Service', () => {
   let eventAnnotationService: EventAnnotationServiceType;
   beforeEach(() => {
     core = coreMock.createStart();
-    (core.savedObjects.client.create as jest.Mock).mockImplementation(() => {
-      return annotationGroupResolveMocks.multiAnnotations;
+    (contentClient.create as jest.Mock).mockImplementation(() => {
+      return { item: annotationGroupResolveMocks.multiAnnotations };
     });
-    (core.savedObjects.client.get as jest.Mock).mockImplementation((_type, id) => {
+    (contentClient.get as jest.Mock).mockImplementation(({ contentTypeId, id }) => {
       const typedId = id as keyof typeof annotationGroupResolveMocks;
-      return annotationGroupResolveMocks[typedId];
+      return { item: annotationGroupResolveMocks[typedId] };
     });
-    (core.savedObjects.client.find as jest.Mock).mockResolvedValue({
-      total: 10,
-      savedObjects: Object.values(annotationGroupResolveMocks),
-    } as Pick<SavedObjectsFindResponse<EventAnnotationGroupAttributes>, 'total' | 'savedObjects'>);
-    (core.savedObjects.client.bulkCreate as jest.Mock).mockImplementation(() => {
-      return annotationResolveMocks.multiAnnotations;
+    (contentClient.search as jest.Mock).mockResolvedValue({
+      pagination: { total: 10 },
+      hits: Object.values(annotationGroupResolveMocks),
     });
+    (contentClient.delete as jest.Mock).mockResolvedValue({});
     eventAnnotationService = getEventAnnotationService(
       core,
+      { client: contentClient } as ContentManagementPublicStart,
       {} as SavedObjectsManagementPluginStart
     );
   });
@@ -512,28 +519,14 @@ describe('Event Annotation Service', () => {
 
       expect(content).toMatchSnapshot();
 
-      expect((core.savedObjects.client.find as jest.Mock).mock.calls).toMatchInlineSnapshot(`
+      expect((contentClient.search as jest.Mock).mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [
             Object {
-              "defaultSearchOperator": "AND",
-              "hasNoReference": undefined,
-              "hasReference": Array [
-                Object {
-                  "id": "1234",
-                  "type": "mytype",
-                },
-              ],
-              "page": 1,
-              "perPage": 20,
-              "search": "my search*",
-              "searchFields": Array [
-                "title^3",
-                "description",
-              ],
-              "type": Array [
-                "event-annotation-group",
-              ],
+              "contentTypeId": "event-annotation-group",
+              "query": Object {
+                "text": "my search*",
+              },
             },
           ],
         ]
@@ -543,10 +536,14 @@ describe('Event Annotation Service', () => {
   describe('deleteAnnotationGroups', () => {
     it('deletes annotation group along with annotations that reference them', async () => {
       await eventAnnotationService.deleteAnnotationGroups(['id1', 'id2']);
-      expect(core.savedObjects.client.bulkDelete).toHaveBeenCalledWith([
-        { id: 'id1', type: 'event-annotation-group' },
-        { id: 'id2', type: 'event-annotation-group' },
-      ]);
+      expect(contentClient.delete).toHaveBeenCalledWith({
+        id: 'id1',
+        contentTypeId: 'event-annotation-group',
+      });
+      expect(contentClient.delete).toHaveBeenCalledWith({
+        id: 'id2',
+        contentTypeId: 'event-annotation-group',
+      });
     });
   });
   describe('createAnnotationGroup', () => {
@@ -563,16 +560,16 @@ describe('Event Annotation Service', () => {
         ignoreGlobalFilters: false,
         annotations,
       });
-      expect(core.savedObjects.client.create).toHaveBeenCalledWith(
-        'event-annotation-group',
-        {
+      expect(contentClient.create).toHaveBeenCalledWith({
+        contentTypeId: 'event-annotation-group',
+        data: {
           title: 'newGroupTitle',
           description: 'my description',
           ignoreGlobalFilters: false,
-          dataViewSpec: null,
+          dataViewSpec: undefined,
           annotations,
         },
-        {
+        options: {
           references: [
             {
               id: 'ipid',
@@ -595,8 +592,8 @@ describe('Event Annotation Service', () => {
               type: 'tag',
             },
           ],
-        }
-      );
+        },
+      });
     });
   });
   describe('updateAnnotationGroup', () => {
@@ -612,17 +609,17 @@ describe('Event Annotation Service', () => {
         },
         'multiAnnotations'
       );
-      expect(core.savedObjects.client.update).toHaveBeenCalledWith(
-        'event-annotation-group',
-        'multiAnnotations',
-        {
+      expect(contentClient.update).toHaveBeenCalledWith({
+        contentTypeId: 'event-annotation-group',
+        id: 'multiAnnotations',
+        data: {
           title: 'newTitle',
           description: '',
           annotations: [],
-          dataViewSpec: null,
+          dataViewSpec: undefined,
           ignoreGlobalFilters: false,
         } as EventAnnotationGroupAttributes,
-        {
+        options: {
           references: [
             {
               id: 'newId',
@@ -630,8 +627,8 @@ describe('Event Annotation Service', () => {
               type: 'index-pattern',
             },
           ],
-        }
-      );
+        },
+      });
     });
   });
 });

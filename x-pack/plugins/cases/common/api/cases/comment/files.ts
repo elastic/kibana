@@ -22,8 +22,6 @@ export const FileAttachmentMetadataRt = rt.strict({
 
 export type FileAttachmentMetadata = rt.TypeOf<typeof FileAttachmentMetadataRt>;
 
-export const FILE_ATTACHMENT_TYPE = '.files';
-
 const MIN_DELETE_IDS = 1;
 
 export const BulkDeleteFileAttachmentsRequestRt = rt.strict({

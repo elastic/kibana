@@ -20,7 +20,7 @@ import {
   createSignalsIndex,
   deleteAllAlerts,
   setSignalStatus,
-  getSignalStatusEmptyResponse,
+  getAlertUpdateEmptyResponse,
   getQuerySignalIds,
   deleteAllRules,
   createRule,
@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
         // remove any server generated items that are indeterministic
         delete body.took;
 
-        expect(body).to.eql(getSignalStatusEmptyResponse());
+        expect(body).to.eql(getAlertUpdateEmptyResponse());
       });
 
       it('should not give errors when querying and the signals index does exist and is empty', async () => {
@@ -65,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
         // remove any server generated items that are indeterministic
         delete body.took;
 
-        expect(body).to.eql(getSignalStatusEmptyResponse());
+        expect(body).to.eql(getAlertUpdateEmptyResponse());
 
         await deleteAllAlerts(supertest, log, es);
       });

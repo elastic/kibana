@@ -161,6 +161,7 @@ export function generateSecretToken() {
   return result;
 }
 
+type PackagePolicyVars = PackageInputType & { secret_token?: string };
 export function getVarsFor({
   config,
   includeSecretToken,
@@ -168,13 +169,13 @@ export function getVarsFor({
   config: PackageInputType;
   includeSecretToken: boolean;
 }) {
-  const configKeys = Object.keys(config) as Array<keyof PackageInputType>;
+  const configKeys = Object.keys(config) as Array<keyof PackagePolicyVars>;
   if (includeSecretToken) {
     configKeys.push('secret_token');
   }
 
   return configKeys.reduce<
-    Partial<Record<keyof PackageInputType, { type: 'text' | 'bool'; value: any }>>
+    Partial<Record<keyof PackagePolicyVars, { type: 'text' | 'bool'; value: any }>>
   >((acc, currKey) => {
     const value = currKey === 'secret_token' ? generateSecretToken() : config[currKey];
     const type = typeof value === 'boolean' ? 'bool' : 'text';

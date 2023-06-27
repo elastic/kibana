@@ -97,5 +97,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-file-types",
     "@kbn/core-http-router-server-mocks",
+    "@kbn/core-application-browser",
   ]
 }

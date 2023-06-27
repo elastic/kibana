@@ -82,6 +82,12 @@ function getMockedSoClient(
           type: 'elasticsearch',
         });
       }
+      case outputIdToUuid('existing-default-and-default-monitoring-output'): {
+        return mockOutputSO('existing-default-and-default-monitoring-output', {
+          is_default: true,
+          is_default_monitoring: true,
+        });
+      }
       case outputIdToUuid('existing-preconfigured-default-output'): {
         return mockOutputSO('existing-preconfigured-default-output', {
           is_default: true,
@@ -566,6 +572,46 @@ describe('Output Service', () => {
         expect.anything(),
         outputIdToUuid('existing-default-output'),
         { is_default: true, name: 'Test' }
+      );
+    });
+
+    it('should not set default output to false when the output is already the default one', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'existing-default-and-default-monitoring-output',
+      });
+
+      await expect(
+        outputService.update(
+          soClient,
+          esClientMock,
+          'existing-default-and-default-monitoring-output',
+          {
+            is_default: false,
+            name: 'Test',
+          }
+        )
+      ).rejects.toThrow(
+        `Default output existing-default-and-default-monitoring-output cannot be set to is_default=false or is_default_monitoring=false manually. Make another output the default first.`
+      );
+    });
+
+    it('should not set default monitoring output to false when the output is already the default one', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'existing-default-and-default-monitoring-output',
+      });
+
+      await expect(
+        outputService.update(
+          soClient,
+          esClientMock,
+          'existing-default-and-default-monitoring-output',
+          {
+            is_default_monitoring: false,
+            name: 'Test',
+          }
+        )
+      ).rejects.toThrow(
+        `Default output existing-default-and-default-monitoring-output cannot be set to is_default=false or is_default_monitoring=false manually. Make another output the default first.`
       );
     });
 

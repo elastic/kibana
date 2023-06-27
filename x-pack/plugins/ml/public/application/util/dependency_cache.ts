@@ -9,7 +9,6 @@ import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type {
   IUiSettingsClient,
   ChromeStart,
-  SavedObjectsClientContract,
   ApplicationStart,
   HttpStart,
   I18nStart,
@@ -43,7 +42,6 @@ export interface DependencyCache {
   fieldFormats: FieldFormatsStart | null;
   autocomplete: UnifiedSearchPublicPluginStart['autocomplete'] | null;
   basePath: IBasePath | null;
-  savedObjectsClient: SavedObjectsClientContract | null;
   savedSearch: SavedSearchPublicPluginStart | null;
   application: ApplicationStart | null;
   http: HttpStart | null;
@@ -69,7 +67,6 @@ const cache: DependencyCache = {
   fieldFormats: null,
   autocomplete: null,
   basePath: null,
-  savedObjectsClient: null,
   savedSearch: null,
   application: null,
   http: null,
@@ -95,7 +92,6 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.fieldFormats = deps.fieldFormats || null;
   cache.autocomplete = deps.autocomplete || null;
   cache.basePath = deps.basePath || null;
-  cache.savedObjectsClient = deps.savedObjectsClient || null;
   cache.savedSearch = deps.savedSearch || null;
   cache.application = deps.application || null;
   cache.http = deps.http || null;
@@ -189,20 +185,6 @@ export function getBasePath() {
     throw new Error("basePath hasn't been initialized");
   }
   return cache.basePath;
-}
-
-export function getSavedObjectsClient() {
-  if (cache.savedObjectsClient === null) {
-    throw new Error("savedObjectsClient hasn't been initialized");
-  }
-  return cache.savedObjectsClient;
-}
-
-export function getSavedSearch() {
-  if (cache.savedSearch === null) {
-    throw new Error("savedSearch hasn't been initialized");
-  }
-  return cache.savedSearch;
 }
 
 export function getApplication() {

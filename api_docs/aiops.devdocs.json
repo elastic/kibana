@@ -530,10 +530,10 @@
               },
               "; fieldStatsServices: ",
               {
-                "pluginId": "unifiedFieldList",
-                "scope": "public",
-                "docId": "kibUnifiedFieldListPluginApi",
-                "section": "def-public.FieldStatsServices",
+                "pluginId": "@kbn/unified-field-list",
+                "scope": "common",
+                "docId": "kibKbnUnifiedFieldListPluginApi",
+                "section": "def-common.FieldStatsServices",
                 "text": "FieldStatsServices"
               },
               "; timeRangeMs?: ",
@@ -757,6 +757,22 @@
                 "section": "def-public.AiopsAppDependencies",
                 "text": "AiopsAppDependencies"
               }
+            ],
+            "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes_app_state.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.ExplainLogRateSpikesAppStateProps.stickyHistogram",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "stickyHistogram",
+            "description": [
+              "Option to make main histogram sticky"
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes_app_state.tsx",
             "deprecated": false,

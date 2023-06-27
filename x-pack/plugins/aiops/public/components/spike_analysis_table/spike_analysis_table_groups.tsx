@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
-import { sortBy } from 'lodash';
+import { orderBy } from 'lodash';
 
 import {
   useEuiBackgroundColor,
@@ -310,7 +310,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
             'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueColumnTooltip',
             {
               defaultMessage:
-                'The significance of changes in the frequency of values; lower values indicate greater change.',
+                'The significance of changes in the frequency of values; lower values indicate greater change; sorting this column will automatically do a secondary sort on the doc count column.',
             }
           )}
         >
@@ -374,13 +374,17 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
   ];
 
   const onChange = useCallback((tableSettings) => {
-    const { index, size } = tableSettings.page;
-    const { field, direction } = tableSettings.sort;
+    if (tableSettings.page) {
+      const { index, size } = tableSettings.page;
+      setPageIndex(index);
+      setPageSize(size);
+    }
 
-    setPageIndex(index);
-    setPageSize(size);
-    setSortField(field);
-    setSortDirection(direction);
+    if (tableSettings.sort) {
+      const { field, direction } = tableSettings.sort;
+      setSortField(field);
+      setSortDirection(direction);
+    }
   }, []);
 
   const { pagination, pageOfItems, sorting } = useMemo(() => {
@@ -388,14 +392,25 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     const itemCount = groupTableItems?.length ?? 0;
 
     let items = groupTableItems ?? [];
-    items = sortBy(groupTableItems, (item) => {
-      if (item && typeof item[sortField] === 'string') {
-        // @ts-ignore Object is possibly null or undefined
-        return item[sortField].toLowerCase();
-      }
-      return item[sortField];
-    });
-    items = sortDirection === 'asc' ? items : items.reverse();
+
+    const sortIteratees = [
+      (item: GroupTableItem) => {
+        if (item && typeof item[sortField] === 'string') {
+          // @ts-ignore Object is possibly null or undefined
+          return item[sortField].toLowerCase();
+        }
+        return item[sortField];
+      },
+    ];
+    const sortDirections = [sortDirection];
+
+    // Only if the table is sorted by p-value, add a secondary sort by doc count.
+    if (sortField === 'pValue') {
+      sortIteratees.push((item: GroupTableItem) => item.docCount);
+      sortDirections.push(sortDirection);
+    }
+
+    items = orderBy(groupTableItems, sortIteratees, sortDirections);
 
     return {
       pageOfItems: items.slice(pageStart, pageStart + pageSize),

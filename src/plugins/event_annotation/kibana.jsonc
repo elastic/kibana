@@ -16,7 +16,8 @@
       "dataViews",
       "unifiedSearch",
       "kibanaUtils",
-      "visualizationUiComponents"
+      "visualizationUiComponents",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "savedObjectsTagging",
@@ -26,8 +27,7 @@
       "savedObjectsFinder",
       "dataViews",
       "kibanaReact",
-      "visualizationUiComponents",
-      "unifiedFieldList"
+      "visualizationUiComponents"
     ],
     "extraPublicDirs": [
       "common"

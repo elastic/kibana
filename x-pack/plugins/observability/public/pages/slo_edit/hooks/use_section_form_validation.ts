@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { CreateSLOInput, MetricCustomIndicatorSchema } from '@kbn/slo-schema';
+import { MetricCustomIndicator } from '@kbn/slo-schema';
 import { FormState, UseFormGetFieldState, UseFormGetValues, UseFormWatch } from 'react-hook-form';
 import { isObject } from 'lodash';
+import { CreateSLOForm } from '../types';
 
 interface Props {
-  getFieldState: UseFormGetFieldState<CreateSLOInput>;
-  getValues: UseFormGetValues<CreateSLOInput>;
-  formState: FormState<CreateSLOInput>;
-  watch: UseFormWatch<CreateSLOInput>;
+  getFieldState: UseFormGetFieldState<CreateSLOForm>;
+  getValues: UseFormGetValues<CreateSLOForm>;
+  formState: FormState<CreateSLOForm>;
+  watch: UseFormWatch<CreateSLOForm>;
 }
 
 export function useSectionFormValidation({ getFieldState, getValues, formState, watch }: Props) {
@@ -22,9 +23,7 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
   switch (watch('indicator.type')) {
     case 'sli.metric.custom':
       const isGoodParamsValid = () => {
-        const data = getValues(
-          'indicator.params.good'
-        ) as MetricCustomIndicatorSchema['params']['good'];
+        const data = getValues('indicator.params.good') as MetricCustomIndicator['params']['good'];
         const isEquationValid = !getFieldState('indicator.params.good.equation').invalid;
         const areMetricsValid =
           isObject(data) && (data.metrics ?? []).every((metric) => Boolean(metric.field));
@@ -34,7 +33,7 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
       const isTotalParamsValid = () => {
         const data = getValues(
           'indicator.params.total'
-        ) as MetricCustomIndicatorSchema['params']['total'];
+        ) as MetricCustomIndicator['params']['total'];
         const isEquationValid = !getFieldState('indicator.params.total.equation').invalid;
         const areMetricsValid =
           isObject(data) && (data.metrics ?? []).every((metric) => Boolean(metric.field));
@@ -61,7 +60,6 @@ export function useSectionFormValidation({ getFieldState, getValues, formState, 
           [
             'indicator.params.index',
             'indicator.params.filter',
-
             'indicator.params.total',
             'indicator.params.timestampField',
           ] as const

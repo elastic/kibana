@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, type FC } from 'react';
+import React, { useEffect, useState, type FC } from 'react';
+import { EuiEmptyPrompt, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import type { Moment } from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { EuiEmptyPrompt, EuiHorizontalRule, EuiResizableContainer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -52,6 +52,8 @@ export interface ExplainLogRateSpikesContentProps {
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
+  /** Option to make the main histogram sticky */
+  stickyHistogram?: boolean;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
@@ -63,14 +65,23 @@ export interface ExplainLogRateSpikesContentProps {
 export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> = ({
   dataView,
   setGlobalState,
-  initialAnalysisStart,
+  initialAnalysisStart: incomingInitialAnalysisStart,
   timeRange,
   esSearchQuery = DEFAULT_SEARCH_QUERY,
+  stickyHistogram,
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
 }) => {
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
+  const [initialAnalysisStart, setInitialAnalysisStart] = useState<
+    number | WindowParameters | undefined
+  >(incomingInitialAnalysisStart);
+  const [isBrushCleared, setIsBrushCleared] = useState(true);
+
+  useEffect(() => {
+    setIsBrushCleared(windowParameters === undefined);
+  }, [windowParameters]);
 
   const {
     currentSelectedSignificantTerm,
@@ -95,95 +106,87 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
   const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
     documentStats;
 
+  function brushSelectionUpdate(d: WindowParameters, force: boolean) {
+    if (!isBrushCleared || force) {
+      setWindowParameters(d);
+    }
+    if (force) {
+      setIsBrushCleared(false);
+    }
+  }
+
   function clearSelection() {
     setWindowParameters(undefined);
     setPinnedSignificantTerm(null);
     setPinnedGroup(null);
     setSelectedSignificantTerm(null);
     setSelectedGroup(null);
+    setIsBrushCleared(true);
+    setInitialAnalysisStart(undefined);
   }
-  // Note: Temporarily removed height and disabled sticky histogram until we can fix the scrolling issue in a follow up
+
   return (
-    <EuiResizableContainer direction="vertical">
-      {(EuiResizablePanel, EuiResizableButton) => (
-        <>
-          <EuiResizablePanel
-            mode={'collapsible'}
-            initialSize={40}
-            minSize={'20%'}
-            tabIndex={0}
-            paddingSize="s"
-          >
-            {documentCountStats !== undefined && (
-              <DocumentCountContent
-                brushSelectionUpdateHandler={setWindowParameters}
-                clearSelectionHandler={clearSelection}
-                documentCountStats={documentCountStats}
-                documentCountStatsSplit={documentCountStatsCompare}
-                documentCountStatsSplitLabel={getDocumentCountStatsSplitLabel(
-                  currentSelectedSignificantTerm,
-                  currentSelectedGroup
-                )}
-                totalCount={totalCount}
-                sampleProbability={sampleProbability}
-                windowParameters={windowParameters}
-                incomingInitialAnalysisStart={initialAnalysisStart}
-                barColorOverride={barColorOverride}
-                barHighlightColorOverride={barHighlightColorOverride}
-              />
-            )}
-            <EuiHorizontalRule />
-          </EuiResizablePanel>
-          {/* <EuiResizableButton /> */}
-          <EuiResizablePanel
-            paddingSize="s"
-            mode={'main'}
-            initialSize={60}
-            minSize={'40%'}
-            tabIndex={0}
-          >
-            {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
-              <ExplainLogRateSpikesAnalysis
-                dataView={dataView}
-                earliest={earliest}
-                latest={latest}
-                windowParameters={windowParameters}
-                searchQuery={esSearchQuery}
-                sampleProbability={sampleProbability}
-                barColorOverride={barColorOverride}
-                barHighlightColorOverride={barHighlightColorOverride}
-                onAnalysisCompleted={onAnalysisCompleted}
-              />
-            )}
-            {windowParameters === undefined && (
-              <EuiEmptyPrompt
-                color="subdued"
-                hasShadow={false}
-                hasBorder={false}
-                css={{ minWidth: '100%' }}
-                title={
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.aiops.explainLogRateSpikesPage.emptyPromptTitle"
-                      defaultMessage="Click a spike in the histogram chart to start the analysis."
-                    />
-                  </h2>
-                }
-                titleSize="xs"
-                body={
-                  <p>
-                    <FormattedMessage
-                      id="xpack.aiops.explainLogRateSpikesPage.emptyPromptBody"
-                      defaultMessage="The explain log rate spikes feature identifies statistically significant field/value combinations that contribute to a log rate spike."
-                    />
-                  </p>
-                }
-                data-test-subj="aiopsNoWindowParametersEmptyPrompt"
-              />
-            )}
-          </EuiResizablePanel>
-        </>
+    <EuiPanel hasBorder={false} hasShadow={false}>
+      {documentCountStats !== undefined && (
+        <DocumentCountContent
+          brushSelectionUpdateHandler={brushSelectionUpdate}
+          documentCountStats={documentCountStats}
+          documentCountStatsSplit={documentCountStatsCompare}
+          documentCountStatsSplitLabel={getDocumentCountStatsSplitLabel(
+            currentSelectedSignificantTerm,
+            currentSelectedGroup
+          )}
+          isBrushCleared={isBrushCleared}
+          totalCount={totalCount}
+          sampleProbability={sampleProbability}
+          initialAnalysisStart={initialAnalysisStart}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
+        />
       )}
-    </EuiResizableContainer>
+      <EuiHorizontalRule />
+      {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
+        <ExplainLogRateSpikesAnalysis
+          dataView={dataView}
+          earliest={earliest}
+          isBrushCleared={isBrushCleared}
+          latest={latest}
+          stickyHistogram={stickyHistogram}
+          onReset={clearSelection}
+          sampleProbability={sampleProbability}
+          searchQuery={esSearchQuery}
+          windowParameters={windowParameters}
+          barColorOverride={barColorOverride}
+          barHighlightColorOverride={barHighlightColorOverride}
+          onAnalysisCompleted={onAnalysisCompleted}
+        />
+      )}
+      {windowParameters === undefined && (
+        <EuiEmptyPrompt
+          color="subdued"
+          hasShadow={false}
+          hasBorder={false}
+          css={{ minWidth: '100%' }}
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.aiops.explainLogRateSpikesPage.emptyPromptTitle"
+                defaultMessage="Click a spike in the histogram chart to start the analysis."
+              />
+            </h2>
+          }
+          titleSize="xs"
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.aiops.explainLogRateSpikesPage.emptyPromptBody"
+                defaultMessage="The explain log rate spikes feature identifies statistically significant field/value combinations that contribute to a log rate spike."
+              />
+            </p>
+          }
+          data-test-subj="aiopsNoWindowParametersEmptyPrompt"
+        />
+      )}
+    </EuiPanel>
   );
 };

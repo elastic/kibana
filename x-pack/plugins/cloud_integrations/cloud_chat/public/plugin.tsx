@@ -39,8 +39,12 @@ interface CloudChatConfig {
 export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, CloudChatStartDeps> {
   private readonly config: CloudChatConfig;
   private chatConfig$ = new ReplaySubject<ChatConfig>(1);
+  private kbnVersion: string;
+  private kbnBuildNum: number;
 
   constructor(initializerContext: PluginInitializerContext<CloudChatConfig>) {
+    this.kbnVersion = initializerContext.env.packageInfo.version;
+    this.kbnBuildNum = initializerContext.env.packageInfo.buildNum;
     this.config = initializerContext.config.get();
   }
 
@@ -101,6 +105,9 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
           email,
           id,
           jwt,
+          trialEndDate: trialEndDate!,
+          kbnVersion: this.kbnVersion,
+          kbnBuildNum: this.kbnBuildNum,
         },
       });
     } catch (e) {

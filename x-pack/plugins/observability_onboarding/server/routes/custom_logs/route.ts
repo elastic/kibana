@@ -6,7 +6,6 @@
  */
 
 import * as t from 'io-ts';
-import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
 import { ObservabilityOnboardingState } from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { createShipperApiKey } from './api_key/create_shipper_api_key';
@@ -50,7 +49,9 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     const coreStart = await core.start();
 
     const kibanaUrl =
-      plugins.cloud?.setup?.kibanaUrl ?? getFallbackUrls(coreStart).kibanaUrl;
+      core.setup.http.basePath.publicBaseUrl ?? // priority given to server.publicBaseUrl
+      plugins.cloud?.setup?.kibanaUrl ?? // then cloud id
+      getFallbackUrls(coreStart).kibanaUrl; // falls back to local network binding
     const scriptDownloadUrl = `${kibanaUrl}/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh`;
     const apiEndpoint = `${kibanaUrl}/api/observability_onboarding`;
 
@@ -71,10 +72,9 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       state: t.record(t.string, t.unknown),
     }),
   }),
-  async handler(resources): Promise<{
-    apiKeyId: string;
-    apiKeyEncoded: string;
-  }> {
+  async handler(
+    resources
+  ): Promise<{ apiKeyEncoded: string; onboardingId: string }> {
     const {
       context,
       params: {
@@ -87,32 +87,61 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
     const {
       elasticsearch: { client },
     } = await context.core;
-    const { id: apiKeyId, encoded: apiKeyEncoded } = await createShipperApiKey(
+    const { encoded: apiKeyEncoded } = await createShipperApiKey(
       client.asCurrentUser,
       name
     );
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
-    await saveObservabilityOnboardingState({
+    const { id } = await saveObservabilityOnboardingState({
       savedObjectsClient,
-      apiKeyId,
       observabilityOnboardingState: { state } as ObservabilityOnboardingState,
     });
 
-    return {
-      apiKeyId,
-      apiKeyEncoded,
-    };
+    return { apiKeyEncoded, onboardingId: id };
+  },
+});
+
+const updateOnboardingStateRoute = createObservabilityOnboardingServerRoute({
+  endpoint:
+    'PUT /internal/observability_onboarding/custom_logs/{onboardingId}/save',
+  options: { tags: [] },
+  params: t.type({
+    path: t.type({
+      onboardingId: t.string,
+    }),
+    body: t.type({
+      state: t.record(t.string, t.unknown),
+    }),
+  }),
+  async handler(resources): Promise<{ onboardingId: string }> {
+    const {
+      params: {
+        path: { onboardingId },
+        body: { state },
+      },
+      core,
+      request,
+    } = resources;
+    const coreStart = await core.start();
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+    const { id } = await saveObservabilityOnboardingState({
+      savedObjectsClient,
+      savedObjectId: onboardingId,
+      observabilityOnboardingState: { state } as ObservabilityOnboardingState,
+    });
+    return { onboardingId: id };
   },
 });
 
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
   endpoint:
-    'GET /api/observability_onboarding/custom_logs/step/{name} 2023-05-24',
+    'GET /api/observability_onboarding/custom_logs/{id}/step/{name} 2023-05-24',
   options: { tags: [] },
   params: t.type({
     path: t.type({
+      id: t.string,
       name: t.string,
     }),
     query: t.type({
@@ -122,13 +151,11 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
   async handler(resources): Promise<object> {
     const {
       params: {
-        path: { name },
+        path: { id, name },
         query: { status },
       },
-      request,
       core,
     } = resources;
-    const authApiKey = getAuthenticationAPIKey(request);
     const coreStart = await core.start();
     const savedObjectsClient =
       coreStart.savedObjects.createInternalRepository();
@@ -136,7 +163,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
     const savedObservabilityOnboardingState =
       await getObservabilityOnboardingState({
         savedObjectsClient,
-        apiKeyId: authApiKey?.apiKeyId as string,
+        savedObjectId: id,
       });
 
     if (!savedObservabilityOnboardingState) {
@@ -146,11 +173,15 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
       };
     }
 
-    const { id, updatedAt, ...observabilityOnboardingState } =
-      savedObservabilityOnboardingState;
+    const {
+      id: savedObjectId,
+      updatedAt,
+      ...observabilityOnboardingState
+    } = savedObservabilityOnboardingState;
+
     await saveObservabilityOnboardingState({
       savedObjectsClient,
-      apiKeyId: authApiKey?.apiKeyId as string,
+      savedObjectId,
       observabilityOnboardingState: {
         ...observabilityOnboardingState,
         progress: {
@@ -164,17 +195,18 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
 });
 
 const getProgressRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'GET /internal/observability_onboarding/custom_logs/progress',
+  endpoint:
+    'GET /internal/observability_onboarding/custom_logs/{onboardingId}/progress',
   options: { tags: [] },
   params: t.type({
-    query: t.type({
-      apiKeyId: t.string,
+    path: t.type({
+      onboardingId: t.string,
     }),
   }),
   async handler(resources): Promise<{ progress: Record<string, string> }> {
     const {
       params: {
-        query: { apiKeyId },
+        path: { onboardingId },
       },
       core,
       request,
@@ -185,7 +217,7 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
     const savedObservabilityOnboardingState =
       (await getObservabilityOnboardingState({
         savedObjectsClient,
-        apiKeyId,
+        savedObjectId: onboardingId,
       })) || null;
     const progress = { ...savedObservabilityOnboardingState?.progress };
 
@@ -223,6 +255,7 @@ export const customLogsRouteRepository = {
   ...logMonitoringPrivilegesRoute,
   ...installShipperSetupRoute,
   ...createApiKeyRoute,
+  ...updateOnboardingStateRoute,
   ...stepProgressUpdateRoute,
   ...getProgressRoute,
 };

@@ -1,0 +1,15 @@
+{
+  "indices.explain_data_lifecycle": {
+    "url_params": {
+      "include_defaults": "__flag__",
+      "master_timeout": ""
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "{indices}/_lifecycle/explain"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/dlm-explain-lifecycle.html"
+  }
+}
