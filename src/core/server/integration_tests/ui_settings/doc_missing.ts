@@ -103,7 +103,9 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
     it('creates doc, returns a 200 with just buildNum', async () => {
       const { supertest } = getServices();
 
-      const { body } = await supertest('delete', '/internal/kibana/settings/defaultIndex').expect(200);
+      const { body } = await supertest('delete', '/internal/kibana/settings/defaultIndex').expect(
+        200
+      );
 
       expect(body).toMatchObject({
         settings: {

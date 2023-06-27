@@ -172,7 +172,9 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
 
       expect(await uiSettings.get('defaultIndex')).toBe(defaultIndex);
 
-      const { body } = await supertest('delete', '/internal/kibana/settings/defaultIndex').expect(200);
+      const { body } = await supertest('delete', '/internal/kibana/settings/defaultIndex').expect(
+        200
+      );
 
       expect(body).toMatchObject({
         settings: {
@@ -339,7 +341,9 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
       it.skip('returns a 400 if deleting overridden value', async () => {
         const { supertest } = await setup();
 
-        const { body } = await supertest('delete', '/internal/kibana/global_settings/foo').expect(400);
+        const { body } = await supertest('delete', '/internal/kibana/global_settings/foo').expect(
+          400
+        );
 
         expect(body).toEqual({
           error: 'Bad Request',
