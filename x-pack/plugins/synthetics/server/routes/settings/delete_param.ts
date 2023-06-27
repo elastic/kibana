@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IKibanaResponse } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsParamType } from '../../../common/types/saved_objects';
@@ -20,7 +21,11 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => 
     }),
   },
   writeAccess: true,
-  handler: async ({ savedObjectsClient, request }): Promise<DeleteParamsResponse[]> => {
+  handler: async ({
+    savedObjectsClient,
+    request,
+    response,
+  }): Promise<IKibanaResponse<DeleteParamsResponse[]>> => {
     const { ids } = request.query as { ids: string };
     const parsedIds = JSON.parse(ids) as string[];
 
@@ -28,6 +33,8 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => 
       parsedIds.map((id) => ({ type: syntheticsParamType, id })),
       { force: true }
     );
-    return result.statuses.map(({ id, success }) => ({ id, deleted: success }));
+    return response.ok({
+      body: result.statuses.map(({ id, success }) => ({ id, deleted: success })),
+    });
   },
 });
