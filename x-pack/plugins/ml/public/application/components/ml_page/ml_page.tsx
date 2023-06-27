@@ -20,7 +20,7 @@ import { DatePickerWrapper } from '@kbn/ml-date-picker';
 
 import * as routes from '../../routing/routes';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
-import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
+import { useCurrentThemeVars, useMlKibana, useNavigateToPath } from '../../contexts/kibana';
 import { MlRoute, PageDependencies } from '../../routing/router';
 import { useActiveRoute } from '../../routing/use_active_route';
 import { useDocTitle } from '../../routing/use_doc_title';
@@ -28,6 +28,7 @@ import { useDocTitle } from '../../routing/use_doc_title';
 import { MlPageHeaderRenderer } from '../page_header/page_header';
 
 import { useSideNavItems } from './side_nav';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
 
 const ML_APP_SELECTOR = '[data-test-subj="mlApp"]';
 
@@ -52,14 +53,25 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
   const {
     services: {
       http: { basePath },
-      mlServices: { httpService, mlCapabilities },
+      mlServices: { httpService },
     },
   } = useMlKibana();
+  const { euiTheme } = useCurrentThemeVars();
 
   const headerPortalNode = useMemo(() => createHtmlPortalNode(), []);
   const [isHeaderMounted, setIsHeaderMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [navMenuEnabled, setNavMenuEnabled] = useState(true);
+
+  const [isADEnabled, isDFAEnabled, isNLPEnabled] = usePermissionCheck([
+    'isADEnabled',
+    'isDFAEnabled',
+    'isNLPEnabled',
+  ]);
+
+  const navMenuEnabled = useMemo(
+    () => isADEnabled && isDFAEnabled && isNLPEnabled,
+    [isADEnabled, isDFAEnabled, isNLPEnabled]
+  );
 
   useEffect(() => {
     const subscriptions = new Subscription();
@@ -69,12 +81,6 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         setIsLoading(v !== 0);
       })
     );
-    subscriptions.add(
-      mlCapabilities.capabilities$.subscribe((v) => {
-        setNavMenuEnabled(v.isADEnabled && v.isDFAEnabled && v.isNLPEnabled);
-      })
-    );
-
     return function cleanup() {
       subscriptions.unsubscribe();
     };
@@ -133,7 +139,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         data-test-subj={'mlApp'}
         restrictWidth={false}
         // forcing the background to white navigation is disabled
-        css={navMenuEnabled ? {} : { background: '#FFF' }}
+        css={navMenuEnabled ? {} : { background: euiTheme.euiPageBackgroundColor }}
         solutionNav={
           navMenuEnabled
             ? {
