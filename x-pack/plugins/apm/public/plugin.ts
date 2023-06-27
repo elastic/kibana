@@ -329,7 +329,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           path: '/services',
           navLinkStatus: config.serverless.enabled
             ? AppNavLinkStatus.visible
-            : AppNavLinkStatus.hidden,
+            : AppNavLinkStatus.default,
         },
         {
           id: 'traces',
@@ -337,7 +337,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           path: '/traces',
           navLinkStatus: config.serverless.enabled
             ? AppNavLinkStatus.visible
-            : AppNavLinkStatus.hidden,
+            : AppNavLinkStatus.default,
         },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
         {
@@ -346,7 +346,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           path: '/dependencies/inventory',
           navLinkStatus: config.serverless.enabled
             ? AppNavLinkStatus.visible
-            : AppNavLinkStatus.hidden,
+            : AppNavLinkStatus.default,
         },
         { id: 'settings', title: apmSettingsTitle, path: '/settings' },
         {
