@@ -7,7 +7,7 @@
 
 import { render, fireEvent, screen } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { MonitorTags } from './monitor_tags';
 import * as hooks from '../../hooks/use_url_params';
 import { renderWithRouter, shallowWithRouter } from '../../lib';

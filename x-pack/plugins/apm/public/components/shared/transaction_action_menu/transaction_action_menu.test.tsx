@@ -7,7 +7,7 @@
 
 import { act, fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';

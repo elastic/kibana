@@ -69,10 +69,10 @@ export const AppSearch: React.FC<InitialAppData> = (props) => {
 
   return (
     <Routes compat={false}>
-      <Route exact path={SETUP_GUIDE_PATH}>
+      <Route path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
-      <Route>{showView()}</Route>
+      <Route path="/">{showView()}</Route>
     </Routes>
   );
 };

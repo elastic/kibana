@@ -7,7 +7,7 @@
 
 import React, { useEffect, type FC } from 'react';
 import { render, act } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 
 import { parseUrlState, useUrlState, UrlStateProvider } from './url_state';
 

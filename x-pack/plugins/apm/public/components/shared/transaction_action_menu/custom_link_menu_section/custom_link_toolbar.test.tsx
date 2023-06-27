@@ -7,7 +7,7 @@
 
 import { act, fireEvent, render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,

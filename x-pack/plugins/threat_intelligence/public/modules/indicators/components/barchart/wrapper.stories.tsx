@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { of } from 'rxjs';
 import { Story } from '@storybook/react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';

@@ -7,7 +7,7 @@
 
 import { act, fireEvent, render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { CustomLinkMenuSection } from '.';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';

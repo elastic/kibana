@@ -9,7 +9,7 @@ import { euiLightVars as lightTheme } from '@kbn/ui-theme';
 import { render } from '@testing-library/react';
 import cytoscape from 'cytoscape';
 import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { ThemeContext } from 'styled-components';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { Controls } from './controls';

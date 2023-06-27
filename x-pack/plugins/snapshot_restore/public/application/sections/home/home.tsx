@@ -131,7 +131,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
 
       <EuiSpacer size="l" />
 
-      <Routes>
+      <Routes compat={false}>
         <Route
           exact
           path={`${BASE_PATH}/repositories/:repositoryName`}

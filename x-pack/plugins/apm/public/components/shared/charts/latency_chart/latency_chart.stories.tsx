@@ -8,7 +8,7 @@
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { LatencyChart } from '.';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';

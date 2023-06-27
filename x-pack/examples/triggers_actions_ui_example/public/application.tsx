@@ -7,8 +7,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { BrowserRouter as Router, Route } from '@kbn/shared-ux-router';
 import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';

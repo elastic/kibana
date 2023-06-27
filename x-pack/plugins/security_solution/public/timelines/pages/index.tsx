@@ -17,12 +17,14 @@ import { appendSearch } from '../../common/components/link_to/helpers';
 
 import { TIMELINES_PATH } from '../../../common/constants';
 
-const timelinesPagePath = `${TIMELINES_PATH}/:tabName`;
 const timelinesDefaultPath = `${TIMELINES_PATH}/${TimelineType.default}`;
 
 export const Timelines = React.memo(() => (
   <Routes>
-    <Route exact path={timelinesPagePath}>
+    <Route exact path={`${TIMELINES_PATH}/${TimelineType.default}`}>
+      <TimelinesPage />
+    </Route>
+    <Route exact path={`${TIMELINES_PATH}/${TimelineType.template}`}>
       <TimelinesPage />
     </Route>
     <Route

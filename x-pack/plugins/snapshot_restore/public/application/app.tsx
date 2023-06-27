@@ -66,7 +66,7 @@ export const App: React.FunctionComponent = () => {
           </PageLoading>
         ) : hasPrivileges ? (
           <div data-test-subj="snapshotRestoreApp" className={APP_WRAPPER_CLASS}>
-            <Routes>
+            <Routes compat={false}>
               <Route exact path="/add_repository" component={RepositoryAdd} />
               <Route exact path="/edit_repository/:name*" component={RepositoryEdit} />
               <Route

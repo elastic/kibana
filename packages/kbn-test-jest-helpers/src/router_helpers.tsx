@@ -7,8 +7,8 @@
  */
 
 import React, { Component, ComponentType } from 'react';
-import { MemoryRouter, withRouter } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { withRouter } from 'react-router-dom';
+import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import { History, LocationDescriptor } from 'history';
 
 const stringifyPath = (path: LocationDescriptor): string => {

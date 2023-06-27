@@ -9,7 +9,7 @@ import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import type { MemoryRouterProps } from 'react-router';
 import { render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import {
   noCreateCasesPermissions,
   noUpdateCasesPermissions,

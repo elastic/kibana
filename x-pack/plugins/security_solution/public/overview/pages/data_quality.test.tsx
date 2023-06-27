@@ -7,7 +7,7 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import { TestProviders } from '../../common/mock';

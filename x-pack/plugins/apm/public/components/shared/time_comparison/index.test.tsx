@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
   expectTextsInDocument,

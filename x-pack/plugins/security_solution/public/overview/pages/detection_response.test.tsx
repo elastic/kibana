@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { render } from '@testing-library/react';
 import { DetectionResponse } from './detection_response';
 import { TestProviders } from '../../common/mock';

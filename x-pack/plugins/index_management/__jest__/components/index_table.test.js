@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers'; // eslint-disable-line no-unused-vars
 import { init as initHttpRequests } from '../client_integration/helpers/http_requests';

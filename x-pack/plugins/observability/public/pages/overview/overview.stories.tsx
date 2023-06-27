@@ -9,7 +9,7 @@ import { makeDecorator } from '@storybook/addons';
 import { storiesOf } from '@storybook/react';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React, { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';

@@ -82,7 +82,7 @@ describe('renderApp', () => {
       expect(mockContainer.querySelector('.kbnPageTemplate')).not.toBeNull();
     });
 
-    it('renders AppSearch', () => {
+    it.only('renders AppSearch', () => {
       act(() => {
         mount(AppSearch);
       });

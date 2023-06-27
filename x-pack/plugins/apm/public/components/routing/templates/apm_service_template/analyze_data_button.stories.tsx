@@ -7,7 +7,7 @@
 
 import type { Story, DecoratorFn } from '@storybook/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';

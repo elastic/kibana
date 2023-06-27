@@ -8,7 +8,7 @@
 /* eslint-disable no-console */
 
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { ThemeProvider } from 'styled-components';
 
 import type { RenderOptions, RenderResult } from '@testing-library/react';

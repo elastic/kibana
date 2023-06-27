@@ -17,7 +17,7 @@ import { Location } from 'history';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { MockApmPluginContextWrapper } from '../context/apm_plugin/mock_apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';

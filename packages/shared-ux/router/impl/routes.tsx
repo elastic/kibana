@@ -19,6 +19,7 @@ export const Routes = ({
   children,
 }: {
   legacySwitch?: boolean;
+  compat?: boolean;
   children: React.ReactNode;
 }) => {
   const match = useRouteMatch();

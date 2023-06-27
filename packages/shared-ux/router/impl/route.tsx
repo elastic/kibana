@@ -30,7 +30,7 @@ export const Route = <T extends {}>({
   render,
   compat,
   ...rest
-}: RouteProps<string, { [K: string]: string } & T> & { compat: boolean }) => {
+}: RouteProps<string, { [K: string]: string } & T> & { compat?: boolean }) => {
   const ReactRouterRouteComponent = compat ? CompatRoute : ReactRouterRoute;
   const component = useMemo(() => {
     if (!Component) {
