@@ -26,11 +26,11 @@ describe('isTypeSupportedByCellActions', () => {
     expect(isTypeSupportedByCellActions(KBN_FIELD_TYPES.DATE)).toBe(true);
   });
 
-  it('returns false if the type is boolean', () => {
-    expect(isTypeSupportedByCellActions(KBN_FIELD_TYPES.BOOLEAN)).toBe(false);
+  it('returns true if the type is boolean', () => {
+    expect(isTypeSupportedByCellActions(KBN_FIELD_TYPES.BOOLEAN)).toBe(true);
   });
 
   it('returns false if the type is unknown', () => {
-    expect(isTypeSupportedByCellActions(KBN_FIELD_TYPES.BOOLEAN)).toBe(false);
+    expect(isTypeSupportedByCellActions(KBN_FIELD_TYPES.UNKNOWN)).toBe(false);
   });
 });

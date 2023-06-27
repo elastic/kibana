@@ -800,6 +800,11 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 |Upgrade Assistant helps users prepare their Stack for being upgraded to the next version of the Elastic stack.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/uptime/README.md[uptime]
+|The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
+in their infrastructure.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
 |NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
 
