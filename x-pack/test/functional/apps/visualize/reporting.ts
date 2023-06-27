@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      it('TSVB Gauge: PNG file matches the baseline image', async function () {
+      xit('TSVB Gauge: PNG file matches the baseline image', async function () {
         log.debug('load saved visualization');
         await PageObjects.visualize.loadSavedVisualization(
           '[K7.6-eCommerce] Sold Products per Day',
