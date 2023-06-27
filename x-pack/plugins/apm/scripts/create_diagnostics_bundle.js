@@ -6,4 +6,4 @@
  */
 
 require('@kbn/babel-register').install();
-require('./diagnostics_bundle/main');
+require('./diagnostics_bundle/cli');
