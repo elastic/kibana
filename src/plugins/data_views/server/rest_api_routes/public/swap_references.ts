@@ -9,17 +9,25 @@
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor, SavedObjectsFindOptions } from '@kbn/core/server';
-import { DataViewsService } from '../../common';
+import { DataViewsService } from '../../../common';
 import { handleErrors } from './util/handle_errors';
-import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
-import { DATA_VIEW_SWAP_REFERENCES_PATH } from '../constants';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common/constants';
+import type {
+  DataViewsServerPluginStartDependencies,
+  DataViewsServerPluginStart,
+} from '../../types';
+import { DATA_VIEW_SWAP_REFERENCES_PATH, INITIAL_REST_VERSION } from '../../constants';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 interface GetDataViewArgs {
   dataViewsService: DataViewsService;
   usageCollection?: UsageCounter;
   counterName: string;
   id: string;
+}
+
+interface SwapRefResponse {
+  result: Array<{ id: string; type: string }>;
+  preview: boolean;
 }
 
 export const swapReference = async ({
@@ -42,12 +50,12 @@ export const swapReferencesRoute = (
   >,
   usageCollection?: UsageCounter
 ) => {
-  router.post(
+  router.versioned.post({ path: DATA_VIEW_SWAP_REFERENCES_PATH, access: 'public' }).addVersion(
     {
-      path: DATA_VIEW_SWAP_REFERENCES_PATH,
+      version: INITIAL_REST_VERSION,
       validate: {
-        body: schema.object(
-          {
+        request: {
+          body: schema.object({
             from_id: idSchema,
             from_type: schema.maybe(schema.string()),
             to: idSchema,
@@ -55,9 +63,16 @@ export const swapReferencesRoute = (
             search_type: schema.maybe(schema.string()),
             preview: schema.maybe(schema.boolean()),
             delete: schema.maybe(schema.boolean()),
+          }),
+        },
+        response: {
+          200: {
+            body: schema.object({
+              result: schema.arrayOf(schema.object({ id: idSchema, type: schema.string() })),
+              preview: schema.boolean(),
+            }),
           },
-          { unknowns: 'forbid' }
-        ),
+        },
       },
     },
     router.handleLegacyErrors(
@@ -103,14 +118,16 @@ export const swapReferencesRoute = (
           type: savedObject.type,
         }));
 
+        const body: SwapRefResponse = {
+          result: resultSummary,
+          preview,
+        };
+
         const response = res.ok({
           headers: {
             'content-type': 'application/json',
           },
-          body: {
-            result: resultSummary,
-            preview,
-          },
+          body,
         });
 
         if (findResult.total === 0) {
