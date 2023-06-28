@@ -24,6 +24,18 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsView-flyout-button');
     },
 
+    async clickHostCheckbox(id: string, os: string) {
+      return testSubjects.click(`checkboxSelectRow-${id}-${os}`);
+    },
+
+    async clickSelectedHostsButton() {
+      return testSubjects.click('hostsViewTableSelectHostsFilterButton');
+    },
+
+    async clickSelectedHostsAddFilterButton() {
+      return testSubjects.click('hostsViewTableAddFilterButton');
+    },
+
     async clickCloseFlyoutButton() {
       return testSubjects.click('euiFlyoutCloseButton');
     },
@@ -80,6 +92,8 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsView-enable-feature-button');
     },
 
+    // Table
+
     async getHostsTable() {
       return testSubjects.find('hostsView-table');
     },
@@ -107,6 +121,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     async getHostsCellContent(cell: WebElementWrapper) {
       const cellContent = await cell.findByClassName('euiTableCellContent');
       return cellContent.getVisibleText();
+    },
+
+    async selectedHostsButtonExist() {
+      return testSubjects.exists('hostsViewTableSelectHostsFilterButton');
     },
 
     async getMetricsTrendContainer() {

@@ -3346,12 +3346,12 @@
           {
             "parentPluginId": "triggersActionsUi",
             "id": "def-public.ConfigFieldSchema.defaultValue",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "defaultValue",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string | string[] | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/components/simple_connector_form.tsx",
             "deprecated": false,
@@ -4365,6 +4365,20 @@
             "tags": [],
             "label": "enabledInLicense",
             "description": [],
+            "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleType.hasFieldsForAAD",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasFieldsForAAD",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false

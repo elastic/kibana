@@ -205,10 +205,17 @@ describe('when on the endpoint list page', () => {
   });
 
   describe('when there are policies, but no hosts', () => {
+    let renderResult: ReturnType<AppContextTestRender['render']>;
     beforeEach(async () => {
+      const policyData = mockPolicyResultList({ total: 3 }).items;
       setEndpointListApiMockImplementation(coreStart.http, {
         endpointsResults: [],
-        endpointPackagePolicies: mockPolicyResultList({ total: 3 }).items,
+        endpointPackagePolicies: policyData,
+      });
+
+      renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
       });
     });
     afterEach(() => {
@@ -216,28 +223,16 @@ describe('when on the endpoint list page', () => {
     });
 
     it('should show the no hosts empty state', async () => {
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
-      });
       const emptyHostsTable = await renderResult.findByTestId('emptyHostsTable');
       expect(emptyHostsTable).not.toBeNull();
     });
 
     it('should display the onboarding steps', async () => {
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
-      });
       const onboardingSteps = await renderResult.findByTestId('onboardingSteps');
       expect(onboardingSteps).not.toBeNull();
     });
 
     it('should show policy selection', async () => {
-      const renderResult = render();
-      await reactTestingLibrary.act(async () => {
-        await middlewareSpy.waitForAction('serverReturnedPoliciesForOnboarding');
-      });
       const onboardingPolicySelect = await renderResult.findByTestId('onboardingPolicySelect');
       expect(onboardingPolicySelect).not.toBeNull();
     });

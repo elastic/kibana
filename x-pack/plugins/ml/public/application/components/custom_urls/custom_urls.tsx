@@ -41,7 +41,6 @@ import {
 import { loadDataViewListItems } from '../../jobs/jobs_list/components/edit_job_flyout/edit_utils';
 import { openCustomUrlWindow } from '../../util/custom_url_utils';
 import type { CustomUrlsWrapperProps } from './custom_urls_wrapper';
-import { isAnomalyDetectionJob } from '../../../../common/types/anomaly_detection_jobs';
 
 interface CustomUrlsState {
   customUrls: MlUrlConfig[];
@@ -163,27 +162,42 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
     const {
       http: { basePath },
       notifications: { toasts },
+      data: { dataViews },
       dashboard,
     } = this.props.kibana.services;
+    const dataViewId = this.state?.editorSettings?.kibanaSettings?.discoverIndexPatternId;
     const job = this.props.job;
-    buildCustomUrlFromSettings(dashboard, this.state.editorSettings as CustomUrlSettings)
-      .then((customUrl) => {
-        getTestUrl(job, customUrl, this.props.currentTimeFilter)
-          .then((testUrl) => {
-            openCustomUrlWindow(testUrl, customUrl, basePath.get());
-          })
-          .catch((resp) => {
-            // eslint-disable-next-line no-console
-            console.error('Error obtaining URL for test:', resp);
-            toasts.addWarning(
-              i18n.translate(
-                'xpack.ml.jobsList.editJobFlyout.customUrls.getTestUrlErrorNotificationMessage',
-                {
-                  defaultMessage: 'An error occurred obtaining the URL to test the configuration',
-                }
-              )
-            );
-          });
+
+    dataViews
+      .get(dataViewId ?? '')
+      .catch((error) => {
+        // We still want to try to get the test URL as not all custom urls require a timefield to be passed.
+        // eslint-disable-next-line no-console
+        console.error('Error obtaining data view:', error);
+      })
+      .then((dataView) => {
+        const timefieldName = dataView?.timeFieldName ?? null;
+        buildCustomUrlFromSettings(dashboard, this.state.editorSettings as CustomUrlSettings).then(
+          (customUrl) => {
+            getTestUrl(job, customUrl, timefieldName, this.props.currentTimeFilter)
+              .then((testUrl) => {
+                openCustomUrlWindow(testUrl, customUrl, basePath.get());
+              })
+              .catch((resp) => {
+                // eslint-disable-next-line no-console
+                console.error('Error obtaining URL for test:', resp);
+                toasts.addWarning(
+                  i18n.translate(
+                    'xpack.ml.jobsList.editJobFlyout.customUrls.getTestUrlErrorNotificationMessage',
+                    {
+                      defaultMessage:
+                        'An error occurred obtaining the URL to test the configuration',
+                    }
+                  )
+                );
+              });
+          }
+        );
       })
       .catch((resp) => {
         // eslint-disable-next-line no-console
@@ -210,7 +224,6 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
     const editMode = this.props.editMode ?? 'inline';
     const editor = (
       <CustomUrlEditor
-        showTimeRangeSelector={isAnomalyDetectionJob(this.props.job)}
         showCustomTimeRangeSelector={isDataFrameAnalyticsConfigs(this.props.job)}
         customUrl={editorSettings}
         setEditCustomUrl={this.setEditCustomUrl}
@@ -326,6 +339,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
           job={this.props.job}
           customUrls={customUrls}
           onChange={this.props.setCustomUrls}
+          dataViewListItems={this.state.dataViewListItems}
         />
       </>
     );

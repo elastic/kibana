@@ -2873,6 +2873,21 @@
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionTypeExecutorOptions.source",
+            "type": "Object",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "ActionExecutionSource",
+              "<unknown> | undefined"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3498,6 +3513,23 @@
           "description": [],
           "signature": [
             "() => { hasPermanentEncryptionKey: boolean; }"
+          ],
+          "path": "x-pack/plugins/actions/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
+          "id": "def-server.PluginSetupContract.getActionsConfigurationUtilities",
+          "type": "Function",
+          "tags": [],
+          "label": "getActionsConfigurationUtilities",
+          "description": [],
+          "signature": [
+            "() => ",
+            "ActionsConfigurationUtilities"
           ],
           "path": "x-pack/plugins/actions/server/plugin.ts",
           "deprecated": false,
