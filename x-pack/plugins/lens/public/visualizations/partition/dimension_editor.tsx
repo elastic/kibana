@@ -72,6 +72,18 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const showColorPicker =
     currentLayer.metrics.includes(props.accessor) && currentLayer.allowMultipleMetrics;
 
+  const colorPickerDisabledMessage = hasNonCollapsedSliceBy(currentLayer)
+    ? ['pie', 'donut'].includes(props.state.shape)
+      ? i18n.translate('xpack.lens.pieChart.colorPicker.disabledBecauseSliceBy', {
+          defaultMessage:
+            'You are unable to apply custom colors to individual slices when the layer includes one or more "Slice by" dimensions.',
+        })
+      : i18n.translate('xpack.lens.pieChart.colorPicker.disabledBecauseGroupBy', {
+          defaultMessage:
+            'You are unable to apply custom colors to individual slices when the layer includes one or more "Group by" dimensions.',
+        })
+    : undefined;
+
   return (
     <>
       {props.accessor === firstNonCollapsedColumnId && (
@@ -94,18 +106,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             datasource: props.datasource,
             palette: props.state.palette,
           })}
-          disabled={hasNonCollapsedSliceBy(currentLayer)}
-          disableHelpTooltip={
-            ['pie', 'donut'].includes(props.state.shape)
-              ? i18n.translate('xpack.lens.pieChart.colorPicker.disabledBecauseSliceBy', {
-                  defaultMessage:
-                    'You are unable to apply custom colors to individual slices when the layer includes one or more "Slice by" dimensions.',
-                })
-              : i18n.translate('xpack.lens.pieChart.colorPicker.disabledBecauseGroupBy', {
-                  defaultMessage:
-                    'You are unable to apply custom colors to individual slices when the layer includes one or more "Group by" dimensions.',
-                })
-          }
+          disabledMessage={colorPickerDisabledMessage}
           setConfig={setConfig}
         />
       )}
