@@ -13,10 +13,7 @@ import { DashboardsLandingPage } from '.';
 import { useCapabilities } from '../../../common/lib/kibana';
 import * as telemetry from '../../../common/lib/telemetry';
 import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
-import {
-  DEFAULT_TAGS_RESPONSE,
-  MOCK_TAG_NAME,
-} from '../../../common/containers/tags/__mocks__/api';
+import { MOCK_TAG_NAME } from '../../../common/containers/tags/__mocks__/api';
 import { DashboardContextProvider } from '../../context/dashboard_context';
 import { act } from 'react-dom/test-utils';
 import type { NavigationLink } from '../../../common/links/types';
@@ -134,16 +131,12 @@ describe('Dashboards landing', () => {
       expect(screen.getByTestId('dashboardsTable')).toBeInTheDocument();
     });
 
-    it('should call DashboardListingTable with correct tagReferences', async () => {
+    it('should call DashboardListingTable with withoutPageTemplateWrapper equals to true', async () => {
       await renderDashboardLanding();
 
-      expect((DashboardListingTable as jest.Mock).mock.calls[0][0].tagReferences).toEqual(
-        DEFAULT_TAGS_RESPONSE.map((res) => ({
-          id: res.id,
-          type: 'tag',
-          ...res.attributes,
-        }))
-      );
+      expect(
+        (DashboardListingTable as jest.Mock).mock.calls[0][0].withoutPageTemplateWrapper
+      ).toEqual(true);
     });
 
     it('should call DashboardListingTable with correct initialFilter', async () => {
