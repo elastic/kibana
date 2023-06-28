@@ -48,6 +48,13 @@ export const DASHBOARDS = i18n.translate('xpack.securitySolution.navigation.dash
   defaultMessage: 'Dashboards',
 });
 
+export const COVERAGE_OVERVIEW = i18n.translate(
+  'xpack.securitySolution.navigation.coverageOverviewDashboard',
+  {
+    defaultMessage: 'MITRE ATT&CK\u00AE Coverage',
+  }
+);
+
 export const NETWORK = i18n.translate('xpack.securitySolution.navigation.network', {
   defaultMessage: 'Network',
 });

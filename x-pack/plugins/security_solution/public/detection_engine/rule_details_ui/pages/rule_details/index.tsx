@@ -612,6 +612,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     },
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
+  const currentAlertStatusFilterValue = useMemo(() => [filterGroup], [filterGroup]);
+  const updatedAtValue = useMemo(() => {
+    return timelinesUi.getLastUpdated({
+      updatedAt: updatedAt || Date.now(),
+      showUpdating,
+    });
+  }, [updatedAt, showUpdating, timelinesUi]);
 
   const renderGroupedAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
@@ -832,13 +839,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           onFilterGroupChanged={onFilterGroupChangedCallback}
                         />
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        {updatedAt &&
-                          timelinesUi.getLastUpdated({
-                            updatedAt: updatedAt || Date.now(),
-                            showUpdating,
-                          })}
-                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>{updatedAtValue}</EuiFlexItem>
                     </EuiFlexGroup>
                     <EuiSpacer size="l" />
                     <Display show={!globalFullScreen}>
@@ -854,7 +855,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     </Display>
                     {ruleId != null && (
                       <GroupedAlertsTable
-                        currentAlertStatusFilterValue={[filterGroup]}
+                        currentAlertStatusFilterValue={currentAlertStatusFilterValue}
                         defaultFilters={alertMergedFilters}
                         from={from}
                         globalFilters={filters}
