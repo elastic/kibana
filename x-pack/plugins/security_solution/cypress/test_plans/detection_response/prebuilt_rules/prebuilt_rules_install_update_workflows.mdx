@@ -24,8 +24,8 @@ Part of epic: [https://github.com/elastic/security-team/issues/1974](https://git
 **THEN** no callout message is displayed for `<prebuilt_rules_status>` rules  
 **AND** no badges with number of available rules to install/update are displayed
 
-*CASE 1: `<prebuilt_rules_status>` = installed*  
-*CASE 2: `<prebuilt_rules_status>` = updated*
+*CASE 1: `<prebuilt_rules_status>` = to install*  
+*CASE 2: `<prebuilt_rules_status>` = to update*
 
 #### **Scenario: Callout message is displayed when there are new prebuilt rules available to install**
 
@@ -120,20 +120,20 @@ Part of epic: [https://github.com/elastic/security-team/issues/1974](https://git
 **AND** the callout message for pending installs/updates is still displayed on Rules Management Page  
 **AND** the number of available rules to install and upgrade in the badges does not change.
 
-*CASE 1: `<action>` = installing all* 
-*CASE 2: `<action>` = installing selected* 
-*CASE 3: `<action>` = installing individual* 
-*CASE 4: `<action>` = Updating all* 
-*CASE 5: `<action>` = Updating selected* 
-*CASE 6: `<action>` = Updating individual*
+*CASE 1: `<action>` = installing all*  
+*CASE 2: `<action>` = installing selected*  
+*CASE 3: `<action>` = installing individual*  
+*CASE 4: `<action>` = Updating all*  
+*CASE 5: `<action>` = Updating selected*  
+*CASE 6: `<action>` = Updating individual* 
 
 #### **Scenario: No callout messages are displayed when rule package isntallation fails and no rules are avialble for install/update**
 
-**GIVEN** user navigates to Rules Management Page
+**GIVEN** user navigates to Rules Management Page  
 **AND** user is running a fresh instance  
-**AND** rule package installation fails
-**THEN** no callouts message should be displayed
-**AND** the number of available rules to install and upgrade in the badges does not change.
+**AND** rule package installation fails  
+**THEN** no callouts message should be displayed  
+**AND** the number of available rules to install and upgrade in the badges does not change.  
 
 
 
@@ -143,14 +143,14 @@ Part of epic: [https://github.com/elastic/security-team/issues/1974](https://git
 
 **GIVEN** a user that doesn’t have `security_detection_engine` package installed  
 **WHEN** user is on Rules Management Page  
-**THEN** “+Add Elastic rules” menu with available Rules counter is displayed
-**AND** Rule Updates tab is displayed
-**AND** “+Add Elastic rules” button is displayed on empty Rules Table
+**THEN** “+Add Elastic rules” menu with available Rules counter is displayed  
+**AND** Rule Updates tab is displayed  
+**AND** “+Add Elastic rules” button is displayed on empty Rules Table  
 
 #### **Scenario: Rules settings persist on Add Elastic Rules table**
 
 **GIVEN** a user has Rules listed on Add Elastic Rules page  
-**WHEN** <case>
+**WHEN** `<case>`  
 **THEN** the available rules state should persist for all the rules  
 
 *CASE 1: user reloads the page* 
@@ -179,18 +179,18 @@ Part of epic: [https://github.com/elastic/security-team/issues/1974](https://git
 #### **Scenario: Rules settings persist on Rule Updates table**
 
 **GIVEN** a user has Rules listed on Rule Updates table  
-**WHEN** <case>
+**WHEN** `<case>`  
 **THEN** the rules with available updates state should persist
 
-*CASE 1: user reloads the page* 
-*CASE 2: after switching table pagination*  
-*CASE 3: After filtering and clear filters*
+*CASE 1: user reloads the page*  
+*CASE 2: after switching table pagination*   
+*CASE 3: After filtering and clear filters*  
 
 #### **Scenario: User can navigate back to Rules Management tab**
 
-**GIVEN** a user is on Rule Updates tab
-**WHEN** user navigates back to Rules Management page  
-**THEN** Rules Management Page is properly displayed
+**GIVEN** a user is on Rule Updates tab  
+**WHEN** user navigates back to Rules Management page   
+**THEN** Rules Management Page is properly displayed  
 
 #### **Scenario: User can filter prebuilt rules by rule name or by tag**
 
@@ -209,14 +209,14 @@ Part of epic: [https://github.com/elastic/security-team/issues/1974](https://git
 
 **GIVEN** a user with Security: read privileges on Security solution  
 **WHEN** user navigates to Add Elastic Rules Page  
-**THEN** user can see available prebuilt rules to install
+**THEN** user can see available prebuilt rules to install  
 **AND** user cannot Install those prebuilt rules
 
 #### **Scenario: User with read privileges on security solution cannot update prebuilt rules**
 
 **GIVEN** a user with Security: read privileges on Security solution  
 **WHEN** user navigates to Rule Updates Tab on Rules Management Page  
-**THEN** user can see new updates for installed prebuilt rules
+**THEN** user can see new updates for installed prebuilt rules  
 **AND** user cannot Update those prebuilt rules
 
 
@@ -229,9 +229,9 @@ Part of epic: [https://github.com/elastic/security-team/issues/1974](https://git
 **GIVEN** a user that is upgrading from version `<version>` to version 8.9  
 **AND** the `<version>` instance contains already installed prebuilt rules  
 **WHEN** the upgrade is complete  
-**THEN** user can install new prebuilt rules
-**AND** remove installed prebuilt rules
-**AND** update prebuilt rules from `<version>` to 8.9
+**THEN** user can install new prebuilt rules  
+**AND** remove installed prebuilt rules  
+**AND** update prebuilt rules from `<version>` to 8.9  
 
 | version  |
 |----------|
