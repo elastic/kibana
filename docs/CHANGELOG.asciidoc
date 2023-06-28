@@ -57,7 +57,7 @@ Review the following information about the {kib} 8.8.2 release.
 
 APM::
 * Circuit breaker and performance improvements for service map {kibana-pull}159883[#159883]
-* Don't use service transaction metrics on transaction detail page {kibana-pull}159085[#159085]
+* Fixes the latency graph displaying all service transactions, rather than the selected one, on the transaction detail page {kibana-pull}159085[#159085]
 
 Dashboard::
 * Fixes styling of top nav bar {kibana-pull}159754[#159754]
@@ -75,16 +75,16 @@ Fleet::
 * Fixing issue of returning output API key {kibana-pull}159179[#159179]
 
 Logs::
-* Fixes log categorization UI failure due to infinite loop {kibana-pull}159090[#159090]
+* Fixes log categorization UI failure due to an infinite loop {kibana-pull}159090[#159090]
 
 Machine Learning::
 * Hiding pattern analysis button for non-time series data {kibana-pull}160051[#160051]
-* Fixes not blocking forced downgrades/installation if cannot delete indices {kibana-pull}159814[#159814]
+* Fixes blocking forced downgrades/installation if indices can't be deleted {kibana-pull}159814[#159814]
 
 Maps::
 * Fixes layer group loading indicator always on when group has non-visible layer {kibana-pull}159517[#159517]
-* Fixes geo line source not loaded unless maps application is opened {kibana-pull}159432[#159432]
-* Fixes map orphans sources on layer deletion {kibana-pull}159067[#159067]
+* Fixes geo line source not loading unless the Maps application is open {kibana-pull}159432[#159432]
+* Fixes Maps orphan sources on layer deletion {kibana-pull}159067[#159067]
 
 Monitoring::
 * Permanently hide the telemetry notice on dismissal {kibana-pull}159893[#159893]
@@ -98,7 +98,7 @@ Platform::
 
 Uptime::
 * Ensures that users can configure custom `Content-Type` headers for HTTP monitors in the Synthetics app {kibana-pull}159737[#159737]
-* Fixes an issue where alerting on Synthetics monitors could sometimes become delayed {kibana-pull}159511[#159511]
+* Fixes an issue where alerting on Synthetics monitors was sometimes delayed {kibana-pull}159511[#159511]
 
 [[release-notes-8.8.1]]
 == {kib} 8.8.1
