@@ -5,16 +5,13 @@ on:
     types:
       - opened
 
-env:
-  NODE_ENV: kibana-github-action
-
 jobs:
   approve:
     name: Auto-approve backport
     runs-on: ubuntu-latest
     if: |
       contains(github.event.pull_request.labels.*.name, 'backport') &&
-      github.event.pull_request.user.login == 'kibanamachine'
+      contains(github.head_ref, 'kibanamachine:backport')
     permissions:
       pull-requests: write
     steps:
