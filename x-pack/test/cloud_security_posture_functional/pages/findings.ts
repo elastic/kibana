@@ -9,6 +9,11 @@ import expect from '@kbn/expect';
 import Chance from 'chance';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
+/* This sleep or delay is added to allow some time for the column to settle down before we get the value and to prevent the test from getting the wrong value*/
+const sleep = (num: number) => {
+  return new Promise((res) => setTimeout(res, num));
+};
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
@@ -95,8 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const benchMarkName = data[0].rule.benchmark.name;
 
-  // Failing: See https://github.com/elastic/kibana/issues/159565
-  describe.skip('Findings Page', () => {
+  describe('Findings Page', () => {
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
     let findingsByResourceTable: typeof findings.findingsByResourceTable;
@@ -131,6 +135,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('SearchBar', () => {
       it('add filter', async () => {
         await filterBar.addFilter({ field: 'rule.name', operation: 'is', value: ruleName1 });
+        sleep(1000);
 
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
         expect(await latestFindingsTable.hasColumnValue('Rule Name', ruleName1)).to.be(true);
@@ -185,11 +190,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       };
       const sortByAlphabeticalOrder = (a: string, b: string) => {
         return a.localeCompare(b);
-      };
-
-      /* This sleep or delay is added to allow some time for the column to settle down before we get the value and to prevent the test from getting the wrong value*/
-      const sleep = (num: number) => {
-        return new Promise((res) => setTimeout(res, num));
       };
 
       it('sorts by a column, should be case sensitive/insensitive depending on the column', async () => {
