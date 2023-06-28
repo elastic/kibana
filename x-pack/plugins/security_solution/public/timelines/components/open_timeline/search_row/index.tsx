@@ -15,7 +15,7 @@ import {
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import { TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../common/api/timeline';
 import * as i18n from '../translations';
 import type { OpenTimelineProps } from '../types';
 

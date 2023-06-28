@@ -7,8 +7,8 @@
 
 import * as rt from 'io-ts';
 
-import { TimelineTypeLiteralRt } from '../../../../../common/types/timeline/api';
-import { unionWithNullType } from '../../../../../common/utility_types';
+import { TimelineTypeLiteralRt } from '../api';
+import { unionWithNullType } from '../../../utility_types';
 
 export const persistFavoriteSchema = rt.type({
   timelineId: unionWithNullType(rt.string),

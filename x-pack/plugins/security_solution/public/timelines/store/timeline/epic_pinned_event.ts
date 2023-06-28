@@ -14,7 +14,7 @@ import { filter, mergeMap, startWith, withLatestFrom, takeUntil } from 'rxjs/ope
 
 import { addError } from '../../../common/store/app/actions';
 import type { inputsModel } from '../../../common/store/inputs';
-import type { PinnedEventResponse } from '../../../../common/types/timeline/pinned_event/api';
+import type { PinnedEventResponse } from '../../../../common/api/timeline';
 import {
   pinEvent,
   endTimelineSaving,

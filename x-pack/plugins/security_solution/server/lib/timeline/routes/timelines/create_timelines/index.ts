@@ -17,7 +17,7 @@ import { buildRouteValidationWithExcess } from '../../../../../utils/build_valid
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
-import { createTimelineSchema } from '../../../schemas/timelines';
+import { createTimelineSchema } from '../../../../../../common/api/timeline';
 import {
   buildFrameworkRequest,
   CompareTimelinesStatus,
@@ -25,7 +25,7 @@ import {
 } from '../../../utils/common';
 import { DEFAULT_ERROR } from '../../../utils/failure_cases';
 import { createTimelines } from './helpers';
-import type { CreateTimelinesResponse } from '../../../../../../common/types/timeline/api';
+import type { CreateTimelinesResponse } from '../../../../../../common/api/timeline';
 
 export * from './helpers';
 

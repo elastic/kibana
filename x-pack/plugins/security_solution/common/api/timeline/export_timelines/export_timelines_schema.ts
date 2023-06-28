@@ -6,9 +6,12 @@
  */
 
 import * as rt from 'io-ts';
+import { unionWithNullType } from '../../../utility_types';
 
-import { TimelineTypeLiteralRt } from '../../../../../common/types/timeline/api';
+export const exportTimelinesQuerySchema = rt.type({
+  file_name: rt.string,
+});
 
-export const getDraftTimelineSchema = rt.type({
-  timelineType: TimelineTypeLiteralRt,
+export const exportTimelinesRequestBodySchema = rt.partial({
+  ids: unionWithNullType(rt.array(rt.string)),
 });

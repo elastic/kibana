@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { TimelineId } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../common/api/timeline';
 
 import { useCreateTimelineButton } from './use_create_timeline';
 

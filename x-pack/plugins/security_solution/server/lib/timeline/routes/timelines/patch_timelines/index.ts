@@ -17,11 +17,11 @@ import type { ConfigType } from '../../../../..';
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
-import { patchTimelineSchema } from '../../../schemas/timelines/patch_timelines_schema';
+import { patchTimelineSchema } from '../../../../../../common/api/timeline';
 import { buildFrameworkRequest, TimelineStatusActions } from '../../../utils/common';
 import { createTimelines } from '../create_timelines';
 import { CompareTimelinesStatus } from '../../../utils/compare_timelines_status';
-import type { PatchTimelinesResponse } from '../../../../../../common/types/timeline/api';
+import type { PatchTimelinesResponse } from '../../../../../../common/api/timeline';
 
 export const patchTimelinesRoute = (
   router: SecuritySolutionPluginRouter,

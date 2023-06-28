@@ -12,16 +12,57 @@ import { stringEnum, unionWithNullType } from '../../utility_types';
 
 import type { Maybe } from '../../search_strategy';
 import { Direction } from '../../search_strategy';
-import type { PinnedEvent } from './pinned_event/api';
-import { PinnedEventRuntimeType } from './pinned_event/api';
+import type { PinnedEvent } from './pinned_events/api';
+import { PinnedEventRuntimeType } from './pinned_events/api';
 import {
   SavedObjectResolveAliasPurpose,
   SavedObjectResolveAliasTargetId,
   SavedObjectResolveOutcome,
-} from '../../api/detection_engine/rule_schema';
-import { errorSchema, success, success_count as successCount } from '../../api/detection_engine';
-import type { Note } from './note/api';
-import { NoteRuntimeType } from './note/api';
+} from '../detection_engine/rule_schema';
+import { errorSchema, success, success_count as successCount } from '../detection_engine';
+
+export const BareNoteSchema = runtimeTypes.intersection([
+  runtimeTypes.type({
+    timelineId: unionWithNullType(runtimeTypes.string),
+  }),
+  runtimeTypes.partial({
+    eventId: unionWithNullType(runtimeTypes.string),
+    note: unionWithNullType(runtimeTypes.string),
+    created: unionWithNullType(runtimeTypes.number),
+    createdBy: unionWithNullType(runtimeTypes.string),
+    updated: unionWithNullType(runtimeTypes.number),
+    updatedBy: unionWithNullType(runtimeTypes.string),
+  }),
+]);
+
+export type BareNote = runtimeTypes.TypeOf<typeof BareNoteSchema>;
+
+/**
+ * This type represents a note type stored in a saved object that does not include any fields that reference
+ * other saved objects.
+ */
+export type BareNoteWithoutExternalRefs = Omit<BareNote, 'timelineId'>;
+
+export const NoteRuntimeType = runtimeTypes.intersection([
+  BareNoteSchema,
+  runtimeTypes.type({
+    noteId: runtimeTypes.string,
+    version: runtimeTypes.string,
+  }),
+  runtimeTypes.partial({
+    timelineVersion: unionWithNullType(runtimeTypes.string),
+  }),
+]);
+
+export type Note = runtimeTypes.TypeOf<typeof NoteRuntimeType>;
+
+export interface ResponseNote {
+  code?: Maybe<number>;
+
+  message?: Maybe<string>;
+
+  note: Note;
+}
 
 /*
  *  ColumnHeader Types

@@ -11,8 +11,8 @@ import {
   sortFieldTimeline,
   TimelineStatusLiteralRt,
   TimelineTypeLiteralRt,
-} from '../../../../../common/types/timeline/api';
-import { unionWithNullType } from '../../../../../common/utility_types';
+} from '../api';
+import { unionWithNullType } from '../../../utility_types';
 
 const BoolFromString = rt.union([rt.literal('true'), rt.literal('false')]);
 

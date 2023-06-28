@@ -6,7 +6,9 @@
  */
 
 import * as runtimeTypes from 'io-ts';
-import { unionWithNullType } from '../../../../../common/utility_types';
+import { unionWithNullType } from '../../../utility_types';
+
+export * from './api';
 
 export const pinnedEventIds = unionWithNullType(runtimeTypes.array(runtimeTypes.string));
 export const persistPinnedEventSchema = runtimeTypes.intersection([

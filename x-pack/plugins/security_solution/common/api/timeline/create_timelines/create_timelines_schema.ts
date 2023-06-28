@@ -7,12 +7,8 @@
 
 import * as rt from 'io-ts';
 
-import {
-  SavedTimelineRuntimeType,
-  TimelineStatusLiteralRt,
-  TimelineTypeLiteralRt,
-} from '../../../../../common/types/timeline/api';
-import { unionWithNullType } from '../../../../../common/utility_types';
+import { SavedTimelineRuntimeType, TimelineStatusLiteralRt, TimelineTypeLiteralRt } from '../api';
+import { unionWithNullType } from '../../../utility_types';
 
 export const createTimelineSchema = rt.intersection([
   rt.type({

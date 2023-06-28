@@ -16,7 +16,7 @@ import {
 import { useNavigation } from '../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../common/constants';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import type { SortFieldTimeline } from '../../../../common/types/timeline/api';
+import type { SortFieldTimeline } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import type { TimelineModel } from '../../store/timeline/model';
 import { timelineSelectors } from '../../store/timeline';

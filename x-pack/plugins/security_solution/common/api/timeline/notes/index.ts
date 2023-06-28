@@ -6,8 +6,8 @@
  */
 
 import * as runtimeTypes from 'io-ts';
-import { unionWithNullType } from '../../../../../common/utility_types';
-import { BareNoteSchema } from '../../../../../common/types/timeline/note/api';
+import { unionWithNullType } from '../../../utility_types';
+import { BareNoteSchema } from '..';
 
 export const eventNotes = unionWithNullType(runtimeTypes.array(BareNoteSchema));
 export const globalNotes = unionWithNullType(runtimeTypes.array(BareNoteSchema));

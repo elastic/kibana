@@ -7,11 +7,12 @@
 
 import path, { join, resolve } from 'path';
 import * as rt from 'io-ts';
-import type { TimelineSavedObject } from '../../../../common/types/timeline/api';
-import { TimelineSavedToReturnObjectRuntimeType } from '../../../../common/types/timeline/api';
+import type { TimelineSavedObject, ImportTimelinesSchema } from '../../../../common/api/timeline';
+import {
+  TimelineSavedToReturnObjectRuntimeType,
+  ImportTimelinesSchemaRt,
+} from '../../../../common/api/timeline';
 
-import type { ImportTimelinesSchema } from '../schemas/timelines/import_timelines_schema';
-import { ImportTimelinesSchemaRt } from '../schemas/timelines/import_timelines_schema';
 import { unionWithNullType } from '../../../../common/utility_types';
 
 import type { FrameworkRequest } from '../../framework';

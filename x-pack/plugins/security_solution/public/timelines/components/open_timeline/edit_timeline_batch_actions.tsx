@@ -9,7 +9,7 @@ import type { EuiBasicTable } from '@elastic/eui';
 import { EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { TimelineType } from '../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../common/api/timeline';
 
 import * as i18n from './translations';
 import type { DeleteTimelines, OpenTimelineResult } from './types';
