@@ -17,6 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/rule-data-utils"
+    "@kbn/rule-data-utils",
+    "@kbn/core"
   ]
 }
