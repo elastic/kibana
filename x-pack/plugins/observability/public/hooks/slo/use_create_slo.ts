@@ -11,7 +11,7 @@ import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/sl
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { v1 as uuidv1 } from 'uuid';
 
-import { paths } from '../../config/paths';
+import { paths } from '../../routes/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
