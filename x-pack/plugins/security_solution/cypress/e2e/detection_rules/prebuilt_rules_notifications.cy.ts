@@ -14,7 +14,6 @@ import {
   preventPrebuiltRulesPackageInstallation,
 } from '../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/common';
-import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 
@@ -24,7 +23,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     /* Make sure persisted rules table state is cleared */
     resetRulesTableState();
     deleteAlertsAndRules();
-    esArchiverResetKibana();
     /* Prevent security_detection_engine from being installed; install assets manually */
     preventPrebuiltRulesPackageInstallation();
     createNewRuleAsset({
