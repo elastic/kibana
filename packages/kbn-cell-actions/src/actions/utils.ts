@@ -8,8 +8,9 @@
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isBoolean, isNumber, isString } from 'lodash/fp';
-import { Serializable } from '@kbn/utility-types';
-import { DefaultActionsPrimitiveValue } from './types';
+import { Serializable, SerializableArray } from '@kbn/utility-types/src/serializable';
+import { DefaultActionsSupportedValue, NonNullableSerializable } from './types';
+import { CellActionFieldValue } from '../types';
 
 export const SUPPORTED_KBN_TYPES = [
   KBN_FIELD_TYPES.DATE,
@@ -22,18 +23,21 @@ export const SUPPORTED_KBN_TYPES = [
 export const isTypeSupportedByDefaultActions = (kbnFieldType: KBN_FIELD_TYPES) =>
   SUPPORTED_KBN_TYPES.includes(kbnFieldType);
 
-export const isNonNullablePrimitiveValue = (
-  value: Serializable
-): value is DefaultActionsPrimitiveValue => isString(value) || isNumber(value) || isBoolean(value);
+const isNonNullablePrimitiveValue = (
+  value: CellActionFieldValue
+): value is string | number | boolean => isString(value) || isNumber(value) || isBoolean(value);
 
-export const isPrimitiveValue = (value: Serializable): value is DefaultActionsPrimitiveValue =>
-  value == null || isNonNullablePrimitiveValue(value);
+const isNonMixedTypeArray = (
+  value: Array<string | number | boolean>
+): value is string[] | number[] | boolean[] => value.every((v) => typeof v === typeof value[0]);
 
-/**
- * Unfortunately, we can't create type guards for this function because `SerializableArray`
- * is an interface that extends Array, which is incompatible with `Array<number | boolean | string>`.
- *
- * Whenever this function returns true, the value is guaranteed to be a `DefaultActionsSupportedValue`.
- */
-export const isValueSupportedByDefaultActions = (value: Serializable) =>
-  isPrimitiveValue(value) || (Array.isArray(value) && value.every(isNonNullablePrimitiveValue));
+export const isValueSupportedByDefaultActions = (
+  value: NonNullableSerializable[]
+): value is DefaultActionsSupportedValue =>
+  value.every(isNonNullablePrimitiveValue) && isNonMixedTypeArray(value);
+
+export const filterOutNullableValues = (value: SerializableArray): NonNullableSerializable[] =>
+  value.filter<NonNullableSerializable>((v): v is NonNullableSerializable => v != null);
+
+export const valueToArray = (value: Serializable): SerializableArray =>
+  Array.isArray(value) ? value : [value];

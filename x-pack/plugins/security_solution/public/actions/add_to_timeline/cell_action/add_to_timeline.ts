@@ -10,9 +10,10 @@ import type { CellActionTemplate } from '@kbn/cell-actions';
 import {
   isTypeSupportedByDefaultActions,
   isValueSupportedByDefaultActions,
+  filterOutNullableValues,
+  valueToArray,
 } from '@kbn/cell-actions/src/actions/utils';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
-import type { DefaultActionsSupportedValue } from '@kbn/cell-actions/src/actions/types';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { addProvider } from '../../../timelines/store/timeline/actions';
 import { TimelineId } from '../../../../common/types';
@@ -55,19 +56,20 @@ export const createAddToTimelineCellActionFactory = createCellActionFactory(
           isTypeSupportedByDefaultActions(field.type as KBN_FIELD_TYPES)
         );
       },
+
       execute: async ({ data, metadata }) => {
         const { name, type } = data[0]?.field;
         const rawValue = data[0]?.value;
+        const value = filterOutNullableValues(valueToArray(rawValue));
 
-        if (!isValueSupportedByDefaultActions(rawValue)) {
+        if (!isValueSupportedByDefaultActions(value)) {
           notificationsService.toasts.addWarning({
             title: ACTION_INCOMPATIBLE_VALUE_WARNING,
           });
           return;
         }
-        const value = rawValue as DefaultActionsSupportedValue;
-        const values = Array.isArray(value) ? value : [value];
-        const [firstValue, ...andValues] = values;
+
+        const [firstValue, ...andValues] = value;
         const [dataProvider] =
           createDataProviders({
             contextId: TimelineId.active,
@@ -96,10 +98,7 @@ export const createAddToTimelineCellActionFactory = createCellActionFactory(
         if (dataProvider) {
           store.dispatch(addProvider({ id: TimelineId.active, providers: [dataProvider] }));
 
-          let messageValue = '';
-          if (value != null) {
-            messageValue = Array.isArray(value) ? value.join(', ') : value.toString();
-          }
+          const messageValue = value.join(', ');
           notificationsService.toasts.addSuccess({
             title: ADD_TO_TIMELINE_SUCCESS_TITLE(messageValue),
           });

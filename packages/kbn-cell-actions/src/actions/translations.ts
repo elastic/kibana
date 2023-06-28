@@ -11,6 +11,6 @@ import { i18n } from '@kbn/i18n';
 export const ACTION_INCOMPATIBLE_VALUE_WARNING = i18n.translate(
   'cellActions.actions.incompatibility.warningMessage',
   {
-    defaultMessage: 'The action can not be executed because the value and type are incompatibility',
+    defaultMessage: 'The action can not be executed because the value and type are incompatible',
   }
 );

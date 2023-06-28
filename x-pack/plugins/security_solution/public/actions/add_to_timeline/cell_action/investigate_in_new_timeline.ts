@@ -10,9 +10,10 @@ import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import {
   isTypeSupportedByDefaultActions,
   isValueSupportedByDefaultActions,
+  valueToArray,
+  filterOutNullableValues,
 } from '@kbn/cell-actions/src/actions/utils';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
-import type { DefaultActionsSupportedValue } from '@kbn/cell-actions/src/actions/types';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { addProvider, showTimeline } from '../../../timelines/store/timeline/actions';
 import { TimelineId } from '../../../../common/types';
@@ -58,15 +59,14 @@ export const createInvestigateInNewTimelineCellActionFactory = createCellActionF
       execute: async ({ data, metadata }) => {
         const field = data[0]?.field;
         const rawValue = data[0]?.value;
+        const value = filterOutNullableValues(valueToArray(rawValue));
 
-        if (!isValueSupportedByDefaultActions(rawValue)) {
+        if (!isValueSupportedByDefaultActions(value)) {
           notificationsService.toasts.addWarning({
             title: ACTION_INCOMPATIBLE_VALUE_WARNING,
           });
           return;
         }
-
-        const value = rawValue as DefaultActionsSupportedValue;
 
         const dataProviders =
           createDataProviders({

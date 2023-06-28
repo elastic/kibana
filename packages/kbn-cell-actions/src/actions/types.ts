@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-export type NullablePrimitiveValue = null | undefined;
-export type NonNullablePrimitiveValue = string | number | boolean;
+import { SerializableRecord } from '@kbn/utility-types';
+import { SerializableArray } from '@kbn/utility-types/src/serializable';
 
-export type DefaultActionsPrimitiveValue = NullablePrimitiveValue | NonNullablePrimitiveValue;
+export type DefaultActionsSupportedValue = string[] | number[] | boolean[];
 
-export type DefaultActionsSupportedValue =
-  | DefaultActionsPrimitiveValue
-  | NonNullablePrimitiveValue[];
+export type NonNullableSerializable =
+  | string
+  | number
+  | boolean
+  | SerializableArray
+  | SerializableRecord;

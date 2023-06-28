@@ -9,10 +9,11 @@ import { addFilterIn, addFilterOut, createFilterInActionFactory } from '@kbn/cel
 import {
   isTypeSupportedByDefaultActions,
   isValueSupportedByDefaultActions,
+  valueToArray,
+  filterOutNullableValues,
 } from '@kbn/cell-actions/src/actions/utils';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
-import type { DefaultActionsSupportedValue } from '@kbn/cell-actions/src/actions/types';
 import type { SecurityAppStore } from '../../../common/store';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { fieldHasCellActions } from '../../utils';
@@ -52,8 +53,9 @@ export const createFilterInCellActionFactory = ({
     execute: async ({ data, metadata }) => {
       const field = data[0]?.field;
       const rawValue = data[0]?.value;
+      const value = filterOutNullableValues(valueToArray(rawValue));
 
-      if (!isValueSupportedByDefaultActions(rawValue)) {
+      if (!isValueSupportedByDefaultActions(value)) {
         notifications.toasts.addWarning({
           title: ACTION_INCOMPATIBLE_VALUE_WARNING,
         });
@@ -61,8 +63,6 @@ export const createFilterInCellActionFactory = ({
       }
 
       if (!field) return;
-
-      const value = rawValue as DefaultActionsSupportedValue;
 
       // if negateFilters is true we have to perform the opposite operation, we can just execute filterOut with the same params
       const addFilter = metadata?.negateFilters === true ? addFilterOut : addFilterIn;

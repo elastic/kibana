@@ -11,7 +11,12 @@ import { NotificationsStart } from '@kbn/core-notifications-browser';
 import { createFilter, isEmptyFilterValue } from './create_filter';
 import { FILTER_CELL_ACTION_TYPE } from '../../constants';
 import { createCellActionFactory } from '../factory';
-import { isTypeSupportedByDefaultActions, isValueSupportedByDefaultActions } from '../utils';
+import {
+  isTypeSupportedByDefaultActions,
+  isValueSupportedByDefaultActions,
+  valueToArray,
+  filterOutNullableValues,
+} from '../utils';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '../translations';
 import { DefaultActionsSupportedValue } from '../types';
 
@@ -41,12 +46,13 @@ export const createFilterOutActionFactory = createCellActionFactory(
         isTypeSupportedByDefaultActions(field.type as KBN_FIELD_TYPES)
       );
     },
+
     execute: async ({ data }) => {
       const field = data[0]?.field;
       const rawValue = data[0]?.value;
+      const value = filterOutNullableValues(valueToArray(rawValue));
 
-      if (isValueSupportedByDefaultActions(rawValue)) {
-        const value = rawValue as DefaultActionsSupportedValue;
+      if (isValueSupportedByDefaultActions(value)) {
         addFilterOut({
           filterManager,
           fieldName: field.name,

@@ -11,7 +11,12 @@ import { NotificationsStart } from '@kbn/core-notifications-browser';
 import { createFilter, isEmptyFilterValue } from './create_filter';
 import { FILTER_CELL_ACTION_TYPE } from '../../constants';
 import { createCellActionFactory } from '../factory';
-import { isTypeSupportedByDefaultActions, isValueSupportedByDefaultActions } from '../utils';
+import {
+  filterOutNullableValues,
+  isTypeSupportedByDefaultActions,
+  isValueSupportedByDefaultActions,
+  valueToArray,
+} from '../utils';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '../translations';
 import { DefaultActionsSupportedValue } from '../types';
 
@@ -44,9 +49,9 @@ export const createFilterInActionFactory = createCellActionFactory(
     execute: async ({ data }) => {
       const field = data[0]?.field;
       const rawValue = data[0]?.value;
+      const value = filterOutNullableValues(valueToArray(rawValue));
 
-      if (isValueSupportedByDefaultActions(rawValue)) {
-        const value = rawValue as DefaultActionsSupportedValue;
+      if (isValueSupportedByDefaultActions(value)) {
         addFilterIn({ filterManager, fieldName: field.name, value });
       } else {
         toasts.addWarning({

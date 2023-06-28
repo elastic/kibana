@@ -24,7 +24,15 @@ export interface CellActionsProviderProps {
 
 type Metadata = Record<string, unknown>;
 
-export type CellActionFieldValue = Serializable;
+export type CellActionFieldValue =
+  | Serializable
+  // Add primitive array types to allow type guards to work.
+  // Because SerializableArray is a cyclic self referenced Array.
+  | string[]
+  | number[]
+  | boolean[]
+  | null[]
+  | undefined[];
 
 export interface CellActionsData {
   /**

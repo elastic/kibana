@@ -13,9 +13,13 @@ import { isString } from 'lodash/fp';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { COPY_CELL_ACTION_TYPE } from '../../constants';
 import { createCellActionFactory } from '../factory';
-import { isTypeSupportedByDefaultActions, isValueSupportedByDefaultActions } from '../utils';
+import {
+  filterOutNullableValues,
+  isTypeSupportedByDefaultActions,
+  isValueSupportedByDefaultActions,
+  valueToArray,
+} from '../utils';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '../translations';
-import { DefaultActionsSupportedValue } from '../types';
 
 const ICON = 'copyClipboard';
 const COPY_TO_CLIPBOARD = i18n.translate('cellActions.actions.copyToClipboard.displayName', {
@@ -48,21 +52,17 @@ export const createCopyToClipboardActionFactory = createCellActionFactory(
     execute: async ({ data }) => {
       const field = data[0]?.field;
       const rawValue = data[0]?.value;
+      const value = filterOutNullableValues(valueToArray(rawValue));
 
-      if (!isValueSupportedByDefaultActions(rawValue)) {
+      if (!isValueSupportedByDefaultActions(value)) {
         notifications.toasts.addWarning({
           title: ACTION_INCOMPATIBLE_VALUE_WARNING,
         });
         return;
       }
-      const value = rawValue as DefaultActionsSupportedValue;
 
-      let textValue: undefined | string;
-      if (value != null) {
-        const valuesArray = Array.isArray(value) ? value : [value];
-        textValue = valuesArray.map((v) => (isString(v) ? `"${escapeValue(v)}"` : v)).join(' AND ');
-      }
-      const text = textValue ? `${field.name}: ${textValue}` : field.name;
+      const textValue = value.map((v) => (isString(v) ? `"${escapeValue(v)}"` : v)).join(' AND ');
+      const text = textValue !== '' ? `${field.name}: ${textValue}` : field.name;
       const isSuccess = copy(text, { debug: true });
 
       if (isSuccess) {

@@ -91,7 +91,11 @@ describe('createFilterOutAction', () => {
 
     it('should create negate filter query with value', async () => {
       await filterOutAction.execute(context);
-      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value, negate: true });
+      expect(mockCreateFilter).toHaveBeenCalledWith({
+        key: fieldName,
+        value: [value],
+        negate: true,
+      });
     });
 
     it('should create negate filter query with array value', async () => {
@@ -121,7 +125,7 @@ describe('createFilterOutAction', () => {
           },
         ],
       });
-      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: null, negate: false });
+      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: [], negate: false });
     });
 
     it('should create filter query with undefined value', async () => {
@@ -136,7 +140,7 @@ describe('createFilterOutAction', () => {
       });
       expect(mockCreateFilter).toHaveBeenCalledWith({
         key: fieldName,
-        value: undefined,
+        value: [],
         negate: false,
       });
     });
@@ -151,7 +155,7 @@ describe('createFilterOutAction', () => {
           },
         ],
       });
-      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: '', negate: false });
+      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: [''], negate: false });
     });
 
     it('should create negate filter query with empty array value', async () => {
