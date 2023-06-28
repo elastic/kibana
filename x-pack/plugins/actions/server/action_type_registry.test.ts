@@ -226,7 +226,7 @@ describe('actionTypeRegistry', () => {
           name: 'My action type',
           minimumLicenseRequired: 'basic',
           supportedFeatureIds: ['alerting'],
-          isSystemAction: true,
+          isSystemAction: false,
           validate: {
             config: { schema: schema.object({}) },
             secrets: { schema: schema.object({}) },
