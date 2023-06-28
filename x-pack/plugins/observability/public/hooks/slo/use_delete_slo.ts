@@ -18,7 +18,7 @@ export function useDeleteSlo() {
   } = useKibana().services;
   const queryClient = useQueryClient();
 
-  const deleteSlo = useMutation<
+  return useMutation<
     string,
     string,
     { id: string; name: string },
@@ -34,7 +34,6 @@ export function useDeleteSlo() {
     },
     {
       onMutate: async (slo) => {
-        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
         await queryClient.cancelQueries(sloKeys.lists());
 
         const latestQueriesData = (
@@ -48,10 +47,8 @@ export function useDeleteSlo() {
           total: data?.total ? data.total - 1 : 0,
         };
 
-        // Optimistically update to the new value
         queryClient.setQueryData(queryKey ?? sloKeys.lists(), optimisticUpdate);
 
-        // Return a context object with the snapshotted value
         return { previousSloList: data };
       },
       // If the mutation fails, use the context returned from onMutate to roll back
@@ -83,6 +80,4 @@ export function useDeleteSlo() {
       },
     }
   );
-
-  return deleteSlo;
 }

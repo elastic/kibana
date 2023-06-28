@@ -93,6 +93,10 @@ export function useFetchSloList({
         return failureCount < 4;
       },
       onSuccess: ({ results }: FindSLOResponse) => {
+        queryClient.invalidateQueries(sloKeys.historicalSummaries());
+        queryClient.invalidateQueries(sloKeys.activeAlerts());
+        queryClient.invalidateQueries(sloKeys.rules());
+
         if (!shouldRefetch) {
           return;
         }
@@ -102,10 +106,6 @@ export function useFetchSloList({
         } else {
           setStateRefetchInterval(LONG_REFETCH_INTERVAL);
         }
-
-        queryClient.invalidateQueries(sloKeys.historicalSummaries());
-        queryClient.invalidateQueries(sloKeys.activeAlerts());
-        queryClient.invalidateQueries(sloKeys.rules());
       },
       onError: (error: Error) => {
         toasts.addError(error, {
