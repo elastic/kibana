@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { TLSAlertService } from './tls_alert_service';
 import { StatusAlertService } from './status_alert_service';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({

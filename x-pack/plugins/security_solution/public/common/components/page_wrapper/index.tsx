@@ -34,7 +34,6 @@ Wrapper.displayName = 'Wrapper';
 
 interface SecuritySolutionPageWrapperProps {
   children: React.ReactNode;
-  restrictWidth?: boolean | number | string;
   style?: Record<string, string>;
   noPadding?: boolean;
   noTimeline?: boolean;

@@ -8,7 +8,7 @@
 /* eslint-disable react/display-name */
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
 import type { Store, AnyAction } from 'redux';

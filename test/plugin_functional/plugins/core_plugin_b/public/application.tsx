@@ -9,8 +9,8 @@
 import { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, withRouter, RouteComponentProps } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { Router, Route } from '@kbn/shared-ux-router';
 
 import {
   EuiPage,
