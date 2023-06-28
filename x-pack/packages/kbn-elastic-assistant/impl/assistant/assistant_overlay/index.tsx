@@ -18,11 +18,14 @@ import { WELCOME_CONVERSATION_TITLE } from '../use_conversation/translations';
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 const StyledEuiModal = styled(EuiModal)`
-  min-width: 1200px;
-  max-height: 100%;
-  height: 100%;
-`;
+  ${({ theme }) => `margin-top: ${theme.eui.euiSizeXXL};`}
+  max-width: 95vw;
+  min-height: 90vh;
 
+  > .euiModal__flex {
+    max-height: 90vh;
+  }
+`;
 /**
  * Modal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever
  * component currently has focus and any specific context it may provide through the SAssInterface.
