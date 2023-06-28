@@ -123,12 +123,12 @@ const ipv4 = '192.0.2.255';
 const ipv6 = '2001:db8:ffff:ffff:ffff:ffff:ffff:ffff';
 const ipv6Encoded = encodeIpv6(ipv6);
 
-const securityBreadCrumb = {
+const securityBreadcrumb = {
   href: 'securitySolutionUI/get_started',
   text: 'Security',
 };
 
-const hostsBreadcrumbs = {
+const hostsBreadcrumb = {
   href: 'securitySolutionUI/hosts',
   text: 'Hosts',
 };
@@ -138,23 +138,28 @@ const networkBreadcrumb = {
   href: 'securitySolutionUI/network',
 };
 
-const exploreBreadcrumbs = {
+const exploreBreadcrumb = {
   href: 'securitySolutionUI/explore',
   text: 'Explore',
 };
 
-const rulesBReadcrumb = {
+const rulesLandingBreadcrumb = {
   text: 'Rules',
+  href: 'securitySolutionUI/rules-landing',
+};
+
+const rulesBreadcrumb = {
+  text: 'SIEM Rules',
   href: 'securitySolutionUI/rules',
 };
 
-const exceptionsBReadcrumb = {
+const exceptionsBreadcrumb = {
   text: 'Shared Exception Lists',
   href: 'securitySolutionUI/exceptions',
 };
 
-const manageBreadcrumbs = {
-  text: 'Manage',
+const settingsBreadcrumb = {
+  text: 'Settings',
   href: 'securitySolutionUI/administration',
 };
 
@@ -187,7 +192,7 @@ describe('Navigation Breadcrumbs', () => {
         getSecuritySolutionUrl
       );
       expect(breadcrumbs).toEqual([
-        securityBreadCrumb,
+        securityBreadcrumb,
         {
           href: 'securitySolutionUI/dashboards',
           text: 'Dashboards',
@@ -205,9 +210,9 @@ describe('Navigation Breadcrumbs', () => {
         getSecuritySolutionUrl
       );
       expect(breadcrumbs).toEqual([
-        securityBreadCrumb,
-        exploreBreadcrumbs,
-        hostsBreadcrumbs,
+        securityBreadcrumb,
+        exploreBreadcrumb,
+        hostsBreadcrumb,
         {
           href: '',
           text: 'Authentications',
@@ -221,8 +226,8 @@ describe('Navigation Breadcrumbs', () => {
         getSecuritySolutionUrl
       );
       expect(breadcrumbs).toEqual([
-        securityBreadCrumb,
-        exploreBreadcrumbs,
+        securityBreadcrumb,
+        exploreBreadcrumb,
         networkBreadcrumb,
         {
           text: 'Flows',
@@ -237,7 +242,7 @@ describe('Navigation Breadcrumbs', () => {
         getSecuritySolutionUrl
       );
       expect(breadcrumbs).toEqual([
-        securityBreadCrumb,
+        securityBreadcrumb,
         {
           text: 'Timelines',
           href: '',
@@ -251,9 +256,9 @@ describe('Navigation Breadcrumbs', () => {
         getSecuritySolutionUrl
       );
       expect(breadcrumbs).toEqual([
-        securityBreadCrumb,
-        exploreBreadcrumbs,
-        hostsBreadcrumbs,
+        securityBreadcrumb,
+        exploreBreadcrumb,
+        hostsBreadcrumb,
         {
           text: 'siem-kibana',
           href: 'securitySolutionUI/hosts/name/siem-kibana',
@@ -268,8 +273,8 @@ describe('Navigation Breadcrumbs', () => {
         getSecuritySolutionUrl
       );
       expect(breadcrumbs).toEqual([
-        securityBreadCrumb,
-        exploreBreadcrumbs,
+        securityBreadcrumb,
+        exploreBreadcrumb,
         networkBreadcrumb,
         {
           text: ipv4,
@@ -285,8 +290,8 @@ describe('Navigation Breadcrumbs', () => {
         getSecuritySolutionUrl
       );
       expect(breadcrumbs).toEqual([
-        securityBreadCrumb,
-        exploreBreadcrumbs,
+        securityBreadcrumb,
+        exploreBreadcrumb,
         networkBreadcrumb,
         {
           text: ipv6,
@@ -302,7 +307,7 @@ describe('Navigation Breadcrumbs', () => {
         getSecuritySolutionUrl
       );
       expect(breadcrumbs).toEqual([
-        securityBreadCrumb,
+        securityBreadcrumb,
         {
           text: 'Alerts',
           href: 'securitySolutionUI/alerts',
@@ -320,8 +325,8 @@ describe('Navigation Breadcrumbs', () => {
         getSecuritySolutionUrl
       );
       expect(breadcrumbs).toEqual([
-        securityBreadCrumb,
-        manageBreadcrumbs,
+        securityBreadcrumb,
+        rulesLandingBreadcrumb,
         {
           text: 'Shared Exception Lists',
           href: '',
@@ -335,10 +340,10 @@ describe('Navigation Breadcrumbs', () => {
         getSecuritySolutionUrl
       );
       expect(breadcrumbs).toEqual([
-        securityBreadCrumb,
-        manageBreadcrumbs,
+        securityBreadcrumb,
+        rulesLandingBreadcrumb,
         {
-          text: 'Rules',
+          ...rulesBreadcrumb,
           href: '',
         },
       ]);
@@ -350,9 +355,9 @@ describe('Navigation Breadcrumbs', () => {
         getSecuritySolutionUrl
       );
       expect(breadcrumbs).toEqual([
-        securityBreadCrumb,
-        manageBreadcrumbs,
-        rulesBReadcrumb,
+        securityBreadcrumb,
+        rulesLandingBreadcrumb,
+        rulesBreadcrumb,
         {
           text: 'Create',
           href: '',
@@ -374,9 +379,9 @@ describe('Navigation Breadcrumbs', () => {
         getSecuritySolutionUrl
       );
       expect(breadcrumbs).toEqual([
-        securityBreadCrumb,
-        manageBreadcrumbs,
-        rulesBReadcrumb,
+        securityBreadcrumb,
+        rulesLandingBreadcrumb,
+        rulesBreadcrumb,
         {
           text: mockRuleName,
           href: `securitySolutionUI/rules/id/${mockDetailName}`,
@@ -402,9 +407,9 @@ describe('Navigation Breadcrumbs', () => {
         getSecuritySolutionUrl
       );
       expect(breadcrumbs).toEqual([
-        securityBreadCrumb,
-        manageBreadcrumbs,
-        rulesBReadcrumb,
+        securityBreadcrumb,
+        rulesLandingBreadcrumb,
+        rulesBreadcrumb,
         {
           text: 'ALERT_RULE_NAME',
           href: `securitySolutionUI/rules/id/${mockDetailName}`,
@@ -446,8 +451,8 @@ describe('Navigation Breadcrumbs', () => {
       );
 
       expect(breadcrumbs).toEqual([
-        securityBreadCrumb,
-        manageBreadcrumbs,
+        securityBreadcrumb,
+        settingsBreadcrumb,
         {
           text: 'Endpoints',
           href: '',
@@ -462,9 +467,9 @@ describe('Navigation Breadcrumbs', () => {
       );
 
       expect(breadcrumbs).toEqual([
-        securityBreadCrumb,
+        securityBreadcrumb,
         {
-          text: 'Manage',
+          ...settingsBreadcrumb,
           href: '',
         },
       ]);
@@ -485,9 +490,9 @@ describe('Navigation Breadcrumbs', () => {
         getSecuritySolutionUrl
       );
       expect(breadcrumbs).toEqual([
-        securityBreadCrumb,
-        manageBreadcrumbs,
-        exceptionsBReadcrumb,
+        securityBreadcrumb,
+        rulesLandingBreadcrumb,
+        exceptionsBreadcrumb,
         {
           text: mockListName,
           href: ``,
