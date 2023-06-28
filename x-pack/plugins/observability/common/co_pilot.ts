@@ -211,19 +211,17 @@ export const coPilotPrompts = {
 
           The request it occurred for is called ${transactionName}.
 
-          ${
-            logStacktrace
+          ${logStacktrace
               ? `The log stacktrace:
           ${logStacktrace}`
               : ''
-          }
+            }
 
-          ${
-            exceptionStacktrace
+          ${exceptionStacktrace
               ? `The exception stacktrace:
           ${exceptionStacktrace}`
               : ''
-          }
+            }
           `,
           role: 'user',
         },
@@ -378,21 +376,37 @@ export const coPilotPrompts = {
         .join('\n');
       const casesRows = casesRowsArray.join('\n');
 
-      const content = `You are an observability manager, using Elastic Observability, and you are planning the prioritized tasks for your team, the current active alerts in the system are represented in the following <csv or json>. Prioritize the alerts for remediation, giving a brief summary for the alerts, indicating if they are already part of a case.
-        - If an alert is part of a case it will have less priority.
-        - Disregard those alerts that have been active for a long time.
-        - Give a brief remediation for each alert
-        - Group alerts with the same or similar reason
-        Summerize the alerts in different groups according to the priorization using bullet points.
+      const content = `Use a temperature of 0.3
 
-Alerts
-${header}
+Only respond with the info requested on the sentences that start with the word Display, do not show original Display sentence. 
+
+The current active alerts in the system are represented in the following table with csv format separated by semicolon. Each row contains the following columns: ${header}
+
 ${rows}
 
-Cases
-${casesHeader}
-${casesRows}
-        `;
+Display the following template sustituting X and Y "There are X total active alerts in the system, and Y of them are not yet assigned to a case and show be reviewed as soon as possible", X beign the total current active alerts and Y being how many do not have values in the column Case_ids. Do not display the template.
+
+The above table has to be ordered based on ascending rank using the following rules:
+- If an alert Start column value is more than 2 days ago, it has a rank of 4
+- Else, If an alert does not have values in the column Case_ids it has a rank of 1
+- Else, If an alert has values in the column Case_ids it has a rank of 3
+- Do not consider Case_max_priority in rank
+- In case of tie in rank, alerts with higher value in Duration column will have a lower rank
+
+Using the following template, display the info filling the columns with the values of the alert with lowest numerical value in rank only based on the above rules, not using other factors:
+"
+The alert with the highest priority right now is: A
+        - Alert summary: B
+        - Assigned to Case Ids: C
+        - Possible next steps: D
+        - The reason this issue is has the highest priority is: E
+"
+A being the Alert uuid
+B being a summary for an SRE of the Reason
+C being the Case ids values
+D being a way to start a remediation of the alert for an SRE
+E being the reasoning why this alert has the lowest numerical value in rank
+`;
 
       console.log('content:', content);
       return [
