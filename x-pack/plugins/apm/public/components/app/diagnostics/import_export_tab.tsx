@@ -87,7 +87,11 @@ function ImportCard() {
     <EuiCard
       icon={<EuiIcon size="xxl" type="exportAction" />}
       title="Import diagnostics report"
-      description="Import a diagnostics report in order to view the results in the UI"
+      description={
+        isImported
+          ? 'Diagnostics report was imported'
+          : `Import a diagnostics report in order to view the results in the UI`
+      }
       footer={
         <div>
           {isImported ? (
@@ -131,6 +135,7 @@ function ImportCard() {
                           setImportError(true);
                         }
                       } catch (e) {
+                        setImportError(true);
                         console.error(
                           `Could not parse file ${file.name}. ${e.message}`
                         );
