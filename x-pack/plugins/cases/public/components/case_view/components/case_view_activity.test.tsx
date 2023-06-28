@@ -194,18 +194,18 @@ for (let index = 0; index < 50; index++) {
 
       const lastPageForAll = Math.ceil(userActionsStats.total / userActivityQueryParams.perPage);
 
-      expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
-        caseData.id,
-        userActivityQueryParams,
-        true
-      );
-      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-        caseData.id,
-        { ...userActivityQueryParams, page: lastPageForAll },
-        true
-      );
-
-      await waitForComponentToUpdate();
+      await waitFor(() => {
+        expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+          caseData.id,
+          userActivityQueryParams,
+          true
+        );
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+          caseData.id,
+          { ...userActivityQueryParams, page: lastPageForAll },
+          true
+        );
+      });
     });
 
     it('should not render the case view status button when the user does not have update permissions', async () => {
@@ -256,9 +256,9 @@ for (let index = 0; index < 50; index++) {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
       expect(
-        screen
-          .getByTestId('case-severity-selection')
-          .classList.contains('euiSuperSelectControl-isLoading')
+        (await screen.findByTestId('case-severity-selection')).classList.contains(
+          'euiSuperSelectControl-isLoading'
+        )
       ).toBeTruthy();
     });
 
@@ -268,9 +268,9 @@ for (let index = 0; index < 50; index++) {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
       expect(
-        screen
-          .getByTestId('case-severity-selection')
-          .classList.contains('euiSuperSelectControl-isLoading')
+        (await screen.findByTestId('case-severity-selection')).classList.contains(
+          'euiSuperSelectControl-isLoading'
+        )
       ).not.toBeTruthy();
     });
 
@@ -283,14 +283,14 @@ for (let index = 0; index < 50; index++) {
       appMockRender = createAppMockRenderer({ license: basicLicense });
 
       appMockRender.render(<CaseViewActivity {...caseProps} />);
-      expect(screen.queryByTestId('case-view-assignees')).toBeNull();
+      expect(screen.queryByTestId('case-view-assignees')).not.toBeInTheDocument();
     });
 
     it('should render the assignees on platinum license', async () => {
       appMockRender = createAppMockRenderer({ license: platinumLicense });
 
       appMockRender.render(<CaseViewActivity {...caseProps} />);
-      expect(screen.getByTestId('case-view-assignees')).toBeInTheDocument();
+      expect(await screen.findByTestId('case-view-assignees')).toBeInTheDocument();
 
       await waitForComponentToUpdate();
     });
@@ -386,7 +386,19 @@ for (let index = 0; index < 50; index++) {
         );
       });
 
-      it('should show history filter as active', async () => {
+      it('should show active filters correctly', async () => {
+        appMockRender.render(<CaseViewActivity {...caseProps} />);
+
+        userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-history'));
+
+        expect(
+          await screen.findByLabelText(`${userActionsStats.totalOtherActions} active filters`)
+        );
+        expect(await screen.findByLabelText(`${userActionsStats.totalComments} available filters`));
+        expect(await screen.findByLabelText(`${userActionsStats.total} available filters`));
+      });
+
+      it('should call user action hooks correctly', async () => {
         appMockRender.render(<CaseViewActivity {...caseProps} />);
 
         const lastPageForHistory = Math.ceil(
@@ -408,12 +420,6 @@ for (let index = 0; index < 50; index++) {
             true
           );
         });
-
-        expect(
-          await screen.findByLabelText(`${userActionsStats.totalOtherActions} active filters`)
-        );
-        expect(await screen.findByLabelText(`${userActionsStats.totalComments} available filters`));
-        expect(await screen.findByLabelText(`${userActionsStats.total} available filters`));
       });
 
       it('should render by desc sort order', async () => {
