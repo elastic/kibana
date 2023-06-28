@@ -63,7 +63,7 @@ import { DiscoverAppLocator } from '../common';
 export interface HistoryLocationState {
   referrer: string;
 }
-// TODO theme needs to be provided with the theme$ observable, let code owners decide
+
 export interface DiscoverServices {
   application: ApplicationStart;
   addBasePath: (path: string) => string;

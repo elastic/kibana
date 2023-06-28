@@ -28,7 +28,7 @@ const InspectFlyout: React.FC<InspectFlyoutProps> = ({ searchSession }) => {
   const renderInfo = () => {
     return (
       <Fragment>
-        <CodeEditor // TODO theme provided by src/plugins/data/public/search/search_service.ts
+        <CodeEditor
           languageId="json"
           value={JSON.stringify(searchSession, null, 2)}
           options={{

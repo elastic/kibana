@@ -259,7 +259,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
               }
               fullWidth
             >
-              <CodeEditor // TODO theme provided in src/plugins/data_view_field_editor/public/open_editor.tsx
+              <CodeEditor
                 languageId={PainlessLang.ID}
                 suggestionProvider={suggestionProvider}
                 // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.

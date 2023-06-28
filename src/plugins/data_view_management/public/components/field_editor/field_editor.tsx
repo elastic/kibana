@@ -601,7 +601,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           isInvalid={isInvalid}
           error={isInvalid ? errorMsg : null}
         >
-          <CodeEditor // TODO theme provided in src/plugins/data_view_management/public/management_app/mount_management_section.tsx
+          <CodeEditor
             languageId={PainlessLang.ID}
             width="100%"
             height="300px"
