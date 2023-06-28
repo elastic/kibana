@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       contains(github.event.pull_request.labels.*.name, 'backport') &&
-      contains(github.base_ref, 'kibanamachine:backport')
+      contains(github.head_ref, 'kibanamachine:backport')
     permissions:
       pull-requests: write
     steps:
