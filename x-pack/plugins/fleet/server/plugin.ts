@@ -121,11 +121,11 @@ import type { PackagePolicyService } from './services/package_policy_service';
 import { PackagePolicyServiceImpl } from './services/package_policy';
 import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
 import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
-import { getRequestStore } from './services/request_store';
 import {
   UninstallTokenService,
   type UninstallTokenServiceInterface,
 } from './services/security/uninstall_token_service';
+import { FleetActionsClient, type FleetActionsClientInterface } from './services/actions';
 import type { FilesClientFactory } from './services/files/types';
 
 export interface FleetSetupDeps {
@@ -230,6 +230,7 @@ export interface FleetStartContract {
 
   messageSigningService: MessageSigningServiceInterface;
   uninstallTokenService: UninstallTokenServiceInterface;
+  createFleetActionsClient: (packageName: string) => FleetActionsClientInterface;
 }
 
 export class FleetPlugin
@@ -389,42 +390,38 @@ export class FleetPlugin
             .getSavedObjects()
             .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
 
-        const requestStore = getRequestStore();
+        return {
+          get agentClient() {
+            const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
 
-        return requestStore.run(request, () => {
-          return {
-            get agentClient() {
-              const agentService = plugin.setupAgentService(esClient.asInternalUser, soClient);
+            return {
+              asCurrentUser: agentService.asScoped(request),
+              asInternalUser: agentService.asInternalUser,
+            };
+          },
+          get packagePolicyService() {
+            const service = plugin.setupPackagePolicyService();
 
-              return {
-                asCurrentUser: agentService.asScoped(request),
-                asInternalUser: agentService.asInternalUser,
-              };
-            },
-            get packagePolicyService() {
-              const service = plugin.setupPackagePolicyService();
+            return {
+              asCurrentUser: service.asScoped(request),
+              asInternalUser: service.asInternalUser,
+            };
+          },
+          authz,
+          get internalSoClient() {
+            // Use a lazy getter to avoid constructing this client when not used by a request handler
+            return getInternalSoClient();
+          },
+          get spaceId() {
+            return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+          },
 
-              return {
-                asCurrentUser: service.asScoped(request),
-                asInternalUser: service.asInternalUser,
-              };
-            },
-            authz,
-            get internalSoClient() {
-              // Use a lazy getter to avoid constructing this client when not used by a request handler
-              return getInternalSoClient();
-            },
-            get spaceId() {
-              return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-            },
-
-            get limitedToPackages() {
-              if (routeAuthz && routeAuthz.granted) {
-                return routeAuthz.scopeDataToPackages;
-              }
-            },
-          };
-        });
+          get limitedToPackages() {
+            if (routeAuthz && routeAuthz.granted) {
+              return routeAuthz.scopeDataToPackages;
+            }
+          },
+        };
       }
     );
 
@@ -586,6 +583,9 @@ export class FleetPlugin
       ),
       messageSigningService,
       uninstallTokenService,
+      createFleetActionsClient(packageName: string) {
+        return new FleetActionsClient(core.elasticsearch.client.asInternalUser, packageName);
+      },
     };
   }
 

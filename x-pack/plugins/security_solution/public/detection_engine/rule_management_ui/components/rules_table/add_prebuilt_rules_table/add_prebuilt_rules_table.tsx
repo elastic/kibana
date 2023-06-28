@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiEmptyPrompt,
   EuiInMemoryTable,
   EuiSkeletonLoading,
   EuiProgress,
@@ -15,19 +14,12 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
+import { AddPrebuiltRulesTableNoItemsMessage } from './add_prebuilt_rules_no_items_message';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
+import { AddPrebuiltRulesTableFilters } from './add_prebuilt_rules_table_filters';
 import { useAddPrebuiltRulesTableColumns } from './use_add_prebuilt_rules_table_columns';
-
-const NO_ITEMS_MESSAGE = (
-  <EuiEmptyPrompt
-    title={<h3>{i18n.NO_RULES_AVAILABLE_FOR_INSTALL}</h3>}
-    titleSize="s"
-    body={i18n.NO_RULES_AVAILABLE_FOR_INSTALL_BODY}
-  />
-);
 
 /**
  * Table Component for displaying new rules that are available to be installed
@@ -38,7 +30,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
   const addRulesTableContext = useAddPrebuiltRulesTableContext();
 
   const {
-    state: { rules, tags, isFetched, isLoading, isRefetching, selectedRules },
+    state: { rules, filteredRules, isFetched, isLoading, isRefetching, selectedRules },
     actions: { selectRules },
   } = addRulesTableContext;
   const rulesColumns = useAddPrebuiltRulesTableColumns();
@@ -68,44 +60,28 @@ export const AddPrebuiltRulesTable = React.memo(() => {
         }
         loadedContent={
           isTableEmpty ? (
-            NO_ITEMS_MESSAGE
+            <AddPrebuiltRulesTableNoItemsMessage />
           ) : (
-            <EuiInMemoryTable
-              items={rules}
-              sorting
-              search={{
-                box: {
-                  incremental: true,
-                  isClearable: true,
-                },
-                filters: [
-                  {
-                    type: 'field_value_selection',
-                    field: 'tags',
-                    name: 'Tags',
-                    multiSelect: true,
-                    options: tags.map((tag) => ({
-                      value: tag,
-                      name: tag,
-                      field: 'tags',
-                    })),
-                  },
-                ],
-              }}
-              pagination={{
-                initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
-                pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
-              }}
-              isSelectable
-              selection={{
-                selectable: () => true,
-                onSelectionChange: selectRules,
-                initialSelected: selectedRules,
-              }}
-              itemId="rule_id"
-              data-test-subj="add-prebuilt-rules-table"
-              columns={rulesColumns}
-            />
+            <>
+              <AddPrebuiltRulesTableFilters />
+              <EuiInMemoryTable
+                items={filteredRules}
+                sorting
+                pagination={{
+                  initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
+                  pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
+                }}
+                isSelectable
+                selection={{
+                  selectable: () => true,
+                  onSelectionChange: selectRules,
+                  initialSelected: selectedRules,
+                }}
+                itemId="rule_id"
+                data-test-subj="add-prebuilt-rules-table"
+                columns={rulesColumns}
+              />
+            </>
           )
         }
       />

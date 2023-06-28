@@ -8,9 +8,12 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
 import { KPIChartProps, Tile } from './tile';
 import { HostCountProvider } from '../../hooks/use_host_count';
+import { TOOLTIP } from '../../translations';
 import { HostsTile } from './hosts_tile';
+import { HostMetricsDocsLink } from '../metric_explanation/host_metrics_docs_link';
 
 const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
   {
@@ -20,10 +23,7 @@ const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
     title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.cpuUsage.title', {
       defaultMessage: 'CPU Usage',
     }),
-    toolTip: i18n.translate('xpack.infra.hostsViewPage.metricTrend.cpuUsage.tooltip', {
-      defaultMessage:
-        'Percentage of CPU time spent in states other than Idle and IOWait, normalized by the number of CPU cores. This includes both time spent on user space and kernel space.',
-    }),
+    toolTip: TOOLTIP.cpuUsage,
   },
   {
     type: 'normalizedLoad1m',
@@ -32,9 +32,7 @@ const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
     title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.normalizedLoad1m.title', {
       defaultMessage: 'Normalized Load',
     }),
-    toolTip: i18n.translate('xpack.infra.hostsViewPage.metricTrend.normalizedLoad1m.tooltip', {
-      defaultMessage: '1 minute load average normalized by the number of CPU cores.',
-    }),
+    toolTip: TOOLTIP.rx,
   },
   {
     type: 'memoryUsage',
@@ -54,15 +52,15 @@ const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
     title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.diskSpaceUsage.title', {
       defaultMessage: 'Disk Space Usage',
     }),
-    toolTip: i18n.translate('xpack.infra.hostsViewPage.metricTrend.diskSpaceUsage.tooltip', {
-      defaultMessage: 'Percentage of disk space used.',
-    }),
+    toolTip: TOOLTIP.tx,
   },
 ];
 
 export const KPIGrid = () => {
   return (
     <HostCountProvider>
+      <HostMetricsDocsLink />
+      <EuiSpacer size="s" />
       <EuiFlexGroup
         direction="row"
         gutterSize="s"

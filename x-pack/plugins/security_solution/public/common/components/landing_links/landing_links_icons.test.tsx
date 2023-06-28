@@ -17,7 +17,7 @@ const DEFAULT_NAV_ITEM: NavigationLink = {
   id: SecurityPageName.overview,
   title: 'TEST LABEL',
   description: 'TEST DESCRIPTION',
-  icon: 'myTestIcon',
+  landingIcon: 'myTestIcon',
 };
 const spyTrack = jest.spyOn(telemetry, 'track');
 

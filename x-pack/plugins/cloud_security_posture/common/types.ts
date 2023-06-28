@@ -131,6 +131,28 @@ export interface GetCspRuleTemplateResponse {
 
 // CNVM DASHBOARD
 
+interface AccountVulnStats {
+  cloudAccountId: string;
+  cloudAccountName: string;
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+}
+
+export interface VulnStatsTrend {
+  '@timestamp': string;
+  policy_template: 'vuln_mgmt';
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+  vulnerabilities_stats_by_cloud_account?: Record<
+    AccountVulnStats['cloudAccountId'],
+    AccountVulnStats
+  >;
+}
+
 export interface CnvmStatistics {
   criticalCount: number | undefined;
   highCount: number | undefined;
@@ -141,6 +163,7 @@ export interface CnvmStatistics {
 
 export interface CnvmDashboardData {
   cnvmStatistics: CnvmStatistics;
+  vulnTrends: VulnStatsTrend[];
   topVulnerableResources: VulnerableResourceStat[];
   topPatchableVulnerabilities: PatchableVulnerabilityStat[];
   topVulnerabilities: VulnerabilityStat[];
