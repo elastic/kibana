@@ -141,7 +141,7 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
       });
     },
 
-    async addDiscoverCustomUrl(jobId: string, customUrl: DiscoverUrlConfig) {
+    async addDiscoverCustomUrl(customUrl: DiscoverUrlConfig) {
       await retry.tryForTime(30 * 1000, async () => {
         const existingCustomUrlCount = await this.getExistingCustomUrlCount();
 
@@ -150,7 +150,7 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
       });
     },
 
-    async addOtherTypeCustomUrl(jobId: string, customUrl: OtherUrlConfig) {
+    async addOtherTypeCustomUrl(customUrl: OtherUrlConfig) {
       await retry.tryForTime(30 * 1000, async () => {
         const existingCustomUrlCount = await this.getExistingCustomUrlCount();
 

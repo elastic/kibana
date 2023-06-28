@@ -370,10 +370,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsEdit.openEditCustomUrlsForJobTab(testData.jobId);
 
           await ml.testExecution.logTestStep('add discover custom url for the analytics job');
-          await ml.dataFrameAnalyticsEdit.addDiscoverCustomUrl(
-            testData.jobId,
-            testDiscoverCustomUrl
-          );
+          await ml.dataFrameAnalyticsEdit.addDiscoverCustomUrl(testDiscoverCustomUrl);
 
           await ml.dataFrameAnalyticsEdit.updateAnalyticsJob();
         });
@@ -400,7 +397,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('add other type custom url for the analytics job');
 
           await ml.testExecution.logTestStep('add other type custom url for the analytics job');
-          await ml.dataFrameAnalyticsEdit.addOtherTypeCustomUrl(testData.jobId, testOtherCustomUrl);
+          await ml.dataFrameAnalyticsEdit.addOtherTypeCustomUrl(testOtherCustomUrl);
 
           await ml.dataFrameAnalyticsEdit.updateAnalyticsJob();
         });
