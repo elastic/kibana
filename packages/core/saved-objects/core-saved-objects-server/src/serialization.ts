@@ -73,7 +73,11 @@ export interface SavedObjectsRawDoc {
   _primary_term?: number;
 }
 
-/** @public */
+/**
+ * @public
+ * Saved object document in ES index in the _source
+ * Similar to SavedObjectDoc and excludes `version`, includes `references`, has `attributes` in [typeMapping]
+ */
 export interface SavedObjectsRawDocSource {
   type: string;
   namespace?: string;

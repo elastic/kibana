@@ -7,10 +7,14 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
+import {
+  isNotFoundFromUnsupportedServer,
+  isSupportedEsServer,
+} from '@kbn/core-elasticsearch-server-internal';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
+  SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsErrorHelpers, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
@@ -23,6 +27,7 @@ import {
   rawDocExistsInNamespaces,
   isFoundGetResponse,
   type GetResponseFound,
+  getSavedObjectFromSource,
 } from '../utils';
 import {
   preflightCheckForCreate,
@@ -117,7 +122,7 @@ export class PreflightCheckHelper {
     if (!this.registry.isMultiNamespace(type)) {
       throw new Error(`Cannot make preflight get request for non-multi-namespace type '${type}'.`);
     }
-
+    // To be replaced with doc from args. Implies unit test updates
     const { body, statusCode, headers } = await this.client.get<SavedObjectsRawDocSource>(
       {
         id: this.serializer.generateRawId(undefined, type, id),
@@ -152,7 +157,90 @@ export class PreflightCheckHelper {
   }
 
   /**
+   * Pre-flight check to ensure that a multi-namespace object exists in the current namespace.
+   checkDocResult
+rawDocSource
+    * if a multi-namespace type isn't found it might still exist in another namespace
+   */
+  public async preflightGetDocForUpdate({
+    type,
+    id,
+    namespace,
+    migrationVersionCompatibility,
+  }: PreflightGetDocForUpdateParams): Promise<PreflightGetDocForUpdateResult> {
+    const getDocWithNamespace = this.registry.isMultiNamespace(type) ? undefined : namespace;
+    const response = await this.client.get<SavedObjectsRawDocSource>(
+      {
+        id: this.serializer.generateRawId(getDocWithNamespace, type, id),
+        index: this.getIndexForType(type),
+      },
+      { ignore: [404], meta: true }
+    );
+    const indexFound = response.statusCode !== 404;
+
+    if (!indexFound && !isSupportedEsServer(response.headers)) {
+      // checking if the 404 is from Elasticsearch
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+
+    if (indexFound && isFoundGetResponse(response.body)) {
+      return {
+        checkDocFound: 'found',
+        rawDocSource: response.body,
+        savedObjectFromRawDoc: getSavedObjectFromSource(this.registry, type, id, response.body, {
+          migrationVersionCompatibility,
+        }) as SavedObject,
+      };
+    }
+
+    return {
+      checkDocFound: 'not_found',
+    };
+  }
+
+  /**
+   * Pre-flight check to ensure that a multi-namespace object exists in the current namespace for update API.
+   */
+  public async preflightCheckNamespacesForUpdate({
+    type,
+    id,
+    namespace,
+    initialNamespaces,
+    preflightGetDocForUpdateResult,
+  }: PreflightCheckNamespacesForUpdateParams): Promise<PreflightCheckNamespacesForUpdateResult> {
+    const { checkDocFound, rawDocSource } = preflightGetDocForUpdateResult;
+    if (!this.registry.isMultiNamespace(type)) {
+      return {
+        checkSkipped: true,
+      };
+    }
+
+    const namespaces = initialNamespaces ?? [SavedObjectsUtils.namespaceIdToString(namespace)];
+
+    if (checkDocFound === 'found' && rawDocSource !== undefined) {
+      if (!rawDocExistsInNamespaces(this.registry, rawDocSource, namespaces)) {
+        return { checkResult: 'found_outside_namespace', checkSkipped: false };
+      }
+      return {
+        checkResult: 'found_in_namespace',
+        savedObjectNamespaces: getSavedObjectNamespaces(namespace, rawDocSource),
+        rawDocSource,
+        checkSkipped: false,
+      };
+    }
+
+    return {
+      checkResult: 'not_found',
+      savedObjectNamespaces: getSavedObjectNamespaces(namespace),
+      checkSkipped: false,
+    };
+  }
+
+  /**
    * Pre-flight check to ensure that an upsert which would create a new object does not result in an alias conflict.
+   *
+   * If an upsert would result in the creation of a new object, we need to check for alias conflicts too.
+   * This takes an extra round trip to Elasticsearch, but this won't happen often.
    */
   public async preflightCheckForUpsertAliasConflict(
     type: string,
@@ -192,6 +280,38 @@ export interface PreflightCheckNamespacesParams {
 /**
  * @internal
  */
+export interface PreflightCheckNamespacesForUpdateParams {
+  /** The object type to fetch */
+  type: string;
+  /** The object ID to fetch */
+  id: string;
+  /** The current space */
+  namespace: string | undefined;
+  /** Optional; for an object that is being created, this specifies the initial namespace(s) it will exist in (overriding the current space) */
+  initialNamespaces?: string[];
+  /** Optional; for a pre-fetched object */
+  preflightGetDocForUpdateResult: PreflightGetDocForUpdateResult;
+}
+/**
+ * @internal
+ */
+export interface PreflightCheckNamespacesForUpdateResult {
+  /** If the object exists, and whether or not it exists in the current space */
+  checkResult?: 'not_found' | 'found_in_namespace' | 'found_outside_namespace';
+  /**
+   * What namespace(s) the object should exist in, if it needs to be created; practically speaking, this will never be undefined if
+   * checkResult == not_found or checkResult == found_in_namespace
+   */
+  savedObjectNamespaces?: string[];
+  /** The source of the raw document, if the object already exists */
+  rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
+  /** Indicates if the namespaces check is called or not. Non-multinamespace types are not shareable */
+  checkSkipped?: boolean;
+}
+
+/**
+ * @internal
+ */
 export interface PreflightCheckNamespacesResult {
   /** If the object exists, and whether or not it exists in the current space */
   checkResult: 'not_found' | 'found_in_namespace' | 'found_outside_namespace';
@@ -202,4 +322,29 @@ export interface PreflightCheckNamespacesResult {
   savedObjectNamespaces?: string[];
   /** The source of the raw document, if the object already exists */
   rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
+}
+
+/**
+ * @internal
+ */
+export interface PreflightGetDocForUpdateParams {
+  /** The object type to fetch */
+  type: string;
+  /** The object ID to fetch */
+  id: string;
+  /** The current space */
+  namespace: string | undefined;
+  /** optional migration version compatibility */
+  migrationVersionCompatibility?: 'compatible' | 'raw';
+}
+
+/**
+ * @internal
+ */
+export interface PreflightGetDocForUpdateResult {
+  /** If the object exists, and whether or not it exists in the current space */
+  checkDocFound: 'not_found' | 'found' | 'unknown';
+  /** The source of the raw document, if the object already exists in the server's version (unsafe to use) */
+  rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
+  savedObjectFromRawDoc?: SavedObject<T>;
 }

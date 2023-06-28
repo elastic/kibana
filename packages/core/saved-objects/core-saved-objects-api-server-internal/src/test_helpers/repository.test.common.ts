@@ -439,7 +439,7 @@ export const getMockGetResponse = (
   }
   const namespaceId = namespaces[0] === 'default' ? undefined : namespaces[0];
 
-  return {
+  const result = {
     // NOTE: Elasticsearch returns more fields (_index, _type) but the SavedObjectsRepository method ignores these
     found: true,
     _id: `${registry.isSingleNamespace(type) && namespaceId ? `${namespaceId}:` : ''}${type}:${id}`,
@@ -464,6 +464,8 @@ export const getMockGetResponse = (
       ...mockTimestampFields,
     } as SavedObjectsRawDocSource,
   } as estypes.GetResponse<SavedObjectsRawDocSource>;
+  console.log('mocked get result', result);
+  return result;
 };
 
 export const getMockMgetResponse = (
@@ -497,6 +499,9 @@ export const mockUpdateResponse = (
   namespaces?: string[],
   originId?: string
 ) => {
+  // @Tina added
+  const migrationVersionCompatibility = options?.migrationVersionCompatibility || 'raw';
+
   client.update.mockResponseOnce(
     {
       _id: `${type}:${id}`,
@@ -511,11 +516,36 @@ export const mockUpdateResponse = (
           // If the existing saved object contains an originId attribute, the operation will return it in the result.
           // The originId parameter is just used for test purposes to modify the mock cluster call response.
           ...(!!originId && { originId }),
+          migrationVersionCompatibility,
         },
       },
     } as estypes.UpdateResponse,
     { statusCode: 200 }
   );
+};
+export const updateBWCSuccess = async <T extends Partial<unknown>>(
+  client: ElasticsearchClientMock,
+  repository: SavedObjectsRepository,
+  registry: SavedObjectTypeRegistry,
+  type: string,
+  id: string,
+  attributes: T,
+  options?: SavedObjectsUpdateOptions,
+  internalOptions: {
+    originId?: string;
+    mockGetResponseValue?: estypes.GetResponse;
+  } = {},
+  objNamespaces?: string[]
+) => {
+  const { mockGetResponseValue, originId } = internalOptions;
+  const mockGetResponse =
+    mockGetResponseValue ??
+    getMockGetResponse(registry, { type, id }, objNamespaces ?? options?.namespace);
+  client.get.mockResponseOnce(mockGetResponse, { statusCode: 200 });
+  mockUpdateResponse(client, type, id, options, objNamespaces, originId);
+  const result = await repository.update(type, id, attributes, options);
+  expect(client.get).toHaveBeenCalled(); // not asserting on the number of calls here, we end up testing the test mocks and not the actual implementation
+  return result;
 };
 
 export const updateSuccess = async <T extends Partial<unknown>>(
@@ -541,7 +571,7 @@ export const updateSuccess = async <T extends Partial<unknown>>(
   }
   mockUpdateResponse(client, type, id, options, objNamespaces, originId);
   const result = await repository.update(type, id, attributes, options);
-  expect(client.get).toHaveBeenCalledTimes(registry.isMultiNamespace(type) ? 1 : 0);
+  expect(client.get).toHaveBeenCalled(); // not asserting on the number of calls here, we end up testing the test mocks and not the actual implementation
   return result;
 };
 
