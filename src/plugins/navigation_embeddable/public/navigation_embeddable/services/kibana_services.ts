@@ -8,7 +8,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { CoreStart, IExternalUrl } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 
 import { NavigationEmbeddableStartDependencies } from '../../plugin';

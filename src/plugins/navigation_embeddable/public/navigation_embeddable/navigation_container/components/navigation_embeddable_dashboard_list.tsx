@@ -19,18 +19,17 @@ import {
   EuiFieldSearch,
   EuiSelectableOption,
 } from '@elastic/eui';
-
-import { DashboardItem } from '../types';
+import { DashboardItem } from '../../dashboard_link/types';
+import { useNavigationEmbeddable } from '../embeddable/navigation_container';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
-import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 
 interface Props {
-  initialSelectionId?: string;
+  initialSelection?: DashboardItem;
   onDashboardSelected: (selectedDashboard: DashboardItem | undefined) => void;
 }
 
 export const NavigationEmbeddableDashboardList = ({
-  initialSelectionId,
+  initialSelection,
   onDashboardSelected,
   ...other
 }: Props) => {
@@ -51,12 +50,12 @@ export const NavigationEmbeddableDashboardList = ({
         return {
           data: dashboard,
           label: dashboard.attributes.title,
-          checked: initialSelectionId === dashboard.id ? 'on' : undefined,
+          checked: initialSelection && initialSelection.id === dashboard.id ? 'on' : undefined,
         } as EuiSelectableOption;
       }) ?? [];
 
     setDashboardListOptions(dashboardOptions);
-  }, [dashboardList, searchString, onDashboardSelected, initialSelectionId]);
+  }, [dashboardList, searchString, onDashboardSelected, initialSelection]);
 
   // {...other} is needed so all inner elements are treated as part of the form
   return (

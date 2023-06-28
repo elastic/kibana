@@ -7,6 +7,7 @@
  */
 
 import { isEmpty } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
@@ -20,19 +21,10 @@ import {
   EuiButtonEmpty,
   EuiPopoverFooter,
   EuiRadioGroupOption,
-  EuiWrappingPopover,
 } from '@elastic/eui';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-
-import { DashboardItem, DashboardLink, ExternalLink, isDashboardLink } from '../types';
+import { useNavigationEmbeddable } from '../embeddable/navigation_container';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
-import {
-  NavigationEmbeddable,
-  NavigationEmbeddableContext,
-  useNavigationEmbeddable,
-} from '../embeddable/navigation_embeddable';
 import { NavigationEmbeddableDashboardList } from './navigation_embeddable_dashboard_list';
-import { coreServices } from '../services/navigation_embeddable_services';
 
 // TODO: As part of https://github.com/elastic/kibana/issues/154381, replace this regex URL check with more robust url validation
 const isValidUrl =
@@ -40,66 +32,20 @@ const isValidUrl =
 
 type LinkType = 'dashboardLink' | 'externalLink';
 
-export const NAV_EMBEDDABLE_POPOVER_WIDTH = 400;
-
-export const EditPopover = ({
-  linkIndex,
-  anchor,
-  closePopover,
-  embeddable,
-}: {
-  linkIndex: number;
-  anchor: HTMLElement;
-  closePopover: () => void;
-  embeddable: NavigationEmbeddable;
-}) => {
-  const links = embeddable.select((state) => state.componentState.links);
-  const editingLink = links ? links[linkIndex] : undefined;
-  console.log('editinglink', editingLink);
-
-  return (
-    <EuiWrappingPopover
-      isOpen={true}
-      anchorPosition={'upLeft'} // has to be `upLeft` or the popover jumps when width is set ¯\_(ツ)_/¯
-      button={anchor}
-      panelStyle={{ width: NAV_EMBEDDABLE_POPOVER_WIDTH }}
-      closePopover={closePopover}
-    >
-      <KibanaThemeProvider theme$={coreServices.theme.theme$}>
-        <NavigationEmbeddableContext.Provider value={embeddable}>
-          <NavigationEmbeddableEditor closePopover={closePopover} editingLink={editingLink} />
-        </NavigationEmbeddableContext.Provider>
-      </KibanaThemeProvider>
-    </EuiWrappingPopover>
-  );
-};
-
-export const NavigationEmbeddableEditor = ({
-  closePopover,
-  editingLink,
-}: {
-  closePopover: () => void;
-  editingLink?: DashboardLink | ExternalLink;
-}) => {
+export const NavigationEmbeddableEditor = ({ closePopover }: { closePopover: () => void }) => {
   const navEmbeddable = useNavigationEmbeddable();
 
-  const [linkLabel, setLinkLabel] = useState<string>(editingLink?.label ?? '');
-
-  const [selectedLinkType, setSelectedLinkType] = useState<LinkType>(
-    !editingLink || isDashboardLink(editingLink) ? 'dashboardLink' : 'externalLink'
-  );
+  const [linkLabel, setLinkLabel] = useState<string>('');
+  const [selectedLinkType, setSelectedLinkType] = useState<LinkType>('dashboardLink');
+  const [isDashboardEditorSelected, setIsDashboardEditorSelected] = useState<boolean>(true);
 
   /** external URL link state */
   const [validUrl, setValidUrl] = useState<boolean>(true);
-  const [selectedUrl, setSelectedUrl] = useState<string>(
-    isDashboardLink(editingLink) ? '' : editingLink?.url ?? ''
-  );
+  const [selectedUrl, setSelectedUrl] = useState<string>();
 
   /** dashboard link state */
   const [selectedDashboard, setSelectedDashboard] = useState<DashboardItem | undefined>();
-  const savedDashboardSelectionId = useRef<string | undefined>(
-    isDashboardLink(editingLink) ? editingLink.id : undefined
-  );
+  const savedDashboardSelection = useRef<DashboardItem | undefined>(undefined);
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
     return [
@@ -128,6 +74,14 @@ export const NavigationEmbeddableEditor = ({
     ];
   }, []);
 
+  useEffect(() => {
+    /**
+     * A boolean check is faster than comparing strings so, since this is such a common check in this component,
+     * storing this value as a boolean is (in theory) marginally more efficient
+     */
+    setIsDashboardEditorSelected(selectedLinkType === 'dashboardLink');
+  }, [selectedLinkType]);
+
   return (
     <>
       <EuiForm component="form">
@@ -138,26 +92,28 @@ export const NavigationEmbeddableEditor = ({
             onChange={(id) => {
               setSelectedLinkType(id as LinkType);
               if (selectedDashboard) {
-                savedDashboardSelectionId.current = selectedDashboard.id;
+                savedDashboardSelection.current = selectedDashboard;
               }
             }}
           />
         </EuiFormRow>
         <EuiFormRow label={NavEmbeddableStrings.editor.getLinkDestinationLabel()}>
-          {selectedLinkType === 'dashboardLink' ? (
+          {isDashboardEditorSelected ? (
             <NavigationEmbeddableDashboardList
-              initialSelectionId={savedDashboardSelectionId.current}
+              initialSelection={savedDashboardSelection.current}
               onDashboardSelected={setSelectedDashboard}
             />
           ) : (
             <EuiFieldText
               placeholder={NavEmbeddableStrings.editor.external.getPlaceholder()}
               isInvalid={!validUrl}
-              value={selectedUrl}
               onChange={(e) => {
                 const url = e.target.value;
-                setSelectedUrl(url);
-                setValidUrl(isValidUrl.test(url));
+                const isValid = isValidUrl.test(url);
+                if (isValid) {
+                  setSelectedUrl(url);
+                }
+                setValidUrl(isValid);
               }}
             />
           )}
@@ -165,7 +121,7 @@ export const NavigationEmbeddableEditor = ({
         <EuiFormRow label={NavEmbeddableStrings.editor.getLinkTextLabel()}>
           <EuiFieldText
             placeholder={
-              selectedDashboard
+              isDashboardEditorSelected && selectedDashboard
                 ? selectedDashboard.attributes.title
                 : NavEmbeddableStrings.editor.getLinkTextPlaceholder()
             }
@@ -189,18 +145,21 @@ export const NavigationEmbeddableEditor = ({
             <EuiButtonEmpty
               size="s"
               disabled={
-                selectedLinkType === 'dashboardLink'
-                  ? !selectedDashboard
-                  : !validUrl || isEmpty(selectedUrl)
+                isDashboardEditorSelected ? !selectedDashboard : !validUrl || isEmpty(selectedUrl)
               }
               onClick={() => {
-                if (isDashboardLink(selectedDashboard)) {
-                  navEmbeddable.dispatch.addDashboardLink({
+                if (isDashboardEditorSelected && selectedDashboard) {
+                  navEmbeddable.addDashboardLink({
+                    id: uuidv4(),
                     label: linkLabel,
-                    id: selectedDashboard.id,
-                    title: selectedDashboard.attributes.title,
-                    description: selectedDashboard.attributes.description,
+                    dashboardId: selectedDashboard.id,
                   });
+                  // navEmbeddable.dispatch.addDashboardLink({
+                  // label: linkLabel,
+                  // id: selectedDashboard.id,
+                  // title: selectedDashboard.attributes.title,
+                  // description: selectedDashboard.attributes.description,
+                  // });
                 } else if (validUrl && selectedUrl) {
                   navEmbeddable.dispatch.addExternalLink({ url: selectedUrl, label: linkLabel });
                 }
@@ -208,7 +167,7 @@ export const NavigationEmbeddableEditor = ({
                 closePopover();
               }}
             >
-              {NavEmbeddableStrings.editor.getApplyButtonLabel()}
+              Apply
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>

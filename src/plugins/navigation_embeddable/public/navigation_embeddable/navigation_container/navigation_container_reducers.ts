@@ -15,49 +15,49 @@ import {
   DashboardItem,
   DashboardLink,
   ExternalLink,
-  NavigationEmbeddableComponentState,
-  NavigationEmbeddableReduxState,
-} from './types';
+  NavigationContainerComponentState,
+  NavigationContainerReduxState,
+} from '../types';
 
 export const navigationEmbeddableReducers = {
   setLoading: (
-    state: WritableDraft<NavigationEmbeddableReduxState>,
+    state: WritableDraft<NavigationContainerReduxState>,
     action: PayloadAction<boolean>
   ) => {
     state.output.loading = action.payload;
   },
   setCanEdit: (
-    state: WritableDraft<NavigationEmbeddableReduxState>,
+    state: WritableDraft<NavigationContainerReduxState>,
     action: PayloadAction<boolean>
   ) => {
     state.componentState.canEdit = action.payload;
   },
   setDashboardList: (
-    state: WritableDraft<NavigationEmbeddableReduxState>,
+    state: WritableDraft<NavigationContainerReduxState>,
     action: PayloadAction<DashboardItem[]>
   ) => {
     state.componentState.dashboardList = action.payload;
   },
   setCurrentDashboard: (
-    state: WritableDraft<NavigationEmbeddableReduxState>,
+    state: WritableDraft<NavigationContainerReduxState>,
     action: PayloadAction<DashboardLink | undefined>
   ) => {
     state.componentState.currentDashboard = action.payload;
   },
   setDashboardCount: (
-    state: WritableDraft<NavigationEmbeddableReduxState>,
+    state: WritableDraft<NavigationContainerReduxState>,
     action: PayloadAction<number>
   ) => {
     state.componentState.totalDashboards = action.payload;
   },
   setLinks: (
-    state: WritableDraft<NavigationEmbeddableReduxState>,
-    action: PayloadAction<NavigationEmbeddableComponentState['links']>
+    state: WritableDraft<NavigationContainerReduxState>,
+    action: PayloadAction<NavigationContainerComponentState['links']>
   ) => {
     state.componentState.links = action.payload;
   },
   addDashboardLink: (
-    state: WritableDraft<NavigationEmbeddableReduxState>,
+    state: WritableDraft<NavigationContainerReduxState>,
     action: PayloadAction<DashboardLink>
   ) => {
     if (!state.explicitInput.links) {
@@ -70,7 +70,7 @@ export const navigationEmbeddableReducers = {
     };
   },
   addExternalLink: (
-    state: WritableDraft<NavigationEmbeddableReduxState>,
+    state: WritableDraft<NavigationContainerReduxState>,
     action: PayloadAction<ExternalLink>
   ) => {
     if (!state.explicitInput.links) {

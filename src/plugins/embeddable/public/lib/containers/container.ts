@@ -370,8 +370,7 @@ export abstract class Container<
     initialInput: TContainerInput,
     initializeSettings?: EmbeddableContainerSettings
   ) {
-    let initializeOrder = Object.keys(initialInput.panels);
-
+    let initializeOrder = Object.keys(initialInput?.panels ?? {}); // TODO: figure this out
     if (initializeSettings?.childIdInitializeOrder) {
       const initializeOrderSet = new Set<string>();
 

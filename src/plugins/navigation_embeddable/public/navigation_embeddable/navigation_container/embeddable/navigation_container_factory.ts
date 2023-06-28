@@ -8,13 +8,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import type { EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
+import type { IContainer } from '@kbn/embeddable-plugin/public';
 import { EmbeddableFactory, EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
 
-import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_embeddable';
-import { untilPluginStartServicesReady } from '../services/navigation_embeddable_services';
+import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_container';
+import { untilPluginStartServicesReady } from '../../services/kibana_services';
+import { NavigationContainerInput } from '../../types';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
+
+const getDefaultNavigationContainerInput = (): Omit<NavigationContainerInput, 'id'> => ({
+  panels: {},
+});
 
 export class NavigationEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
   public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
@@ -27,10 +32,14 @@ export class NavigationEmbeddableFactoryDefinition implements EmbeddableFactoryD
     return true;
   }
 
-  public async create(initialInput: EmbeddableInput, parent?: IContainer) {
+  public getDefaultInput(): Partial<NavigationContainerInput> {
+    return getDefaultNavigationContainerInput();
+  }
+
+  public async create(initialInput: NavigationContainerInput, parent?: IContainer) {
     await untilPluginStartServicesReady();
     const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
-    const { NavigationEmbeddable } = await import('./navigation_embeddable');
+    const { NavigationContainer } = await import('./navigation_container');
 
     /**
      * TODO: What are our conditions to ensure this embeddable is editable?
@@ -44,10 +53,10 @@ export class NavigationEmbeddableFactoryDefinition implements EmbeddableFactoryD
      *      );
      *   }
      */
-    return new NavigationEmbeddable(
+    return new NavigationContainer(
       reduxEmbeddablePackage,
-      { editable: true },
-      initialInput,
+      // { editable: true },
+      { ...getDefaultNavigationContainerInput, ...initialInput },
       parent
     );
   }

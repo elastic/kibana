@@ -8,7 +8,7 @@
 
 export {
   NAVIGATION_EMBEDDABLE_TYPE,
-  NavigationEmbeddable,
-} from './embeddable/navigation_embeddable';
-export type { NavigationEmbeddableFactory } from './embeddable/navigation_embeddable_factory';
-export { NavigationEmbeddableFactoryDefinition } from './embeddable/navigation_embeddable_factory';
+  NavigationContainer as NavigationEmbeddable,
+} from './navigation_container/embeddable/navigation_container';
+export type { NavigationEmbeddableFactory } from './navigation_container/embeddable/navigation_container_factory';
+export { NavigationEmbeddableFactoryDefinition } from './navigation_container/embeddable/navigation_container_factory';
