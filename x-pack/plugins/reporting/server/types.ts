@@ -60,13 +60,15 @@ export type ScrollConfig = ReportingConfigType['csv']['scroll'];
  * Internal Types
  */
 
-export type CreateJobFn<JobParamsType> = (
+// standard type for create job function of any ExportType implementation
+export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
   jobParams: JobParamsType,
   context: ReportingRequestHandlerContext,
   req: KibanaRequest
-) => JobParamsType & { isDeprecated: boolean; browserTimezone: any };
+) => Promise<Omit<JobPayloadType, 'headers' | 'spaceId'>>;
 
-export type RunTaskFn<TaskPayloadType> = (
+// standard type for run task function of any ExportType implementation
+export type RunTaskFn<TaskPayloadType = BasePayload> = (
   jobId: string,
   payload: TaskPayloadType,
   cancellationToken: CancellationToken,

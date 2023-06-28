@@ -70,11 +70,7 @@ export class CsvSearchsourceExportType extends ExportType<
     this.startDeps = startDeps;
   }
 
-  /**
-   * @param jobParamsCSV
-   * @returns jobParams
-   */
-  public createJob = (jobParams: JobParamsCSV) => {
+  public createJob = async (jobParams: JobParamsCSV) => {
     return { ...jobParams, isDeprecated: false };
   };
 
