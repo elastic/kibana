@@ -35,7 +35,7 @@ import {
 } from '../../slo_edit/helpers/process_slo_form_values';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { rulesLocatorID, sloFeatureId } from '../../../../common';
-import { paths } from '../../../config/paths';
+import { paths } from '../../../routes/paths';
 import type { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import type { SloRule } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import type { RulesParams } from '../../../locators/rules';
