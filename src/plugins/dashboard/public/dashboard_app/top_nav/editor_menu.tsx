@@ -268,9 +268,10 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
       repositionOnScroll
       ownFocus
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
-        defaultMessage: 'Select type',
+        defaultMessage: 'Add panel',
       })}
       size="s"
+      iconType="plusInCircle"
       panelPaddingSize="none"
       data-test-subj="dashboardEditorMenuButton"
     >
