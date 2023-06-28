@@ -20,7 +20,7 @@ const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const StyledEuiModal = styled(EuiModal)`
   ${({ theme }) => `margin-top: ${theme.eui.euiSizeXXL};`}
   min-width: 95vw;
-  min-height: 90vh;
+  min-height: 25vh;
 `;
 /**
  * Modal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever

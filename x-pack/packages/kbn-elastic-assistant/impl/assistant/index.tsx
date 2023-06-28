@@ -492,13 +492,15 @@ const AssistantComponent: React.FC<Props> = ({
             width: 100%;
           `}
         >
+          {isWelcomeSetup && <EuiFlexItem>{connectorPrompt}</EuiFlexItem>}
+        </EuiFlexGroup>
+        <EuiFlexGroup
+          gutterSize="none"
+          css={css`
+            width: 100%;
+          `}
+        >
           <EuiFlexItem>
-            {isWelcomeSetup && (
-              <>
-                {connectorPrompt}
-                <EuiSpacer />
-              </>
-            )}
             <PromptTextArea
               onPromptSubmit={handleSendMessage}
               ref={promptTextAreaRef}
