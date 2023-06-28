@@ -8,16 +8,17 @@ import {
   EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
+import { TechnicalPreviewBadge } from '@kbn/observability-shared-plugin/public';
 import type { ChatCompletionRequestMessage } from 'openai';
 import React, { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -166,10 +167,6 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
     );
   }
 
-  const tooltipContent = i18n.translate('xpack.observability.coPilotPrompt.askCoPilot', {
-    defaultMessage: 'Ask the AI assistant for help',
-  });
-
   return (
     <EuiPanel color="primary">
       <EuiAccordion
@@ -186,14 +183,23 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
         buttonContent={
           <EuiFlexGroup direction="row" alignItems="center">
             <EuiFlexItem grow>
-              <EuiText size="m" color={theme.euiTheme.colors.primaryText}>
-                <strong>{title}</strong>
-              </EuiText>
+              <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="m" color={theme.euiTheme.colors.primaryText}>
+                    <strong>{title}</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color={theme.euiTheme.colors.primaryText}>
+                    {i18n.translate('xpack.observability.coPilotChatPrompt.subtitle', {
+                      defaultMessage: 'Get helpful insights from our Elastic AI Assistant',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={tooltipContent}>
-                <EuiIcon color={theme.euiTheme.colors.primaryText} type="questionInCircle" />
-              </EuiToolTip>
+              <TechnicalPreviewBadge />
             </EuiFlexItem>
           </EuiFlexGroup>
         }
@@ -202,7 +208,9 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
           setHasOpened(true);
         }}
       >
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
+        <EuiHorizontalRule margin="none" />
+        <EuiSpacer size="m" />
         {inner}
       </EuiAccordion>
     </EuiPanel>
