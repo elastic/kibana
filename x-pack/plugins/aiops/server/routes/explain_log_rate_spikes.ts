@@ -430,193 +430,85 @@ export const defineExplainLogRateSpikesRoute = (
                 return;
               }
 
-              let isGroupingDone = true;
+              if (groupingEnabled) {
+                logDebugMessage('Group results.');
 
-              function asyncGrouping() {
-                return new Promise(async (resolve, reject) => {
-                  try {
-                    logDebugMessage('Group results.');
-                    isGroupingDone = false;
-                    push(
-                      updateLoadingStateAction({
-                        ccsWarning: false,
-                        loaded,
-                        loadingState: i18n.translate(
-                          'xpack.aiops.explainLogRateSpikes.loadingState.groupingResults',
-                          {
-                            defaultMessage:
-                              'Transforming significant field/value pairs into groups.',
-                          }
-                        ),
-                        groupsMissing: true,
-                      })
-                    );
-                    try {
-                      const { fields, df } = await fetchFrequentItemSets(
-                        client,
-                        request.body.index,
-                        JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
-                        significantTerms,
-                        request.body.timeFieldName,
-                        request.body.deviationMin,
-                        request.body.deviationMax,
-                        logger,
-                        sampleProbability,
-                        pushError,
-                        abortSignal
-                      );
-                      if (shouldStop) {
-                        logDebugMessage('shouldStop after fetching frequent_item_sets.');
-                        isGroupingDone = true;
-                        resolve(shouldStop);
+                push(
+                  updateLoadingStateAction({
+                    ccsWarning: false,
+                    loaded,
+                    loadingState: i18n.translate(
+                      'xpack.aiops.explainLogRateSpikes.loadingState.groupingResults',
+                      {
+                        defaultMessage: 'Transforming significant field/value pairs into groups.',
                       }
-                      if (fields.length > 0 && df.length > 0) {
-                        const significantTermGroups = getSignificantTermGroups(
-                          df,
-                          significantTerms,
-                          fields
-                        );
+                    ),
+                    groupsMissing: true,
+                  })
+                );
 
-                        // We'll find out if there's at least one group with at least two items,
-                        // only then will we return the groups to the clients and make the grouping option available.
-                        const maxItems = Math.max(
-                          ...significantTermGroups.map((g) => g.group.length)
-                        );
-                        if (maxItems > 1) {
-                          push(addSignificantTermsGroupAction(significantTermGroups));
-                        }
-                        loaded += PROGRESS_STEP_GROUPING;
-                        pushHistogramDataLoadingState();
-                        if (shouldStop) {
-                          logDebugMessage('shouldStop after grouping.');
-                          isGroupingDone = true;
-                          resolve(shouldStop);
-                        }
-                        logDebugMessage(`Fetch ${significantTermGroups.length} group histograms.`);
-                        const groupHistogramQueue = queue(async function (
-                          cpg: SignificantTermGroup
-                        ) {
-                          if (shouldStop) {
-                            logDebugMessage('shouldStop abort fetching group histograms.');
-                            groupHistogramQueue.kill();
-                            isGroupingDone = true;
-                            resolve(shouldStop);
-                          }
-                          if (overallTimeSeries !== undefined) {
-                            const histogramQuery = getHistogramQuery(
-                              request.body,
-                              getGroupFilter(cpg)
-                            );
-                            let cpgTimeSeries: NumericChartData;
-                            try {
-                              cpgTimeSeries = (
-                                (await fetchHistogramsForFields(
-                                  client,
-                                  request.body.index,
-                                  histogramQuery,
-                                  // fields
-                                  [
-                                    {
-                                      fieldName: request.body.timeFieldName,
-                                      type: KBN_FIELD_TYPES.DATE,
-                                      interval: overallTimeSeries.interval,
-                                      min: overallTimeSeries.stats[0],
-                                      max: overallTimeSeries.stats[1],
-                                    },
-                                  ],
-                                  // samplerShardSize
-                                  -1,
-                                  undefined,
-                                  abortSignal,
-                                  sampleProbability,
-                                  RANDOM_SAMPLER_SEED
-                                )) as [NumericChartData]
-                              )[0];
-                            } catch (e) {
-                              if (!isRequestAbortedError(e)) {
-                                logger.error(
-                                  `Failed to fetch the histogram data for group #${
-                                    cpg.id
-                                  }, got: \n${e.toString()}`
-                                );
-                                pushError(
-                                  `Failed to fetch the histogram data for group #${cpg.id}.`
-                                );
-                              }
-                              isGroupingDone = true;
-                              reject(false);
-                            }
-                            const histogram =
-                              overallTimeSeries.data.map((o, i) => {
-                                const current = cpgTimeSeries.data.find(
-                                  (d1) => d1.key_as_string === o.key_as_string
-                                ) ?? {
-                                  doc_count: 0,
-                                };
-                                return {
-                                  key: o.key,
-                                  key_as_string: o.key_as_string ?? '',
-                                  doc_count_significant_term: current.doc_count,
-                                  doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                                };
-                              }) ?? [];
-                            push(
-                              addSignificantTermsGroupHistogramAction([
-                                {
-                                  id: cpg.id,
-                                  histogram,
-                                },
-                              ])
-                            );
-                          }
-                        },
-                        MAX_CONCURRENT_QUERIES);
-                        groupHistogramQueue.push(significantTermGroups);
-                        await groupHistogramQueue.drain();
-                        isGroupingDone = true;
-                        resolve(false);
-                      }
-                    } catch (e) {
-                      if (!isRequestAbortedError(e)) {
-                        logger.error(
-                          `Failed to transform field/value pairs into groups, got: \n${e.toString()}`
-                        );
-                        pushError(`Failed to transform field/value pairs into groups.`);
-                      }
-                      isGroupingDone = true;
-                      reject(false);
-                    }
-                    loaded += PROGRESS_STEP_HISTOGRAMS_GROUPS;
-                  } catch (error) {
-                    isGroupingDone = true;
-                    reject(false);
+                try {
+                  const { fields, df } = await fetchFrequentItemSets(
+                    client,
+                    request.body.index,
+                    JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
+                    significantTerms,
+                    request.body.timeFieldName,
+                    request.body.deviationMin,
+                    request.body.deviationMax,
+                    logger,
+                    sampleProbability,
+                    pushError,
+                    abortSignal
+                  );
+
+                  if (shouldStop) {
+                    logDebugMessage('shouldStop after fetching frequent_item_sets.');
+                    end();
+                    return;
                   }
-                });
-              }
 
-              logDebugMessage(`Fetch ${significantTerms.length} field/value histograms.`);
+                  if (fields.length > 0 && df.length > 0) {
+                    const significantTermGroups = getSignificantTermGroups(
+                      df,
+                      significantTerms,
+                      fields
+                    );
 
-              function asyncHistograms() {
-                return new Promise(async (resolve, reject) => {
-                  try {
-                    const fieldValueHistogramQueue = queue(async function (cp: SignificantTerm) {
+                    // We'll find out if there's at least one group with at least two items,
+                    // only then will we return the groups to the clients and make the grouping option available.
+                    const maxItems = Math.max(...significantTermGroups.map((g) => g.group.length));
+
+                    if (maxItems > 1) {
+                      push(addSignificantTermsGroupAction(significantTermGroups));
+                    }
+
+                    loaded += PROGRESS_STEP_GROUPING;
+
+                    pushHistogramDataLoadingState();
+
+                    if (shouldStop) {
+                      logDebugMessage('shouldStop after grouping.');
+                      end();
+                      return;
+                    }
+
+                    logDebugMessage(`Fetch ${significantTermGroups.length} group histograms.`);
+
+                    const groupHistogramQueue = queue(async function (cpg: SignificantTermGroup) {
                       if (shouldStop) {
-                        logDebugMessage('shouldStop abort fetching field/value histograms.');
-                        fieldValueHistogramQueue.kill();
-                        resolve(shouldStop);
+                        logDebugMessage('shouldStop abort fetching group histograms.');
+                        groupHistogramQueue.kill();
+                        end();
+                        return;
                       }
 
                       if (overallTimeSeries !== undefined) {
-                        const histogramQuery = getHistogramQuery(request.body, [
-                          {
-                            term: { [cp.fieldName]: cp.fieldValue },
-                          },
-                        ]);
+                        const histogramQuery = getHistogramQuery(request.body, getGroupFilter(cpg));
 
-                        let cpTimeSeries: NumericChartData;
-
+                        let cpgTimeSeries: NumericChartData;
                         try {
-                          cpTimeSeries = (
+                          cpgTimeSeries = (
                             (await fetchHistogramsForFields(
                               client,
                               request.body.index,
@@ -640,20 +532,19 @@ export const defineExplainLogRateSpikesRoute = (
                             )) as [NumericChartData]
                           )[0];
                         } catch (e) {
-                          logger.error(
-                            `Failed to fetch the histogram data for field/value pair "${
-                              cp.fieldName
-                            }:${cp.fieldValue}", got: \n${e.toString()}`
-                          );
-                          pushError(
-                            `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${cp.fieldValue}".`
-                          );
-                          resolve(false);
+                          if (!isRequestAbortedError(e)) {
+                            logger.error(
+                              `Failed to fetch the histogram data for group #${
+                                cpg.id
+                              }, got: \n${e.toString()}`
+                            );
+                            pushError(`Failed to fetch the histogram data for group #${cpg.id}.`);
+                          }
+                          return;
                         }
-
                         const histogram =
                           overallTimeSeries.data.map((o, i) => {
-                            const current = cpTimeSeries.data.find(
+                            const current = cpgTimeSeries.data.find(
                               (d1) => d1.key_as_string === o.key_as_string
                             ) ?? {
                               doc_count: 0,
@@ -666,17 +557,10 @@ export const defineExplainLogRateSpikesRoute = (
                             };
                           }) ?? [];
 
-                        const { fieldName, fieldValue } = cp;
-
-                        loaded += (1 / significantTerms.length) * PROGRESS_STEP_HISTOGRAMS;
-                        if (isGroupingDone) {
-                          pushHistogramDataLoadingState();
-                        }
                         push(
-                          addSignificantTermsHistogramAction([
+                          addSignificantTermsGroupHistogramAction([
                             {
-                              fieldName,
-                              fieldValue,
+                              id: cpg.id,
                               histogram,
                             },
                           ])
@@ -684,37 +568,118 @@ export const defineExplainLogRateSpikesRoute = (
                       }
                     }, MAX_CONCURRENT_QUERIES);
 
-                    fieldValueHistogramQueue.push(significantTerms);
-                    await fieldValueHistogramQueue.drain();
-                    resolve(false);
-                  } catch (error) {
-                    reject(false);
+                    groupHistogramQueue.push(significantTermGroups);
+                    await groupHistogramQueue.drain();
                   }
-                });
+                } catch (e) {
+                  if (!isRequestAbortedError(e)) {
+                    logger.error(
+                      `Failed to transform field/value pairs into groups, got: \n${e.toString()}`
+                    );
+                    pushError(`Failed to transform field/value pairs into groups.`);
+                  }
+                }
               }
 
-              const parallelFetch = [];
+              loaded += PROGRESS_STEP_HISTOGRAMS_GROUPS;
 
+              logDebugMessage(`Fetch ${significantTerms.length} field/value histograms.`);
+
+              // time series filtered by fields
               if (
                 significantTerms.length > 0 &&
                 overallTimeSeries !== undefined &&
                 !request.body.overrides?.regroupOnly
               ) {
-                parallelFetch.push(asyncHistograms());
+                const fieldValueHistogramQueue = queue(async function (cp: SignificantTerm) {
+                  if (shouldStop) {
+                    logDebugMessage('shouldStop abort fetching field/value histograms.');
+                    fieldValueHistogramQueue.kill();
+                    end();
+                    return;
+                  }
+
+                  if (overallTimeSeries !== undefined) {
+                    const histogramQuery = getHistogramQuery(request.body, [
+                      {
+                        term: { [cp.fieldName]: cp.fieldValue },
+                      },
+                    ]);
+
+                    let cpTimeSeries: NumericChartData;
+
+                    try {
+                      cpTimeSeries = (
+                        (await fetchHistogramsForFields(
+                          client,
+                          request.body.index,
+                          histogramQuery,
+                          // fields
+                          [
+                            {
+                              fieldName: request.body.timeFieldName,
+                              type: KBN_FIELD_TYPES.DATE,
+                              interval: overallTimeSeries.interval,
+                              min: overallTimeSeries.stats[0],
+                              max: overallTimeSeries.stats[1],
+                            },
+                          ],
+                          // samplerShardSize
+                          -1,
+                          undefined,
+                          abortSignal,
+                          sampleProbability,
+                          RANDOM_SAMPLER_SEED
+                        )) as [NumericChartData]
+                      )[0];
+                    } catch (e) {
+                      logger.error(
+                        `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${
+                          cp.fieldValue
+                        }", got: \n${e.toString()}`
+                      );
+                      pushError(
+                        `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${cp.fieldValue}".`
+                      );
+                      return;
+                    }
+
+                    const histogram =
+                      overallTimeSeries.data.map((o, i) => {
+                        const current = cpTimeSeries.data.find(
+                          (d1) => d1.key_as_string === o.key_as_string
+                        ) ?? {
+                          doc_count: 0,
+                        };
+                        return {
+                          key: o.key,
+                          key_as_string: o.key_as_string ?? '',
+                          doc_count_significant_term: current.doc_count,
+                          doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                        };
+                      }) ?? [];
+
+                    const { fieldName, fieldValue } = cp;
+
+                    loaded += (1 / significantTerms.length) * PROGRESS_STEP_HISTOGRAMS;
+                    pushHistogramDataLoadingState();
+                    push(
+                      addSignificantTermsHistogramAction([
+                        {
+                          fieldName,
+                          fieldValue,
+                          histogram,
+                        },
+                      ])
+                    );
+                  }
+                }, MAX_CONCURRENT_QUERIES);
+
+                fieldValueHistogramQueue.push(significantTerms);
+                await fieldValueHistogramQueue.drain();
               }
 
-              if (groupingEnabled) {
-                parallelFetch.push(asyncGrouping());
-              } else {
-                loaded += PROGRESS_STEP_HISTOGRAMS_GROUPS;
-              }
-              const shouldStops = await Promise.all(parallelFetch);
-
-              if (shouldStops.includes(true)) {
-                end();
-              } else {
-                endWithUpdatedLoadingState();
-              }
+              endWithUpdatedLoadingState();
             } catch (e) {
               if (!isRequestAbortedError(e)) {
                 logger.error(
