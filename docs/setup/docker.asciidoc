@@ -99,12 +99,6 @@ endif::[]
 
 ifeval::["{release-state}"!="unreleased"]
 
-[source,sh,subs="attributes"]
-----
-docker pull {docker-image}
-docker run --name kib-01 --net elastic -p 5601:5601 {docker-image}
-----
-
 .. Pull the {kib} Docker image:
 +
 [source,sh,subs="attributes"]
