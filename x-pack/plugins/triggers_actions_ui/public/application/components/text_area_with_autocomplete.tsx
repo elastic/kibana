@@ -12,7 +12,6 @@ import {
   EuiSelectable,
   EuiSelectableOption,
   EuiPortal,
-  findPopoverPosition,
 } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
