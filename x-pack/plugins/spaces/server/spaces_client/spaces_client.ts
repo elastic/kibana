@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { omit } from 'lodash';
 
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type {
@@ -170,20 +169,27 @@ export class SpacesClient implements ISpacesClient {
     await this.repository.bulkUpdate(objectsToUpdate);
   }
 
-  private transformSavedObjectToSpace(savedObject: SavedObject<any>) {
+  private transformSavedObjectToSpace(savedObject: SavedObject<any>):v1.Space {
     return {
       id: savedObject.id,
-      name: savedObject.attributes.name,
+      name: savedObject.attributes.name??'',
       description: savedObject.attributes.description,
       color: savedObject.attributes.color,
       initials: savedObject.attributes.initials,
       imageUrl: savedObject.attributes.imageUrl,
-      disabledFeatures: savedObject.attributes.disabledFeatures,
+      disabledFeatures: savedObject.attributes.disabledFeatures??[],
       _reserved: savedObject.attributes._reserved,
     } as v1.Space;
   }
 
   private generateSpaceAttributes(space: v1.Space) {
-    return omit(space, ['id', '_reserved']);
+    return {
+      name: space.name,
+      description: space.description,
+      color: space.color,
+      initials: space.initials,
+      imageUrl: space.imageUrl,
+      disabledFeatures: space.disabledFeatures
+    }
   }
 }
