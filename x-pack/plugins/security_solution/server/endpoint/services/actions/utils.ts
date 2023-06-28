@@ -198,19 +198,22 @@ export const getActionStatus = ({
   expirationDate,
   isCompleted,
   wasSuccessful,
+  error,
 }: {
   expirationDate: string;
   isCompleted: boolean;
   wasSuccessful: boolean;
+  error?: string;
 }): { status: ActionDetails['status']; isExpired: boolean } => {
   const isExpired = !isCompleted && expirationDate < new Date().toISOString();
-  const status = isExpired
-    ? 'failed'
-    : isCompleted
-    ? wasSuccessful
-      ? 'successful'
-      : 'failed'
-    : 'pending';
+  const status =
+    isExpired || error
+      ? 'failed'
+      : isCompleted
+      ? wasSuccessful
+        ? 'successful'
+        : 'failed'
+      : 'pending';
 
   return { isExpired, status };
 };

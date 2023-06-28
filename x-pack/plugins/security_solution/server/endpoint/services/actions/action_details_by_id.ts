@@ -124,6 +124,7 @@ export const getActionDetailsById = async (
     expirationDate: normalizedActionRequest.expiration,
     isCompleted,
     wasSuccessful,
+    error: normalizedActionRequest.error?.message,
   });
 
   const actionDetails: ActionDetails = {

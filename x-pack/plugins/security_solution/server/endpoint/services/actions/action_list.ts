@@ -282,6 +282,7 @@ const getActionDetailsList = async ({
       expirationDate: action.expiration,
       isCompleted,
       wasSuccessful,
+      error: action.error?.message,
     });
 
     const actionRecord: ActionListApiResponse['data'][number] = {
