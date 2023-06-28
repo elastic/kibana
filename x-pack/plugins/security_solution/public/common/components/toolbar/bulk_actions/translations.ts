@@ -187,7 +187,7 @@ export const ALERT_TAGS_MENU_SEARCH_NO_TAGS_FOUND = i18n.translate(
 export const ALERT_TAGS_MENU_EMPTY = i18n.translate(
   'xpack.securitySolution.bulkActions.alertTagsMenuEmptyMessage',
   {
-    defaultMessage: 'No tag options exist, add tag options in Advanced Settings.',
+    defaultMessage: 'No alert tag options exist, add tag options in Kibana Advanced Settings.',
   }
 );
 
@@ -201,13 +201,13 @@ export const ALERT_TAGS_APPLY_BUTTON_MESSAGE = i18n.translate(
 export const ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE = i18n.translate(
   'xpack.securitySolution.bulkActions.alertTagsContextMenuItemTitle',
   {
-    defaultMessage: 'Manage alert tags',
+    defaultMessage: 'Apply alert tags',
   }
 );
 
 export const ALERT_TAGS_CONTEXT_MENU_ITEM_TOOLTIP_INFO = i18n.translate(
   'xpack.securitySolution.bulkActions.alertTagsContextMenuItemTooltip',
   {
-    defaultMessage: 'Update default tag options in the advanced settings',
+    defaultMessage: 'Change alert tag options in Kibana Advanced Settings.',
   }
 );
