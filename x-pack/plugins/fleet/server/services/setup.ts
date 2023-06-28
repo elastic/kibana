@@ -179,11 +179,6 @@ async function createSetupSideEffects(
     await appContextService.getUninstallTokenService()?.encryptTokens();
   }
 
-  console.log(
-    '~~~~~~~~~~~~ tokens:',
-    JSON.stringify(await appContextService.getUninstallTokenService()?.getAllTokens())
-  );
-
   logger.debug('Upgrade Agent policy schema version');
   await upgradeAgentPolicySchemaVersion(soClient);
 

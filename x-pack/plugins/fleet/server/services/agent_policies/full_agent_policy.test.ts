@@ -461,7 +461,7 @@ describe('getFullAgentPolicy', () => {
       signing_key: 'thisisapublickey',
     });
     expect(agentPolicy!.signed).toMatchObject({
-      data: 'eyJpZCI6ImFnZW50LXBvbGljeSIsImFnZW50Ijp7InByb3RlY3Rpb24iOnsiZW5hYmxlZCI6ZmFsc2UsInVuaW5zdGFsbF90b2tlbl9oYXNoIjoiIiwic2lnbmluZ19rZXkiOiJ0aGlzaXNhcHVibGlja2V5In19fQ==',
+      data: 'eyJpZCI6ImFnZW50LXBvbGljeSIsImFnZW50Ijp7ImZlYXR1cmVzIjp7fSwicHJvdGVjdGlvbiI6eyJlbmFibGVkIjpmYWxzZSwidW5pbnN0YWxsX3Rva2VuX2hhc2giOiIiLCJzaWduaW5nX2tleSI6InRoaXNpc2FwdWJsaWNrZXkifX0sImlucHV0cyI6W119',
       signature: 'thisisasignature',
     });
   });
