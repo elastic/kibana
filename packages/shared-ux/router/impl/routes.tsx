@@ -29,7 +29,6 @@ export const Routes = ({
     <Switch>
       {Children.map(children, (child) => {
         if (React.isValidElement(child) && child.type === LegacyRoute) {
-          // @ts-expect-error
           return React.cloneElement(child, { compat });
         }
 
