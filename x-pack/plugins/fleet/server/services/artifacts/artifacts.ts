@@ -97,15 +97,15 @@ const generateArtifactBatches = (
   maxArtifactsBatchSizeInBytes: number = BULK_CREATE_MAX_ARTIFACTS_BYTES
 ): {
   batches: Array<Array<ArtifactElasticsearchProperties | { create: { _id: string } }>>;
-  artifactsEsResponse: Artifact[];
+  nonSortedEsArtifactsResponse: Artifact[];
 } => {
   const batches: Array<Array<ArtifactElasticsearchProperties | { create: { _id: string } }>> = [];
-  const artifactsEsResponse: Artifact[] = [];
+  const nonSortedEsArtifactsResponse: Artifact[] = [];
   let artifactsBatchLengthInBytes = 0;
   const sortedArtifacts = sortBy(artifacts, 'encodedSize');
 
   sortedArtifacts.forEach((artifact, index) => {
-    const esArtifactResponse = esSearchHitToArtifact({
+    const nonSortedEsArtifactResponse = esSearchHitToArtifact({
       _id: uniqueIdFromArtifact(artifacts[index]),
       _source: newArtifactToElasticsearchProperties(artifacts[index]),
     });
@@ -121,7 +121,7 @@ const generateArtifactBatches = (
     if (artifact.encodedSize + artifactsBatchLengthInBytes >= maxArtifactsBatchSizeInBytes) {
       artifactsBatchLengthInBytes = artifact.encodedSize;
       // Use non sorted artifacts array to preserve the artifacts order in the response
-      artifactsEsResponse.push(esArtifactResponse);
+      nonSortedEsArtifactsResponse.push(nonSortedEsArtifactResponse);
 
       batches.push([bulkOperation, esArtifact]);
     } else {
@@ -132,13 +132,13 @@ const generateArtifactBatches = (
       // Adds the next artifact to the current batch and increases the batch size count with the artifact size.
       artifactsBatchLengthInBytes += artifact.encodedSize;
       // Use non sorted artifacts array to preserve the artifacts order in the response
-      artifactsEsResponse.push(esArtifactResponse);
+      nonSortedEsArtifactsResponse.push(nonSortedEsArtifactResponse);
 
       batches[batches.length - 1].push(bulkOperation, esArtifact);
     }
   });
 
-  return { batches, artifactsEsResponse };
+  return { batches, nonSortedEsArtifactsResponse };
 };
 
 export const bulkCreateArtifacts = async (
@@ -146,7 +146,7 @@ export const bulkCreateArtifacts = async (
   artifacts: NewArtifact[],
   refresh = false
 ): Promise<{ artifacts?: Artifact[]; errors?: Error[] }> => {
-  const { batches, artifactsEsResponse } = generateArtifactBatches(
+  const { batches, nonSortedEsArtifactsResponse } = generateArtifactBatches(
     artifacts,
     appContextService.getConfig()?.createArtifactsBulkBatchSize
   );
@@ -186,7 +186,7 @@ export const bulkCreateArtifacts = async (
   }
 
   return {
-    artifacts: artifactsEsResponse,
+    artifacts: nonSortedEsArtifactsResponse,
   };
 };
 
