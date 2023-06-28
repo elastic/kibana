@@ -25,6 +25,7 @@ const transformConnector: RewriteRequestCase<
   is_deprecated: isDeprecated,
   referenced_by_count: referencedByCount,
   is_missing_secrets: isMissingSecrets,
+  is_system_action: isSystemAction,
   ...res
 }) => ({
   actionTypeId,
@@ -32,6 +33,7 @@ const transformConnector: RewriteRequestCase<
   isDeprecated,
   referencedByCount,
   isMissingSecrets,
+  isSystemAction,
   ...res,
 });
 

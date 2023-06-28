@@ -20,6 +20,7 @@ const rewriteBodyRes: RewriteRequestCase<
   is_preconfigured: isPreconfigured,
   is_deprecated: isDeprecated,
   is_missing_secrets: isMissingSecrets,
+  is_system_action: isSystemAction,
   ...res
 }) => ({
   ...res,
@@ -27,6 +28,7 @@ const rewriteBodyRes: RewriteRequestCase<
   isPreconfigured,
   isDeprecated,
   isMissingSecrets,
+  isSystemAction,
 });
 
 export async function updateActionConnector({

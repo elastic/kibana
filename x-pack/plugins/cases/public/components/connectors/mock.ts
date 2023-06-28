@@ -14,6 +14,7 @@ export const connector = {
   config: {},
   isPreconfigured: false,
   isDeprecated: false,
+  isSystemAction: false,
 };
 
 export const swimlaneConnector = {

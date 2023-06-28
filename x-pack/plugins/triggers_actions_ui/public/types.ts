@@ -278,6 +278,7 @@ export interface ActionConnectorProps<Config, Secrets> {
   config: Config;
   isPreconfigured: boolean;
   isDeprecated: boolean;
+  isSystemAction: boolean;
   isMissingSecrets?: boolean;
 }
 
