@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '@elastic/charts';
+import { AreaSeries, Axis, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import { EuiFlexItem, EuiIcon, EuiLoadingChart, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -39,6 +39,7 @@ export function DataPreviewChart() {
       {!isPreviewLoading && !!previewData && (
         <EuiPanel hasBorder={true} hasShadow={false}>
           <Chart size={{ height: 160, width: '100%' }}>
+            <Tooltip type="vertical" />
             <Settings
               baseTheme={baseTheme}
               showLegend={false}
@@ -50,7 +51,6 @@ export function DataPreviewChart() {
                   },
                 },
               ]}
-              tooltip="vertical"
               noResults={
                 <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
               }
