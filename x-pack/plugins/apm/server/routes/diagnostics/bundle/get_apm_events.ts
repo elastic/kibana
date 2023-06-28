@@ -19,6 +19,7 @@ import { getTypedSearch, TypedSearch } from '../create_typed_es_client';
 import { getApmIndexPatterns } from './get_indices';
 
 export interface ApmEvent {
+  legacy?: boolean;
   name: string;
   kuery: string;
   index: string[];
@@ -54,7 +55,7 @@ export async function getApmEvents({
     }),
     getEventWithMetricsetInterval({
       ...commonProps,
-      name: 'Metric: Service transaction (with summary field)',
+      name: 'Metric: Service transaction (8.7+)',
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "service_transaction" AND ${TRANSACTION_DURATION_SUMMARY} :* `,
@@ -63,7 +64,7 @@ export async function getApmEvents({
     }),
     getEventWithMetricsetInterval({
       ...commonProps,
-      name: 'Metric: Transaction (with summary field)',
+      name: 'Metric: Transaction (8.7+)',
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "transaction" AND ${TRANSACTION_DURATION_SUMMARY} :* `,
@@ -72,7 +73,8 @@ export async function getApmEvents({
     }),
     getEventWithMetricsetInterval({
       ...commonProps,
-      name: 'Metric: Service transaction (without summary field)',
+      legacy: true,
+      name: 'Metric: Service transaction (pre-8.7)',
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "service_transaction" AND not ${TRANSACTION_DURATION_SUMMARY} :* `,
@@ -81,7 +83,8 @@ export async function getApmEvents({
     }),
     getEventWithMetricsetInterval({
       ...commonProps,
-      name: 'Metric: Transaction (without summary field)',
+      legacy: true,
+      name: 'Metric: Transaction (pre-8.7)',
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "transaction" AND not ${TRANSACTION_DURATION_SUMMARY} :* `,
@@ -130,6 +133,7 @@ export async function getApmEvents({
 }
 
 async function getEventWithMetricsetInterval({
+  legacy,
   name,
   index,
   start,
@@ -137,6 +141,7 @@ async function getEventWithMetricsetInterval({
   kuery,
   typedSearch,
 }: {
+  legacy?: boolean;
   name: string;
   index: string[];
   start: number;
@@ -175,6 +180,7 @@ async function getEventWithMetricsetInterval({
   const intervals = merge(defaultIntervals, foundIntervals);
 
   return {
+    legacy,
     name,
     kuery,
     index,

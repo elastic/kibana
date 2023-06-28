@@ -11,7 +11,7 @@ import {
   EuiBasicTableColumn,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { orderBy } from 'lodash';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -39,7 +39,20 @@ export function DiagnosticsApmDocuments() {
     query: { rangeFrom, rangeTo },
   } = useApmParams('/diagnostics/documents');
 
-  const items = diagnosticsBundle?.apmEvents ?? [];
+  const items = useMemo<ApmEvent[]>(() => {
+    return (
+      diagnosticsBundle?.apmEvents.filter(({ legacy, docCount, intervals }) => {
+        const isLegacyAndUnused =
+          legacy === true &&
+          docCount === 0 &&
+          intervals &&
+          Object.values(intervals).every((interval) => interval === 0);
+
+        return !isLegacyAndUnused;
+      }) ?? []
+    );
+  }, [diagnosticsBundle?.apmEvents]);
+
   const columns: Array<EuiBasicTableColumn<ApmEvent>> = [
     {
       name: 'Name',

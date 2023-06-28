@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiCallOut } from '@elastic/eui';
 import { ApmIntegrationPackageStatus } from './apm_integration_package_status';
 import { IndexTemplatesStatus } from './index_templates_status';
 import { FieldMappingStatus } from './indicies_status';
@@ -20,27 +20,22 @@ export function DiagnosticsSummary() {
     diagnosticsBundle?.apmIndices ?? {}
   ).some((indicies) => indicies.includes(':'));
 
+  if (isCrossCluster) {
+    return (
+      <EuiCallOut title="Cross cluster search not supported" color="warning">
+        The APM index settings is targetting remote clusters. Please note: this
+        is not currently supported by the Diagnostics Tool and functionality
+        will therefore be limited.
+      </EuiCallOut>
+    );
+  }
+
   return (
-    <>
-      {isCrossCluster && (
-        <>
-          <EuiCallOut
-            title="Cross cluster search not supported"
-            color="warning"
-          >
-            The APM index settings is targetting remote clusters. Please note:
-            this is not currently supported by the Diagnostics Tool and
-            functionality will therefore be limited.
-          </EuiCallOut>
-          <EuiSpacer />
-        </>
-      )}
-      <EuiFlexGroup direction="column">
-        <ApmIntegrationPackageStatus />
-        <IndexTemplatesStatus />
-        <DataStreamsStatus />
-        <FieldMappingStatus />
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup direction="column">
+      <ApmIntegrationPackageStatus />
+      <IndexTemplatesStatus />
+      <DataStreamsStatus />
+      <FieldMappingStatus />
+    </EuiFlexGroup>
   );
 }
