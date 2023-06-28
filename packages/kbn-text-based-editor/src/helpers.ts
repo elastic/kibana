@@ -44,25 +44,26 @@ export const useDebounceWithOptions = (
 
 export const parseWarning = (warning: string): MonacoError[] => {
   if (warning.includes('Line')) {
-    const text = warning.split('Line')[1];
-    const [lineNumber, startPosition, warningMessage] = text.split(':');
-    const [trimmedMessage] = warningMessage.split('"');
-    // initialize the length to 10 in case no error word found
-    let errorLength = 10;
-    const [_, wordWithError] = trimmedMessage.split('[');
-    if (wordWithError) {
-      errorLength = wordWithError.length - 1;
-    }
-    return [
-      {
+    const splitByLine = warning.split('Line');
+    splitByLine.shift();
+    return splitByLine.map((item) => {
+      const [lineNumber, startPosition, warningMessage] = item.split(':');
+      const [trimmedMessage] = warningMessage.split('"');
+      // initialize the length to 10 in case no error word found
+      let errorLength = 10;
+      const [_, wordWithError] = trimmedMessage.split('[');
+      if (wordWithError) {
+        errorLength = wordWithError.length - 1;
+      }
+      return {
         message: trimmedMessage.trimStart(),
         startColumn: Number(startPosition),
         startLineNumber: Number(lineNumber),
         endColumn: Number(startPosition) + errorLength,
         endLineNumber: Number(lineNumber),
         severity: monaco.MarkerSeverity.Error,
-      },
-    ];
+      };
+    });
   } else {
     // unknown error message
     return [

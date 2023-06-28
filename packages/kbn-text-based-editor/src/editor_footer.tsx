@@ -214,7 +214,9 @@ export const EditorFooter = memo(function EditorFooter({
                           {i18n.translate(
                             'textBasedEditor.query.textBasedLanguagesEditor.warningCount',
                             {
-                              defaultMessage: '1 warning',
+                              defaultMessage:
+                                '{count} {count, plural, one {warning} other {warnings}}',
+                              values: { count: warning.length },
                             }
                           )}
                         </p>

@@ -608,7 +608,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         iconSide="left"
                         data-test-subj="TextBasedLangEditor-inline-warning-badge"
                       >
-                        1
+                        {editorWarning.length}
                       </EuiBadge>
                     )}
                     <CodeEditor
