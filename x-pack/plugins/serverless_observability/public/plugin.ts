@@ -28,10 +28,11 @@ export class ServerlessObservabilityPlugin
     core: CoreStart,
     setupDeps: ServerlessObservabilityPluginStartDependencies
   ): ServerlessObservabilityPluginStart {
-    const { observabilityShared, serverless } = setupDeps;
+    const { observabilityShared, serverless, management } = setupDeps;
     observabilityShared.setIsSidebarEnabled(false);
     serverless.setProjectHome('/app/observability/landing');
     serverless.setSideNavComponent(getObservabilitySideNavComponent(core, { serverless }));
+    management.setupCardsNavigation({ enabled: true });
     return {};
   }
 

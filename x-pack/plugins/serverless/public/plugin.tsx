@@ -61,7 +61,6 @@ export class ServerlessPlugin
 
     core.chrome.setChromeStyle('project');
     management.setIsSidebarEnabled(false);
-    management.setupCardsNavigation({ enabled: true });
 
     // Casting the "chrome.projects" service to an "internal" type: this is intentional to obscure the property from Typescript.
     const { project } = core.chrome as InternalChromeStart;

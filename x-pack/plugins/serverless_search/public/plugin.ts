@@ -68,10 +68,11 @@ export class ServerlessSearchPlugin
 
   public start(
     core: CoreStart,
-    { serverless }: ServerlessSearchPluginStartDependencies
+    { serverless, management }: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
     serverless.setProjectHome('/app/elasticsearch');
     serverless.setSideNavComponent(createComponent(core, { serverless }));
+    management.setupCardsNavigation({ enabled: true });
     return {};
   }
 

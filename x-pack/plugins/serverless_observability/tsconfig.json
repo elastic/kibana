@@ -17,6 +17,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
+    "@kbn/management-plugin",
     "@kbn/serverless",
     "@kbn/observability-shared-plugin",
     "@kbn/kibana-react-plugin",
