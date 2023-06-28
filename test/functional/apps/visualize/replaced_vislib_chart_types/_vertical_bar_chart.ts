@@ -309,7 +309,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectCustomSortMetric(3, 'Min', 'bytes');
         await PageObjects.visEditor.clickGo(true);
 
-        const expectedEntries = ['200', '404', '503'];
+        const expectedEntries = ['404', '200', '503'];
         const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
       });

@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.loadSavedSearch('with breakdown');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const list = await PageObjects.discover.getHistogramLegendList();
-      expect(list).to.eql(['Other', 'png', 'css', 'jpg']);
+      expect(list).to.eql(['jpg', 'css', 'png', 'Other']);
     });
   });
 }
