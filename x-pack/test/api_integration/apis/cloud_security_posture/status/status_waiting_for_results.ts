@@ -89,7 +89,10 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/internal/cloud_security_posture/status`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
-        expect(res.kspm.status).to.be('waiting_for_results');
+        expect(res.kspm.status).to.eql(
+          'waiting_for_results',
+          `expected waiting_for_results but got ${res.kspm.status} instead`
+        );
       });
 
       it(`Should return waiting_for_result when installed cspm, has no findings and it has been less than 10 minutes since the installation`, async () => {
@@ -114,7 +117,10 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/internal/cloud_security_posture/status`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
-        expect(res.cspm.status).to.be('waiting_for_results');
+        expect(res.cspm.status).to.eql(
+          'waiting_for_results',
+          `expected waiting_for_results but got ${res.cspm.status} instead`
+        );
       });
 
       it(`Should return waiting_for_result when installed cnvm, has no findings and it has been less than 4 hours minutes since the installation`, async () => {
@@ -139,7 +145,10 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/internal/cloud_security_posture/status`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
-        expect(res.vuln_mgmt.status).to.be('waiting_for_results');
+        expect(res.vuln_mgmt.status).to.eql(
+          'waiting_for_results',
+          `expected waiting_for_results but got ${res.vuln_mgmt.status} instead`
+        );
       });
     });
   });

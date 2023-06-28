@@ -83,9 +83,18 @@ export default function (providerContext: FtrProviderContext) {
           .auth(UNPRIVILEGED_USERNAME, 'changeme')
           .expect(200);
 
-        expect(res.kspm.status).to.be('unprivileged');
-        expect(res.cspm.status).to.be('unprivileged');
-        expect(res.vuln_mgmt.status).to.be('unprivileged');
+        expect(res.kspm.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.kspm.status} instead`
+        );
+        expect(res.cspm.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.cspm.status} instead`
+        );
+        expect(res.vuln_mgmt.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.vuln_mgmt.status} instead`
+        );
       });
     });
 
@@ -131,14 +140,35 @@ export default function (providerContext: FtrProviderContext) {
           .auth(UNPRIVILEGED_USERNAME, 'changeme')
           .expect(200);
 
-        expect(res.kspm.status).to.be('unprivileged');
-        expect(res.cspm.status).to.be('unprivileged');
-        expect(res.vuln_mgmt.status).to.be('unprivileged');
+        expect(res.kspm.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.kspm.status} instead`
+        );
+        expect(res.cspm.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.cspm.status} instead`
+        );
+        expect(res.vuln_mgmt.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.vuln_mgmt.status} instead`
+        );
 
-        expect(res.indicesDetails[0].status).to.be('empty');
-        expect(res.indicesDetails[1].status).to.be('empty');
-        expect(res.indicesDetails[2].status).to.be('unprivileged');
-        expect(res.indicesDetails[3].status).to.be('unprivileged');
+        expect(res.indicesDetails[0].status).to.eql(
+          'empty',
+          `expected empty but got ${res.indicesDetails[0].status} instead`
+        );
+        expect(res.indicesDetails[1].status).to.eql(
+          'empty',
+          `expected empty but got ${res.indicesDetails[1].status} instead`
+        );
+        expect(res.indicesDetails[2].status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.indicesDetails[2].status} instead`
+        );
+        expect(res.indicesDetails[3].status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.indicesDetails[3].status} instead`
+        );
       });
 
       it(`Return unprivileged when missing access to score index`, async () => {
@@ -161,14 +191,35 @@ export default function (providerContext: FtrProviderContext) {
           .auth(UNPRIVILEGED_USERNAME, 'changeme')
           .expect(200);
 
-        expect(res.kspm.status).to.be('unprivileged');
-        expect(res.cspm.status).to.be('unprivileged');
-        expect(res.vuln_mgmt.status).to.be('unprivileged');
+        expect(res.kspm.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.kspm.status} instead`
+        );
+        expect(res.cspm.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.cspm.status} instead`
+        );
+        expect(res.vuln_mgmt.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.vuln_mgmt.status} instead`
+        );
 
-        expect(res.indicesDetails[0].status).to.be('unprivileged');
-        expect(res.indicesDetails[1].status).to.be('empty');
-        expect(res.indicesDetails[2].status).to.be('empty');
-        expect(res.indicesDetails[3].status).to.be('unprivileged');
+        expect(res.indicesDetails[0].status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.indicesDetails[0].status} instead`
+        );
+        expect(res.indicesDetails[1].status).to.eql(
+          'empty',
+          `expected empty but got ${res.indicesDetails[1].status} instead`
+        );
+        expect(res.indicesDetails[2].status).to.eql(
+          'empty',
+          `expected empty but got ${res.indicesDetails[2].status} instead`
+        );
+        expect(res.indicesDetails[3].status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.indicesDetails[3].status} instead`
+        );
       });
 
       it(`Return unprivileged when missing access to vulnerabilities_latest index`, async () => {
@@ -194,14 +245,35 @@ export default function (providerContext: FtrProviderContext) {
           .auth(UNPRIVILEGED_USERNAME, 'changeme')
           .expect(200);
 
-        expect(res.kspm.status).to.be('unprivileged');
-        expect(res.cspm.status).to.be('unprivileged');
-        expect(res.vuln_mgmt.status).to.be('not-installed');
+        expect(res.kspm.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.kspm.status} instead`
+        );
+        expect(res.cspm.status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.cspm.status} instead`
+        );
+        expect(res.vuln_mgmt.status).to.eql(
+          'not-installed',
+          `expected not-installed but got ${res.vuln_mgmt.status} instead`
+        );
 
-        expect(res.indicesDetails[0].status).to.be('unprivileged');
-        expect(res.indicesDetails[1].status).to.be('empty');
-        expect(res.indicesDetails[2].status).to.be('unprivileged');
-        expect(res.indicesDetails[3].status).to.be('empty');
+        expect(res.indicesDetails[0].status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.indicesDetails[0].status} instead`
+        );
+        expect(res.indicesDetails[1].status).to.eql(
+          'empty',
+          `expected empty but got ${res.indicesDetails[1].status} instead`
+        );
+        expect(res.indicesDetails[2].status).to.eql(
+          'unprivileged',
+          `expected unprivileged but got ${res.indicesDetails[2].status} instead`
+        );
+        expect(res.indicesDetails[3].status).to.eql(
+          'empty',
+          `expected empty but got ${res.indicesDetails[3].status} instead`
+        );
       });
     });
   });

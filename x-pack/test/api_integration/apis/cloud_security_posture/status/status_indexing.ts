@@ -73,7 +73,10 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        expect(res.kspm.status).to.be('indexing');
+        expect(res.kspm.status).to.eql(
+          'indexing',
+          `expected indexing but got ${res.kspm.status} instead`
+        );
       });
 
       it(`Return cspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new cspm documents, but has newly connected agents  `, async () => {
@@ -91,7 +94,10 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        expect(res.cspm.status).to.be('indexing');
+        expect(res.cspm.status).to.eql(
+          'indexing',
+          `expected indexing but got ${res.cspm.status} instead`
+        );
       });
 
       it(`Return vuln status indexing when logs-cloud_security_posture.vulnerabilities_latest-default doesn't contain vuln new documents, but has newly connected agents`, async () => {
@@ -109,7 +115,10 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        expect(res.vuln_mgmt.status).to.be('indexing');
+        expect(res.vuln_mgmt.status).to.eql(
+          'indexing',
+          `expected indexing but got ${res.vuln_mgmt.status} instead`
+        );
       });
     });
   });
