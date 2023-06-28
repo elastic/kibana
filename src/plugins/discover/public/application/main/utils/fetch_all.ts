@@ -85,7 +85,7 @@ export function fetchAll(
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, textBasedQueryColumns }) => {
+      .then(({ records, textBasedQueryColumns, warning }) => {
         // If the total hits (or chart) query is still loading, emit a partial
         // hit count that's at least our retrieved document count
         if (dataSubjects.totalHits$.getValue().fetchStatus === FetchStatus.LOADING) {
@@ -111,6 +111,7 @@ export function fetchAll(
           fetchStatus,
           result: records,
           textBasedQueryColumns,
+          warning,
           recordRawType,
           query,
         });

@@ -173,12 +173,19 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   }, [isSidebarClosed, storage]);
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
+  const documentState = useDataState(stateContainer.dataState.data$.documents$);
 
   const textBasedLanguageModeErrors = useMemo(() => {
     if (isPlainRecord) {
       return dataState.error;
     }
   }, [dataState.error, isPlainRecord]);
+
+  const textBasedLanguageModeWarning = useMemo(() => {
+    if (isPlainRecord) {
+      return documentState.warning;
+    }
+  }, [documentState.warning, isPlainRecord]);
 
   const resizeRef = useRef<HTMLDivElement>(null);
 
@@ -269,6 +276,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         updateQuery={stateContainer.actions.onUpdateQuery}
         isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
+        textBasedLanguageModeWarning={textBasedLanguageModeWarning}
         onFieldEdited={onFieldEdited}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">

@@ -32,6 +32,7 @@ interface EditorFooterProps {
   lines: number;
   containerCSS: Interpolation<Theme>;
   errors?: MonacoError[];
+  warning?: MonacoError[];
   detectTimestamp: boolean;
   onErrorClick: (error: MonacoError) => void;
   refreshErrors: () => void;
@@ -41,6 +42,7 @@ export const EditorFooter = memo(function EditorFooter({
   lines,
   containerCSS,
   errors,
+  warning,
   detectTimestamp,
   onErrorClick,
   refreshErrors,
@@ -173,6 +175,98 @@ export const EditorFooter = memo(function EditorFooter({
                                   className="TextBasedLangEditor_errorMessage"
                                 >
                                   {error.message}
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
+                            </EuiDescriptionListDescription>
+                          );
+                        })}
+                      </EuiDescriptionList>
+                    </div>
+                  </EuiPopover>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+          {warning && warning.length > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="warning" color="warning" size="s" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    button={
+                      <EuiText
+                        size="xs"
+                        color="warning"
+                        css={css`
+                          &:hover {
+                            cursor: pointer;
+                            text-decoration: underline;
+                          }
+                        `}
+                        onClick={() => {
+                          refreshErrors();
+                          setIsPopoverOpen(!isPopoverOpen);
+                        }}
+                      >
+                        <p>
+                          {i18n.translate(
+                            'textBasedEditor.query.textBasedLanguagesEditor.warningCount',
+                            {
+                              defaultMessage: '1 warning',
+                            }
+                          )}
+                        </p>
+                      </EuiText>
+                    }
+                    ownFocus={false}
+                    isOpen={isPopoverOpen}
+                    closePopover={() => setIsPopoverOpen(false)}
+                  >
+                    <div style={{ width: 500 }}>
+                      <EuiPopoverTitle paddingSize="s">
+                        {i18n.translate(
+                          'textBasedEditor.query.textBasedLanguagesEditor.warningsTitle',
+                          {
+                            defaultMessage: 'Warnings',
+                          }
+                        )}
+                      </EuiPopoverTitle>
+                      <EuiDescriptionList>
+                        {warning.map((warn, index) => {
+                          return (
+                            <EuiDescriptionListDescription
+                              key={index}
+                              className={classNameCss`
+                                &:hover {
+                                  cursor: pointer;
+                                }
+                              `}
+                              onClick={() => onErrorClick(warn)}
+                            >
+                              <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
+                                <EuiFlexItem grow={false}>
+                                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                                    <EuiFlexItem grow={false}>
+                                      <EuiIcon type="warning" color="warning" size="s" />
+                                    </EuiFlexItem>
+                                    <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
+                                      {i18n.translate(
+                                        'textBasedEditor.query.textBasedLanguagesEditor.lineNumber',
+                                        {
+                                          defaultMessage: 'Line {lineNumber}',
+                                          values: { lineNumber: warn.startLineNumber },
+                                        }
+                                      )}
+                                    </EuiFlexItem>
+                                  </EuiFlexGroup>
+                                </EuiFlexItem>
+                                <EuiFlexItem
+                                  grow={false}
+                                  className="TextBasedLangEditor_errorMessage"
+                                >
+                                  {warn.message}
                                 </EuiFlexItem>
                               </EuiFlexGroup>
                             </EuiDescriptionListDescription>

@@ -47,6 +47,7 @@ export function fetchTextBased(
         });
         let finalData: DataTableRecord[] = [];
         let textBasedQueryColumns: Datatable['columns'] | undefined;
+        let warning: string | undefined;
         let error: string | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {
           const response = resp as Datatable | TextBasedErrorResponse;
@@ -56,6 +57,7 @@ export function fetchTextBased(
             const table = response as Datatable;
             const rows = table?.rows ?? [];
             textBasedQueryColumns = table?.columns ?? undefined;
+            warning = table.warning ?? undefined;
             finalData = rows.map(
               (row: Record<string, string>, idx: number) =>
                 ({
@@ -73,6 +75,7 @@ export function fetchTextBased(
             return {
               records: finalData || [],
               textBasedQueryColumns,
+              warning,
             };
           }
         });
@@ -80,6 +83,7 @@ export function fetchTextBased(
       return {
         records: [] as DataTableRecord[],
         textBasedQueryColumns: [],
+        warning: undefined,
       };
     })
     .catch((err) => {

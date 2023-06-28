@@ -18,6 +18,7 @@ export const textBasedLanguagedEditorStyles = (
   editorHeight: number,
   isCodeEditorExpanded: boolean,
   hasErrors: boolean,
+  hasWarning: boolean,
   isCodeEditorExpandedFocused: boolean,
   hasReference: boolean
 ) => {
@@ -56,7 +57,7 @@ export const textBasedLanguagedEditorStyles = (
     linesBadge: {
       position: 'absolute' as 'absolute', // cast string to type 'absolute',
       zIndex: 1,
-      right: hasErrors ? '60px' : '12px',
+      right: hasErrors || hasWarning ? '60px' : '12px',
       top: '50%',
       transform: 'translate(0, -50%)',
     },
