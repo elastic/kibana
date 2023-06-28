@@ -40,8 +40,6 @@ import { ReportingCore } from './core';
  */
 export interface ReportingSetup {
   registerExportTypes: ExportTypesRegistry['register'];
-  getEsClient: ReportingCore['getEsClient'];
-  getDataService: ReportingCore['getDataService'];
   getSpaceId: ReportingCore['getSpaceId'];
   getScreenshots: ReportingCore['getScreenshots'];
   /**

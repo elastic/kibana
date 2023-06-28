@@ -18,7 +18,9 @@ import {
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
+  IClusterClient,
 } from '@kbn/core/server';
+import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
@@ -39,6 +41,8 @@ export interface ExportTypeStartDeps {
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   screenshotting: ScreenshottingStart;
+  esClient: IClusterClient;
+  data: DataPluginStart;
   reporting: ReportingStart;
 }
 
@@ -134,5 +138,15 @@ export abstract class ExportType<
       uuid: this.context.env.instanceUuid,
       protocol: serverInfo.protocol,
     };
+  }
+
+  protected async getEsClient() {
+    const startDeps = await this.startDeps;
+    return startDeps.esClient;
+  }
+
+  protected async getDataService() {
+    const startDeps = await this.startDeps;
+    return startDeps.data;
   }
 }

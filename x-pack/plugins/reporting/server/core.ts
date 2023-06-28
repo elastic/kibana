@@ -141,8 +141,6 @@ export class ReportingCore {
       registerExportTypes: (id) => id,
       getScreenshots: this.getScreenshots.bind(this),
       getSpaceId: this.getSpaceId.bind(this),
-      getEsClient: this.getEsClient.bind(this),
-      getDataService: this.getDataService.bind(this),
     });
 
     this.executing = new Set();

@@ -83,11 +83,11 @@ export class CsvSearchsourceExportType extends ExportType<JobParamsCSV, TaskPayl
     const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
     const fakeRequest = this.getFakeRequest(headers, job.spaceId, logger);
     const uiSettings = await this.getUiSettingsClient(fakeRequest, logger);
-    const dataPluginStart = await this.startDeps.reporting.getDataService();
+    const dataPluginStart = await this.getDataService();
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
 
     const [es, searchSourceStart] = await Promise.all([
-      (await this.startDeps.reporting.getEsClient()).asScoped(fakeRequest),
+      (await this.getEsClient()).asScoped(fakeRequest),
       await dataPluginStart.search.searchSource.asScoped(fakeRequest),
     ]);
 
