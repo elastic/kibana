@@ -35,7 +35,7 @@ export function useCreateSlo() {
     },
     {
       onMutate: async ({ slo }) => {
-        await queryClient.cancelQueries(sloKeys.lists());
+        await queryClient.cancelQueries({ queryKey: sloKeys.lists(), exact: false });
 
         const queriesData = queryClient.getQueriesData<FindSLOResponse>({
           queryKey: sloKeys.lists(),

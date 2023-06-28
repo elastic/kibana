@@ -32,7 +32,7 @@ export function useCloneSlo() {
     },
     {
       onMutate: async ({ slo, originalSloId }) => {
-        await queryClient.cancelQueries(sloKeys.lists());
+        await queryClient.cancelQueries({ queryKey: sloKeys.lists(), exact: false });
 
         const queriesData = queryClient.getQueriesData<FindSLOResponse>({
           queryKey: sloKeys.lists(),
