@@ -9,6 +9,7 @@ import React from 'react';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { TopNFunctionsTable } from '../../../components/topn_functions';
+import { Grid } from '../../../components/topn_functions/grid';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
@@ -57,7 +58,26 @@ export function TopNFunctionsView() {
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexItem>
+              <Grid
+                topNFunctions={state.data}
+                sortDirection={sortDirection}
+                sortField={sortField}
+                onSortChange={(nextSort) => {
+                  profilingRouter.push(routePath, {
+                    path,
+                    query: {
+                      ...query,
+                      sortField: nextSort.sortField,
+                      sortDirection: nextSort.sortDirection,
+                    },
+                  });
+                }}
+                totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
+                isDifferentialView={false}
+              />
+            </EuiFlexItem>
             <EuiFlexItem>
               <AsyncComponent {...state} size="xl" alignTop>
                 <TopNFunctionsTable
