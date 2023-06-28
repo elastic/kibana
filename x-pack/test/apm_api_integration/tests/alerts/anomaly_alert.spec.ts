@@ -23,8 +23,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
 
   const synthtraceEsClient = getService('synthtraceEsClient');
-  // FLAKY https://github.com/elastic/kibana/issues/160298
-  registry.when.skip(
+
+  registry.when(
     'fetching service anomalies with a trial license',
     { config: 'trial', archives: [] },
     () => {
