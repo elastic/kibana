@@ -140,9 +140,8 @@ export interface ActionType<
     secrets: ValidatorType<Secrets>;
     connector?: (config: Config, secrets: Secrets) => string | null;
   };
-
+  isSystemAction?: boolean;
   renderParameterTemplates?: RenderParameterTemplates<Params>;
-
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }
 
