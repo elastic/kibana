@@ -32,6 +32,7 @@ export const swimlaneConnector = {
   },
   isPreconfigured: false,
   isDeprecated: false,
+  isSystemAction: false,
 };
 
 export const issues = [

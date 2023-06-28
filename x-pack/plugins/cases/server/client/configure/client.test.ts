@@ -72,6 +72,7 @@ describe('client', () => {
         config: {},
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
         referencedByCount: 1,
       },
       {
@@ -81,6 +82,8 @@ describe('client', () => {
         config: {},
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
+
         referencedByCount: 1,
       },
       {
@@ -90,6 +93,7 @@ describe('client', () => {
         config: {},
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
         referencedByCount: 1,
       },
     ];
@@ -135,6 +139,7 @@ describe('client', () => {
           config: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
         },
       ]);
@@ -181,6 +186,7 @@ describe('client', () => {
           config: {},
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
         },
       ]);
