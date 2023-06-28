@@ -1,9 +1,8 @@
 on:
   pull_request_target:
-    branches-ignore:
-      - main
     types:
       - opened
+      - created
 
 env:
   NODE_ENV: kibana-github-action
