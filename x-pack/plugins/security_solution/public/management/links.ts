@@ -48,6 +48,7 @@ import { IconTool } from '../common/icons/tool';
 import { IconPipeline } from '../common/icons/pipeline';
 import { IconSavedObject } from '../common/icons/saved_object';
 import { IconDashboards } from '../common/icons/dashboards';
+import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 
