@@ -18,7 +18,13 @@ export type {
 export { palette, systemPalette } from './expressions/palette';
 
 export { paletteIds, defaultCustomColors } from './constants';
-export type { AllowedSettingsOverrides, ColorSchema, RawColorSchema, ColorMap } from './static';
+export type {
+  AllowedChartOverrides,
+  AllowedSettingsOverrides,
+  ColorSchema,
+  RawColorSchema,
+  ColorMap,
+} from './static';
 export {
   ColorSchemas,
   vislibColorMaps,
