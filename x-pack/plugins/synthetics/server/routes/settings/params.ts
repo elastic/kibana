@@ -52,12 +52,13 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
         }
 
         return response.ok({
-          body: hits.map(({ id, attributes: { key, value, description }, namespaces }) => ({
+          body: hits.map(({ id, attributes: { key, value, description, tags }, namespaces }) => ({
             id,
             key,
             value,
             description,
             namespaces,
+            tags,
           })),
         });
       } else {
@@ -66,12 +67,15 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
           perPage: 10000,
         });
         return response.ok({
-          body: data.saved_objects.map(({ id, attributes: { key, description }, namespaces }) => ({
-            id,
-            key,
-            description,
-            namespaces,
-          })),
+          body: data.saved_objects.map(
+            ({ id, attributes: { key, description, tags }, namespaces }) => ({
+              id,
+              key,
+              description,
+              namespaces,
+              tags,
+            })
+          ),
         });
       }
     } catch (error) {
