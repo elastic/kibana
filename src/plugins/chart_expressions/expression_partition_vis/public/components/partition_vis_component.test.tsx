@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Settings, TooltipType, SeriesIdentifier } from '@elastic/charts';
+import { Settings, TooltipType, SeriesIdentifier, Tooltip } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -239,14 +239,14 @@ describe('PartitionVisComponent', function () {
 
   it('defaults on displaying the tooltip', () => {
     const component = shallow(<PartitionVisComponent {...wrapperProps} />);
-    expect(component.find(Settings).prop('tooltip')).toStrictEqual({ type: TooltipType.Follow });
+    expect(component.find(Tooltip).prop('type')).toBe(TooltipType.Follow);
   });
 
   it('doesnt show the tooltip when the user requests it', () => {
     const newParams = { ...visParams, addTooltip: false };
     const newProps = { ...wrapperProps, visParams: newParams };
     const component = shallow(<PartitionVisComponent {...newProps} />);
-    expect(component.find(Settings).prop('tooltip')).toStrictEqual({ type: TooltipType.None });
+    expect(component.find(Tooltip).prop('type')).toBe(TooltipType.None);
   });
 
   it('calls filter callback', () => {

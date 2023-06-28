@@ -25,7 +25,6 @@
       "share",
       "unifiedSearch",
       "dataViews",
-      "advancedSettings",
       "lens",
       "maps",
       "uiActions"
@@ -36,6 +35,7 @@
       "cases",
       "charts",
       "cloud",
+      "discover",
       "fleet",
       "fieldFormats",
       "home",
@@ -49,6 +49,7 @@
       "profiling"
     ],
     "requiredBundles": [
+      "advancedSettings",
       "fleet",
       "kibanaReact",
       "kibanaUtils",

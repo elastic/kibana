@@ -65,6 +65,10 @@ import {
   ProfilingPluginSetup,
   ProfilingPluginStart,
 } from '@kbn/profiling-plugin/public';
+import {
+  DiscoverStart,
+  DiscoverSetup,
+} from '@kbn/discover-plugin/public/plugin';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
   getApmEnrollmentFlyoutData,
@@ -84,6 +88,7 @@ export type ApmPluginStart = void;
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
+  discover?: DiscoverSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
@@ -103,6 +108,7 @@ export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
   charts?: ChartsPluginStart;
   data: DataPublicPluginStart;
+  discover?: DiscoverStart;
   embeddable: EmbeddableStart;
   home: void;
   inspector: InspectorPluginStart;

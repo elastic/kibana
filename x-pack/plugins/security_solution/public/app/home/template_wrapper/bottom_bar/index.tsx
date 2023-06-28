@@ -30,7 +30,9 @@ export const SecuritySolutionBottomBar = React.memo(() => {
   );
 });
 
-export const SecuritySolutionBottomBarProps: EuiBottomBarProps = {
+export const SecuritySolutionBottomBarProps: EuiBottomBarProps & {
+  restrictWidth?: boolean | number | string;
+} = {
   className: BOTTOM_BAR_CLASSNAME,
   'data-test-subj': 'timeline-bottom-bar-container',
 };
