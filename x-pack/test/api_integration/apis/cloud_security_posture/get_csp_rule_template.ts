@@ -57,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(body.message).to.eql(
         'Please provide either benchmarkId or packagePolicyId, but not both',
-        `expected 'Please provide either benchmarkId or packagePolicyId, but not both' but got ${body.message} instead`
+        `expected message to be 'Please provide either benchmarkId or packagePolicyId, but not both' but got ${body.message} instead`
       );
     });
 
@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(body.message).to.eql(
         'Please provide either benchmarkId or packagePolicyId, but not both',
-        `expected 'Please provide either benchmarkId or packagePolicyId, but not both' but got ${body.message} instead`
+        `expected message to be 'Please provide either benchmarkId or packagePolicyId, but not both' but got ${body.message} instead`
       );
     });
 
@@ -97,8 +97,14 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(404);
 
-      expect(body.statusCode).to.eql(404, `expected 404 but got ${body.statusCode} instead`);
-      expect(body.error).to.eql('Not Found', `expected 'Not Found' but got ${body.error} instead`);
+      expect(body.statusCode).to.eql(
+        404,
+        `expected status code to be 404 but got ${body.statusCode} instead`
+      );
+      expect(body.error).to.eql(
+        'Not Found',
+        `expected error message to be 'Not Found' but got ${body.error} instead`
+      );
     });
 
     it(`Should return 200 status code and filter rules by benchmarkId`, async () => {
@@ -221,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(body.items.length).to.eql(
         perPage,
-        `expected ${perPage} but got ${body.items.length} instead`
+        `expected length to be ${perPage} but got ${body.items.length} instead`
       );
     });
   });

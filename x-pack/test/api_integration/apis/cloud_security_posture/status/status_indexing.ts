@@ -75,7 +75,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(res.kspm.status).to.eql(
           'indexing',
-          `expected indexing but got ${res.kspm.status} instead`
+          `expected kspm status to be indexing but got ${res.kspm.status} instead`
         );
       });
 
@@ -96,7 +96,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(res.cspm.status).to.eql(
           'indexing',
-          `expected indexing but got ${res.cspm.status} instead`
+          `expected cspm status to be indexing but got ${res.cspm.status} instead`
         );
       });
 
@@ -117,7 +117,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(res.vuln_mgmt.status).to.eql(
           'indexing',
-          `expected indexing but got ${res.vuln_mgmt.status} instead`
+          `expected vuln_mgmt status to be indexing but got ${res.vuln_mgmt.status} instead`
         );
       });
     });

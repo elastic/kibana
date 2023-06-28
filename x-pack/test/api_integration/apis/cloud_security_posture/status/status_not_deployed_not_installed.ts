@@ -55,23 +55,23 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(res.kspm.status).to.eql(
           'not-deployed',
-          `expected not-deployed but got ${res.kspm.status} instead`
+          `expected kspm status to be not-deployed but got ${res.kspm.status} instead`
         );
         expect(res.cspm.status).to.eql(
           'not-installed',
-          `expected not-installed but got ${res.cspm.status} instead`
+          `expected cspm status to be not-installed but got ${res.cspm.status} instead`
         );
         expect(res.vuln_mgmt.status).to.eql(
           'not-installed',
-          `expected not-installed but got ${res.vuln_mgmt.status} instead`
+          `expected vuln_mgmt status to be not-installed but got ${res.vuln_mgmt.status} instead`
         );
         expect(res.kspm.healthyAgents).to.eql(
           0,
-          `expected 0 but got ${res.kspm.healthyAgents} instead`
+          `expected number of kspm healthy agents to be 0 but got ${res.kspm.healthyAgents} instead`
         );
         expect(res.kspm.installedPackagePolicies).to.eql(
           1,
-          `expected 1 but got ${res.kspm.installedPackagePolicies} instead`
+          `expected number of kspm installed package policies to be 1 but got ${res.kspm.installedPackagePolicies} instead`
         );
       });
 
@@ -92,23 +92,23 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(res.cspm.status).to.eql(
           'not-deployed',
-          `expected not-deployed but got ${res.cspm.status} instead`
+          `expected cspm status to be not-deployed but got ${res.cspm.status} instead`
         );
         expect(res.kspm.status).to.eql(
           'not-installed',
-          `expected not-installed but got ${res.kspm.status} instead`
+          `expected kspm status to be not-installed but got ${res.kspm.status} instead`
         );
         expect(res.vuln_mgmt.status).to.eql(
           'not-installed',
-          `expected not-installed but got ${res.vuln_mgmt.status} instead`
+          `expected vuln_mgmt status to be not-installed but got ${res.vuln_mgmt.status} instead`
         );
         expect(res.cspm.healthyAgents).to.eql(
           0,
-          `expected 0 but got ${res.cspm.healthyAgents} instead`
+          `expected number of cspm healthy agents to be 0 but got ${res.cspm.healthyAgents} instead`
         );
         expect(res.cspm.installedPackagePolicies).to.eql(
           1,
-          `expected 1 but got ${res.cspm.installedPackagePolicies} instead`
+          `expected number of cspm installed package policies to be 1 but got ${res.cspm.installedPackagePolicies} instead`
         );
       });
 
@@ -129,23 +129,23 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(res.cspm.status).to.eql(
           'not-installed',
-          `expected not-installed but got ${res.cspm.status} instead`
+          `expected cspm status to be not-installed but got ${res.cspm.status} instead`
         );
         expect(res.kspm.status).to.eql(
           'not-installed',
-          `expected not-installed but got ${res.kspm.status} instead`
+          `expected kspm status to be not-installed but got ${res.kspm.status} instead`
         );
         expect(res.vuln_mgmt.status).to.eql(
           'not-deployed',
-          `expected not-deployed but got ${res.vuln_mgmt.status} instead`
+          `expected vuln_mgmt status to be not-deployed but got ${res.vuln_mgmt.status} instead`
         );
         expect(res.vuln_mgmt.healthyAgents).to.eql(
           0,
-          `expected 0 but got ${res.vuln_mgmt.healthyAgents} instead`
+          `expected number of vuln_mgmt healthy agents to be 0 but got ${res.vuln_mgmt.healthyAgents} instead`
         );
         expect(res.vuln_mgmt.installedPackagePolicies).to.eql(
           1,
-          `expected 1 but got ${res.vuln_mgmt.installedPackagePolicies} instead`
+          `expected number of vuln_mgmt installed package policies to be 1 but got ${res.vuln_mgmt.installedPackagePolicies} instead`
         );
       });
     });

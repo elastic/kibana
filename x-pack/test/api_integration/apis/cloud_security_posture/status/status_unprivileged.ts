@@ -10,6 +10,7 @@ import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  FINDINGS_INDEX_PATTERN,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -153,21 +154,39 @@ export default function (providerContext: FtrProviderContext) {
           `expected unprivileged but got ${res.vuln_mgmt.status} instead`
         );
 
-        expect(res.indicesDetails[0].status).to.eql(
+        expect(
+          res.indicesDetails.find((idx) => idx.index === LATEST_FINDINGS_INDEX_DEFAULT_NS)?.status
+        ).to.eql(
           'empty',
-          `expected empty but got ${res.indicesDetails[0].status} instead`
+          `expected empty but got ${
+            res.indicesDetails.find((idx) => idx.index === LATEST_FINDINGS_INDEX_DEFAULT_NS)?.status
+          } instead`
         );
-        expect(res.indicesDetails[1].status).to.eql(
+        expect(
+          res.indicesDetails.find((idx) => idx.index === FINDINGS_INDEX_PATTERN)?.status
+        ).to.eql(
           'empty',
-          `expected empty but got ${res.indicesDetails[1].status} instead`
+          `expected empty but got ${
+            res.indicesDetails.find((idx) => idx.index === FINDINGS_INDEX_PATTERN)?.status
+          } instead`
         );
-        expect(res.indicesDetails[2].status).to.eql(
+        expect(
+          res.indicesDetails.find((idx) => idx.index === BENCHMARK_SCORE_INDEX_DEFAULT_NS)?.status
+        ).to.eql(
           'unprivileged',
-          `expected unprivileged but got ${res.indicesDetails[2].status} instead`
+          `expected unprivileged but got ${
+            res.indicesDetails.find((idx) => idx.index === BENCHMARK_SCORE_INDEX_DEFAULT_NS)?.status
+          } instead`
         );
-        expect(res.indicesDetails[3].status).to.eql(
+        expect(
+          res.indicesDetails.find((idx) => idx.index === LATEST_VULNERABILITIES_INDEX_DEFAULT_NS)
+            ?.status
+        ).to.eql(
           'unprivileged',
-          `expected unprivileged but got ${res.indicesDetails[3].status} instead`
+          `expected unprivileged but got ${
+            res.indicesDetails.find((idx) => idx.index === LATEST_VULNERABILITIES_INDEX_DEFAULT_NS)
+              ?.status
+          } instead`
         );
       });
 
@@ -204,21 +223,39 @@ export default function (providerContext: FtrProviderContext) {
           `expected unprivileged but got ${res.vuln_mgmt.status} instead`
         );
 
-        expect(res.indicesDetails[0].status).to.eql(
+        expect(
+          res.indicesDetails.find((idx) => idx.index === LATEST_FINDINGS_INDEX_DEFAULT_NS)?.status
+        ).to.eql(
           'unprivileged',
-          `expected unprivileged but got ${res.indicesDetails[0].status} instead`
+          `expected unprivileged but got ${
+            res.indicesDetails.find((idx) => idx.index === LATEST_FINDINGS_INDEX_DEFAULT_NS)?.status
+          } instead`
         );
-        expect(res.indicesDetails[1].status).to.eql(
+        expect(
+          res.indicesDetails.find((idx) => idx.index === FINDINGS_INDEX_PATTERN)?.status
+        ).to.eql(
           'empty',
-          `expected empty but got ${res.indicesDetails[1].status} instead`
+          `expected empty but got ${
+            res.indicesDetails.find((idx) => idx.index === FINDINGS_INDEX_PATTERN)?.status
+          } instead`
         );
-        expect(res.indicesDetails[2].status).to.eql(
+        expect(
+          res.indicesDetails.find((idx) => idx.index === BENCHMARK_SCORE_INDEX_DEFAULT_NS)?.status
+        ).to.eql(
           'empty',
-          `expected empty but got ${res.indicesDetails[2].status} instead`
+          `expected empty but got ${
+            res.indicesDetails.find((idx) => idx.index === BENCHMARK_SCORE_INDEX_DEFAULT_NS)?.status
+          } instead`
         );
-        expect(res.indicesDetails[3].status).to.eql(
+        expect(
+          res.indicesDetails.find((idx) => idx.index === LATEST_VULNERABILITIES_INDEX_DEFAULT_NS)
+            ?.status
+        ).to.eql(
           'unprivileged',
-          `expected unprivileged but got ${res.indicesDetails[3].status} instead`
+          `expected unprivileged but got ${
+            res.indicesDetails.find((idx) => idx.index === LATEST_VULNERABILITIES_INDEX_DEFAULT_NS)
+              ?.status
+          } instead`
         );
       });
 
@@ -258,21 +295,39 @@ export default function (providerContext: FtrProviderContext) {
           `expected not-installed but got ${res.vuln_mgmt.status} instead`
         );
 
-        expect(res.indicesDetails[0].status).to.eql(
+        expect(
+          res.indicesDetails.find((idx) => idx.index === LATEST_FINDINGS_INDEX_DEFAULT_NS)?.status
+        ).to.eql(
           'unprivileged',
-          `expected unprivileged but got ${res.indicesDetails[0].status} instead`
+          `expected unprivileged but got ${
+            res.indicesDetails.find((idx) => idx.index === LATEST_FINDINGS_INDEX_DEFAULT_NS)?.status
+          } instead`
         );
-        expect(res.indicesDetails[1].status).to.eql(
+        expect(
+          res.indicesDetails.find((idx) => idx.index === FINDINGS_INDEX_PATTERN)?.status
+        ).to.eql(
           'empty',
-          `expected empty but got ${res.indicesDetails[1].status} instead`
+          `expected empty but got ${
+            res.indicesDetails.find((idx) => idx.index === FINDINGS_INDEX_PATTERN)?.status
+          } instead`
         );
-        expect(res.indicesDetails[2].status).to.eql(
+        expect(
+          res.indicesDetails.find((idx) => idx.index === BENCHMARK_SCORE_INDEX_DEFAULT_NS)?.status
+        ).to.eql(
           'unprivileged',
-          `expected unprivileged but got ${res.indicesDetails[2].status} instead`
+          `expected unprivileged but got ${
+            res.indicesDetails.find((idx) => idx.index === BENCHMARK_SCORE_INDEX_DEFAULT_NS)?.status
+          } instead`
         );
-        expect(res.indicesDetails[3].status).to.eql(
+        expect(
+          res.indicesDetails.find((idx) => idx.index === LATEST_VULNERABILITIES_INDEX_DEFAULT_NS)
+            ?.status
+        ).to.eql(
           'empty',
-          `expected empty but got ${res.indicesDetails[3].status} instead`
+          `expected empty but got ${
+            res.indicesDetails.find((idx) => idx.index === LATEST_VULNERABILITIES_INDEX_DEFAULT_NS)
+              ?.status
+          } instead`
         );
       });
     });

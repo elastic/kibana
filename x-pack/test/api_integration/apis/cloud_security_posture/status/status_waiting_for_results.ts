@@ -91,7 +91,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         expect(res.kspm.status).to.eql(
           'waiting_for_results',
-          `expected waiting_for_results but got ${res.kspm.status} instead`
+          `expected kspm status to be waiting_for_results but got ${res.kspm.status} instead`
         );
       });
 
@@ -119,7 +119,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         expect(res.cspm.status).to.eql(
           'waiting_for_results',
-          `expected waiting_for_results but got ${res.cspm.status} instead`
+          `expected cspm status to be waiting_for_results but got ${res.cspm.status} instead`
         );
       });
 
@@ -147,7 +147,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         expect(res.vuln_mgmt.status).to.eql(
           'waiting_for_results',
-          `expected waiting_for_results but got ${res.vuln_mgmt.status} instead`
+          `expected vuln_mgmt status to be waiting_for_results but got ${res.vuln_mgmt.status} instead`
         );
       });
     });
