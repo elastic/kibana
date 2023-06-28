@@ -200,12 +200,12 @@ export class HeaderHelpMenu extends Component<Props, State> {
         {defaultContentLinks.map(({ href, title, iconType }, i) => {
           const isLast = i === defaultContentLinks.length - 1;
           return (
-            <>
+            <Fragment key={i}>
               <EuiButtonEmpty href={href} target="_blank" size="s" flush="left" iconType={iconType}>
                 {title}
               </EuiButtonEmpty>
               {!isLast && <EuiSpacer size="xs" />}
-            </>
+            </Fragment>
           );
         })}
       </Fragment>
