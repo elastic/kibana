@@ -14,7 +14,7 @@ import { DataStreamsStatus } from './data_streams_status';
 import { useDiagnosticsContext } from '../context/use_diagnostics';
 
 export function DiagnosticsSummary() {
-  const { diagnosticsBundle, status, isImported } = useDiagnosticsContext();
+  const { diagnosticsBundle } = useDiagnosticsContext();
 
   const isCrossCluster = Object.values(
     diagnosticsBundle?.apmIndices ?? {}
