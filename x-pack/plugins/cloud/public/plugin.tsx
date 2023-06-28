@@ -64,10 +64,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       decodedId = decodeCloudId(id, this.logger);
     }
 
-    core.getStartServices().then(([coreStart]) => {
-      coreStart.chrome.setIsCloudEnabled(this.isCloudEnabled);
-    });
-
     return {
       cloudId: id,
       deploymentId: parseDeploymentIdFromDeploymentUrl(this.config.deployment_url),
