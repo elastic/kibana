@@ -45,7 +45,7 @@ describe('pickupUpdatedMappings', () => {
       const logs = await parseLogFile(defaultLogFilePath);
 
       expect(logs).not.toContainLogEntry(
-        'Kibana is performing a compatible update and it will update the following SO types so that ES can pickup the updated mappings'
+        'Kibana is performing a compatible upgrade and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings'
       );
     });
   });
@@ -59,7 +59,7 @@ describe('pickupUpdatedMappings', () => {
       const logs = await parseLogFile(defaultLogFilePath);
 
       expect(logs).toContainLogEntry(
-        'Kibana is performing a compatible update and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings: complex.'
+        'Kibana is performing a compatible upgrade and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings: complex.'
       );
     });
 
@@ -79,10 +79,10 @@ describe('pickupUpdatedMappings', () => {
       const logs = await parseLogFile(defaultLogFilePath);
 
       expect(logs).toContainLogEntry(
-        'Kibana is performing a compatible update and some root fields have been updated. All SO documents must be updated. Updated root fields: namespace.'
+        'Kibana is performing a compatible upgrade and the mappings of some root fields have been changed. For Elasticsearch to pickup these mappings, all saved objects need to be updated. Updated root fields: namespace.'
       );
       expect(logs).not.toContainLogEntry(
-        'Kibana is performing a compatible update and it will update the following SO types so that ES can pickup the updated mappings'
+        'Kibana is performing a compatible upgrade and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings'
       );
     });
   });

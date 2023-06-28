@@ -1469,7 +1469,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
               ...stateP.logs,
               {
                 level: 'info',
-                message: `Kibana is performing a compatible update and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings: ${left.updatedTypes}.`,
+                message: `Kibana is performing a compatible upgrade and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings: ${left.updatedTypes}.`,
               },
             ],
           };
