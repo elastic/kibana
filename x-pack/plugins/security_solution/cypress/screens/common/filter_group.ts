@@ -21,6 +21,8 @@ export const OPTION_LIST_LABELS = '.controlFrame__labelToolTip';
 
 export const OPTION_LIST_VALUES = (idx: number) => `[data-test-subj="optionsList-control-${idx}"]`;
 
+export const OPTION_LIST_CLEAR_BTN = '.presentationUtil__floatingActions [aria-label="Clear"]';
+
 export const OPTION_LIST_NUMBER_OFF = '.euiFilterButton__notification';
 
 export const OPTION_LISTS_LOADING = '.optionsList--filterBtnWrapper .euiLoadingSpinner';
