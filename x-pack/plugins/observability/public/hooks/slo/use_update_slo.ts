@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { FindSLOResponse, UpdateSLOInput, UpdateSLOResponse } from '@kbn/slo-schema';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
@@ -22,7 +22,7 @@ export function useUpdateSlo() {
     UpdateSLOResponse,
     string,
     { sloId: string; slo: UpdateSLOInput },
-    { previousSloList: FindSLOResponse | undefined }
+    { previousData?: FindSLOResponse; queryKey?: QueryKey }
   >(
     ['updateSlo'],
     ({ sloId, slo }) => {
@@ -31,29 +31,32 @@ export function useUpdateSlo() {
     },
     {
       onMutate: async ({ sloId, slo }) => {
-        // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-        await queryClient.cancelQueries(sloKeys.lists());
+        await queryClient.cancelQueries({ queryKey: sloKeys.lists(), exact: false });
 
-        const latestQueriesData = (
-          queryClient.getQueriesData<FindSLOResponse>(sloKeys.lists()) ?? []
-        ).at(0);
+        const queriesData = queryClient.getQueriesData<FindSLOResponse>({
+          queryKey: sloKeys.lists(),
+          exact: false,
+        });
+        const [queryKey, previousData] = queriesData?.at(0) ?? [];
 
-        const [queryKey, data] = latestQueriesData || [];
         const updatedItem = { ...slo, id: sloId };
         const optimisticUpdate = {
-          ...data,
-          results: [...(data?.results?.filter((result) => result.id !== sloId) ?? []), updatedItem],
-          total: data?.total ? data.total : 1,
+          page: previousData?.page ?? 1,
+          perPage: previousData?.perPage ?? 25,
+          total: previousData?.total ? previousData.total : 1,
+          results: [
+            ...(previousData?.results?.filter((result) => result.id !== sloId) ?? []),
+            updatedItem,
+          ],
         };
 
-        queryClient.setQueryData(queryKey ?? sloKeys.lists(), optimisticUpdate);
+        if (queryKey) {
+          queryClient.setQueryData(queryKey, optimisticUpdate);
+        }
 
-        // Return a context object with the snapshotted value
-        return { previousSloList: data };
+        return { previousData, queryKey };
       },
       onSuccess: (_data, { slo: { name } }) => {
-        queryClient.invalidateQueries(sloKeys.lists());
-
         toasts.addSuccess(
           i18n.translate('xpack.observability.slo.update.successNotification', {
             defaultMessage: 'Successfully updated {name}',
@@ -62,8 +65,8 @@ export function useUpdateSlo() {
         );
       },
       onError: (error, { slo: { name } }, context) => {
-        if (context?.previousSloList) {
-          queryClient.setQueryData(sloKeys.lists(), context.previousSloList);
+        if (context?.previousData && context?.queryKey) {
+          queryClient.setQueryData(context.queryKey, context.previousData);
         }
 
         toasts.addError(new Error(String(error)), {
@@ -72,6 +75,9 @@ export function useUpdateSlo() {
             values: { name },
           }),
         });
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
       },
     }
   );
