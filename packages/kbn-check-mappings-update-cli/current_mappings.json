@@ -1713,6 +1713,17 @@
           }
         }
       },
+      "headers": {
+        "dynamic": false,
+        "properties": {
+          "key": {
+            "type": "text"
+          },
+          "value": {
+            "type": "text"
+          }
+        }
+      },
       "timeout": {
         "type": "integer"
       },
