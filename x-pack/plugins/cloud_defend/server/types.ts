@@ -11,7 +11,7 @@ import type {
   CustomRequestHandlerContext,
   Logger,
   SavedObjectsClientContract,
-  IScopedClusterClient,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
@@ -47,7 +47,7 @@ export interface CloudDefendPluginStartDeps {
 export interface CloudDefendApiRequestHandlerContext {
   user: ReturnType<SecurityPluginStart['authc']['getCurrentUser']>;
   logger: Logger;
-  esClient: IScopedClusterClient;
+  esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   agentPolicyService: AgentPolicyServiceInterface;
   agentService: AgentService;

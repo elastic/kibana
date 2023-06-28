@@ -13,13 +13,20 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import type { AgentPolicyServiceInterface, AgentService } from '@kbn/fleet-plugin/server';
+import type { SavedObjectsClientContract, Logger, ElasticsearchClient } from '@kbn/core/server';
+import type {
+  AgentPolicyServiceInterface,
+  AgentService,
+  PackageService,
+  PackagePolicyClient,
+} from '@kbn/fleet-plugin/server';
 import moment from 'moment';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   ALERTS_INDEX_PATTERN,
+  FILE_INDEX_PATTERN,
   INTEGRATION_PACKAGE_NAME,
+  PROCESS_INDEX_PATTERN,
   STATUS_ROUTE_PATH,
 } from '../../../common/constants';
 import type { CloudDefendApiRequestHandlerContext, CloudDefendRouter } from '../../types';
@@ -31,6 +38,16 @@ import {
   getInstalledPolicyTemplates,
 } from '../../lib/fleet_util';
 import { checkIndexStatus } from '../../lib/check_index_status';
+
+interface CloudDefendStatusDependencies {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  agentPolicyService: AgentPolicyServiceInterface;
+  agentService: AgentService;
+  packagePolicyService: PackagePolicyClient;
+  packageService: PackageService;
+}
 
 export const INDEX_TIMEOUT_IN_MINUTES = 10;
 
@@ -95,7 +112,7 @@ const assertResponse = (
   }
 };
 
-const getCloudDefendStatus = async ({
+export const getCloudDefendStatus = async ({
   logger,
   esClient,
   soClient,
@@ -103,15 +120,19 @@ const getCloudDefendStatus = async ({
   packagePolicyService,
   agentPolicyService,
   agentService,
-}: CloudDefendApiRequestHandlerContext): Promise<CloudDefendSetupStatus> => {
+}: CloudDefendStatusDependencies): Promise<CloudDefendSetupStatus> => {
   const [
     alertsIndexStatus,
+    fileIndexStatus,
+    processIndexStatus,
     installation,
     latestCloudDefendPackage,
     installedPackagePolicies,
     installedPolicyTemplates,
   ] = await Promise.all([
-    checkIndexStatus(esClient.asCurrentUser, ALERTS_INDEX_PATTERN, logger),
+    checkIndexStatus(esClient, ALERTS_INDEX_PATTERN, logger),
+    checkIndexStatus(esClient, FILE_INDEX_PATTERN, logger),
+    checkIndexStatus(esClient, PROCESS_INDEX_PATTERN, logger),
     packageService.asInternalUser.getInstallation(INTEGRATION_PACKAGE_NAME),
     packageService.asInternalUser.fetchFindLatestPackage(INTEGRATION_PACKAGE_NAME),
     getCloudDefendPackagePolicies(soClient, packagePolicyService, INTEGRATION_PACKAGE_NAME, {
@@ -136,6 +157,14 @@ const getCloudDefendStatus = async ({
     {
       index: ALERTS_INDEX_PATTERN,
       status: alertsIndexStatus,
+    },
+    {
+      index: FILE_INDEX_PATTERN,
+      status: fileIndexStatus,
+    },
+    {
+      index: PROCESS_INDEX_PATTERN,
+      status: processIndexStatus,
     },
   ];
 
