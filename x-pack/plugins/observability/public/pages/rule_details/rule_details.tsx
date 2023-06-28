@@ -32,7 +32,7 @@ import {
   RULE_DETAILS_ALERTS_TAB,
   RULE_DETAILS_TAB_URL_STORAGE_KEY,
 } from './constants';
-import { paths } from '../../config/paths';
+import { paths } from '../../routes/paths';
 import {
   defaultTimeRange,
   getDefaultAlertSummaryTimeRange,
