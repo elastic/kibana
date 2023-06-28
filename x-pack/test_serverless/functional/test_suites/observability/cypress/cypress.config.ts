@@ -27,7 +27,7 @@ export default defineCypressConfig({
   },
   e2e: {
     baseUrl: 'http://localhost:5620',
-    supportFile: false,
+    supportFile: './support/e2e.ts',
     specPattern: './e2e/**/*.cy.ts',
   },
 });
