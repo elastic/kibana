@@ -10,6 +10,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 
+import { AppDefinition } from './types';
+
 export enum appIds {
   INGEST_PIPELINES = 'ingest_pipelines',
   PIPELINES = 'pipelines',
@@ -32,14 +34,7 @@ export const appCategories = {
   OTHER: 'other',
 };
 
-export const appDefinitions: Record<
-  AppId,
-  {
-    category: string;
-    description: string;
-    icon: React.ReactElement;
-  }
-> = {
+export const appDefinitions: Record<AppId, AppDefinition> = {
   [appIds.INGEST_PIPELINES]: {
     category: appCategories.DATA,
     description: i18n.translate(

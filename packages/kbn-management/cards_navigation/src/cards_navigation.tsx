@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { CardsNavigationComponentProps, AppRegistrySections, Application } from './types';
+import { CardsNavigationComponentProps, AppRegistrySections, Application, AppProps } from './types';
 import { appCategories, appDefinitions, getAppIdsByCategory } from './consts';
 import type { AppId } from './consts';
 
@@ -45,7 +45,7 @@ const getAppsForCategory = (category: string, filteredApps: { [key: string]: App
         ...appDefinitions[appId],
       };
     })
-    .filter(Boolean);
+    .filter(Boolean) as AppProps[];
 };
 
 const getEnabledAppsByCategory = (sections: AppRegistrySections[], hideLinksTo: string[]) => {
@@ -124,16 +124,16 @@ export const CardsNavigation = ({
           </EuiText>
           <EuiSpacer size="l" />
           <EuiFlexGrid columns={3}>
-            {category.apps.map((app) => (
-              <EuiFlexItem key={app!.id}>
+            {category.apps.map((app: AppProps) => (
+              <EuiFlexItem key={app.id}>
                 <EuiCard
-                  data-test-subj={`app-card-${app!.id}`}
+                  data-test-subj={`app-card-${app.id}`}
                   layout="horizontal"
-                  icon={app!.icon}
+                  icon={app.icon}
                   titleSize="xs"
-                  title={app!.title}
-                  description={app!.description}
-                  href={appBasePath + app!.href}
+                  title={app.title}
+                  description={app.description}
+                  href={appBasePath + app.href}
                   onClick={onCardClick}
                 />
               </EuiFlexItem>

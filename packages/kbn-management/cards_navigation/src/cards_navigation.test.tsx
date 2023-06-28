@@ -17,7 +17,7 @@ const renderCardsNavigationComponent = (props: CardsNavigationComponentProps) =>
   return [render(<CardsNavigation {...props} />)];
 };
 
-describe('ProjectSwitcher', () => {
+describe('Cards Navigation', () => {
   describe('Component', () => {
     test('is rendered', () => {
       expect(() =>
