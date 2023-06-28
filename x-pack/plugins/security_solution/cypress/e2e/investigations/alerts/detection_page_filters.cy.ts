@@ -6,6 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
+import type { FilterItemObj } from '../../../../public/common/components/filter_group/types';
 import { getNewRule } from '../../../objects/rule';
 import {
   CONTROL_FRAMES,
@@ -84,12 +85,7 @@ const customFilters = [
   },
 ];
 const assertFilterControlsWithFilterObject = (
-  filterObject: Array<{
-    fieldName: string;
-    title: string;
-    selectedOptions?: string[];
-    [k: string]: unknown;
-  }> = DEFAULT_DETECTION_PAGE_FILTERS
+  filterObject: FilterItemObj[] = DEFAULT_DETECTION_PAGE_FILTERS
 ) => {
   cy.get(CONTROL_FRAMES).should((sub) => {
     expect(sub.length).eq(filterObject.length);
@@ -129,7 +125,7 @@ describe(`Detections : Page Filters`, () => {
     assertFilterControlsWithFilterObject();
   });
 
-  context.only('Alert Page Filters Customization ', () => {
+  context('Alert Page Filters Customization ', () => {
     beforeEach(() => {
       login();
       visit(ALERTS_URL);

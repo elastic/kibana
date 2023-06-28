@@ -11,7 +11,7 @@ import type {
   OptionsListEmbeddableInput,
 } from '@kbn/controls-plugin/common';
 
-import { isEmpty } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import type { FilterItemObj } from './types';
 
 export const getPanelsInOrderFromControlsInput = (controlInput: ControlGroupInput) => {
@@ -125,3 +125,30 @@ export const reorderControlsWithDefaultControls = (args: ReorderControlsArgs) =>
 
   return [...resultDefaultControls, ...resultNonPersitantControls];
 };
+
+export const getFilterControlsComparator =
+  (...fieldsToCompare: Array<keyof FilterItemObj>) =>
+  (value1: FilterItemObj[], value2: FilterItemObj[]) => {
+    if (value1.length !== value2.length) return false;
+    const valmod1 = value1.map((v) => {
+      return fieldsToCompare.reduce((prev, current) => {
+        const result = {
+          ...prev,
+          [current]: v[current],
+        };
+        return result;
+      }, {} as FilterItemObj);
+    });
+
+    const valmod2 = value2.map((v) => {
+      return fieldsToCompare.reduce((prev, current) => {
+        const result = {
+          ...prev,
+          [current]: v[current],
+        };
+        return result;
+      }, {} as FilterItemObj);
+    });
+
+    return isEqual(valmod1, valmod2);
+  };

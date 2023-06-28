@@ -10,9 +10,11 @@ import {
   getFilterItemObjListFromControlInput,
   mergeControls,
   reorderControlsWithDefaultControls,
+  getFilterControlsComparator,
 } from './utils';
 import { initialInputData } from './mocks/data';
 import type { FilterItemObj } from './types';
+import { isEqualWith } from 'lodash';
 
 const defaultControls: FilterItemObj[] = [
   {
@@ -243,6 +245,43 @@ describe('utils', () => {
       });
 
       expect(result).toMatchObject(expectedResult);
+    });
+  });
+
+  describe('getFilterControlsComparator', () => {
+    it('should return true when controls are equal and and list of field is empty', () => {
+      const comparator = getFilterControlsComparator();
+      const result = isEqualWith(defaultControls, defaultControls, comparator);
+
+      expect(result).toBe(true);
+    });
+    it('should return false when arrays of different length', () => {
+      const comparator = getFilterControlsComparator();
+      const result = isEqualWith(defaultControls, thirdControlsSet, comparator);
+
+      expect(result).toBe(false);
+    });
+    it('should return true when given set of fields match ', () => {
+      const comparator = getFilterControlsComparator('fieldName');
+      const result = isEqualWith(defaultControls, secondControlsSet, comparator);
+
+      expect(result).toBe(true);
+    });
+    it("should return false when given set of fields don't match ", () => {
+      const comparator = getFilterControlsComparator('fieldName', 'selectedOptions');
+      const result = isEqualWith(defaultControls, secondControlsSet, comparator);
+      expect(result).toBe(false);
+    });
+
+    it('should return true when comparing empty set of filter controls', () => {
+      const comparator = getFilterControlsComparator('fieldName', 'selectedOptions');
+      const result = isEqualWith([], [], comparator);
+      expect(result).toBe(true);
+    });
+    it('should return false when comparing one empty and one non-empty set of filter controls', () => {
+      const comparator = getFilterControlsComparator('fieldName', 'selectedOptions');
+      const result = isEqualWith(defaultControls, [], comparator);
+      expect(result).toBe(false);
     });
   });
 });

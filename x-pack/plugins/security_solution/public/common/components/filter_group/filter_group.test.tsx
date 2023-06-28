@@ -304,7 +304,7 @@ describe(' Filter Group Component ', () => {
       );
     });
 
-    it('should save controls successfully', async () => {
+    it('should not rebuild controls while saving controls when controls are in desired order', async () => {
       render(<TestComponent />);
       updateControlGroupInputMock(initialInputData as ControlGroupInput);
       await openContextMenu();
@@ -314,7 +314,9 @@ describe(' Filter Group Component ', () => {
       const newInputData = {
         ...initialInputData,
         panels: {
+          // status as  persistent controls is first in the position with order as 0
           '0': initialInputData.panels['0'],
+          '1': initialInputData.panels['1'],
         },
       } as ControlGroupInput;
 
@@ -330,7 +332,46 @@ describe(' Filter Group Component ', () => {
         expect(screen.queryAllByTestId(TEST_IDS.SAVE_CONTROL)).toHaveLength(0);
 
         // check if upsert was called correctly
-        expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(1);
+        expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(0);
+      });
+    });
+
+    it('should  rebuild and save controls successfully when controls are not in desired order', async () => {
+      render(<TestComponent />);
+      updateControlGroupInputMock(initialInputData as ControlGroupInput);
+      await openContextMenu();
+      fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.EDIT));
+
+      // modify controls
+      const newInputData = {
+        ...initialInputData,
+        panels: {
+          '0': {
+            ...initialInputData.panels['0'],
+            // status is second in position.
+            // this will force the rebuilding of controls
+            order: 1,
+          },
+          '1': {
+            ...initialInputData.panels['1'],
+            order: 0,
+          },
+        },
+      } as ControlGroupInput;
+
+      updateControlGroupInputMock(newInputData);
+
+      // clear any previous calls to the API
+      controlGroupMock.addOptionsListControl.mockClear();
+
+      fireEvent.click(screen.getByTestId(TEST_IDS.SAVE_CONTROL));
+
+      await waitFor(() => {
+        // edit model gone
+        expect(screen.queryAllByTestId(TEST_IDS.SAVE_CONTROL)).toHaveLength(0);
+
+        // check if upsert was called correctly
+        expect(controlGroupMock.addOptionsListControl.mock.calls.length).toBe(2);
         // field id is not required to be passed  when creating a control
         const { id, ...expectedInputData } = initialInputData.panels['0'].explicitInput;
         expect(controlGroupMock.addOptionsListControl.mock.calls[0][0]).toMatchObject({
