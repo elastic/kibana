@@ -45,6 +45,7 @@ describe('actionTypeRegistry', () => {
           secrets: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
         },
       ],
     };

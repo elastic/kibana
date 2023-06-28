@@ -81,6 +81,7 @@ export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig
   config?: Config;
   isPreconfigured: boolean;
   isDeprecated: boolean;
+  isSystemAction: boolean;
 }
 
 export interface PreConfiguredAction<
