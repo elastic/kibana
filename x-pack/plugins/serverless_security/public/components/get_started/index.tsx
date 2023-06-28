@@ -9,7 +9,7 @@ import React from 'react';
 
 import { KibanaServicesProvider, type Services } from '../../common/services';
 import type { GetStartedComponent } from './types';
-import { GetStarted } from './get_started';
+import { GetStarted } from './lazy';
 
 export const getSecurityGetStartedComponent = (services: Services): GetStartedComponent => {
   return () => (

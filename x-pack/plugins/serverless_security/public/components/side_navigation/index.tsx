@@ -7,7 +7,7 @@
 import React from 'react';
 
 import type { SideNavComponent } from '@kbn/core-chrome-browser/src/project_navigation';
-import { SecuritySideNavigation } from './side_navigation';
+import { SecuritySideNavigation } from './lazy';
 import { KibanaServicesProvider, type Services } from '../../common/services';
 
 export const getSecuritySideNavComponent = (services: Services): SideNavComponent => {
