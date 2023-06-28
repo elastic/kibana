@@ -673,7 +673,7 @@
           "CoreVitalProps",
           ") => JSX.Element"
         ],
-        "path": "x-pack/plugins/observability/public/components/core_web_vitals/get_core_web_vitals_lazy.tsx",
+        "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -687,7 +687,7 @@
             "signature": [
               "CoreVitalProps"
             ],
-            "path": "x-pack/plugins/observability/public/components/core_web_vitals/get_core_web_vitals_lazy.tsx",
+            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3453,7 +3453,7 @@
         "tags": [],
         "label": "UXMetrics",
         "description": [],
-        "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
+        "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3467,7 +3467,7 @@
             "signature": [
               "number | null"
             ],
-            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
+            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3481,7 +3481,7 @@
             "signature": [
               "number | null | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
+            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3495,7 +3495,7 @@
             "signature": [
               "number | null | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
+            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3506,7 +3506,7 @@
             "tags": [],
             "label": "tbt",
             "description": [],
-            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
+            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3520,7 +3520,7 @@
             "signature": [
               "number | null | undefined"
             ],
-            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
+            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3531,7 +3531,7 @@
             "tags": [],
             "label": "coreVitalPages",
             "description": [],
-            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
+            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3545,7 +3545,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
+            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3559,7 +3559,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
+            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3573,7 +3573,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/plugins/observability/public/components/core_web_vitals/core_vitals.tsx",
+            "path": "x-pack/plugins/observability/public/pages/overview/components/sections/ux/core_web_vitals/core_vitals.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -14191,21 +14191,6 @@
         "description": [],
         "signature": [
           "\"observabilityCases\""
-        ],
-        "path": "x-pack/plugins/observability/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observability",
-        "id": "def-common.casesPath",
-        "type": "string",
-        "tags": [],
-        "label": "casesPath",
-        "description": [],
-        "signature": [
-          "\"/cases\""
         ],
         "path": "x-pack/plugins/observability/common/index.ts",
         "deprecated": false,
