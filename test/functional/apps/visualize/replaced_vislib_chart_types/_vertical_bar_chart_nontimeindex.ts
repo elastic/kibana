@@ -184,7 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo(true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const expectedEntries = ['200','404', '503']; // sorting order aligned with reading direction top-bottom
+        const expectedEntries = ['200', '404', '503']; // sorting order aligned with reading direction top-bottom
 
         const legendEntries = await PageObjects.visChart.getLegendEntriesXYCharts(xyChartSelector);
         expect(legendEntries).to.eql(expectedEntries);
