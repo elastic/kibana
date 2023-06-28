@@ -27,7 +27,7 @@ export const RiskScoreEnableSection = () => {
         <EuiTitle>
           <h2>{i18n.RISK_SCORE_MODULE_STATUS}</h2>
         </EuiTitle>
-
+        <EuiSpacer size="m" />
         <EuiFlexItem grow={0}>
           <EuiHorizontalRule margin="s" />
           <EuiFlexGroup justifyContent="spaceBetween">
