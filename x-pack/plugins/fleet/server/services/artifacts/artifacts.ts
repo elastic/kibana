@@ -173,12 +173,12 @@ export const bulkCreateArtifacts = async (
   }
 
   // Use non sorted artifacts array to preserve the artifacts order in the response
-  const nonSortedEsArtifactsResponse: Artifact[] = ([] = artifacts.map((artifact) => {
+  const nonSortedEsArtifactsResponse: Artifact[] = artifacts.map((artifact) => {
     return esSearchHitToArtifact({
       _id: uniqueIdFromArtifact(artifact),
       _source: newArtifactToElasticsearchProperties(artifact),
     });
-  }));
+  });
 
   return {
     artifacts: nonSortedEsArtifactsResponse,
