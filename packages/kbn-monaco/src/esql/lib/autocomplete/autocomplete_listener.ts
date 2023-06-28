@@ -48,6 +48,7 @@ import {
   RenameVariableContext,
   BooleanExpressionContext,
   RegexBooleanExpressionContext,
+  WhereBooleanExpressionContext,
   LimitCommandContext,
   ValueExpressionContext,
   KeepCommandContext,
@@ -354,6 +355,10 @@ export class AutocompleteListener implements ESQLParserListener {
     }
   }
 
+  enterWhereBooleanExpression(ctx: WhereBooleanExpressionContext) {
+    this.suggestions = [];
+  }
+
   enterWhereCommand(ctx: WhereCommandContext) {
     this.suggestions = [];
     this.parentContext = ESQLParser.WHERE;
@@ -370,7 +375,9 @@ export class AutocompleteListener implements ESQLParserListener {
       this.suggestions = this.fields;
       return;
     } else {
-      const innerBooleanExpressions = booleanExpression.getRuleContexts(BooleanExpressionContext);
+      const innerBooleanExpressions = booleanExpression.getRuleContexts(
+        WhereBooleanExpressionContext
+      );
       const regexBooleanExpression = booleanExpression.getRuleContexts(
         RegexBooleanExpressionContext
       );
