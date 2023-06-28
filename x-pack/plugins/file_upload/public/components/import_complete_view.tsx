@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { CodeEditor, KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { getDocLinks, getHttp, getUiSettings, getSettings } from '../kibana_services';
+import { getDocLinks, getHttp, getUiSettings, getSettings, getTheme } from '../kibana_services';
 import { ImportResults } from '../importer';
 import { getPartialImportMessage } from './utils';
 
@@ -221,8 +221,9 @@ export class ImportCompleteView extends Component<Props, {}> {
   }
 
   render() {
+    const theme = getTheme();
     return (
-      <KibanaContextProvider services={services}>
+      <KibanaContextProvider services={{ ...services, theme }}>
         {this._getStatusMsg()}
 
         {this._renderCodeEditor(
