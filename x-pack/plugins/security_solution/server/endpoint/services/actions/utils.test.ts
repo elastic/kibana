@@ -128,7 +128,6 @@ describe('When using Actions service utilities', () => {
           mapToNormalizedActionRequest(
             fleetActionGenerator.generate({
               agents: [],
-              '@timestamp': '2022-04-27T16:08:47.449Z',
             })
           ),
           []
@@ -145,7 +144,6 @@ describe('When using Actions service utilities', () => {
           mapToNormalizedActionRequest(
             fleetActionGenerator.generate({
               agents: ['123'],
-              '@timestamp': '2022-04-27T16:08:47.449Z',
             })
           ),
           []
@@ -159,7 +157,6 @@ describe('When using Actions service utilities', () => {
           mapToNormalizedActionRequest(
             fleetActionGenerator.generate({
               agents: ['123'],
-              '@timestamp': '2022-04-27T16:08:47.449Z',
             })
           ),
           [
@@ -189,7 +186,6 @@ describe('When using Actions service utilities', () => {
           mapToNormalizedActionRequest(
             fleetActionGenerator.generate({
               agents: ['123'],
-              '@timestamp': '2022-04-27T16:08:47.449Z',
             })
           ),
           [endpointResponse]
@@ -244,7 +240,6 @@ describe('When using Actions service utilities', () => {
           mapToNormalizedActionRequest(
             fleetActionGenerator.generate({
               agents: ['123'],
-              '@timestamp': '2022-04-27T16:08:47.449Z',
             })
           ),
           [endpointResponse]
@@ -308,7 +303,6 @@ describe('When using Actions service utilities', () => {
             mapToNormalizedActionRequest(
               fleetActionGenerator.generate({
                 agents: ['123'],
-                '@timestamp': '2022-04-27T16:08:47.449Z',
               })
             ),
             [endpointResponseAtError]
@@ -336,7 +330,6 @@ describe('When using Actions service utilities', () => {
             mapToNormalizedActionRequest(
               fleetActionGenerator.generate({
                 agents: ['123'],
-                '@timestamp': '2022-04-27T16:08:47.449Z',
               })
             ),
             [fleetResponseAtError]
@@ -364,7 +357,6 @@ describe('When using Actions service utilities', () => {
             mapToNormalizedActionRequest(
               fleetActionGenerator.generate({
                 agents: ['123'],
-                '@timestamp': '2022-04-27T16:08:47.449Z',
               })
             ),
             [fleetResponseAtError, endpointResponseAtError]
@@ -455,7 +447,6 @@ describe('When using Actions service utilities', () => {
             mapToNormalizedActionRequest(
               fleetActionGenerator.generate({
                 agents: agentIds,
-                '@timestamp': '2022-04-27T16:08:47.449Z',
               })
             ),
             []
@@ -486,7 +477,6 @@ describe('When using Actions service utilities', () => {
             mapToNormalizedActionRequest(
               fleetActionGenerator.generate({
                 agents: agentIds,
-                '@timestamp': '2022-04-27T16:08:47.449Z',
               })
             ),
             [
@@ -530,7 +520,6 @@ describe('When using Actions service utilities', () => {
             mapToNormalizedActionRequest(
               fleetActionGenerator.generate({
                 agents: agentIds,
-                '@timestamp': '2022-04-27T16:08:47.449Z',
               })
             ),
             [...action123Responses, ...action456Responses, ...action789Responses]
@@ -573,7 +562,6 @@ describe('When using Actions service utilities', () => {
             mapToNormalizedActionRequest(
               fleetActionGenerator.generate({
                 agents: agentIds,
-                '@timestamp': '2022-04-27T16:08:47.449Z',
               })
             ),
             [
@@ -638,7 +626,6 @@ describe('When using Actions service utilities', () => {
             mapToNormalizedActionRequest(
               fleetActionGenerator.generate({
                 agents: agentIds,
-                '@timestamp': '2022-04-27T16:08:47.449Z',
               })
             ),
             [
