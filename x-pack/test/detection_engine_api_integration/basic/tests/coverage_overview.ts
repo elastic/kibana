@@ -10,12 +10,20 @@ import expect from '@kbn/expect';
 import { RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL } from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/urls';
 import { ThreatArray } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createRule, deleteAllRules, getSimpleRule } from '../../utils';
+import {
+  createPrebuiltRuleAssetSavedObjects,
+  createRuleAssetSavedObject,
+  createRule,
+  deleteAllRules,
+  getSimpleRule,
+  installPrebuiltRulesAndTimelines,
+} from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('coverage_overview', () => {
     beforeEach(async () => {
@@ -66,7 +74,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('returns response with an unmapped rule', async () => {
-        const rule1 = await createRule(supertest, log, getSimpleRule());
+        const rule1 = await createRule(supertest, log, { ...getSimpleRule(), threat: undefined });
 
         const { body } = await supertest
           .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
@@ -335,12 +343,16 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('source', () => {
         it('returns response filtered by custom rules', async () => {
-          const expectedRule1 = await createRule(supertest, log, {
+          await createPrebuiltRuleAssetSavedObjects(es, [
+            createRuleAssetSavedObject({
+              rule_id: 'prebuilt-rule-1',
+              threat: generateThreatArray(1),
+            }),
+          ]);
+          await installPrebuiltRulesAndTimelines(supertest);
+
+          const expectedRule = await createRule(supertest, log, {
             ...getSimpleRule('rule-1'),
-            threat: generateThreatArray(1),
-          });
-          const expectedRule2 = await createRule(supertest, log, {
-            ...getSimpleRule('rule-2', true),
             threat: generateThreatArray(2),
           });
 
@@ -356,21 +368,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(body).to.eql({
             coverage: {
-              T001: [expectedRule1.id],
-              TA001: [expectedRule1.id],
-              'T001.001': [expectedRule1.id],
-              T002: [expectedRule2.id],
-              TA002: [expectedRule2.id],
-              'T002.002': [expectedRule2.id],
+              T002: [expectedRule.id],
+              TA002: [expectedRule.id],
+              'T002.002': [expectedRule.id],
             },
             unmapped_rule_ids: [],
             rules_data: {
-              [expectedRule1.id]: {
+              [expectedRule.id]: {
                 activity: 'disabled',
-                name: 'Simple Rule Query',
-              },
-              [expectedRule2.id]: {
-                activity: 'enabled',
                 name: 'Simple Rule Query',
               },
             },
