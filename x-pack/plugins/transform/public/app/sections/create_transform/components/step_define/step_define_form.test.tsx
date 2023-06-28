@@ -83,7 +83,7 @@ describe('Transform: <DefinePivotForm />', () => {
       storage: createMockStorage(),
     };
 
-    const mockOnChange = jest.fn(); // Mock the onChange callback
+    const mockOnChange = jest.fn();
 
     const { getByText } = render(
       <I18nProvider>
@@ -104,6 +104,7 @@ describe('Transform: <DefinePivotForm />', () => {
     await waitFor(() => {
       expect(getByText('Data view')).toBeInTheDocument();
       expect(getByText(searchItems.dataView.getIndexPattern())).toBeInTheDocument();
+      expect(mockOnChange).toBeCalled();
     });
   }, 10000);
 });
