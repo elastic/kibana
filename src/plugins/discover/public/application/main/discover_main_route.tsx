@@ -96,6 +96,9 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
 
   const checkData = useCallback(async () => {
     try {
+      if (savedSearchId) {
+        return true; // bypass NoData screen
+      }
       const hasUserDataViewValue = await data.dataViews.hasData
         .hasUserDataView()
         .catch(() => false);
@@ -124,7 +127,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
       setError(e);
       return false;
     }
-  }, [data.dataViews, isDev]);
+  }, [data.dataViews, isDev, savedSearchId]);
 
   const loadSavedSearch = useCallback(
     async (nextDataView?: DataView) => {
