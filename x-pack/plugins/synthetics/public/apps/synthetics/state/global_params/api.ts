@@ -25,9 +25,8 @@ export const getGlobalParams = async (): Promise<SyntheticsParams[]> => {
 
 export const addGlobalParam = async (
   paramRequest: SyntheticsParamRequest
-): Promise<SyntheticsParams> => {
-  return apiService.post(SYNTHETICS_API_URLS.PARAMS, paramRequest, SyntheticsParamsCodec);
-};
+): Promise<SyntheticsParams> =>
+  apiService.post(SYNTHETICS_API_URLS.PARAMS, paramRequest, SyntheticsParamsCodec);
 
 export const editGlobalParam = async ({
   paramRequest,
@@ -35,8 +34,8 @@ export const editGlobalParam = async ({
 }: {
   id: string;
   paramRequest: SyntheticsParamRequest;
-}): Promise<SyntheticsParams> => {
-  return apiService.put<SyntheticsParams>(
+}): Promise<SyntheticsParams> =>
+  apiService.put<SyntheticsParams>(
     SYNTHETICS_API_URLS.PARAMS,
     {
       id,
@@ -44,14 +43,8 @@ export const editGlobalParam = async ({
     },
     SyntheticsParamsCodec
   );
-};
 
-export const deleteGlobalParams = async ({
-  ids,
-}: {
-  ids: string[];
-}): Promise<DeleteParamsResponse[]> => {
-  return apiService.delete(SYNTHETICS_API_URLS.PARAMS, {
+export const deleteGlobalParams = async (ids: string[]): Promise<DeleteParamsResponse[]> =>
+  apiService.delete(SYNTHETICS_API_URLS.PARAMS, {
     ids: JSON.stringify(ids),
   });
-};
