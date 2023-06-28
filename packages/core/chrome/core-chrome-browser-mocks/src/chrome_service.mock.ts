@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ChromeBadge, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
@@ -58,7 +58,7 @@ const createStartContractMock = () => {
     setHelpExtension: jest.fn(),
     setHelpMenuLinks: jest.fn(),
     setHelpSupportUrl: jest.fn(),
-    getHelpSupportUrl$: jest.fn(),
+    getHelpSupportUrl$: jest.fn(() => of('https://www.elastic.co/support')),
     getIsNavDrawerLocked$: jest.fn(),
     getCustomNavLink$: jest.fn(),
     setCustomNavLink: jest.fn(),

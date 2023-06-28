@@ -8,6 +8,7 @@
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { of } from 'rxjs';
 
 import { maybeAddCloudLinks } from './maybe_add_cloud_links';
 
@@ -18,6 +19,7 @@ describe('maybeAddCloudLinks', () => {
       security,
       chrome: coreMock.createStart().chrome,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: false },
+      docLinks: coreMock.createStart().docLinks,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -29,11 +31,12 @@ describe('maybeAddCloudLinks', () => {
     security.authc.getCurrentUser.mockResolvedValue(
       securityMock.createMockAuthenticatedUser({ elastic_cloud_user: true })
     );
-    const chrome = coreMock.createStart().chrome;
+    const { chrome, docLinks } = coreMock.createStart();
     maybeAddCloudLinks({
       security,
       chrome,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
+      docLinks,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -74,16 +77,37 @@ describe('maybeAddCloudLinks', () => {
         ],
       ]
     `);
+
+    expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
+    expect(chrome.setHelpMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "href": "https://www.elastic.co/guide/en/index.html",
+            "title": "Documentation",
+          },
+          Object {
+            "href": "https://www.elastic.co/support",
+            "title": "Support",
+          },
+          Object {
+            "href": "https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback",
+            "title": "Give feedback",
+          },
+        ],
+      ]
+    `);
   });
 
   it('when cloud enabled and it fails to fetch the user, it sets the links', async () => {
     const security = securityMock.createStart();
     security.authc.getCurrentUser.mockRejectedValue(new Error('Something went terribly wrong'));
-    const chrome = coreMock.createStart().chrome;
+    const { chrome, docLinks } = coreMock.createStart();
     maybeAddCloudLinks({
       security,
       chrome,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
+      docLinks,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
@@ -120,6 +144,25 @@ describe('maybeAddCloudLinks', () => {
             "iconType": "gear",
             "label": "Organization",
             "order": 300,
+          },
+        ],
+      ]
+    `);
+    expect(chrome.setHelpMenuLinks).toHaveBeenCalledTimes(1);
+    expect(chrome.setHelpMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "href": "https://www.elastic.co/guide/en/index.html",
+            "title": "Documentation",
+          },
+          Object {
+            "href": "https://www.elastic.co/support",
+            "title": "Support",
+          },
+          Object {
+            "href": "https://www.elastic.co/products/kibana/feedback?blade=kibanafeedback",
+            "title": "Give feedback",
           },
         ],
       ]
@@ -131,16 +174,18 @@ describe('maybeAddCloudLinks', () => {
     security.authc.getCurrentUser.mockResolvedValue(
       securityMock.createMockAuthenticatedUser({ elastic_cloud_user: false })
     );
-    const chrome = coreMock.createStart().chrome;
+    const { chrome, docLinks } = coreMock.createStart();
     maybeAddCloudLinks({
       security,
       chrome,
       cloud: { ...cloudMock.createStart(), isCloudEnabled: true },
+      docLinks,
     });
     // Since there's a promise, let's wait for the next tick
     await new Promise((resolve) => process.nextTick(resolve));
     expect(security.authc.getCurrentUser).toHaveBeenCalledTimes(1);
     expect(chrome.setCustomNavLink).not.toHaveBeenCalled();
     expect(security.navControlService.addUserMenuLinks).not.toHaveBeenCalled();
+    expect(chrome.setHelpMenuLinks).not.toHaveBeenCalledTimes(1);
   });
 });
