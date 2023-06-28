@@ -45,6 +45,9 @@ import {
   ALERTS_HISTOGRAM_LEGEND,
   LEGEND_ACTIONS,
   SESSION_VIEWER_BUTTON,
+  ALERT_TAGGING_CONTEXT_MENU_ITEM,
+  ALERT_TAGGING_CONTEXT_MENU,
+  ALERT_TAGGING_UPDATE_BUTTON,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -89,16 +92,18 @@ export const openAddEndpointExceptionFromFirstAlert = () => {
   cy.get(FIELD_INPUT).should('be.visible');
 };
 
-export const openAddExceptionFromAlertDetails = () => {
-  cy.get(EXPAND_ALERT_BTN).first().click({ force: true });
-
+export const openAddRuleExceptionFromAlertActionButton = () => {
   cy.get(TAKE_ACTION_BTN).click();
   cy.get(TAKE_ACTION_MENU).should('be.visible');
 
-  cy.get(ADD_EXCEPTION_BTN).click();
-  cy.get(ADD_EXCEPTION_BTN).should('not.be.visible');
+  cy.get(ADD_EXCEPTION_BTN, { timeout: 10000 }).first().click();
 };
 
+export const openAddEndpointExceptionFromAlertActionButton = () => {
+  cy.get(TAKE_ACTION_BTN).click();
+  cy.get(TAKE_ACTION_MENU).should('be.visible');
+  cy.get(ADD_ENDPOINT_EXCEPTION_BTN, { timeout: 10000 }).first().click();
+};
 export const closeFirstAlert = () => {
   expandFirstAlertActions();
   cy.get(CLOSE_ALERT_BTN).click();
@@ -446,4 +451,22 @@ export const visitAlertsPageWithCustomFilters = (pageFilters: FilterItemObj[]) =
 
 export const openSessionViewerFromAlertTable = (rowIndex: number = 0) => {
   cy.get(SESSION_VIEWER_BUTTON).eq(rowIndex).click();
+};
+
+export const openAlertTaggingContextMenu = () => {
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
+  cy.get(ALERT_TAGGING_CONTEXT_MENU_ITEM).click();
+};
+
+export const openAlertTaggingBulkActionMenu = () => {
+  cy.get(TAKE_ACTION_POPOVER_BTN).click();
+  cy.get(ALERT_TAGGING_CONTEXT_MENU_ITEM).click();
+};
+
+export const clickAlertTag = (tag: string) => {
+  cy.get(ALERT_TAGGING_CONTEXT_MENU).contains(tag).click();
+};
+
+export const updateAlertTags = () => {
+  cy.get(ALERT_TAGGING_UPDATE_BUTTON).click();
 };

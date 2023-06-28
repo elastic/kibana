@@ -68,7 +68,6 @@ export const SimpleMonitorForm = () => {
         error={hasURLError ? URL_REQUIRED_LABEL : undefined}
       >
         <EuiFieldText
-          placeholder={WEBSITE_URL_PLACEHOLDER}
           fullWidth
           {...register(ConfigKey.URLS, { required: true })}
           isInvalid={!!errors?.[ConfigKey.URLS]}

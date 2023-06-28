@@ -13,6 +13,7 @@ import {
   Position,
   Settings,
   TooltipProps,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -158,11 +159,8 @@ export const MetricsExplorerChart = ({
               tickFormat={yAxisFormater}
               domain={domain}
             />
-            <Settings
-              tooltip={tooltipProps}
-              onBrushEnd={handleTimeChange}
-              theme={getChartTheme(isDarkMode)}
-            />
+            <Tooltip {...tooltipProps} />
+            <Settings onBrushEnd={handleTimeChange} theme={getChartTheme(isDarkMode)} />
           </Chart>
         ) : options.metrics.length > 0 ? (
           <MetricsExplorerEmptyChart />

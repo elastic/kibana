@@ -144,8 +144,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Selecting a conflicting option in the first control will validate the second and third controls', async () => {
+      await dashboardControls.clearControlSelections(controlIds[0]);
+
       await dashboardControls.optionsListOpenPopover(controlIds[0]);
-      await dashboardControls.optionsListPopoverClearSelections();
       await dashboardControls.optionsListPopoverSelectOption('dog');
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
@@ -200,8 +201,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
       await dashboard.waitForRenderComplete();
 
+      await dashboardControls.clearControlSelections(controlIds[1]);
       await dashboardControls.optionsListOpenPopover(controlIds[1]);
-      await dashboardControls.optionsListPopoverClearSelections();
       expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
       await dashboardControls.ensureAvailableOptionsEqual(
         controlIds[1],
@@ -212,8 +213,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         true
       );
 
+      await dashboardControls.clearControlSelections(controlIds[2]);
       await dashboardControls.optionsListOpenPopover(controlIds[2]);
-      await dashboardControls.optionsListPopoverClearSelections();
       expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(1);
       await dashboardControls.ensureAvailableOptionsEqual(
         controlIds[2],

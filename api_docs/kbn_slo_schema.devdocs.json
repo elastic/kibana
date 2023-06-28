@@ -415,6 +415,36 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.APMTransactionDurationIndicator",
+        "type": "Type",
+        "tags": [],
+        "label": "APMTransactionDurationIndicator",
+        "description": [],
+        "signature": [
+          "{ type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; }"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.APMTransactionErrorRateIndicator",
+        "type": "Type",
+        "tags": [],
+        "label": "APMTransactionErrorRateIndicator",
+        "description": [],
+        "signature": [
+          "{ type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; }"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.BudgetingMethod",
         "type": "Type",
         "tags": [],
@@ -710,7 +740,22 @@
         "label": "GetPreviewDataResponse",
         "description": [],
         "signature": [
-          "{ date: Date; sliValue: number; }[]"
+          "{ date: string; sliValue: number; }[]"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.GetSLOBurnRatesResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetSLOBurnRatesResponse",
+        "description": [],
+        "signature": [
+          "{ burnRates: { name: string; burnRate: number; sli: number; }[]; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -756,6 +801,21 @@
         "description": [],
         "signature": [
           "{ type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; filter: string; good: string; total: string; timestampField: string; }; } | { type: \"sli.metric.custom\"; params: { index: string; filter: string; good: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; total: { metrics: { name: string; aggregation: \"sum\"; field: string; }[]; equation: string; }; timestampField: string; }; }"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.IndicatorType",
+        "type": "Type",
+        "tags": [],
+        "label": "IndicatorType",
+        "description": [],
+        "signature": [
+          "\"sli.apm.transactionDuration\" | \"sli.apm.transactionErrorRate\" | \"sli.kql.custom\" | \"sli.metric.custom\""
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -848,6 +908,21 @@
           "{ status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.TimeWindow",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeWindow",
+        "description": [],
+        "signature": [
+          "\"rolling\" | \"calendarAligned\""
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2657,6 +2732,70 @@
           "<Date, string, unknown>; sliValue: ",
           "NumberC",
           "; }>>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.getSLOBurnRatesParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getSLOBurnRatesParamsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ id: ",
+          "StringC",
+          "; }>; body: ",
+          "TypeC",
+          "<{ windows: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; duration: ",
+          "Type",
+          "<",
+          {
+            "pluginId": "@kbn/slo-schema",
+            "scope": "common",
+            "docId": "kibKbnSloSchemaPluginApi",
+            "section": "def-common.Duration",
+            "text": "Duration"
+          },
+          ", string, unknown>; }>>; }>; }>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.getSLOBurnRatesResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "getSLOBurnRatesResponseSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ burnRates: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ name: ",
+          "StringC",
+          "; burnRate: ",
+          "NumberC",
+          "; sli: ",
+          "NumberC",
+          "; }>>; }>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -4776,6 +4915,26 @@
           ", string, unknown>; type: ",
           "LiteralC",
           "<\"calendarAligned\">; }>]>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/time_window.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.timeWindowTypeSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "timeWindowTypeSchema",
+        "description": [],
+        "signature": [
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"rolling\">, ",
+          "LiteralC",
+          "<\"calendarAligned\">]>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/time_window.ts",
         "deprecated": false,
