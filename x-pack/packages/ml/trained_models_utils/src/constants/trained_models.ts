@@ -65,4 +65,4 @@ export const MODEL_STATE = {
   DOWNLOADED: 'downloaded',
 } as const;
 
-export type ModelState = typeof MODEL_STATE[keyof typeof MODEL_STATE];
+export type ModelState = typeof MODEL_STATE[keyof typeof MODEL_STATE] | null;
