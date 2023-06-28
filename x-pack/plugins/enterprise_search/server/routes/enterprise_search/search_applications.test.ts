@@ -211,9 +211,9 @@ describe('engines routes', () => {
         meta: {
           body: {
             error: {
+              reason: `Invalid alias name [engine name]: must not contain the following characters ['\',' ','"','<','*','?','>','|',',','/']`,
               type: 'invalid_alias_name_exception',
             },
-            reason: `Invalid alias name [engine name]: must not contain the following characters ['\',' ','"','<','*','?','>','|',',','/']`,
           },
           statusCode: 400,
         },
@@ -221,12 +221,13 @@ describe('engines routes', () => {
       await mockRouter.callRoute({
         params: { engine_name: 'engine name' },
       });
+      const exceptionReason = `Search application name must not contain: [ '' , ' ' , '\"' , '<' , '*' , '?' , '>' , '|' , ',' , '/' ]`;
       expect(mockRouter.response.customError).toHaveBeenCalledWith({
         body: {
           attributes: {
             error_code: 'search_application_name_invalid',
           },
-          message: 'Invalid Search application name. ',
+          message: `Invalid Search application name. ${exceptionReason}`,
         },
         statusCode: 400,
       });
