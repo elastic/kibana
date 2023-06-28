@@ -14,6 +14,7 @@ import { PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
+import type { UpdateSavedQueryResponse } from './types';
 
 export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.put(
@@ -122,9 +123,26 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           {};
       }
 
+      const { attributes } = updatedSavedQuerySO;
+
+      const data: Partial<UpdateSavedQueryResponse> = {
+        description: attributes.description,
+        id: attributes.id,
+        removed: attributes.removed,
+        snapshot: attributes.snapshot,
+        version: attributes.version,
+        ecs_mapping: attributes.ecs_mapping,
+        interval: attributes.interval,
+        platform: attributes.platform,
+        query: attributes.query,
+        updated_at: attributes.updated_at,
+        updated_by: attributes.updated_by,
+        saved_object_id: updatedSavedQuerySO.id,
+      };
+
       return response.ok({
         body: {
-          data: { ...updatedSavedQuerySO.attributes, saved_object_id: updatedSavedQuerySO.id },
+          data,
         },
       });
     }
