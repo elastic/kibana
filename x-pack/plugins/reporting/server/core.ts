@@ -115,7 +115,7 @@ export class ReportingCore {
     this.packageInfo = context.env.packageInfo;
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
-
+      
     this.csvSearchsourceExport = new CsvSearchsourceExportType(
       this.core,
       this.config,
@@ -123,7 +123,6 @@ export class ReportingCore {
       this.context
     );
     this.exportTypesRegistry.register(this.csvSearchsourceExport);
-
     this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.pdfExport);
 
@@ -151,7 +150,6 @@ export class ReportingCore {
   public pluginSetup(setupDeps: ReportingInternalSetup) {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
-
     this.csvSearchsourceExport.setup(setupDeps);
     this.pdfExport.setup(setupDeps);
 
@@ -168,6 +166,7 @@ export class ReportingCore {
   public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
+    
     this.csvSearchsourceExport.start(startDeps);
     this.pdfExport.start({ ...startDeps, reporting: this.getContract() });
 

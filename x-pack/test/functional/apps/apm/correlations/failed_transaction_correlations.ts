@@ -25,8 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   };
 
   describe('failed transactions correlations', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/127416
-    describe.skip('space with no features disabled', () => {
+    describe('space with no features disabled', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/metrics_and_apm');
         await spacesService.create({
@@ -64,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const fromTime = 'Jul 29, 2019 @ 00:00:00.000';
         const toTime = 'Jul 30, 2019 @ 00:00:00.000';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime, true);
 
         await retry.try(async () => {
           const apmMainContainerText = await testSubjects.getVisibleTextAll('apmMainContainer');
