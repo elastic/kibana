@@ -28,7 +28,7 @@ import { asWeight } from '../../utils/formatters/as_weight';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { StackFrameSummary } from '../stack_frame_summary';
-import { GetLabel } from './get_label';
+import { Label } from './label';
 
 interface Row {
   rank: number;
@@ -89,7 +89,7 @@ function TotalSamplesStat({
       title={
         <EuiText style={{ fontWeight: 'bold' }}>
           {value}
-          <GetLabel value={percentDelta} prepend="(" append=")" />
+          <Label value={percentDelta} prepend="(" append=")" />
         </EuiText>
       }
       description={sampleHeader}
@@ -121,10 +121,10 @@ function SampleStat({
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>{samplesLabel}</EuiFlexItem>
       <EuiFlexItem>
-        <GetLabel value={percentDelta} append=" rel" />
+        <Label value={percentDelta} append=" rel" />
       </EuiFlexItem>
       <EuiFlexItem>
-        <GetLabel value={totalPercentDelta} append=" abs" />
+        <Label value={totalPercentDelta} append=" abs" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -141,7 +141,7 @@ function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU?: number; isSampled?: 
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>{cpuLabel}</EuiFlexItem>
       <EuiFlexItem>
-        <GetLabel value={diffCPU} prepend="(" append=")" />
+        <Label value={diffCPU} prepend="(" append=")" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

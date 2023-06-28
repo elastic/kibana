@@ -62,18 +62,6 @@ export function TopNFunctionsView() {
             <EuiFlexItem>
               <Grid
                 topNFunctions={state.data}
-                sortDirection={sortDirection}
-                sortField={sortField}
-                onSortChange={(nextSort) => {
-                  profilingRouter.push(routePath, {
-                    path,
-                    query: {
-                      ...query,
-                      sortField: nextSort.sortField,
-                      sortDirection: nextSort.sortDirection,
-                    },
-                  });
-                }}
                 totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
                 isDifferentialView={false}
               />

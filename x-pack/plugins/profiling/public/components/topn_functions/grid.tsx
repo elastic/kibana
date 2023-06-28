@@ -6,40 +6,24 @@
  */
 
 import {
-  EuiBadge,
   EuiButtonIcon,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
   EuiDataGridControlColumn,
   EuiDataGridSorting,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiScreenReaderOnly,
-  EuiText,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { keyBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
-import { TopNFunctions, TopNFunctionSortField } from '../../../common/functions';
-import { StackFrameMetadata } from '../../../common/profiling';
-import { calculateImpactEstimates } from '../../utils/calculate_impact_estimates';
-import { asCost } from '../../utils/formatters/as_cost';
-import { asWeight } from '../../utils/formatters/as_weight';
+import { TopNFunctions } from '../../../common/functions';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
-import { StackFrameSummary } from '../stack_frame_summary';
-import { GetLabel } from './get_label';
+import { FunctionRow } from './function_row';
+import { getFunctionsRows, IFunctionRow } from './utils';
 
 interface Props {
-  sortDirection: 'asc' | 'desc';
-  sortField: TopNFunctionSortField;
-  onSortChange: (options: {
-    sortDirection: 'asc' | 'desc';
-    sortField: TopNFunctionSortField;
-  }) => void;
   topNFunctions?: TopNFunctions;
   comparisonTopNFunctions?: TopNFunctions;
   totalSeconds: number;
@@ -48,78 +32,7 @@ interface Props {
   comparisonScaleFactor?: number;
 }
 
-interface Row {
-  rank: number;
-  frame: StackFrameMetadata;
-  samples: number;
-  exclusiveCPU: number;
-  inclusiveCPU: number;
-  impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
-  diff?: {
-    rank: number;
-    samples: number;
-    exclusiveCPU: number;
-    inclusiveCPU: number;
-  };
-}
-
-function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFactor?: number }) {
-  return value * scaleFactor;
-}
-function SampleStat({
-  samples,
-  diffSamples,
-  totalSamples,
-  isSampled,
-}: {
-  samples: number;
-  diffSamples?: number;
-  totalSamples: number;
-  isSampled: boolean;
-}) {
-  const samplesLabel = `${isSampled ? '~ ' : ''}${samples.toLocaleString()}`;
-
-  if (diffSamples === undefined || diffSamples === 0 || totalSamples === 0) {
-    return <>{samplesLabel}</>;
-  }
-
-  const percentDelta = (diffSamples / (samples - diffSamples)) * 100;
-  const totalPercentDelta = (diffSamples / totalSamples) * 100;
-
-  return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem>{samplesLabel}</EuiFlexItem>
-      <EuiFlexItem>
-        <GetLabel value={percentDelta} append=" rel" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <GetLabel value={totalPercentDelta} append=" abs" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
-
-function CPUStat({ cpu, diffCPU }: { cpu: number; diffCPU?: number; isSampled?: boolean }) {
-  const cpuLabel = `${cpu.toFixed(2)}%`;
-
-  if (diffCPU === undefined || diffCPU === 0) {
-    return <>{cpuLabel}</>;
-  }
-
-  return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem>{cpuLabel}</EuiFlexItem>
-      <EuiFlexItem>
-        <GetLabel value={diffCPU} prepend="(" append=")" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
-
 export function Grid({
-  sortDirection,
-  sortField,
-  onSortChange,
   topNFunctions,
   comparisonTopNFunctions,
   totalSeconds,
@@ -127,10 +40,24 @@ export function Grid({
   baselineScaleFactor,
   comparisonScaleFactor,
 }: Props) {
-  const theme = useEuiTheme();
-  const [selectedRow, setSelectedRow] = useState<Row | undefined>();
+  const [selectedRow, setSelectedRow] = useState<IFunctionRow | undefined>();
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([
+    { id: 'rank', direction: 'asc' },
+  ]);
+  function onSort(newSortingColumns: EuiDataGridSorting['columns']) {
+    setSortingColumns(newSortingColumns);
+  }
+
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 100 });
+  function onChangeItemsPerPage(pageSize: number) {
+    setPagination((state) => ({ ...state, pageSize, pageIndex: 0 }));
+  }
+  function onChangePage(pageIndex: number) {
+    setPagination((state) => ({ ...state, pageIndex }));
+  }
+
   const isEstimatedA = (topNFunctions?.SamplingRate ?? 1.0) !== 1.0;
-  const totalCount: number = useMemo(() => {
+  const totalCount = useMemo(() => {
     if (!topNFunctions || !topNFunctions.TotalCount) {
       return 0;
     }
@@ -138,66 +65,13 @@ export function Grid({
     return topNFunctions.TotalCount;
   }, [topNFunctions]);
 
-  const rows: Row[] = useMemo(() => {
-    if (!topNFunctions || !topNFunctions.TotalCount || topNFunctions.TotalCount === 0) {
-      return [];
-    }
-
-    const comparisonDataById = comparisonTopNFunctions
-      ? keyBy(comparisonTopNFunctions.TopN, 'Id')
-      : {};
-
-    return topNFunctions.TopN.filter((topN) => topN.CountExclusive > 0).map((topN, i) => {
-      const comparisonRow = comparisonDataById?.[topN.Id];
-
-      const topNCountExclusiveScaled = scaleValue({
-        value: topN.CountExclusive,
-        scaleFactor: baselineScaleFactor,
-      });
-
-      const inclusiveCPU = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
-      const exclusiveCPU = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
-      const totalSamples = topN.CountExclusive;
-
-      const impactEstimates =
-        totalSeconds > 0
-          ? calculateImpactEstimates({
-              countExclusive: exclusiveCPU,
-              countInclusive: inclusiveCPU,
-              totalSamples,
-              totalSeconds,
-            })
-          : undefined;
-
-      function calculateDiff() {
-        if (comparisonTopNFunctions && comparisonRow) {
-          const comparisonCountExclusiveScaled = scaleValue({
-            value: comparisonRow.CountExclusive,
-            scaleFactor: comparisonScaleFactor,
-          });
-
-          return {
-            rank: topN.Rank - comparisonRow.Rank,
-            samples: topNCountExclusiveScaled - comparisonCountExclusiveScaled,
-            exclusiveCPU:
-              exclusiveCPU -
-              (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
-            inclusiveCPU:
-              inclusiveCPU -
-              (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
-          };
-        }
-      }
-
-      return {
-        rank: topN.Rank,
-        frame: topN.Frame,
-        samples: topNCountExclusiveScaled,
-        exclusiveCPU,
-        inclusiveCPU,
-        impactEstimates,
-        diff: calculateDiff(),
-      };
+  const rows = useMemo(() => {
+    return getFunctionsRows({
+      baselineScaleFactor,
+      comparisonScaleFactor,
+      comparisonTopNFunctions,
+      topNFunctions,
+      totalSeconds,
     });
   }, [
     topNFunctions,
@@ -210,7 +84,7 @@ export function Grid({
   const columns: EuiDataGridColumn[] = [
     {
       id: 'rank',
-      initialWidth: 70,
+      initialWidth: 90,
       displayAsText: i18n.translate('xpack.profiling.functionsView.rankColumnLabel', {
         defaultMessage: 'Rank',
       }),
@@ -248,8 +122,16 @@ export function Grid({
       ),
     },
   ];
+
   const leadingControlColumns: EuiDataGridControlColumn[] = [];
-  if (!isDifferentialView) {
+  if (isDifferentialView) {
+    columns.push({
+      id: 'diff',
+      displayAsText: i18n.translate('xpack.profiling.functionsView.diffColumnLabel', {
+        defaultMessage: 'Diff',
+      }),
+    });
+  } else {
     columns.push(
       {
         id: 'annualizedCo2',
@@ -299,85 +181,19 @@ export function Grid({
     });
   }
 
-  if (comparisonTopNFunctions) {
-    columns.push({
-      id: 'diff',
-      displayAsText: i18n.translate('xpack.profiling.functionsView.diffColumnLabel', {
-        defaultMessage: 'Diff',
-      }),
-    });
-  }
   const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
-
-  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
-  function onSort(newSortingColumns: EuiDataGridSorting['columns']) {
-    setSortingColumns(newSortingColumns);
-  }
 
   function RenderCellValue({ rowIndex, columnId }: EuiDataGridCellValueElementProps) {
     const data = rows[rowIndex];
     if (data) {
-      if (columnId === 'rank') {
-        return <div>{data.rank}</div>;
-      }
-
-      if (columnId === 'function') {
-        return <StackFrameSummary frame={data.frame} />;
-      }
-
-      if (columnId === 'samples') {
-        return (
-          <SampleStat
-            samples={data.samples}
-            diffSamples={data.diff?.samples}
-            totalSamples={totalCount}
-            isSampled={isEstimatedA}
-          />
-        );
-      }
-
-      if (columnId === 'selfCPU') {
-        return <CPUStat cpu={data.exclusiveCPU} diffCPU={data.diff?.exclusiveCPU} />;
-      }
-
-      if (columnId === 'totalCPU') {
-        return <CPUStat cpu={data.inclusiveCPU} diffCPU={data.diff?.inclusiveCPU} />;
-      }
-
-      if (columnId === 'annualizedCo2' && data.impactEstimates?.annualizedCo2) {
-        return <div>{asWeight(data.impactEstimates.annualizedCo2)}</div>;
-      }
-
-      if (columnId === 'annualizedDollarCost' && data.impactEstimates?.annualizedDollarCost) {
-        return <div>{asCost(data.impactEstimates.annualizedDollarCost)}</div>;
-      }
-
-      if (columnId === 'diff') {
-        if (!data.diff) {
-          return (
-            <EuiText size="xs" color={theme.euiTheme.colors.primaryText}>
-              {i18n.translate('xpack.profiling.functionsView.newLabel', {
-                defaultMessage: 'New',
-              })}
-            </EuiText>
-          );
-        }
-
-        if (data.diff.rank === 0) {
-          return null;
-        }
-
-        return (
-          <EuiBadge
-            color={data.diff.rank > 0 ? 'success' : 'danger'}
-            iconType={data.diff.rank > 0 ? 'sortDown' : 'sortUp'}
-            iconSide="right"
-            style={{ minWidth: '100%', textAlign: 'right' }}
-          >
-            {data.diff.rank}
-          </EuiBadge>
-        );
-      }
+      return (
+        <FunctionRow
+          functionRow={data}
+          columnId={columnId}
+          isEstimatedA={isEstimatedA}
+          totalCount={totalCount}
+        />
+      );
     }
     return null;
   }
@@ -390,8 +206,16 @@ export function Grid({
         columnVisibility={{ visibleColumns, setVisibleColumns }}
         rowCount={totalCount}
         renderCellValue={RenderCellValue}
+        inMemory={{ level: 'sorting' }}
         sorting={{ columns: sortingColumns, onSort }}
         leadingControlColumns={leadingControlColumns}
+        pagination={{
+          ...pagination,
+          onChangeItemsPerPage,
+          onChangePage,
+        }}
+        rowHeightsOptions={{ defaultHeight: 'auto' }}
+        toolbarVisibility={{ showColumnSelector: false }}
       />
       {selectedRow && (
         <FrameInformationTooltip
