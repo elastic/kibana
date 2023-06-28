@@ -10,27 +10,15 @@ import expect from '@kbn/expect';
 import { RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL } from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/urls';
 import { ThreatArray } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import {
-  createRule,
-  createSignalsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-  getSimpleRule,
-} from '../../utils';
+import { createRule, deleteAllRules, getSimpleRule } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
-  const es = getService('es');
 
   describe('coverage_overview', () => {
     beforeEach(async () => {
-      await createSignalsIndex(supertest, log);
-    });
-
-    afterEach(async () => {
-      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 
