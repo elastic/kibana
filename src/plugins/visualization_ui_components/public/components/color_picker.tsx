@@ -33,12 +33,12 @@ const tooltipContent = {
 };
 
 export const ColorPicker = ({
+  overwriteColor,
+  defaultColor,
+  setConfig,
   label,
   disableHelpTooltip,
   disabled,
-  setConfig,
-  defaultColor,
-  overwriteColor,
   showAlpha,
 }: {
   overwriteColor?: string | null;
