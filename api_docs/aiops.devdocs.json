@@ -530,10 +530,10 @@
               },
               "; fieldStatsServices: ",
               {
-                "pluginId": "unifiedFieldList",
-                "scope": "public",
-                "docId": "kibUnifiedFieldListPluginApi",
-                "section": "def-public.FieldStatsServices",
+                "pluginId": "@kbn/unified-field-list",
+                "scope": "common",
+                "docId": "kibKbnUnifiedFieldListPluginApi",
+                "section": "def-common.FieldStatsServices",
                 "text": "FieldStatsServices"
               },
               "; timeRangeMs?: ",
