@@ -22,7 +22,7 @@ const createMockConfig = (mockConfig: ConfigType = { enabled: true, maxSpaces: 1
 };
 
 describe('#getAll', () => {
-  const savedObjects:SavedObject<unknown>[] = [
+  const savedObjects: Array<SavedObject<unknown>> = [
     {
       // foo has all of the attributes expected by the space interface
       id: 'foo',
@@ -65,14 +65,14 @@ describe('#getAll', () => {
     },
   ];
 
-  const expectedSpaces:Space[] = [
+  const expectedSpaces: Space[] = [
     {
       id: 'foo',
       name: 'foo-name',
       description: 'foo-description',
-      color: "#FFFFFF",
-      initials: "FB",
-      imageUrl: "go-bots/predates/transformers",
+      color: '#FFFFFF',
+      initials: 'FB',
+      imageUrl: 'go-bots/predates/transformers',
       disabledFeatures: [],
       _reserved: true,
     },
@@ -80,7 +80,7 @@ describe('#getAll', () => {
       id: 'bar',
       name: 'bar-name',
       description: 'bar-description',
-      initials: "BA",
+      initials: 'BA',
       disabledFeatures: [],
     },
     {
@@ -123,7 +123,7 @@ describe('#getAll', () => {
 });
 
 describe('#get', () => {
-  const savedObject:SavedObject = {
+  const savedObject: SavedObject = {
     id: 'foo',
     type: 'space',
     references: [],
@@ -139,13 +139,13 @@ describe('#get', () => {
     },
   };
 
-  const expectedSpace:Space = {
+  const expectedSpace: Space = {
     id: 'foo',
     name: 'foo-name',
     description: 'foo-description',
-    color: "#FFFFFF",
-    initials: "FB",
-    imageUrl: "go-bots/predates/transformers",
+    color: '#FFFFFF',
+    initials: 'FB',
+    imageUrl: 'go-bots/predates/transformers',
     disabledFeatures: [],
     _reserved: true,
   };
@@ -168,12 +168,12 @@ describe('#get', () => {
 describe('#create', () => {
   const id = 'foo';
   const attributes = {
-      name: 'foo-name',
-      description: 'foo-description',
-      color: '#FFFFFF',
-      initials: 'FB',
-      imageUrl: "go-bots/predates/transformers",
-      disabledFeatures: [],
+    name: 'foo-name',
+    description: 'foo-description',
+    color: '#FFFFFF',
+    initials: 'FB',
+    imageUrl: 'go-bots/predates/transformers',
+    disabledFeatures: [],
   };
 
   const spaceToCreate = {
@@ -183,7 +183,7 @@ describe('#create', () => {
     bar: 'foo-bar', // will not make it to the saved object attributes
   };
 
-  const savedObject:SavedObject = {
+  const savedObject: SavedObject = {
     id,
     type: 'space',
     references: [],
@@ -193,7 +193,7 @@ describe('#create', () => {
     },
   };
 
-  const expectedReturnedSpace:Space = {
+  const expectedReturnedSpace: Space = {
     id,
     ...attributes,
   };
@@ -252,12 +252,12 @@ describe('#create', () => {
 
 describe('#update', () => {
   const attributes = {
-      name: 'foo-name',
-      description: 'foo-description',
-      color: '#FFFFFF',
-      initials: 'FB',
-      imageUrl: "go-bots/predates/transformers",
-      disabledFeatures: [],
+    name: 'foo-name',
+    description: 'foo-description',
+    color: '#FFFFFF',
+    initials: 'FB',
+    imageUrl: 'go-bots/predates/transformers',
+    disabledFeatures: [],
   };
 
   const spaceToUpdate = {
@@ -267,7 +267,7 @@ describe('#update', () => {
     bar: 'foo-bar', // will not make it to the saved object attributes
   };
 
-  const savedObject:SavedObject = {
+  const savedObject: SavedObject = {
     id: 'foo',
     type: 'space',
     references: [],
@@ -278,7 +278,7 @@ describe('#update', () => {
     },
   };
 
-  const expectedReturnedSpace:Space = {
+  const expectedReturnedSpace: Space = {
     id: 'foo',
     ...attributes,
     _reserved: true,
@@ -303,7 +303,7 @@ describe('#update', () => {
 describe('#delete', () => {
   const id = 'foo';
 
-  const reservedSavedObject:SavedObject = {
+  const reservedSavedObject: SavedObject = {
     id,
     type: 'space',
     references: [],
@@ -315,7 +315,7 @@ describe('#delete', () => {
     },
   };
 
-  const notReservedSavedObject:SavedObject = {
+  const notReservedSavedObject: SavedObject = {
     id,
     type: 'space',
     references: [],
@@ -363,12 +363,7 @@ describe('#disableLegacyUrlAliases', () => {
     const mockConfig = createMockConfig();
     const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
 
-    const client = new SpacesClient(
-      mockDebugLogger,
-      mockConfig,
-      mockCallWithRequestRepository,
-      []
-    );
+    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
     const aliases = [
       { targetSpace: 'space1', targetType: 'foo', sourceId: '123' },
       { targetSpace: 'space2', targetType: 'bar', sourceId: '456' },

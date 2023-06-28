@@ -169,15 +169,15 @@ export class SpacesClient implements ISpacesClient {
     await this.repository.bulkUpdate(objectsToUpdate);
   }
 
-  private transformSavedObjectToSpace(savedObject: SavedObject<any>):v1.Space {
+  private transformSavedObjectToSpace(savedObject: SavedObject<any>): v1.Space {
     return {
       id: savedObject.id,
-      name: savedObject.attributes.name??'',
+      name: savedObject.attributes.name ?? '',
       description: savedObject.attributes.description,
       color: savedObject.attributes.color,
       initials: savedObject.attributes.initials,
       imageUrl: savedObject.attributes.imageUrl,
-      disabledFeatures: savedObject.attributes.disabledFeatures??[],
+      disabledFeatures: savedObject.attributes.disabledFeatures ?? [],
       _reserved: savedObject.attributes._reserved,
     } as v1.Space;
   }
@@ -189,7 +189,7 @@ export class SpacesClient implements ISpacesClient {
       color: space.color,
       initials: space.initials,
       imageUrl: space.imageUrl,
-      disabledFeatures: space.disabledFeatures
-    }
+      disabledFeatures: space.disabledFeatures,
+    };
   }
 }
