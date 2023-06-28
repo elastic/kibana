@@ -38,7 +38,7 @@ export const getInstallationStats = async (
     packagePolicies: PackagePolicy[],
     agentPolicies: AgentPolicy[]
   ) => {
-    const installationStats = await packagePolicies.map(
+    const installationStats = packagePolicies.map(
       (packagePolicy: PackagePolicy): CloudSecurityInstallationStats => {
         const agentCounts =
           agentPolicies?.find((agentPolicy) => agentPolicy?.id === packagePolicy.policy_id)
