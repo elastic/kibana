@@ -133,13 +133,15 @@ paths:
         - $ref: '#/components/parameters/space_id'
         - name: assignees
           in: query
-          description: Filters the returned cases by assignees. Valid values are `none` or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API.
+          description: |
+            Filters the returned cases by assignees. Valid values are `none` or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API.
           schema:
             oneOf:
               - type: string
               - type: array
                 items:
                   type: string
+                maximum: 100
         - name: category
           in: query
           description: Filters the returned cases by category. Limited to 100 categories.
@@ -176,6 +178,7 @@ paths:
               - type: array
                 items:
                   type: string
+                maximum: 100
           example: elastic
         - name: search
           in: query
@@ -222,6 +225,7 @@ paths:
               - type: array
                 items:
                   type: string
+                maximum: 100
           example: tag-1
         - name: to
           in: query
