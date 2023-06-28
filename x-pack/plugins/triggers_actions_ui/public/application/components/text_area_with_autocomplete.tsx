@@ -6,7 +6,14 @@
  */
 
 import React, { useState, useMemo, useRef } from 'react';
-import { EuiTextArea, EuiFormRow, EuiSelectable, EuiSelectableOption } from '@elastic/eui';
+import {
+  EuiTextArea,
+  EuiFormRow,
+  EuiSelectable,
+  EuiSelectableOption,
+  EuiPortal,
+  findPopoverPosition,
+} from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import getCaretCoordinates from 'textarea-caret';
@@ -95,49 +102,6 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
     }));
   }, [matches]);
 
-  const onChangeWithMessageVariable = () => {
-    if (!textAreaRef.current) return;
-    const { value, selectionStart } = textAreaRef.current; // check for selectionEnd, should be when the start is?
-
-    const newCaretPosition = getCaretCoordinates(
-      textAreaRef.current,
-      textAreaRef.current.selectionStart
-    );
-
-    const borderWidth = 2;
-    const marginTextArea = 12 * 2; // window.getComputedStyle(_textAreaRef$current).getPropertyValue("padding")
-    const overflowOffset = document.getElementsByClassName('euiFlyoutBody__overflow')[0].offsetTop;
-    const textAreaClientRect = textAreaRef.current?.getBoundingClientRect();
-    const top = textAreaClientRect.top;
-    const width = textAreaClientRect.width;
-    setCaretPosition({
-      top:
-        top -
-        (overflowOffset + borderWidth + marginTextArea + textAreaRef.current.scrollTop) +
-        newCaretPosition?.top +
-        newCaretPosition.height,
-      left: newCaretPosition.left,
-      height: newCaretPosition.height,
-      width,
-    });
-
-    const lastCloseBracketIndex = value.slice(0, selectionStart).lastIndexOf(' ');
-    const lastDoubleCurlyBracket = value.slice(0, selectionStart).lastIndexOf('{{');
-    const currentWordStartIndex = Math.max(lastCloseBracketIndex, lastDoubleCurlyBracket);
-
-    const currentWord = value
-      .slice(currentWordStartIndex === -1 ? 0 : currentWordStartIndex, selectionStart)
-      .trim();
-    if (currentWord.startsWith('{{')) {
-      const filteredMatches = filterSuggestions(suggestions, currentWord.slice(2));
-      setMatches(filteredMatches);
-    } else {
-      setMatches([]);
-    }
-
-    editAction(paramsProperty, value, index);
-  };
-
   const onOptionPick = (newOptions: EuiSelectableOption[]) => {
     if (!textAreaRef.current) return;
     const { value, selectionStart } = textAreaRef.current; // check for selectionEnd, should be when the start is?
@@ -164,6 +128,50 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
     }
   };
 
+  const onChangeWithMessageVariable = () => {
+    if (!textAreaRef.current) return;
+    const { value, selectionStart } = textAreaRef.current; // check for selectionEnd, should be when the start is?
+
+    window.setTimeout(() => {
+      if (textAreaRef.current) {
+        const newCaretPosition = getCaretCoordinates(
+          textAreaRef.current,
+          textAreaRef.current.selectionStart
+        );
+
+        const textAreaClientRect = textAreaRef.current?.getBoundingClientRect();
+
+        setCaretPosition({
+          top:
+            textAreaClientRect.top -
+            textAreaRef.current.scrollTop +
+            newCaretPosition?.top +
+            newCaretPosition.height +
+            window.pageYOffset,
+          left: textAreaClientRect.left + window.pageXOffset,
+          height: newCaretPosition.height,
+          width: textAreaClientRect.width,
+        });
+      }
+    }, 0);
+
+    const lastCloseBracketIndex = value.slice(0, selectionStart).lastIndexOf(' ');
+    const lastDoubleCurlyBracket = value.slice(0, selectionStart).lastIndexOf('{{');
+    const currentWordStartIndex = Math.max(lastCloseBracketIndex, lastDoubleCurlyBracket);
+
+    const currentWord = value
+      .slice(currentWordStartIndex === -1 ? 0 : currentWordStartIndex, selectionStart)
+      .trim();
+    if (currentWord.startsWith('{{')) {
+      const filteredMatches = filterSuggestions(suggestions, currentWord.slice(2));
+      setMatches(filteredMatches);
+    } else {
+      setMatches([]);
+    }
+
+    editAction(paramsProperty, value, index);
+  };
+
   return (
     <EuiFormRow
       fullWidth
@@ -181,7 +189,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
           name={paramsProperty}
           value={inputTargetValue || ''}
           data-test-subj={`${paramsProperty}TextArea`}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChangeWithMessageVariable(e)}
+          onChange={() => onChangeWithMessageVariable()}
           onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
             setListOpen(true);
           }}
@@ -199,20 +207,25 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
           }}
         />
         {matches.length > 0 && isListOpen && (
-          <EuiSelectable
-            style={{
-              position: 'absolute',
-              top: caretPosition.top,
-              width: caretPosition.width,
-              border: '1px solid rgb(211, 218, 230)',
-              background: '#fbfcfd',
-            }}
-            options={optionsToShow}
-            onChange={onOptionPick}
-            singleSelection
-          >
-            {(list) => list}
-          </EuiSelectable>
+          <EuiPortal>
+            <EuiSelectable
+              style={{
+                position: 'absolute',
+                top: caretPosition.top,
+                width: caretPosition.width,
+                left: caretPosition.left,
+                border: '1px solid rgb(211, 218, 230)',
+                background: '#fbfcfd',
+                zIndex: 3000,
+              }}
+              height={32 * 5.5}
+              options={optionsToShow}
+              onChange={onOptionPick}
+              singleSelection
+            >
+              {(list) => list}
+            </EuiSelectable>
+          </EuiPortal>
         )}
       </>
     </EuiFormRow>
