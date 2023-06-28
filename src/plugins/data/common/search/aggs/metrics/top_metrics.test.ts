@@ -197,5 +197,11 @@ describe('Top metrics metric', () => {
         query: { match_phrase: { bytes: 10 } },
       });
     });
+    it('returns combined OR filter for array values', () => {
+      expect(getTopMetricsMetricAgg().createFilter!(aggConfig, ['10', '20']).meta.params).toEqual([
+        { query: { match_phrase: { bytes: 10 } }, meta: { index: '1234' } },
+        { query: { match_phrase: { bytes: 20 } }, meta: { index: '1234' } },
+      ]);
+    });
   });
 });

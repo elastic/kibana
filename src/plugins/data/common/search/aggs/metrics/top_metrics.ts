@@ -9,12 +9,12 @@
 import _ from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { buildPhraseFilter } from '@kbn/es-query';
 import { aggTopMetricsFnName } from './top_metrics_fn';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { DataViewField, KBN_FIELD_TYPES } from '../../..';
 import { BaseAggParams } from '../types';
+import { createTopHitFilter } from './lib/create_filter';
 
 export interface BaseAggParamsTopMetrics extends BaseAggParams {
   field: string;
@@ -163,11 +163,6 @@ export const getTopMetricsMetricAgg = () => {
       if (results.length === 1) return results[0];
       return results;
     },
-    createFilter: (agg, key) => {
-      const field = agg.getField();
-      if (field) {
-        return buildPhraseFilter(field, key, agg.getIndexPattern());
-      }
-    },
+    createFilter: createTopHitFilter,
   });
 };

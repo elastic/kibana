@@ -9,12 +9,12 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { buildPhraseFilter } from '@kbn/es-query';
 import { aggTopHitFnName } from './top_hit_fn';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { flattenHit, KBN_FIELD_TYPES } from '../../..';
 import { BaseAggParams } from '../types';
+import { createTopHitFilter } from './lib/create_filter';
 
 export interface BaseAggParamsTopHit extends BaseAggParams {
   field: string;
@@ -257,11 +257,6 @@ export const getTopHitMetricAgg = () => {
       }
       return values;
     },
-    createFilter: (agg, key) => {
-      const field = agg.getField();
-      if (field) {
-        return buildPhraseFilter(field, key, agg.getIndexPattern());
-      }
-    },
+    createFilter: createTopHitFilter,
   });
 };
