@@ -146,6 +146,7 @@ interface Props {
   isDifferentialView: boolean;
   baselineScaleFactor?: number;
   comparisonScaleFactor?: number;
+  onFrameClick?: (functionName: string) => void;
 }
 
 function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFactor?: number }) {
@@ -162,6 +163,7 @@ export function TopNFunctionsTable({
   isDifferentialView,
   baselineScaleFactor,
   comparisonScaleFactor,
+  onFrameClick,
 }: Props) {
   const [selectedRow, setSelectedRow] = useState<Row | undefined>();
   const isEstimatedA = (topNFunctions?.SamplingRate ?? 1.0) !== 1.0;
@@ -260,7 +262,9 @@ export function TopNFunctionsTable({
       name: i18n.translate('xpack.profiling.functionsView.functionColumnLabel', {
         defaultMessage: 'Function',
       }),
-      render: (_, { frame }) => <StackFrameSummary frame={frame} />,
+      render: (_, { frame }) => {
+        return <StackFrameSummary frame={frame} onFrameClick={onFrameClick} />;
+      },
       width: '50%',
     },
     {
