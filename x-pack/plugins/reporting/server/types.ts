@@ -39,13 +39,15 @@ import { ReportingCore } from './core';
  * Plugin Setup Contract
  */
 export interface ReportingSetup {
+  registerExportTypes: ExportTypesRegistry['register'];
+  getEsClient: ReportingCore['getEsClient'];
+  getDataService: ReportingCore['getDataService'];
   getSpaceId: ReportingCore['getSpaceId'];
   getScreenshots: ReportingCore['getScreenshots'];
   /**
    * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
    */
   usesUiCapabilities: () => boolean;
-  registerExportTypes: ExportTypesRegistry['register'];
 }
 
 /**

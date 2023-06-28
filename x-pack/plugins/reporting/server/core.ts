@@ -141,6 +141,8 @@ export class ReportingCore {
       registerExportTypes: (id) => id,
       getScreenshots: this.getScreenshots.bind(this),
       getSpaceId: this.getSpaceId.bind(this),
+      getEsClient: this.getEsClient.bind(this),
+      getDataService: this.getDataService.bind(this),
     });
 
     this.executing = new Set();
@@ -173,8 +175,9 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
 
-    this.csvSearchsourceExport.start({ ...startDeps, reporting: this.getContract() });
-    this.pdfExport.start({ ...startDeps, reporting: this.getContract() });
+    const reportingStart = this.getContract();
+    this.csvSearchsourceExport.start({ ...startDeps, reporting: reportingStart });
+    this.pdfExport.start({ ...startDeps, reporting: reportingStart });
 
     await this.assertKibanaIsAvailable();
 
