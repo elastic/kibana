@@ -124,6 +124,7 @@ export const dataLoaders = (
         isolation,
         withResponseActions,
         numResponseActions,
+        alertIds,
       } = options;
 
       return cyLoadEndpointDataHandler(esClient, kbnClient, {
@@ -133,6 +134,7 @@ export const dataLoaders = (
         isolation,
         withResponseActions,
         numResponseActions,
+        alertIds,
       });
     },
 

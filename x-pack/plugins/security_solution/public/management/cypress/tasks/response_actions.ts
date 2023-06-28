@@ -84,6 +84,9 @@ export const waitForActionToComplete = (
         return request<ActionDetailsApiResponse>({
           method: 'GET',
           url: resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId || 'undefined' }),
+          headers: {
+            'Elastic-Api-Version': '2023-10-31',
+          },
         }).then((response) => {
           if (response.body.data.isCompleted) {
             action = response.body.data;

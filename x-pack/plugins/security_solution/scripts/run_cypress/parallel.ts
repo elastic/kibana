@@ -187,9 +187,10 @@ export const cli = () => {
                   }
                   return element.value as string;
                 });
+              } else if (property.value.type === 'StringLiteral') {
+                value = property.value.value;
               }
               if (key && value) {
-                // @ts-expect-error
                 acc[key] = value;
               }
               return acc;
@@ -286,6 +287,10 @@ export const cli = () => {
                       configFromTestFile?.enableExperimental
                     )}`
                   );
+                }
+
+                if (configFromTestFile?.license) {
+                  vars.esTestCluster.license = configFromTestFile.license;
                 }
 
                 if (hasFleetServerArgs) {
