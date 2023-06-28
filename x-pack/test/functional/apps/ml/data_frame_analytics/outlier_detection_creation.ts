@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  describe.only('outlier detection creation', function () {
+  describe('outlier detection creation', function () {
     let testDashboardId: string | null = null;
 
     before(async () => {
