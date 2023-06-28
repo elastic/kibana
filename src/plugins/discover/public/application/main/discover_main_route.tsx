@@ -258,7 +258,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
 
     return (
       <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
-        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} allowAdHocDataView />
+        <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
       </AnalyticsNoDataPageKibanaProvider>
     );
   }
