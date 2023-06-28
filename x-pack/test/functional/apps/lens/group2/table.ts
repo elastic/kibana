@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow to configure column visibility', async () => {
-      expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('Top values of ip');
+      expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('Top 3 values of ip');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(2)).to.equal('Average of bytes');
 
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.toggleColumnVisibility('lnsDatatable_rows > lns-dimensionTrigger', 4);
 
-      expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('Top values of ip');
+      expect(await PageObjects.lens.getDatatableHeaderText(0)).to.equal('Top 3 values of ip');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.equal('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableHeaderText(2)).to.equal('Average of bytes');
     });

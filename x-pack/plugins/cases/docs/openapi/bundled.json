@@ -1852,7 +1852,15 @@
             "$ref": "#/components/parameters/page_index"
           },
           {
-            "$ref": "#/components/parameters/page_size"
+            "name": "perPage",
+            "in": "query",
+            "description": "The number of items to return. Limited to 100 items.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "maximum": 100
+            }
           },
           {
             "$ref": "#/components/parameters/sort_order"

@@ -14,5 +14,6 @@ export {
   SetAppSearchChrome,
   SetWorkplaceSearchChrome,
   SetSearchExperiencesChrome,
-  SetEnterpriseSearchEnginesChrome,
+  SetEnterpriseSearchApplicationsChrome,
+  SetVectorSearchChrome,
 } from './set_chrome';

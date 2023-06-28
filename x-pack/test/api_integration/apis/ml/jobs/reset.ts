@@ -52,7 +52,8 @@ export default ({ getService }: FtrProviderContext) => {
     [MULTI_METRIC_JOB_CONFIG.job_id]: { reset: true, task: 'cannot be predicted' },
   };
 
-  describe('reset_jobs', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/160370
+  describe.skip('reset_jobs', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
@@ -84,6 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
         await ml.api.deleteAnomalyDetectionJobES(job.job_id);
       }
       await ml.api.cleanMlIndices();
+      await ml.testResources.cleanMLSavedObjects();
     });
 
     it('succeeds for ML Poweruser and keeps user annotations', async () => {
