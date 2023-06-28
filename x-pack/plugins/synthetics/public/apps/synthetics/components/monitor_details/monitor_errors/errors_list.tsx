@@ -24,13 +24,14 @@ import { Ping, PingState } from '../../../../../../common/runtime_types';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
-import { isActiveState } from '../hooks/use_monitor_errors';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 
-export function isErrorActive(item: PingState, lastErrorId?: string, latestPingStatus?: string) {
-  // if the error is the most recent, `isActiveState`, and the monitor
-  // is not yet back up, label the error as active
-  return isActiveState(item) && lastErrorId === item.state.id && latestPingStatus !== 'up';
+function isErrorActive(latestMonitorStatus?: string, latestDocId?: string, currentDocId?: string) {
+  return (
+    latestMonitorStatus === 'down' &&
+    typeof latestDocId !== 'undefined' &&
+    latestDocId === currentDocId
+  );
 }
 
 export const ErrorsList = ({
@@ -64,7 +65,6 @@ export const ErrorsList = ({
   const lastErrorTestRun = errorStates?.sort((a, b) => {
     return moment(b.state.started_at).valueOf() - moment(a.state.started_at).valueOf();
   })?.[0];
-
   const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
   const columns = [
@@ -83,7 +83,13 @@ export const ErrorsList = ({
             locationId={location?.id}
           />
         );
-        if (isErrorActive(item, lastErrorTestRun?.state.id, latestPing?.monitor.status)) {
+        if (
+          isErrorActive(
+            latestPing?.monitor.status,
+            lastErrorTestRun['@timestamp'],
+            item['@timestamp']
+          )
+        ) {
           return (
             <EuiFlexGroup gutterSize="m" alignItems="center" wrap={true}>
               <EuiFlexItem grow={false} className="eui-textNoWrap">
@@ -142,7 +148,11 @@ export const ErrorsList = ({
       align: 'right' as const,
       sortable: true,
       render: (value: string, item: PingState) => {
-        const isActive = isActiveState(item);
+        const isActive = isErrorActive(
+          latestPing?.monitor.status,
+          lastErrorTestRun['@timestamp'],
+          item['@timestamp']
+        );
         let activeDuration = 0;
         if (item.monitor.timespan) {
           const diff = moment(item.monitor.timespan.lt).diff(
