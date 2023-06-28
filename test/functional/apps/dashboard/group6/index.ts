@@ -22,25 +22,18 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
   }
 
-  describe('dashboard app - group 5', function () {
+  describe('dashboard app - group 6', function () {
     before(loadCurrentData);
     after(unloadCurrentData);
 
-    // This has to be first since the other tests create some embeddables as side affects and our counting assumes
-    // a fresh index.
-    loadTestFile(require.resolve('./empty_dashboard'));
-    loadTestFile(require.resolve('./dashboard_settings'));
-    loadTestFile(require.resolve('./data_shared_attributes'));
-    loadTestFile(require.resolve('./share'));
-    loadTestFile(require.resolve('./embed_mode'));
-    loadTestFile(require.resolve('./dashboard_back_button'));
-    loadTestFile(require.resolve('./dashboard_error_handling'));
-    loadTestFile(require.resolve('./legacy_urls'));
-    loadTestFile(require.resolve('./saved_search_embeddable'));
-
-    // Note: This one must be last because it unloads some data for one of its tests!
-    // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched
-    // to improve efficiency...
-    loadTestFile(require.resolve('./dashboard_query_bar'));
+    loadTestFile(require.resolve('./dashboard_grid'));
+    loadTestFile(require.resolve('./view_edit'));
+    loadTestFile(require.resolve('./dashboard_saved_query'));
+    // Order of test suites *shouldn't* be important but there's a bug for the view_edit test above
+    // https://github.com/elastic/kibana/issues/46752
+    // The dashboard_snapshot test below requires the timestamped URL which breaks the view_edit test.
+    // If we don't use the timestamp in the URL, the colors in the charts will be different.
+    loadTestFile(require.resolve('./dashboard_snapshots'));
+    loadTestFile(require.resolve('./embeddable_library'));
   });
 }
