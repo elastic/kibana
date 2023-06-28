@@ -112,6 +112,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           name: 'A casesWebhook action',
           connector_type_id: '.cases-webhook',
           is_missing_secrets: false,
+          is_system_action: false,
           config: simulatorConfig,
         });
 
@@ -126,6 +127,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
           name: 'A casesWebhook action',
           connector_type_id: '.cases-webhook',
           is_missing_secrets: false,
+          is_system_action: false,
           config: simulatorConfig,
         });
       });
