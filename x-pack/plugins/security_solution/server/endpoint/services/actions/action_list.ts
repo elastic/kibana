@@ -276,13 +276,12 @@ const getActionDetailsList = async ({
 
     // find the specific response's details using that set of matching responses
     const { isCompleted, completedAt, wasSuccessful, errors, agentState, outputs } =
-      getActionCompletionInfo(action.agents, matchedResponses);
+      getActionCompletionInfo(action, matchedResponses);
 
     const { isExpired, status } = getActionStatus({
       expirationDate: action.expiration,
       isCompleted,
       wasSuccessful,
-      error: action.error?.message,
     });
 
     const actionRecord: ActionListApiResponse['data'][number] = {
