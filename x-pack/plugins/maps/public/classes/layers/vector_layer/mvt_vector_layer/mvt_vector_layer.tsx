@@ -74,6 +74,11 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     this._source = args.source as IMvtVectorSource;
   }
 
+  isLayerLoading(zoom: number) {
+    const isSourceLoading = super.isLayerLoading(zoom);
+    return isSourceLoading ? true : this._isLoadingJoins();
+  }
+
   _isTiled(): boolean {
     // Uses tiled maplibre source 'vector'
     return true;

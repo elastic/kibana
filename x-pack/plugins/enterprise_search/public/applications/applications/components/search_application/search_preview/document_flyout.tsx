@@ -53,7 +53,7 @@ export const DocumentFlyout: React.FC = () => {
   const columns: Array<EuiBasicTableColumn<ConvertedResultWithType>> = [
     {
       name: i18n.translate(
-        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.documentFlyout.fieldLabel',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.documentFlyout.fieldLabel',
         { defaultMessage: 'Field' }
       ),
       render: ({ field: key, type }: ConvertedResultWithType) => (
@@ -71,7 +71,7 @@ export const DocumentFlyout: React.FC = () => {
     {
       field: 'value',
       name: i18n.translate(
-        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.documentFlyout.valueLabel',
+        'xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.documentFlyout.valueLabel',
         { defaultMessage: 'Value' }
       ),
       render: (value: FieldValue) => (
@@ -92,7 +92,7 @@ export const DocumentFlyout: React.FC = () => {
           <EuiTitle size="m">
             <h2>
               <FormattedMessage
-                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.documentFlyout.title"
+                id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.documentFlyout.title"
                 defaultMessage="Document: {id}"
                 values={{ id }}
               />
@@ -100,7 +100,7 @@ export const DocumentFlyout: React.FC = () => {
           </EuiTitle>
           <EuiTextColor color="subdued">
             <FormattedMessage
-              id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreivew.documentFlyout.fieldCount"
+              id="xpack.enterpriseSearch.searchApplications.searchApplication.searchPreview.documentFlyout.fieldCount"
               defaultMessage="{fieldCount} {fieldCount, plural, one {Field} other {Fields}}"
               values={{ fieldCount: items.length }}
             />
