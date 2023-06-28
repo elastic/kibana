@@ -120,6 +120,7 @@ export interface DocLinks {
     readonly connectorsClients: string;
     readonly connectorsConfluence: string;
     readonly connectorsContentExtraction: string;
+    readonly connectorsDropbox: string;
     readonly connectorsGoogleCloudStorage: string;
     readonly connectorsJira: string;
     readonly connectorsMicrosoftSQL: string;
@@ -130,6 +131,7 @@ export interface DocLinks {
     readonly connectorsOracle: string;
     readonly connectorsPostgreSQL: string;
     readonly connectorsS3: string;
+    readonly connectorsServiceNow: string;
     readonly connectorsSharepoint: string;
     readonly connectorsSharepointOnline: string;
     readonly connectorsWorkplaceSearch: string;
@@ -156,7 +158,9 @@ export interface DocLinks {
     readonly mailService: string;
     readonly mlDocumentEnrichment: string;
     readonly searchApplicationsTemplates: string;
+    readonly searchApplicationsSearchApi: string;
     readonly searchApplications: string;
+    readonly searchApplicationsGettingStarted: string;
     readonly searchTemplates: string;
     readonly start: string;
     readonly supportedNlpModels: string;

@@ -12,7 +12,7 @@ import {
   PluginInitializerContext,
   AppMountParameters,
 } from '@kbn/core/public';
-import { BehaviorSubject, from } from 'rxjs';
+import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -34,8 +34,6 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/p
 
 import { FleetStart } from '@kbn/fleet-plugin/public';
 import {
-  enableLegacyUptimeApp,
-  FetchDataParams,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
@@ -51,18 +49,8 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
-import { AppStatus, AppUpdater } from '@kbn/core-application-browser';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
-import {
-  LazySyntheticsPolicyCreateExtension,
-  LazySyntheticsPolicyEditExtension,
-} from './legacy_uptime/components/fleet_package';
-import { LazySyntheticsCustomAssetsExtension } from './legacy_uptime/components/fleet_package/lazy_synthetics_custom_assets_extension';
-import {
-  uptimeAlertTypeInitializers,
-  legacyAlertTypeInitializers,
-} from './legacy_uptime/lib/alert_types';
 import { locators } from './apps/locators';
 import { setStartServices } from './kibana_services';
 import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
@@ -119,60 +107,12 @@ export class UptimePlugin
 {
   constructor(private readonly initContext: PluginInitializerContext) {}
 
-  private uptimeAppUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
-
   public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
-    if (plugins.home) {
-      plugins.home.featureCatalogue.register({
-        id: PLUGIN.ID,
-        title: PLUGIN.TITLE,
-        description: PLUGIN.DESCRIPTION,
-        icon: 'uptimeApp',
-        path: '/app/uptime',
-        showOnHomePage: false,
-        category: 'data',
-      });
-    }
-    const getUptimeDataHelper = async () => {
-      const [coreStart] = await core.getStartServices();
-      const { UptimeDataHelper } = await import('./legacy_uptime/app/uptime_overview_fetcher');
-
-      return UptimeDataHelper(coreStart);
-    };
-
     locators.forEach((locator) => {
       plugins.share.url.locators.create(locator);
     });
 
-    plugins.observability.dashboard.register({
-      appName: 'uptime',
-      hasData: async () => {
-        const dataHelper = await getUptimeDataHelper();
-        const status = await dataHelper.indexStatus();
-        return { hasData: status.indexExists, indices: status.indices };
-      },
-      fetchData: async (params: FetchDataParams) => {
-        const dataHelper = await getUptimeDataHelper();
-        return await dataHelper.overviewData(params);
-      },
-    });
-
-    plugins.exploratoryView.register({
-      appName: 'uptime',
-      hasData: async () => {
-        const dataHelper = await getUptimeDataHelper();
-        const status = await dataHelper.indexStatus();
-        return { hasData: status.indexExists, indices: status.indices };
-      },
-      fetchData: async (params: FetchDataParams) => {
-        const dataHelper = await getUptimeDataHelper();
-        return await dataHelper.overviewData(params);
-      },
-    });
-
     registerSyntheticsRoutesWithNavigation(core, plugins);
-
-    core.getStartServices().then(([coreStart, clientPluginsStart]) => {});
 
     const appKeywords = [
       'Synthetics',
@@ -191,27 +131,6 @@ export class UptimePlugin
       'web performance',
       'web perf',
     ];
-
-    core.application.register({
-      id: PLUGIN.ID,
-      euiIconType: 'logoObservability',
-
-      order: 8400,
-      title: PLUGIN.TITLE,
-      category: DEFAULT_APP_CATEGORIES.observability,
-      keywords: appKeywords,
-      deepLinks: [
-        { id: 'Down monitors', title: 'Down monitors', path: '/?statusFilter=down' },
-        { id: 'Certificates', title: 'TLS Certificates', path: '/certificates' },
-        { id: 'Settings', title: 'Settings', path: '/settings' },
-      ],
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, corePlugins] = await core.getStartServices();
-        const { renderApp } = await import('./legacy_uptime/app/render_app');
-        return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
-      },
-      updater$: this.uptimeAppUpdater,
-    });
 
     // Register the Synthetics UI plugin
     core.application.register({
@@ -234,9 +153,7 @@ export class UptimePlugin
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
     const { triggersActionsUi } = pluginsStart;
 
-    const { registerExtension } = pluginsStart.fleet;
     setStartServices(coreStart);
-    registerUptimeFleetExtensions(registerExtension);
 
     syntheticsAlertTypeInitializers.forEach((init) => {
       const { observabilityRuleTypeRegistry } = pluginsStart.observability;
@@ -249,67 +166,9 @@ export class UptimePlugin
         observabilityRuleTypeRegistry.register(alertInitializer);
       }
     });
-
-    uptimeAlertTypeInitializers.forEach((init) => {
-      const { observabilityRuleTypeRegistry } = pluginsStart.observability;
-
-      const alertInitializer = init({
-        core: coreStart,
-        plugins: pluginsStart,
-      });
-      if (!triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)) {
-        observabilityRuleTypeRegistry.register(alertInitializer);
-      }
-    });
-
-    legacyAlertTypeInitializers.forEach((init) => {
-      const alertInitializer = init({
-        core: coreStart,
-        plugins: pluginsStart,
-      });
-      if (!triggersActionsUi.ruleTypeRegistry.has(alertInitializer.id)) {
-        triggersActionsUi.ruleTypeRegistry.register(alertInitializer);
-      }
-    });
-
-    setUptimeAppStatus(coreStart, pluginsStart, this.uptimeAppUpdater);
   }
 
   public stop(): void {}
-}
-
-function registerUptimeRoutesWithNavigation(coreStart: CoreStart, plugins: ClientPluginsStart) {
-  async function getUptimeSections() {
-    if (coreStart.application.capabilities.uptime.show) {
-      return [
-        {
-          label: 'Uptime',
-          sortKey: 500,
-          entries: [
-            {
-              label: i18n.translate('xpack.synthetics.overview.uptimeHeading', {
-                defaultMessage: 'Uptime Monitors',
-              }),
-              app: 'uptime',
-              path: '/',
-              matchFullPath: true,
-              ignoreTrailingSlash: true,
-            },
-            {
-              label: i18n.translate('xpack.synthetics.certificatesPage.heading', {
-                defaultMessage: 'TLS Certificates',
-              }),
-              app: 'uptime',
-              path: '/certificates',
-              matchFullPath: true,
-            },
-          ],
-        },
-      ];
-    }
-    return [];
-  }
-  plugins.observabilityShared.navigation.registerSections(from(getUptimeSections()));
 }
 
 function registerSyntheticsRoutesWithNavigation(
@@ -352,49 +211,4 @@ function registerSyntheticsRoutesWithNavigation(
       })
     )
   );
-}
-
-function registerUptimeFleetExtensions(registerExtension: FleetStart['registerExtension']) {
-  registerExtension({
-    package: 'synthetics',
-    view: 'package-policy-create',
-    Component: LazySyntheticsPolicyCreateExtension,
-  });
-
-  registerExtension({
-    package: 'synthetics',
-    view: 'package-policy-edit',
-    useLatestPackageVersion: true,
-    Component: LazySyntheticsPolicyEditExtension,
-  });
-
-  registerExtension({
-    package: 'synthetics',
-    view: 'package-detail-assets',
-    Component: LazySyntheticsCustomAssetsExtension,
-  });
-}
-
-function setUptimeAppStatus(
-  coreStart: CoreStart,
-  pluginsStart: ClientPluginsStart,
-  updater: BehaviorSubject<AppUpdater>
-) {
-  import('./legacy_uptime/app/uptime_overview_fetcher').then(({ UptimeDataHelper }) => {
-    const isEnabled = coreStart.uiSettings.get<boolean>(enableLegacyUptimeApp);
-    if (isEnabled) {
-      registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
-      updater.next(() => ({ status: AppStatus.accessible }));
-    } else {
-      const indexStatusPromise = UptimeDataHelper(coreStart).indexStatus('now-7d', 'now');
-      indexStatusPromise.then((indexStatus) => {
-        if (indexStatus.indexExists) {
-          registerUptimeRoutesWithNavigation(coreStart, pluginsStart);
-          updater.next(() => ({ status: AppStatus.accessible }));
-        } else {
-          updater.next(() => ({ status: AppStatus.inaccessible }));
-        }
-      });
-    }
-  });
 }

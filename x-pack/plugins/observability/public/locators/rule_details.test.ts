@@ -8,6 +8,7 @@
 import { ACTIVE_ALERTS } from '../components/alert_search_bar/constants';
 import { EXECUTION_TAB, ALERTS_TAB } from '../pages/rule_details/constants';
 import { getRuleDetailsPath, RuleDetailsLocatorDefinition } from './rule_details';
+import { RULES_PATH } from '../routes/paths';
 
 describe('RuleDetailsLocator', () => {
   const locator = new RuleDetailsLocatorDefinition();
@@ -21,15 +22,13 @@ describe('RuleDetailsLocator', () => {
 
   it('should return correct url when tabId is execution', async () => {
     const location = await locator.getLocation({ ruleId: mockedRuleId, tabId: EXECUTION_TAB });
-    expect(location.path).toMatchInlineSnapshot(
-      `"/alerts/rules/389d3318-7e10-4996-bb45-128e1607fb7e?tabId=execution"`
-    );
+    expect(location.path).toEqual(`${RULES_PATH}/${mockedRuleId}?tabId=execution`);
   });
 
   it('should return correct url when tabId is alerts without extra search params', async () => {
     const location = await locator.getLocation({ ruleId: mockedRuleId, tabId: ALERTS_TAB });
-    expect(location.path).toMatchInlineSnapshot(
-      `"/alerts/rules/389d3318-7e10-4996-bb45-128e1607fb7e?tabId=alerts&searchBarParams=(kuery:'',rangeFrom:now-15m,rangeTo:now,status:all)"`
+    expect(location.path).toEqual(
+      `${RULES_PATH}/${mockedRuleId}?tabId=alerts&searchBarParams=(kuery:'',rangeFrom:now-15m,rangeTo:now,status:all)`
     );
   });
 
@@ -42,8 +41,8 @@ describe('RuleDetailsLocator', () => {
       kuery: 'mockedKuery',
       status: ACTIVE_ALERTS.status,
     });
-    expect(location.path).toMatchInlineSnapshot(
-      `"/alerts/rules/389d3318-7e10-4996-bb45-128e1607fb7e?tabId=alerts&searchBarParams=(kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom,status:active)"`
+    expect(location.path).toEqual(
+      `${RULES_PATH}/${mockedRuleId}?tabId=alerts&searchBarParams=(kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom,status:active)`
     );
   });
 });

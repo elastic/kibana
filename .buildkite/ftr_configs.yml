@@ -55,7 +55,7 @@ disabled:
 
   # Elastic Synthetics configs
   - x-pack/plugins/synthetics/e2e/config.ts
-  - x-pack/plugins/synthetics/e2e/uptime/synthetics_run.ts
+  - x-pack/plugins/uptime/e2e/uptime/synthetics_run.ts
   - x-pack/plugins/synthetics/e2e/synthetics/synthetics_run.ts
   - x-pack/plugins/ux/e2e/synthetics_run.ts
   - x-pack/plugins/exploratory_view/e2e/synthetics_run.ts
@@ -196,6 +196,7 @@ enabled:
   - x-pack/test/api_integration/apis/security/config.ts
   - x-pack/test/api_integration/apis/security_solution/config.ts
   - x-pack/test/api_integration/apis/spaces/config.ts
+  - x-pack/test/api_integration/apis/stats/config.ts
   - x-pack/test/api_integration/apis/status/config.ts
   - x-pack/test/api_integration/apis/synthetics/config.ts
   - x-pack/test/api_integration/apis/telemetry/config.ts
@@ -327,6 +328,8 @@ enabled:
   - x-pack/test/observability_api_integration/trial/config.ts
   - x-pack/test/observability_api_integration/apis/config.ts
   - x-pack/test/observability_functional/with_rac_write.config.ts
+  - x-pack/test/observability_onboarding_api_integration/basic/config.ts
+  - x-pack/test/observability_onboarding_api_integration/cloud/config.ts
   - x-pack/test/plugin_api_integration/config.ts
   - x-pack/test/plugin_functional/config.ts
   - x-pack/test/reporting_api_integration/reporting_and_security.config.ts
@@ -399,3 +402,4 @@ enabled:
   - x-pack/performance/journeys/dashboard_listing_page.ts
   - x-pack/performance/journeys/cloud_security_dashboard.ts
   - x-pack/test/custom_branding/config.ts
+  - x-pack/test/profiling_api_integration/cloud/config.ts

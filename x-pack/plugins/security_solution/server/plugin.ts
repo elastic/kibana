@@ -437,6 +437,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       packagePolicyService,
       agentPolicyService,
       createFilesClient,
+      createFleetActionsClient,
     } =
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       plugins.fleet!;
@@ -521,6 +522,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         core.elasticsearch.client.asInternalUser,
         this.endpointContext
       ),
+      createFleetActionsClient,
     });
 
     this.telemetryReceiver.start(
