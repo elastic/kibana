@@ -45,13 +45,6 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
   });
 
-  after(() => {
-    // Reload after using esArchiverResetKibana to
-    // prevent flakyness in unrelated test suites
-    esArchiverLoad('auditbeat');
-    esArchiverLoad('network');
-  });
-
   describe('Installation of prebuilt rules package via Fleet', () => {
     beforeEach(() => {
       cy.intercept('POST', '/api/fleet/epm/packages/_bulk*').as('installPackage');
