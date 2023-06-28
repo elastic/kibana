@@ -26,18 +26,21 @@ export const limitedArraySchema = <T extends rt.Mixed>(
   codec: T,
   min: number,
   max: number,
-  fieldName: string
+  fieldName?: string
 ) =>
   new rt.Type<Array<rt.TypeOf<typeof codec>>, Array<rt.TypeOf<typeof codec>>, unknown>(
     'LimitedArray',
     (input): input is T[] => rt.array(codec).is(input),
     (input, context) =>
       either.chain(rt.array(codec).validate(input, context), (s) => {
+        const fieldNameErrorMessage =
+          fieldName != null ? `The length of the field ${fieldName} is too short. ` : '';
+
         if (s.length < min) {
           return rt.failure(
             input,
             context,
-            `The length of the field ${fieldName} is too short. Array must be of length >= ${min}.`
+            `${fieldNameErrorMessage}Array must be of length >= ${min}.`
           );
         }
 
@@ -45,7 +48,7 @@ export const limitedArraySchema = <T extends rt.Mixed>(
           return rt.failure(
             input,
             context,
-            `The length of the field ${fieldName} is too long. Array must be of length <= ${max}.`
+            `${fieldNameErrorMessage}Array must be of length <= ${max}.`
           );
         }
 

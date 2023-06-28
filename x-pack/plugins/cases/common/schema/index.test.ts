@@ -23,7 +23,7 @@ describe('schema', () => {
     expect(PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1).decode([])))
       .toMatchInlineSnapshot(`
       Array [
-        "array must be of length >= 1",
+        "Array must be of length >= 1.",
       ]
     `);
   });
@@ -32,7 +32,26 @@ describe('schema', () => {
     expect(PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1).decode(['a', 'b'])))
       .toMatchInlineSnapshot(`
       Array [
-        "array must be of length <= 1",
+        "Array must be of length <= 1.",
+      ]
+    `);
+  });
+
+  it('displays field name error message when lower boundary fails', () => {
+    expect(PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1, 'foobar').decode([])))
+      .toMatchInlineSnapshot(`
+      Array [
+        "The length of the field foobar is too short. Array must be of length >= 1.",
+      ]
+    `);
+  });
+
+  it('displays field name error message when upper boundary fails', () => {
+    expect(
+      PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1, 'foobar').decode(['a', 'b']))
+    ).toMatchInlineSnapshot(`
+      Array [
+        "The length of the field foobar is too short. Array must be of length <= 1.",
       ]
     `);
   });
