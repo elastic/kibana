@@ -120,13 +120,13 @@ export async function collectServices({
       }
 
       containerHosts.buckets?.forEach((containerBucket: any) => {
-        const [containerId, hostname] = containerBucket.key;
-        if (containerId) {
-          (service['asset.parents'] as string[]).push(`container:${containerId}`);
-        }
-
+        const [hostname, containerId] = containerBucket.key;
         if (hostname) {
           (service['asset.references'] as string[]).push(`host:${hostname}`);
+        }
+
+        if (containerId) {
+          (service['asset.parents'] as string[]).push(`container:${containerId}`);
         }
       });
 

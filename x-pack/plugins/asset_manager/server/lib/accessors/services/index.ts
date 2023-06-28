@@ -18,4 +18,5 @@ export interface ServiceIdentifier {
   'asset.ean': string;
   'asset.id': string;
   'asset.name'?: string;
+  'service.environment'?: string;
 }
