@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiIconTip, EuiFlexItem } from '@elastic/eui';
 import type { RenderContentPanelProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { BulkAlertTagsPanel } from './alert_bulk_tags';
 import * as i18n from './translations';
 import { useSetAlertTags } from './use_set_alert_tags';
@@ -37,10 +38,22 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
     },
   ];
 
+  const TitleContent = useMemo(
+    () => (
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>{i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip content={i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TOOLTIP_INFO} position="right" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    []
+  );
+
   const alertTagsPanels = [
     {
       id: 1,
-      title: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+      title: TitleContent,
       renderContent: ({
         alertItems,
         refresh,

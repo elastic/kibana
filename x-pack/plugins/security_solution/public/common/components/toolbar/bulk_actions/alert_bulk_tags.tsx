@@ -146,7 +146,7 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
         size="s"
         onClick={onTagsUpdate}
       >
-        {i18n.ALERT_TAGS_UPDATE_BUTTON_MESSAGE}
+        {i18n.ALERT_TAGS_APPLY_BUTTON_MESSAGE}
       </EuiButton>
     </>
   );
