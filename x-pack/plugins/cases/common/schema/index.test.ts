@@ -51,7 +51,7 @@ describe('schema', () => {
       PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1, 'foobar').decode(['a', 'b']))
     ).toMatchInlineSnapshot(`
       Array [
-        "The length of the field foobar is too short. Array must be of length <= 1.",
+        "The length of the field foobar is too long. Array must be of length <= 1.",
       ]
     `);
   });
