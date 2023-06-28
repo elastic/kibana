@@ -136,6 +136,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           id: 'my-test-email',
           is_preconfigured: true,
           is_deprecated: false,
+          is_system_action: false,
           connector_type_id: '.email',
           name: 'TestEmail#xyz',
           referenced_by_count: 0,
