@@ -16,6 +16,7 @@ import {
   EuiTitle,
   EuiCallOut,
   EuiButton,
+  EuiIcon,
 } from '@elastic/eui';
 import { RiskScoreEntity } from '../../../common/risk_engine/types';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
@@ -59,9 +60,10 @@ const RiskScorePreviewPanel = ({
         buttonContent={trigger === 'closed' ? showMessage : hideMessage}
         forceState={trigger}
         onToggle={onToggle}
+        extraAction={<EuiIcon type={type === RiskScoreEntity.host ? 'storage' : 'user'} />}
       >
         <>
-          <EuiSpacer size={'s'} />
+          <EuiSpacer size={'m'} />
           <RiskScorePreviewTable items={items} type={type} />
         </>
       </EuiAccordion>

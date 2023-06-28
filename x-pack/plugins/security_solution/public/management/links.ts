@@ -62,6 +62,7 @@ import { IconExceptionLists } from './icons/exception_lists';
 import { IconHostIsolation } from './icons/host_isolation';
 import { IconSiemRules } from './icons/siem_rules';
 import { IconTrustedApplications } from './icons/trusted_applications';
+import { IconEntityAnalytics } from './icons/entity_analytics';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 
 const categories = [
@@ -236,7 +237,7 @@ export const links: LinkItem = {
           defaultMessage: 'Entity Analytics management.',
         }
       ),
-      landingIcon: IconActionHistory,
+      landingIcon: IconEntityAnalytics,
       path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
       skipUrlState: true,
       hideTimeline: true,
