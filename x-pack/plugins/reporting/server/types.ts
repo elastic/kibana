@@ -33,11 +33,14 @@ import type { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
 import type { BaseParams, BasePayload, UrlOrUrlLocatorTuple } from '../common/types';
 import type { ReportingConfigType } from './config';
 import { ExportTypesRegistry } from './lib';
+import { ReportingCore } from './core';
 
 /**
  * Plugin Setup Contract
  */
 export interface ReportingSetup {
+  getSpaceId: ReportingCore['getSpaceId'];
+  getScreenshots: ReportingCore['getScreenshots'];
   /**
    * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
    */
@@ -64,8 +67,8 @@ export type CreateJobFn<JobParamsType> = (
 ) => JobParamsType & { isDeprecated: boolean; browserTimezone: any };
 
 export type RunTaskFn<TaskPayloadType> = (
-  payload: TaskPayloadType,
   jobId: string,
+  payload: TaskPayloadType,
   cancellationToken: CancellationToken,
   stream: Writable
 ) => Promise<TaskRunResult>;

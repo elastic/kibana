@@ -26,7 +26,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -38,6 +38,7 @@ import { filter, map, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { createConfig, ReportingConfigType } from './config';
 import { CsvSearchsourceExportType } from './export_types/csv_searchsource';
+import { PdfExportType } from './export_types/printable_pdf_v2';
 import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
@@ -99,6 +100,7 @@ export class ReportingCore {
   private config: ReportingConfigType;
   private executing: Set<string>;
   private csvSearchsourceExport: CsvSearchsourceExportType;
+  private pdfExport: PdfExportType;
   private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
@@ -122,6 +124,9 @@ export class ReportingCore {
     );
     this.exportTypesRegistry.register(this.csvSearchsourceExport);
 
+    this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
+    this.exportTypesRegistry.register(this.pdfExport);
+
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
     this.monitorTask = new MonitorReportsTask(this, config, this.logger);
@@ -129,6 +134,8 @@ export class ReportingCore {
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
       registerExportTypes: (id) => id,
+      getScreenshots: this.getScreenshots.bind(this),
+      getSpaceId: this.getSpaceId.bind(this),
     });
 
     this.executing = new Set();
@@ -146,6 +153,7 @@ export class ReportingCore {
     this.pluginSetupDeps = setupDeps; // cache
 
     this.csvSearchsourceExport.setup(setupDeps);
+    this.pdfExport.setup(setupDeps);
 
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
@@ -161,6 +169,7 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
     this.csvSearchsourceExport.start(startDeps);
+    this.pdfExport.start({ ...startDeps, reporting: this.getContract() });
 
     await this.assertKibanaIsAvailable();
 
@@ -369,6 +378,40 @@ export class ReportingCore {
     const startDeps = await this.getPluginStartDeps();
     return startDeps.esClient;
   }
+
+  public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
+    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
+    if (spacesService) {
+      const spaceId = spacesService?.getSpaceId(request);
+
+      if (spaceId !== DEFAULT_SPACE_ID) {
+        logger.info(`Request uses Space ID: ${spaceId}`);
+        return spaceId;
+      } else {
+        logger.debug(`Request uses default Space`);
+      }
+    }
+  }
+
+  public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;
+  public getScreenshots(options: PngScreenshotOptions): Rx.Observable<PngScreenshotResult>;
+  public getScreenshots(
+    options: PngScreenshotOptions | PdfScreenshotOptions
+  ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
+    return Rx.defer(() => this.getPluginStartDeps()).pipe(
+      switchMap(({ screenshotting }) => {
+        return screenshotting.getScreenshots({
+          ...options,
+          urls: options.urls.map((url) =>
+            typeof url === 'string'
+              ? url
+              : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+          ),
+        } as ScreenshotOptions);
+      })
+    );
+  }
+
   public trackReport(reportId: string) {
     this.executing.add(reportId);
   }

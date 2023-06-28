@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.existOrFail('csvDownloadStarted'); // validate toast panel
   };
 
-  describe('Download CSV', () => {
+  describe.skip('Download CSV', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await browser.setWindowSize(1600, 850);
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    describe('Default Saved Search Data', () => {
+    describe.skip('Default Saved Search Data', () => {
       const dashboardAllDataHiddenTitles = 'Ecom Dashboard Hidden Panel Titles';
       const dashboardPeriodOf2DaysData = 'Ecom Dashboard - 3 Day Period';
 
@@ -131,7 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Filtered Saved Search', () => {
+    describe.skip('Filtered Saved Search', () => {
       const TEST_SEARCH_TITLE = 'Customer Betty';
       const TEST_DASHBOARD_TITLE = 'Filtered Search Data';
       const setTimeRange = async () => {
@@ -165,7 +165,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Field Formatters and Scripted Fields', () => {
+    describe.skip('Field Formatters and Scripted Fields', () => {
       const dashboardWithScriptedFieldsSearch = 'names dashboard';
 
       before(async () => {

@@ -121,9 +121,7 @@ export class ExecuteReportTask implements ReportingTask {
   }
 
   private getJobContentEncoding(jobType: string) {
-    const exportType = this.exportTypesRegistry.get(
-      ({ jobType: _jobType }) => _jobType === jobType
-    );
+    const exportType = this.exportTypesRegistry.get((e) => e.jobType === jobType);
     return exportType.jobContentEncoding;
   }
 
@@ -245,7 +243,8 @@ export class ExecuteReportTask implements ReportingTask {
     cancellationToken: CancellationToken,
     stream: Writable
   ): Promise<TaskRunResult> {
-    const exportType = this.exportTypesRegistry.get(({ jobType }) => jobType === task.jobtype);
+    const exportType = this.exportTypesRegistry.get((e) => e.jobType === task.jobtype);
+
     if (!exportType) {
       throw new Error(`No export type from ${task.jobtype} found to execute report`);
     }
