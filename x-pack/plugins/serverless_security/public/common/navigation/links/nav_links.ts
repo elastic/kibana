@@ -14,5 +14,5 @@ export const getProjectNavLinks$ = (navLinks$: Observable<NavigationLink[]>): Pr
 };
 
 // TODO: This is a placeholder function that will be used to process the nav links,
-// mixing internal Security nav links with the external links to other plugins, in the correct order.
+// It will mix internal Security nav links with the external links to other plugins, in the correct order.
 const processNavLinks = (navLinks: NavigationLink[]): ProjectNavigationLink[] => navLinks;

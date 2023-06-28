@@ -10,10 +10,31 @@ import type {
   ChromeProjectNavigation,
   ChromeProjectNavigationNode,
 } from '@kbn/core-chrome-browser';
-import { APP_UI_ID } from '@kbn/security-solution-plugin/common';
+import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
 import { combineLatest, skipWhile, debounceTime } from 'rxjs';
 import type { Services } from '../services';
 import type { ProjectNavigationLink } from './links/types';
+
+// We need to hide breadcrumbs for some pages (tabs) because they appear duplicated.
+// They are incorrectly processed as trailing breadcrumbs in SecuritySolution, because of `SpyRoute` architecture limitations.
+// They are are navLinks tree with a SecurityPageName, so they should be treated as leading breadcrumbs in ESS as well.
+// TODO: Improve the breadcrumbs logic in `use_breadcrumbs_nav` to avoid this workaround.
+const HIDDEN_BREADCRUMBS = new Set<SecurityPageName>([
+  SecurityPageName.networkDns,
+  SecurityPageName.networkHttp,
+  SecurityPageName.networkTls,
+  SecurityPageName.networkAnomalies,
+  SecurityPageName.networkEvents,
+  SecurityPageName.usersAuthentications,
+  SecurityPageName.usersAnomalies,
+  SecurityPageName.usersRisk,
+  SecurityPageName.usersEvents,
+  SecurityPageName.uncommonProcesses,
+  SecurityPageName.hostsAnomalies,
+  SecurityPageName.hostsEvents,
+  SecurityPageName.hostsRisk,
+  SecurityPageName.sessions,
+]);
 
 export const subscribeNavigationTree = (services: Services): void => {
   const { chrome, serverless, projectNavLinks$ } = services;
@@ -26,7 +47,7 @@ export const subscribeNavigationTree = (services: Services): void => {
     .subscribe(([navLinks]) => {
       const projectNavTree: ChromeProjectNavigation = {
         // The root link is temporary until the issue about having multiple links at first level is solved.
-        // Replace it by:
+        // TODO: Assign the navigationTree nodes when the issue is solved:
         // navigationTree: formatChromeProjectNavNodes(chrome.navLinks, navLinks),
         navigationTree: [
           {
@@ -53,11 +74,13 @@ const formatChromeProjectNavNodes = (
     const id = deepLinkId ? `${appId}:${deepLinkId}` : appId;
 
     if (chromeNavLinks.has(id)) {
+      const hidden = appId === APP_UI_ID && HIDDEN_BREADCRUMBS.has(deepLinkId as SecurityPageName);
       const link: ChromeProjectNavigationNode = {
         id,
         title,
         path: [...path, deepLinkId],
         deepLink: chromeNavLinks.get(id),
+        ...(hidden && { breadcrumbStatus: 'hidden' }),
       };
 
       if (links?.length) {

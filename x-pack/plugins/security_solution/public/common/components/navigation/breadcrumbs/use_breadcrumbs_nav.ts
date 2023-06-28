@@ -10,15 +10,6 @@ import { useDispatch } from 'react-redux';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { Dispatch } from 'redux';
-import { getTrailingBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../explore/hosts/pages/details/breadcrumbs';
-import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../explore/network/pages/details/breadcrumbs';
-import { getTrailingBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/breadcrumbs';
-import { getTrailingBreadcrumbs as geExceptionsBreadcrumbs } from '../../../../exceptions/utils/breadcrumbs';
-import { getTrailingBreadcrumbs as getCSPBreadcrumbs } from '../../../../cloud_security_posture/breadcrumbs';
-import { getTrailingBreadcrumbs as getUsersBreadcrumbs } from '../../../../explore/users/pages/details/breadcrumbs';
-import { getTrailingBreadcrumbs as getKubernetesBreadcrumbs } from '../../../../kubernetes/pages/utils/breadcrumbs';
-import { getTrailingBreadcrumbs as getAlertDetailBreadcrumbs } from '../../../../detections/pages/alert_details/utils/breadcrumbs';
-import { getTrailingBreadcrumbs as getDashboardBreadcrumbs } from '../../../../dashboards/pages/breadcrumbs';
 import { SecurityPageName } from '../../../../app/types';
 import type { RouteSpyState } from '../../../utils/route/types';
 import { timelineActions } from '../../../../timelines/store/timeline';
@@ -31,6 +22,7 @@ import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { updateBreadcrumbsNav } from '../../../breadcrumbs';
 import { getAncestorLinksInfo } from '../../../links';
 import { APP_NAME } from '../../../../../common/constants';
+import { getTrailingBreadcrumbs } from './trailing_breadcrumbs';
 
 export const useBreadcrumbsNav = () => {
   const dispatch = useDispatch();
@@ -39,6 +31,11 @@ export const useBreadcrumbsNav = () => {
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
 
   useEffect(() => {
+    // cases manages its own breadcrumbs
+    if (!routeProps.pageName || routeProps.pageName === SecurityPageName.case) {
+      return;
+    }
+
     const leadingBreadcrumbs = getLeadingBreadcrumbs(routeProps, getSecuritySolutionUrl);
     const trailingBreadcrumbs = getTrailingBreadcrumbs(routeProps, getSecuritySolutionUrl);
 
@@ -53,13 +50,6 @@ const getLeadingBreadcrumbs = (
   { pageName }: RouteSpyState,
   getSecuritySolutionUrl: GetSecuritySolutionUrl
 ) => {
-  if (
-    !pageName ||
-    pageName === SecurityPageName.case // cases manages its own breadcrumbs
-  ) {
-    return [];
-  }
-
   const landingBreadcrumb: ChromeBreadcrumb = {
     text: APP_NAME,
     href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.landing }),
@@ -71,35 +61,6 @@ const getLeadingBreadcrumbs = (
   }));
 
   return [landingBreadcrumb, ...breadcrumbs];
-};
-
-const getTrailingBreadcrumbs = (
-  spyState: RouteSpyState,
-  getSecuritySolutionUrl: GetSecuritySolutionUrl
-) => {
-  switch (spyState.pageName) {
-    case SecurityPageName.hosts:
-      return getHostDetailsBreadcrumbs(spyState, getSecuritySolutionUrl);
-    case SecurityPageName.network:
-      return getIPDetailsBreadcrumbs(spyState, getSecuritySolutionUrl);
-    case SecurityPageName.users:
-      return getUsersBreadcrumbs(spyState, getSecuritySolutionUrl);
-    case SecurityPageName.rules:
-    case SecurityPageName.rulesAdd:
-    case SecurityPageName.rulesCreate:
-      return getDetectionRulesBreadcrumbs(spyState, getSecuritySolutionUrl);
-    case SecurityPageName.exceptions:
-      return geExceptionsBreadcrumbs(spyState, getSecuritySolutionUrl);
-    case SecurityPageName.kubernetes:
-      return getKubernetesBreadcrumbs(spyState, getSecuritySolutionUrl);
-    case SecurityPageName.alerts:
-      return getAlertDetailBreadcrumbs(spyState, getSecuritySolutionUrl);
-    case SecurityPageName.cloudSecurityPostureBenchmarks:
-      return getCSPBreadcrumbs(spyState, getSecuritySolutionUrl);
-    case SecurityPageName.dashboards:
-      return getDashboardBreadcrumbs(spyState);
-  }
-  return [];
 };
 
 const addOnClicksHandlers = (

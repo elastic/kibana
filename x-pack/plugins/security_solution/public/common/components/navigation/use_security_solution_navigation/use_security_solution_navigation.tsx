@@ -16,7 +16,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { useKibana } from '../../../lib/kibana';
-import { useBreadcrumbsNav } from '../breadcrumbs/use_breadcrumbs_nav';
+import { useBreadcrumbsNav } from '../breadcrumbs';
 import { SecuritySideNav } from '../security_side_nav';
 
 const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mainLabel', {
