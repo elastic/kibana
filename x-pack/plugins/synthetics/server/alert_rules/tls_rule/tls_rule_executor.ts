@@ -11,28 +11,28 @@ import {
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
+import { formatFilterString } from '../common';
+import { SyntheticsServerSetup } from '../../types';
 import { getSyntheticsCerts } from '../../queries/get_certs';
 import { TLSParams } from '../../../common/runtime_types/alerts/tls';
-import { savedObjectsAdapter } from '../../legacy_uptime/lib/saved_objects';
+import { savedObjectsAdapter } from '../../saved_objects';
 import { DYNAMIC_SETTINGS_DEFAULTS, SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import {
   getAllMonitors,
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { CertResult, EncryptedSyntheticsMonitor } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
-import { formatFilterString } from '../../legacy_uptime/lib/alerts/status_check';
+import { UptimeEsClient } from '../../lib';
 
 export class TLSRuleExecutor {
   previousStartedAt: Date | null;
   params: TLSParams;
   esClient: UptimeEsClient;
   soClient: SavedObjectsClientContract;
-  server: UptimeServerSetup;
+  server: SyntheticsServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>> = [];
 
@@ -41,7 +41,7 @@ export class TLSRuleExecutor {
     p: TLSParams,
     soClient: SavedObjectsClientContract,
     scopedClient: ElasticsearchClient,
-    server: UptimeServerSetup,
+    server: SyntheticsServerSetup,
     syntheticsMonitorClient: SyntheticsMonitorClient
   ) {
     this.previousStartedAt = previousStartedAt;
