@@ -1,15 +1,15 @@
 get:
-  summary: Aggregates and returns a list of case tags.
-  operationId: getCaseTags
+  summary: Gets all alerts attached to a case in the default space.
   description: >
-    You must have read privileges for the **Cases** feature in the
+    You must have `read` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
     feature privileges, depending on the owner of the cases you're seeking.
+  x-technical-preview: true
+  operationId: getCaseAlertsDefaultSpace
   tags:
     - cases
   parameters:
-    - $ref: '../components/parameters/space_id.yaml'
-    - $ref: '../components/parameters/owner.yaml'
+    - $ref: ../components/parameters/case_id.yaml
   responses:
     '200':
       description: Indicates a successful call.
@@ -18,10 +18,10 @@ get:
           schema:
             type: array
             items:
-              type: string
+              $ref: '../components/schemas/alert_response_properties.yaml'
           examples:
-            getTagsResponse:
-              $ref: '../components/examples/get_tags_response.yaml'
+            getCaseAlertsResponse:
+              $ref: '../components/examples/get_case_alerts_response.yaml'
     '401':
       description: Authorization information is missing or invalid.
       content:
