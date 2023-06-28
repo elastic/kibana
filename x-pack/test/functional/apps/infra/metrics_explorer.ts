@@ -26,7 +26,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ]);
 
   describe('Metrics Explorer', function () {
-    this.tags('includeFirefox');
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -97,8 +96,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Saved Views', function () {
-      // FLAKY: https://github.com/elastic/kibana/issues/157738
-      this.tags('skipFirefox');
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await pageObjects.infraHome.goToMetricExplorer();
