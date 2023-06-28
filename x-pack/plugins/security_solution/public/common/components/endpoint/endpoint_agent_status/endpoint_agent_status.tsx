@@ -90,11 +90,12 @@ export const EndpointAgentStatus = memo<EndpointAgentStatusProps>(
         return [false, {}];
       }
 
+      const endpointPending = endpointPendingActions?.data?.[0]?.pending_actions ?? {};
       const pending = pendingActions
         ? pendingActions
         : endpointPendingActions?.data[0].pending_actions ?? {};
 
-      return [Object.keys(pending).length > 0, pending];
+      return [Object.keys(endpointPending).length > 0, pending];
     }, [endpointPendingActions, pendingActions]);
 
     const status = endpointHostInfo.host_status;
