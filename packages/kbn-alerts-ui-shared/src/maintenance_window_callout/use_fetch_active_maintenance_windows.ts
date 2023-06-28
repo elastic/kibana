@@ -8,22 +8,17 @@
 
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
-import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { KibanaServices } from './types';
+import { fetchActiveMaintenanceWindows } from './api';
 
 export const useFetchActiveMaintenanceWindows = (
-  { http, notifications: { toasts } }: CoreStart,
+  { http, notifications: { toasts } }: KibanaServices,
   { enabled }: Pick<UseQueryOptions, 'enabled'>
 ) => {
-  const fetchActiveMaintenanceWindows = async (signal?: AbortSignal) =>
-    http.fetch(INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH, {
-      method: 'GET',
-      signal,
-    });
-
   return useQuery(
     ['GET', INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH],
-    ({ signal }) => fetchActiveMaintenanceWindows(signal),
+    ({ signal }) => fetchActiveMaintenanceWindows(http, signal),
     {
       enabled,
       refetchInterval: 60000,
@@ -34,7 +29,7 @@ export const useFetchActiveMaintenanceWindows = (
   );
 };
 
-const INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH = `/internal/alerting/rules/maintenance_window`;
+const INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH = `/internal/alerting/rules/maintenance_window/_active`;
 const FETCH_ERROR = i18n.translate('xpack.alerting.maintenanceWindowCallout.fetchError', {
   defaultMessage: 'Failed to check if maintenance windows are active',
 });

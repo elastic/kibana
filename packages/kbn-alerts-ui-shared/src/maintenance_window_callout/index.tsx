@@ -7,10 +7,9 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
-import { MaintenanceWindow, MaintenanceWindowStatus } from './types';
+import { MaintenanceWindow, MaintenanceWindowStatus, KibanaServices } from './types';
 import { useFetchActiveMaintenanceWindows } from './use_fetch_active_maintenance_windows';
 
 const MAINTENANCE_WINDOW_FEATURE_ID = 'maintenanceWindow';
@@ -30,7 +29,7 @@ const MAINTENANCE_WINDOW_RUNNING_DESCRIPTION = i18n.translate(
 export function MaintenanceWindowCallout({
   kibanaServices,
 }: {
-  kibanaServices: CoreStart;
+  kibanaServices: KibanaServices;
 }): JSX.Element | null {
   const {
     application: { capabilities },

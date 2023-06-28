@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import type { WeekdayStr } from 'rrule';
+import { CoreStart } from '@kbn/core/public';
 
 export enum MaintenanceWindowStatus {
   Running = 'running',
@@ -65,4 +66,10 @@ export interface RRuleRecord {
   byhour: number[];
   byminute: number[];
   bysecond: number[];
+}
+
+export interface KibanaServices {
+  application: Pick<CoreStart['application'], 'capabilities'>;
+  http: CoreStart['http'];
+  notifications: Pick<CoreStart['notifications'], 'toasts'>;
 }
