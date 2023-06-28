@@ -16,7 +16,7 @@ export const ADD_QUICK_PROMPT = i18n.translate(
 export const ADD_QUICK_PROMPT_MODAL_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.quickPrompts.addQuickPromptModal.modalTitle',
   {
-    defaultMessage: 'Add/Modify Quick Prompt',
+    defaultMessage: 'Quick Prompts',
   }
 );
 

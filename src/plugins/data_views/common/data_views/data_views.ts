@@ -393,7 +393,7 @@ export class DataViewsService {
     const savedObjects = await this.savedObjectsClient.find({
       fields: ['title'],
       search,
-      searchFields: ['title'],
+      searchFields: ['title', 'name'],
       perPage: size,
     });
     const getIndexPatternPromises = savedObjects.map(async (savedObject) => {

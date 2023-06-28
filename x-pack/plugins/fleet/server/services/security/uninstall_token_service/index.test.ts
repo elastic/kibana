@@ -22,6 +22,8 @@ import { agentPolicyService } from '../../agent_policy';
 import { UninstallTokenService, type UninstallTokenServiceInterface } from '.';
 
 describe('UninstallTokenService', () => {
+  const aDayAgo = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   let esoClientMock: jest.Mocked<EncryptedSavedObjectsClient>;
   let mockContext: MockedFleetAppContext;
@@ -36,7 +38,6 @@ describe('UninstallTokenService', () => {
             policy_id: 'test-policy-id',
             token: 'test-token',
           },
-          created_at: 'yesterday',
         }
       : {
           id: 'test-so-id',
@@ -44,7 +45,6 @@ describe('UninstallTokenService', () => {
             policy_id: 'test-policy-id',
             token_plain: 'test-token-plain',
           },
-          created_at: 'yesterday',
         };
   }
 
@@ -56,6 +56,7 @@ describe('UninstallTokenService', () => {
             policy_id: 'test-policy-id-two',
             token: 'test-token-two',
           },
+          created_at: aDayAgo,
         }
       : {
           id: 'test-so-id-two',
@@ -63,6 +64,7 @@ describe('UninstallTokenService', () => {
             policy_id: 'test-policy-id-two',
             token_plain: 'test-token-plain-two',
           },
+          created_at: aDayAgo,
         };
   }
 
@@ -91,6 +93,9 @@ describe('UninstallTokenService', () => {
               {
                 _id: defaultSO2.id,
                 ...defaultSO2,
+                _source: {
+                  created_at: defaultSO2.created_at,
+                },
               },
             ],
           },
@@ -186,7 +191,6 @@ describe('UninstallTokenService', () => {
         expect(token).toEqual({
           policy_id: so.attributes.policy_id,
           token: getToken(so, canEncrypt),
-          created_at: 'yesterday',
         } as UninstallToken);
       });
 
@@ -202,11 +206,11 @@ describe('UninstallTokenService', () => {
           {
             policy_id: so.attributes.policy_id,
             token: getToken(so, canEncrypt),
-            created_at: 'yesterday',
           },
           {
             policy_id: so2.attributes.policy_id,
             token: getToken(so2, canEncrypt),
+            created_at: aDayAgo,
           },
         ] as UninstallToken[]);
       });
@@ -220,11 +224,11 @@ describe('UninstallTokenService', () => {
           {
             policy_id: so.attributes.policy_id,
             token: getToken(so, canEncrypt),
-            created_at: 'yesterday',
           },
           {
             policy_id: so2.attributes.policy_id,
             token: getToken(so2, canEncrypt),
+            created_at: aDayAgo,
           },
         ] as UninstallToken[]);
       });
@@ -432,6 +436,30 @@ describe('UninstallTokenService', () => {
               },
             },
           ]);
+        });
+      });
+
+      describe('agentTamperProtectionEnabled false', () => {
+        beforeAll(() => {
+          // @ts-ignore
+          mockContext.experimentalFeatures.agentTamperProtectionEnabled = false;
+        });
+
+        it('generateTokensForPolicyIds should not generate token if agentTamperProtectionEnabled: false', async () => {
+          const so = getDefaultSO();
+          await uninstallTokenService.generateTokensForPolicyIds([so.attributes.policy_id]);
+          expect(soClientMock.bulkCreate).not.toBeCalled();
+        });
+
+        it('generateTokensForAllPolicies should not generate token if agentTamperProtectionEnabled: false', async () => {
+          await uninstallTokenService.generateTokensForAllPolicies();
+          expect(soClientMock.bulkCreate).not.toBeCalled();
+        });
+
+        it('generateTokenForPolicyId should not generate token if agentTamperProtectionEnabled: false', async () => {
+          const so = getDefaultSO();
+          await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id);
+          expect(soClientMock.bulkCreate).not.toBeCalled();
         });
       });
     });

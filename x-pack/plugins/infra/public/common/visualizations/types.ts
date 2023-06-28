@@ -30,6 +30,7 @@ export interface MetricChartOptions extends LensOptions {
   showTitle?: boolean;
   showTrendLine?: boolean;
   backgroundColor?: string;
+  decimals?: number;
 }
 
 export interface LensLineChartConfig {

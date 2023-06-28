@@ -6,6 +6,7 @@
  */
 import { v4 as uuidV4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { unzipFile } from '../../common/unzipt_project_code';
 import {
   ConfigKey,
@@ -13,15 +14,14 @@ import {
   SyntheticsMonitor,
   PrivateLocation,
 } from '../../../common/runtime_types';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
-import { API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { validateMonitor } from './monitor_validation';
 import { getPrivateLocations, hydrateMonitorFields } from './add_monitor';
 
 export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
-  path: API_URLS.SYNTHETICS_MONITOR_INSPECT,
+  path: SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT,
   validate: {
     body: schema.any(),
     query: schema.object({

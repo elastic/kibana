@@ -8,3 +8,4 @@
 
 export { runTelemetryCheck } from './src/cli/run_telemetry_check';
 export { runTelemetryExtract } from './src/cli/run_telemetry_extract';
+export { assertTelemetryPayload } from './src/schema_ftr_validations';

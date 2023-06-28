@@ -27,10 +27,10 @@ post:
       content: 
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/400_response.yaml'
     '401':
       description: Unauthorized response
       content: 
         application/json:
           schema:
-            $ref: '../components/schemas/4xx_response.yaml'
+            $ref: '../components/schemas/401_response.yaml'

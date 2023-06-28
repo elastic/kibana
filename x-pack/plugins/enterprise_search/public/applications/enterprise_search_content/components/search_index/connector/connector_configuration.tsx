@@ -36,6 +36,7 @@ import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector/generate
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
 import { isConnectorIndex } from '../../../utils/indices';
 
+import { SyncsContextMenu } from '../components/header_actions/syncs_context_menu';
 import { IndexNameLogic } from '../index_name_logic';
 
 import { IndexViewLogic } from '../index_view_logic';
@@ -257,7 +258,7 @@ service_type: "${index.connector.service_type || 'changeme'}"
                             'xpack.enterpriseSearch.content.indices.configurationConnector.scheduleSync.description',
                             {
                               defaultMessage:
-                                'Once configured, set a recurring sync schedule to keep your documents in sync over time. You can also simply trigger a one-time sync.',
+                                'Finalize your connector by triggering a one-time sync, or setting a recurring sync to keep your data source in sync over time',
                             }
                           )}
                         </EuiText>
@@ -281,15 +282,18 @@ service_type: "${index.connector.service_type || 'changeme'}"
                               )}
                             </EuiButtonTo>
                           </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <SyncsContextMenu />
+                          </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   ),
-                  status: index.connector.scheduling.enabled ? 'complete' : 'incomplete',
+                  status: index.connector.scheduling.full.enabled ? 'complete' : 'incomplete',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.schedule.title',
                     {
-                      defaultMessage: 'Set a recurring sync schedule',
+                      defaultMessage: 'Advanced configuration',
                     }
                   ),
                   titleSize: 'xs',

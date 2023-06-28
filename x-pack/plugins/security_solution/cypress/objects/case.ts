@@ -92,6 +92,7 @@ export const getCaseResponse = (): Case => ({
   totalComment: 0,
   totalAlerts: 0,
   version: 'test-version',
+  category: null,
 });
 
 export const getServiceNowConnector = (): Connector => ({

@@ -6,42 +6,38 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiIcon, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
-import type { HostNodeRow } from '../types';
 
 export interface LinkToUptimeProps {
   nodeType: InventoryItemType;
-  node: HostNodeRow;
+  nodeName: string;
+  nodeIp?: string | null;
 }
 
-export const LinkToUptime = ({ nodeType, node }: LinkToUptimeProps) => {
+export const LinkToUptime = ({ nodeType, nodeName, nodeIp }: LinkToUptimeProps) => {
   const { share } = useKibanaContextForPlugin().services;
-  const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiLink
+    <EuiButtonEmpty
       data-test-subj="hostsView-flyout-uptime-link"
+      size="xs"
+      iconSide="left"
+      iconType="popout"
+      flush="both"
       onClick={() =>
         share.url.locators
           .get(uptimeOverviewLocatorID)!
-          .navigate({ [nodeType]: node.name, ip: node.ip })
+          .navigate({ [nodeType]: nodeName, ip: nodeIp })
       }
     >
-      <EuiIcon
-        type="popout"
-        css={css`
-          margin-right: ${euiTheme.size.xs};
-        `}
-      />
       <FormattedMessage
         id="xpack.infra.hostsViewPage.flyout.uptimeLinkLabel"
         defaultMessage="Uptime"
       />
-    </EuiLink>
+    </EuiButtonEmpty>
   );
 };

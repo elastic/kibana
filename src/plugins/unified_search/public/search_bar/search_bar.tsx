@@ -48,6 +48,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   indexPatterns?: DataView[];
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
+  dataViewPickerOverride?: React.ReactNode;
   screenTitle?: string;
   dataTestSubj?: string;
   // Togglers
@@ -87,6 +88,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   // Autorefresh
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   indicateNoData?: boolean;
+  // Disables the default auto-refresh option inside the date picker
+  isAutoRefreshDisabled?: boolean;
 
   placeholder?: string;
   isClearable?: boolean;
@@ -577,6 +580,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
+          dataViewPickerOverride={this.props.dataViewPickerOverride}
           showSubmitButton={this.props.showSubmitButton}
           submitButtonStyle={this.props.submitButtonStyle}
           dataTestSubj={this.props.dataTestSubj}

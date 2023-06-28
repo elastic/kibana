@@ -25,7 +25,7 @@ export const SeveritySidebarSelector: React.FC<Props> = ({
   isDisabled,
 }) => {
   return (
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem grow={false} data-test-subj="sidebar-severity">
       <EuiText>
         <h4>{SEVERITY_TITLE}</h4>
       </EuiText>

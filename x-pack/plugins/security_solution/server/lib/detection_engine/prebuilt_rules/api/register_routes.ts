@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ConfigType } from '../../../../config';
 import type { SetupPlugins } from '../../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
@@ -20,24 +19,19 @@ import { performRuleUpgradeRoute } from './perform_rule_upgrade/perform_rule_upg
 
 export const registerPrebuiltRulesRoutes = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
   security: SetupPlugins['security']
 ) => {
-  const { prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled } = config.experimentalFeatures;
-
   // Legacy endpoints that we're going to deprecate
   getPrebuiltRulesAndTimelinesStatusRoute(router, security);
   installPrebuiltRulesAndTimelinesRoute(router);
 
-  if (prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled) {
-    // New endpoints for the rule upgrade and installation workflows
-    getPrebuiltRulesStatusRoute(router);
-    performRuleInstallationRoute(router);
-    performRuleUpgradeRoute(router);
-    reviewRuleInstallationRoute(router);
-    reviewRuleUpgradeRoute(router);
+  // New endpoints for the rule upgrade and installation workflows
+  getPrebuiltRulesStatusRoute(router);
+  performRuleInstallationRoute(router);
+  performRuleUpgradeRoute(router);
+  reviewRuleInstallationRoute(router);
+  reviewRuleUpgradeRoute(router);
 
-    // Helper endpoints for development and testing. Should be removed later.
-    generateAssetsRoute(router);
-  }
+  // Helper endpoints for development and testing. Should be removed later.
+  generateAssetsRoute(router);
 };

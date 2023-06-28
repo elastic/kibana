@@ -11,12 +11,14 @@ import React, {
   memo,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
   useCallback,
 } from 'react';
 import { EuiMarkdownEditor } from '@elastic/eui';
 import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
+import { useLicense } from '../../hooks/use_license';
 
 import { uiPlugins, parsingPlugins, processingPlugins } from './plugins';
 
@@ -52,6 +54,12 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
       }
     }, [autoFocusDisabled]);
 
+    const licenseIsPlatinum = useLicense().isPlatinumPlus();
+
+    const uiPluginsWithState = useMemo(() => {
+      return uiPlugins({ licenseIsPlatinum });
+    }, [licenseIsPlatinum]);
+
     // @ts-expect-error update types
     useImperativeHandle(ref, () => {
       if (!editorRef.current) {
@@ -73,7 +81,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
         editorId={editorId}
         onChange={onChange}
         value={value}
-        uiPlugins={uiPlugins}
+        uiPlugins={uiPluginsWithState}
         parsingPluginList={parsingPlugins}
         processingPluginList={processingPlugins}
         onParse={onParse}

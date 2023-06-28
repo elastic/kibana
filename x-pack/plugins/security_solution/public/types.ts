@@ -81,6 +81,15 @@ export interface SetupPlugins {
   ml?: MlPluginSetup;
 }
 
+/**
+ * IMPORTANT - PLEASE READ: When adding new plugins to the
+ * security solution, please ensure you add that plugin
+ * name to the kibana.jsonc file located in ../kibana.jsonc
+ *
+ * Without adding the plugin name there, the plugin will not
+ * fulfill at runtime, despite the types showing up correctly
+ * in the code.
+ */
 export interface StartPlugins {
   cases: CasesUiStart;
   data: DataPublicPluginStart;
@@ -135,7 +144,7 @@ export type StartServices = CoreStart &
     };
     savedObjectsManagement: SavedObjectsManagementPluginStart;
     isSidebarEnabled$: BehaviorSubject<boolean>;
-    getStartedComponent: GetStartedComponent | undefined;
+    getStartedComponent$: BehaviorSubject<React.ComponentType | null>;
     upselling: UpsellingService;
     telemetry: TelemetryClientStart;
   };
@@ -145,15 +154,10 @@ export interface PluginSetup {
   upselling: UpsellingService;
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type GetStartedComponentProps = {};
-
-export type GetStartedComponent = (props?: GetStartedComponentProps) => JSX.Element;
-
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
-  setGetStartedPage: (getStartedComponent: GetStartedComponent) => void;
+  setGetStartedPage: (getStartedComponent: React.ComponentType) => void;
 }
 
 export interface AppObservableLibs {

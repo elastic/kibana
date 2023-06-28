@@ -30,12 +30,12 @@ import { SloSummary } from './slo_summary';
 import { SloDeleteConfirmationModal } from './slo_delete_confirmation_modal';
 import { SloBadges } from './badges/slo_badges';
 import {
-  transformSloResponseToCreateSloInput,
-  transformValuesToCreateSLOInput,
+  transformSloResponseToCreateSloForm,
+  transformCreateSLOFormToCreateSLOInput,
 } from '../../slo_edit/helpers/process_slo_form_values';
-import { SLO_BURN_RATE_RULE_ID } from '../../../../common/constants';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
 import { rulesLocatorID, sloFeatureId } from '../../../../common';
-import { paths } from '../../../config/paths';
+import { paths } from '../../../routes/paths';
 import type { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import type { SloRule } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import type { RulesParams } from '../../../locators/rules';
@@ -111,11 +111,11 @@ export function SloListItem({
   };
 
   const handleClone = () => {
-    const newSlo = transformValuesToCreateSLOInput(
-      transformSloResponseToCreateSloInput({ ...slo, name: `[Copy] ${slo.name}` })!
+    const newSlo = transformCreateSLOFormToCreateSLOInput(
+      transformSloResponseToCreateSloForm({ ...slo, name: `[Copy] ${slo.name}` })!
     );
 
-    cloneSlo({ slo: newSlo, idToCopyFrom: slo.id });
+    cloneSlo({ slo: newSlo, originalSloId: slo.id });
     setIsActionsPopoverOpen(false);
   };
 
@@ -180,7 +180,9 @@ export function SloListItem({
             anchorPosition="downLeft"
             button={
               <EuiButtonIcon
-                aria-label="Actions"
+                aria-label={i18n.translate('xpack.observability.slo.item.actions.button', {
+                  defaultMessage: 'Actions',
+                })}
                 color="text"
                 disabled={!slo.summary}
                 display="empty"
@@ -202,7 +204,7 @@ export function SloListItem({
                   onClick={handleViewDetails}
                   data-test-subj="sloActionsView"
                 >
-                  {i18n.translate('xpack.observability.slo.slo.item.actions.details', {
+                  {i18n.translate('xpack.observability.slo.item.actions.details', {
                     defaultMessage: 'Details',
                   })}
                 </EuiContextMenuItem>,
@@ -213,7 +215,7 @@ export function SloListItem({
                   onClick={handleEdit}
                   data-test-subj="sloActionsEdit"
                 >
-                  {i18n.translate('xpack.observability.slo.slo.item.actions.edit', {
+                  {i18n.translate('xpack.observability.slo.item.actions.edit', {
                     defaultMessage: 'Edit',
                   })}
                 </EuiContextMenuItem>,
@@ -224,7 +226,7 @@ export function SloListItem({
                   onClick={handleCreateRule}
                   data-test-subj="sloActionsCreateRule"
                 >
-                  {i18n.translate('xpack.observability.slo.slo.item.actions.createRule', {
+                  {i18n.translate('xpack.observability.slo.item.actions.createRule', {
                     defaultMessage: 'Create new alert rule',
                   })}
                 </EuiContextMenuItem>,
@@ -235,7 +237,7 @@ export function SloListItem({
                   onClick={handleNavigateToRules}
                   data-test-subj="sloActionsManageRules"
                 >
-                  {i18n.translate('xpack.observability.slo.slo.item.actions.manageRules', {
+                  {i18n.translate('xpack.observability.slo.item.actions.manageRules', {
                     defaultMessage: 'Manage rules',
                   })}
                 </EuiContextMenuItem>,
@@ -246,7 +248,7 @@ export function SloListItem({
                   onClick={handleClone}
                   data-test-subj="sloActionsClone"
                 >
-                  {i18n.translate('xpack.observability.slo.slo.item.actions.clone', {
+                  {i18n.translate('xpack.observability.slo.item.actions.clone', {
                     defaultMessage: 'Clone',
                   })}
                 </EuiContextMenuItem>,
@@ -257,7 +259,7 @@ export function SloListItem({
                   onClick={handleDelete}
                   data-test-subj="sloActionsDelete"
                 >
-                  {i18n.translate('xpack.observability.slo.slo.item.actions.delete', {
+                  {i18n.translate('xpack.observability.slo.item.actions.delete', {
                     defaultMessage: 'Delete',
                   })}
                 </EuiContextMenuItem>,
@@ -271,7 +273,7 @@ export function SloListItem({
         <AddRuleFlyout
           consumer={sloFeatureId}
           filteredRuleTypes={filteredRuleTypes}
-          ruleTypeId={SLO_BURN_RATE_RULE_ID}
+          ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
           initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
           onSave={handleSavedRule}
           onClose={() => {

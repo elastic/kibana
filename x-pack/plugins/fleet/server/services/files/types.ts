@@ -119,3 +119,26 @@ export interface FileCustomMeta {
   target_agents: string[];
   action_id: string;
 }
+
+export interface FilesClientFactory {
+  /**
+   * Client to interact with files that will be sent to a host.
+   * @param packageName
+   * @param maxSizeBytes
+   */
+  toHost: (
+    /** The integration package name */
+    packageName: string,
+    /** Max file size allow to be created (in bytes) */
+    maxSizeBytes?: number
+  ) => FleetToHostFileClientInterface;
+
+  /**
+   * Client to interact with files that were sent from the host
+   * @param packageName
+   */
+  fromHost: (
+    /** The integration package name */
+    packageName: string
+  ) => FleetFromHostFileClientInterface;
+}

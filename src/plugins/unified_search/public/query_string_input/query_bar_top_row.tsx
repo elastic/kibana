@@ -8,7 +8,7 @@
 
 import dateMath from '@kbn/datemath';
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
@@ -103,6 +103,7 @@ const SuperDatePicker = React.memo(
 // @internal
 export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
   customSubmitButton?: any;
+  dataViewPickerOverride?: ReactNode;
   dataTestSubj?: string;
   dateRangeFrom?: string;
   dateRangeTo?: string;
@@ -680,7 +681,7 @@ export const QueryBarTopRow = React.memo(
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
               wrap
             >
-              {renderDataViewsPicker()}
+              {props.dataViewPickerOverride || renderDataViewsPicker()}
               <EuiFlexItem
                 grow={!shouldShowDatePickerAsBadge()}
                 style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}

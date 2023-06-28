@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
+import { createHttpServer, createConfigService } from '@kbn/core-http-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
 import type { IRouter } from '@kbn/core-http-server';
 import type { CliArgs } from '@kbn/config';
@@ -30,6 +30,18 @@ describe('Routing versioned requests', () => {
     server = createHttpServer({
       logger,
       env: createTestEnv({ envOptions: getEnvOptions({ cliArgs }) }),
+      configService: createConfigService({
+        // We manually sync the config in our mock at this point
+        server:
+          cliArgs.serverless === true
+            ? {
+                versioned: {
+                  versionResolution: 'newest',
+                  strictClientVersionCheck: false,
+                },
+              }
+            : undefined,
+      }),
     });
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
@@ -160,8 +172,8 @@ describe('Routing versioned requests', () => {
   it('returns the version in response headers', async () => {
     router.versioned
       .get({ path: '/my-path', access: 'public' })
-      .addVersion({ validate: false, version: '2020-02-02' }, async (ctx, req, res) => {
-        return res.ok({ body: { v: '2020-02-02' } });
+      .addVersion({ validate: false, version: '2023-10-31' }, async (ctx, req, res) => {
+        return res.ok({ body: { foo: 'bar' } });
       });
 
     await server.start();
@@ -169,10 +181,10 @@ describe('Routing versioned requests', () => {
     await expect(
       supertest
         .get('/my-path')
-        .set('Elastic-Api-Version', '2020-02-02')
+        .set('Elastic-Api-Version', '2023-10-31')
         .expect(200)
         .then(({ header }) => header)
-    ).resolves.toEqual(expect.objectContaining({ 'elastic-api-version': '2020-02-02' }));
+    ).resolves.toEqual(expect.objectContaining({ 'elastic-api-version': '2023-10-31' }));
   });
 
   it('runs response validation when in dev', async () => {
@@ -247,19 +259,15 @@ describe('Routing versioned requests', () => {
     ).resolves.toMatch(/Please specify.+version/);
   });
 
-  it.each([
-    ['public', '2022-02-02', '2022-02-03'],
-    ['internal', '1', '2'],
-  ])('requires version headers to be set %p when in dev', async (access, v1, v2) => {
+  it('requires version headers to be set for public endpoints when in dev', async () => {
     await setupServer({ dev: true });
     router.versioned
-      .get({ path: '/my-path', access: access as 'internal' | 'public' })
+      .get({
+        path: '/my-path',
+        access: 'public',
+      })
       .addVersion(
-        { version: v1, validate: { response: { 200: { body: schema.number() } } } },
-        async (ctx, req, res) => res.ok()
-      )
-      .addVersion(
-        { version: v2, validate: { response: { 200: { body: schema.number() } } } },
+        { version: '2023-10-31', validate: { response: { 200: { body: schema.number() } } } },
         async (ctx, req, res) => res.ok()
       );
     await server.start();

@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
     const { body, status } = await supertest
       .get(`/s/${idSpace1}/api/ml/saved_objects/sync`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(getCommonRequestHeader('2023-05-15'));
+      .set(getCommonRequestHeader('2023-10-31'));
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;

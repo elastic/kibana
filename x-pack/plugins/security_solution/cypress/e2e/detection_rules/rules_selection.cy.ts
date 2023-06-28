@@ -10,12 +10,14 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../../screens/alerts_detection_rules';
 import {
-  loadPrebuiltDetectionRules,
   selectNumberOfRules,
   unselectNumberOfRules,
   waitForPrebuiltDetectionRulesToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
-import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_rules';
+import {
+  excessivelyInstallAllPrebuiltRules,
+  getAvailablePrebuiltRulesCount,
+} from '../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
@@ -29,7 +31,7 @@ describe.skip('Rules selection', () => {
   });
 
   it('should correctly update the selection label when rules are individually selected and unselected', () => {
-    loadPrebuiltDetectionRules();
+    excessivelyInstallAllPrebuiltRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
     selectNumberOfRules(2);
@@ -42,7 +44,7 @@ describe.skip('Rules selection', () => {
   });
 
   it('should correctly update the selection label when rules are bulk selected and then bulk un-selected', () => {
-    loadPrebuiltDetectionRules();
+    excessivelyInstallAllPrebuiltRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
     cy.get(SELECT_ALL_RULES_BTN).click();
@@ -63,7 +65,7 @@ describe.skip('Rules selection', () => {
   });
 
   it('should correctly update the selection label when rules are bulk selected and then unselected via the table select all checkbox', () => {
-    loadPrebuiltDetectionRules();
+    excessivelyInstallAllPrebuiltRules();
     waitForPrebuiltDetectionRulesToBeLoaded();
 
     cy.get(SELECT_ALL_RULES_BTN).click();

@@ -32,24 +32,42 @@ export enum FieldType {
   BOOLEAN = 'bool',
 }
 
+export interface ConnectorConfigCategoryProperties {
+  label: string;
+  order: number;
+  type: 'category';
+}
+
+export interface Validation {
+  constraint: string | number;
+  type: string;
+}
+
 export interface ConnectorConfigProperties {
+  category?: string;
   default_value: string | number | boolean | null;
   depends_on: Dependency[];
   display: DisplayType;
   label: string;
   options: SelectOption[];
   order?: number | null;
+  placeholder?: string;
   required: boolean;
   sensitive: boolean;
-  tooltip: string;
+  tooltip: string | null;
   type: FieldType;
   ui_restrictions: string[];
-  validations: string[];
+  validations: Validation[];
   value: string | number | boolean | null;
 }
 
-export type ConnectorConfiguration = Record<string, ConnectorConfigProperties | null> & {
-  extract_full_html?: { label: string; value: boolean };
+export type ConnectorConfiguration = Record<
+  string,
+  ConnectorConfigProperties | ConnectorConfigCategoryProperties | null
+> & {
+  extract_full_html?: { label: string; value: boolean }; // This only exists for Crawler
+  use_document_level_security?: ConnectorConfigProperties;
+  use_text_extraction_service?: ConnectorConfigProperties; // This only exists for SharePoint Online
 };
 
 export interface ConnectorSyncConfigProperties {
@@ -61,7 +79,7 @@ export type ConnectorSyncConfiguration = Record<string, ConnectorSyncConfigPrope
 
 export interface ConnectorScheduling {
   enabled: boolean;
-  interval: string;
+  interval: string; // interval has crontab syntax
 }
 
 export interface CustomScheduling {
@@ -189,6 +207,12 @@ export type ConnectorFeatures = Partial<{
   };
 }> | null;
 
+export interface SchedulingConfiguraton {
+  access_control: ConnectorScheduling;
+  full: ConnectorScheduling;
+  incremental: ConnectorScheduling;
+}
+
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
@@ -201,6 +225,7 @@ export interface Connector {
   index_name: string;
   is_native: boolean;
   language: string | null;
+  last_access_control_sync_error: string | null;
   last_access_control_sync_scheduled_at: string | null;
   last_access_control_sync_status: SyncStatus | null;
   last_incremental_sync_scheduled_at: string | null;
@@ -211,10 +236,7 @@ export interface Connector {
   last_synced: string | null;
   name: string;
   pipeline?: IngestPipelineParams | null;
-  scheduling: {
-    enabled: boolean;
-    interval: string; // crontab syntax
-  };
+  scheduling: SchedulingConfiguraton;
   service_type: string | null;
   status: ConnectorStatus;
   sync_now: boolean;

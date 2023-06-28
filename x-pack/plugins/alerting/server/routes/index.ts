@@ -58,6 +58,7 @@ import { finishMaintenanceWindowRoute } from './maintenance_window/finish_mainte
 import { activeMaintenanceWindowsRoute } from './maintenance_window/active_maintenance_windows';
 import { registerValueSuggestionsRoute } from './suggestions/values_suggestion_rules';
 import { registerFieldsRoute } from './suggestions/fields_rules';
+import { bulkGetMaintenanceWindowRoute } from './maintenance_window/bulk_get_maintenance_windows';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -117,4 +118,5 @@ export function defineRoutes(opts: RouteOptions) {
   activeMaintenanceWindowsRoute(router, licenseState);
   registerValueSuggestionsRoute(router, licenseState, config$!);
   registerFieldsRoute(router, licenseState);
+  bulkGetMaintenanceWindowRoute(router, licenseState);
 }

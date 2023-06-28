@@ -14,7 +14,7 @@ import { TakeActionDropdown } from '.';
 import { generateAlertDetailsDataMock } from '../../../common/components/event_details/__mocks__';
 import { getDetectionAlertMock } from '../../../common/mock/mock_detection_alerts';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { TimelineId } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types/timeline';
 import { TestProviders } from '../../../common/mock';
 import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';

@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import {
   EuiButton,
   EuiCode,
@@ -21,14 +23,30 @@ import {
   EuiTabs,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import { useProfilingParams } from '../../hooks/use_profiling_params';
+import { useProfilingRouter } from '../../hooks/use_profiling_router';
+import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 import { AsyncStatus, useAsync } from '../../hooks/use_async';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 
-export function NoDataView({ subTitle }: { subTitle: string }) {
+export enum NoDataTabs {
+  Kubernetes = 'kubernetes',
+  Docker = 'docker',
+  Binary = 'binary',
+  Deb = 'deb',
+  RPM = 'rpm',
+  ElasticAgentIntegration = 'elasticAgentIntegration',
+  Symbols = 'symbols',
+}
+
+export function NoDataView() {
+  const { query } = useProfilingParams('/add-data-instructions');
+  const { selectedTab } = query;
+  const profilingRouter = useProfilingRouter();
+  const routePath = useProfilingRoutePath();
+
   const {
     services: { setupDataCollectionInstructions },
     start: { core },
@@ -41,14 +59,14 @@ export function NoDataView({ subTitle }: { subTitle: string }) {
     [setupDataCollectionInstructions]
   );
 
-  const secretToken = data?.variables.secretToken;
-  const collectionAgentHostPort = data?.variables.apmServerUrl.replace('https://', '');
-  const symbolUrl = data?.variables.apmServerUrl.replace(/\.apm\./, '.symbols.');
+  const secretToken = data?.collector?.secretToken;
+  const collectionAgentHost = data?.collector?.host;
+  const symbolUrl = data?.symbolizer?.host;
   const hostAgentVersion = 'v3';
 
   const tabs = [
     {
-      key: 'kubernetes',
+      key: NoDataTabs.Kubernetes,
       title: i18n.translate('xpack.profiling.tabs.kubernetesTitle', {
         defaultMessage: 'Kubernetes',
       }),
@@ -71,7 +89,7 @@ export function NoDataView({ subTitle }: { subTitle: string }) {
             <EuiCodeBlock paddingSize="s" isCopyable>
               {`helm install --create-namespace -n=universal-profiling universal-profiling-agent \\
 --set "projectID=1,secretToken=${secretToken}" \\
---set "collectionAgentHostPort=${collectionAgentHostPort}" \\
+--set "collectionAgentHostPort=${collectionAgentHost}" \\
 --set "version=${hostAgentVersion}" \\
 optimyze/pf-host-agent`}
             </EuiCodeBlock>
@@ -97,7 +115,7 @@ optimyze/pf-host-agent`}
       ],
     },
     {
-      key: 'docker',
+      key: NoDataTabs.Docker,
       title: i18n.translate('xpack.profiling.tabs.dockerTitle', {
         defaultMessage: 'Docker',
       }),
@@ -112,14 +130,14 @@ optimyze/pf-host-agent`}
 -v /var/run/docker.sock:/var/run/docker.sock -v /sys/kernel/debug:/sys/kernel/debug:ro \\
 docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-host-agent \\
 -project-id=1 -secret-token=${secretToken} \\
--collection-agent=${collectionAgentHostPort}`}
+-collection-agent=${collectionAgentHost}`}
             </EuiCodeBlock>
           ),
         },
       ],
     },
     {
-      key: 'binary',
+      key: NoDataTabs.Binary,
       title: i18n.translate('xpack.profiling.tabs.binaryTitle', {
         defaultMessage: 'Binary',
       }),
@@ -150,14 +168,14 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`sudo pf-host-agent/pf-host-agent -project-id=1 -secret-token=${secretToken} -collection-agent=${collectionAgentHostPort}`}
+              {`sudo pf-host-agent/pf-host-agent -project-id=1 -secret-token=${secretToken} -collection-agent=${collectionAgentHost}`}
             </EuiCodeBlock>
           ),
         },
       ],
     },
     {
-      key: 'deb',
+      key: NoDataTabs.Deb,
       title: i18n.translate('xpack.profiling.tabs.debTitle', {
         defaultMessage: 'DEB Package',
       }),
@@ -192,7 +210,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHostPort}" | sudo tee -a /etc/prodfiler/prodfiler.conf`}
+              {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHost}" | sudo tee -a /etc/prodfiler/prodfiler.conf`}
             </EuiCodeBlock>
           ),
         },
@@ -210,7 +228,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
       ],
     },
     {
-      key: 'rpm',
+      key: NoDataTabs.RPM,
       title: i18n.translate('xpack.profiling.tabs.rpmTitle', {
         defaultMessage: 'RPM Package',
       }),
@@ -245,7 +263,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHostPort}" | sudo tee -a /etc/prodfiler/prodfiler.conf`}
+              {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHost}" | sudo tee -a /etc/prodfiler/prodfiler.conf`}
             </EuiCodeBlock>
           ),
         },
@@ -263,7 +281,67 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
       ],
     },
     {
-      key: 'symbols',
+      key: NoDataTabs.ElasticAgentIntegration,
+      title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.title', {
+        defaultMessage: 'Elastic Agent Integration',
+      }),
+      steps: [
+        {
+          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1', {
+            defaultMessage: 'Copy credentials',
+          }),
+          content: (
+            <>
+              <EuiText>
+                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.hint', {
+                  defaultMessage:
+                    "You'll need these credentials to set up Universal Profiling. Please save them in a secure location, as they will be required in the subsequent step.",
+                })}
+              </EuiText>
+              <EuiSpacer />
+              <EuiText style={{ fontWeight: 'bold' }} size="s">
+                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.secretToken', {
+                  defaultMessage: 'Secret token:',
+                })}
+              </EuiText>
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {secretToken}
+              </EuiCodeBlock>
+              <EuiSpacer size="s" />
+              <EuiText style={{ fontWeight: 'bold' }} size="s">
+                {i18n.translate(
+                  'xpack.profiling.tabs.elasticAgentIntegrarion.step1.collectionAgentUrl',
+                  { defaultMessage: 'Universal Profiling Collector url:' }
+                )}
+              </EuiText>
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {collectionAgentHost}
+              </EuiCodeBlock>
+            </>
+          ),
+        },
+        {
+          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2', {
+            defaultMessage: 'Fleet',
+          }),
+          content: (
+            <EuiButton
+              iconType="gear"
+              fill
+              href={`${core.http.basePath.prepend(
+                '/app/integrations/detail/profiler_agent-8.8.0-preview/overview?prerelease=true'
+              )}`}
+            >
+              {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2.button', {
+                defaultMessage: 'Manage Universal Profiling agent in Fleet',
+              })}
+            </EuiButton>
+          ),
+        },
+      ],
+    },
+    {
+      key: NoDataTabs.Symbols,
       title: i18n.translate('xpack.profiling.tabs.symbols.title', {
         defaultMessage: 'Upload Symbols',
       }),
@@ -349,64 +427,7 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
         },
       ],
     },
-    {
-      key: 'elasticAgentIntegration',
-      title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.title', {
-        defaultMessage: 'Elastic Agent Integration',
-      }),
-      steps: [
-        {
-          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1', {
-            defaultMessage: 'Copy credentials',
-          }),
-          content: (
-            <>
-              <EuiText>
-                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.hint', {
-                  defaultMessage:
-                    "You'll need these credentials to set up Universal Profiling. Please save them in a secure location, as they will be required in the subsequent step.",
-                })}
-              </EuiText>
-              <EuiSpacer />
-              <EuiCodeBlock paddingSize="s" isCopyable>
-                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.secretToken', {
-                  defaultMessage: 'Secret token: {secretToken}',
-                  values: { secretToken },
-                })}
-              </EuiCodeBlock>
-              <EuiSpacer size="s" />
-              <EuiCodeBlock paddingSize="s" isCopyable>
-                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.apmServerUrl', {
-                  defaultMessage: 'APM server url: {apmServerUrl}',
-                  values: { apmServerUrl: collectionAgentHostPort },
-                })}
-              </EuiCodeBlock>
-            </>
-          ),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2', {
-            defaultMessage: 'Fleet',
-          }),
-          content: (
-            <EuiButton
-              iconType="gear"
-              fill
-              href={`${core.http.basePath.prepend(
-                '/app/integrations/detail/profiler_agent-8.8.0-preview/overview'
-              )}`}
-            >
-              {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2.button', {
-                defaultMessage: 'Manage Universal Profiling agent in Fleet',
-              })}
-            </EuiButton>
-          ),
-        },
-      ],
-    },
   ];
-
-  const [selectedTab, setSelectedTab] = useState(tabs[0].key);
 
   const displayedTab = tabs.find((tab) => tab.key === selectedTab)!;
 
@@ -441,7 +462,11 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
         <></>
       ) : (
         <>
-          <EuiText>{subTitle}</EuiText>
+          <EuiText>
+            {i18n.translate('xpack.profiling.noDataPage.addDataTitle', {
+              defaultMessage: 'Select an option below to deploy the host-agent.',
+            })}
+          </EuiText>
           <EuiSpacer />
           <EuiSplitPanel.Outer>
             <EuiPanel hasBorder={false} hasShadow={false} grow={false} paddingSize="none">
@@ -451,7 +476,12 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
                     return (
                       <EuiTab
                         key={tab.key}
-                        onClick={() => setSelectedTab(tab.key)}
+                        onClick={() => {
+                          profilingRouter.push(routePath, {
+                            path: {},
+                            query: { selectedTab: tab.key },
+                          });
+                        }}
                         isSelected={tab.key === selectedTab}
                       >
                         {tab.title}

@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
-import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { useDispatch } from 'react-redux';
@@ -33,10 +33,8 @@ export const DeleteParam = ({
     setIsDeleting(true);
   };
 
-  const { savedObjects } = useKibana().services;
-
   const { status } = useFetcher(() => {
-    if (isDeleting && savedObjects) {
+    if (isDeleting) {
       return deleteGlobalParams({ ids: items.map(({ id }) => id) });
     }
   }, [items, isDeleting]);

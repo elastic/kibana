@@ -10,7 +10,6 @@ import {
   CASE_METRICS_DETAILS_URL,
   CASE_COMMENTS_URL,
   CASE_USER_ACTIONS_URL,
-  CASE_COMMENT_DETAILS_URL,
   CASE_PUSH_URL,
   CASE_CONFIGURE_DETAILS_URL,
   CASE_ALERTS_URL,
@@ -34,10 +33,6 @@ export const getCaseDetailsMetricsUrl = (id: string): string => {
 
 export const getCaseCommentsUrl = (id: string): string => {
   return CASE_COMMENTS_URL.replace('{case_id}', id);
-};
-
-export const getCaseCommentDetailsUrl = (caseId: string, commentId: string): string => {
-  return CASE_COMMENT_DETAILS_URL.replace('{case_id}', caseId).replace('{comment_id}', commentId);
 };
 
 export const getCaseFindAttachmentsUrl = (caseId: string): string => {
