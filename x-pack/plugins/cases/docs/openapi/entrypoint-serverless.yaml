@@ -1,0 +1,35 @@
+openapi: 3.0.1
+info:
+  title: Serverless Cases
+  description: OpenAPI schema for Serverless Cases endpoints
+  version: 'YYYY-MM-DD'
+  contact:
+    name: Cases Team
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: cases
+    description: Case APIs enable you to open and track issues.
+servers:
+  - url: 'http://localhost:5601'
+    description: local
+paths:
+  '/api/cases':
+    $ref: 'paths/api@cases.yaml'
+  '/api/cases/_find':
+    $ref: 'paths/api@cases@_find.yaml'
+  '/api/cases/{caseId}':
+    $ref: 'paths/api@cases@{caseid}.yaml'
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: ApiKey
+security:
+  - basicAuth: []
+  - apiKeyAuth: []
