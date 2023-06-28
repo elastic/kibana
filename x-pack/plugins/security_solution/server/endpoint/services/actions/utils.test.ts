@@ -123,17 +123,45 @@ describe('When using Actions service utilities', () => {
     });
 
     it('should show complete `false` if no action ids', () => {
-      expect(getActionCompletionInfo([], [])).toEqual({ ...NOT_COMPLETED_OUTPUT, agentState: {} });
+      expect(
+        getActionCompletionInfo(
+          mapToNormalizedActionRequest(
+            fleetActionGenerator.generate({
+              agents: [],
+              '@timestamp': '2022-04-27T16:08:47.449Z',
+            })
+          ),
+          []
+        )
+      ).toEqual({
+        ...NOT_COMPLETED_OUTPUT,
+        agentState: {},
+      });
     });
 
     it('should show complete as `false` if no responses', () => {
-      expect(getActionCompletionInfo(['123'], [])).toEqual(NOT_COMPLETED_OUTPUT);
+      expect(
+        getActionCompletionInfo(
+          mapToNormalizedActionRequest(
+            fleetActionGenerator.generate({
+              agents: ['123'],
+              '@timestamp': '2022-04-27T16:08:47.449Z',
+            })
+          ),
+          []
+        )
+      ).toEqual(NOT_COMPLETED_OUTPUT);
     });
 
     it('should show complete as `false` if no Endpoint response', () => {
       expect(
         getActionCompletionInfo(
-          ['123'],
+          mapToNormalizedActionRequest(
+            fleetActionGenerator.generate({
+              agents: ['123'],
+              '@timestamp': '2022-04-27T16:08:47.449Z',
+            })
+          ),
           [
             fleetActionGenerator.generateActivityLogActionResponse({
               item: { data: { action_id: '123' } },
@@ -156,7 +184,17 @@ describe('When using Actions service utilities', () => {
           },
         },
       });
-      expect(getActionCompletionInfo(['123'], [endpointResponse])).toEqual({
+      expect(
+        getActionCompletionInfo(
+          mapToNormalizedActionRequest(
+            fleetActionGenerator.generate({
+              agents: ['123'],
+              '@timestamp': '2022-04-27T16:08:47.449Z',
+            })
+          ),
+          [endpointResponse]
+        )
+      ).toEqual({
         isCompleted: true,
         completedAt: COMPLETED_AT,
         errors: undefined,
@@ -201,7 +239,17 @@ describe('When using Actions service utilities', () => {
           },
         },
       });
-      expect(getActionCompletionInfo(['123'], [endpointResponse])).toEqual({
+      expect(
+        getActionCompletionInfo(
+          mapToNormalizedActionRequest(
+            fleetActionGenerator.generate({
+              agents: ['123'],
+              '@timestamp': '2022-04-27T16:08:47.449Z',
+            })
+          ),
+          [endpointResponse]
+        )
+      ).toEqual({
         isCompleted: true,
         completedAt: COMPLETED_AT,
         errors: undefined,
@@ -255,7 +303,17 @@ describe('When using Actions service utilities', () => {
       });
 
       it('should show `wasSuccessful` as `false` if endpoint action response has error', () => {
-        expect(getActionCompletionInfo(['123'], [endpointResponseAtError])).toEqual({
+        expect(
+          getActionCompletionInfo(
+            mapToNormalizedActionRequest(
+              fleetActionGenerator.generate({
+                agents: ['123'],
+                '@timestamp': '2022-04-27T16:08:47.449Z',
+              })
+            ),
+            [endpointResponseAtError]
+          )
+        ).toEqual({
           completedAt: endpointResponseAtError.item.data['@timestamp'],
           errors: ['Endpoint action response error: endpoint failed to apply'],
           isCompleted: true,
@@ -273,7 +331,17 @@ describe('When using Actions service utilities', () => {
       });
 
       it('should show `wasSuccessful` as `false` if fleet action response has error (no endpoint response)', () => {
-        expect(getActionCompletionInfo(['123'], [fleetResponseAtError])).toEqual({
+        expect(
+          getActionCompletionInfo(
+            mapToNormalizedActionRequest(
+              fleetActionGenerator.generate({
+                agents: ['123'],
+                '@timestamp': '2022-04-27T16:08:47.449Z',
+              })
+            ),
+            [fleetResponseAtError]
+          )
+        ).toEqual({
           completedAt: fleetResponseAtError.item.data.completed_at,
           errors: ['Fleet action response error: agent failed to deliver'],
           isCompleted: true,
@@ -292,7 +360,15 @@ describe('When using Actions service utilities', () => {
 
       it('should include both fleet and endpoint errors if both responses returned failure', () => {
         expect(
-          getActionCompletionInfo(['123'], [fleetResponseAtError, endpointResponseAtError])
+          getActionCompletionInfo(
+            mapToNormalizedActionRequest(
+              fleetActionGenerator.generate({
+                agents: ['123'],
+                '@timestamp': '2022-04-27T16:08:47.449Z',
+              })
+            ),
+            [fleetResponseAtError, endpointResponseAtError]
+          )
         ).toEqual({
           completedAt: endpointResponseAtError.item.data['@timestamp'],
           errors: [
@@ -374,7 +450,17 @@ describe('When using Actions service utilities', () => {
       });
 
       it('should show complete as `false` if no responses', () => {
-        expect(getActionCompletionInfo(agentIds, [])).toEqual({
+        expect(
+          getActionCompletionInfo(
+            mapToNormalizedActionRequest(
+              fleetActionGenerator.generate({
+                agents: agentIds,
+                '@timestamp': '2022-04-27T16:08:47.449Z',
+              })
+            ),
+            []
+          )
+        ).toEqual({
           ...NOT_COMPLETED_OUTPUT,
           agentState: {
             ...NOT_COMPLETED_OUTPUT.agentState,
@@ -396,14 +482,22 @@ describe('When using Actions service utilities', () => {
 
       it('should complete as `false` if at least one agent id has not received a response', () => {
         expect(
-          getActionCompletionInfo(agentIds, [
-            ...action123Responses,
+          getActionCompletionInfo(
+            mapToNormalizedActionRequest(
+              fleetActionGenerator.generate({
+                agents: agentIds,
+                '@timestamp': '2022-04-27T16:08:47.449Z',
+              })
+            ),
+            [
+              ...action123Responses,
 
-            // Action id: 456 === Not complete (only fleet response)
-            action456Responses[0],
+              // Action id: 456 === Not complete (only fleet response)
+              action456Responses[0],
 
-            ...action789Responses,
-          ])
+              ...action789Responses,
+            ]
+          )
         ).toEqual({
           ...NOT_COMPLETED_OUTPUT,
           outputs: expect.any(Object),
@@ -432,11 +526,15 @@ describe('When using Actions service utilities', () => {
 
       it('should show complete as `true` if all agent response were received', () => {
         expect(
-          getActionCompletionInfo(agentIds, [
-            ...action123Responses,
-            ...action456Responses,
-            ...action789Responses,
-          ])
+          getActionCompletionInfo(
+            mapToNormalizedActionRequest(
+              fleetActionGenerator.generate({
+                agents: agentIds,
+                '@timestamp': '2022-04-27T16:08:47.449Z',
+              })
+            ),
+            [...action123Responses, ...action456Responses, ...action789Responses]
+          )
         ).toEqual({
           isCompleted: true,
           completedAt: COMPLETED_AT,
@@ -471,14 +569,22 @@ describe('When using Actions service utilities', () => {
         action456Responses[0].item.data['@timestamp'] = '2022-05-06T12:50:19.747Z';
 
         expect(
-          getActionCompletionInfo(agentIds, [
-            ...action123Responses,
+          getActionCompletionInfo(
+            mapToNormalizedActionRequest(
+              fleetActionGenerator.generate({
+                agents: agentIds,
+                '@timestamp': '2022-04-27T16:08:47.449Z',
+              })
+            ),
+            [
+              ...action123Responses,
 
-            // Action id: 456 === is complete with only a fleet response that has `error`
-            action456Responses[0],
+              // Action id: 456 === is complete with only a fleet response that has `error`
+              action456Responses[0],
 
-            ...action789Responses,
-          ])
+              ...action789Responses,
+            ]
+          )
         ).toEqual({
           completedAt: '2022-05-06T12:50:19.747Z',
           errors: ['Fleet action response error: something is no good'],
@@ -528,14 +634,22 @@ describe('When using Actions service utilities', () => {
         };
 
         expect(
-          getActionCompletionInfo(agentIds, [
-            ...action123Responses,
+          getActionCompletionInfo(
+            mapToNormalizedActionRequest(
+              fleetActionGenerator.generate({
+                agents: agentIds,
+                '@timestamp': '2022-04-27T16:08:47.449Z',
+              })
+            ),
+            [
+              ...action123Responses,
 
-            // Action id: 456 === Not complete (only fleet response)
-            action456Responses[0],
+              // Action id: 456 === Not complete (only fleet response)
+              action456Responses[0],
 
-            ...action789Responses,
-          ])
+              ...action789Responses,
+            ]
+          )
         ).toEqual({
           ...NOT_COMPLETED_OUTPUT,
           agentState: {
