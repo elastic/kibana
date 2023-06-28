@@ -1071,8 +1071,6 @@ describe('TableListView', () => {
   });
 
   describe('initialFilter', () => {
-    let router: Router | undefined;
-
     const setupTagFiltering = registerTestBed<string, TableListViewTableProps>(
       WithServices<TableListViewTableProps>(TableListViewTable, {
         getTagList: () => [
@@ -1084,9 +1082,6 @@ describe('TableListView', () => {
         defaultProps: { ...requiredProps, initialFilter: `tag:("tag-1")`, urlStateEnabled: false },
         memoryRouter: {
           wrapComponent: true,
-          onRouter: (_router: Router) => {
-            router = _router;
-          },
         },
       }
     );
