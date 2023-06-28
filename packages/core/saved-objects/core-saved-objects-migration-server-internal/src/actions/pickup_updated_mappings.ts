@@ -21,7 +21,7 @@ export interface UpdateByQueryResponse {
 
 /**
  * Pickup updated mappings by performing an update by query operation on all
- * documents in the index. Returns a task ID which can be
+ * documents matching the passed in query. Returns a task ID which can be
  * tracked for progress.
  *
  * @remarks When mappings are updated to add a field which previously wasn't

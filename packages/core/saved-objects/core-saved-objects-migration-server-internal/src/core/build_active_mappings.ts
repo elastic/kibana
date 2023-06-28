@@ -67,18 +67,21 @@ export function diffMappings(actual: IndexMapping, expected: IndexMapping) {
  * Compares the actual vs expected mappings' hashes.
  * Returns a list with all the hashes that have been updated.
  */
-export const getUpdatedHashes = (
-  current: IndexMapping,
-  updated: IndexMapping
-): string[] | undefined => {
-  if (!current._meta?.migrationMappingPropertyHashes) {
-    return undefined;
+export const getUpdatedHashes = ({
+  actual,
+  expected,
+}: {
+  actual: IndexMapping;
+  expected: IndexMapping;
+}): string[] => {
+  if (!actual._meta?.migrationMappingPropertyHashes) {
+    return Object.keys(expected._meta!.migrationMappingPropertyHashes!);
   }
 
-  const updatedHashes = Object.keys(updated._meta!.migrationMappingPropertyHashes!).filter(
+  const updatedHashes = Object.keys(expected._meta!.migrationMappingPropertyHashes!).filter(
     (key) =>
-      current._meta!.migrationMappingPropertyHashes![key] !==
-      updated._meta!.migrationMappingPropertyHashes![key]
+      actual._meta!.migrationMappingPropertyHashes![key] !==
+      expected._meta!.migrationMappingPropertyHashes![key]
   );
 
   return updatedHashes;

@@ -47,7 +47,6 @@ import {
   hasLaterVersionAlias,
   aliasVersion,
   REINDEX_TEMP_SUFFIX,
-  getIndexTypes,
 } from './helpers';
 import { buildTempIndexMap, createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
@@ -1423,63 +1422,61 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CHECK_TARGET_MAPPINGS') {
     const res = resW as ResponseType<typeof stateP.controlState>;
     if (Either.isRight(res)) {
-      if (!res.right.match) {
-        if (res.right.updatedHashes?.length) {
-          const typeFields = getIndexTypes(stateP);
-          const nonTypeFields = res.right.updatedHashes.filter(
-            (field) => !typeFields.includes(field)
-          );
-
-          if (nonTypeFields.length) {
-            return {
-              ...stateP,
-              controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
-              updatedTypesQuery: Option.none,
-              logs: [
-                ...stateP.logs,
-                {
-                  level: 'info',
-                  message: `Kibana is performing a compatible update and some root fields have been updated. All SO documents must be updated. Updated root fields: ${nonTypeFields}.`,
-                },
-              ],
-            };
-          } else {
-            // all updated hashes correspond to SO types
-            const updatedTypes = res.right.updatedHashes;
-            return {
-              ...stateP,
-              controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
-              updatedTypesQuery: Option.some({
-                bool: {
-                  should: updatedTypes.map((type) => ({ term: { type } })),
-                },
-              }),
-              logs: [
-                ...stateP.logs,
-                {
-                  level: 'info',
-                  message: `Kibana is performing a compatible update and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings: ${updatedTypes}.`,
-                },
-              ],
-            };
-          }
-        } else {
-          // some top-level properties have changed, e.g. 'dynamic' or '_meta' (see diffMappings())
+      // The md5 of ALL mappings match, so there's no need to update target mappings
+      return {
+        ...stateP,
+        controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
+      };
+    } else {
+      const left = res.left;
+      if (isTypeof(left, 'actual_mappings_incomplete')) {
+        // reindex migration
+        // some top-level properties have changed, e.g. 'dynamic' or '_meta' (see checkTargetMappings())
+        // we must "pick-up" all documents on the index (by not providing a query)
+        return {
+          ...stateP,
+          controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
+          updatedTypesQuery: Option.none,
+        };
+      } else if (isTypeof(left, 'compared_mappings_changed')) {
+        if (left.updatedRootFields.length) {
+          // compatible migration, some core fields have been updated
           return {
             ...stateP,
             controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
+            // we must "pick-up" all documents on the index (by not providing a query)
             updatedTypesQuery: Option.none,
+            logs: [
+              ...stateP.logs,
+              {
+                level: 'info',
+                message: `Kibana is performing a compatible upgrade and the mappings of some root fields have been changed. For Elasticsearch to pickup these mappings, all saved objects need to be updated. Updated root fields: ${left.updatedRootFields}.`,
+              },
+            ],
+          };
+        } else {
+          // compatible migration, all updated hashes correspond to SO types
+          return {
+            ...stateP,
+            controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
+            // we can "pick-up" only the SO types that have changed
+            updatedTypesQuery: Option.some({
+              bool: {
+                should: left.updatedTypes.map((type) => ({ term: { type } })),
+              },
+            }),
+            logs: [
+              ...stateP.logs,
+              {
+                level: 'info',
+                message: `Kibana is performing a compatible update and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings: ${left.updatedTypes}.`,
+              },
+            ],
           };
         }
       } else {
-        // The md5 of ALL mappings match, so there's no need to update target mappings
-        return {
-          ...stateP,
-          controlState: 'CHECK_VERSION_INDEX_READY_ACTIONS',
-        };
+        throwBadResponse(stateP, res as never);
       }
-    } else {
-      throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_PROPERTIES') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;

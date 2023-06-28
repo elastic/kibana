@@ -210,23 +210,23 @@ describe('diffMappings', () => {
 });
 
 describe('getUpdatedHashes', () => {
-  test('is undefined if _meta is missing from actual', () => {
+  test('gives all hashes if _meta is missing from actual', () => {
     const actual: IndexMapping = {
       dynamic: 'strict',
       properties: {},
     };
     const expected: IndexMapping = {
       _meta: {
-        migrationMappingPropertyHashes: { foo: 'bar' },
+        migrationMappingPropertyHashes: { foo: 'bar', bar: 'baz' },
       },
       dynamic: 'strict',
       properties: {},
     };
 
-    expect(getUpdatedHashes(actual, expected)).toBeUndefined();
+    expect(getUpdatedHashes({ actual, expected })).toEqual(['foo', 'bar']);
   });
 
-  test('is undefined if migrationMappingPropertyHashes is missing from actual', () => {
+  test('gives all hashes if migrationMappingPropertyHashes is missing from actual', () => {
     const actual: IndexMapping = {
       dynamic: 'strict',
       properties: {},
@@ -234,13 +234,13 @@ describe('getUpdatedHashes', () => {
     };
     const expected: IndexMapping = {
       _meta: {
-        migrationMappingPropertyHashes: { foo: 'bar' },
+        migrationMappingPropertyHashes: { foo: 'bar', bar: 'baz' },
       },
       dynamic: 'strict',
       properties: {},
     };
 
-    expect(getUpdatedHashes(actual, expected)).toBeUndefined();
+    expect(getUpdatedHashes({ actual, expected })).toEqual(['foo', 'bar']);
   });
 
   test('gives a list of the types with updated hashes', () => {
@@ -267,6 +267,6 @@ describe('getUpdatedHashes', () => {
       },
     };
 
-    expect(getUpdatedHashes(actual, expected)).toEqual(['type2', 'type4']);
+    expect(getUpdatedHashes({ actual, expected })).toEqual(['type2', 'type4']);
   });
 });
