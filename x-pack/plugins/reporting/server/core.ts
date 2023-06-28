@@ -24,7 +24,12 @@ import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+import {
+  PdfScreenshotResult,
+  PngScreenshotResult,
+  ScreenshotOptions,
+  ScreenshottingStart,
+} from '@kbn/screenshotting-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
@@ -36,6 +41,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
+import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
 import { CsvSearchsourceExportType } from './export_types/csv_searchsource';
 import { PdfExportType } from './export_types/printable_pdf_v2';
@@ -43,7 +49,7 @@ import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
-import type { ReportingPluginRouter } from './types';
+import type { PdfScreenshotOptions, PngScreenshotOptions, ReportingPluginRouter } from './types';
 
 export interface ReportingInternalSetup {
   basePath: Pick<IBasePath, 'set'>;
@@ -115,7 +121,7 @@ export class ReportingCore {
     this.packageInfo = context.env.packageInfo;
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
-      
+
     this.csvSearchsourceExport = new CsvSearchsourceExportType(
       this.core,
       this.config,
@@ -166,8 +172,8 @@ export class ReportingCore {
   public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
-    
-    this.csvSearchsourceExport.start(startDeps);
+
+    this.csvSearchsourceExport.start({ ...startDeps, reporting: this.getContract() });
     this.pdfExport.start({ ...startDeps, reporting: this.getContract() });
 
     await this.assertKibanaIsAvailable();
@@ -344,20 +350,6 @@ export class ReportingCore {
     return this.pluginSetupDeps;
   }
 
-  public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
-    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
-    if (spacesService) {
-      const spaceId = spacesService?.getSpaceId(request);
-
-      if (spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Request uses Space ID: ${spaceId}`);
-        return spaceId;
-      } else {
-        logger.debug(`Request uses default Space`);
-      }
-    }
-  }
-
   public async getDataViewsService(request: KibanaRequest) {
     const { savedObjects } = await this.getPluginStartDeps();
     const savedObjectsClient = savedObjects.getScopedClient(request);
@@ -398,7 +390,7 @@ export class ReportingCore {
     options: PngScreenshotOptions | PdfScreenshotOptions
   ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
-      switchMap(({ screenshotting }) => {
+      Rx.switchMap(({ screenshotting }) => {
         return screenshotting.getScreenshots({
           ...options,
           urls: options.urls.map((url) =>
