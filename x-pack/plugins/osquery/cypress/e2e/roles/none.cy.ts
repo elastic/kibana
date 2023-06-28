@@ -11,7 +11,7 @@ import { ROLE, login } from '../../tasks/login';
 import { NAV_SEARCH_INPUT_OSQUERY_RESULTS } from '../../tasks/navigation';
 import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
 
-describe('None', () => {
+describe.only('None', () => {
   beforeEach(() => {
     login(ROLE.none);
 
@@ -27,7 +27,6 @@ describe('None', () => {
 
   it('should get 403 forbidden response when trying to GET osquery', () => {
     request({
-      method: 'GET',
       url: '/app/osquery/live_queries',
       failOnStatusCode: false,
       headers: {
@@ -37,7 +36,6 @@ describe('None', () => {
       expect(resp.status).to.eq(403);
     });
     request({
-      method: 'GET',
       url: '/app/osquery/saved_queries',
       failOnStatusCode: false,
       headers: {
@@ -47,7 +45,6 @@ describe('None', () => {
       expect(resp.status).to.eq(403);
     });
     request({
-      method: 'GET',
       url: '/app/osquery/packs',
       failOnStatusCode: false,
       headers: {
