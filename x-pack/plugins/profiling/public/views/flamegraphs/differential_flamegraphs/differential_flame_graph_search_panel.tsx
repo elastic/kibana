@@ -6,30 +6,27 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { useProfilingParams } from '../../hooks/use_profiling_params';
-import { useProfilingRouter } from '../../hooks/use_profiling_router';
-import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
-import { PrimaryAndComparisonSearchBar } from '../../components/primary_and_comparison_search_bar';
-import { PrimaryProfilingSearchBar } from '../../components/profiling_app_page_template/primary_profiling_search_bar';
+import { useProfilingParams } from '../../../hooks/use_profiling_params';
+import { useProfilingRouter } from '../../../hooks/use_profiling_router';
+import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
+import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
 import {
   ComparisonMode,
   NormalizationMode,
   NormalizationOptions,
   NormalizationMenu,
-} from '../../components/normalization_menu';
-import { DifferentialComparisonMode } from '../../components/differential_comparison_mode';
+} from '../../../components/normalization_menu';
+import { DifferentialComparisonMode } from '../../../components/differential_comparison_mode';
 
 interface Props {
-  isDifferentialView: boolean;
   comparisonMode: ComparisonMode;
   normalizationMode: NormalizationMode;
   normalizationOptions: NormalizationOptions;
 }
 
-export function FlameGraphSearchPanel({
+export function DifferentialFlameGraphSearchPanel({
   comparisonMode,
   normalizationMode,
-  isDifferentialView,
   normalizationOptions,
 }: Props) {
   const { path, query } = useProfilingParams('/flamegraphs/*');
@@ -77,29 +74,25 @@ export function FlameGraphSearchPanel({
   }
   return (
     <EuiPanel hasShadow={false} color="subdued">
-      {isDifferentialView ? <PrimaryAndComparisonSearchBar /> : <PrimaryProfilingSearchBar />}
+      <PrimaryAndComparisonSearchBar />
       <EuiHorizontalRule />
       <EuiFlexGroup direction="row">
-        {isDifferentialView && (
-          <>
-            <DifferentialComparisonMode
-              comparisonMode={comparisonMode}
-              onChange={onChangeComparisonMode}
-            />
-            {comparisonMode === ComparisonMode.Absolute && (
+        <DifferentialComparisonMode
+          comparisonMode={comparisonMode}
+          onChange={onChangeComparisonMode}
+        />
+        {comparisonMode === ComparisonMode.Absolute && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <NormalizationMenu
-                      onChange={onChangeNormalizationMode}
-                      mode={normalizationMode}
-                      options={normalizationOptions}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <NormalizationMenu
+                  onChange={onChangeNormalizationMode}
+                  mode={normalizationMode}
+                  options={normalizationOptions}
+                />
               </EuiFlexItem>
-            )}
-          </>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         )}
       </EuiFlexGroup>
     </EuiPanel>
