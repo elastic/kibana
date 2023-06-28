@@ -265,6 +265,7 @@ enabled:
   - x-pack/test/functional/apps/data_views/config.ts
   - x-pack/test/functional/apps/dev_tools/config.ts
   - x-pack/test/functional/apps/discover/config.ts
+  - x-pack/test/functional/apps/discover_log_explorer/config.ts
   - x-pack/test/functional/apps/graph/config.ts
   - x-pack/test/functional/apps/grok_debugger/config.ts
   - x-pack/test/functional/apps/home/config.ts
