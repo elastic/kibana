@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core-saved-objects-server';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 
 import type { GetAllSpacesPurpose, Space } from '../../common';
