@@ -91,15 +91,17 @@ export const getDefaultColorForMultiMetricDimension = ({
   columnId,
   paletteService,
   datasource,
+  palette,
 }: {
   layer: PieLayerState;
   columnId: string;
   paletteService: PaletteRegistry;
   datasource: DatasourcePublicAPI | undefined;
+  palette?: PieVisualizationState['palette'];
 }) => {
   const columnToLabelMap = datasource ? getColumnToLabelMap(layer.metrics, datasource) : {};
   const sortedMetrics = getSortedAccessorsForGroup(datasource, layer, 'metrics');
-  return paletteService.get('default').getCategoricalColor([
+  return paletteService.get(palette?.name || 'default').getCategoricalColor([
     {
       name: columnToLabelMap[columnId],
       rankAtDepth: sortedMetrics.indexOf(columnId),
@@ -346,6 +348,7 @@ export const getPieVisualization = ({
                     columnId,
                     paletteService,
                     datasource,
+                    palette: state.palette,
                   }) ??
                   undefined,
               }
@@ -675,6 +678,7 @@ export const getPieVisualization = ({
                 columnId,
                 paletteService,
                 datasource,
+                palette: state.palette,
               })
           )
         );

@@ -34,7 +34,6 @@ import {
   hasNonCollapsedSliceBy,
   isCollapsed,
 } from './visualization';
-import { StaticColorControls } from './static_color_controls';
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -346,6 +345,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             columnId: props.accessor,
             paletteService: props.paletteService,
             datasource: props.datasource,
+            palette: props.state.palette,
           })}
           disabled={hasNonCollapsedSliceBy(currentLayer)}
           disableHelpTooltip={
