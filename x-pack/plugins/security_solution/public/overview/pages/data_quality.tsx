@@ -31,7 +31,7 @@ import styled from 'styled-components';
 
 import { SecurityPageName } from '../../app/types';
 import { getGroupByFieldsOnClick } from '../../common/components/alerts_treemap/lib/helpers';
-import { useTheme } from '../../common/components/charts/common';
+import { useThemes } from '../../common/components/charts/common';
 import { HeaderPage } from '../../common/components/header_page';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { useLocalStorage } from '../../common/components/local_storage';
@@ -131,7 +131,7 @@ const renderOption = (
 const DataQualityComponent: React.FC = () => {
   const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
   const httpFetch = KibanaServices.get().http.fetch;
-  const theme = useTheme();
+  const { baseTheme, theme } = useThemes();
   const toasts = useToasts();
   const addSuccessToast = useCallback(
     (toast: { title: string }) => {
@@ -242,6 +242,7 @@ const DataQualityComponent: React.FC = () => {
             openCreateCaseFlyout={openCreateCaseFlyout}
             patterns={alertsAndSelectedPatterns}
             setLastChecked={setLastChecked}
+            baseTheme={baseTheme}
             theme={theme}
           />
         </SecuritySolutionPageWrapper>
