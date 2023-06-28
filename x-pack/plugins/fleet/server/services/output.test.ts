@@ -811,6 +811,7 @@ describe('Output Service', () => {
         ssl: null,
         timeout: null,
         topics: null,
+        headers: null,
         username: null,
         version: null,
       });
@@ -925,6 +926,7 @@ describe('Output Service', () => {
         sasl: null,
         timeout: null,
         topics: null,
+        headers: null,
         username: null,
         version: null,
       });

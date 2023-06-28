@@ -101,6 +101,15 @@ properties:
               type: string
             condition:
               type: string
+  headers:
+    type: array
+    items:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
   timeout:
     type: number
   broker_timeout:

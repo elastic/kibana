@@ -7758,6 +7758,20 @@
               }
             }
           },
+          "headers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            }
+          },
           "timeout": {
             "type": "number"
           },
@@ -8142,6 +8156,20 @@
                       "type": "string"
                     }
                   }
+                }
+              }
+            }
+          },
+          "headers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "string"
                 }
               }
             }
