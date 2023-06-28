@@ -115,6 +115,8 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
   const [isPlatinumPopoverOpen, setIsPlatinumPopoverOpen] = useState(false);
 
   const isGated = !hasPlatinumLicense && type === SyncJobType.ACCESS_CONTROL;
+  const isDocumentLevelSecurityDisabled =
+    !index.connector.configuration.use_document_level_security?.value;
 
   return (
     <>
@@ -163,7 +165,7 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EnableSwitch
-                    disabled={isGated}
+                    disabled={isGated || isDocumentLevelSecurityDisabled}
                     checked={scheduling[type].enabled}
                     onChange={(e) => {
                       if (e.target.checked) {
@@ -185,7 +187,7 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
               </EuiFlexGroup>
             ) : (
               <EnableSwitch
-                disabled={isGated}
+                disabled={isGated || isDocumentLevelSecurityDisabled}
                 checked={scheduling[type].enabled}
                 onChange={(e) => {
                   if (e.target.checked) {

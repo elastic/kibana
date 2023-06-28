@@ -20,6 +20,7 @@ import {
   HttpStart,
   NotificationsStart,
   ApplicationStart,
+  AnalyticsServiceStart,
 } from '@kbn/core/public';
 import {
   FilterManager,
@@ -66,6 +67,7 @@ export interface HistoryLocationState {
 export interface DiscoverServices {
   application: ApplicationStart;
   addBasePath: (path: string) => string;
+  analytics: AnalyticsServiceStart;
   capabilities: Capabilities;
   chrome: ChromeStart;
   core: CoreStart;
@@ -73,7 +75,7 @@ export interface DiscoverServices {
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
   history: () => History<HistoryLocationState>;
-  theme: ChartsPluginStart['theme'];
+  theme: CoreStart['theme'];
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsContract;
@@ -121,13 +123,14 @@ export const buildServices = memoize(function (
   return {
     application: core.application,
     addBasePath: core.http.basePath.prepend,
+    analytics: core.analytics,
     capabilities: core.application.capabilities,
     chrome: core.chrome,
     core,
     data: plugins.data,
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
-    theme: plugins.charts.theme,
+    theme: core.theme,
     fieldFormats: plugins.fieldFormats,
     filterManager: plugins.data.query.filterManager,
     history: getHistory,
