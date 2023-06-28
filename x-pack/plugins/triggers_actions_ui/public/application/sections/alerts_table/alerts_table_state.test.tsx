@@ -730,6 +730,11 @@ describe('AlertsTableState', () => {
     beforeEach(() => {
       hookUseFetchBrowserFieldCapabilities.mockClear();
       hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [true, browserFields]);
+      useBulkGetCasesMock.mockReturnValue({ data: new Map(), isFetching: false });
+      useBulkGetMaintenanceWindowsMock.mockReturnValue({
+        data: new Map(),
+        isFetching: false,
+      });
     });
 
     it('should show field browser', () => {
