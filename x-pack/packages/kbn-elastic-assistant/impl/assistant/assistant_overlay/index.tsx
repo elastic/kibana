@@ -19,12 +19,8 @@ const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 const StyledEuiModal = styled(EuiModal)`
   ${({ theme }) => `margin-top: ${theme.eui.euiSizeXXL};`}
-  max-width: 95vw;
+  min-width: 95vw;
   min-height: 90vh;
-
-  > .euiModal__flex {
-    max-height: 90vh;
-  }
 `;
 /**
  * Modal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever
@@ -82,7 +78,7 @@ export const AssistantOverlay: React.FC = React.memo(() => {
   return (
     <>
       {isModalVisible && (
-        <StyledEuiModal onClose={handleCloseModal}>
+        <StyledEuiModal onClose={handleCloseModal} data-test-subj="ai-assistant-modal">
           <Assistant conversationId={conversationId} promptContextId={promptContextId} />
         </StyledEuiModal>
       )}
