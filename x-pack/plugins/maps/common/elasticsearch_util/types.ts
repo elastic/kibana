@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MultiPolygon, Polygon, Position } from 'geojson';
 import type { Filter } from '@kbn/es-query';
 import { ES_SPATIAL_RELATIONS } from '../constants';
@@ -27,7 +28,7 @@ export interface ESBBox {
 export interface GeoShapeQueryBody {
   shape?: MultiPolygon | Polygon;
   relation?: ES_SPATIAL_RELATIONS;
-  indexed_shape?: PreIndexedShape;
+  indexed_shape?: estypes.QueryDslFieldLookup;
 }
 
 // Index signature explicitly states that anything stored in an object using a string conforms to the structure
@@ -52,9 +53,3 @@ export type GeoFilter = Filter & {
   };
   geo_shape?: GeoShapeQuery;
 };
-
-export interface PreIndexedShape {
-  index: string;
-  id: string | number;
-  path: string;
-}

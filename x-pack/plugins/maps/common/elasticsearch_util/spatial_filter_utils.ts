@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { Feature, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
 // @ts-expect-error
@@ -13,7 +14,7 @@ import { FilterMeta, FILTERS } from '@kbn/es-query';
 import { MapExtent } from '../descriptor_types';
 import { ES_SPATIAL_RELATIONS } from '../constants';
 import { getEsSpatialRelationLabel } from '../i18n_getters';
-import { GeoFilter, GeoShapeQueryBody, PreIndexedShape } from './types';
+import { GeoFilter, GeoShapeQueryBody } from './types';
 import { makeESBbox } from './elasticsearch_geo_utils';
 
 const SPATIAL_FILTER_TYPE = FILTERS.SPATIAL_FILTER;
@@ -104,7 +105,7 @@ export function buildGeoShapeFilter({
   geoFieldNames,
   relation = ES_SPATIAL_RELATIONS.INTERSECTS,
 }: {
-  preIndexedShape?: PreIndexedShape | null;
+  preIndexedShape?: estypes.QueryDslFieldLookup | null;
   geometry?: MultiPolygon | Polygon;
   geometryLabel: string;
   geoFieldNames: string[];
