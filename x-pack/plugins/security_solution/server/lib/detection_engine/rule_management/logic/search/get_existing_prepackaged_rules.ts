@@ -6,7 +6,10 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { convertRuleSourceToKQL } from '../../../../../../common/utils/kql';
+import {
+  KQL_FILTER_IMMUTABLE_RULES,
+  KQL_FILTER_MUTABLE_RULES,
+} from '../../../../../../common/utils/kql';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { findRules } from './find_rules';
 import type { RuleAlertType } from '../../../rule_schema';
@@ -18,7 +21,7 @@ export const getNonPackagedRulesCount = async ({
 }: {
   rulesClient: RulesClient;
 }): Promise<number> => {
-  return getRulesCount({ rulesClient, filter: convertRuleSourceToKQL('custom') });
+  return getRulesCount({ rulesClient, filter: KQL_FILTER_MUTABLE_RULES });
 };
 
 export const getRulesCount = async ({
@@ -70,7 +73,7 @@ export const getNonPackagedRules = async ({
 }): Promise<RuleAlertType[]> => {
   return getRules({
     rulesClient,
-    filter: convertRuleSourceToKQL('custom'),
+    filter: KQL_FILTER_MUTABLE_RULES,
   });
 };
 
@@ -81,6 +84,6 @@ export const getExistingPrepackagedRules = async ({
 }): Promise<RuleAlertType[]> => {
   return getRules({
     rulesClient,
-    filter: convertRuleSourceToKQL('prebuilt'),
+    filter: KQL_FILTER_IMMUTABLE_RULES,
   });
 };

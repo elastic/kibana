@@ -18,6 +18,11 @@ import {
   TAGS_FIELD,
 } from '../rule_fields';
 
+export const KQL_FILTER_IMMUTABLE_RULES = `${PARAMS_IMMUTABLE_FIELD}: true`;
+export const KQL_FILTER_MUTABLE_RULES = `${PARAMS_IMMUTABLE_FIELD}: false`;
+export const KQL_FILTER_ENABLED_RULES = `${ENABLED_FIELD}: true`;
+export const KQL_FILTER_DISABLED_RULES = `${ENABLED_FIELD}: false`;
+
 interface RulesFilterOptions {
   filter: string;
   showCustomRules: boolean;
@@ -53,13 +58,13 @@ export function convertRulesFilterToKQL({
   if (showCustomRules && showElasticRules) {
     // if both showCustomRules && showElasticRules selected we omit filter, as it includes all existing rules
   } else if (showElasticRules) {
-    kql.push(convertRuleSourceToKQL('prebuilt'));
+    kql.push(KQL_FILTER_IMMUTABLE_RULES);
   } else if (showCustomRules) {
-    kql.push(convertRuleSourceToKQL('custom'));
+    kql.push(KQL_FILTER_MUTABLE_RULES);
   }
 
   if (enabled !== undefined) {
-    kql.push(convertRuleEnabledStatusToKQL(enabled));
+    kql.push(enabled ? KQL_FILTER_ENABLED_RULES : KQL_FILTER_DISABLED_RULES);
   }
 
   if (tags?.length) {
@@ -97,19 +102,6 @@ export function convertRuleSearchTermToKQL(
   attributes = SEARCHABLE_RULE_ATTRIBUTES
 ): string {
   return attributes.map((param) => `${param}: "${escapeKuery(searchTerm)}"`).join(' OR ');
-}
-
-export function convertRuleEnabledStatusToKQL(enabled: boolean): string {
-  return `${ENABLED_FIELD}: ${enabled ? 'true' : 'false'}`;
-}
-
-/**
- * Build a KQL to fetch either custom or prebuilt rules
- */
-export function convertRuleSourceToKQL(source: 'custom' | 'prebuilt'): string {
-  return source === 'custom'
-    ? `${PARAMS_IMMUTABLE_FIELD}: false`
-    : `${PARAMS_IMMUTABLE_FIELD}: true`;
 }
 
 export function convertRuleTagsToKQL(tags: string[]): string {
