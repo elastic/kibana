@@ -80,7 +80,7 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
       }
     },
 
-    async fillInDiscoverUrlForm(customUrl: DiscoverUrlConfig) {
+    async fillInDiscoverUrlForm(customUrl: DiscoverUrlConfig, addTimerange: boolean = false) {
       await this.clickOpenCustomUrlEditor();
       await customUrls.setCustomUrlLabel(customUrl.label);
       await mlCommonUI.selectRadioGroupValue(
@@ -92,10 +92,12 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
         customUrl.indexPattern
       );
       await customUrls.setCustomUrlQueryEntityFieldNames(customUrl.queryEntityFieldNames);
-      await mlCommonUI.selectSelectValueByVisibleText(
-        'mlJobCustomUrlTimeRangeInput',
-        customUrl.timeRange
-      );
+      if (addTimerange) {
+        await mlCommonUI.selectSelectValueByVisibleText(
+          'mlJobCustomUrlTimeRangeInput',
+          customUrl.timeRange
+        );
+      }
       if (customUrl.timeRange === TIME_RANGE_TYPE.INTERVAL) {
         await customUrls.setCustomUrlTimeRangeInterval(customUrl.timeRangeInterval!);
       }
@@ -105,7 +107,7 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
       await this.clickOpenCustomUrlEditor();
       await customUrls.setCustomUrlLabel(customUrl.label);
       await mlCommonUI.selectRadioGroupValue(
-        `mlJobCustomUrlLinkToTypeInput`,
+        'mlJobCustomUrlLinkToTypeInput',
         URL_TYPE.KIBANA_DASHBOARD
       );
       await mlCommonUI.selectSelectValueByVisibleText(
@@ -113,11 +115,11 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
         customUrl.dashboardName
       );
       await customUrls.setCustomUrlQueryEntityFieldNames(customUrl.queryEntityFieldNames);
-      await mlCommonUI.selectSelectValueByVisibleText(
-        'mlJobCustomUrlTimeRangeInput',
-        customUrl.timeRange
-      );
       if (customUrl.timeRange === TIME_RANGE_TYPE.INTERVAL) {
+        await mlCommonUI.selectSelectValueByVisibleText(
+          'mlJobCustomUrlTimeRangeInput',
+          customUrl.timeRange
+        );
         await customUrls.setCustomUrlTimeRangeInterval(customUrl.timeRangeInterval!);
       }
     },
@@ -130,47 +132,31 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
     },
 
     async addDashboardCustomUrl(
-      jobId: string,
       customUrl: DashboardUrlConfig,
       expectedResult: { index: number; url: string }
     ) {
       await retry.tryForTime(30 * 1000, async () => {
-        await this.closeEditJobFlyout();
-        await this.openEditCustomUrlsForJobTab(jobId);
         await this.fillInDashboardUrlForm(customUrl);
         await this.saveCustomUrl(customUrl.label, expectedResult.index, expectedResult.url);
       });
-
-      // Save the job
-      await this.updateAnalyticsJob();
     },
 
     async addDiscoverCustomUrl(jobId: string, customUrl: DiscoverUrlConfig) {
       await retry.tryForTime(30 * 1000, async () => {
-        // await this.closeEditJobFlyout();
-        await this.openEditCustomUrlsForJobTab(jobId);
         const existingCustomUrlCount = await this.getExistingCustomUrlCount();
 
         await this.fillInDiscoverUrlForm(customUrl);
         await this.saveCustomUrl(customUrl.label, existingCustomUrlCount);
       });
-
-      // Save the job
-      await this.updateAnalyticsJob();
     },
 
     async addOtherTypeCustomUrl(jobId: string, customUrl: OtherUrlConfig) {
       await retry.tryForTime(30 * 1000, async () => {
-        await this.closeEditJobFlyout();
-        await this.openEditCustomUrlsForJobTab(jobId);
         const existingCustomUrlCount = await this.getExistingCustomUrlCount();
 
         await this.fillInOtherUrlForm(customUrl);
         await this.saveCustomUrl(customUrl.label, existingCustomUrlCount);
       });
-
-      // Save the job
-      await this.updateAnalyticsJob();
     },
 
     async closeEditJobFlyout() {

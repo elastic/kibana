@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  // TimeRangeType,
-  TIME_RANGE_TYPE,
-  // URL_TYPE,
-} from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
+import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
 import type { FieldStatsType } from '../common/types';
@@ -21,17 +17,16 @@ import {
 
 const testDiscoverCustomUrl: DiscoverUrlConfig = {
   label: 'Show data',
-  indexPattern: 'ft_farequote',
-  queryEntityFieldNames: ['airline'],
+  indexPattern: 'ft_ihp_outlier',
+  queryEntityFieldNames: ['SaleType'],
   timeRange: TIME_RANGE_TYPE.AUTO,
 };
 
 const testDashboardCustomUrl: DashboardUrlConfig = {
   label: 'Show dashboard',
   dashboardName: 'ML Test',
-  queryEntityFieldNames: ['airline'],
-  timeRange: TIME_RANGE_TYPE.INTERVAL,
-  timeRangeInterval: '1h',
+  queryEntityFieldNames: ['SaleType'],
+  timeRange: TIME_RANGE_TYPE.AUTO,
 };
 
 const testOtherCustomUrl: OtherUrlConfig = {
@@ -45,9 +40,12 @@ export default function ({ getService }: FtrProviderContext) {
   const editedDescription = 'Edited description';
 
   describe.only('outlier detection creation', function () {
+    let testDashboardId: string | null = null;
+
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier');
+      testDashboardId = await ml.testResources.createMLTestDashboardIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -366,11 +364,47 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
-        it('adds custom urls to the analytics job', async () => {
+        it('adds discover custom url to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for discover url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+          await ml.dataFrameAnalyticsEdit.openEditCustomUrlsForJobTab(testData.jobId);
+
           await ml.testExecution.logTestStep('add discover custom url for the analytics job');
-          ml.dataFrameAnalyticsEdit.addDiscoverCustomUrl(testData.jobId, testDiscoverCustomUrl);
+          await ml.dataFrameAnalyticsEdit.addDiscoverCustomUrl(
+            testData.jobId,
+            testDiscoverCustomUrl
+          );
+
+          await ml.dataFrameAnalyticsEdit.updateAnalyticsJob();
         });
-        // HERE
+
+        it('adds dashboard custom urls to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for dashboard url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+          await ml.dataFrameAnalyticsEdit.openEditCustomUrlsForJobTab(testData.jobId);
+
+          await ml.testExecution.logTestStep('add dashboard custom url for the analytics job');
+          await ml.dataFrameAnalyticsEdit.addDashboardCustomUrl(testDashboardCustomUrl, {
+            index: 1,
+            url: `dashboards#/view/${testDashboardId}?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'SaleType:\"$SaleType$\"'))`,
+          });
+
+          await ml.dataFrameAnalyticsEdit.updateAnalyticsJob();
+        });
+
+        it('adds other custom url type to the analytics job', async () => {
+          await ml.testExecution.logTestStep('opens edit flyout for other url');
+          await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
+          await ml.dataFrameAnalyticsEdit.openEditCustomUrlsForJobTab(testData.jobId);
+
+          await ml.testExecution.logTestStep('add other type custom url for the analytics job');
+
+          await ml.testExecution.logTestStep('add other type custom url for the analytics job');
+          await ml.dataFrameAnalyticsEdit.addOtherTypeCustomUrl(testData.jobId, testOtherCustomUrl);
+
+          await ml.dataFrameAnalyticsEdit.updateAnalyticsJob();
+        });
+
         it('edits the analytics job and displays it correctly in the job list', async () => {
           await ml.testExecution.logTestStep(
             'should open the edit form for the created job in the analytics table'
