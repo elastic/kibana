@@ -290,6 +290,22 @@ export const createExternalService = (
         res,
       });
 
+      if (incident.status != null) {
+        // TODO: get the transitions to build a mapping and then set the status
+        const statusRes = await request({
+          axios: axiosInstance,
+          method: 'post',
+          url: `${incidentUrl}/${incidentId}/transitions`,
+          logger,
+          data: { fields },
+          configurationUtilities,
+        });
+
+        throwIfResponseIsNotValid({
+          res,
+        });
+      }
+
       const updatedIncident = await getIncident(incidentId as string);
 
       return {

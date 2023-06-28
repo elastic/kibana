@@ -16,11 +16,14 @@ import { bulkGetAttachmentsRoute } from './internal/bulk_get_attachments';
 import { getCaseUsersRoute } from './internal/get_case_users';
 import { bulkDeleteFileAttachments } from './internal/bulk_delete_file_attachments';
 import { getCategoriesRoute } from './cases/categories/get_categories';
+import type { Syncer } from '../../services/sync/task_service';
+import { startSyncRoute } from './internal/start_sync';
 
-export const getInternalRoutes = (userProfileService: UserProfileService) =>
+export const getInternalRoutes = (userProfileService: UserProfileService, syncer: Syncer) =>
   [
     bulkCreateAttachmentsRoute,
     suggestUserProfilesRoute(userProfileService),
+    startSyncRoute(syncer),
     getConnectorsRoute,
     bulkGetCasesRoute,
     getCaseUserActionStatsRoute,

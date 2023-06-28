@@ -173,6 +173,7 @@ export function transformSavedObjectToExternalModel(
     SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.severity] ?? CaseSeverity.LOW;
   const status = STATUS_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.status] ?? CaseStatuses.open;
   const category = !caseSavedObjectAttributes.category ? null : caseSavedObjectAttributes.category;
+  const externalSync = caseSavedObjectAttributes.settings.externalSync ?? false;
 
   return {
     ...caseSavedObject,
@@ -183,6 +184,10 @@ export function transformSavedObjectToExternalModel(
       connector,
       external_service: externalService,
       category,
+      settings: {
+        ...caseSavedObjectAttributes.settings,
+        externalSync,
+      },
     },
   };
 }

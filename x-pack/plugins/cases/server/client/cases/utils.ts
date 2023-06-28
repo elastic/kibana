@@ -290,20 +290,23 @@ export const addKibanaInformationToDescription = (
     )
   );
 
-  const descriptionWithKibanaInformation = `${theCase.description}\n\n${addedBy}.`;
+  return theCase.description;
 
-  if (!publicBaseUrl) {
-    return descriptionWithKibanaInformation;
-  }
+  // TODO: temporary removing this because we'll have to filter this part of the message out for syncing
+  // const descriptionWithKibanaInformation = `${theCase.description}\n\n${addedBy}.`;
 
-  const caseUrl = getCaseViewPath({
-    publicBaseUrl,
-    spaceId,
-    caseId: theCase.id,
-    owner: theCase.owner,
-  });
+  // if (!publicBaseUrl) {
+  //   return descriptionWithKibanaInformation;
+  // }
 
-  return `${descriptionWithKibanaInformation}\n${i18n.VIEW_IN_KIBANA}.\n${i18n.CASE_URL(caseUrl)}`;
+  // const caseUrl = getCaseViewPath({
+  //   publicBaseUrl,
+  //   spaceId,
+  //   caseId: theCase.id,
+  //   owner: theCase.owner,
+  // });
+
+  // return `${descriptionWithKibanaInformation}\n${i18n.VIEW_IN_KIBANA}.\n${i18n.CASE_URL(caseUrl)}`;
 };
 
 const addKibanaInformationToComments = (

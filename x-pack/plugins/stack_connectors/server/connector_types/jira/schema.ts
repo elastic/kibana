@@ -27,6 +27,7 @@ export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
 
 export const ExecutorSubActionPushParamsSchema = schema.object({
   incident: schema.object({
+    status: schema.nullable(schema.string()),
     summary: schema.string(),
     description: schema.nullable(schema.string()),
     externalId: schema.nullable(schema.string()),

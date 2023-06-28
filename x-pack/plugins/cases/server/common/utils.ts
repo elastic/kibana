@@ -85,6 +85,10 @@ export const transformNewCase = ({
   updated_by: null,
   assignees: dedupAssignees(newCase.assignees) ?? [],
   category: newCase.category ?? null,
+  settings: {
+    ...newCase.settings,
+    externalSync: newCase.settings.externalSync ?? false,
+  },
 });
 
 export const transformCases = ({
