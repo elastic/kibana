@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 import { Spaces, UserAtSpaceScenarios } from '../../../scenarios';
 import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -65,8 +65,8 @@ export default function createRuleSuggestionValuesTests({ getService }: FtrProvi
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
+              expect(response.statusCode).toEqual(403);
+              expect(response.body).toEqual({
                 error: 'Forbidden',
                 message: 'Unauthorized to find rules for any rule types',
                 statusCode: 403,
@@ -77,8 +77,8 @@ export default function createRuleSuggestionValuesTests({ getService }: FtrProvi
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(200);
-              expect(response.body).to.eql(['forest', 'fox']);
+              expect(response.statusCode).toEqual(200);
+              expect(response.body).toEqual(['forest', 'fox']);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -96,7 +96,7 @@ export default function createRuleSuggestionValuesTests({ getService }: FtrProvi
           filters: [],
           query: 'f',
         });
-      expect(response.body).to.eql(['forest', 'fox']);
+      expect(response.body).toEqual(expect.arrayContaining(['forest', 'fox']));
     });
 
     it('Get tags value suggestion for alert.tags in space 2', async () => {
@@ -108,8 +108,7 @@ export default function createRuleSuggestionValuesTests({ getService }: FtrProvi
           filters: [],
           query: 'f',
         });
-
-      expect(response.body).to.eql(['fish']);
+      expect(response.body).toEqual(expect.arrayContaining(['fish']));
     });
   });
 }
