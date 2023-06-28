@@ -186,26 +186,22 @@ describe('When using the artifacts services', () => {
     });
 
     it('should create and return a multiple big artifacts', async () => {
-      const { ...generatedArtifact1 } = generateArtifactMock({
+      const newBigArtifact1 = generateArtifactMock({
         encodedSize: 5_000_500,
         decodedSha256: '1234',
       });
-      const newBigArtifact1 = generatedArtifact1;
-      const { ...generatedArtifact2 } = generateArtifactMock({
+      const newBigArtifact2 = generateArtifactMock({
         encodedSize: 500,
         decodedSha256: '2345',
       });
-      const newBigArtifact2 = generatedArtifact2;
-      const { ...generatedArtifact3 } = generateArtifactMock({
+      const newBigArtifact3 = generateArtifactMock({
         encodedSize: 233,
         decodedSha256: '3456',
       });
-      const newBigArtifact3 = generatedArtifact3;
-      const { ...generatedArtifact4 } = generateArtifactMock({
+      const newBigArtifact4 = generateArtifactMock({
         encodedSize: 7_000_000,
         decodedSha256: '4567',
       });
-      const newBigArtifact4 = generatedArtifact4;
 
       const { artifacts } = await bulkCreateArtifacts(esClientMock, [
         newBigArtifact1,
