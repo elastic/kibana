@@ -46,12 +46,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/120056
-  registry.when.skip(
+  registry.when(
     'Instance details when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {
-      describe.skip('fetch instance details', () => {
+      describe('fetch instance details', () => {
         let response: {
           status: number;
           body: ServiceOverviewInstanceDetails;
@@ -70,7 +69,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             endpoint:
               'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}',
             params: {
-              path: { serviceName: 'opbeans-node', serviceNodeName: serviceNodeIds[0] },
+              path: { serviceName: 'opbeans-java', serviceNodeName: serviceNodeIds[0] },
               query: {
                 start,
                 end,

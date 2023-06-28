@@ -52,7 +52,6 @@ export const TopNAction = ({
           showLegend
           scopeId={metadata?.scopeId}
           toggleTopN={onClose}
-          value={firstItem.value}
           indexPattern={indexPattern}
           browserFields={browserFields}
         />
