@@ -1,10 +1,10 @@
-# Rule Immutability / Customization
+# Prebuilt Rules Install and Update workflows
 
 ## Test Plan for 2nd Milestone of Customizing prebuilt detection rules
 
 ### Useful information
 
-Ticket: [https://github.com/elastic/security-team/issues/1974](https://github.com/elastic/security-team/issues/1974)
+Part of epic: [https://github.com/elastic/security-team/issues/1974](https://github.com/elastic/security-team/issues/1974)
 
 **Assumptions**
 - The current test plan is only for Milestone 2 of the Rule Immutability/Customization feature to be released in 8.9. It does not pretend to cover any scenario for past or future milestones. Scenarios and flows are sensitive to change in future Milestones.
@@ -17,18 +17,12 @@ Ticket: [https://github.com/elastic/security-team/issues/1974](https://github.co
 
 ### Notifications
 
-#### **Scenario: No callout messages are displayed when user does not have prebuilt rules installed**
-
-**GIVEN** user doesn't have any 8.x prebuilt rules installed  
-**AND** user is running a fresh instance  
-**WHEN** user navigates to the Rules Management Page  
-**THEN** no callouts message should be displayed
-
 #### **Scenario: No callout messages are displayed when there are no pending installs/updates**
 
 **GIVEN** user has the latest version of prebuilt rules `<prebuilt_rules_status>`  
 **WHEN** user navigates to the Rules Management Page  
 **THEN** no callout message is displayed for `<prebuilt_rules_status>` rules  
+**AND** no badges with number of available rules to install/update are displayed
 
 *CASE 1: `<prebuilt_rules_status>` = installed*  
 *CASE 2: `<prebuilt_rules_status>` = updated*
@@ -55,8 +49,22 @@ Ticket: [https://github.com/elastic/security-team/issues/1974](https://github.co
 **WHEN** user navigates to Rules Management Page  
 **AND** user deletes some prebuilt rules  
 **THEN** user should see a callout message with the same amount of prebuilt rules ready to install  
+**AND** the updated number of available rules to install should be displayed on the +Add Elastic Rules link
+
+#### **Scenario: User is notified that all available rules have been installed in the Add Elastic Rules**
+
+**GIVEN** user has all available rules installed
+**WHEN** user navigates to the Add Elastic Rules Page
+**THEN** user should see a message indicating that all available rules have been installed
+**AND** user should see a CTA that leads to the Rules Management Page
+**AND** user should navigate back to Rules Management Page when clicking on the CTA
 
 
+#### **Scenario: User is notified that all installed rules are up to date in the Rule Updates tab**
+
+**GIVEN** user has all available rules installed
+**WHEN** user navigates to the Rule Update
+**THEN** user should see a message indicating that all installed rules are up to date
 
 
 ### Prebuilt Rules Installation
@@ -73,11 +81,12 @@ Ticket: [https://github.com/elastic/security-team/issues/1974](https://github.co
 
 *CASE 1: `<amount>` = All*  
 *CASE 2: `<amount>` = Selected*  
+*CASE 3: `<amount>` = Individual*  
 
-#### **Scenario: User performing a clean install for prebuilt rules sees a loading skeleton until installation is completed**
+#### **Scenario: User navigating to the Add Elastic Rules page sees a loading skeleton until the prebuilt rules package installation is completed**
 
 **GIVEN** a user that is on Rules Management Page  
-**WHEN** user installs all prebuilt rules through Add Elastic Rules button/link  
+**WHEN** user to the Add Elastic Rules page before rules package is installed 
 **THEN** a loading skeleton is displayed until the installation is completed
 
 
@@ -92,7 +101,7 @@ Ticket: [https://github.com/elastic/security-team/issues/1974](https://github.co
 **AND** there are new updates available for those prebuilt rules  
 **AND** user is on Rules Management Page  
 **WHEN** user navigates to the Rules Update tab  
-**THEN** user should see all the prebuilt rules  
+**THEN** user should see all the prebuilt rules that have updates available    
 **AND** user can update outdated prebuilt rules  
 **AND** successfully updated message is displayed  
 **AND** Rules Upgrade tab counter is decreased according to the number of updated rules  
@@ -100,7 +109,7 @@ Ticket: [https://github.com/elastic/security-team/issues/1974](https://github.co
 
 
 
-### Installation / Update Failure
+### Package Installation / Rule Installation / Rule Update Failure
 
 #### **Scenario: Error message is displayed when any prebuilt rules operation fails**
 
@@ -109,10 +118,22 @@ Ticket: [https://github.com/elastic/security-team/issues/1974](https://github.co
 **THEN** user should see an error message    
 **AND** prebuilt rules are not installed/updated    
 **AND** the callout message for pending installs/updates is still displayed on Rules Management Page  
+**AND** the number of available rules to install and upgrade in the badges does not change.
 
-*CASE 1: `<action>` = installing all*  
-*CASE 2: `<action>` = installing selected*  
-*CASE 3: `<action>` = Updating selected*
+*CASE 1: `<action>` = installing all* 
+*CASE 2: `<action>` = installing selected* 
+*CASE 3: `<action>` = installing individual* 
+*CASE 4: `<action>` = Updating all* 
+*CASE 5: `<action>` = Updating selected* 
+*CASE 6: `<action>` = Updating individual*
+
+#### **Scenario: No callout messages are displayed when rule package isntallation fails and no rules are avialble for install/update**
+
+**GIVEN** user navigates to Rules Management Page
+**AND** user is running a fresh instance  
+**AND** rule package installation fails
+**THEN** no callouts message should be displayed
+**AND** the number of available rules to install and upgrade in the badges does not change.
 
 
 
@@ -129,9 +150,10 @@ Ticket: [https://github.com/elastic/security-team/issues/1974](https://github.co
 #### **Scenario: Rules settings persist on Add Elastic Rules table**
 
 **GIVEN** a user has Rules listed on Add Elastic Rules page  
-**WHEN** user reloads the page  
-**THEN** the rule state should persist for all the rules  
-*CASE 1: after refreshing the table*  
+**WHEN** <case>
+**THEN** the available rules state should persist for all the rules  
+
+*CASE 1: user reloads the page* 
 *CASE 2: after switching table pagination*  
 *CASE 3: After filtering and clear filters*
 
@@ -141,16 +163,43 @@ Ticket: [https://github.com/elastic/security-team/issues/1974](https://github.co
 **WHEN** user navigates back to Rules Management page  
 **THEN** Rules Management Page is properly displayed
 
-#### **Scenario: User can filter prebuilt rules by query or by tag**
+#### **Scenario: User can filter prebuilt rules by rule name or by tag**
 
 **GIVEN** a user is on Add Rules Page  
 **WHEN** user filters by `<filter>`  
 **THEN** Add Rules Table is properly updated
 
-*CASE 1: `<filter>` = Query filter on search bar*  
+*CASE 1: `<filter>` = rule name on search bar*  
 *CASE 2: `<filter>` = Tag filter*
 
 
+
+### Rule Updates tab
+
+#### **Scenario: Rules settings persist on Rule Updates table**
+
+**GIVEN** a user has Rules listed on Rule Updates table  
+**WHEN** <case>
+**THEN** the rules with available updates state should persist
+
+*CASE 1: user reloads the page* 
+*CASE 2: after switching table pagination*  
+*CASE 3: After filtering and clear filters*
+
+#### **Scenario: User can navigate back to Rules Management tab**
+
+**GIVEN** a user is on Rule Updates tab
+**WHEN** user navigates back to Rules Management page  
+**THEN** Rules Management Page is properly displayed
+
+#### **Scenario: User can filter prebuilt rules by rule name or by tag**
+
+**GIVEN** a user is on Rule Updates tab  
+**WHEN** user filters by `<filter>`  
+**THEN** Rule Updates tab is properly updated  
+
+*CASE 1: `<filter>` = rule name on search bar*  
+*CASE 2: `<filter>` = Tag filter*
 
 
 
