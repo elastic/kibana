@@ -22,11 +22,12 @@ import {
   EuiRadioGroupOption,
 } from '@elastic/eui';
 
+import { DashboardItem } from '../types';
+import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 import { NavigationEmbeddableDashboardList } from './navigation_embeddable_dashboard_list';
-import { DashboardItem } from '../types';
 
-// TODO: As part of https://github.com/elastic/kibana/issues/154381, replace this regex URL check with more robost url validation
+// TODO: As part of https://github.com/elastic/kibana/issues/154381, replace this regex URL check with more robust url validation
 const isValidUrl =
   /^https?:\/\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
 
@@ -59,7 +60,7 @@ export const NavigationEmbeddableEditor = ({
             <EuiFlexItem grow={false}>
               <EuiIcon type={'dashboardApp'} color="text" />
             </EuiFlexItem>
-            <EuiFlexItem>Dashboard</EuiFlexItem>
+            <EuiFlexItem>{NavEmbeddableStrings.editor.dashboard.getLinkTypeLabel()}</EuiFlexItem>
           </EuiFlexGroup>
         ),
         id: 'dashboardLink' as LinkType,
@@ -70,7 +71,7 @@ export const NavigationEmbeddableEditor = ({
             <EuiFlexItem grow={false}>
               <EuiIcon type={'link'} color="text" />
             </EuiFlexItem>
-            <EuiFlexItem>URL</EuiFlexItem>
+            <EuiFlexItem>{NavEmbeddableStrings.editor.external.getLinkTypeLabel()}</EuiFlexItem>
           </EuiFlexGroup>
         ),
         id: 'externalLink' as LinkType,
@@ -89,7 +90,7 @@ export const NavigationEmbeddableEditor = ({
   return (
     <>
       <EuiForm component="form">
-        <EuiFormRow label="Go to">
+        <EuiFormRow label={NavEmbeddableStrings.editor.getLinkTypePickerLabel()}>
           <EuiRadioGroup
             options={linkTypes}
             idSelected={selectedLinkType}
@@ -99,10 +100,9 @@ export const NavigationEmbeddableEditor = ({
                 savedDashboardSelection.current = selectedDashboard;
               }
             }}
-            name="radio group"
           />
         </EuiFormRow>
-        <EuiFormRow label="Choose destination">
+        <EuiFormRow label={NavEmbeddableStrings.editor.getLinkDestinationLabel()}>
           {isDashboardEditorSelected ? (
             <NavigationEmbeddableDashboardList
               initialSelection={savedDashboardSelection.current}
@@ -110,8 +110,7 @@ export const NavigationEmbeddableEditor = ({
             />
           ) : (
             <EuiFieldText
-              placeholder={'Enter external URL'}
-              aria-label="Use aria labels when no actual label is in use"
+              placeholder={NavEmbeddableStrings.editor.external.getPlaceholder()}
               isInvalid={!validUrl}
               onChange={(e) => {
                 const url = e.target.value;
@@ -124,18 +123,17 @@ export const NavigationEmbeddableEditor = ({
             />
           )}
         </EuiFormRow>
-        <EuiFormRow label="Text">
+        <EuiFormRow label={NavEmbeddableStrings.editor.getLinkTextLabel()}>
           <EuiFieldText
             placeholder={
               isDashboardEditorSelected && selectedDashboard
                 ? selectedDashboard.attributes.title
-                : 'Enter text for link'
+                : NavEmbeddableStrings.editor.getLinkTextPlaceholder()
             }
             value={linkLabel}
             onChange={(e) => {
               setLinkLabel(e.target.value);
             }}
-            aria-label="Use aria labels when no actual label is in use"
           />
         </EuiFormRow>
         {/* TODO: As part of https://github.com/elastic/kibana/issues/154381, we should pull in the custom settings for each link type.

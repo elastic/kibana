@@ -20,8 +20,9 @@ import {
   EuiSelectableOption,
 } from '@elastic/eui';
 
-import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 import { DashboardItem } from '../types';
+import { NavEmbeddableStrings } from './navigation_embeddable_strings';
+import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 
 interface Props {
   initialSelection?: DashboardItem;
@@ -62,7 +63,7 @@ export const NavigationEmbeddableDashboardList = ({
     <div {...other}>
       <EuiFieldSearch
         isClearable={true}
-        placeholder={'Search for a dashboard'}
+        placeholder={NavEmbeddableStrings.editor.dashboard.getSearchPlaceholder()}
         onSearch={(value) => {
           setSearchString(value);
         }}
@@ -85,7 +86,9 @@ export const NavigationEmbeddableDashboardList = ({
               </EuiFlexItem>
               {option.id === currentDashboard?.id && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge>Current</EuiBadge>
+                  <EuiBadge>
+                    {NavEmbeddableStrings.editor.dashboard.getCurrentDashboardLabel()}
+                  </EuiBadge>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

@@ -18,8 +18,9 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { isDashboardLink } from '../types';
-import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
+import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { NavigationEmbeddableEditor } from './navigation_embeddable_editor';
+import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 
 import './navigation_embeddable.scss';
 
@@ -66,7 +67,7 @@ export const NavigationEmbeddableComponent = () => {
 
   const addLinkButton = (
     <EuiButtonEmpty onClick={onButtonClick} iconType="plusInCircle">
-      Add link
+      {NavEmbeddableStrings.component.getAddButtonLabel()}
     </EuiButtonEmpty>
   );
 
