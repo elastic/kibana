@@ -60,8 +60,8 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/object-versioning",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/content-management-table-list-view",
-    "@kbn/content-management-table-list-view-table"
+    "@kbn/content-management-table-list-view-table",
+    "@kbn/shared-ux-page-kibana-template"
   ],
   "exclude": ["target/**/*"]
 }
