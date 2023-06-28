@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { merge } from 'lodash';
 import {
   PROCESSOR_EVENT,
   METRICSET_NAME,
@@ -163,17 +164,22 @@ async function getEventWithMetricsetInterval({
     },
   });
 
+  const intervals = merge(
+    { '1m': 0, '10m': 0, '60m': 0 },
+    res.aggregations?.metricset_intervals.buckets.reduce<
+      Record<string, number>
+    >((acc, item) => {
+      acc[item.key] = item.doc_count;
+      return acc;
+    }, {})
+  );
+
   return {
     name,
     kuery,
     index,
     docCount: res.hits.total.value,
-    intervals: res.aggregations?.metricset_intervals.buckets.reduce<
-      Record<string, number>
-    >((acc, item) => {
-      acc[item.key] = item.doc_count;
-      return acc;
-    }, {}),
+    intervals,
   };
 }
 
