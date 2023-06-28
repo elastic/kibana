@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiSpacer } from '@elastic/eu
 import { RiskScorePreviewSection } from '../components/risk_score_preview_section';
 import { RiskScoreEnableSection } from '../components/risk_score_enable_section';
 import { MissingPrivilegesCallOut } from '../../detections/components/callouts/missing_privileges_callout';
-import { ENTITY_ANALYTICS_MANAGEMENT } from '../../app/translations';
+import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
 
 export const EntityAnalyticsManagementPage = () => {
   return (
@@ -19,7 +19,7 @@ export const EntityAnalyticsManagementPage = () => {
       <MissingPrivilegesCallOut />
       <EuiPageHeader
         data-test-subj="entityAnalyticsManagmentPageTitle"
-        pageTitle={ENTITY_ANALYTICS_MANAGEMENT}
+        pageTitle={ENTITY_ANALYTICS_RISK_SCORE}
       />
       <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="xl">

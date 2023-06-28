@@ -22,10 +22,10 @@ export const DATA_QUALITY = i18n.translate(
   }
 );
 
-export const ENTITY_ANALYTICS_MANAGEMENT = i18n.translate(
-  'xpack.securitySolution.navigation.entityAnalyticsManagement',
+export const ENTITY_ANALYTICS_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.navigation.entityRiskScore',
   {
-    defaultMessage: 'Entity Analytics',
+    defaultMessage: 'Entity Risk Score',
   }
 );
 

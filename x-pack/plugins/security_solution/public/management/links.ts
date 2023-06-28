@@ -35,7 +35,7 @@ import {
   POLICIES,
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
-  ENTITY_ANALYTICS_MANAGEMENT,
+  ENTITY_ANALYTICS_RISK_SCORE,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -53,6 +53,12 @@ import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 
 const categories = [
+  {
+    label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
+      defaultMessage: 'Entity Analytics',
+    }),
+    linkIds: [SecurityPageName.entityAnalyticsManagement],
+  },
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
       defaultMessage: 'Endpoints',
@@ -163,13 +169,10 @@ export const links: LinkItem = {
     },
     {
       id: SecurityPageName.entityAnalyticsManagement,
-      title: ENTITY_ANALYTICS_MANAGEMENT,
-      description: i18n.translate(
-        'xpack.securitySolution.appLinks.entityAnalyticsManagementDescription',
-        {
-          defaultMessage: 'Entity Analytics management.',
-        }
-      ),
+      title: ENTITY_ANALYTICS_RISK_SCORE,
+      description: i18n.translate('xpack.securitySolution.appLinks.entityRiskScoringDescription', {
+        defaultMessage: 'Manage entity risk scoring and detect insider threats.',
+      }),
       landingIcon: IconEntityAnalytics,
       path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
       skipUrlState: true,
