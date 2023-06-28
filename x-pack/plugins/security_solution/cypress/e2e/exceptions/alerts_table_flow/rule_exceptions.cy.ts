@@ -169,7 +169,7 @@ describe('Rule Exceptions workflows from Alert', () => {
      */
     validateExceptionCommentCountAndText(
       1,
-      'Exception conditions are pre-filled with relevant data from'
+      'Exception conditions are pre-filled with relevant data from alert with "id"'
     );
 
     addExceptionFlyoutItemName(ITEM_NAME);
@@ -207,7 +207,7 @@ describe('Rule Exceptions workflows from Alert', () => {
      */
     validateExceptionCommentCountAndText(
       1,
-      'Exception conditions are pre-filled with relevant data from'
+      'Exception conditions are pre-filled with relevant data from alert with "id"'
     );
 
     addExceptionFlyoutItemName(ITEM_NAME);
