@@ -34,6 +34,7 @@ describe('<AnalyzeGraph />', () => {
   it('renders analyzer graph correctly', () => {
     const contextValue = {
       eventId: 'eventId',
+      scopeId: 'flyout',
     } as unknown as LeftPanelContext;
 
     const wrapper = render(
