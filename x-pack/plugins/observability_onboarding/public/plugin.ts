@@ -54,6 +54,7 @@ export class ObservabilityOnboardingPlugin
   ) {
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
+      serverless: { enabled: isServerlessEnabled },
     } = this.ctx.config.get<ObservabilityOnboardingConfig>();
 
     const pluginSetupDeps = plugins;
@@ -62,7 +63,9 @@ export class ObservabilityOnboardingPlugin
     // and go to /app/observabilityOnboarding
     if (isObservabilityOnboardingUiEnabled) {
       core.application.register({
-        navLinkStatus: AppNavLinkStatus.hidden,
+        navLinkStatus: isServerlessEnabled
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
         id: 'observabilityOnboarding',
         title: 'Observability Onboarding',
         order: 8500,

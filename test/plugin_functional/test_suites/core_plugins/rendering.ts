@@ -189,6 +189,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.migrationToFleetAvailable (any)',
         'xpack.apm.featureFlags.sourcemapApiAvailable (any)',
         'xpack.apm.featureFlags.storageExplorerAvailable (any)',
+        'xpack.apm.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
+        'xpack.observability_onboarding.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
         'xpack.cases.files.allowedMimeTypes (array)',
         'xpack.cases.files.maxSize (number)',
         'xpack.cases.markdownPlugins.lens (boolean)',
@@ -218,6 +220,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
         'xpack.fleet.agents.enabled (boolean)',
         'xpack.fleet.enableExperimental (array)',
+        'xpack.fleet.internal.disableProxies (boolean)',
         'xpack.fleet.internal.fleetServerStandalone (boolean)',
         'xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout (number)',
         'xpack.global_search.search_timeout (duration)',
