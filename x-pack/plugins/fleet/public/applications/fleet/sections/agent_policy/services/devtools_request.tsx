@@ -77,7 +77,7 @@ export function generateUpdatePackagePolicyDevToolsRequest(
     packagePolicyRouteService.getUpdatePath(packagePolicyId),
     {
       package: formatPackage(packagePolicy.package),
-      ...omit(packagePolicy, 'version', 'package', 'enabled'),
+      ...omit(packagePolicy, 'version', 'package', 'enabled', 'secret_references'),
       inputs: formatInputs(packagePolicy.inputs),
       vars: formatVars(packagePolicy.vars),
     }
