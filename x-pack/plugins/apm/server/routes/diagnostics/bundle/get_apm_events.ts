@@ -164,15 +164,15 @@ async function getEventWithMetricsetInterval({
     },
   });
 
-  const intervals = merge(
-    { '1m': 0, '10m': 0, '60m': 0 },
-    res.aggregations?.metricset_intervals.buckets.reduce<
-      Record<string, number>
-    >((acc, item) => {
-      acc[item.key] = item.doc_count;
-      return acc;
-    }, {})
-  );
+  const defaultIntervals = { '1m': 0, '10m': 0, '60m': 0 };
+  const foundIntervals = res.aggregations?.metricset_intervals.buckets.reduce<
+    Record<string, number>
+  >((acc, item) => {
+    acc[item.key] = item.doc_count;
+    return acc;
+  }, {});
+
+  const intervals = merge(defaultIntervals, foundIntervals);
 
   return {
     name,
