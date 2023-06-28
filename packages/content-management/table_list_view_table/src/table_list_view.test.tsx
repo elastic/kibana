@@ -1070,6 +1070,70 @@ describe('TableListView', () => {
     });
   });
 
+  describe('initialFilter', () => {
+    let router: Router | undefined;
+
+    const setupTagFiltering = registerTestBed<string, TableListViewTableProps>(
+      WithServices<TableListViewTableProps>(TableListViewTable, {
+        getTagList: () => [
+          { id: 'id-tag-1', name: 'tag-1', type: 'tag', description: '', color: '' },
+          { id: 'id-tag-2', name: 'tag-2', type: 'tag', description: '', color: '' },
+        ],
+      }),
+      {
+        defaultProps: { ...requiredProps, initialFilter: `tag:("tag-1")`, urlStateEnabled: false },
+        memoryRouter: {
+          wrapComponent: true,
+          onRouter: (_router: Router) => {
+            router = _router;
+          },
+        },
+      }
+    );
+
+    const hits: UserContentCommonSchema[] = [
+      {
+        id: '123',
+        updatedAt: yesterday.toISOString(),
+        type: 'dashboard',
+        attributes: {
+          title: 'Item 1',
+          description: '',
+        },
+        references: [{ id: 'id-tag-1', name: 'tag-1', type: 'tag' }],
+      },
+      {
+        id: '456',
+        updatedAt: twoDaysAgo.toISOString(),
+        type: 'dashboard',
+        attributes: {
+          title: 'Item 2',
+          description: '',
+        },
+        references: [{ id: 'id-tag-2', name: 'tag-2', type: 'tag' }],
+      },
+    ];
+
+    test('should read search term from initialFilter', async () => {
+      let testBed: TestBed;
+
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+        });
+      });
+
+      const { component, find } = testBed!;
+      component.update();
+
+      const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
+
+      expect(getSearchBoxValue()).toBe('tag:("tag-1")');
+    });
+  });
+
   describe('row item actions', () => {
     const hits: UserContentCommonSchema[] = [
       {
