@@ -62,6 +62,7 @@ export interface RegistryRuleType
     | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
+    | 'fieldsForAAD'
   > {
   id: string;
   enabledInLicense: boolean;
@@ -378,6 +379,7 @@ export class RuleTypeRegistry {
             doesSetRecoveryContext,
             alerts,
             getSummarizedAlerts,
+            fieldsForAAD,
           },
         ]: [string, UntypedNormalizedRuleType]) => ({
           id,
@@ -398,6 +400,7 @@ export class RuleTypeRegistry {
             minimumLicenseRequired
           ).isValid,
           hasGetSummarizedAlerts: !!getSummarizedAlerts,
+          hasFieldsForAAD: Boolean(fieldsForAAD),
           ...(alerts ? { alerts } : {}),
         })
       )
