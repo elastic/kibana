@@ -97,7 +97,7 @@ export const getFieldPreviewChanges = (
     map((items) =>
       // reduce the fields to make diffing easier
       items!.map((item) => {
-        const key = item.key.split(`${parentName}.`)[1];
+        const key = item.key.substring(`${parentName}.`.length);
         return { name: key, type: item.type! };
       })
     ),
