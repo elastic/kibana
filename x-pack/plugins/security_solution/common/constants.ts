@@ -514,14 +514,12 @@ export const DEFAULT_DETECTION_PAGE_FILTERS: Array<
     selectedOptions: ['open'],
     hideActionBar: true,
     persist: true,
-    hideExists: true,
   },
   {
     title: 'Severity',
     fieldName: 'kibana.alert.severity',
     selectedOptions: [],
     hideActionBar: true,
-    hideExists: true,
   },
   {
     title: 'User',
