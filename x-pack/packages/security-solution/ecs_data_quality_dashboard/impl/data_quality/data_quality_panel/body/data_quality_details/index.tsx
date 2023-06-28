@@ -9,6 +9,7 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -52,7 +53,8 @@ export interface Props {
   patternIndexNames: Record<string, string[]>;
   patternRollups: Record<string, PatternRollup>;
   patterns: string[];
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
   updatePatternIndexNames: ({
     indexNames,
     pattern,
@@ -76,6 +78,7 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
   patternRollups,
   patterns,
   theme,
+  baseTheme,
   updatePatternIndexNames,
   updatePatternRollup,
 }) => {
@@ -97,6 +100,7 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
         onIndexSelected={onIndexSelected}
         patterns={patterns}
         theme={theme}
+        baseTheme={baseTheme}
         patternRollups={patternRollups}
       />
 
@@ -111,6 +115,7 @@ const DataQualityDetailsComponent: React.FC<Props> = ({
         openCreateCaseFlyout={openCreateCaseFlyout}
         patterns={patterns}
         theme={theme}
+        baseTheme={baseTheme}
         patternIndexNames={patternIndexNames}
         patternRollups={patternRollups}
         selectedIndex={selectedIndex}

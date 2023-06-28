@@ -3514,7 +3514,7 @@
             "label": "soMigrationsConfig",
             "description": [],
             "signature": [
-              "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnNonMigratorNodes: boolean; }>; readonly batchSize: number; readonly maxBatchSizeBytes: ",
+              "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly zdt: Readonly<{} & { metaPickupSyncDelaySec: number; runOnRoles: string[]; }>; readonly batchSize: number; readonly maxBatchSizeBytes: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
