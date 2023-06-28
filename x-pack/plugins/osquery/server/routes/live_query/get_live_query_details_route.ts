@@ -11,6 +11,7 @@ import { every, map, mapKeys, pick, reduce } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom, zip } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import { getActionResponses } from './utils';
 
@@ -29,7 +30,7 @@ export const getLiveQueryDetailsRoute = (router: IRouter<DataRequestHandlerConte
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             params: schema.object(

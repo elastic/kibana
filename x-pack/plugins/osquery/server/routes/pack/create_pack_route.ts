@@ -16,6 +16,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
+import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
@@ -41,7 +42,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: schema.object(

@@ -9,6 +9,7 @@ import { filter, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
+import { API_VERSIONS } from '../../../common/constants';
 import type { PackSavedObject } from '../../common/types';
 import { PLUGIN_ID } from '../../../common';
 
@@ -21,13 +22,12 @@ export const readPackRoute = (router: IRouter) => {
   router.versioned
     .get({
       access: 'public',
-
       path: '/api/osquery/packs/{id}',
       options: { tags: [`access:${PLUGIN_ID}-readPacks`] },
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             params: schema.object({

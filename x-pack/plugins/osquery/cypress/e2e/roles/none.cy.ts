@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { API_VERSIONS } from '../../../common/constants';
 import { request } from '../../tasks/common';
 import { ROLE, login } from '../../tasks/login';
 import { NAV_SEARCH_INPUT_OSQUERY_RESULTS } from '../../tasks/navigation';
@@ -30,7 +31,7 @@ describe('None', () => {
       url: '/app/osquery/live_queries',
       failOnStatusCode: false,
       headers: {
-        'Elastic-Api-Version': '2023-10-31',
+        'Elastic-Api-Version': API_VERSIONS.public.v1,
       },
     }).then((resp) => {
       expect(resp.status).to.eq(403);
@@ -40,7 +41,7 @@ describe('None', () => {
       url: '/app/osquery/saved_queries',
       failOnStatusCode: false,
       headers: {
-        'Elastic-Api-Version': '2023-10-31',
+        'Elastic-Api-Version': API_VERSIONS.public.v1,
       },
     }).then((resp) => {
       expect(resp.status).to.eq(403);
@@ -50,7 +51,7 @@ describe('None', () => {
       url: '/app/osquery/packs',
       failOnStatusCode: false,
       headers: {
-        'Elastic-Api-Version': '2023-10-31',
+        'Elastic-Api-Version': API_VERSIONS.public.v1,
       },
     }).then((resp) => {
       expect(resp.status).to.eq(403);

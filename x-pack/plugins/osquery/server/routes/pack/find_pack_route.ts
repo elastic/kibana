@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
+import { API_VERSIONS } from '../../../common/constants';
 import { packSavedObjectType } from '../../../common/types';
 import { PLUGIN_ID } from '../../../common';
 import type { PackSavedObject } from '../../common/types';
@@ -24,7 +25,7 @@ export const findPackRoute = (router: IRouter) => {
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             query: schema.object(

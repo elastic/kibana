@@ -17,6 +17,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
+import { API_VERSIONS } from '../../../common/constants';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -37,13 +38,12 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
   router.versioned
     .put({
       access: 'public',
-
       path: '/api/osquery/packs/{id}',
       options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             params: schema.object(

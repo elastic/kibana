@@ -15,6 +15,7 @@ import { savedQuerySavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 import type { UpdateSavedQueryResponse } from './types';
+import {API_VERSIONS} from "@kbn/osquery-plugin/common/constants";
 
 export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -25,7 +26,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             params: schema.object({

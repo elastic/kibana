@@ -7,6 +7,7 @@
 
 import { isEmpty, pickBy, some, isBoolean } from 'lodash';
 import type { IRouter } from '@kbn/core/server';
+import { API_VERSIONS } from '../../../common/constants';
 import type { SavedQueryResponse } from './types';
 import type { SavedQuerySavedObject } from '../../common/types';
 import { PLUGIN_ID } from '../../../common';
@@ -26,7 +27,7 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidation<

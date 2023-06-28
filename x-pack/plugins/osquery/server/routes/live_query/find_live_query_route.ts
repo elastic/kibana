@@ -11,6 +11,7 @@ import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 
 import type {
@@ -30,7 +31,7 @@ export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) =
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             query: schema.object(

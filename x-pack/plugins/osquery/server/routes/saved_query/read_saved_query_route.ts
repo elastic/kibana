@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import { API_VERSIONS } from '../../../common/constants';
 import type { SavedQueryResponse } from './types';
 import type { SavedQuerySavedObject } from '../../common/types';
 import { isSavedQueryPrebuilt } from './utils';
@@ -24,7 +25,7 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             params: schema.object({

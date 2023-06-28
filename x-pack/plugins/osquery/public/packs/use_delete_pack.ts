@@ -8,6 +8,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
@@ -31,7 +32,7 @@ export const useDeletePack = ({ packId, withRedirect }: UseDeletePackProps) => {
   return useMutation(
     () =>
       http.delete(`/api/osquery/packs/${packId}`, {
-        version: '2023-10-31',
+        version: API_VERSIONS.public.v1,
       }),
     {
       onError: (error: { body: { error: string; message: string } }) => {

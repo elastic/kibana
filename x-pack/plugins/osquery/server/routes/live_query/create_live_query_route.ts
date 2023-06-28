@@ -11,6 +11,7 @@ import markdown from 'remark-parse-no-trim';
 import { some, filter } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
+import { API_VERSIONS } from '../../../common/constants';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
 import { createLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
@@ -28,7 +29,7 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             body: buildRouteValidation<

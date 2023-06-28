@@ -11,6 +11,7 @@ import type {
 } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import type { Case } from '@kbn/cases-plugin/common';
+import { API_VERSIONS } from '../../common/constants';
 import type { SavedQuerySOFormData } from '../../public/saved_queries/form/use_saved_query_form';
 import type { LiveQueryDetailsItem } from '../../public/actions/use_live_query_details';
 import type { PackSavedObject, PackItem } from '../../public/packs/types';
@@ -73,7 +74,7 @@ export const loadSavedQuery = (payload: SavedQuerySOFormData = savedQueryFixture
       id: payload.id ?? generateRandomStringName(1)[0],
     },
     headers: {
-      'Elastic-Api-Version': '2023-10-31',
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
     url: '/api/osquery/saved_queries',
   }).then((response) => response.body.data);
@@ -83,7 +84,7 @@ export const cleanupSavedQuery = (id: string) => {
     method: 'DELETE',
     url: `/api/osquery/saved_queries/${id}`,
     headers: {
-      'Elastic-Api-Version': '2023-10-31',
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
   });
 };
@@ -99,7 +100,7 @@ export const loadPack = (payload: Partial<PackItem> = {}, space = 'default') =>
       enabled: payload.enabled || true,
     },
     headers: {
-      'Elastic-Api-Version': '2023-10-31',
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
     url: `/s/${space}/api/osquery/packs`,
   }).then((response) => response.body.data);
@@ -109,7 +110,7 @@ export const cleanupPack = (id: string, space = 'default') => {
     method: 'DELETE',
     url: `/s/${space}/api/osquery/packs/${id}`,
     headers: {
-      'Elastic-Api-Version': '2023-10-31',
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
   });
 };
@@ -127,7 +128,7 @@ export const loadLiveQuery = (
     body: payload,
     url: `/api/osquery/live_queries`,
     headers: {
-      'Elastic-Api-Version': '2023-10-31',
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
   }).then((response) => response.body.data);
 
@@ -202,7 +203,7 @@ export const cleanupRule = (id: string) => {
     method: 'DELETE',
     url: `/api/detection_engine/rules?id=${id}`,
     headers: {
-      'Elastic-Api-Version': '2023-10-31',
+      'Elastic-Api-Version': API_VERSIONS.public.v1,
     },
   });
 };

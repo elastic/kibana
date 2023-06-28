@@ -8,6 +8,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
@@ -28,7 +29,10 @@ export const useDeleteSavedQuery = ({ savedQueryId }: UseDeleteSavedQueryProps) 
   const setErrorToast = useErrorToast();
 
   return useMutation(
-    () => http.delete(`/api/osquery/saved_queries/${savedQueryId}`, { version: '2023-10-31' }),
+    () =>
+      http.delete(`/api/osquery/saved_queries/${savedQueryId}`, {
+        version: API_VERSIONS.public.v1,
+      }),
     {
       onError: (error: { body: { error: string; message: string } }) => {
         setErrorToast(error, {
