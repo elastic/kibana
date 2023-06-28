@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
     const defaultXContentTypeOptions = 'nosniff';
     const defaultXFrameOptions = 'SAMEORIGIN';
 
-    it('API endpoint reponse contains default security headers', async () => {
+    it('API endpoint response contains default security headers', async () => {
       const { header } = await supertest
         .get(`/internal/security/me`)
         .set(svlCommonApi.getCommonRequestHeader())
@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(header['x-frame-options']).toEqual(defaultXFrameOptions);
     });
 
-    it('redirect endpoint reponse contains default security headers', async () => {
+    it('redirect endpoint response contains default security headers', async () => {
       const { header } = await supertest
         .get(`/login`)
         .set(svlCommonApi.getCommonRequestHeader())
