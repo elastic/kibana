@@ -14,7 +14,7 @@ import { AlertsLocatorParams } from '../..';
 export const getAlertUrl = async (
   alertUuid: string | null,
   spaceId: string,
-  startedAt: string | null,
+  startedAt: string,
   alertsLocator?: LocatorPublic<AlertsLocatorParams>,
   publicBaseUrl?: string
 ) => {

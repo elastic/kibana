@@ -30,7 +30,6 @@ export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
   mappings: { fieldMap: legacyExperimentalFieldMap },
   useEcs: true,
   useLegacyAlerts: true,
-  shouldWrite: true,
 };
 
 const registerRuleTypes = (
