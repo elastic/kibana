@@ -8,7 +8,6 @@
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
-import { of } from 'rxjs';
 
 import { maybeAddCloudLinks } from './maybe_add_cloud_links';
 
