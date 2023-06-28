@@ -11,7 +11,7 @@ import { ROLE, login } from '../../tasks/login';
 import { NAV_SEARCH_INPUT_OSQUERY_RESULTS } from '../../tasks/navigation';
 import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
 
-describe.only('None', () => {
+describe('None', () => {
   beforeEach(() => {
     login(ROLE.none);
 
