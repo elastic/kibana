@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Query } from '@elastic/eui';
+import { Ast, Query } from '@elastic/eui';
 import { renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
 import { useTagFilterPanel } from './use_tag_filter_panel';
@@ -62,6 +62,26 @@ describe('useTagFilterPanel', () => {
     expect(result.current.isInUse).toBe(false);
     expect(result.current.options).toEqual([]);
     expect(result.current.totalActiveFilters).toBe(0);
+  });
+
+  it('should initialize filter options with default state', () => {
+    let ast = Ast.create([]);
+    ast = ast.addOrFieldValue('tag', 'tag', true, 'eq');
+    ast = ast.addOrFieldValue('tag', 'tag3', false, 'eq');
+    const text = `tag:("tag") -tag:(tag3)`;
+    const initialQuery = new Query(ast, undefined, text);
+
+    const { result } = renderHook(() =>
+      useTagFilterPanel({
+        query: initialQuery,
+        tagsToTableItemMap,
+        getTagList,
+        addOrRemoveIncludeTagFilter,
+        addOrRemoveExcludeTagFilter,
+      })
+    );
+
+    expect(result.current.totalActiveFilters).toBe(3);
   });
 
   it('should render options with query', async () => {
