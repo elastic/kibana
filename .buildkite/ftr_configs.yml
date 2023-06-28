@@ -207,6 +207,7 @@ enabled:
   - x-pack/test/apm_api_integration/basic/config.ts
   - x-pack/test/apm_api_integration/cloud/config.ts
   - x-pack/test/apm_api_integration/rules/config.ts
+  - x-pack/test/apm_api_integration/serverless/config.ts
   - x-pack/test/apm_api_integration/trial/config.ts
   - x-pack/test/banners_functional/config.ts
   - x-pack/test/cases_api_integration/security_and_spaces/config_basic.ts

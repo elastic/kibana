@@ -46,6 +46,18 @@ const apmFtrConfigs = {
       'logging.loggers': [apmDebugLogger],
     },
   },
+  serverless: {
+    license: 'basic' as const,
+    kibanaConfig: {
+      'xpack.apm.featureFlags.agentConfigurationAvailable': 'false',
+      'xpack.apm.featureFlags.configurableIndicesAvailable': 'false',
+      'xpack.apm.featureFlags.infrastructureTabAvailable': 'false',
+      'xpack.apm.featureFlags.infraUiAvailable': 'false',
+      'xpack.apm.featureFlags.migrationToFleetAvailable': 'false',
+      'xpack.apm.featureFlags.sourcemapApiAvailable': 'false',
+      'xpack.apm.featureFlags.storageExplorerAvailable': 'false',
+    },
+  },
 };
 
 export type APMFtrConfigName = keyof typeof apmFtrConfigs;

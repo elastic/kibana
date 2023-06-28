@@ -22,6 +22,11 @@ const { argv } = yargs(process.argv.slice(2))
     type: 'boolean',
     description: 'Run tests with trial license',
   })
+  .option('serverlesss', {
+    default: false,
+    type: 'boolean',
+    description: 'Run tests for serverless',
+  })
   .option('server', {
     default: false,
     type: 'boolean',
@@ -76,13 +81,23 @@ const {
   grepFiles,
   inspect,
   updateSnapshots,
+  serverlesss,
 } = argv;
-
-if (trial === false && basic === false) {
-  throw new Error('Please specify either --trial or --basic');
+if (trial === false && basic === false && serverlesss === false) {
+  throw new Error('Please specify either --trial , --basic or --serverlesss');
 }
 
 const license = trial ? 'trial' : 'basic';
+
+let config;
+
+if (serverlesss) {
+  config = 'serverless';
+} else if (basic) {
+  config = 'basic';
+} else {
+  config = 'trial';
+}
 
 console.log(`License: ${license}`);
 
@@ -99,7 +114,7 @@ const cmd = [
   `../../../../../scripts/${ftrScript}`,
   ...(grep ? [`--grep "${grep}"`] : []),
   ...(updateSnapshots ? [`--updateSnapshots`] : []),
-  `--config ../../../../test/apm_api_integration/${license}/config.ts`,
+  `--config ../../../../test/apm_api_integration/${config}/config.ts`,
 ].join(' ');
 
 console.log(`Running: "${cmd}"`);

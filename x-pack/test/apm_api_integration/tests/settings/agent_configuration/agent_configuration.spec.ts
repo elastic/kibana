@@ -95,6 +95,16 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
   }
 
   registry.when(
+    'agent configuration for serverless',
+    { config: 'serverless', archives: [] },
+    () => {
+      it('throws error to get all configurations', async () => {
+        await expectStatusCode(() => getAllConfigurations(), 404);
+      });
+    }
+  );
+
+  registry.when(
     'agent configuration when no data is loaded',
     { config: 'basic', archives: [] },
     () => {
