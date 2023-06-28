@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IClusterClient } from '@kbn/core-elasticsearch-server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import { CsvGenerator } from '@kbn/generate-csv';
@@ -33,7 +32,6 @@ type CsvSearchsourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchsourceExportTypeStartDeps extends BaseExportTypeStartDeps {
   discover: DiscoverServerPluginStart;
   data: DataPluginStart;
-  esClient: IClusterClient;
 }
 
 export class CsvSearchsourceExportType extends ExportType<
@@ -54,20 +52,10 @@ export class CsvSearchsourceExportType extends ExportType<
     LICENSE_TYPE_PLATINUM,
     LICENSE_TYPE_ENTERPRISE,
   ];
-  declare startDeps: CsvSearchsourceExportTypeStartDeps;
-
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
     const logger = args[2];
     this.logger = logger.get('csv-searchsource-export');
-  }
-
-  setup(setupDeps: ExportTypeSetupDeps) {
-    this.setupDeps = setupDeps;
-  }
-
-  start(startDeps: CsvSearchsourceExportTypeStartDeps) {
-    this.startDeps = startDeps;
   }
 
   public createJob = async (jobParams: JobParamsCSV) => {
@@ -85,13 +73,11 @@ export class CsvSearchsourceExportType extends ExportType<
     const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
     const fakeRequest = this.getFakeRequest(headers, job.spaceId, logger);
     const uiSettings = await this.getUiSettingsClient(fakeRequest, logger);
-    const dataPluginStart = await this.getDataService();
+    const dataPluginStart = this.startDeps.data;
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
 
-    const [es, searchSourceStart] = await Promise.all([
-      (await this.getEsClient()).asScoped(fakeRequest),
-      await dataPluginStart.search.searchSource.asScoped(fakeRequest),
-    ]);
+    const es = this.startDeps.esClient.asScoped(fakeRequest);
+    const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(fakeRequest);
 
     const clients = {
       uiSettings,

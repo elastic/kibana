@@ -137,14 +137,4 @@ export abstract class ExportType<
       protocol: serverInfo.protocol,
     };
   }
-
-  protected async getEsClient() {
-    const startDeps = await this.startDeps;
-    return startDeps.esClient;
-  }
-
-  protected async getDataService() {
-    const startDeps = await this.startDeps;
-    return startDeps.data;
-  }
 }
