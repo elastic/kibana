@@ -114,14 +114,7 @@ export const AppGlobalStyle = createGlobalStyle<{
     width: 1px;
   }
 
-  .securitySolutionTemplateWrapper {
-    width: 100%;
-  }
 
-  #securitySolutionWrapperInner {
-    display: flex;
-    flex-direction: column;
-  }
 `;
 
 export const DescriptionListStyled = styled(EuiDescriptionList)`

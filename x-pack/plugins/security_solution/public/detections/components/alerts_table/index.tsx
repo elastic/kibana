@@ -335,7 +335,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   }
 
   return (
-    <div>
+    <>
       {graphOverlay}
       <FullWidthFlexGroupTable $visible={!graphEventId && graphOverlay == null} gutterSize="none">
         <StatefulEventContext.Provider value={activeStatefulEventContext}>
@@ -343,6 +343,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
         </StatefulEventContext.Provider>
       </FullWidthFlexGroupTable>
       {DetailsPanel}
-    </div>
+    </>
   );
 };

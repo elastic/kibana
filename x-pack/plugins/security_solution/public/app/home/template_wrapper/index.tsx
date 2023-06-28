@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import classnames from 'classnames';
 import { EuiThemeProvider, useEuiTheme } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -71,17 +70,6 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
     const { colorMode: globalColorMode } = useEuiTheme();
 
     const [flyoutRef, handleFlyoutChangedOrClosed] = useSyncFlyoutStateWithUrl();
-    const propsWithClassname = useMemo(() => {
-      const id = rest.mainProps?.id ?? null;
-      return {
-        ...rest,
-        className: classnames(rest.className, 'securitySolutionTemplateWrapper'),
-        mainProps: {
-          ...rest.mainProps,
-          id: id ? `${id} securitySolutionWrapperInner` : `securitySolutionWrapperInner`,
-        },
-      };
-    }, [rest]);
 
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
@@ -111,7 +99,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<Omit<KibanaPageTemplatePr
             component="div"
             grow
             contentProps={{
-              css: { display: 'flex', flex: 1, width: '100%', alignItems: 'stretch' },
+              css: { display: 'flex', flex: 1, width: '100%', alignItems: 'flex-start' },
             }}
           >
             {children}
