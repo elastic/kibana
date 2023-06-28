@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
+import { sleep } from '../helper';
 
 // Defined in CSP plugin
 const LATEST_FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
@@ -61,6 +62,7 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
 
     getKubernetesTab: async () => {
       const tabs = await dashboard.getDashboardTabs();
+      sleep(1000);
       return await tabs.findByXpath(`//span[text()="Kubernetes"]`);
     },
 

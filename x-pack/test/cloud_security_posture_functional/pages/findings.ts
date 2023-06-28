@@ -8,11 +8,7 @@
 import expect from '@kbn/expect';
 import Chance from 'chance';
 import type { FtrProviderContext } from '../ftr_provider_context';
-
-/* This sleep or delay is added to allow some time for the column to settle down before we get the value and to prevent the test from getting the wrong value*/
-const sleep = (num: number) => {
-  return new Promise((res) => setTimeout(res, num));
-};
+import { sleep } from '../helper';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
