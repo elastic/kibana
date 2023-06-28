@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -47,7 +47,6 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     before(setup);
     after(teardown);
     loadTestFile(require.resolve('./control_group_settings'));
-    loadTestFile(require.resolve('./options_list'));
     loadTestFile(require.resolve('./range_slider'));
     loadTestFile(require.resolve('./time_slider'));
     loadTestFile(require.resolve('./control_group_chaining'));
