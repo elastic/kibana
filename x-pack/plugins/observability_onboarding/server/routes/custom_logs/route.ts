@@ -137,14 +137,14 @@ const updateOnboardingStateRoute = createObservabilityOnboardingServerRoute({
 
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
   endpoint:
-    'GET /internal/observability_onboarding/custom_logs/{id}/step/{name}',
+    'POST /internal/observability_onboarding/custom_logs/{id}/step/{name}',
   options: { tags: [] },
   params: t.type({
     path: t.type({
       id: t.string,
       name: t.string,
     }),
-    query: t.type({
+    body: t.type({
       status: t.string,
     }),
   }),
@@ -152,7 +152,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
     const {
       params: {
         path: { id, name },
-        query: { status },
+        body: { status },
       },
       core,
     } = resources;
