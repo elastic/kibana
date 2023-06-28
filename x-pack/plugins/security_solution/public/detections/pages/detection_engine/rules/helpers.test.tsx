@@ -15,7 +15,6 @@ import {
   getActionsStepsData,
   getHumanizedDuration,
   getModifiedAboutDetailsData,
-  getPrePackagedRuleInstallationStatus,
   getPrePackagedTimelineInstallationStatus,
   determineDetailsValue,
   fillEmptySeverityMappings,
@@ -427,73 +426,6 @@ describe('rule helpers', () => {
       };
 
       expect(result).toEqual(aboutRuleDetailsData);
-    });
-  });
-
-  describe('getPrePackagedRuleStatus', () => {
-    test('ruleNotInstalled', () => {
-      const rulesInstalled = 0;
-      const rulesNotInstalled = 1;
-      const rulesNotUpdated = 0;
-      const result: string = getPrePackagedRuleInstallationStatus(
-        rulesInstalled,
-        rulesNotInstalled,
-        rulesNotUpdated
-      );
-
-      expect(result).toEqual('ruleNotInstalled');
-    });
-
-    test('ruleInstalled', () => {
-      const rulesInstalled = 1;
-      const rulesNotInstalled = 0;
-      const rulesNotUpdated = 0;
-      const result: string = getPrePackagedRuleInstallationStatus(
-        rulesInstalled,
-        rulesNotInstalled,
-        rulesNotUpdated
-      );
-
-      expect(result).toEqual('ruleInstalled');
-    });
-
-    test('someRuleUninstall', () => {
-      const rulesInstalled = 1;
-      const rulesNotInstalled = 1;
-      const rulesNotUpdated = 0;
-      const result: string = getPrePackagedRuleInstallationStatus(
-        rulesInstalled,
-        rulesNotInstalled,
-        rulesNotUpdated
-      );
-
-      expect(result).toEqual('someRuleUninstall');
-    });
-
-    test('ruleNeedUpdate', () => {
-      const rulesInstalled = 1;
-      const rulesNotInstalled = 0;
-      const rulesNotUpdated = 1;
-      const result: string = getPrePackagedRuleInstallationStatus(
-        rulesInstalled,
-        rulesNotInstalled,
-        rulesNotUpdated
-      );
-
-      expect(result).toEqual('ruleNeedUpdate');
-    });
-
-    test('unknown', () => {
-      const rulesInstalled = undefined;
-      const rulesNotInstalled = undefined;
-      const rulesNotUpdated = undefined;
-      const result: string = getPrePackagedRuleInstallationStatus(
-        rulesInstalled,
-        rulesNotInstalled,
-        rulesNotUpdated
-      );
-
-      expect(result).toEqual('unknown');
     });
   });
 

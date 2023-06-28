@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { EuiIconTip, EuiResizeObserver } from '@elastic/eui';
@@ -84,9 +84,11 @@ export const TagCloudChart = ({
   const [warning, setWarning] = useState(false);
   const { bucket, metric, scale, palette, showLabel, orientation } = visParams;
 
-  const bucketFormatter = bucket
-    ? getFormatService().deserialize(getFormatByAccessor(bucket, visData.columns))
-    : null;
+  const bucketFormatter = useMemo(() => {
+    return bucket
+      ? getFormatService().deserialize(getFormatByAccessor(bucket, visData.columns))
+      : null;
+  }, [bucket, visData.columns]);
 
   const tagCloudData = useMemo(() => {
     const bucketColumn = bucket ? getColumnByAccessor(bucket, visData.columns)! : null;
@@ -119,6 +121,16 @@ export const TagCloudChart = ({
     visData.columns,
     visData.rows,
   ]);
+
+  useEffect(() => {
+    // clear warning when data changes
+    if (warning) {
+      setWarning(false);
+    }
+    // "warning" excluded from dependencies.
+    // Clear warning when "tagCloudData" changes. Do not clear warning when "warning" changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tagCloudData]);
 
   const label = bucket
     ? `${getColumnByAccessor(bucket, visData.columns)!.name} - ${

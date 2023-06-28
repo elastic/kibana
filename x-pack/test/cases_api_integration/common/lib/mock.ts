@@ -22,9 +22,9 @@ import {
   CommentRequestExternalReferenceSOType,
   CommentRequestExternalReferenceNoSOType,
   CommentRequestPersistableStateType,
-  FILE_ATTACHMENT_TYPE,
   FileAttachmentMetadata,
 } from '@kbn/cases-plugin/common/api';
+import { FILE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };

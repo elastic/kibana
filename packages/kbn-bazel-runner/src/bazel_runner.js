@@ -112,8 +112,8 @@ async function runBazelRunner(runner, args, options = undefined) {
     ]),
   ]);
 
-  if (process.env.CI) {
-    // on CI it's useful to reduce the logging output, but we still want to see basic info from Bazel so continue to log the INFO: lines from bazel
+  if (process.env.CI && !options?.quiet) {
+    // on CI it's useful to reduce the logging output, but we still want to see basic info from Bazel so continue to log the INFO: lines from bazel.
     for (const line of buffer) {
       if (line.startsWith('INFO:') && !line.startsWith('INFO: From ')) {
         console.log(options?.logPrefix ? `${options.logPrefix} ${line}` : line);

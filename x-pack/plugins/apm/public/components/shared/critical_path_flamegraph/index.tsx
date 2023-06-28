@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Chart, Datum, Flame, Settings } from '@elastic/charts';
+import { Chart, Datum, Flame, Settings, Tooltip } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -117,6 +117,25 @@ export function CriticalPathFlamegraph(
         flameGraph && (
           <EuiFlexItem grow>
             <Chart key={flameGraph.key} className={chartClassName}>
+              <Tooltip
+                customTooltip={(tooltipProps) => {
+                  const valueIndex = tooltipProps.values[0]
+                    .valueAccessor as number;
+                  const operationId = flameGraph.operationId[valueIndex];
+                  const operationMetadata = criticalPath?.metadata[operationId];
+                  const countInclusive = flameGraph.viewModel.value[valueIndex];
+                  const countExclusive = flameGraph.countExclusive[valueIndex];
+
+                  return (
+                    <CriticalPathFlamegraphTooltip
+                      metadata={operationMetadata}
+                      countInclusive={countInclusive}
+                      countExclusive={countExclusive}
+                      totalCount={flameGraph.viewModel.value[0]}
+                    />
+                  );
+                }}
+              />
               <Settings
                 theme={[
                   {
@@ -125,28 +144,6 @@ export function CriticalPathFlamegraph(
                   },
                   ...chartTheme,
                 ]}
-                tooltip={{
-                  customTooltip: (tooltipProps) => {
-                    const valueIndex = tooltipProps.values[0]
-                      .valueAccessor as number;
-                    const operationId = flameGraph.operationId[valueIndex];
-                    const operationMetadata =
-                      criticalPath?.metadata[operationId];
-                    const countInclusive =
-                      flameGraph.viewModel.value[valueIndex];
-                    const countExclusive =
-                      flameGraph.countExclusive[valueIndex];
-
-                    return (
-                      <CriticalPathFlamegraphTooltip
-                        metadata={operationMetadata}
-                        countInclusive={countInclusive}
-                        countExclusive={countExclusive}
-                        totalCount={flameGraph.viewModel.value[0]}
-                      />
-                    );
-                  },
-                }}
                 onElementClick={(elements) => {}}
               />
               <Flame

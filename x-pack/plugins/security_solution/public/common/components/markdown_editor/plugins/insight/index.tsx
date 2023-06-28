@@ -15,7 +15,6 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiCallOut,
-  EuiBetaBadge,
   EuiCodeBlock,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -432,9 +431,6 @@ const InsightEditorComponent = ({
                 />
               )}
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge color={'hollow'} label={i18n.TECH_PREVIEW} size="s" />
-            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -453,7 +449,10 @@ const InsightEditorComponent = ({
             <EuiFormRow
               label={i18n.LABEL}
               helpText={i18n.LABEL_TEXT}
-              isInvalid={labelController.field.value != null}
+              isInvalid={
+                labelController.field.value !== undefined &&
+                labelController.field.value.trim().length === 0
+              }
               fullWidth
             >
               <EuiFieldText
@@ -524,29 +523,32 @@ const exampleInsight = `${insightPrefix}{
   "label": "Test action",
   "description": "Click to investigate",
   "providers": [
-    [     
+    [
       {"field": "event.id", "value": "{{kibana.alert.original_event.id}}", "queryType": "phrase", "excluded": "false"}
     ],
-    [  
+    [
       {"field": "event.action", "value": "", "queryType": "exists", "excluded": "false"},
       {"field": "process.pid", "value": "{{process.pid}}", "queryType": "phrase", "excluded":"false"}
     ]
   ]
 }}`;
 
-export const plugin = {
-  name: 'insights',
-  button: {
-    label: 'Insights',
-    iconType: 'aggregate',
-  },
-  helpText: (
-    <div>
-      <EuiCodeBlock language="md" fontSize="l" paddingSize="s" isCopyable>
-        {exampleInsight}
-      </EuiCodeBlock>
-      <EuiSpacer size="s" />
-    </div>
-  ),
-  editor: InsightEditor,
+export const plugin = ({ licenseIsPlatinum }: { licenseIsPlatinum: boolean }) => {
+  return {
+    name: 'insights',
+    button: {
+      label: licenseIsPlatinum ? i18n.INVESTIGATE : i18n.INIGHT_UPSELL,
+      iconType: 'timelineWithArrow',
+      isDisabled: !licenseIsPlatinum,
+    },
+    helpText: (
+      <div>
+        <EuiCodeBlock language="md" fontSize="l" paddingSize="s" isCopyable>
+          {exampleInsight}
+        </EuiCodeBlock>
+        <EuiSpacer size="s" />
+      </div>
+    ),
+    editor: InsightEditor,
+  };
 };

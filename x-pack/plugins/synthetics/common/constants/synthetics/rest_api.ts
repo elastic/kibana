@@ -8,7 +8,7 @@
 export enum SYNTHETICS_API_URLS {
   // Service end points
   INDEX_TEMPLATES = '/internal/synthetics/service/index_templates',
-  SERVICE_LOCATIONS = '/internal/synthetics/service/locations',
+  SERVICE_LOCATIONS = '/internal/uptime/service/locations',
   SYNTHETICS_MONITORS = '/internal/synthetics/service/monitors',
   SYNTHETICS_MONITOR_INSPECT = '/internal/synthetics/service/monitor/inspect',
   GET_SYNTHETICS_MONITOR = '/internal/synthetics/service/monitor/{monitorId}',
@@ -25,6 +25,7 @@ export enum SYNTHETICS_API_URLS {
   OVERVIEW_STATUS = `/internal/synthetics/overview_status`,
   INDEX_SIZE = `/internal/synthetics/index_size`,
   PARAMS = `/internal/synthetics/params`,
+  AGENT_POLICIES = `/internal/synthetics/agent_policies`,
   PRIVATE_LOCATIONS = `/internal/synthetics/private_locations`,
   PRIVATE_LOCATIONS_MONITORS = `/internal/synthetics/private_locations/monitors`,
   SYNC_GLOBAL_PARAMS = `/internal/synthetics/sync_global_params`,
@@ -38,9 +39,10 @@ export enum SYNTHETICS_API_URLS {
   DELETE_PACKAGE_POLICY = `/internal/synthetics/monitor/policy/{packagePolicyId}`,
   FILTERS = '/internal/synthetics/monitor/filters',
 
+  CERTS = '/internal/synthetics/certs',
+
   // Project monitor public endpoint
   SYNTHETICS_MONITORS_PROJECT = '/api/synthetics/project/{projectName}/monitors',
   SYNTHETICS_MONITORS_PROJECT_UPDATE = '/api/synthetics/project/{projectName}/monitors/_bulk_update',
   SYNTHETICS_MONITORS_PROJECT_DELETE = '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
-  SYNTHETICS_MONITORS_PROJECT_LEGACY = '/api/synthetics/service/project/monitors',
 }

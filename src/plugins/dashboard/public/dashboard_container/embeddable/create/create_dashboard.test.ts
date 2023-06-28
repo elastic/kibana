@@ -146,7 +146,29 @@ test('applies time range and refresh interval from initial input to query servic
   ).toHaveBeenCalledWith(refreshInterval);
 });
 
-test('applied time range from query service to initial input if time restore is off', async () => {
+test('applies time range from query service to initial input if time restore is on but there is an explicit time range in the URL', async () => {
+  const urlTimeRange = { from: new Date().toISOString(), to: new Date().toISOString() };
+  const savedTimeRange = { from: 'now - 7 days', to: 'now' };
+  pluginServices.getServices().data.query.timefilter.timefilter.getTime = jest
+    .fn()
+    .mockReturnValue(urlTimeRange);
+  const kbnUrlStateStorage = createKbnUrlStateStorage();
+  kbnUrlStateStorage.get = jest.fn().mockReturnValue({ time: urlTimeRange });
+
+  const dashboard = await createDashboard({
+    useUnifiedSearchIntegration: true,
+    unifiedSearchSettings: {
+      kbnUrlStateStorage,
+    },
+    getInitialInput: () => ({
+      timeRestore: true,
+      timeRange: savedTimeRange,
+    }),
+  });
+  expect(dashboard.getState().explicitInput.timeRange).toEqual(urlTimeRange);
+});
+
+test('applies time range from query service to initial input if time restore is off', async () => {
   const timeRange = { from: new Date().toISOString(), to: new Date().toISOString() };
   pluginServices.getServices().data.query.timefilter.timefilter.getTime = jest
     .fn()

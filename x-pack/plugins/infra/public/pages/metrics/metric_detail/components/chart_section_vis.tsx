@@ -16,6 +16,7 @@ import {
   Settings,
   BrushEndListener,
   TooltipProps,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
 import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
@@ -131,8 +132,8 @@ export const ChartSectionVis = ({
                 stack={stacked}
               />
             ))}
+          <Tooltip {...tooltipProps} />
           <Settings
-            tooltip={tooltipProps}
             onBrushEnd={handleTimeChange}
             theme={getChartTheme(isDarkMode)}
             showLegend

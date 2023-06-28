@@ -189,8 +189,6 @@ export class HttpService
         contextName: ContextName,
         provider: IContextProvider<Context, ContextName>
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
-
-      registerPrebootRoutes: this.internalPreboot!.registerRoutes,
     };
 
     return this.internalSetup;

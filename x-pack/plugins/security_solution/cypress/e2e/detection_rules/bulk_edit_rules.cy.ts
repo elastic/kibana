@@ -34,7 +34,6 @@ import {
   testAllTagsBadges,
   testTagsBadge,
   testMultipleSelectedRulesLabel,
-  loadPrebuiltDetectionRulesFromHeaderBtn,
   filterByElasticRules,
   clickErrorToastBtn,
   unselectRuleByName,
@@ -90,7 +89,10 @@ import {
 } from '../../objects/rule';
 
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
-import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_rules';
+import {
+  getAvailablePrebuiltRulesCount,
+  excessivelyInstallAllPrebuiltRules,
+} from '../../tasks/api_calls/prebuilt_rules';
 import { setRowsPerPageTo } from '../../tasks/table_pagination';
 
 const RULE_NAME = 'Custom rule for bulk actions';
@@ -151,7 +153,7 @@ describe('Detection rules, bulk edit', () => {
     it('Only prebuilt rules selected', () => {
       const expectedNumberOfSelectedRules = 10;
 
-      loadPrebuiltDetectionRulesFromHeaderBtn();
+      excessivelyInstallAllPrebuiltRules();
 
       // select Elastic(prebuilt) rules, check if we can't proceed further, as Elastic rules are not editable
       filterByElasticRules();
@@ -167,7 +169,7 @@ describe('Detection rules, bulk edit', () => {
     });
 
     it('Prebuilt and custom rules selected: user proceeds with custom rules editing', () => {
-      loadPrebuiltDetectionRulesFromHeaderBtn();
+      excessivelyInstallAllPrebuiltRules();
 
       // modal window should show how many rules can be edit, how many not
       selectAllRules();
@@ -190,7 +192,7 @@ describe('Detection rules, bulk edit', () => {
     });
 
     it('Prebuilt and custom rules selected: user cancels action', () => {
-      loadPrebuiltDetectionRulesFromHeaderBtn();
+      excessivelyInstallAllPrebuiltRules();
 
       // modal window should show how many rules can be edit, how many not
       selectAllRules();

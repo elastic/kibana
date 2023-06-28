@@ -5,150 +5,58 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   ActionConnectorFieldsProps,
-  ConfigFieldSchema,
-  SecretsFieldSchema,
   SimpleConnectorForm,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   UseField,
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { useGetDashboard } from './use_get_dashboard';
 import { OpenAiProviderType } from '../../../common/gen_ai/constants';
 import * as i18n from './translations';
-import { DEFAULT_URL, DEFAULT_URL_AZURE } from './constants';
+import {
+  azureAiConfig,
+  azureAiSecrets,
+  openAiConfig,
+  openAiSecrets,
+  providerOptions,
+} from './constants';
 const { emptyField } = fieldValidators;
-
-const openAiConfig: ConfigFieldSchema[] = [
-  {
-    id: 'apiUrl',
-    label: i18n.API_URL_LABEL,
-    isUrlField: true,
-    defaultValue: DEFAULT_URL,
-    helpText: (
-      <FormattedMessage
-        defaultMessage="The OpenAI API endpoint URL. For more information on the URL, refer to the {genAiAPIUrlDocs}."
-        id="xpack.stackConnectors.components.genAi.openAiDocumentation"
-        values={{
-          genAiAPIUrlDocs: (
-            <EuiLink
-              data-test-subj="open-ai-api-doc"
-              href="https://platform.openai.com/docs/api-reference"
-              target="_blank"
-            >
-              {`${i18n.OPEN_AI} ${i18n.DOCUMENTATION}`}
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
-  },
-];
-
-const azureAiConfig: ConfigFieldSchema[] = [
-  {
-    id: 'apiUrl',
-    label: i18n.API_URL_LABEL,
-    isUrlField: true,
-    defaultValue: DEFAULT_URL_AZURE,
-    helpText: (
-      <FormattedMessage
-        defaultMessage="The Azure OpenAI API endpoint URL. For more information on the URL, refer to the {genAiAPIUrlDocs}."
-        id="xpack.stackConnectors.components.genAi.azureAiDocumentation"
-        values={{
-          genAiAPIUrlDocs: (
-            <EuiLink
-              data-test-subj="azure-ai-api-doc"
-              href="https://learn.microsoft.com/en-us/azure/cognitive-services/openai/reference"
-              target="_blank"
-            >
-              {`${i18n.AZURE_AI} ${i18n.DOCUMENTATION}`}
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
-  },
-];
-
-const openAiSecrets: SecretsFieldSchema[] = [
-  {
-    id: 'apiKey',
-    label: i18n.API_KEY_LABEL,
-    isPasswordField: true,
-    helpText: (
-      <FormattedMessage
-        defaultMessage="The OpenAI API authentication key for HTTP Basic authentication. For more details about generating OpenAI API keys, refer to the {genAiAPIKeyDocs}."
-        id="xpack.stackConnectors.components.genAi.openAiApiKeyDocumentation"
-        values={{
-          genAiAPIKeyDocs: (
-            <EuiLink
-              data-test-subj="open-ai-api-keys-doc"
-              href="https://platform.openai.com/account/api-keys"
-              target="_blank"
-            >
-              {`${i18n.OPEN_AI} ${i18n.DOCUMENTATION}`}
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
-  },
-];
-
-const azureAiSecrets: SecretsFieldSchema[] = [
-  {
-    id: 'apiKey',
-    label: i18n.API_KEY_LABEL,
-    isPasswordField: true,
-    helpText: (
-      <FormattedMessage
-        defaultMessage="The Azure API key for HTTP Basic authentication. For more details about generating Azure OpenAI API keys, refer to the {genAiAPIKeyDocs}."
-        id="xpack.stackConnectors.components.genAi.azureAiApiKeyDocumentation"
-        values={{
-          genAiAPIKeyDocs: (
-            <EuiLink
-              data-test-subj="azure-ai-api-keys-doc"
-              href="https://learn.microsoft.com/en-us/azure/cognitive-services/openai/reference#authentication"
-              target="_blank"
-            >
-              {`${i18n.AZURE_AI} ${i18n.DOCUMENTATION}`}
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
-  },
-];
-
-const providerOptions = [
-  {
-    value: OpenAiProviderType.OpenAi,
-    text: i18n.OPEN_AI,
-    label: i18n.OPEN_AI,
-  },
-  {
-    value: OpenAiProviderType.AzureAi,
-    text: i18n.AZURE_AI,
-    label: i18n.AZURE_AI,
-  },
-];
 
 const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
   readOnly,
   isEdit,
 }) => {
   const { getFieldDefaultValue } = useFormContext();
-  const [{ config }] = useFormData({
+  const [{ config, id, name }] = useFormData({
     watch: ['config.apiProvider'],
   });
+
+  const {
+    services: {
+      application: { navigateToUrl },
+    },
+  } = useKibana();
+
+  const { dashboardUrl } = useGetDashboard({ connectorId: id });
+
+  const onClick = useCallback(
+    (e) => {
+      e.preventDefault();
+      if (dashboardUrl) {
+        navigateToUrl(dashboardUrl);
+      }
+    },
+    [dashboardUrl, navigateToUrl]
+  );
 
   const selectedProviderDefaultValue = useMemo(
     () =>
@@ -198,6 +106,11 @@ const GenerativeAiConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
           configFormSchema={azureAiConfig}
           secretsFormSchema={azureAiSecrets}
         />
+      )}
+      {isEdit && dashboardUrl != null && (
+        <EuiLink data-test-subj="link-gen-ai-token-dashboard" onClick={onClick}>
+          {i18n.USAGE_DASHBOARD_LINK(selectedProviderDefaultValue, name)}
+        </EuiLink>
       )}
     </>
   );

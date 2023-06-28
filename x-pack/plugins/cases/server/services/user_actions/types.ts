@@ -90,6 +90,9 @@ export interface BuilderParameters {
   delete_case: {
     parameters: { payload: {} };
   };
+  category: {
+    parameters: { payload: { category: string | null } };
+  };
 }
 
 export interface CreateUserAction<T extends keyof BuilderParameters> {

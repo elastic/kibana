@@ -13,7 +13,7 @@ import type {
   NodeDefinition,
 } from '@kbn/core-chrome-browser';
 
-import type { CloudLinkProps, RecentlyAccessedProps } from './components';
+import type { RecentlyAccessedProps } from './components';
 
 export type NonEmptyArray<T> = [T, ...T[]];
 
@@ -50,6 +50,11 @@ export interface NodePropsEnhanced<
    * the EuiSideNavItemType (see navigation_section_ui.tsx)
    */
   renderItem?: () => ReactElement;
+  /**
+   * Forces the node to be active. This is used to force a collapisble nav group to be open
+   * even if the URL does not match any of the nodes in the group.
+   */
+  isActive?: boolean;
 }
 
 /**
@@ -78,15 +83,6 @@ export interface RecentlyAccessedDefinition extends RecentlyAccessedProps {
 /**
  * @public
  *
- * A cloud link root item definition. Use it to add one or more links to the Cloud console
- */
-export interface CloudLinkDefinition extends CloudLinkProps {
-  type: 'cloudLink';
-}
-
-/**
- * @public
- *
  * A group root item definition.
  */
 export interface GroupDefinition<
@@ -95,7 +91,15 @@ export interface GroupDefinition<
   ChildrenId extends string = Id
 > extends NodeDefinition<LinkId, Id, ChildrenId> {
   type: 'navGroup';
-  /** Flag to indicate if the group is initially collapsed or not. */
+  /**
+   * Flag to indicate if the group is initially collapsed or not.
+   *
+   * `false`: the group will be opened event if none of its children nodes matches the current URL.
+   *
+   * `true`: the group will be collapsed event if any of its children nodes matches the current URL.
+   *
+   * `undefined`: the group will be opened if any of its children nodes matches the current URL.
+   */
   defaultIsCollapsed?: boolean;
   preset?: NavigationGroupPreset;
 }
@@ -109,7 +113,7 @@ export type RootNavigationItemDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
-> = RecentlyAccessedDefinition | CloudLinkDefinition | GroupDefinition<LinkId, Id, ChildrenId>;
+> = RecentlyAccessedDefinition | GroupDefinition<LinkId, Id, ChildrenId>;
 
 export type ProjectNavigationTreeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
@@ -142,10 +146,6 @@ export interface NavigationTreeDefinition {
  * or when calling `setNavigation()` on the serverless plugin.
  */
 export interface ProjectNavigationDefinition {
-  /**
-   * The URL href for the home link
-   */
-  homeRef: string;
   /**
    * A navigation tree structure with object items containing labels, links, and sub-items
    * for a project. Use it if you only need to configure your project navigation and leave
