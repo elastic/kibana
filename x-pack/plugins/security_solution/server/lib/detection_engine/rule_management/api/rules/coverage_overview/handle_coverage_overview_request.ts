@@ -7,11 +7,14 @@
 
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { convertRulesFilterToKQL } from '../../../../../../../common/utils/kql';
 import type { CoverageOverviewRequestBody } from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
-import { CoverageOverviewRuleActivity } from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
+import {
+  CoverageOverviewRuleSource,
+  CoverageOverviewRuleActivity,
+} from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/request_schema';
 import type { CoverageOverviewResponse } from '../../../../../../../common/detection_engine/rule_management/api/rules/coverage_overview/response_schema';
 import type { RuleParams } from '../../../../rule_schema';
-import { convertFilterToKQL } from './utils/convert_filter_to_kql';
 
 type CoverageOverviewRuleParams = Pick<RuleParams, 'threat'>;
 
@@ -28,7 +31,18 @@ export async function handleCoverageOverviewRequest({
   params: { filter },
   deps: { rulesClient },
 }: HandleCoverageOverviewRequestArgs): Promise<CoverageOverviewResponse> {
-  const kqlFilter = filter ? convertFilterToKQL(filter) : undefined;
+  const kqlFilter = filter
+    ? convertRulesFilterToKQL({
+        filter: filter.search_term,
+        showCustomRules: filter.source?.includes(CoverageOverviewRuleSource.Custom) ?? false,
+        showElasticRules: filter.source?.includes(CoverageOverviewRuleSource.Prebuilt) ?? false,
+        enabled: filter.activity?.includes(CoverageOverviewRuleActivity.Disabled)
+          ? false
+          : filter.activity?.includes(CoverageOverviewRuleActivity.Enabled)
+          ? true
+          : undefined,
+      })
+    : undefined;
 
   // rulesClient.find uses ES Search API to fetch the rules. It has some limitations when the number of rules exceeds
   // index.max_result_window (set to 10K by default) Kibana fails. A proper way to handle it is via ES PIT API.
