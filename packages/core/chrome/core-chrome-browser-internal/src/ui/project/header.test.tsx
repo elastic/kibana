@@ -24,6 +24,7 @@ describe('Header', () => {
     globalHelpExtensionMenuLinks$: Rx.of([]),
     helpExtension$: Rx.of(undefined),
     helpSupportUrl$: Rx.of('app/help'),
+    helpMenuLinks$: Rx.of([]),
     homeHref$: Rx.of('app/home'),
     kibanaVersion: '8.9',
     loadingCount$: Rx.of(0),

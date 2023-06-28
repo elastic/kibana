@@ -26,7 +26,7 @@ describe('HeaderHelpMenu', () => {
         helpSupportUrl$={helpSupportUrl$}
         kibanaVersion={'version'}
         kibanaDocLink={''}
-        isCloudEnabled={false}
+        defaultContentLinks$={of([])}
       />
     );
 
@@ -42,31 +42,6 @@ describe('HeaderHelpMenu', () => {
       'Give feedback',
       'Open an issue in GitHub',
     ]);
-  });
-
-  test('it only renders the default content (on Cloud)', () => {
-    const application = applicationServiceMock.createInternalStartContract();
-    const helpExtension$ = new BehaviorSubject(undefined);
-    const helpSupportUrl$ = new BehaviorSubject('');
-
-    const component = mountWithIntl(
-      <HeaderHelpMenu
-        navigateToUrl={application.navigateToUrl}
-        globalHelpExtensionMenuLinks$={of([])}
-        helpExtension$={helpExtension$}
-        helpSupportUrl$={helpSupportUrl$}
-        kibanaVersion={'version'}
-        kibanaDocLink={''}
-        isCloudEnabled
-      />
-    );
-
-    component.find('EuiButtonEmpty').simulate('click');
-
-    const buttons = component.find('EuiButtonEmpty');
-    const buttonTexts = buttons.map((button) => button.text()).filter((text) => text.trim() !== '');
-
-    expect(buttonTexts).toEqual(['Documentation', 'Support', 'Give feedback']);
   });
 
   test('it renders the global custom content + the default content', () => {
@@ -96,7 +71,7 @@ describe('HeaderHelpMenu', () => {
         helpSupportUrl$={helpSupportUrl$}
         kibanaVersion={'version'}
         kibanaDocLink={''}
-        isCloudEnabled={false}
+        defaultContentLinks$={of([])}
       />
     );
 
