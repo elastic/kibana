@@ -25,12 +25,12 @@ import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 
 interface Props {
-  initialSelection?: DashboardItem;
+  initialSelectionId?: string;
   onDashboardSelected: (selectedDashboard: DashboardItem | undefined) => void;
 }
 
 export const NavigationEmbeddableDashboardList = ({
-  initialSelection,
+  initialSelectionId,
   onDashboardSelected,
   ...other
 }: Props) => {
@@ -51,12 +51,12 @@ export const NavigationEmbeddableDashboardList = ({
         return {
           data: dashboard,
           label: dashboard.attributes.title,
-          checked: initialSelection && initialSelection.id === dashboard.id ? 'on' : undefined,
+          checked: initialSelectionId === dashboard.id ? 'on' : undefined,
         } as EuiSelectableOption;
       }) ?? [];
 
     setDashboardListOptions(dashboardOptions);
-  }, [dashboardList, searchString, onDashboardSelected, initialSelection]);
+  }, [dashboardList, searchString, onDashboardSelected, initialSelectionId]);
 
   // {...other} is needed so all inner elements are treated as part of the form
   return (

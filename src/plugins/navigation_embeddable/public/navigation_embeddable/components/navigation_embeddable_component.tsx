@@ -6,20 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
-  EuiButtonEmpty,
-  EuiListGroup,
-  EuiListGroupItemProps,
   EuiPanel,
   EuiPopover,
+  EuiListGroup,
+  EuiButtonEmpty,
+  EuiListGroupItemProps,
+  EuiListGroupItemExtraActionProps,
 } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import ReactDOM from 'react-dom';
 
 import { isDashboardLink } from '../types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
-import { NavigationEmbeddableEditor } from './navigation_embeddable_editor';
+import {
+  EditPopover,
+  NavigationEmbeddableEditor,
+  NAV_EMBEDDABLE_POPOVER_WIDTH,
+} from './navigation_embeddable_editor';
 import { useNavigationEmbeddable } from '../embeddable/navigation_embeddable';
 
 import './navigation_embeddable.scss';
@@ -28,21 +33,69 @@ export const NavigationEmbeddableComponent = () => {
   const navEmbeddable = useNavigationEmbeddable();
 
   const links = navEmbeddable.select((state) => state.componentState.links);
-  const viewMode = navEmbeddable.select((state) => state.componentState.viewMode);
+  const canEdit = navEmbeddable.select((state) => state.componentState.canEdit);
   const currentDashboard = navEmbeddable.select((state) => state.componentState.currentDashboard);
 
   const [isEditPopoverOpen, setIsEditPopoverOpen] = useState(false);
+  const [isAddPopoverOpen, setIsAddPopoverOpen] = useState(false);
   const [dashboardListGroupItems, setDashboardListGroupItems] = useState<EuiListGroupItemProps[]>(
     []
   );
 
+  const editPopoverContainer = useRef<HTMLDivElement | null>(null);
+  const editPopoverAnchor = useRef<HTMLButtonElement | null>(null);
+  const [editIndex, setEditIndex] = useState<number>();
+
+  const closeEditPopover = useCallback(() => {
+    setIsEditPopoverOpen(false);
+
+    if (!editPopoverContainer.current) return;
+
+    ReactDOM.unmountComponentAtNode(editPopoverContainer.current);
+    document.body.removeChild(editPopoverContainer.current);
+    editPopoverContainer.current = null;
+  }, []);
+
+  useEffect(() => {
+    if (!editPopoverAnchor.current) return;
+
+    if (isEditPopoverOpen && editIndex !== undefined && !editPopoverContainer.current) {
+      console.log('use effect', editIndex);
+      const container = document.createElement('div');
+      editPopoverContainer.current = container;
+      document.body.appendChild(container);
+      const element = (
+        <EditPopover
+          linkIndex={editIndex}
+          embeddable={navEmbeddable}
+          anchor={editPopoverAnchor.current}
+          closePopover={closeEditPopover}
+        />
+      );
+      ReactDOM.render(element, editPopoverContainer.current);
+    } else {
+      closeEditPopover();
+    }
+  }, [navEmbeddable, editIndex, isEditPopoverOpen, closeEditPopover]);
+
   useEffect(() => {
     setDashboardListGroupItems(
-      (links ?? []).map((link) => {
+      (links ?? []).map((link, i) => {
+        const editAction: EuiListGroupItemExtraActionProps = {
+          iconType: 'pencil',
+          onClick: (e) => {
+            editPopoverAnchor.current = e.target as HTMLButtonElement;
+            setEditIndex(i);
+            setIsEditPopoverOpen(!isEditPopoverOpen);
+          },
+          'aria-label': 'Edit link',
+        };
+
         if (isDashboardLink(link)) {
           return {
             label: link.label || link.title,
             iconType: 'dashboardApp',
+            extraAction: canEdit ? editAction : undefined,
             ...(link.id === currentDashboard?.id
               ? {
                   color: 'text',
@@ -57,13 +110,14 @@ export const NavigationEmbeddableComponent = () => {
           label: link.label || link.url,
           iconType: 'link',
           color: 'primary',
+          extraAction: canEdit ? editAction : undefined,
           onClick: () => {}, // TODO: As part of https://github.com/elastic/kibana/issues/154381, connect to drilldown
         };
       })
     );
-  }, [links, currentDashboard]);
+  }, [links, isEditPopoverOpen, canEdit, currentDashboard]);
 
-  const onButtonClick = useCallback(() => setIsEditPopoverOpen((isOpen) => !isOpen), []);
+  const onButtonClick = useCallback(() => setIsAddPopoverOpen((isOpen) => !isOpen), []);
 
   const addLinkButton = (
     <EuiButtonEmpty onClick={onButtonClick} iconType="plusInCircle">
@@ -74,16 +128,16 @@ export const NavigationEmbeddableComponent = () => {
   // TODO: As part of https://github.com/elastic/kibana/issues/154357, replace `EuiListGroup` with horizontal VS vertical layout
   return (
     <EuiPanel className="eui-yScroll">
-      <EuiListGroup flush listItems={dashboardListGroupItems} size="s" />
-      {viewMode === ViewMode.EDIT && (
+      <EuiListGroup flush maxWidth="none" listItems={dashboardListGroupItems} size="s" />
+      {canEdit && (
         <EuiPopover
           button={addLinkButton}
-          panelStyle={{ width: 400 }}
-          isOpen={isEditPopoverOpen}
+          panelStyle={{ width: NAV_EMBEDDABLE_POPOVER_WIDTH }}
+          isOpen={isAddPopoverOpen}
           panelPaddingSize="m"
-          closePopover={() => setIsEditPopoverOpen(false)}
+          closePopover={() => setIsAddPopoverOpen(false)}
         >
-          <NavigationEmbeddableEditor setIsPopoverOpen={setIsEditPopoverOpen} />
+          <NavigationEmbeddableEditor closePopover={() => setIsAddPopoverOpen(false)} />
         </EuiPopover>
       )}
     </EuiPanel>

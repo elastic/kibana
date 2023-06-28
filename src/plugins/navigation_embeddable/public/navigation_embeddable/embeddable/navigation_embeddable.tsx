@@ -6,28 +6,29 @@
  * Side Public License, v 1.
  */
 
-import ReactDOM from 'react-dom';
+import ReactDOM, { render } from 'react-dom';
 import { batch } from 'react-redux';
 import { isEmpty, isEqual } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import { distinctUntilChanged, skip, Subscription } from 'rxjs';
 
-import { Embeddable } from '@kbn/embeddable-plugin/public';
+import { Embeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import type { IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
-import { navigationEmbeddableReducers } from '../navigation_embeddable_reducers';
 import {
   DashboardItem,
   isDashboardLink,
   NavigationEmbeddableInput,
   NavigationEmbeddableReduxState,
 } from '../types';
+import { navigationEmbeddableReducers } from '../navigation_embeddable_reducers';
 import { coreServices, dashboardServices } from '../services/navigation_embeddable_services';
 import { NavigationEmbeddableComponent } from '../components/navigation_embeddable_component';
+import { EditPopover } from '../components/navigation_embeddable_editor';
 
 export const NAVIGATION_EMBEDDABLE_TYPE = 'navigation';
 
@@ -118,7 +119,9 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
       this.getInput$()
         .pipe(distinctUntilChanged((a, b) => a.viewMode === b.viewMode))
         .subscribe(async ({ viewMode }) => {
-          this.dispatch.setViewMode(viewMode);
+          this.dispatch.setCanEdit(
+            Boolean(this.getOutput().editable) && viewMode === ViewMode.EDIT
+          );
         })
     );
 
@@ -280,6 +283,19 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput> 
       const currentDashboard = await this.fetchCurrentDashboard();
       this.dispatch.setCurrentDashboard(currentDashboard);
     }
+  }
+
+  public openEditPopover(anchor: HTMLElement) {
+    render(
+      <EditPopover
+        this={this}
+        isPopoverOpen={true}
+        setIsPopoverOpen={() => unmountComponentAtNode(this.node)}
+        anchor={anchor}
+      />,
+      this.node,
+      () => unmountComponentAtNode(this.node)
+    );
   }
 
   public async reload() {

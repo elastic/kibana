@@ -10,7 +10,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { WritableDraft } from 'immer/dist/types/types-external';
 
 import { PayloadAction } from '@reduxjs/toolkit';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import {
   DashboardItem,
@@ -27,11 +26,11 @@ export const navigationEmbeddableReducers = {
   ) => {
     state.output.loading = action.payload;
   },
-  setViewMode: (
+  setCanEdit: (
     state: WritableDraft<NavigationEmbeddableReduxState>,
-    action: PayloadAction<ViewMode | undefined>
+    action: PayloadAction<boolean>
   ) => {
-    state.componentState.viewMode = action.payload;
+    state.componentState.canEdit = action.payload;
   },
   setDashboardList: (
     state: WritableDraft<NavigationEmbeddableReduxState>,

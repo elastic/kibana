@@ -8,7 +8,7 @@
 
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
-import { EmbeddableInput, EmbeddableOutput, ViewMode } from '@kbn/embeddable-plugin/public';
+import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 
 export interface ExternalLink {
   url: string;
@@ -34,9 +34,9 @@ export type IExternalLink = ExternalLink & { order: number };
 export type IDashboardLink = Pick<DashboardLink, 'id' | 'label'> & { order: number };
 
 export const isDashboardLink = (
-  link: DashboardLink | ExternalLink
+  link: DashboardLink | ExternalLink | undefined
 ): link is IDashboardLink | DashboardLink => {
-  return Boolean((link as IDashboardLink).id);
+  return Boolean(link && (link as IDashboardLink).id);
 };
 
 export interface NavigationEmbeddableInput extends EmbeddableInput {
@@ -47,7 +47,7 @@ export interface NavigationEmbeddableInput extends EmbeddableInput {
  * Redux state
  */
 export interface NavigationEmbeddableComponentState {
-  viewMode?: ViewMode;
+  canEdit?: boolean;
   totalDashboards?: number;
   dashboardList?: DashboardItem[];
   currentDashboard?: DashboardLink;

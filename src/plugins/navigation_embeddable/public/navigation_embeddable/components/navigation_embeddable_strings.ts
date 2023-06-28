@@ -16,6 +16,10 @@ export const NavEmbeddableStrings = {
       }),
   },
   editor: {
+    getApplyButtonLabel: () =>
+      i18n.translate('navEmbeddable.editor.confirmApplyButtonLabel', {
+        defaultMessage: 'Apply',
+      }),
     getLinkTypePickerLabel: () =>
       i18n.translate('navEmbeddable.editor.linkTypeFormLabel', {
         defaultMessage: 'Go to',
