@@ -404,7 +404,6 @@ for (let index = 0; index < 50; index++) {
         const lastPageForHistory = Math.ceil(
           userActionsStats.totalOtherActions / userActivityQueryParams.perPage
         );
-
         userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-history'));
 
         await waitFor(() => {
@@ -431,13 +430,18 @@ for (let index = 0; index < 50; index++) {
 
         await waitFor(() => {
           expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
-        });
+          expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+            caseData.id,
+            { type: 'all', sortOrder: 'desc', page: 3, perPage: 10 },
+            true
+          );
 
-        expect(await screen.findByLabelText(`${userActionsStats.total} active filters`));
-        expect(await screen.findByLabelText(`${userActionsStats.totalComments} available filters`));
-        expect(
-          await screen.findByLabelText(`${userActionsStats.totalOtherActions} available filters`)
-        );
+          expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+            caseData.id,
+            { type: 'all', sortOrder: 'desc', page: 1, perPage: 10 },
+            true
+          );
+        });
       });
     });
 
