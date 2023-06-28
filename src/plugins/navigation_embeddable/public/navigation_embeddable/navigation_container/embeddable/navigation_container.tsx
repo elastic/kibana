@@ -102,7 +102,6 @@ export class NavigationContainer extends Container<
 
   protected getInheritedInput(id: string): LinkInput {
     // console.log('get inherited input');
-
     const { viewMode } = this.getInput();
 
     return { id, viewMode };
@@ -111,7 +110,7 @@ export class NavigationContainer extends Container<
   private async initialize() {
     // this.setupSubscriptions();
 
-    // await this.updateParentDashboard();
+    await this.updateParentDashboard();
     // await this.updateDashboardLinks();
 
     this.setInitializationFinished();
@@ -302,19 +301,19 @@ export class NavigationContainer extends Container<
     return dashboardList;
   }
 
-  // private async updateParentDashboard() {
-  //   const parentDashboardId = (this.parent as DashboardContainer | undefined)?.getState()
-  //     .componentState.lastSavedId;
-  //   this.currentDashboardId = parentDashboardId;
-  //   if (this.currentDashboardId) {
-  //     /**
-  //      * if there is no `currentDashboardId`, the dashboard has never been saved so there is no "current
-  //      * dashboard" to reference in the dashboard list
-  //      */
-  //     const currentDashboard = await this.fetchCurrentDashboard();
-  //     this.dispatch.setCurrentDashboard(currentDashboard);
-  //   }
-  // }
+  private async updateParentDashboard() {
+    const parentDashboardId = (this.parent as DashboardContainer | undefined)?.getState()
+      .componentState.lastSavedId;
+    this.currentDashboardId = parentDashboardId;
+    if (this.currentDashboardId) {
+      /**
+       * if there is no `currentDashboardId`, the dashboard has never been saved so there is no "current
+       * dashboard" to reference in the dashboard list
+       */
+      const currentDashboard = await this.fetchCurrentDashboard();
+      this.dispatch.setCurrentDashboard(currentDashboard);
+    }
+  }
 
   public async reload() {
     // await this.updateDashboardLinks();
@@ -333,7 +332,7 @@ export class NavigationContainer extends Container<
     }
     this.node = node;
 
-    console.log('render');
+    // console.log('render');
 
     ReactDOM.render(
       <KibanaThemeProvider theme$={coreServices.theme.theme$}>

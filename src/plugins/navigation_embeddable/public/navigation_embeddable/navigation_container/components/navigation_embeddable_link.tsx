@@ -40,7 +40,7 @@ export const useChildEmbeddable = ({
     let mounted = true;
     (async () => {
       const newEmbeddable = await untilEmbeddableLoaded(embeddableId);
-      console.log(embeddableId, newEmbeddable);
+      // console.log(embeddableId, newEmbeddable);
       if (!mounted) return;
       setEmbeddable(newEmbeddable);
     })();
@@ -65,7 +65,7 @@ export const NavigationEmbeddableLink = ({
     embeddableType,
     embeddableId,
   });
-  console.log(embeddable);
+  // console.log(embeddable);
 
   useEffect(() => {
     if (embeddableRoot.current) {
