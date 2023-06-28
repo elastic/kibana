@@ -13,10 +13,12 @@ import { SyntheticsMonitorStatusTranslations } from '../../../common/rules/synth
 import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../../types';
 import {
   ACTION_GROUP_DEFINITIONS,
-  SYNTHETICS_ALERT_RULE_TYPES,
+  SYNTHETICS_STATUS_RULE,
+  SYNTHETICS_TLS_RULE,
 } from '../../../common/constants/synthetics_alerts';
 
-export class StatusAlertService {
+type DefaultRuleType = typeof SYNTHETICS_STATUS_RULE | typeof SYNTHETICS_TLS_RULE;
+export class DefaultAlertService {
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
   server: SyntheticsServerSetup;
@@ -31,14 +33,49 @@ export class StatusAlertService {
     this.soClient = soClient;
   }
 
-  async getExistingAlert() {
+  async setupDefaultAlerts() {
+    const [statusRule, tlsRule] = await Promise.allSettled([
+      this.setupStatusRule(),
+      this.setupTlsRule(),
+    ]);
+
+    if (statusRule.status === 'rejected') {
+      throw statusRule.reason;
+    }
+    if (tlsRule.status === 'rejected') {
+      throw tlsRule.reason;
+    }
+
+    return {
+      statusRule: statusRule.status === 'fulfilled' ? statusRule.value : null,
+      tlsRule: tlsRule.status === 'fulfilled' ? tlsRule.value : null,
+    };
+  }
+
+  setupStatusRule() {
+    return this.createDefaultAlertIfNotExist(
+      SYNTHETICS_STATUS_RULE,
+      `Synthetics status internal alert`,
+      '1m'
+    );
+  }
+
+  setupTlsRule() {
+    return this.createDefaultAlertIfNotExist(
+      SYNTHETICS_TLS_RULE,
+      `Synthetics internal TLS alert`,
+      '10m'
+    );
+  }
+
+  async getExistingAlert(ruleType: DefaultRuleType) {
     const rulesClient = (await this.context.alerting)?.getRulesClient();
 
     const { data } = await rulesClient.find({
       options: {
         page: 1,
         perPage: 1,
-        filter: `alert.attributes.alertTypeId:(${SYNTHETICS_ALERT_RULE_TYPES.MONITOR_STATUS})`,
+        filter: `alert.attributes.alertTypeId:(${ruleType})`,
       },
     });
 
@@ -49,8 +86,8 @@ export class StatusAlertService {
 
     return { ...alert, ruleTypeId: alert.alertTypeId };
   }
-  async createDefaultAlertIfNotExist() {
-    const alert = await this.getExistingAlert();
+  async createDefaultAlertIfNotExist(ruleType: DefaultRuleType, name: string, interval: string) {
+    const alert = await this.getExistingAlert(ruleType);
     if (alert) {
       return alert;
     }
@@ -63,10 +100,10 @@ export class StatusAlertService {
         actions,
         params: {},
         consumer: 'uptime',
-        alertTypeId: SYNTHETICS_ALERT_RULE_TYPES.MONITOR_STATUS,
-        schedule: { interval: '1m' },
+        alertTypeId: ruleType,
+        schedule: { interval },
         tags: ['SYNTHETICS_DEFAULT_ALERT'],
-        name: `Synthetics internal alert`,
+        name,
         enabled: true,
         throttle: null,
       },
@@ -74,10 +111,21 @@ export class StatusAlertService {
     return { ...newAlert, ruleTypeId: newAlert.alertTypeId };
   }
 
-  async updateDefaultAlert() {
+  updateStatusRule() {
+    return this.updateDefaultAlert(
+      SYNTHETICS_STATUS_RULE,
+      `Synthetics status internal alert`,
+      '1m'
+    );
+  }
+  updateTlsRule() {
+    return this.updateDefaultAlert(SYNTHETICS_TLS_RULE, `Synthetics internal TLS alert`, '10m');
+  }
+
+  async updateDefaultAlert(ruleType: DefaultRuleType, name: string, interval: string) {
     const rulesClient = (await this.context.alerting)?.getRulesClient();
 
-    const alert = await this.getExistingAlert();
+    const alert = await this.getExistingAlert(ruleType);
     if (alert) {
       const actions = await this.getAlertActions();
       const updatedAlert = await rulesClient.update({
@@ -94,7 +142,7 @@ export class StatusAlertService {
       return { ...updatedAlert, ruleTypeId: updatedAlert.alertTypeId };
     }
 
-    return await this.createDefaultAlertIfNotExist();
+    return await this.createDefaultAlertIfNotExist(ruleType, name, interval);
   }
 
   async getAlertActions() {
