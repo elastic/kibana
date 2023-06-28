@@ -8,6 +8,10 @@
 import type { Capabilities } from '@kbn/core/types';
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { IconType } from '@elastic/eui';
+import type {
+  LinkCategory as BaseLinkCategory,
+  LinkCategories as BaseLinkCategories,
+} from '@kbn/security-solution-side-nav';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { SecurityPageName } from '../../../common/constants';
 import type { UpsellingService } from '../lib/upsellings';
@@ -23,12 +27,8 @@ export interface LinksPermissions {
   license?: ILicense;
 }
 
-export interface LinkCategory {
-  label: string;
-  linkIds: readonly SecurityPageName[];
-}
-
-export type LinkCategories = Readonly<LinkCategory[]>;
+export type LinkCategory = BaseLinkCategory<SecurityPageName>;
+export type LinkCategories = BaseLinkCategories<SecurityPageName>;
 
 export interface LinkItem {
   /**
@@ -120,6 +120,10 @@ export interface LinkItem {
    */
   sideNavDisabled?: boolean;
   /**
+   * Icon that is displayed on the side navigation menu.
+   */
+  sideNavIcon?: IconType;
+  /**
    * Disables the state query string in the URL. Defaults to false.
    */
   skipUrlState?: boolean;
@@ -143,11 +147,12 @@ export interface NavigationLink {
   categories?: LinkCategories;
   description?: string;
   disabled?: boolean;
-  icon?: IconType;
   id: SecurityPageName;
+  landingIcon?: IconType;
+  landingImage?: string;
   links?: NavigationLink[];
-  image?: string;
   title: string;
+  sideNavIcon?: IconType;
   skipUrlState?: boolean;
   unauthorized?: boolean;
   isBeta?: boolean;

@@ -100,7 +100,7 @@ describe('createAddToTimelineCellAction', () => {
     it('should execute with number value', async () => {
       await addToTimelineAction.execute({
         data: [{ field: { name: 'process.parent.pid', type: 'number' }, value: 12345 }],
-      } as unknown as CellActionExecutionContext); // TODO: remove `as unknown` when number value type is supported
+      } as CellActionExecutionContext);
       expect(mockDispatch).toHaveBeenCalledWith(
         set(
           'payload.providers[0]',

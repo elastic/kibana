@@ -55,7 +55,7 @@ disabled:
 
   # Elastic Synthetics configs
   - x-pack/plugins/synthetics/e2e/config.ts
-  - x-pack/plugins/synthetics/e2e/uptime/synthetics_run.ts
+  - x-pack/plugins/uptime/e2e/uptime/synthetics_run.ts
   - x-pack/plugins/synthetics/e2e/synthetics/synthetics_run.ts
   - x-pack/plugins/ux/e2e/synthetics_run.ts
   - x-pack/plugins/exploratory_view/e2e/synthetics_run.ts
@@ -196,6 +196,7 @@ enabled:
   - x-pack/test/api_integration/apis/security/config.ts
   - x-pack/test/api_integration/apis/security_solution/config.ts
   - x-pack/test/api_integration/apis/spaces/config.ts
+  - x-pack/test/api_integration/apis/stats/config.ts
   - x-pack/test/api_integration/apis/status/config.ts
   - x-pack/test/api_integration/apis/synthetics/config.ts
   - x-pack/test/api_integration/apis/telemetry/config.ts
@@ -264,6 +265,7 @@ enabled:
   - x-pack/test/functional/apps/data_views/config.ts
   - x-pack/test/functional/apps/dev_tools/config.ts
   - x-pack/test/functional/apps/discover/config.ts
+  - x-pack/test/functional/apps/discover_log_explorer/config.ts
   - x-pack/test/functional/apps/graph/config.ts
   - x-pack/test/functional/apps/grok_debugger/config.ts
   - x-pack/test/functional/apps/home/config.ts
