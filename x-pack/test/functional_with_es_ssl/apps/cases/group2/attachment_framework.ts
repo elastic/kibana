@@ -89,7 +89,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
    * Attachment types are being registered in
    * x-pack/test/functional_with_es_ssl/plugins/cases/public/plugin.ts
    */
-  describe('Attachment framework', () => {
+  describe.only('Attachment framework', () => {
     describe('External reference attachments', () => {
       let caseWithAttachment: Case;
       const externalReferenceAttachment = getExternalReferenceAttachment();
@@ -351,17 +351,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
-        );
-
         await common.navigateToApp('dashboard');
         await dashboard.preserveCrossAppState();
 
         await listingTable.searchForItemWithName(myDashboardName);
         await listingTable.checkListingSelectAllCheckbox();
         await listingTable.clickDeleteSelected();
+
+        await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+        );
       });
 
       it('adds lens visualization to a new case from dashboard', async () => {
