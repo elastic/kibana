@@ -26,11 +26,11 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       await testSubjects.existOrFail('mlPageSourceSelection');
     },
 
-    async clickUseFullDataButton() {
+    async clickUseFullDataButton(expectedDocCount: string) {
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
         await testSubjects.clickWhenNotDisabledWithoutRetry('superDatePickerApplyTimeButton');
-        await this.assertTotalDocumentCount('14,005');
+        await this.assertTotalDocumentCount(expectedDocCount);
       });
     },
 
@@ -126,6 +126,40 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
         expect(formattedDocCount).to.eql(
           expectedDocCount,
           `Expected discover document count to be '${expectedDocCount}' (got '${formattedDocCount}')`
+        );
+      });
+    },
+
+    async clickDiscoverField(fieldName: string) {
+      await testSubjects.clickWhenNotDisabled(`dscFieldListPanelField-${fieldName}`, {
+        timeout: 5000,
+      });
+    },
+    async clickDiscoverMenuAnalyzeButton(fieldName: string) {
+      await testSubjects.clickWhenNotDisabled(`fieldCategorize-${fieldName}`, {
+        timeout: 5000,
+      });
+    },
+
+    async assertLogPatternAnalysisFlyoutExists() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail('mlJobSelectorFlyoutBody');
+      });
+    },
+
+    async assertLogPatternAnalysisFlyoutDoesNotExist() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.missingOrFail('mlJobSelectorFlyoutBody');
+      });
+    },
+
+    async assertLogPatternAnalysisFlyoutTitle(fieldName: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        const title = await testSubjects.getVisibleText('mlJobSelectorFlyoutTitle');
+        const expectedTitle = `Pattern analysis of ${fieldName}`;
+        expect(title).to.eql(
+          expectedTitle,
+          `Expected flyout title to be '${expectedTitle}' (got '${title}')`
         );
       });
     },

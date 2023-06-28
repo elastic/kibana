@@ -8,12 +8,12 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const elasticChart = getService('elasticChart');
   const esArchiver = getService('esArchiver');
   const aiops = getService('aiops');
   const browser = getService('browser');
   const retry = getService('retry');
   const ml = getService('ml');
+  const PageObjects = getPageObjects(['common', 'timePicker']);
   const selectedField = '@message';
 
   async function retrySwitchTab(tabIndex: number, seconds: number) {
@@ -45,18 +45,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it(`loads the log pattern analysis page`, async () => {
-      // Start navigation from the base of the ML app.
-      await ml.navigation.navigateToMl();
-      await elasticChart.setNewChartUiDebugFlag(true);
-      await aiops.logPatternAnalysisPage.navigateToIndexPatternSelection();
-      await ml.jobSourceSelection.selectSourceForLogPatternAnalysisDetection('logstash-*');
-      await aiops.logPatternAnalysisPage.assertLogPatternAnalysisPageExists();
-    });
+      await ml.navigation.navigateToDiscoverViaAppsMenu();
+      await PageObjects.timePicker.pauseAutoRefresh();
+      await PageObjects.timePicker.setAbsoluteRange(
+        'Sep 20, 2015 @ 00:00:00.000',
+        'Sep 22, 2015 @ 23:50:13.253'
+      );
+      await aiops.logPatternAnalysisPage.assertDiscoverDocCount('14005');
 
-    it('loads categories based on field selection', async () => {
-      await aiops.logPatternAnalysisPage.clickUseFullDataButton('14,005');
-      await aiops.logPatternAnalysisPage.selectCategoryField(selectedField);
-      await aiops.logPatternAnalysisPage.clickRunButton();
+      // const availableFields = await testSubjects.find('fieldListGroupedAvailableFields');
+      await aiops.logPatternAnalysisPage.clickDiscoverField(selectedField);
+      await aiops.logPatternAnalysisPage.clickDiscoverMenuAnalyzeButton(selectedField);
+
+      await aiops.logPatternAnalysisPage.assertLogPatternAnalysisFlyoutExists();
+      await aiops.logPatternAnalysisPage.assertLogPatternAnalysisFlyoutTitle(selectedField);
+
       await aiops.logPatternAnalysisPage.assertTotalCategoriesFound(3);
       await aiops.logPatternAnalysisPage.assertCategoryTableRows(3);
 
@@ -64,8 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const categoryCount = await aiops.logPatternAnalysisPage.getCategoryCountFromTable(0);
       await aiops.logPatternAnalysisPage.clickFilterInButton(0);
 
-      retrySwitchTab(1, 10);
-      tabsCount++;
+      await aiops.logPatternAnalysisPage.assertLogPatternAnalysisFlyoutDoesNotExist();
 
       await aiops.logPatternAnalysisPage.assertDiscoverDocCountExists();
 
