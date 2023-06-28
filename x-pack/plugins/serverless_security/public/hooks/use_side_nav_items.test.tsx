@@ -6,11 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import {
-  usePartitionFooterNavItems,
-  useSideNavItems,
-  useSideNavSelectedId,
-} from './use_side_nav_items';
+import { useSideNavItems, useSideNavSelectedId } from './use_side_nav_items';
 import { BehaviorSubject } from 'rxjs';
 import type { NavigationLink } from '@kbn/security-solution-plugin/public/common/links/types';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
@@ -55,12 +51,14 @@ describe('useSideNavItems', () => {
       {
         id: SecurityPageName.alerts,
         label: 'Alerts',
+        position: 'top',
         href: expect.any(String),
         onClick: expect.any(Function),
       },
       {
         id: SecurityPageName.case,
         label: 'Cases',
+        position: 'top',
         href: expect.any(String),
         onClick: expect.any(Function),
       },
@@ -82,6 +80,7 @@ describe('useSideNavItems', () => {
       {
         id: SecurityPageName.dashboards,
         label: 'Dashboards',
+        position: 'top',
         href: expect.any(String),
         onClick: expect.any(Function),
         items: [
@@ -101,6 +100,7 @@ describe('useSideNavItems', () => {
       {
         id: SecurityPageName.landing,
         title: 'Get Started',
+        sideNavIcon: 'launch',
       },
     ]);
     const { result } = renderHook(useSideNavItems, { wrapper: KibanaServicesProvider });
@@ -110,109 +110,14 @@ describe('useSideNavItems', () => {
     expect(items).toEqual([
       {
         id: SecurityPageName.landing,
-        label: 'GET STARTED',
+        label: 'Get Started',
+        position: 'bottom',
         href: expect.any(String),
         onClick: expect.any(Function),
-        labelSize: 'xs',
         iconType: 'launch',
         appendSeparator: true,
       },
     ]);
-  });
-});
-
-describe('usePartitionFooterNavItems', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should partition main items only', async () => {
-    const mainInputItems = [
-      {
-        id: SecurityPageName.dashboards,
-        label: 'Dashboards',
-        href: '',
-        onClick: jest.fn(),
-      },
-      {
-        id: SecurityPageName.alerts,
-        label: 'Alerts',
-        href: '',
-        onClick: jest.fn(),
-      },
-    ];
-    const { result } = renderHook(usePartitionFooterNavItems, {
-      initialProps: mainInputItems,
-    });
-
-    const [items, footerItems] = result.current;
-
-    expect(items).toEqual(mainInputItems);
-    expect(footerItems).toEqual([]);
-  });
-
-  it('should partition footer items only', async () => {
-    const footerInputItems = [
-      {
-        id: SecurityPageName.landing,
-        label: 'GET STARTED',
-        href: '',
-        onClick: jest.fn(),
-      },
-      {
-        id: SecurityPageName.administration,
-        label: 'Manage',
-        href: '',
-        onClick: jest.fn(),
-      },
-    ];
-    const { result } = renderHook(usePartitionFooterNavItems, {
-      initialProps: footerInputItems,
-    });
-
-    const [items, footerItems] = result.current;
-
-    expect(items).toEqual([]);
-    expect(footerItems).toEqual(footerInputItems);
-  });
-
-  it('should partition main and footer items', async () => {
-    const mainInputItems = [
-      {
-        id: SecurityPageName.dashboards,
-        label: 'Dashboards',
-        href: '',
-        onClick: jest.fn(),
-      },
-      {
-        id: SecurityPageName.alerts,
-        label: 'Alerts',
-        href: '',
-        onClick: jest.fn(),
-      },
-    ];
-    const footerInputItems = [
-      {
-        id: SecurityPageName.landing,
-        label: 'GET STARTED',
-        href: '',
-        onClick: jest.fn(),
-      },
-      {
-        id: SecurityPageName.administration,
-        label: 'Manage',
-        href: '',
-        onClick: jest.fn(),
-      },
-    ];
-    const { result } = renderHook(usePartitionFooterNavItems, {
-      initialProps: [...mainInputItems, ...footerInputItems],
-    });
-
-    const [items, footerItems] = result.current;
-
-    expect(items).toEqual(mainInputItems);
-    expect(footerItems).toEqual(footerInputItems);
   });
 });
 
