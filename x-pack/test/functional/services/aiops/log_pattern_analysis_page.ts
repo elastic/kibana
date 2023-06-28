@@ -26,7 +26,7 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       await testSubjects.existOrFail('mlPageSourceSelection');
     },
 
-    async clickUseFullDataButton(expectedDocCount: string) {
+    async clickUseFullDataButton(expectedDocCount: number) {
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
         await testSubjects.clickWhenNotDisabledWithoutRetry('superDatePickerApplyTimeButton');
@@ -49,12 +49,13 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       );
     },
 
-    async assertTotalDocumentCount(expectedFormattedTotalDocCount: string) {
+    async assertTotalDocumentCount(expectedFormattedTotalDocCount: number) {
       await retry.tryForTime(5000, async () => {
         const docCount = await testSubjects.getVisibleText('aiopsTotalDocCount');
-        expect(docCount).to.eql(
+        const formattedDocCount = Number(docCount.replaceAll(',', ''));
+        expect(formattedDocCount).to.eql(
           expectedFormattedTotalDocCount,
-          `Expected total document count to be '${expectedFormattedTotalDocCount}' (got '${docCount}')`
+          `Expected total document count to be '${expectedFormattedTotalDocCount}' (got '${formattedDocCount}')`
         );
       });
     },
@@ -99,9 +100,21 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
     },
 
     async clickFilterInButton(rowIndex: number) {
+      this.clickFilterButtons('in', rowIndex);
+    },
+
+    async clickFilterOutButton(rowIndex: number) {
+      this.clickFilterButtons('out', rowIndex);
+    },
+
+    async clickFilterButtons(buttonType: 'in' | 'out', rowIndex: number) {
       const tableListContainer = await testSubjects.find('aiopsLogPatternsTable', 5000);
       const rows = await tableListContainer.findAllByClassName('euiTableRow');
-      const button = await rows[rowIndex].findByTestSubject('aiopsLogPatternsActionFilterInButton');
+      const button = await rows[rowIndex].findByTestSubject(
+        buttonType === 'in'
+          ? 'aiopsLogPatternsActionFilterInButton'
+          : 'aiopsLogPatternsActionFilterOutButton'
+      );
       button.click();
     },
 
@@ -110,7 +123,7 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       const rows = await tableListContainer.findAllByClassName('euiTableRow');
       const row = rows[rowIndex];
       const cells = await row.findAllByClassName('euiTableRowCell');
-      return await cells[0].getVisibleText();
+      return Number(await cells[0].getVisibleText());
     },
 
     async assertDiscoverDocCountExists() {
@@ -119,7 +132,7 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       });
     },
 
-    async assertDiscoverDocCount(expectedDocCount: string) {
+    async assertDiscoverDocCount(expectedDocCount: number) {
       await retry.tryForTime(5000, async () => {
         const docCount = await testSubjects.getVisibleText('unifiedHistogramQueryHits');
         const formattedDocCount = docCount.replaceAll(',', '');

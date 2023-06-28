@@ -15,6 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const ml = getService('ml');
   const selectedField = '@message';
+  const totalDocCount = 14005;
 
   async function retrySwitchTab(tabIndex: number, seconds: number) {
     await retry.tryForTime(seconds * 1000, async () => {
@@ -44,17 +45,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await ml.testResources.deleteIndexPatternByTitle('logstash-*');
     });
 
-    it(`loads the log pattern analysis page`, async () => {
+    it(`loads the log pattern analysis page and filters in patterns in discover`, async () => {
       // Start navigation from the base of the ML app.
       await ml.navigation.navigateToMl();
       await elasticChart.setNewChartUiDebugFlag(true);
       await aiops.logPatternAnalysisPage.navigateToIndexPatternSelection();
       await ml.jobSourceSelection.selectSourceForLogPatternAnalysisDetection('logstash-*');
       await aiops.logPatternAnalysisPage.assertLogPatternAnalysisPageExists();
-    });
 
-    it('loads categories based on field selection', async () => {
-      await aiops.logPatternAnalysisPage.clickUseFullDataButton('14,005');
+      await aiops.logPatternAnalysisPage.clickUseFullDataButton(totalDocCount);
       await aiops.logPatternAnalysisPage.selectCategoryField(selectedField);
       await aiops.logPatternAnalysisPage.clickRunButton();
       await aiops.logPatternAnalysisPage.assertTotalCategoriesFound(3);
@@ -71,8 +70,33 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // ensure the discover doc count is equal to the category count
       await aiops.logPatternAnalysisPage.assertDiscoverDocCount(categoryCount);
+    });
 
-      // await new Promise((r) => setTimeout(r, 400000));
+    it(`loads the log pattern analysis page and filters out patterns in discover`, async () => {
+      // Start navigation from the base of the ML app.
+      await ml.navigation.navigateToMl();
+      await elasticChart.setNewChartUiDebugFlag(true);
+      await aiops.logPatternAnalysisPage.navigateToIndexPatternSelection();
+      await ml.jobSourceSelection.selectSourceForLogPatternAnalysisDetection('logstash-*');
+      await aiops.logPatternAnalysisPage.assertLogPatternAnalysisPageExists();
+
+      await aiops.logPatternAnalysisPage.clickUseFullDataButton(totalDocCount);
+      await aiops.logPatternAnalysisPage.selectCategoryField(selectedField);
+      await aiops.logPatternAnalysisPage.clickRunButton();
+      await aiops.logPatternAnalysisPage.assertTotalCategoriesFound(3);
+      await aiops.logPatternAnalysisPage.assertCategoryTableRows(3);
+
+      // get category count from the first row
+      const categoryCount = await aiops.logPatternAnalysisPage.getCategoryCountFromTable(0);
+      await aiops.logPatternAnalysisPage.clickFilterOutButton(0);
+
+      retrySwitchTab(1, 10);
+      tabsCount++;
+
+      await aiops.logPatternAnalysisPage.assertDiscoverDocCountExists();
+
+      // ensure the discover doc count is equal to the total doc count minus category count
+      await aiops.logPatternAnalysisPage.assertDiscoverDocCount(totalDocCount - categoryCount);
     });
   });
 }
