@@ -6,6 +6,7 @@
  */
 
 import type { Alert } from '@kbn/alerts-as-data-utils';
+import { DeepPartial } from '@kbn/utility-types';
 import { Alert as LegacyAlert } from '../alert/alert';
 import {
   AlertInstanceContext,
@@ -96,11 +97,6 @@ export interface TrackedAlerts<
   recovered: Record<string, LegacyAlert<State, Context>>;
 }
 
-// allows Partial on nested objects
-export type RecursivePartial<T> = {
-  [P in keyof T]?: RecursivePartial<T[P]>;
-};
-
 export interface PublicAlertsClient<
   AlertData extends RuleAlertData,
   State extends AlertInstanceState,
@@ -124,7 +120,7 @@ export interface ReportedAlert<
   actionGroup: ActionGroupIds;
   state?: State;
   context?: Context;
-  payload?: RecursivePartial<AlertData>;
+  payload?: DeepPartial<AlertData>;
 }
 
 export interface RecoveredAlertData<

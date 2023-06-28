@@ -11,6 +11,7 @@ import { chunk, flatMap, isEmpty, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { DeepPartial } from '@kbn/utility-types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -32,7 +33,6 @@ import {
   ReportedAlert,
   ReportedAlertData,
   UpdateableAlert,
-  RecursivePartial,
 } from './types';
 import {
   buildNewAlert,
@@ -78,7 +78,7 @@ export class AlertsClient<
 
   private indexTemplateAndPattern: IIndexPatternString;
 
-  private reportedAlerts: Record<string, RecursivePartial<AlertData>> = {};
+  private reportedAlerts: Record<string, DeepPartial<AlertData>> = {};
 
   constructor(private readonly options: AlertsClientParams) {
     this.legacyAlertsClient = new LegacyAlertsClient<

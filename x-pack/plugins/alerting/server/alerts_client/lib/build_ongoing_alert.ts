@@ -7,9 +7,10 @@
 
 import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
+import { DeepPartial } from '@kbn/utility-types';
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
-import type { AlertRule, RecursivePartial } from '../types';
+import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
 
 interface BuildOngoingAlertOpts<
@@ -22,7 +23,7 @@ interface BuildOngoingAlertOpts<
   alert: Alert & AlertData;
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
-  payload?: RecursivePartial<AlertData>;
+  payload?: DeepPartial<AlertData>;
   timestamp: string;
   kibanaVersion: string;
 }

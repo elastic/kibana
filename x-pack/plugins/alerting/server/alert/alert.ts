@@ -78,7 +78,7 @@ export class Alert<
   }
 
   getStart(): string | null {
-    return this.state.start ? (this.state.start as string) : null;
+    return this.state.start ? `${this.state.start}` : null;
   }
 
   hasScheduledActions() {
