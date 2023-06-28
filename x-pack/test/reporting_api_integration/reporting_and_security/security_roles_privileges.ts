@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.deleteAllReports();
     });
 
-    describe.skip('Dashboard: CSV download file', () => {
+    describe('Dashboard: CSV download file', () => {
       it('does not allow user that does not have the role-based privilege', async () => {
         const res = await reportingAPI.downloadCsv(
           reportingAPI.DATA_ANALYST_USERNAME,
@@ -167,7 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.skip('Discover: Generate CSV report', () => {
+    describe('Discover: Generate CSV report', () => {
       it('does not allow user that does not have the role-based privilege', async () => {
         const res = await reportingAPI.generateCsv(
           {
@@ -205,7 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // This tests the same API as x-pack/test/api_integration/apis/security/privileges.ts, but it uses the non-deprecated config
-    xit('should register reporting privileges with the security privileges API', async () => {
+    it('should register reporting privileges with the security privileges API', async () => {
       await supertest
         .get('/api/security/privileges')
         .set('kbn-xsrf', 'xxx')

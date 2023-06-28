@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return res;
   };
 
-  describe.skip('Discover CSV Export', () => {
+  describe('Discover CSV Export', () => {
     describe('Check Available', () => {
       before(async () => {
         await esArchiver.emptyKibanaIndex();
@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('Generate CSV: new search', () => {
+    describe('Generate CSV: new search', () => {
       before(async () => {
         await reportingAPI.initEcommerce();
       });
@@ -169,7 +169,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('Generate CSV: sparse data', () => {
+    describe('Generate CSV: sparse data', () => {
       const TEST_INDEX_NAME = 'sparse_data';
       const TEST_DOC_COUNT = 510;
 

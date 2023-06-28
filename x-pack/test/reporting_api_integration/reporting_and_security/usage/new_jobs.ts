@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.teardownEcommerce();
     });
 
-    xit('should handle csv_searchsource', async () => {
+    it('should handle csv_searchsource', async () => {
       await reportingAPI.expectAllJobsToFinishSuccessfully(
         await Promise.all([reportingAPI.postJob(urls.JOB_PARAMS_CSV_DEFAULT_SPACE)])
       );

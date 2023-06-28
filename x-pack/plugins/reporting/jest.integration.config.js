@@ -9,7 +9,4 @@ module.exports = {
   preset: '@kbn/test/jest_integration',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/reporting'],
-  collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/reporting/server/export_types/printable_pdf_v2/**/*.{js,ts,tsx}',
-  ],
 };

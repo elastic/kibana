@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
   };
 
-  describe.skip('CSV Generation from Saved Search ID', () => {
+  describe('CSV Generation from Saved Search ID', () => {
     before(async () => {
       // clear any previous UI Settings
       await kibanaServer.uiSettings.replace({});
