@@ -105,7 +105,7 @@ export const DashboardsLandingPage = () => {
 
   const initialFilter = useMemo(() => getInitialFilterString(securityTags), [securityTags]);
   return (
-    <SecuritySolutionPageWrapper noPadding>
+    <SecuritySolutionPageWrapper>
       <Header canCreateDashboard={canCreateDashboard} />
       <EuiSpacer size="xl" />
 
@@ -127,6 +127,7 @@ export const DashboardsLandingPage = () => {
             withPageTemplateHeader={false}
             initialFilter={initialFilter}
             urlStateEnabled={false}
+            withoutPageTemplateWrapper={true}
           >
             <EuiTitle size="xxxs">
               <h2>{i18n.DASHBOARDS_PAGE_SECTION_CUSTOM}</h2>
