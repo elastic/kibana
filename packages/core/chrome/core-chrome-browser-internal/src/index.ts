@@ -8,3 +8,4 @@
 
 export { ChromeService } from './chrome_service';
 export type { InternalChromeStart } from './types';
+export { KIBANA_FEEDBACK_LINK } from './constants';

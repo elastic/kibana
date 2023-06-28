@@ -29,21 +29,52 @@ import type {
   ChromeHelpExtension,
   ChromeGlobalHelpExtensionMenuLink,
 } from '@kbn/core-chrome-browser';
+import type { ChromeHelpMenuLink } from '@kbn/core-chrome-browser/src';
 import { GITHUB_CREATE_ISSUE_LINK, KIBANA_FEEDBACK_LINK } from '../../constants';
 import { HeaderExtension } from './header_extension';
 import { isModifiedOrPrevented } from './nav_link';
+
+const buildDefaultContentLinks = ({
+  kibanaDocLink,
+  helpSupportUrl,
+}: {
+  kibanaDocLink: string;
+  helpSupportUrl: string;
+}): ChromeHelpMenuLink[] => [
+  {
+    title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle', {
+      defaultMessage: 'Kibana documentation',
+    }),
+    href: kibanaDocLink,
+  },
+  {
+    title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle', {
+      defaultMessage: 'Ask Elastic',
+    }),
+    href: helpSupportUrl,
+  },
+  {
+    title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle', {
+      defaultMessage: 'Give feedback',
+    }),
+    href: KIBANA_FEEDBACK_LINK,
+  },
+  {
+    title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle', {
+      defaultMessage: 'Open an issue in GitHub',
+    }),
+    href: GITHUB_CREATE_ISSUE_LINK,
+  },
+];
 
 interface Props {
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
+  defaultContentLinks$: Observable<ChromeHelpMenuLink[]>;
   kibanaVersion: string;
   kibanaDocLink: string;
-  /**
-   * `true` when Kibana is running on Elastic Cloud.
-   */
-  isCloudEnabled: boolean;
 }
 
 interface State {
@@ -51,6 +82,7 @@ interface State {
   helpExtension?: ChromeHelpExtension;
   helpSupportUrl: string;
   globalHelpExtensionMenuLinks: ChromeGlobalHelpExtensionMenuLink[];
+  defaultContentLinks: ChromeHelpMenuLink[];
 }
 
 export class HeaderHelpMenu extends Component<Props, State> {
@@ -64,6 +96,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
       helpExtension: undefined,
       helpSupportUrl: '',
       globalHelpExtensionMenuLinks: [],
+      defaultContentLinks: [],
     };
   }
 
@@ -71,14 +104,21 @@ export class HeaderHelpMenu extends Component<Props, State> {
     this.subscription = combineLatest(
       this.props.helpExtension$,
       this.props.helpSupportUrl$,
-      this.props.globalHelpExtensionMenuLinks$
-    ).subscribe(([helpExtension, helpSupportUrl, globalHelpExtensionMenuLinks]) => {
-      this.setState({
-        helpExtension,
-        helpSupportUrl,
-        globalHelpExtensionMenuLinks,
-      });
-    });
+      this.props.globalHelpExtensionMenuLinks$,
+      this.props.defaultContentLinks$
+    ).subscribe(
+      ([helpExtension, helpSupportUrl, globalHelpExtensionMenuLinks, defaultContentLinks]) => {
+        this.setState({
+          helpExtension,
+          helpSupportUrl,
+          globalHelpExtensionMenuLinks,
+          defaultContentLinks:
+            defaultContentLinks.length === 0
+              ? buildDefaultContentLinks({ ...this.props, helpSupportUrl })
+              : defaultContentLinks,
+        });
+      }
+    );
   }
 
   public componentWillUnmount() {
@@ -153,66 +193,21 @@ export class HeaderHelpMenu extends Component<Props, State> {
   }
 
   private renderDefaultContent() {
-    const { kibanaDocLink, isCloudEnabled } = this.props;
-    const { helpSupportUrl } = this.state;
+    const { defaultContentLinks } = this.state;
 
     return (
       <Fragment>
-        <EuiButtonEmpty href={kibanaDocLink} target="_blank" size="s" flush="left">
-          {isCloudEnabled ? (
-            <FormattedMessage
-              id="core.ui.chrome.headerGlobalNav.helpMenuDocumentationTitle"
-              defaultMessage="Documentation"
-            />
-          ) : (
-            <FormattedMessage
-              id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
-              defaultMessage="Kibana documentation"
-            />
-          )}
-        </EuiButtonEmpty>
-
-        <EuiSpacer size="xs" />
-
-        <EuiButtonEmpty href={helpSupportUrl} target="_blank" size="s" flush="left">
-          {isCloudEnabled ? (
-            <FormattedMessage
-              id="core.ui.chrome.headerGlobalNav.helpMenuSupportTitle"
-              defaultMessage="Support"
-            />
-          ) : (
-            <FormattedMessage
-              id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
-              defaultMessage="Ask Elastic"
-            />
-          )}
-        </EuiButtonEmpty>
-
-        <EuiSpacer size="xs" />
-
-        <EuiButtonEmpty href={KIBANA_FEEDBACK_LINK} target="_blank" size="s" flush="left">
-          <FormattedMessage
-            id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle"
-            defaultMessage="Give feedback"
-          />
-        </EuiButtonEmpty>
-
-        <EuiSpacer size="xs" />
-
-        {!isCloudEnabled && (
-          <EuiButtonEmpty
-            href={GITHUB_CREATE_ISSUE_LINK}
-            target="_blank"
-            size="s"
-            iconType="logoGithub"
-            flush="left"
-          >
-            <FormattedMessage
-              id="core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle"
-              defaultMessage="Open an issue in GitHub"
-            />
-          </EuiButtonEmpty>
-        )}
+        {defaultContentLinks.map(({ href, title, iconType }, i) => {
+          const isLast = i === defaultContentLinks.length - 1;
+          return (
+            <>
+              <EuiButtonEmpty href={href} target="_blank" size="s" flush="left" iconType={iconType}>
+                {title}
+              </EuiButtonEmpty>
+              {!isLast && <EuiSpacer size="xs" />}
+            </>
+          );
+        })}
       </Fragment>
     );
   }

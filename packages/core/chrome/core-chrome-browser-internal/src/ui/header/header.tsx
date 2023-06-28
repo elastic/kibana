@@ -27,6 +27,7 @@ import type {
   ChromeBreadcrumb,
   ChromeNavControl,
   ChromeNavLink,
+  ChromeHelpMenuLink,
   ChromeRecentlyAccessedHistoryItem,
   ChromeBreadcrumbsAppendExtension,
   ChromeHelpExtension,
@@ -58,7 +59,6 @@ export interface HeaderProps {
   customNavLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
   isVisible$: Observable<boolean>;
-  isCloudEnabled: boolean;
   kibanaDocLink: string;
   navLinks$: Observable<ChromeNavLink[]>;
   recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
@@ -66,6 +66,7 @@ export interface HeaderProps {
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
+  helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
   navControlsLeft$: Observable<readonly ChromeNavControl[]>;
   navControlsCenter$: Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Observable<readonly ChromeNavControl[]>;
@@ -84,7 +85,6 @@ export function Header({
   basePath,
   onIsLockedUpdate,
   homeHref,
-  isCloudEnabled,
   breadcrumbsAppendExtension$,
   globalHelpExtensionMenuLinks$,
   customBranding$,
@@ -165,10 +165,10 @@ export function Header({
                     globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
                     helpExtension$={observables.helpExtension$}
                     helpSupportUrl$={observables.helpSupportUrl$}
+                    defaultContentLinks$={observables.helpMenuLinks$}
                     kibanaDocLink={kibanaDocLink}
                     kibanaVersion={kibanaVersion}
                     navigateToUrl={application.navigateToUrl}
-                    isCloudEnabled={isCloudEnabled}
                   />,
                   <HeaderNavControls navControls$={observables.navControlsRight$} />,
                 ],

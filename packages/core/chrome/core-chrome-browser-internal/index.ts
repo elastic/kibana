@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { ChromeService } from './src';
+export { ChromeService, KIBANA_FEEDBACK_LINK } from './src';
 export type { InternalChromeStart } from './src';

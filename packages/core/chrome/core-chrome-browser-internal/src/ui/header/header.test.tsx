@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
@@ -87,7 +87,7 @@ describe('Header', () => {
         customNavLink$={customNavLink$}
         breadcrumbsAppendExtension$={breadcrumbsAppendExtension$}
         headerBanner$={headerBanner$}
-        isCloudEnabled={false}
+        helpMenuLinks$={of([])}
       />
     );
     expect(component.find('EuiHeader').exists()).toBeFalsy();

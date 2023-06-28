@@ -24,6 +24,7 @@ import {
   ChromeBreadcrumb,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
+  ChromeHelpMenuLink,
   ChromeNavControl,
 } from '@kbn/core-chrome-browser/src';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -92,6 +93,7 @@ export interface Props {
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
+  helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
   homeHref$: Observable<string | undefined>;
   kibanaVersion: string;
   application: InternalApplicationStart;
@@ -239,10 +241,10 @@ export const ProjectHeader = ({
               globalHelpExtensionMenuLinks$={observables.globalHelpExtensionMenuLinks$}
               helpExtension$={observables.helpExtension$}
               helpSupportUrl$={observables.helpSupportUrl$}
+              defaultContentLinks$={observables.helpMenuLinks$}
               kibanaDocLink={kibanaDocLink}
               kibanaVersion={kibanaVersion}
               navigateToUrl={application.navigateToUrl}
-              isCloudEnabled={true}
             />
           </EuiHeaderSectionItem>
         </EuiHeaderSection>

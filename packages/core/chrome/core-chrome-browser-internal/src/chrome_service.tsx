@@ -33,7 +33,10 @@ import type {
   ChromeSetProjectBreadcrumbsParams,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import type { SideNavComponent as ISideNavComponent } from '@kbn/core-chrome-browser';
+import type {
+  SideNavComponent as ISideNavComponent,
+  ChromeHelpMenuLink,
+} from '@kbn/core-chrome-browser';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
@@ -67,7 +70,6 @@ export interface StartDeps {
 
 /** @internal */
 export class ChromeService {
-  private isCloudEnabled: boolean = false;
   private isVisible$!: Observable<boolean>;
   private isForceHidden$!: BehaviorSubject<boolean>;
   private readonly stop$ = new ReplaySubject<void>(1);
@@ -169,6 +171,7 @@ export class ChromeService {
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start();
     const { customBranding$ } = customBranding;
+    const helpMenuLinks$ = navControls.getHelpMenuLinks$();
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -302,6 +305,7 @@ export class ChromeService {
               breadcrumbs$={currentProjectBreadcrumbs$}
               helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
               helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
+              helpMenuLinks$={helpMenuLinks$}
               navControlsLeft$={navControls.getLeft$()}
               navControlsCenter$={navControls.getCenter$()}
               navControlsRight$={navControls.getRight$()}
@@ -329,18 +333,14 @@ export class ChromeService {
           breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
           breadcrumbsAppendExtension$={breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$))}
           customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
-          kibanaDocLink={
-            this.isCloudEnabled
-              ? docLinks.links.elasticStackGetStarted
-              : docLinks.links.kibana.guide
-          }
+          kibanaDocLink={docLinks.links.kibana.guide}
           forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
           globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
           helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
           helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
+          helpMenuLinks$={helpMenuLinks$}
           homeHref={http.basePath.prepend('/app/home')}
           isVisible$={this.isVisible$}
-          isCloudEnabled={this.isCloudEnabled}
           kibanaVersion={injectedMetadata.getKibanaVersion()}
           navLinks$={navLinks.getNavLinks$()}
           recentlyAccessed$={recentlyAccessed.get$()}
@@ -365,10 +365,6 @@ export class ChromeService {
       getIsVisible$: () => this.isVisible$,
 
       setIsVisible: (isVisible: boolean) => this.isForceHidden$.next(!isVisible),
-
-      setIsCloudEnabled: (isCloudEnabled: boolean) => {
-        this.isCloudEnabled = isCloudEnabled;
-      },
 
       getBadge$: () => badge$.pipe(takeUntil(this.stop$)),
 
@@ -409,12 +405,18 @@ export class ChromeService {
 
       setHelpSupportUrl: (url: string) => helpSupportUrl$.next(url),
 
+      getHelpSupportUrl$: () => helpSupportUrl$.pipe(takeUntil(this.stop$)),
+
       getIsNavDrawerLocked$: () => getIsNavDrawerLocked$,
 
       getCustomNavLink$: () => customNavLink$.pipe(takeUntil(this.stop$)),
 
       setCustomNavLink: (customNavLink?: ChromeNavLink) => {
         customNavLink$.next(customNavLink);
+      },
+
+      setHelpMenuLinks: (helpMenuLinks: ChromeHelpMenuLink[]) => {
+        navControls.setHelpMenuLinks(helpMenuLinks);
       },
 
       setHeaderBanner: (headerBanner?: ChromeUserBanner) => {
