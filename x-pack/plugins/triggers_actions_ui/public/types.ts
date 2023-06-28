@@ -583,7 +583,7 @@ export interface BulkActionsConfig {
 
 interface PanelConfig {
   id: number;
-  title?: string;
+  title?: JSX.Element;
   'data-test-subj'?: string;
 }
 
