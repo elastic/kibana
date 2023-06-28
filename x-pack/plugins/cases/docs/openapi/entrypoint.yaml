@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   title: Cases
   description: OpenAPI schema for Cases endpoints
@@ -15,6 +15,12 @@ servers:
   - url: 'http://localhost:5601'
     description: local
 paths:
+  '/api/cases':
+    $ref: 'paths/api@cases.yaml'
+  '/api/cases/_find':
+    $ref: 'paths/api@cases@_find.yaml'
+  '/api/cases/{caseId}':
+    $ref: 'paths/api@cases@{caseid}.yaml'
   '/s/{spaceId}/api/cases':
     $ref: 'paths/s@{spaceid}@api@cases.yaml'
   '/s/{spaceId}/api/cases/_find':
