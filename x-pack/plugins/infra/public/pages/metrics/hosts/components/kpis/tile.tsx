@@ -93,6 +93,7 @@ export const Tile = ({
 
   const extraActionOptions = getExtraActions({
     timeRange: searchCriteria.dateRange,
+    query: searchCriteria.query,
     filters,
   });
 
@@ -156,6 +157,7 @@ export const Tile = ({
             lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
             dateRange={afterLoadedState.dateRange}
             filters={afterLoadedState.filters}
+            query={afterLoadedState.query}
             onBrushEnd={handleBrushEnd}
             loading={loading}
           />

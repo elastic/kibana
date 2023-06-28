@@ -72,6 +72,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
 
   const extraActionOptions = getExtraActions({
     timeRange: afterLoadedState.dateRange,
+    query: afterLoadedState.query,
     filters,
   });
 
@@ -129,6 +130,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
           lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
           dateRange={afterLoadedState.dateRange}
           filters={filters}
+          query={afterLoadedState.query}
           onBrushEnd={handleBrushEnd}
           loading={loading}
           hasTitle
