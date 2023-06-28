@@ -36,6 +36,10 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
     $addBottomPadding?: boolean;
   }
 >`
+  .kbnSolutionNav {
+    background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
+  }
+
   .${BOTTOM_BAR_CLASSNAME} {
     animation: 'none !important'; // disable the default bottom bar slide animation
     background: ${({ theme }) =>
