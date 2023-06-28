@@ -60,18 +60,18 @@ const mapCopilotParams = (alerts: any[], cases: any) => {
         const caseData = await cases.api.cases.bulkGet({ ids: alert['kibana.alert.case_ids'] });
         mappedData.cases = caseData.cases
           ? caseData.cases.map((item: any) => ({
-              id: item.id,
-              status: item.status,
-              createdAt: item.created_at,
-              updatedAt: item.updated_at,
-              duration: item.duration,
-              severity: item.severity,
-              assignees: item.assignees.length,
-              totalAlerts: item.totalAlerts,
-              category: item.category,
-              tags: item.tags.join(','),
-              totalComment: item.totalComment,
-            }))
+            id: item.id,
+            status: item.status,
+            createdAt: item.created_at,
+            updatedAt: item.updated_at,
+            duration: item.duration,
+            severity: item.severity,
+            assignees: item.assignees.length,
+            totalAlerts: item.totalAlerts,
+            category: item.category,
+            tags: item.tags.join(','),
+            totalComment: item.totalComment,
+          }))
           : undefined;
       }
 
@@ -224,7 +224,7 @@ function InternalAlertsPage() {
             <CoPilotPrompt
               coPilot={coPilotService}
               title={i18n.translate('xpack.observability.alerts.prioritizeAlerts.title', {
-                defaultMessage: 'Prioritized list of Alerts',
+                defaultMessage: '🔥 What is on fire?',
               })}
               params={alerts}
               promptId={CoPilotPromptId.PrioritizeAlerts}
