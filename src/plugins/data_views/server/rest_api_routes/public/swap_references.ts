@@ -28,6 +28,7 @@ interface GetDataViewArgs {
 interface SwapRefResponse {
   result: Array<{ id: string; type: string }>;
   preview: boolean;
+  deleteSuccess?: boolean;
 }
 
 export const swapReference = async ({
@@ -70,6 +71,7 @@ export const swapReferencesRoute = (
             body: schema.object({
               result: schema.arrayOf(schema.object({ id: idSchema, type: schema.string() })),
               preview: schema.boolean(),
+              deleteSuccess: schema.maybe(schema.boolean()),
             }),
           },
         },
@@ -82,9 +84,10 @@ export const swapReferencesRoute = (
         const types = core.savedObjects.getTypeRegistry().getAllTypes();
         const type = req.body.from_type || DATA_VIEW_SAVED_OBJECT_TYPE;
         const preview = req.body.preview !== undefined ? req.body.preview : true;
-        const searchId = Array.isArray(req.body.search_id)
-          ? req.body.search_id.join(' | ')
-          : req.body.search_id;
+        const searchId =
+          !Array.isArray(req.body.search_id) && req.body.search_id !== undefined
+            ? [req.body.search_id]
+            : req.body.search_id;
 
         usageCollection?.incrementCounter({ counterName: 'swap_references' });
 
@@ -101,19 +104,18 @@ export const swapReferencesRoute = (
           hasReference: { type, id: req.body.from_id },
         };
 
-        if (searchId) {
-          findParams.searchFields = ['id'];
-          findParams.search = searchId;
-        }
-
         if (req.body.search_type) {
           findParams.type = [req.body.search_type];
         }
 
-        const findResult = await savedObjectsClient.find(findParams);
+        const { saved_objects: savedObjects } = await savedObjectsClient.find(findParams);
+
+        const filteredSavedObjects = searchId
+          ? savedObjects.filter((so) => searchId?.includes(so.id))
+          : savedObjects;
 
         // create summary of affected objects
-        const resultSummary = findResult.saved_objects.map((savedObject) => ({
+        const resultSummary = filteredSavedObjects.map((savedObject) => ({
           id: savedObject.id,
           type: savedObject.type,
         }));
@@ -123,26 +125,18 @@ export const swapReferencesRoute = (
           preview,
         };
 
-        const response = res.ok({
-          headers: {
-            'content-type': 'application/json',
-          },
-          body,
-        });
-
-        if (findResult.total === 0) {
-          throw new Error(
-            `Could not find any objects based on search criteria: ${JSON.stringify(findParams)}`
-          );
-        }
-
         // bail if preview
         if (preview) {
-          return response;
+          return res.ok({
+            headers: {
+              'content-type': 'application/json',
+            },
+            body,
+          });
         }
 
         // iterate over list and update references
-        for (const savedObject of findResult.saved_objects) {
+        for (const savedObject of filteredSavedObjects) {
           const updatedRefs = savedObject.references.map((ref) => {
             if (ref.type === type && ref.id === req.body.from_id) {
               return { ...ref, id: req.body.to };
@@ -164,15 +158,18 @@ export const swapReferencesRoute = (
         if (req.body.delete) {
           const verifyNoMoreRefs = await savedObjectsClient.find(findParams);
           if (verifyNoMoreRefs.total > 0) {
-            throw new Error(
-              `Could not delete object with type ${type} and id ${req.body.from_id} because it still has references`
-            );
+            body.deleteSuccess = false;
           } else {
             await savedObjectsClient.delete(type, req.body.from_id);
           }
         }
 
-        return response;
+        return res.ok({
+          headers: {
+            'content-type': 'application/json',
+          },
+          body,
+        });
       })
     )
   );
