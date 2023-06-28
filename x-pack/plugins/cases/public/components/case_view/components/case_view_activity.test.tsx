@@ -348,6 +348,12 @@ for (let index = 0; index < 50; index++) {
 
           expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
         });
+      });
+
+      it('should call user action hooks correctly when filtering for all', async () => {
+        appMockRender.render(<CaseViewActivity {...caseProps} />);
+
+        userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-all'));
 
         expect(await screen.findByLabelText(`${userActionsStats.total} active filters`));
         expect(await screen.findByLabelText(`${userActionsStats.totalComments} available filters`));
@@ -378,6 +384,12 @@ for (let index = 0; index < 50; index++) {
             false
           );
         });
+      });
+
+      it('should call user action hooks correctly when filtering for comments', async () => {
+        appMockRender.render(<CaseViewActivity {...caseProps} />);
+
+        userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-comments'));
 
         expect(await screen.findByLabelText(`${userActionsStats.totalComments} active filters`));
         expect(await screen.findByLabelText(`${userActionsStats.total} available filters`));
@@ -386,7 +398,7 @@ for (let index = 0; index < 50; index++) {
         );
       });
 
-      it('should show active filters correctly', async () => {
+      it('should show history as active filter correctly', async () => {
         appMockRender.render(<CaseViewActivity {...caseProps} />);
 
         userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-history'));
@@ -398,7 +410,7 @@ for (let index = 0; index < 50; index++) {
         expect(await screen.findByLabelText(`${userActionsStats.total} available filters`));
       });
 
-      it('should call user action hooks correctly', async () => {
+      it('should call user action hooks correctly when filtering for history', async () => {
         appMockRender.render(<CaseViewActivity {...caseProps} />);
 
         const lastPageForHistory = Math.ceil(
