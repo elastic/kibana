@@ -16,7 +16,7 @@ describe('handleCoverageOverviewRequest', () => {
     rulesClient = rulesClientMock.create();
   });
 
-  it('processes rules in chunks', async () => {
+  it('does not request more than 10k', async () => {
     rulesClient.find
       .mockResolvedValueOnce({
         total: 25555,
@@ -36,42 +36,6 @@ describe('handleCoverageOverviewRequest', () => {
         perPage: 10000,
         data: generateRules(10000),
       });
-
-    await handleCoverageOverviewRequest({
-      params: {},
-      deps: {
-        rulesClient,
-      },
-    });
-
-    expect(rulesClient.find).toHaveBeenCalledTimes(3);
-    expect(rulesClient.find).toHaveBeenCalledWith({
-      options: expect.objectContaining({
-        page: 1,
-        perPage: 10000,
-      }),
-    });
-    expect(rulesClient.find).toHaveBeenCalledWith({
-      options: expect.objectContaining({
-        page: 2,
-        perPage: 10000,
-      }),
-    });
-    expect(rulesClient.find).toHaveBeenCalledWith({
-      options: expect.objectContaining({
-        page: 3,
-        perPage: 10000,
-      }),
-    });
-  });
-
-  it('request only the first chunk if there are less rules than the chunk size', async () => {
-    rulesClient.find.mockResolvedValueOnce({
-      total: 9000,
-      page: 1,
-      perPage: 10000,
-      data: generateRules(9000),
-    });
 
     await handleCoverageOverviewRequest({
       params: {},
