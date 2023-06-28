@@ -17,23 +17,16 @@ import {
   EuiButtonGroup,
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
-import type { PaletteRegistry } from '@kbn/coloring';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { ColorPicker, useDebouncedValue } from '@kbn/visualization-ui-components/public';
+import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { PieVisualizationState, SharedPieLayerState } from '../../../common/types';
 import { LegendDisplay } from '../../../common/constants';
-import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../../types';
-import { ToolbarPopover, LegendSettingsPopover, PalettePicker } from '../../shared_components';
+import { VisualizationToolbarProps } from '../../types';
+import { ToolbarPopover, LegendSettingsPopover } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { shouldShowValuesInLegend } from './render_helpers';
-import { CollapseSetting } from '../../shared_components/collapse_setting';
-import {
-  getDefaultColorForMultiMetricDimension,
-  hasNonCollapsedSliceBy,
-  isCollapsed,
-} from './visualization';
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -306,122 +299,3 @@ const DecimalPlaceSlider = ({
     />
   );
 };
-
-type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
-  paletteService: PaletteRegistry;
-};
-
-export function DimensionEditor(props: DimensionEditorProps) {
-  const currentLayer = props.state.layers.find((layer) => layer.layerId === props.layerId);
-
-  if (!currentLayer) {
-    return null;
-  }
-
-  const firstNonCollapsedColumnId = currentLayer.primaryGroups.find(
-    (id) => !isCollapsed(id, currentLayer)
-  );
-
-  const showColorPicker =
-    currentLayer.metrics.includes(props.accessor) && currentLayer.allowMultipleMetrics;
-
-  return (
-    <>
-      {props.accessor === firstNonCollapsedColumnId && (
-        <PalettePicker
-          palettes={props.paletteService}
-          activePalette={props.state.palette}
-          setPalette={(newPalette) => {
-            props.setState({ ...props.state, palette: newPalette });
-          }}
-        />
-      )}
-      {showColorPicker && (
-        <ColorPicker
-          {...props}
-          overwriteColor={currentLayer.colorsByDimension?.[props.accessor]}
-          defaultColor={getDefaultColorForMultiMetricDimension({
-            layer: currentLayer,
-            columnId: props.accessor,
-            paletteService: props.paletteService,
-            datasource: props.datasource,
-            palette: props.state.palette,
-          })}
-          disabled={hasNonCollapsedSliceBy(currentLayer)}
-          disableHelpTooltip={
-            ['pie', 'donut'].includes(props.state.shape)
-              ? i18n.translate('xpack.lens.pieChart.colorPicker.disabledBecauseSliceBy', {
-                  defaultMessage:
-                    'You are unable to apply custom colors to individual slices when the layer includes one or more "Slice by" dimensions.',
-                })
-              : i18n.translate('xpack.lens.pieChart.colorPicker.disabledBecauseGroupBy', {
-                  defaultMessage:
-                    'You are unable to apply custom colors to individual slices when the layer includes one or more "Group by" dimensions.',
-                })
-          }
-          setConfig={({ color }) => {
-            const newColorsByDimension = { ...currentLayer.colorsByDimension };
-
-            if (color) {
-              newColorsByDimension[props.accessor] = color;
-            } else {
-              delete newColorsByDimension[props.accessor];
-            }
-
-            props.setState({
-              ...props.state,
-              layers: props.state.layers.map((layer) =>
-                layer.layerId === currentLayer.layerId
-                  ? {
-                      ...layer,
-                      colorsByDimension: newColorsByDimension,
-                    }
-                  : layer
-              ),
-            });
-          }}
-        />
-      )}
-    </>
-  );
-}
-
-export function DimensionDataExtraEditor(
-  props: VisualizationDimensionEditorProps<PieVisualizationState> & {
-    paletteService: PaletteRegistry;
-  }
-) {
-  const currentLayer = props.state.layers.find((layer) => layer.layerId === props.layerId);
-
-  if (!currentLayer) {
-    return null;
-  }
-
-  return (
-    <>
-      {[...currentLayer.primaryGroups, ...(currentLayer.secondaryGroups ?? [])].includes(
-        props.accessor
-      ) && (
-        <CollapseSetting
-          value={currentLayer?.collapseFns?.[props.accessor] || ''}
-          onChange={(collapseFn) => {
-            props.setState({
-              ...props.state,
-              layers: props.state.layers.map((layer) =>
-                layer.layerId !== props.layerId
-                  ? layer
-                  : {
-                      ...layer,
-                      collapseFns: {
-                        ...layer.collapseFns,
-                        [props.accessor]: collapseFn,
-                      },
-                    }
-              ),
-            });
-          }}
-        />
-      )}
-    </>
-  );
-}
