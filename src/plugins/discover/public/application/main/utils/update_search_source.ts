@@ -35,27 +35,20 @@ export function updateVolatileSearchSource(
     uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
   );
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
-  const { filterManager, timefilter } = data.query;
-  const filters = [...filterManager.getGlobalFilters()];
+  searchSource.setField('trackTotalHits', true).setField('sort', usedSort);
 
   if (dataView.type !== DataViewType.ROLLUP) {
-    // Set the date range filter fields from timeFilter using the absolute format.
-    // Search sessions requires that it be converted from a relative range.
-    const timeFilter = timefilter.timefilter.createFilter(dataView);
-
-    if (timeFilter) {
-      filters.push(timeFilter);
-    }
+    // Set the date range filter fields from timeFilter using the absolute format. Search sessions requires that it be converted from a relative range
+    searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(dataView));
   }
-
-  searchSource
-    .setField('trackTotalHits', true)
-    .setField('sort', usedSort)
-    .setField('filter', filters);
 
   if (useNewFieldsApi) {
     searchSource.removeField('fieldsFromSource');
-    searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
+    const fields: Record<string, string> = { field: '*' };
+
+    fields.include_unmapped = 'true';
+
+    searchSource.setField('fields', [fields]);
   } else {
     searchSource.removeField('fields');
   }

@@ -329,7 +329,7 @@ describe('Test discover state actions', () => {
     const unsubscribe = state.actions.initializeAndSync();
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(filters:!(),refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
+      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
     const { searchSource, ...savedSearch } = state.savedSearchState.getState();
@@ -356,7 +356,7 @@ describe('Test discover state actions', () => {
     const unsubscribe = state.actions.initializeAndSync();
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(filters:!(),refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
+      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
     unsubscribe();
@@ -398,7 +398,7 @@ describe('Test discover state actions', () => {
     await new Promise(process.nextTick);
     expect(newSavedSearch?.id).toBe('the-saved-search-id');
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(filters:!(),refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
+      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())"`
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
     unsubscribe();
@@ -658,7 +658,7 @@ describe('Test discover state actions', () => {
     const unsubscribe = state.actions.initializeAndSync();
     await new Promise(process.nextTick);
     const initialUrlState =
-      '/#?_g=(filters:!(),refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())';
+      '/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:the-data-view-id,interval:auto,sort:!())';
     expect(getCurrentUrl()).toBe(initialUrlState);
     expect(state.internalState.getState().dataView?.id).toBe(dataViewMock.id!);
 
@@ -666,7 +666,7 @@ describe('Test discover state actions', () => {
     await state.actions.onChangeDataView(dataViewComplexMock.id!);
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(filters:!(),refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:data-view-with-various-field-types-id,interval:auto,sort:!(!(data,desc)))"`
+      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:data-view-with-various-field-types-id,interval:auto,sort:!(!(data,desc)))"`
     );
     await waitFor(() => {
       expect(state.dataState.fetch).toHaveBeenCalledTimes(1);

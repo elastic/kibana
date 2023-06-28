@@ -43,7 +43,6 @@ export function createDiscoverServicesMock(): DiscoverServices {
   const expressionsPlugin = expressionsPluginMock.createStartContract();
 
   dataPlugin.query.filterManager.getFilters = jest.fn(() => []);
-  dataPlugin.query.filterManager.getGlobalFilters = jest.fn(() => []);
   dataPlugin.query.filterManager.getUpdates$ = jest.fn(() => of({}) as unknown as Observable<void>);
   dataPlugin.query.timefilter.timefilter.createFilter = jest.fn();
   dataPlugin.query.timefilter.timefilter.getAbsoluteTime = jest.fn(() => ({
