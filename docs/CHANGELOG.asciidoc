@@ -60,9 +60,7 @@ Review the following information about the {kib} 8.8.1 release.
 *Details* +
 Fleet introduced audit logging for various CRUD (create, read, update, and delete) operations in 8.8.0.
 
-This audit logging is not enabled by default. Users must set `xpack.security.audit.enabled: true` in the `kibana.yml` to enable it.
-
-We have identified an off-heap memory leak in Fleet audit logging that can result in Kibana instances getting terminated by the operating system kernel's `oom-killer`.
+While audit logging is not enabled by default, we have identified an off-heap memory leak in the implementation of Fleet audit logging that can result in poor Kibana performance and in some cases, Kibana instances getting terminated by the OS kernel's oom-killer. This memory leak can occur even when Kibana audit logging is not explicitly enabled (regardless of whether `xpack.security.audit.enabled` is set in the kibana.yml).
 
 *Impact* +
 The 8.8.2 release includes in {kibana-pull}159807[a fix] for this problem. Customers using Fleet integrations
