@@ -22,7 +22,7 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
 } from '../../../common/constants';
-import { ExportType, ExportTypeSetupDeps, ExportTypeStartDeps } from '../common';
+import { ExportType, BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from '../common';
 import { ReportingRequestHandlerContext } from '../../types';
 import { getFieldFormats } from '../../services';
 import { decryptJobHeaders } from '../common/decrypt_job_headers';
@@ -31,7 +31,8 @@ import { decryptJobHeaders } from '../common/decrypt_job_headers';
  * @TODO move to be within @kbn/reporitng-export-types
  */
 
-export interface CsvExportTypeStartDeps extends ExportTypeStartDeps {
+type CsvV2ExportTypeSetupDeps = BaseExportTypeSetupDeps;
+export interface CsvV2ExportTypeStartDeps extends BaseExportTypeStartDeps {
   discover: DiscoverServerPluginStart;
   data: DataPluginStart;
   esClient: IClusterClient;
@@ -39,7 +40,9 @@ export interface CsvExportTypeStartDeps extends ExportTypeStartDeps {
 
 export class CsvV2ExportType extends ExportType<
   JobParamsCsvFromSavedObject,
-  TaskPayloadCsvFromSavedObject
+  TaskPayloadCsvFromSavedObject,
+  CsvV2ExportTypeSetupDeps,
+  CsvV2ExportTypeStartDeps
 > {
   id = CSV_REPORT_TYPE_V2;
   name = 'csv_v2';

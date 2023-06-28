@@ -6,23 +6,21 @@
  */
 
 import {
-  IBasePath,
-  Headers,
-  Logger,
   CoreKibanaRequest,
   CoreSetup,
   FakeRawRequest,
+  Headers,
   HttpServiceSetup,
+  IBasePath,
+  IClusterClient,
   KibanaRequest,
+  Logger,
   PluginInitializerContext,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
-  IClusterClient,
 } from '@kbn/core/server';
-import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
-import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { ReportingConfigType } from '../../config';
@@ -32,23 +30,23 @@ import { CreateJobFn, ReportingStart, RunTaskFn } from '../../types';
 /**
  * @TODO move to be within @kbn-reporting-export-types
  */
-export interface ExportTypeSetupDeps {
+export interface BaseExportTypeSetupDeps {
   basePath: Pick<IBasePath, 'set'>;
   spaces?: SpacesPluginSetup;
 }
 
-export interface ExportTypeStartDeps {
+export interface BaseExportTypeStartDeps {
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
-  screenshotting: ScreenshottingStart;
   esClient: IClusterClient;
-  data: DataPluginStart;
   reporting: ReportingStart;
 }
 
 export abstract class ExportType<
   JobParamsType extends object = any,
-  TaskPayloadType extends object = any
+  TaskPayloadType extends object = any,
+  SetupDepsType extends BaseExportTypeSetupDeps = BaseExportTypeSetupDeps,
+  StartDepsType extends BaseExportTypeStartDeps = BaseExportTypeStartDeps
 > {
   abstract id: string; // ID for exportTypesRegistry.get()
   abstract name: string; // user-facing string
@@ -62,8 +60,8 @@ export abstract class ExportType<
 
   abstract validLicenses: LicenseType[];
 
-  public setupDeps!: ExportTypeSetupDeps;
-  public startDeps!: ExportTypeStartDeps;
+  public setupDeps!: SetupDepsType;
+  public startDeps!: StartDepsType;
   public http!: HttpServiceSetup;
 
   constructor(
@@ -75,10 +73,10 @@ export abstract class ExportType<
     this.http = core.http;
   }
 
-  setup(setupDeps: ExportTypeSetupDeps) {
+  setup(setupDeps: SetupDepsType) {
     this.setupDeps = setupDeps;
   }
-  start(startDeps: ExportTypeStartDeps) {
+  start(startDeps: StartDepsType) {
     this.startDeps = startDeps;
   }
 

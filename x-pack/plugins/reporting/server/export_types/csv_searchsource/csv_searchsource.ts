@@ -21,7 +21,7 @@ import {
   LICENSE_TYPE_TRIAL,
 } from '../../../common/constants';
 import { getFieldFormats } from '../../services';
-import { ExportType, ExportTypeSetupDeps, ExportTypeStartDeps } from '../common';
+import { ExportType, BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from '../common';
 import { decryptJobHeaders } from '../common/decrypt_job_headers';
 import { JobParamsCSV, TaskPayloadCSV } from './types';
 
@@ -29,13 +29,19 @@ import { JobParamsCSV, TaskPayloadCSV } from './types';
  * @TODO move to be within @kbn/reporitng-export-types
  */
 
-export interface CsvSearchsourceExportTypeStartDeps extends ExportTypeStartDeps {
+type CsvSearchsourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
+interface CsvSearchsourceExportTypeStartDeps extends BaseExportTypeStartDeps {
   discover: DiscoverServerPluginStart;
   data: DataPluginStart;
   esClient: IClusterClient;
 }
 
-export class CsvSearchsourceExportType extends ExportType<JobParamsCSV, TaskPayloadCSV> {
+export class CsvSearchsourceExportType extends ExportType<
+  JobParamsCSV,
+  TaskPayloadCSV,
+  CsvSearchsourceExportTypeSetupDeps,
+  CsvSearchsourceExportTypeStartDeps
+> {
   id = 'csv_searchsource';
   name = CSV_JOB_TYPE;
   jobType = CONTENT_TYPE_CSV;
