@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useState } from 'react';
-import { LinkEmbeddable, LinkPanels } from '../types';
+import { LinkPanels } from '../types';
 
 export const getNextPanelOrder = (panels?: LinkPanels) => {
   let nextOrder = 0;

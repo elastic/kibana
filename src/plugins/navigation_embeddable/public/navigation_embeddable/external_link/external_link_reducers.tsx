@@ -8,17 +8,10 @@
 
 import { WritableDraft } from 'immer/dist/types/types-external';
 import { PayloadAction } from '@reduxjs/toolkit';
-import { DashboardLinkReduxState } from './types';
+import { ExternalLinkReduxState } from './types';
 
-export const dashboardLinkReducers = {
-  setLoading: (state: WritableDraft<DashboardLinkReduxState>, action: PayloadAction<boolean>) => {
+export const externalLinkReducers = {
+  setLoading: (state: WritableDraft<ExternalLinkReduxState>, action: PayloadAction<boolean>) => {
     state.output.loading = action.payload;
-  },
-  setCurrentDashboardId: (
-    state: WritableDraft<DashboardLinkReduxState>,
-    action: PayloadAction<string>
-  ) => {
-    // TODO: use this for when the dashboard is saved / renamed / etc.
-    state.componentState.currentDashboardId = action.payload;
   },
 };

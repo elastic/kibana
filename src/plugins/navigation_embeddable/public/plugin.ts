@@ -18,6 +18,10 @@ import {
   DASHBOARD_LINK_EMBEDDABLE_TYPE,
 } from './navigation_embeddable/dashboard_link/embeddable/dashboard_link_embeddable_factory';
 import { linksService } from './navigation_embeddable/services/links_service';
+import {
+  ExternalLinkFactory,
+  EXTERNAL_LINK_EMBEDDABLE_TYPE,
+} from './navigation_embeddable/external_link/embeddable/external_link_embeddable_factory';
 
 export interface NavigationEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -56,6 +60,13 @@ export class NavigationEmbeddablePlugin
         dashboardLinkFactoryDef
       )();
       linksService.registerLinkType(dashboardLinkFactory);
+
+      const externalLinkFactoryDef = new ExternalLinkFactory();
+      const externalLinkFactory = plugins.embeddable.registerEmbeddableFactory(
+        EXTERNAL_LINK_EMBEDDABLE_TYPE,
+        externalLinkFactoryDef
+      )();
+      linksService.registerLinkType(externalLinkFactory);
     });
   }
 

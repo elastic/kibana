@@ -6,22 +6,19 @@
  * Side Public License, v 1.
  */
 
+import ReactDOM from 'react-dom';
 import React, { createContext, useContext } from 'react';
-import { isEmpty } from 'lodash';
 
 import { Embeddable } from '@kbn/embeddable-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
-import { DashboardItem, DashboardLinkInput, DashboardLinkReduxState } from '../types';
+import { dashboardLinkReducers } from '../dashboard_link_reducers';
+import { DashboardLinkComponent } from '../components/dashboard_link_component';
 import { coreServices, dashboardServices } from '../../services/kibana_services';
 import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from './dashboard_link_embeddable_factory';
+import { DashboardItem, DashboardLinkInput, DashboardLinkReduxState } from '../types';
 import { NavigationContainer } from '../../navigation_container/embeddable/navigation_container';
-import { dashboardLinkReducers } from '../dashboard_link_reducers';
-import ReactDOM from 'react-dom';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { DashboardLinkEditor } from '../components/dashboard_link_editor';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { DashboardLinkComponent } from '../components/dashboard_link_component';
 
 export const DashboardLinkContext = createContext<DashboardLinkEmbeddable | null>(null);
 export const useDashboardLinkEmbeddable = (): DashboardLinkEmbeddable => {
@@ -41,8 +38,6 @@ export class DashboardLinkEmbeddable extends Embeddable<DashboardLinkInput> {
   public readonly type = DASHBOARD_LINK_EMBEDDABLE_TYPE;
 
   private node?: HTMLElement;
-
-  private currentDashboardId?: string;
 
   // state management
   public select: DashboardLinkReduxEmbeddableTools['select'];
@@ -66,7 +61,7 @@ export class DashboardLinkEmbeddable extends Embeddable<DashboardLinkInput> {
     >({
       embeddable: this,
       reducers: dashboardLinkReducers,
-      initialComponentState: {}, // getDefaultComponentState
+      initialComponentState: { currentDashboardId: parent.getParentDashboardId() },
     });
 
     this.select = reduxEmbeddableTools.select;
@@ -74,18 +69,19 @@ export class DashboardLinkEmbeddable extends Embeddable<DashboardLinkInput> {
     this.dispatch = reduxEmbeddableTools.dispatch;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
-
-    this.currentDashboardId = parent.getParentDashboardId();
-    if (this.currentDashboardId) this.dispatch.setCurrentDashboardId(this.currentDashboardId);
   }
 
   public async fetchDashboard(): Promise<DashboardItem> {
+    this.dispatch.setLoading(true);
+
     const dashboardId = this.input.dashboardId;
     const findDashboardsService = await dashboardServices.findDashboardsService();
     const response = (await findDashboardsService.findByIds([dashboardId]))[0];
     if (response.status === 'error') {
       throw new Error('failure'); // TODO: better error handling
     }
+
+    this.dispatch.setLoading(false);
     return response;
   }
 

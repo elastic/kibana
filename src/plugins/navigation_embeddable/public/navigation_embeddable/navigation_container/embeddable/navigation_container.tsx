@@ -8,19 +8,17 @@
 
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty } from 'lodash';
 import React, { createContext, useContext } from 'react';
-import { distinctUntilChanged, skip, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
-import { Container, ContainerOutput, ViewMode } from '@kbn/embeddable-plugin/public';
+import { Container, ContainerOutput } from '@kbn/embeddable-plugin/public';
 import type { IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
 import {
-  DashboardItem,
   LinkInput,
   LinkPanelState,
   NavigationContainerInput,
@@ -33,6 +31,8 @@ import { linksService } from '../../services/links_service';
 import { DashboardLinkInput } from '../../dashboard_link/types';
 import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
 import { getNextPanelOrder } from '../navigation_container_helpers';
+import { ExternalLinkInput } from '../../external_link/types';
+import { EXTERNAL_LINK_EMBEDDABLE_TYPE } from '../../external_link/embeddable/external_link_embeddable_factory';
 
 export const NAVIGATION_EMBEDDABLE_TYPE = 'navigation';
 
@@ -125,6 +125,15 @@ export class NavigationContainer extends Container<
     return this.createAndSaveEmbeddable(panelState.type, panelState);
   }
 
+  public addExternalLink(input: ExternalLinkInput) {
+    const panelState: LinkPanelState<ExternalLinkInput> = {
+      type: EXTERNAL_LINK_EMBEDDABLE_TYPE,
+      explicitInput: input,
+      order: getNextPanelOrder(this.getInput().panels),
+    };
+    return this.createAndSaveEmbeddable(panelState.type, panelState);
+  }
+
   public getParentDashboardId(): string | undefined {
     const parentDashboardId = (this.parent as DashboardContainer | undefined)?.getState()
       .componentState.lastSavedId;
@@ -175,65 +184,6 @@ export class NavigationContainer extends Container<
   //         })
   //     );
   //   }
-  // }
-
-  // private async updateDashboardLinks() {
-  //   const { links } = this.getState().explicitInput;
-
-  //   if (!links) {
-  //     this.dispatch.setLinks([]);
-  //     return;
-  //   }
-
-  //   this.dispatch.setLoading(true);
-
-  //   /** Get all of the dashboard IDs that are referenced so we can fetch their saved objects */
-  //   const uniqueDashboardIds = new Set<string>();
-  //   Object.keys(links).forEach((linkId) => {
-  //     const link = links[linkId];
-  //     if (isDashboardLink(link)) {
-  //       uniqueDashboardIds.add(link.id);
-  //     }
-  //   });
-
-  //   /** Fetch the dashboard saved objects from their IDs and store the attributes */
-  //   const dashboardAttributes: { [dashboardId: string]: DashboardAttributes } = {};
-  //   if (!isEmpty(uniqueDashboardIds)) {
-  //     const findDashboardsService = await dashboardServices.findDashboardsService();
-  //     const responses = await findDashboardsService.findByIds(Array.from(uniqueDashboardIds));
-  //     responses.forEach((response) => {
-  //       if (response.status === 'error') {
-  //         throw new Error('failure'); // TODO: better error handling
-  //       }
-  //       dashboardAttributes[response.id] = response.attributes;
-  //     });
-  //   }
-
-  //   /** Convert the explicit input `links` object to a sorted array for component state */
-  //   const sortedLinks = Object.keys(links)
-  //     .sort(function (a, b) {
-  //       return links[a].order - links[b].order;
-  //     })
-  //     .map((linkId) => {
-  //       const link = links[linkId];
-  //       if (isDashboardLink(link)) {
-  //         const dashboardId = link.id;
-  //         return {
-  //           id: dashboardId,
-  //           label: link.label,
-  //           order: link.order,
-  //           title: dashboardAttributes[dashboardId].title,
-  //           description: dashboardAttributes[dashboardId].description,
-  //         };
-  //       }
-  //       return link;
-  //     });
-
-  //   /** Update component state to keep in sync with changes to explicit input */
-  //   batch(() => {
-  //     this.dispatch.setLinks(sortedLinks);
-  //     this.dispatch.setLoading(false);
-  //   });
   // }
 
   private async fetchCurrentDashboard(): Promise<DashboardItem> {

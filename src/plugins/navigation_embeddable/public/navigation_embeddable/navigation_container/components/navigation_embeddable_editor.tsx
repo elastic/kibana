@@ -25,6 +25,7 @@ import {
 import { useNavigationEmbeddable } from '../embeddable/navigation_container';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { NavigationEmbeddableDashboardList } from './navigation_embeddable_dashboard_list';
+import { DashboardItem } from '../../dashboard_link/types';
 
 // TODO: As part of https://github.com/elastic/kibana/issues/154381, replace this regex URL check with more robust url validation
 const isValidUrl =
@@ -161,7 +162,11 @@ export const NavigationEmbeddableEditor = ({ closePopover }: { closePopover: () 
                   // description: selectedDashboard.attributes.description,
                   // });
                 } else if (validUrl && selectedUrl) {
-                  navEmbeddable.dispatch.addExternalLink({ url: selectedUrl, label: linkLabel });
+                  navEmbeddable.addExternalLink({
+                    id: uuidv4(),
+                    label: linkLabel,
+                    url: selectedUrl,
+                  });
                 }
                 setLinkLabel('');
                 closePopover();

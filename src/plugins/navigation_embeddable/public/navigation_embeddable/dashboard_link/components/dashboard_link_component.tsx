@@ -7,13 +7,10 @@
  */
 
 import useAsync from 'react-use/lib/useAsync';
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
-import {
-  DashboardLinkEmbeddable,
-  useDashboardLinkEmbeddable,
-} from '../embeddable/dashboard_link_embeddable';
+import { useDashboardLinkEmbeddable } from '../embeddable/dashboard_link_embeddable';
 
 export const DashboardLinkComponent = () => {
   const embeddable = useDashboardLinkEmbeddable();
