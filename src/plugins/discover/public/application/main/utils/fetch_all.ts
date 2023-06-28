@@ -83,7 +83,7 @@ export function fetchAll(
       useTextbased && query
         ? fetchTextBased(query, dataView, data, services.expressions, inspectorAdapters)
         : fetchDocuments(searchSource, fetchDeps);
-    const fetchType = useSql && query ? 'fetchSql' : 'fetchDocuments';
+    const fetchType = useTextbased && query ? 'fetchTextBased' : 'fetchDocuments';
     const startTime = window.performance.now();
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
