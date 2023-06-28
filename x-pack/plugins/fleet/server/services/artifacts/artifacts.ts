@@ -106,7 +106,7 @@ const generateArtifactBatches = (
 
   sortedArtifacts.forEach((artifact, index) => {
     const esArtifactResponse = esSearchHitToArtifact({
-      _id: uniqueIdFromArtifact(artifact),
+      _id: uniqueIdFromArtifact(artifacts[index]),
       _source: newArtifactToElasticsearchProperties(artifacts[index]),
     });
     const esArtifact = newArtifactToElasticsearchProperties(artifact);
