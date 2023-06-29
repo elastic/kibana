@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { nonEmptyStringRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
+import { inventoryViewAttributesRT } from './common';
 
 export const updateInventoryViewAttributesRequestPayloadRT = rt.intersection([
-  rt.type({
-    name: nonEmptyStringRt,
+  inventoryViewAttributesRT,
+  rt.partial({
+    isDefault: rt.undefined,
+    isStatic: rt.undefined,
   }),
-  rt.UnknownRecord,
-  rt.exact(rt.partial({ isDefault: rt.undefined, isStatic: rt.undefined })),
 ]);
 
 export type UpdateInventoryViewAttributesRequestPayload = rt.TypeOf<
@@ -21,5 +21,5 @@ export type UpdateInventoryViewAttributesRequestPayload = rt.TypeOf<
 >;
 
 export const updateInventoryViewRequestPayloadRT = rt.type({
-  attributes: updateInventoryViewAttributesRequestPayloadRT,
+  attributes: inventoryViewAttributesRT,
 });
