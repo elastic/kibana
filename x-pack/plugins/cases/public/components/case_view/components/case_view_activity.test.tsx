@@ -333,21 +333,21 @@ for (let index = 0; index < 40; index++) {
 
         userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-all'));
 
-        await waitFor(() => {
-          expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
-            caseData.id,
-            userActivityQueryParams,
-            true
-          );
+        await waitForComponentToUpdate();
 
-          expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-            caseData.id,
-            { ...userActivityQueryParams, page: lastPageForAll },
-            true
-          );
+        expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+          caseData.id,
+          userActivityQueryParams,
+          true
+        );
 
-          expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
-        });
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+          caseData.id,
+          { ...userActivityQueryParams, page: lastPageForAll },
+          true
+        );
+
+        expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
       });
 
       it('should call user action hooks correctly when filtering for all', async () => {
@@ -371,19 +371,19 @@ for (let index = 0; index < 40; index++) {
 
         userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-comments'));
 
-        await waitFor(() => {
-          expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
-          expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
-            caseData.id,
-            { ...userActivityQueryParams, type: 'user' },
-            true
-          );
-          expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-            caseData.id,
-            { ...userActivityQueryParams, type: 'user', page: lastPageForComment },
-            false
-          );
-        });
+        await waitForComponentToUpdate();
+
+        expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
+        expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+          caseData.id,
+          { ...userActivityQueryParams, type: 'user' },
+          true
+        );
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+          caseData.id,
+          { ...userActivityQueryParams, type: 'user', page: lastPageForComment },
+          false
+        );
       });
 
       it('should call user action hooks correctly when filtering for comments', async () => {
@@ -416,21 +416,22 @@ for (let index = 0; index < 40; index++) {
         const lastPageForHistory = Math.ceil(
           userActionsStats.totalOtherActions / userActivityQueryParams.perPage
         );
+
         userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-history'));
 
-        await waitFor(() => {
-          expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
-          expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
-            caseData.id,
-            { ...userActivityQueryParams, type: 'action' },
-            true
-          );
-          expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-            caseData.id,
-            { ...userActivityQueryParams, type: 'action', page: lastPageForHistory },
-            true
-          );
-        });
+        await waitForComponentToUpdate();
+
+        expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
+        expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+          caseData.id,
+          { ...userActivityQueryParams, type: 'action' },
+          true
+        );
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+          caseData.id,
+          { ...userActivityQueryParams, type: 'action', page: lastPageForHistory },
+          true
+        );
       });
 
       it('should render by desc sort order', async () => {
