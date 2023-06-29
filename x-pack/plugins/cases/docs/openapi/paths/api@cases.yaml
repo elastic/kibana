@@ -1,6 +1,6 @@
 post:
-  summary: Creates a case.
-  operationId: createCase
+  summary: Creates a case in the default space.
+  operationId: createCaseDefaultSpace
   description: >
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana 
@@ -8,8 +8,7 @@ post:
   tags:
     - cases
   parameters:
-    - $ref: ../components/headers/kbn_xsrf.yaml
-    - $ref: '../components/parameters/space_id.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
   requestBody:
     required: true
     content:
@@ -39,8 +38,8 @@ post:
      - url: https://localhost:5601
 
 delete:
-  summary: Deletes one or more cases.
-  operationId: deleteCase
+  summary: Deletes one or more cases in the default space.
+  operationId: deleteCaseDefaultSpace
   description: >
     You must have `read` or `all` privileges and the `delete` sub-feature
     privilege for the **Cases** feature in the **Management**,
@@ -49,9 +48,8 @@ delete:
   tags:
     - cases
   parameters:
-    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/ids.yaml'
-    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '204':
       description: Indicates a successful call.
@@ -65,8 +63,8 @@ delete:
     - url: https://localhost:5601
 
 patch:
-  summary: Updates one or more cases.
-  operationId: updateCase
+  summary: Updates one or more cases in the default space.
+  operationId: updateCaseDefaultSpace
   description: >
     You must have `all` privileges for the **Cases** feature in the 
     **Management**, **Observability**, or **Security** section of the Kibana 
@@ -75,7 +73,6 @@ patch:
     - cases
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
-    - $ref: '../components/parameters/space_id.yaml'
   requestBody:
     content:
       application/json:
