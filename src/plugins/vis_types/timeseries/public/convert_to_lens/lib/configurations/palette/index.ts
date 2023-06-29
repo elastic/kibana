@@ -5,10 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import color from 'color';
+import chroma from 'chroma-js';
 import { ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { uniqBy } from 'lodash';
 import { Panel, Series } from '../../../../../common/types';
+
+// This is used in substitution of the default color returned from the previously used `color` depenendency.
+// In the `color` dependency, a null or undefined passed argument is converted to a default black color.  
+const DEFAULT_MISSING_COLOR =  '#000000';
 
 const Operators = {
   GTE: 'gte',
@@ -76,13 +80,13 @@ const isGaugeColorRule = (
   return Boolean(metricRule.gauge);
 };
 
-const getColor = (rule: ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule) => {
+const getColor = (rule: ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule): string => {
   if (isMetricColorRule(rule)) {
-    return rule.background_color ?? rule.color;
+    return rule.background_color ?? rule.color ?? DEFAULT_MISSING_COLOR;
   } else if (isGaugeColorRule(rule)) {
-    return rule.gauge;
+    return rule.gauge ?? DEFAULT_MISSING_COLOR;
   }
-  return rule.text;
+  return rule.text ?? DEFAULT_MISSING_COLOR;
 };
 
 const getColorStopsWithMinMaxForAllGteOrWithLte = (
@@ -103,7 +107,7 @@ const getColorStopsWithMinMaxForAllGteOrWithLte = (
       return [
         ...colors,
         {
-          color: color(lastRuleColor).hex(),
+          color: chroma(lastRuleColor).hex(),
           stop: rule.value!,
         },
       ];
@@ -111,7 +115,7 @@ const getColorStopsWithMinMaxForAllGteOrWithLte = (
     return [
       ...colors,
       {
-        color: color(rgbColor).hex(),
+        color: chroma(rgbColor).hex(),
         stop: rule.value!,
       },
     ];
@@ -148,13 +152,13 @@ const getColorStopsWithMinMaxForLtWithLte = (
   const lastRule = rules[rules.length - 1];
   const colorStops = rules.reduce<ColorStop[]>((colors, rule, index, rulesArr) => {
     if (index === 0) {
-      return [{ color: color(getColor(rule)).hex(), stop: -Infinity }];
+      return [{ color: chroma(getColor(rule)).hex(), stop: -Infinity }];
     }
     const rgbColor = getColor(rule);
     return [
       ...colors,
       {
-        color: color(rgbColor).hex(),
+        color: chroma(rgbColor).hex(),
         stop: rulesArr[index - 1].value!,
       },
     ];
@@ -187,7 +191,7 @@ const getColorStopWithMinMaxForLte = (
   rule: ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule
 ): ColorStopsWithMinMax => {
   const colorStop = {
-    color: color(getColor(rule)).hex(),
+    color: chroma(getColor(rule)).hex(),
     stop: rule.value!,
   };
   return {
@@ -205,7 +209,7 @@ const getColorStopWithMinMaxForGte = (
   baseColor?: string
 ): ColorStopsWithMinMax => {
   const colorStop = {
-    color: color(getColor(rule)).hex(),
+    color: chroma(getColor(rule)).hex(),
     stop: rule.value!,
   };
   return {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import color from 'color';
+import chroma from 'chroma-js';
 import { MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
 import { Panel } from '../../../../../common/types';
 import { Column, Layer } from '../../convert';
@@ -61,7 +61,7 @@ export const getConfigurationForGauge = (
   }
 
   const primaryColumn = findMetricColumn(primaryMetricWithCollapseFn.metric, layer.columns);
-  const primaryColor = primarySeries.color ? color(primarySeries.color).hex() : undefined;
+  const primaryColor = primarySeries.color ? chroma(primarySeries.color).hex() : undefined;
 
   const gaugePalette = getPalette(model.gauge_color_rules ?? [], primaryColor);
   if (gaugePalette === null) {

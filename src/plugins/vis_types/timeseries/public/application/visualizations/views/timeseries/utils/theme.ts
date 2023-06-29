@@ -6,21 +6,12 @@
  * Side Public License, v 1.
  */
 
-// @ts-ignore
-import colorJS from 'color';
+import chroma from 'chroma-js';
 import { Theme, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
 
-function computeRelativeLuminosity(rgb: string) {
-  return colorJS(rgb).luminosity();
-}
-
-function computeContrast(rgb1: string, rgb2: string) {
-  return colorJS(rgb1).contrast(colorJS(rgb2));
-}
-
 function getAAARelativeLum(bgColor: string, fgColor: string, ratio = 7) {
-  const relLum1 = computeRelativeLuminosity(bgColor);
-  const relLum2 = computeRelativeLuminosity(fgColor);
+  const relLum1 = chroma(bgColor).luminance();
+  const relLum2 = chroma(fgColor).luminance();
   if (relLum1 > relLum2) {
     // relLum1 is brighter, relLum2 is darker
     return (relLum1 + 0.05 - ratio * 0.05) / ratio;
@@ -55,8 +46,8 @@ function findBestContrastColor(
   darkFgColor: string,
   ratio = 4.5
 ) {
-  const lc = computeContrast(bgColor, lightFgColor);
-  const dc = computeContrast(bgColor, darkFgColor);
+  const lc = chroma.contrast(bgColor, lightFgColor);
+  const dc = chroma.contrast(bgColor, darkFgColor);
   if (lc >= dc) {
     if (lc >= ratio) {
       return lightFgColor;
@@ -77,7 +68,7 @@ function isValidColor(color: string | null | undefined): color is string {
     return false;
   }
   try {
-    colorJS(color);
+    chroma(color);
     return true;
   } catch {
     return false;
@@ -95,7 +86,7 @@ export function getBaseTheme(baseTheme: Theme, bgColor?: string | null): Theme {
     return baseTheme;
   }
 
-  const bgLuminosity = computeRelativeLuminosity(bgColor);
+  const bgLuminosity = chroma(bgColor).luminance();
   const mainTheme = bgLuminosity <= 0.179 ? DARK_THEME : LIGHT_THEME;
   const color = findBestContrastColor(
     bgColor,
@@ -131,6 +122,6 @@ export function getChartClasses(bgColor?: string) {
   if (typeof bgColor !== 'string') {
     return;
   }
-  const bgLuminosity = computeRelativeLuminosity(bgColor);
+  const bgLuminosity = chroma(bgColor).luminance();
   return bgLuminosity <= 0.179 ? 'tvbVisTimeSeriesDark' : 'tvbVisTimeSeriesLight';
 }

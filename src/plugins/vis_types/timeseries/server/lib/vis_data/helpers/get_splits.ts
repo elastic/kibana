@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Color from 'color';
+import chroma from 'chroma-js';
 import { get, isPlainObject } from 'lodash';
 import { overwrite } from '.';
 
@@ -51,7 +51,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
     meta = get(resp, `aggregations.${series.id}.meta`);
   }
 
-  const color = new Color(series.color);
+  const color = chroma(series.color);
   const metric = getLastMetric(series);
   const buckets = get(resp, `aggregations.${series.id}.buckets`);
 

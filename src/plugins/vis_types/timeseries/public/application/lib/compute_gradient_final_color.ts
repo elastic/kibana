@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import Color from 'color';
+import chroma from 'chroma-js';
 
 export const computeGradientFinalColor = (color: string): string => {
-  let inputColor = new Color(color);
-  const hsl = inputColor.hsl().object();
-  hsl.l -= inputColor.luminosity() * 100;
-  inputColor = Color.hsl(hsl);
-  return inputColor.rgb().toString();
+  let inputColor = chroma(color);
+  const [h,s,l] = inputColor.hsl();
+  const lightness = l - inputColor.luminance();
+  return chroma.hsl(h,s,lightness).css();
 };

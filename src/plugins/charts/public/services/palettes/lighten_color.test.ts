@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import color from 'color';
+import chroma from 'chroma-js';
 import { lightenColor } from './lighten_color';
 
 describe('lighten_color', () => {
@@ -19,15 +19,15 @@ describe('lighten_color', () => {
   });
 
   it('should lighten color', () => {
-    const baseLightness = color('#FF0000', 'hsl').lightness();
+    const baseLightness = chroma('#FF0000').hsl()[2];
     const result1 = lightenColor('#FF0000', 5, 10);
     const result2 = lightenColor('#FF0000', 10, 10);
-    expect(baseLightness).toBeLessThan(color(result1, 'hsl').lightness());
-    expect(color(result1, 'hsl').lightness()).toBeLessThan(color(result2, 'hsl').lightness());
+    expect(baseLightness).toBeLessThan(chroma(result1).hsl()[2]);
+    expect(chroma(result1).hsl()[2]).toBeLessThan(chroma(result2).hsl()[2]);
   });
 
   it('should not exceed top lightness', () => {
     const result = lightenColor('#c0c0c0', 10, 10);
-    expect(color(result, 'hsl').lightness()).toBeLessThan(95);
+    expect(chroma(result).hsl()[2]).toBeLessThan(95);
   });
 });

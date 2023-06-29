@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import Color from 'color';
+import chroma from 'chroma-js';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { COLOR_MAPPING_SETTING } from '../../../common';
@@ -67,8 +67,7 @@ describe('Mapped Colors', () => {
   });
 
   it('should treat different formats of colors as equal', () => {
-    const color = new Color(seedColors[0]);
-    const rgb = `rgb(${color.red()}, ${color.green()}, ${color.blue()})`;
+    const rgb = chroma(seedColors[0]).css();
     const newConfig = { bar: rgb };
     config.set(COLOR_MAPPING_SETTING, newConfig);
 

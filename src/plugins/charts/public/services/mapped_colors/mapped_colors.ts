@@ -7,14 +7,14 @@
  */
 
 import _ from 'lodash';
-import Color from 'color';
+import chroma from 'chroma-js';
 
 import { CoreSetup } from '@kbn/core/public';
 
 import { COLOR_MAPPING_SETTING } from '../../../common';
 import { createColorPalette } from '../../static/colors';
 
-const standardizeColor = (color: string) => new Color(color).hex().toLowerCase();
+const standardizeColor = (color: string) => chroma(color).hex().toLowerCase();
 
 /**
  * Maintains a lookup table that associates the value (key) with a hex color (value)

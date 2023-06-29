@@ -795,7 +795,6 @@
     "cheerio": "^1.0.0-rc.10",
     "chroma-js": "^2.1.0",
     "classnames": "2.2.6",
-    "color": "^4.2.3",
     "commander": "^4.1.1",
     "compare-versions": "3.5.1",
     "constate": "^3.3.2",

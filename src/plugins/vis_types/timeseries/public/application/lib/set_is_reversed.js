@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import color from 'color';
+import chroma from 'chroma-js';
 import { getUISettings } from '../../services';
 
 const isDarkTheme = () => getUISettings().get('theme:darkMode');
@@ -15,7 +15,7 @@ const isDarkTheme = () => getUISettings().get('theme:darkMode');
  * Returns true if the color that is passed has low luminosity
  */
 const isColorDark = (c) => {
-  return color(c).luminosity() < 0.45;
+  return color(c).luminance() < 0.45;
 };
 
 /**

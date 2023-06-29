@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import color from 'color';
+import chroma from 'chroma-js';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { getStopsWithColorsFromRanges, PaletteConfig } from '../../../utils';
 import { PaletteParams } from './types';
@@ -17,18 +17,18 @@ type ColorStopsWithMinMax = Pick<
   'colorStops' | 'stops' | 'steps' | 'rangeMax' | 'rangeMin' | 'continuity'
 >;
 
-const buildPaletteParams = ({ color: colors, stop }: PaletteConfig): ColorStopsWithMinMax => {
-  const colorsWithoutStartColor = colors.slice(1, colors.length);
+const buildPaletteParams = ({ color, stop }: PaletteConfig): ColorStopsWithMinMax => {
+  const colorsWithoutStartColor = color.slice(1, color.length);
   return {
     rangeMin: stop[0],
     rangeMax: stop[stop.length - 1],
     continuity: 'none',
     colorStops: colorsWithoutStartColor.map((c, index) => ({
-      color: color(c!).hex(),
+      color: chroma(c!).hex(),
       stop: stop[index],
     })),
     stops: colorsWithoutStartColor.map((c, index) => ({
-      color: color(c!).hex(),
+      color: chroma(c!).hex(),
       stop: stop[index + 1],
     })),
   };
