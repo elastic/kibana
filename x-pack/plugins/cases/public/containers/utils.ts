@@ -11,10 +11,10 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import type { ToastInputFields } from '@kbn/core/public';
+import type { Configuration, Configurations } from '../../common/types/domain';
+import { ConfigurationRt, ConfigurationsRt } from '../../common/types/domain';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import type {
-  Configurations,
-  Configuration,
   UserActions,
   CasePatchRequest,
   CaseResolveResponse,
@@ -28,8 +28,6 @@ import {
   CaseRt,
   CasesRt,
   throwErrors,
-  ConfigurationsRt,
-  ConfigurationRt,
   UserActionsRt,
   CommentType,
   CaseResolveResponseRt,

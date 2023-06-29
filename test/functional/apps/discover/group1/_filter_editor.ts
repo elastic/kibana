@@ -17,7 +17,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const browser = getService('browser');
+  const dataGrid = getService('dataGrid');
+  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'unifiedFieldList']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
@@ -123,6 +125,45 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(await PageObjects.discover.getHitCount()).to.be('1');
           });
         });
+      });
+
+      const runFilterTest = async (pinned = false) => {
+        await filterBar.removeAllFilters();
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
+        await retry.try(async function () {
+          const cell = await dataGrid.getCellElement(0, 3);
+          expect(await cell.getVisibleText()).to.be('jpg');
+          expect(await PageObjects.discover.getHitCount()).to.be('14,004');
+        });
+        await filterBar.addFilter({
+          field: 'extension.raw',
+          operation: 'is',
+          value: 'css',
+        });
+        if (pinned) {
+          await filterBar.toggleFilterPinned('extension.raw');
+        }
+        await retry.try(async function () {
+          expect(await filterBar.hasFilter('extension.raw', 'css', true, pinned)).to.be(true);
+          const cell = await dataGrid.getCellElement(0, 3);
+          expect(await cell.getVisibleText()).to.be('css');
+          expect(await PageObjects.discover.getHitCount()).to.be('2,159');
+        });
+        await browser.refresh();
+        await retry.try(async function () {
+          expect(await filterBar.hasFilter('extension.raw', 'css', true, pinned)).to.be(true);
+          expect(await PageObjects.discover.getHitCount()).to.be('2,159');
+          const cell = await dataGrid.getCellElement(0, 3);
+          expect(await cell.getVisibleText()).to.be('css');
+        });
+      };
+
+      it('should support app filters in histogram/total hits and data grid', async function () {
+        await runFilterTest();
+      });
+
+      it('should support pinned filters in histogram/total hits and data grid', async function () {
+        await runFilterTest(true);
       });
     });
 
