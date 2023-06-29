@@ -222,7 +222,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             })
           );
         }),
-        map(({ rawResponse: body }) => {
+        map(({ rawResponse: body, warning }) => {
           const columns =
             body.columns?.map(({ name, type }) => ({
               id: sanitize(name),
@@ -239,6 +239,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             },
             columns,
             rows,
+            warning,
           } as Datatable;
         })
       );

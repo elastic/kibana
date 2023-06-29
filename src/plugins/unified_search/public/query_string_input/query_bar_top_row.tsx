@@ -135,6 +135,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onFiltersUpdated?: (filters: Filter[]) => void;
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
+  textBasedLanguageModeWarning?: string;
   onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   filterBar?: React.ReactNode;
   showDatePickerAsBadge?: boolean;
@@ -642,6 +643,7 @@ export const QueryBarTopRow = React.memo(
             expandCodeEditor={(status: boolean) => setCodeEditorIsExpanded(status)}
             isCodeEditorExpanded={codeEditorIsExpanded}
             errors={props.textBasedLanguageModeErrors}
+            warning={props.textBasedLanguageModeWarning}
             detectTimestamp={detectTimestamp}
             onTextLangQuerySubmit={() =>
               onSubmit({

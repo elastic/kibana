@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { parseErrors, getInlineEditorText } from './helpers';
+import { parseErrors, parseWarning, getInlineEditorText } from './helpers';
 
 describe('helpers', function () {
   describe('parseErrors', function () {
@@ -61,6 +61,49 @@ describe('helpers', function () {
           message: 'I am an unknown error',
           severity: 8,
           startColumn: 1,
+          startLineNumber: 1,
+        },
+      ]);
+    });
+  });
+
+  describe('parseWarning', function () {
+    it('should return the correct warning object from ESQL ES response for an one liner query', function () {
+      const warning =
+        '299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Line 1:52: evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded."';
+      expect(parseWarning(warning)).toEqual([
+        {
+          endColumn: 138,
+          endLineNumber: 1,
+          message:
+            'evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.',
+          severity: 8,
+          startColumn: 52,
+          startLineNumber: 1,
+        },
+      ]);
+    });
+
+    it('should return the correct array of warnings if multiple warnins are detected', function () {
+      const warning =
+        '299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Line 1:52: evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.", 299 Elasticsearch-8.10.0-SNAPSHOT-adb9fce96079b421c2575f0d2d445f492eb5f075 "Line 1:84: evaluation of [date_parse(geo.src)] failed, treating result as null. Only first 20 failures recorded."';
+      expect(parseWarning(warning)).toEqual([
+        {
+          endColumn: 138,
+          endLineNumber: 1,
+          message:
+            'evaluation of [date_parse(geo.dest)] failed, treating result as null. Only first 20 failures recorded.',
+          severity: 8,
+          startColumn: 52,
+          startLineNumber: 1,
+        },
+        {
+          endColumn: 169,
+          endLineNumber: 1,
+          message:
+            'evaluation of [date_parse(geo.src)] failed, treating result as null. Only first 20 failures recorded.',
+          severity: 8,
+          startColumn: 84,
           startLineNumber: 1,
         },
       ]);
