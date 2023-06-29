@@ -66,7 +66,6 @@ export const ExtractionRulesTable: React.FC = () => {
               if (rule) {
                 openEditRuleFlyout({
                   fieldRule: rule,
-                  fieldRuleIndex: rule.index,
                   isNewRule: false,
                 });
               }
