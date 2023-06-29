@@ -45,52 +45,54 @@ interface Row {
   };
 }
 
-function getTotalSamplesLabel(samplingRate?: number) {
-  if (samplingRate === undefined) {
-    return i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel', {
-      defaultMessage: 'Total sample estimate:',
-    });
-  }
-  return i18n.translate('xpack.profiling.functionsView.totalSampleCountLabelWithSamplingRate', {
-    defaultMessage: 'Total sample (estimate sample rate: {samplingRate}):',
-    values: { samplingRate },
-  });
-}
-
 function TotalSamplesStat({
-  totalSamples,
-  newSamples,
-  samplingRateA,
-  samplingRateB,
+  baselineTotalSamples,
+  baselineScaleFactor,
+  comparisonTotalSamples,
+  comparisonScaleFactor,
 }: {
-  totalSamples: number;
-  newSamples: number | undefined;
-  samplingRateA: number;
-  samplingRateB: number | undefined;
+  baselineTotalSamples: number;
+  baselineScaleFactor?: number;
+  comparisonTotalSamples?: number;
+  comparisonScaleFactor?: number;
 }) {
-  const value = totalSamples.toLocaleString();
+  const scaledBaselineTotalSamples = scaleValue({
+    value: baselineTotalSamples,
+    scaleFactor: baselineScaleFactor,
+  });
 
-  if (newSamples === undefined || newSamples === 0) {
+  const value = scaledBaselineTotalSamples.toLocaleString();
+
+  const sampleHeader = i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel', {
+    defaultMessage: ' Total sample estimate: ',
+  });
+
+  if (comparisonTotalSamples === undefined || comparisonTotalSamples === 0) {
     return (
       <EuiStat
         title={<EuiText style={{ fontWeight: 'bold' }}>{value}</EuiText>}
-        description={getTotalSamplesLabel(samplingRateA)}
+        description={sampleHeader}
       />
     );
   }
 
-  const diffSamples = totalSamples - newSamples;
-  const percentDelta = (diffSamples / (totalSamples - diffSamples)) * 100;
+  const scaledComparisonTotalSamples = scaleValue({
+    value: comparisonTotalSamples,
+    scaleFactor: comparisonScaleFactor,
+  });
+
+  const diffSamples = scaledBaselineTotalSamples - scaledComparisonTotalSamples;
+  const percentDelta = (diffSamples / (scaledBaselineTotalSamples - diffSamples)) * 100;
 
   return (
     <EuiStat
       title={
         <EuiText style={{ fontWeight: 'bold' }}>
           {value}
-          <GetLabel value={percentDelta} prepend=" (" append=")" />
+          <GetLabel value={percentDelta} prepend="(" append=")" />
         </EuiText>
       }
-      description={getTotalSamplesLabel(samplingRateB)}
+      description={sampleHeader}
     />
   );
 }
@@ -416,10 +418,10 @@ export function TopNFunctionsTable({
   return (
     <>
       <TotalSamplesStat
-        totalSamples={totalCount}
-        newSamples={comparisonTopNFunctions?.TotalCount}
-        samplingRateA={topNFunctions?.SamplingRate ?? 1.0}
-        samplingRateB={comparisonTopNFunctions?.SamplingRate ?? 1.0}
+        baselineTotalSamples={totalCount}
+        baselineScaleFactor={baselineScaleFactor}
+        comparisonTotalSamples={comparisonTopNFunctions?.TotalCount}
+        comparisonScaleFactor={comparisonScaleFactor}
       />
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
