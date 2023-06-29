@@ -421,8 +421,8 @@ export class ManifestManager {
         const fleetArtifact = fleetArtfactsByIdentifier[artifactId];
 
         if (!fleetArtifact) return;
-
         newManifest.replaceArtifact(fleetArtifact);
+        this.logger.debug(`New created artifact ${artifactId} added to the manifest`);
       });
     }
 
