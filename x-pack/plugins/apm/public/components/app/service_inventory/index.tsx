@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -30,6 +31,7 @@ import { SearchBar } from '../../shared/search_bar/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ServiceList } from './service_list';
 import { orderServiceItems } from './service_list/order_service_items';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 const initialData = {
   requestId: '',
@@ -202,7 +204,18 @@ function useServicesDetailedStatisticsFetcher({
 }
 
 export function ServiceInventory() {
+  const {
+    core: { analytics },
+  } = useApmPluginContext();
+  const fetchMainStatisticsStartTime = window.performance.now();
   const { mainStatisticsFetch } = useServicesMainStatisticsFetcher();
+  const fetchMainStatisticsDuration =
+    window.performance.now() - fetchMainStatisticsStartTime;
+
+  reportPerformanceMetricEvent(analytics, {
+    eventName: 'serviceInventoryFetchMainStatistics',
+    duration: fetchMainStatisticsDuration,
+  });
 
   const mainStatisticsItems = mainStatisticsFetch.data?.items ?? [];
 
@@ -228,11 +241,20 @@ export function ServiceInventory() {
 
   const initialSortDirection = 'desc';
 
+  const fetchDetailStatisticsStartTime = window.performance.now();
   const { comparisonFetch } = useServicesDetailedStatisticsFetcher({
     mainStatisticsFetch,
     initialSortField,
     initialSortDirection,
     tiebreakerField,
+  });
+
+  const fetchDetailStatisticsDuration =
+    window.performance.now() - fetchDetailStatisticsStartTime;
+
+  reportPerformanceMetricEvent(analytics, {
+    eventName: 'serviceInventoryDetailStatistics',
+    duration: fetchDetailStatisticsDuration,
   });
 
   const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
