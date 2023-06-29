@@ -23,5 +23,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-chrome-navigation",
     "@kbn/i18n",
+    "@kbn/management-cards-navigation",
   ]
 }
