@@ -96,7 +96,7 @@ export interface KafkaOutput extends NewBaseOutput {
     topic: string;
     when?: {
       type?: ValueOf<KafkaTopicWhenType>;
-      conditional?: string;
+      condition?: string;
     };
   }>;
   headers?: Array<{

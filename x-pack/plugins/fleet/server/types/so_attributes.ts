@@ -179,7 +179,7 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
     topic: string;
     when?: {
       type?: ValueOf<KafkaTopicWhenType>;
-      conditional?: string;
+      condition?: string;
     };
   }>;
   headers?: Array<{
