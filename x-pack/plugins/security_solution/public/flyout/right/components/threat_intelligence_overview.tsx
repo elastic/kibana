@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
 import React, { useCallback } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import { InsightsSubSection } from './insights_subsection';
-import type { InsightsSummaryPanelData } from './insights_summary_panel';
-import { InsightsSummaryPanel } from './insights_summary_panel';
+import { InsightsSummaryRow } from './insights_summary_row';
 import { useRightPanelContext } from '../context';
 import { INSIGHTS_THREAT_INTELLIGENCE_TEST_ID } from './test_ids';
 import {
@@ -30,8 +30,8 @@ import { LeftPanelKey, LeftPanelInsightsTabPath } from '../../left';
  * The component fetches the necessary data, then pass it down to the InsightsSubSection component for loading and error state,
  * and the SummaryPanel component for data rendering.
  */
-export const ThreatIntelligenceOverview: React.FC = () => {
-  const { eventId, indexName, dataFormattedForFieldBrowser } = useRightPanelContext();
+export const ThreatIntelligenceOverview: FC = () => {
+  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutContext();
 
   const goToThreatIntelligenceTab = useCallback(() => {
@@ -41,40 +41,48 @@ export const ThreatIntelligenceOverview: React.FC = () => {
       params: {
         id: eventId,
         indexName,
+        scopeId,
       },
     });
-  }, [eventId, openLeftPanel, indexName]);
+  }, [eventId, openLeftPanel, indexName, scopeId]);
 
-  const { loading, threatMatchesCount, threatEnrichmentsCount } = useFetchThreatIntelligence({
+  const {
+    loading: threatIntelLoading,
+    error: threatIntelError,
+    threatMatchesCount,
+    threatEnrichmentsCount,
+  } = useFetchThreatIntelligence({
     dataFormattedForFieldBrowser,
   });
 
-  const data: InsightsSummaryPanelData[] = [
-    {
-      icon: 'image',
-      value: threatMatchesCount,
-      text: threatMatchesCount <= 1 ? THREAT_MATCH_DETECTED : THREAT_MATCHES_DETECTED,
-    },
-    {
-      icon: 'warning',
-      value: threatEnrichmentsCount,
-      text: threatMatchesCount <= 1 ? THREAT_ENRICHMENT : THREAT_ENRICHMENTS,
-    },
-  ];
-
-  const error: boolean =
-    !eventId ||
-    !dataFormattedForFieldBrowser ||
-    (threatMatchesCount === 0 && threatEnrichmentsCount === 0);
+  const error: boolean = !eventId || !dataFormattedForFieldBrowser || threatIntelError;
 
   return (
     <InsightsSubSection
-      loading={loading}
       error={error}
       title={THREAT_INTELLIGENCE_TITLE}
       data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
     >
-      <InsightsSummaryPanel data={data} data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID} />
+      <EuiPanel hasShadow={false} hasBorder={true} paddingSize="s">
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <InsightsSummaryRow
+            loading={threatIntelLoading}
+            error={error}
+            icon={'warning'}
+            value={threatMatchesCount}
+            text={threatMatchesCount <= 1 ? THREAT_MATCH_DETECTED : THREAT_MATCHES_DETECTED}
+            data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
+          />
+          <InsightsSummaryRow
+            loading={threatIntelLoading}
+            error={error}
+            icon={'warning'}
+            value={threatEnrichmentsCount}
+            text={threatEnrichmentsCount <= 1 ? THREAT_ENRICHMENT : THREAT_ENRICHMENTS}
+            data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
+          />
+        </EuiFlexGroup>
+      </EuiPanel>
       <EuiButtonEmpty
         onClick={goToThreatIntelligenceTab}
         iconType="arrowStart"

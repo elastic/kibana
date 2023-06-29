@@ -257,7 +257,7 @@ export async function getStorageDetailsPerIndex({
           ? indexInfo.settings?.index?.number_of_shards ?? 0
           : undefined,
         replica: indexInfo
-          ? indexInfo.settings?.number_of_replicas ?? 0
+          ? indexInfo.settings?.index?.number_of_replicas ?? 0
           : undefined,
         size,
         dataStream: indexInfo?.data_stream,

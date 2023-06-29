@@ -43,8 +43,8 @@ export type { PackagePolicyClient } from './services/package_policy_service';
 export { relativeDownloadUrlFromArtifact } from './services/artifacts/mappings';
 
 export type {
-  FleetFileTransferDirection,
-  FleetFileClientInterface,
+  FleetFromHostFileClientInterface,
+  FleetToHostFileClientInterface,
   FleetFile,
   HapiReadableStream,
   FleetFileUpdatableFields,

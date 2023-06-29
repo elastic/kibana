@@ -17,8 +17,8 @@ describe('ALL - Inventory', () => {
 
   before(() => {
     loadSavedQuery().then((data) => {
-      savedQueryId = data.id;
-      savedQueryName = data.attributes.id;
+      savedQueryId = data.saved_object_id;
+      savedQueryName = data.id;
     });
   });
 

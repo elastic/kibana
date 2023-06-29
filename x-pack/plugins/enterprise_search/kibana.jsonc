@@ -23,6 +23,7 @@
       "guidedOnboarding",
       "lens",
       "embeddable",
+      "share"
     ],
     "optionalPlugins": [
       "customIntegrations",

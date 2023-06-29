@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
@@ -26,10 +25,6 @@ export const unifiedHistogramServicesMock = {
     get: jest.fn(),
     isDefault: jest.fn(() => true),
   },
-  theme: {
-    useChartsTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
-    useChartsBaseTheme: jest.fn(() => EUI_CHARTS_THEME_LIGHT.theme),
-  },
   lens: {
     EmbeddableComponent: jest.fn(() => null),
     navigateToPrefilledEditor: jest.fn(),
@@ -46,4 +41,9 @@ export const unifiedHistogramServicesMock = {
     clear: jest.fn(),
   },
   expressions: expressionsPluginMock.createStartContract(),
+  capabilities: {
+    dashboard: {
+      showWriteControls: true,
+    },
+  },
 } as unknown as UnifiedHistogramServices;

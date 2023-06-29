@@ -70,6 +70,7 @@ export const schema: FormSchema<FormProps> = {
       ],
     },
     ends: {
+      type: FIELD_TYPES.BUTTON_GROUP,
       label: i18n.CREATE_FORM_ENDS,
       defaultValue: EndsOptions.NEVER,
       validations: [],
@@ -91,6 +92,6 @@ export const schema: FormSchema<FormProps> = {
       defaultValue: Frequency.WEEKLY,
     },
     byweekday: {},
-    bymonth: {},
+    bymonth: { type: FIELD_TYPES.BUTTON_GROUP, label: '', validations: [], defaultValue: 'day' },
   },
 };

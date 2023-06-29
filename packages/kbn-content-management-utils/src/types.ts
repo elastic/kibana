@@ -176,7 +176,7 @@ export interface SavedObjectUpdateOptions<Attributes = unknown> {
 }
 
 /** Return value for Saved Object get, T is item returned */
-export type GetResultSO<T extends object> = GetResult<
+export type GetResultSO<T extends object = object> = GetResult<
   T,
   {
     outcome: 'exactMatch' | 'aliasMatch' | 'conflict';

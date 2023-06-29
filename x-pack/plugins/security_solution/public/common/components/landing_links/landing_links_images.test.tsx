@@ -7,25 +7,25 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { BETA } from '@kbn/kubernetes-security-plugin/common/translations';
 import { SecurityPageName } from '../../../app/types';
-import type { NavLinkItem } from '../navigation/types';
+import type { NavigationLink } from '../../links/types';
 import { TestProviders } from '../../mock';
 import { LandingLinksImages, LandingImageCards } from './landing_links_images';
 import * as telemetry from '../../lib/telemetry';
 
-const DEFAULT_NAV_ITEM: NavLinkItem = {
+const BETA = 'Beta';
+const DEFAULT_NAV_ITEM: NavigationLink = {
   id: SecurityPageName.overview,
   title: 'TEST LABEL',
   description: 'TEST DESCRIPTION',
-  image: 'TEST_IMAGE.png',
+  landingImage: 'TEST_IMAGE.png',
 };
 
-const BETA_NAV_ITEM: NavLinkItem = {
+const BETA_NAV_ITEM: NavigationLink = {
   id: SecurityPageName.kubernetes,
   title: 'TEST LABEL',
   description: 'TEST DESCRIPTION',
-  image: 'TEST_IMAGE.png',
+  landingImage: 'TEST_IMAGE.png',
   isBeta: true,
 };
 
@@ -58,17 +58,17 @@ describe('LandingLinksImages', () => {
     expect(queryByText(title)).toBeInTheDocument();
   });
 
-  it('renders image', () => {
-    const image = 'test_image.jpeg';
+  it('renders landingImage', () => {
+    const landingImage = 'test_image.jpeg';
     const title = 'TEST_LABEL';
 
     const { getByTestId } = render(
       <TestProviders>
-        <LandingLinksImages items={[{ ...DEFAULT_NAV_ITEM, image, title }]} />
+        <LandingLinksImages items={[{ ...DEFAULT_NAV_ITEM, landingImage, title }]} />
       </TestProviders>
     );
 
-    expect(getByTestId('LandingLinksImage')).toHaveAttribute('src', image);
+    expect(getByTestId('LandingLinksImage')).toHaveAttribute('src', landingImage);
   });
 
   it('renders beta tag when isBeta is true', () => {
@@ -105,26 +105,26 @@ describe('LandingImageCards', () => {
     expect(queryByText(title)).toBeInTheDocument();
   });
 
-  it('renders image', () => {
-    const image = 'test_image.jpeg';
+  it('renders landingImage', () => {
+    const landingImage = 'test_image.jpeg';
     const title = 'TEST_LABEL';
 
     const { getByTestId } = render(
       <TestProviders>
-        <LandingImageCards items={[{ ...DEFAULT_NAV_ITEM, image, title }]} />
+        <LandingImageCards items={[{ ...DEFAULT_NAV_ITEM, landingImage, title }]} />
       </TestProviders>
     );
 
-    expect(getByTestId('LandingImageCard-image')).toHaveAttribute('src', image);
+    expect(getByTestId('LandingImageCard-image')).toHaveAttribute('src', landingImage);
   });
 
   it('sends telemetry', () => {
-    const image = 'test_image.jpeg';
+    const landingImage = 'test_image.jpeg';
     const title = 'TEST LABEL';
 
     const { getByText } = render(
       <TestProviders>
-        <LandingImageCards items={[{ ...DEFAULT_NAV_ITEM, image, title }]} />
+        <LandingImageCards items={[{ ...DEFAULT_NAV_ITEM, landingImage, title }]} />
       </TestProviders>
     );
 

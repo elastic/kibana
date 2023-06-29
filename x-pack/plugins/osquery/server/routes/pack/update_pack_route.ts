@@ -30,7 +30,8 @@ import {
 } from './utils';
 
 import { convertShardsToArray, getInternalSavedObjectsClient } from '../utils';
-import type { PackSavedObjectAttributes } from '../../common/types';
+import type { PackSavedObject } from '../../common/types';
+import type { PackResponseData } from './types';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.put(
@@ -100,7 +101,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       );
 
       if (name) {
-        const conflictingEntries = await savedObjectsClient.find<PackSavedObjectAttributes>({
+        const conflictingEntries = await savedObjectsClient.find<PackSavedObject>({
           type: packSavedObjectType,
           filter: `${packSavedObjectType}.attributes.name: "${name}"`,
         });
@@ -159,7 +160,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
       const references = getUpdatedReferences();
 
-      await savedObjectsClient.update<PackSavedObjectAttributes>(
+      await savedObjectsClient.update<PackSavedObject>(
         packSavedObjectType,
         request.params.id,
         {
@@ -181,12 +182,12 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         filter(currentPackSO.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]),
         'id'
       );
-      const updatedPackSO = await savedObjectsClient.get<{
-        name: string;
-        enabled: boolean;
-        queries: Record<string, unknown>;
-      }>(packSavedObjectType, request.params.id);
+      const updatedPackSO = await savedObjectsClient.get<PackSavedObject>(
+        packSavedObjectType,
+        request.params.id
+      );
 
+      // @ts-expect-error update types
       updatedPackSO.attributes.queries = convertSOQueriesToPack(updatedPackSO.attributes.queries);
 
       if (enabled == null && !currentPackSO.attributes.enabled) {
@@ -349,7 +350,26 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
       }
 
-      return response.ok({ body: { data: updatedPackSO } });
+      const { attributes } = updatedPackSO;
+
+      const data: PackResponseData = {
+        name: attributes.name,
+        description: attributes.description,
+        queries: attributes.queries,
+        version: attributes.version,
+        enabled: attributes.enabled,
+        created_at: attributes.created_at,
+        created_by: attributes.created_by,
+        updated_at: attributes.updated_at,
+        updated_by: attributes.updated_by,
+        policy_ids: attributes.policy_ids,
+        shards: attributes.shards,
+        saved_object_id: updatedPackSO.id,
+      };
+
+      return response.ok({
+        body: { data },
+      });
     }
   );
 };

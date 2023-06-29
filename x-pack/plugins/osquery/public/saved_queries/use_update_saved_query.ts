@@ -48,7 +48,7 @@ export const useUpdateSavedQuery = ({ savedQueryId }: UseUpdateSavedQueryProps) 
           i18n.translate('xpack.osquery.editSavedQuery.successToastMessageText', {
             defaultMessage: 'Successfully updated "{savedQueryName}" query',
             values: {
-              savedQueryName: payload.data.attributes?.id ?? '',
+              savedQueryName: payload.data.id ?? '',
             },
           })
         );

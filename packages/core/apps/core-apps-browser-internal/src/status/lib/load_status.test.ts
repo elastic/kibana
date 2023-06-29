@@ -20,6 +20,7 @@ const mockedResponse: StatusResponse = {
     build_hash: '9007199254740991',
     build_number: 12,
     build_snapshot: false,
+    build_date: '2023-05-15T23:12:09.000Z',
   },
   status: {
     overall: {

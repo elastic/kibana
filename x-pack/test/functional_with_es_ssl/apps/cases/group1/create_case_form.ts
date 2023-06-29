@@ -40,6 +40,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         description: 'test description',
         tag: 'tagme',
         severity: CaseSeverity.HIGH,
+        category: 'new',
       });
 
       await testSubjects.existOrFail('case-view-title', {
@@ -56,6 +57,9 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
       // validate tag exists
       await testSubjects.existOrFail('tag-tagme');
+
+      // validate category exists
+      await testSubjects.existOrFail('category-viewer-new');
 
       // validate no connector added
       const button = await find.byCssSelector('[data-test-subj*="case-callout"] button');
@@ -85,8 +89,8 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('case-view-title');
-        await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
-        await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user2');
+        await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
+        await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user2-remove-group');
       });
     });
   });

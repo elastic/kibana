@@ -47,5 +47,8 @@ export default function ({ loadTestFile, getService }) {
 
     // Fleet proxies
     loadTestFile(require.resolve('./fleet_proxies/crud')); // ~ 20s
+
+    // Uninstall tokens
+    loadTestFile(require.resolve('./uninstall_token/get')); // ~ 20s
   });
 }

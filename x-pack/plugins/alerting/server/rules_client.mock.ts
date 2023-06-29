@@ -13,6 +13,7 @@ export type RulesClientMock = jest.Mocked<Schema>;
 const createRulesClientMock = () => {
   const mocked: RulesClientMock = {
     aggregate: jest.fn().mockReturnValue({ ruleExecutionStatus: {}, ruleLastRunOutcome: {} }),
+    getTags: jest.fn(),
     create: jest.fn(),
     get: jest.fn(),
     resolve: jest.fn(),
@@ -27,7 +28,7 @@ const createRulesClientMock = () => {
     unmuteAll: jest.fn(),
     muteInstance: jest.fn(),
     unmuteInstance: jest.fn(),
-    listAlertTypes: jest.fn(),
+    listRuleTypes: jest.fn(),
     getAlertSummary: jest.fn(),
     getExecutionLogForRule: jest.fn(),
     getRuleExecutionKPI: jest.fn(),

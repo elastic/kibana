@@ -10,6 +10,8 @@
     "configPath": ["xpack", "apm"],
     "requiredPlugins": [
       "data",
+      "dashboard",
+      "controls",
       "embeddable",
       "features",
       "infra",
@@ -23,8 +25,6 @@
       "share",
       "unifiedSearch",
       "dataViews",
-      "advancedSettings",
-      "unifiedFieldList",
       "lens",
       "maps",
       "uiActions"
@@ -35,6 +35,7 @@
       "cases",
       "charts",
       "cloud",
+      "discover",
       "fleet",
       "fieldFormats",
       "home",
@@ -42,9 +43,12 @@
       "security",
       "spaces",
       "taskManager",
-      "usageCollection"
+      "usageCollection",
+      "customIntegrations", // Move this to requiredPlugins after completely migrating from the Tutorials Home App
+      "licenseManagement"
     ],
     "requiredBundles": [
+      "advancedSettings",
       "fleet",
       "kibanaReact",
       "kibanaUtils",

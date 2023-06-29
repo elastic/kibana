@@ -1,6 +1,6 @@
 title: Budgeting method
 type: string
-description: The budgeting method to use
+description: The budgeting method to use when computing the rollup data.
 enum:
   - occurrences
   - timeslices

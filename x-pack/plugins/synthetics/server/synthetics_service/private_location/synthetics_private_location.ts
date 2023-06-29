@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
-import { formatSyntheticsPolicy } from '../../../common/formatters/format_synthetics_policy';
+import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
+import { SyntheticsServerSetup } from '../../types';
+import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import {
   ConfigKey,
   HeartbeatConfig,
@@ -17,7 +19,7 @@ import {
   PrivateLocation,
   SourceType,
 } from '../../../common/runtime_types';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
+import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
@@ -31,20 +33,26 @@ export interface FailedPolicyUpdate {
 }
 
 export class SyntheticsPrivateLocation {
-  private readonly server: UptimeServerSetup;
+  private readonly server: SyntheticsServerSetup;
 
-  constructor(_server: UptimeServerSetup) {
+  constructor(_server: SyntheticsServerSetup) {
     this.server = _server;
   }
 
-  async buildNewPolicy(
-    savedObjectsClient: SavedObjectsClientContract
-  ): Promise<NewPackagePolicy | undefined> {
-    return await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
-      savedObjectsClient,
+  async buildNewPolicy(): Promise<NewPackagePolicy> {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+
+    const newPolicy = await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
+      soClient,
       'synthetics',
       this.server.logger
     );
+
+    if (!newPolicy) {
+      throw new Error(`Unable to create Synthetics package policy template for private location`);
+    }
+
+    return newPolicy;
   }
 
   getPolicyId(config: HeartbeatConfig, locId: string, spaceId: string) {
@@ -57,15 +65,10 @@ export class SyntheticsPrivateLocation {
   generateNewPolicy(
     config: HeartbeatConfig,
     privateLocation: PrivateLocation,
-    savedObjectsClient: SavedObjectsClientContract,
     newPolicyTemplate: NewPackagePolicy,
     spaceId: string,
     globalParams: Record<string, string>
   ): (NewPackagePolicy & { policy_id: string }) | null {
-    if (!savedObjectsClient) {
-      throw new Error('Could not find savedObjectsClient');
-    }
-
     const { label: locName } = privateLocation;
 
     const newPolicy = cloneDeep(newPolicyTemplate);
@@ -86,10 +89,10 @@ export class SyntheticsPrivateLocation {
         {
           ...(config as Partial<MonitorFields>),
           config_id: config.fields?.config_id,
-          location_name: privateLocation.label,
+          location_name: stringifyString(privateLocation.label),
           location_id: privateLocation.id,
-          'monitor.project.id': config.fields?.['monitor.project.name'],
-          'monitor.project.name': config.fields?.['monitor.project.name'],
+          'monitor.project.id': stringifyString(config.fields?.['monitor.project.name']),
+          'monitor.project.name': stringifyString(config.fields?.['monitor.project.name']),
         },
         globalParams
       );
@@ -101,38 +104,19 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async checkPermissions(request: KibanaRequest, error: string) {
-    const {
-      integrations: { writeIntegrationPolicies },
-    } = await this.server.fleet.authz.fromRequest(request);
-
-    if (!writeIntegrationPolicies) {
-      throw new Error(error);
-    }
-  }
-
   async createPackagePolicies(
     configs: PrivateConfig[],
     request: KibanaRequest,
-    savedObjectsClient: SavedObjectsClientContract,
     privateLocations: PrivateLocation[],
     spaceId: string
   ) {
     if (configs.length === 0) {
       return { created: [], failed: [] };
     }
-    await this.checkPermissions(
-      request,
-      `Unable to create Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.`
-    );
 
     const newPolicies: NewPackagePolicyWithId[] = [];
 
-    const newPolicyTemplate = await this.buildNewPolicy(savedObjectsClient);
-
-    if (!newPolicyTemplate) {
-      throw new Error(`Unable to create Synthetics package policy for private location`);
-    }
+    const newPolicyTemplate = await this.buildNewPolicy();
 
     for (const { config, globalParams } of configs) {
       try {
@@ -152,7 +136,6 @@ export class SyntheticsPrivateLocation {
           const newPolicy = this.generateNewPolicy(
             config,
             location,
-            savedObjectsClient,
             newPolicyTemplate,
             spaceId,
             globalParams
@@ -180,17 +163,59 @@ export class SyntheticsPrivateLocation {
     }
 
     try {
-      return await this.createPolicyBulk(newPolicies, savedObjectsClient);
+      return await this.createPolicyBulk(newPolicies);
     } catch (e) {
       this.server.logger.error(e);
       throw e;
     }
   }
 
+  async inspectPackagePolicy({
+    privateConfig,
+    spaceId,
+    allPrivateLocations,
+  }: {
+    privateConfig?: PrivateConfig;
+    allPrivateLocations: PrivateLocation[];
+    spaceId: string;
+  }) {
+    if (!privateConfig) {
+      return null;
+    }
+    const newPolicyTemplate = await this.buildNewPolicy();
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+
+    const { config, globalParams } = privateConfig;
+    try {
+      const { locations } = config;
+
+      const privateLocation = locations.find((loc) => !loc.isServiceManaged);
+
+      const location = allPrivateLocations?.find((loc) => loc.id === privateLocation?.id)!;
+
+      const newPolicy = this.generateNewPolicy(
+        config,
+        location,
+        newPolicyTemplate,
+        spaceId,
+        globalParams
+      );
+
+      const pkgPolicy = {
+        ...newPolicy,
+        id: this.getPolicyId(config, location.id, spaceId),
+      } as NewPackagePolicyWithId;
+
+      return await this.server.fleet.packagePolicyService.inspect(soClient, pkgPolicy);
+    } catch (e) {
+      this.server.logger.error(e);
+      return null;
+    }
+  }
+
   async editMonitors(
     configs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }>,
     request: KibanaRequest,
-    savedObjectsClient: SavedObjectsClientContract,
     allPrivateLocations: PrivateLocation[],
     spaceId: string
   ) {
@@ -198,16 +223,7 @@ export class SyntheticsPrivateLocation {
       return {};
     }
 
-    await this.checkPermissions(
-      request,
-      `Unable to update Synthetics package policy for monitor. Fleet write permissions are needed to use Synthetics private locations.`
-    );
-
-    const newPolicyTemplate = await this.buildNewPolicy(savedObjectsClient);
-
-    if (!newPolicyTemplate) {
-      throw new Error(`Unable to create Synthetics package policy for private location`);
-    }
+    const newPolicyTemplate = await this.buildNewPolicy();
 
     const policiesToUpdate: NewPackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
@@ -216,7 +232,6 @@ export class SyntheticsPrivateLocation {
     const existingPolicies = await this.getExistingPolicies(
       configs.map(({ config }) => config),
       allPrivateLocations,
-      savedObjectsClient,
       spaceId
     );
 
@@ -234,7 +249,6 @@ export class SyntheticsPrivateLocation {
             const newPolicy = this.generateNewPolicy(
               config,
               privateLocation,
-              savedObjectsClient,
               newPolicyTemplate,
               spaceId,
               globalParams
@@ -260,9 +274,9 @@ export class SyntheticsPrivateLocation {
     }
 
     const [_createResponse, failedUpdatesRes, _deleteResponse] = await Promise.all([
-      this.createPolicyBulk(policiesToCreate, savedObjectsClient),
-      this.updatePolicyBulk(policiesToUpdate, savedObjectsClient),
-      this.deletePolicyBulk(policiesToDelete, savedObjectsClient),
+      this.createPolicyBulk(policiesToCreate),
+      this.updatePolicyBulk(policiesToUpdate),
+      this.deletePolicyBulk(policiesToDelete),
     ]);
 
     const failedUpdates = failedUpdatesRes?.map(({ packagePolicy, error }) => {
@@ -290,9 +304,10 @@ export class SyntheticsPrivateLocation {
   async getExistingPolicies(
     configs: HeartbeatConfig[],
     allPrivateLocations: PrivateLocation[],
-    savedObjectsClient: SavedObjectsClientContract,
     spaceId: string
   ) {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+
     const listOfPolicies: string[] = [];
     for (const config of configs) {
       for (const privateLocation of allPrivateLocations) {
@@ -301,19 +316,16 @@ export class SyntheticsPrivateLocation {
       }
     }
     return (
-      (await this.server.fleet.packagePolicyService.getByIDs(savedObjectsClient, listOfPolicies, {
+      (await this.server.fleet.packagePolicyService.getByIDs(soClient, listOfPolicies, {
         ignoreMissing: true,
       })) ?? []
     );
   }
 
-  async createPolicyBulk(
-    newPolicies: NewPackagePolicyWithId[],
-    savedObjectsClient: SavedObjectsClientContract
-  ) {
-    const soClient = savedObjectsClient;
+  async createPolicyBulk(newPolicies: NewPackagePolicyWithId[]) {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
     const esClient = this.server.uptimeEsClient.baseESClient;
-    if (soClient && esClient && newPolicies.length > 0) {
+    if (esClient && newPolicies.length > 0) {
       return await this.server.fleet.packagePolicyService.bulkCreate(
         soClient,
         esClient,
@@ -322,11 +334,8 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async updatePolicyBulk(
-    policiesToUpdate: NewPackagePolicyWithId[],
-    savedObjectsClient: SavedObjectsClientContract
-  ) {
-    const soClient = savedObjectsClient;
+  async updatePolicyBulk(policiesToUpdate: NewPackagePolicyWithId[]) {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
     const esClient = this.server.uptimeEsClient.baseESClient;
     if (soClient && esClient && policiesToUpdate.length > 0) {
       const { failedPolicies } = await this.server.fleet.packagePolicyService.bulkUpdate(
@@ -341,11 +350,8 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async deletePolicyBulk(
-    policyIdsToDelete: string[],
-    savedObjectsClient: SavedObjectsClientContract
-  ) {
-    const soClient = savedObjectsClient;
+  async deletePolicyBulk(policyIdsToDelete: string[]) {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
     const esClient = this.server.uptimeEsClient.baseESClient;
     if (soClient && esClient && policyIdsToDelete.length > 0) {
       return await this.server.fleet.packagePolicyService.delete(
@@ -359,12 +365,10 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async deleteMonitors(
-    configs: HeartbeatConfig[],
-    request: KibanaRequest,
-    soClient: SavedObjectsClientContract,
-    spaceId: string
-  ) {
+  async deleteMonitors(configs: HeartbeatConfig[], request: KibanaRequest, spaceId: string) {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const esClient = this.server.uptimeEsClient.baseESClient;
+
     const policyIdsToDelete = [];
     for (const config of configs) {
       const { locations } = config;
@@ -372,7 +376,6 @@ export class SyntheticsPrivateLocation {
       const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
 
       for (const privateLocation of monitorPrivateLocations) {
-        await this.checkPermissions(request, deletePermissionError(config[ConfigKey.NAME]));
         try {
           policyIdsToDelete.push(this.getPolicyId(config, privateLocation.id, spaceId));
         } catch (e) {
@@ -382,19 +385,24 @@ export class SyntheticsPrivateLocation {
       }
     }
     if (policyIdsToDelete.length > 0) {
-      await this.checkPermissions(request, deletePermissionError());
-      await this.deletePolicyBulk(policyIdsToDelete, soClient);
+      const result = await this.server.fleet.packagePolicyService.delete(
+        soClient,
+        esClient,
+        policyIdsToDelete,
+        {
+          force: true,
+        }
+      );
+      const failedPolicies = result?.filter((policy) => !policy.success);
+      if (failedPolicies?.length === policyIdsToDelete.length) {
+        throw new Error(deletePolicyError(configs[0][ConfigKey.NAME]));
+      }
+      return result;
     }
   }
 
   async getAgentPolicies() {
-    const agentPolicies = await this.server.fleet.agentPolicyService.list(
-      this.server.savedObjectsClient!,
-      {
-        page: 1,
-        perPage: 10000,
-      }
-    );
+    const agentPolicies = await getAgentPoliciesAsInternalUser(this.server);
 
     return agentPolicies.items;
   }
@@ -406,10 +414,6 @@ const throwAddEditError = (hasPolicy: boolean, location?: string, name?: string)
       name ? 'for monitor ' + name : ''
     } for private location: ${location}`
   );
-};
-
-export const deletePermissionError = (name?: string) => {
-  return `Unable to delete Synthetics package policy for monitor ${name}. Fleet write permissions are needed to use Synthetics private locations.`;
 };
 
 const deletePolicyError = (name: string, location?: string) => {

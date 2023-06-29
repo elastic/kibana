@@ -28,22 +28,27 @@ import React, { useState } from 'react';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { MANAGEMENT_API_KEYS } from '../../routes';
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
+import { CreateApiKeyResponse } from './types';
 
-export const ApiKeyPanel: React.FC = () => {
+export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: string) => void }) => {
   const { cloud, http, userProfile } = useKibanaServices();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const { data } = useQuery({
     queryKey: ['apiKey'],
     queryFn: () => http.fetch<{ apiKeys: ApiKey[] }>('/internal/serverless_search/api_keys'),
   });
-  const [apiKey, setApiKey] = useState<ApiKey | undefined>(undefined);
+  const [apiKey, setApiKey] = useState<CreateApiKeyResponse | undefined>(undefined);
+  const saveApiKey = (value: CreateApiKeyResponse) => {
+    setApiKey(value);
+    if (value.encoded) setClientApiKey(value.encoded);
+  };
 
   return (
     <>
       {isFlyoutOpen && (
         <CreateApiKeyFlyout
           onClose={() => setIsFlyoutOpen(false)}
-          setApiKey={setApiKey}
+          setApiKey={saveApiKey}
           username={userProfile.user.full_name || userProfile.user.username}
         />
       )}
@@ -190,8 +195,7 @@ export const ApiKeyPanel: React.FC = () => {
                 overflow-wrap: anywhere;
               `}
             >
-              {cloud.cloudId ||
-                'ProjectXDHS:dXMtd2VzdDIuZ2NwLmVsYXN0aWMtY2xvdWQuY29tJDEwMDYxN2IwMzM3ODRiYWJhODc5NzZiOTA0MTA3NGYwJDQ5ZWM'}
+              {cloud.cloudId}
             </EuiCodeBlock>
           </EuiSplitPanel.Inner>
         </EuiThemeProvider>

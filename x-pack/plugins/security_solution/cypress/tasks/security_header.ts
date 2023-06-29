@@ -9,7 +9,8 @@ import { TOASTER } from '../screens/alerts_detection_rules';
 import { KQL_INPUT, openNavigationPanelFor, REFRESH_BUTTON } from '../screens/security_header';
 
 export const clearSearchBar = () => {
-  cy.get(KQL_INPUT).clear().type('{enter}');
+  cy.get(KQL_INPUT).clear();
+  cy.get(KQL_INPUT).realPress('Enter');
 };
 
 export const kqlSearch = (search: string) => {
@@ -23,9 +24,8 @@ export const navigateFromHeaderTo = (page: string) => {
 };
 
 export const refreshPage = () => {
-  cy.get(REFRESH_BUTTON)
-    .click({ force: true })
-    .should('not.have.attr', 'aria-label', 'Needs updating');
+  cy.get(REFRESH_BUTTON).click({ force: true });
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
 };
 
 export const saveQuery = (name: string) => {

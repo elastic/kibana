@@ -8,14 +8,14 @@ import expect from '@kbn/expect';
 import type { BenchmarkResponse } from '@kbn/cloud-security-posture-plugin/common/types';
 import type { SuperTest, Test } from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
-// import { createPackagePolicy } from './status';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('GET /internal/cloud_security_posture/benchmark', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/159732
+  describe.skip('GET /internal/cloud_security_posture/benchmark', () => {
     let agentPolicyId: string;
     let agentPolicyId2: string;
     let agentPolicyId3: string;

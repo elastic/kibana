@@ -122,7 +122,7 @@ describe('ESSearchSource', () => {
         const tileUrl = await esSearchSource.getTileUrl(requestMeta, '1234', false, 5);
 
         const urlParts = tileUrl.split('?');
-        expect(urlParts[0]).toEqual('rootdir/api/maps/mvt/getTile/{z}/{x}/{y}.pbf');
+        expect(urlParts[0]).toEqual('rootdir/internal/maps/mvt/getTile/{z}/{x}/{y}.pbf');
 
         const params = new URLSearchParams(urlParts[1]);
         expect(Object.fromEntries(params)).toEqual({

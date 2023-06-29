@@ -117,7 +117,7 @@ export const TableRowActions: React.FunctionComponent<{
       </EuiContextMenuItem>
     );
 
-    if (agentTamperProtectionEnabled) {
+    if (agentTamperProtectionEnabled && agent.policy_id) {
       menuItems.push(
         <EuiContextMenuItem
           icon="minusInCircle"

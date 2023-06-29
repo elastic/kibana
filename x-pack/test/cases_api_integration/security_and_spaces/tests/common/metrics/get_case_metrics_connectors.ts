@@ -125,7 +125,10 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 id: theCase.id,
                 version: patchedCases[0].version,
-                connector: { ...jiraConnector, fields: { ...jiraConnector.fields, urgency: '1' } },
+                connector: {
+                  ...jiraConnector,
+                  fields: { ...jiraConnector.fields, issueType: 'Bug' },
+                },
               },
             ],
           },

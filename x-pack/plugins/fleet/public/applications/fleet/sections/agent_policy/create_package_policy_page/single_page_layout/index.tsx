@@ -58,6 +58,7 @@ import {
 
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
 import { useDevToolsRequest, useOnSubmit } from './hooks';
+import { PostInstallCloudFormationModal } from './components/post_install_cloud_formation_modal';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -402,9 +403,20 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             onCancel={() => setFormState('VALID')}
           />
         )}
-        {formState === 'SUBMITTED_NO_AGENTS' && agentPolicy && packageInfo && (
-          <PostInstallAddAgentModal
-            packageInfo={packageInfo}
+        {formState === 'SUBMITTED_NO_AGENTS' &&
+          agentPolicy &&
+          packageInfo &&
+          savedPackagePolicy && (
+            <PostInstallAddAgentModal
+              packageInfo={packageInfo}
+              onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+              onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+            />
+          )}
+        {formState === 'SUBMITTED_CLOUD_FORMATION' && agentPolicy && savedPackagePolicy && (
+          <PostInstallCloudFormationModal
+            agentPolicy={agentPolicy}
+            packagePolicy={savedPackagePolicy}
             onConfirm={() => navigateAddAgent(savedPackagePolicy)}
             onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
           />

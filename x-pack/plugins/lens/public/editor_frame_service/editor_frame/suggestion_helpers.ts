@@ -23,7 +23,6 @@ import type {
   DatasourceLayers,
 } from '../../types';
 import type { LayerType } from '../../../common/types';
-import { getLayerType } from './config_panel/add_layer';
 import {
   LensDispatch,
   switchVisualization,
@@ -79,7 +78,7 @@ export function getSuggestions({
     }
     const layers = datasource.getLayers(datasourceState);
     for (const layerId of layers) {
-      const type = getLayerType(activeVisualization, visualizationState, layerId);
+      const type = activeVisualization.getLayerType(layerId, visualizationState) || LayerTypes.DATA;
       memo[layerId] = type;
     }
     return memo;
@@ -136,6 +135,10 @@ export function getSuggestions({
   // and rank them by score
   return Object.entries(visualizationMap)
     .flatMap(([visualizationId, visualization]) => {
+      // in case a missing visualization type is passed via SO, just avoid to compute anything for it
+      if (!visualization) {
+        return [];
+      }
       const supportedLayerTypes = visualization.getSupportedLayers().map(({ type }) => type);
       return datasourceTableSuggestions
         .filter((datasourceSuggestion) => {

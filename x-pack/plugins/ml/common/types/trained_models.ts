@@ -6,8 +6,11 @@
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DeploymentState, TrainedModelType } from '@kbn/ml-trained-models-utils';
-import type { DataFrameAnalyticsConfig } from './data_frame_analytics';
-import type { FeatureImportanceBaseline, TotalFeatureImportance } from './feature_importance';
+import type {
+  DataFrameAnalyticsConfig,
+  FeatureImportanceBaseline,
+  TotalFeatureImportance,
+} from '@kbn/ml-data-frame-analytics-utils';
 import type { XOR } from './common';
 import type { MlSavedObjectType } from './saved_objects';
 
@@ -199,6 +202,7 @@ export interface AllocatedModel {
     throughput_last_minute: number;
     number_of_allocations: number;
     threads_per_allocation: number;
+    error_count?: number;
   };
 }
 

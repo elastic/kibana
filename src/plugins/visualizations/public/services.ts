@@ -29,6 +29,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { TypesStart } from './vis_types';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
@@ -84,3 +85,6 @@ export const [getSavedObjectsManagement, setSavedObjectsManagement] =
 
 export const [getContentManagement, setContentManagement] =
   createGetterSetter<ContentManagementPublicStart>('SavedObjectsManagement');
+
+export const [getSavedSearch, setSavedSearch] =
+  createGetterSetter<SavedSearchPublicPluginStart>('SavedSearch');

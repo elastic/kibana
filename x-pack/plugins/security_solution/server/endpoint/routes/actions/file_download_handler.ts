@@ -25,6 +25,10 @@ export const registerActionFileDownloadRoutes = (
 ) => {
   const logger = endpointContext.logFactory.get('actionFileDownload');
 
+  // NOTE:
+  // This API (as of today - 2023-06-21) can not be versioned because it is used
+  // to download files from the UI, where its used as part of a `<a>` anchor, which
+  // has no way to define the version header.
   router.get(
     {
       path: ACTION_AGENT_FILE_DOWNLOAD_ROUTE,
@@ -50,7 +54,7 @@ export const getActionFileDownloadRouteHandler = (
   const logger = endpointContext.logFactory.get('actionFileDownload');
 
   return async (context, req, res) => {
-    const fleetFiles = await endpointContext.service.getFleetFilesClient('from-host');
+    const fleetFiles = await endpointContext.service.getFleetFromHostFilesClient();
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const { action_id: actionId, file_id: fileId } = req.params;
 

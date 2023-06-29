@@ -22,7 +22,7 @@ const Template: ComponentStory<typeof Component> = () => (
   <Component
     ruleParams={{} as BurnRateRuleParams}
     setRuleParams={() => {}}
-    errors={{ sloId: [], longWindow: [], burnRateThreshold: [] }}
+    errors={{ sloId: [], windows: [] }}
   />
 );
 

@@ -25,18 +25,18 @@ const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
 const kibanaVersion = '25.2.3';
 
+const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
+  name: 'unknown',
+  namespaceType: 'single',
+  hidden: false,
+  mappings: { properties: {} },
+  migrations: {},
+  ...parts,
+});
+
 const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
-  types.forEach((type) =>
-    registry.registerType({
-      name: 'unknown',
-      namespaceType: 'single',
-      hidden: false,
-      mappings: { properties: {} },
-      migrations: {},
-      ...type,
-    })
-  );
+  types.forEach((type) => registry.registerType(createType(type)));
   registry.registerType({
     name: LEGACY_URL_ALIAS_TYPE,
     namespaceType: 'agnostic',
@@ -1375,6 +1375,95 @@ describe('DocumentMigrator', () => {
         expect(actual).not.toHaveProperty('typeMigrationVersion');
         expect(actual).not.toHaveProperty('migrationVersion');
       });
+    });
+  });
+
+  describe('down migration', () => {
+    it('accepts to downgrade the document if `allowDowngrade` is true', () => {
+      const registry = createRegistry({});
+
+      const fooType = createType({
+        name: 'foo',
+        switchToModelVersionAt: '8.5.0',
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {
+              forwardCompatibility: (attrs: any) => {
+                return {
+                  foo: attrs.foo,
+                };
+              },
+            },
+          },
+        },
+      });
+      registry.registerType(fooType);
+
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: registry,
+      });
+      migrator.prepareMigrations();
+
+      const document: SavedObjectUnsanitizedDoc = {
+        id: 'smelly',
+        type: 'foo',
+        attributes: {
+          foo: 'bar',
+          hello: 'dolly',
+        },
+        typeMigrationVersion: '10.2.0',
+      };
+
+      const migrated = migrator.migrate(document, { allowDowngrade: true });
+
+      expect(migrated).toHaveProperty('typeMigrationVersion', '10.1.0');
+      expect(migrated.attributes).toEqual({ foo: 'bar' });
+    });
+
+    it('throws when trying to downgrade if `allowDowngrade` is false', () => {
+      const registry = createRegistry({});
+
+      const fooType = createType({
+        name: 'foo',
+        switchToModelVersionAt: '8.5.0',
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {
+              forwardCompatibility: (attrs: any) => {
+                return {
+                  foo: attrs.foo,
+                };
+              },
+            },
+          },
+        },
+      });
+      registry.registerType(fooType);
+
+      const migrator = new DocumentMigrator({
+        ...testOpts(),
+        typeRegistry: registry,
+      });
+      migrator.prepareMigrations();
+
+      const document: SavedObjectUnsanitizedDoc = {
+        id: 'smelly',
+        type: 'foo',
+        attributes: {
+          foo: 'bar',
+          hello: 'dolly',
+        },
+        typeMigrationVersion: '10.2.0',
+      };
+
+      expect(() =>
+        migrator.migrate(document, { allowDowngrade: false })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Document \\"smelly\\" belongs to a more recent version of Kibana [10.2.0] when the last known version is [10.1.0]."`
+      );
     });
   });
 });

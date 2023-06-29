@@ -10,7 +10,7 @@ import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_job
 import { ANNOTATION_TYPE } from '@kbn/ml-plugin/common/constants/annotations';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -79,9 +79,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('it should fetch datafeed chart data', async () => {
       const { body, status } = await supertest
-        .post(`/api/ml/results/datafeed_results_chart`)
+        .post(`/internal/ml/results/datafeed_results_chart`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(requestBody);
       ml.api.assertResponseStatusCode(200, status, body);
 
@@ -99,9 +99,9 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       const { body, status } = await supertest
-        .post(`/api/ml/results/datafeed_results_chart`)
+        .post(`/internal/ml/results/datafeed_results_chart`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(incompleteRequestBody);
       ml.api.assertResponseStatusCode(400, status, body);
 
@@ -113,9 +113,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('it should not allow fetching of datafeed chart data without required permissions', async () => {
       const { body, status } = await supertest
-        .post(`/api/ml/results/datafeed_results_chart`)
+        .post(`/internal/ml/results/datafeed_results_chart`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(requestBody);
       ml.api.assertResponseStatusCode(403, status, body);
 

@@ -144,10 +144,12 @@ function UserDetailsEditor({ user }: { user: AuthenticatedUser }) {
 
 function UserSettingsEditor({
   formik,
-  isDarkModeOverride,
+  isThemeOverridden,
+  isOverriddenThemeDarkMode,
 }: {
   formik: ReturnType<typeof useUserProfileForm>;
-  isDarkModeOverride: boolean;
+  isThemeOverridden: boolean;
+  isOverriddenThemeDarkMode: boolean;
 }) {
   if (!formik.values.data) {
     return null;
@@ -155,8 +157,12 @@ function UserSettingsEditor({
 
   let idSelected = formik.values.data.userSettings.darkMode;
 
-  if (isDarkModeOverride) {
-    idSelected = 'dark';
+  if (isThemeOverridden) {
+    if (isOverriddenThemeDarkMode) {
+      idSelected = 'dark';
+    } else {
+      idSelected = 'light';
+    }
   }
 
   return (
@@ -180,7 +186,7 @@ function UserSettingsEditor({
     >
       <FormRow
         name="data.userSettings.darkMode"
-        helpText={renderHelpText(isDarkModeOverride)}
+        helpText={renderHelpText(isThemeOverridden)}
         label={
           <FormLabel for="data.userSettings.darkMode">
             <FormattedMessage
@@ -201,7 +207,7 @@ function UserSettingsEditor({
           buttonSize="m"
           data-test-subj="darkModeButton"
           idSelected={idSelected}
-          isDisabled={isDarkModeOverride}
+          isDisabled={isThemeOverridden}
           options={[
             {
               id: '',
@@ -546,7 +552,9 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
   const isCloudUser = user.elastic_cloud_user;
 
-  const isDarkModeOverride = determineIfDarkModeOverride(services.settings.client);
+  const { isThemeOverridden, isOverriddenThemeDarkMode } = determineIfThemeOverridden(
+    services.settings.client
+  );
 
   const rightSideItems = [
     {
@@ -675,7 +683,11 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   onShowPasswordForm={() => setShowChangePasswordForm(true)}
                 />
                 {isCloudUser ? null : (
-                  <UserSettingsEditor formik={formik} isDarkModeOverride={isDarkModeOverride} />
+                  <UserSettingsEditor
+                    formik={formik}
+                    isThemeOverridden={isThemeOverridden}
+                    isOverriddenThemeDarkMode={isOverriddenThemeDarkMode}
+                  />
                 )}
               </Form>
             </EuiPageTemplate>
@@ -910,9 +922,12 @@ function renderHelpText(isOverridden: boolean) {
   }
 }
 
-function determineIfDarkModeOverride(settingsClient: IUiSettingsClient) {
-  const isThemeOverridden = settingsClient.isOverridden('theme:darkMode');
-  const isOverriddenThemeDarkMode = settingsClient.get<boolean>('theme:darkMode');
-
-  return isThemeOverridden && isOverriddenThemeDarkMode;
+function determineIfThemeOverridden(settingsClient: IUiSettingsClient): {
+  isThemeOverridden: boolean;
+  isOverriddenThemeDarkMode: boolean;
+} {
+  return {
+    isThemeOverridden: settingsClient.isOverridden('theme:darkMode'),
+    isOverriddenThemeDarkMode: settingsClient.get<boolean>('theme:darkMode'),
+  };
 }

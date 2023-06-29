@@ -32,6 +32,7 @@ import { LegacyDataTableVisPageObject } from './legacy/data_table_vis';
 import { IndexPatternFieldEditorPageObject } from './management/indexpattern_field_editor_page';
 import { DashboardPageControls } from './dashboard_page_controls';
 import { UnifiedSearchPageObject } from './unified_search_page';
+import { UnifiedFieldListPageObject } from './unified_field_list';
 import { FilesManagementPageObject } from './files_management';
 
 export const pageObjects = {
@@ -61,5 +62,6 @@ export const pageObjects = {
   savedObjects: SavedObjectsPageObject,
   indexPatternFieldEditorObjects: IndexPatternFieldEditorPageObject,
   unifiedSearch: UnifiedSearchPageObject,
+  unifiedFieldList: UnifiedFieldListPageObject,
   filesManagement: FilesManagementPageObject,
 };
