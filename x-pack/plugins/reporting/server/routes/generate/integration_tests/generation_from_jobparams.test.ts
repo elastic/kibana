@@ -50,6 +50,18 @@ describe('POST /api/reporting/generate', () => {
   );
 
   beforeEach(async () => {
+    ({ server, httpSetup } = await setupServer(reportingSymbol));
+    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
+      reportingSymbol,
+      'reporting',
+      () => ({
+        usesUiCapabilities: jest.fn(),
+        getSpaceId: jest.fn(),
+        getScreenshots: jest.fn(),
+        registerExportTypes: jest.fn(),
+      })
+    );
+
     const mockSetupDeps = createMockPluginSetup({
       security: {
         license: { isEnabled: () => true },
@@ -76,13 +88,6 @@ describe('POST /api/reporting/generate', () => {
       mockConfigSchema,
       mockSetupDeps,
       mockStartDeps
-    );
-
-    ({ server, httpSetup } = await setupServer(reportingSymbol));
-    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
-      reportingSymbol,
-      'reporting',
-      mockReportingCore.getContract
     );
 
     mockExportTypesRegistry = new ExportTypesRegistry();
