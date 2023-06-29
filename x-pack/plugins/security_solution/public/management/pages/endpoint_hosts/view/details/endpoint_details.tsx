@@ -103,7 +103,7 @@ export const EndpointDetails = memo(() => {
           defaultMessage: 'Could not find host',
         }),
         text: i18n.translate('xpack.securitySolution.endpoint.details.errorBody', {
-            defaultMessage: 'Please exit the flyout and select an available host.',
+          defaultMessage: 'Please exit the flyout and select an available host.',
         }),
       });
     }
