@@ -384,8 +384,6 @@ The current active alerts in the system are represented in the following table w
 
 ${rows}
 
-Display the following template sustituting X and Y "There are X total active alerts in the system, and Y of them are not yet assigned to a case and show be reviewed as soon as possible", X beign the total current active alerts and Y being how many do not have values in the column Case_ids. Do not display the template.
-
 The above table has to be ordered based on ascending rank using the following rules:
 - If an alert Start column value is more than 2 days ago, it has a rank of 4
 - Else, If an alert does not have values in the column Case_ids it has a rank of 1
@@ -395,17 +393,20 @@ The above table has to be ordered based on ascending rank using the following ru
 
 Using the following template, display the info filling the columns with the values of the alert with lowest numerical value in rank only based on the above rules, not using other factors:
 "
-The alert with the highest priority right now is: A
-        - Alert summary: B
-        - Assigned to Case Ids: C
-        - Possible next steps: D
-        - The reason this issue is has the highest priority is: E
+🧯 The alert with the highest priority right now is: B
+        📂 Assigned to Case Ids: C
+        ⏭️ Possible next steps: D
+        ︖ The reason this issue is has the highest priority is: E
+        🔗 Alert id: A
 "
 A being the Alert uuid
 B being a summary for an SRE of the Reason
 C being the Case ids values
 D being a way to start a remediation of the alert for an SRE
 E being the reasoning why this alert has the lowest numerical value in rank
+
+Display the following template sustituting X and Y "There are X total active alerts in the system, and Y of them are not yet assigned to a case and show be reviewed as soon as possible", X beign the total current active alerts and Y being how many do not have values in the column Case_ids. Do not display the template.
+
 `;
 
       console.log('content:', content);
