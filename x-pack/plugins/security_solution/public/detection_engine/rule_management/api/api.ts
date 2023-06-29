@@ -16,6 +16,7 @@ import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
+import { convertRulesFilterToKQL } from '../../../../common/utils/kql';
 import type { UpgradeSpecificRulesRequest } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_request_schema';
 import type { PerformRuleUpgradeResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_response_schema';
 import type { InstallSpecificRulesRequest } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_request_schema';
@@ -73,7 +74,6 @@ import type {
   RulesSnoozeSettingsMap,
   UpdateRulesProps,
 } from '../logic/types';
-import { convertRulesFilterToKQL } from '../logic/utils';
 import type { ReviewRuleUpgradeResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/review_rule_upgrade/response_schema';
 import type { ReviewRuleInstallationResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/review_rule_installation/response_schema';
 
@@ -169,14 +169,14 @@ export const fetchRules = async ({
   },
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
-  const filterString = convertRulesFilterToKQL(filterOptions);
+  const kql = convertRulesFilterToKQL(filterOptions);
 
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,
     sort_field: sortingOptions.field,
     sort_order: sortingOptions.order,
-    ...(filterString !== '' ? { filter: filterString } : {}),
+    ...(kql !== '' ? { filter: kql } : {}),
   };
 
   return KibanaServices.get().http.fetch<FetchRulesResponse>(DETECTION_ENGINE_RULES_URL_FIND, {
