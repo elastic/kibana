@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const MANAGEMENT_API_KEYS = '/app/management/security/api_keys';
-
-// Server Routes
-export const CREATE_API_KEY_PATH = '/internal/security/api_key';
-export const FETCH_INDICES_PATH = '/internal/serverless_search/indices';
+export const API_KEY_PLACEHOLDER = 'your_api_key';
+export const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';
+export const INDEX_NAME_PLACEHOLDER = 'index_name';
