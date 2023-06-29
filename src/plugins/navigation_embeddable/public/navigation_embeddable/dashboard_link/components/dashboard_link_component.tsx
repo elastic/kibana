@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import useAsync from 'react-use/lib/useAsync';
 import React from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
@@ -15,18 +14,18 @@ import { useDashboardLinkEmbeddable } from '../embeddable/dashboard_link_embedda
 export const DashboardLinkComponent = () => {
   const embeddable = useDashboardLinkEmbeddable();
 
+  const isLoading = embeddable.select((state) => state.output.loading);
+  const dashboardLinkId = embeddable.select((state) => state.explicitInput.dashboardId);
   const dashboardLinkLabel = embeddable.select((state) => state.explicitInput.label);
-  const currentDashboardId = embeddable.select((state) => state.componentState.currentDashboardId);
 
-  const { loading: loadingDashboard, value: dashboard } = useAsync(async () => {
-    return await embeddable.fetchDashboard();
-  }, []);
+  const dashboardTitle = embeddable.select((state) => state.componentState.dashboardTitle);
+  const currentDashboardId = embeddable.select((state) => state.componentState.currentDashboardId);
 
   return (
     <EuiButtonEmpty
-      isLoading={loadingDashboard}
+      isLoading={isLoading}
       iconType="dashboardApp"
-      {...(dashboard && dashboard.id === currentDashboardId
+      {...(dashboardLinkId === currentDashboardId
         ? {
             color: 'text',
           }
@@ -35,7 +34,7 @@ export const DashboardLinkComponent = () => {
             onClick: () => {}, // TODO: As part of https://github.com/elastic/kibana/issues/154381, connect to drilldown
           })}
     >
-      {dashboardLinkLabel || dashboard?.attributes.title}
+      {dashboardLinkLabel || dashboardTitle}
     </EuiButtonEmpty>
   );
 };

@@ -7,7 +7,9 @@
  */
 
 import ReactDOM from 'react-dom';
+import { batch } from 'react-redux';
 import React, { createContext, useContext } from 'react';
+import { distinctUntilChanged, skip, Subscription } from 'rxjs';
 
 import { Embeddable } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -17,7 +19,7 @@ import { dashboardLinkReducers } from '../dashboard_link_reducers';
 import { DashboardLinkComponent } from '../components/dashboard_link_component';
 import { coreServices, dashboardServices } from '../../services/kibana_services';
 import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from './dashboard_link_embeddable_factory';
-import { DashboardItem, DashboardLinkInput, DashboardLinkReduxState } from '../types';
+import { DashboardLinkInput, DashboardLinkReduxState } from '../types';
 import { NavigationContainer } from '../../navigation_container/embeddable/navigation_container';
 
 export const DashboardLinkContext = createContext<DashboardLinkEmbeddable | null>(null);
@@ -47,6 +49,8 @@ export class DashboardLinkEmbeddable extends Embeddable<DashboardLinkInput> {
 
   private cleanupStateTools: () => void;
 
+  private subscriptions: Subscription = new Subscription();
+
   constructor(
     reduxToolsPackage: ReduxToolsPackage,
     initialInput: DashboardLinkInput,
@@ -69,9 +73,31 @@ export class DashboardLinkEmbeddable extends Embeddable<DashboardLinkInput> {
     this.dispatch = reduxEmbeddableTools.dispatch;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
+
+    this.initialize();
   }
 
-  public async fetchDashboard(): Promise<DashboardItem> {
+  private async initialize() {
+    this.setupSubscriptions();
+    await this.fetchDashboard();
+    this.setInitializationFinished();
+  }
+
+  private setupSubscriptions() {
+    /** When this embeddable's link in the explicit input, update component state to match */
+    this.subscriptions.add(
+      this.getInput$()
+        .pipe(
+          skip(1),
+          distinctUntilChanged((a, b) => a.dashboardId === b.dashboardId)
+        )
+        .subscribe(async () => {
+          await this.fetchDashboard();
+        })
+    );
+  }
+
+  public async fetchDashboard() {
     this.dispatch.setLoading(true);
 
     const dashboardId = this.input.dashboardId;
@@ -81,8 +107,11 @@ export class DashboardLinkEmbeddable extends Embeddable<DashboardLinkInput> {
       throw new Error('failure'); // TODO: better error handling
     }
 
-    this.dispatch.setLoading(false);
-    return response;
+    batch(() => {
+      this.dispatch.setDashboardTitle(response.attributes.title);
+      this.dispatch.setDashboardDescription(response.attributes.description);
+      this.dispatch.setLoading(false);
+    });
   }
 
   public render(node: HTMLElement) {

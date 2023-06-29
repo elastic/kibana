@@ -6,16 +6,9 @@
  * Side Public License, v 1.
  */
 
-import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import {
-  EuiFormControlLayout,
-  EuiFormLabel,
-  EuiFormRow,
-  EuiLoadingChart,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiLoadingChart } from '@elastic/eui';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { useNavigationEmbeddable } from '../embeddable/navigation_container';
 import { LinkEmbeddable } from '../../types';
@@ -65,7 +58,6 @@ export const NavigationEmbeddableLink = ({
     embeddableType,
     embeddableId,
   });
-  // console.log(embeddable);
 
   useEffect(() => {
     if (embeddableRoot.current) {

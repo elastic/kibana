@@ -301,7 +301,7 @@ export abstract class Container<
 
   public async getExplicitInputIsEqual(lastInput: TContainerInput) {
     const { panels: lastPanels, ...restOfLastInput } = lastInput;
-    const { panels: currentPanels, ...restOfCurrentInput } = this.getInput();
+    const { panels: currentPanels, ...restOfCurrentInput } = this.getExplicitInput();
     const otherInputIsEqual = isEqual(restOfLastInput, restOfCurrentInput);
     if (!otherInputIsEqual) return false;
 

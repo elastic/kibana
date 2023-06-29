@@ -102,9 +102,9 @@ export class NavigationContainer extends Container<
 
   protected getInheritedInput(id: string): LinkInput {
     // console.log('get inherited input');
-    const { viewMode } = this.getInput();
+    // const { viewMode } = this.getInput();
 
-    return { id, viewMode };
+    return { id };
   }
 
   private async initialize() {
