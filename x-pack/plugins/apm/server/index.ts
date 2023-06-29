@@ -89,6 +89,15 @@ const configSchema = schema.object({
     sourcemapApiAvailable: disabledOnServerless,
     storageExplorerAvailable: disabledOnServerless,
   }),
+  serverless: schema.object({
+    enabled: schema.conditional(
+      schema.contextRef('serverless'),
+      true,
+      schema.literal(true),
+      schema.never(),
+      { defaultValue: schema.contextRef('serverless') }
+    ),
+  }),
 });
 
 // plugin config
@@ -150,6 +159,7 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     managedServiceUrl: true,
     serverlessOnboarding: true,
     featureFlags: true,
+    serverless: true,
   },
   schema: configSchema,
 };
