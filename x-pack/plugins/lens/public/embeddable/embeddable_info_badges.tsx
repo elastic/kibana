@@ -66,8 +66,8 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
               color: transparent;
               font-size: ${xsFontSize};
               height: ${euiTheme.size.l} !important;
-              .euiButtonEmpty__content {
-                padding: 0 ${euiTheme.size.xs};
+              .euiButtonEmpty {
+                padding-inline: ${euiTheme.size.xs};
               }
               .euiButtonEmpty__text {
                 margin-inline-start: ${euiTheme.size.xs};
