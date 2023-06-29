@@ -23,27 +23,43 @@ export interface DefaultDatasetsSelectorContext {
 
 export type DatasetsSelectorTypestate =
   | {
-      value: 'closed';
+      value: 'popover';
       context: DefaultDatasetsSelectorContext;
     }
   | {
-      value: 'open';
+      value: 'popover.closed';
       context: DefaultDatasetsSelectorContext;
     }
   | {
-      value: { open: 'hist' };
+      value: 'popover.open';
       context: DefaultDatasetsSelectorContext;
     }
   | {
-      value: { open: 'listingIntegrations' };
+      value: 'popover.open.hist';
       context: DefaultDatasetsSelectorContext;
     }
   | {
-      value: { open: 'listingIntegrationStreams' };
+      value: 'popover.open.listingIntegrations';
       context: DefaultDatasetsSelectorContext;
     }
   | {
-      value: { open: 'listingUnmanagedStreams' };
+      value: 'popover.open.listingIntegrationStreams';
+      context: DefaultDatasetsSelectorContext;
+    }
+  | {
+      value: 'popover.open.listingUnmanagedStreams';
+      context: DefaultDatasetsSelectorContext;
+    }
+  | {
+      value: 'selection';
+      context: DefaultDatasetsSelectorContext;
+    }
+  | {
+      value: 'selection.single';
+      context: DefaultDatasetsSelectorContext;
+    }
+  | {
+      value: 'selection.all';
       context: DefaultDatasetsSelectorContext;
     };
 
@@ -65,7 +81,7 @@ export type DatasetsSelectorEvent =
       dataset: Dataset;
     }
   | {
-      type: 'SELECT_ALL_LOG_DATASET';
+      type: 'SELECT_ALL_LOGS_DATASET';
       dataset: Dataset;
     }
   | {

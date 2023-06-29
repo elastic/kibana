@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiContextMenu, EuiHorizontalRule, EuiIcon } from '@elastic/eui';
+import { EuiContextMenu, EuiHorizontalRule } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { Dataset } from '../../../common/datasets';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 import { dynamic } from '../../utils/dynamic';
 import {
@@ -23,7 +22,12 @@ import { DatasetsPopover } from './sub_components/datasets_popover';
 import { DatasetSkeleton } from './sub_components/datasets_skeleton';
 import { SearchControls } from './sub_components/search_controls';
 import { DatasetSelectorProps } from './types';
-import { buildIntegrationsTree } from './utils';
+import {
+  buildIntegrationsTree,
+  createAllLogDatasetsItem,
+  createUnmanagedDatasetsItem,
+  createIntegrationStatusItem,
+} from './utils';
 
 /**
  * Lazy load hidden components
@@ -31,7 +35,6 @@ import { buildIntegrationsTree } from './utils';
 const DatasetsList = dynamic(() => import('./sub_components/datasets_list'), {
   fallback: <DatasetSkeleton />,
 });
-const IntegrationsListStatus = dynamic(() => import('./sub_components/integrations_list_status'));
 
 export function DatasetSelector({
   datasets,
@@ -83,34 +86,20 @@ export function DatasetSelector({
   const [setSpyRef] = useIntersectionRef({ onIntersecting: scrollToIntegrationsBottom });
 
   const { items: integrationItems, panels: integrationPanels } = useMemo(() => {
-    const allLogDataset = Dataset.createAllLogsDataset();
-    const allLogDatasetsItem = {
-      name: allLogDataset.title,
-      icon: allLogDataset.iconType && <EuiIcon type={allLogDataset.iconType} />,
-      onClick: () => selectAllLogDataset(allLogDataset),
-    };
-
-    const unmanagedDatasetsItem = {
-      name: uncategorizedLabel,
-      icon: <EuiIcon type="documents" />,
-      onClick: onStreamsEntryClick,
-      panel: UNMANAGED_STREAMS_PANEL_ID,
-    };
-
-    const createIntegrationStatusItem = () => ({
-      disabled: true,
-      name: (
-        <IntegrationsListStatus
-          error={integrationsError}
-          integrations={integrations}
-          onRetry={onIntegrationsReload}
-        />
-      ),
-    });
+    const allLogDatasetsItem = createAllLogDatasetsItem({ onClick: selectAllLogDataset });
+    const unmanagedDatasetsItem = createUnmanagedDatasetsItem({ onClick: onStreamsEntryClick });
 
     if (!integrations || integrations.length === 0) {
       return {
-        items: [allLogDatasetsItem, unmanagedDatasetsItem, createIntegrationStatusItem()],
+        items: [
+          allLogDatasetsItem,
+          unmanagedDatasetsItem,
+          createIntegrationStatusItem({
+            error: integrationsError,
+            integrations,
+            onRetry: onIntegrationsReload,
+          }),
+        ],
         panels: [],
       };
     }
@@ -128,6 +117,7 @@ export function DatasetSelector({
   }, [
     integrations,
     integrationsError,
+    selectAllLogDataset,
     selectDataset,
     onIntegrationsReload,
     onStreamsEntryClick,
@@ -179,6 +169,7 @@ export function DatasetSelector({
         onPanelChange={changePanel}
         className="eui-yScroll"
         css={contextMenuStyles}
+        size="s"
       />
     </DatasetsPopover>
   );

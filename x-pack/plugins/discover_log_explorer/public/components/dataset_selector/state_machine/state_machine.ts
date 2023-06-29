@@ -19,35 +19,34 @@ import {
 export const createPureDatasetsSelectorStateMachine = (
   initialContext: Partial<DefaultDatasetsSelectorContext> = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVsztgZTABswBjdAewCcA6Ew87CAYgBUB5AcQ4BkBRAbQAMAXUSgADgwCW6KeQB2YkAA9EARgBMggMzUAbAHYAnHoAcBgKwAaEAE9EptdQsBfFzbSZsuAsTJVqcnEweSYAYW42PAERJUlYGTlFJBV1LV1DE3NrO0RtQSdXdxBPLBx8IlIKGiCQ1k4eGNEU+MSFJVUETR19YzNLG3sEDQs1Nw8MMp9K-xrg+WpsP2rqQilYWXkoAEl5dDAoSgwk2HCACQBBADkOXgB9AAVr3m4hZolpWXaUzoAWAycpm0FiM2gGuQQem0pmceg0v1M-1+mjUgiM4xKk28FWWAVqCyWVQCaw2Ui2u32h2OClOYUuN3uTyuL34aneIFaX2SoD+AOoQJBYJyQ1R-35Bl+RkREpRY2KpWxviJcxCixmKxJmx2ewORy5pzwYQASmxuNw7uw7tsrixeBwjRcWNs2Fc8HcAEJsFjsACybzinySHXUagMgwcFl+1FDalMIJlGlR6PlWPKStmgXmatxNE1ZO1lL1JyY0QuRrpHoAmncrhcfU0AwkucGuoj9EY1L9BHDhYgDPlqAY9BY9GiE0mMQq0+q8VnCRm8+SdVT9SW2EaWFW7uvkLwjf6WoHvjz1EYNPztOlNL3IYIDNRgaD48jE2jJ6npjnM6r5xr1lqKV1al5DwdBKDAVAAFtaXpW5HmeV5YkPJsgx+RA9GHaMjAsbRr3DBAjCMe8wUlaUXwnFMvGnL98WzZVVn-fNAJXJJQPAqCDV4MsK3data3rA8PhQ49UgQUxTEEagNGHHt8PMc8sn7JEUTfSiphxejaN-YlGKXQtgLYiDoLXDctx3PdBI5I9uVE8SYUEHQjG7EZ8IlIxYXhMiVOTCYqM-TS5xnXNdKgABVeRINQeRUBgCBDI485rjgpkWSQoS2hszoMIsLCcLwiELHE6hnIRZTXx8zE-I0jMtKChjSS2cLIui2L4uM0tyzOLd+IbZCMpbcTJIKEcXIhX4oX0EbtDKpNfnfKr0xWWqv0XMKIqimLIDag1103XjtyNXd9zSqzhMyhxzH5K9RqGabJJGeb1MW2dVUg8gIDARZ82IEsXl4MJNwuM07kiDg7mQR0LmiFhLM5VCTwQf5dGG2SIU7PR3KUx9xzlXynrq2i3o+r6th+6I+AB8HIeh2HrJbDQgWcfC1GBPRB0TbRoScgxzAMAxHsVAmsyJz7UEIQhfopzcIZYKHeBhk64ZErLCOjPQu1RkVcPckipRmuVinkd64CUKd-NmRt+rQhAAFoNDDCEbb0AXqPougGEgS3m2tln7eoIiZJuxARjmtTBZo+Yvfh0TE2ZzCHrD12aqzAALf8o+VxAz2Z2MYXMUj9Zd82lsCnMM-OyEjHwkZz0sIvqpLn86tW5iixpcuWxZtmRpvbCcrhAvx1UvHw4CpuVpC1uDLAoz4D672Eelf3+hvVECgfNyvPK+vnpVAlm5CpqNtameOI762l8Um8QXPEqt4okek8bhYRfPhGNGBJm0Y-wFN8LxPi4vRfsbEmUBiBv1EpedyFgP6-CFMzUYt8JIAm0NzXm-MAENyAdQEW1AxaEAgZ0UwoJehXwQZ2ZwyCWZoL5hgtwQA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVsztgZTABswBjdAewCcA6AB3PoDcwaTDzsIBiAFQHkA4gIAyAUQDaABgC6iUPVgBLdIvIA7OSAAeiABwAmADQgAnogCMAVknUAnPfsB2W5cfPLuxwF8vxtJmxcAmIyKjoGcmYaBjA1LgBhYT48CRlNBWVVDSRtC3NbABZqADZnR3ziySqAZklHYzMEav1zagKHewLqwurq3R8-DCwcfCJSChp6JhZqGLj+ITEpWRyMlXVNHQRzfKLS23LbSpq6hsRq4ts7DuKDSXNq8wKBkH9hoLHQyYio2dpY6iERSwFRqKAASTU6DAUEoGCysASAAkAIIAOQEogA+gAFdGiYTLdIcTIbHJbArOai6aqWQqOKqSXQuNxnbbmBnUaqOawVWzdYp9F5vQKjEITcLTaL-NSA4GgiFQmFw9ZqRHxVEY7F4tEE8TmFbyEmqzaISlXGl0ymM5mueqmRCOYqtSTFfSUt26fLc4VDUXBcZhKaRGZzOUgxRgyHQ2Hw9SIvDxABKfGEwix-Cx4LRPFEAiTKJ44L4aLwWIAQnwePwALJE1bGrKm9n2xoHaptFpe5m6LoXX0BEYBr6SkPSgFAiNRpWx1UJ0QopMaisATSxaJRNdShpAayb5IsvZKtiedXM+gv1QKBTZuks+mo90szo5ztq+m8vlefqHnwlwd+MNJwVaNlTjNUuDwPgkx4VcsWg5BRCTesjSUE0D22WwHxpfRJEpRxdGKSxiI5NlHFqEpJH5fRdGZKpzF7Ad3jFQNvilP4J3lSNFRjFUEUgglRHiWCUTTLEkgEMtkELFEUh4FDd0bMlQC2HYj32Q5jkkWpWzNBjqGsejHnPZkOSY-0-yDH5QxlcMQJnPj1DwdBKDAVAAFt1U1TFcXxQk0gbND9xUxBSlafJLGaHlz2dSwyPMGxn3dXoGSdfRBXM39xSs9igK46dePA5zXI8+dF2Xcs1w3LcFL3ZTcgQWjimodLn3vbkaIMYo2Q8SxqCsN1HkFLpigyr8RSy1jR0A2zgO40DZyyYq3M8yDoNgyr4KTRDkIC1DSWyELGsKR9tKwwoClG8puodBBLtaRx2nsL19AOAxXEyj5srYscONlOaCrA1VltKgSxGErFpJ4WTRHkvbFKC+rVIYvYygqRkdLIt0DLda8CgvWwqNsT6WJHACbM4qcoAAVTUdzUDUVAYAgEHVo1dEfJ1PV4bqw6GrC-qXCiywYqsNkdnyakeUke8nWcbT+nGn8vqm8nx3+-KabphmmcgVmyqXJE4Oq7diURvmtiax8BuvWkjnIoxbs6NpbnIxwLwvfYSeHf9rPVuzuNp+nGeZ-W1pguCEKQ2qlItvR+WpXCrxlg4eSI29ykfXGiOZWkPE-QZBxVsm-b+gOwSDnXQ5clb53B2CoZhuGd155s1NRg50ZOXSW1aTxrH0SxLvvEXniVovSYlbBxSyaglDBYgwaEkSxIkqSZLkmPzebD9HBKSKDG5Up9CvcWrUfC9zS9YoChpMfC+Yn2wmn8ZZ-nqBF5SevIY32Gt4O5sRFHwnkeAUZ8CUrQ3UaE8FwbRCKSA-FRW49xvaWRoC-Mgs9UCEEIEvCGjdN481js2XoHYT4RVdEcI4BhxbWhKOYN0TJb5uEej4L8ahyAQDgJoCaxcJhmwARhAAtBRQmhE7xdGZAUGW3I2RCPdKdRkJEvRuCsPfb8E8n4-SiAI9CR0WhskFAZRk9wYpD2dKw8ej80HTRmGwDgkBdHBQak8KkdwrwFG9BcfGbJuR9Uul0PCd5IpdFQd9Wx6snFI1CrYXxj0WpPWvuUXqxQwmq1LmGAAFvKKJcdti0hxu6LCVhaIy10IYy4lF+R9GfLoGWZkrEWXCWrMuAMeJAwRLktuBSkrtBaB4OpHhxZ1GwtLJkr0LpUTSSXXKs1NYLUcmofWXSMJ3g7NQtwHhOpUUdo0coHZelEQeLabS0zfazMpgqSuIc9Y11Kiso6ay7Cux5AYUpWFxbnlGYZYJVE3BnOfn+ZxrcMIcmAQ8J44CU6XWqOLPoHYdgvlpC0AiBEAXoKBeoOe3FiAPJcReEofQGLu1wnSawUCLBuj7lhWo9hkF3lSY0yaI4MGqmoNgwgeKtjEQfM4PGNJKjPgIuLXGXIaVE3pc+NhXggA */
   createMachine<DatasetsSelectorContext, DatasetsSelectorEvent, DatasetsSelectorTypestate>(
     {
       context: { ...DEFAULT_CONTEXT, ...initialContext },
       preserveActionOrder: true,
       predictableActionArguments: true,
       id: 'DatasetsSelector',
-      initial: 'closed',
+      type: 'parallel',
       states: {
-        closed: {
-          id: 'closed',
-          on: {
-            TOGGLE: 'open.hist',
-          },
-        },
-        open: {
-          type: 'parallel',
-          on: {
-            CLOSE: 'closed',
-            TOGGLE: 'closed',
-          },
+        popover: {
+          initial: 'closed',
           states: {
-            hist: {
-              type: 'history',
-              history: 'deep',
+            closed: {
+              id: 'closed',
+              on: {
+                TOGGLE: 'open.hist',
+              },
             },
-            selector: {
+            open: {
               initial: 'listingIntegrations',
+              on: {
+                CLOSE: 'closed',
+                TOGGLE: 'closed',
+              },
               states: {
+                hist: {
+                  type: 'history',
+                },
                 listingIntegrations: {
                   entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
                   on: {
@@ -69,6 +68,7 @@ export const createPureDatasetsSelectorStateMachine = (
                     SORT_BY_ORDER: {
                       actions: ['storeSearch', 'sortIntegrations'],
                     },
+                    SELECT_ALL_LOGS_DATASET: '#closed',
                   },
                 },
                 listingIntegrationStreams: {
@@ -81,6 +81,7 @@ export const createPureDatasetsSelectorStateMachine = (
                     SORT_BY_ORDER: {
                       actions: ['storeSearch', 'sortIntegrationsStreams'],
                     },
+                    SELECT_DATASET: '#closed',
                   },
                 },
                 listingUnmanagedStreams: {
@@ -93,32 +94,32 @@ export const createPureDatasetsSelectorStateMachine = (
                     SORT_BY_ORDER: {
                       actions: ['storeSearch', 'sortUnmanagedStreams'],
                     },
+                    SELECT_DATASET: '#closed',
                   },
                 },
               },
             },
-            mode: {
-              initial: 'single',
-              states: {
-                single: {
-                  on: {
-                    SELECT_ALL_LOG_DATASET: {
-                      cond: 'isListingIntegrations',
-                      actions: ['storeSelection', 'notifySelectionChanged', 'closeSelector'],
-                      target: 'all',
-                    },
-                    SELECT_DATASET: {
-                      actions: ['storeSelection', 'notifySelectionChanged', 'closeSelector'],
-                    },
-                  },
+          },
+        },
+        selection: {
+          initial: 'single',
+          states: {
+            single: {
+              on: {
+                SELECT_ALL_LOGS_DATASET: {
+                  actions: ['storeSelection', 'notifySelectionChanged'],
+                  target: 'all',
                 },
-                all: {
-                  on: {
-                    SELECT_DATASET: {
-                      actions: ['storeSelection', 'notifySelectionChanged', 'closeSelector'],
-                      target: 'single',
-                    },
-                  },
+                SELECT_DATASET: {
+                  actions: ['storeSelection', 'notifySelectionChanged'],
+                },
+              },
+            },
+            all: {
+              on: {
+                SELECT_DATASET: {
+                  actions: ['storeSelection', 'notifySelectionChanged'],
+                  target: 'single',
                 },
               },
             },
@@ -128,7 +129,6 @@ export const createPureDatasetsSelectorStateMachine = (
     },
     {
       actions: {
-        closeSelector: raise('CLOSE'),
         storePanelId: assign((_context, event) =>
           'panelId' in event ? { panelId: event.panelId } : {}
         ),
@@ -157,9 +157,6 @@ export const createPureDatasetsSelectorStateMachine = (
         }),
       },
       guards: {
-        isListingIntegrations: (_context, _event, { state }) => {
-          return state.matches('open.selector.listingIntegrations');
-        },
         isUnmanagedStreamsId: (_context, event) => {
           return 'panelId' in event && event.panelId === UNMANAGED_STREAMS_PANEL_ID;
         },

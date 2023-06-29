@@ -45,7 +45,9 @@ export const useDatasetSelector = ({
     })
   );
 
-  const isOpen = useSelector(datasetsSelectorStateService, (state) => state.matches('open'));
+  const isOpen = useSelector(datasetsSelectorStateService, (state) =>
+    state.matches('popover.open')
+  );
 
   const panelId = useSelector(datasetsSelectorStateService, (state) => state.context.panelId);
   const search = useSelector(datasetsSelectorStateService, (state) => state.context.search);
@@ -71,7 +73,7 @@ export const useDatasetSelector = ({
   );
 
   const selectAllLogDataset = useCallback<DatasetSelectionHandler>(
-    (dataset) => datasetsSelectorStateService.send({ type: 'SELECT_ALL_LOG_DATASET', dataset }),
+    (dataset) => datasetsSelectorStateService.send({ type: 'SELECT_ALL_LOGS_DATASET', dataset }),
     [datasetsSelectorStateService]
   );
 

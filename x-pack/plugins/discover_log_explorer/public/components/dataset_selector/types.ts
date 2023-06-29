@@ -26,7 +26,7 @@ export interface DatasetSelectorProps {
   /* The integrations list, each integration includes its data streams */
   integrations: Integration[] | null;
   /* Any error occurred to show when the user preview the integrations */
-  integrationsError?: Error | null;
+  integrationsError: Error | null;
   /* Flags for loading/searching integrations or data streams*/
   isLoadingIntegrations: boolean;
   isLoadingStreams: boolean;

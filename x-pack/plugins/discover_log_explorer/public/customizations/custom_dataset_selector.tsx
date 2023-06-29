@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
-import { IndexPattern } from '@kbn/io-ts-utils';
 import { Dataset } from '../../common/datasets/models/dataset';
 import { DatasetSelectionHandler, DatasetSelector } from '../components/dataset_selector';
 import { DatasetsProvider, useDatasetsContext } from '../hooks/use_datasets';
-import { InternalStateProvider, useDataView } from '../hooks/use_data_view';
+import { InternalStateProvider } from '../hooks/use_data_view';
 import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
 import { IDatasetsClient } from '../services/datasets';
 
@@ -20,13 +19,15 @@ interface CustomDatasetSelectorProps {
 }
 
 export const CustomDatasetSelector = withProviders(({ stateContainer }) => {
-  // Container component, here goes all the state management and custom logic usage to keep the DatasetSelector presentational.
-  const dataView = useDataView();
+  const initialSelected: Dataset = Dataset.createAllLogsDataset();
 
-  const initialSelected: Dataset = Dataset.create({
-    name: dataView.getIndexPattern() as IndexPattern,
-    title: dataView.getName(),
-  });
+  /**
+   * TODO: This is a workaround to set the initial data view to the initialSelected value
+   * until we handle the restore/initialization of the dataview with https://github.com/elastic/kibana/issues/160425,
+   * where this value will be used to control the DatasetSelector selection.
+   */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  React.useEffect(() => handleStreamSelection(initialSelected), []);
 
   const {
     error: integrationsError,

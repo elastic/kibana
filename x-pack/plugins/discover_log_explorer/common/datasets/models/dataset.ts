@@ -22,7 +22,7 @@ export class Dataset {
   title: DatasetType['title'];
   parentIntegration?: IntegrationBase;
 
-  private constructor(dataset: DatasetDeps, parentIntegration?: IntegrationType) {
+  private constructor(dataset: DatasetDeps, parentIntegration?: IntegrationBase) {
     this.id = `dataset-${dataset.name}` as DatasetId;
     this.iconType = dataset.iconType;
     this.name = dataset.name;
@@ -37,12 +37,21 @@ export class Dataset {
     // Invert the property because the API returns the index pattern as `name` and a readable name as `title`
     return {
       id: this.id,
-      name: this.title,
-      title: this.name,
+      name: this.parentIntegration?.name
+        ? `[${this.parentIntegration.name}] ${this.title}`
+        : this.title,
+      title: this.name as string,
     };
   }
 
-  public static create(dataset: DatasetDeps, parentIntegration?: IntegrationType) {
+  toPlain() {
+    return {
+      name: this.name,
+      title: this.title,
+    };
+  }
+
+  public static create(dataset: DatasetDeps, parentIntegration?: IntegrationBase) {
     return new Dataset(dataset, parentIntegration);
   }
 
