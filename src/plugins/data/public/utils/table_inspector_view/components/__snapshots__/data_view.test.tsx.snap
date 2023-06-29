@@ -371,7 +371,7 @@ Array [
         >
           <nav
             aria-label="Pagination for table: "
-            class="euiPagination emotion-euiPagination-EuiPagination"
+            class="euiPagination emotion-euiPagination"
           >
             <span
               aria-atomic="true"
@@ -383,7 +383,7 @@ Array [
             </span>
             <button
               aria-label="Previous page"
-              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationArrowButton"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
               data-test-subj="pagination-button-previous"
               disabled=""
               type="button"
@@ -425,7 +425,7 @@ Array [
             </ul>
             <button
               aria-label="Next page"
-              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationArrowButton"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
               data-test-subj="pagination-button-next"
               disabled=""
               type="button"
@@ -711,7 +711,7 @@ Array [
         >
           <nav
             aria-label="Pagination for table: "
-            class="euiPagination emotion-euiPagination-EuiPagination"
+            class="euiPagination emotion-euiPagination"
           >
             <span
               aria-atomic="true"
@@ -723,7 +723,7 @@ Array [
             </span>
             <button
               aria-label="Previous page"
-              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationArrowButton"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
               data-test-subj="pagination-button-previous"
               disabled=""
               type="button"
@@ -765,7 +765,7 @@ Array [
             </ul>
             <button
               aria-label="Next page"
-              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationArrowButton"
+              class="euiButtonIcon euiPaginationArrowButton emotion-euiButtonIcon-xs-empty-disabled-isDisabled-euiPaginationButton"
               data-test-subj="pagination-button-next"
               disabled=""
               type="button"
