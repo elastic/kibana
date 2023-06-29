@@ -29,8 +29,18 @@ post:
             packages:
               type: array
               items:
-                type: string
-              description: list of package names to install
+                oneOf:
+                  - type: string
+                    description: package name
+                  - type: object
+                    properties:
+                      name:
+                        type: string
+                        description: package name
+                      version:
+                        type: string
+                        description: package version
+              description: list of packages to install
             force:
               type: boolean
               description: force install to ignore package verification errors

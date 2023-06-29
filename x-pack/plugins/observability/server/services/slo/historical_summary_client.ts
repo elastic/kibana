@@ -286,9 +286,8 @@ function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearch
 }
 
 function getDateRange(slo: SLO) {
-  const unit = toMomentUnitOfTime(slo.timeWindow.duration.unit);
-
   if (rollingTimeWindowSchema.is(slo.timeWindow)) {
+    const unit = toMomentUnitOfTime(slo.timeWindow.duration.unit);
     const now = moment();
     return {
       from: now

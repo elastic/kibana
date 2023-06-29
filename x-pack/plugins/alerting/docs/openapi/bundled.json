@@ -564,6 +564,9 @@
                 "examples": {
                   "findRulesResponse": {
                     "$ref": "#/components/examples/find_rules_response"
+                  },
+                  "findConditionalActionRulesResponse": {
+                    "$ref": "#/components/examples/find_rules_response_conditional_action"
                   }
                 }
               }
@@ -1097,7 +1100,7 @@
       "post": {
         "summary": "Mutes an alert.",
         "operationId": "muteAlert",
-        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. \n",
+        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
         "tags": [
           "alerting"
         ],
@@ -1146,7 +1149,7 @@
       "post": {
         "summary": "Unmutes an alert.",
         "operationId": "unmuteAlert",
-        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature. \n",
+        "description": "You must have `all` privileges for the appropriate Kibana features, depending on the `consumer` and `rule_type_id` of the rule. For example, the **Management > Stack Rules** feature, **Analytics > Discover** and **Machine Learning** features, **Observability**, and **Security** features. If the rule has actions, you must also have `read` privileges for the **Management > Actions and Connectors** feature.\n",
         "tags": [
           "alerting"
         ],
@@ -2449,7 +2452,7 @@
     "schemas": {
       "notify_when": {
         "type": "string",
-        "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met.\n",
+        "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
         "enum": [
           "onActionGroupChange",
           "onActiveAlert",
@@ -2459,7 +2462,7 @@
       },
       "throttle": {
         "type": "string",
-        "description": "The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if `notify_when` is set to `onThrottleInterval`. It is specified in seconds, minutes, hours, or days.",
+        "description": "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
         "nullable": true,
         "default": null,
         "example": "10m"
@@ -2476,6 +2479,120 @@
         "items": {
           "type": "object",
           "properties": {
+            "alerts_filter": {
+              "type": "object",
+              "description": "Conditions that affect whether the action runs. If you specify multiple conditions, all conditions must be met for the action to run. For example, if an alert occurs within the specified time frame and matches the query, the action runs.\n",
+              "properties": {
+                "query": {
+                  "type": "object",
+                  "description": "Defines a query filter that determines whether the action runs.",
+                  "properties": {
+                    "kql": {
+                      "type": "string",
+                      "description": "A filter written in Kibana Query Language (KQL)."
+                    },
+                    "filters": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "description": "A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the `kbn-es-query` package.",
+                        "properties": {
+                          "meta": {
+                            "type": "object",
+                            "properties": {
+                              "alias": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "controlledBy": {
+                                "type": "string"
+                              },
+                              "disabled": {
+                                "type": "boolean"
+                              },
+                              "field": {
+                                "type": "string"
+                              },
+                              "group": {
+                                "type": "string"
+                              },
+                              "index": {
+                                "type": "string"
+                              },
+                              "isMultiIndex": {
+                                "type": "boolean"
+                              },
+                              "key": {
+                                "type": "string"
+                              },
+                              "negate": {
+                                "type": "boolean"
+                              },
+                              "params": {
+                                "type": "object"
+                              },
+                              "type": {
+                                "type": "string"
+                              },
+                              "value": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "query": {
+                            "type": "object"
+                          },
+                          "$state": {
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "timeframe": {
+                  "type": "object",
+                  "description": "Defines a period that limits whether the action runs.",
+                  "properties": {
+                    "days": {
+                      "type": "array",
+                      "description": "Defines the days of the week that the action can run, represented as an array of numbers. For example, `1` represents Monday. An empty array is equivalent to specifying all the days of the week.",
+                      "items": {
+                        "type": "integer"
+                      },
+                      "example": [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5
+                      ]
+                    },
+                    "hours": {
+                      "type": "object",
+                      "description": "Defines the range of time in a day that the action can run. If the `start` value is `00:00` and the `end` value is `24:00`, actions be generated all day.\n",
+                      "properties": {
+                        "end": {
+                          "type": "string",
+                          "description": "The end of the time frame in 24-hour notation (`hh:mm`).",
+                          "example": "17:00"
+                        },
+                        "start": {
+                          "type": "string",
+                          "description": "The start of the time frame in 24-hour notation (`hh:mm`).",
+                          "example": "08:00"
+                        }
+                      }
+                    },
+                    "timezone": {
+                      "type": "string",
+                      "description": "The ISO time zone for the `hours` values. Values such as `UTC` and `UTC+1` also work but lack built-in daylight savings time support and are not recommended.\n",
+                      "example": "Europe/Madrid"
+                    }
+                  }
+                }
+              }
+            },
             "connector_type_id": {
               "type": "string",
               "description": "The type of connector. This property appears in responses but cannot be set in requests.",
@@ -2516,6 +2633,11 @@
               "type": "object",
               "description": "The parameters for the action, which are sent to the connector. The `params` are handled as Mustache templates and passed a default set of context.",
               "additionalProperties": true
+            },
+            "uuid": {
+              "type": "string",
+              "description": "A universally unique identifier (UUID) for the action.",
+              "example": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61"
             }
           }
         }
@@ -2565,8 +2687,14 @@
           "actions": {
             "$ref": "#/components/schemas/actions"
           },
+          "api_key_created_by_user": {
+            "type": "boolean",
+            "description": "Indicates whether the API key that is associated with the rule was created by the user.",
+            "example": false
+          },
           "api_key_owner": {
             "type": "string",
+            "description": "The owner of the API key that is associated with the rule and used to run background tasks.\n",
             "nullable": true,
             "example": "elastic"
           },
@@ -2640,9 +2768,14 @@
                 "example": "succeeded"
               },
               "outcome_msg": {
-                "type": "string",
-                "nullable": true,
-                "example": null
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "nullable": true
+              },
+              "outcome_order": {
+                "type": "integer"
               },
               "warning": {
                 "type": "string",
@@ -2674,12 +2807,18 @@
             "example": "2022-12-06T00:14:43.818Z"
           },
           "notify_when": {
-            "$ref": "#/components/schemas/notify_when"
+            "type": "string",
+            "description": "Indicates how often alerts generate actions.",
+            "nullable": true
           },
           "params": {
             "type": "object",
             "description": "The parameters for the rule.",
             "additionalProperties": true
+          },
+          "revision": {
+            "type": "integer",
+            "description": "The rule revision number."
           },
           "rule_type_id": {
             "type": "string",
@@ -2764,7 +2903,7 @@
       },
       "update_rule_request": {
         "title": "Update rule request",
-        "description": "The update rule API request body varies depending on the type of rule and actions.",
+        "description": "The update rule API request body varies depending on the type of rule and actions.\n",
         "type": "object",
         "required": [
           "name",
@@ -2995,13 +3134,14 @@
             "aggField": "sheet.version",
             "termField": "name.keyword"
           },
+          "revision": 1,
           "rule_type_id": ".index-threshold",
           "created_by": "elastic",
           "updated_by": "elastic",
           "created_at": "2022-12-13T22:33:41.163Z",
           "updated_at": "2022-12-13T22:33:41.163Z",
           "api_key_owner": "elastic",
-          "notify_when": "onActionGroupChange",
+          "notify_when": null,
           "muted_alert_ids": [],
           "mute_all": false,
           "scheduled_task_id": "31697a40-7b36-11ed-aa79-f742c05329b2",
@@ -3014,10 +3154,17 @@
             {
               "group": "threshold met",
               "id": "1007a0c0-7a6e-11ed-89d5-abec321c0def",
+              "uuid": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
               "params": {
                 "level": "info",
                 "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}",
                 "connector_type_id": ".server-log"
+              },
+              "connector_type_id": ".server-log",
+              "frequency": {
+                "throttle": null,
+                "summary": false,
+                "notify_when": "onActionGroupChange"
               }
             }
           ],
@@ -3032,7 +3179,8 @@
             "warning": null,
             "outcome": "succeeded"
           },
-          "next_run": "2022-12-13T22:34:44.314Z"
+          "next_run": "2022-12-13T22:34:44.314Z",
+          "api_key_created_by_user": false
         }
       },
       "update_rule_request": {
@@ -3086,6 +3234,7 @@
           "name": "new name",
           "enabled": true,
           "throttle": null,
+          "revision": 1,
           "running": false,
           "schedule": {
             "interval": "10m"
@@ -3129,6 +3278,7 @@
                 "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}"
               },
               "id": "96b668d0-a1b6-11ed-afdf-d39a49596974",
+              "uuid": "07aef2a0-9eed-4ef9-94ec-39ba58eb609d",
               "connector_type_id": ".server-log",
               "frequency": {
                 "summary": false,
@@ -3148,7 +3298,8 @@
             "warning": null,
             "outcome": "succeeded"
           },
-          "next_run": "2023-01-31T23:49:42.432Z"
+          "next_run": "2023-01-31T23:49:42.432Z",
+          "api_key_created_by_user": false
         }
       },
       "create_rule_request": {
@@ -3156,7 +3307,7 @@
         "value": {
           "actions": [
             {
-              "id": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2",
+              "id": "48de3460-f401-11ed-9f8e-399c75a2deeb",
               "frequency": {
                 "notify_when": "onActionGroupChange",
                 "summary": false
@@ -3203,6 +3354,8 @@
             {
               "group": "threshold met",
               "id": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2",
+              "uuid": "07aef2a0-9eed-4ef9-94ec-39ba58eb609d",
+              "connector_type_id": ".server-log",
               "frequency": {
                 "notify_when": "onActionGroupChange",
                 "summary": false,
@@ -3214,6 +3367,7 @@
               }
             }
           ],
+          "api_key_created_by_user": false,
           "api_key_owner": "elastic",
           "consumer": "alerts",
           "created_at": "2022-06-08T17:20:31.632Z",
@@ -3227,7 +3381,7 @@
           "muted_alert_ids": [],
           "mute_all": false,
           "name": "my rule",
-          "notify_when": "onActionGroupChange",
+          "notify_when": null,
           "params": {
             "aggType": "avg",
             "termSize": 6,
@@ -3245,6 +3399,7 @@
             "aggField": "sheet.version",
             "termField": "name.keyword"
           },
+          "revision": 0,
           "rule_type_id": ".index-threshold",
           "running": false,
           "schedule": {
@@ -3295,13 +3450,13 @@
                 "aggField": "sheet.version",
                 "termField": "name.keyword"
               },
+              "revision": 1,
               "rule_type_id": ".index-threshold",
               "created_by": "elastic",
               "updated_by": "elastic",
               "created_at": "2022-12-05T23:40:33.132Z",
               "updated_at": "2022-12-05T23:40:33.132Z",
               "api_key_owner": "elastic",
-              "notify_when": "onActionGroupChange",
               "mute_all": false,
               "muted_alert_ids": [],
               "scheduled_task_id": "3583a470-74f6-11ed-9801-35303b735aef",
@@ -3314,10 +3469,16 @@
                 {
                   "id": "9dca3e00-74f5-11ed-9801-35303b735aef",
                   "group": "threshold met",
+                  "uuid": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
                   "params": {
                     "level": "info",
                     "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}",
                     "connector_type_id": ".server-log"
+                  },
+                  "frequency": {
+                    "summary": false,
+                    "notify_when": "onActionGroupChange",
+                    "throttle": null
                   }
                 }
               ],
@@ -3332,7 +3493,170 @@
                 "warning": null,
                 "outcome": "succeeded"
               },
-              "next_run": "2022-12-06T01:45:23.912Z"
+              "next_run": "2022-12-06T01:45:23.912Z",
+              "api_key_created_by_user": false
+            }
+          ]
+        }
+      },
+      "find_rules_response_conditional_action": {
+        "summary": "Retrieve information about a rule that has conditional actions.",
+        "value": {
+          "page": 1,
+          "total": 1,
+          "per_page": 10,
+          "data": [
+            {
+              "id": "6107a8f0-f401-11ed-9f8e-399c75a2deeb",
+              "name": "security_rule",
+              "consumer": "siem",
+              "enabled": true,
+              "tags": [],
+              "throttle": null,
+              "revision": 1,
+              "running": false,
+              "schedule": {
+                "interval": "1m"
+              },
+              "params": {
+                "author": [],
+                "description": "A security threshold rule.",
+                "ruleId": "an_internal_rule_id",
+                "falsePositives": [],
+                "from": "now-3660s",
+                "immutable": false,
+                "license": "",
+                "outputIndex": "",
+                "meta": {
+                  "from": "1h",
+                  "kibana_siem_app_url": "https://localhost:5601/app/security"
+                },
+                "maxSignals": 100,
+                "riskScore": 21,
+                "riskScoreMapping": [],
+                "severity": "low",
+                "severityMapping": [],
+                "threat": [],
+                "to": "now",
+                "references": [],
+                "version": 1,
+                "exceptionsList": [],
+                "type": "threshold",
+                "language": "kuery",
+                "index": [
+                  "kibana_sample_data_logs"
+                ],
+                "query": "*",
+                "filters": [],
+                "threshold": {
+                  "field": [
+                    "bytes"
+                  ],
+                  "value": 1,
+                  "cardinality": []
+                }
+              },
+              "rule_type_id": "siem.thresholdRule",
+              "created_by": "elastic",
+              "updated_by": "elastic",
+              "created_at": "2023-05-16T15:50:28.358Z",
+              "updated_at": "2023-05-16T20:25:42.559Z",
+              "api_key_owner": "elastic",
+              "notify_when": null,
+              "mute_all": false,
+              "muted_alert_ids": [],
+              "scheduled_task_id": "6107a8f0-f401-11ed-9f8e-399c75a2deeb",
+              "execution_status": {
+                "status": "ok",
+                "last_execution_date": "2023-05-16T20:26:49.590Z",
+                "last_duration": 166
+              },
+              "actions": [
+                {
+                  "group": "default",
+                  "id": "49eae970-f401-11ed-9f8e-399c75a2deeb",
+                  "params": {
+                    "documents": [
+                      {
+                        "rule_id": {
+                          "[object Object]": null
+                        },
+                        "rule_name": {
+                          "[object Object]": null
+                        },
+                        "alert_id": {
+                          "[object Object]": null
+                        },
+                        "context_message": {
+                          "[object Object]": null
+                        }
+                      }
+                    ]
+                  },
+                  "connector_type_id": ".index",
+                  "frequency": {
+                    "summary": true,
+                    "notify_when": "onActiveAlert",
+                    "throttle": null
+                  },
+                  "uuid": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
+                  "alerts_filter": {
+                    "timeframe": {
+                      "days": [
+                        7
+                      ],
+                      "timezone": "UTC",
+                      "hours": {
+                        "start": "08:00",
+                        "end": "17:00"
+                      }
+                    },
+                    "query": {
+                      "kql": "",
+                      "filters": [
+                        {
+                          "meta": {
+                            "disabled": false,
+                            "negate": false,
+                            "alias": null,
+                            "index": "c4bdca79-e69e-4d80-82a1-e5192c621bea",
+                            "key": "client.geo.region_iso_code",
+                            "field": "client.geo.region_iso_code",
+                            "params": {
+                              "query": "CA-QC",
+                              "type": "phrase"
+                            }
+                          },
+                          "$state": {
+                            "store": "appState"
+                          },
+                          "query": {
+                            "match_phrase": {
+                              "client.geo.region_iso_code": "CA-QC"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "last_run": {
+                "alerts_count": {
+                  "new": 0,
+                  "ignored": 0,
+                  "recovered": 0,
+                  "active": 0
+                },
+                "outcome_msg": [
+                  "Rule execution completed successfully"
+                ],
+                "outcome_order": 0,
+                "warning": null,
+                "outcome": "succeeded"
+              },
+              "next_run": "2023-05-16T20:27:49.507Z",
+              "api_key_created_by_user": false
             }
           ]
         }

@@ -12,7 +12,3 @@ export interface TreeViewOptionsGroup {
   label: string;
   value: TreeViewKind;
 }
-
-export interface AgentIdResult {
-  agentId: string | null;
-}

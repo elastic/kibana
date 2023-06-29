@@ -1140,3 +1140,33 @@ export const SAVED_QUERY_LOAD_ERROR_TOAST = i18n.translate(
     defaultMessage: 'Failed to load the saved query',
   }
 );
+
+// Prompt Context i18n
+export const RULE_MANAGEMENT_CONTEXT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.ruleManagementContextDescription',
+  {
+    defaultMessage: 'Selected Detection Rules',
+  }
+);
+
+export const EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.explainThenSummarizeRuleDetails',
+  {
+    defaultMessage:
+      "Please explain the selected rules above. For each rule, highlight why they are relevant, the query as published on Elastic's detection rules repository and an in-depth explanation of it, and what they typically mean for an organization if detected.",
+  }
+);
+
+export const DETECTION_RULES_CONVERSATION_ID = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.detectionRulesConversationId',
+  {
+    defaultMessage: 'Detection Rules',
+  }
+);
+
+export const RULE_MANAGEMENT_CONTEXT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.ruleManagementContextTooltip',
+  {
+    defaultMessage: 'Add this alert as context',
+  }
+);

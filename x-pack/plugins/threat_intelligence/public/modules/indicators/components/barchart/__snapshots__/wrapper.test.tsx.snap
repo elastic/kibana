@@ -43,6 +43,7 @@ exports[`<IndicatorsBarChartWrapper /> when not loading or refetching should ren
               >
                 <span
                   class="euiComboBoxPill euiComboBoxPill--plainText"
+                  value="string"
                 >
                   threat.feed.name
                 </span>

@@ -66,8 +66,11 @@
 
 .lnsLayerPanel__dimensionRemove {
   margin-right: $euiSizeS;
-  visibility: hidden;
   opacity: 0;
+
+  &:focus {
+    opacity: 1;
+  }
 }
 
 .lnsLayerPanel__dimension {

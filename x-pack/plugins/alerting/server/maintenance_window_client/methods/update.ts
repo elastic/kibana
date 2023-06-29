@@ -84,7 +84,8 @@ async function updateWithOCC(
       ...(typeof enabled === 'boolean' ? { enabled } : {}),
       expirationDate,
       events,
-      ...modificationMetadata,
+      updatedBy: modificationMetadata.updatedBy,
+      updatedAt: modificationMetadata.updatedAt,
     };
 
     // We are deleting and then creating rather than updating because SO.update

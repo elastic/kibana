@@ -249,9 +249,16 @@ storiesOf('SearchBar', module)
       showDatePicker: false,
     } as SearchBarProps)
   )
-  .add('with date picker off', () =>
+  .add('with the default date picker auto refresh interval on', () =>
     wrapSearchBarInContext({
-      showDatePicker: false,
+      showDatePicker: true,
+      onRefreshChange: action('onRefreshChange'),
+    } as SearchBarProps)
+  )
+  .add('with the default date picker auto refresh interval off', () =>
+    wrapSearchBarInContext({
+      showDatePicker: true,
+      isAutoRefreshDisabled: true,
     } as SearchBarProps)
   )
   .add('with only the date picker on', () =>
@@ -445,6 +452,11 @@ storiesOf('SearchBar', module)
         },
       },
     } as unknown as SearchBarProps)
+  )
+  .add('without switch query language', () =>
+    wrapSearchBarInContext({
+      disableQueryLanguageSwitcher: true,
+    } as SearchBarProps)
   )
   .add('show only query bar without submit', () =>
     wrapSearchBarInContext({

@@ -24,7 +24,7 @@ export const MonitorAsyncError = () => {
         title={
           <FormattedMessage
             id="xpack.synthetics.monitorManagement.monitorSync.failure.title"
-            defaultMessage="Monitors failed to sync with the Synthetics service"
+            defaultMessage="Some monitors are not running correctly"
           />
         }
         color="warning"
@@ -33,7 +33,7 @@ export const MonitorAsyncError = () => {
         <p>
           <FormattedMessage
             id="xpack.synthetics.monitorManagement.monitorSync.failure.content"
-            defaultMessage="There was a problem syncing your monitors for one or more locations:"
+            defaultMessage="There was a problem running your monitors for one or more locations:"
           />
         </p>
         <ul>

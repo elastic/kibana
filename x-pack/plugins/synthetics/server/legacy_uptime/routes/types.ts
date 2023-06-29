@@ -120,6 +120,7 @@ export interface RouteContext {
   server: UptimeServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   subject?: Subject<unknown>;
+  spaceId: string;
 }
 
 export type SyntheticsRouteHandler = ({
@@ -139,6 +140,7 @@ export type SyntheticsStreamingRouteHandler = ({
   server,
   savedObjectsClient,
   subject: Subject,
+  spaceId,
 }: {
   uptimeEsClient: UptimeEsClient;
   context: UptimeRequestHandlerContext;
@@ -147,4 +149,5 @@ export type SyntheticsStreamingRouteHandler = ({
   server: UptimeServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   subject?: Subject<unknown>;
+  spaceId: string;
 }) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;

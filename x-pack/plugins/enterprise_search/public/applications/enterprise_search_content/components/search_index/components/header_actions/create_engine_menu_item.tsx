@@ -11,11 +11,11 @@ import { EuiContextMenuItem, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic
 
 import { i18n } from '@kbn/i18n';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../../../../../../common/constants';
+import { APPLICATIONS_PLUGIN } from '../../../../../../../common/constants';
+import { ENGINE_CREATION_PATH } from '../../../../../applications/routes';
 import { ESINDEX_QUERY_PARAMETER } from '../../../../../shared/constants';
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../../shared/kibana';
-import { ENGINE_CREATION_PATH } from '../../../../routes';
 
 export interface CreateEngineMenuItemProps {
   indexName?: string;
@@ -29,9 +29,9 @@ export const CreateEngineMenuItem: React.FC<CreateEngineMenuItemProps> = ({
   isHiddenIndex,
 }) => {
   const searchApplicationCreationPath = !indexName
-    ? `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}${ENGINE_CREATION_PATH}`
+    ? `${APPLICATIONS_PLUGIN.URL}${ENGINE_CREATION_PATH}`
     : generateEncodedPath(
-        `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}${ENGINE_CREATION_PATH}?:indexKey=:indexName`,
+        `${APPLICATIONS_PLUGIN.URL}${ENGINE_CREATION_PATH}?:indexKey=:indexName`,
         {
           indexKey: ESINDEX_QUERY_PARAMETER,
           indexName,

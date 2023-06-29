@@ -13,6 +13,7 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { transformAlertToNormalizedRuleAction } from '../../../../../../../common/detection_engine/transform_actions';
 import type { FormSchema } from '../../../../../../shared_imports';
 import {
   useForm,
@@ -104,7 +105,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
     onConfirm({
       type: editAction,
       value: {
-        actions: actions.map(({ actionTypeId, ...action }) => action),
+        actions: actions.map(transformAlertToNormalizedRuleAction),
       },
     });
   }, [form, onConfirm]);

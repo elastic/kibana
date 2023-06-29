@@ -14,17 +14,31 @@ import {
   SchemaField,
 } from '../../../common/types/engines';
 
+import { availableIndices } from './available_indices';
+
 export const fetchEngineFieldCapabilities = async (
   client: IScopedClusterClient,
   engine: EnterpriseSearchEngine
 ): Promise<EnterpriseSearchEngineFieldCapabilities> => {
   const { name, updated_at_millis, indices } = engine;
+
+  const availableIndicesList = await availableIndices(client, indices);
+
+  if (!availableIndicesList.length) {
+    return {
+      fields: [],
+      name,
+      updated_at_millis,
+    };
+  }
+
   const fieldCapabilities = await client.asCurrentUser.fieldCaps({
     fields: '*',
-    include_unmapped: true,
-    index: indices,
     filters: '-metadata',
+    include_unmapped: true,
+    index: availableIndicesList,
   });
+
   const fields = parseFieldsCapabilities(fieldCapabilities);
   return {
     fields,

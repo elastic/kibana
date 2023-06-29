@@ -11,7 +11,9 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiText } from '@elastic/eui';
+
+import { HttpError } from '../../../../../../../common/types/api';
 
 import {
   TextExpansionCallOut,
@@ -20,7 +22,10 @@ import {
   ModelDeployed,
   TextExpansionDismissButton,
   ModelStarted,
+  FineTuneModelsButton,
 } from './text_expansion_callout';
+
+import { TextExpansionErrors } from './text_expansion_errors';
 
 jest.mock('./text_expansion_callout_data', () => ({
   useTextExpansionCallOutData: jest.fn(() => ({
@@ -33,6 +38,7 @@ jest.mock('./text_expansion_callout_data', () => ({
 }));
 
 const DEFAULT_VALUES = {
+  startTextExpansionModelError: undefined,
   isCreateButtonDisabled: false,
   isModelDownloadInProgress: false,
   isModelDownloaded: false,
@@ -44,6 +50,21 @@ describe('TextExpansionCallOut', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues(DEFAULT_VALUES);
+  });
+  it('renders error panel instead of normal panel if there are some errors', () => {
+    setMockValues({
+      ...DEFAULT_VALUES,
+      startTextExpansionModelError: {
+        body: {
+          error: 'some-error',
+          message: 'some-error-message',
+          statusCode: 500,
+        },
+      } as HttpError,
+    });
+
+    const wrapper = shallow(<TextExpansionCallOut />);
+    expect(wrapper.find(TextExpansionErrors).length).toBe(1);
   });
   it('renders panel with deployment instructions if the model is not deployed', () => {
     const wrapper = shallow(<TextExpansionCallOut />);
@@ -80,7 +101,12 @@ describe('TextExpansionCallOut', () => {
   describe('DeployModel', () => {
     it('renders deploy button', () => {
       const wrapper = shallow(
-        <DeployModel dismiss={() => {}} isCreateButtonDisabled={false} isDismissable={false} />
+        <DeployModel
+          dismiss={() => {}}
+          ingestionMethod="crawler"
+          isCreateButtonDisabled={false}
+          isDismissable={false}
+        />
       );
       expect(wrapper.find(EuiButton).length).toBe(1);
       const button = wrapper.find(EuiButton);
@@ -88,7 +114,12 @@ describe('TextExpansionCallOut', () => {
     });
     it('renders disabled deploy button if it is set to disabled', () => {
       const wrapper = shallow(
-        <DeployModel dismiss={() => {}} isCreateButtonDisabled isDismissable={false} />
+        <DeployModel
+          dismiss={() => {}}
+          ingestionMethod="crawler"
+          isCreateButtonDisabled
+          isDismissable={false}
+        />
       );
       expect(wrapper.find(EuiButton).length).toBe(1);
       const button = wrapper.find(EuiButton);
@@ -96,13 +127,23 @@ describe('TextExpansionCallOut', () => {
     });
     it('renders dismiss button if it is set to dismissable', () => {
       const wrapper = shallow(
-        <DeployModel dismiss={() => {}} isCreateButtonDisabled={false} isDismissable />
+        <DeployModel
+          dismiss={() => {}}
+          ingestionMethod="crawler"
+          isCreateButtonDisabled={false}
+          isDismissable
+        />
       );
       expect(wrapper.find(TextExpansionDismissButton).length).toBe(1);
     });
     it('does not render dismiss button if it is set to non-dismissable', () => {
       const wrapper = shallow(
-        <DeployModel dismiss={() => {}} isCreateButtonDisabled={false} isDismissable={false} />
+        <DeployModel
+          dismiss={() => {}}
+          ingestionMethod="crawler"
+          isCreateButtonDisabled={false}
+          isDismissable={false}
+        />
       );
       expect(wrapper.find(TextExpansionDismissButton).length).toBe(0);
     });
@@ -124,7 +165,12 @@ describe('TextExpansionCallOut', () => {
   describe('ModelDeployed', () => {
     it('renders start button', () => {
       const wrapper = shallow(
-        <ModelDeployed dismiss={() => {}} isDismissable={false} isStartButtonDisabled={false} />
+        <ModelDeployed
+          dismiss={() => {}}
+          ingestionMethod="crawler"
+          isDismissable={false}
+          isStartButtonDisabled={false}
+        />
       );
       expect(wrapper.find(EuiButton).length).toBe(1);
       const button = wrapper.find(EuiButton);
@@ -132,7 +178,12 @@ describe('TextExpansionCallOut', () => {
     });
     it('renders disabled start button if it is set to disabled', () => {
       const wrapper = shallow(
-        <ModelDeployed dismiss={() => {}} isDismissable={false} isStartButtonDisabled />
+        <ModelDeployed
+          dismiss={() => {}}
+          ingestionMethod="crawler"
+          isDismissable={false}
+          isStartButtonDisabled
+        />
       );
       expect(wrapper.find(EuiButton).length).toBe(1);
       const button = wrapper.find(EuiButton);
@@ -140,13 +191,23 @@ describe('TextExpansionCallOut', () => {
     });
     it('renders dismiss button if it is set to dismissable', () => {
       const wrapper = shallow(
-        <ModelDeployed dismiss={() => {}} isDismissable isStartButtonDisabled={false} />
+        <ModelDeployed
+          dismiss={() => {}}
+          ingestionMethod="crawler"
+          isDismissable
+          isStartButtonDisabled={false}
+        />
       );
       expect(wrapper.find(TextExpansionDismissButton).length).toBe(1);
     });
     it('does not render dismiss button if it is set to non-dismissable', () => {
       const wrapper = shallow(
-        <ModelDeployed dismiss={() => {}} isDismissable={false} isStartButtonDisabled={false} />
+        <ModelDeployed
+          dismiss={() => {}}
+          ingestionMethod="crawler"
+          isDismissable={false}
+          isStartButtonDisabled={false}
+        />
       );
       expect(wrapper.find(TextExpansionDismissButton).length).toBe(0);
     });
@@ -154,12 +215,28 @@ describe('TextExpansionCallOut', () => {
 
   describe('ModelStarted', () => {
     it('renders dismiss button if it is set to dismissable', () => {
-      const wrapper = shallow(<ModelStarted dismiss={() => {}} isDismissable />);
+      const wrapper = shallow(
+        <ModelStarted dismiss={() => {}} isCompact={false} isDismissable isSingleThreaded />
+      );
       expect(wrapper.find(TextExpansionDismissButton).length).toBe(1);
     });
     it('does not render dismiss button if it is set to non-dismissable', () => {
-      const wrapper = shallow(<ModelStarted dismiss={() => {}} isDismissable={false} />);
+      const wrapper = shallow(
+        <ModelStarted dismiss={() => {}} isCompact={false} isDismissable={false} isSingleThreaded />
+      );
       expect(wrapper.find(TextExpansionDismissButton).length).toBe(0);
+    });
+    it('renders fine-tune button if the model is running single-threaded', () => {
+      const wrapper = shallow(
+        <ModelStarted dismiss={() => {}} isCompact={false} isDismissable isSingleThreaded />
+      );
+      expect(wrapper.find(FineTuneModelsButton).length).toBe(1);
+    });
+    it('does not render description if it is set to compact', () => {
+      const wrapper = shallow(
+        <ModelStarted dismiss={() => {}} isCompact isDismissable isSingleThreaded />
+      );
+      expect(wrapper.find(EuiText).length).toBe(1); // Title only
     });
   });
 });

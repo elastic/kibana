@@ -70,7 +70,7 @@ export const KPIGrid = () => {
         direction="row"
         gutterSize="s"
         style={{ flexGrow: 0 }}
-        data-test-subj="hostsView-metricsTrend"
+        data-test-subj="hostsViewKPIGrid"
       >
         <EuiFlexItem>
           <HostsTile />

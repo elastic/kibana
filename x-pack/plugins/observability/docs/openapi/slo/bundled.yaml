@@ -424,15 +424,6 @@ components:
               description: The APM transaction name or "*"
               type: string
               example: GET /my/api
-            goodStatusCodes:
-              description: The status codes considered as good events. Default to 2xx, 3xx and 4xx
-              type: array
-              items:
-                type: string
-              example:
-                - 2xx
-                - 3xx
-                - 4xx
             filter:
               description: KQL query used for filtering the data
               type: string
@@ -512,22 +503,18 @@ components:
       title: Calendar aligned time window definition
       required:
         - duration
-        - calendar
+        - isCalendar
       description: Defines properties for calendar aligned time window
       type: object
       properties:
         duration:
-          description: the duration formatted as {duration}{unit}
+          description: the duration formatted as {duration}{unit}, accept '1w' (weekly calendar) or '1M' (monthly calendar) only
           type: string
           example: 1M
-        calendar:
-          description: Defines the calendar start date
-          type: object
-          properties:
-            startTime:
-              description: The start date to use.
-              type: string
-              example: '2022-01-01T08:00:00.000Z'
+        isCalendar:
+          description: Indicates a calendar aligned time window
+          type: boolean
+          example: true
     budgeting_method:
       title: Budgeting method
       type: string

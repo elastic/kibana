@@ -77,13 +77,13 @@ import { useKibana } from '../../../common/lib/kibana';
 import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-import { DetectionPageFilterSet } from '../../components/detection_page_filters';
 import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
 import { GroupedAlertsTable } from '../../components/alerts_table/alerts_grouping';
 import { AlertsTableComponent } from '../../components/alerts_table';
 import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
+import { DetectionPageFilterSet } from '../../components/detection_page_filters';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -153,7 +153,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const {
     indexPattern,
     runtimeMappings,
-    dataViewId,
     loading: isLoadingIndexPattern,
   } = useSourcererDataView(SourcererScopeName.detections);
 
@@ -171,6 +170,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   } = useKibana().services;
 
   const { filterManager } = data.query;
+
+  const topLevelFilters = useMemo(() => {
+    return [
+      ...filters,
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
+    ];
+  }, [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filters]);
 
   const alertPageFilters = useMemo(() => {
     if (arePageFiltersEnabled) {
@@ -230,13 +237,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   );
 
   const alertsDefaultFilters = useMemo(
-    () => [
-      ...filters,
-      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-      ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
-      ...(alertPageFilters ?? []),
-    ],
-    [filters, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, alertPageFilters]
+    () => [...topLevelFilters, ...(alertPageFilters ?? [])],
+    [topLevelFilters, alertPageFilters]
   );
 
   // AlertsTable manages global filters itself, so not including `filters`
@@ -348,9 +350,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
         </EuiFlexGroup>
       ) : (
         <DetectionPageFilterSet
-          dataViewId={dataViewId}
           onFilterChange={pageFiltersUpdateHandler}
-          filters={filters}
+          filters={topLevelFilters}
           query={query}
           timeRange={{
             from,
@@ -362,10 +363,9 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
         />
       ),
     [
+      topLevelFilters,
       arePageFiltersEnabled,
-      dataViewId,
       statusFilter,
-      filters,
       onFilterGroupChangedCallback,
       pageFiltersUpdateHandler,
       showUpdating,

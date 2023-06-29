@@ -37,7 +37,7 @@ export const transformPutPayloadToElasticsearchRole = (
     metadata: rolePayload.metadata,
     cluster: elasticsearch.cluster || [],
     indices: elasticsearch.indices || [],
-    remote_indices: elasticsearch.remote_indices || [],
+    remote_indices: elasticsearch.remote_indices,
     run_as: elasticsearch.run_as || [],
     applications: [
       ...transformPrivilegesToElasticsearchPrivileges(application, kibana),

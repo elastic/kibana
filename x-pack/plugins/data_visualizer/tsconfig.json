@@ -54,12 +54,12 @@
     "@kbn/share-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/ui-actions-plugin",
-    "@kbn/ui-theme",
     "@kbn/unified-field-list-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/utility-types",
     "@kbn/ml-error-utils",
+    "@kbn/ml-kibana-theme",
   ],
   "exclude": [
     "target/**/*",

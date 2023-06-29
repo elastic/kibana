@@ -63,6 +63,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             value: 'oldBar',
           },
         },
@@ -83,6 +84,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             value: 'oldBar',
           },
         },
@@ -101,6 +103,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             validation_errors: [],
             value: 'oldBar',
           },
@@ -121,6 +124,7 @@ describe('ConnectorConfigurationLogic', () => {
           tooltip: '',
           type: FieldType.STRING,
           ui_restrictions: [],
+          validations: [],
           value: 'fourthBar',
         },
       });
@@ -139,6 +143,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             value: 'fourthBar',
           },
         },
@@ -157,6 +162,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             validation_errors: [],
             value: 'fourthBar',
           },
@@ -178,6 +184,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             value: 'foofoo',
           },
           password: {
@@ -192,6 +199,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             value: 'fourthBar',
           },
           restricted: {
@@ -206,6 +214,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: ['advanced'],
+            validations: [],
             value: 'I am restricted',
           },
           shownDependent1: {
@@ -220,6 +229,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             value: 'I should appear (one dependency)',
           },
           shownDependent2: {
@@ -237,6 +247,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             value: 'I should appear (multiple dependencies)',
           },
           hiddenDependent1: {
@@ -251,6 +262,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             value: 'I should hide (one dependency)',
           },
           hiddenDependent2: {
@@ -268,6 +280,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             value: 'I should hide (multiple dependencies)',
           },
         });
@@ -284,6 +297,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             value: 'foofoo',
           },
           password: {
@@ -298,6 +312,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             value: 'fourthBar',
           },
           restricted: {
@@ -312,6 +327,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: ['advanced'],
+            validations: [],
             value: 'I am restricted',
           },
           shownDependent1: {
@@ -326,6 +342,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             value: 'I should appear (one dependency)',
           },
           shownDependent2: {
@@ -343,6 +360,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             value: 'I should appear (multiple dependencies)',
           },
           hiddenDependent1: {
@@ -357,6 +375,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             value: 'I should hide (one dependency)',
           },
           hiddenDependent2: {
@@ -374,6 +393,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             value: 'I should hide (multiple dependencies)',
           },
         });
@@ -409,6 +429,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               value: 'foofoo',
             },
             password: {
@@ -423,6 +444,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               value: 'fourthBar',
             },
             restricted: {
@@ -437,6 +459,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: ['advanced'],
+              validations: [],
               value: 'I am restricted',
             },
             shownDependent1: {
@@ -451,6 +474,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               value: 'I should appear (one dependency)',
             },
             shownDependent2: {
@@ -468,6 +492,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               value: 'I should appear (multiple dependencies)',
             },
             hiddenDependent1: {
@@ -482,6 +507,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               value: 'I should hide (one dependency)',
             },
             hiddenDependent2: {
@@ -499,6 +525,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               value: 'I should hide (multiple dependencies)',
             },
           },
@@ -517,6 +544,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               validation_errors: [],
               value: 'foofoo',
             },
@@ -534,6 +562,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               validation_errors: [],
               value: 'fourthBar',
             },
@@ -551,6 +580,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               validation_errors: [],
               value: 'I should appear (one dependency)',
             },
@@ -571,6 +601,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               validation_errors: [],
               value: 'I should appear (multiple dependencies)',
             },
@@ -588,6 +619,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               value: 'fafa',
             },
             password: {
@@ -602,6 +634,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               value: 'fourthBar',
             },
             restricted: {
@@ -616,6 +649,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: ['advanced'],
+              validations: [],
               value: 'I am restricted',
             },
             shownDependent1: {
@@ -630,6 +664,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               value: 'I should appear (one dependency)',
             },
             shownDependent2: {
@@ -647,6 +682,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               value: 'I should appear (multiple dependencies)',
             },
             hiddenDependent1: {
@@ -661,6 +697,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               value: 'I should hide (one dependency)',
             },
             hiddenDependent2: {
@@ -678,6 +715,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               value: 'I should hide (multiple dependencies)',
             },
           },
@@ -696,6 +734,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               validation_errors: [],
               value: 'fafa',
             },
@@ -713,6 +752,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               validation_errors: [],
               value: 'fourthBar',
             },
@@ -730,6 +770,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               validation_errors: [],
               value: 'I should hide (one dependency)',
             },
@@ -750,6 +791,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               validation_errors: [],
               value: 'I should hide (multiple dependencies)',
             },
@@ -778,6 +820,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               validation_errors: [],
               value: 'barbar',
             },
@@ -818,6 +861,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               validation_errors: [],
               value: 'barbar',
             },
@@ -843,6 +887,7 @@ describe('ConnectorConfigurationLogic', () => {
               tooltip: '',
               type: FieldType.STRING,
               ui_restrictions: [],
+              validations: [],
               validation_errors: [],
               value: 'barbar',
             },
@@ -869,6 +914,7 @@ describe('ConnectorConfigurationLogic', () => {
             tooltip: '',
             type: FieldType.STRING,
             ui_restrictions: [],
+            validations: [],
             validation_errors: [],
             value: 'Barbara',
           },

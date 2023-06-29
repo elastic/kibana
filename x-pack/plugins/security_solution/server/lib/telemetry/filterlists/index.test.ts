@@ -6,30 +6,26 @@
  */
 
 import { copyAllowlistedFields } from '.';
+import { prebuiltRuleAllowlistFields } from './prebuilt_rules_alerts';
+import type { AllowlistFields } from './types';
 
 describe('Security Telemetry filters', () => {
   describe('allowlistEventFields', () => {
-    const allowlist = {
+    const testingKeys: AllowlistFields = {
       _id: true,
       a: true,
       b: true,
       c: {
         d: true,
       },
-      'kibana.alert.ancestors': true,
-      'kibana.alert.original_event.module': true,
-      'event.id': true,
-      'event.ingested': true,
-      'event.kind': true,
-      'event.module': true,
-      'event.outcome': true,
-      'event.provider': true,
-      'event.type': true,
-      'powershell.file.script_block_text': true,
       'kubernetes.pod.uid': true,
       'kubernetes.pod.name': true,
       'kubernetes.pod.ip': true,
-      package_version: true,
+    };
+
+    const allowlist = {
+      ...prebuiltRuleAllowlistFields,
+      ...testingKeys,
     };
 
     it('filters top level', () => {
@@ -45,6 +41,67 @@ describe('Security Telemetry filters', () => {
         a: 'a',
         b: 'b',
       });
+    });
+
+    it('filters endpoint enrichments', () => {
+      const expected = {
+        dll: {
+          code_signature: {
+            trusted: '1',
+          },
+          Ext: {
+            relative_file_creation_time: '2',
+            relative_file_name_modify_time: '3',
+          },
+          hash: {
+            sha256: '4',
+          },
+          name: '5',
+          path: '6',
+          pe: {
+            imphash: '7',
+            original_file_name: '8',
+          },
+        },
+        file: {
+          directory: '9',
+          Ext: {
+            entropy: '10',
+            header_bytes: '11',
+            original: {
+              name: '12',
+            },
+          },
+        },
+        process: {
+          Ext: {
+            api: {
+              name: '13',
+            },
+            effective_parent: {
+              executable: '14',
+              name: '15',
+            },
+          },
+          parent: {
+            Ext: {
+              real: {
+                pid: '16',
+              },
+            },
+          },
+        },
+      };
+
+      const event = {
+        ...expected,
+        ...{
+          val1: 'unexpected-1',
+          val2: 'unexpected-2',
+        },
+      };
+
+      expect(copyAllowlistedFields(allowlist, event)).toStrictEqual(expected);
     });
 
     it('filters nested', () => {

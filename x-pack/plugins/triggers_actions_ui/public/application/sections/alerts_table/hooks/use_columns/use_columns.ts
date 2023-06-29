@@ -10,7 +10,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { AlertsTableStorage } from '../../alerts_table_state';
 import { toggleColumn } from './toggle_column';
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
@@ -151,7 +151,15 @@ export const useColumns = ({
     initialBrowserFields,
   });
 
-  const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
+  const [columns, setColumns] = useState<EuiDataGridColumn[]>(() => {
+    let cols = storageAlertsTable.current.columns;
+    // before restoring from storage, enrich the column data
+    if (initialBrowserFields && defaultColumns) {
+      cols = populateColumns(cols, initialBrowserFields, defaultColumns);
+    }
+    return cols;
+  });
+
   const [isColumnsPopulated, setColumnsPopulated] = useState<boolean>(false);
 
   const defaultColumnsRef = useRef<typeof defaultColumns>(defaultColumns);
@@ -162,16 +170,18 @@ export const useColumns = ({
   );
 
   useEffect(() => {
-    // if defaultColumns have changed, populate again
+    // if defaultColumns have changed,
+    // get the latest columns provided by client and
     if (didDefaultColumnChange) {
       defaultColumnsRef.current = defaultColumns;
+      setColumnsPopulated(false);
       setColumns(storageAlertsTable.current.columns);
       return;
     }
   }, [didDefaultColumnChange, storageAlertsTable, defaultColumns]);
 
   useEffect(() => {
-    if (isBrowserFieldDataLoading !== false || isColumnsPopulated) return;
+    if (isEmpty(browserFields) || isColumnsPopulated) return;
 
     const populatedColumns = populateColumns(columns, browserFields, defaultColumns);
 
@@ -233,9 +243,13 @@ export const useColumns = ({
     [columns]
   );
 
+  const visibleColumns = useMemo(() => {
+    return getColumnIds(columns);
+  }, [columns]);
+
   return {
     columns,
-    visibleColumns: getColumnIds(columns),
+    visibleColumns,
     isBrowserFieldDataLoading,
     browserFields,
     onColumnsChange: setColumnsAndSave,

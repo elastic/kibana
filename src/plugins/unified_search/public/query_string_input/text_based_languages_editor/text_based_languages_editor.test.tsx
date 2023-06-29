@@ -11,17 +11,20 @@ import { act } from 'react-dom/test-utils';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { TextBasedLanguagesEditor, TextBasedLanguagesEditorProps } from '.';
 
 describe('TextBasedLanguagesEditor', () => {
   const uiConfig: Record<string, any> = {};
+  const { theme: setUpMockTheme } = coreMock.createSetup();
   const uiSettings = {
     get: (key: string) => uiConfig[key],
   } as IUiSettingsClient;
 
   const services = {
     uiSettings,
+    theme: setUpMockTheme,
   };
 
   function renderTextBasedLanguagesEditorComponent(testProps: TextBasedLanguagesEditorProps) {

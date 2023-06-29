@@ -27,7 +27,6 @@ import {
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DataRequest } from '../../util/data_request';
-import { registerSource } from '../source_registry';
 import { convertToGeoJson } from './convert_to_geojson';
 import { ESDocField } from '../../fields/es_doc_field';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -404,8 +403,3 @@ export class ESGeoLineSource extends AbstractESAggSource {
     return [LICENSED_FEATURES.GEO_LINE_AGG];
   }
 }
-
-registerSource({
-  ConstructorFunction: ESGeoLineSource,
-  type: SOURCE_TYPES.ES_GEO_LINE,
-});

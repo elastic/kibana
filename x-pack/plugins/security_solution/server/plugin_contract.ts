@@ -17,6 +17,7 @@ import type {
   PluginStartContract as AlertingPluginStart,
 } from '@kbn/alerting-plugin/server';
 import type { CasesStart } from '@kbn/cases-plugin/server';
+import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -43,6 +44,7 @@ import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 
 export interface SecuritySolutionPluginSetupDependencies {
+  actions: ActionsPluginSetup;
   alerting: AlertingPluginSetup;
   cloud: CloudSetup;
   data: DataPluginSetup;

@@ -31,7 +31,7 @@ export const registerObservabilityRuleTypes = (
     },
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return '/unknown/docs';
+      return 'https://www.elastic.co/guide/en/observability/current/slo-burn-rate-alert.html';
     },
     ruleParamsExpression: lazy(() => import('../components/app/burn_rate_rule_editor')),
     validate: validateBurnRateRule,

@@ -60,6 +60,7 @@ export interface Props {
   };
   ilmPhase: IlmPhase | undefined;
   indexName: string;
+  isAssistantEnabled: boolean;
   openCreateCaseFlyout: ({
     comments,
     headerContent,
@@ -82,6 +83,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   getGroupByFieldsOnClick,
   ilmPhase,
   indexName,
+  isAssistantEnabled,
   openCreateCaseFlyout,
   pattern,
   patternRollup,
@@ -143,6 +145,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         docsCount,
         getGroupByFieldsOnClick,
         ilmPhase,
+        isAssistantEnabled,
         indexName,
         onAddToNewCase,
         partitionedFieldMetadata: partitionedFieldMetadata ?? EMPTY_METADATA,
@@ -161,6 +164,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
       getGroupByFieldsOnClick,
       ilmPhase,
       indexName,
+      isAssistantEnabled,
       onAddToNewCase,
       partitionedFieldMetadata,
       pattern,

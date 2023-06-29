@@ -43,6 +43,13 @@ jest.mock('../../kibana_services', () => {
     getCore() {
       return {};
     },
+    getEMSSettings() {
+      return {
+        isEMSUrlSet() {
+          return false;
+        },
+      };
+    },
   };
 });
 

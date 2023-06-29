@@ -177,7 +177,7 @@ describe('FetchHistoricalSummary', () => {
       const slo = createSLO({
         timeWindow: {
           duration: oneMonth(),
-          calendar: { startTime: new Date('2023-01-01T00:00:00.000Z') },
+          isCalendar: true,
         },
         budgetingMethod: 'timeslices',
         objective: { target: 0.95, timesliceTarget: 0.9, timesliceWindow: oneMinute() },
@@ -200,7 +200,7 @@ describe('FetchHistoricalSummary', () => {
       const slo = createSLO({
         timeWindow: {
           duration: oneMonth(),
-          calendar: { startTime: new Date('2023-01-01T00:00:00.000Z') },
+          isCalendar: true,
         },
         budgetingMethod: 'occurrences',
         objective: { target: 0.95 },

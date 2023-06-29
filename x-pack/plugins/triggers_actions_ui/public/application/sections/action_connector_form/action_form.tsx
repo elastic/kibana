@@ -25,6 +25,7 @@ import {
   RuleActionFrequency,
   RuleActionParam,
 } from '@kbn/alerting-plugin/common';
+import { v4 as uuidv4 } from 'uuid';
 import { betaBadgeProps } from './beta_badge_props';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
 import {
@@ -242,6 +243,7 @@ export const ActionForm = ({
         group: defaultActionGroupId,
         params: {},
         frequency: defaultRuleFrequency,
+        uuid: uuidv4(),
       });
       setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
     } else {
@@ -255,6 +257,7 @@ export const ActionForm = ({
           group: defaultActionGroupId,
           params: {},
           frequency: DEFAULT_FREQUENCY,
+          uuid: uuidv4(),
         });
         setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
       }
@@ -427,7 +430,7 @@ export const ActionForm = ({
               actionItem={actionItem}
               actionConnector={actionConnector}
               index={index}
-              key={`action-form-action-at-${index}`}
+              key={`action-form-action-at-${actionItem.uuid}`}
               setActionParamsProperty={setActionParamsProperty}
               setActionFrequencyProperty={setActionFrequencyProperty}
               setActionAlertsFilterProperty={setActionAlertsFilterProperty}
@@ -562,6 +565,10 @@ export const ActionForm = ({
           actionType={actionTypesIndex[activeActionItem.actionTypeId]}
           onClose={closeAddConnectorModal}
           postSaveEventHandler={(savedAction: ActionConnector) => {
+            // TODO: fix in https://github.com/elastic/kibana/issues/155993
+            // actionTypes with subtypes need to be updated in case they switched to a
+            // subtype that is not the default one
+            actions[0].actionTypeId = savedAction.actionTypeId;
             connectors.push(savedAction);
             const indicesToUpdate = activeActionItem.indices || [];
             indicesToUpdate.forEach((index: number) => setActionIdByIndex(savedAction.id, index));

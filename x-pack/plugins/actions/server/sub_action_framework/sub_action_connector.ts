@@ -9,6 +9,7 @@ import { isPlainObject, isEmpty } from 'lodash';
 import { Type } from '@kbn/config-schema';
 import { Logger } from '@kbn/logging';
 import axios, { AxiosInstance, AxiosResponse, AxiosError, AxiosRequestHeaders } from 'axios';
+import { assertURL } from './helpers/validators';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { SubAction, SubActionRequestParams } from './types';
 import { ServiceParams } from './types';
@@ -24,7 +25,6 @@ const isAxiosError = (error: unknown): error is AxiosError => (error as AxiosErr
 export abstract class SubActionConnector<Config, Secrets> {
   [k: string]: ((params: unknown) => unknown) | unknown;
   private axiosInstance: AxiosInstance;
-  private validProtocols: string[] = ['http:', 'https:'];
   private subActions: Map<string, SubAction> = new Map();
   private configurationUtilities: ActionsConfigurationUtilities;
   protected logger: Logger;
@@ -56,19 +56,7 @@ export abstract class SubActionConnector<Config, Secrets> {
   }
 
   private assertURL(url: string) {
-    try {
-      const parsedUrl = new URL(url);
-
-      if (!parsedUrl.hostname) {
-        throw new Error('URL must contain hostname');
-      }
-
-      if (!this.validProtocols.includes(parsedUrl.protocol)) {
-        throw new Error('Invalid protocol');
-      }
-    } catch (error) {
-      throw new Error(`URL Error: ${error.message}`);
-    }
+    assertURL(url);
   }
 
   private ensureUriAllowed(url: string) {

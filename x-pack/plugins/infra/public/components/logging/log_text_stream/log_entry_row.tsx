@@ -5,26 +5,30 @@
  * 2.0.
  */
 
-import React, { memo, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useUiTracker } from '@kbn/observability-plugin/public';
-import { isTimestampColumn } from '../../../utils/log_entry';
+import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
+import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
+import { isEmpty } from 'lodash';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import useAsync from 'react-use/lib/useAsync';
+import { LogColumn, LogEntry } from '../../../../common/log_entry';
 import { TextScale } from '../../../../common/log_text_scale';
-import { LogEntryColumn, LogEntryColumnWidths, iconColumnId } from './log_entry_column';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import {
+  isFieldColumnRenderConfiguration,
+  isMessageColumnRenderConfiguration,
+  isTimestampColumnRenderConfiguration,
+  LogColumnRenderConfiguration,
+} from '../../../utils/log_column_render_configuration';
+import { isTimestampColumn } from '../../../utils/log_entry';
+import { iconColumnId, LogEntryColumn, LogEntryColumnWidths } from './log_entry_column';
+import { LogEntryContextMenu } from './log_entry_context_menu';
 import { LogEntryFieldColumn } from './log_entry_field_column';
 import { LogEntryMessageColumn } from './log_entry_message_column';
 import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
-import { monospaceTextStyle, hoveredContentStyle, highlightedContentStyle } from './text_styles';
-import { LogEntry, LogColumn } from '../../../../common/log_entry';
-import { LogEntryContextMenu } from './log_entry_context_menu';
-import {
-  LogColumnRenderConfiguration,
-  isTimestampColumnRenderConfiguration,
-  isMessageColumnRenderConfiguration,
-  isFieldColumnRenderConfiguration,
-} from '../../../utils/log_column_render_configuration';
+import { highlightedContentStyle, hoveredContentStyle, monospaceTextStyle } from './text_styles';
 
 const MENU_LABEL = i18n.translate('xpack.infra.logEntryItemView.logEntryActionsMenuToolTip', {
   defaultMessage: 'View actions for line',
@@ -94,6 +98,16 @@ export const LogEntryRow = memo(
     const hasActionFlyoutWithItem = openFlyoutWithItem !== undefined;
     const hasActionViewLogInContext = hasContext && openViewLogInContext !== undefined;
     const hasActionsMenu = hasActionFlyoutWithItem || hasActionViewLogInContext;
+
+    const uiActions = useKibanaContextForPlugin().services.uiActions;
+
+    const externalContextMenuItems = useAsync(() => {
+      return getContextMenuItemsFromActions({
+        uiActions,
+        triggerId: ObservabilityTriggerId.LogEntryContextMenu,
+        context: logEntry,
+      });
+    }, [uiActions, logEntry]);
 
     const menuItems = useMemo(() => {
       const items = [];
@@ -237,6 +251,7 @@ export const LogEntryRow = memo(
                 onOpen={openMenu}
                 onClose={closeMenu}
                 items={menuItems}
+                externalItems={externalContextMenuItems.value}
               />
             ) : null}
           </LogEntryColumn>

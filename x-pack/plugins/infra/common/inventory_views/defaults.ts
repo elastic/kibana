@@ -47,6 +47,5 @@ export const staticInventoryViewAttributes: InventoryViewAttributes = {
     kind: 'kuery',
     expression: '',
   },
-  time: Date.now(),
   autoReload: false,
 };

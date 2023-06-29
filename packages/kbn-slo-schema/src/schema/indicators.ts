@@ -39,9 +39,6 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
       index: t.string,
     }),
     t.partial({
-      goodStatusCodes: t.array(
-        t.union([t.literal('2xx'), t.literal('3xx'), t.literal('4xx'), t.literal('5xx')])
-      ),
       filter: t.string,
     }),
   ]),

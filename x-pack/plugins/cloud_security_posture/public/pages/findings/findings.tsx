@@ -76,8 +76,8 @@ export const Findings = () => {
           isSelected={location.pathname !== findingsNavigation.vulnerabilities.path}
         >
           <FormattedMessage
-            id="xpack.csp.findings.tabs.configurations"
-            defaultMessage="Configurations"
+            id="xpack.csp.findings.tabs.misconfigurations"
+            defaultMessage="Misconfigurations"
           />
         </EuiTab>
       </EuiTabs>

@@ -47,6 +47,15 @@ const chartBase: ChartBase = {
   series,
 };
 
+export const systemMemoryFilter = {
+  bool: {
+    filter: [
+      { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
+      { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+    ],
+  },
+};
+
 export const percentSystemMemoryUsedScript = {
   lang: 'painless',
   source: `
@@ -59,6 +68,17 @@ export const percentSystemMemoryUsedScript = {
     return null;
   `,
 } as const;
+
+export const cgroupMemoryFilter = {
+  bool: {
+    filter: [{ exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } }],
+    should: [
+      { exists: { field: METRIC_CGROUP_MEMORY_LIMIT_BYTES } },
+      { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+    ],
+    minimum_should_match: 1,
+  },
+};
 
 export const percentCgroupMemoryUsedScript = {
   lang: 'painless',
@@ -147,7 +167,7 @@ export async function getMemoryChartData({
           memoryUsedMax: { max: { script: percentCgroupMemoryUsedScript } },
         },
         additionalFilters: [
-          { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
+          cgroupMemoryFilter,
           ...termQuery(FAAS_ID, serverlessId),
         ],
         operationName: 'get_cgroup_memory_metrics_charts',
@@ -169,8 +189,7 @@ export async function getMemoryChartData({
             memoryUsedMax: { max: { script: percentSystemMemoryUsedScript } },
           },
           additionalFilters: [
-            { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-            { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+            systemMemoryFilter,
             ...termQuery(FAAS_ID, serverlessId),
           ],
           operationName: 'get_system_memory_metrics_charts',

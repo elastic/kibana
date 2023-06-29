@@ -81,10 +81,10 @@ export function SloEditForm({ slo }: Props) {
   }
 
   useEffect(() => {
-    if (isEditMode && rules && rules[slo.id].length && isCreateRuleCheckboxChecked) {
+    if (isEditMode && rules && rules[slo.id].length) {
       setIsCreateRuleCheckboxChecked(false);
     }
-  }, [isCreateRuleCheckboxChecked, isEditMode, rules, slo]);
+  }, [isEditMode, rules, slo]);
 
   const methods = useForm({
     defaultValues: { ...SLO_EDIT_FORM_DEFAULT_VALUES, ...urlParams },

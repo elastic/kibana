@@ -52,6 +52,7 @@ export class SetViewControl extends Component<Props, State> {
         button={
           <EuiPanel paddingSize="none" className="mapToolbarOverlay__button">
             <EuiButtonIcon
+              className="mapToolbarOverlay__buttonIcon-empty"
               size="s"
               onClick={this._togglePopover}
               data-test-subj="toggleSetViewVisibilityButton"

@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useRef } from 'react';
-import {
-  UseField,
-  useFormContext,
-  useFormData,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import React, { memo, useRef } from 'react';
+import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { MarkdownEditorForm } from '../markdown_editor';
-import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import { ID as LensPluginId } from '../markdown_editor/plugins/lens/constants';
 
 interface Props {
@@ -23,32 +18,9 @@ interface Props {
 export const fieldName = 'description';
 
 const DescriptionComponent: React.FC<Props> = ({ isLoading, draftStorageKey }) => {
-  const { draftComment, hasIncomingLensState, openLensModal, clearDraftComment } =
-    useLensDraftComment();
-  const { setFieldValue } = useFormContext();
   const [{ title, tags }] = useFormData({ watch: ['title', 'tags'] });
   const editorRef = useRef<Record<string, unknown>>();
   const disabledUiPlugins = [LensPluginId];
-
-  useEffect(() => {
-    if (draftComment?.commentId === fieldName && editorRef.current) {
-      setFieldValue(fieldName, draftComment.comment);
-
-      if (draftComment.caseTitle) {
-        setFieldValue('title', draftComment.caseTitle);
-      }
-
-      if (draftComment.caseTags && draftComment.caseTags.length > 0) {
-        setFieldValue('tags', draftComment.caseTags);
-      }
-
-      if (hasIncomingLensState) {
-        openLensModal({ editorRef: editorRef.current });
-      } else {
-        clearDraftComment();
-      }
-    }
-  }, [clearDraftComment, draftComment, hasIncomingLensState, openLensModal, setFieldValue]);
 
   return (
     <UseField

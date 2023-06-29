@@ -84,7 +84,7 @@ export function useFetchSloList({
           return;
         }
 
-        if (results.find((slo) => slo.summary.status === 'NO_DATA')) {
+        if (results.find((slo) => slo.summary.status === 'NO_DATA' || !slo.summary)) {
           setStateRefetchInterval(SHORT_REFETCH_INTERVAL);
         } else {
           setStateRefetchInterval(LONG_REFETCH_INTERVAL);

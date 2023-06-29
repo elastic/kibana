@@ -22,11 +22,9 @@ export function sevenDaysRolling(): TimeWindow {
   };
 }
 
-export function weeklyCalendarAligned(startTime: Date): TimeWindow {
+export function weeklyCalendarAligned(): TimeWindow {
   return {
     duration: oneWeek(),
-    calendar: {
-      startTime,
-    },
+    isCalendar: true,
   };
 }

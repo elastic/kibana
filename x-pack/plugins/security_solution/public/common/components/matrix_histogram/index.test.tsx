@@ -45,8 +45,11 @@ jest.mock('./utils', () => ({
   getCustomChartData: jest.fn().mockReturnValue(true),
 }));
 
+const mockUseVisualizationResponse = jest.fn(() => [
+  { aggregations: [{ buckets: [{ key: '1234' }] }], hits: { total: 999 } },
+]);
 jest.mock('../visualization_actions/use_visualization_response', () => ({
-  useVisualizationResponse: jest.fn().mockReturnValue([{ hits: { total: 999 } }]),
+  useVisualizationResponse: () => mockUseVisualizationResponse(),
 }));
 
 const mockLocation = jest.fn().mockReturnValue({ pathname: '/test' });
@@ -338,6 +341,26 @@ describe('Matrix Histogram Component', () => {
 
       expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toEqual(
         'Showing: 999 events'
+      );
+    });
+
+    test('it should render 0 as subtitle when buckets are empty', () => {
+      mockUseVisualizationResponse.mockReturnValue([
+        { aggregations: [{ buckets: [] }], hits: { total: 999 } },
+      ]);
+      mockUseMatrix.mockReturnValue([
+        false,
+        {
+          data: [],
+          inspect: false,
+          totalCount: 0,
+        },
+      ]);
+      wrapper.setProps({ endDate: 100 });
+      wrapper.update();
+
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toEqual(
+        'Showing: 0 events'
       );
     });
   });

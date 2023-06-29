@@ -10,7 +10,13 @@ import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../utils/kibana_react';
 import { findMaintenanceWindows } from '../services/maintenance_windows_api/find';
 
-export const useFindMaintenanceWindows = () => {
+interface UseFindMaintenanceWindowsProps {
+  enabled?: boolean;
+}
+
+export const useFindMaintenanceWindows = (props?: UseFindMaintenanceWindowsProps) => {
+  const { enabled = true } = props || {};
+
   const {
     http,
     notifications: { toasts },
@@ -32,6 +38,7 @@ export const useFindMaintenanceWindows = () => {
 
   const {
     isLoading,
+    isFetching,
     data = [],
     refetch,
   } = useQuery({
@@ -41,11 +48,12 @@ export const useFindMaintenanceWindows = () => {
     refetchOnWindowFocus: false,
     retry: false,
     cacheTime: 0,
+    enabled,
   });
 
   return {
     maintenanceWindows: data,
-    isLoading,
+    isLoading: enabled && (isLoading || isFetching),
     refetch,
   };
 };

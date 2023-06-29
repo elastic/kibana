@@ -20,7 +20,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
       visualization: {
         legend: {
           isVisible: true,
-          position: 'left',
+          position: 'right',
           legendSize: 'xlarge',
         },
         valueLabels: 'hide',
@@ -36,6 +36,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
           yLeft: false,
           yRight: false,
         },
+        valuesInLegend: true,
         tickLabelsVisibilitySettings: {
           x: true,
           yLeft: true,

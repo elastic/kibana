@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useValues } from 'kea';
 
-import { ENGINES_PLUGIN } from '../../../../common/constants';
+import { APPLICATIONS_PLUGIN } from '../../../../common/constants';
 
 import { KibanaLogic } from '../kibana';
 
@@ -179,7 +179,7 @@ export const SetEnterpriseSearchEnginesChrome: React.FC<SetChromeProps> = ({ tra
   const docTitle = appSearchTitle(title);
 
   const breadcrumbs = useEnterpriseSearchEnginesBreadcrumbs(
-    useGenerateBreadcrumbs([ENGINES_PLUGIN.NAV_TITLE, ...trail])
+    useGenerateBreadcrumbs([APPLICATIONS_PLUGIN.NAV_TITLE, ...trail])
   );
 
   useEffect(() => {

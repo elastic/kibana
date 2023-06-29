@@ -251,9 +251,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // Failing: See https://github.com/elastic/kibana/issues/150557
-  describe.skip('export jobs', function () {
+  describe('export jobs', function () {
     this.tags(['ml']);
+
     before(async () => {
       await ml.api.cleanMlIndices();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -282,6 +282,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToStackManagement();
       await ml.navigation.navigateToStackManagementJobsListPage();
     });
+
     after(async () => {
       await ml.api.cleanMlIndices();
       ml.stackManagementJobs.deleteExportedFiles([

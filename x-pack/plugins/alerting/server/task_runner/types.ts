@@ -87,6 +87,7 @@ export interface ExecutionHandlerOptions<
   ruleLabel: string;
   previousStartedAt: Date | null;
   actionsClient: PublicMethodsOf<ActionsClient>;
+  maintenanceWindowIds?: string[];
 }
 
 export interface Executable<

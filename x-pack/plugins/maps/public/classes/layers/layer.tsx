@@ -68,7 +68,7 @@ export interface ILayer {
   getCurrentStyle(): IStyle;
   getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
-  isLayerLoading(): boolean;
+  isLayerLoading(zoom: number): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
@@ -126,7 +126,7 @@ export type LayerIcon = {
 };
 
 export interface ILayerArguments {
-  layerDescriptor: LayerDescriptor;
+  layerDescriptor: Partial<LayerDescriptor>;
   source: ISource;
 }
 
@@ -375,7 +375,10 @@ export class AbstractLayer implements ILayer {
     return this._dataRequests.find((dataRequest) => dataRequest.getDataId() === id);
   }
 
-  isLayerLoading(): boolean {
+  isLayerLoading(zoom: number): boolean {
+    if (!this.isVisible() || !this.showAtZoomLevel(zoom)) {
+      return false;
+    }
     const hasOpenDataRequests = this._dataRequests.some((dataRequest) => dataRequest.isLoading());
 
     if (this._isTiled()) {

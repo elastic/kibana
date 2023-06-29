@@ -5,12 +5,239 @@ Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
 
-Previous versions: {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] 
+Previous versions: {kibana-ref-all}/8.7/whats-new.html[8.7] | {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2]
 | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
-//NOTE: The notable-highlights tagged regions are re-used in the
-//Installation and Upgrade Guide
 
-// tag::notable-highlights[]
 
-// end::notable-highlights[]
+[discrete]
+=== Discover
+
+[discrete]
+==== Machine learning pattern analysis
+
+preview:[] You can now run a pattern analysis directly from *Discover*,
+making it easy to explore your machine learning log pattern data.
+In *Discover*, hover over a field to run and load the pattern analysis,
+then select one or more patterns to filter for or filter out,
+displaying only the logs you’re interested in.
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt00d70d606a672ff5/64593a2a6c8b04303c3005ba/highlights-discover-ml.gif[How to run pattern analysis directly from Discover]
+
+
+[discrete]
+==== Add columns to the document table with drag & drop
+
+*Discover* now provides you with a simple drag-and-drop experience
+that helps you explore your data in just a few clicks.
+From the *Available fields* list, drag the fields you want to explore to the
+document table, then watch as *Discover* automatically creates columns for each of your fields.
+
+[role="screenshot"]
+image::images/highlights-discover-document-table.png[Drag fields from Available fields list to the document table]
+
+
+[discrete]
+=== Lens
+
+[discrete]
+==== Better visualization loading time with sampling
+
+When you create visualizations for your dashboards,
+check out the new *Sampling* layer setting.
+Using the slider, select the percentage between performance and accuracy.
+Lowering the sampling percentage improves the visualization loading time,
+and raising the percentage improves the accuracy. When added to dashboards,
+the visualization now includes a sampling notification.
+
+[role="screenshot"]
+image::images/highlights-lens-visualization-loading.png[New visualization modifiers in Lens]
+[role="screenshot"]
+image::images/highlights-lens-tooltip.png[Icon popover on icon in dashboard]
+
+[discrete]
+==== Improvements to metric charts
+
+preview:[] When you create visualizations for your dashboards,
+you’ll find more design improvements and options
+for customizing your metric visualizations. The latest changes include:
+
+* Improved text weight and size
+* Display values with bytes and bits formatting, with prefix format support up to yottabyte and yottabit
+* Display text string values
+* Add icons
+
+[role="screenshot"]
+image::images/highlights-lens-metric-chart.png[Improvements to Lens metric chart]
+
+[discrete]
+=== Dashboard
+
+[discrete]
+==== A better way to change settings
+
+Quickly change your dashboard settings with a single click,
+and right from the dashboard. When editing your dashboards,
+the toolbar now includes a *Settings* option that opens a flyout,
+allowing you to change the title, description, tags, and more.
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt8f3b173784551741/6463a0c7a64c0922fb531e97/highlights-dashboard-settings.gif[How to edit dashboard Settings]
+
+
+[discrete]
+=== Maps
+
+[discrete]
+==== Reduce clutter with metric filtering
+
+Use metric filtering to hide aggregation buckets to reduce clutter and highlight areas of interest.
+Consider this map, where areas with more traffic are obscured by areas with little traffic.
+
+[role="screenshot"]
+image::images/highlights-map-with-web-traffic.png[Metric filtering in maps]
+
+With configure metric filtering, you can hide the clusters with little web traffic.
+
+[role="screenshot"]
+image::images/highlights-maps-metric-filtering.png[How to configure metric filtering, width="50%"]
+
+The map now has less visual clutter and it’s easier to visualize areas with high web traffic,
+enabling your marketing team to better target high value areas.
+
+[role="screenshot"]
+image::images/highlights-maps-less-clutter.png[Same map, but with less less visual clustter]
+
+
+[discrete]
+=== Machine learning
+
+[discrete]
+==== {transform-cap} ‘schedule now’ added to UI
+
+The {transform} UI has been updated to make use of the *Schedule now*
+functionality. This schedules a {transform} to instantly process new data
+without waiting for the configured interval between checks for changes in the
+source indices. This operation is useful for {transforms} with a longer
+frequency setting, where the {transform} can be activated to update directly
+after data has been uploaded. Use this feature on individual {transforms} and
+as a bulk action on multiple {transforms}.
+
+[role="screenshot"]
+image::images/highlights-ml-transform-schedule-now.png[Shedule now action for Transforms]
+
+[discrete]
+==== ELSER configuration on Trained Models UI
+
+Elastic Learned Sparse EncodeR (ELSER) is a {ml} model newly added to the
+library. ELSER improves your search relevance by enabling you to perform
+semantic search. This search type operates on the meaning of words and does
+not search only on literal terms. The *Trained Models* UI enables you to easily
+download and deploy the model in your cluster and use ELSER in an {infer}
+pipeline or a text expansion query.
+
+[role="screenshot"]
+image::images/highlights-ml-ELSER-config.png[ELSER configuration in the Trained Models UI]
+
+[discrete]
+==== Change point detection&mdash;multiple metrics and split fields
+
+Change point detection was introduced in 8.7 as part of AIOps Labs. In 8.8, it
+supports multiple change point configurations, which enables you to view data
+from different metrics and partitions in a table layout with change point
+previews. It accommodates more results on a single page, provides more sorting
+possibilities, and makes it possible to zoom in on particular entries.
+It has updated controls for the metric and split fields, which provides easy
+access to the top values and distribution of the configuring field.
+The quick filter action simplifies the investigation of certain partitions or
+excludes them from the analysis.
+
+[role="screenshot"]
+image::images/highlights-ml-change-point-detection-enhancements.png[Change point detection multiple metrics and split fields]
+
+[discrete]
+==== {dfanalytics-cap} drilldown actions
+
+Starting in 8.8, the results data grid provides a link in the *Actions* column to
+*Discover* filtering for the row's field/values.
+Creating custom URLs for jobs is also supported from the jobs list. You can
+create a link to *Discover*, *Dashboard*, or an external URL. You can
+also test the configured custom URL.
+
+[role="screenshot"]
+image::images/highlights-ml-dfa-drilldown-1.png[Data frame analytics custom URLs]
+
+The custom URLs you create appear in the {dfanalytics} results table row.
+You can click through to any URL with the values from that row.
+
+[role="screenshot"]
+image::images/highlights-ml-dfa-drilldown-2.png[Data frame analytics results table]
+
+
+
+[discrete]
+=== Alerting
+
+[discrete]
+==== Maintenance windows
+
+Schedule single or recurring maintenance windows to reduce alert noise and suppress notifications.
+For example, if you have a planned outage or event, a maintenance window prevents false alarms during this period.
+// For more information, check <<maintenance-windows>>.
+
+[role="screenshot"]
+image::images/highlights-maintenance-windows.png[Viewing maintenance windows in {kib}]
+
+[discrete]
+=== Cases
+
+These features are all available for cases in *{stack-manage-app}*, *{observability}*, and the *{security-app}*.
+
+[discrete]
+==== Case activities
+
+In 8.8, when you view a case, there are new *Comments* and *History* filters on the *Activity* tab.
+These filters separate comments from user and system actions, such as alerts and user assignments.
+Pagination and sorting are now also provided on this tab.
+
+[role="screenshot"]
+image::images/highlights-case-activity.png[The Activity tab in a case in {stack-manage-app}>Cases]
+
+
+[discrete]
+==== Case attachments
+
+You can now attach files to cases for better investigation processes.
+With the new capability, you can upload indicators of compromise (IOCs)
+and other files to support alert and case triage. For more information, check <<add-case-files>>.
+
+[discrete]
+=== Per-user dark mode
+
+Continuing our user-first effort for personalization and collaboration,
+you can now customize the theme by setting dark mode individually.
+Choose between dark mode, light mode, or the default theme in the space.
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt2ed2dc9d48d9f74f/645948420de513a368974770/highlights-security-dark-mode.gif[Per user dark mode]
+
+
+[discrete]
+=== Custom Branding
+A frequently requested feature, *Custom Branding* enables you
+to embed Elastic in a corporate portal environment with your
+own branding.
+
+[role="screenshot"]
+image::images/highlights-custom-branding.png[UI for creating custom branding, width=50%]
+
+You can customize your logo, organization name, page title, and browser icon. Open *Stack Management*,
+select *Advanced Settings*, and then select the *Global Settings* tab.
+
+To create a custom brand, you must have {kib} admin access.  Custom branding is a
+https://www.elastic.co/subscriptions[subscription feature] and
+and applies to all spaces.
+
+[role="screenshot"]
+image::images/highlights-branding-settings.png[Settings in for customizing logo, organaization name, page title, and browser icon]

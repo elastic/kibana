@@ -14,13 +14,6 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 import { AgentUpgradeAgentModal } from '.';
 import type { AgentUpgradeAgentModalProps } from '.';
 
-jest.mock('../../../../../../hooks/use_fleet_status', () => ({
-  FleetStatusProvider: (props: any) => {
-    return props.children;
-  },
-  useFleetStatus: jest.fn().mockReturnValue({}),
-}));
-
 jest.mock('@elastic/eui', () => {
   return {
     ...jest.requireActual('@elastic/eui'),

@@ -106,7 +106,7 @@ export const useGetIlmPolicies = () => {
 
 const formatAge = (age?: string) => {
   if (!age) {
-    return '';
+    return '--';
   }
   const [value] = age.split('d');
   return i18n.translate('xpack.synthetics.settingsRoute.table.retentionPeriodValue', {

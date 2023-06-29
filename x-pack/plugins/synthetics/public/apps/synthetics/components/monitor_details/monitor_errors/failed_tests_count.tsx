@@ -12,14 +12,24 @@ import { FAILED_TESTS_LABEL } from './failed_tests';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
-export const FailedTestsCount = ({ from, to, id }: { to: string; from: string; id: string }) => {
+export const FailedTestsCount = ({
+  from,
+  to,
+  id,
+  location,
+}: {
+  to: string;
+  from: string;
+  id: string;
+  location: ReturnType<typeof useSelectedLocation>;
+}) => {
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
   const monitorId = useMonitorQueryId();
 
-  const selectedLocation = useSelectedLocation();
+  const selectedLocation = location;
 
   if (!monitorId || !selectedLocation) {
     return null;

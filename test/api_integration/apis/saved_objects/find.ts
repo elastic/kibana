@@ -130,7 +130,8 @@ export default function ({ getService }: FtrProviderContext) {
           }));
     });
 
-    describe('wildcard namespace', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/156581
+    describe.skip('wildcard namespace', () => {
       it('should return 200 with individual responses from the all namespaces', async () =>
         await supertest
           .get(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RotateKeyPairSchema } from './message_signing_service';
+import { errorMessage, RotateKeyPairSchema } from './message_signing_service';
 
 describe('RotateKeyPairSchema', () => {
   it('should throw on `false` values for acknowledge', () => {
@@ -13,15 +13,11 @@ describe('RotateKeyPairSchema', () => {
       RotateKeyPairSchema.query.validate({
         acknowledge: false,
       })
-    ).toThrowError(
-      'You must acknowledge the risks of rotating the key pair with acknowledge=true in the request parameters.'
-    );
+    ).toThrowError(errorMessage);
   });
 
   it('should allow without any query', () => {
-    expect(() => RotateKeyPairSchema.query.validate({})).toThrowError(
-      'You must acknowledge the risks of rotating the key pair with acknowledge=true in the request parameters.'
-    );
+    expect(() => RotateKeyPairSchema.query.validate({})).toThrowError(errorMessage);
   });
 
   it.each([1, 'string'])('should not allow non-boolean `%s` values for acknowledge', (value) => {

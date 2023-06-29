@@ -7,7 +7,7 @@
     "server": false,
     "browser": true,
     "configPath": ["xpack", "observability_shared"],
-    "requiredPlugins": ["cases", "guidedOnboarding"],
+    "requiredPlugins": ["cases", "guidedOnboarding", "uiActions"],
     "optionalPlugins": [],
     "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": ["common"]

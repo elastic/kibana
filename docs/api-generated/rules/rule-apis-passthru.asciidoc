@@ -100,31 +100,10 @@ Any modifications made to this file will be overwritten.
     <pre class="example"><code>{
   "throttle" : "10m",
   "created_at" : "2022-12-05T23:36:58.284Z",
-  "last_run" : {
-    "alerts_count" : {
-      "ignored" : 6,
-      "new" : 1,
-      "recovered" : 5,
-      "active" : 0
-    },
-    "outcome_msg" : "outcome_msg",
-    "warning" : "warning",
-    "outcome" : "succeeded"
-  },
-  "params" : {
-    "key" : ""
-  },
-  "created_by" : "elastic",
+  "api_key_created_by_user" : false,
   "enabled" : true,
-  "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
-  "rule_type_id" : "monitoring_alert_cluster_health",
-  "tags" : [ "tags", "tags" ],
   "running" : true,
-  "api_key_owner" : "elastic",
-  "schedule" : {
-    "interval" : "1m"
-  },
-  "notify_when" : "onActiveAlert",
+  "notify_when" : "notify_when",
   "next_run" : "2022-12-06T00:14:43.818Z",
   "updated_at" : "2022-12-05T23:36:58.284Z",
   "execution_status" : {
@@ -132,16 +111,90 @@ Any modifications made to this file will be overwritten.
     "last_duration" : 55,
     "status" : "ok"
   },
-  "name" : "cluster_health_rule",
-  "updated_by" : "elastic",
   "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
   "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "consumer" : "alerts",
+  "last_run" : {
+    "alerts_count" : {
+      "ignored" : 6,
+      "new" : 1,
+      "recovered" : 5,
+      "active" : 0
+    },
+    "outcome_msg" : [ "outcome_msg", "outcome_msg" ],
+    "outcome_order" : 5,
+    "warning" : "warning",
+    "outcome" : "succeeded"
+  },
+  "params" : {
+    "key" : ""
+  },
+  "created_by" : "elastic",
+  "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+  "rule_type_id" : "monitoring_alert_cluster_health",
+  "revision" : 2,
+  "tags" : [ "tags", "tags" ],
+  "api_key_owner" : "elastic",
+  "schedule" : {
+    "interval" : "1m"
+  },
+  "name" : "cluster_health_rule",
+  "updated_by" : "elastic",
   "mute_all" : false,
   "actions" : [ {
+    "alerts_filter" : {
+      "timeframe" : {
+        "hours" : {
+          "start" : "08:00",
+          "end" : "17:00"
+        },
+        "timezone" : "Europe/Madrid",
+        "days" : [ 1, 2, 3, 4, 5 ]
+      },
+      "query" : {
+        "kql" : "kql",
+        "filters" : [ {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        }, {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        } ]
+      }
+    },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
     "params" : {
       "key" : ""
     },
+    "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
     "connector_type_id" : ".server-log",
     "frequency" : {
       "summary" : true,
@@ -150,10 +203,59 @@ Any modifications made to this file will be overwritten.
     },
     "group" : "default"
   }, {
+    "alerts_filter" : {
+      "timeframe" : {
+        "hours" : {
+          "start" : "08:00",
+          "end" : "17:00"
+        },
+        "timezone" : "Europe/Madrid",
+        "days" : [ 1, 2, 3, 4, 5 ]
+      },
+      "query" : {
+        "kql" : "kql",
+        "filters" : [ {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        }, {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        } ]
+      }
+    },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
     "params" : {
       "key" : ""
     },
+    "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
     "connector_type_id" : ".server-log",
     "frequency" : {
       "summary" : true,
@@ -161,8 +263,7 @@ Any modifications made to this file will be overwritten.
       "notify_when" : "onActiveAlert"
     },
     "group" : "default"
-  } ],
-  "consumer" : "alerts"
+  } ]
 }</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -396,31 +497,10 @@ Any modifications made to this file will be overwritten.
   "data" : [ {
     "throttle" : "10m",
     "created_at" : "2022-12-05T23:36:58.284Z",
-    "last_run" : {
-      "alerts_count" : {
-        "ignored" : 6,
-        "new" : 1,
-        "recovered" : 5,
-        "active" : 0
-      },
-      "outcome_msg" : "outcome_msg",
-      "warning" : "warning",
-      "outcome" : "succeeded"
-    },
-    "params" : {
-      "key" : ""
-    },
-    "created_by" : "elastic",
+    "api_key_created_by_user" : false,
     "enabled" : true,
-    "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
-    "rule_type_id" : "monitoring_alert_cluster_health",
-    "tags" : [ "tags", "tags" ],
     "running" : true,
-    "api_key_owner" : "elastic",
-    "schedule" : {
-      "interval" : "1m"
-    },
-    "notify_when" : "onActiveAlert",
+    "notify_when" : "notify_when",
     "next_run" : "2022-12-06T00:14:43.818Z",
     "updated_at" : "2022-12-05T23:36:58.284Z",
     "execution_status" : {
@@ -428,16 +508,90 @@ Any modifications made to this file will be overwritten.
       "last_duration" : 55,
       "status" : "ok"
     },
-    "name" : "cluster_health_rule",
-    "updated_by" : "elastic",
     "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
     "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+    "consumer" : "alerts",
+    "last_run" : {
+      "alerts_count" : {
+        "ignored" : 6,
+        "new" : 1,
+        "recovered" : 5,
+        "active" : 0
+      },
+      "outcome_msg" : [ "outcome_msg", "outcome_msg" ],
+      "outcome_order" : 5,
+      "warning" : "warning",
+      "outcome" : "succeeded"
+    },
+    "params" : {
+      "key" : ""
+    },
+    "created_by" : "elastic",
+    "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+    "rule_type_id" : "monitoring_alert_cluster_health",
+    "revision" : 2,
+    "tags" : [ "tags", "tags" ],
+    "api_key_owner" : "elastic",
+    "schedule" : {
+      "interval" : "1m"
+    },
+    "name" : "cluster_health_rule",
+    "updated_by" : "elastic",
     "mute_all" : false,
     "actions" : [ {
+      "alerts_filter" : {
+        "timeframe" : {
+          "hours" : {
+            "start" : "08:00",
+            "end" : "17:00"
+          },
+          "timezone" : "Europe/Madrid",
+          "days" : [ 1, 2, 3, 4, 5 ]
+        },
+        "query" : {
+          "kql" : "kql",
+          "filters" : [ {
+            "$state" : "{}",
+            "meta" : {
+              "field" : "field",
+              "controlledBy" : "controlledBy",
+              "negate" : true,
+              "alias" : "alias",
+              "index" : "index",
+              "disabled" : true,
+              "params" : "{}",
+              "type" : "type",
+              "value" : "value",
+              "isMultiIndex" : true,
+              "key" : "key",
+              "group" : "group"
+            },
+            "query" : "{}"
+          }, {
+            "$state" : "{}",
+            "meta" : {
+              "field" : "field",
+              "controlledBy" : "controlledBy",
+              "negate" : true,
+              "alias" : "alias",
+              "index" : "index",
+              "disabled" : true,
+              "params" : "{}",
+              "type" : "type",
+              "value" : "value",
+              "isMultiIndex" : true,
+              "key" : "key",
+              "group" : "group"
+            },
+            "query" : "{}"
+          } ]
+        }
+      },
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
       "params" : {
         "key" : ""
       },
+      "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
       "connector_type_id" : ".server-log",
       "frequency" : {
         "summary" : true,
@@ -446,10 +600,59 @@ Any modifications made to this file will be overwritten.
       },
       "group" : "default"
     }, {
+      "alerts_filter" : {
+        "timeframe" : {
+          "hours" : {
+            "start" : "08:00",
+            "end" : "17:00"
+          },
+          "timezone" : "Europe/Madrid",
+          "days" : [ 1, 2, 3, 4, 5 ]
+        },
+        "query" : {
+          "kql" : "kql",
+          "filters" : [ {
+            "$state" : "{}",
+            "meta" : {
+              "field" : "field",
+              "controlledBy" : "controlledBy",
+              "negate" : true,
+              "alias" : "alias",
+              "index" : "index",
+              "disabled" : true,
+              "params" : "{}",
+              "type" : "type",
+              "value" : "value",
+              "isMultiIndex" : true,
+              "key" : "key",
+              "group" : "group"
+            },
+            "query" : "{}"
+          }, {
+            "$state" : "{}",
+            "meta" : {
+              "field" : "field",
+              "controlledBy" : "controlledBy",
+              "negate" : true,
+              "alias" : "alias",
+              "index" : "index",
+              "disabled" : true,
+              "params" : "{}",
+              "type" : "type",
+              "value" : "value",
+              "isMultiIndex" : true,
+              "key" : "key",
+              "group" : "group"
+            },
+            "query" : "{}"
+          } ]
+        }
+      },
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
       "params" : {
         "key" : ""
       },
+      "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
       "connector_type_id" : ".server-log",
       "frequency" : {
         "summary" : true,
@@ -457,36 +660,14 @@ Any modifications made to this file will be overwritten.
         "notify_when" : "onActiveAlert"
       },
       "group" : "default"
-    } ],
-    "consumer" : "alerts"
+    } ]
   }, {
     "throttle" : "10m",
     "created_at" : "2022-12-05T23:36:58.284Z",
-    "last_run" : {
-      "alerts_count" : {
-        "ignored" : 6,
-        "new" : 1,
-        "recovered" : 5,
-        "active" : 0
-      },
-      "outcome_msg" : "outcome_msg",
-      "warning" : "warning",
-      "outcome" : "succeeded"
-    },
-    "params" : {
-      "key" : ""
-    },
-    "created_by" : "elastic",
+    "api_key_created_by_user" : false,
     "enabled" : true,
-    "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
-    "rule_type_id" : "monitoring_alert_cluster_health",
-    "tags" : [ "tags", "tags" ],
     "running" : true,
-    "api_key_owner" : "elastic",
-    "schedule" : {
-      "interval" : "1m"
-    },
-    "notify_when" : "onActiveAlert",
+    "notify_when" : "notify_when",
     "next_run" : "2022-12-06T00:14:43.818Z",
     "updated_at" : "2022-12-05T23:36:58.284Z",
     "execution_status" : {
@@ -494,16 +675,90 @@ Any modifications made to this file will be overwritten.
       "last_duration" : 55,
       "status" : "ok"
     },
-    "name" : "cluster_health_rule",
-    "updated_by" : "elastic",
     "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
     "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+    "consumer" : "alerts",
+    "last_run" : {
+      "alerts_count" : {
+        "ignored" : 6,
+        "new" : 1,
+        "recovered" : 5,
+        "active" : 0
+      },
+      "outcome_msg" : [ "outcome_msg", "outcome_msg" ],
+      "outcome_order" : 5,
+      "warning" : "warning",
+      "outcome" : "succeeded"
+    },
+    "params" : {
+      "key" : ""
+    },
+    "created_by" : "elastic",
+    "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+    "rule_type_id" : "monitoring_alert_cluster_health",
+    "revision" : 2,
+    "tags" : [ "tags", "tags" ],
+    "api_key_owner" : "elastic",
+    "schedule" : {
+      "interval" : "1m"
+    },
+    "name" : "cluster_health_rule",
+    "updated_by" : "elastic",
     "mute_all" : false,
     "actions" : [ {
+      "alerts_filter" : {
+        "timeframe" : {
+          "hours" : {
+            "start" : "08:00",
+            "end" : "17:00"
+          },
+          "timezone" : "Europe/Madrid",
+          "days" : [ 1, 2, 3, 4, 5 ]
+        },
+        "query" : {
+          "kql" : "kql",
+          "filters" : [ {
+            "$state" : "{}",
+            "meta" : {
+              "field" : "field",
+              "controlledBy" : "controlledBy",
+              "negate" : true,
+              "alias" : "alias",
+              "index" : "index",
+              "disabled" : true,
+              "params" : "{}",
+              "type" : "type",
+              "value" : "value",
+              "isMultiIndex" : true,
+              "key" : "key",
+              "group" : "group"
+            },
+            "query" : "{}"
+          }, {
+            "$state" : "{}",
+            "meta" : {
+              "field" : "field",
+              "controlledBy" : "controlledBy",
+              "negate" : true,
+              "alias" : "alias",
+              "index" : "index",
+              "disabled" : true,
+              "params" : "{}",
+              "type" : "type",
+              "value" : "value",
+              "isMultiIndex" : true,
+              "key" : "key",
+              "group" : "group"
+            },
+            "query" : "{}"
+          } ]
+        }
+      },
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
       "params" : {
         "key" : ""
       },
+      "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
       "connector_type_id" : ".server-log",
       "frequency" : {
         "summary" : true,
@@ -512,10 +767,59 @@ Any modifications made to this file will be overwritten.
       },
       "group" : "default"
     }, {
+      "alerts_filter" : {
+        "timeframe" : {
+          "hours" : {
+            "start" : "08:00",
+            "end" : "17:00"
+          },
+          "timezone" : "Europe/Madrid",
+          "days" : [ 1, 2, 3, 4, 5 ]
+        },
+        "query" : {
+          "kql" : "kql",
+          "filters" : [ {
+            "$state" : "{}",
+            "meta" : {
+              "field" : "field",
+              "controlledBy" : "controlledBy",
+              "negate" : true,
+              "alias" : "alias",
+              "index" : "index",
+              "disabled" : true,
+              "params" : "{}",
+              "type" : "type",
+              "value" : "value",
+              "isMultiIndex" : true,
+              "key" : "key",
+              "group" : "group"
+            },
+            "query" : "{}"
+          }, {
+            "$state" : "{}",
+            "meta" : {
+              "field" : "field",
+              "controlledBy" : "controlledBy",
+              "negate" : true,
+              "alias" : "alias",
+              "index" : "index",
+              "disabled" : true,
+              "params" : "{}",
+              "type" : "type",
+              "value" : "value",
+              "isMultiIndex" : true,
+              "key" : "key",
+              "group" : "group"
+            },
+            "query" : "{}"
+          } ]
+        }
+      },
       "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
       "params" : {
         "key" : ""
       },
+      "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
       "connector_type_id" : ".server-log",
       "frequency" : {
         "summary" : true,
@@ -523,8 +827,7 @@ Any modifications made to this file will be overwritten.
         "notify_when" : "onActiveAlert"
       },
       "group" : "default"
-    } ],
-    "consumer" : "alerts"
+    } ]
   } ],
   "page" : 0
 }</code></pre>
@@ -643,31 +946,10 @@ Any modifications made to this file will be overwritten.
     <pre class="example"><code>{
   "throttle" : "10m",
   "created_at" : "2022-12-05T23:36:58.284Z",
-  "last_run" : {
-    "alerts_count" : {
-      "ignored" : 6,
-      "new" : 1,
-      "recovered" : 5,
-      "active" : 0
-    },
-    "outcome_msg" : "outcome_msg",
-    "warning" : "warning",
-    "outcome" : "succeeded"
-  },
-  "params" : {
-    "key" : ""
-  },
-  "created_by" : "elastic",
+  "api_key_created_by_user" : false,
   "enabled" : true,
-  "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
-  "rule_type_id" : "monitoring_alert_cluster_health",
-  "tags" : [ "tags", "tags" ],
   "running" : true,
-  "api_key_owner" : "elastic",
-  "schedule" : {
-    "interval" : "1m"
-  },
-  "notify_when" : "onActiveAlert",
+  "notify_when" : "notify_when",
   "next_run" : "2022-12-06T00:14:43.818Z",
   "updated_at" : "2022-12-05T23:36:58.284Z",
   "execution_status" : {
@@ -675,16 +957,90 @@ Any modifications made to this file will be overwritten.
     "last_duration" : 55,
     "status" : "ok"
   },
-  "name" : "cluster_health_rule",
-  "updated_by" : "elastic",
   "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
   "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "consumer" : "alerts",
+  "last_run" : {
+    "alerts_count" : {
+      "ignored" : 6,
+      "new" : 1,
+      "recovered" : 5,
+      "active" : 0
+    },
+    "outcome_msg" : [ "outcome_msg", "outcome_msg" ],
+    "outcome_order" : 5,
+    "warning" : "warning",
+    "outcome" : "succeeded"
+  },
+  "params" : {
+    "key" : ""
+  },
+  "created_by" : "elastic",
+  "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+  "rule_type_id" : "monitoring_alert_cluster_health",
+  "revision" : 2,
+  "tags" : [ "tags", "tags" ],
+  "api_key_owner" : "elastic",
+  "schedule" : {
+    "interval" : "1m"
+  },
+  "name" : "cluster_health_rule",
+  "updated_by" : "elastic",
   "mute_all" : false,
   "actions" : [ {
+    "alerts_filter" : {
+      "timeframe" : {
+        "hours" : {
+          "start" : "08:00",
+          "end" : "17:00"
+        },
+        "timezone" : "Europe/Madrid",
+        "days" : [ 1, 2, 3, 4, 5 ]
+      },
+      "query" : {
+        "kql" : "kql",
+        "filters" : [ {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        }, {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        } ]
+      }
+    },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
     "params" : {
       "key" : ""
     },
+    "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
     "connector_type_id" : ".server-log",
     "frequency" : {
       "summary" : true,
@@ -693,10 +1049,59 @@ Any modifications made to this file will be overwritten.
     },
     "group" : "default"
   }, {
+    "alerts_filter" : {
+      "timeframe" : {
+        "hours" : {
+          "start" : "08:00",
+          "end" : "17:00"
+        },
+        "timezone" : "Europe/Madrid",
+        "days" : [ 1, 2, 3, 4, 5 ]
+      },
+      "query" : {
+        "kql" : "kql",
+        "filters" : [ {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        }, {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        } ]
+      }
+    },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
     "params" : {
       "key" : ""
     },
+    "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
     "connector_type_id" : ".server-log",
     "frequency" : {
       "summary" : true,
@@ -704,8 +1109,7 @@ Any modifications made to this file will be overwritten.
       "notify_when" : "onActiveAlert"
     },
     "group" : "default"
-  } ],
-  "consumer" : "alerts"
+  } ]
 }</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -2001,31 +2405,10 @@ Any modifications made to this file will be overwritten.
     <pre class="example"><code>{
   "throttle" : "10m",
   "created_at" : "2022-12-05T23:36:58.284Z",
-  "last_run" : {
-    "alerts_count" : {
-      "ignored" : 6,
-      "new" : 1,
-      "recovered" : 5,
-      "active" : 0
-    },
-    "outcome_msg" : "outcome_msg",
-    "warning" : "warning",
-    "outcome" : "succeeded"
-  },
-  "params" : {
-    "key" : ""
-  },
-  "created_by" : "elastic",
+  "api_key_created_by_user" : false,
   "enabled" : true,
-  "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
-  "rule_type_id" : "monitoring_alert_cluster_health",
-  "tags" : [ "tags", "tags" ],
   "running" : true,
-  "api_key_owner" : "elastic",
-  "schedule" : {
-    "interval" : "1m"
-  },
-  "notify_when" : "onActiveAlert",
+  "notify_when" : "notify_when",
   "next_run" : "2022-12-06T00:14:43.818Z",
   "updated_at" : "2022-12-05T23:36:58.284Z",
   "execution_status" : {
@@ -2033,16 +2416,90 @@ Any modifications made to this file will be overwritten.
     "last_duration" : 55,
     "status" : "ok"
   },
-  "name" : "cluster_health_rule",
-  "updated_by" : "elastic",
   "scheduled_task_id" : "b530fed0-74f5-11ed-9801-35303b735aef",
   "id" : "b530fed0-74f5-11ed-9801-35303b735aef",
+  "consumer" : "alerts",
+  "last_run" : {
+    "alerts_count" : {
+      "ignored" : 6,
+      "new" : 1,
+      "recovered" : 5,
+      "active" : 0
+    },
+    "outcome_msg" : [ "outcome_msg", "outcome_msg" ],
+    "outcome_order" : 5,
+    "warning" : "warning",
+    "outcome" : "succeeded"
+  },
+  "params" : {
+    "key" : ""
+  },
+  "created_by" : "elastic",
+  "muted_alert_ids" : [ "muted_alert_ids", "muted_alert_ids" ],
+  "rule_type_id" : "monitoring_alert_cluster_health",
+  "revision" : 2,
+  "tags" : [ "tags", "tags" ],
+  "api_key_owner" : "elastic",
+  "schedule" : {
+    "interval" : "1m"
+  },
+  "name" : "cluster_health_rule",
+  "updated_by" : "elastic",
   "mute_all" : false,
   "actions" : [ {
+    "alerts_filter" : {
+      "timeframe" : {
+        "hours" : {
+          "start" : "08:00",
+          "end" : "17:00"
+        },
+        "timezone" : "Europe/Madrid",
+        "days" : [ 1, 2, 3, 4, 5 ]
+      },
+      "query" : {
+        "kql" : "kql",
+        "filters" : [ {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        }, {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        } ]
+      }
+    },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
     "params" : {
       "key" : ""
     },
+    "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
     "connector_type_id" : ".server-log",
     "frequency" : {
       "summary" : true,
@@ -2051,10 +2508,59 @@ Any modifications made to this file will be overwritten.
     },
     "group" : "default"
   }, {
+    "alerts_filter" : {
+      "timeframe" : {
+        "hours" : {
+          "start" : "08:00",
+          "end" : "17:00"
+        },
+        "timezone" : "Europe/Madrid",
+        "days" : [ 1, 2, 3, 4, 5 ]
+      },
+      "query" : {
+        "kql" : "kql",
+        "filters" : [ {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        }, {
+          "$state" : "{}",
+          "meta" : {
+            "field" : "field",
+            "controlledBy" : "controlledBy",
+            "negate" : true,
+            "alias" : "alias",
+            "index" : "index",
+            "disabled" : true,
+            "params" : "{}",
+            "type" : "type",
+            "value" : "value",
+            "isMultiIndex" : true,
+            "key" : "key",
+            "group" : "group"
+          },
+          "query" : "{}"
+        } ]
+      }
+    },
     "id" : "9dca3e00-74f5-11ed-9801-35303b735aef",
     "params" : {
       "key" : ""
     },
+    "uuid" : "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61",
     "connector_type_id" : ".server-log",
     "frequency" : {
       "summary" : true,
@@ -2062,8 +2568,7 @@ Any modifications made to this file will be overwritten.
       "notify_when" : "onActiveAlert"
     },
     "group" : "default"
-  } ],
-  "consumer" : "alerts"
+  } ]
 }</code></pre>
 
     <h3 class="field-label">Produces</h3>
@@ -2099,6 +2604,12 @@ Any modifications made to this file will be overwritten.
     <li><a href="#Legacy_update_alert_request_properties_actions_inner"><code>Legacy_update_alert_request_properties_actions_inner</code> - </a></li>
     <li><a href="#Legacy_update_alert_request_properties_schedule"><code>Legacy_update_alert_request_properties_schedule</code> - </a></li>
     <li><a href="#actions_inner"><code>actions_inner</code> - </a></li>
+    <li><a href="#actions_inner_alerts_filter"><code>actions_inner_alerts_filter</code> - </a></li>
+    <li><a href="#actions_inner_alerts_filter_query"><code>actions_inner_alerts_filter_query</code> - </a></li>
+    <li><a href="#actions_inner_alerts_filter_query_filters_inner"><code>actions_inner_alerts_filter_query_filters_inner</code> - </a></li>
+    <li><a href="#actions_inner_alerts_filter_query_filters_inner_meta"><code>actions_inner_alerts_filter_query_filters_inner_meta</code> - </a></li>
+    <li><a href="#actions_inner_alerts_filter_timeframe"><code>actions_inner_alerts_filter_timeframe</code> - </a></li>
+    <li><a href="#actions_inner_alerts_filter_timeframe_hours"><code>actions_inner_alerts_filter_timeframe_hours</code> - </a></li>
     <li><a href="#actions_inner_frequency"><code>actions_inner_frequency</code> - </a></li>
     <li><a href="#alert_response_properties"><code>alert_response_properties</code> - Legacy alert response properties</a></li>
     <li><a href="#alert_response_properties_executionStatus"><code>alert_response_properties_executionStatus</code> - </a></li>
@@ -2226,11 +2737,73 @@ Any modifications made to this file will be overwritten.
     <h3><a name="actions_inner"><code>actions_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">connector_type_id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. This property appears in responses but cannot be set in requests. </div>
+      <div class="param">alerts_filter (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter">actions_inner_alerts_filter</a></span>  </div>
+<div class="param">connector_type_id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. This property appears in responses but cannot be set in requests. </div>
 <div class="param">frequency (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_frequency">actions_inner_frequency</a></span>  </div>
 <div class="param">group (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The group name for the actions. If you don't need to group actions, set to <code>default</code>. </div>
 <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the connector saved object. </div>
 <div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the action, which are sent to the connector. The <code>params</code> are handled as Mustache templates and passed a default set of context. </div>
+<div class="param">uuid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A universally unique identifier (UUID) for the action. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions_inner_alerts_filter"><code>actions_inner_alerts_filter</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Conditions that affect whether the action runs. If you specify multiple conditions, all conditions must be met for the action to run. For example, if an alert occurs within the specified time frame and matches the query, the action runs.</div>
+    <div class="field-items">
+      <div class="param">query (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_query">actions_inner_alerts_filter_query</a></span>  </div>
+<div class="param">timeframe (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_timeframe">actions_inner_alerts_filter_timeframe</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions_inner_alerts_filter_query"><code>actions_inner_alerts_filter_query</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines a query filter that determines whether the action runs.</div>
+    <div class="field-items">
+      <div class="param">kql (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A filter written in Kibana Query Language (KQL). </div>
+<div class="param">filters (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_query_filters_inner">array[actions_inner_alerts_filter_query_filters_inner]</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions_inner_alerts_filter_query_filters_inner"><code>actions_inner_alerts_filter_query_filters_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>A filter written in Elasticsearch Query Domain Specific Language (DSL) as defined in the <code>kbn-es-query</code> package.</div>
+    <div class="field-items">
+      <div class="param">meta (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_query_filters_inner_meta">actions_inner_alerts_filter_query_filters_inner_meta</a></span>  </div>
+<div class="param">query (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+<div class="param">Dollarstate (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions_inner_alerts_filter_query_filters_inner_meta"><code>actions_inner_alerts_filter_query_filters_inner_meta</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">alias (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">controlledBy (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">disabled (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+<div class="param">field (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">group (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">index (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">isMultiIndex (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+<div class="param">key (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">negate (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+<div class="param">params (optional)</div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span>  </div>
+<div class="param">type (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">value (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions_inner_alerts_filter_timeframe"><code>actions_inner_alerts_filter_timeframe</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines a period that limits whether the action runs.</div>
+    <div class="field-items">
+      <div class="param">days (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">array[Integer]</a></span> Defines the days of the week that the action can run, represented as an array of numbers. For example, <code>1</code> represents Monday. An empty array is equivalent to specifying all the days of the week. </div>
+<div class="param">hours (optional)</div><div class="param-desc"><span class="param-type"><a href="#actions_inner_alerts_filter_timeframe_hours">actions_inner_alerts_filter_timeframe_hours</a></span>  </div>
+<div class="param">timezone (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ISO time zone for the <code>hours</code> values. Values such as <code>UTC</code> and <code>UTC+1</code> also work but lack built-in daylight savings time support and are not recommended. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="actions_inner_alerts_filter_timeframe_hours"><code>actions_inner_alerts_filter_timeframe_hours</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines the range of time in a day that the action can run. If the <code>start</code> value is <code>00:00</code> and the <code>end</code> value is <code>24:00</code>, actions be generated all day.</div>
+    <div class="field-items">
+      <div class="param">end (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The end of the time frame in 24-hour notation (<code>hh:mm</code>). </div>
+<div class="param">start (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The start of the time frame in 24-hour notation (<code>hh:mm</code>). </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2239,7 +2812,7 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">notify_when </div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
 <div class="param">summary </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the action is a summary. </div>
-<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2295,7 +2868,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The ID of the rule type that you want to call when the rule is scheduled to run. For example, <code>.es-query</code>, <code>.index-threshold</code>, <code>logs.alert.document.count</code>, <code>monitoring_alert_cluster_health</code>, <code>siem.thresholdRule</code>, or <code>xpack.ml.anomaly_detection_alert</code>. </div>
 <div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
 <div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
-<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -2557,7 +3130,7 @@ Any modifications made to this file will be overwritten.
   </div>
   <div class="model">
     <h3><a name="notify_when"><code>notify_when</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>Indicates how often alerts generate actions. Valid values include: <code>onActionGroupChange</code>: Actions run when the alert status changes; <code>onActiveAlert</code>: Actions run when the alert becomes active and at each check interval while the rule conditions are met; <code>onThrottleInterval</code>: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met.</div>
+    <div class='model-description'>Indicates how often alerts generate actions. Valid values include: <code>onActionGroupChange</code>: Actions run when the alert status changes; <code>onActiveAlert</code>: Actions run when the alert becomes active and at each check interval while the rule conditions are met; <code>onThrottleInterval</code>: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify <code>notify_when</code> at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.</div>
     <div class="field-items">
           </div>  <!-- field-items -->
   </div>
@@ -2566,7 +3139,8 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'></div>
     <div class="field-items">
       <div class="param">actions </div><div class="param-desc"><span class="param-type"><a href="#actions_inner">array[actions_inner]</a></span>  </div>
-<div class="param">api_key_owner </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">api_key_created_by_user (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the API key that is associated with the rule was created by the user. </div>
+<div class="param">api_key_owner </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The owner of the API key that is associated with the rule and used to run background tasks. </div>
 <div class="param">consumer </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The application or feature that owns the rule. For example, <code>alerts</code>, <code>apm</code>, <code>discover</code>, <code>infrastructure</code>, <code>logs</code>, <code>metrics</code>, <code>ml</code>, <code>monitoring</code>, <code>securitySolution</code>, <code>siem</code>, <code>stackAlerts</code>, or <code>uptime</code>. </div>
 <div class="param">created_at </div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span> The date and time that the rule was created. format: date-time</div>
 <div class="param">created_by </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the user that created the rule. </div>
@@ -2578,14 +3152,15 @@ Any modifications made to this file will be overwritten.
 <div class="param">mute_all </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
 <div class="param">name </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The name of the rule. </div>
 <div class="param">next_run (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
-<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#notify_when">notify_when</a></span>  </div>
+<div class="param">notify_when (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Indicates how often alerts generate actions. </div>
 <div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the rule. </div>
+<div class="param">revision (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> The rule revision number. </div>
 <div class="param">rule_type_id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the type of rule. For example, <code>.es-query</code>, <code>.index-threshold</code>, <code>logs.alert.document.count</code>, <code>monitoring_alert_cluster_health</code>, <code>siem.thresholdRule</code>, or <code>xpack.ml.anomaly_detection_alert</code>. </div>
 <div class="param">running (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether the rule is running. </div>
 <div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
 <div class="param">scheduled_task_id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
 <div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
-<div class="param">throttle </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+<div class="param">throttle </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values. </div>
 <div class="param">updated_at </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The date and time that the rule was updated most recently. </div>
 <div class="param">updated_by </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the user that updated this rule most recently. </div>
     </div>  <!-- field-items -->
@@ -2605,7 +3180,8 @@ Any modifications made to this file will be overwritten.
     <div class="field-items">
       <div class="param">alerts_count (optional)</div><div class="param-desc"><span class="param-type"><a href="#rule_response_properties_last_run_alerts_count">rule_response_properties_last_run_alerts_count</a></span>  </div>
 <div class="param">outcome (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
-<div class="param">outcome_msg (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">outcome_msg (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span>  </div>
+<div class="param">outcome_order (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span>  </div>
 <div class="param">warning (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
@@ -2636,7 +3212,7 @@ Any modifications made to this file will be overwritten.
 <div class="param">params </div><div class="param-desc"><span class="param-type"><a href="#AnyType">map[String, oas_any_type_not_mapped]</a></span> The parameters for the rule. </div>
 <div class="param">schedule </div><div class="param-desc"><span class="param-type"><a href="#schedule">schedule</a></span>  </div>
 <div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The tags for the rule. </div>
-<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. It is specified in seconds, minutes, hours, or days. </div>
+<div class="param">throttle (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if <code>notify_when</code> is set to <code>onThrottleInterval</code>. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values. </div>
     </div>  <!-- field-items -->
   </div>
 </div>

@@ -67,12 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.existOrFail('csvDownloadStarted'); // validate toast panel
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/150561
-  // Failing: See https://github.com/elastic/kibana/issues/150562
-  // Failing: See https://github.com/elastic/kibana/issues/148314
-  // Failing: See https://github.com/elastic/kibana/issues/150563
-  // Failing: See https://github.com/elastic/kibana/issues/150561
-  describe.skip('Download CSV', () => {
+  describe('Download CSV', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await browser.setWindowSize(1600, 850);

@@ -30,7 +30,7 @@ interface BulkField extends Pick<CellActionField, 'name' | 'type'> {
 
 export interface UseDataGridColumnsCellActionsProps
   extends Pick<CellActionsProps, 'triggerId' | 'metadata' | 'disabledActionTypes'> {
-  fields: BulkField[];
+  fields?: BulkField[];
   dataGridRef: MutableRefObject<EuiDataGridRefProps | null>;
 }
 export type UseDataGridColumnsCellActions<
@@ -46,11 +46,11 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
 }) => {
   const bulkContexts: CellActionCompatibilityContext[] = useMemo(
     () =>
-      fields.map(({ values, ...field }) => ({
+      fields?.map(({ values, ...field }) => ({
         field, // we are getting the actions for the whole column field, so the compatibility check will be done without the value
         trigger: { id: triggerId },
         metadata,
-      })),
+      })) ?? [],
     [fields, triggerId, metadata]
   );
 
@@ -60,11 +60,13 @@ export const useDataGridColumnsCellActions: UseDataGridColumnsCellActions = ({
 
   const columnsCellActions = useMemo<EuiDataGridColumnCellAction[][]>(() => {
     if (loading) {
-      return fields.map(() => [
-        () => <EuiLoadingSpinner size="s" data-test-subj="dataGridColumnCellAction-loading" />,
-      ]);
+      return (
+        fields?.map(() => [
+          () => <EuiLoadingSpinner size="s" data-test-subj="dataGridColumnCellAction-loading" />,
+        ]) ?? []
+      );
     }
-    if (!columnsActions) {
+    if (!columnsActions || !fields || fields.length === 0) {
       return [];
     }
     return columnsActions.map((actions, columnIndex) =>

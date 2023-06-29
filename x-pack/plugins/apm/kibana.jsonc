@@ -26,7 +26,8 @@
       "advancedSettings",
       "unifiedFieldList",
       "lens",
-      "maps"
+      "maps",
+      "uiActions"
     ],
     "optionalPlugins": [
       "actions",

@@ -848,7 +848,7 @@ describe('Detections Rules API', () => {
             mute_all: false,
           },
           {
-            id: '1',
+            id: '2',
             mute_all: false,
             active_snoozes: [],
             is_snoozed_until: '2023-04-24T19:31:46.765Z',
@@ -856,21 +856,19 @@ describe('Detections Rules API', () => {
         ],
       });
 
-      const result = await fetchRulesSnoozeSettings({ ids: ['id1'] });
+      const result = await fetchRulesSnoozeSettings({ ids: ['1', '2'] });
 
-      expect(result).toEqual([
-        {
-          id: '1',
+      expect(result).toEqual({
+        '1': {
           muteAll: false,
           activeSnoozes: [],
         },
-        {
-          id: '1',
+        '2': {
           muteAll: false,
           activeSnoozes: [],
           isSnoozedUntil: new Date('2023-04-24T19:31:46.765Z'),
         },
-      ]);
+      });
     });
   });
 });

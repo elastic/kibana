@@ -189,12 +189,8 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
           const { fieldName, fieldValue, duplicate } = groupItem;
           if (valuesBadges.length >= MAX_GROUP_BADGES) break;
           valuesBadges.push(
-            <>
-              <EuiBadge
-                key={`${fieldName}-id`}
-                data-test-subj="aiopsSpikeAnalysisTableColumnGroupBadge"
-                color="hollow"
-              >
+            <span key={`${fieldName}-id`}>
+              <EuiBadge data-test-subj="aiopsSpikeAnalysisTableColumnGroupBadge" color="hollow">
                 <span>
                   {(duplicate ?? 0) <= 1 ? '* ' : ''}
                   {`${fieldName}: `}
@@ -202,7 +198,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                 <span style={{ color: visColors[2] }}>{`${fieldValue}`}</span>
               </EuiBadge>
               <EuiSpacer size="xs" />
-            </>
+            </span>
           );
         }
 

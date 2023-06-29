@@ -11,7 +11,6 @@ import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
 import { MonitorServiceLocationCodec, ServiceLocationErrors } from './locations';
 import {
-  CodeEditorModeCodec,
   DataStream,
   DataStreamCodec,
   FormMonitorTypeCodec,
@@ -22,6 +21,7 @@ import {
   SourceTypeCodec,
   TLSVersionCodec,
   VerificationModeCodec,
+  RequestBodyCheckCodec,
 } from './monitor_configs';
 import { MetadataCodec } from './monitor_meta_data';
 import { PrivateLocationCodec } from './synthetics_private_locations';
@@ -75,6 +75,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.ORIGINAL_SPACE]: t.string,
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
     [ConfigKey.ALERT_CONFIG]: AlertConfigsCodec,
+    [ConfigKey.PARAMS]: t.string,
   }),
 ]);
 
@@ -194,7 +195,7 @@ export const HTTPSensitiveAdvancedFieldsCodec = t.intersection([
     [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: t.array(t.string),
     [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: t.array(t.string),
     [ConfigKey.RESPONSE_HEADERS_CHECK]: t.record(t.string, t.string),
-    [ConfigKey.REQUEST_BODY_CHECK]: t.interface({ value: t.string, type: CodeEditorModeCodec }),
+    [ConfigKey.REQUEST_BODY_CHECK]: RequestBodyCheckCodec,
     [ConfigKey.REQUEST_HEADERS_CHECK]: t.record(t.string, t.string),
     [ConfigKey.USERNAME]: t.string,
   }),
@@ -243,7 +244,6 @@ export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.SOURCE_INLINE]: t.string,
     [ConfigKey.SOURCE_PROJECT_CONTENT]: t.string,
-    [ConfigKey.PARAMS]: t.string,
     [ConfigKey.URLS]: t.union([t.string, t.null]),
     [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),

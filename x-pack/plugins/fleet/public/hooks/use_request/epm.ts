@@ -204,7 +204,9 @@ export const sendInstallPackage = (pkgName: string, pkgVersion: string, force: b
   });
 };
 
-export const sendBulkInstallPackages = (packages: string[]) => {
+export const sendBulkInstallPackages = (
+  packages: Array<string | { name: string; version: string }>
+) => {
   return sendRequest<InstallPackageResponse, FleetErrorResponse>({
     path: epmRouteService.getBulkInstallPath(),
     method: 'post',

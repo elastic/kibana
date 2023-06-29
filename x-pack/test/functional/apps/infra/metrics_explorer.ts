@@ -26,7 +26,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   ]);
 
   describe('Metrics Explorer', function () {
-    this.tags('includeFirefox');
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -96,14 +95,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Saved Views', () => {
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+    describe('Saved Views', function () {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await pageObjects.infraHome.goToMetricExplorer();
+      });
+
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
       describe('save functionality', () => {
         it('should have saved views component', async () => {
-          await pageObjects.common.navigateToApp('infraOps');
-          await pageObjects.infraHome.goToMetricExplorer();
-          await pageObjects.infraSavedViews.getSavedViewsButton();
           await pageObjects.infraSavedViews.ensureViewIsLoaded('Default view');
         });
 

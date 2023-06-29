@@ -29,9 +29,10 @@ import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_ma
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
-import type { FilterGroupProps } from '../../../common/components/filter_group/types';
 import { FilterGroup } from '../../../common/components/filter_group';
 import type { AlertsTableComponentProps } from '../../components/alerts_table/alerts_grouping';
+import { getMockedFilterGroupWithCustomFilters } from '../../../common/components/filter_group/mocks';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -171,7 +172,46 @@ const state: State = {
 };
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+
+const getStoreWithCustomState = (newState: State = state) => {
+  return createStore(newState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+};
+
+const store = getStoreWithCustomState();
+
+const stateWithBuildingBlockAlertsEnabled: State = {
+  ...state,
+  dataTable: {
+    ...state.dataTable,
+    tableById: {
+      ...state.dataTable.tableById,
+      [TableId.test]: {
+        ...state.dataTable.tableById[TableId.test],
+        additionalFilters: {
+          showOnlyThreatIndicatorAlerts: false,
+          showBuildingBlockAlerts: true,
+        },
+      },
+    },
+  },
+};
+
+const stateWithThreatIndicatorsAlertEnabled: State = {
+  ...state,
+  dataTable: {
+    ...state.dataTable,
+    tableById: {
+      ...state.dataTable.tableById,
+      [TableId.test]: {
+        ...state.dataTable.tableById[TableId.test],
+        additionalFilters: {
+          showOnlyThreatIndicatorAlerts: true,
+          showBuildingBlockAlerts: false,
+        },
+      },
+    },
+  },
+};
 
 jest.mock('../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline', () => ({
   useAddBulkToTimelineAction: jest.fn(() => {}),
@@ -230,22 +270,93 @@ describe('DetectionEnginePageComponent', () => {
     });
   });
 
-  it('the pageFiltersUpdateHandler updates status when a multi status filter is passed', async () => {
-    (FilterGroup as jest.Mock).mockImplementationOnce(({ onFilterChange }: FilterGroupProps) => {
-      if (onFilterChange) {
-        // once with status
-        onFilterChange([
+  it('should pass building block filter to the alert Page Controls', async () => {
+    const MockedFilterGroup = FilterGroup as jest.Mock;
+    MockedFilterGroup.mockImplementationOnce(getMockedFilterGroupWithCustomFilters());
+    await waitFor(() => {
+      render(
+        <TestProviders store={getStoreWithCustomState(stateWithBuildingBlockAlertsEnabled)}>
+          <Router history={mockHistory}>
+            <DetectionEnginePage />
+          </Router>
+        </TestProviders>
+      );
+    });
+
+    expect(MockedFilterGroup).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: [
           {
             meta: {
-              index: 'security-solution-default',
-              key: 'kibana.alert.workflow_status',
-              params: ['open', 'acknowledged'],
+              alias: null,
+              negate: true,
+              disabled: false,
+              type: 'exists',
+              key: 'kibana.alert.building_block_type',
+              value: 'exists',
+            },
+            query: {
+              exists: {
+                field: 'kibana.alert.building_block_type',
+              },
             },
           },
-        ]);
-      }
-      return <span />;
+        ],
+      }),
+      expect.anything()
+    );
+  });
+
+  it('should pass threat Indicator filter to the alert Page Controls', async () => {
+    const MockedFilterGroup = FilterGroup as jest.Mock;
+    MockedFilterGroup.mockImplementationOnce(getMockedFilterGroupWithCustomFilters());
+
+    await waitFor(() => {
+      render(
+        <TestProviders store={getStoreWithCustomState(stateWithThreatIndicatorsAlertEnabled)}>
+          <Router history={mockHistory}>
+            <DetectionEnginePage />
+          </Router>
+        </TestProviders>
+      );
     });
+
+    expect(MockedFilterGroup).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: [
+          {
+            meta: {
+              alias: null,
+              negate: true,
+              disabled: false,
+              type: 'exists',
+              key: 'kibana.alert.building_block_type',
+              value: 'exists',
+            },
+            query: {
+              exists: {
+                field: 'kibana.alert.building_block_type',
+              },
+            },
+          },
+        ],
+      }),
+      expect.anything()
+    );
+  });
+
+  it('the pageFiltersUpdateHandler updates status when a multi status filter is passed', async () => {
+    (FilterGroup as jest.Mock).mockImplementationOnce(
+      getMockedFilterGroupWithCustomFilters([
+        {
+          meta: {
+            index: 'security-solution-default',
+            key: 'kibana.alert.workflow_status',
+            params: ['open', 'acknowledged'],
+          },
+        },
+      ])
+    );
     await waitFor(() => {
       render(
         <TestProviders store={store}>
@@ -261,38 +372,34 @@ describe('DetectionEnginePageComponent', () => {
   });
 
   it('the pageFiltersUpdateHandler updates status when a single status filter is passed', async () => {
-    (FilterGroup as jest.Mock).mockImplementationOnce(({ onFilterChange }: FilterGroupProps) => {
-      if (onFilterChange) {
-        // once with status
-        onFilterChange([
-          {
-            meta: {
-              index: 'security-solution-default',
-              key: 'kibana.alert.workflow_status',
-              disabled: false,
-            },
-            query: {
-              match_phrase: {
-                'kibana.alert.workflow_status': 'open',
-              },
+    (FilterGroup as jest.Mock).mockImplementationOnce(
+      getMockedFilterGroupWithCustomFilters([
+        {
+          meta: {
+            index: 'security-solution-default',
+            key: 'kibana.alert.workflow_status',
+            disabled: false,
+          },
+          query: {
+            match_phrase: {
+              'kibana.alert.workflow_status': 'open',
             },
           },
-          {
-            meta: {
-              index: 'security-solution-default',
-              key: 'kibana.alert.severity',
-              disabled: false,
-            },
-            query: {
-              match_phrase: {
-                'kibana.alert.severity': 'low',
-              },
+        },
+        {
+          meta: {
+            index: 'security-solution-default',
+            key: 'kibana.alert.severity',
+            disabled: false,
+          },
+          query: {
+            match_phrase: {
+              'kibana.alert.severity': 'low',
             },
           },
-        ]);
-      }
-      return <span />;
-    });
+        },
+      ])
+    );
     await waitFor(() => {
       render(
         <TestProviders store={store}>
@@ -308,26 +415,22 @@ describe('DetectionEnginePageComponent', () => {
   });
 
   it('the pageFiltersUpdateHandler clears status when no status filter is passed', async () => {
-    (FilterGroup as jest.Mock).mockImplementationOnce(({ onFilterChange }: FilterGroupProps) => {
-      if (onFilterChange) {
-        // once with status
-        onFilterChange([
-          {
-            meta: {
-              index: 'security-solution-default',
-              key: 'kibana.alert.severity',
-              disabled: false,
-            },
-            query: {
-              match_phrase: {
-                'kibana.alert.severity': 'low',
-              },
+    (FilterGroup as jest.Mock).mockImplementationOnce(
+      getMockedFilterGroupWithCustomFilters([
+        {
+          meta: {
+            index: 'security-solution-default',
+            key: 'kibana.alert.severity',
+            disabled: false,
+          },
+          query: {
+            match_phrase: {
+              'kibana.alert.severity': 'low',
             },
           },
-        ]);
-      }
-      return <span />;
-    });
+        },
+      ])
+    );
     await waitFor(() => {
       render(
         <TestProviders store={store}>

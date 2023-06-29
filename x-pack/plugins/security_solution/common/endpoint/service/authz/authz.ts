@@ -26,7 +26,7 @@ import type { MaybeImmutable } from '../../types';
 export function hasKibanaPrivilege(
   fleetAuthz: FleetAuthz,
   isEndpointRbacEnabled: boolean,
-  isSuperuser: boolean,
+  isSuperuser: boolean = false,
   privilege: keyof typeof ENDPOINT_PRIVILEGES
 ): boolean {
   // user is superuser, always return true
@@ -60,7 +60,7 @@ export function hasKibanaPrivilege(
 export const calculateEndpointAuthz = (
   licenseService: LicenseService,
   fleetAuthz: FleetAuthz,
-  userRoles: MaybeImmutable<string[]>,
+  userRoles: MaybeImmutable<string[]> = [],
   isEndpointRbacEnabled: boolean = false,
   hasHostIsolationExceptionsItems: boolean = false
 ): EndpointAuthz => {

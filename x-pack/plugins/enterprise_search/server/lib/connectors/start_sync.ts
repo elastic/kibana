@@ -76,6 +76,7 @@ export const startConnectorSync = async (
         metadata: {},
         started_at: null,
         status: SyncStatus.PENDING,
+        total_document_count: null,
         trigger_method: TriggerMethod.ON_DEMAND,
         worker_hostname: null,
       },

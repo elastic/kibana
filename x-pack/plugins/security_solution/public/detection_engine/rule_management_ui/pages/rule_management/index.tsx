@@ -10,7 +10,6 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
-import { HeaderPage } from '../../../../common/components/header_page';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import { getDetectionEngineUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
@@ -43,6 +42,7 @@ import * as i18n from '../../../../detections/pages/detection_engine/rules/trans
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 
 import { MaintenanceWindowCallout } from '../../components/maintenance_window_callout/maintenance_window_callout';
+import { SuperHeader } from './super_header';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -114,7 +114,7 @@ const RulesPageComponent: React.FC = () => {
 
       <RulesTableContextProvider>
         <SecuritySolutionPageWrapper>
-          <HeaderPage title={i18n.PAGE_TITLE}>
+          <SuperHeader>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
               <EuiFlexItem grow={false}>
                 <LoadPrePackagedRules>
@@ -155,7 +155,7 @@ const RulesPageComponent: React.FC = () => {
                 </SecuritySolutionLinkButton>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </HeaderPage>
+          </SuperHeader>
           {(prePackagedRuleStatus === 'ruleNeedUpdate' ||
             prePackagedTimelineStatus === 'timelineNeedUpdate') && (
             <UpdatePrePackagedRulesCallOut data-test-subj="update-callout-button" />

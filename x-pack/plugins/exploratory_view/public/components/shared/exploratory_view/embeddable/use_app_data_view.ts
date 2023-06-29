@@ -48,5 +48,5 @@ export const useAppDataView = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataViewTitle, seriesDataType, JSON.stringify(series)]);
 
-  return { dataViews, loading };
+  return { dataViews, loading: loading && !dataViews[seriesDataType] };
 };

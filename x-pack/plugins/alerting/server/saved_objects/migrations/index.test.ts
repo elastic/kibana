@@ -2653,20 +2653,26 @@ describe('successful migrations', () => {
       ]);
     });
 
-    test('migrates rule to include revision and defaults revision to 0', () => {
-      const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0'];
+    describe('security rule version to revision', () => {
+      test('migrates rule to include revision and defaults revision to 0', () => {
+        const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.8.0'
+        ];
 
-      const rule = getMockData();
-      const migratedAlert880 = migration880(rule, migrationContext);
-      expect(migratedAlert880.attributes.revision).toEqual(0);
-    });
+        const rule = getMockData();
+        const migratedAlert880 = migration880(rule, migrationContext);
+        expect(migratedAlert880.attributes.revision).toEqual(0);
+      });
 
-    test('migrates security rule version to revision', () => {
-      const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0'];
+      test('migrates security rule version to revision', () => {
+        const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.8.0'
+        ];
 
-      const rule = getMockData({ alertTypeId: ruleTypeMappings.eql, params: { version: 2 } });
-      const migratedAlert880 = migration880(rule, migrationContext);
-      expect(migratedAlert880.attributes.revision).toEqual(2);
+        const rule = getMockData({ alertTypeId: ruleTypeMappings.eql, params: { version: 2 } });
+        const migratedAlert880 = migration880(rule, migrationContext);
+        expect(migratedAlert880.attributes.revision).toEqual(2);
+      });
     });
 
     describe('migrate actions frequency for Security Solution ', () => {
@@ -2712,6 +2718,36 @@ describe('successful migrations', () => {
           }
         );
         expect(updatedActions).toEqual(rule.attributes.actions);
+      });
+    });
+
+    describe('unmute security rules', () => {
+      test.each(Object.values(ruleTypeMappings))(
+        'unmutes custom rules of type "%s" successfully',
+        (ruleType) => {
+          const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+            '8.8.0'
+          ];
+
+          const rule = getMockData({ alertTypeId: ruleType, muteAll: true });
+          const migratedAlert880 = migration880(rule, migrationContext);
+
+          expect(migratedAlert880.attributes.muteAll).toBeFalsy();
+        }
+      );
+
+      test('ignores non security rules', () => {
+        const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)[
+          '8.8.0'
+        ];
+
+        const rule = getMockData({
+          alertTypeId: 'unknown',
+          muteAll: true,
+        });
+        const migratedAlert880 = migration880(rule, migrationContext);
+
+        expect(migratedAlert880.attributes.muteAll).toBeTruthy();
       });
     });
   });

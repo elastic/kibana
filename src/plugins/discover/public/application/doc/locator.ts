@@ -45,7 +45,7 @@ export class DiscoverSingleDocLocatorDefinition
       dataViewId = index;
     }
 
-    const path = `#/doc/${dataViewId}/${rowIndex}?id=${rowId}`;
+    const path = `#/doc/${dataViewId}/${rowIndex}?id=${encodeURIComponent(rowId)}`;
 
     return {
       app: 'discover',

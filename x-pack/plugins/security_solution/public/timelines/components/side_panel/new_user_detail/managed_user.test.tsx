@@ -78,4 +78,34 @@ describe('ManagedUser', () => {
 
     expect(getByTestId('managedUser-data')).toHaveTextContent('123456, 654321');
   });
+
+  it('it renders the call out when the integration is disabled', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <ManagedUser
+          {...{
+            ...mockProps,
+            managedUser: { ...mockManagedUser, isIntegrationEnabled: false },
+          }}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('managedUser-integration-disable-callout')).toBeInTheDocument();
+  });
+
+  it("it doesn't show the call out when the user is loading", () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <ManagedUser
+          {...{
+            ...mockProps,
+            managedUser: { ...mockManagedUser, isLoading: true, isIntegrationEnabled: false },
+          }}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('managedUser-integration-disable-callout')).not.toBeInTheDocument();
+  });
 });

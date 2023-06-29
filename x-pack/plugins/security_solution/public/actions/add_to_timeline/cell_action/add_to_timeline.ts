@@ -40,22 +40,40 @@ export const createAddToTimelineCellActionFactory = createCellActionFactory(
       getDisplayNameTooltip: () => ADD_TO_TIMELINE,
       isCompatible: async ({ field }) =>
         fieldHasCellActions(field.name) && isValidDataProviderField(field.name, field.type),
-      execute: async ({ field, metadata }) => {
-        const dataProviders =
+      execute: async ({ field: { value, type, name }, metadata }) => {
+        const values = Array.isArray(value) ? value : [value];
+        const [firstValue, ...andValues] = values;
+        const [dataProvider] =
           createDataProviders({
             contextId: TimelineId.active,
-            fieldType: field.type,
-            values: field.value,
-            field: field.name,
+            fieldType: type,
+            values: firstValue,
+            field: name,
             negate: metadata?.negateFilters === true,
           }) ?? [];
 
-        if (dataProviders.length > 0) {
-          store.dispatch(addProvider({ id: TimelineId.active, providers: dataProviders }));
+        if (dataProvider) {
+          andValues.forEach((andValue) => {
+            const [andDataProvider] =
+              createDataProviders({
+                contextId: TimelineId.active,
+                fieldType: type,
+                values: andValue,
+                field: name,
+                negate: metadata?.negateFilters === true,
+              }) ?? [];
+            if (andDataProvider) {
+              dataProvider.and.push(andDataProvider);
+            }
+          });
+        }
+
+        if (dataProvider) {
+          store.dispatch(addProvider({ id: TimelineId.active, providers: [dataProvider] }));
 
           let messageValue = '';
-          if (field.value != null) {
-            messageValue = Array.isArray(field.value) ? field.value.join(', ') : field.value;
+          if (value != null) {
+            messageValue = Array.isArray(value) ? value.join(', ') : value;
           }
           notificationsService.toasts.addSuccess({
             title: ADD_TO_TIMELINE_SUCCESS_TITLE(messageValue),

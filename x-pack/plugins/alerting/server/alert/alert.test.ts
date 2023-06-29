@@ -344,6 +344,7 @@ describe('updateLastScheduledActions()', () => {
           group: 'default',
         },
         flappingHistory: [],
+        maintenanceWindowIds: [],
       },
     });
   });
@@ -357,6 +358,7 @@ describe('updateLastScheduledActions()', () => {
       state: {},
       meta: {
         flappingHistory: [],
+        maintenanceWindowIds: [],
         uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
@@ -373,6 +375,7 @@ describe('updateLastScheduledActions()', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: {
         flappingHistory: [],
+        maintenanceWindowIds: [],
         lastScheduledActions: {
           date: new Date(),
           group: 'default',
@@ -387,6 +390,7 @@ describe('updateLastScheduledActions()', () => {
       state: {},
       meta: {
         flappingHistory: [],
+        maintenanceWindowIds: [],
         uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
@@ -484,6 +488,7 @@ describe('toJSON', () => {
             group: 'default',
           },
           flappingHistory: [false, true],
+          maintenanceWindowIds: [],
           flapping: false,
           pendingRecoveredCount: 2,
         },
@@ -548,6 +553,7 @@ describe('toRaw', () => {
       meta: {
         flappingHistory: [false, true, true],
         flapping: false,
+        maintenanceWindowIds: [],
         uuid: expect.any(String),
       },
     });
@@ -570,6 +576,7 @@ describe('setFlappingHistory', () => {
           "flappingHistory": Array [
             false,
           ],
+          "maintenanceWindowIds": Array [],
           "uuid": Any<String>,
         },
         "state": Object {},
@@ -602,6 +609,7 @@ describe('setFlapping', () => {
         "meta": Object {
           "flapping": false,
           "flappingHistory": Array [],
+          "maintenanceWindowIds": Array [],
           "uuid": Any<String>,
         },
         "state": Object {},

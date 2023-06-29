@@ -11,6 +11,7 @@ import type {
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
 import type { Filter, KueryNode } from '@kbn/es-query';
+import { IsoWeekday } from './iso_weekdays';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 import { RuleSnooze } from './rule_snooze_type';
 
@@ -83,7 +84,6 @@ export interface RuleActionFrequency extends SavedObjectAttributes {
   throttle: string | null;
 }
 
-export type IsoWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export interface AlertsFilterTimeframe extends SavedObjectAttributes {
   days: IsoWeekday[];
   timezone: string;

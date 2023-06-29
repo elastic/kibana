@@ -10,10 +10,11 @@ import {
   parseEndpoint,
   routeValidationObject,
 } from '@kbn/server-route-repository';
-import { CoreSetup, Logger, RouteRegistrar } from '@kbn/core/server';
+import { CoreSetup, KibanaRequest, Logger, RouteRegistrar } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
+import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';
@@ -28,6 +29,7 @@ interface RegisterRoutes {
 
 export interface RegisterRoutesDependencies {
   ruleDataService: RuleDataPluginService;
+  getRulesClientWithRequest: (request: KibanaRequest) => RulesClientApi;
 }
 
 export function registerRoutes({ repository, core, logger, dependencies }: RegisterRoutes) {

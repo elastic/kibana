@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 
 const API_ENDPOINT_ACTION_PATH = '/api/endpoint/action/*';
@@ -111,25 +110,12 @@ export const filterOutEndpoints = (endpointHostname: string): void => {
   });
 };
 
-export const createAgentPolicyTask = (
-  version: string,
-  cb: (response: IndexedFleetEndpointPolicyResponse) => void
-) => {
-  const policyName = `Reassign ${Math.random().toString(36).substring(2, 7)}`;
-
-  cy.task<IndexedFleetEndpointPolicyResponse>('indexFleetEndpointPolicy', {
-    policyName,
-    endpointPackageVersion: version,
-    agentPolicyName: policyName,
-  }).then(cb);
-};
-
 export const filterOutIsolatedHosts = (): void => {
   cy.getByTestSubj('adminSearchBar').click().type('united.endpoint.Endpoint.state.isolation: true');
   cy.getByTestSubj('querySubmitButton').click();
 };
 
-export const checkEndpointListForIsolatedHosts = (expectIsolated = true): void => {
+const checkEndpointListForIsolatedHosts = (expectIsolated: boolean): void => {
   const chainer = expectIsolated ? 'contain.text' : 'not.contain.text';
   cy.getByTestSubj('endpointListTable').within(() => {
     cy.get('tbody tr').each(($tr) => {
@@ -139,3 +125,23 @@ export const checkEndpointListForIsolatedHosts = (expectIsolated = true): void =
     });
   });
 };
+
+export const checkEndpointListForOnlyUnIsolatedHosts = (): void =>
+  checkEndpointListForIsolatedHosts(false);
+export const checkEndpointListForOnlyIsolatedHosts = (): void =>
+  checkEndpointListForIsolatedHosts(true);
+
+export const checkEndpointIsolationStatus = (
+  endpointHostname: string,
+  expectIsolated: boolean
+): void => {
+  const chainer = expectIsolated ? 'contain.text' : 'not.contain.text';
+
+  cy.contains(endpointHostname).parents('td').siblings('td').eq(0).should(chainer, 'Isolated');
+};
+
+export const checkEndpointIsIsolated = (endpointHostname: string): void =>
+  checkEndpointIsolationStatus(endpointHostname, true);
+
+export const checkEndpointIsNotIsolated = (endpointHostname: string): void =>
+  checkEndpointIsolationStatus(endpointHostname, false);

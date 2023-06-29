@@ -9,6 +9,8 @@
 import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import './discover_grid.scss';
 import {
   EuiDataGridSorting,
@@ -25,7 +27,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { ToastsStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
+import type { ToastsStart, IUiSettingsClient, HttpStart, CoreStart } from '@kbn/core/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
@@ -51,6 +53,8 @@ import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../hooks/use_row_heights_options';
 import { convertValueToString } from '../../utils/convert_value_to_string';
 import { getRowsPerPageOptions, getDefaultRowsPerPage } from '../../utils/rows_per_page';
+
+const themeDefault = { darkMode: false };
 
 interface SortObj {
   id: string;
@@ -136,6 +140,10 @@ export interface DiscoverGridProps {
    */
   showTimeCol: boolean;
   /**
+   * Determines whether the full screen button should be displayed
+   */
+  showFullScreenButton?: boolean;
+  /**
    * Manage user sorting control
    */
   isSortEnabled?: boolean;
@@ -195,6 +203,7 @@ export interface DiscoverGridProps {
    * Service dependencies
    */
   services: {
+    core: CoreStart;
     fieldFormats: FieldFormatsStart;
     addBasePath: HttpStart['basePath']['prepend'];
     uiSettings: IUiSettingsClient;
@@ -228,6 +237,7 @@ export const DiscoverGrid = ({
   setExpandedDoc,
   settings,
   showTimeCol,
+  showFullScreenButton = true,
   sort,
   useNewFieldsApi,
   isSortEnabled = true,
@@ -244,6 +254,7 @@ export const DiscoverGrid = ({
   services,
 }: DiscoverGridProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings } = services;
+  const { darkMode } = useObservable(services.core.theme?.theme$ ?? of(themeDefault), themeDefault);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
@@ -510,14 +521,16 @@ export const DiscoverGrid = ({
             showSortSelector: isSortEnabled,
             additionalControls,
             showDisplaySelector,
+            showFullScreenSelector: showFullScreenButton,
           }
         : {
             ...toolbarVisibilityDefaults,
             showSortSelector: isSortEnabled,
             additionalControls,
             showDisplaySelector,
+            showFullScreenSelector: showFullScreenButton,
           },
-    [showDisplaySelector, defaultColumns, additionalControls, isSortEnabled]
+    [defaultColumns, isSortEnabled, additionalControls, showDisplaySelector, showFullScreenButton]
   );
 
   const rowHeightsOptions = useRowHeightsOptions({
@@ -564,7 +577,7 @@ export const DiscoverGrid = ({
         rows: displayedRows,
         onFilter,
         dataView,
-        isDarkMode: services.uiSettings.get('theme:darkMode'),
+        isDarkMode: darkMode,
         selectedDocs: usedSelectedDocs,
         setSelectedDocs: (newSelectedDocs) => {
           setSelectedDocs(newSelectedDocs);

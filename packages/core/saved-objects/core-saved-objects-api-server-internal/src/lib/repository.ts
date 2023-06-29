@@ -208,6 +208,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   private _mappings: IndexMapping;
   private _registry: ISavedObjectTypeRegistry;
   private _allowedTypes: string[];
+  private typeValidatorMap: Record<string, SavedObjectsTypeValidator> = {};
   private readonly client: RepositoryEsClient;
   private readonly _encryptionExtension?: ISavedObjectsEncryptionExtension;
   private readonly _securityExtension?: ISavedObjectsSecurityExtension;
@@ -403,7 +404,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
      * migration to fail, but it's the best we can do without devising a way to run validations
      * inside the migration algorithm itself.
      */
-    this.validateObjectAttributes(type, migrated as SavedObjectSanitizedDoc<T>);
+    this.validateObjectForCreate(type, migrated as SavedObjectSanitizedDoc<T>);
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc<T>);
 
@@ -629,7 +630,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
          * inside the migration algorithm itself.
          */
         try {
-          this.validateObjectAttributes(object.type, migrated);
+          this.validateObjectForCreate(object.type, migrated);
         } catch (error) {
           return {
             tag: 'Left',
@@ -2757,23 +2758,29 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   }
 
   /** Validate a migrated doc against the registered saved object type's schema. */
-  private validateObjectAttributes(type: string, doc: SavedObjectSanitizedDoc) {
-    const savedObjectType = this._registry.getType(type);
-    if (!savedObjectType?.schemas) {
+  private validateObjectForCreate(type: string, doc: SavedObjectSanitizedDoc) {
+    if (!this._registry.getType(type)) {
       return;
     }
-
-    const validator = new SavedObjectsTypeValidator({
-      logger: this._logger.get('type-validator'),
-      type,
-      validationMap: savedObjectType.schemas,
-    });
-
+    const validator = this.getTypeValidator(type);
     try {
-      validator.validate(this._migrator.kibanaVersion, doc);
+      validator.validate(doc, this._migrator.kibanaVersion);
     } catch (error) {
       throw SavedObjectsErrorHelpers.createBadRequestError(error.message);
     }
+  }
+
+  private getTypeValidator(type: string): SavedObjectsTypeValidator {
+    if (!this.typeValidatorMap[type]) {
+      const savedObjectType = this._registry.getType(type);
+      this.typeValidatorMap[type] = new SavedObjectsTypeValidator({
+        logger: this._logger.get('type-validator'),
+        type,
+        validationMap: savedObjectType!.schemas ?? {},
+        defaultVersion: this._migrator.kibanaVersion,
+      });
+    }
+    return this.typeValidatorMap[type]!;
   }
 
   /** This is used when objects are created. */

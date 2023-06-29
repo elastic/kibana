@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataViewBase, Filter } from '@kbn/es-query';
+import { DataViewBase, Filter, isCombinedFilter } from '@kbn/es-query';
 
 export const createHostsFilter = (hostNames: string[], dataView?: DataViewBase): Filter => {
   return {
@@ -24,4 +24,18 @@ export const createHostsFilter = (hostNames: string[], dataView?: DataViewBase):
         }
       : {},
   };
+};
+
+export const retrieveFieldsFromFilter = (filters: Filter[], fields: string[] = []) => {
+  for (const filter of filters) {
+    if (isCombinedFilter(filter)) {
+      retrieveFieldsFromFilter(filter.meta.params, fields);
+    }
+
+    if (filter.meta.key) {
+      fields.push(filter.meta.key);
+    }
+  }
+
+  return fields;
 };

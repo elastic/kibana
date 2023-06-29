@@ -235,7 +235,7 @@ const TAGS_LABEL = i18n.translate('xpack.synthetics.management.monitorList.tags'
 });
 
 const ENABLED_LABEL = i18n.translate('xpack.synthetics.detailsPanel.monitorDetails.enabled', {
-  defaultMessage: 'Enabled',
+  defaultMessage: 'Enabled (all locations)',
 });
 
 const MONITOR_TYPE_LABEL = i18n.translate(

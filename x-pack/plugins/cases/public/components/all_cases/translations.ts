@@ -52,7 +52,7 @@ export const BULK_ACTIONS = i18n.translate('xpack.cases.caseTable.bulkActions', 
 });
 
 export const EXTERNAL_INCIDENT = i18n.translate('xpack.cases.caseTable.snIncident', {
-  defaultMessage: 'External Incident',
+  defaultMessage: 'External incident',
 });
 
 export const SEVERITY = i18n.translate('xpack.cases.caseTable.severity', {
@@ -60,7 +60,7 @@ export const SEVERITY = i18n.translate('xpack.cases.caseTable.severity', {
 });
 
 export const INCIDENT_MANAGEMENT_SYSTEM = i18n.translate('xpack.cases.caseTable.incidentSystem', {
-  defaultMessage: 'Incident Management System',
+  defaultMessage: 'Incident management system',
 });
 
 export const SEARCH_PLACEHOLDER = i18n.translate('xpack.cases.caseTable.searchPlaceholder', {

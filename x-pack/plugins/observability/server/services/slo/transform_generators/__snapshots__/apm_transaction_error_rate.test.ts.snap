@@ -181,23 +181,11 @@ Object {
       "slo.numerator": Object {
         "filter": Object {
           "bool": Object {
-            "should": Array [
-              Object {
-                "match": Object {
-                  "transaction.result": "HTTP 2xx",
-                },
+            "should": Object {
+              "match": Object {
+                "event.outcome": "success",
               },
-              Object {
-                "match": Object {
-                  "transaction.result": "HTTP 3xx",
-                },
-              },
-              Object {
-                "match": Object {
-                  "transaction.result": "HTTP 4xx",
-                },
-              },
-            ],
+            },
           },
         },
       },
@@ -329,23 +317,11 @@ Object {
       "slo.numerator": Object {
         "filter": Object {
           "bool": Object {
-            "should": Array [
-              Object {
-                "match": Object {
-                  "transaction.result": "HTTP 2xx",
-                },
+            "should": Object {
+              "match": Object {
+                "event.outcome": "success",
               },
-              Object {
-                "match": Object {
-                  "transaction.result": "HTTP 3xx",
-                },
-              },
-              Object {
-                "match": Object {
-                  "transaction.result": "HTTP 4xx",
-                },
-              },
-            ],
+            },
           },
         },
       },
@@ -451,38 +427,5 @@ Object {
     },
   },
   "transform_id": Any<String>,
-}
-`;
-
-exports[`APM Transaction Error Rate Transform Generator uses default values when 'good_status_codes' is not specified 1`] = `
-Object {
-  "slo.denominator": Object {
-    "value_count": Object {
-      "field": "transaction.duration.histogram",
-    },
-  },
-  "slo.numerator": Object {
-    "filter": Object {
-      "bool": Object {
-        "should": Array [
-          Object {
-            "match": Object {
-              "transaction.result": "HTTP 2xx",
-            },
-          },
-          Object {
-            "match": Object {
-              "transaction.result": "HTTP 3xx",
-            },
-          },
-          Object {
-            "match": Object {
-              "transaction.result": "HTTP 4xx",
-            },
-          },
-        ],
-      },
-    },
-  },
 }
 `;

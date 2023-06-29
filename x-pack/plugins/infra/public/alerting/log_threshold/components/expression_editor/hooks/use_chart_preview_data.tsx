@@ -68,7 +68,7 @@ export const useChartPreviewData = ({
           let seriesQueryB = ratio[1].data.series[0].points;
           let seriesId = 'ratio';
           // When groupBy and a filter is applied, return the ratio only for the filtered grouped-by
-          if (ruleParams.groupBy.length && filterSeriesByGroupName) {
+          if (ruleParams.groupBy?.length && filterSeriesByGroupName) {
             seriesId = filterSeriesByGroupName;
             seriesQueryA =
               ratio[0].data.series.find((series) => series.id === filterSeriesByGroupName)

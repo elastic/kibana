@@ -66,7 +66,9 @@ const renderTransaction = async (transaction: Record<string, any>) => {
     }
   );
 
-  fireEvent.click(rendered.getByText('Investigate'));
+  await act(async () => {
+    fireEvent.click(rendered.getByText('Investigate'));
+  });
 
   return rendered;
 };
@@ -291,7 +293,7 @@ describe('TransactionActionMenu component', () => {
         { wrapper: Wrapper }
       );
     }
-    it('doesnt show custom links when license is not valid', () => {
+    it('doesnt show custom links when license is not valid', async () => {
       const license = new License({
         signature: 'test signature',
         license: {
@@ -303,12 +305,12 @@ describe('TransactionActionMenu component', () => {
         },
       });
       const component = renderTransactionActionMenuWithLicense(license);
-      act(() => {
+      await act(async () => {
         fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsNotInDocument(component, ['Custom Links']);
     });
-    it('doesnt show custom links when basic license', () => {
+    it('doesnt show custom links when basic license', async () => {
       const license = new License({
         signature: 'test signature',
         license: {
@@ -328,12 +330,12 @@ describe('TransactionActionMenu component', () => {
         </LicenseContext.Provider>,
         { wrapper: Wrapper }
       );
-      act(() => {
+      await act(async () => {
         fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsNotInDocument(component, ['Custom Links']);
     });
-    it('shows custom links when trial license', () => {
+    it('shows custom links when trial license', async () => {
       const license = new License({
         signature: 'test signature',
         license: {
@@ -345,12 +347,12 @@ describe('TransactionActionMenu component', () => {
         },
       });
       const component = renderTransactionActionMenuWithLicense(license);
-      act(() => {
+      await act(async () => {
         fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsInDocument(component, ['Custom Links']);
     });
-    it('shows custom links when gold license', () => {
+    it('shows custom links when gold license', async () => {
       const license = new License({
         signature: 'test signature',
         license: {
@@ -362,12 +364,12 @@ describe('TransactionActionMenu component', () => {
         },
       });
       const component = renderTransactionActionMenuWithLicense(license);
-      act(() => {
+      await act(async () => {
         fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsInDocument(component, ['Custom Links']);
     });
-    it('opens flyout with filters prefilled', () => {
+    it('opens flyout with filters prefilled', async () => {
       const license = new License({
         signature: 'test signature',
         license: {
@@ -379,11 +381,11 @@ describe('TransactionActionMenu component', () => {
         },
       });
       const component = renderTransactionActionMenuWithLicense(license);
-      act(() => {
+      await act(async () => {
         fireEvent.click(component.getByText('Investigate'));
       });
       expectTextsInDocument(component, ['Custom Links']);
-      act(() => {
+      await act(async () => {
         fireEvent.click(component.getByText('Create custom link'));
       });
       expectTextsInDocument(component, ['Create link']);

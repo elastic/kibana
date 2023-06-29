@@ -97,6 +97,10 @@ export const mockOptions: RiskScoreRequestOptions = {
 describe('buildRiskScoreQuery search strategy', () => {
   const buildKpiRiskScoreQuery = jest.spyOn(buildQuery, 'buildRiskScoreQuery');
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('buildDsl', () => {
     test('should build dsl query', () => {
       riskScore.buildDsl(mockOptions);
@@ -166,5 +170,30 @@ describe('buildRiskScoreQuery search strategy', () => {
     const result = await riskScore.parse(mockOptions, mockSearchStrategyResponse, mockDeps);
 
     expect(get('data[0].oldestAlertTimestamp', result)).toBe(oldestAlertTimestamp);
+  });
+
+  test('should filter enhance query by time range', async () => {
+    await riskScore.parse(
+      {
+        ...mockOptions,
+        alertsTimerange: {
+          from: 'now-5m',
+          to: 'now',
+          interval: '1m',
+        },
+      },
+      mockSearchStrategyResponse,
+      mockDeps
+    );
+
+    expect(searchMock.mock.calls[0][0].query.bool.filter).toEqual(
+      expect.arrayContaining([
+        {
+          range: {
+            '@timestamp': { format: 'strict_date_optional_time', gte: 'now-5m', lte: 'now' },
+          },
+        },
+      ])
+    );
   });
 });

@@ -6,6 +6,7 @@
  */
 import { SearchResponse, AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 
 import {
   EnterpriseSearchEngine,
@@ -21,7 +22,10 @@ import { RouteDependencies } from '../../plugin';
 
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
-import { isNotFoundException } from '../../utils/identify_exceptions';
+import {
+  isNotFoundException,
+  isVersionConflictEngineException,
+} from '../../utils/identify_exceptions';
 
 export function registerEnginesRoutes({ log, router }: RouteDependencies) {
   router.get(
@@ -88,14 +92,32 @@ export function registerEnginesRoutes({ log, router }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engine =
-        await client.asCurrentUser.transport.request<EnterpriseSearchEngineUpsertResponse>({
-          body: { indices: request.body.indices },
-          method: 'PUT',
-          path: `/_application/search_application/${request.params.engine_name}`,
-          querystring: request.query,
-        });
-      return response.ok({ body: engine });
+      try {
+        const engine =
+          await client.asCurrentUser.transport.request<EnterpriseSearchEngineUpsertResponse>({
+            body: { indices: request.body.indices },
+            method: 'PUT',
+            path: `/_application/search_application/${request.params.engine_name}`,
+            querystring: request.query,
+          });
+        return response.ok({ body: engine });
+      } catch (error) {
+        if (isVersionConflictEngineException(error)) {
+          return createError({
+            errorCode: ErrorCode.SEARCH_APPLICATION_ALREADY_EXISTS,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.createSearchApplication.searchApplciationExistsError',
+              {
+                defaultMessage: 'Search application name already taken. Choose another name.',
+              }
+            ),
+            response,
+            statusCode: 409,
+          });
+        }
+
+        throw error;
+      }
     })
   );
 

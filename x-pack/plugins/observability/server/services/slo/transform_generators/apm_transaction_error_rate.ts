@@ -24,9 +24,6 @@ import { APMTransactionErrorRateIndicator, SLO } from '../../../domain/models';
 import { Query } from './types';
 import { parseIndex } from './common';
 
-const ALLOWED_STATUS_CODES = ['2xx', '3xx', '4xx', '5xx'];
-const DEFAULT_GOOD_STATUS_CODES = ['2xx', '3xx', '4xx'];
-
 export class ApmTransactionErrorRateTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
     if (!apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) {
@@ -39,7 +36,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       this.buildSource(slo, slo.indicator),
       this.buildDestination(),
       this.buildGroupBy(slo),
-      this.buildAggregations(slo, slo.indicator),
+      this.buildAggregations(slo),
       this.buildSettings(slo)
     );
   }
@@ -119,14 +116,16 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     };
   }
 
-  private buildAggregations(slo: SLO, indicator: APMTransactionErrorRateIndicator) {
-    const goodStatusCodesFilter = this.getGoodStatusCodesFilter(indicator.params.goodStatusCodes);
-
+  private buildAggregations(slo: SLO) {
     return {
       'slo.numerator': {
         filter: {
           bool: {
-            should: goodStatusCodesFilter,
+            should: {
+              match: {
+                'event.outcome': 'success',
+              },
+            },
           },
         },
       },
@@ -147,18 +146,5 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
         },
       }),
     };
-  }
-
-  private getGoodStatusCodesFilter(goodStatusCodes: string[] | undefined) {
-    let statusCodes = goodStatusCodes?.filter((code) => ALLOWED_STATUS_CODES.includes(code));
-    if (statusCodes === undefined || statusCodes.length === 0) {
-      statusCodes = DEFAULT_GOOD_STATUS_CODES;
-    }
-
-    return statusCodes.map((code) => ({
-      match: {
-        'transaction.result': `HTTP ${code}`,
-      },
-    }));
   }
 }

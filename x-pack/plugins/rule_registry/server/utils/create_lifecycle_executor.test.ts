@@ -991,7 +991,7 @@ describe('createLifecycleExecutor', () => {
       );
     });
 
-    it('updates documents with maintenance window ids for repeatedly firing alerts', async () => {
+    it('does not update documents with maintenance window ids for repeatedly firing alerts', async () => {
       const logger = loggerMock.create();
       const ruleDataClientMock = createRuleDataClientMock();
       ruleDataClientMock.getReader().search.mockResolvedValue({
@@ -1094,7 +1094,6 @@ describe('createLifecycleExecutor', () => {
               labels: { LABEL_0_KEY: 'LABEL_0_VALUE' },
               [EVENT_ACTION]: 'active',
               [EVENT_KIND]: 'signal',
-              [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds,
             }),
             { index: { _id: 'TEST_ALERT_1_UUID' } },
             expect.objectContaining({
@@ -1103,7 +1102,6 @@ describe('createLifecycleExecutor', () => {
               [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
               [EVENT_ACTION]: 'active',
               [EVENT_KIND]: 'signal',
-              [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds,
             }),
           ],
         })
@@ -1121,7 +1119,7 @@ describe('createLifecycleExecutor', () => {
       );
     });
 
-    it('updates document with maintenance window ids for recovered alerts', async () => {
+    it('does not update documents with maintenance window ids for recovered alerts', async () => {
       const logger = loggerMock.create();
       const ruleDataClientMock = createRuleDataClientMock();
       ruleDataClientMock.getReader().search.mockResolvedValue({
@@ -1220,7 +1218,6 @@ describe('createLifecycleExecutor', () => {
               [TAGS]: ['source-tag1', 'source-tag2', 'rule-tag1', 'rule-tag2'],
               [EVENT_ACTION]: 'close',
               [EVENT_KIND]: 'signal',
-              [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds,
             }),
             { index: { _id: 'TEST_ALERT_1_UUID' } },
             expect.objectContaining({
@@ -1229,7 +1226,6 @@ describe('createLifecycleExecutor', () => {
               [EVENT_ACTION]: 'active',
               [EVENT_KIND]: 'signal',
               [TAGS]: ['source-tag3', 'source-tag4', 'rule-tag1', 'rule-tag2'],
-              [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds,
             }),
           ]),
         })

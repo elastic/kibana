@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
+import React, { useCallback, useMemo } from 'react';
+import type { Query, TimeRange, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGrid,
@@ -21,7 +21,6 @@ import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
-import { HostsSearchPayload } from '../../hooks/use_unified_search_url_state';
 import { LimitOptions } from './limit_options';
 import { HostLimitOptions } from '../../types';
 
@@ -38,13 +37,14 @@ export const UnifiedSearchBar = () => {
     onSubmit({ limit });
   };
 
-  const onPanelFiltersChange = (panelFilters: Filter[]) => {
-    if (!compareFilters(searchCriteria.panelFilters, panelFilters, COMPARE_ALL_OPTIONS)) {
+  const onPanelFiltersChange = useCallback(
+    (panelFilters: Filter[]) => {
       onSubmit({ panelFilters });
-    }
-  };
+    },
+    [onSubmit]
+  );
 
-  const handleRefresh = (payload: HostsSearchPayload, isUpdate?: boolean) => {
+  const handleRefresh = (payload: { query?: Query; dateRange: TimeRange }, isUpdate?: boolean) => {
     // This makes sure `onQueryChange` is only called when the submit button is clicked
     if (isUpdate === false) {
       onSubmit(payload);
@@ -69,6 +69,7 @@ export const UnifiedSearchBar = () => {
             showQueryInput
             showQueryMenu
             useDefaultBehaviors
+            isAutoRefreshDisabled
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -79,7 +80,6 @@ export const UnifiedSearchBar = () => {
                 dataView={dataView}
                 query={searchCriteria.query}
                 filters={searchCriteria.filters}
-                selectedOptions={searchCriteria.panelFilters}
                 onFiltersChange={onPanelFiltersChange}
               />
             </EuiFlexItem>

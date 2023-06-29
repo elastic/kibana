@@ -31,7 +31,7 @@ export const ServiceLocationsField = ({
     <EuiFormRow
       fullWidth
       label={LOCATIONS_LABEL}
-      helpText={!errors?.[ConfigKey.LOCATIONS] ? SELECT_ONE_OR_MORE_LOCATIONS : undefined}
+      helpText={!errors?.[ConfigKey.LOCATIONS] ? SELECT_ONE_OR_MORE_LOCATIONS_DETAILS : undefined}
       isInvalid={!!errors?.[ConfigKey.LOCATIONS]}
       error={SELECT_ONE_OR_MORE_LOCATIONS}
     >
@@ -67,6 +67,13 @@ const SELECT_ONE_OR_MORE_LOCATIONS = i18n.translate(
   'xpack.synthetics.monitorManagement.selectOneOrMoreLocations',
   {
     defaultMessage: 'Select one or more locations.',
+  }
+);
+
+const SELECT_ONE_OR_MORE_LOCATIONS_DETAILS = i18n.translate(
+  'xpack.synthetics.monitorManagement.selectOneOrMoreLocationsDetails',
+  {
+    defaultMessage: 'Select locations where monitors will be executed.',
   }
 );
 

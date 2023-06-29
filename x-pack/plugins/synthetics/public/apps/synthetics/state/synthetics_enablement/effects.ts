@@ -29,5 +29,5 @@ export function* fetchSyntheticsEnablementEffect() {
 }
 
 const failureMessage = i18n.translate('xpack.synthetics.settings.enablement.fail', {
-  defaultMessage: 'Failed to enable Monitor Management',
+  defaultMessage: 'Failed to enable Synthetics App',
 });

@@ -77,22 +77,18 @@ export const Tile = ({
     visualizationType: 'metricChart',
   });
 
-  const hostsFilterQuery = useMemo(() => {
-    return createHostsFilter(
-      hostNodes.map((p) => p.name),
-      dataView
-    );
+  const filters = useMemo(() => {
+    return [
+      createHostsFilter(
+        hostNodes.map((p) => p.name),
+        dataView
+      ),
+    ];
   }, [hostNodes, dataView]);
-
-  const filters = useMemo(
-    () => [...searchCriteria.filters, ...searchCriteria.panelFilters, ...[hostsFilterQuery]],
-    [hostsFilterQuery, searchCriteria.filters, searchCriteria.panelFilters]
-  );
 
   const extraActionOptions = getExtraActions({
     timeRange: searchCriteria.dateRange,
     filters,
-    query: searchCriteria.query,
   });
 
   const handleBrushEnd = ({ range }: BrushTriggerEvent['data']) => {
@@ -119,7 +115,7 @@ export const Tile = ({
       hasShadow={false}
       paddingSize={error ? 'm' : 'none'}
       style={{ minHeight: MIN_HEIGHT }}
-      data-test-subj={`hostsView-metricsTrend-${type}`}
+      data-test-subj={`hostsViewKPI-${type}`}
     >
       {error ? (
         <EuiFlexGroup
@@ -149,14 +145,13 @@ export const Tile = ({
           anchorClassName="eui-fullWidth"
         >
           <LensWrapper
-            id={`hostViewKPIChart-${type}`}
+            id={`hostsViewKPIGrid${type}Tile`}
             attributes={afterLoadedState.attributes}
             style={{ height: MIN_HEIGHT }}
             extraActions={[extraActionOptions.openInLens]}
             lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
             dateRange={afterLoadedState.dateRange}
             filters={afterLoadedState.filters}
-            query={afterLoadedState.query}
             onBrushEnd={handleBrushEnd}
             loading={loading}
           />

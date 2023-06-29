@@ -77,7 +77,7 @@ describe('<Policies />', () => {
     expect(screen.getByText(error.message)).toBeInTheDocument();
   });
 
-  it('renders the benchmarks table', () => {
+  it('renders the policies table', () => {
     renderPolicies(
       createReactQueryResponse({
         status: 'success',

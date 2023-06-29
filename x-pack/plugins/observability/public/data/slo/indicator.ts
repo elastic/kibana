@@ -17,7 +17,6 @@ export const buildApmAvailabilityIndicator = (
       service: 'o11y-app',
       transactionType: 'request',
       transactionName: 'GET /flaky',
-      goodStatusCodes: ['2xx', '3xx', '4xx'],
       index: 'metrics-apm*',
       ...params,
     },

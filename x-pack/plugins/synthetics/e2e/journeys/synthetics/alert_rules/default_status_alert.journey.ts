@@ -58,6 +58,7 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await page.isDisabled(byTestId('xpack.synthetics.toggleAlertFlyout'));
     await page.click(byTestId('xpack.synthetics.toggleAlertFlyout'));
     await page.waitForSelector('text=Edit rule');
+    expect(await page.locator(`[data-test-subj="intervalFormRow"]`).count()).toEqual(0);
     await page.click(byTestId('saveEditedRuleButton'));
     await page.waitForSelector("text=Updated 'Synthetics internal alert'");
   });

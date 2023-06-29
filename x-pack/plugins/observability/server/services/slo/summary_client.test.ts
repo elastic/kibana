@@ -88,7 +88,7 @@ describe('SummaryClient', () => {
     describe('with calendar aligned and occurrences SLO', () => {
       it('returns the summary', async () => {
         const slo = createSLO({
-          timeWindow: weeklyCalendarAligned(new Date('2022-09-01T00:00:00.000Z')),
+          timeWindow: weeklyCalendarAligned(),
         });
         esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
         const summaryClient = new DefaultSummaryClient(esClientMock);
@@ -186,7 +186,7 @@ describe('SummaryClient', () => {
             timesliceTarget: 0.9,
             timesliceWindow: new Duration(10, DurationUnit.Minute),
           },
-          timeWindow: weeklyCalendarAligned(new Date('2022-09-01T00:00:00.000Z')),
+          timeWindow: weeklyCalendarAligned(),
         });
         esClientMock.msearch.mockResolvedValueOnce(createEsResponse());
         const summaryClient = new DefaultSummaryClient(esClientMock);

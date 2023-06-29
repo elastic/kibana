@@ -7,7 +7,6 @@
 
 import type { SimpleSavedObject } from '@kbn/core/public';
 import {
-  EncryptedSyntheticsMonitor,
   Locations,
   MonitorFields,
   ServiceLocationErrors,
@@ -19,18 +18,9 @@ export interface MonitorIdParam {
   monitorId: string;
 }
 
-export type SyntheticsMonitorSavedObject = SimpleSavedObject<EncryptedSyntheticsMonitor> & {
-  updated_at: string;
-};
-
 export type DecryptedSyntheticsMonitorSavedObject = SimpleSavedObject<SyntheticsMonitor> & {
   updated_at: string;
 };
-
-export interface SyntheticsServiceAllowed {
-  serviceAllowed: boolean;
-  signupUrl: string;
-}
 
 export interface TestNowResponse {
   schedule: SyntheticsMonitorSchedule;

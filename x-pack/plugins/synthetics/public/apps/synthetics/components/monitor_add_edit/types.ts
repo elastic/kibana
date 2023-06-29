@@ -18,6 +18,7 @@ import {
   FormMonitorType,
   MonitorFields,
   ResponseCheckJSON,
+  RequestBodyCheck,
 } from '../../../../../common/runtime_types/monitor_management';
 import { AlertConfigKey } from './constants';
 
@@ -38,6 +39,7 @@ export interface FormLocation {
   isServiceManaged: boolean;
   label: string;
 }
+
 export type FormConfig = MonitorFields & {
   isTLSEnabled: boolean;
   ['schedule.number']: string;
@@ -57,6 +59,9 @@ export type FormConfig = MonitorFields & {
     supported_protocols: MonitorFields[ConfigKey.TLS_VERSION];
   };
   check: {
+    request: {
+      body: RequestBodyCheck;
+    };
     response: {
       json: ResponseCheckJSON[];
     };
@@ -66,7 +71,7 @@ export type FormConfig = MonitorFields & {
 export interface FieldMeta<TFieldKey extends keyof FormConfig> {
   fieldKey: keyof FormConfig;
   component: React.ComponentType<any>;
-  label?: string;
+  label?: string | React.ReactNode;
   ariaLabel?: string;
   helpText?: string | React.ReactNode;
   hidden?: (depenencies: unknown[]) => boolean;

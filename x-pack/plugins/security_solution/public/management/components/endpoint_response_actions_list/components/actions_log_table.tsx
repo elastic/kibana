@@ -19,6 +19,7 @@ import {
   EuiToolTip,
   type HorizontalAlignment,
   type CriteriaWithPagination,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -55,12 +56,12 @@ interface ExpandedRowMapType {
 
 const getResponseActionListTableColumns = ({
   getTestId,
-  itemIdToExpandedRowMap,
+  expandedRowMap,
   showHostNames,
   onClickCallback,
 }: {
   getTestId: (suffix?: string | undefined) => string | undefined;
-  itemIdToExpandedRowMap: ExpandedRowMapType;
+  expandedRowMap: ExpandedRowMapType;
   showHostNames: boolean;
   onClickCallback: (actionListDataItem: ActionListApiResponse['data'][number]) => () => void;
 }) => {
@@ -245,10 +246,8 @@ const getResponseActionListTableColumns = ({
           <EuiButtonIcon
             data-test-subj={getTestId('expand-button')}
             onClick={onClickCallback(actionListDataItem)}
-            aria-label={
-              itemIdToExpandedRowMap[actionId] ? ARIA_LABELS.collapse : ARIA_LABELS.expand
-            }
-            iconType={itemIdToExpandedRowMap[actionId] ? 'arrowUp' : 'arrowDown'}
+            aria-label={expandedRowMap[actionId] ? ARIA_LABELS.collapse : ARIA_LABELS.expand}
+            iconType={expandedRowMap[actionId] ? 'arrowUp' : 'arrowDown'}
           />
         );
       },
@@ -290,13 +289,13 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
     showHostNames,
     totalItemCount,
   }) => {
-    const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMapType>({});
-
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { pagination: paginationFromUrlParams } = useUrlPagination();
     const { withOutputs: withOutputsFromUrl } = useActionHistoryUrlParams();
 
-    const getActionIdsWithDetails = useCallback((): string[] => {
+    const [expandedRowMap, setExpandedRowMap] = useState<ExpandedRowMapType>({});
+
+    const actionIdsWithOpenTrays = useMemo((): string[] => {
       // get the list of action ids from URL params on the history page
       if (!isFlyout) {
         return withOutputsFromUrl ?? [];
@@ -309,40 +308,48 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
         : [];
     }, [isFlyout, queryParams.withOutputs, withOutputsFromUrl]);
 
+    const redoOpenTrays = useCallback(() => {
+      if (actionIdsWithOpenTrays.length && items.length) {
+        const openDetails = actionIdsWithOpenTrays.reduce<ExpandedRowMapType>(
+          (idToRowMap, actionId) => {
+            const actionItem = items.find((item) => item.id === actionId);
+            if (!actionItem) {
+              idToRowMap[actionId] = <EuiSkeletonText size="relative" lines={8} />;
+            } else {
+              idToRowMap[actionId] = (
+                <ActionsLogExpandedTray action={actionItem} data-test-subj={dataTestSubj} />
+              );
+            }
+            return idToRowMap;
+          },
+          {}
+        );
+        setExpandedRowMap(openDetails);
+      }
+    }, [actionIdsWithOpenTrays, dataTestSubj, items]);
+
+    // open trays that were open using URL params/ query params
     useEffect(() => {
-      const actionIdsWithDetails = getActionIdsWithDetails();
-      const openDetails = actionIdsWithDetails.reduce<ExpandedRowMapType>(
-        (idToRowMap, actionId) => {
-          idToRowMap[actionId] = (
-            <ActionsLogExpandedTray
-              action={items.filter((item) => item.id === actionId)[0]}
-              data-test-subj={dataTestSubj}
-            />
-          );
-          return idToRowMap;
-        },
-        {}
-      );
-      setItemIdToExpandedRowMap(openDetails);
-    }, [dataTestSubj, getActionIdsWithDetails, items, queryParams.withOutputs, withOutputsFromUrl]);
+      redoOpenTrays();
+    }, [redoOpenTrays]);
 
     const toggleDetails = useCallback(
       (action: ActionListApiResponse['data'][number]) => {
-        const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-        if (itemIdToExpandedRowMapValues[action.id]) {
+        const expandedRowMapCopy = { ...expandedRowMap };
+        if (expandedRowMapCopy[action.id]) {
           // close tray
-          delete itemIdToExpandedRowMapValues[action.id];
+          delete expandedRowMapCopy[action.id];
         } else {
           // assign the expanded tray content to the map
           // with action details
-          itemIdToExpandedRowMapValues[action.id] = (
+          expandedRowMapCopy[action.id] = (
             <ActionsLogExpandedTray action={action} data-test-subj={dataTestSubj} />
           );
         }
-        onShowActionDetails(Object.keys(itemIdToExpandedRowMapValues));
-        setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+        onShowActionDetails(Object.keys(expandedRowMapCopy));
+        setExpandedRowMap(expandedRowMapCopy);
       },
-      [itemIdToExpandedRowMap, onShowActionDetails, dataTestSubj]
+      [expandedRowMap, onShowActionDetails, dataTestSubj]
     );
 
     // memoized callback for toggleDetails
@@ -409,11 +416,11 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
       () =>
         getResponseActionListTableColumns({
           getTestId,
-          itemIdToExpandedRowMap,
+          expandedRowMap,
           onClickCallback,
           showHostNames,
         }),
-      [itemIdToExpandedRowMap, getTestId, onClickCallback, showHostNames]
+      [expandedRowMap, getTestId, onClickCallback, showHostNames]
     );
 
     return (
@@ -425,7 +432,7 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
           items={items}
           columns={columns}
           itemId="id"
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          itemIdToExpandedRowMap={expandedRowMap}
           isExpandable
           pagination={tablePagination}
           onChange={onChange}
