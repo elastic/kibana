@@ -1252,7 +1252,7 @@ describe('TableList', () => {
   it('reports the page data test subject', async () => {
     const setPageDataTestSubject = jest.fn();
 
-    act(() => {
+    await act(async () => {
       setup({ setPageDataTestSubject });
     });
 
