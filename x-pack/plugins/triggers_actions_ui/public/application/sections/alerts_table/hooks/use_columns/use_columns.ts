@@ -135,15 +135,18 @@ const persist = ({
   storageAlertsTable,
   columns,
   storage,
+  visibleColumns,
 }: {
   id: string;
   storageAlertsTable: React.MutableRefObject<AlertsTableStorage>;
   storage: React.MutableRefObject<IStorageWrapper>;
   columns: EuiDataGridColumn[];
+  visibleColumns: string[];
 }) => {
   storageAlertsTable.current = {
     ...storageAlertsTable.current,
     columns,
+    visibleColumns,
   };
   storage.current.set(id, storageAlertsTable.current);
 };
@@ -175,7 +178,9 @@ export const useColumns = ({
     return cols;
   });
 
-  const [visibleColumns, setVisibleColumns] = useState(getColumnIds(columns));
+  const [visibleColumns, setVisibleColumns] = useState(
+    storageAlertsTable.current.visibleColumns ?? getColumnIds(columns)
+  );
 
   const [isColumnsPopulated, setColumnsPopulated] = useState<boolean>(false);
 
@@ -214,14 +219,25 @@ export const useColumns = ({
         storage,
         storageAlertsTable,
         columns: newColumns,
+        visibleColumns,
       });
     },
-    [id, storage, storageAlertsTable]
+    [id, storage, storageAlertsTable, visibleColumns]
   );
 
-  const setColumnsByColumnIds = useCallback((columnIds: string[]) => {
-    setVisibleColumns(columnIds);
-  }, []);
+  const setColumnsByColumnIds = useCallback(
+    (columnIds: string[]) => {
+      setVisibleColumns(columnIds);
+      persist({
+        id,
+        storage,
+        storageAlertsTable,
+        columns,
+        visibleColumns: columnIds,
+      });
+    },
+    [columns, id, storage, storageAlertsTable]
+  );
 
   const onToggleColumn = useCallback(
     (columnId: string): void => {
