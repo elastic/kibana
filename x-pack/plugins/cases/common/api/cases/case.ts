@@ -68,7 +68,7 @@ const CaseBasicRt = rt.strict({
   /**
    * The identifying strings for filter a case
    */
-  tags: limitedArraySchema(limitedStringSchema('tag', 1, MAX_TAG_LENGTH), 0, MAX_TAGS),
+  tags: limitedArraySchema(limitedStringSchema('tag', 1, MAX_TAG_LENGTH), 0, MAX_TAGS, 'tags'),
   /**
    * The title of a case
    */
@@ -144,7 +144,7 @@ export const CasePostRequestRt = rt.intersection([
     /**
      * Identifiers for the case.
      */
-    tags: limitedArraySchema(limitedStringSchema('tag', 1, MAX_TAG_LENGTH), 0, MAX_TAGS),
+    tags: limitedArraySchema(limitedStringSchema('tag', 1, MAX_TAG_LENGTH), 0, MAX_TAGS, 'tags'),
     /**
      * Title of the case
      */

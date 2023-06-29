@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { MAX_DESCRIPTION_LENGTH, MAX_TAGS, MAX_TAG_LENGTH, MAX_TITLE_LENGTH } from '../../../common/constants';
+import {
+  MAX_DESCRIPTION_LENGTH,
+  MAX_TAGS,
+  MAX_TAG_LENGTH,
+  MAX_TITLE_LENGTH,
+} from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { CaseSeverity, ConnectorTypes } from '../../../common/api';
 import { mockCases } from '../../mocks';
@@ -196,7 +201,7 @@ describe('create', () => {
       const tags = Array(MAX_TAGS + 1).fill('foo');
 
       await expect(create({ ...theCase, tags }, clientArgs)).rejects.toThrow(
-        `Failed to create case: Error: array must be of length <= ${MAX_TAGS}`
+        `Failed to create case: Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS}.`
       );
     });
 

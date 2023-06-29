@@ -10,68 +10,54 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { limitedArraySchema, limitedStringSchema, NonEmptyString } from '.';
 
 describe('schema', () => {
-  it('fails when given an empty string', () => {
-    expect(PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1).decode([''])))
-      .toMatchInlineSnapshot(`
+  describe('limitedArraySchema', () => {
+    const fieldName = 'foobar';
+
+    it('fails when given an empty string', () => {
+      expect(PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1, fieldName).decode([''])))
+        .toMatchInlineSnapshot(`
       Array [
         "string must have length >= 1",
       ]
     `);
-  });
+    });
 
-  it('fails when given an empty array', () => {
-    expect(PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1).decode([])))
-      .toMatchInlineSnapshot(`
-      Array [
-        "Array must be of length >= 1.",
-      ]
-    `);
-  });
-
-  it('fails when given an array larger than the limit of one item', () => {
-    expect(PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1).decode(['a', 'b'])))
-      .toMatchInlineSnapshot(`
-      Array [
-        "Array must be of length <= 1.",
-      ]
-    `);
-  });
-
-  it('displays field name error message when lower boundary fails', () => {
-    expect(PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1, 'foobar').decode([])))
-      .toMatchInlineSnapshot(`
+    it('fails when given an empty array', () => {
+      expect(PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1, fieldName).decode([])))
+        .toMatchInlineSnapshot(`
       Array [
         "The length of the field foobar is too short. Array must be of length >= 1.",
       ]
     `);
-  });
+    });
 
-  it('displays field name error message when upper boundary fails', () => {
-    expect(
-      PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1, 'foobar').decode(['a', 'b']))
-    ).toMatchInlineSnapshot(`
+    it('fails when given an array larger than the limit of one item', () => {
+      expect(
+        PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1, fieldName).decode(['a', 'b']))
+      ).toMatchInlineSnapshot(`
       Array [
         "The length of the field foobar is too long. Array must be of length <= 1.",
       ]
     `);
-  });
+    });
 
-  it('succeeds when given an array of 1 item with a non-empty string', () => {
-    expect(PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1).decode(['a'])))
-      .toMatchInlineSnapshot(`
+    it('succeeds when given an array of 1 item with a non-empty string', () => {
+      expect(PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1, fieldName).decode(['a'])))
+        .toMatchInlineSnapshot(`
       Array [
         "No errors!",
       ]
     `);
-  });
+    });
 
-  it('succeeds when given an array of 0 item with a non-empty string when the min is 0', () => {
-    expect(PathReporter.report(limitedArraySchema(NonEmptyString, 0, 2).decode([])))
-      .toMatchInlineSnapshot(`
+    it('succeeds when given an array of 0 item with a non-empty string when the min is 0', () => {
+      expect(PathReporter.report(limitedArraySchema(NonEmptyString, 0, 2, fieldName).decode([])))
+        .toMatchInlineSnapshot(`
       Array [
         "No errors!",
       ]
     `);
+    });
   });
 
   describe('limitedStringSchema', () => {
@@ -96,7 +82,25 @@ describe('schema', () => {
     });
 
     it('succeeds when given string within limit', () => {
-      expect(PathReporter.report(limitedStringSchema(fieldName, 1, 5).decode('Hello')))
+      expect(PathReporter.report(limitedStringSchema(fieldName, 1, 50).decode('Hello!!')))
+        .toMatchInlineSnapshot(`
+        Array [
+          "No errors!",
+        ]
+      `);
+    });
+
+    it('succeeds when given string is empty and minimum is 0', () => {
+      expect(PathReporter.report(limitedStringSchema(fieldName, 0, 5).decode('')))
+        .toMatchInlineSnapshot(`
+        Array [
+          "No errors!",
+        ]
+      `);
+    });
+
+    it('succeeds when given string is same as maximum', () => {
+      expect(PathReporter.report(limitedStringSchema(fieldName, 0, 5).decode('Hello')))
         .toMatchInlineSnapshot(`
         Array [
           "No errors!",

@@ -636,7 +636,7 @@ describe('update', () => {
           clientArgs
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: array must be of length <= ${MAX_TAGS}`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS}.`
       );
     });
 

@@ -22,7 +22,7 @@ export const NonEmptyString = new rt.Type<string, string, unknown>(
   rt.identity
 );
 
-export const limitedStringSchema = (field: string, min: number, max: number) =>
+export const limitedStringSchema = (fieldName: string, min: number, max: number) =>
   new rt.Type<string, string, unknown>(
     'LimitedString',
     rt.string.is,
@@ -32,7 +32,7 @@ export const limitedStringSchema = (field: string, min: number, max: number) =>
           return rt.failure(
             input,
             context,
-            `The length of the ${field} is too short. The minimum length is ${min}.`
+            `The length of the ${fieldName} is too short. The minimum length is ${min}.`
           );
         }
 
@@ -40,7 +40,7 @@ export const limitedStringSchema = (field: string, min: number, max: number) =>
           return rt.failure(
             input,
             context,
-            `The length of the ${field} is too long. The maximum length is ${max}.`
+            `The length of the ${fieldName} is too long. The maximum length is ${max}.`
           );
         }
 
@@ -53,7 +53,7 @@ export const limitedArraySchema = <T extends rt.Mixed>(
   codec: T,
   min: number,
   max: number,
-  fieldName?: string
+  fieldName: string
 ) =>
   new rt.Type<Array<rt.TypeOf<typeof codec>>, Array<rt.TypeOf<typeof codec>>, unknown>(
     'LimitedArray',
@@ -61,23 +61,18 @@ export const limitedArraySchema = <T extends rt.Mixed>(
     (input, context) =>
       either.chain(rt.array(codec).validate(input, context), (s) => {
         if (s.length < min) {
-          const fieldNameErrorMessage =
-            fieldName != null ? `The length of the field ${fieldName} is too short. ` : '';
-
           return rt.failure(
             input,
             context,
-            `${fieldNameErrorMessage}Array must be of length >= ${min}.`
+            `The length of the field ${fieldName} is too short. Array must be of length >= ${min}.`
           );
         }
 
         if (s.length > max) {
-          const fieldNameErrorMessage =
-            fieldName != null ? `The length of the field ${fieldName} is too long. ` : '';
           return rt.failure(
             input,
             context,
-            `${fieldNameErrorMessage}Array must be of length <= ${max}.`
+            `The length of the field ${fieldName} is too long. Array must be of length <= ${max}.`
           );
         }
 
