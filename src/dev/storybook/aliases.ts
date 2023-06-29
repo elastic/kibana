@@ -28,6 +28,7 @@ export const storybookAliases = {
   dashboard: 'src/plugins/dashboard/.storybook',
   data: 'src/plugins/data/.storybook',
   discover: 'src/plugins/discover/.storybook',
+  discover_log_explorer: 'x-pack/plugins/discover_log_explorer/.storybook',
   embeddable: 'src/plugins/embeddable/.storybook',
   es_ui_shared: 'src/plugins/es_ui_shared/.storybook',
   expression_error: 'src/plugins/expression_error/.storybook',
