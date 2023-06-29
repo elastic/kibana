@@ -14,7 +14,6 @@ import { ThemeService, LegacyColorsService } from './services';
 import { PaletteService } from './services/palettes/service';
 import { ActiveCursor } from './services/active_cursor';
 
-
 interface SetupDependencies {
   expressions: ExpressionsSetup;
 }
