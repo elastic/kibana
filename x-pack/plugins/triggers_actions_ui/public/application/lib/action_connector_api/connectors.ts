@@ -41,5 +41,6 @@ export async function loadAllActions({ http }: { http: HttpSetup }): Promise<Act
   const res = await http.get<Parameters<typeof rewriteResponseRes>[0]>(
     `${BASE_ACTION_API_PATH}/connectors`
   );
-  return rewriteResponseRes(res);
+
+  return rewriteResponseRes(res) as ActionConnector[];
 }

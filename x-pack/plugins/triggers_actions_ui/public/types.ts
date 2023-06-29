@@ -287,6 +287,7 @@ export type PreConfiguredActionConnector = Omit<
   'config' | 'secrets'
 > & {
   isPreconfigured: true;
+  isSystemAction: false;
 };
 
 export type UserConfiguredActionConnector<Config, Secrets> = ActionConnectorProps<
@@ -294,10 +295,17 @@ export type UserConfiguredActionConnector<Config, Secrets> = ActionConnectorProp
   Secrets
 > & {
   isPreconfigured: false;
+  isSystemAction: false;
+};
+
+export type SystemAction = Omit<ActionConnectorProps<never, never>, 'config' | 'secrets'> & {
+  isSystemAction: true;
+  isPreconfigured: false;
 };
 
 export type ActionConnector<Config = Record<string, unknown>, Secrets = Record<string, unknown>> =
   | PreConfiguredActionConnector
+  | SystemAction
   | UserConfiguredActionConnector<Config, Secrets>;
 
 export type ActionConnectorWithoutId<

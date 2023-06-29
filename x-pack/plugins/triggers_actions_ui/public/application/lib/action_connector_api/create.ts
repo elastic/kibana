@@ -49,5 +49,5 @@ export async function createActionConnector({
     `${BASE_ACTION_API_PATH}/connector`,
     { body: JSON.stringify(rewriteBodyRequest(connector)) }
   );
-  return rewriteBodyRes(res);
+  return rewriteBodyRes(res) as ActionConnector;
 }

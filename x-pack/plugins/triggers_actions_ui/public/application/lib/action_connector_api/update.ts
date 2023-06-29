@@ -51,5 +51,5 @@ export async function updateActionConnector({
     }
   );
 
-  return rewriteBodyRes(res);
+  return rewriteBodyRes(res) as ActionConnector;
 }
