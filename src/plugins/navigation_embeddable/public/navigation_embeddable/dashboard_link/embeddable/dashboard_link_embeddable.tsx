@@ -13,6 +13,7 @@ import { distinctUntilChanged, skip, Subscription } from 'rxjs';
 
 import { Embeddable } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
 import { dashboardLinkReducers } from '../dashboard_link_reducers';
@@ -65,7 +66,10 @@ export class DashboardLinkEmbeddable extends Embeddable<DashboardLinkInput> {
     >({
       embeddable: this,
       reducers: dashboardLinkReducers,
-      initialComponentState: { currentDashboardId: parent.getParentDashboardId() },
+      initialComponentState: {
+        parentDashboardId: (this.getRoot() as DashboardContainer).getState().componentState
+          .lastSavedId,
+      },
     });
 
     this.select = reduxEmbeddableTools.select;
@@ -84,20 +88,44 @@ export class DashboardLinkEmbeddable extends Embeddable<DashboardLinkInput> {
   }
 
   private setupSubscriptions() {
+    const {
+      componentState: { parentDashboardId },
+      explicitInput: { dashboardId },
+    } = this.getState();
+
+    /** if  */
+    if (parentDashboardId === dashboardId) {
+      this.subscriptions.add(
+        this.getRoot()
+          .getInput$()
+          .pipe(
+            skip(1),
+            distinctUntilChanged((a, b) => a.title === b.title && a.description === b.description)
+          )
+          .subscribe(({ title, description }) => {
+            batch(() => {
+              this.dispatch.setDashboardTitle(title);
+              this.dispatch.setDashboardDescription(description);
+            });
+          })
+      );
+    }
+
     /** When this embeddable's link in the explicit input, update component state to match */
-    this.subscriptions.add(
-      this.getInput$()
-        .pipe(
-          skip(1),
-          distinctUntilChanged((a, b) => a.dashboardId === b.dashboardId)
-        )
-        .subscribe(async () => {
-          await this.fetchDashboard();
-        })
-    );
+    // this.subscriptions.add(
+    //   this.getInput$()
+    //     .pipe(
+    //       skip(1),
+    //       distinctUntilChanged((a, b) => a.dashboardId === b.dashboardId)
+    //     )
+    //     .subscribe(async () => {
+    //       await this.fetchDashboard();
+    //     })
+    // );
   }
 
   public async fetchDashboard() {
+    console.log('fetch dashboard');
     this.dispatch.setLoading(true);
 
     const dashboardId = this.input.dashboardId;
@@ -133,7 +161,7 @@ export class DashboardLinkEmbeddable extends Embeddable<DashboardLinkInput> {
   public destroy() {
     super.destroy();
     this.cleanupStateTools();
-    // this.subscriptions.unsubscribe();
+    this.subscriptions.unsubscribe();
     if (this.node) ReactDOM.unmountComponentAtNode(this.node);
   }
 

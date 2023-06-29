@@ -15,17 +15,18 @@ export const DashboardLinkComponent = () => {
   const embeddable = useDashboardLinkEmbeddable();
 
   const isLoading = embeddable.select((state) => state.output.loading);
-  const dashboardLinkId = embeddable.select((state) => state.explicitInput.dashboardId);
+
   const dashboardLinkLabel = embeddable.select((state) => state.explicitInput.label);
+  const dashboardLinkId = embeddable.select((state) => state.explicitInput.dashboardId);
 
   const dashboardTitle = embeddable.select((state) => state.componentState.dashboardTitle);
-  const currentDashboardId = embeddable.select((state) => state.componentState.currentDashboardId);
+  const parentDashboardId = embeddable.select((state) => state.componentState.parentDashboardId);
 
   return (
     <EuiButtonEmpty
       isLoading={isLoading}
       iconType="dashboardApp"
-      {...(dashboardLinkId === currentDashboardId
+      {...(dashboardLinkId === parentDashboardId
         ? {
             color: 'text',
           }

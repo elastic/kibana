@@ -16,7 +16,7 @@ export interface DashboardLinkInput extends LinkInput {
 }
 
 export interface DashboardLinkComponentState {
-  currentDashboardId?: string;
+  parentDashboardId?: string;
 
   dashboardTitle?: string;
   dashboardDescription?: string;

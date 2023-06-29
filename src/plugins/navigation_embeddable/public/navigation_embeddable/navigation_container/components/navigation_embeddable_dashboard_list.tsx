@@ -34,7 +34,6 @@ export const NavigationEmbeddableDashboardList = ({
   ...other
 }: Props) => {
   const navEmbeddable = useNavigationEmbeddable();
-  const currentDashboard = navEmbeddable.select((state) => state.componentState.currentDashboard);
   const isLoading = navEmbeddable.select((state) => state.output.loading);
 
   const [searchString, setSearchString] = useState<string>('');
@@ -83,7 +82,7 @@ export const NavigationEmbeddableDashboardList = ({
               <EuiFlexItem grow={false}>
                 <EuiHighlight search={searchString}>{option.label}</EuiHighlight>
               </EuiFlexItem>
-              {option.id === currentDashboard?.id && (
+              {option.id === navEmbeddable.parentDashboardId && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge>
                     {NavEmbeddableStrings.editor.dashboard.getCurrentDashboardLabel()}

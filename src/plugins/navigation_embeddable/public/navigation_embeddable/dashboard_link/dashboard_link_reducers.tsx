@@ -19,17 +19,17 @@ export const dashboardLinkReducers = {
     action: PayloadAction<string>
   ) => {
     // TODO: use this for when the dashboard is saved / renamed / etc.
-    state.componentState.currentDashboardId = action.payload;
+    state.componentState.parentDashboardId = action.payload;
   },
   setDashboardTitle: (
     state: WritableDraft<DashboardLinkReduxState>,
-    action: PayloadAction<string>
+    action: PayloadAction<string | undefined>
   ) => {
     state.componentState.dashboardTitle = action.payload;
   },
   setDashboardDescription: (
     state: WritableDraft<DashboardLinkReduxState>,
-    action: PayloadAction<string>
+    action: PayloadAction<string | undefined>
   ) => {
     state.componentState.dashboardDescription = action.payload;
   },

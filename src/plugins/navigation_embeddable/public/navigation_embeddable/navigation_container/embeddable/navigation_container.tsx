@@ -7,13 +7,11 @@
  */
 
 import ReactDOM from 'react-dom';
-import { batch } from 'react-redux';
 import { isEmpty } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import { Subscription } from 'rxjs';
 
 import { Container, ContainerOutput } from '@kbn/embeddable-plugin/public';
-import type { IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
@@ -28,7 +26,7 @@ import { navigationEmbeddableReducers } from '../navigation_container_reducers';
 import { coreServices, dashboardServices } from '../../services/kibana_services';
 import { NavigationEmbeddableComponent } from '../components/navigation_embeddable_component';
 import { linksService } from '../../services/links_service';
-import { DashboardLinkInput } from '../../dashboard_link/types';
+import { DashboardItem, DashboardLinkInput } from '../../dashboard_link/types';
 import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
 import { getNextPanelOrder } from '../navigation_container_helpers';
 import { ExternalLinkInput } from '../../external_link/types';
@@ -62,8 +60,9 @@ export class NavigationContainer extends Container<
   public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
 
   private node?: HTMLElement;
-  private currentDashboardId?: string;
   private subscriptions: Subscription = new Subscription();
+
+  public parentDashboardId?: string;
 
   // state management
   public select: NavigationReduxEmbeddableTools['select'];
@@ -77,9 +76,16 @@ export class NavigationContainer extends Container<
     reduxToolsPackage: ReduxToolsPackage,
     // config: NavigationEmbeddableConfig,
     initialInput: NavigationContainerInput,
-    parent?: IContainer
+    parent?: DashboardContainer
   ) {
-    super(initialInput, { embeddableLoaded: {} }, linksService.getLinkFactory, parent);
+    super(
+      initialInput,
+      {
+        embeddableLoaded: {},
+      },
+      linksService.getLinkFactory,
+      parent
+    );
 
     /** Build redux embeddable tools */
     const reduxEmbeddableTools = reduxToolsPackage.createReduxEmbeddableTools<
@@ -103,16 +109,14 @@ export class NavigationContainer extends Container<
   protected getInheritedInput(id: string): LinkInput {
     // console.log('get inherited input');
     // const { viewMode } = this.getInput();
-
     return { id };
   }
 
   private async initialize() {
-    // this.setupSubscriptions();
-
-    await this.updateParentDashboard();
-    // await this.updateDashboardLinks();
-
+    this.parentDashboardId = (
+      this.parent as DashboardContainer
+    ).getState().componentState.lastSavedId;
+    this.setupSubscriptions();
     this.setInitializationFinished();
   }
 
@@ -134,65 +138,58 @@ export class NavigationContainer extends Container<
     return this.createAndSaveEmbeddable(panelState.type, panelState);
   }
 
-  public getParentDashboardId(): string | undefined {
-    const parentDashboardId = (this.parent as DashboardContainer | undefined)?.getState()
-      .componentState.lastSavedId;
-    return parentDashboardId;
-  }
-
-  // private setupSubscriptions() {
-  //   /** When this embeddable's dashboard links change in the explicit input, update component state to match */
-  //   this.subscriptions.add(
-  //     this.getInput$()
-  //       .pipe(
-  //         skip(1),
-  //         distinctUntilChanged((a, b) => isEqual(a.links, b.links))
-  //       )
-  //       .subscribe(async () => {
-  //         await this.updateDashboardLinks();
-  //       })
-  //   );
-
-  //   /** Keep the component state view mode in sync with the input view mode so that we can toggle the add button */
-  //   this.subscriptions.add(
-  //     this.getInput$()
-  //       .pipe(distinctUntilChanged((a, b) => a.viewMode === b.viewMode))
-  //       .subscribe(async ({ viewMode }) => {
-  //         this.dispatch.setCanEdit(
-  //           Boolean(this.getOutput().editable) && viewMode === ViewMode.EDIT
-  //         );
-  //       })
-  //   );
-
-  //   /**
-  //    * If this embeddable is contained in a parent dashboard, it should refetch its parent's saved object info in response
-  //    * to changes to its parent's id (which means the parent dashboard was cloned/"saved as"), title, and/or description
-  //    **/
-  //   if (this.parent) {
-  //     this.subscriptions.add(
-  //       this.parent
-  //         .getInput$()
-  //         .pipe(
-  //           skip(1),
-  //           distinctUntilChanged(
-  //             (a, b) => a.id === b.id && a.title === b.title && a.description === b.description
-  //           )
-  //         )
-  //         .subscribe(async () => {
-  //           await this.updateParentDashboard();
-  //           await this.updateDashboardLinks();
-  //         })
-  //     );
-  //   }
+  // public getParentDashboardId(): string | undefined {
+  //   const parentDashboardId = (this.parent as DashboardContainer).getState().componentState
+  //     .lastSavedId;
+  //   this.parentDashboardId = (this.parent as DashboardContainer).getState().componentState
+  //   .lastSavedId;
   // }
 
+  private setupSubscriptions() {
+    // /** Keep the component state view mode in sync with the input view mode so that we can toggle the add button */
+    // this.subscriptions.add(
+    //   this.getInput$()
+    //     .pipe(distinctUntilChanged((a, b) => a.viewMode === b.viewMode))
+    //     .subscribe(async ({ viewMode }) => {
+    //       this.dispatch.setCanEdit(
+    //         Boolean(this.getOutput().editable) && viewMode === ViewMode.EDIT
+    //       );
+    //     })
+    // );
+    /**
+     * If this embeddable is contained in a parent dashboard, it should refetch its parent's saved object info in response
+     * to changes to its parent's id (which means the parent dashboard was cloned/"saved as"), title, and/or description
+     **/
+    // if (this.parent) {
+    //   this.subscriptions.add(
+    //     this.parent.getOutput$().subscribe((output) => {
+    //       console.log('parent output changed', output);
+    //     })
+    //   );
+    //   this.subscriptions.add(
+    //     this.parent
+    //       .getInput$()
+    //       .pipe(
+    //         skip(1),
+    //         distinctUntilChanged(
+    //           (a, b) => a.id === b.id && a.title === b.title && a.description === b.description
+    //         )
+    //       )
+    //       .subscribe(async () => {
+    //         console.log('fire!');
+    //         await this.updateParentDashboardId();
+    //       })
+    //   );
+    // }
+  }
+
   private async fetchCurrentDashboard(): Promise<DashboardItem> {
-    if (!this.currentDashboardId) {
+    if (!this.parentDashboardId) {
       throw new Error('failure'); // TODO: better error handling
     }
 
     const findDashboardsService = await dashboardServices.findDashboardsService();
-    const response = (await findDashboardsService.findByIds([this.currentDashboardId]))[0];
+    const response = (await findDashboardsService.findByIds([this.parentDashboardId]))[0];
     if (response.status === 'error') {
       throw new Error('failure'); // TODO: better error handling
     }
@@ -214,10 +211,10 @@ export class NavigationContainer extends Container<
     let dashboardList: DashboardItem[] = responses.hits;
 
     /** When the parent dashboard has been saved (i.e. it has an ID) and there is no search string ... */
-    if (this.currentDashboardId && isEmpty(search)) {
+    if (this.parentDashboardId && isEmpty(search)) {
       /** ...force the current dashboard (if it is present in the original search results) to the top of the list */
       dashboardList = dashboardList.sort((dashboard) => {
-        const isCurrentDashboard = dashboard.id === this.currentDashboardId;
+        const isCurrentDashboard = dashboard.id === this.parentDashboardId;
         if (isCurrentDashboard) {
           currentDashboard = dashboard;
         }
@@ -240,30 +237,12 @@ export class NavigationContainer extends Container<
       return { id: hit.id, attributes: hit.attributes };
     });
 
-    batch(() => {
-      this.dispatch.setDashboardList(simplifiedDashboardList);
-      this.dispatch.setDashboardCount(responses.total); // TODO: Remove this if we don't actually need it
-      if (currentDashboard) {
-        this.dispatch.setCurrentDashboard(currentDashboard);
-      }
-    });
-
-    return dashboardList;
+    return simplifiedDashboardList;
   }
 
-  private async updateParentDashboard() {
-    const parentDashboardId = (this.parent as DashboardContainer | undefined)?.getState()
-      .componentState.lastSavedId;
-    this.currentDashboardId = parentDashboardId;
-    if (this.currentDashboardId) {
-      /**
-       * if there is no `currentDashboardId`, the dashboard has never been saved so there is no "current
-       * dashboard" to reference in the dashboard list
-       */
-      const currentDashboard = await this.fetchCurrentDashboard();
-      this.dispatch.setCurrentDashboard(currentDashboard);
-    }
-  }
+  // public getParentDashboard(): DashboardContainer {
+  //   return this.parent as DashboardContainer;
+  // }
 
   public async reload() {
     // await this.updateDashboardLinks();
