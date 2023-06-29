@@ -20,6 +20,7 @@ import {
   deleteRole,
   deleteUser,
   deleteIndex,
+  assertIndexStatus,
 } from '../helper';
 
 const UNPRIVILEGED_ROLE = 'unprivileged_test_role';
@@ -154,39 +155,13 @@ export default function (providerContext: FtrProviderContext) {
           `expected unprivileged but got ${res.vuln_mgmt.status} instead`
         );
 
-        expect(
-          res.indicesDetails.find((idx) => idx.index === LATEST_FINDINGS_INDEX_DEFAULT_NS)?.status
-        ).to.eql(
-          'empty',
-          `expected empty but got ${
-            res.indicesDetails.find((idx) => idx.index === LATEST_FINDINGS_INDEX_DEFAULT_NS)?.status
-          } instead`
-        );
-        expect(
-          res.indicesDetails.find((idx) => idx.index === FINDINGS_INDEX_PATTERN)?.status
-        ).to.eql(
-          'empty',
-          `expected empty but got ${
-            res.indicesDetails.find((idx) => idx.index === FINDINGS_INDEX_PATTERN)?.status
-          } instead`
-        );
-        expect(
-          res.indicesDetails.find((idx) => idx.index === BENCHMARK_SCORE_INDEX_DEFAULT_NS)?.status
-        ).to.eql(
-          'unprivileged',
-          `expected unprivileged but got ${
-            res.indicesDetails.find((idx) => idx.index === BENCHMARK_SCORE_INDEX_DEFAULT_NS)?.status
-          } instead`
-        );
-        expect(
-          res.indicesDetails.find((idx) => idx.index === LATEST_VULNERABILITIES_INDEX_DEFAULT_NS)
-            ?.status
-        ).to.eql(
-          'unprivileged',
-          `expected unprivileged but got ${
-            res.indicesDetails.find((idx) => idx.index === LATEST_VULNERABILITIES_INDEX_DEFAULT_NS)
-              ?.status
-          } instead`
+        assertIndexStatus(res.indicesDetails, LATEST_FINDINGS_INDEX_DEFAULT_NS, 'empty');
+        assertIndexStatus(res.indicesDetails, FINDINGS_INDEX_PATTERN, 'empty');
+        assertIndexStatus(res.indicesDetails, BENCHMARK_SCORE_INDEX_DEFAULT_NS, 'unprivileged');
+        assertIndexStatus(
+          res.indicesDetails,
+          LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+          'unprivileged'
         );
       });
 
@@ -223,39 +198,13 @@ export default function (providerContext: FtrProviderContext) {
           `expected unprivileged but got ${res.vuln_mgmt.status} instead`
         );
 
-        expect(
-          res.indicesDetails.find((idx) => idx.index === LATEST_FINDINGS_INDEX_DEFAULT_NS)?.status
-        ).to.eql(
-          'unprivileged',
-          `expected unprivileged but got ${
-            res.indicesDetails.find((idx) => idx.index === LATEST_FINDINGS_INDEX_DEFAULT_NS)?.status
-          } instead`
-        );
-        expect(
-          res.indicesDetails.find((idx) => idx.index === FINDINGS_INDEX_PATTERN)?.status
-        ).to.eql(
-          'empty',
-          `expected empty but got ${
-            res.indicesDetails.find((idx) => idx.index === FINDINGS_INDEX_PATTERN)?.status
-          } instead`
-        );
-        expect(
-          res.indicesDetails.find((idx) => idx.index === BENCHMARK_SCORE_INDEX_DEFAULT_NS)?.status
-        ).to.eql(
-          'empty',
-          `expected empty but got ${
-            res.indicesDetails.find((idx) => idx.index === BENCHMARK_SCORE_INDEX_DEFAULT_NS)?.status
-          } instead`
-        );
-        expect(
-          res.indicesDetails.find((idx) => idx.index === LATEST_VULNERABILITIES_INDEX_DEFAULT_NS)
-            ?.status
-        ).to.eql(
-          'unprivileged',
-          `expected unprivileged but got ${
-            res.indicesDetails.find((idx) => idx.index === LATEST_VULNERABILITIES_INDEX_DEFAULT_NS)
-              ?.status
-          } instead`
+        assertIndexStatus(res.indicesDetails, LATEST_FINDINGS_INDEX_DEFAULT_NS, 'unprivileged');
+        assertIndexStatus(res.indicesDetails, FINDINGS_INDEX_PATTERN, 'empty');
+        assertIndexStatus(res.indicesDetails, BENCHMARK_SCORE_INDEX_DEFAULT_NS, 'empty');
+        assertIndexStatus(
+          res.indicesDetails,
+          LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+          'unprivileged'
         );
       });
 
@@ -295,40 +244,10 @@ export default function (providerContext: FtrProviderContext) {
           `expected not-installed but got ${res.vuln_mgmt.status} instead`
         );
 
-        expect(
-          res.indicesDetails.find((idx) => idx.index === LATEST_FINDINGS_INDEX_DEFAULT_NS)?.status
-        ).to.eql(
-          'unprivileged',
-          `expected unprivileged but got ${
-            res.indicesDetails.find((idx) => idx.index === LATEST_FINDINGS_INDEX_DEFAULT_NS)?.status
-          } instead`
-        );
-        expect(
-          res.indicesDetails.find((idx) => idx.index === FINDINGS_INDEX_PATTERN)?.status
-        ).to.eql(
-          'empty',
-          `expected empty but got ${
-            res.indicesDetails.find((idx) => idx.index === FINDINGS_INDEX_PATTERN)?.status
-          } instead`
-        );
-        expect(
-          res.indicesDetails.find((idx) => idx.index === BENCHMARK_SCORE_INDEX_DEFAULT_NS)?.status
-        ).to.eql(
-          'unprivileged',
-          `expected unprivileged but got ${
-            res.indicesDetails.find((idx) => idx.index === BENCHMARK_SCORE_INDEX_DEFAULT_NS)?.status
-          } instead`
-        );
-        expect(
-          res.indicesDetails.find((idx) => idx.index === LATEST_VULNERABILITIES_INDEX_DEFAULT_NS)
-            ?.status
-        ).to.eql(
-          'empty',
-          `expected empty but got ${
-            res.indicesDetails.find((idx) => idx.index === LATEST_VULNERABILITIES_INDEX_DEFAULT_NS)
-              ?.status
-          } instead`
-        );
+        assertIndexStatus(res.indicesDetails, LATEST_FINDINGS_INDEX_DEFAULT_NS, 'unprivileged');
+        assertIndexStatus(res.indicesDetails, FINDINGS_INDEX_PATTERN, 'empty');
+        assertIndexStatus(res.indicesDetails, BENCHMARK_SCORE_INDEX_DEFAULT_NS, 'unprivileged');
+        assertIndexStatus(res.indicesDetails, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS, 'empty');
       });
     });
   });

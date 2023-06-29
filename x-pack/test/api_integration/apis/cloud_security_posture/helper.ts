@@ -8,6 +8,8 @@
 import type { SuperTest, Test } from 'supertest';
 import { Client } from '@elastic/elasticsearch';
 import { SecurityService } from '../../../../../test/common/services/security/security';
+import type { IndexDetails } from '../../../../../x-pack/plugins/cloud_security_posture/common/types';
+import expect from '@kbn/expect/expect';
 
 export const deleteIndex = (es: Client, indexToBeDeleted: string[]) => {
   Promise.all([
@@ -141,3 +143,8 @@ export const deleteRole = async (security: SecurityService, roleName: string) =>
 export const deleteUser = async (security: SecurityService, userName: string) => {
   await security.user.delete(userName);
 };
+
+export const assertIndexStatus = (indicesDetails: IndexDetails[], indexName: string, expectedStatus: string) => {
+    const actualValue = indicesDetails.find((idx) => idx.index === indexName)?.status;
+    expect(actualValue).to.eql(expectedStatus, `expected ${indexName} to be ${expectedStatus} but got  ${actualValue} instead`);
+}
