@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isDefined } from '@kbn/ml-is-defined';
+import { getRenamedAggNameAndMsgDueToConflict } from '../common/get_agg_name_conflict_toast_messages';
 import { AggName } from '../../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../../common/types/common';
 
@@ -119,16 +120,29 @@ export const usePivotConfig = (
     (d: DropDownLabel[]) => {
       const label: AggName = d[0].label;
       const config: PivotGroupByConfig = groupByOptionsData[label];
-      const aggName: AggName = config.aggName;
+      let aggName: AggName = config.aggName;
 
-      const aggNameConflictMessages = getAggNameConflictToastMessages(
+      const { newAggName, toastMsg: aggRenamedInfoMsg } = getRenamedAggNameAndMsgDueToConflict(
         aggName,
         aggList,
-        groupByList
+        groupByList,
+        config
       );
-      if (aggNameConflictMessages.length > 0) {
-        aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
-        return;
+
+      if (newAggName && aggRenamedInfoMsg) {
+        aggName = newAggName;
+        config.aggName = aggName;
+        toastNotifications.addInfo({ text: aggRenamedInfoMsg });
+      } else {
+        const aggNameConflictMessages = getAggNameConflictToastMessages(
+          aggName,
+          aggList,
+          groupByList
+        );
+        if (aggNameConflictMessages.length > 0) {
+          aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
+          return;
+        }
       }
 
       groupByList[aggName] = config;
@@ -217,14 +231,26 @@ export const usePivotConfig = (
         config.aggName = aggName;
       }
 
-      const aggNameConflictMessages = getAggNameConflictToastMessages(
+      const { newAggName, toastMsg: aggRenamedInfoMsg } = getRenamedAggNameAndMsgDueToConflict(
         aggName,
         aggList,
         groupByList
       );
-      if (aggNameConflictMessages.length > 0) {
-        aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
-        return;
+
+      if (newAggName && aggRenamedInfoMsg) {
+        toastNotifications.addInfo({ text: aggRenamedInfoMsg });
+        aggName = newAggName;
+        config.aggName = aggName;
+      } else {
+        const aggNameConflictMessages = getAggNameConflictToastMessages(
+          aggName,
+          aggList,
+          groupByList
+        );
+        if (aggNameConflictMessages.length > 0) {
+          aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
+          return;
+        }
       }
 
       aggList[aggName] = config;

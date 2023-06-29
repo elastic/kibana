@@ -7,8 +7,59 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { AggName } from '../../../../../../../common/types/aggregations';
-import { PivotAggsConfigDict, PivotGroupByConfigDict } from '../../../../../common';
+import {
+  PIVOT_SUPPORTED_GROUP_BY_AGGS,
+  PivotAggsConfigDict,
+  PivotGroupByConfig,
+  PivotGroupByConfigDict,
+} from '../../../../../common';
+
+/**
+ * Helper function to rename aggName if fieldName might have already existed
+ * Ex: Rename '@timestamp.value_count' to '@timestamp_1.value_count' if '@timestamp' is already used in groupBy
+ * @param aggName
+ * @param aggList
+ * @param groupByList
+ */
+export function getRenamedAggNameAndMsgDueToConflict(
+  aggName: AggName,
+  aggList: PivotAggsConfigDict,
+  groupByList: PivotGroupByConfigDict,
+  groupByConfig?: PivotGroupByConfig
+) {
+  const [fieldName, rest] = aggName.split('.');
+
+  const hasDateHistogramConflictWithGroupBy =
+    groupByList[fieldName] &&
+    groupByList[fieldName].agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
+
+  const hasDateHistogramConflictWithAggList =
+    Object.values(aggList).find((a) => isPopulatedObject(a, ['field']) && a.field === fieldName) &&
+    groupByConfig?.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
+
+  if (hasDateHistogramConflictWithGroupBy || hasDateHistogramConflictWithAggList) {
+    const regExp = new RegExp(`^${fieldName}(\\d)*$`);
+    const increment: number = Object.keys(groupByList).reduce((acc, curr) => {
+      const match = curr.match(regExp);
+      if (!match || !match[1]) return acc;
+      const n = Number(match[1]);
+      return n > acc ? n : acc;
+    }, 0 as number);
+
+    const newAggName = `${fieldName}${increment + 1}${rest ? '.' + rest : ''}`;
+    const toastMsg = i18n.translate(
+      'xpack.transform.stepDefineForm.renamedAggNameDueToConflictErrorMessage',
+      {
+        defaultMessage: `Renamed '{aggName}' to '{newAggName}' because of a nesting conflict.`,
+        values: { aggName, newAggName },
+      }
+    );
+    return { newAggName, toastMsg };
+  }
+  return { newAggName: undefined, toastMsg: undefined };
+}
 
 export function getAggNameConflictToastMessages(
   aggName: AggName,
