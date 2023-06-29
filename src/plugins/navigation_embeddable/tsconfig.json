@@ -8,6 +8,11 @@
     "@kbn/core",
     "@kbn/embeddable-plugin",
     "@kbn/i18n",
+    "@kbn/object-versioning",
+    "@kbn/config-schema",
+    "@kbn/content-management-utils",
+    "@kbn/content-management-plugin",
+    "@kbn/dashboard-plugin",
   ],
   "exclude": [
     "target/**/*",
