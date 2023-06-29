@@ -52,6 +52,18 @@ describe('GET /api/reporting/jobs/download', () => {
   const mockConfigSchema = createMockConfigSchema({ roles: { enabled: false } });
 
   beforeEach(async () => {
+    ({ server, httpSetup } = await setupServer(reportingSymbol));
+    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
+      reportingSymbol,
+      'reporting',
+      () => ({
+        usesUiCapabilities: jest.fn(),
+        getSpaceId: jest.fn(),
+        getScreenshots: jest.fn(),
+        registerExportTypes: jest.fn(),
+      })
+    );
+
     mockSetupDeps = createMockPluginSetup({
       security: {
         license: { isEnabled: () => true },
@@ -101,13 +113,6 @@ describe('GET /api/reporting/jobs/download', () => {
     }) as typeof stream;
 
     (getContentStream as jest.MockedFunction<typeof getContentStream>).mockResolvedValue(stream);
-
-    ({ server, httpSetup } = await setupServer(reportingSymbol));
-    httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
-      reportingSymbol,
-      'reporting',
-      core.getContract
-    );
   });
 
   afterEach(async () => {
