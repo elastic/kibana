@@ -278,7 +278,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       viewMode,
       query,
       id,
-      // do not pass any time information from dashboard to panel when panel has custom time range
+      // do not pass any time information from dashboard to panel when panel has custom time range 
+      // to avoid confusing panel which timeRange should be used
       timeRange: hasCustomTimeRange ? undefined : timeRange,
       timeslice: hasCustomTimeRange ? undefined : timeslice,
     };
