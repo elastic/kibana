@@ -10,6 +10,7 @@ import { uninstallTokensRouteService } from '../../../common/services';
 import type {
   GetUninstallTokensMetadataRequest,
   GetUninstallTokensMetadataResponse,
+  GetUninstallTokenResponse,
 } from '../../../common/types/rest_spec/uninstall_token';
 
 import { useRequest } from './use_request';
@@ -31,3 +32,9 @@ export const useGetUninstallTokens = ({
     query,
   });
 };
+
+export const useGetUninstallToken = (uninstallTokenId: string) =>
+  useRequest<GetUninstallTokenResponse>({
+    method: 'get',
+    path: uninstallTokensRouteService.getInfoPath(uninstallTokenId),
+  });
