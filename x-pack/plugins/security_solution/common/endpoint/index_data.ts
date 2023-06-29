@@ -65,7 +65,8 @@ export async function indexHostsAndAlerts(
   options: TreeOptions = {},
   DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator,
   withResponseActions = true,
-  numResponseActions?: number
+  numResponseActions?: number,
+  alertIds?: string[]
 ): Promise<IndexedHostsAndAlertsResponse> {
   const random = seedrandom(seed);
   const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
@@ -119,6 +120,7 @@ export async function indexHostsAndAlerts(
       generator,
       withResponseActions,
       numResponseActions,
+      alertIds,
     });
 
     mergeAndAppendArrays(response, indexedHosts);

@@ -83,7 +83,7 @@ export const createAddToTimelineCellActionFactory = createCellActionFactory(
 
           let messageValue = '';
           if (value != null) {
-            messageValue = Array.isArray(value) ? value.join(', ') : value;
+            messageValue = Array.isArray(value) ? value.join(', ') : value.toString();
           }
           notificationsService.toasts.addSuccess({
             title: ADD_TO_TIMELINE_SUCCESS_TITLE(messageValue),
