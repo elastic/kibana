@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import { KibanaServices } from './types';
 
 export const fetchActiveMaintenanceWindows = async (
-  http: CoreStart['http'],
+  http: KibanaServices['http'],
   signal?: AbortSignal
 ) =>
   http.fetch(INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH, {
