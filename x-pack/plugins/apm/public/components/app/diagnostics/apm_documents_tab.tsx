@@ -11,7 +11,7 @@ import {
   EuiBasicTableColumn,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { orderBy } from 'lodash';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -22,6 +22,14 @@ import { useDiagnosticsContext } from './context/use_diagnostics';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 
+function formatDocCount(count?: number) {
+  if (count === undefined) {
+    return '-';
+  }
+
+  return asInteger(count);
+}
+
 export function DiagnosticsApmDocuments() {
   const { diagnosticsBundle, isImported } = useDiagnosticsContext();
   const { discover } = useKibana<ApmPluginStartDeps>().services;
@@ -31,7 +39,20 @@ export function DiagnosticsApmDocuments() {
     query: { rangeFrom, rangeTo },
   } = useApmParams('/diagnostics/documents');
 
-  const items = diagnosticsBundle?.apmEvents ?? [];
+  const items = useMemo<ApmEvent[]>(() => {
+    return (
+      diagnosticsBundle?.apmEvents.filter(({ legacy, docCount, intervals }) => {
+        const isLegacyAndUnused =
+          legacy === true &&
+          docCount === 0 &&
+          intervals &&
+          Object.values(intervals).every((interval) => interval === 0);
+
+        return !isLegacyAndUnused;
+      }) ?? []
+    );
+  }, [diagnosticsBundle?.apmEvents]);
+
   const columns: Array<EuiBasicTableColumn<ApmEvent>> = [
     {
       name: 'Name',
@@ -48,24 +69,24 @@ export function DiagnosticsApmDocuments() {
       name: '1m',
       field: 'intervals.1m',
       render: (_, { intervals }) => {
-        const interval = intervals?.['1m'];
-        return interval ? asInteger(interval) : '-';
+        const docCount = intervals?.['1m'];
+        return formatDocCount(docCount);
       },
     },
     {
       name: '10m',
       field: 'intervals.10m',
       render: (_, { intervals }) => {
-        const interval = intervals?.['10m'];
-        return interval ? asInteger(interval) : '-';
+        const docCount = intervals?.['10m'];
+        return formatDocCount(docCount);
       },
     },
     {
       name: '60m',
       field: 'intervals.60m',
       render: (_, { intervals }) => {
-        const interval = intervals?.['60m'];
-        return interval ? asInteger(interval) : '-';
+        const docCount = intervals?.['60m'];
+        return formatDocCount(docCount);
       },
     },
     {

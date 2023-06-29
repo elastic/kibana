@@ -163,4 +163,5 @@ export interface FieldDescriptorRestResponse {
   timeZone?: string[];
   timeSeriesMetric?: 'histogram' | 'summary' | 'counter' | 'gauge';
   timeSeriesDimension?: boolean;
+  conflictDescriptions?: Record<string, string[]>;
 }

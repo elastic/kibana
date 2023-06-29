@@ -135,6 +135,13 @@ export function DifferentialTopNFunctionsView() {
 
   const isNormalizedByTime = normalizationMode === NormalizationMode.Time;
 
+  function handleOnFrameClick(functionName: string) {
+    profilingRouter.push('/flamegraphs/flamegraph', {
+      path: {},
+      query: { ...query, searchText: functionName },
+    });
+  }
+
   return (
     <>
       <EuiFlexGroup direction="column">
@@ -169,6 +176,7 @@ export function DifferentialTopNFunctionsView() {
                   totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
                   isDifferentialView={true}
                   baselineScaleFactor={isNormalizedByTime ? baselineTime : baseline}
+                  onFrameClick={handleOnFrameClick}
                 />
               </AsyncComponent>
             </EuiFlexItem>
@@ -196,6 +204,7 @@ export function DifferentialTopNFunctionsView() {
                     isDifferentialView={true}
                     baselineScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
                     comparisonScaleFactor={isNormalizedByTime ? baselineTime : baseline}
+                    onFrameClick={handleOnFrameClick}
                   />
                 </AsyncComponent>
               </EuiFlexItem>
