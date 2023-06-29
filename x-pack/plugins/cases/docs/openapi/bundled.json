@@ -12,16 +12,24 @@
       "url": "https://www.elastic.co/licensing/elastic-license"
     }
   },
-  "tags": [
-    {
-      "name": "cases",
-      "description": "Case APIs enable you to open and track issues."
-    }
-  ],
   "servers": [
     {
       "url": "http://localhost:5601",
       "description": "local"
+    }
+  ],
+  "security": [
+    {
+      "basicAuth": []
+    },
+    {
+      "apiKeyAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "cases",
+      "description": "Case APIs enable you to open and track issues."
     }
   ],
   "paths": {
@@ -2865,7 +2873,8 @@
           },
           "description": {
             "description": "The description for the case.",
-            "type": "string"
+            "type": "string",
+            "maximum": 30000
           },
           "owner": {
             "$ref": "#/components/schemas/owners"
@@ -2879,13 +2888,21 @@
           "tags": {
             "description": "The words and phrases that help categorize cases. It can be an empty array.",
             "type": "array",
+            "maxItems": 200,
             "items": {
-              "type": "string"
+              "type": "string",
+              "maximum": 256
             }
+          },
+          "category": {
+            "description": "Category for the case. It could be a word or a phrase to categorize the case.",
+            "type": "string",
+            "maximum": 50
           },
           "title": {
             "description": "A title for the case.",
-            "type": "string"
+            "type": "string",
+            "maximum": 160
           }
         }
       },
@@ -3493,7 +3510,8 @@
                 },
                 "id": {
                   "description": "The identifier for the case.",
-                  "type": "string"
+                  "type": "string",
+                  "maximum": 30000
                 },
                 "settings": {
                   "$ref": "#/components/schemas/settings"
@@ -3507,13 +3525,21 @@
                 "tags": {
                   "description": "The words and phrases that help categorize cases.",
                   "type": "array",
+                  "maxItems": 200,
                   "items": {
-                    "type": "string"
+                    "type": "string",
+                    "maximum": 256
                   }
+                },
+                "category": {
+                  "description": "Category for the case. It could be a word or a phrase to categorize the case.",
+                  "type": "string",
+                  "maximum": 50
                 },
                 "title": {
                   "description": "A title for the case.",
-                  "type": "string"
+                  "type": "string",
+                  "maximum": 160
                 },
                 "version": {
                   "description": "The current version of the case. To determine this value, use the get case or find cases APIs.",
@@ -5281,13 +5307,5 @@
         }
       }
     }
-  },
-  "security": [
-    {
-      "basicAuth": []
-    },
-    {
-      "apiKeyAuth": []
-    }
-  ]
+  }
 }
