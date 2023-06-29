@@ -48,8 +48,8 @@ import {
 import type { TransformStats } from '../types';
 import {
   HOST_METADATA_LIST_ROUTE,
-  metadataTransformPrefix,
   METADATA_UNITED_TRANSFORM,
+  metadataTransformPrefix,
 } from '../../../../../common/endpoint/constants';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
@@ -485,17 +485,17 @@ describe('when on the endpoint list page', () => {
   });
 
   describe('when there is a selected host in the url', () => {
-    let hostDetails: HostInfo;
+    let hostInfo: HostInfo;
     let renderAndWaitForData: () => Promise<ReturnType<AppContextTestRender['render']>>;
     const mockEndpointListApi = (mockedPolicyResponse?: HostPolicyResponse) => {
       const {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        host_status,
+        host_status: hostStatus,
+        last_checkin: lastCheckin,
         metadata: { agent, Endpoint, ...details },
       } = mockEndpointDetailsApiResult();
 
-      hostDetails = {
-        host_status,
+      hostInfo = {
+        host_status: hostStatus,
         metadata: {
           ...details,
           Endpoint: {
@@ -510,13 +510,14 @@ describe('when on the endpoint list page', () => {
             id: '1',
           },
         },
+        last_checkin: lastCheckin,
       };
 
       const policy = docGenerator.generatePolicyPackagePolicy();
-      policy.id = hostDetails.metadata.Endpoint.policy.applied.id;
+      policy.id = hostInfo.metadata.Endpoint.policy.applied.id;
 
       setEndpointListApiMockImplementation(coreStart.http, {
-        endpointsResults: [hostDetails],
+        endpointsResults: [hostInfo],
         endpointPackagePolicies: [policy],
         policyResponse: mockedPolicyResponse,
       });
@@ -617,7 +618,7 @@ describe('when on the endpoint list page', () => {
       const policyDetailsLink = await renderResult.findByTestId('policyDetailsValue');
       expect(policyDetailsLink).not.toBeNull();
       expect(policyDetailsLink.getAttribute('href')).toEqual(
-        `${APP_PATH}${MANAGEMENT_PATH}/policy/${hostDetails.metadata.Endpoint.policy.applied.id}/settings`
+        `${APP_PATH}${MANAGEMENT_PATH}/policy/${hostInfo.metadata.Endpoint.policy.applied.id}/settings`
       );
     });
 
@@ -626,7 +627,7 @@ describe('when on the endpoint list page', () => {
       const policyDetailsRevElement = await renderResult.findByTestId('policyDetailsRevNo');
       expect(policyDetailsRevElement).not.toBeNull();
       expect(policyDetailsRevElement.textContent).toEqual(
-        `rev. ${hostDetails.metadata.Endpoint.policy.applied.endpoint_policy_version}`
+        `rev. ${hostInfo.metadata.Endpoint.policy.applied.endpoint_policy_version}`
       );
     });
 
@@ -639,7 +640,7 @@ describe('when on the endpoint list page', () => {
       });
       const changedUrlAction = await userChangedUrlChecker;
       expect(changedUrlAction.payload.pathname).toEqual(
-        `${MANAGEMENT_PATH}/policy/${hostDetails.metadata.Endpoint.policy.applied.id}/settings`
+        `${MANAGEMENT_PATH}/policy/${hostInfo.metadata.Endpoint.policy.applied.id}/settings`
       );
     });
 
