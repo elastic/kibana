@@ -30,7 +30,7 @@ describe('reducer', () => {
     const initialState = {
       activeProducts: new Set([ProductId.analytics]),
       finishedSteps: {} as Record<CardId, Set<StepId>>,
-      activeCards: {} as Record<SectionId, Record<CardId, ActiveCard>> | null,
+      activeCards: {} as ActiveCards | null,
     };
 
     const action: ToggleProductAction = {
@@ -56,7 +56,7 @@ describe('reducer', () => {
             timeInMins: 3,
           },
         },
-      } as unknown as Record<SectionId, Record<CardId, ActiveCard>> | null,
+      } as unknown as ActiveCards | null,
     };
 
     const action: AddFinishedStepAction = {

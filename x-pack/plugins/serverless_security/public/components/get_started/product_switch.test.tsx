@@ -49,12 +49,12 @@ describe('ProductSwitch', () => {
     fireEvent.click(analyticsSwitch);
 
     expect(onProductSwitchChangedMock).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'analytics' })
+      expect.objectContaining({ id: 'security' })
     );
   });
 
   it('should have checked switches for activeProducts', () => {
-    const activeProducts = new Set([ProductId.analytics, ProductId.endpoint]);
+    const activeProducts = new Set([ProductId.security, ProductId.endpoint]);
     const { getByTestId } = render(
       <ProductSwitch
         onProductSwitchChanged={onProductSwitchChangedMock}
@@ -63,7 +63,7 @@ describe('ProductSwitch', () => {
       />
     );
 
-    const analyticsSwitch = getByTestId('analytics');
+    const analyticsSwitch = getByTestId('security');
     const cloudSwitch = getByTestId('cloud');
     const endpointSwitch = getByTestId('endpoint');
 

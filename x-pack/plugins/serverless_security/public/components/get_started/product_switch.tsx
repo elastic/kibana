@@ -13,7 +13,7 @@ import { ProductId, Switch } from './types';
 
 const switches: Switch[] = [
   {
-    id: ProductId.analytics,
+    id: ProductId.security,
     label: i18n.ANALYTICS_SWITCH_LABEL,
   },
   {
@@ -29,9 +29,8 @@ const switches: Switch[] = [
 const ProductSwitchComponent: React.FC<{
   onProductSwitchChanged: (item: Switch) => void;
   activeProducts: Set<ProductId>;
-  shadow?: string;
   euiTheme: EuiThemeComputed;
-}> = ({ onProductSwitchChanged, activeProducts, euiTheme, shadow = '' }) => {
+}> = ({ onProductSwitchChanged, activeProducts, euiTheme }) => {
   const switchNodes = useMemo(
     () =>
       switches.map((item) => (
@@ -58,8 +57,7 @@ const ProductSwitchComponent: React.FC<{
       paddingSize="none"
       hasShadow={false}
       css={css`
-        padding: ${euiTheme.base * 1.25}px ${euiTheme.base * 2.25}px;
-        ${shadow};
+        padding: ${euiTheme.base * 1.25}px 0;
       `}
       borderRadius="none"
     >

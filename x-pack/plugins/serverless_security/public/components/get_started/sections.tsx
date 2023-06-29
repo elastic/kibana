@@ -85,7 +85,7 @@ export const sections: Section[] = [
       {
         icon: { type: protect, size: 'xl' },
         title: i18n.PROTECT_YOUR_ENVIRONMENT_TITLE,
-        id: GetSetUpCardId.protectYourEnvironmentInRuntime,
+        id: GetSetUpCardId.protectYourEnvironmentInRealtime,
         productTypeRequired: [
           ...ActiveConditions.cloudToggled,
           ...ActiveConditions.endpointToggled,

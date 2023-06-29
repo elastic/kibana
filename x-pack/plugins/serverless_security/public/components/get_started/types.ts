@@ -56,8 +56,10 @@ export interface Card {
   stepsLeft?: number;
 }
 
+export type ActiveCards = Record<SectionId, Record<CardId, ActiveCard>>;
+
 export enum ProductId {
-  analytics = 'analytics',
+  security = 'security',
   cloud = 'cloud',
   endpoint = 'endpoint',
 }
@@ -71,7 +73,7 @@ export enum GetSetUpCardId {
   activateAndCreateRules = 'activateAndCreateRules',
   bringInYourData = 'bringInYourData',
   introduction = 'introduction',
-  protectYourEnvironmentInRuntime = 'protectYourEnvironmentInRuntime',
+  protectYourEnvironmentInRealtime = 'protectYourEnvironmentInRealtime',
 }
 
 export enum IntroductionSteps {

@@ -35,6 +35,14 @@ describe('GetStartedComponent', () => {
     expect(description).toBeInTheDocument();
   });
 
+  it('should render Product Switch', () => {
+    const { getByTestId } = render(<GetStartedComponent />);
+
+    const productSwitch = getByTestId('product-switch');
+
+    expect(productSwitch).toBeInTheDocument();
+  });
+
   it('should render WelcomePanel and TogglePanel', () => {
     const { getByTestId } = render(<GetStartedComponent />);
 

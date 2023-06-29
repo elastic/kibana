@@ -6,7 +6,7 @@
  */
 
 import { getSections } from './sections';
-import { ActiveCard, Card, CardId, ProductId, SectionId, StepId } from './types';
+import { ActiveCard, ActiveCards, Card, CardId, ProductId, SectionId, StepId } from './types';
 
 export const getCardTimeInMinutes = (card: Card, stepsDone: Set<StepId>) =>
   card.steps?.reduce(
@@ -46,7 +46,7 @@ export const setupCards = (
           acc[section.id] = cardsInSections;
         }
         return acc;
-      }, {} as Record<SectionId, Record<CardId, ActiveCard>>)
+      }, {} as ActiveCards)
     : null;
 
 export const updateCard = ({
@@ -58,10 +58,10 @@ export const updateCard = ({
 }: {
   finishedSteps: Record<CardId, Set<StepId>>;
   activeProducts: Set<ProductId>;
-  activeCards: Record<SectionId, Record<CardId, ActiveCard>> | null;
+  activeCards: ActiveCards | null;
   sectionId: SectionId;
   cardId: CardId;
-}): Record<SectionId, Record<CardId, ActiveCard>> | null => {
+}): ActiveCards | null => {
   const sections = getSections();
   const section = sections.find(({ id }) => id === sectionId);
   const cards = section?.cards;
