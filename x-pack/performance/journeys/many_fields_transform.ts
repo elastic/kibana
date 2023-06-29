@@ -13,7 +13,7 @@ export const journey = new Journey({
   kbnArchives: ['test/functional/fixtures/kbn_archiver/many_fields_data_view'],
   esArchives: ['test/functional/fixtures/es_archiver/many_fields'],
 })
-  .step('Go to Transform Page', async ({ page, kbnUrl }) => {
+  .step('Go to Transforms', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`app/management/data/transform`));
     await waitForChrome(page);
     await page.waitForSelector(subj('transformCreateFirstButton'));
