@@ -274,7 +274,9 @@ export const buildPalettes: (
       ...buildGradient('temperature', euiPaletteForTemperature),
     },
     complimentary: {
-      title: i18n.translate('charts.palettes.complimentaryLabel', { defaultMessage: 'Complimentary' }),
+      title: i18n.translate('charts.palettes.complimentaryLabel', {
+        defaultMessage: 'Complimentary',
+      }),
       ...buildGradient('complimentary', euiPaletteComplimentary),
     },
     negative: {
@@ -298,7 +300,9 @@ export const buildPalettes: (
       ...buildGradient('gray', euiPaletteGray),
     },
     kibana_palette: {
-      title: i18n.translate('charts.palettes.kibanaPaletteLabel', { defaultMessage: 'Compatibility' }),
+      title: i18n.translate('charts.palettes.kibanaPaletteLabel', {
+        defaultMessage: 'Compatibility',
+      }),
       ...buildSyncedKibanaPalette(legacyColorsService),
     },
     custom: buildCustomPalette() as PaletteDefinition<unknown>,
