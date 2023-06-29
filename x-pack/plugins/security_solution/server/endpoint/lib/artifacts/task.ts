@@ -53,11 +53,11 @@ export class ManifestTask {
           return {
             run: async () => {
               const taskInterval = (await this.endpointAppContext.config()).packagerTaskInterval;
-              const initTime = new Date().getTime();
+              const startTime = new Date().getTime();
               await this.runTask(taskInstance.id);
               const endTime = new Date().getTime();
               this.logger.debug(
-                `${ManifestTaskConstants.TYPE} task run took ${endTime - initTime}ms`
+                `${ManifestTaskConstants.TYPE} task run took ${endTime - startTime}ms`
               );
               const nextRun = new Date();
               if (taskInterval.endsWith('s')) {
