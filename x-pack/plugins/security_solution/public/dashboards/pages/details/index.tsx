@@ -105,10 +105,11 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
         >
           <EuiFlexItem grow={false}>
             <HeaderPage border title={dashboardDetails?.title ?? <EuiLoadingSpinner size="m" />}>
-              {showWriteControls && dashboardExists && dashboardContainer && (
+              {showWriteControls && dashboardExists && dashboardContainer && savedObjectId && (
                 <DashboardToolBar
                   dashboardContainer={dashboardContainer}
                   onLoad={onDashboardToolBarLoad}
+                  dashboardId={savedObjectId}
                 />
               )}
             </HeaderPage>

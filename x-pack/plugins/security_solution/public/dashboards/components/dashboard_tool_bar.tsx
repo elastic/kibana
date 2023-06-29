@@ -18,9 +18,11 @@ import { useNavigateTo } from '../../common/lib/kibana';
 const DashboardToolBarComponent = ({
   dashboardContainer,
   onLoad,
+  dashboardId,
 }: {
   dashboardContainer: DashboardAPI;
   onLoad: (mode: ViewMode) => void;
+  dashboardId: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const viewMode = dashboardContainer.select((state) => state.explicitInput.viewMode);
@@ -77,6 +79,8 @@ const DashboardToolBarComponent = ({
         `,
         topNavMenuAlignRight: true,
       }}
+      originatingApp="security"
+      originatingPath={`dashboards/${dashboardId}/edit`}
     />
   );
 };

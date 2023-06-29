@@ -39,6 +39,8 @@ import './_dashboard_top_nav.scss';
 export interface InternalDashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
+  originatingApp?: string;
+  originatingPath?: string;
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
@@ -46,6 +48,8 @@ const LabsFlyout = withSuspense(LazyLabsFlyout, null);
 export function InternalDashboardTopNav({
   embedSettings,
   redirectTo,
+  originatingApp,
+  originatingPath,
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
@@ -284,7 +288,11 @@ export function InternalDashboardTopNav({
         </PresentationUtilContextProvider>
       ) : null}
       {viewMode === ViewMode.EDIT ? (
-        <DashboardEditingToolbar wrapperCss={visibilityProps.editingToolBarCss} />
+        <DashboardEditingToolbar
+          wrapperCss={visibilityProps.editingToolBarCss}
+          originatingApp={originatingApp}
+          originatingPath={originatingPath}
+        />
       ) : null}
       {visibilityProps.showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>
