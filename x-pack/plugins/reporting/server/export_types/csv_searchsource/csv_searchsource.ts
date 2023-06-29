@@ -8,7 +8,6 @@
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import { CsvGenerator } from '@kbn/generate-csv';
-import { CONTENT_TYPE_CSV } from '@kbn/generate-csv/src/constants';
 import { CancellationToken } from '@kbn/reporting-common';
 import { Writable } from 'stream';
 import {
@@ -42,7 +41,7 @@ export class CsvSearchsourceExportType extends ExportType<
 > {
   id = 'csv_searchsource';
   name = CSV_JOB_TYPE;
-  jobType = CONTENT_TYPE_CSV;
+  jobType = CSV_JOB_TYPE;
   jobContentEncoding = 'base64' as const;
   jobContentExtension = 'csv' as const;
   validLicenses = [
