@@ -12,8 +12,6 @@ export {
   vislibColorMaps,
   colorSchemas,
   getHeatmapColors,
-  truncatedColorMaps,
-  truncatedColorSchemas,
 } from './color_maps';
 
 export { ColorMode, LabelRotation, defaultCountLabel } from './components';
