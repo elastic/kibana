@@ -123,7 +123,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   },
   [appIds.DATA_VIEWS]: {
     category: appCategories.DATA,
-    description: i18n.translate('management.landing.withCardNavigation.apiKeysDescription', {
+    description: i18n.translate('management.landing.withCardNavigation.dataViewsDescription', {
       defaultMessage:
         'Create and manage the data views that help you retrieve your data from Elasticsearch.',
     }),
@@ -131,7 +131,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   },
   [appIds.CONNECTORS]: {
     category: appCategories.OTHER,
-    description: i18n.translate('management.landing.withCardNavigation.dataViewsDescription', {
+    description: i18n.translate('management.landing.withCardNavigation.connectorsDescription', {
       defaultMessage: 'Connect third-party software with your alerting data.',
     }),
     icon: <EuiIcon size="l" type="desktop" />,
