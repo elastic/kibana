@@ -75,11 +75,6 @@
   &.kbnBody--chromeHidden {
     @include kbnAffordForHeader(0);
   }
-  // FIXME: requires default header affordance if the "header action menu toolbar" is visible
-  // FIXME: for now the toolbar is always available
-  // &.kbnBody--projectLayout {
-  //   @include kbnAffordForHeader($euiHeaderHeightCompensation);
-  // }
   &.kbnBody--chromeHidden.kbnBody--hasHeaderBanner {
     @include kbnAffordForHeader($kbnHeaderBannerHeight);
   }
