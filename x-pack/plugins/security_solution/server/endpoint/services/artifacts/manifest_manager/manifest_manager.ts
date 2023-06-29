@@ -34,7 +34,10 @@ import {
   Manifest,
   convertExceptionsToEndpointFormat,
 } from '../../../lib/artifacts';
-import type { InternalArtifactCompleteSchema } from '../../../schemas/artifacts';
+import type {
+  InternalArtifactCompleteSchema,
+  WrappedTranslatedExceptionList,
+} from '../../../schemas/artifacts';
 import { internalArtifactCompleteSchema } from '../../../schemas/artifacts';
 import type { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
@@ -155,7 +158,7 @@ export class ManifestManager {
     os: string;
     policyId?: string;
     schemaVersion: string;
-  }) {
+  }): Promise<WrappedTranslatedExceptionList> {
     if (!this.cachedExceptionsListsByOs.has(`${listId}-${os}`)) {
       const itemsByListId = await getAllItemsFromEndpointExceptionList({
         elClient,
@@ -218,7 +221,7 @@ export class ManifestManager {
     allPolicyIds: string[],
     supportedOSs: string[],
     osOptions: BuildArtifactsForOsOptions
-  ) {
+  ): Promise<Record<string, InternalArtifactCompleteSchema[]>> {
     const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
     await pMap(
       allPolicyIds,
@@ -618,7 +621,7 @@ export class ManifestManager {
         currentBatch
       );
 
-      // Parse errors
+      // Update errors
       if (!isEmpty(response.failedPolicies)) {
         errors.push(
           ...response.failedPolicies.map((failedPolicy) => {
@@ -667,7 +670,10 @@ export class ManifestManager {
     this.logger.info(`Committed manifest ${manifest.getSemanticVersion()}`);
   }
 
-  private async listEndpointPolicies(page: number, perPage: number) {
+  private async listEndpointPolicies(
+    page: number,
+    perPage: number
+  ): Promise<ListResult<PackagePolicy>> {
     return this.packagePolicyService.list(this.savedObjectsClient, {
       page,
       perPage,
@@ -675,7 +681,7 @@ export class ManifestManager {
     });
   }
 
-  private async listEndpointPolicyIds() {
+  private async listEndpointPolicyIds(): Promise<string[]> {
     const allPolicyIds: string[] = [];
     await iterateAllListItems(
       (page, perPage) => {
