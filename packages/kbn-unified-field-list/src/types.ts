@@ -7,7 +7,7 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { EuiButtonIconProps, EuiButtonProps } from '@elastic/eui';
+import type { EuiButtonIconProps, EuiButtonProps } from '@elastic/eui';
 
 export interface BucketedAggregation<KeyType = string> {
   buckets: Array<{
