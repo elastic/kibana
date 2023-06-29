@@ -13,6 +13,7 @@ import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 're
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import type { SessionViewConfig } from '../../../../../common/types';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
@@ -36,7 +37,6 @@ import {
   getEventIdToNoteIdsSelector,
 } from './selectors';
 import * as i18n from './translations';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { TIMELINE_CONVERSATION_TITLE } from '../../../../assistant/content/conversations/translations';
 
@@ -172,7 +172,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     timelineType,
     showTimeline,
   }) => {
-    const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
+    const { isAssistantEnabled } = useAssistantAvailability();
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -297,7 +297,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   sessionViewConfig,
   timelineDescription,
 }) => {
-  const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
+  const { isAssistantEnabled } = useAssistantAvailability();
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
   const getShowTimeline = useMemo(() => getShowTimelineSelector(), []);
