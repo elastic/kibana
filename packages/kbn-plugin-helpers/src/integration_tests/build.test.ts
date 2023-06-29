@@ -39,6 +39,9 @@ it('builds a generated plugin into a viable archive', async () => {
     process.execPath,
     ['scripts/generate_plugin', '-y', '--name', 'fooTestPlugin'],
     {
+      env: {
+        NODE_OPTIONS: '--openssl-legacy-provider',
+      },
       cwd: REPO_ROOT,
       all: true,
     }
@@ -61,6 +64,9 @@ it('builds a generated plugin into a viable archive', async () => {
     process.execPath,
     ['../../scripts/plugin_helpers', 'build', '--kibana-version', '7.5.0'],
     {
+      env: {
+        NODE_OPTIONS: '--openssl-legacy-provider',
+      },
       cwd: PLUGIN_DIR,
       all: true,
     }

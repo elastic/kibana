@@ -58,6 +58,17 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
       });
     },
 
+    async addComment(comment: string) {
+      const addCommentElement = await find.byCssSelector(
+        '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+      );
+
+      await addCommentElement.focus();
+      await addCommentElement.type(comment);
+
+      await this.submitComment();
+    },
+
     async addVisualizationToNewComment(visName: string) {
       // open saved object finder
       const addCommentElement = await testSubjects.find('add-comment');
