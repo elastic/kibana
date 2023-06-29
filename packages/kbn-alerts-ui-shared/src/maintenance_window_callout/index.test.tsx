@@ -148,6 +148,7 @@ describe('MaintenanceWindowCallout', () => {
       { wrapper: TestProviders }
     );
 
+    // @ts-expect-error
     expect(await findByText('Maintenance window is running')).toBeInTheDocument();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
@@ -160,7 +161,7 @@ describe('MaintenanceWindowCallout', () => {
     const { container } = render(<MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />, {
       wrapper: TestProviders,
     });
-
+    // @ts-expect-error
     expect(container).toBeEmptyDOMElement();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
@@ -171,7 +172,7 @@ describe('MaintenanceWindowCallout', () => {
     const { container } = render(<MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />, {
       wrapper: TestProviders,
     });
-
+    // @ts-expect-error
     expect(container).toBeEmptyDOMElement();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
@@ -233,7 +234,7 @@ describe('MaintenanceWindowCallout', () => {
     const { container } = render(<MaintenanceWindowCallout kibanaServices={servicesMock} />, {
       wrapper: TestProviders,
     });
-
+    // @ts-expect-error
     expect(container).toBeEmptyDOMElement();
   });
 
@@ -254,7 +255,7 @@ describe('MaintenanceWindowCallout', () => {
     const { findByText } = render(<MaintenanceWindowCallout kibanaServices={servicesMock} />, {
       wrapper: TestProviders,
     });
-
+    // @ts-expect-error
     expect(await findByText('Maintenance window is running')).toBeInTheDocument();
   });
 });
