@@ -8,19 +8,24 @@
 
 import React from 'react';
 
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+
 import { EuiButtonEmpty } from '@elastic/eui';
 import { useDashboardLinkEmbeddable } from '../embeddable/dashboard_link_embeddable';
+// import { useNavigationEmbeddable } from '../../navigation_container/embeddable/navigation_container';
 
 export const DashboardLinkComponent = () => {
   const embeddable = useDashboardLinkEmbeddable();
+  const parentDashboard = embeddable.getRoot() as DashboardContainer;
 
   const isLoading = embeddable.select((state) => state.output.loading);
 
   const dashboardLinkLabel = embeddable.select((state) => state.explicitInput.label);
   const dashboardLinkId = embeddable.select((state) => state.explicitInput.dashboardId);
-
   const dashboardTitle = embeddable.select((state) => state.componentState.dashboardTitle);
-  const parentDashboardId = embeddable.select((state) => state.componentState.parentDashboardId);
+
+  const parentDashboardId = parentDashboard.select((state) => state.componentState.lastSavedId);
+  const parentDashboardTitle = parentDashboard.select((state) => state.explicitInput.title);
 
   return (
     <EuiButtonEmpty
@@ -35,7 +40,9 @@ export const DashboardLinkComponent = () => {
             onClick: () => {}, // TODO: As part of https://github.com/elastic/kibana/issues/154381, connect to drilldown
           })}
     >
-      {dashboardLinkLabel || dashboardTitle}
+      {dashboardLinkLabel || dashboardLinkId === parentDashboardId
+        ? parentDashboardTitle
+        : dashboardTitle}
     </EuiButtonEmpty>
   );
 };

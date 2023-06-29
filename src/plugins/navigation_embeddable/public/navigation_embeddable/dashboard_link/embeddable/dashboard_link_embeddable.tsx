@@ -9,7 +9,7 @@
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import React, { createContext, useContext } from 'react';
-import { distinctUntilChanged, skip, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import { Embeddable } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -41,7 +41,6 @@ export class DashboardLinkEmbeddable extends Embeddable<DashboardLinkInput> {
   public readonly type = DASHBOARD_LINK_EMBEDDABLE_TYPE;
 
   private node?: HTMLElement;
-
   // state management
   public select: DashboardLinkReduxEmbeddableTools['select'];
   public getState: DashboardLinkReduxEmbeddableTools['getState'];
@@ -78,6 +77,8 @@ export class DashboardLinkEmbeddable extends Embeddable<DashboardLinkInput> {
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
 
+    console.log('INITIALIZE LINK');
+
     this.initialize();
   }
 
@@ -88,29 +89,45 @@ export class DashboardLinkEmbeddable extends Embeddable<DashboardLinkInput> {
   }
 
   private setupSubscriptions() {
-    const {
-      componentState: { parentDashboardId },
-      explicitInput: { dashboardId },
-    } = this.getState();
-
-    /** if  */
-    if (parentDashboardId === dashboardId) {
-      this.subscriptions.add(
-        this.getRoot()
-          .getInput$()
-          .pipe(
-            skip(1),
-            distinctUntilChanged((a, b) => a.title === b.title && a.description === b.description)
-          )
-          .subscribe(({ title, description }) => {
-            batch(() => {
-              this.dispatch.setDashboardTitle(title);
-              this.dispatch.setDashboardDescription(description);
-            });
-          })
-      );
-    }
-
+    // this.subscriptions.add(
+    //   this.getUpdated$().subscribe((changes) => {
+    //     console.log('UPDATED', changes);
+    //   })
+    // );
+    // const unsubscribe = (this.getRoot() as DashboardContainer).onStateChange(() => {
+    //   const {
+    //     componentState: { parentDashboardId },
+    //   } = this.getState();
+    //   const {
+    //     componentState: { lastSavedId },
+    //   } = (this.getRoot() as DashboardContainer).getState();
+    //   if (lastSavedId && lastSavedId !== parentDashboardId) {
+    //     this.dispatch.setCurrentDashboardId(lastSavedId);
+    //     this.fetchDashboard();
+    //   }
+    // });
+    /** if we're on the current dashboard, listen for changes to its title and/or description */
+    // const {
+    //   explicitInput: { dashboardId },
+    //   componentState: { parentDashboardId },
+    // } = this.getState();
+    // if (parentDashboardId === dashboardId) {
+    //   this.subscriptions.add(
+    //     this.getRoot()
+    //       .getInput$()
+    //       .pipe(
+    //         skip(1),
+    //         distinctUntilChanged((a, b) => a.title === b.title && a.description === b.description)
+    //       )
+    //       .subscribe(({ title, description }) => {
+    //         console.log('here', title, description);
+    //         batch(() => {
+    //           this.dispatch.setDashboardTitle(title);
+    //           this.dispatch.setDashboardDescription(description);
+    //         });
+    //       })
+    //   );
+    // }
     /** When this embeddable's link in the explicit input, update component state to match */
     // this.subscriptions.add(
     //   this.getInput$()
