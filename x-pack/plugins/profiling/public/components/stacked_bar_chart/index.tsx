@@ -17,7 +17,6 @@ import {
   Tooltip,
   XYChartElementEvent,
   TooltipContainer,
-  CustomTooltip,
 } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
 import { keyBy } from 'lodash';
@@ -57,7 +56,7 @@ export function StackedBarChart({
 
   const { chartsBaseTheme, chartsTheme } = useProfilingChartsTheme();
 
-  const CustomTooltipWithSubChart: CustomTooltip = () => {
+  function CustomTooltipWithSubChart() {
     if (!highlightedSample) {
       return null;
     }
@@ -90,7 +89,7 @@ export function StackedBarChart({
         </EuiPanel>
       </TooltipContainer>
     );
-  };
+  }
 
   return (
     <Chart size={{ height }}>

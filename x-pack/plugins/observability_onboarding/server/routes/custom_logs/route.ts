@@ -53,7 +53,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
       plugins.cloud?.setup?.kibanaUrl ?? // then cloud id
       getFallbackUrls(coreStart).kibanaUrl; // falls back to local network binding
     const scriptDownloadUrl = `${kibanaUrl}/plugins/observabilityOnboarding/assets/standalone_agent_setup.sh`;
-    const apiEndpoint = `${kibanaUrl}/api/observability_onboarding`;
+    const apiEndpoint = `${kibanaUrl}/internal/observability_onboarding`;
 
     return {
       apiEndpoint,
@@ -137,14 +137,14 @@ const updateOnboardingStateRoute = createObservabilityOnboardingServerRoute({
 
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
   endpoint:
-    'GET /api/observability_onboarding/custom_logs/{id}/step/{name} 2023-05-24',
+    'POST /internal/observability_onboarding/custom_logs/{id}/step/{name}',
   options: { tags: [] },
   params: t.type({
     path: t.type({
       id: t.string,
       name: t.string,
     }),
-    query: t.type({
+    body: t.type({
       status: t.string,
     }),
   }),
@@ -152,7 +152,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
     const {
       params: {
         path: { id, name },
-        query: { status },
+        body: { status },
       },
       core,
     } = resources;
