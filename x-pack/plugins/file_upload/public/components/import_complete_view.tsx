@@ -27,6 +27,7 @@ import { getPartialImportMessage } from './utils';
 const services = {
   uiSettings: getUiSettings(),
   settings: getSettings(),
+  theme: getTheme(),
 };
 
 interface Props {
@@ -221,9 +222,8 @@ export class ImportCompleteView extends Component<Props, {}> {
   }
 
   render() {
-    const theme = getTheme();
     return (
-      <KibanaContextProvider services={{ ...services, theme }}>
+      <KibanaContextProvider services={services}>
         {this._getStatusMsg()}
 
         {this._renderCodeEditor(
