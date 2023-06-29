@@ -51,7 +51,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
     meta = get(resp, `aggregations.${series.id}.meta`);
   }
 
-  const color = chroma(series.color);
+  const color = chroma(series.color).hex();
   const metric = getLastMetric(series);
   const buckets = get(resp, `aggregations.${series.id}.buckets`);
 
@@ -71,7 +71,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
         bucket.id = `${series.id}${SERIES_SEPARATOR}${bucket.key}`;
         bucket.splitByLabel = splitByLabel;
         bucket.label = formatKey(bucket.key, series);
-        bucket.color = color.string();
+        bucket.color = color;
         bucket.meta = meta;
         bucket.termsSplitKey = bucket.key;
         return bucket;
@@ -109,7 +109,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
       id: series.id,
       splitByLabel,
       label: series.label || splitByLabel,
-      color: color.string(),
+      color,
       ...mergeObj,
       meta: meta!,
     },
