@@ -12,7 +12,7 @@ import {
   TaskManagerStartContract,
   IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
-import { PreConfiguredAction } from '../types';
+import { InMemoryConnector } from '../types';
 import { getTotalCount, getInUseTotalCount, getExecutionsPerDayCount } from './actions_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'actions_telemetry';
@@ -24,10 +24,10 @@ export function initializeActionsTelemetry(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  preconfiguredActions: PreConfiguredAction[],
+  inMemoryConnectors: InMemoryConnector[],
   eventLogIndex: string
 ) {
-  registerActionsTelemetryTask(logger, taskManager, core, preconfiguredActions, eventLogIndex);
+  registerActionsTelemetryTask(logger, taskManager, core, inMemoryConnectors, eventLogIndex);
 }
 
 export function scheduleActionsTelemetry(logger: Logger, taskManager: TaskManagerStartContract) {
@@ -38,14 +38,14 @@ function registerActionsTelemetryTask(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  preconfiguredActions: PreConfiguredAction[],
+  inMemoryConnectors: InMemoryConnector[],
   eventLogIndex: string
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions usage fetch task',
       timeout: '5m',
-      createTaskRunner: telemetryTaskRunner(logger, core, preconfiguredActions, eventLogIndex),
+      createTaskRunner: telemetryTaskRunner(logger, core, inMemoryConnectors, eventLogIndex),
     },
   });
 }
@@ -67,7 +67,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 export function telemetryTaskRunner(
   logger: Logger,
   core: CoreSetup,
-  preconfiguredActions: PreConfiguredAction[],
+  inMemoryConnectors: InMemoryConnector[],
   eventLogIndex: string
 ) {
   return ({ taskInstance }: RunContext) => {
@@ -89,8 +89,8 @@ export function telemetryTaskRunner(
         const actionIndex = await getActionIndex();
         const esClient = await getEsClient();
         return Promise.all([
-          getTotalCount(esClient, actionIndex, logger, preconfiguredActions),
-          getInUseTotalCount(esClient, actionIndex, logger, undefined, preconfiguredActions),
+          getTotalCount(esClient, actionIndex, logger, inMemoryConnectors),
+          getInUseTotalCount(esClient, actionIndex, logger, undefined, inMemoryConnectors),
           getExecutionsPerDayCount(esClient, eventLogIndex, logger),
         ]).then(([totalAggegations, totalInUse, totalExecutionsPerDay]) => {
           const hasErrors =

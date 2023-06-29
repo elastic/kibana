@@ -36,7 +36,7 @@ describe('actionTypeRegistry', () => {
       ),
       actionsConfigUtils: mockedActionsConfig,
       licenseState: mockedLicenseState,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           actionTypeId: 'foo',
           config: {},

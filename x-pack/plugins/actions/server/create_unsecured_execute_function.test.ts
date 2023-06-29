@@ -25,7 +25,7 @@ describe('bulkExecute()', () => {
     const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       connectorTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredConnectors: [
+      inMemoryConnectors: [
         {
           id: '123',
           actionTypeId: '.email',
@@ -131,7 +131,7 @@ describe('bulkExecute()', () => {
     const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       connectorTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredConnectors: [
+      inMemoryConnectors: [
         {
           id: '123',
           actionTypeId: '.email',
@@ -249,7 +249,7 @@ describe('bulkExecute()', () => {
     const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       connectorTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredConnectors: [
+      inMemoryConnectors: [
         {
           id: '123',
           actionTypeId: '.email',
@@ -391,7 +391,7 @@ describe('bulkExecute()', () => {
     const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       connectorTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredConnectors: [
+      inMemoryConnectors: [
         {
           id: '123',
           actionTypeId: '.email',
@@ -427,7 +427,7 @@ describe('bulkExecute()', () => {
     const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       connectorTypeRegistry: mockedConnectorTypeRegistry,
-      preconfiguredConnectors: [
+      inMemoryConnectors: [
         {
           id: '123',
           actionTypeId: '.email',
@@ -464,7 +464,7 @@ describe('bulkExecute()', () => {
     const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       connectorTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredConnectors: [
+      inMemoryConnectors: [
         {
           id: '123',
           actionTypeId: '.email',

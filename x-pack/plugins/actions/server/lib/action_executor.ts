@@ -25,7 +25,7 @@ import {
   ActionTypeExecutorRawResult,
   ActionTypeRegistryContract,
   GetServicesFunction,
-  PreConfiguredAction,
+  InMemoryConnector,
   RawAction,
   ValidatorServices,
 } from '../types';
@@ -46,7 +46,7 @@ export interface ActionExecutorContext {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
-  preconfiguredActions: PreConfiguredAction[];
+  inMemoryConnectors: InMemoryConnector[];
 }
 
 export interface TaskInfo {
@@ -118,7 +118,7 @@ export class ActionExecutor {
           encryptedSavedObjectsClient,
           actionTypeRegistry,
           eventLogger,
-          preconfiguredActions,
+          inMemoryConnectors,
           security,
         } = this.actionExecutorContext!;
 
@@ -129,7 +129,7 @@ export class ActionExecutor {
         const actionInfo = await getActionInfoInternal(
           this.isESOCanEncrypt,
           encryptedSavedObjectsClient,
-          preconfiguredActions,
+          inMemoryConnectors,
           actionId,
           namespace.namespace
         );
@@ -341,7 +341,7 @@ export class ActionExecutor {
     source?: ActionExecutionSource<Source>;
     consumer?: string;
   }) {
-    const { spaces, encryptedSavedObjectsClient, preconfiguredActions, eventLogger } =
+    const { spaces, encryptedSavedObjectsClient, inMemoryConnectors, eventLogger } =
       this.actionExecutorContext!;
 
     const spaceId = spaces && spaces.getSpaceId(request);
@@ -350,7 +350,7 @@ export class ActionExecutor {
       this.actionInfo = await getActionInfoInternal(
         this.isESOCanEncrypt,
         encryptedSavedObjectsClient,
-        preconfiguredActions,
+        inMemoryConnectors,
         actionId,
         namespace.namespace
       );
@@ -405,13 +405,13 @@ interface ActionInfo {
 async function getActionInfoInternal(
   isESOCanEncrypt: boolean,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
-  preconfiguredActions: PreConfiguredAction[],
+  inMemoryConnectors: InMemoryConnector[],
   actionId: string,
   namespace: string | undefined
 ): Promise<ActionInfo> {
   // check to see if it's a pre-configured action first
-  const pcAction = preconfiguredActions.find(
-    (preconfiguredAction) => preconfiguredAction.id === actionId
+  const pcAction = inMemoryConnectors.find(
+    (inMemoryConnector) => inMemoryConnector.id === actionId
   );
   if (pcAction) {
     return {

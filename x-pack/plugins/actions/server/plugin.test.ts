@@ -390,7 +390,7 @@ describe('Actions Plugin', () => {
 
         const pluginStart = await plugin.start(coreStart, pluginsStart);
 
-        expect(pluginStart.preconfiguredActions.length).toEqual(1);
+        expect(pluginStart.inMemoryConnectors.length).toEqual(1);
         expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.server-log')).toBe(true);
       });
 
@@ -414,7 +414,7 @@ describe('Actions Plugin', () => {
 
         const pluginStart = await plugin.start(coreStart, pluginsStart);
 
-        expect(pluginStart.preconfiguredActions.length).toEqual(2);
+        expect(pluginStart.inMemoryConnectors.length).toEqual(2);
         expect(
           pluginStart.isActionExecutable('preconfigured-alert-history-es-index', '.index')
         ).toBe(true);
@@ -438,7 +438,7 @@ describe('Actions Plugin', () => {
         await plugin.setup(coreSetup as any, pluginsSetup);
         const pluginStart = await plugin.start(coreStart, pluginsStart);
 
-        expect(pluginStart.preconfiguredActions.length).toEqual(0);
+        expect(pluginStart.inMemoryConnectors.length).toEqual(0);
         expect(context.logger.get().warn).toHaveBeenCalledWith(
           `Preconfigured connectors cannot have the id "${AlertHistoryEsIndexConnectorId}" because this is a reserved id.`
         );

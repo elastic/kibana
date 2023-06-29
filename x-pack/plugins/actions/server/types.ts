@@ -84,7 +84,7 @@ export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig
   isSystemAction: boolean;
 }
 
-export interface PreConfiguredAction<
+export interface InMemoryConnector<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets
 > extends ActionResult<Config> {

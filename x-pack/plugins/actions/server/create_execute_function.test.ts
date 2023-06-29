@@ -32,7 +32,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry,
       isESOCanEncrypt: true,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -103,7 +103,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry,
       isESOCanEncrypt: true,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -176,7 +176,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry,
       isESOCanEncrypt: true,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -247,7 +247,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       isESOCanEncrypt: true,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: '123',
           actionTypeId: 'mock-action-preconfigured',
@@ -327,7 +327,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       isESOCanEncrypt: true,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: '123',
           actionTypeId: 'mock-action-preconfigured',
@@ -428,7 +428,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       isESOCanEncrypt: false,
       actionTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     await expect(
       executeFn(savedObjectsClient, {
@@ -449,7 +449,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
       actionTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: '123',
@@ -481,7 +481,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     mockedActionTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
       throw new Error('Fail');
@@ -513,7 +513,7 @@ describe('execute()', () => {
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           actionTypeId: 'mock-action',
           config: {},
@@ -562,7 +562,7 @@ describe('bulkExecute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry,
       isESOCanEncrypt: true,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -650,7 +650,7 @@ describe('bulkExecute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry,
       isESOCanEncrypt: true,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -741,7 +741,7 @@ describe('bulkExecute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry,
       isESOCanEncrypt: true,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -825,7 +825,7 @@ describe('bulkExecute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       isESOCanEncrypt: true,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: '123',
           actionTypeId: 'mock-action-preconfigured',
@@ -922,7 +922,7 @@ describe('bulkExecute()', () => {
       taskManager: mockTaskManager,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       isESOCanEncrypt: true,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: '123',
           actionTypeId: 'mock-action-preconfigured',
@@ -1040,7 +1040,7 @@ describe('bulkExecute()', () => {
       taskManager: mockTaskManager,
       isESOCanEncrypt: false,
       actionTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     await expect(
       executeFn(savedObjectsClient, [
@@ -1063,7 +1063,7 @@ describe('bulkExecute()', () => {
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
       actionTypeRegistry: actionTypeRegistryMock.create(),
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -1101,7 +1101,7 @@ describe('bulkExecute()', () => {
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     });
     mockedActionTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
       throw new Error('Fail');
@@ -1139,7 +1139,7 @@ describe('bulkExecute()', () => {
       taskManager: mockTaskManager,
       isESOCanEncrypt: true,
       actionTypeRegistry: mockedActionTypeRegistry,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           actionTypeId: 'mock-action',
           config: {},

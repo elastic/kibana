@@ -133,7 +133,7 @@ beforeEach(() => {
     ),
     actionsConfigUtils: actionsConfigMock.create(),
     licenseState: mockedLicenseState,
-    preconfiguredActions: [],
+    inMemoryConnectors: [],
   };
   actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
   actionsClient = new ActionsClient({
@@ -142,7 +142,7 @@ beforeEach(() => {
     unsecuredSavedObjectsClient,
     scopedClusterClient,
     kibanaIndices,
-    preconfiguredActions: [],
+    inMemoryConnectors: [],
     actionExecutor,
     executionEnqueuer,
     ephemeralExecutionEnqueuer,
@@ -594,7 +594,7 @@ describe('create()', () => {
       ),
       actionsConfigUtils: localConfigUtils,
       licenseState: licenseStateMock.create(),
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
     };
 
     actionTypeRegistry = new ActionTypeRegistry(localActionTypeRegistryParams);
@@ -604,7 +604,7 @@ describe('create()', () => {
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
-      preconfiguredActions: [],
+      inMemoryConnectors: [],
       actionExecutor,
       executionEnqueuer,
       ephemeralExecutionEnqueuer,
@@ -715,7 +715,7 @@ describe('create()', () => {
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: preDefinedId,
           actionTypeId: 'my-action-type',
@@ -793,7 +793,7 @@ describe('get()', () => {
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
-        preconfiguredActions: [
+        inMemoryConnectors: [
           {
             id: 'testPreconfigured',
             actionTypeId: 'my-action-type',
@@ -855,7 +855,7 @@ describe('get()', () => {
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
-        preconfiguredActions: [
+        inMemoryConnectors: [
           {
             id: 'testPreconfigured',
             actionTypeId: 'my-action-type',
@@ -980,7 +980,7 @@ describe('get()', () => {
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: 'testPreconfigured',
           actionTypeId: '.slack',
@@ -1058,7 +1058,7 @@ describe('getAll()', () => {
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
-        preconfiguredActions: [
+        inMemoryConnectors: [
           {
             id: 'testPreconfigured',
             actionTypeId: '.slack',
@@ -1202,7 +1202,7 @@ describe('getAll()', () => {
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: 'testPreconfigured',
           actionTypeId: '.slack',
@@ -1288,7 +1288,7 @@ describe('getBulk()', () => {
         bulkExecutionEnqueuer,
         request,
         authorization: authorization as unknown as ActionsAuthorization,
-        preconfiguredActions: [
+        inMemoryConnectors: [
           {
             id: 'testPreconfigured',
             actionTypeId: '.slack',
@@ -1426,7 +1426,7 @@ describe('getBulk()', () => {
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: 'testPreconfigured',
           actionTypeId: '.slack',
@@ -1489,7 +1489,7 @@ describe('getOAuthAccessToken()', () => {
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: 'testPreconfigured',
           actionTypeId: '.slack',
@@ -2714,7 +2714,7 @@ describe('isPreconfigured()', () => {
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: 'testPreconfigured',
           actionTypeId: 'my-action-type',
@@ -2754,7 +2754,7 @@ describe('isPreconfigured()', () => {
       bulkExecutionEnqueuer,
       request,
       authorization: authorization as unknown as ActionsAuthorization,
-      preconfiguredActions: [
+      inMemoryConnectors: [
         {
           id: 'testPreconfigured',
           actionTypeId: 'my-action-type',

@@ -19,7 +19,7 @@ import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
 
-const preconfiguredActions = [
+const inMemoryConnectors = [
   {
     actionTypeId: 'foo',
     config: {},
@@ -41,7 +41,7 @@ describe('successful migrations', () => {
   describe('7.16.0', () => {
     test('adds actionId to references array if actionId is not preconfigured', () => {
       const migration716 = SavedObjectsUtils.getMigrationFunction(
-        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, inMemoryConnectors)['7.16.0']
       );
       const actionTaskParam = getMockData();
       const migratedActionTaskParam = migration716(actionTaskParam, context);
@@ -59,7 +59,7 @@ describe('successful migrations', () => {
 
     test('does not add actionId to references array if actionId is preconfigured', () => {
       const migration716 = SavedObjectsUtils.getMigrationFunction(
-        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, inMemoryConnectors)['7.16.0']
       );
       const actionTaskParam = getMockData({ actionId: 'my-slack1' });
       const migratedActionTaskParam = migration716(actionTaskParam, context);
@@ -71,7 +71,7 @@ describe('successful migrations', () => {
 
     test('handles empty relatedSavedObjects array', () => {
       const migration716 = SavedObjectsUtils.getMigrationFunction(
-        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, inMemoryConnectors)['7.16.0']
       );
       const actionTaskParam = getMockData({ relatedSavedObjects: [] });
       const migratedActionTaskParam = migration716(actionTaskParam, context);
@@ -93,7 +93,7 @@ describe('successful migrations', () => {
 
     test('adds actionId and relatedSavedObjects to references array', () => {
       const migration716 = SavedObjectsUtils.getMigrationFunction(
-        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, inMemoryConnectors)['7.16.0']
       );
       const actionTaskParam = getMockData({
         relatedSavedObjects: [
@@ -136,7 +136,7 @@ describe('successful migrations', () => {
 
     test('only adds relatedSavedObjects to references array if action is preconfigured', () => {
       const migration716 = SavedObjectsUtils.getMigrationFunction(
-        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, inMemoryConnectors)['7.16.0']
       );
       const actionTaskParam = getMockData({
         actionId: 'my-slack1',
@@ -175,7 +175,7 @@ describe('successful migrations', () => {
 
     test('adds actionId and multiple relatedSavedObjects to references array', () => {
       const migration716 = SavedObjectsUtils.getMigrationFunction(
-        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, inMemoryConnectors)['7.16.0']
       );
       const actionTaskParam = getMockData({
         relatedSavedObjects: [
@@ -233,7 +233,7 @@ describe('successful migrations', () => {
 
     test('does not overwrite existing references', () => {
       const migration716 = SavedObjectsUtils.getMigrationFunction(
-        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, inMemoryConnectors)['7.16.0']
       );
       const actionTaskParam = getMockData(
         {
@@ -290,7 +290,7 @@ describe('successful migrations', () => {
 
     test('does not overwrite existing references if relatedSavedObjects is undefined', () => {
       const migration716 = SavedObjectsUtils.getMigrationFunction(
-        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, inMemoryConnectors)['7.16.0']
       );
       const actionTaskParam = getMockData({}, [
         {
@@ -319,7 +319,7 @@ describe('successful migrations', () => {
 
     test('does not overwrite existing references if relatedSavedObjects is empty', () => {
       const migration716 = SavedObjectsUtils.getMigrationFunction(
-        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, inMemoryConnectors)['7.16.0']
       );
       const actionTaskParam = getMockData({ relatedSavedObjects: [] }, [
         {
@@ -373,7 +373,7 @@ describe('handles errors during migrations', () => {
   describe('7.16.0 throws if migration fails', () => {
     test('should show the proper exception', () => {
       const migration716 = SavedObjectsUtils.getMigrationFunction(
-        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, inMemoryConnectors)['7.16.0']
       );
       const actionTaskParam = getMockData();
       expect(() => {
@@ -394,12 +394,12 @@ describe('handles errors during migrations', () => {
 describe('isPreconfiguredAction()', () => {
   test('returns true if actionId is preconfigured action', () => {
     expect(
-      isPreconfiguredAction(getMockData({ actionId: 'my-slack1' }), preconfiguredActions)
+      isPreconfiguredAction(getMockData({ actionId: 'my-slack1' }), inMemoryConnectors)
     ).toEqual(true);
   });
 
   test('returns false if actionId is not preconfigured action', () => {
-    expect(isPreconfiguredAction(getMockData(), preconfiguredActions)).toEqual(false);
+    expect(isPreconfiguredAction(getMockData(), inMemoryConnectors)).toEqual(false);
   });
 });
 

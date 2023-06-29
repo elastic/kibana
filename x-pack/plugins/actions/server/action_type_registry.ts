@@ -14,7 +14,7 @@ import { ActionsConfigurationUtilities } from './actions_config';
 import { getActionTypeFeatureUsageName, TaskRunnerFactory, ILicenseState } from './lib';
 import {
   ActionType,
-  PreConfiguredAction,
+  InMemoryConnector,
   ActionTypeConfig,
   ActionTypeSecrets,
   ActionTypeParams,
@@ -26,7 +26,7 @@ export interface ActionTypeRegistryOpts {
   taskRunnerFactory: TaskRunnerFactory;
   actionsConfigUtils: ActionsConfigurationUtilities;
   licenseState: ILicenseState;
-  preconfiguredActions: PreConfiguredAction[];
+  inMemoryConnectors: InMemoryConnector[];
 }
 
 export class ActionTypeRegistry {
@@ -35,7 +35,7 @@ export class ActionTypeRegistry {
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly actionsConfigUtils: ActionsConfigurationUtilities;
   private readonly licenseState: ILicenseState;
-  private readonly preconfiguredActions: PreConfiguredAction[];
+  private readonly inMemoryConnectors: InMemoryConnector[];
   private readonly licensing: LicensingPluginSetup;
 
   constructor(constructorParams: ActionTypeRegistryOpts) {
@@ -43,7 +43,7 @@ export class ActionTypeRegistry {
     this.taskRunnerFactory = constructorParams.taskRunnerFactory;
     this.actionsConfigUtils = constructorParams.actionsConfigUtils;
     this.licenseState = constructorParams.licenseState;
-    this.preconfiguredActions = constructorParams.preconfiguredActions;
+    this.inMemoryConnectors = constructorParams.inMemoryConnectors;
     this.licensing = constructorParams.licensing;
   }
 
@@ -89,9 +89,8 @@ export class ActionTypeRegistry {
     return (
       actionTypeEnabled ||
       (!actionTypeEnabled &&
-        this.preconfiguredActions.find(
-          (preconfiguredAction) => preconfiguredAction.id === actionId
-        ) !== undefined)
+        this.inMemoryConnectors.find((inMemoryConnector) => inMemoryConnector.id === actionId) !==
+          undefined)
     );
   }
 

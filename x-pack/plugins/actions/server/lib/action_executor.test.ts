@@ -51,7 +51,7 @@ actionExecutor.initialize({
   actionTypeRegistry,
   encryptedSavedObjectsClient,
   eventLogger,
-  preconfiguredActions: [
+  inMemoryConnectors: [
     {
       id: 'preconfigured',
       name: 'Preconfigured',
@@ -958,7 +958,7 @@ test('throws an error when passing isESOCanEncrypt with value of false', async (
     actionTypeRegistry,
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
-    preconfiguredActions: [],
+    inMemoryConnectors: [],
   });
   await expect(
     customActionExecutor.execute(executeParams)
@@ -976,7 +976,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
     actionTypeRegistry,
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
-    preconfiguredActions: [
+    inMemoryConnectors: [
       {
         id: 'preconfigured',
         name: 'Preconfigured',
