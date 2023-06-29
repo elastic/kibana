@@ -178,25 +178,28 @@ async function fetchContainerStats(
         ccs = index.includes(':') ? index.split(':')[0] : undefined;
       }
 
-      if (node.quota_micros_max.value === -1 && node.quota_micros_min.value === -1) {
+      const limitsNotSet = node.quota_micros_max.value === -1 && node.quota_micros_min.value === -1;
+      const notRunningInAContainer =
+        node.quota_micros_min.value === null && node.quota_micros_max.value === null;
+      if (limitsNotSet || notRunningInAContainer) {
         return {
+          missingLimits: true,
           clusterUuid: cluster.key as string,
           nodeId: node.key as string,
           cpuUsage: node.average_cpu_usage_percent.value ?? undefined,
           nodeName,
           ccs,
-          missingLimits: true,
         };
       }
 
       if (node.quota_micros_min.value !== node.quota_micros_max.value) {
         return {
+          limitsChanged: true,
           clusterUuid: cluster.key as string,
           nodeId: node.key as string,
           cpuUsage: undefined,
           nodeName,
           ccs,
-          limitsChanged: true,
         };
       }
 
@@ -365,7 +368,9 @@ async function fetchNonContainerStats(
         ccs = index.includes(':') ? index.split(':')[0] : undefined;
       }
 
-      if (node.quota_micros_min.value !== -1 || node.quota_micros_max.value !== -1) {
+      const runningInAContainer =
+        node.quota_micros_min.value !== null || node.quota_micros_max.value !== null;
+      if (runningInAContainer) {
         return {
           clusterUuid: cluster.key as string,
           nodeId: node.key as string,
