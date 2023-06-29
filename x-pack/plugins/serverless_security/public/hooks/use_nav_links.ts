@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../common/services';
 
 export const useNavLinks = () => {
-  const { projectNavLinks$ } = useKibana().services;
+  const { getProjectNavLinks$ } = useKibana().services;
+  const projectNavLinks$ = useMemo(() => getProjectNavLinks$(), [getProjectNavLinks$]);
   return useObservable(projectNavLinks$, []);
 };

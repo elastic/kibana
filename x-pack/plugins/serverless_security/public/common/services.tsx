@@ -16,7 +16,7 @@ import type { ServerlessSecurityPluginStartDependencies } from '../types';
 import { getProjectNavLinks$, type ProjectNavLinks } from './navigation/links';
 
 interface InternalServices {
-  projectNavLinks$: ProjectNavLinks;
+  getProjectNavLinks$: () => ProjectNavLinks;
 }
 export type Services = CoreStart & ServerlessSecurityPluginStartDependencies & InternalServices;
 
@@ -34,5 +34,5 @@ export const createServices = (
 ): Services => {
   const { securitySolution } = pluginsStart;
   const projectNavLinks$ = getProjectNavLinks$(securitySolution.getNavLinks$());
-  return { ...core, ...pluginsStart, projectNavLinks$ };
+  return { ...core, ...pluginsStart, getProjectNavLinks$: () => projectNavLinks$ };
 };

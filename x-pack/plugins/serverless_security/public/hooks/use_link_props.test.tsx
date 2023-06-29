@@ -8,7 +8,7 @@
 import { MouseEvent } from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
-import { KibanaServicesProvider, servicesMocks } from '../services.mock';
+import { KibanaServicesProvider, servicesMocks } from '../common/services.mock';
 import { useGetLinkProps, useLinkProps } from './use_link_props';
 
 const { getUrlForApp: mockGetUrlForApp, navigateToUrl: mockNavigateToUrl } =
