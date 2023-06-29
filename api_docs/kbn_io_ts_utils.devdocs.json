@@ -644,10 +644,10 @@
     "misc": [
       {
         "parentPluginId": "@kbn/io-ts-utils",
-        "id": "def-common.IndexPatternType",
+        "id": "def-common.IndexPattern",
         "type": "Type",
         "tags": [],
-        "label": "IndexPatternType",
+        "label": "IndexPattern",
         "description": [],
         "signature": [
           "string & ",
