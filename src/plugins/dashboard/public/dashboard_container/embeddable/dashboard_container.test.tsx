@@ -295,7 +295,7 @@ describe('getInheritedInput', () => {
             timeRange: {
               to: 'now',
               from: 'now-24h',
-            }
+            },
           },
           type: CONTACT_CARD_EMBEDDABLE,
         }),
