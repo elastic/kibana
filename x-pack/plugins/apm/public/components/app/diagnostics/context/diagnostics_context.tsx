@@ -39,6 +39,7 @@ export function DiagnosticsContextProvider({
   const { data, status, refetch } = useFetcher(
     (callApmApi) => {
       return callApmApi(`GET /internal/apm/diagnostics`, {
+        isCachable: false,
         params: {
           query: {
             start,
