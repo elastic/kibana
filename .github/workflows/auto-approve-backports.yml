@@ -12,8 +12,8 @@ jobs:
     name: Auto-approve backport
     runs-on: ubuntu-latest
     if: |
-      contains(github.event.pull_request_target.labels.*.name, 'backport') &&
-      github.event.pull_request_target.user.login == 'kibanamachine'
+      startsWith(github.event.pull_request.head.ref, 'backport') &&
+      github.event.pull_request.user.login == 'kibanamachine'
     permissions:
       pull-requests: write
     steps:
