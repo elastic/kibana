@@ -43,7 +43,7 @@ export interface FieldListSidebarProps {
   services: AppPluginStartDependencies & {
     core: CoreStart;
   };
-  onAddFieldToWorkplace: UnifiedFieldListSidebarContainerProps['onAddFieldToWorkspace'];
+  onAddFieldToWorkspace: UnifiedFieldListSidebarContainerProps['onAddFieldToWorkspace'];
   onRemoveFieldFromWorkspace: UnifiedFieldListSidebarContainerProps['onRemoveFieldFromWorkspace'];
 }
 
@@ -51,7 +51,7 @@ export const FieldListSidebar: React.FC<FieldListSidebarProps> = ({
   dataView,
   selectedFieldNames,
   services,
-  onAddFieldToWorkplace,
+  onAddFieldToWorkspace,
   onRemoveFieldFromWorkspace,
 }) => {
   const dragDropContext = useContext(DragContext);
@@ -90,7 +90,7 @@ export const FieldListSidebar: React.FC<FieldListSidebarProps> = ({
         searchMode="documents"
         allFields={dataView.fields}
         workspaceSelectedFieldNames={selectedFieldNames}
-        onAddFieldToWorkspace={onAddFieldToWorkplace}
+        onAddFieldToWorkspace={onAddFieldToWorkspace}
         onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
         onAddFilter={onAddFilter}
         onFieldEdited={onFieldEdited}

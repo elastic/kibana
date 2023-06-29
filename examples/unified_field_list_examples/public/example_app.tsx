@@ -36,7 +36,7 @@ export const UnifiedFieldListExampleApp: React.FC<UnifiedFieldListExampleAppProp
   const [dataView, setDataView] = useState<DataView | null>();
   const [selectedFieldNames, setSelectedFieldNames] = useState<string[]>([]);
 
-  const onAddFieldToWorkplace = useCallback(
+  const onAddFieldToWorkspace = useCallback(
     (field: DataViewField) => {
       setSelectedFieldNames((names) => [...names, field.name]);
     },
@@ -126,7 +126,7 @@ export const UnifiedFieldListExampleApp: React.FC<UnifiedFieldListExampleAppProp
                         services={services}
                         dataView={dataView}
                         selectedFieldNames={selectedFieldNames}
-                        onAddFieldToWorkplace={onAddFieldToWorkplace}
+                        onAddFieldToWorkspace={onAddFieldToWorkspace}
                         onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
                       />
                     </EuiFlexItem>

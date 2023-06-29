@@ -47,7 +47,7 @@ Include the building block into your application:
   searchMode="documents"
   allFields={dataView.fields}
   workspaceSelectedFieldNames={selectedFieldNames}
-  onAddFieldToWorkspace={onAddFieldToWorkplace}
+  onAddFieldToWorkspace={onAddFieldToWorkspace}
   onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
   onAddFilter={onAddFilter}
   onFieldEdited={onFieldEdited}
