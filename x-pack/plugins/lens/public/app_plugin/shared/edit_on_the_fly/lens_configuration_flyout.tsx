@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   useEuiTheme,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -159,6 +160,13 @@ export function LensEditCongifurationFlyout({
             />
           </EuiFlexItem>
           <EuiFlexItem>
+            <EuiCallOut
+              title={i18n.translate('xpack.lens.config.configFlyoutCallout', {
+                defaultMessage: 'SQL currently offers limited configuration options',
+              })}
+              iconType="iInCircle"
+            />
+            <EuiSpacer size="m" />
             <VisualizationToolbar
               activeVisualization={activeVisualization}
               framePublicAPI={framePublicAPI}
