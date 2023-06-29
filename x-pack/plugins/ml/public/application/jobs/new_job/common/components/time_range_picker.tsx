@@ -44,12 +44,16 @@ export const TimeRangePicker: FC<Props> = ({ setTimeRange, timeRange }) => {
   // update the parent start and end if the timepicker changes
   useEffect(() => {
     if (startMoment !== undefined && endMoment !== undefined) {
-      setTimeRange({
-        start: startMoment.valueOf(),
-        end: endMoment.valueOf(),
-      });
+      const start = startMoment.valueOf();
+      const end = endMoment.valueOf();
+      if (start !== timeRange.start || end !== timeRange.end) {
+        setTimeRange({
+          start,
+          end,
+        });
+      }
     }
-  }, [startMoment, endMoment, setTimeRange]);
+  }, [startMoment, endMoment, setTimeRange, timeRange]);
 
   // update our local start and end moment objects if
   // the parent start and end updates.
