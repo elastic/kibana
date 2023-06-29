@@ -15,8 +15,13 @@ import {
 
 import { ListWithKuerySchema, BulkRequestBodySchema } from './common';
 
+import { inputsFormat } from '../../../common/constants';
+
 export const GetPackagePoliciesRequestSchema = {
   query: ListWithKuerySchema.extends({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
     withAgentCount: schema.maybe(schema.boolean()),
   }),
 };

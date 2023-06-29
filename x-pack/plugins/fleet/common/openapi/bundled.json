@@ -3903,7 +3903,21 @@
         "security": [],
         "parameters": []
       },
-      "parameters": [],
+      "parameters": [
+        {
+          "name": "format",
+          "in": "query",
+          "description": "Simplified or legacy format for package inputs",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "simplified",
+              "legacy"
+            ]
+          }
+        }
+      ],
       "post": {
         "summary": "Create package policy",
         "tags": [
@@ -6763,8 +6777,15 @@
                 "type": "number"
               },
               "inputs": {
-                "type": "array",
-                "items": {}
+                "oneOf": [
+                  {
+                    "type": "array",
+                    "items": {}
+                  },
+                  {
+                    "type": "object"
+                  }
+                ]
               }
             },
             "required": [

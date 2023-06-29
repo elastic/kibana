@@ -44,13 +44,19 @@ import type {
   UpgradePackagePolicyDryRunResponse,
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
-import { installationStatuses } from '../../../common/constants';
+import { installationStatuses, inputsFormat } from '../../../common/constants';
 import { defaultFleetErrorHandler, PackagePolicyNotFoundError } from '../../errors';
 import { getInstallations, getPackageInfo } from '../../services/epm/packages';
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
-import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
+import {
+  simplifiedPackagePolicytoNewPackagePolicy,
+  packagePolicyToSimplifiedPackagePolicy,
+} from '../../../common/services/simplified_package_policy_helper';
 
-import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
+import type {
+  SimplifiedPackagePolicy,
+  FormattedPackagePolicy,
+} from '../../../common/services/simplified_package_policy_helper';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -73,6 +79,21 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
 
     if (request.query.withAgentCount) {
       await populatePackagePolicyAssignedAgentsCount(esClient, items);
+    }
+
+    if (request.query.format === inputsFormat.Simplified) {
+      const formattedItems: FormattedPackagePolicy[] = [];
+      items.forEach((item) => {
+        formattedItems.push(packagePolicyToSimplifiedPackagePolicy(item));
+      });
+      return response.ok({
+        body: {
+          items: formattedItems,
+          total,
+          page,
+          perPage,
+        },
+      });
     }
 
     // agnostic to package-level RBAC
