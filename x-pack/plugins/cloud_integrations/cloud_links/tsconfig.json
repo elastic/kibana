@@ -19,7 +19,6 @@
     "@kbn/guided-onboarding-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/core-doc-links-browser",
-    "@kbn/core-chrome-browser-internal",
   ],
   "exclude": [
     "target/**/*",
