@@ -22,18 +22,36 @@ export const NonEmptyString = new rt.Type<string, string, unknown>(
   rt.identity
 );
 
-export const limitedArraySchema = <T extends rt.Mixed>(codec: T, min: number, max: number) =>
+export const limitedArraySchema = <T extends rt.Mixed>(
+  codec: T,
+  min: number,
+  max: number,
+  fieldName?: string
+) =>
   new rt.Type<Array<rt.TypeOf<typeof codec>>, Array<rt.TypeOf<typeof codec>>, unknown>(
     'LimitedArray',
     (input): input is T[] => rt.array(codec).is(input),
     (input, context) =>
       either.chain(rt.array(codec).validate(input, context), (s) => {
         if (s.length < min) {
-          return rt.failure(input, context, `array must be of length >= ${min}`);
+          const fieldNameErrorMessage =
+            fieldName != null ? `The length of the field ${fieldName} is too short. ` : '';
+
+          return rt.failure(
+            input,
+            context,
+            `${fieldNameErrorMessage}Array must be of length >= ${min}.`
+          );
         }
 
         if (s.length > max) {
-          return rt.failure(input, context, `array must be of length <= ${max}`);
+          const fieldNameErrorMessage =
+            fieldName != null ? `The length of the field ${fieldName} is too long. ` : '';
+          return rt.failure(
+            input,
+            context,
+            `${fieldNameErrorMessage}Array must be of length <= ${max}.`
+          );
         }
 
         return rt.success(s);

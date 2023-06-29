@@ -25,7 +25,7 @@ export type FileAttachmentMetadata = rt.TypeOf<typeof FileAttachmentMetadataRt>;
 const MIN_DELETE_IDS = 1;
 
 export const BulkDeleteFileAttachmentsRequestRt = rt.strict({
-  ids: limitedArraySchema(NonEmptyString, MIN_DELETE_IDS, MAX_DELETE_FILES),
+  ids: limitedArraySchema(NonEmptyString, MIN_DELETE_IDS, MAX_DELETE_FILES, 'ids'),
 });
 
 export type BulkDeleteFileAttachmentsRequest = rt.TypeOf<typeof BulkDeleteFileAttachmentsRequestRt>;
