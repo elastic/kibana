@@ -80,7 +80,7 @@ export const OutputFormKafkaSection: React.FunctionComponent<Props> = (props) =>
             defaultMessage: 'Specify host',
           }
         )}
-        sortable={false}
+        sortable={true}
         helpText={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.logstashHostsInputDescription"

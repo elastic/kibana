@@ -773,6 +773,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaPartitionTypeRandomInput.value,
     kafkaPartitionTypeRoundRobinInput.value,
     kafkaPartitionTypeHashInput.value,
+    kafkaTopicsInput.value,
     kafkaDefaultTopicInput.value,
     kafkaHeadersInput.value,
     kafkaBrokerTimeoutInput.value,
