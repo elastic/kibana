@@ -19,10 +19,12 @@ export const journey = new Journey({
     await page.waitForSelector(subj('transformCreateFirstButton'));
     await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
   })
-  .step('Go to Transform Wizard', async ({ page }) => {
+  .step('Go to data view selection', async ({ page }) => {
     const createButtons = page.locator(subj('transformCreateFirstButton'));
     await createButtons.first().click();
     await page.waitForSelector(subj('savedObjectsFinderTable'));
+  })
+  .step('Go to Transform Wizard', async ({ page }) => {
     await page.click(subj('savedObjectTitleindices-stats*'));
     // Extended the timeout, this one tracks a known issue with slow data grid performance with many fields
     await page.waitForSelector(subj('transformIndexPreview loaded'), { timeout: 120000 });
