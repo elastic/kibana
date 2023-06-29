@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
   const ml = getService('ml');
-  const PageObjects = getPageObjects(['common', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
   const selectedField = '@message';
   const totalDocCount = 14005;
 
@@ -52,6 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Sep 20, 2015 @ 00:00:00.000',
         'Sep 22, 2015 @ 23:50:13.253'
       );
+      await PageObjects.discover.selectIndexPattern('logstash-*');
       await aiops.logPatternAnalysisPage.assertDiscoverDocCount(totalDocCount);
 
       await aiops.logPatternAnalysisPage.clickDiscoverField(selectedField);
