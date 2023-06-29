@@ -72,6 +72,8 @@ function applyEnabledFeatures(mlCaps: MlCapabilities, enabledFeatures: MlFeature
   mlCaps.isDFAEnabled = enabledFeatures.dfa;
   mlCaps.isNLPEnabled = enabledFeatures.nlp;
 
+  mlCaps.canViewMlNodes = mlCaps.isADEnabled && mlCaps.isDFAEnabled && mlCaps.isNLPEnabled;
+
   if (enabledFeatures.ad === false) {
     featureCapabilities.ad.forEach((c) => (mlCaps[c] = false));
   }
