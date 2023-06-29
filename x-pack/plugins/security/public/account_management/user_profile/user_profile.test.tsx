@@ -256,9 +256,12 @@ describe('useUserProfileForm', () => {
           <UserProfile user={nonCloudUser} data={data} />
         </Providers>
       );
-      const darkModeButton = testWrapper.find('EuiButtonGroup[data-test-subj="darkModeButton"]');
-      expect(darkModeButton).toBeTruthy();
-      expect(darkModeButton.getDOMNode()).not.toBeDisabled();
+
+      const darkModeButtonGroup = testWrapper.find('fieldset[data-test-subj="darkModeButton"]');
+      expect(darkModeButtonGroup.getDOMNode()).not.toBeDisabled();
+
+      const defaultButton = darkModeButtonGroup.find('label[title="Space default"]');
+      expect(defaultButton.hasClass('euiButtonGroupButton-isSelected')).toBe(true);
     });
 
     it('should not display if the User is a cloud user', () => {
@@ -281,7 +284,7 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      expect(testWrapper.exists('EuiButtonGroup[data-test-subj="darkModeButton"]')).toBeFalsy();
+      expect(testWrapper.exists('[data-test-subj="darkModeButton"]')).toBeFalsy();
     });
 
     it('should add special toast after submitting form successfully since darkMode requires a refresh', async () => {
@@ -314,8 +317,8 @@ describe('useUserProfileForm', () => {
       const data: UserProfileData = {};
 
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
-      coreStart.settings.client.get.mockReturnValueOnce(true);
-      coreStart.settings.client.isOverridden.mockReturnValueOnce(true);
+      coreStart.settings.client.get.mockReturnValue(true);
+      coreStart.settings.client.isOverridden.mockReturnValue(true);
 
       const testWrapper = mount(
         <Providers
@@ -332,17 +335,19 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      const darkModeButton = testWrapper.find('EuiButtonGroup[data-test-subj="darkModeButton"]');
-      expect(darkModeButton).toBeTruthy();
-      expect(darkModeButton.getDOMNode()).toHaveProperty('disabled');
+      const darkModeButtonGroup = testWrapper.find('fieldset[data-test-subj="darkModeButton"]');
+      expect(darkModeButtonGroup.getDOMNode()).toBeDisabled();
+
+      const darkModeButton = darkModeButtonGroup.find('button[title="Dark"]');
+      expect(darkModeButton.hasClass('euiButtonGroupButton-isSelected')).toBe(true);
     });
 
     it('should be disabled if the theme has been set to `darkMode: false` in the config', () => {
       const data: UserProfileData = {};
 
       const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
-      coreStart.settings.client.get.mockReturnValueOnce(false);
-      coreStart.settings.client.isOverridden.mockReturnValueOnce(true);
+      coreStart.settings.client.get.mockReturnValue(false);
+      coreStart.settings.client.isOverridden.mockReturnValue(true);
 
       const testWrapper = mount(
         <Providers
@@ -359,9 +364,11 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      const darkModeButton = testWrapper.find('EuiButtonGroup[data-test-subj="darkModeButton"]');
-      expect(darkModeButton).toBeTruthy();
-      expect(darkModeButton.getDOMNode()).toHaveProperty('disabled');
+      const darkModeButtonGroup = testWrapper.find('fieldset[data-test-subj="darkModeButton"]');
+      expect(darkModeButtonGroup.getDOMNode()).toBeDisabled();
+
+      const lightModeButton = darkModeButtonGroup.find('button[title="Light"]');
+      expect(lightModeButton.hasClass('euiButtonGroupButton-isSelected')).toBe(true);
     });
   });
 });
