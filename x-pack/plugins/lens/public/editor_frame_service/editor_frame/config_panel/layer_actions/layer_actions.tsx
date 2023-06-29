@@ -47,6 +47,7 @@ export const getSharedActions = ({
   openLayerSettings,
   onCloneLayer,
   onRemoveLayer,
+  customRemoveModalText,
 }: {
   onRemoveLayer: () => void;
   onCloneLayer: () => void;
@@ -54,12 +55,12 @@ export const getSharedActions = ({
   layerId: string;
   isOnlyLayer: boolean;
   activeVisualization: Visualization;
-  visualizationState: unknown;
   layerType?: LayerType;
   isTextBasedLanguage?: boolean;
   hasLayerSettings: boolean;
   openLayerSettings: () => void;
   core: Pick<CoreStart, 'overlays' | 'theme'>;
+  customRemoveModalText?: { title?: string; description?: string };
 }) => [
   getOpenLayerSettingsAction({
     hasLayerSettings,
@@ -77,6 +78,7 @@ export const getSharedActions = ({
     layerType,
     isOnlyLayer,
     core,
+    customModalText: customRemoveModalText,
   }),
 ];
 

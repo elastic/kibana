@@ -94,6 +94,7 @@ import {
   getVisualizationType,
   isAnnotationsLayer,
   isBucketed,
+  isByReferenceAnnotationsLayer,
   isDataLayer,
   isNumericDynamicMetric,
   isReferenceLayer,
@@ -297,6 +298,14 @@ export const getXyVisualization = ({
       );
     }
     return actions;
+  },
+
+  getCustomRemoveLayerText(layerId, state) {
+    const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
+    const layer = state.layers[layerIndex];
+    if (layer && isByReferenceAnnotationsLayer(layer)) {
+      return { title: `Delete "${layer.__lastSaved.title}"` };
+    }
   },
 
   hasLayerSettings({ state, layerId: currentLayerId }) {
