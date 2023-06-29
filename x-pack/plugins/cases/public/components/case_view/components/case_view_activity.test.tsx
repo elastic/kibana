@@ -303,7 +303,7 @@ describe('Case View Page activity tab', () => {
     appMockRender = createAppMockRenderer({ license: basicLicense });
 
     appMockRender.render(<CaseViewActivity {...caseProps} />);
-    expect(screen.queryByTestId('case-view-edit-connector')).toBeNull();
+    expect(screen.queryByTestId('case-view-edit-connector')).not.toBeInTheDocument();
   });
 
   it('should render the connector on platinum license', async () => {
