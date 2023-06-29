@@ -14,6 +14,7 @@ import {
 } from '@kbn/core/server';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DefaultAlertService } from '../default_alerts/default_alert_service';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { formatKibanaNamespace } from '../../synthetics_service/formatters/private_formatters';
 import { getSyntheticsPrivateLocations } from '../../legacy_uptime/lib/saved_objects/private_locations';
@@ -35,7 +36,6 @@ import { sendTelemetryEvents, formatTelemetryEvent } from '../telemetry/monitor_
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 import { deleteMonitor } from './delete_monitor';
-import { StatusAlertService } from '../default_alerts/status_alert_service';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -94,8 +94,8 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
       try {
         // we do this async, so we don't block the user, error handling will be done on the UI via separate api
-        const statusAlertService = new StatusAlertService(context, server, savedObjectsClient);
-        statusAlertService.createDefaultAlertIfNotExist().then(() => {
+        const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
+        defaultAlertService.setupDefaultAlerts().then(() => {
           server.logger.debug(
             `Successfully created default alert for monitor: ${newMonitor.attributes.name}`
           );
