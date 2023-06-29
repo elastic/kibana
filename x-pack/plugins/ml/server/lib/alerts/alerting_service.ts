@@ -78,6 +78,7 @@ export function buildExplorerUrl(
   jobIds: string[],
   timeRange: { from: string; to: string; mode?: string },
   type: MlAnomalyResultType,
+  spaceId: string,
   r?: AlertExecutionResult
 ): string {
   const isInfluencerResult = type === ML_ANOMALY_RESULT_TYPE.INFLUENCER;
@@ -145,7 +146,10 @@ export function buildExplorerUrl(
       },
     },
   };
-  return `/app/ml/explorer/?_g=${encodeURIComponent(
+
+  const spacePathComponent: string = spaceId === 'default' ? '' : `/s/${spaceId}`;
+
+  return `${spacePathComponent}/app/ml/explorer/?_g=${encodeURIComponent(
     rison.encode(globalState)
   )}&_a=${encodeURIComponent(rison.encode(appState))}`;
 }
@@ -765,9 +769,11 @@ export function alertingServiceProvider(
      * Return the result of an alert condition execution.
      *
      * @param params - Alert params
+     * @param spaceId
      */
     execute: async (
-      params: MlAnomalyDetectionAlertParams
+      params: MlAnomalyDetectionAlertParams,
+      spaceId: string
     ): Promise<
       { context: AnomalyDetectionAlertContext; name: string; isHealthy: boolean } | undefined
     > => {
@@ -784,6 +790,7 @@ export function alertingServiceProvider(
           result.jobIds,
           { from: result.bucketRange.start, to: result.bucketRange.end },
           params.resultType,
+          spaceId,
           result
         );
 
@@ -806,7 +813,8 @@ export function alertingServiceProvider(
               to: 'now',
               mode: 'relative',
             },
-            queryParams.resultType
+            queryParams.resultType,
+            spaceId
           ),
           jobIds: queryParams.jobIds,
           message: i18n.translate(
