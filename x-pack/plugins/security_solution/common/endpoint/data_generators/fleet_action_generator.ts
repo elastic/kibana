@@ -30,7 +30,7 @@ export class FleetActionGenerator extends BaseDataGenerator {
         expiration: this.randomFutureDate(timeStamp),
         type: 'INPUT_ACTION',
         input_type: 'endpoint',
-        agents: [this.seededUUIDv4()],
+        agents: overrides.agents ? overrides.agents : [this.seededUUIDv4()],
         user_id: 'elastic',
         data: {
           command: this.randomResponseActionCommand(),
