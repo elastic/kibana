@@ -31,7 +31,6 @@ import { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Router } from '@kbn/shared-ux-router';
-import classnames from 'classnames';
 import React, { createRef, useCallback, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
@@ -173,7 +172,6 @@ export const ProjectHeader = ({
   const [isOpen, setIsOpen] = useLocalStorage(LOCAL_STORAGE_IS_OPEN_KEY, true);
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
-  const className = classnames('hide-for-sharing', 'projectHeaderGlobalNav');
 
   return (
     <>
@@ -185,8 +183,8 @@ export const ProjectHeader = ({
       <SkipToMainContent />
 
       <HeaderTopBanner headerBanner$={observables.headerBanner$} />
-      <header className={className} data-test-subj="headerGlobalNav">
-        <div id="globalHeaderBars" className="header__bars">
+      <header data-test-subj="kibanaProjectHeader">
+        <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
           <EuiHeader position="fixed" className="header__firstBar">
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem css={headerCss.nav.toggleNavButton}>
