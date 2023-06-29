@@ -30,7 +30,8 @@ import type {
   ChromeGlobalHelpExtensionMenuLink,
 } from '@kbn/core-chrome-browser';
 import type { ChromeHelpMenuLink } from '@kbn/core-chrome-browser/src';
-import { GITHUB_CREATE_ISSUE_LINK, KIBANA_FEEDBACK_LINK } from '../../constants';
+import { GITHUB_CREATE_ISSUE_LINK, KIBANA_FEEDBACK_LINK } from '@kbn/core-doc-links-browser';
+
 import { HeaderExtension } from './header_extension';
 import { isModifiedOrPrevented } from './nav_link';
 

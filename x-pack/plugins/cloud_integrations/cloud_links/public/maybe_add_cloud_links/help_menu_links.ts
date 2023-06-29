@@ -6,8 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { ChromeHelpMenuLink } from '@kbn/core-chrome-browser';
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { KIBANA_FEEDBACK_LINK } from '@kbn/core-chrome-browser-internal';
+import { DocLinksStart, KIBANA_FEEDBACK_LINK } from '@kbn/core-doc-links-browser';
 
 export const createHelpMenuLinks = ({
   docLinks,

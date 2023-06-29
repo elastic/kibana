@@ -15,7 +15,7 @@ import { EuiLink } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { type DocLinksStart, KIBANA_ASK_ELASTIC_LINK } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
@@ -37,7 +37,7 @@ import type {
   SideNavComponent as ISideNavComponent,
   ChromeHelpMenuLink,
 } from '@kbn/core-chrome-browser';
-import { KIBANA_ASK_ELASTIC_LINK } from './constants';
+
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';

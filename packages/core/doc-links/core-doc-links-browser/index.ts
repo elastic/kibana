@@ -7,3 +7,9 @@
  */
 
 export type { DocLinksStart } from './src/types';
+
+export {
+  GITHUB_CREATE_ISSUE_LINK,
+  KIBANA_ASK_ELASTIC_LINK,
+  KIBANA_FEEDBACK_LINK,
+} from './src/constants';
