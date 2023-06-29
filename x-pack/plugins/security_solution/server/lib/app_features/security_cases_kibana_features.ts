@@ -8,21 +8,20 @@
 import { i18n } from '@kbn/i18n';
 
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
-import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
   createUICapabilities as createCasesUICapabilities,
   getApiTags as getCasesApiTags,
 } from '@kbn/cases-plugin/common';
-import type { AppFeaturesCasesConfig } from './types';
+import type { AppFeaturesCasesConfig, BaseKibanaFeatureConfig } from './types';
 import { APP_ID, CASES_FEATURE_ID } from '../../../common/constants';
-import { casesSubFeatureDelete } from './security_cases_kibana_sub_features';
+import { CasesSubFeatureId } from './security_cases_kibana_sub_features';
 import { AppFeatureCasesKey } from '../../../common/types/app_features';
 
 const casesCapabilities = createCasesUICapabilities();
 const casesApiTags = getCasesApiTags(APP_ID);
 
-export const getCasesBaseKibanaFeature = (): KibanaFeatureConfig => ({
+export const getCasesBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   id: CASES_FEATURE_ID,
   name: i18n.translate('xpack.securitySolution.featureRegistry.linkSecuritySolutionCaseTitle', {
     defaultMessage: 'Cases',
@@ -63,11 +62,23 @@ export const getCasesBaseKibanaFeature = (): KibanaFeatureConfig => ({
       ui: casesCapabilities.read,
     },
   },
-  subFeatures: [casesSubFeatureDelete],
 });
 
-// It maps the AppFeatures keys to Kibana privileges
+export const getCasesBaseKibanaSubFeatureIds = (): CasesSubFeatureId[] => [
+  CasesSubFeatureId.deleteCases,
+];
+
+/**
+ * Maps the AppFeatures keys to Kibana privileges that will be merged
+ * into the base privileges config for the Security Cases app.
+ *
+ * Privileges can be added in different ways:
+ * - `privileges`: the privileges that will be added directly into the main Security Cases feature.
+ * - `subFeatureIds`: the ids of the sub-features that will be added into the Cases subFeatures entry.
+ * - `subFeaturesPrivileges`: the privileges that will be added into the existing Cases subFeature with the privilege `id` specified.
+ */
 export const getCasesAppFeaturesConfig = (): AppFeaturesCasesConfig => ({
-  // TODO Add cases connector configuration
-  [AppFeatureCasesKey.casesConnectors]: {},
+  [AppFeatureCasesKey.casesConnectors]: {
+    // TODO: Add cases connector configuration privileges
+  },
 });

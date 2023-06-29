@@ -11,7 +11,7 @@ import { IBasePath } from '@kbn/core/public';
 import { isEmpty, pickBy } from 'lodash';
 import moment from 'moment';
 import url from 'url';
-import type { InfraLocators } from '@kbn/infra-plugin/public/locators';
+import type { InfraLocators } from '@kbn/infra-plugin/common/locators';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getDiscoverHref } from '../links/discover_links/discover_link';
 import { getDiscoverQuery } from '../links/discover_links/discover_transaction_link';

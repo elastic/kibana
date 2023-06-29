@@ -18,21 +18,21 @@ import {
   FEATURE_INFLUENCE,
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
+import {
+  getFieldType,
+  getDataGridSchemasFromFieldTypes,
+  showDataGridColumnChartErrorMessageToast,
+  useRenderCellValue,
+  type UseIndexDataReturnType,
+} from '@kbn/ml-data-grid';
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 import {
   useColorRange,
   COLOR_RANGE,
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
-import {
-  getFieldType,
-  getDataGridSchemasFromFieldTypes,
-  showDataGridColumnChartErrorMessageToast,
-  useRenderCellValue,
-  UseIndexDataReturnType,
-} from '../../../../../components/data_grid';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { getIndexData, getIndexFields } from '../../../../common';
@@ -43,7 +43,7 @@ import { useExplorationDataGrid } from '../exploration_results_table/use_explora
 export const useOutlierData = (
   indexPattern: DataView | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
-  searchQuery: SavedSearchQuery
+  searchQuery: estypes.QueryDslQueryContainer
 ): UseIndexDataReturnType => {
   const needsDestIndexFields =
     indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
@@ -152,7 +152,7 @@ export const useOutlierData = (
     jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD,
     (columnId, cellValue, fullItem, setCellProps) => {
       const resultsField = jobConfig?.dest.results_field ?? '';
-      let backgroundColor;
+      let backgroundColor: string | undefined;
 
       const featureNames = fullItem[`${resultsField}.${FEATURE_INFLUENCE}`];
 
@@ -166,11 +166,16 @@ export const useOutlierData = (
         }
       }
 
-      if (backgroundColor !== undefined) {
-        setCellProps({
-          style: { backgroundColor: String(backgroundColor) },
-        });
-      }
+      // From EUI docs: Treated as React component allowing hooks, context, and other React concepts to be used.
+      // This is the recommended use of setCellProps: https://github.com/elastic/eui/blob/main/src/components/datagrid/data_grid_types.ts#L521-L525
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useEffect(() => {
+        if (backgroundColor) {
+          setCellProps({
+            style: { backgroundColor: String(backgroundColor) },
+          });
+        }
+      }, [backgroundColor, setCellProps]);
     }
   );
 

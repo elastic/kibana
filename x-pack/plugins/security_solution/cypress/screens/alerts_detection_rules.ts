@@ -63,6 +63,8 @@ export const LOAD_PREBUILT_RULES_BTN = '[data-test-subj="load-prebuilt-rules"]';
 
 export const LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN = '[data-test-subj="loadPrebuiltRulesBtn"]';
 
+export const INSTALL_ALL_RULES_BUTTON = '[data-test-subj="installAllRulesButton"]';
+
 export const RULES_TABLE_INITIAL_LOADING_INDICATOR =
   '[data-test-subj="initialLoadingPanelAllRulesTable"]';
 
@@ -129,6 +131,8 @@ export const TOASTER = '[data-test-subj="euiToastHeader"]';
 export const TOASTER_BODY = '[data-test-subj="globalToastList"] [data-test-subj="euiToastBody"]';
 
 export const TOASTER_ERROR_BTN = '[data-test-subj="errorToastBtn"]';
+
+export const TOASTER_CLOSE_ICON = '[data-test-subj="toastCloseButton"]';
 
 export const RULE_IMPORT_OVERWRITE_CHECKBOX = '[id="importDataModalCheckboxLabel"]';
 

@@ -349,10 +349,22 @@ describe('ManifestManager', () => {
 
     test('Builds fully new manifest if no baseline parameter passed and present exception list items', async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
-      const trustedAppListItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
-      const eventFiltersListItem = getExceptionListItemSchemaMock({ os_types: ['windows'] });
-      const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
-      const blocklistsListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
+      const trustedAppListItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: ['policy:all'],
+      });
+      const eventFiltersListItem = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        tags: ['policy:all'],
+      });
+      const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: ['policy:all'],
+      });
+      const blocklistsListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        tags: ['policy:all'],
+      });
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
@@ -417,10 +429,22 @@ describe('ManifestManager', () => {
 
     test('Reuses artifacts when baseline parameter passed and present exception list items', async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
-      const trustedAppListItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
-      const eventFiltersListItem = getExceptionListItemSchemaMock({ os_types: ['windows'] });
-      const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
-      const blocklistsListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
+      const trustedAppListItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: ['policy:all'],
+      });
+      const eventFiltersListItem = getExceptionListItemSchemaMock({
+        os_types: ['windows'],
+        tags: ['policy:all'],
+      });
+      const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: ['policy:all'],
+      });
+      const blocklistsListItem = getExceptionListItemSchemaMock({
+        os_types: ['macos'],
+        tags: ['policy:all'],
+      });
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
@@ -486,15 +510,18 @@ describe('ManifestManager', () => {
       }
     });
 
-    //
     test('Builds manifest with policy specific exception list items for trusted apps', async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
-      const trustedAppListItem = getExceptionListItemSchemaMock({ os_types: ['linux'] });
+      const trustedAppListItem = getExceptionListItemSchemaMock({
+        os_types: ['linux'],
+        tags: ['policy:all'],
+      });
       const trustedAppListItemPolicy2 = getExceptionListItemSchemaMock({
         os_types: ['linux'],
         entries: [
           { field: 'other.field', operator: 'included', type: 'match', value: 'other value' },
         ],
+        tags: [`policy:${TEST_POLICY_ID_2}`],
       });
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
@@ -502,8 +529,7 @@ describe('ManifestManager', () => {
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
         [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
         [ENDPOINT_TRUSTED_APPS_LIST_ID]: {
-          linux: [trustedAppListItem],
-          [`linux-${TEST_POLICY_ID_2}`]: [trustedAppListItem, trustedAppListItemPolicy2],
+          linux: [trustedAppListItem, trustedAppListItemPolicy2],
         },
       });
       context.packagePolicyService.listIds = mockPolicyListIdsResponse([
@@ -574,14 +600,10 @@ describe('ManifestManager', () => {
         ])
       ).resolves.toStrictEqual([]);
 
-      expect(context.artifactClient.deleteArtifact).toHaveBeenNthCalledWith(
-        1,
-        ARTIFACT_ID_EXCEPTIONS_MACOS
-      );
-      expect(context.artifactClient.deleteArtifact).toHaveBeenNthCalledWith(
-        2,
-        ARTIFACT_ID_EXCEPTIONS_WINDOWS
-      );
+      expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([
+        ARTIFACT_ID_EXCEPTIONS_MACOS,
+        ARTIFACT_ID_EXCEPTIONS_WINDOWS,
+      ]);
     });
 
     test('Returns errors for partial failures', async () => {
@@ -590,10 +612,11 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
       const error = new Error();
 
-      artifactClient.deleteArtifact.mockImplementation(async (id) => {
-        if (id === ARTIFACT_ID_EXCEPTIONS_WINDOWS) {
-          throw error;
+      artifactClient.bulkDeleteArtifacts.mockImplementation(async (ids): Promise<Error[]> => {
+        if (ids[1] === ARTIFACT_ID_EXCEPTIONS_WINDOWS) {
+          return [error];
         }
+        return [];
       });
 
       await expect(
@@ -603,20 +626,16 @@ describe('ManifestManager', () => {
         ])
       ).resolves.toStrictEqual([error]);
 
-      expect(artifactClient.deleteArtifact).toHaveBeenCalledTimes(2);
-      expect(artifactClient.deleteArtifact).toHaveBeenNthCalledWith(
-        1,
-        ARTIFACT_ID_EXCEPTIONS_MACOS
-      );
-      expect(artifactClient.deleteArtifact).toHaveBeenNthCalledWith(
-        2,
-        ARTIFACT_ID_EXCEPTIONS_WINDOWS
-      );
+      expect(artifactClient.bulkDeleteArtifacts).toHaveBeenCalledTimes(1);
+      expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([
+        ARTIFACT_ID_EXCEPTIONS_MACOS,
+        ARTIFACT_ID_EXCEPTIONS_WINDOWS,
+      ]);
     });
   });
 
   describe('pushArtifacts', () => {
-    test('Successfully invokes artifactClient and stores in the cache', async () => {
+    test('Successfully invokes artifactClient', async () => {
       const context = buildManifestManagerContextMock({});
       const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
@@ -637,12 +656,6 @@ describe('ManifestManager', () => {
           ...ARTIFACT_EXCEPTIONS_WINDOWS,
         },
       ]);
-      expect(
-        JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!.toString())
-      ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_MACOS));
-      expect(
-        JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_WINDOWS))!.toString())
-      ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_WINDOWS));
     });
 
     test('Returns errors for partial failures', async () => {
@@ -684,10 +697,6 @@ describe('ManifestManager', () => {
           ...ARTIFACT_EXCEPTIONS_WINDOWS,
         },
       ]);
-      expect(
-        JSON.parse(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!.toString())
-      ).toStrictEqual(getArtifactObject(ARTIFACT_EXCEPTIONS_MACOS));
-      expect(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_WINDOWS))).toBeUndefined();
     });
   });
 
@@ -800,12 +809,6 @@ describe('ManifestManager', () => {
         total: items.length,
       });
 
-    const toNewPackagePolicy = (packagePolicy: PackagePolicy) => {
-      const { id, revision, updated_at: updatedAt, updated_by: updatedBy, ...rest } = packagePolicy;
-
-      return rest;
-    };
-
     test('Should not dispatch if no policies', async () => {
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
@@ -817,7 +820,7 @@ describe('ManifestManager', () => {
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
 
-      expect(context.packagePolicyService.update).toHaveBeenCalledTimes(0);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(0);
     });
 
     test('Should return errors if invalid config for package policy', async () => {
@@ -835,7 +838,7 @@ describe('ManifestManager', () => {
         new EndpointError(`Package Policy ${TEST_POLICY_ID_1} has no 'inputs[0].config'`),
       ]);
 
-      expect(context.packagePolicyService.update).toHaveBeenCalledTimes(0);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(0);
     });
 
     test('Should not dispatch if semantic version has not changed', async () => {
@@ -864,7 +867,7 @@ describe('ManifestManager', () => {
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
 
-      expect(context.packagePolicyService.update).toHaveBeenCalledTimes(0);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(0);
     });
 
     test('Should dispatch to only policies where list of artifacts changed', async () => {
@@ -908,17 +911,16 @@ describe('ManifestManager', () => {
           },
         }),
       ]);
-      context.packagePolicyService.update = jest.fn().mockResolvedValue({});
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({});
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
 
-      expect(context.packagePolicyService.update).toHaveBeenCalledTimes(1);
-      expect(context.packagePolicyService.update).toHaveBeenNthCalledWith(
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenNthCalledWith(
         1,
         expect.anything(),
-        undefined,
-        TEST_POLICY_ID_1,
-        toNewPackagePolicy(
+        context.esClient,
+        [
           createPackagePolicyWithConfigMock({
             id: TEST_POLICY_ID_1,
             config: {
@@ -932,8 +934,8 @@ describe('ManifestManager', () => {
                 },
               },
             },
-          })
-        )
+          }),
+        ]
       );
     });
 
@@ -980,17 +982,16 @@ describe('ManifestManager', () => {
           },
         }),
       ]);
-      context.packagePolicyService.update = jest.fn().mockResolvedValue({});
+      context.packagePolicyService.bulkUpdate = jest.fn().mockResolvedValue({});
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
 
-      expect(context.packagePolicyService.update).toHaveBeenCalledTimes(1);
-      expect(context.packagePolicyService.update).toHaveBeenNthCalledWith(
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenNthCalledWith(
         1,
         expect.anything(),
-        undefined,
-        TEST_POLICY_ID_1,
-        toNewPackagePolicy(
+        context.esClient,
+        [
           createPackagePolicyWithConfigMock({
             id: TEST_POLICY_ID_1,
             config: {
@@ -1004,8 +1005,8 @@ describe('ManifestManager', () => {
                 },
               },
             },
-          })
-        )
+          }),
+        ]
       );
     });
 
@@ -1043,17 +1044,13 @@ describe('ManifestManager', () => {
           },
         }),
       ]);
-      context.packagePolicyService.update = jest.fn().mockImplementation(async (...args) => {
-        if (args[2] === TEST_POLICY_ID_2) {
-          throw error;
-        } else {
-          return {};
-        }
-      });
+      context.packagePolicyService.bulkUpdate = jest
+        .fn()
+        .mockResolvedValue({ updatedPolicies: [{}], failedPolicies: [{ error }] });
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([error]);
 
-      expect(context.packagePolicyService.update).toHaveBeenCalledTimes(2);
+      expect(context.packagePolicyService.bulkUpdate).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -1084,9 +1081,9 @@ describe('ManifestManager', () => {
       const artifactToBeRemoved = await context.artifactClient.getArtifact('');
       expect(artifactToBeRemoved).not.toBeUndefined();
 
-      expect(context.artifactClient.deleteArtifact).toHaveBeenCalledWith(
-        getArtifactId(artifactToBeRemoved!)
-      );
+      expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledWith([
+        getArtifactId(artifactToBeRemoved!),
+      ]);
     });
 
     test('When there is no artifact to be removed', async () => {
@@ -1123,7 +1120,7 @@ describe('ManifestManager', () => {
 
       await manifestManager.cleanup(manifest);
 
-      expect(context.artifactClient.deleteArtifact).toHaveBeenCalledTimes(0);
+      expect(context.artifactClient.bulkDeleteArtifacts).toHaveBeenCalledTimes(0);
     });
   });
 });

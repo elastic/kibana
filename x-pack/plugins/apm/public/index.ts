@@ -14,6 +14,20 @@ export interface ConfigSchema {
     enabled: boolean;
   };
   latestAgentVersionsUrl: string;
+  serverlessOnboarding: boolean;
+  managedServiceUrl: string;
+  featureFlags: {
+    agentConfigurationAvailable: boolean;
+    configurableIndicesAvailable: boolean;
+    infrastructureTabAvailable: boolean;
+    infraUiAvailable: boolean;
+    migrationToFleetAvailable: boolean;
+    sourcemapApiAvailable: boolean;
+    storageExplorerAvailable: boolean;
+  };
+  serverless: {
+    enabled: boolean;
+  };
 }
 
 export const plugin: PluginInitializer<ApmPluginSetup, ApmPluginStart> = (

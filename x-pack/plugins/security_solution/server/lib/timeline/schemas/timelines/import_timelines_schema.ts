@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-import { SavedTimelineRuntimeType } from '../../../../../common/types/timeline';
+import { SavedTimelineRuntimeType } from '../../../../../common/types/timeline/api';
 import { unionWithNullType } from '../../../../../common/utility_types';
 
 import { eventNotes, globalNotes } from '../notes';

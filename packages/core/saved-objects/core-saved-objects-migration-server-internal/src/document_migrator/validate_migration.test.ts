@@ -187,7 +187,7 @@ describe('validateTypeMigrations', () => {
       });
 
       expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
-        `"Type foo: Uusing modelVersions requires to specify switchToModelVersionAt"`
+        `"Type foo: Using modelVersions requires to specify switchToModelVersionAt"`
       );
     });
 
@@ -233,6 +233,15 @@ describe('validateTypeMigrations', () => {
       expect(() => validate({ type, kibanaVersion: '3.2.3' })).toThrowErrorMatchingInlineSnapshot(
         `"Type foo: gaps between model versions aren't allowed (missing versions: 2,4,5)"`
       );
+    });
+
+    it('does not throw passing an empty model version map', () => {
+      const type = createType({
+        name: 'foo',
+        modelVersions: {},
+      });
+
+      expect(() => validate({ type, kibanaVersion: '3.2.3' })).not.toThrow();
     });
   });
 

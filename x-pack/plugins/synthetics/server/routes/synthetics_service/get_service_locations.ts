@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
-import { API_URLS } from '../../../common/constants';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const getServiceLocationsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
-  path: API_URLS.SERVICE_LOCATIONS,
+  path: SYNTHETICS_API_URLS.SERVICE_LOCATIONS,
   validate: {},
   handler: async ({ server, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
     const { throttling, allLocations } = await getAllLocations({

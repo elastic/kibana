@@ -131,6 +131,7 @@ const InContextMenuActions = (props: LayerActionsProps) => {
           size="s"
           items={props.actions.map((i) => (
             <EuiContextMenuItem
+              key={i.displayName}
               icon={<EuiIcon type={i.icon} title={i.displayName} color={i.color} />}
               data-test-subj={i['data-test-subj']}
               aria-label={i.displayName}

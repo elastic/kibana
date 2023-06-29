@@ -14,6 +14,7 @@ import {
   routeValidationObject,
 } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
+import { ObservabilityOnboardingConfig } from '..';
 import { ObservabilityOnboardingRequestHandlerContext } from '../types';
 import { ObservabilityOnboardingRouteHandlerResources } from './types';
 
@@ -22,6 +23,7 @@ interface RegisterRoutes {
   repository: ServerRouteRepository;
   logger: Logger;
   plugins: ObservabilityOnboardingRouteHandlerResources['plugins'];
+  config: ObservabilityOnboardingConfig;
 }
 
 export function registerRoutes({
@@ -29,6 +31,7 @@ export function registerRoutes({
   core,
   logger,
   plugins,
+  config,
 }: RegisterRoutes) {
   const routes = Object.values(repository);
 
@@ -73,6 +76,7 @@ export function registerRoutes({
                 return coreStart;
               },
             },
+            config,
           })) as any;
 
           if (data === undefined) {

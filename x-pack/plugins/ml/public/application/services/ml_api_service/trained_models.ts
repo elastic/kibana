@@ -114,11 +114,18 @@ export function trainedModelsApiProvider(httpService: HttpService) {
      *
      * @param modelId - Model ID
      */
-    deleteTrainedModel(modelId: string) {
+    deleteTrainedModel(
+      modelId: string,
+      options: { with_pipelines?: boolean; force?: boolean } = {
+        with_pipelines: false,
+        force: false,
+      }
+    ) {
       return httpService.http<{ acknowledge: boolean }>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}`,
         method: 'DELETE',
         version: '1',
+        query: options,
       });
     },
 

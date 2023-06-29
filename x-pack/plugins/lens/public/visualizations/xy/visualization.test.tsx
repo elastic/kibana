@@ -52,6 +52,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { getAnnotationsLayers } from './visualization_helpers';
 import { cloneDeep } from 'lodash';
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -108,6 +109,7 @@ const xyVisualization = getXyVisualization({
   storage: {} as IStorageWrapper,
   data: dataPluginMock.createStartContract(),
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+  dataViewsService: {} as DataViewsServicePublic,
 });
 
 describe('xy_visualization', () => {

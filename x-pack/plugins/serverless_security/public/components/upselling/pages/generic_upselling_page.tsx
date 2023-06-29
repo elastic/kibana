@@ -7,13 +7,12 @@
 
 import React from 'react';
 import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
-import { SecurityProductLineIds } from '../../../../common/config';
+import type { AppFeatureKey } from '@kbn/security-solution-plugin/common';
+import { useProductTypeByPLI } from '../hooks/use_product_type_by_pli';
 
-export const GenericUpsellingPage: React.FC<{ projectPLIs: SecurityProductLineIds }> = React.memo(
-  ({ projectPLIs }) => {
-    const upsellingPLI = projectPLIs.includes('securityComplete')
-      ? 'Security Complete'
-      : 'Security Essential';
+export const GenericUpsellingPage: React.FC<{ requiredPLI: AppFeatureKey }> = React.memo(
+  ({ requiredPLI }) => {
+    const productTypeRequired = useProductTypeByPLI(requiredPLI);
 
     return (
       <EuiEmptyPrompt
@@ -21,7 +20,7 @@ export const GenericUpsellingPage: React.FC<{ projectPLIs: SecurityProductLineId
         title={<>This is a testing component for a Serverless upselling prompt.</>}
         body={
           <>
-            Get <EuiLink href="#">{upsellingPLI}</EuiLink> to enable this feature
+            Get <EuiLink href="#">{productTypeRequired}</EuiLink> to enable this feature
             <br />
             <br />
             <iframe

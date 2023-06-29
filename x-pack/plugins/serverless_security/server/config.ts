@@ -7,17 +7,17 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
-import { productLineIds } from '../common/config';
+import { productTypes } from '../common/config';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  productLineIds,
+  productTypes,
 });
 export type ServerlessSecurityConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ServerlessSecurityConfig> = {
   exposeToBrowser: {
-    productLineIds: true,
+    productTypes: true,
   },
   schema: configSchema,
 };

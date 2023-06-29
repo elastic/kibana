@@ -9,10 +9,18 @@
 import { get } from 'lodash';
 import { getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
 
-import { OptionsListRequestBody, OptionsListSuggestions } from '../../common/options_list/types';
+import {
+  OptionsListRequestBody,
+  OptionsListSuggestions,
+  OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE,
+} from '../../common/options_list/types';
 import { getIpRangeQuery, type IpRangeQuery } from '../../common/options_list/ip_search';
 import { EsBucket, OptionsListSuggestionAggregationBuilder } from './types';
-import { getIpBuckets, getSortType } from './options_list_suggestion_query_helpers';
+import {
+  getEscapedWildcardQuery,
+  getIpBuckets,
+  getSortType,
+} from './options_list_suggestion_query_helpers';
 
 /**
  * Suggestion aggregations
@@ -34,6 +42,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
    */
   textOrKeywordOrNested: {
     buildAggregation: ({
+      searchTechnique,
       searchString,
       fieldName,
       fieldSpec,
@@ -56,13 +65,16 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
           },
         },
       };
-      if (searchString) {
+      if (searchString && searchString.length > 0) {
         textOrKeywordQuery = {
           filteredSuggestions: {
             filter: {
-              prefix: {
+              [(searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE) as string]: {
                 [fieldName]: {
-                  value: searchString,
+                  value:
+                    searchTechnique === 'wildcard'
+                      ? `*${getEscapedWildcardQuery(searchString)}*`
+                      : searchString,
                   case_insensitive: true,
                 },
               },
@@ -146,7 +158,7 @@ const expensiveSuggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggr
         ],
       };
 
-      if (searchString) {
+      if (searchString && searchString.length > 0) {
         ipRangeQuery = getIpRangeQuery(searchString);
         if (!ipRangeQuery.validSearch) {
           // ideally should be prevented on the client side but, if somehow an invalid search gets through to the server,

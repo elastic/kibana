@@ -10,4 +10,7 @@ import { createTestConfig } from '../../config.base';
 export default createTestConfig({
   serverlessProject: 'security',
   testFiles: [require.resolve('.')],
+  junit: {
+    reportName: 'Serverless Security API Integration Tests',
+  },
 });

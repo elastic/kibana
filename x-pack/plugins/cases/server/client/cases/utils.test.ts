@@ -10,7 +10,6 @@ import {
   userActions,
   commentAlert,
   commentAlertMultipleIds,
-  mappings,
   isolateCommentActions,
   releaseCommentActions,
   isolateCommentActionsMultipleTargets,
@@ -34,7 +33,7 @@ import { flattenCaseSavedObject } from '../../common/utils';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
 import { userProfiles, userProfilesMap } from '../user_profiles.mock';
-import { mockCases } from '../../mocks';
+import { mappings, mockCases } from '../../mocks';
 
 const allComments = [
   commentObj,

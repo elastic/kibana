@@ -61,40 +61,40 @@ describe('Detection rules, bulk duplicate', () => {
     resetRulesTableState();
     deleteAlertsAndRules();
     esArchiverResetKibana();
-    createRule<{ id: string }>(
-      getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1' })
-    ).then((response) => {
-      createRuleExceptionItem(response.body.id, [
-        {
-          description: 'Exception item for rule default exception list',
-          entries: [
-            {
-              field: 'user.name',
-              operator: 'included',
-              type: 'match',
-              value: 'some value',
-            },
-          ],
-          name: EXPIRED_EXCEPTION_ITEM_NAME,
-          type: 'simple',
-          expire_time: expiredDate,
-        },
-        {
-          description: 'Exception item for rule default exception list',
-          entries: [
-            {
-              field: 'user.name',
-              operator: 'included',
-              type: 'match',
-              value: 'some value',
-            },
-          ],
-          name: NON_EXPIRED_EXCEPTION_ITEM_NAME,
-          type: 'simple',
-          expire_time: futureDate,
-        },
-      ]);
-    });
+    createRule(getNewRule({ name: RULE_NAME, ...defaultRuleData, rule_id: '1' })).then(
+      (response) => {
+        createRuleExceptionItem(response.body.id, [
+          {
+            description: 'Exception item for rule default exception list',
+            entries: [
+              {
+                field: 'user.name',
+                operator: 'included',
+                type: 'match',
+                value: 'some value',
+              },
+            ],
+            name: EXPIRED_EXCEPTION_ITEM_NAME,
+            type: 'simple',
+            expire_time: expiredDate,
+          },
+          {
+            description: 'Exception item for rule default exception list',
+            entries: [
+              {
+                field: 'user.name',
+                operator: 'included',
+                type: 'match',
+                value: 'some value',
+              },
+            ],
+            name: NON_EXPIRED_EXCEPTION_ITEM_NAME,
+            type: 'simple',
+            expire_time: futureDate,
+          },
+        ]);
+      }
+    );
 
     visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
 

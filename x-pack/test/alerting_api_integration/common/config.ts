@@ -45,6 +45,7 @@ const enabledActionTypes = [
   '.jira',
   '.resilient',
   '.gen-ai',
+  '.d3security',
   '.slack',
   '.slack_api',
   '.tines',
@@ -214,6 +215,18 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 password: 'password',
               },
             },
+            'notification-email': {
+              actionTypeId: '.email',
+              name: 'Notification Email Connector',
+              config: {
+                from: 'me@test.com',
+                service: '__json',
+              },
+              secrets: {
+                user: 'user',
+                password: 'password',
+              },
+            },
             'my-slack1': {
               actionTypeId: '.slack',
               name: 'Slack#xyz',
@@ -316,6 +329,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
               ]
             : []),
+          '--notifications.connectors.default.email=notification-email',
         ],
       },
     };

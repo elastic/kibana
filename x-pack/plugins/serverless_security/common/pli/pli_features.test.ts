@@ -8,25 +8,65 @@ import { getProductAppFeatures } from './pli_features';
 import * as pliConfig from './pli_config';
 
 describe('getProductAppFeatures', () => {
-  it('returns the union of all enabled PLIs features', () => {
+  it('should return the essentials PLIs features', () => {
     // @ts-ignore reassigning readonly value for testing
-    pliConfig.PLI_APP_FEATURES = { securityEssentials: ['foo'], securityComplete: ['baz'] };
+    pliConfig.PLI_APP_FEATURES = {
+      security: {
+        essentials: ['foo'],
+        complete: ['baz'],
+      },
+    };
 
-    expect(getProductAppFeatures(['securityEssentials', 'securityComplete'])).toEqual({
-      foo: true,
-      baz: true,
-    });
+    const appFeatureKeys = getProductAppFeatures([
+      { product_line: 'security', product_tier: 'essentials' },
+    ]);
+
+    expect(appFeatureKeys).toEqual(['foo']);
   });
 
-  it('returns a single PLI when only one is enabled', () => {
+  it('should return the complete PLIs features, which includes essentials', () => {
     // @ts-ignore reassigning readonly value for testing
-    pliConfig.PLI_APP_FEATURES = { securityEssentials: [], securityComplete: ['foo'] };
-    expect(getProductAppFeatures(['securityEssentials', 'securityComplete'])).toEqual({
-      foo: true,
-    });
+    pliConfig.PLI_APP_FEATURES = {
+      security: {
+        essentials: ['foo'],
+        complete: ['baz'],
+      },
+    };
+
+    const appFeatureKeys = getProductAppFeatures([
+      { product_line: 'security', product_tier: 'complete' },
+    ]);
+
+    expect(appFeatureKeys).toEqual(['foo', 'baz']);
+  });
+
+  it('should return the union of all enabled PLIs features without duplicates', () => {
+    // @ts-ignore reassigning readonly value for testing
+    pliConfig.PLI_APP_FEATURES = {
+      security: {
+        essentials: ['foo'],
+        complete: ['baz'],
+      },
+      endpoint: {
+        essentials: ['bar', 'repeated'],
+        complete: ['qux', 'quux'],
+      },
+      cloud: {
+        essentials: ['corge', 'garply', 'repeated'],
+        complete: ['grault'],
+      },
+    };
+
+    const appFeatureKeys = getProductAppFeatures([
+      { product_line: 'security', product_tier: 'essentials' },
+      { product_line: 'endpoint', product_tier: 'complete' },
+      { product_line: 'cloud', product_tier: 'essentials' },
+    ]);
+
+    expect(appFeatureKeys).toEqual(['foo', 'bar', 'repeated', 'qux', 'quux', 'corge', 'garply']);
   });
 
   it('returns an empty object if no PLIs are enabled', () => {
-    expect(getProductAppFeatures([])).toEqual({});
+    expect(getProductAppFeatures([])).toEqual([]);
   });
 });

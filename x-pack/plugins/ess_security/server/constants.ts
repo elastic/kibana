@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { AppFeatureKey, AppFeatureKeys } from '@kbn/security-solution-plugin/common';
+import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-plugin/common';
 
-export const DEFAULT_APP_FEATURES: AppFeatureKeys = {
-  [AppFeatureKey.advancedInsights]: true,
-  [AppFeatureKey.casesConnectors]: true,
-};
+// Just copying all feature keys for now.
+// We may need a different set of keys in the future if we create serverless-specific appFeatures
+export const DEFAULT_APP_FEATURES = [...ALL_APP_FEATURE_KEYS];

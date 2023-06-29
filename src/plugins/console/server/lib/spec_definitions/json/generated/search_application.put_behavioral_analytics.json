@@ -1,0 +1,11 @@
+{
+  "search_application.put_behavioral_analytics": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_application/analytics/{name}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/put-analytics-collection.html"
+  }
+}

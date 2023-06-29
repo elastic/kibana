@@ -50,15 +50,28 @@ const CASES_APP_FEATURE_CONFIG = {
 
 jest.mock('./security_kibana_features', () => {
   return {
-    getSecurityBaseKibanaFeature: jest.fn().mockReturnValue(SECURITY_BASE_CONFIG),
-    getSecurityAppFeaturesConfig: jest.fn().mockReturnValue(SECURITY_APP_FEATURE_CONFIG),
+    getSecurityBaseKibanaFeature: jest.fn(() => SECURITY_BASE_CONFIG),
+    getSecurityBaseKibanaSubFeatureIds: jest.fn(() => ['subFeature1']),
+    getSecurityAppFeaturesConfig: jest.fn(() => SECURITY_APP_FEATURE_CONFIG),
+  };
+});
+jest.mock('./security_kibana_sub_features', () => {
+  return {
+    securitySubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
   };
 });
 
 jest.mock('./security_cases_kibana_features', () => {
   return {
-    getCasesBaseKibanaFeature: jest.fn().mockReturnValue(CASES_BASE_CONFIG),
-    getCasesAppFeaturesConfig: jest.fn().mockReturnValue(CASES_APP_FEATURE_CONFIG),
+    getCasesBaseKibanaFeature: jest.fn(() => CASES_BASE_CONFIG),
+    getCasesBaseKibanaSubFeatureIds: jest.fn(() => ['subFeature1']),
+    getCasesAppFeaturesConfig: jest.fn(() => CASES_APP_FEATURE_CONFIG),
+  };
+});
+
+jest.mock('./security_cases_kibana_sub_features', () => {
+  return {
+    casesSubFeaturesMap: new Map([['subFeature1', { baz: 'baz' }]]),
   };
 });
 
@@ -69,9 +82,7 @@ describe('AppFeatures', () => {
       getKibanaFeatures: jest.fn(),
     } as unknown as PluginSetupContract;
 
-    const appFeatureKeys = {
-      'test-base-feature': true,
-    } as unknown as AppFeatureKeys;
+    const appFeatureKeys = ['test-base-feature'] as unknown as AppFeatureKeys;
 
     const appFeatures = new AppFeatures(
       {} as unknown as Logger,
@@ -83,6 +94,7 @@ describe('AppFeatures', () => {
     expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
       ...SECURITY_BASE_CONFIG,
       ...SECURITY_APP_FEATURE_CONFIG['test-base-feature'],
+      subFeatures: [{ baz: 'baz' }],
     });
   });
 
@@ -91,9 +103,7 @@ describe('AppFeatures', () => {
       registerKibanaFeature: jest.fn(),
     } as unknown as PluginSetupContract;
 
-    const appFeatureKeys = {
-      'test-cases-feature': true,
-    } as unknown as AppFeatureKeys;
+    const appFeatureKeys = ['test-cases-feature'] as unknown as AppFeatureKeys;
 
     const appFeatures = new AppFeatures(
       {} as unknown as Logger,
@@ -105,6 +115,7 @@ describe('AppFeatures', () => {
     expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledWith({
       ...CASES_BASE_CONFIG,
       ...CASES_APP_FEATURE_CONFIG['test-cases-feature'],
+      subFeatures: [{ baz: 'baz' }],
     });
   });
 });

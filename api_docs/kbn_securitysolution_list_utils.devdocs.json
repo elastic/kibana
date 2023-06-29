@@ -3380,7 +3380,7 @@
         "label": "SavedObjectType",
         "description": [],
         "signature": [
-          "\"exception-list-agnostic\" | \"exception-list\""
+          "\"exception-list\" | \"exception-list-agnostic\""
         ],
         "path": "packages/kbn-securitysolution-list-utils/src/types/index.ts",
         "deprecated": false,

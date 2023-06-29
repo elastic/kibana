@@ -8,11 +8,24 @@
 import { dataStreamRouteService } from '../../services';
 import type { GetDataStreamsResponse } from '../../types';
 
-import { useRequest } from './use_request';
+import { useRequest, sendRequest } from './use_request';
 
 export const useGetDataStreams = () => {
   return useRequest<GetDataStreamsResponse>({
     path: dataStreamRouteService.getListPath(),
     method: 'get',
   });
+};
+
+export const sendGetDataStreams = async () => {
+  const res = await sendRequest<GetDataStreamsResponse>({
+    path: dataStreamRouteService.getListPath(),
+    method: 'get',
+  });
+
+  if (res.error) {
+    throw res.error;
+  }
+
+  return res.data;
 };

@@ -7,12 +7,13 @@
 
 import { useMemo } from 'react';
 
+import type { NewJobCapsResponse } from '@kbn/ml-anomaly-utils';
 import type {
   AnalyticsMapReturnType,
-  DeleteDataFrameAnalyticsWithIndexStatus,
-  UpdateDataFrameAnalyticsConfig,
   DataFrameAnalyticsConfig,
   DataFrameAnalyticsStats,
+  DeleteDataFrameAnalyticsWithIndexStatus,
+  UpdateDataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
@@ -21,7 +22,6 @@ import { useMlKibana } from '../../contexts/kibana';
 
 import type { ValidateAnalyticsJobResponse } from '../../../../common/constants/validation';
 import type { DeepPartial } from '../../../../common/types/common';
-import type { NewJobCapsResponse } from '../../../../common/types/fields';
 import type { JobMessage } from '../../../../common/types/audit_message';
 
 export interface GetDataFrameAnalyticsStatsResponseOk {

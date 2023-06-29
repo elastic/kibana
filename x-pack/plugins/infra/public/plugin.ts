@@ -35,7 +35,7 @@ import {
   InfraLocators,
   LogsLocatorDefinition,
   NodeLogsLocatorDefinition,
-} from './locators';
+} from '../common/locators';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
@@ -61,6 +61,7 @@ export class Plugin implements InfraClientPluginClass {
   private telemetry: TelemetryService;
   private locators?: InfraLocators;
   private appTarget: string;
+  private kibanaVersion: string;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<InfraPublicConfig>) {
@@ -74,6 +75,7 @@ export class Plugin implements InfraClientPluginClass {
     this.metricsExplorerViews = new MetricsExplorerViewsService();
     this.telemetry = new TelemetryService();
     this.appTarget = this.config.logs.app_target;
+    this.kibanaVersion = context.env.packageInfo.version;
   }
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
@@ -89,9 +91,6 @@ export class Plugin implements InfraClientPluginClass {
       createInventoryMetricRuleType()
     );
 
-    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createLogThresholdRuleType(core)
-    );
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createMetricThresholdRuleType()
     );
@@ -116,7 +115,7 @@ export class Plugin implements InfraClientPluginClass {
     const infraEntries = [
       { label: 'Inventory', app: 'metrics', path: '/inventory' },
       { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
-      { label: 'Hosts', isTechnicalPreview: true, app: 'metrics', path: '/hosts' },
+      { label: 'Hosts', isBetaFeature: true, app: 'metrics', path: '/hosts' },
     ];
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndHostViewFlag$.pipe(
@@ -189,6 +188,10 @@ export class Plugin implements InfraClientPluginClass {
         },
       });
     }
+
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
+      createLogThresholdRuleType(core, logsLocator)
+    );
 
     if (this.appTarget === LOGS_APP_TARGET) {
       core.application.register({
@@ -285,10 +288,15 @@ export class Plugin implements InfraClientPluginClass {
       deepLinks: infraDeepLinks,
       mount: async (params: AppMountParameters) => {
         // mount callback should not use setup dependencies, get start dependencies instead
-        const [coreStart, pluginsStart, pluginStart] = await core.getStartServices();
+        const [coreStart, plugins, pluginStart] = await core.getStartServices();
         const { renderApp } = await import('./apps/metrics_app');
 
-        return renderApp(coreStart, pluginsStart, pluginStart, params);
+        return renderApp(
+          coreStart,
+          { ...plugins, kibanaVersion: this.kibanaVersion },
+          pluginStart,
+          params
+        );
       },
     });
 

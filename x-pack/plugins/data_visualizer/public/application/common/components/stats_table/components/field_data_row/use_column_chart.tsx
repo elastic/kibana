@@ -22,7 +22,7 @@ import {
   type ChartDataItem,
   type NumericDataItem,
   type OrdinalDataItem,
-} from './field_histograms';
+} from '@kbn/ml-data-grid';
 
 const NON_AGGREGATABLE = 'non-aggregatable';
 

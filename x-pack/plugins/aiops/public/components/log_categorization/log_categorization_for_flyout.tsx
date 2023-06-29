@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { FC, useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import type { SavedSearch } from '@kbn/discover-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

@@ -12,15 +12,14 @@ import type {
   SectionUpsellings,
   UpsellingSectionId,
 } from '@kbn/security-solution-plugin/public';
-
-import type { SecurityProductLineIds } from '../../../common/config';
+import type { SecurityProductTypes } from '../../../common/config';
 import { getProductAppFeatures } from '../../../common/pli/pli_features';
 
 const GenericUpsellingPageLazy = lazy(() => import('./pages/generic_upselling_page'));
 const GenericUpsellingSectionLazy = lazy(() => import('./pages/generic_upselling_section'));
 
 interface UpsellingsConfig {
-  feature: AppFeatureKey;
+  pli: AppFeatureKey;
   component: React.ComponentType;
 }
 
@@ -29,13 +28,13 @@ type UpsellingSections = Array<UpsellingsConfig & { id: UpsellingSectionId }>;
 
 export const registerUpsellings = (
   upselling: UpsellingService,
-  projectPLIs: SecurityProductLineIds
+  productTypes: SecurityProductTypes
 ) => {
-  const PLIsFeatures = getProductAppFeatures(projectPLIs);
+  const enabledPLIsSet = new Set(getProductAppFeatures(productTypes));
 
-  const upsellingPages = getUpsellingPages(projectPLIs).reduce<PageUpsellings>(
-    (pageUpsellings, { pageName, feature, component }) => {
-      if (!PLIsFeatures[feature]) {
+  const upsellingPagesToRegister = upsellingPages.reduce<PageUpsellings>(
+    (pageUpsellings, { pageName, pli, component }) => {
+      if (!enabledPLIsSet.has(pli)) {
         pageUpsellings[pageName] = component;
       }
       return pageUpsellings;
@@ -43,9 +42,9 @@ export const registerUpsellings = (
     {}
   );
 
-  const upsellingSections = getUpsellingSections(projectPLIs).reduce<SectionUpsellings>(
-    (sectionUpsellings, { id, feature, component }) => {
-      if (!PLIsFeatures[feature]) {
+  const upsellingSectionsToRegister = upsellingSections.reduce<SectionUpsellings>(
+    (sectionUpsellings, { id, pli, component }) => {
+      if (!enabledPLIsSet.has(pli)) {
         sectionUpsellings[id] = component;
       }
       return sectionUpsellings;
@@ -53,23 +52,24 @@ export const registerUpsellings = (
     {}
   );
 
-  upselling.registerPages(upsellingPages);
-  upselling.registerSections(upsellingSections);
+  upselling.registerPages(upsellingPagesToRegister);
+  upselling.registerSections(upsellingSectionsToRegister);
 };
 
-// Upselling configuration for pages and sections components
-const getUpsellingPages = (projectPLIs: SecurityProductLineIds): UpsellingPages => [
+// Upsellings for entire pages, linked to a SecurityPageName
+export const upsellingPages: UpsellingPages = [
   {
     pageName: SecurityPageName.entityAnalytics,
-    feature: AppFeatureKey.advancedInsights,
-    component: () => <GenericUpsellingPageLazy projectPLIs={projectPLIs} />,
+    pli: AppFeatureKey.advancedInsights,
+    component: () => <GenericUpsellingPageLazy requiredPLI={AppFeatureKey.advancedInsights} />,
   },
 ];
 
-const getUpsellingSections = (projectPLIs: SecurityProductLineIds): UpsellingSections => [
+// Upsellings for sections, linked by arbitrary ids
+export const upsellingSections: UpsellingSections = [
   {
     id: 'entity_analytics_panel',
-    feature: AppFeatureKey.advancedInsights,
-    component: () => <GenericUpsellingSectionLazy projectPLIs={projectPLIs} />,
+    pli: AppFeatureKey.advancedInsights,
+    component: () => <GenericUpsellingSectionLazy requiredPLI={AppFeatureKey.advancedInsights} />,
   },
 ];

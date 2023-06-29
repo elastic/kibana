@@ -14,19 +14,17 @@ import numeral from '@elastic/numeral';
 import { indexPatterns } from '@kbn/data-plugin/public';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import {
-  getNumTopFeatureImportanceValues,
-  ANALYSIS_CONFIG_TYPE,
-} from '@kbn/ml-data-frame-analytics-utils';
-
-import {
   getDependentVar,
+  getNumTopFeatureImportanceValues,
   getTrainingPercent,
   isRegressionAnalysis,
   isClassificationAnalysis,
+  ANALYSIS_CONFIG_TYPE,
   NUM_TOP_FEATURE_IMPORTANCE_VALUES_MIN,
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
 } from '@kbn/ml-data-frame-analytics-utils';
+
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
 import { Action, ACTION } from './actions';

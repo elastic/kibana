@@ -13,8 +13,8 @@ import type {
 } from '@kbn/core/server';
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import type { ConfigurationAttributes } from '../../../common/types/domain';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
-import type { ConfigurationAttributes } from '../../../common/api';
 import { decodeOrThrow } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import {
@@ -118,7 +118,10 @@ export class CaseConfigureService {
   }: PostCaseConfigureArgs): Promise<ConfigurationSavedObjectTransformed> {
     try {
       this.log.debug(`Attempting to POST a new case configuration`);
-      const esConfigInfo = transformAttributesToESModel(attributes);
+
+      const decodedAttributes = decodeOrThrow(ConfigurationTransformedAttributesRt)(attributes);
+      const esConfigInfo = transformAttributesToESModel(decodedAttributes);
+
       const createdConfig =
         await unsecuredSavedObjectsClient.create<ConfigurationPersistedAttributes>(
           CASE_CONFIGURE_SAVED_OBJECT,
@@ -144,7 +147,9 @@ export class CaseConfigureService {
   > {
     try {
       this.log.debug(`Attempting to UPDATE case configuration ${configurationId}`);
-      const esUpdateInfo = transformAttributesToESModel(updatedAttributes);
+
+      const decodedAttributes = decodeOrThrow(ConfigurationPartialAttributesRt)(updatedAttributes);
+      const esUpdateInfo = transformAttributesToESModel(decodedAttributes);
 
       const updatedConfiguration =
         await unsecuredSavedObjectsClient.update<ConfigurationPersistedAttributes>(

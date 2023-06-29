@@ -12,9 +12,9 @@ import {
   FetchDataParams,
   LogsFetchDataResponse,
 } from '@kbn/observability-plugin/public';
+import { DEFAULT_LOG_VIEW } from '../../common/log_views';
 import { TIMESTAMP_FIELD } from '../../common/constants';
 import { InfraClientStartDeps, InfraClientStartServicesAccessor } from '../types';
-import { DEFAULT_LOG_VIEW } from '../observability_logs/log_view_state/src/defaults';
 
 interface StatsAggregation {
   buckets: Array<{
