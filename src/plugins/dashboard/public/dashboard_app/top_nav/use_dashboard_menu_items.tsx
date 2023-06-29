@@ -268,16 +268,17 @@ export const useDashboardMenuItems = ({
     const shareMenuItem = share ? [menuItems.share] : [];
     const editModeItems: TopNavMenuData[] = [];
     if (lastSavedId) {
-      editModeItems.push(
-        menuItems.saveAs,
-        menuItems.switchToViewMode,
-        resetChangesMenuItem,
-        menuItems.quickSave
-      );
-    } else {
-      editModeItems.push(menuItems.switchToViewMode, menuItems.saveAs);
+      editModeItems.push(resetChangesMenuItem, menuItems.quickSave);
     }
-    return [...labsMenuItem, menuItems.settings, ...shareMenuItem, ...editModeItems];
+    return [
+      menuItems.switchToViewMode,
+      // menuItems.settings,
+      ...labsMenuItem,
+      menuItems.fullScreen,
+      ...shareMenuItem,
+      menuItems.clone,
+      ...editModeItems,
+    ];
   }, [lastSavedId, menuItems, share, resetChangesMenuItem, isLabsEnabled]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };
