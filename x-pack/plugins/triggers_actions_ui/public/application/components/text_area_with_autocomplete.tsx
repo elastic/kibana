@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useRef, useCallback, EventHandler } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import getCaretCoordinates from 'textarea-caret';
 import {
   EuiTextArea,
