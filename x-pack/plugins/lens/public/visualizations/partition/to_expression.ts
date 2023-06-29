@@ -34,7 +34,7 @@ import {
   PieChartTypes,
 } from '../../../common/constants';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
-import { isCollapsed } from './visualization';
+import { hasNonCollapsedSliceBy, isCollapsed } from './visualization';
 
 interface Attributes {
   isPreview: boolean;
@@ -110,7 +110,7 @@ const generateCommonLabelsAstArgs: GenerateLabelsAstArguments = (
     layer.numberDisplay !== NumberDisplay.HIDDEN ? (layer.numberDisplay as ValueFormats) : [];
   const percentDecimals = layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS;
   const colorOverrides =
-    layer.allowMultipleMetrics && !layer.primaryGroups.length
+    layer.allowMultipleMetrics && !hasNonCollapsedSliceBy(layer)
       ? Object.entries(columnToLabelMap).reduce<Record<string, string>>(
           (acc, [columnId, label]) => {
             const color = layer.colorsByDimension?.[columnId];
