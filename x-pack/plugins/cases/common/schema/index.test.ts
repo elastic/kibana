@@ -7,7 +7,7 @@
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
 
-import { limitedArraySchema, NonEmptyString } from '.';
+import { limitedArraySchema, limitedStringSchema, NonEmptyString } from '.';
 
 describe('schema', () => {
   it('fails when given an empty string', () => {
@@ -53,5 +53,36 @@ describe('schema', () => {
         "No errors!",
       ]
     `);
+  });
+
+  describe('limitedStringSchema', () => {
+    const fieldName = 'foo';
+
+    it('fails when given string is shorter than minimum', () => {
+      expect(PathReporter.report(limitedStringSchema(fieldName, 1, 1).decode('')))
+        .toMatchInlineSnapshot(`
+        Array [
+          "The length of the ${fieldName} is too short. The minimum length is 1.",
+        ]
+      `);
+    });
+
+    it('fails when given string is larger than maximum', () => {
+      expect(PathReporter.report(limitedStringSchema(fieldName, 1, 5).decode('Hello there!!')))
+        .toMatchInlineSnapshot(`
+        Array [
+          "The length of the ${fieldName} is too long. The maximum length is 5.",
+        ]
+      `);
+    });
+
+    it('succeeds when given string within limit', () => {
+      expect(PathReporter.report(limitedStringSchema(fieldName, 1, 5).decode('Hello')))
+        .toMatchInlineSnapshot(`
+        Array [
+          "No errors!",
+        ]
+      `);
+    });
   });
 });

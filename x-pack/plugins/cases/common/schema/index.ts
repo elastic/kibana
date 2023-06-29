@@ -22,6 +22,33 @@ export const NonEmptyString = new rt.Type<string, string, unknown>(
   rt.identity
 );
 
+export const limitedStringSchema = (field: string, min: number, max: number) =>
+  new rt.Type<string, string, unknown>(
+    'LimitedString',
+    rt.string.is,
+    (input, context) =>
+      either.chain(rt.string.validate(input, context), (s) => {
+        if (s.trim().length < min) {
+          return rt.failure(
+            input,
+            context,
+            `The length of the ${field} is too short. The minimum length is ${min}.`
+          );
+        }
+
+        if (s.length > max) {
+          return rt.failure(
+            input,
+            context,
+            `The length of the ${field} is too long. The maximum length is ${max}.`
+          );
+        }
+
+        return rt.success(s);
+      }),
+    rt.identity
+  );
+
 export const limitedArraySchema = <T extends rt.Mixed>(codec: T, min: number, max: number) =>
   new rt.Type<Array<rt.TypeOf<typeof codec>>, Array<rt.TypeOf<typeof codec>>, unknown>(
     'LimitedArray',

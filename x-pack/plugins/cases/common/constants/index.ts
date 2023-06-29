@@ -113,6 +113,9 @@ export const MAX_CATEGORY_FILTER_LENGTH = 100 as const;
 
 export const MAX_TITLE_LENGTH = 160 as const;
 export const MAX_CATEGORY_LENGTH = 50 as const;
+export const MAX_DESCRIPTION_LENGTH = 30000 as const;
+export const MAX_TAG_LENGTH = 256 as const;
+export const MAX_TAGS = 200 as const;
 
 /**
  * Cases features

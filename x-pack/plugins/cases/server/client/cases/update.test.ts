@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import {
+  MAX_CATEGORY_LENGTH,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_TAGS,
+  MAX_TAG_LENGTH,
+  MAX_TITLE_LENGTH,
+} from '../../../common/constants';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { update } from './update';
@@ -286,6 +293,27 @@ describe('update', () => {
       });
     });
 
+    it(`does not throw error when category is non empty string less than ${MAX_CATEGORY_LENGTH} characters`, async () => {
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }],
+      });
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                category: 'foobar',
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).resolves.not.toThrow();
+    });
+
     it('does not update the category if the length is too long', async () => {
       await expect(
         update(
@@ -301,7 +329,7 @@ describe('update', () => {
           clientArgs
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the category is too long. The maximum length is 50, ids: [mock-id-1]'
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the category is too long. The maximum length is ${MAX_CATEGORY_LENGTH}.,Invalid value \"A very long category with more than fifty characters!\" supplied to \"cases,category\"`
       );
     });
 
@@ -320,7 +348,7 @@ describe('update', () => {
           clientArgs
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The category cannot be an empty string. Ids: [mock-id-1]'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the category is too short. The minimum length is 1.,Invalid value "" supplied to "cases,category"'
       );
     });
 
@@ -339,7 +367,337 @@ describe('update', () => {
           clientArgs
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The category cannot be an empty string. Ids: [mock-id-1]'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the category is too short. The minimum length is 1.,Invalid value "   " supplied to "cases,category"'
+      );
+    });
+  });
+
+  describe('Title', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+    });
+
+    it(`does not throw error when title is non empty string less than ${MAX_TITLE_LENGTH} characters`, async () => {
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }],
+      });
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                title: 'This is a test case!!',
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).resolves.not.toThrow();
+    });
+
+    it('does not update the title if the length is too long', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                title:
+                  'This is a very long title with more than one hundred and sixty characters!! To confirm the maximum limit error thrown for more than one hundred and sixty characters!!',
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}.`
+      );
+    });
+
+    it('does not update the title if it is just an empty string', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                title: '',
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the title is too short. The minimum length is 1.'
+      );
+    });
+
+    it('does not update the title if it is a string with empty characters', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                title: '   ',
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the title is too short. The minimum length is 1.'
+      );
+    });
+  });
+
+  describe('Description', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+    });
+
+    it(`does not throw error when description is non empty string less than ${MAX_DESCRIPTION_LENGTH} characters`, async () => {
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }],
+      });
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                description: 'New updated description!!',
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).resolves.not.toThrow();
+    });
+
+    it('does not update the description if the length is too long', async () => {
+      const description = Array(MAX_DESCRIPTION_LENGTH + 1)
+        .fill('a')
+        .toString();
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                description,
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the description is too long. The maximum length is ${MAX_DESCRIPTION_LENGTH}.`
+      );
+    });
+
+    it('does not update the description if it is just an empty string', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                description: '',
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the description is too short. The minimum length is 1.'
+      );
+    });
+
+    it('does not update the description if it is a string with empty characters', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                description: '   ',
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the description is too short. The minimum length is 1.'
+      );
+    });
+  });
+
+  describe('Tags', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+    });
+
+    it(`does not throw error when tags array is empty`, async () => {
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }],
+      });
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                tags: [],
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).resolves.not.toThrow();
+    });
+
+    it(`does not throw error when tags array length is less than ${MAX_TAGS} and tag has ${MAX_TAG_LENGTH} characters`, async () => {
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }],
+      });
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                tags: ['foo', 'bar'],
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).resolves.not.toThrow();
+    });
+
+    it('does not update the tags if the array length is too long', async () => {
+      const tags = Array(MAX_TAGS + 1).fill('foo');
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                tags,
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: array must be of length <= ${MAX_TAGS}`
+      );
+    });
+
+    it('does not update the tags if tag length is too long', async () => {
+      const tag = Array(MAX_TAG_LENGTH + 1)
+        .fill('f')
+        .toString();
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                tags: [tag],
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the tag is too long. The maximum length is ${MAX_TAG_LENGTH}.`
+      );
+    });
+
+    it('does not update the tags if tag is empty string', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                tags: [''],
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the tag is too short. The minimum length is 1.'
+      );
+    });
+
+    it('does not update the tags if tag is a string with empty characters', async () => {
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                tags: ['   '],
+              },
+            ],
+          },
+          clientArgs
+        )
+      ).rejects.toThrow(
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the tag is too short. The minimum length is 1.'
       );
     });
   });

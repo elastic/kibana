@@ -13,6 +13,14 @@ import { CommentRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt } from '../connectors/connector';
 import { CaseAssigneesRt } from './assignee';
+import { limitedArraySchema, limitedStringSchema } from '../../schema';
+import {
+  MAX_DESCRIPTION_LENGTH,
+  MAX_TITLE_LENGTH,
+  MAX_TAG_LENGTH,
+  MAX_CATEGORY_LENGTH,
+  MAX_TAGS,
+} from '../../constants';
 
 export const AttachmentTotalsRt = rt.strict({
   alerts: rt.number,
@@ -52,7 +60,7 @@ const CaseBasicRt = rt.strict({
   /**
    * The description of the case
    */
-  description: rt.string,
+  description: limitedStringSchema('description', 1, MAX_DESCRIPTION_LENGTH),
   /**
    * The current status of the case (open, closed, in-progress)
    */
@@ -60,11 +68,11 @@ const CaseBasicRt = rt.strict({
   /**
    * The identifying strings for filter a case
    */
-  tags: rt.array(rt.string),
+  tags: limitedArraySchema(limitedStringSchema('tag', 1, MAX_TAG_LENGTH), 0, MAX_TAGS),
   /**
    * The title of a case
    */
-  title: rt.string,
+  title: limitedStringSchema('title', 1, MAX_TITLE_LENGTH),
   /**
    * The external system that the case can be synced with
    */
@@ -88,7 +96,7 @@ const CaseBasicRt = rt.strict({
   /**
    * The category of the case.
    */
-  category: rt.union([rt.string, rt.null]),
+  category: rt.union([limitedStringSchema('category', 1, MAX_CATEGORY_LENGTH), rt.null]),
 });
 
 /**
@@ -132,15 +140,15 @@ export const CasePostRequestRt = rt.intersection([
     /**
      * Description of the case
      */
-    description: rt.string,
+    description: limitedStringSchema('description', 1, MAX_DESCRIPTION_LENGTH),
     /**
      * Identifiers for the case.
      */
-    tags: rt.array(rt.string),
+    tags: limitedArraySchema(limitedStringSchema('tag', 1, MAX_TAG_LENGTH), 0, MAX_TAGS),
     /**
      * Title of the case
      */
-    title: rt.string,
+    title: limitedStringSchema('title', 1, MAX_TITLE_LENGTH),
     /**
      * The external configuration for the case
      */
@@ -169,7 +177,7 @@ export const CasePostRequestRt = rt.intersection([
       /**
        * The category of the case.
        */
-      category: rt.union([rt.string, rt.null]),
+      category: rt.union([limitedStringSchema('category', 1, MAX_CATEGORY_LENGTH), rt.null]),
     })
   ),
 ]);
