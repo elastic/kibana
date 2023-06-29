@@ -10,7 +10,6 @@ import { isNumber, clamp } from 'lodash';
 
 import { vislibColorMaps, RawColorSchema } from './color_maps';
 
-
 function interpolateLinearly(x: number, values: RawColorSchema['value']) {
   // Split values into four lists
   const xValues: number[] = [];
