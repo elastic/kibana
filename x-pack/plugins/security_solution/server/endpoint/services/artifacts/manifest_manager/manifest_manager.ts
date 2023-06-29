@@ -7,7 +7,7 @@
 
 import pMap from 'p-map';
 import semver from 'semver';
-import { isEqual, isEmpty, chunk } from 'lodash';
+import { isEqual, isEmpty, chunk, keyBy } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
 import {
@@ -18,7 +18,7 @@ import {
   ENDPOINT_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
-import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
@@ -477,8 +477,11 @@ export class ManifestManager {
         soVersion: manifestSo.version,
       });
 
+      const fleetArtifacts = await this.listAllArtifacts();
+      const fleetArtifactsById = keyBy(fleetArtifacts, (artifact) => getArtifactId(artifact));
+
       for (const entry of manifestSo.attributes.artifacts) {
-        const artifact = await this.artifactClient.getArtifact(entry.artifactId);
+        const artifact = fleetArtifactsById[entry.artifactId];
 
         if (!artifact) {
           this.logger.error(
@@ -694,32 +697,40 @@ export class ManifestManager {
   }
 
   /**
-   * Cleanup .fleet-artifacts index if there are some orphan artifacts
+   * Retrieves all .fleet-artifacts for endpoint package
+   * @returns Artifact[]
    */
-  public async cleanup(manifest: Manifest) {
-    try {
-      const fleetArtifacts = [];
-      const perPage = 100;
-      let page = 1;
+  private async listAllArtifacts(): Promise<Artifact[]> {
+    const fleetArtifacts = [];
+    const perPage = 100;
+    let page = 1;
 
-      let fleetArtifactsResponse = await this.artifactClient.listArtifacts({
+    let fleetArtifactsResponse = await this.artifactClient.listArtifacts({
+      perPage,
+      page,
+    });
+    fleetArtifacts.push(...fleetArtifactsResponse.items);
+
+    while (
+      fleetArtifactsResponse.total > fleetArtifacts.length &&
+      !isEmpty(fleetArtifactsResponse.items)
+    ) {
+      page += 1;
+      fleetArtifactsResponse = await this.artifactClient.listArtifacts({
         perPage,
         page,
       });
       fleetArtifacts.push(...fleetArtifactsResponse.items);
+    }
+    return fleetArtifacts;
+  }
 
-      while (
-        fleetArtifactsResponse.total > fleetArtifacts.length &&
-        !isEmpty(fleetArtifactsResponse.items)
-      ) {
-        page += 1;
-        fleetArtifactsResponse = await this.artifactClient.listArtifacts({
-          perPage,
-          page,
-        });
-        fleetArtifacts.push(...fleetArtifactsResponse.items);
-      }
-
+  /**
+   * Cleanup .fleet-artifacts index if there are some orphan artifacts
+   */
+  public async cleanup(manifest: Manifest) {
+    try {
+      const fleetArtifacts = await this.listAllArtifacts();
       if (isEmpty(fleetArtifacts)) {
         return;
       }
