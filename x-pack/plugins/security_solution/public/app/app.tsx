@@ -19,6 +19,7 @@ import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { getComments } from '../assistant/get_comments';
 import { augmentMessageCodeBlocks, LOCAL_STORAGE_KEY } from '../assistant/helpers';
 import { useConversationStore } from '../assistant/use_conversation_store';
@@ -117,6 +118,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
                               {children}
                             </PageRouter>
                           </CellActionsProvider>
+                          <ReactQueryDevtools initialIsOpen={false} />
                         </ReactQueryClientProvider>
                       </ManageUserInfo>
                     </UserPrivilegesProvider>

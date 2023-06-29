@@ -49,6 +49,7 @@ import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
@@ -120,6 +121,7 @@ export interface StartPlugins {
   cloudExperiments?: CloudExperimentsPluginStart;
   dataViews: DataViewsServicePublic;
   fieldFormats: FieldFormatsStartCommon;
+  expressions: ExpressionsStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {

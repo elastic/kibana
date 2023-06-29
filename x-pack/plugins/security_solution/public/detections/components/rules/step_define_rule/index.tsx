@@ -85,9 +85,7 @@ import { defaultCustomQuery } from '../../../pages/detection_engine/rules/utils'
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
 import { GroupByFields } from '../group_by_fields';
 import { EsqlFieldsSelect } from '../esql_fields_select/esql_fields_select';
-import { useEsqlQuery } from '../esql_fields_select/use_esql_query';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { useEsqlFieldOptions } from '../../../hooks/use_esql_field_options';
 import {
   minimumLicenseForSuppression,
   AlertSuppressionMissingFieldsStrategy,
@@ -479,23 +477,14 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [license, groupByFields]
   );
 
-  const { options: esqlFieldOptions, isLoading: isEsqlFieldOptionsLoading } = useEsqlFieldOptions(
-    isEsqlRule(ruleType) && typeof queryBar.query.query === 'string'
-      ? queryBar.query.query
-      : undefined
+  const esqlQuery = useMemo(
+    () =>
+      isEsqlRule(ruleType) && typeof queryBar?.query?.query === 'string'
+        ? queryBar.query.query
+        : undefined,
+    [queryBar?.query?.query, ruleType]
   );
-
   const isEsqlGrouping = true;
-  // const isEsqlGrouping =
-  //   isEsqlRule(ruleType) && typeof queryBar.query.query === 'string'
-  //     ? /\sstats\s.*\sby\s/.test(queryBar.query.query)
-  //     : false;
-
-  const { getEsqlFields } = useEsqlQuery();
-  const esqlValidationDataProvider = useCallback(
-    () => Promise.resolve({ getEsqlFields }),
-    [getEsqlFields]
-  );
 
   const EsqlDurationOptions = useCallback(
     ({ esqlSuppressionDurationValue, esqlSuppressionDurationUnit, esqlSuppressionMode }) => (
@@ -707,7 +696,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       <UseField
         key="QueryBarDefineRule"
         path="queryBar"
-        validationDataProvider={esqlValidationDataProvider}
         config={{
           // TODO: use memo
           ...schema.queryBar,
@@ -717,7 +705,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         componentProps={queryBarProps}
       />
     ),
-    [queryBarProps, esqlValidationDataProvider]
+    [queryBarProps]
   );
 
   const QueryBarMemo = useMemo(
@@ -902,10 +890,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               path="esqlOptions.groupByFields"
               component={EsqlFieldsSelect}
               componentProps={{
-                options: esqlFieldOptions,
-                isLoading: isEsqlFieldOptionsLoading,
+                query: esqlQuery,
               }}
-              validationDataProvider={esqlValidationDataProvider}
             />
           </RuleTypeEuiFormRow>
 

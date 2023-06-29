@@ -6,22 +6,82 @@
  */
 
 import { isEmpty } from 'lodash';
+import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
+
+import { KibanaServices } from '../../../../common/lib/kibana';
+import { securitySolutionQueryClient } from '../../../../common/containers/query_client/query_client_provider';
 
 import type { ValidationError, ValidationFunc } from '../../../../shared_imports';
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import type { FieldValueQueryBar } from '../query_bar';
-import type { GetEsqlFields } from './use_esql_query';
 
 export enum ERROR_CODES {
   INVALID_ESQL = 'ERR_INVALID_ESQL',
   INVALID_ESQL_GROUPING_FIELDS = 'INVALID_ESQL_GROUPING_FIELDS',
 }
 
+const constructValidationError = (error: Error) => {
+  return {
+    code: ERROR_CODES.INVALID_ESQL,
+    message: error?.message
+      ? `Error validating ESQL: "${error?.message}"`
+      : 'Unknown error while validating ESQL',
+    error,
+  };
+};
+
+const constructGroupingFieldsValidationError = (error: Error) => {
+  return {
+    code: ERROR_CODES.INVALID_ESQL_GROUPING_FIELDS,
+    message: 'Fields not possible to validate',
+    error,
+  };
+};
+
+const fetchEsqlFields = (esqlQuery: string) => {
+  const services = KibanaServices.get();
+  const emptyResultsEsqlQuery = `${esqlQuery} | limit 0`;
+
+  return securitySolutionQueryClient.fetchQuery({
+    queryKey: [esqlQuery.trim()],
+    queryFn: async () => {
+      try {
+        const res = await fetchFieldsFromESQL(
+          { esql: emptyResultsEsqlQuery },
+          services.expressions
+        );
+        return res;
+      } catch (e) {
+        // TODO: separate network error?
+        return { error: e };
+      }
+    },
+
+    staleTime: 60 * 1000,
+  });
+};
+
+export const fetchEsqlOptions = async (esqlQuery: string) => {
+  try {
+    const data = await fetchEsqlFields(esqlQuery);
+
+    if (data && 'error' in data) {
+      return [];
+    }
+
+    const options = (data?.columns ?? []).map(({ id }) => ({ label: id }));
+
+    return options;
+  } catch (e) {
+    return [];
+  }
+};
+
 export const esqlValidator = async (
   ...args: Parameters<ValidationFunc>
 ): Promise<ValidationError<ERROR_CODES> | void | undefined> => {
-  const [{ value, formData, customData }] = args;
+  const [{ value, formData }] = args;
   const { query: queryValue } = value as FieldValueQueryBar;
   const query = queryValue.query as string;
   const { ruleType } = formData as DefineStepRule;
@@ -32,24 +92,20 @@ export const esqlValidator = async (
   }
 
   try {
-    const provider = (await customData.provider()) as { getEsqlFields: GetEsqlFields };
+    const data = await fetchEsqlFields(query);
 
-    await provider.getEsqlFields(query);
+    if (data && 'error' in data) {
+      return constructValidationError(data.error);
+    }
   } catch (error) {
-    return {
-      code: ERROR_CODES.INVALID_ESQL,
-      message: error?.message
-        ? `Error validating ESQL: "${error?.message}"`
-        : 'Unknown error while validating ESQL',
-      error,
-    };
+    return constructValidationError(error);
   }
 };
 
 export const esqlGroupingFieldsValidator = async (
   ...args: Parameters<ValidationFunc>
 ): Promise<ValidationError<ERROR_CODES> | void | undefined> => {
-  const [{ value, formData, customData, path }] = args;
+  const [{ value, formData, path }] = args;
   const groupingFields = (value ?? []) as string[];
   const query = formData.queryBar?.query?.query as string;
 
@@ -61,9 +117,11 @@ export const esqlGroupingFieldsValidator = async (
   }
 
   try {
-    const provider = (await customData.provider()) as { getEsqlFields: GetEsqlFields };
+    const data = await fetchEsqlFields(query);
 
-    const data = await provider.getEsqlFields(query);
+    if (data && 'error' in data) {
+      return constructGroupingFieldsValidationError(data.error);
+    }
 
     const options = (data?.columns ?? []).map(({ id }) => ({ label: id }));
     const optionsSet = new Set(options?.map((option) => option.label));
@@ -84,10 +142,6 @@ export const esqlGroupingFieldsValidator = async (
       };
     }
   } catch (error) {
-    return {
-      code: ERROR_CODES.INVALID_ESQL_GROUPING_FIELDS,
-      message: 'Fields not possible to validate',
-      error,
-    };
+    return constructGroupingFieldsValidationError(error);
   }
 };
