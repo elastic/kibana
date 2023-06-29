@@ -255,3 +255,53 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
   // const action = findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`);
   // expect(action.length).toBe(1);
 });
+
+describe('getInheritedInput', () => {
+  const dashboardTimeRange = {
+    to: 'now',
+    from: 'now-15m',
+  };
+  const dashboardTimeslice = [1688061910000, 1688062209000];
+
+  test('Should pass dashboard timeRange and timeslice to panel when panel does not have custom time range', () => {
+    const container = buildMockDashboard({
+      timeRange: dashboardTimeRange,
+      timeslice: dashboardTimeslice,
+      panels: {
+        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+          explicitInput: {
+            id: '123',
+          },
+          type: CONTACT_CARD_EMBEDDABLE,
+        }),
+      },
+    });
+
+    const inheritedInput = container.getInheritedInput('123');
+    expect(inheritedInput.timeRange).toEqual(dashboardTimeRange);
+    expect(inheritedInput.timeslice).toEqual(dashboardTimeslice);
+  });
+
+  test('Should not pass dashboard timeRange and timeslice to panel when panel has custom time range', () => {
+    const container = buildMockDashboard({
+      timeRange: dashboardTimeRange,
+      timeslice: dashboardTimeslice,
+      panels: {
+        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+          explicitInput: {
+            id: '123',
+            timeRange: {
+              to: 'now',
+              from: 'now-24h',
+            }
+          },
+          type: CONTACT_CARD_EMBEDDABLE,
+        }),
+      },
+    });
+
+    const inheritedInput = container.getInheritedInput('123');
+    expect(inheritedInput.timeRange).toBeUndefined();
+    expect(inheritedInput.timeslice).toBeUndefined();
+  });
+});

@@ -259,12 +259,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       hidePanelTitles,
       refreshInterval,
       executionContext,
+      panels,
     } = this.input;
 
     let combinedFilters = filters;
     if (this.controlGroup) {
       combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
     }
+    const hasCustomTimeRange = Boolean(panels[id]?.explicitInput?.timeRange);
     return {
       searchSessionId: this.searchSessionId,
       refreshConfig: refreshInterval,
@@ -273,11 +275,12 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       executionContext,
       syncTooltips,
       syncColors,
-      timeRange,
-      timeslice,
       viewMode,
       query,
       id,
+      // do not pass any time information from dashboard to panel when panel has custom time range
+      timeRange: hasCustomTimeRange ? undefined : timeRange,
+      timeslice: hasCustomTimeRange ? undefined : timeslice,
     };
   }
 
