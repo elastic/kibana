@@ -407,7 +407,7 @@ describe('update', () => {
       ).resolves.not.toThrow();
     });
 
-    it('does not update the title if the length is too long', async () => {
+    it('throws error if the title is too long', async () => {
       await expect(
         update(
           {
@@ -427,7 +427,7 @@ describe('update', () => {
       );
     });
 
-    it('does not update the title if it is just an empty string', async () => {
+    it('throws error if title is just an empty string', async () => {
       await expect(
         update(
           {
@@ -446,7 +446,7 @@ describe('update', () => {
       );
     });
 
-    it('does not update the title if it is a string with empty characters', async () => {
+    it('throws error if title is a string with empty characters', async () => {
       await expect(
         update(
           {
@@ -501,7 +501,7 @@ describe('update', () => {
       ).resolves.not.toThrow();
     });
 
-    it('does not update the description if the length is too long', async () => {
+    it('throws error when the description is too long', async () => {
       const description = Array(MAX_DESCRIPTION_LENGTH + 1)
         .fill('a')
         .toString();
@@ -524,7 +524,7 @@ describe('update', () => {
       );
     });
 
-    it('does not update the description if it is just an empty string', async () => {
+    it('throws error if description is just an empty string', async () => {
       await expect(
         update(
           {
@@ -543,7 +543,7 @@ describe('update', () => {
       );
     });
 
-    it('does not update the description if it is a string with empty characters', async () => {
+    it('throws error if description is a string with empty characters', async () => {
       await expect(
         update(
           {
@@ -577,7 +577,7 @@ describe('update', () => {
       });
     });
 
-    it(`does not throw error when tags array is empty`, async () => {
+    it('does not throw error when tags array is empty', async () => {
       clientArgs.services.caseService.patchCases.mockResolvedValue({
         saved_objects: [{ ...mockCases[0] }],
       });
@@ -619,7 +619,7 @@ describe('update', () => {
       ).resolves.not.toThrow();
     });
 
-    it('does not update the tags if the array length is too long', async () => {
+    it('throws error if the tags array length is too long', async () => {
       const tags = Array(MAX_TAGS + 1).fill('foo');
 
       await expect(
@@ -640,7 +640,7 @@ describe('update', () => {
       );
     });
 
-    it('does not update the tags if tag length is too long', async () => {
+    it('throws error if the tag length is too long', async () => {
       const tag = Array(MAX_TAG_LENGTH + 1)
         .fill('f')
         .toString();
@@ -663,7 +663,7 @@ describe('update', () => {
       );
     });
 
-    it('does not update the tags if tag is empty string', async () => {
+    it('throws error if tag is empty string', async () => {
       await expect(
         update(
           {
@@ -682,7 +682,7 @@ describe('update', () => {
       );
     });
 
-    it('does not update the tags if tag is a string with empty characters', async () => {
+    it('throws error if tag is a string with empty characters', async () => {
       await expect(
         update(
           {

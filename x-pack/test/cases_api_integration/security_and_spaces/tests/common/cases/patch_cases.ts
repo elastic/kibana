@@ -580,6 +580,40 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      it('400s if the title an empty string', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                title: '',
+              },
+            ],
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s if the title is a string with empty characters', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                title: '  ',
+              },
+            ],
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
       it('400s if the description is too long', async () => {
         const longDescription = 'a'.repeat(30001);
 
@@ -592,6 +626,40 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: postedCase.id,
                 version: postedCase.version,
                 description: longDescription,
+              },
+            ],
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s if the description an empty string', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                description: '',
+              },
+            ],
+          },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s if the description is a string with empty characters', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                description: '  ',
               },
             ],
           },

@@ -60,7 +60,7 @@ const CaseBasicRt = rt.strict({
   /**
    * The description of the case
    */
-  description: limitedStringSchema('description', 1, MAX_DESCRIPTION_LENGTH),
+  description: rt.string,
   /**
    * The current status of the case (open, closed, in-progress)
    */
@@ -68,11 +68,11 @@ const CaseBasicRt = rt.strict({
   /**
    * The identifying strings for filter a case
    */
-  tags: limitedArraySchema(limitedStringSchema('tag', 1, MAX_TAG_LENGTH), 0, MAX_TAGS, 'tags'),
+  tags: rt.array(rt.string),
   /**
    * The title of a case
    */
-  title: limitedStringSchema('title', 1, MAX_TITLE_LENGTH),
+  title: rt.string,
   /**
    * The external system that the case can be synced with
    */
@@ -96,7 +96,7 @@ const CaseBasicRt = rt.strict({
   /**
    * The category of the case.
    */
-  category: rt.union([limitedStringSchema('category', 1, MAX_CATEGORY_LENGTH), rt.null]),
+  category: rt.union([rt.string, rt.null]),
 });
 
 /**
@@ -343,7 +343,50 @@ export const CasesFindResponseRt = rt.intersection([
 ]);
 
 export const CasePatchRequestRt = rt.intersection([
-  rt.exact(rt.partial(CaseBasicRt.type.props)),
+  rt.exact(
+    rt.partial({
+      /**
+       * The description of the case
+       */
+      description: limitedStringSchema('description', 1, MAX_DESCRIPTION_LENGTH),
+      /**
+       * The current status of the case (open, closed, in-progress)
+       */
+      status: CaseStatusRt,
+      /**
+       * The identifying strings for filter a case
+       */
+      tags: limitedArraySchema(limitedStringSchema('tag', 1, MAX_TAG_LENGTH), 0, MAX_TAGS, 'tags'),
+      /**
+       * The title of a case
+       */
+      title: limitedStringSchema('title', 1, MAX_TITLE_LENGTH),
+      /**
+       * The external system that the case can be synced with
+       */
+      connector: CaseConnectorRt,
+      /**
+       * The alert sync settings
+       */
+      settings: SettingsRt,
+      /**
+       * The plugin owner of the case
+       */
+      owner: rt.string,
+      /**
+       * The severity of the case
+       */
+      severity: CaseSeverityRt,
+      /**
+       * The users assigned to this case
+       */
+      assignees: CaseAssigneesRt,
+      /**
+       * The category of the case.
+       */
+      category: rt.union([limitedStringSchema('category', 1, MAX_CATEGORY_LENGTH), rt.null]),
+    })
+  ),
   /**
    * The saved object ID and version
    */
