@@ -41,7 +41,13 @@ export class NavControlsService {
       registerExtension: (navControl: ChromeNavControl) =>
         navControlsExtension$.next(new Set([...navControlsExtension$.value.values(), navControl])),
 
-      setHelpMenuLinks: (links: ChromeHelpMenuLink[]) => helpMenuLinks$.next(links),
+      setHelpMenuLinks: (links: ChromeHelpMenuLink[]) => {
+        // This extension point is only intended to be used once by the cloud integration > cloud_links plugin
+        if (helpMenuLinks$.value.length > 0) {
+          throw new Error(`Help menu links have already been set`);
+        }
+        helpMenuLinks$.next(links);
+      },
 
       getLeft$: () =>
         navControlsLeft$.pipe(
