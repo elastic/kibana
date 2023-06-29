@@ -1,15 +1,14 @@
 get:
-  summary: Finds user activity for a case.
+  summary: Finds user activity for a case in the default space.
   description: >
     You must have `read` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
     feature privileges, depending on the owner of the case you're seeking.
-  operationId: findCaseActivity
+  operationId: findCaseActivityDefaultSpace
   tags:
     - cases
   parameters:
     - $ref: '../components/parameters/case_id.yaml'
-    - $ref: '../components/parameters/space_id.yaml'
     - name: page
       in: query
       description: The page number to return.

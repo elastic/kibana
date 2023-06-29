@@ -1,6 +1,6 @@
 get:
-  summary: Retrieves external connection details, such as the closure type and default connector for cases.
-  operationId: getCaseConfiguration
+  summary: Retrieves external connection details, such as the closure type and default connector for cases in the default space.
+  operationId: getCaseConfigurationDefaultSpace
   description: >
     You must have `read` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
@@ -8,7 +8,6 @@ get:
   tags:
     - cases
   parameters:
-    - $ref: '../components/parameters/space_id.yaml'
     - $ref: '../components/parameters/owner.yaml'
   responses:
     '200':
@@ -31,8 +30,8 @@ get:
         - url: https://localhost:5601
 
 post:
-  summary: Sets external connection details, such as the closure type and default connector for cases. 
-  operationId: setCaseConfiguration
+  summary: Sets external connection details, such as the closure type and default connector for cases in the default space.
+  operationId: setCaseConfigurationDefaultSpace
   description: >
     You must have `all` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
@@ -46,7 +45,6 @@ post:
     - cases
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
-    - $ref: '../components/parameters/space_id.yaml'
   requestBody:
     content:
       application/json:
