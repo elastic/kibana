@@ -9,6 +9,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
+import type { TimeRange } from '@kbn/es-query';
 import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
 import { findTestSubject, nextTick } from '@kbn/test-jest-helpers';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -268,7 +269,7 @@ describe('getInheritedInput', () => {
       timeRange: dashboardTimeRange,
       timeslice: dashboardTimeslice,
       panels: {
-        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        '123': getSampleDashboardPanel<ContactCardEmbeddableInput & { timeRange: TimeRange }>({
           explicitInput: {
             id: '123',
           },
@@ -288,7 +289,7 @@ describe('getInheritedInput', () => {
       timeRange: dashboardTimeRange,
       timeslice: dashboardTimeslice,
       panels: {
-        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        '123': getSampleDashboardPanel<ContactCardEmbeddableInput & { timeRange: TimeRange }>({
           explicitInput: {
             id: '123',
             timeRange: {
