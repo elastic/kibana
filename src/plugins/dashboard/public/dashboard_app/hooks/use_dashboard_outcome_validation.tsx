@@ -8,18 +8,12 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-import { DashboardRedirect } from '../types';
 import { pluginServices } from '../../services/plugin_services';
 import { createDashboardEditUrl } from '../../dashboard_constants';
-import { getDashboardURL404String } from '../_dashboard_app_strings';
 import { useDashboardMountContext } from './dashboard_mount_context';
 import { LoadDashboardFromSavedObjectReturn } from '../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
 
-export const useDashboardOutcomeValidation = ({
-  redirectTo,
-}: {
-  redirectTo: DashboardRedirect;
-}) => {
+export const useDashboardOutcomeValidation = () => {
   const [aliasId, setAliasId] = useState<string>();
   const [outcome, setOutcome] = useState<string>();
   const [savedObjectId, setSavedObjectId] = useState<string>();
@@ -30,17 +24,11 @@ export const useDashboardOutcomeValidation = ({
   /**
    * Unpack dashboard services
    */
-  const {
-    notifications: { toasts },
-    screenshotMode,
-    spaces,
-  } = pluginServices.getServices();
+  const { screenshotMode, spaces } = pluginServices.getServices();
 
   const validateOutcome = useCallback(
     ({ dashboardFound, resolveMeta, dashboardId }: LoadDashboardFromSavedObjectReturn) => {
       if (!dashboardFound) {
-        toasts.addDanger(getDashboardURL404String());
-        redirectTo({ destination: 'listing' });
         return false; // redirected. Stop loading dashboard.
       }
 
@@ -68,7 +56,7 @@ export const useDashboardOutcomeValidation = ({
       }
       return true;
     },
-    [scopedHistory, redirectTo, screenshotMode, spaces, toasts]
+    [scopedHistory, screenshotMode, spaces]
   );
 
   const getLegacyConflictWarning = useMemo(() => {

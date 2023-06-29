@@ -15,6 +15,7 @@ import {
 } from '@kbn/core/public';
 import { Filter, Query } from '@kbn/es-query';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { cleanFiltersForSerialize } from '@kbn/presentation-util-plugin/public';
 import { rawControlGroupAttributesToControlGroupInput } from '@kbn/controls-plugin/common';
 import { parseSearchSourceJSON, injectSearchSourceReferences } from '@kbn/data-plugin/public';
@@ -79,7 +80,9 @@ export const loadDashboardStateFromSavedObject = async ({
     await savedObjectsClient.resolve<DashboardAttributes>(
       DASHBOARD_SAVED_OBJECT_TYPE,
       savedObjectId
-    );
+    ).catch((e) => {
+      throw new SavedObjectNotFound(DASHBOARD_SAVED_OBJECT_TYPE, id);
+    });
   if (!rawDashboardSavedObject._version) {
     return { dashboardInput: newDashboardState, dashboardFound: false, dashboardId: savedObjectId };
   }

@@ -47,7 +47,7 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/core-overlays-browser-mocks",
     "@kbn/core-theme-browser-mocks",
-    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/core-ui-settings-browser-mocks",``
     "@kbn/core-saved-objects-common",
     "@kbn/task-manager-plugin",
     "@kbn/core-execution-context-common",
@@ -57,6 +57,7 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/core-saved-objects-server",
+    "@kbn/shared-ux-prompt-not-found"
   ],
   "exclude": [
     "target/**/*",
