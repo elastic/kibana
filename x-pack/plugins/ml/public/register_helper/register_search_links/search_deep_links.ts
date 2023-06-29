@@ -12,6 +12,19 @@ import { type AppDeepLink, AppNavLinkStatus } from '@kbn/core/public';
 import { ML_PAGES } from '../../../common/constants/locator';
 import type { MlCapabilities } from '../../shared';
 
+function getNavStatus(
+  mlCapabilities: MlCapabilities,
+  statusIfServerless: boolean
+): AppNavLinkStatus | undefined {
+  if (mlCapabilities.isADEnabled && mlCapabilities.isDFAEnabled && mlCapabilities.isNLPEnabled) {
+    // if all features are enabled we can assume that we are not running in serverless mode.
+    // returning default will not add the link to the nav menu, but the link will be registered for searching
+    return AppNavLinkStatus.default;
+  }
+
+  return statusIfServerless ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden;
+}
+
 function getOverviewLinkDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
   return {
     id: 'overview',
@@ -19,21 +32,19 @@ function getOverviewLinkDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<Li
       defaultMessage: 'Overview',
     }),
     path: `/${ML_PAGES.OVERVIEW}`,
-    navLinkStatus:
-      mlCapabilities.isADEnabled && mlCapabilities.isDFAEnabled && mlCapabilities.isNLPEnabled
-        ? AppNavLinkStatus.visible
-        : AppNavLinkStatus.hidden,
+    navLinkStatus: getNavStatus(mlCapabilities, false),
   };
 }
 
 function getAnomalyDetectionDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  const navLinkStatus = getNavStatus(mlCapabilities, mlCapabilities.isADEnabled);
   return {
     id: 'anomalyDetection',
     title: i18n.translate('xpack.ml.deepLink.anomalyDetection', {
       defaultMessage: 'Anomaly Detection',
     }),
     path: `/${ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE}`,
-    navLinkStatus: mlCapabilities.isADEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+    navLinkStatus,
     deepLinks: [
       {
         id: 'anomalyExplorer',
@@ -41,9 +52,7 @@ function getAnomalyDetectionDeepLink(mlCapabilities: MlCapabilities): AppDeepLin
           defaultMessage: 'Anomaly explorer',
         }),
         path: `/${ML_PAGES.ANOMALY_EXPLORER}`,
-        navLinkStatus: mlCapabilities.isADEnabled
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.hidden,
+        navLinkStatus,
       },
       {
         id: 'singleMetricViewer',
@@ -51,22 +60,21 @@ function getAnomalyDetectionDeepLink(mlCapabilities: MlCapabilities): AppDeepLin
           defaultMessage: 'Single metric viewer',
         }),
         path: `/${ML_PAGES.SINGLE_METRIC_VIEWER}`,
-        navLinkStatus: mlCapabilities.isADEnabled
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.hidden,
+        navLinkStatus,
       },
     ],
   };
 }
 
 function getDataFrameAnalyticsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  const navLinkStatus = getNavStatus(mlCapabilities, mlCapabilities.isDFAEnabled);
   return {
     id: 'dataFrameAnalytics',
     title: i18n.translate('xpack.ml.deepLink.dataFrameAnalytics', {
       defaultMessage: 'Data Frame Analytics',
     }),
     path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE}`,
-    navLinkStatus: mlCapabilities.isDFAEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+    navLinkStatus,
     deepLinks: [
       {
         id: 'resultExplorer',
@@ -74,9 +82,7 @@ function getDataFrameAnalyticsDeepLink(mlCapabilities: MlCapabilities): AppDeepL
           defaultMessage: 'Results explorer',
         }),
         path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION}`,
-        navLinkStatus: mlCapabilities.isDFAEnabled
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.hidden,
+        navLinkStatus,
       },
       {
         id: 'analyticsMap',
@@ -84,15 +90,14 @@ function getDataFrameAnalyticsDeepLink(mlCapabilities: MlCapabilities): AppDeepL
           defaultMessage: 'Analytics map',
         }),
         path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_MAP}`,
-        navLinkStatus: mlCapabilities.isDFAEnabled
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.hidden,
+        navLinkStatus,
       },
     ],
   };
 }
 
 function getAiopsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  const navLinkStatus = getNavStatus(mlCapabilities, mlCapabilities.canUseAiops);
   return {
     id: 'aiOps',
     title: i18n.translate('xpack.ml.deepLink.aiOps', {
@@ -100,7 +105,7 @@ function getAiopsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
     }),
     // Default to the index select page for the explain log rate spikes since we don't have an AIops overview page
     path: `/${ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT}`,
-    navLinkStatus: mlCapabilities.canUseAiops ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+    navLinkStatus,
     deepLinks: [
       {
         id: 'explainLogRateSpikes',
@@ -108,9 +113,7 @@ function getAiopsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
           defaultMessage: 'Explain Log Rate Spikes',
         }),
         path: `/${ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT}`,
-        navLinkStatus: mlCapabilities.canUseAiops
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.hidden,
+        navLinkStatus,
       },
       {
         id: 'logPatternAnalysis',
@@ -118,9 +121,7 @@ function getAiopsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
           defaultMessage: 'Log Pattern Analysis',
         }),
         path: `/${ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT}`,
-        navLinkStatus: mlCapabilities.canUseAiops
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.hidden,
+        navLinkStatus,
       },
       {
         id: 'changePointDetections',
@@ -128,22 +129,21 @@ function getAiopsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
           defaultMessage: 'Change Point Detection',
         }),
         path: `/${ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT}`,
-        navLinkStatus: mlCapabilities.canUseAiops
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.hidden,
+        navLinkStatus,
       },
     ],
   };
 }
 
 function getModelManagementDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  const navLinkStatus = getNavStatus(mlCapabilities, mlCapabilities.isNLPEnabled);
   return {
     id: 'modelManagement',
     title: i18n.translate('xpack.ml.deepLink.modelManagement', {
       defaultMessage: 'Model Management',
     }),
     path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
-    navLinkStatus: mlCapabilities.isNLPEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+    navLinkStatus,
     deepLinks: [
       {
         id: 'nodesOverview',
@@ -151,9 +151,7 @@ function getModelManagementDeepLink(mlCapabilities: MlCapabilities): AppDeepLink
           defaultMessage: 'Trained Models',
         }),
         path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
-        navLinkStatus: mlCapabilities.isNLPEnabled
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.hidden,
+        navLinkStatus,
       },
       {
         id: 'nodes',
@@ -161,10 +159,7 @@ function getModelManagementDeepLink(mlCapabilities: MlCapabilities): AppDeepLink
           defaultMessage: 'Nodes',
         }),
         path: `/${ML_PAGES.NODES}`,
-        navLinkStatus:
-          mlCapabilities.isADEnabled && mlCapabilities.isDFAEnabled && mlCapabilities.isNLPEnabled
-            ? AppNavLinkStatus.visible
-            : AppNavLinkStatus.hidden,
+        navLinkStatus: getNavStatus(mlCapabilities, false),
       },
     ],
   };
@@ -177,10 +172,7 @@ function getMemoryUsageDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<Lin
       defaultMessage: 'Memory Usage',
     }),
     path: `/${ML_PAGES.MEMORY_USAGE}`,
-    navLinkStatus:
-      mlCapabilities.isADEnabled && mlCapabilities.isDFAEnabled && mlCapabilities.isNLPEnabled
-        ? AppNavLinkStatus.visible
-        : AppNavLinkStatus.hidden,
+    navLinkStatus: getNavStatus(mlCapabilities, false),
   };
 }
 
@@ -191,10 +183,7 @@ function getDataVisualizerDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<
       defaultMessage: 'Data Visualizer',
     }),
     path: `/${ML_PAGES.DATA_VISUALIZER}`,
-    navLinkStatus:
-      mlCapabilities.isADEnabled && mlCapabilities.isDFAEnabled && mlCapabilities.isNLPEnabled
-        ? AppNavLinkStatus.visible
-        : AppNavLinkStatus.hidden,
+    navLinkStatus: getNavStatus(mlCapabilities, false),
   };
 }
 
@@ -206,10 +195,7 @@ function getFileUploadDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<Link
     }),
     keywords: ['CSV', 'JSON'],
     path: `/${ML_PAGES.DATA_VISUALIZER_FILE}`,
-    navLinkStatus:
-      mlCapabilities.isADEnabled && mlCapabilities.isDFAEnabled && mlCapabilities.isNLPEnabled
-        ? AppNavLinkStatus.visible
-        : AppNavLinkStatus.hidden,
+    navLinkStatus: getNavStatus(mlCapabilities, false),
   };
 }
 
@@ -220,21 +206,19 @@ function getIndexDataVisualizerDeepLink(mlCapabilities: MlCapabilities): AppDeep
       defaultMessage: 'Index Data Visualizer',
     }),
     path: `/${ML_PAGES.DATA_VISUALIZER_INDEX_SELECT}`,
-    navLinkStatus:
-      mlCapabilities.isADEnabled && mlCapabilities.isDFAEnabled && mlCapabilities.isNLPEnabled
-        ? AppNavLinkStatus.visible
-        : AppNavLinkStatus.hidden,
+    navLinkStatus: getNavStatus(mlCapabilities, false),
   };
 }
 
 function getSettingsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId> {
+  const navLinkStatus = getNavStatus(mlCapabilities, mlCapabilities.isADEnabled);
   return {
     id: 'settings',
     title: i18n.translate('xpack.ml.deepLink.settings', {
       defaultMessage: 'Settings',
     }),
     path: `/${ML_PAGES.SETTINGS}`,
-    navLinkStatus: mlCapabilities.isADEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+    navLinkStatus,
     deepLinks: [
       {
         id: 'calendarSettings',
@@ -242,9 +226,7 @@ function getSettingsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId
           defaultMessage: 'Calendars',
         }),
         path: `/${ML_PAGES.CALENDARS_MANAGE}`,
-        navLinkStatus: mlCapabilities.isADEnabled
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.hidden,
+        navLinkStatus,
       },
       {
         id: 'filterListsSettings',
@@ -252,9 +234,7 @@ function getSettingsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<LinkId
           defaultMessage: 'Filter Lists',
         }),
         path: `/${ML_PAGES.SETTINGS}`, // Link to settings page as read only users cannot view filter lists.
-        navLinkStatus: mlCapabilities.isADEnabled
-          ? AppNavLinkStatus.visible
-          : AppNavLinkStatus.hidden,
+        navLinkStatus,
       },
     ],
   };
@@ -267,7 +247,7 @@ function getNotificationsDeepLink(mlCapabilities: MlCapabilities): AppDeepLink<L
       defaultMessage: 'Notifications',
     }),
     path: `/${ML_PAGES.NOTIFICATIONS}`,
-    navLinkStatus: AppNavLinkStatus.visible,
+    navLinkStatus: getNavStatus(mlCapabilities, true),
   };
 }
 
