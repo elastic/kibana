@@ -58,6 +58,7 @@ describe('useColumn', () => {
   ];
 
   beforeEach(() => {
+    setItemStorageMock.mockClear();
     storage = { current: new Storage(mockStorage) };
   });
 
@@ -108,7 +109,7 @@ describe('useColumn', () => {
     await waitForNextUpdate();
     expect(setItemStorageMock).toHaveBeenCalledWith(
       'useColumnTest',
-      '{"columns":[{"id":"event.action","displayAsText":"Alert status","initialWidth":150},{"id":"@timestamp","displayAsText":"Last updated","initialWidth":100,"schema":"datetime"},{"id":"kibana.alert.duration.us","displayAsText":"Duration","initialWidth":150,"schema":"numeric"},{"id":"kibana.alert.reason","displayAsText":"Reason"}],"visibleColumns":[],"sort":[]}'
+      '{"columns":[{"id":"event.action","displayAsText":"Alert status","initialWidth":150},{"id":"@timestamp","displayAsText":"Last updated","initialWidth":100,"schema":"datetime"},{"id":"kibana.alert.duration.us","displayAsText":"Duration","initialWidth":150,"schema":"numeric"},{"id":"kibana.alert.reason","displayAsText":"Reason"}],"visibleColumns":["event.action","@timestamp","kibana.alert.duration.us","kibana.alert.reason"],"sort":[]}'
     );
     expect(result.current.columns.find((c) => c.id === '@timestamp')).toEqual({
       displayAsText: 'Last updated',
