@@ -9,6 +9,8 @@ import { useState, useCallback, useEffect } from 'react';
 import type React from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 
+import type { KafkaTopicWhenType, ValueOf } from '../../common/types';
+
 export interface FormInput {
   validate: () => boolean;
 }
@@ -245,6 +247,83 @@ export function useCustomInput(
 
   const onChange = useCallback(
     (newValues) => {
+      setValue(newValues);
+      if (errors && validate) {
+        setErrors(validate(newValues));
+      }
+    },
+    [validate, errors]
+  );
+
+  return {
+    props: {
+      id,
+      value,
+      onChange,
+      errors,
+      isInvalid,
+      disabled,
+    },
+    formRowProps: {
+      error: errors,
+      isInvalid,
+    },
+    value,
+    clear: () => {
+      setValue([]);
+    },
+    setValue,
+    validate: validateCallback,
+    hasChanged,
+  };
+}
+
+type Topic = Array<{
+  topic: string;
+  when?: {
+    type?: ValueOf<KafkaTopicWhenType>;
+    condition?: string;
+  };
+}>;
+
+// TODO: Unify with useCustomInput
+export function useTopicsInput(
+  id: string,
+  defaultValue: Topic = [],
+  validate?: (value: Topic) => Array<{ message: string; index: number }> | undefined,
+  disabled = false
+) {
+  const [value, setValue] = useState<typeof defaultValue>(defaultValue);
+  const [errors, setErrors] = useState<Array<{ message: string; index: number }> | undefined>();
+  const [hasChanged, setHasChanged] = useState(false);
+
+  useEffect(() => {
+    if (hasChanged) {
+      return;
+    }
+    if (
+      value.length !== defaultValue.length ||
+      value.some((val, idx) => val !== defaultValue[idx])
+    ) {
+      setHasChanged(true);
+    }
+  }, [hasChanged, value, defaultValue]);
+
+  const isInvalid = errors !== undefined;
+
+  const validateCallback = useCallback(() => {
+    if (validate) {
+      const newErrors = validate(value);
+      setErrors(newErrors);
+
+      return newErrors === undefined;
+    }
+
+    return true;
+  }, [validate, value]);
+
+  const onChange = useCallback(
+    (newValues: Topic) => {
       setValue(newValues);
       if (errors && validate) {
         setErrors(validate(newValues));

@@ -38,6 +38,7 @@ import {
   useRadioInput,
   sendPutOutput,
   useCustomInput,
+  useTopicsInput,
 } from '../../../../hooks';
 import type { Output } from '../../../../types';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
@@ -54,6 +55,8 @@ import {
   validateKafkaUsername,
   validateKafkaPassword,
   validateKafkaHeaders,
+  validateKafkaDefaultTopic,
+  validateKafkaTopics,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
 
@@ -94,6 +97,8 @@ export interface OutputFormInputsType {
   kafkaPartitionTypeRoundRobinInput: ReturnType<typeof useInput>;
   kafkaHeadersInput: ReturnType<typeof useCustomInput>;
   kafkaClientIdInput: ReturnType<typeof useInput>;
+  kafkaDefaultTopicInput: ReturnType<typeof useInput>;
+  kafkaTopicsInput: ReturnType<typeof useTopicsInput>;
   kafkaCompressionInput: ReturnType<typeof useSwitchInput>;
   kafkaCompressionLevelInput: ReturnType<typeof useInput>;
   kafkaCompressionCodecInput: ReturnType<typeof useInput>;
@@ -247,6 +252,23 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
 
   const kafkaOutput = output as KafkaOutput;
 
+  const extractDefaultKafkaTopic = (topics?: Array<{ topic: string }>): string => {
+    if (!topics || topics.length === 0) {
+      return '';
+    }
+
+    const lastTopic = topics[topics.length - 1].topic;
+    return lastTopic || '';
+  };
+
+  const extractKafkaTopics = (topics?: Array<{ topic: string }>) => {
+    if (!topics || topics.length <= 1) {
+      return [];
+    }
+
+    return topics.slice(0, -1);
+  };
+
   const kafkaVersionInput = useInput(
     kafkaOutput?.version ?? '1.0.0',
     undefined,
@@ -319,6 +341,17 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     isDisabled('partition')
   );
 
+  const kafkaDefaultTopicInput = useInput(
+    extractDefaultKafkaTopic(kafkaOutput?.topics),
+    validateKafkaDefaultTopic,
+    isDisabled('topics')
+  );
+  const kafkaTopicsInput = useTopicsInput(
+    'kafkaTopicsComboBox',
+    extractKafkaTopics(kafkaOutput?.topics),
+    validateKafkaTopics,
+    isDisabled('topics')
+  );
   const kafkaHeadersInput = useCustomInput(
     'kafkaHeadersComboBox',
     kafkaOutput?.headers ?? [{ key: '', value: '' }],
@@ -422,6 +455,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaSslCertificateAuthoritiesInput,
     kafkaSslCertificateInput,
     kafkaSslKeyInput,
+    kafkaDefaultTopicInput,
+    kafkaTopicsInput,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -434,6 +469,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     const kafkaPasswordValid = kafkaAuthPasswordInput.validate();
     const kafkaSslCertificateValid = kafkaSslCertificateInput.validate();
     const kafkaSslKeyValid = kafkaSslKeyInput.validate();
+    const kafkaDefaultTopicValid = kafkaDefaultTopicInput.validate();
+    const kafkaTopicsValid = kafkaTopicsInput.validate();
     const kafkaHeadersValid = kafkaHeadersInput.validate();
     const logstashHostsValid = logstashHostsInput.validate();
     const additionalYamlConfigValid = additionalYamlConfigInput.validate();
@@ -462,6 +499,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
         kafkaUsernameValid &&
         kafkaPasswordValid &&
         kafkaHeadersValid &&
+        kafkaDefaultTopicValid &&
+        kafkaTopicsValid &&
         additionalYamlConfigValid
       );
     } else {
@@ -482,6 +521,8 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaAuthPasswordInput,
     kafkaSslCertificateInput,
     kafkaSslKeyInput,
+    kafkaDefaultTopicInput,
+    kafkaTopicsInput,
     kafkaHeadersInput,
     logstashHostsInput,
     additionalYamlConfigInput,
@@ -618,7 +659,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
                     },
                   }
                 : {}),
-              topics: [{ topic: 'hello' }], // TODO: add to UI
+              topics: [...kafkaTopicsInput.value, { topic: kafkaDefaultTopicInput.value }],
               headers: kafkaHeadersInput.value,
               timeout: parseIntegerIfStringDefined(kafkaBrokerTimeoutInput.value),
               broker_timeout: parseIntegerIfStringDefined(
@@ -732,6 +773,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     kafkaPartitionTypeRandomInput.value,
     kafkaPartitionTypeRoundRobinInput.value,
     kafkaPartitionTypeHashInput.value,
+    kafkaDefaultTopicInput.value,
     kafkaHeadersInput.value,
     kafkaBrokerTimeoutInput.value,
     kafkaBrokerReachabilityTimeoutInput.value,

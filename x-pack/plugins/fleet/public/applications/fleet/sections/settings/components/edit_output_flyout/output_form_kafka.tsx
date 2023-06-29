@@ -16,6 +16,8 @@ import { kafkaSupportedVersions } from '../../../../../../../common/constants';
 
 import { MultiRowInput } from '../multi_row_input';
 
+import { OutputFormKafkaTopics } from './output_form_kafka_topics';
+
 import { OutputFormKafkaHeaders } from './output_form_kafka_headers';
 
 import { OutputFormKafkaBroker } from './output_form_kafka_broker';
@@ -106,6 +108,9 @@ export const OutputFormKafkaSection: React.FunctionComponent<Props> = (props) =>
       <EuiSpacer size="m" />
 
       <OutputFormKafkaPartitioning inputs={inputs} />
+      <EuiSpacer size="m" />
+
+      <OutputFormKafkaTopics inputs={inputs} />
       <EuiSpacer size="m" />
 
       <OutputFormKafkaHeaders inputs={inputs} />

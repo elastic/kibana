@@ -201,6 +201,41 @@ export function validateSSLKey(value: string) {
   }
 }
 
+export function validateKafkaDefaultTopic(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kafkaDefaultTopicRequiredMessage', {
+        defaultMessage: 'Default topic is required',
+      }),
+    ];
+  }
+}
+
+export function validateKafkaTopics(
+  topics: Array<{
+    topic: string;
+  }>
+) {
+  const errors: Array<{
+    message: string;
+    index: number;
+  }> = [];
+
+  topics.forEach((topic, index) => {
+    if (!topic.topic || topic.topic === '') {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicRequiredMessage', {
+          defaultMessage: 'Topic is required',
+        }),
+        index,
+      });
+    }
+  });
+  if (errors.length) {
+    return errors;
+  }
+}
+
 export function validateKafkaHeaders(pairs: Array<{ key: string; value: string }>) {
   const errors: Array<{
     message: string;

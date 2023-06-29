@@ -158,7 +158,7 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
                   onClick={() => deleteKeyValuePair(index)}
                   iconType="cross"
                   disabled={deleteButtonDisabled}
-                  aria-label={i18n.translate('xpack.fleet.multiRowInput.deleteButton', {
+                  aria-label={i18n.translate('xpack.fleet.kafkaHeadersInput.deleteButton', {
                     defaultMessage: 'Delete row',
                   })}
                 />
@@ -171,14 +171,14 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
 
       <EuiSpacer size="m" />
       <EuiButtonEmpty
-        data-test-subj="fleetServerHosts.multiRowInput.addRowButton"
+        data-test-subj="kafkaHeaders.multiRowInput.addRowButton"
         disabled={addKeyValuePairButtonDisabled}
         size="xs"
         flush="left"
         iconType="plusInCircle"
         onClick={addKeyValuePair}
       >
-        <FormattedMessage id="xpack.fleet.multiRowInput.addRow" defaultMessage="Add header" />
+        <FormattedMessage id="xpack.fleet.kafkaHeadersInput.addRow" defaultMessage="Add header" />
       </EuiButtonEmpty>
       <EuiSpacer size="m" />
       <EuiFormRow
@@ -191,7 +191,7 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
         }
       >
         <EuiFieldText
-          data-test-subj="settingsOutputsFlyout.kafkaPasswordInput"
+          data-test-subj="settingsOutputsFlyout.kafkaClientIdInput"
           fullWidth
           {...inputs.kafkaClientIdInput.props}
         />
