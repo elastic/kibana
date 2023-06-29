@@ -185,7 +185,7 @@ export const ProjectHeader = ({
       <SkipToMainContent />
 
       <HeaderTopBanner headerBanner$={observables.headerBanner$} />
-      <header className={className} data-test-subj="kibanaProjectHeader">
+      <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars" className="header__bars">
           <EuiHeader position="fixed" className="header__firstBar">
             <EuiHeaderSection grow={false}>
@@ -263,16 +263,20 @@ export const ProjectHeader = ({
             </EuiHeaderSection>
           </EuiHeader>
 
-          {headerActionMenuMounter.mount && (
-            <EuiHeader data-test-subj="kibanaProjectHeaderActionMenu">
-              <EuiHeaderSection />
+          <EuiHeader
+            position="fixed"
+            className="header__secondBar"
+            data-test-subj="kibanaProjectHeaderActionMenu"
+          >
+            <EuiHeaderSection />
+            {headerActionMenuMounter.mount && (
               <EuiHeaderSection side="right">
                 <EuiHeaderSectionItem>
                   <HeaderActionMenu mounter={headerActionMenuMounter} />
                 </EuiHeaderSectionItem>
               </EuiHeaderSection>
-            </EuiHeader>
-          )}
+            )}
+          </EuiHeader>
         </div>
       </header>
     </>

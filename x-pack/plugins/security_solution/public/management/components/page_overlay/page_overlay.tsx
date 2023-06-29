@@ -96,6 +96,7 @@ const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
   // With serverless, there is 1 less header displayed, thus the display of the page overlay
   // need to be adjusted slightly so that it still display below the header
   //-------------------------------------------------------------------------------------------
+  // FIXME test for top header banner @tsullivan
   body.kbnBody.kbnBody--projectLayout:not(.${PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME}) .${PAGE_OVERLAY_CSS_CLASSNAME} {
     top: ${({ theme: { eui } }) => eui.euiHeaderHeightCompensation};
     height: calc(100% - (${({ theme: { eui } }) => eui.euiHeaderHeightCompensation}));
