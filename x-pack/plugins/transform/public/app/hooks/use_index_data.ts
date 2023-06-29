@@ -54,7 +54,11 @@ export const useIndexData = (
   timeRangeMs?: TimeRangeMs
 ): UseIndexDataReturnType => {
   const { analytics } = useAppDependencies();
+
+  // Store the performance metric's start time using a ref
+  // to be able to track it across rerenders.
   const loadIndexDataStartTime = useRef<number | undefined>(window.performance.now());
+
   const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
 
   const api = useApi();
@@ -324,7 +328,10 @@ export const useIndexData = (
     loadIndexDataStartTime.current !== undefined
   ) {
     const loadIndexDataDuration = window.performance.now() - loadIndexDataStartTime.current;
+
+    // Set this to undefined so reporting the metric gets triggered only once.
     loadIndexDataStartTime.current = undefined;
+
     reportPerformanceMetricEvent(analytics, {
       eventName: 'transformLoadIndexPreview',
       duration: loadIndexDataDuration,
