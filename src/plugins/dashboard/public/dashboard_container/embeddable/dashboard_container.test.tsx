@@ -269,7 +269,7 @@ describe('getInheritedInput', () => {
       timeRange: dashboardTimeRange,
       timeslice: dashboardTimeslice,
       panels: {
-        '123': getSampleDashboardPanel<ContactCardEmbeddableInput & { timeRange: TimeRange }>({
+        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
           explicitInput: {
             id: '123',
           },
