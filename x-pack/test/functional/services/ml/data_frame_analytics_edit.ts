@@ -64,6 +64,15 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
       await testSubjects.existOrFail('mlJobCustomUrlForm');
     },
 
+    async clickIntervalTimeRangeSwitch() {
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
+          'mlJobCustomUrlIntervalTimeRangeSwitch'
+        );
+      });
+      await testSubjects.existOrFail('mlJobCustomUrlTimeRangeIntervalInput');
+    },
+
     async getExistingCustomUrlCount(): Promise<number> {
       const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
       return existingCustomUrls.length;
@@ -114,12 +123,10 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
         'mlJobCustomUrlDashboardNameInput',
         customUrl.dashboardName
       );
+
       await customUrls.setCustomUrlQueryEntityFieldNames(customUrl.queryEntityFieldNames);
       if (customUrl.timeRange === TIME_RANGE_TYPE.INTERVAL) {
-        await mlCommonUI.selectSelectValueByVisibleText(
-          'mlJobCustomUrlTimeRangeInput',
-          customUrl.timeRange
-        );
+        await this.clickIntervalTimeRangeSwitch();
         await customUrls.setCustomUrlTimeRangeInterval(customUrl.timeRangeInterval!);
       }
     },
@@ -127,7 +134,7 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
     async fillInOtherUrlForm(customUrl: OtherUrlConfig) {
       await this.clickOpenCustomUrlEditor();
       await customUrls.setCustomUrlLabel(customUrl.label);
-      await mlCommonUI.selectRadioGroupValue(`mlJobCustomUrlLinkToTypeInput`, URL_TYPE.OTHER);
+      await mlCommonUI.selectRadioGroupValue('mlJobCustomUrlLinkToTypeInput', URL_TYPE.OTHER);
       await customUrls.setCustomUrlOtherTypeUrl(customUrl.url);
     },
 
@@ -137,8 +144,8 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
     ) {
       await retry.tryForTime(30 * 1000, async () => {
         await this.fillInDashboardUrlForm(customUrl);
-        await this.saveCustomUrl(customUrl.label, expectedResult.index, expectedResult.url);
       });
+      await this.saveCustomUrl(customUrl.label, expectedResult.index, expectedResult.url);
     },
 
     async addDiscoverCustomUrl(customUrl: DiscoverUrlConfig) {
@@ -157,6 +164,40 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
         await this.fillInOtherUrlForm(customUrl);
         await this.saveCustomUrl(customUrl.label, existingCustomUrlCount);
       });
+    },
+
+    async testOtherTypeCustomUrlAction(indexInList: number, expectedUrl: string) {
+      await customUrls.assertCustomUrlUrlValue(indexInList, expectedUrl);
+      await this.closeEditJobFlyout();
+    },
+
+    async editCustomUrl(indexInList: number, customUrl: { label: string; url: string }) {
+      await customUrls.editCustomUrlLabel(indexInList, customUrl.label);
+      await customUrls.editCustomUrlUrlValue(indexInList, customUrl.url);
+    },
+
+    async deleteCustomUrl(jobId: string, indexInList: number) {
+      const beforeCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlItemLabel');
+      await customUrls.deleteCustomUrl(indexInList);
+      return beforeCustomUrls.length;
+    },
+
+    async assertCustomUrlsLength(expectedLength: number) {
+      await customUrls.assertCustomUrlsLength(expectedLength);
+      await this.closeEditJobFlyout();
+    },
+
+    async openTestCustomUrl(jobId: string, indexInList: number) {
+      await this.openEditCustomUrlsForJobTab(jobId);
+      await customUrls.clickTestCustomUrl(indexInList);
+    },
+
+    async testDiscoverCustomUrlAction(expectedHitCountFormatted: string) {
+      await customUrls.assertDiscoverCustomUrlAction(expectedHitCountFormatted);
+    },
+
+    async testDashboardCustomUrlAction(expectedPanelCount: number) {
+      await customUrls.assertDashboardCustomUrlAction(expectedPanelCount);
     },
 
     async closeEditJobFlyout() {
