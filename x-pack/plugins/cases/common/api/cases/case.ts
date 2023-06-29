@@ -13,6 +13,8 @@ import { CommentRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt } from '../connectors/connector';
 import { CaseAssigneesRt } from './assignee';
+import { limitedArraySchema, NonEmptyString } from '../../schema';
+import { MAX_DELETE_IDS_LENGTH } from '../../constants';
 
 export const AttachmentTotalsRt = rt.strict({
   alerts: rt.number,
@@ -283,6 +285,13 @@ export const CasesFindRequestRt = rt.exact(
   })
 );
 
+export const CasesDeleteRequestRt = limitedArraySchema(
+  NonEmptyString,
+  1,
+  MAX_DELETE_IDS_LENGTH,
+  'ids'
+);
+
 export const CasesByAlertIDRequestRt = rt.exact(
   rt.partial({
     /**
@@ -420,6 +429,7 @@ export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type Case = rt.TypeOf<typeof CaseRt>;
 export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
 export type Cases = rt.TypeOf<typeof CasesRt>;
+export type CasesDeleteRequest = rt.TypeOf<typeof CasesDeleteRequestRt>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
 export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
