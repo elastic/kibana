@@ -70,14 +70,12 @@ export class SyncSavedObjectService {
     connectorId,
     caseId,
     externalId,
-    externalSystemSyncedAt,
-    caseSyncedAt,
+    lastSyncedAt,
   }: {
     connectorId: string;
     caseId: string;
     externalId: string;
-    externalSystemSyncedAt: string;
-    caseSyncedAt: string;
+    lastSyncedAt: string;
   }) {
     try {
       const savedObjectId = this.getSavedObjectId({ connectorId, caseId });
@@ -86,8 +84,7 @@ export class SyncSavedObjectService {
         CASE_SYNC_SAVED_OBJECT,
         {
           externalId,
-          externalSystemSyncedAt,
-          caseSyncedAt,
+          lastSyncedAt,
         },
         {
           id: savedObjectId,
@@ -108,14 +105,12 @@ export class SyncSavedObjectService {
   public async update({
     connectorId,
     caseId,
-    externalSystemSyncedAt,
-    caseSyncedAt,
+    lastSyncedAt,
     version,
   }: {
     connectorId: string;
     caseId: string;
-    externalSystemSyncedAt: string;
-    caseSyncedAt: string;
+    lastSyncedAt: string;
     version: string;
   }) {
     try {
@@ -125,8 +120,7 @@ export class SyncSavedObjectService {
         CASE_SYNC_SAVED_OBJECT,
         savedObjectId,
         {
-          externalSystemSyncedAt,
-          caseSyncedAt,
+          lastSyncedAt,
         },
         { version }
       );

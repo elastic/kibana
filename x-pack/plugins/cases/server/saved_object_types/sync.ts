@@ -17,10 +17,7 @@ export const casesSyncSavedObjectType: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      caseLastSynced: {
-        type: 'date',
-      },
-      externalSystemLastSynced: {
+      lastSynced: {
         type: 'date',
       },
       externalId: {

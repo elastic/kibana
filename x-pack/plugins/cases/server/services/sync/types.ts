@@ -22,8 +22,7 @@ export interface Sync {
   connectorId: string;
   caseId: string;
   externalId: string;
-  externalSystemSyncedAt: string;
-  caseSyncedAt: string;
+  lastSyncedAt: string;
 }
 
 export interface SyncApiKey {
@@ -31,6 +30,7 @@ export interface SyncApiKey {
   apiKeyId: string;
 }
 
+// TODO: these should be imported from the stack connectors plugin
 export interface JiraIncidentResponse {
   summary: string;
   description: string;
@@ -42,10 +42,31 @@ export interface JiraIncidentResponse {
   updated: string;
 }
 
+// TODO: these should be imported from the stack connectors plugin
+export interface Transition {
+  id: string;
+  name: string;
+  statusId: string;
+}
+
+// TODO: these should be imported from the stack connectors plugin
+export interface ExternalServiceTransitionsResponse {
+  byName: Map<string, Transition>;
+  byId: Map<string, Transition>;
+  byStatusId: Map<string, Transition>;
+}
+
 export interface Mapping {
+  mapping: MappingEntry[];
+  externalToCase: Map<string, MappingEntry>;
+  caseToExternal: Map<string, MappingEntry>;
+}
+
+export interface MappingEntry {
   key: string;
   caseField: string;
-  translation?: Map<string, unknown>;
+  translateToCase?: Map<string, unknown>;
+  translateToExternal?: Map<unknown, string>;
 }
 
 export interface SyncTaskContext {

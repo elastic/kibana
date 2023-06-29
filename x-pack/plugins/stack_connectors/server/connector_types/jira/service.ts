@@ -22,13 +22,16 @@ import {
   ExternalServiceCommentResponse,
   ExternalServiceCredentials,
   ExternalServiceIncidentResponse,
+  ExternalServiceTransitionsResponse,
   Fields,
   FieldSchema,
   GetCommonFieldsResponse,
+  GetTransitionsResponse,
   Incident,
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
   ResponseError,
+  Transition,
   UpdateIncidentParams,
 } from './types';
 import { escapeJqlSpecialCharacters } from './utils';
@@ -290,19 +293,22 @@ export const createExternalService = (
         res,
       });
 
-      if (incident.status != null) {
-        // TODO: get the transitions to build a mapping and then set the status
+      if (incident.statusTransitionId != null) {
         const statusRes = await request({
           axios: axiosInstance,
           method: 'post',
           url: `${incidentUrl}/${incidentId}/transitions`,
           logger,
-          data: { fields },
+          data: {
+            transition: {
+              id: incident.statusTransitionId,
+            },
+          },
           configurationUtilities,
         });
 
         throwIfResponseIsNotValid({
-          res,
+          res: statusRes,
         });
       }
 
@@ -324,6 +330,44 @@ export const createExternalService = (
         )
       );
     }
+  };
+
+  const getTransitions = async (
+    incidentId: string
+  ): Promise<ExternalServiceTransitionsResponse> => {
+    const res = await request({
+      axios: axiosInstance,
+      method: 'get',
+      url: `${incidentUrl}/${incidentId}/transitions`,
+      logger,
+      configurationUtilities,
+    });
+
+    throwIfResponseIsNotValid({
+      res,
+    });
+
+    const typedRes = res.data as unknown as GetTransitionsResponse;
+
+    const results: ExternalServiceTransitionsResponse = {
+      byId: new Map<string, Transition>(),
+      byName: new Map<string, Transition>(),
+      byStatusId: new Map<string, Transition>(),
+    };
+
+    for (const transition of typedRes.transitions) {
+      const transformedTransition = {
+        id: transition.id,
+        name: transition.name,
+        statusId: transition.to.id,
+      };
+
+      results.byId.set(transition.id, transformedTransition);
+      results.byName.set(transition.name, transformedTransition);
+      results.byStatusId.set(transition.to.id, transformedTransition);
+    }
+
+    return results;
   };
 
   const createComment = async ({
@@ -585,5 +629,6 @@ export const createExternalService = (
     getFieldsByIssueType,
     getIssues,
     getIssue,
+    getTransitions,
   };
 };

@@ -27,7 +27,7 @@ export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
 
 export const ExecutorSubActionPushParamsSchema = schema.object({
   incident: schema.object({
-    status: schema.nullable(schema.string()),
+    statusTransitionId: schema.nullable(schema.string()),
     summary: schema.string(),
     description: schema.nullable(schema.string()),
     externalId: schema.nullable(schema.string()),
@@ -55,6 +55,10 @@ export const ExecutorSubActionPushParamsSchema = schema.object({
 });
 
 export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
+  externalId: schema.string(),
+});
+
+export const ExecutorSubActionGetTransitionsParamsSchema = schema.object({
   externalId: schema.string(),
 });
 
@@ -101,5 +105,9 @@ export const ExecutorParamsSchema = schema.oneOf([
   schema.object({
     subAction: schema.literal('issue'),
     subActionParams: ExecutorSubActionGetIssueParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('getTransitions'),
+    subActionParams: ExecutorSubActionGetTransitionsParamsSchema,
   }),
 ]);

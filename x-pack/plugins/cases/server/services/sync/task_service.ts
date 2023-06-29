@@ -83,7 +83,7 @@ export class Syncer {
       attachmentService,
     });
 
-    const cases = await caseService.findCases({ filter: createFilter(), perPage: 1 });
+    const cases = await caseService.findCases({ filter: createFilter(), perPage: 5 });
     console.log('num cases found', cases.saved_objects.length);
 
     const casesGroupedByConnectorId = groupByConnectorId(cases);
@@ -120,15 +120,11 @@ export class Syncer {
         const comparableCase = translate(externalIncident);
         console.log('comparableCase', JSON.stringify(comparableCase, null, 2));
 
-        const caseSyncTimestamp = new Date(syncInfo.attributes.caseSyncedAt);
+        const lastSyncedAt = new Date(syncInfo.attributes.lastSyncedAt);
         const caseInfoUpdatedAt = new Date(caseInfo.attributes.updated_at ?? 0);
-        const externalIncidentSyncTimestamp = new Date(syncInfo.attributes.externalSystemSyncedAt);
         const externalIncidentUpdatedAt = new Date(externalIncident.updated);
 
-        if (
-          caseInfoUpdatedAt > caseSyncTimestamp &&
-          externalIncidentUpdatedAt > externalIncidentSyncTimestamp
-        ) {
+        if (caseInfoUpdatedAt > lastSyncedAt && externalIncidentUpdatedAt > lastSyncedAt) {
           // TODO: conflict use the kibana case
           console.log('encountered a conflict taking everything from the case');
           await this.pushCaseToExternal({
@@ -138,7 +134,7 @@ export class Syncer {
             casesClient,
             syncInfo,
           });
-        } else if (caseInfoUpdatedAt > caseSyncTimestamp) {
+        } else if (caseInfoUpdatedAt > lastSyncedAt) {
           await this.pushCaseToExternal({
             connectorId,
             caseInfo,
@@ -146,7 +142,7 @@ export class Syncer {
             casesClient,
             syncInfo,
           });
-        } else if (externalIncidentUpdatedAt > externalIncidentSyncTimestamp) {
+        } else if (externalIncidentUpdatedAt > lastSyncedAt) {
           // TODO: implement a partial update
           console.log('doing a case update');
           await casesClient.cases.update({
@@ -166,10 +162,11 @@ export class Syncer {
           await syncService.update({
             connectorId,
             caseId: caseInfo.id,
-            caseSyncedAt: syncTimestamp,
-            externalSystemSyncedAt: syncTimestamp,
+            lastSyncedAt: syncTimestamp,
             version: syncInfo.version ?? '',
           });
+        } else {
+          console.log('no changes found');
         }
       }
     }
@@ -202,8 +199,7 @@ export class Syncer {
         caseId: caseInfo.id,
         // TODO: fix me
         externalId: pushRes.external_service?.external_id ?? '',
-        caseSyncedAt: syncTimestamp,
-        externalSystemSyncedAt: syncTimestamp,
+        lastSyncedAt: syncTimestamp,
       });
 
       return;
@@ -213,8 +209,7 @@ export class Syncer {
     await syncService.update({
       connectorId,
       caseId: caseInfo.id,
-      caseSyncedAt: syncTimestamp,
-      externalSystemSyncedAt: syncTimestamp,
+      lastSyncedAt: syncTimestamp,
       version: syncInfo.version ?? '',
     });
   }

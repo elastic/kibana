@@ -22,6 +22,7 @@ import {
   ExecutorSubActionGetIssuesParamsSchema,
   ExecutorSubActionGetIssueParamsSchema,
   ExecutorSubActionCommonFieldsParamsSchema,
+  ExecutorSubActionGetTransitionsParamsSchema,
 } from './schema';
 
 export type JiraPublicConfigurationType = TypeOf<typeof ExternalIncidentServiceConfigurationSchema>;
@@ -108,12 +109,17 @@ export interface ExternalService {
   getIssues: (title: string) => Promise<GetIssuesResponse>;
   getIssueTypes: () => Promise<GetIssueTypesResponse>;
   updateIncident: (params: UpdateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
+  getTransitions: (incidentId: string) => Promise<ExternalServiceTransitionsResponse>;
 }
 
 export type PushToServiceApiParams = ExecutorSubActionPushParams;
 
 export type ExecutorSubActionGetIncidentParams = TypeOf<
   typeof ExecutorSubActionGetIncidentParamsSchema
+>;
+
+export type ExecutorSubActionGetTransitionsParams = TypeOf<
+  typeof ExecutorSubActionGetTransitionsParamsSchema
 >;
 
 export type ExecutorSubActionHandshakeParams = TypeOf<
@@ -184,6 +190,11 @@ export interface GetIssueHandlerArgs {
   params: ExecutorSubActionGetIssueParams;
 }
 
+export interface GetTransitionsHandlerArgs {
+  externalService: ExternalService;
+  params: ExecutorSubActionGetTransitionsParams;
+}
+
 export interface ExternalServiceApi {
   getFields: (args: GetCommonFieldsHandlerArgs) => Promise<GetCommonFieldsResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<ExternalServiceParams | undefined>;
@@ -195,6 +206,7 @@ export interface ExternalServiceApi {
   ) => Promise<GetFieldsByIssueTypeResponse>;
   issue: (args: GetIssueHandlerArgs) => Promise<GetIssueResponse>;
   issues: (args: GetIssuesHandlerArgs) => Promise<GetIssuesResponse>;
+  getTransitions: (args: GetTransitionsHandlerArgs) => Promise<ExternalServiceTransitionsResponse>;
 }
 
 export type JiraExecutorResultData =
@@ -203,7 +215,8 @@ export type JiraExecutorResultData =
   | GetFieldsByIssueTypeResponse
   | GetIssuesResponse
   | GetIssueResponse
-  | ExternalServiceParams;
+  | ExternalServiceParams
+  | ExternalServiceTransitionsResponse;
 
 export interface Fields {
   [key: string]: string | string[] | { name: string } | { key: string } | { id: string };
@@ -220,4 +233,26 @@ export interface ExternalServiceCommentResponse {
   commentId: string;
   pushedDate: string;
   externalCommentId?: string;
+}
+
+export interface Transition {
+  id: string;
+  name: string;
+  statusId: string;
+}
+
+export interface ExternalServiceTransitionsResponse {
+  byName: Map<string, Transition>;
+  byId: Map<string, Transition>;
+  byStatusId: Map<string, Transition>;
+}
+
+export interface GetTransitionsResponse {
+  transitions: Array<{
+    id: string;
+    name: string;
+    to: {
+      id: string;
+    };
+  }>;
 }

@@ -8,10 +8,15 @@
 import { CaseStatuses } from '@kbn/cases-components';
 import { set } from '@kbn/safer-lodash-set';
 import { get } from 'lodash';
-import type { JiraIncidentResponse, Mapping, SyncFields } from './types';
+import type { JiraIncidentResponse, Mapping, MappingEntry, SyncFields } from './types';
 
-export const getJiraToCaseMapping = (): Mapping[] => {
-  return [
+const TODO = 'To Do';
+const IN_PROGRESS = 'In Progress';
+const DONE = 'Done';
+
+// TODO: move this to the connectors directory within cases
+export const getJiraToCaseMapping = (): Mapping => {
+  const mapping = [
     {
       key: 'summary',
       caseField: 'title',
@@ -21,21 +26,39 @@ export const getJiraToCaseMapping = (): Mapping[] => {
       caseField: 'description',
     },
     {
-      key: 'status.id',
+      key: 'status.name',
       caseField: 'status',
-      translation: new Map([
-        ['10000', CaseStatuses.open],
-        ['10001', CaseStatuses['in-progress']],
-        ['10002', CaseStatuses.closed],
+      translateToCase: new Map([
+        [TODO, CaseStatuses.open],
+        [IN_PROGRESS, CaseStatuses['in-progress']],
+        [DONE, CaseStatuses.closed],
+      ]),
+      translateToExternal: new Map([
+        [CaseStatuses.open, TODO],
+        [CaseStatuses['in-progress'], IN_PROGRESS],
+        [CaseStatuses.closed, DONE],
       ]),
     },
   ];
+
+  const jiraToCase = new Map<string, MappingEntry>(mapping.map((entry) => [entry.key, entry]));
+  const caseToJira = new Map<string, MappingEntry>(
+    mapping.map((entry) => [entry.caseField, entry])
+  );
+
+  return {
+    mapping,
+    externalToCase: jiraToCase,
+    caseToExternal: caseToJira,
+  };
 };
 
 export const translate = (incident: JiraIncidentResponse): SyncFields => {
   const caseCompareFields: SyncFields = { title: '', description: '', status: CaseStatuses.open };
 
-  for (const { key, caseField, translation } of getJiraToCaseMapping()) {
+  const jiraMapping = getJiraToCaseMapping();
+
+  for (const { key, caseField, translateToCase: translation } of jiraMapping.mapping) {
     if (translation) {
       const value = get(incident, key, '');
 
