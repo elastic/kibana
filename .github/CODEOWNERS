@@ -963,6 +963,9 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 #CC# /src/plugins/newsfeed @elastic/kibana-core
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
 
+# AppEx Platform Services Security
+x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
+
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core
 /x-pack/.telemetryrc.json @elastic/kibana-core
