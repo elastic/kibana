@@ -72,35 +72,37 @@ export const MetadataSummary = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="m" responsive={false} wrap={true}>
-        {metadataData(metadata?.info).map((metadataValue) => (
-          <EuiFlexItem key={metadataValue.field}>
-            <EuiDescriptionList data-test-subj="infraMetadataSummaryItem" compressed>
-              <EuiDescriptionListTitle
-                css={css`
-                  white-space: nowrap;
-                `}
-              >
-                {columnTitles[metadataValue.field as MetadataFields]}
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {metadataLoading ? (
-                  <EuiLoadingSpinner />
-                ) : (
-                  <ExpandableContent values={metadataValue.value ?? NOT_AVAILABLE_LABEL} />
-                )}
-              </EuiDescriptionListDescription>
-            </EuiDescriptionList>
-          </EuiFlexItem>
-        ))}
-        <EuiFlexItem key="metadata-link">
+      <EuiFlexGroup gutterSize="m" responsive={false} wrap={true} justifyContent="spaceBetween">
+        <EuiFlexGroup alignItems="flexStart">
+          {metadataData(metadata?.info).map((metadataValue) => (
+            <EuiFlexItem key={metadataValue.field}>
+              <EuiDescriptionList data-test-subj="infraMetadataSummaryItem" compressed>
+                <EuiDescriptionListTitle
+                  css={css`
+                    white-space: nowrap;
+                  `}
+                >
+                  {columnTitles[metadataValue.field as MetadataFields]}
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {metadataLoading ? (
+                    <EuiLoadingSpinner />
+                  ) : (
+                    <ExpandableContent values={metadataValue.value ?? NOT_AVAILABLE_LABEL} />
+                  )}
+                </EuiDescriptionListDescription>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+        <EuiFlexItem grow={false} key="metadata-link">
           <EuiButtonEmpty
             data-test-subj="infraMetadataSummaryShowAllMetadataButton"
             onClick={onClick}
             size="s"
-            iconSide="left"
             flush="both"
-            iconType="inspect"
+            iconSide="right"
+            iconType="sortRight"
           >
             <FormattedMessage
               id="xpack.infra.assetDetailsEmbeddable.metadataSummary.showAllMetadataButton"
