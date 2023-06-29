@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ChromeNavLinks,
-  ChromeProjectNavigation,
-  ChromeProjectNavigationNode,
-} from '@kbn/core-chrome-browser';
+import type { ChromeNavLinks, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
 import { combineLatest, skipWhile, debounceTime } from 'rxjs';
 import type { Services } from '../services';
@@ -37,50 +33,48 @@ const HIDDEN_BREADCRUMBS = new Set<SecurityPageName>([
 ]);
 
 export const subscribeNavigationTree = (services: Services): void => {
-  const { chrome, serverless, projectNavLinks$ } = services;
+  const { chrome, serverless, getProjectNavLinks$ } = services;
 
   combineLatest([
-    projectNavLinks$.pipe(skipWhile((navLink) => navLink.length === 0)),
+    getProjectNavLinks$().pipe(skipWhile((navLink) => navLink.length === 0)),
     chrome.navLinks.getNavLinks$().pipe(skipWhile((chromeNavLinks) => chromeNavLinks.length === 0)),
   ])
     .pipe(debounceTime(100)) // avoid multiple calls in a short time
-    .subscribe(([navLinks]) => {
-      const projectNavTree: ChromeProjectNavigation = {
-        // The root link is temporary until the issue about having multiple links at first level is solved.
-        // TODO: Assign the navigationTree nodes when the issue is solved:
-        // navigationTree: formatChromeProjectNavNodes(chrome.navLinks, navLinks),
-        navigationTree: [
-          {
-            id: 'root',
-            title: 'Root',
-            path: ['root'],
-            breadcrumbStatus: 'hidden',
-            children: formatChromeProjectNavNodes(chrome.navLinks, navLinks, ['root']),
-          },
-        ],
-      };
-      serverless.setNavigation(projectNavTree);
+    .subscribe(([projectNavLinks]) => {
+      // The root link is temporary until the issue about having multiple links at first level is solved.
+      // TODO: Assign the navigationTree nodes when the issue is solved:
+      // const navigationTree = formatChromeProjectNavNodes(chrome.navLinks, projectNavLinks),
+      const navigationTree: ChromeProjectNavigationNode[] = [
+        {
+          id: 'root',
+          title: 'Root',
+          path: ['root'],
+          breadcrumbStatus: 'hidden',
+          children: formatChromeProjectNavNodes(chrome.navLinks, projectNavLinks, ['root']),
+        },
+      ];
+      serverless.setNavigation({ navigationTree });
     });
 };
 
 const formatChromeProjectNavNodes = (
   chromeNavLinks: ChromeNavLinks,
-  navLinks: ProjectNavigationLink[],
+  projectNavLinks: ProjectNavigationLink[],
   path: string[] = []
-): ChromeProjectNavigationNode[] => {
-  return navLinks.reduce<ChromeProjectNavigationNode[]>((navNodes, navLink) => {
+): ChromeProjectNavigationNode[] =>
+  projectNavLinks.reduce<ChromeProjectNavigationNode[]>((navNodes, navLink) => {
     const { id: deepLinkId, appId = APP_UI_ID, links, title } = navLink;
 
     const id = deepLinkId ? `${appId}:${deepLinkId}` : appId;
 
     if (chromeNavLinks.has(id)) {
-      const hidden = appId === APP_UI_ID && HIDDEN_BREADCRUMBS.has(deepLinkId as SecurityPageName);
+      const breadcrumbHidden = appId === APP_UI_ID && HIDDEN_BREADCRUMBS.has(deepLinkId);
       const link: ChromeProjectNavigationNode = {
         id,
         title,
-        path: [...path, deepLinkId],
+        path: [...path, id],
         deepLink: chromeNavLinks.get(id),
-        ...(hidden && { breadcrumbStatus: 'hidden' }),
+        ...(breadcrumbHidden && { breadcrumbStatus: 'hidden' }),
       };
 
       if (links?.length) {
@@ -90,4 +84,3 @@ const formatChromeProjectNavNodes = (
     }
     return navNodes;
   }, []);
-};

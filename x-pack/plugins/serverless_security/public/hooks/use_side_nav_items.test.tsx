@@ -8,7 +8,11 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useSideNavItems, useSideNavSelectedId } from './use_side_nav_items';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
-import { KibanaServicesProvider, servicesMocks, mockNavLinks } from '../common/services.mock';
+import {
+  KibanaServicesProvider,
+  servicesMocks,
+  mockProjectNavLinks,
+} from '../common/services.mock';
 
 jest.mock('./use_link_props');
 
@@ -33,7 +37,7 @@ describe('useSideNavItems', () => {
   });
 
   it('should return main items', async () => {
-    mockNavLinks.mockReturnValueOnce([
+    mockProjectNavLinks.mockReturnValueOnce([
       { id: SecurityPageName.alerts, title: 'Alerts' },
       { id: SecurityPageName.case, title: 'Cases' },
     ]);
@@ -59,7 +63,7 @@ describe('useSideNavItems', () => {
   });
 
   it('should return secondary items', async () => {
-    mockNavLinks.mockReturnValueOnce([
+    mockProjectNavLinks.mockReturnValueOnce([
       {
         id: SecurityPageName.dashboards,
         title: 'Dashboards',
@@ -89,7 +93,7 @@ describe('useSideNavItems', () => {
   });
 
   it('should return get started link', async () => {
-    mockNavLinks.mockReturnValueOnce([
+    mockProjectNavLinks.mockReturnValueOnce([
       {
         id: SecurityPageName.landing,
         title: 'Get Started',

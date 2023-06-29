@@ -15,14 +15,14 @@ import { BehaviorSubject } from 'rxjs';
 import type { ProjectNavigationLink } from './navigation/links';
 import type { Services } from './services';
 
-export const mockNavLinks = jest.fn((): ProjectNavigationLink[] => []);
+export const mockProjectNavLinks = jest.fn((): ProjectNavigationLink[] => []);
 
 export const servicesMocks: Services = {
   ...coreMock.createStart(),
   serverless: serverlessMock.createStart(),
   security: securityMock.createStart(),
   securitySolution: securitySolutionMock.createStart(),
-  getProjectNavLinks$: jest.fn(() => new BehaviorSubject(mockNavLinks())),
+  getProjectNavLinks$: jest.fn(() => new BehaviorSubject(mockProjectNavLinks())),
 };
 
 export const KibanaServicesProvider = React.memo(({ children }) => (

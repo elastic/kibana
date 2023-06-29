@@ -11,10 +11,10 @@ import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/commo
 import { KibanaServicesProvider, servicesMocks } from '../common/services.mock';
 import { useGetLinkProps, useLinkProps } from './use_link_props';
 
-const { getUrlForApp: mockGetUrlForApp, navigateToUrl: mockNavigateToUrl } =
-  servicesMocks.application;
+const { getUrlForApp, navigateToUrl: mockNavigateToUrl } = servicesMocks.application;
 
 const href = '/app/security/test';
+const mockGetUrlForApp = getUrlForApp as jest.MockedFunction<typeof getUrlForApp>;
 mockGetUrlForApp.mockReturnValue(href);
 
 describe('useLinkProps', () => {
