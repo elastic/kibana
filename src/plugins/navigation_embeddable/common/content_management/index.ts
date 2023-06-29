@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-export type { NavigationEmbeddableFactory } from './embeddable';
-export {
-  NAVIGATION_EMBEDDABLE_TYPE,
-  NavigationEmbeddableFactoryDefinition,
-  NavigationEmbeddable,
-} from './embeddable';
+export { LATEST_VERSION, CONTENT_ID } from '../constants';
 
-import { NavigationEmbeddablePlugin } from './plugin';
+export type { NavigationEmbeddableContentType } from '../types';
 
-export function plugin() {
-  return new NavigationEmbeddablePlugin();
-}
+export type {
+  NavigationEmbeddableCrudTypes,
+  NavigationEmbeddableAttributes,
+  NavigationEmbeddableItem,
+} from './latest';
+
+export * as NavigationEmbeddableV1 from './v1';
