@@ -7,7 +7,6 @@
 import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import {
   EuiIcon,
   EuiPanel,
@@ -24,7 +23,6 @@ import { useUnifiedSearchContext } from '../../../../pages/metrics/hosts/hooks/u
 import type { HostsLensMetricChartFormulas } from '../../../../common/visualizations';
 import { LensWrapper } from '../../../../pages/metrics/hosts/components/chart/lens_wrapper';
 import { buildCombinedHostsFilter } from '../../../../pages/metrics/hosts/utils';
-import { useAfterLoadedState } from '../../../../pages/metrics/hosts/hooks/use_after_loaded_state';
 import { TooltipContent } from '../../../../pages/metrics/hosts/components/metric_explanation/tooltip_content';
 
 export interface KPIChartProps {
@@ -48,7 +46,7 @@ export const Tile = ({
   trendLine = false,
   nodeName,
 }: KPIChartProps & { nodeName: string }) => {
-  const { searchCriteria, onSubmit } = useUnifiedSearchContext();
+  const { searchCriteria } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
 
   const getSubtitle = () =>
@@ -85,23 +83,7 @@ export const Tile = ({
     filters,
   });
 
-  const handleBrushEnd = ({ range }: BrushTriggerEvent['data']) => {
-    const [min, max] = range;
-    onSubmit({
-      dateRange: {
-        from: new Date(min).toISOString(),
-        to: new Date(max).toISOString(),
-        mode: 'absolute',
-      },
-    });
-  };
-
   const loading = !attributes;
-  const { afterLoadedState } = useAfterLoadedState(loading, {
-    attributes,
-    ...searchCriteria,
-    filters,
-  });
 
   return (
     <EuiPanelStyled
@@ -138,12 +120,11 @@ export const Tile = ({
         >
           <LensWrapper
             id={`hostsViewKPIGrid${type}Tile`}
-            attributes={afterLoadedState.attributes}
+            attributes={attributes}
             style={{ height: MIN_HEIGHT }}
             extraActions={[extraActionOptions.openInLens]}
-            dateRange={afterLoadedState.dateRange}
-            filters={afterLoadedState.filters}
-            onBrushEnd={handleBrushEnd}
+            dateRange={searchCriteria.dateRange}
+            filters={filters}
             loading={loading}
           />
         </EuiToolTip>
