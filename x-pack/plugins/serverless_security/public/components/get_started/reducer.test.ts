@@ -12,7 +12,6 @@ import {
   getActiveCardsInitialStates,
 } from './reducer';
 import {
-  ActiveCard,
   CardId,
   GetSetUpCardId,
   GetStartedPageActions,
