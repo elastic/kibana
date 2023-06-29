@@ -261,7 +261,7 @@ describe('getInheritedInput', () => {
     to: 'now',
     from: 'now-15m',
   };
-  const dashboardTimeslice = [1688061910000, 1688062209000];
+  const dashboardTimeslice = [1688061910000, 1688062209000] as [number, number];
 
   test('Should pass dashboard timeRange and timeslice to panel when panel does not have custom time range', () => {
     const container = buildMockDashboard({
@@ -277,6 +277,7 @@ describe('getInheritedInput', () => {
       },
     });
 
+    // @ts-expect-error getInheritedInput is protected
     const inheritedInput = container.getInheritedInput('123');
     expect(inheritedInput.timeRange).toEqual(dashboardTimeRange);
     expect(inheritedInput.timeslice).toEqual(dashboardTimeslice);
@@ -300,6 +301,7 @@ describe('getInheritedInput', () => {
       },
     });
 
+    // @ts-expect-error getInheritedInput is protected
     const inheritedInput = container.getInheritedInput('123');
     expect(inheritedInput.timeRange).toBeUndefined();
     expect(inheritedInput.timeslice).toBeUndefined();

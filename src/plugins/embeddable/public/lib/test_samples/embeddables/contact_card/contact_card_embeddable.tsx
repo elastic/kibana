@@ -9,6 +9,7 @@
 import React from 'react';
 import ReactDom from 'react-dom';
 import { Subscription } from 'rxjs';
+import type { TimeRange } from '@kbn/es-query';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { Container } from '../../../containers';
@@ -20,6 +21,7 @@ export interface ContactCardEmbeddableInput extends EmbeddableInput {
   firstName: string;
   lastName?: string;
   nameTitle?: string;
+  timeRange?: TimeRange;
 }
 
 export interface ContactCardEmbeddableOutput extends EmbeddableOutput {
