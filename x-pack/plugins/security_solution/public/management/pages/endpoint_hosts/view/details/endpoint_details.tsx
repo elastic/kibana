@@ -14,8 +14,8 @@ import type { HostMetadata } from '../../../../../../common/endpoint/types';
 import { useToasts } from '../../../../../common/lib/kibana';
 import { getEndpointDetailsPath } from '../../../../common/routing';
 import {
-  detailsError,
   fullDetailsHostInfo,
+  hostInfoError,
   policyVersionInfo,
   showView,
   uiQueryParams,
@@ -37,7 +37,7 @@ export const EndpointDetails = memo(() => {
   const queryParams = useEndpointSelector(uiQueryParams);
 
   const hostInfo = useEndpointSelector(fullDetailsHostInfo);
-  const hostDetailsError = useEndpointSelector(detailsError);
+  const hostDetailsError = useEndpointSelector(hostInfoError);
 
   const policyInfo = useEndpointSelector(policyVersionInfo);
   const show = useEndpointSelector(showView);
