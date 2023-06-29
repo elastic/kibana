@@ -18,6 +18,8 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiIconTip,
+  EuiKeyPadMenu,
+  EuiKeyPadMenuItem,
   EuiPageTemplate_Deprecated as EuiPageTemplate,
   EuiSpacer,
   EuiText,
@@ -165,6 +167,27 @@ function UserSettingsEditor({
     }
   }
 
+  interface ThemeKeyPadItem {
+    id: string;
+    label: string;
+    icon: string;
+  }
+
+  const themeKeyPadMenuItem = ({ id, label, icon }: ThemeKeyPadItem) => {
+    return (
+      <EuiKeyPadMenuItem
+        name={id}
+        label={label}
+        checkable="single"
+        isSelected={idSelected === id}
+        isDisabled={isThemeOverridden}
+        onChange={() => formik.setFieldValue('data.userSettings.darkMode', id)}
+      >
+        <EuiIcon type={icon} size="l" />
+      </EuiKeyPadMenuItem>
+    );
+  };
+
   return (
     <EuiDescribedFormGroup
       fullWidth
@@ -197,51 +220,41 @@ function UserSettingsEditor({
         }
         fullWidth
       >
-        <EuiButtonGroup
-          legend={i18n.translate(
+        <EuiKeyPadMenu
+          aria-label={i18n.translate(
             'xpack.security.accountManagement.userProfile.userSettings.themeGroupDescription',
             {
               defaultMessage: 'Elastic theme',
             }
           )}
-          buttonSize="m"
-          data-test-subj="darkModeButton"
-          idSelected={idSelected}
-          isDisabled={isThemeOverridden}
-          options={[
-            {
-              id: '',
-              label: (
-                <FormattedMessage
-                  id="xpack.security.accountManagement.userProfile.defaultModeButton"
-                  defaultMessage="Space default"
-                />
-              ),
-            },
-            {
-              id: 'light',
-              label: (
-                <FormattedMessage
-                  id="xpack.security.accountManagement.userProfile.lightModeButton"
-                  defaultMessage="Light"
-                />
-              ),
-              iconType: 'sun',
-            },
-            {
-              id: 'dark',
-              label: (
-                <FormattedMessage
-                  id="xpack.security.accountManagement.userProfile.darkModeButton"
-                  defaultMessage="Dark"
-                />
-              ),
-              iconType: 'moon',
-            },
-          ]}
-          onChange={(id: string) => formik.setFieldValue('data.userSettings.darkMode', id)}
-          isFullWidth
-        />
+          data-test-subj="themeMenu"
+          checkable={true}
+        >
+          {themeKeyPadMenuItem({
+            id: '',
+            label: i18n.translate(
+              'xpack.security.accountManagement.userProfile.defaultModeButton',
+              {
+                defaultMessage: 'Space default',
+              }
+            ),
+            icon: 'spaces',
+          })}
+          {themeKeyPadMenuItem({
+            id: 'light',
+            label: i18n.translate('xpack.security.accountManagement.userProfile.lightModeButton', {
+              defaultMessage: 'Light',
+            }),
+            icon: 'sun',
+          })}
+          {themeKeyPadMenuItem({
+            id: 'dark',
+            label: i18n.translate('xpack.security.accountManagement.userProfile.darkModeButton', {
+              defaultMessage: 'Dark',
+            }),
+            icon: 'moon',
+          })}
+        </EuiKeyPadMenu>
       </FormRow>
     </EuiDescribedFormGroup>
   );
@@ -912,7 +925,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
 function renderHelpText(isOverridden: boolean) {
   if (isOverridden) {
     return (
-      <EuiText size="xs">
+      <EuiText size="xs" data-test-subj="themeOverrideMessage">
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.overriddenMessage"
           defaultMessage="This setting is overridden by the Kibana server and can not be changed."
