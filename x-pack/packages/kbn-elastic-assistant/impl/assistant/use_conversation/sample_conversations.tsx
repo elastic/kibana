@@ -134,4 +134,31 @@ export const BASE_CONVERSATIONS: Record<string, Conversation> = {
     ],
     apiConfig: {},
   },
+  enterprise: {
+    id: 'enterprise',
+    theme: {
+      title: ELASTIC_AI_ASSISTANT_TITLE,
+      titleIcon: 'logoSecurity',
+      assistant: {
+        name: ELASTIC_AI_ASSISTANT,
+        icon: 'logoSecurity',
+      },
+      system: {
+        icon: 'logoElastic',
+      },
+      user: {},
+    },
+    messages: [
+      {
+        role: 'assistant',
+        content: i18n.ENTERPRISE,
+        timestamp: '',
+        presentation: {
+          delay: 2 * 1000,
+          stream: true,
+        },
+      },
+    ],
+    apiConfig: {},
+  },
 };

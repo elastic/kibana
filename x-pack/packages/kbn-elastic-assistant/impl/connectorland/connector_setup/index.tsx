@@ -7,14 +7,7 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
-import {
-  EuiAvatar,
-  EuiBadge,
-  EuiCommentList,
-  EuiMarkdownFormat,
-  EuiText,
-  EuiTextAlign,
-} from '@elastic/eui';
+import { EuiAvatar, EuiBadge, EuiMarkdownFormat, EuiText, EuiTextAlign } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
@@ -38,10 +31,6 @@ import { useAssistantContext } from '../../assistant_context';
 import { WELCOME_CONVERSATION_TITLE } from '../../assistant/use_conversation/translations';
 
 const MESSAGE_INDEX_BEFORE_CONNECTOR = 2;
-
-const StyledCommentList = styled(EuiCommentList)`
-  margin-right: 20px;
-`;
 
 const ConnectorButtonWrapper = styled.div`
   margin-top: 20px;
@@ -72,7 +61,7 @@ export const useConnectorSetup = ({
   onSetupComplete,
   refetchConnectors,
 }: ConnectorSetupProps): {
-  connectorDialog: React.ReactElement;
+  connectorDialog: EuiCommentProps[];
   connectorPrompt: React.ReactElement;
 } => {
   const { appendMessage, setApiConfig, setConversation } = useConversation();
@@ -169,29 +158,38 @@ export const useConnectorSetup = ({
     ]
   );
 
-  return {
-    connectorDialog: (
-      <StyledCommentList
-        comments={conversation.messages.slice(0, currentMessageIndex + 1).map((message, index) => {
-          const isUser = message.role === 'user';
+  const connectorDialog = useMemo(
+    () =>
+      conversation.messages.slice(0, currentMessageIndex + 1).map((message, index) => {
+        const isUser = message.role === 'user';
 
-          const commentProps: EuiCommentProps = {
-            username: isUser ? userName : assistantName,
-            children: commentBody(message, index, conversation.messages.length),
-            timelineAvatar: (
-              <EuiAvatar
-                name={i18n.CONNECTOR_SETUP_USER_ASSISTANT}
-                size="l"
-                color="subdued"
-                iconType={conversation?.theme?.assistant?.icon ?? 'logoElastic'}
-              />
-            ),
-            timestamp: `${i18n.CONNECTOR_SETUP_TIMESTAMP_AT}: ${message.timestamp}`,
-          };
-          return commentProps;
-        })}
-      />
-    ),
+        const commentProps: EuiCommentProps = {
+          username: isUser ? userName : assistantName,
+          children: commentBody(message, index, conversation.messages.length),
+          timelineAvatar: (
+            <EuiAvatar
+              name={i18n.CONNECTOR_SETUP_USER_ASSISTANT}
+              size="l"
+              color="subdued"
+              iconType={conversation?.theme?.assistant?.icon ?? 'logoElastic'}
+            />
+          ),
+          timestamp: `${i18n.CONNECTOR_SETUP_TIMESTAMP_AT}: ${message.timestamp}`,
+        };
+        return commentProps;
+      }),
+    [
+      assistantName,
+      commentBody,
+      conversation.messages,
+      conversation?.theme?.assistant?.icon,
+      currentMessageIndex,
+      userName,
+    ]
+  );
+
+  return {
+    connectorDialog,
     connectorPrompt: (
       <div data-test-subj="connectorPrompt">
         {(showAddConnectorButton || isConnectorConfigured) && (

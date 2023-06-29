@@ -83,6 +83,10 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables the Elastic AI Assistant
+   * @deprecated no longer being checked from 8.9+, will not have an effect
+   * Only in place in 8.8.1 and 8.8.2
+   * Leaving flag definition as to not throw errors on upgrade if a user had this enabled in their kibana settings
+   * As requested here https://github.com/elastic/security-team/issues/6877
    */
   assistantEnabled: false,
 

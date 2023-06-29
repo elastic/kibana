@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useLicense } from '../../common/hooks/use_license';
 
 export interface UseAssistantAvailability {
-  isAssistantAvailable: boolean;
+  // True when user is Enterprise. When false, the Assistant is disabled and unavailable
   isAssistantEnabled: boolean;
+  // When true, the Assistant is hidden and unavailable
+  isAssistantHidden: boolean;
 }
 
 export const useAssistantAvailability = (): UseAssistantAvailability => {
-  const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
-
+  const isEnterprise = useLicense().isEnterprise();
+  console.log('isEnterprise???', isEnterprise);
   return {
-    isAssistantAvailable: isAssistantEnabled,
-    isAssistantEnabled,
+    // TODO: Before merging, make it return the real value
+    isAssistantEnabled: false, // isEnterprise,
+    // TODO: RBAC check (https://github.com/elastic/security-team/issues/6932)
+    // Leaving as a placeholder for RBAC as the same behavior will be required
+    // When true, the Assistant is hidden and unavailable
+    isAssistantHidden: false,
   };
 };
