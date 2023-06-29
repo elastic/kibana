@@ -55,7 +55,7 @@ const navigationTree: NavigationTreeDefinition = {
                   link: 'ml:anomalyDetection',
                 },
                 {
-                  title: i18n.translate('defaultNavigation.ml.spike.analysis', {
+                  title: i18n.translate('xpack.serverlessObservability.ml.spike.analysis', {
                     defaultMessage: 'Spike analysis',
                   }),
                   link: 'ml:explainLogRateSpikes',
