@@ -384,17 +384,17 @@ The current active alerts in the system are represented in the following table w
 
 ${rows}
 
-The above table has to be ordered based on ascending rank using the following priority rules:
-- If an alert Start column value is more than 2 days ago, it has a rank of 4
-- Else, If an alert does not have values in the column "Case ids", it's not assigned to a Case id, it has a rank of 1
-- Else, If an alert has values in the column "Case ids" it has a rank of 3
-- Do not consider Case_max_priority in rank
-- In case of tie in rank, alerts with higher value in Duration column will have a lower rank
+Assign a ranking position to the each alert within the group of total alerts, basing the ranking only in the following rules:
+- If an alert Start column value is more than 2 days ago, they have the lower positions in the ranking
+- Else, if an alert column "Case ids" is empty or "unnasigned", they have the higher positions in the ranking
+- Else, if an alert has values in the column "Case ids" they have the intermediate positions in the ranking
+- In case of tie between alerts in the position in ranking, alerts with be ordered from higher to lower alert Duration in the ranking
+- Do not consider other external factors outside from the above
 
-Using the following template, display the info filling the columns with the values of the alert with lowest numerical value in rank using only the above priority rules, not using other factors:
+Using the following template, display the info filling the columns with the values of the single alert with the highest position in rank, using only the above priority rules, not using other factors:
 "
 🥇 The the alert with the highest priority right now has the following Reason: A
-        📂 Assigned to Case Ids: B
+        📂 Assigned to Case ids: B
         🧯 Possible next steps: C
         🔗 Alert id: D
         ︖ The reason this issue is has the highest priority is: E
@@ -407,7 +407,7 @@ E being the reasoning why this alert has the lowest numerical value in rank base
 
 
 At the end of the response, display the following template sustituting X and Y 
-"🔍 There are X total active alerts in the system, and Y of them are not yet assigned to a case and show be reviewed as soon as possible", X beign the total current active alerts and Y being how many do not have values in the column Case_ids. Do not display the template.
+"🔍 There are X total active alerts in the system, and Y of them are not yet assigned to a case and show be reviewed as soon as possible", X beign the total current active alerts and Y being how many do not have values in the column "Case ids". Do not display the template.
 
 `;
 
