@@ -13,9 +13,9 @@ import {
   UpdatePackagePolicyRequestBodySchema,
 } from '../models';
 
-import { ListWithKuerySchema, BulkRequestBodySchema } from './common';
-
 import { inputsFormat } from '../../../common/constants';
+
+import { ListWithKuerySchema, BulkRequestBodySchema } from './common';
 
 export const GetPackagePoliciesRequestSchema = {
   query: ListWithKuerySchema.extends({
