@@ -331,9 +331,8 @@ for (let index = 0; index < 40; index++) {
 
         const lastPageForAll = Math.ceil(userActionsStats.total / userActivityQueryParams.perPage);
 
-        userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-all'));
-
-        await waitForComponentToUpdate();
+        expect(await screen.findByTestId('user-actions-activity-bar'));
+        userEvent.click(screen.getByTestId('user-actions-filter-activity-button-all'));
 
         expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
           caseData.id,
@@ -355,11 +354,9 @@ for (let index = 0; index < 40; index++) {
 
         userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-all'));
 
-        expect(await screen.findByLabelText(`${userActionsStats.total} active filters`));
-        expect(await screen.findByLabelText(`${userActionsStats.totalComments} available filters`));
-        expect(
-          await screen.findByLabelText(`${userActionsStats.totalOtherActions} available filters`)
-        );
+        expect(screen.getByLabelText(`${userActionsStats.total} active filters`));
+        expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
+        expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`));
       });
 
       it('should show comment filter as active', async () => {
@@ -369,9 +366,8 @@ for (let index = 0; index < 40; index++) {
           userActionsStats.totalComments / userActivityQueryParams.perPage
         );
 
-        userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-comments'));
-
-        await waitForComponentToUpdate();
+        expect(await screen.findByTestId('user-actions-activity-bar'));
+        userEvent.click(screen.getByTestId('user-actions-filter-activity-button-comments'));
 
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
         expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
@@ -389,25 +385,23 @@ for (let index = 0; index < 40; index++) {
       it('should call user action hooks correctly when filtering for comments', async () => {
         appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-        userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-comments'));
+        expect(await screen.findByTestId('user-actions-activity-bar'));
+        userEvent.click(screen.getByTestId('user-actions-filter-activity-button-comments'));
 
-        expect(await screen.findByLabelText(`${userActionsStats.totalComments} active filters`));
-        expect(await screen.findByLabelText(`${userActionsStats.total} available filters`));
-        expect(
-          await screen.findByLabelText(`${userActionsStats.totalOtherActions} available filters`)
-        );
+        expect(screen.getByLabelText(`${userActionsStats.totalComments} active filters`));
+        expect(screen.getByLabelText(`${userActionsStats.total} available filters`));
+        expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`));
       });
 
       it('should show history as active filter correctly', async () => {
         appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-        userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-history'));
+        expect(await screen.findByTestId('user-actions-activity-bar'));
+        userEvent.click(screen.getByTestId('user-actions-filter-activity-button-history'));
 
-        expect(
-          await screen.findByLabelText(`${userActionsStats.totalOtherActions} active filters`)
-        );
-        expect(await screen.findByLabelText(`${userActionsStats.totalComments} available filters`));
-        expect(await screen.findByLabelText(`${userActionsStats.total} available filters`));
+        expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} active filters`));
+        expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
+        expect(screen.getByLabelText(`${userActionsStats.total} available filters`));
       });
 
       it('should call user action hooks correctly when filtering for history', async () => {
@@ -417,9 +411,8 @@ for (let index = 0; index < 40; index++) {
           userActionsStats.totalOtherActions / userActivityQueryParams.perPage
         );
 
-        userEvent.click(await screen.findByTestId('user-actions-filter-activity-button-history'));
-
-        await waitForComponentToUpdate();
+        expect(await screen.findByTestId('user-actions-activity-bar'));
+        userEvent.click(screen.getByTestId('user-actions-filter-activity-button-history'));
 
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
         expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
