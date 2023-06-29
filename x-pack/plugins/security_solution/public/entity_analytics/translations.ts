@@ -78,6 +78,14 @@ export const PREVIEW = i18n.translate('xpack.securitySolution.riskScore.riskScor
   defaultMessage: 'Preview',
 });
 
+export const PREVIEW_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.preview',
+  {
+    defaultMessage:
+      'The entities shown in the preview are the riskiest found in the 1000 sampled during your chosen timeframe. They may not be the riskiest entities across all of your data.',
+  }
+);
+
 export const PREVIEW_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.errorTitle',
   {
@@ -98,3 +106,4 @@ export const PREVIEW_ERROR_TRY_AGAIN = i18n.translate(
     defaultMessage: 'Try again',
   }
 );
+_;

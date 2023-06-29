@@ -17,6 +17,7 @@ import {
   EuiCallOut,
   EuiButton,
   EuiIcon,
+  EuiText,
 } from '@elastic/eui';
 import { RiskScoreEntity } from '../../../common/risk_engine/types';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
@@ -115,6 +116,8 @@ export const RiskScorePreviewSection = () => {
       <EuiTitle>
         <h2>{i18n.PREVIEW}</h2>
       </EuiTitle>
+      <EuiSpacer size={'s'} />
+      <EuiText>{i18n.PREVIEW_DESCRIPTION}</EuiText>
       <EuiSpacer />
       <EuiFormRow fullWidth>
         <EuiSuperDatePicker
