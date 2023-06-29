@@ -26,14 +26,6 @@ import { formatTestDuration } from '../../../utils/monitor_test_result/test_time
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 
-function isErrorActive(latestMonitorStatus?: string, latestDocId?: string, currentDocId?: string) {
-  return (
-    latestMonitorStatus === 'down' &&
-    typeof latestDocId !== 'undefined' &&
-    latestDocId === currentDocId
-  );
-}
-
 export const ErrorsList = ({
   errorStates,
   loading,
@@ -83,13 +75,13 @@ export const ErrorsList = ({
             locationId={location?.id}
           />
         );
-        if (
-          isErrorActive(
-            latestPing?.monitor.status,
-            lastErrorTestRun['@timestamp'],
-            item['@timestamp']
-          )
-        ) {
+
+        const isErrorActive =
+          latestPing?.monitor.status === 'down' &&
+          lastErrorTestRun['@timestamp'] === item['@timestamp'] &&
+          typeof item['@timestamp'] !== undefined;
+
+        if (isErrorActive) {
           return (
             <EuiFlexGroup gutterSize="m" alignItems="center" wrap={true}>
               <EuiFlexItem grow={false} className="eui-textNoWrap">
