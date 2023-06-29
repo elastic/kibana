@@ -1,4 +1,4 @@
-title: Bad response
+title: Unauthorized
 type: object
 required:
   - statusCode
