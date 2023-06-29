@@ -39,7 +39,6 @@
     "@kbn/generate-csv",
     "@kbn/reporting-common",
     "@kbn/saved-search-plugin",
-    "@kbn/core-elasticsearch-server",
   ],
   "exclude": [
     "target/**/*",
