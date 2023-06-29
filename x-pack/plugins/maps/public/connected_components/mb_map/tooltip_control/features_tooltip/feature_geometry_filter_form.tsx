@@ -15,7 +15,6 @@ import rison from '@kbn/rison';
 import { URL_MAX_LENGTH } from '@kbn/core/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { buildGeoShapeFilter } from '../../../../../common/elasticsearch_util';
-import { ES_SPATIAL_RELATIONS } from '../../../../../common/constants';
 import { GeometryFilterForm } from '../../../../components/draw_forms/geometry_filter_form/geometry_filter_form';
 
 // over estimated and imprecise value to ensure filter has additional room for any meta keys added when filter is mapped.
@@ -79,7 +78,7 @@ export class FeatureGeometryFilterForm extends Component<Props, State> {
     relation,
   }: {
     geometryLabel: string;
-    relation: ES_SPATIAL_RELATIONS;
+    relation: estypes.GeoShapeRelation;
   }) => {
     this.setState({ errorMsg: undefined });
     const preIndexedShape = await this._loadPreIndexedShape();

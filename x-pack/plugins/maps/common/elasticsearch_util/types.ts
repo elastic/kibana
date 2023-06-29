@@ -8,7 +8,6 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MultiPolygon, Polygon, Position } from 'geojson';
 import type { Filter } from '@kbn/es-query';
-import { ES_SPATIAL_RELATIONS } from '../constants';
 
 export type Coordinates = Position | Position[] | Position[][] | Position[][][];
 
@@ -27,7 +26,7 @@ export interface ESBBox {
 
 export interface GeoShapeQueryBody {
   shape?: MultiPolygon | Polygon;
-  relation?: ES_SPATIAL_RELATIONS;
+  relation?: estypes.GeoShapeRelation;
   indexed_shape?: estypes.QueryDslFieldLookup;
 }
 

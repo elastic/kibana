@@ -12,7 +12,6 @@ import { Feature, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
 import turfCircle from '@turf/circle';
 import { FilterMeta, FILTERS } from '@kbn/es-query';
 import { MapExtent } from '../descriptor_types';
-import { ES_SPATIAL_RELATIONS } from '../constants';
 import { getEsSpatialRelationLabel } from '../i18n_getters';
 import { GeoFilter, GeoShapeQueryBody } from './types';
 import { makeESBbox } from './elasticsearch_geo_utils';
@@ -103,13 +102,13 @@ export function buildGeoShapeFilter({
   geometry,
   geometryLabel,
   geoFieldNames,
-  relation = ES_SPATIAL_RELATIONS.INTERSECTS,
+  relation = 'intersects',
 }: {
   preIndexedShape?: estypes.QueryDslFieldLookup | null;
   geometry?: MultiPolygon | Polygon;
   geometryLabel: string;
   geoFieldNames: string[];
-  relation?: ES_SPATIAL_RELATIONS;
+  relation?: estypes.GeoShapeRelation;
 }): GeoFilter {
   const meta: FilterMeta = {
     type: SPATIAL_FILTER_TYPE,
