@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
@@ -15,13 +14,12 @@ import {
   NormalizationOptions,
 } from '../../../components/normalization_menu';
 import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
-import { TopNFunctionsTable } from '../../../components/topn_functions';
+import { Grid } from '../../../components/topn_functions/grid';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
-import { ProfilingRoutes } from '../../../routing';
 
 export function DifferentialTopNFunctionsView() {
   const {
@@ -159,7 +157,14 @@ export function DifferentialTopNFunctionsView() {
           <EuiFlexGroup direction="row" gutterSize="s">
             <EuiFlexItem>
               <AsyncComponent {...state} size="xl" alignTop>
-                <TopNFunctionsTable
+                <Grid
+                  topNFunctions={state.data}
+                  totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
+                  isDifferentialView={true}
+                  onFrameClick={handleOnFrameClick}
+                  baselineScaleFactor={isNormalizedByTime ? baselineTime : baseline}
+                />
+                {/* <TopNFunctionsTable
                   topNFunctions={state.data}
                   sortDirection={sortDirection}
                   sortField={sortField}
@@ -177,13 +182,24 @@ export function DifferentialTopNFunctionsView() {
                   isDifferentialView={true}
                   baselineScaleFactor={isNormalizedByTime ? baselineTime : baseline}
                   onFrameClick={handleOnFrameClick}
-                />
+                /> */}
               </AsyncComponent>
             </EuiFlexItem>
             {comparisonTimeRange.inSeconds.start && comparisonTimeRange.inSeconds.end ? (
               <EuiFlexItem>
                 <AsyncComponent {...comparisonState} size="xl" alignTop>
-                  <TopNFunctionsTable
+                  <Grid
+                    topNFunctions={comparisonState.data}
+                    comparisonTopNFunctions={state.data}
+                    totalSeconds={
+                      comparisonTimeRange.inSeconds.end - comparisonTimeRange.inSeconds.start
+                    }
+                    isDifferentialView={true}
+                    baselineScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
+                    comparisonScaleFactor={isNormalizedByTime ? baselineTime : baseline}
+                    onFrameClick={handleOnFrameClick}
+                  />
+                  {/* <TopNFunctionsTable
                     sortDirection={sortDirection}
                     sortField={sortField}
                     onSortChange={(nextSort) => {
@@ -205,7 +221,7 @@ export function DifferentialTopNFunctionsView() {
                     baselineScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
                     comparisonScaleFactor={isNormalizedByTime ? baselineTime : baseline}
                     onFrameClick={handleOnFrameClick}
-                  />
+                  /> */}
                 </AsyncComponent>
               </EuiFlexItem>
             ) : null}

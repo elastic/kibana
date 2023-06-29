@@ -13,7 +13,7 @@ import {
   EuiDataGridControlColumn,
   EuiDataGridSorting,
   EuiScreenReaderOnly,
-  EuiToolTip,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
@@ -21,6 +21,7 @@ import { TopNFunctions } from '../../../common/functions';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { FunctionRow } from './function_row';
+import { TotalSamplesStat } from './total_samples_stat';
 import { getFunctionsRows, IFunctionRow } from './utils';
 
 interface Props {
@@ -30,6 +31,7 @@ interface Props {
   isDifferentialView: boolean;
   baselineScaleFactor?: number;
   comparisonScaleFactor?: number;
+  onFrameClick?: (functionName: string) => void;
 }
 
 export function Grid({
@@ -39,6 +41,7 @@ export function Grid({
   isDifferentialView,
   baselineScaleFactor,
   comparisonScaleFactor,
+  onFrameClick,
 }: Props) {
   const [selectedRow, setSelectedRow] = useState<IFunctionRow | undefined>();
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([
@@ -164,18 +167,12 @@ export function Grid({
           setSelectedRow(rows[rowIndex]);
         }
         return (
-          <EuiToolTip
-            content={i18n.translate('xpack.profiling.functionsView.showMoreButton', {
-              defaultMessage: `Show more information`,
-            })}
-          >
-            <EuiButtonIcon
-              aria-label="Show actions"
-              iconType="expand"
-              color="text"
-              onClick={handleOnClick}
-            />
-          </EuiToolTip>
+          <EuiButtonIcon
+            aria-label="Show actions"
+            iconType="expand"
+            color="text"
+            onClick={handleOnClick}
+          />
         );
       },
     });
@@ -192,6 +189,7 @@ export function Grid({
           columnId={columnId}
           isEstimatedA={isEstimatedA}
           totalCount={totalCount}
+          onFrameClick={onFrameClick}
         />
       );
     }
@@ -200,11 +198,18 @@ export function Grid({
 
   return (
     <>
+      <TotalSamplesStat
+        baselineTotalSamples={totalCount}
+        baselineScaleFactor={baselineScaleFactor}
+        comparisonTotalSamples={comparisonTopNFunctions?.TotalCount}
+        comparisonScaleFactor={comparisonScaleFactor}
+      />
+      <EuiSpacer size="s" />
       <EuiDataGrid
         aria-label="TopN functions"
         columns={columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
-        rowCount={totalCount}
+        rowCount={1000}
         renderCellValue={RenderCellValue}
         inMemory={{ level: 'sorting' }}
         sorting={{ columns: sortingColumns, onSort }}
@@ -215,7 +220,12 @@ export function Grid({
           onChangePage,
         }}
         rowHeightsOptions={{ defaultHeight: 'auto' }}
-        toolbarVisibility={{ showColumnSelector: false }}
+        toolbarVisibility={{
+          showColumnSelector: false,
+          showKeyboardShortcuts: !isDifferentialView,
+          showDisplaySelector: !isDifferentialView,
+          showFullScreenSelector: !isDifferentialView,
+        }}
       />
       {selectedRow && (
         <FrameInformationTooltip

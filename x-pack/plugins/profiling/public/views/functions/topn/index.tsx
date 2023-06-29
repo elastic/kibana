@@ -60,13 +60,17 @@ export function TopNFunctionsView() {
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
-              <Grid
-                topNFunctions={state.data}
-                totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
-                isDifferentialView={false}
-              />
+              <AsyncComponent {...state} size="xl" alignTop>
+                <Grid
+                  topNFunctions={state.data}
+                  totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
+                  isDifferentialView={false}
+                  onFrameClick={handleOnFrameClick}
+                />
+              </AsyncComponent>
             </EuiFlexItem>
-            <EuiFlexItem>
+
+            {/* <EuiFlexItem>
               <AsyncComponent {...state} size="xl" alignTop>
                 <TopNFunctionsTable
                   topNFunctions={state.data}
@@ -87,7 +91,7 @@ export function TopNFunctionsView() {
                   onFrameClick={handleOnFrameClick}
                 />
               </AsyncComponent>
-            </EuiFlexItem>
+            </EuiFlexItem> */}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

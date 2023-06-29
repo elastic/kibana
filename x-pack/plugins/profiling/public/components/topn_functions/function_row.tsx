@@ -20,16 +20,23 @@ interface Props {
   columnId: string;
   totalCount: number;
   isEstimatedA: boolean;
+  onFrameClick?: (functionName: string) => void;
 }
 
-export function FunctionRow({ functionRow, columnId, totalCount, isEstimatedA }: Props) {
+export function FunctionRow({
+  functionRow,
+  columnId,
+  totalCount,
+  isEstimatedA,
+  onFrameClick,
+}: Props) {
   const theme = useEuiTheme();
   if (columnId === 'rank') {
     return <div>{functionRow.rank}</div>;
   }
 
   if (columnId === 'function') {
-    return <StackFrameSummary frame={functionRow.frame} />;
+    return <StackFrameSummary frame={functionRow.frame} onFrameClick={onFrameClick} />;
   }
 
   if (columnId === 'samples') {
