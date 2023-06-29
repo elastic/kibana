@@ -161,19 +161,15 @@ The 8.8.1 release includes in {kibana-pull}158940[a fix] for this problem. Custo
 
 // tag::known-issue-159807[]
 [discrete]
-.Memory leak in Fleet audit logging.
+.Memory leak in {fleet} audit logging.
 [%collapsible]
 ====
 *Details* +
-Fleet introduced audit logging for various CRUD (create, read, update, and delete) operations in 8.8.0.
-
-This audit logging is not enabled by default. Users must set `xpack.security.audit.enabled: true` in the `kibana.yml` to enable it.
-
-We have identified an off-heap memory leak in Fleet audit logging that can result in Kibana instances getting terminated by the operating system kernel's `oom-killer`.
-
+{fleet} introduced audit logging for various CRUD (create, read, update, and delete) operations in version 8.8.0.
+While audit logging is not enabled by default, we have identified an off-heap memory leak in the implementation of {fleet} audit logging that can result in poor {kib} performance, and in some cases {kib} instances being terminated by the OS kernel's oom-killer. This memory leak can occur even when {kib} audit logging is not explicitly enabled (regardless of whether `xpack.security.audit.enabled` is set in the `kibana.yml` settings file).
 *Impact* +
-The 8.8.2 release includes in {kibana-pull}159807[a fix] for this problem. Customers using Fleet integrations
-and Kibana audit logging in 8.8.0 and 8.8.1 should upgrade to 8.8.2 or above to obtain the fix.
+The version 8.8.2 release includes in {kibana-pull}159807[a fix] for this problem. If you are using {fleet} integrations
+and {kib} audit logging in version 8.8.0 or 8.8.1, you should upgrade to 8.8.2 or above to obtain the fix.
 ====
 // end::known-issue-159807[]
 
