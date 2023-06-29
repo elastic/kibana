@@ -18,17 +18,18 @@ const mockApplication = applicationServiceMock.createInternalStartContract();
 describe('Header', () => {
   const mockProps: Omit<ProjectHeaderProps, 'children'> = {
     application: mockApplication,
-    breadcrumbs$: Rx.of([]),
-    actionMenu$: Rx.of(undefined),
     kibanaDocLink: 'app/help/doclinks',
+    kibanaVersion: '8.9',
+    actionMenu$: Rx.of(),
+    breadcrumbs$: Rx.of([]),
     globalHelpExtensionMenuLinks$: Rx.of([]),
-    helpExtension$: Rx.of(undefined),
+    headerBanner$: Rx.of(),
+    helpExtension$: Rx.of(),
     helpSupportUrl$: Rx.of('app/help'),
     homeHref$: Rx.of('app/home'),
-    kibanaVersion: '8.9',
     loadingCount$: Rx.of(0),
-    navControlsLeft$: Rx.of([]),
     navControlsCenter$: Rx.of([]),
+    navControlsLeft$: Rx.of([]),
     navControlsRight$: Rx.of([]),
     prependBasePath: (str) => `hello/world/${str}`,
   };

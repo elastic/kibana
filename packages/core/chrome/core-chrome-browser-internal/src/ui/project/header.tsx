@@ -89,20 +89,20 @@ const headerStrings = {
 };
 
 export interface Props {
-  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  actionMenu$: Observable<MountPoint | undefined>;
   kibanaDocLink: string;
   children: React.ReactNode;
+  kibanaVersion: string;
+  application: InternalApplicationStart;
+  actionMenu$: Observable<MountPoint | undefined>;
+  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
+  headerBanner$: Observable<ChromeUserBanner | undefined>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
   homeHref$: Observable<string | undefined>;
-  kibanaVersion: string;
-  application: InternalApplicationStart;
-  headerBanner$: Observable<ChromeUserBanner | undefined>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
-  navControlsLeft$: Observable<ChromeNavControl[]>;
   navControlsCenter$: Observable<ChromeNavControl[]>;
+  navControlsLeft$: Observable<ChromeNavControl[]>;
   navControlsRight$: Observable<ChromeNavControl[]>;
   prependBasePath: (url: string) => string;
 }
