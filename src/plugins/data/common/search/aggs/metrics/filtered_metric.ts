@@ -52,7 +52,6 @@ export const getFilteredMetricAgg = ({ getConfig }: FiltersMetricAggDependencies
     getSerializedFormat,
     createFilter: (agg, inputState) => {
       const indexPattern = agg.getIndexPattern();
-      if (!indexPattern) return;
       if (
         agg.params.customMetric.type.name === 'top_hits' ||
         agg.params.customMetric.type.name === 'top_metrics'

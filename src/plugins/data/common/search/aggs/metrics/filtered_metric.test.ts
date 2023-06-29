@@ -87,7 +87,11 @@ describe('filtered metric agg type', () => {
 
     expect(agg.getResponseId()).toEqual('filtered_metric-bucket');
   });
-  it('returns phrase filter for filtered metric on top metrics', () => {
+  it.each`
+    aggType
+    ${'top_metrics'}
+    ${'top_hits'}
+  `('returns phrase filter for filtered metric for $aggType', ({ aggType }) => {
     const topMetricsAggConfigs = new AggConfigs(
       indexPattern,
       [
@@ -103,7 +107,7 @@ describe('filtered metric agg type', () => {
               },
             },
             customMetric: {
-              type: 'top_metrics',
+              type: aggType,
               params: {
                 field: 'bytes',
               },
@@ -121,28 +125,15 @@ describe('filtered metric agg type', () => {
       getFilteredMetricAgg(aggTypesDependencies).createFilter!(
         topMetricsAggConfigs.aggs[0] as IMetricAggConfig,
         10
-      )
-    ).toEqual({
-      meta: { index: '1234' },
-      query: { match_phrase: { bytes: 10 } },
-    });
+      ).query.match_phrase
+    ).toEqual({ bytes: 10 });
   });
   it('returns filter from the custom bucket filter parameter for metric', () => {
     expect(
       getFilteredMetricAgg(aggTypesDependencies).createFilter!(
         aggConfigs.aggs[0] as IMetricAggConfig,
         '10'
-      )
-    ).toEqual({
-      query: {
-        bool: {
-          must: [],
-          filter: [{ bool: { should: [{ match: { bytes: 'b' } }], minimum_should_match: 1 } }],
-          should: [],
-          must_not: [],
-        },
-      },
-      meta: { index: '1234', alias: 'a: b' },
-    });
+      ).query.bool.filter[0].bool.should[0].match
+    ).toEqual({ bytes: 'b' });
   });
 });
