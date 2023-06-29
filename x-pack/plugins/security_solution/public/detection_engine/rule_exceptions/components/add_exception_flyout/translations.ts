@@ -89,6 +89,7 @@ export const ADD_RULE_EXCEPTION_FROM_ALERT_COMMENT = (alertId: string) =>
     'xpack.securitySolution.ruleExceptions.addExceptionFlyout.addRuleExceptionFromAlertComment',
     {
       values: { alertId },
-      defaultMessage: 'Exception conditions are pre-filled with relevant data from {alertId}.',
+      defaultMessage:
+        'Exception conditions are pre-filled with relevant data from alert with "id" {alertId}.',
     }
   );

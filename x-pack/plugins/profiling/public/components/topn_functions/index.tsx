@@ -46,19 +46,28 @@ interface Row {
 }
 
 function TotalSamplesStat({
-  totalSamples,
-  newSamples,
+  baselineTotalSamples,
+  baselineScaleFactor,
+  comparisonTotalSamples,
+  comparisonScaleFactor,
 }: {
-  totalSamples: number;
-  newSamples: number | undefined;
+  baselineTotalSamples: number;
+  baselineScaleFactor?: number;
+  comparisonTotalSamples?: number;
+  comparisonScaleFactor?: number;
 }) {
-  const value = totalSamples.toLocaleString();
+  const scaledBaselineTotalSamples = scaleValue({
+    value: baselineTotalSamples,
+    scaleFactor: baselineScaleFactor,
+  });
+
+  const value = scaledBaselineTotalSamples.toLocaleString();
 
   const sampleHeader = i18n.translate('xpack.profiling.functionsView.totalSampleCountLabel', {
     defaultMessage: ' Total sample estimate: ',
   });
 
-  if (newSamples === undefined || newSamples === 0) {
+  if (comparisonTotalSamples === undefined || comparisonTotalSamples === 0) {
     return (
       <EuiStat
         title={<EuiText style={{ fontWeight: 'bold' }}>{value}</EuiText>}
@@ -67,8 +76,13 @@ function TotalSamplesStat({
     );
   }
 
-  const diffSamples = totalSamples - newSamples;
-  const percentDelta = (diffSamples / (totalSamples - diffSamples)) * 100;
+  const scaledComparisonTotalSamples = scaleValue({
+    value: comparisonTotalSamples,
+    scaleFactor: comparisonScaleFactor,
+  });
+
+  const diffSamples = scaledBaselineTotalSamples - scaledComparisonTotalSamples;
+  const percentDelta = (diffSamples / (scaledBaselineTotalSamples - diffSamples)) * 100;
 
   return (
     <EuiStat
@@ -146,6 +160,7 @@ interface Props {
   isDifferentialView: boolean;
   baselineScaleFactor?: number;
   comparisonScaleFactor?: number;
+  onFrameClick?: (functionName: string) => void;
 }
 
 function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFactor?: number }) {
@@ -162,6 +177,7 @@ export function TopNFunctionsTable({
   isDifferentialView,
   baselineScaleFactor,
   comparisonScaleFactor,
+  onFrameClick,
 }: Props) {
   const [selectedRow, setSelectedRow] = useState<Row | undefined>();
   const isEstimatedA = (topNFunctions?.SamplingRate ?? 1.0) !== 1.0;
@@ -260,7 +276,9 @@ export function TopNFunctionsTable({
       name: i18n.translate('xpack.profiling.functionsView.functionColumnLabel', {
         defaultMessage: 'Function',
       }),
-      render: (_, { frame }) => <StackFrameSummary frame={frame} />,
+      render: (_, { frame }) => {
+        return <StackFrameSummary frame={frame} onFrameClick={onFrameClick} />;
+      },
       width: '50%',
     },
     {
@@ -404,8 +422,10 @@ export function TopNFunctionsTable({
   return (
     <>
       <TotalSamplesStat
-        totalSamples={totalCount}
-        newSamples={comparisonTopNFunctions?.TotalCount}
+        baselineTotalSamples={totalCount}
+        baselineScaleFactor={baselineScaleFactor}
+        comparisonTotalSamples={comparisonTopNFunctions?.TotalCount}
+        comparisonScaleFactor={comparisonScaleFactor}
       />
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
