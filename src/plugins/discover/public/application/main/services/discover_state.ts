@@ -135,7 +135,7 @@ export interface DiscoverStateContainer {
      * Used by the Data View Picker
      * @param pattern
      */
-    onCreateDefaultAdHocDataView: (pattern: string) => Promise<void>;
+    onCreateDefaultAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<void>;
     /**
      * Triggered when a new data view is created
      * @param dataView
@@ -351,10 +351,7 @@ export function getDiscoverStateContainer({
     const unsubscribeData = dataStateContainer.subscribe();
 
     // updates saved search when query or filters change, triggers data fetching
-    const filterUnsubscribe = merge(
-      services.data.query.queryString.getUpdates$(),
-      services.filterManager.getFetches$()
-    ).subscribe(async () => {
+    const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(async () => {
       await savedSearchContainer.update({
         nextDataView: internalStateContainer.getState().dataView,
         nextState: appStateContainer.getState(),
@@ -388,10 +385,8 @@ export function getDiscoverStateContainer({
     };
   };
 
-  const onCreateDefaultAdHocDataView = async (pattern: string) => {
-    const newDataView = await services.dataViews.create({
-      title: pattern,
-    });
+  const onCreateDefaultAdHocDataView = async (dataViewSpec: DataViewSpec) => {
+    const newDataView = await services.dataViews.create(dataViewSpec);
     if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
       newDataView.timeFieldName = '@timestamp';
     }

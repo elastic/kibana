@@ -25,16 +25,25 @@ const navigationTree: NavigationTreeDefinition = {
       title: 'Observability',
       icon: 'logoObservability',
       defaultIsCollapsed: false,
+      breadcrumbStatus: 'hidden',
       children: [
         {
-          id: 'services-infra',
+          id: 'discover-dashboard-viz',
           children: [
-            { link: 'apm:services' },
             {
-              title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
-                defaultMessage: 'Infrastructure',
+              link: 'discover',
+            },
+            {
+              title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
+                defaultMessage: 'Dashboards',
               }),
-              link: 'metrics:inventory',
+              link: 'dashboards',
+            },
+            {
+              title: i18n.translate('xpack.serverlessObservability.nav.visualizations', {
+                defaultMessage: 'Visualizations',
+              }),
+              link: 'visualize',
             },
           ],
         },
@@ -53,32 +62,21 @@ const navigationTree: NavigationTreeDefinition = {
           ],
         },
         {
-          id: 'signals',
-          title: 'Signals',
+          id: 'apm',
+          title: 'APM',
           children: [
+            { link: 'apm:services' },
             {
               link: 'apm:traces',
             },
             {
-              title: i18n.translate('xpack.serverlessObservability.nav.signalsLogs', {
+              title: i18n.translate('xpack.serverlessObservability.nav.logs', {
                 defaultMessage: 'Logs',
               }),
               link: 'logs:stream',
             },
-          ],
-        },
-        {
-          id: 'toolbox',
-          title: 'Toolbox',
-          children: [
             {
-              title: i18n.translate('xpack.serverlessObservability.nav.toolBoxVisualization', {
-                defaultMessage: 'Visualization',
-              }),
-              link: 'visualize',
-            },
-            {
-              link: 'dashboards',
+              link: 'apm:dependencies',
             },
           ],
         },
@@ -95,14 +93,6 @@ const navigationTree: NavigationTreeDefinition = {
           ],
         },
       ],
-    },
-    {
-      type: 'navGroup',
-      ...getPresets('analytics'),
-    },
-    {
-      type: 'navGroup',
-      ...getPresets('ml'),
     },
   ],
   footer: [

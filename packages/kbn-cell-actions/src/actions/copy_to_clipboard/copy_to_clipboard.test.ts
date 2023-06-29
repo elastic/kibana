@@ -68,7 +68,7 @@ describe('Default createCopyToClipboardActionFactory', () => {
       expect(mockSuccessToast).toHaveBeenCalled();
     });
 
-    it('should suport multiple values', async () => {
+    it('should support multiple values', async () => {
       await copyToClipboardAction.execute({
         ...context,
         data: [
@@ -81,6 +81,34 @@ describe('Default createCopyToClipboardActionFactory', () => {
       expect(mockCopy).toHaveBeenCalledWith(
         'user.name: "the \\"value\\"" AND "another value" AND "last value"'
       );
+      expect(mockSuccessToast).toHaveBeenCalled();
+    });
+
+    it('should support numbers', async () => {
+      await copyToClipboardAction.execute({
+        ...context,
+        data: [
+          {
+            ...context.data[0],
+            value: [1, 2, 3],
+          },
+        ],
+      });
+      expect(mockCopy).toHaveBeenCalledWith('user.name: 1 AND 2 AND 3');
+      expect(mockSuccessToast).toHaveBeenCalled();
+    });
+
+    it('should support booleans', async () => {
+      await copyToClipboardAction.execute({
+        ...context,
+        data: [
+          {
+            ...context.data[0],
+            value: [true, false, true],
+          },
+        ],
+      });
+      expect(mockCopy).toHaveBeenCalledWith('user.name: true AND false AND true');
       expect(mockSuccessToast).toHaveBeenCalled();
     });
   });
