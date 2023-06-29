@@ -38,7 +38,7 @@
         "label": "ObservabilityOnboardingConfig",
         "description": [],
         "signature": [
-          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; }"
+          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly serverless: Readonly<{} & { enabled: true; }>; }"
         ],
         "path": "x-pack/plugins/observability_onboarding/server/index.ts",
         "deprecated": false,
