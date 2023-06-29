@@ -347,49 +347,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                closure_type:
-                  $ref: '#/components/schemas/closure_types'
-                connector:
-                  description: An object that contains the connector configuration.
-                  type: object
-                  properties:
-                    fields:
-                      description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-                      nullable: true
-                      type: object
-                    id:
-                      description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
-                      type: string
-                      example: none
-                    name:
-                      description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
-                      type: string
-                      example: none
-                    type:
-                      $ref: '#/components/schemas/connector_types'
-                  required:
-                    - fields
-                    - id
-                    - name
-                    - type
-                owner:
-                  $ref: '#/components/schemas/owners'
-                settings:
-                  description: An object that contains the case settings.
-                  type: object
-                  properties:
-                    syncAlerts:
-                      description: Turns alert syncing on or off.
-                      type: boolean
-                      example: true
-                  required:
-                    - syncAlerts
-              required:
-                - closure_type
-                - connector
-                - owner
+              $ref: '#/components/schemas/set_case_configuration_request'
             examples:
               setCaseConfigRequest:
                 $ref: '#/components/examples/set_case_configuration_request'
@@ -520,40 +478,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                closure_type:
-                  $ref: '#/components/schemas/closure_types'
-                connector:
-                  description: An object that contains the connector configuration.
-                  type: object
-                  properties:
-                    fields:
-                      description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-                      nullable: true
-                      type: object
-                    id:
-                      description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
-                      type: string
-                      example: none
-                    name:
-                      description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
-                      type: string
-                      example: none
-                    type:
-                      $ref: '#/components/schemas/connector_types'
-                  required:
-                    - fields
-                    - id
-                    - name
-                    - type
-                version:
-                  description: |
-                    The version of the connector. To retrieve the version value, use the get configuration API.
-                  type: string
-                  example: WzIwMiwxXQ==
-              required:
-                - version
+              $ref: '#/components/schemas/update_case_configuration_request'
       responses:
         '200':
           description: Indicates a successful call.
@@ -1553,49 +1478,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                closure_type:
-                  $ref: '#/components/schemas/closure_types'
-                connector:
-                  description: An object that contains the connector configuration.
-                  type: object
-                  properties:
-                    fields:
-                      description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-                      nullable: true
-                      type: object
-                    id:
-                      description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
-                      type: string
-                      example: none
-                    name:
-                      description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
-                      type: string
-                      example: none
-                    type:
-                      $ref: '#/components/schemas/connector_types'
-                  required:
-                    - fields
-                    - id
-                    - name
-                    - type
-                owner:
-                  $ref: '#/components/schemas/owners'
-                settings:
-                  description: An object that contains the case settings.
-                  type: object
-                  properties:
-                    syncAlerts:
-                      description: Turns alert syncing on or off.
-                      type: boolean
-                      example: true
-                  required:
-                    - syncAlerts
-              required:
-                - closure_type
-                - connector
-                - owner
+              $ref: '#/components/schemas/set_case_configuration_request'
             examples:
               setCaseConfigRequest:
                 $ref: '#/components/examples/set_case_configuration_request'
@@ -1727,40 +1610,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                closure_type:
-                  $ref: '#/components/schemas/closure_types'
-                connector:
-                  description: An object that contains the connector configuration.
-                  type: object
-                  properties:
-                    fields:
-                      description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-                      nullable: true
-                      type: object
-                    id:
-                      description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
-                      type: string
-                      example: none
-                    name:
-                      description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
-                      type: string
-                      example: none
-                    type:
-                      $ref: '#/components/schemas/connector_types'
-                  required:
-                    - fields
-                    - id
-                    - name
-                    - type
-                version:
-                  description: |
-                    The version of the connector. To retrieve the version value, use the get configuration API.
-                  type: string
-                  example: WzIwMiwxXQ==
-              required:
-                - version
+              $ref: '#/components/schemas/update_case_configuration_request'
       responses:
         '200':
           description: Indicates a successful call.
@@ -3534,6 +3384,89 @@ components:
         - .servicenow-sir
         - .swimlane
       example: .none
+    set_case_configuration_request:
+      title: Set case configuration request
+      description: External connection details, such as the closure type and default connector for cases.
+      type: object
+      required:
+        - closure_type
+        - connector
+        - owner
+      properties:
+        closure_type:
+          $ref: '#/components/schemas/closure_types'
+        connector:
+          description: An object that contains the connector configuration.
+          type: object
+          properties:
+            fields:
+              description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
+              nullable: true
+              type: object
+            id:
+              description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
+              type: string
+              example: none
+            name:
+              description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
+              type: string
+              example: none
+            type:
+              $ref: '#/components/schemas/connector_types'
+          required:
+            - fields
+            - id
+            - name
+            - type
+        owner:
+          $ref: '#/components/schemas/owners'
+        settings:
+          description: An object that contains the case settings.
+          type: object
+          properties:
+            syncAlerts:
+              description: Turns alert syncing on or off.
+              type: boolean
+              example: true
+          required:
+            - syncAlerts
+    update_case_configuration_request:
+      title: Update case configuration request
+      description: External connection details, such as the closure type and default connector for cases.
+      type: object
+      required:
+        - version
+      properties:
+        closure_type:
+          $ref: '#/components/schemas/closure_types'
+        connector:
+          description: An object that contains the connector configuration.
+          type: object
+          properties:
+            fields:
+              description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
+              nullable: true
+              type: object
+            id:
+              description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
+              type: string
+              example: none
+            name:
+              description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
+              type: string
+              example: none
+            type:
+              $ref: '#/components/schemas/connector_types'
+          required:
+            - fields
+            - id
+            - name
+            - type
+        version:
+          description: |
+            The version of the connector. To retrieve the version value, use the get configuration API.
+          type: string
+          example: WzIwMiwxXQ==
     alert_response_properties:
       type: object
       properties:

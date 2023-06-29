@@ -860,7 +860,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of user actions to return per page. default: 20 </div><div class="param">sortOrder (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: asc </div><div class="param">types (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: desc </div><div class="param">types (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the types of user actions to return. default: null </div>
     </div>  <!-- field-items -->
@@ -952,7 +952,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of user actions to return per page. default: 20 </div><div class="param">sortOrder (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: asc </div><div class="param">types (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: desc </div><div class="param">types (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the types of user actions to return. default: null </div>
     </div>  <!-- field-items -->
@@ -1154,7 +1154,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the returned cases by assignees. Valid values are <code>none</code> or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API. default: null </div><div class="param">defaultSearchOperator (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The default operator to use for the simple_query_string. default: OR </div><div class="param">fields (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; he default operator to use for the simple_query_string. default: OR </div><div class="param">fields (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The fields in the entity to return in the response. default: null </div><div class="param">from (optional)</div>
 
@@ -1347,7 +1347,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Filters the returned cases by assignees. Valid values are <code>none</code> or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API. default: null </div><div class="param">defaultSearchOperator (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The default operator to use for the simple_query_string. default: OR </div><div class="param">fields (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; he default operator to use for the simple_query_string. default: OR </div><div class="param">fields (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The fields in the entity to return in the response. default: null </div><div class="param">from (optional)</div>
 
@@ -3141,7 +3141,7 @@ Any modifications made to this file will be overwritten.
 
     <h3 class="field-label">Request body</h3>
     <div class="field-items">
-      <div class="param">setCaseConfigurationDefaultSpace_request <a href="#setCaseConfigurationDefaultSpace_request">setCaseConfigurationDefaultSpace_request</a> (optional)</div>
+      <div class="param">set_case_configuration_request <a href="#set_case_configuration_request">set_case_configuration_request</a> (optional)</div>
 
       <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
 
@@ -3236,7 +3236,7 @@ Any modifications made to this file will be overwritten.
 
     <h3 class="field-label">Request body</h3>
     <div class="field-items">
-      <div class="param">setCaseConfigurationDefaultSpace_request <a href="#setCaseConfigurationDefaultSpace_request">setCaseConfigurationDefaultSpace_request</a> (optional)</div>
+      <div class="param">set_case_configuration_request <a href="#set_case_configuration_request">set_case_configuration_request</a> (optional)</div>
 
       <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
 
@@ -3701,7 +3701,7 @@ Any modifications made to this file will be overwritten.
 
     <h3 class="field-label">Request body</h3>
     <div class="field-items">
-      <div class="param">updateCaseConfigurationDefaultSpace_request <a href="#updateCaseConfigurationDefaultSpace_request">updateCaseConfigurationDefaultSpace_request</a> (optional)</div>
+      <div class="param">update_case_configuration_request <a href="#update_case_configuration_request">update_case_configuration_request</a> (optional)</div>
 
       <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
 
@@ -3802,7 +3802,7 @@ Any modifications made to this file will be overwritten.
 
     <h3 class="field-label">Request body</h3>
     <div class="field-items">
-      <div class="param">updateCaseConfigurationDefaultSpace_request <a href="#updateCaseConfigurationDefaultSpace_request">updateCaseConfigurationDefaultSpace_request</a> (optional)</div>
+      <div class="param">update_case_configuration_request <a href="#update_case_configuration_request">update_case_configuration_request</a> (optional)</div>
 
       <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash;  </div>
 
@@ -4071,15 +4071,15 @@ Any modifications made to this file will be overwritten.
     <li><a href="#payload_user_comment"><code>payload_user_comment</code> - </a></li>
     <li><a href="#payload_user_comment_comment"><code>payload_user_comment_comment</code> - </a></li>
     <li><a href="#rule"><code>rule</code> - Alerting rule</a></li>
-    <li><a href="#setCaseConfigurationDefaultSpace_request"><code>setCaseConfigurationDefaultSpace_request</code> - </a></li>
-    <li><a href="#setCaseConfigurationDefaultSpace_request_connector"><code>setCaseConfigurationDefaultSpace_request_connector</code> - </a></li>
-    <li><a href="#setCaseConfigurationDefaultSpace_request_settings"><code>setCaseConfigurationDefaultSpace_request_settings</code> - </a></li>
+    <li><a href="#set_case_configuration_request"><code>set_case_configuration_request</code> - Set case configuration request</a></li>
+    <li><a href="#set_case_configuration_request_connector"><code>set_case_configuration_request_connector</code> - </a></li>
+    <li><a href="#set_case_configuration_request_settings"><code>set_case_configuration_request_settings</code> - </a></li>
     <li><a href="#settings"><code>settings</code> - </a></li>
     <li><a href="#severity_property"><code>severity_property</code> - </a></li>
     <li><a href="#status"><code>status</code> - </a></li>
-    <li><a href="#updateCaseConfigurationDefaultSpace_request"><code>updateCaseConfigurationDefaultSpace_request</code> - </a></li>
     <li><a href="#update_alert_comment_request_properties"><code>update_alert_comment_request_properties</code> - Update case comment request properties for alerts</a></li>
     <li><a href="#update_case_comment_request"><code>update_case_comment_request</code> - Update case comment request</a></li>
+    <li><a href="#update_case_configuration_request"><code>update_case_configuration_request</code> - Update case configuration request</a></li>
     <li><a href="#update_case_request"><code>update_case_request</code> - Update case request</a></li>
     <li><a href="#update_case_request_cases_inner"><code>update_case_request_cases_inner</code> - </a></li>
     <li><a href="#update_user_comment_request_properties"><code>update_user_comment_request_properties</code> - Update case comment request properties for user comments</a></li>
@@ -4817,17 +4817,17 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="setCaseConfigurationDefaultSpace_request"><code>setCaseConfigurationDefaultSpace_request</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
+    <h3><a name="set_case_configuration_request"><code>set_case_configuration_request</code> - Set case configuration request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>External connection details, such as the closure type and default connector for cases.</div>
     <div class="field-items">
       <div class="param">closure_type </div><div class="param-desc"><span class="param-type"><a href="#closure_types">closure_types</a></span>  </div>
-<div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#setCaseConfigurationDefaultSpace_request_connector">setCaseConfigurationDefaultSpace_request_connector</a></span>  </div>
+<div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#set_case_configuration_request_connector">set_case_configuration_request_connector</a></span>  </div>
 <div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#setCaseConfigurationDefaultSpace_request_settings">setCaseConfigurationDefaultSpace_request_settings</a></span>  </div>
+<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#set_case_configuration_request_settings">set_case_configuration_request_settings</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="setCaseConfigurationDefaultSpace_request_connector"><code>setCaseConfigurationDefaultSpace_request_connector</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="set_case_configuration_request_connector"><code>set_case_configuration_request_connector</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>An object that contains the connector configuration.</div>
     <div class="field-items">
       <div class="param">fields </div><div class="param-desc"><span class="param-type"><a href="#">Object</a></span> The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to <code>null</code>. </div>
@@ -4837,7 +4837,7 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="setCaseConfigurationDefaultSpace_request_settings"><code>setCaseConfigurationDefaultSpace_request_settings</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <h3><a name="set_case_configuration_request_settings"><code>set_case_configuration_request_settings</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>An object that contains the case settings.</div>
     <div class="field-items">
       <div class="param">syncAlerts </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Turns alert syncing on or off. </div>
@@ -4861,15 +4861,6 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'>The status of the case.</div>
     <div class="field-items">
           </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="updateCaseConfigurationDefaultSpace_request"><code>updateCaseConfigurationDefaultSpace_request</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">closure_type (optional)</div><div class="param-desc"><span class="param-type"><a href="#closure_types">closure_types</a></span>  </div>
-<div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#setCaseConfigurationDefaultSpace_request_connector">setCaseConfigurationDefaultSpace_request_connector</a></span>  </div>
-<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The version of the connector. To retrieve the version value, use the get configuration API. </div>
-    </div>  <!-- field-items -->
   </div>
   <div class="model">
     <h3><a name="update_alert_comment_request_properties"><code>update_alert_comment_request_properties</code> - Update case comment request properties for alerts</a> <a class="up" href="#__Models">Up</a></h3>
@@ -4900,6 +4891,15 @@ Any modifications made to this file will be overwritten.
         <div class="param-enum">user</div>
 <div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current comment version. To retrieve version values, use the get comments API. </div>
 <div class="param">comment </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The new comment. It is required only when <code>type</code> is <code>user</code>. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="update_case_configuration_request"><code>update_case_configuration_request</code> - Update case configuration request</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>External connection details, such as the closure type and default connector for cases.</div>
+    <div class="field-items">
+      <div class="param">closure_type (optional)</div><div class="param-desc"><span class="param-type"><a href="#closure_types">closure_types</a></span>  </div>
+<div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#set_case_configuration_request_connector">set_case_configuration_request_connector</a></span>  </div>
+<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The version of the connector. To retrieve the version value, use the get configuration API. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
