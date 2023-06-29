@@ -32,7 +32,14 @@ if ! yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"; then
   yarn kbn bootstrap --force-install
 fi
 
+echo "--- Finding out what node-sass versions are available"
+
+uname -a
+node -p "process.versions.module"
+ls -la node_modules/node-sass/vendor/**/
+
+sleep 350
+
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'yarn kbn bootstrap'
 fi
-
