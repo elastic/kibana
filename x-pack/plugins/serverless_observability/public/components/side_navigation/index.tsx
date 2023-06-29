@@ -94,6 +94,10 @@ const navigationTree: NavigationTreeDefinition = {
         },
       ],
     },
+    {
+      type: 'navGroup',
+      ...getPresets('ml'),
+    },
   ],
   footer: [
     {
