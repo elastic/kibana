@@ -66,7 +66,7 @@ export class RequestHandler {
     const headers = await this.encryptHeaders();
 
     // 3. Create a payload object by calling exportType.createJob(), and adding some automatic parameters
-    const job = exportType.createJob(jobParams, context, req);
+    const job = await exportType.createJob(jobParams, context, req);
 
     const payload = {
       ...job,

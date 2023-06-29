@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IClusterClient } from '@kbn/core-elasticsearch-server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import { CsvGenerator } from '@kbn/generate-csv';
@@ -21,7 +20,7 @@ import {
   LICENSE_TYPE_TRIAL,
 } from '../../../common/constants';
 import { getFieldFormats } from '../../services';
-import { ExportType, ExportTypeSetupDeps, ExportTypeStartDeps } from '../common';
+import { ExportType, BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from '../common';
 import { decryptJobHeaders } from '../common/decrypt_job_headers';
 import { JobParamsCSV, TaskPayloadCSV } from './types';
 
@@ -29,13 +28,18 @@ import { JobParamsCSV, TaskPayloadCSV } from './types';
  * @TODO move to be within @kbn/reporitng-export-types
  */
 
-export interface CsvSearchsourceExportTypeStartDeps extends ExportTypeStartDeps {
+type CsvSearchsourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
+interface CsvSearchsourceExportTypeStartDeps extends BaseExportTypeStartDeps {
   discover: DiscoverServerPluginStart;
   data: DataPluginStart;
-  esClient: IClusterClient;
 }
 
-export class CsvSearchsourceExportType extends ExportType<JobParamsCSV, TaskPayloadCSV> {
+export class CsvSearchsourceExportType extends ExportType<
+  JobParamsCSV,
+  TaskPayloadCSV,
+  CsvSearchsourceExportTypeSetupDeps,
+  CsvSearchsourceExportTypeStartDeps
+> {
   id = 'csv_searchsource';
   name = CSV_JOB_TYPE;
   jobType = CONTENT_TYPE_CSV;
@@ -48,27 +52,13 @@ export class CsvSearchsourceExportType extends ExportType<JobParamsCSV, TaskPayl
     LICENSE_TYPE_PLATINUM,
     LICENSE_TYPE_ENTERPRISE,
   ];
-  declare startDeps: CsvSearchsourceExportTypeStartDeps;
-
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
     const logger = args[2];
     this.logger = logger.get('csv-searchsource-export');
   }
 
-  setup(setupDeps: ExportTypeSetupDeps) {
-    this.setupDeps = setupDeps;
-  }
-
-  start(startDeps: CsvSearchsourceExportTypeStartDeps) {
-    this.startDeps = startDeps;
-  }
-
-  /**
-   * @param jobParamsCSV
-   * @returns jobParams
-   */
-  public createJob = (jobParams: JobParamsCSV) => {
+  public createJob = async (jobParams: JobParamsCSV) => {
     return { ...jobParams, isDeprecated: false };
   };
 
@@ -83,13 +73,11 @@ export class CsvSearchsourceExportType extends ExportType<JobParamsCSV, TaskPayl
     const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
     const fakeRequest = this.getFakeRequest(headers, job.spaceId, logger);
     const uiSettings = await this.getUiSettingsClient(fakeRequest, logger);
-    const dataPluginStart = await this.getDataService();
+    const dataPluginStart = this.startDeps.data;
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
 
-    const [es, searchSourceStart] = await Promise.all([
-      (await this.getEsClient()).asScoped(fakeRequest),
-      await dataPluginStart.search.searchSource.asScoped(fakeRequest),
-    ]);
+    const es = this.startDeps.esClient.asScoped(fakeRequest);
+    const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(fakeRequest);
 
     const clients = {
       uiSettings,

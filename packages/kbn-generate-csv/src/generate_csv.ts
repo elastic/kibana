@@ -479,6 +479,7 @@ export class CsvGenerator {
         i18nTexts.csvRowCountError({ expected: totalRecords ?? NaN, received: this.csvRowCount })
       );
     }
+
     return {
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,

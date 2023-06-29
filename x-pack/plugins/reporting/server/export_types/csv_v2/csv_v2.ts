@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { KibanaRequest, IClusterClient } from '@kbn/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { CsvGenerator } from '@kbn/generate-csv';
@@ -22,7 +22,7 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
 } from '../../../common/constants';
-import { ExportType, ExportTypeSetupDeps, ExportTypeStartDeps } from '../common';
+import { ExportType, BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from '../common';
 import { ReportingRequestHandlerContext } from '../../types';
 import { getFieldFormats } from '../../services';
 import { decryptJobHeaders } from '../common/decrypt_job_headers';
@@ -31,15 +31,17 @@ import { decryptJobHeaders } from '../common/decrypt_job_headers';
  * @TODO move to be within @kbn/reporitng-export-types
  */
 
-export interface CsvExportTypeStartDeps extends ExportTypeStartDeps {
+type CsvV2ExportTypeSetupDeps = BaseExportTypeSetupDeps;
+export interface CsvV2ExportTypeStartDeps extends BaseExportTypeStartDeps {
   discover: DiscoverServerPluginStart;
   data: DataPluginStart;
-  esClient: IClusterClient;
 }
 
 export class CsvV2ExportType extends ExportType<
   JobParamsCsvFromSavedObject,
-  TaskPayloadCsvFromSavedObject
+  TaskPayloadCsvFromSavedObject,
+  CsvV2ExportTypeSetupDeps,
+  CsvV2ExportTypeStartDeps
 > {
   id = CSV_REPORT_TYPE_V2;
   name = 'csv_v2';
@@ -53,24 +55,11 @@ export class CsvV2ExportType extends ExportType<
     LICENSE_TYPE_PLATINUM,
     LICENSE_TYPE_ENTERPRISE,
   ];
-  declare startDeps: CsvExportTypeStartDeps;
 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
     const logger = args[2];
     this.logger = logger.get('csv-export-v2');
-  }
-
-  setup(setupDeps: ExportTypeSetupDeps) {
-    this.setupDeps = setupDeps;
-  }
-
-  start(startDeps: CsvExportTypeStartDeps) {
-    this.startDeps = startDeps;
-  }
-
-  public getEsClient() {
-    return this.startDeps.esClient;
   }
 
   public createJob = async (
@@ -117,7 +106,7 @@ export class CsvV2ExportType extends ExportType<
     const fakeRequest = this.getFakeRequest(headers, job.spaceId, logger);
     const uiSettings = await this.getUiSettingsClient(fakeRequest, logger);
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
-    const { data: dataPluginStart, discover: discoverPluginStart } = await this.startDeps;
+    const { data: dataPluginStart, discover: discoverPluginStart } = this.startDeps;
     const data = dataPluginStart.search.asScoped(fakeRequest);
 
     const { locatorParams } = job;
@@ -128,10 +117,8 @@ export class CsvV2ExportType extends ExportType<
     const columns = await locatorClient.columnsFromLocator(params);
     const searchSource = await locatorClient.searchSourceFromLocator(params);
 
-    const [es, searchSourceStart] = await Promise.all([
-      (await this.getEsClient()).asScoped(fakeRequest),
-      await dataPluginStart.search.searchSource.asScoped(fakeRequest),
-    ]);
+    const es = this.startDeps.esClient.asScoped(fakeRequest);
+    const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(fakeRequest);
 
     const clients = { uiSettings, data, es };
     const dependencies = { searchSourceStart, fieldFormatsRegistry };
