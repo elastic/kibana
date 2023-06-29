@@ -65,6 +65,10 @@ export type DatasetsSelectorEvent =
       dataset: Dataset;
     }
   | {
+      type: 'SELECT_ALL_LOG_DATASET';
+      dataset: Dataset;
+    }
+  | {
       type: 'SCROLL_TO_INTEGRATIONS_BOTTOM';
     }
   | {

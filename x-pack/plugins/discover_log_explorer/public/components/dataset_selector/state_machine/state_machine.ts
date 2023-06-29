@@ -19,7 +19,7 @@ import {
 export const createPureDatasetsSelectorStateMachine = (
   initialContext: Partial<DefaultDatasetsSelectorContext> = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVsztgZTABswBjdAewCcA6Ew87CAYgBUB5AcQ4BkBRAbQAMAXUSgADgwCW6KeQB2YkAA9EAVgBMAGhABPRAA4AjNTWDzggJxqjAFgODbANicBfVzrSZsuAsTJU1OTiYPJMAMLcbHgCIkqSsDJyikgqiEZGLtTO9hrWBgZqThpqOvoItraC1EYA7E6CdgYAzIJFghrN7p4YWDj4RKQUNMGhrJw8saKpCUkKSqoIGQ3ULrWWjU6WzbW2dmXqzbbZarUaxmZqzoJuHiBefb6DASMh8tSEUrCy8lAAkvJ0GAoJQMMlYBEABIAQQAchxeAB9AAKcN43CE0wk0lk81Si1szRMLTU2xsTk0RksBgOCEstQM1B2Ng6jlsGnOtW6916PgG-mGQTeHy+P3+gOBoNx8gh4Rh8KRqNh6P4RixIFm0oWiEJxOapP1mUp1NpRUs1BuGlqzX1DnaGm5Dz5fiGgVG70+3ykvwBQJBYIUELw4QASmxuNxEexEX9YSxeBwQ9CWH82LC8IiAEJsFjsACymPiOOS2oQBlqFosVerzVp9Q0NVqVJtnWpxiMjt5-RdLyFoRFXp9Ev90qDvGhIblWYAmojYdC81Mi4ktfj0ldVpY7OZ2fTbKcaXpEE5moz6mpSQyjESbAZO95u89Be6B2LfZKAzKmHg2CGWDPEV-ZBeBDQsZmLPFQEWTIGxaDRBCJKwMlOIxTSMNQmVJDRilPJx2Ww+9Hn5V1Xn7T032HKVkjwdBKDAVAAFtZXlBEUTRDE4nAlcSzXBBigwqk1COWp1gMSx6UPcpb1MYomy2NoXEI50nzdYVyO9cU-SohQaLoxixz4cJ-2QZNoRiFgwOxbjILSJZr0ZJx1kcm1TyKEpaQpBtLXqLZWmaJwOzuJ1HwFVSyNFDT3xHajaPopjv3HSdIQA+dF0sjUIJSKDDCqahsKKIwEJbIw8lpZpLGOdCT1k7YGXLLogq7J5QtIj0IqHLTP10uKg1-f9M1nICQPSzUeOyst7ErcrCo6ToOUsWkrWqWozA6a1HLaCqGp6B9mpIvs2sHKAAFV5AY1B5FQGAIG6-SoThVilRVTirLmLLbP4mprGE0TxIZWlLCtahyzMQp-O2c5bh2oie2fNT2pOs6LquyBbvimJDOM0zzJGzLSwyU9Vic60bUKfiAcqbINCpdkXBaOxbCUkL9pfdTflO87LuutGxwnKcBrnBcly4t7SwMXLGgK6m5v82paQcZpsicMTsLsalKi5RrduI3tWYRjnke52K7p-P8AKG0CXoy6z3sWcWKwMeCrWw2oOjpjyHAtWSyfQsw8ncO55HICA4CUYK9peZdRd4gBaRlxITxPE7OWkY4wpPHEKQSjiZiPBToBhICj1dxuvQkvqEuoxNw6wPMcGSrT9i9rihnltdhsL3tGmzFnKytqwH2sjyWFo8tWq1Zc2wlc51uH+wAC1FYuxtswqnAb+w6lPHYjEd2l92OfVtgCtp1gvQLoeUlqDtfSLKM-eARZL1ebg34xrRaJtxflk9VhKRwSpbAZCJGeHdWq3w6h+aUPNl490MIICslhlZnAaMsfUpoOQNy2I7eCt4L5txhipcBbNEacxRjdY2TFYG23gYg5B2FGiZHQcPbYxIVo3DpnsAwFIA6uCAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVsztgZTABswBjdAewCcA6Ew87CAYgBUB5AcQ4BkBRAbQAMAXUSgADgwCW6KeQB2YkAA9EARgBMggMzUAbAHYAnHoAcBgKwAaEAE9EptdQsBfFzbSZsuAsTJVqcnEweSYAYW42PAERJUlYGTlFJBV1LV1DE3NrO0RtQSdXdxBPLBx8IlIKGiCQ1k4eGNEU+MSFJVUETR19YzNLG3sEDQs1Nw8MMp9K-xrg+WpsP2rqQilYWXkoAEl5dDAoSgwk2HCACQBBADkOXgB9AAVr3m4hZolpWXaUzoAWAycpm0FiM2gGuQQem0pmceg0v1M-1+mjUgiM4xKk28FWWAVqCyWVQCaw2Ui2u32h2OClOYUuN3uTyuL34aneIFaX2SoD+AOoQJBYJyQ1R-35Bl+RkREpRY2KpWxviJcxCixmKxJmx2ewORy5pzwYQASmxuNw7uw7tsrixeBwjRcWNs2Fc8HcAEJsFjsACybzinySHXUagMgwcFl+1FDalMIJlGlR6PlWPKStmgXmatxNE1ZO1lL1JyY0QuRrpHoAmncrhcfU0AwkucGuoj9EY1L9BHDhYgDPlqAY9BY9GiE0mMQq0+q8VnCRm8+SdVT9SW2EaWFW7uvkLwjf6WoHvjz1EYNPztOlNL3IYIDNRgaD48jE2jJ6npjnM6r5xr1lqKV1al5DwdBKDAVAAFtaXpW5HmeV5YkPJsgx+RA9GHaMjAsbRr3DBAjCMe8wUlaUXwnFMvGnL98WzZVVn-fNAJXJJQPAqCDV4MsK3data3rA8PhQ49UgQUxTEEagNGHHt8PMc8sn7JEUTfSiphxejaN-YlGKXQtgLYiDoLXDctx3PdBI5I9uVE8SYUEHQjG7EZ8IlIxYXhMiVOTCYqM-TS5xnXNdKgABVeRINQeRUBgCBDI485rjgpkWSQoS2hszoMIsLCcLwiELHE6hnIRZTXx8zE-I0jMtKChjSS2cLIui2L4uM0tyzOLd+IbZCMpbcTJIKEcXIhX4oX0EbtDKpNfnfKr0xWWqv0XMKIqimLIDag1103XjtyNXd9zSqzhMyhxzH5K9RqGabJJGeb1MW2dVUg8gIDARZ82IEsXl4MJNwuM07kiDg7mQR0LmiFhLM5VCTwQf5dGG2SIU7PR3KUx9xzlXynrq2i3o+r6th+6I+AB8HIeh2HrJbDQgWcfC1GBPRB0TbRoScgxzAMAxHsVAmsyJz7UEIQhfopzcIZYKHeBhk64ZErLCOjPQu1RkVcPckipRmuVinkd64CUKd-NmRt+rQhAAFoNDDCEbb0AXqPougGEgS3m2tln7eoIiZJuxARjmtTBZo+Yvfh0TE2ZzCHrD12aqzAALf8o+VxAz2Z2MYXMUj9Zd82lsCnMM-OyEjHwkZz0sIvqpLn86tW5iixpcuWxZtmRpvbCcrhAvx1UvHw4CpuVpC1uDLAoz4D672Eelf3+hvVECgfNyvPK+vnpVAlm5CpqNtameOI762l8Um8QXPEqt4okek8bhYRfPhGNGBJm0Y-wFN8LxPi4vRfsbEmUBiBv1EpedyFgP6-CFMzUYt8JIAm0NzXm-MAENyAdQEW1AxaEAgZ0UwoJehXwQZ2ZwyCWZoL5hgtwQA */
   createMachine<DatasetsSelectorContext, DatasetsSelectorEvent, DatasetsSelectorTypestate>(
     {
       context: { ...DEFAULT_CONTEXT, ...initialContext },
@@ -35,7 +35,7 @@ export const createPureDatasetsSelectorStateMachine = (
           },
         },
         open: {
-          initial: 'listingIntegrations',
+          type: 'parallel',
           on: {
             CLOSE: 'closed',
             TOGGLE: 'closed',
@@ -43,59 +43,82 @@ export const createPureDatasetsSelectorStateMachine = (
           states: {
             hist: {
               type: 'history',
+              history: 'deep',
             },
-            listingIntegrations: {
-              entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
-              on: {
-                CHANGE_PANEL: [
-                  {
-                    cond: 'isUnmanagedStreamsId',
-                    target: 'listingUnmanagedStreams',
+            selector: {
+              initial: 'listingIntegrations',
+              states: {
+                listingIntegrations: {
+                  entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
+                  on: {
+                    CHANGE_PANEL: [
+                      {
+                        cond: 'isUnmanagedStreamsId',
+                        target: 'listingUnmanagedStreams',
+                      },
+                      {
+                        target: 'listingIntegrationStreams',
+                      },
+                    ],
+                    SCROLL_TO_INTEGRATIONS_BOTTOM: {
+                      actions: 'loadMoreIntegrations',
+                    },
+                    SEARCH_BY_NAME: {
+                      actions: ['storeSearch', 'searchIntegrations'],
+                    },
+                    SORT_BY_ORDER: {
+                      actions: ['storeSearch', 'sortIntegrations'],
+                    },
                   },
-                  {
-                    target: 'listingIntegrationStreams',
+                },
+                listingIntegrationStreams: {
+                  entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
+                  on: {
+                    CHANGE_PANEL: 'listingIntegrations',
+                    SEARCH_BY_NAME: {
+                      actions: ['storeSearch', 'searchIntegrationsStreams'],
+                    },
+                    SORT_BY_ORDER: {
+                      actions: ['storeSearch', 'sortIntegrationsStreams'],
+                    },
                   },
-                ],
-                SCROLL_TO_INTEGRATIONS_BOTTOM: {
-                  actions: 'loadMoreIntegrations',
                 },
-                SEARCH_BY_NAME: {
-                  actions: ['storeSearch', 'searchIntegrations'],
-                },
-                SORT_BY_ORDER: {
-                  actions: ['storeSearch', 'sortIntegrations'],
+                listingUnmanagedStreams: {
+                  entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
+                  on: {
+                    CHANGE_PANEL: 'listingIntegrations',
+                    SEARCH_BY_NAME: {
+                      actions: ['storeSearch', 'searchUnmanagedStreams'],
+                    },
+                    SORT_BY_ORDER: {
+                      actions: ['storeSearch', 'sortUnmanagedStreams'],
+                    },
+                  },
                 },
               },
             },
-            listingIntegrationStreams: {
-              entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
-              on: {
-                CHANGE_PANEL: 'listingIntegrations',
-                SELECT_DATASET: {
-                  actions: ['storeSelected', 'selectStream'],
-                  target: '#closed',
+            mode: {
+              initial: 'single',
+              states: {
+                single: {
+                  on: {
+                    SELECT_ALL_LOG_DATASET: {
+                      cond: 'isListingIntegrations',
+                      actions: ['storeSelection', 'notifySelectionChanged', 'closeSelector'],
+                      target: 'all',
+                    },
+                    SELECT_DATASET: {
+                      actions: ['storeSelection', 'notifySelectionChanged', 'closeSelector'],
+                    },
+                  },
                 },
-                SEARCH_BY_NAME: {
-                  actions: ['storeSearch', 'searchIntegrationsStreams'],
-                },
-                SORT_BY_ORDER: {
-                  actions: ['storeSearch', 'sortIntegrationsStreams'],
-                },
-              },
-            },
-            listingUnmanagedStreams: {
-              entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
-              on: {
-                CHANGE_PANEL: 'listingIntegrations',
-                SELECT_DATASET: {
-                  actions: ['storeSelected', 'selectStream'],
-                  target: '#closed',
-                },
-                SEARCH_BY_NAME: {
-                  actions: ['storeSearch', 'searchUnmanagedStreams'],
-                },
-                SORT_BY_ORDER: {
-                  actions: ['storeSearch', 'sortUnmanagedStreams'],
+                all: {
+                  on: {
+                    SELECT_DATASET: {
+                      actions: ['storeSelection', 'notifySelectionChanged', 'closeSelector'],
+                      target: 'single',
+                    },
+                  },
                 },
               },
             },
@@ -105,6 +128,7 @@ export const createPureDatasetsSelectorStateMachine = (
     },
     {
       actions: {
+        closeSelector: raise('CLOSE'),
         storePanelId: assign((_context, event) =>
           'panelId' in event ? { panelId: event.panelId } : {}
         ),
@@ -118,7 +142,7 @@ export const createPureDatasetsSelectorStateMachine = (
           }
           return {};
         }),
-        storeSelected: assign((_context, event) =>
+        storeSelection: assign((_context, event) =>
           'dataset' in event ? { selected: event.dataset } : {}
         ),
         retrieveSearchFromCache: assign((context, event) =>
@@ -133,6 +157,9 @@ export const createPureDatasetsSelectorStateMachine = (
         }),
       },
       guards: {
+        isListingIntegrations: (_context, _event, { state }) => {
+          return state.matches('open.selector.listingIntegrations');
+        },
         isUnmanagedStreamsId: (_context, event) => {
           return 'panelId' in event && event.panelId === UNMANAGED_STREAMS_PANEL_ID;
         },
@@ -155,7 +182,7 @@ export const createDatasetsSelectorStateMachine = ({
 }: DatasetsSelectorStateMachineDependencies) =>
   createPureDatasetsSelectorStateMachine(initialContext).withConfig({
     actions: {
-      selectStream: (_context, event) => {
+      notifySelectionChanged: (_context, event) => {
         if ('dataset' in event) {
           return onDatasetSelected(event.dataset);
         }

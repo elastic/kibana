@@ -70,6 +70,11 @@ export const useDatasetSelector = ({
     [datasetsSelectorStateService]
   );
 
+  const selectAllLogDataset = useCallback<DatasetSelectionHandler>(
+    (dataset) => datasetsSelectorStateService.send({ type: 'SELECT_ALL_LOG_DATASET', dataset }),
+    [datasetsSelectorStateService]
+  );
+
   const selectDataset = useCallback<DatasetSelectionHandler>(
     (dataset) => datasetsSelectorStateService.send({ type: 'SELECT_DATASET', dataset }),
     [datasetsSelectorStateService]
@@ -101,6 +106,7 @@ export const useDatasetSelector = ({
     changePanel,
     scrollToIntegrationsBottom,
     searchByName,
+    selectAllLogDataset,
     selectDataset,
     sortByOrder,
     togglePopover,

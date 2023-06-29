@@ -9,6 +9,7 @@ import React from 'react';
 import {
   EuiButton,
   EuiHorizontalRule,
+  EuiIcon,
   EuiPanel,
   EuiPopover,
   EuiPopoverProps,
@@ -34,7 +35,7 @@ export const DatasetsPopover = ({
   selected,
   ...props
 }: DatasetsPopoverProps) => {
-  const { title, parentIntegration } = selected ?? {};
+  const { iconType, title, parentIntegration } = selected ?? {};
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const buttonStyles = getPopoverButtonStyles({ fullWidth: isMobile });
@@ -52,14 +53,16 @@ export const DatasetsPopover = ({
           onClick={onClick}
           fullWidth={isMobile}
         >
-          {hasIntegration && (
+          {iconType ? (
+            <EuiIcon type={iconType} />
+          ) : hasIntegration ? (
             <PackageIcon
               packageName={parentIntegration.name}
               version={parentIntegration.version}
               size="m"
               tryApi
             />
-          )}
+          ) : null}
           <span className="eui-textTruncate">{title}</span>
         </EuiButton>
       }

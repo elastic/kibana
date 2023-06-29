@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiContextMenu, EuiHorizontalRule } from '@elastic/eui';
+import { EuiContextMenu, EuiHorizontalRule, EuiIcon } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { Dataset } from '../../../common/datasets';
 import { useIntersectionRef } from '../../hooks/use_intersection_ref';
 import { dynamic } from '../../utils/dynamic';
 import {
@@ -61,6 +62,7 @@ export function DatasetSelector({
     changePanel,
     scrollToIntegrationsBottom,
     searchByName,
+    selectAllLogDataset,
     selectDataset,
     sortByOrder,
     togglePopover,
@@ -81,8 +83,16 @@ export function DatasetSelector({
   const [setSpyRef] = useIntersectionRef({ onIntersecting: scrollToIntegrationsBottom });
 
   const { items: integrationItems, panels: integrationPanels } = useMemo(() => {
-    const datasetsItem = {
+    const allLogDataset = Dataset.createAllLogsDataset();
+    const allLogDatasetsItem = {
+      name: allLogDataset.title,
+      icon: allLogDataset.iconType && <EuiIcon type={allLogDataset.iconType} />,
+      onClick: () => selectAllLogDataset(allLogDataset),
+    };
+
+    const unmanagedDatasetsItem = {
       name: uncategorizedLabel,
+      icon: <EuiIcon type="documents" />,
       onClick: onStreamsEntryClick,
       panel: UNMANAGED_STREAMS_PANEL_ID,
     };
@@ -100,7 +110,7 @@ export function DatasetSelector({
 
     if (!integrations || integrations.length === 0) {
       return {
-        items: [datasetsItem, createIntegrationStatusItem()],
+        items: [allLogDatasetsItem, unmanagedDatasetsItem, createIntegrationStatusItem()],
         panels: [],
       };
     }
@@ -112,7 +122,7 @@ export function DatasetSelector({
     });
 
     return {
-      items: [datasetsItem, ...items],
+      items: [allLogDatasetsItem, unmanagedDatasetsItem, ...items],
       panels,
     };
   }, [

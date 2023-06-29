@@ -5,19 +5,26 @@
  * 2.0.
  */
 
+import { IconType } from '@elastic/eui';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { IndexPattern } from '@kbn/io-ts-utils';
 import { DatasetId, DatasetType, IntegrationType } from '../types';
 
 type IntegrationBase = Pick<IntegrationType, 'name' | 'version'>;
+interface DatasetDeps extends DatasetType {
+  iconType?: IconType;
+}
 
 export class Dataset {
   id: DatasetId;
+  iconType?: IconType;
   name: DatasetType['name'];
   title: DatasetType['title'];
   parentIntegration?: IntegrationBase;
 
-  private constructor(dataset: DatasetType, parentIntegration?: IntegrationType) {
+  private constructor(dataset: DatasetDeps, parentIntegration?: IntegrationType) {
     this.id = `dataset-${dataset.name}` as DatasetId;
+    this.iconType = dataset.iconType;
     this.name = dataset.name;
     this.title = dataset.title ?? dataset.name;
     this.parentIntegration = parentIntegration && {
@@ -35,7 +42,15 @@ export class Dataset {
     };
   }
 
-  public static create(dataset: DatasetType, parentIntegration?: IntegrationType) {
+  public static create(dataset: DatasetDeps, parentIntegration?: IntegrationType) {
     return new Dataset(dataset, parentIntegration);
+  }
+
+  public static createAllLogsDataset() {
+    return new Dataset({
+      name: 'logs-*-*' as IndexPattern,
+      title: 'All log datasets',
+      iconType: 'editorChecklist',
+    });
   }
 }
