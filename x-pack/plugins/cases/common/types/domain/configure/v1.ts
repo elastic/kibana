@@ -6,9 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseConnectorRt } from '../connectors/connector';
-import { ConnectorMappingsRt } from '../connectors/mappings';
-import { UserRt } from '../user';
+import { CaseConnectorRt, UserRt, ConnectorMappingsRt } from '../../../api';
 
 const ClosureTypeRt = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
 
@@ -23,7 +21,7 @@ export const ConfigurationBasicWithoutOwnerRt = rt.strict({
   closure_type: ClosureTypeRt,
 });
 
-const CasesConfigureBasicRt = rt.intersection([
+export const CasesConfigureBasicRt = rt.intersection([
   ConfigurationBasicWithoutOwnerRt,
   rt.strict({
     /**
@@ -31,12 +29,6 @@ const CasesConfigureBasicRt = rt.intersection([
      */
     owner: rt.string,
   }),
-]);
-
-export const ConfigurationRequestRt = CasesConfigureBasicRt;
-export const ConfigurationPatchRequestRt = rt.intersection([
-  rt.exact(rt.partial(ConfigurationBasicWithoutOwnerRt.type.props)),
-  rt.strict({ version: rt.string }),
 ]);
 
 export const ConfigurationActivityFieldsRt = rt.strict({
@@ -62,27 +54,9 @@ export const ConfigurationRt = rt.intersection([
   }),
 ]);
 
-export const GetConfigurationFindRequestRt = rt.exact(
-  rt.partial({
-    /**
-     * The configuration plugin owner to filter the search by. If this is left empty the results will include all configurations
-     * that the user has permissions to access
-     */
-    owner: rt.union([rt.array(rt.string), rt.string]),
-  })
-);
-
-export const CaseConfigureRequestParamsRt = rt.strict({
-  configuration_id: rt.string,
-});
-
 export const ConfigurationsRt = rt.array(ConfigurationRt);
 
 export type ClosureType = rt.TypeOf<typeof ClosureTypeRt>;
-export type ConfigurationRequest = rt.TypeOf<typeof ConfigurationRequestRt>;
-export type ConfigurationPatchRequest = rt.TypeOf<typeof ConfigurationPatchRequestRt>;
 export type ConfigurationAttributes = rt.TypeOf<typeof ConfigurationAttributesRt>;
 export type Configuration = rt.TypeOf<typeof ConfigurationRt>;
 export type Configurations = rt.TypeOf<typeof ConfigurationsRt>;
-
-export type GetConfigurationFindRequest = rt.TypeOf<typeof GetConfigurationFindRequestRt>;

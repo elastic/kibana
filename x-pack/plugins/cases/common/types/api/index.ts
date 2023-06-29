@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export * from './case';
-export * from './comment';
-export * from './status';
-export * from './user_actions';
-export * from './constants';
-export * from './alerts';
-export * from './user_profiles';
-export * from './assignee';
+// Latest
+export * from './configure/latest';
+
+// V1
+export * as configureApiV1 from './configure/v1';
