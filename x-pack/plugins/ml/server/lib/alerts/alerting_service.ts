@@ -23,6 +23,7 @@ import {
   type MlAnomalyResultType,
   ML_ANOMALY_RESULT_TYPE,
 } from '@kbn/ml-anomaly-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { MlClient } from '../ml_client';
 import {
   MlAnomalyDetectionAlertParams,
@@ -147,7 +148,8 @@ export function buildExplorerUrl(
     },
   };
 
-  const spacePathComponent: string = !spaceId || spaceId === 'default' ? '' : `/s/${spaceId}`;
+  const spacePathComponent: string =
+    !spaceId || spaceId === DEFAULT_SPACE_ID ? '' : `/s/${spaceId}`;
 
   return `${spacePathComponent}/app/ml/explorer/?_g=${encodeURIComponent(
     rison.encode(globalState)
