@@ -156,16 +156,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       // wrapping into own describe to make sure new tab is cleaned up even if test failed
       // see: https://github.com/elastic/kibana/pull/67280#discussion_r430528122
-      xdescribe('tests Discover type custom URL', () => {
+      describe('tests Discover type custom URL', () => {
         let tabsCount = 1;
-        const docCountFormatted = '0'; // Discover has no content for last 15.
 
         it('opens Discover page from test link in the edit job flyout', async () => {
           await ml.dataFrameAnalyticsTable.openEditFlyout(dfaJobId);
           await ml.dataFrameAnalyticsEdit.openTestCustomUrl(dfaJobId, 0);
           await browser.switchTab(1);
           tabsCount++;
-          await ml.dataFrameAnalyticsEdit.testDiscoverCustomUrlAction(docCountFormatted);
+          await ml.dataFrameAnalyticsEdit.testDiscoverCustomUrlAction(); // Discover has no content for last 15m.
         });
 
         after(async () => {

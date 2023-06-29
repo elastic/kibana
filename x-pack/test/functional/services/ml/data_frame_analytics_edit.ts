@@ -192,7 +192,7 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
       await customUrls.clickTestCustomUrl(indexInList);
     },
 
-    async testDiscoverCustomUrlAction(expectedHitCountFormatted: string) {
+    async testDiscoverCustomUrlAction(expectedHitCountFormatted?: string) {
       await customUrls.assertDiscoverCustomUrlAction(expectedHitCountFormatted);
     },
 
