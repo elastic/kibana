@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { MAX_DESCRIPTION_LENGTH, MAX_TAGS, MAX_TAG_LENGTH, MAX_TITLE_LENGTH } from '../../../common/constants';
+import {
+  MAX_DESCRIPTION_LENGTH,
+  MAX_TAGS,
+  MAX_TAG_LENGTH,
+  MAX_TITLE_LENGTH,
+} from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { CaseSeverity, ConnectorTypes } from '../../../common/api';
 import { mockCases } from '../../mocks';
