@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { nonEmptyStringRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
+import { inventoryViewAttributesRT } from '../../../inventory_views';
 
-export const findInventoryViewAttributesResponseRT = rt.strict({
-  name: nonEmptyStringRt,
-  isDefault: rt.boolean,
-  isStatic: rt.boolean,
-});
+export const findInventoryViewAttributesResponseRT = rt.intersection([
+  inventoryViewAttributesRT,
+  rt.type({
+    isDefault: rt.boolean,
+    isStatic: rt.boolean,
+  }),
+]);
 
 const findInventoryViewResponseRT = rt.exact(
   rt.intersection([

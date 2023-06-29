@@ -6,31 +6,32 @@
  */
 
 import { useCallback, useState, useEffect } from 'react';
-import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import createContainer from 'constate';
+import {
+  InventoryLegendOptions,
+  InventoryOptionsState,
+  inventoryOptionsStateRT,
+  InventorySortOption,
+} from '../../../../../common/inventory_views';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
-import { InventoryColorPaletteRT } from '../../../../lib/lib';
 import {
   SnapshotMetricInput,
   SnapshotGroupBy,
   SnapshotCustomMetricInput,
-  SnapshotMetricInputRT,
-  SnapshotGroupByRT,
-  SnapshotCustomMetricInputRT,
 } from '../../../../../common/http_api/snapshot_api';
 import { useUrlState } from '../../../../utils/use_url_state';
-import { InventoryItemType, ItemTypeRT } from '../../../../../common/inventory_models/types';
+import { InventoryItemType } from '../../../../../common/inventory_models/types';
 
-export const DEFAULT_LEGEND: WaffleLegendOptions = {
+export const DEFAULT_LEGEND: InventoryLegendOptions = {
   palette: 'cool',
   steps: 10,
   reverseColors: false,
 };
 
-export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
+export const DEFAULT_WAFFLE_OPTIONS_STATE: InventoryOptionsState = {
   metric: { type: 'cpu' },
   groupBy: [],
   nodeType: 'host',
@@ -48,14 +49,14 @@ export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
 };
 
 export const useWaffleOptions = () => {
-  const [urlState, setUrlState] = useUrlState<WaffleOptionsState>({
+  const [urlState, setUrlState] = useUrlState<InventoryOptionsState>({
     defaultState: DEFAULT_WAFFLE_OPTIONS_STATE,
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleOptions',
   });
 
-  const [state, setState] = useState<WaffleOptionsState>(urlState);
+  const [state, setState] = useState<InventoryOptionsState>(urlState);
 
   useEffect(() => setUrlState(state), [setUrlState, state]);
 
@@ -114,14 +115,14 @@ export const useWaffleOptions = () => {
   );
 
   const changeLegend = useCallback(
-    (legend: WaffleLegendOptions) => {
+    (legend: InventoryLegendOptions) => {
       setState((previous) => ({ ...previous, legend }));
     },
     [setState]
   );
 
   const changeSort = useCallback(
-    (sort: WaffleSortOption) => {
+    (sort: InventorySortOption) => {
       setState((previous) => ({ ...previous, sort }));
     },
     [setState]
@@ -160,51 +161,11 @@ export const useWaffleOptions = () => {
   };
 };
 
-const WaffleLegendOptionsRT = rt.type({
-  palette: InventoryColorPaletteRT,
-  steps: rt.number,
-  reverseColors: rt.boolean,
-});
-
-export type WaffleLegendOptions = rt.TypeOf<typeof WaffleLegendOptionsRT>;
-
-export const WaffleSortOptionRT = rt.type({
-  by: rt.keyof({ name: null, value: null }),
-  direction: rt.keyof({ asc: null, desc: null }),
-});
-
-export const WaffleOptionsStateRT = rt.intersection([
-  rt.type({
-    metric: SnapshotMetricInputRT,
-    groupBy: SnapshotGroupByRT,
-    nodeType: ItemTypeRT,
-    view: rt.string,
-    customOptions: rt.array(
-      rt.type({
-        text: rt.string,
-        field: rt.string,
-      })
-    ),
-    boundsOverride: rt.type({
-      min: rt.number,
-      max: rt.number,
-    }),
-    autoBounds: rt.boolean,
-    accountId: rt.string,
-    region: rt.string,
-    customMetrics: rt.array(SnapshotCustomMetricInputRT),
-    sort: WaffleSortOptionRT,
-  }),
-  rt.partial({ source: rt.string, legend: WaffleLegendOptionsRT, timelineOpen: rt.boolean }),
-]);
-
-export type WaffleSortOption = rt.TypeOf<typeof WaffleSortOptionRT>;
-export type WaffleOptionsState = rt.TypeOf<typeof WaffleOptionsStateRT>;
-const encodeUrlState = (state: WaffleOptionsState) => {
-  return WaffleOptionsStateRT.encode(state);
+const encodeUrlState = (state: InventoryOptionsState) => {
+  return inventoryOptionsStateRT.encode(state);
 };
 const decodeUrlState = (value: unknown) => {
-  const state = pipe(WaffleOptionsStateRT.decode(value), fold(constant(undefined), identity));
+  const state = pipe(inventoryOptionsStateRT.decode(value), fold(constant(undefined), identity));
   if (state) {
     state.source = 'url';
   }

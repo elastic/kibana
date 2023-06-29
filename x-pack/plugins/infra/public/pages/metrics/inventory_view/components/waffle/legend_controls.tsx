@@ -27,8 +27,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { SyntheticEvent, useState, useCallback, useEffect } from 'react';
 import { first, last } from 'lodash';
-import { InfraWaffleMapBounds, InventoryColorPalette, PALETTES } from '../../../../../lib/lib';
-import { WaffleLegendOptions } from '../../hooks/use_waffle_options';
+import {
+  InventoryColorPalette,
+  InventoryLegendOptions,
+  InventoryMapBounds,
+} from '../../../../../../common/inventory_views';
+import { PALETTES } from '../../../../../lib/lib';
 import { getColorPalette } from '../../lib/get_color_palette';
 import { convertBoundsToPercents } from '../../lib/convert_bounds_to_percents';
 import { SwatchLabel } from './swatch_label';
@@ -37,14 +41,14 @@ import { PalettePreview } from './palette_preview';
 interface Props {
   onChange: (options: {
     auto: boolean;
-    bounds: InfraWaffleMapBounds;
-    legend: WaffleLegendOptions;
+    bounds: InventoryMapBounds;
+    legend: InventoryLegendOptions;
   }) => void;
-  bounds: InfraWaffleMapBounds;
-  dataBounds: InfraWaffleMapBounds;
+  bounds: InventoryMapBounds;
+  dataBounds: InventoryMapBounds;
   autoBounds: boolean;
-  boundsOverride: InfraWaffleMapBounds;
-  options: WaffleLegendOptions;
+  boundsOverride: InventoryMapBounds;
+  options: InventoryLegendOptions;
 }
 
 const PALETTE_NAMES: InventoryColorPalette[] = [

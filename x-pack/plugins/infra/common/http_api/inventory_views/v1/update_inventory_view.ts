@@ -6,9 +6,9 @@
  */
 
 import * as rt from 'io-ts';
-import { inventoryViewAttributesRT } from './common';
+import { inventoryViewAttributesRT } from '../../../inventory_views';
 
-export const updateInventoryViewAttributesRequestPayloadRT = rt.intersection([
+export const updateInventoryViewAttributesRequestPayloadRT = rt.union([
   inventoryViewAttributesRT,
   rt.partial({
     isDefault: rt.undefined,
@@ -21,5 +21,5 @@ export type UpdateInventoryViewAttributesRequestPayload = rt.TypeOf<
 >;
 
 export const updateInventoryViewRequestPayloadRT = rt.type({
-  attributes: inventoryViewAttributesRT,
+  attributes: updateInventoryViewAttributesRequestPayloadRT,
 });

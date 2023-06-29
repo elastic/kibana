@@ -72,9 +72,6 @@ export const PALETTES = {
   }),
 };
 
-export const InventoryColorPaletteRT = rt.keyof(PALETTES);
-export type InventoryColorPalette = rt.TypeOf<typeof InventoryColorPaletteRT>;
-
 export const StepRuleRT = rt.intersection([
   rt.type({
     value: rt.number,
@@ -134,11 +131,6 @@ export interface InfraWaffleMapOptions {
 export interface InfraOptions {
   timerange: InfraTimerangeInput;
   wafflemap: InfraWaffleMapOptions;
-}
-
-export interface InfraWaffleMapBounds {
-  min: number;
-  max: number;
 }
 
 export type InfraFormatter = (value: string | number) => string;

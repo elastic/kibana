@@ -6,9 +6,9 @@
  */
 
 import * as rt from 'io-ts';
-import { inventoryViewAttributesRT } from './common';
+import { inventoryViewAttributesRT } from '../../../inventory_views';
 
-export const createInventoryViewAttributesRequestPayloadRT = rt.intersection([
+export const createInventoryViewAttributesRequestPayloadRT = rt.union([
   inventoryViewAttributesRT,
   rt.partial({
     isDefault: rt.undefined,
