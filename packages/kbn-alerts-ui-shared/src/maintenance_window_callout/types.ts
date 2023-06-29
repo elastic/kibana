@@ -71,5 +71,5 @@ export interface RRuleRecord {
 export interface KibanaServices {
   application: { capabilities: { maintenanceWindow: Record<string, boolean> } };
   http: Pick<CoreStart['http'], 'fetch'>;
-  notifications: Pick<Pick<CoreStart['notifications'], 'toasts'>, 'addError'>;
+  notifications: Pick<CoreStart['notifications'], 'toasts'>;
 }
