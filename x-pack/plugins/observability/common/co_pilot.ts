@@ -384,28 +384,30 @@ The current active alerts in the system are represented in the following table w
 
 ${rows}
 
-The above table has to be ordered based on ascending rank using the following rules:
+The above table has to be ordered based on ascending rank using the following priority rules:
 - If an alert Start column value is more than 2 days ago, it has a rank of 4
-- Else, If an alert does not have values in the column Case_ids it has a rank of 1
-- Else, If an alert has values in the column Case_ids it has a rank of 3
+- Else, If an alert does not have values in the column "Case ids", it's not assigned to a Case id, it has a rank of 1
+- Else, If an alert has values in the column "Case ids" it has a rank of 3
 - Do not consider Case_max_priority in rank
 - In case of tie in rank, alerts with higher value in Duration column will have a lower rank
 
-Using the following template, display the info filling the columns with the values of the alert with lowest numerical value in rank only based on the above rules, not using other factors:
+Using the following template, display the info filling the columns with the values of the alert with lowest numerical value in rank using only the above priority rules, not using other factors:
 "
-🧯 The alert with the highest priority right now is: B
-        📂 Assigned to Case Ids: C
-        ⏭️ Possible next steps: D
+🥇 The the alert with the highest priority right now has the following Reason: A
+        📂 Assigned to Case Ids: B
+        🧯 Possible next steps: C
+        🔗 Alert id: D
         ︖ The reason this issue is has the highest priority is: E
-        🔗 Alert id: A
 "
-A being the Alert uuid
-B being a summary for an SRE of the Reason
-C being the Case ids values
-D being a way to start a remediation of the alert for an SRE
-E being the reasoning why this alert has the lowest numerical value in rank
+A being the alert Reason column value
+B being the Case ids values
+C being a way to start a remediation of the alert for an SRE
+D being the Alert uuid value
+E being the reasoning why this alert has the lowest numerical value in rank based on the mentioned priority rules
 
-Display the following template sustituting X and Y "There are X total active alerts in the system, and Y of them are not yet assigned to a case and show be reviewed as soon as possible", X beign the total current active alerts and Y being how many do not have values in the column Case_ids. Do not display the template.
+
+At the end of the response, display the following template sustituting X and Y 
+"🔍 There are X total active alerts in the system, and Y of them are not yet assigned to a case and show be reviewed as soon as possible", X beign the total current active alerts and Y being how many do not have values in the column Case_ids. Do not display the template.
 
 `;
 
