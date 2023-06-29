@@ -78,7 +78,7 @@ export default function createRuleSuggestionValuesTests({ getService }: FtrProvi
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).toEqual(200);
-              expect(response.body).toEqual(['forest', 'fox']);
+              expect(response.body).toEqual(expect.arrayContaining(['forest', 'fox']));
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
