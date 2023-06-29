@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { TLSAlertService } from './tls_alert_service';
-import { StatusAlertService } from './status_alert_service';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
+import { DefaultAlertService } from './default_alert_service';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const enableDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -16,12 +15,11 @@ export const enableDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
   validate: {},
   writeAccess: true,
   handler: async ({ context, server, savedObjectsClient }): Promise<any> => {
-    const statusAlertService = new StatusAlertService(context, server, savedObjectsClient);
-    const tlsAlertService = new TLSAlertService(context, server, savedObjectsClient);
+    const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
 
     const [statusRule, tlsRule] = await Promise.allSettled([
-      statusAlertService.createDefaultAlertIfNotExist(),
-      tlsAlertService.createDefaultAlertIfNotExist(),
+      defaultAlertService.setupStatusRule(),
+      defaultAlertService.setupTlsRule(),
     ]);
 
     if (statusRule.status === 'rejected') {
