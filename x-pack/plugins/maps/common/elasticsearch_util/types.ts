@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { MultiPolygon, Polygon, Position } from 'geojson';
+import { Position } from 'geojson';
 import type { Filter } from '@kbn/es-query';
 
 export type Coordinates = Position | Position[] | Position[][] | Position[][][];
@@ -24,17 +24,11 @@ export interface ESBBox {
   bottom_right: number[];
 }
 
-export interface GeoShapeQueryBody {
-  shape?: MultiPolygon | Polygon;
-  relation?: estypes.GeoShapeRelation;
-  indexed_shape?: estypes.QueryDslFieldLookup;
-}
-
 // Index signature explicitly states that anything stored in an object using a string conforms to the structure
 // problem is that Elasticsearch signature also allows for other string keys to conform to other structures, like 'ignore_unmapped'
 // Use intersection type to exclude certain properties from the index signature
 // https://basarat.gitbook.io/typescript/type-system/index-signatures#excluding-certain-properties-from-the-index-signature
-type GeoShapeQuery = { ignore_unmapped: boolean } & { [geoFieldName: string]: GeoShapeQueryBody };
+type GeoShapeQuery = { ignore_unmapped: boolean } & { [geoFieldName: string]: estypes.QueryDslGeoShapeFieldQuery };
 
 export type GeoFilter = Filter & {
   geo_bounding_box?: {

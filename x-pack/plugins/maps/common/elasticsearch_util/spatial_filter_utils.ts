@@ -13,7 +13,7 @@ import turfCircle from '@turf/circle';
 import { FilterMeta, FILTERS } from '@kbn/es-query';
 import { MapExtent } from '../descriptor_types';
 import { getEsSpatialRelationLabel } from '../i18n_getters';
-import { GeoFilter, GeoShapeQueryBody } from './types';
+import { GeoFilter } from './types';
 import { makeESBbox } from './elasticsearch_geo_utils';
 
 const SPATIAL_FILTER_TYPE = FILTERS.SPATIAL_FILTER;
@@ -118,7 +118,7 @@ export function buildGeoShapeFilter({
   };
 
   function createGeoFilter(geoFieldName: string) {
-    const shapeQuery: GeoShapeQueryBody = {
+    const shapeQuery: estypes.QueryDslGeoShapeFieldQuery = {
       relation,
     };
     if (preIndexedShape) {
@@ -138,7 +138,7 @@ export function buildGeoShapeFilter({
   }
 
   // Currently no way to create an object with exclude property from index signature
-  // typescript error for "ignore_unmapped is not assignable to type 'GeoShapeQueryBody'" expected"
+  // typescript error for "ignore_unmapped is not assignable to type 'estypes.QueryDslGeoShapeFieldQuery'" expected"
   // @ts-expect-error
   return createMultiGeoFieldFilter(geoFieldNames, meta, createGeoFilter);
 }
