@@ -94,8 +94,17 @@ export class CpuUsageRule extends BaseRule {
     stat: AlertCpuUsageNodeStats,
     threshold: number
   ): { shouldFire: boolean; severity: AlertSeverity } {
-    if (stat.missingLimits || stat.limitsChanged || stat.cpuUsage === undefined) {
-      return { shouldFire: true, severity: AlertSeverity.Warning };
+    if (
+      stat.missingLimits ||
+      stat.limitsChanged ||
+      stat.unexpectedLimits ||
+      stat.cpuUsage === undefined
+    ) {
+      let severity = AlertSeverity.Warning;
+      if (stat.cpuUsage && stat.cpuUsage > threshold) {
+        severity = AlertSeverity.Danger;
+      }
+      return { shouldFire: true, severity };
     }
 
     return { shouldFire: stat.cpuUsage > threshold, severity: AlertSeverity.Danger };
@@ -137,7 +146,20 @@ export class CpuUsageRule extends BaseRule {
     if (stat.missingLimits) {
       return {
         text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.missingLimits', {
-          defaultMessage: `Node #start_link{nodeName}#end_link does not have resource limits configured. Fallback metrics reports usage of {cpuUsage}%. Please check the Kibana logs for more details. Last checked at #absolute`,
+          defaultMessage: `Kibana is configured for containerized workloads but node #start_link{nodeName}#end_link does not have resource limits configured. Fallback metric reports usage of {cpuUsage}%. Last checked at #absolute`,
+          values: {
+            nodeName: stat.nodeName,
+            cpuUsage: numeral(stat.cpuUsage).format(ROUNDED_FLOAT),
+          },
+        }),
+        tokens,
+      };
+    }
+
+    if (stat.unexpectedLimits) {
+      return {
+        text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.limitsChanged', {
+          defaultMessage: `Kibana is configured for non-containerized workloads but node #start_link{nodeName}#end_link has resource limits configured. Node reports usage of {cpuUsage}%. Last checked at #absolute`,
           values: {
             nodeName: stat.nodeName,
             cpuUsage: numeral(stat.cpuUsage).format(ROUNDED_FLOAT),
@@ -150,7 +172,7 @@ export class CpuUsageRule extends BaseRule {
     if (stat.limitsChanged) {
       return {
         text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.limitsChanged', {
-          defaultMessage: `Resource limits for node #start_link{nodeName}#end_link has changed within the look back window, reported average CPU usage cannot be trusted. Please monitor the usage until the window has moved. Last checked at #absolute`,
+          defaultMessage: `Resource limits for node #start_link{nodeName}#end_link has changed within the look back window, unable to confidently calculate CPU usage for alerting. Please monitor the usage until the window has moved. Last checked at #absolute`,
           values: {
             nodeName: stat.nodeName,
           },
@@ -224,12 +246,8 @@ export class CpuUsageRule extends BaseRule {
       ccs
     );
     const action = `[${fullActionText}](${globalStateLink})`;
-    const internalShortMessage = this.getShortMessage(
-      firingNode,
-      cluster.clusterName,
-      shortActionText
-    );
-    const internalFullMessage = this.getFullMessage(firingNode, cluster.clusterName, action);
+    const internalShortMessage = this.getMessage(firingNode, cluster.clusterName, shortActionText);
+    const internalFullMessage = this.getMessage(firingNode, cluster.clusterName, action);
     instance.scheduleActions('default', {
       internalShortMessage,
       internalFullMessage: Globals.app.isCloud ? internalShortMessage : internalFullMessage,
@@ -246,51 +264,26 @@ export class CpuUsageRule extends BaseRule {
     });
   }
 
-  private getShortMessage(state: AlertCpuUsageState, clusterName: string, shortActionText: string) {
+  private getMessage(state: AlertCpuUsageState, clusterName: string, action: string) {
     const stat = state.meta as AlertCpuUsageNodeStats;
 
-    if (stat.cpuUsage === undefined || stat.missingLimits || stat.limitsChanged) {
-      return i18n.translate(
-        'xpack.monitoring.alerts.cpuUsage.firing.internalShortMessageForFailure',
-        {
-          defaultMessage: `CPU usage alert for node {nodeName} in cluster {clusterName} faced issues while evaluating the usage. {shortActionText}`,
-          values: {
-            clusterName,
-            nodeName: state.nodeName,
-            shortActionText,
-          },
-        }
-      );
+    if (
+      stat.missingLimits ||
+      stat.limitsChanged ||
+      stat.unexpectedLimits ||
+      stat.cpuUsage === undefined
+    ) {
+      return i18n.translate('xpack.monitoring.alerts.cpuUsage.firing.internalMessageForFailure', {
+        defaultMessage: `CPU usage alert for node {nodeName} in cluster {clusterName} faced issues while evaluating the usage. {action}`,
+        values: {
+          clusterName,
+          nodeName: state.nodeName,
+          action,
+        },
+      });
     }
 
-    return i18n.translate('xpack.monitoring.alerts.cpuUsage.firing.internalShortMessage', {
-      defaultMessage: `CPU usage alert is firing for node {nodeName} in cluster {clusterName}. {shortActionText}`,
-      values: {
-        clusterName,
-        nodeName: state.nodeName,
-        shortActionText,
-      },
-    });
-  }
-
-  private getFullMessage(state: AlertCpuUsageState, clusterName: string, action: string) {
-    const stat = state.meta as AlertCpuUsageNodeStats;
-
-    if (stat.cpuUsage === undefined || stat.missingLimits || stat.limitsChanged) {
-      return i18n.translate(
-        'xpack.monitoring.alerts.cpuUsage.firing.internalFullMessageForFailure',
-        {
-          defaultMessage: `CPU usage alert for node {nodeName} in cluster {clusterName} faced issues while evaluating the usage. {action}`,
-          values: {
-            clusterName,
-            nodeName: state.nodeName,
-            action,
-          },
-        }
-      );
-    }
-
-    return i18n.translate('xpack.monitoring.alerts.cpuUsage.firing.internalFullMessage', {
+    return i18n.translate('xpack.monitoring.alerts.cpuUsage.firing.internalMessage', {
       defaultMessage: `CPU usage alert is firing for node {nodeName} in cluster {clusterName}. {action}`,
       values: {
         clusterName,

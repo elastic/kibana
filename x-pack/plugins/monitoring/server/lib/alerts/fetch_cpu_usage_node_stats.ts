@@ -179,10 +179,6 @@ async function fetchContainerStats(
       }
 
       if (node.quota_micros_max.value === -1 && node.quota_micros_min.value === -1) {
-        logger.info(
-          `CPU usage rule: Configured for container workload but node ${nodeName} does not have limits set, using \`node_stats.process.cpu.percent\` as fallback field`
-        );
-
         return {
           clusterUuid: cluster.key as string,
           nodeId: node.key as string,
@@ -194,10 +190,6 @@ async function fetchContainerStats(
       }
 
       if (node.quota_micros_min.value !== node.quota_micros_max.value) {
-        logger.warn(
-          `CPU usage rule: Container limits changed for node ${nodeName}, usage cannot be established at this time`
-        );
-
         return {
           clusterUuid: cluster.key as string,
           nodeId: node.key as string,
@@ -329,6 +321,17 @@ async function fetchNonContainerStats(
                   field: 'node_stats.process.cpu.percent',
                 },
               },
+              // Container limit min and max, to detect possible config errors
+              quota_micros_max: {
+                max: {
+                  field: 'node_stats.os.cgroup.cpu.cfs_quota_micros',
+                },
+              },
+              quota_micros_min: {
+                min: {
+                  field: 'node_stats.os.cgroup.cpu.cfs_quota_micros',
+                },
+              },
             },
           },
         },
@@ -360,6 +363,17 @@ async function fetchNonContainerStats(
       if (node.index.buckets.length) {
         const index = node.index.buckets[0].key as string;
         ccs = index.includes(':') ? index.split(':')[0] : undefined;
+      }
+
+      if (node.quota_micros_min.value !== -1 || node.quota_micros_max.value !== -1) {
+        return {
+          clusterUuid: cluster.key as string,
+          nodeId: node.key as string,
+          cpuUsage: node.average_cpu.value ?? undefined,
+          nodeName,
+          ccs,
+          unexpectedLimits: true,
+        };
       }
 
       return {
