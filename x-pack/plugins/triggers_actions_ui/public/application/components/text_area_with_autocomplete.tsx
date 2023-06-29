@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useCallback, EventHandler } from 'react';
+import getCaretCoordinates from 'textarea-caret';
 import {
   EuiTextArea,
   EuiFormRow,
   EuiSelectable,
   EuiSelectableOption,
   EuiPortal,
-  findPopoverPosition,
+  EuiOutsideClickDetector,
 } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
-import getCaretCoordinates from 'textarea-caret';
 
 interface Props {
   messageVariables?: ActionVariable[];
@@ -89,8 +89,10 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   const suggestions = convertArrayToObject(messageVariables?.map(({ name }) => name));
   const [matches, setMatches] = useState<string[]>([]);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
+  const selectableRef = useRef<EuiSelectable | null>(null);
   const [caretPosition, setCaretPosition] = useState({ top: 0, left: 0, height: 0, width: 0 });
   const [isListOpen, setListOpen] = useState(false);
+  const [selectableHasFocus, setSelectableHasFocus] = useState(false);
 
   const optionsToShow: EuiSelectableOption[] = useMemo(() => {
     return matches?.map((variable) => ({
@@ -102,31 +104,34 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
     }));
   }, [matches]);
 
-  const onOptionPick = (newOptions: EuiSelectableOption[]) => {
-    if (!textAreaRef.current) return;
-    const { value, selectionStart } = textAreaRef.current; // check for selectionEnd, should be when the start is?
-    const lastCloseBracketIndex = value.slice(0, selectionStart).lastIndexOf(' ');
-    const lastDoubleCurlyBracket = value.slice(0, selectionStart).lastIndexOf('{{');
-    const currentWordStartIndex = Math.max(lastCloseBracketIndex, lastDoubleCurlyBracket);
+  const onOptionPick = useCallback(
+    (newOptions: EuiSelectableOption[]) => {
+      if (!textAreaRef.current) return;
+      const { value, selectionStart } = textAreaRef.current; // check for selectionEnd, should be when the start is?
+      const lastCloseBracketIndex = value.slice(0, selectionStart).lastIndexOf(' ');
+      const lastDoubleCurlyBracket = value.slice(0, selectionStart).lastIndexOf('{{');
+      const currentWordStartIndex = Math.max(lastCloseBracketIndex, lastDoubleCurlyBracket);
 
-    const words = value
-      .slice(currentWordStartIndex === -1 ? 0 : currentWordStartIndex + 2, selectionStart)
-      .trim()
-      .split('.');
+      const words = value
+        .slice(currentWordStartIndex === -1 ? 0 : currentWordStartIndex + 2, selectionStart)
+        .trim()
+        .split('.');
 
-    const checkedElement = newOptions.find(({ checked }) => checked === 'on');
-    if (checkedElement) {
-      words[words.length - 1] = checkedElement.label;
-      const newInputText =
-        value.slice(0, currentWordStartIndex) +
-        '{{' +
-        words.join('.') +
-        '}}' +
-        value.slice(selectionStart);
-      editAction(paramsProperty, newInputText, index);
-      setMatches([]);
-    }
-  };
+      const checkedElement = newOptions.find(({ checked }) => checked === 'on');
+      if (checkedElement) {
+        words[words.length - 1] = checkedElement.label;
+        const newInputText =
+          value.slice(0, currentWordStartIndex) +
+          '{{' +
+          words.join('.') +
+          '}}' +
+          value.slice(selectionStart);
+        editAction(paramsProperty, newInputText, index);
+        setMatches([]);
+      }
+    },
+    [editAction, index, paramsProperty]
+  );
 
   const onChangeWithMessageVariable = () => {
     if (!textAreaRef.current) return;
@@ -165,12 +170,86 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
     if (currentWord.startsWith('{{')) {
       const filteredMatches = filterSuggestions(suggestions, currentWord.slice(2));
       setMatches(filteredMatches);
+      setListOpen((prevVal) => {
+        if (!prevVal) {
+          return true;
+        }
+        return prevVal;
+      });
     } else {
       setMatches([]);
     }
 
     editAction(paramsProperty, value, index);
   };
+
+  const textareaOnKeyPress = useCallback(
+    (event) => {
+      if (selectableRef.current && isListOpen) {
+        if (!selectableHasFocus && (event.code === 'ArrowUp' || event.code === 'ArrowDown')) {
+          event.preventDefault();
+          event.stopPropagation();
+          selectableRef.current.onFocus();
+          setSelectableHasFocus(true);
+        } else if (event.code === 'ArrowUp') {
+          event.preventDefault();
+          event.stopPropagation();
+          selectableRef.current.incrementActiveOptionIndex(-1);
+        } else if (event.code === 'ArrowDown') {
+          event.preventDefault();
+          event.stopPropagation();
+          selectableRef.current.incrementActiveOptionIndex(1);
+        } else if (event.code === 'Escape') {
+          event.preventDefault();
+          event.stopPropagation();
+          setListOpen(false);
+          setSelectableHasFocus(false);
+        } else if (event.code === 'Enter' || event.code === 'Space') {
+          const optionIndex = selectableRef.current.state.activeOptionIndex;
+          onOptionPick(
+            optionsToShow.map((ots, idx) => {
+              if (idx === optionIndex) {
+                return {
+                  ...ots,
+                  checked: 'on',
+                };
+              }
+              return ots;
+            })
+          );
+          setListOpen(false);
+          setSelectableHasFocus(false);
+        }
+      } else {
+        setSelectableHasFocus((prevValue) => {
+          if (prevValue) {
+            return false;
+          }
+          return prevValue;
+        });
+      }
+    },
+    [isListOpen, onOptionPick, optionsToShow, selectableHasFocus]
+  );
+
+  const clickOutSideTextArea = useCallback((event) => {
+    // TODO we need to use a class name directly (.euiSelectable), that's just the idea how to do it
+    const box = document.querySelector('.euiSelectable')?.getBoundingClientRect() || {
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+    };
+    if (
+      event.clientX > box.left &&
+      event.clientX < box.right &&
+      event.clientY > box.top &&
+      event.clientY < box.bottom
+    ) {
+      return;
+    }
+    setListOpen(false);
+  }, []);
 
   return (
     <EuiFormRow
@@ -181,34 +260,35 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
       label={label}
     >
       <>
-        <EuiTextArea
-          disabled={isDisabled}
-          inputRef={textAreaRef}
-          fullWidth
-          isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
-          name={paramsProperty}
-          value={inputTargetValue || ''}
-          data-test-subj={`${paramsProperty}TextArea`}
-          onChange={() => onChangeWithMessageVariable()}
-          onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
-            setListOpen(true);
-          }}
-          // onKeyDown={}
-          // onMouseLeave={}
-          // onMouseOut={}
-          onWheel={() => {
-            // setListOpen(false);
-          }}
-          onBlur={() => {
-            // setListOpen(false);
-            if (!inputTargetValue) {
-              editAction(paramsProperty, '', index);
-            }
-          }}
-        />
+        <EuiOutsideClickDetector onOutsideClick={clickOutSideTextArea}>
+          <EuiTextArea
+            disabled={isDisabled}
+            inputRef={textAreaRef}
+            fullWidth
+            isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
+            name={paramsProperty}
+            value={inputTargetValue || ''}
+            data-test-subj={`${paramsProperty}TextArea`}
+            onChange={() => onChangeWithMessageVariable()}
+            onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
+              setListOpen(true);
+            }}
+            onKeyDown={textareaOnKeyPress}
+            // onWheel={() => {
+            //   setListOpen(false);
+            // }}
+            onBlur={() => {
+              // setListOpen(false);
+              if (!inputTargetValue && !isListOpen) {
+                editAction(paramsProperty, '', index);
+              }
+            }}
+          />
+        </EuiOutsideClickDetector>
         {matches.length > 0 && isListOpen && (
           <EuiPortal>
             <EuiSelectable
+              ref={selectableRef}
               style={{
                 position: 'absolute',
                 top: caretPosition.top,
@@ -221,7 +301,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
               height={32 * 5.5}
               options={optionsToShow}
               onChange={onOptionPick}
-              singleSelection
+              singleSelection={true}
             >
               {(list) => list}
             </EuiSelectable>
