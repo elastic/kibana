@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
@@ -47,6 +47,12 @@ export const DiscoverTopNav = ({
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
   const savedSearch = useSavedSearchInitial();
+  const [dataViewList, setDataViewList] = useState([dataView]);
+  useEffect(() => {
+    if (!dataViewList.includes(dataView)) {
+      setDataViewList([...dataViewList, dataView]);
+    }
+  }, [dataView, dataViewList, setDataViewList]);
   const showDatePicker = useMemo(() => {
     // always show the timepicker for text based languages
     return (
@@ -203,7 +209,7 @@ export const DiscoverTopNav = ({
     <AggregateQueryTopNavMenu
       appName="discover"
       config={topNavMenu}
-      indexPatterns={[dataView]}
+      indexPatterns={dataViewList}
       onQuerySubmit={updateQuery}
       onSavedQueryIdChange={updateSavedQueryId}
       query={query}
