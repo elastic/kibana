@@ -23,6 +23,7 @@ import { useParams } from 'react-router-dom';
 import { noop } from 'lodash';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import { RulePreview } from '../../../../detections/components/rules/rule_preview';
 import { getIsRulePreviewDisabled } from '../../../../detections/components/rules/rule_preview/helpers';
 import type { RuleUpdateProps } from '../../../../../common/detection_engine/rule_schema';
@@ -65,6 +66,7 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 import { useRuleForms, useRuleIndexPattern } from '../form';
+import { useEsqlIndex } from '../../hooks';
 import { CustomHeaderPageMemo } from '..';
 
 const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
@@ -145,11 +147,17 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
     actionsStepDefault: ruleActionsData,
   });
 
+  const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, defineStepData.ruleType);
+  const memoizedIndex = useMemo(
+    () => (isEsqlRule(defineStepData.ruleType) ? esqlIndex : defineStepData.index),
+    [defineStepData.index, esqlIndex, defineStepData.ruleType]
+  );
+
   const isPreviewDisabled = getIsRulePreviewDisabled({
     ruleType: defineStepData.ruleType,
     isQueryBarValid,
     isThreatQueryBarValid,
-    index: defineStepData.index,
+    index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
     dataSourceType: defineStepData.dataSourceType,
     threatIndex: defineStepData.threatIndex,
@@ -200,7 +208,7 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
 
   const { indexPattern, isIndexPatternLoading, browserFields } = useRuleIndexPattern({
     dataSourceType: defineStepData.dataSourceType,
-    index: defineStepData.index,
+    index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
   });
 
@@ -238,15 +246,14 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                   setIsQueryBarValid={setIsQueryBarValid}
                   setIsThreatQueryBarValid={setIsThreatQueryBarValid}
                   ruleType={defineStepData.ruleType}
-                  index={defineStepData.index}
+                  index={memoizedIndex}
                   threatIndex={defineStepData.threatIndex}
                   groupByFields={defineStepData.groupByFields}
                   dataSourceType={defineStepData.dataSourceType}
                   shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
                   queryBarTitle={defineStepData.queryBar.title}
                   queryBarSavedId={defineStepData.queryBar.saved_id}
-                  query={defineStepData.queryBar.query.query}
-                  esqlOptions={defineStepData.esqlOptions}
+                  esqlGroupByFields={defineStepData.esqlOptions.groupByFields}
                 />
               )}
               <EuiSpacer />
@@ -273,8 +280,7 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
                   isUpdateView
                   ruleType={defineStepData.ruleType}
                   machineLearningJobId={defineStepData.machineLearningJobId}
-                  index={defineStepData.index}
-                  query={defineStepData.queryBar.query.query}
+                  index={memoizedIndex}
                   dataViewId={defineStepData.dataViewId}
                   timestampOverride={aboutStepData.timestampOverride}
                   form={aboutStepForm}
@@ -369,6 +375,7 @@ const EditRulePageComponent: FC<{ rule: Rule }> = ({ rule }) => {
       actionsStepData,
       actionMessageParams,
       actionsStepForm,
+      memoizedIndex,
     ]
   );
 

@@ -29,7 +29,7 @@ import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type { SavedQuery } from '@kbn/data-plugin/public';
-import type { DataViewBase, Query } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
 import { useRuleFromTimeline } from '../../../containers/detection_engine/rules/use_rule_from_timeline';
@@ -111,8 +111,7 @@ interface StepDefineRuleProps extends RuleStepProps {
   shouldLoadQueryDynamically: boolean;
   queryBarTitle: string | undefined;
   queryBarSavedId: string | null | undefined;
-  query: Query['query'];
-  esqlOptions: DefineStepRule['esqlOptions'];
+  esqlGroupByFields?: string[];
 }
 
 interface StepDefineRuleReadOnlyProps {
@@ -170,8 +169,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   shouldLoadQueryDynamically,
   queryBarTitle,
   queryBarSavedId,
-  query,
-  esqlOptions,
+  esqlGroupByFields,
 }) => {
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -179,7 +177,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [threatIndexModified, setThreatIndexModified] = useState(false);
   const license = useLicense();
 
-  const { getFields, reset, setFieldValue } = form;
+  const { getFields, reset, setFieldValue, getFormData } = form;
 
   const setRuleTypeCallback = useSetFieldValueWithCallback({
     field: 'ruleType',
@@ -429,18 +427,18 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ),
     [license, groupByFields]
   );
-
-  const esqlQuery = useMemo(
-    () => (isEsqlRule(ruleType) && typeof query === 'string' ? query : undefined),
-    [query, ruleType]
-  );
+  const esqlQuery = '';
+  // const esqlQuery = useMemo(
+  //   () => (isEsqlRule(ruleType) && typeof query === 'string' ? query : undefined),
+  //   [query, ruleType]
+  // );
   const isEsqlGrouping = true;
 
   const EsqlDurationOptions = useCallback(
     ({ esqlSuppressionDurationValue, esqlSuppressionDurationUnit, esqlSuppressionMode }) => (
       <EuiRadioGroup
         idSelected={esqlSuppressionMode.value ?? GroupByOptions.PerRuleExecution}
-        disabled={!esqlOptions?.groupByFields?.length}
+        disabled={!esqlGroupByFields?.length}
         options={[
           {
             id: GroupByOptions.PerRuleExecution,
@@ -458,7 +456,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   minimumValue={1}
                   isDisabled={
                     esqlSuppressionMode.value === GroupByOptions.PerRuleExecution ||
-                    !esqlOptions?.groupByFields?.length
+                    !esqlGroupByFields?.length
                   }
                 />
               </>
@@ -471,7 +469,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         data-test-subj="esqlSuppressionOptions"
       />
     ),
-    [esqlOptions?.groupByFields?.length]
+    [esqlGroupByFields?.length]
   );
 
   const AlertsSuppressionMissingFields = useCallback(
@@ -841,7 +839,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               path="esqlOptions.groupByFields"
               component={EsqlFieldsSelect}
               componentProps={{
-                query: esqlQuery,
+                getFormData,
               }}
             />
           </RuleTypeEuiFormRow>

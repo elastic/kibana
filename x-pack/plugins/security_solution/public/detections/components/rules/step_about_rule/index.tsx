@@ -10,10 +10,10 @@ import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
-import type { DataViewBase, Query } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import type { Severity, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
-import { isThreatMatchRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
+import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import type { RuleStepProps, AboutStepRule } from '../../../pages/detection_engine/rules/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
@@ -44,7 +44,6 @@ interface StepAboutRuleProps extends RuleStepProps {
   dataViewId: string | undefined;
   timestampOverride: string;
   form: FormHook<AboutStepRule>;
-  query: Query['query'];
 }
 
 interface StepAboutRuleReadOnlyProps {
@@ -74,17 +73,12 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   isUpdateView = false,
   isLoading,
   form,
-  query,
 }) => {
   const { data } = useKibana().services;
 
   const isThreatMatchRuleValue = useMemo(() => isThreatMatchRule(ruleType), [ruleType]);
 
-  const esqlQuery = useMemo(() => {
-    return isEsqlRule(ruleType) && typeof query === 'string' ? query : undefined;
-  }, [ruleType, query]);
-
-  const { ruleIndices } = useRuleIndices(machineLearningJobId, index, esqlQuery);
+  const { ruleIndices } = useRuleIndices(machineLearningJobId, index);
 
   /**
    * 1. if not null, fetch data view from id saved on rule form
