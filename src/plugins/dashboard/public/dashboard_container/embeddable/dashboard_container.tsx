@@ -266,7 +266,9 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     if (this.controlGroup) {
       combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
     }
-    const hasCustomTimeRange = Boolean((panels[id]?.explicitInput as Partial<InheritedChildInput>)?.timeRange);
+    const hasCustomTimeRange = Boolean(
+      (panels[id]?.explicitInput as Partial<InheritedChildInput>)?.timeRange
+    );
     return {
       searchSessionId: this.searchSessionId,
       refreshConfig: refreshInterval,
