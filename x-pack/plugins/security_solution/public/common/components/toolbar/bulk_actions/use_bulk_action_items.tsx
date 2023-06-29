@@ -25,7 +25,6 @@ export interface BulkActionsProps {
   eventIds: string[];
   currentStatus?: AlertWorkflowStatus;
   query?: string;
-  indexName: string;
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
   showAlertStatusActions?: boolean;
@@ -38,7 +37,6 @@ export const useBulkActionItems = ({
   eventIds,
   currentStatus,
   query,
-  indexName,
   setEventsLoading,
   showAlertStatusActions = true,
   setEventsDeleted,
