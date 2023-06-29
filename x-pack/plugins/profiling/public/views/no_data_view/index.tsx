@@ -299,21 +299,23 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
                 })}
               </EuiText>
               <EuiSpacer />
-              <EuiCodeBlock paddingSize="s" isCopyable>
+              <EuiText style={{ fontWeight: 'bold' }} size="s">
                 {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.secretToken', {
-                  defaultMessage: 'Secret token: {secretToken}',
-                  values: { secretToken },
+                  defaultMessage: 'Secret token:',
                 })}
+              </EuiText>
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {secretToken}
               </EuiCodeBlock>
               <EuiSpacer size="s" />
-              <EuiCodeBlock paddingSize="s" isCopyable>
+              <EuiText style={{ fontWeight: 'bold' }} size="s">
                 {i18n.translate(
                   'xpack.profiling.tabs.elasticAgentIntegrarion.step1.collectionAgentUrl',
-                  {
-                    defaultMessage: 'Universal Profiling Collector url: {collectionAgentHost}',
-                    values: { collectionAgentHost },
-                  }
+                  { defaultMessage: 'Universal Profiling Collector url:' }
                 )}
+              </EuiText>
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {collectionAgentHost}
               </EuiCodeBlock>
             </>
           ),
