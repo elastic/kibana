@@ -232,7 +232,7 @@
                   "items": {
                     "type": "string"
                   },
-                  "maximum": 100
+                  "maxItems": 100
                 }
               ]
             }
@@ -298,7 +298,7 @@
                   "items": {
                     "type": "string"
                   },
-                  "maximum": 100
+                  "maxItems": 100
                 }
               ]
             },
@@ -378,7 +378,7 @@
                   "items": {
                     "type": "string"
                   },
-                  "maximum": 100
+                  "maxItems": 100
                 }
               ]
             },

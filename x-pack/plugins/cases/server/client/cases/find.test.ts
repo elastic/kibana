@@ -126,7 +126,7 @@ describe('find', () => {
       const findRequest = createCasesClientMockFindRequest({ tags });
 
       await expect(find(findRequest, clientArgs)).rejects.toThrowError(
-        'Error: array must be of length <= 100'
+        `Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_FILTER_LENGTH}`
       );
     });
 
@@ -136,7 +136,7 @@ describe('find', () => {
       const findRequest = createCasesClientMockFindRequest({ assignees });
 
       await expect(find(findRequest, clientArgs)).rejects.toThrowError(
-        'Error: array must be of length <= 100'
+        `Error: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_FILTER_LENGTH}`
       );
     });
 
@@ -146,7 +146,7 @@ describe('find', () => {
       const findRequest = createCasesClientMockFindRequest({ reporters });
 
       await expect(find(findRequest, clientArgs)).rejects.toThrowError(
-        'Error: array must be of length <= 100'
+        `Error: The length of the field reporters is too long. Array must be of length <= ${MAX_REPORTERS_FILTER_LENGTH}.`
       );
     });
   });

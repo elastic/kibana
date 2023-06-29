@@ -213,7 +213,7 @@ export const CasesFindRequestRt = rt.exact(
     /**
      * Tags to filter by
      */
-    tags: rt.union([limitedArraySchema(rt.string, 0, MAX_TAGS_FILTER_LENGTH), rt.string]),
+    tags: rt.union([limitedArraySchema(rt.string, 0, MAX_TAGS_FILTER_LENGTH, 'tags'), rt.string]),
     /**
      * The status of the case (open, closed, in-progress)
      */
@@ -225,11 +225,17 @@ export const CasesFindRequestRt = rt.exact(
     /**
      * The uids of the user profiles to filter by
      */
-    assignees: rt.union([limitedArraySchema(rt.string, 0, MAX_ASSIGNEES_FILTER_LENGTH), rt.string]),
+    assignees: rt.union([
+      limitedArraySchema(rt.string, 0, MAX_ASSIGNEES_FILTER_LENGTH, 'assignees'),
+      rt.string,
+    ]),
     /**
      * The reporters to filter by
      */
-    reporters: rt.union([limitedArraySchema(rt.string, 0, MAX_REPORTERS_FILTER_LENGTH), rt.string]),
+    reporters: rt.union([
+      limitedArraySchema(rt.string, 0, MAX_REPORTERS_FILTER_LENGTH, 'reporters'),
+      rt.string,
+    ]),
     /**
      * Operator to use for the `search` field
      */

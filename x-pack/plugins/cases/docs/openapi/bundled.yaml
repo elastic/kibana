@@ -141,7 +141,7 @@ paths:
               - type: array
                 items:
                   type: string
-                maximum: 100
+                maxItems: 100
         - name: category
           in: query
           description: Filters the returned cases by category. Limited to 100 categories.
@@ -178,7 +178,7 @@ paths:
               - type: array
                 items:
                   type: string
-                maximum: 100
+                maxItems: 100
           example: elastic
         - name: search
           in: query
@@ -225,7 +225,7 @@ paths:
               - type: array
                 items:
                   type: string
-                maximum: 100
+                maxItems: 100
           example: tag-1
         - name: to
           in: query
