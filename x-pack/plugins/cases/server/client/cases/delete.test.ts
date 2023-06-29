@@ -97,7 +97,7 @@ describe('delete', () => {
     });
 
     describe('errors', () => {
-      it(`throws 400 when trying to delete more than ${MAX_DELETE_IDS_LENGTH} files at a time`, async () => {
+      it(`throws 400 when trying to delete more than ${MAX_DELETE_IDS_LENGTH} cases at a time`, async () => {
         const caseIds = new Array(MAX_DELETE_IDS_LENGTH + 1).fill('id');
 
         await expect(deleteCases(caseIds, clientArgs)).rejects.toThrowError(
