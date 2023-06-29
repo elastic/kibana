@@ -1,0 +1,29 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { Journey } from '@kbn/journeys';
+import { subj } from '@kbn/test-subj-selector';
+import { waitForChrome } from '../utils';
+
+export const journey = new Journey({
+  kbnArchives: ['test/functional/fixtures/kbn_archiver/many_fields_data_view'],
+  esArchives: ['test/functional/fixtures/es_archiver/many_fields'],
+})
+  .step('Go to Transform Page', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get(`app/management/data/transform`));
+    await waitForChrome(page);
+    await page.waitForSelector(subj('transformCreateFirstButton'));
+    await page.waitForSelector(subj('globalLoadingIndicator-hidden'));
+  })
+  .step('Go to Transform Wizard', async ({ page }) => {
+    const createButtons = page.locator(subj('transformCreateFirstButton'));
+    await createButtons.first().click();
+    await page.waitForSelector(subj('savedObjectsFinderTable'));
+    await page.click(subj('savedObjectTitleindices-stats*'));
+    await page.waitForSelector(subj('transformIndexPreview loaded'), { timeout: 300000 });
+    await page.waitForSelector(subj('globalLoadingIndicator-hidden'), { timeout: 300000 });
+  });
