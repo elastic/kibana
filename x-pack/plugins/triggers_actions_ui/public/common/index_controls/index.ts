@@ -8,7 +8,6 @@
 import { uniq } from 'lodash';
 import { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { estypes } from '@elastic/elasticsearch';
 import { loadIndexPatterns, getMatchingIndices, getESIndexFields } from '../lib/data_apis';
 
 export interface IOption {
@@ -68,12 +67,8 @@ export const getIndexOptions = async (http: HttpSetup, pattern: string) => {
   return options;
 };
 
-export const getFields = async (
-  http: HttpSetup,
-  indexes: string[],
-  runtimeMappings?: estypes.MappingRuntimeFields
-) => {
-  return await getESIndexFields({ indexes, http, runtimeMappings });
+export const getFields = async (http: HttpSetup, indexes: string[]) => {
+  return await getESIndexFields({ indexes, http });
 };
 
 export const firstFieldOption = {

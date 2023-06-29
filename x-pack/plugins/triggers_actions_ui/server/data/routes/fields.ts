@@ -15,11 +15,9 @@ import {
   ElasticsearchClient,
 } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 const bodySchema = schema.object({
   indexPatterns: schema.arrayOf(schema.string()),
-  runtimeMappings: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
 type RequestBody = TypeOf<typeof bodySchema>;
@@ -53,7 +51,7 @@ export function createFieldsRoute(logger: Logger, router: IRouter, baseRoute: st
 
     try {
       const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
-      rawFields = await getRawFields(esClient, req.body.indexPatterns, req.body.runtimeMappings);
+      rawFields = await getRawFields(esClient, req.body.indexPatterns);
     } catch (err) {
       const indexPatterns = req.body.indexPatterns.join(',');
       logger.warn(
@@ -94,17 +92,12 @@ interface Field {
   aggregatable: boolean;
 }
 
-async function getRawFields(
-  esClient: ElasticsearchClient,
-  indexes: string[],
-  runtimeMappings?: estypes.MappingRuntimeFields
-): Promise<RawFields> {
+async function getRawFields(esClient: ElasticsearchClient, indexes: string[]): Promise<RawFields> {
   const params = {
     index: indexes,
     fields: ['*'],
     ignore_unavailable: true,
     allow_no_indices: true,
-    runtime_mappings: runtimeMappings,
   };
   const result = await esClient.fieldCaps(params);
   return result as RawFields;

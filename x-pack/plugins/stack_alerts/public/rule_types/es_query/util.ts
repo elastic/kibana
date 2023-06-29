@@ -8,6 +8,7 @@
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { estypes } from '@elastic/elasticsearch';
 import { EsQueryRuleParams, SearchType } from './types';
 
 export const isSearchSourceRule = (
@@ -39,6 +40,23 @@ export const convertFieldSpecToFieldOption = (fieldSpec: FieldSpec[]): FieldOpti
 
       return converted;
     });
+};
+
+export const convertRawRuntimeFieldtoFieldOption = (
+  rawFields: estypes.MappingRuntimeFields
+): FieldOption[] => {
+  const result: FieldOption[] = [];
+  for (const name of Object.keys(rawFields)) {
+    const rawField = rawFields[name];
+    const type = rawField.type;
+
+    const normalizedType = type;
+    const aggregatable = true;
+    const searchable = true;
+
+    result.push({ name, type, normalizedType, aggregatable, searchable });
+  }
+  return result;
 };
 
 export const useTriggerUiActionServices = () => useKibana().services;

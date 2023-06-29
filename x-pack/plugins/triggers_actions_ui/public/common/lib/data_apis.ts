@@ -7,7 +7,6 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
-import { estypes } from '@elastic/elasticsearch';
 import { FieldOption } from '../types';
 
 const DATA_API_ROOT = '/internal/triggers_actions_ui/data';
@@ -47,15 +46,13 @@ export async function getMatchingIndices({
 export async function getESIndexFields({
   indexes,
   http,
-  runtimeMappings,
 }: {
   indexes: string[];
   http: HttpSetup;
-  runtimeMappings?: estypes.MappingRuntimeFields;
 }): Promise<FieldOption[]> {
   const { fields } = await http.post<{ fields: ReturnType<typeof getESIndexFields> }>(
     `${DATA_API_ROOT}/_fields`,
-    { body: JSON.stringify({ indexPatterns: indexes, runtimeMappings }) }
+    { body: JSON.stringify({ indexPatterns: indexes }) }
   );
   return fields;
 }

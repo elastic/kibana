@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { convertFieldSpecToFieldOption } from './util';
+import { convertFieldSpecToFieldOption, convertRawRuntimeFieldtoFieldOption } from './util';
 
 describe('convertFieldSpecToFieldOption', () => {
   test('should correctly convert FieldSpec to FieldOption', () => {
@@ -142,6 +142,30 @@ describe('convertFieldSpecToFieldOption', () => {
         name: 'event.risk_score',
         type: 'float',
         normalizedType: 'number',
+        aggregatable: true,
+        searchable: true,
+      },
+    ]);
+  });
+});
+
+describe('convertRawRuntimeFieldtoFieldOption', () => {
+  test('should correctly convert raw runtime field to FieldOption', () => {
+    expect(
+      convertRawRuntimeFieldtoFieldOption({
+        day_of_week: {
+          type: 'keyword',
+          script: {
+            source:
+              "emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",
+          },
+        },
+      })
+    ).toEqual([
+      {
+        name: 'day_of_week',
+        type: 'keyword',
+        normalizedType: 'keyword',
         aggregatable: true,
         searchable: true,
       },

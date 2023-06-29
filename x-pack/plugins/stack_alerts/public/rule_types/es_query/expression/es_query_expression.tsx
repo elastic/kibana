@@ -33,7 +33,7 @@ import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
-import { useTriggerUiActionServices } from '../util';
+import { convertRawRuntimeFieldtoFieldOption, useTriggerUiActionServices } from '../util';
 
 const { useXJsonMode } = XJson;
 
@@ -91,14 +91,12 @@ export const EsQueryExpression: React.FC<
 
   const [esFields, setEsFields] = useState<FieldOption[]>([]);
   const { convertToJson, setXJson, xJson } = useXJsonMode(DEFAULT_VALUES.QUERY);
-  const [indices, setIndices] = useState<string[]>([]);
 
   const setDefaultExpressionValues = async () => {
     setRuleProperty('params', currentRuleParams);
     setXJson(esQuery ?? DEFAULT_VALUES.QUERY);
 
     if (index && index.length > 0) {
-      setIndices(index);
       await refreshEsFields(index);
     }
   };
@@ -108,19 +106,20 @@ export const EsQueryExpression: React.FC<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const refreshEsFields = async (indicesToSearch?: string[]) => {
+  const refreshEsFields = async (indices: string[]) => {
+    const currentEsFields = await getFields(http, indices);
+    const runtimeFields = getRuntimeFields();
+    setEsFields(currentEsFields.concat(runtimeFields));
+  };
+
+  const getRuntimeFields = () => {
     let runtimeMappings;
     try {
       runtimeMappings = get(JSON.parse(xJson), 'runtime_mappings');
     } catch (e) {
       // ignore error
     }
-    const currentEsFields = await getFields(
-      http,
-      indicesToSearch ? indicesToSearch : indices,
-      runtimeMappings
-    );
-    setEsFields(currentEsFields);
+    return runtimeMappings ? convertRawRuntimeFieldtoFieldOption(runtimeMappings) : [];
   };
 
   const onTestQuery = useCallback(async () => {
@@ -205,15 +204,14 @@ export const EsQueryExpression: React.FC<
         esFields={esFields}
         timeField={timeField}
         errors={errors}
-        onIndexChange={async (newIndices: string[]) => {
-          setParam('index', newIndices);
-          setIndices(newIndices);
+        onIndexChange={async (indices: string[]) => {
+          setParam('index', indices);
 
           // reset expression fields if indices are deleted
-          if (newIndices.length === 0) {
+          if (indices.length === 0) {
             setRuleProperty('params', {
               timeField: ruleParams.timeField,
-              index: newIndices,
+              index: indices,
               esQuery: DEFAULT_VALUES.QUERY,
               size: DEFAULT_VALUES.SIZE,
               thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
@@ -227,7 +225,7 @@ export const EsQueryExpression: React.FC<
               excludeHitsFromPreviousRun: DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
             });
           } else {
-            await refreshEsFields(newIndices);
+            await refreshEsFields(indices);
           }
         }}
         onTimeFieldChange={(updatedTimeField: string) => setParam('timeField', updatedTimeField)}
@@ -263,10 +261,12 @@ export const EsQueryExpression: React.FC<
           width="100%"
           height="200px"
           value={xJson}
-          onChange={async (xjson: string) => {
+          onChange={(xjson: string) => {
             setXJson(xjson);
             setParam('esQuery', convertToJson(xjson));
-            await refreshEsFields();
+
+            const runtimeFields = getRuntimeFields();
+            setEsFields(esFields.concat(runtimeFields));
           }}
           options={{
             ariaLabel: i18n.translate('xpack.stackAlerts.esQuery.ui.queryEditor', {

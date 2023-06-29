@@ -12,18 +12,12 @@ import {
   getESIndexFields,
 } from './data_apis';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { estypes } from '@elastic/elasticsearch';
 
 const mockFind = jest.fn();
 const perPage = 1000;
 const http = httpServiceMock.createStartContract();
 const pattern = 'test-pattern';
 const indexes = ['test-index'];
-const runtimeMappings = {
-  test: {
-    type: 'keyword',
-  },
-} as estypes.MappingRuntimeFields;
 
 const generateDataView = (title: string) => ({
   title,
@@ -40,28 +34,12 @@ const mockPattern = 'test-pattern';
 
 describe('Data API', () => {
   describe('index fields', () => {
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
     test('fetches index fields', async () => {
       http.post.mockResolvedValueOnce(mockFields);
       const fields = await getESIndexFields({ indexes, http });
 
       expect(http.post).toHaveBeenCalledWith('/internal/triggers_actions_ui/data/_fields', {
         body: `{"indexPatterns":${JSON.stringify(indexes)}}`,
-      });
-      expect(fields).toEqual(mockFields.fields);
-    });
-
-    test('fetches index fields with runtime mappings', async () => {
-      http.post.mockResolvedValueOnce(mockFields);
-      const fields = await getESIndexFields({ indexes, http, runtimeMappings });
-
-      expect(http.post).toHaveBeenCalledWith('/internal/triggers_actions_ui/data/_fields', {
-        body: `{"indexPatterns":${JSON.stringify(indexes)},"runtimeMappings":${JSON.stringify(
-          runtimeMappings
-        )}}`,
       });
       expect(fields).toEqual(mockFields.fields);
     });
