@@ -17,6 +17,7 @@ import { useMetadata } from '../../hooks/use_metadata';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { MetadataSummary } from './metadata_summary';
 import { KPIGrid } from './kpi_grid';
+import type { TabIds } from '../../types';
 
 export interface MetadataSearchUrlState {
   metadataSearchUrlState: string;
@@ -27,12 +28,15 @@ export interface MetadataProps {
   currentTimeRange: MetricsTimeInput;
   nodeName: string;
   nodeType: InventoryItemType;
-  showActionsColumn?: boolean;
-  search?: string;
-  onSearchChange?: (query: string) => void;
+  onTabsStateChange?: (tabId: TabIds) => void;
 }
 
-export const Overview = ({ nodeName, currentTimeRange, nodeType }: MetadataProps) => {
+export const Overview = ({
+  nodeName,
+  currentTimeRange,
+  nodeType,
+  onTabsStateChange,
+}: MetadataProps) => {
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useSourceContext();
   const {
@@ -77,7 +81,11 @@ export const Overview = ({ nodeName, currentTimeRange, nodeType }: MetadataProps
         <KPIGrid nodeName={nodeName} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <MetadataSummary metadata={metadata} metadataLoading={metadataLoading} />
+        <MetadataSummary
+          metadata={metadata}
+          metadataLoading={metadataLoading}
+          onShowAllClick={onTabsStateChange}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false} />
     </EuiFlexGroup>

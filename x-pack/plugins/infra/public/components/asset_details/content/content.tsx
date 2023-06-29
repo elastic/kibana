@@ -8,7 +8,7 @@
 import React from 'react';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import { Anomalies, Metadata, Processes, Osquery, Metrics, Logs, Overview } from '../tabs';
-import { FlyoutTabIds, type TabState, type AssetDetailsProps } from '../types';
+import { FlyoutTabIds, type TabState, type AssetDetailsProps, TabIds } from '../types';
 
 type Props = Pick<
   AssetDetailsProps,
@@ -22,7 +22,7 @@ export const Content = ({
   nodeType = 'host',
   onTabsStateChange,
 }: Props) => {
-  const onChange = (state: TabState) => {
+  const onChange = (state: TabState & { activeTabId?: TabIds }) => {
     if (!onTabsStateChange) {
       return;
     }
@@ -40,9 +40,7 @@ export const Content = ({
           currentTimeRange={currentTimeRange}
           nodeName={node.name}
           nodeType={nodeType}
-          showActionsColumn={overrides?.metadata?.showActionsColumn}
-          search={overrides?.metadata?.query}
-          onSearchChange={(query) => onChange({ metadata: { query } })}
+          onTabsStateChange={(tabId: TabIds) => onChange({ activeTabId: tabId })}
         />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.LOGS}>

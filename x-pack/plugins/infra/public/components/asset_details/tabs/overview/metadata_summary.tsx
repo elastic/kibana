@@ -7,6 +7,7 @@
 
 import { EuiDescriptionListTitle } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiDescriptionList,
@@ -17,9 +18,12 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { InfraMetadata } from '../../../../../common/http_api';
 import { NOT_AVAILABLE_LABEL } from '../../translations';
 import { ExpandableContent } from '../metadata/table';
+import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
+import { FlyoutTabIds, type TabIds } from '../../types';
 
 const columnTitles = {
   hostIp: i18n.translate('xpack.assetDetailsEmbeddable.overview.metadataHostIpHeading', {
@@ -49,9 +53,23 @@ const metadataData = (metadataInfo: InfraMetadata['info']) => [
 interface MetadataSummaryProps {
   metadata: InfraMetadata | null;
   metadataLoading: boolean;
+  onShowAllClick?: (tabId: TabIds) => void;
 }
 
-export const MetadataSummary = ({ metadata, metadataLoading }: MetadataSummaryProps) => {
+export const MetadataSummary = ({
+  metadata,
+  metadataLoading,
+  onShowAllClick,
+}: MetadataSummaryProps) => {
+  const { showTab } = useTabSwitcherContext();
+
+  const onClick = () => {
+    if (onShowAllClick) {
+      onShowAllClick(FlyoutTabIds.METADATA);
+    }
+    showTab(FlyoutTabIds.METADATA);
+  };
+
   return (
     <>
       <EuiFlexGroup gutterSize="m" responsive={false} wrap={true}>
@@ -75,6 +93,21 @@ export const MetadataSummary = ({ metadata, metadataLoading }: MetadataSummaryPr
             </EuiDescriptionList>
           </EuiFlexItem>
         ))}
+        <EuiFlexItem key="metadata-link">
+          <EuiButtonEmpty
+            data-test-subj="infraMetadataSummaryShowAllMetadataButton"
+            onClick={onClick}
+            size="s"
+            iconSide="left"
+            flush="both"
+            iconType="inspect"
+          >
+            <FormattedMessage
+              id="xpack.infra.assetDetailsEmbeddable.metadataSummary.showAllMetadataButton"
+              defaultMessage="Show all"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule margin="m" />
     </>
