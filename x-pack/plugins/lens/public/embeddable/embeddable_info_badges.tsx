@@ -69,8 +69,8 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
               .euiButtonEmpty {
                 padding-inline: ${euiTheme.size.xs};
               }
-              .euiButtonEmpty__text {
-                margin-inline-start: ${euiTheme.size.xs};
+              .euiButtonEmpty__content {
+                gap: ${euiTheme.size.xs};
               }
             `}
             iconType="wrench"
