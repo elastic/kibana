@@ -103,14 +103,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           describe('should not skip logs verification', () => {
             before(async () => {
               await observabilityOnboardingApiClient.logMonitoringUser({
-                endpoint:
-                  'GET /api/observability_onboarding/custom_logs/{id}/step/{name} 2023-05-24',
+                endpoint: 'POST /internal/observability_onboarding/custom_logs/{id}/step/{name}',
                 params: {
                   path: {
                     id: onboardingId,
                     name: 'ea-status',
                   },
-                  query: {
+                  body: {
                     status: 'complete',
                   },
                 },

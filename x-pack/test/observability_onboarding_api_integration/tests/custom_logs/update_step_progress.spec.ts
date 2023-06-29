@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE } from '@kbn/observability-onboarding-plugin/server/saved_objects/observability_onboarding_status';
-import { ObservabilityOnboardingApiClientKey } from '../../common/config';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ObservabilityOnboardingApiError } from '../../common/observability_onboarding_api_supertest';
 import { expectToReject } from '../../common/utils/expect_to_reject';
@@ -17,25 +16,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const observabilityOnboardingApiClient = getService('observabilityOnboardingApiClient');
 
-  async function callApi({
-    id,
-    name,
-    status,
-    user = 'logMonitoringUser',
-  }: {
-    id: string;
-    name: string;
-    status: string;
-    user?: ObservabilityOnboardingApiClientKey;
-  }) {
-    return await observabilityOnboardingApiClient[user]({
-      endpoint: 'GET /api/observability_onboarding/custom_logs/{id}/step/{name} 2023-05-24',
+  async function callApi({ id, name, status }: { id: string; name: string; status: string }) {
+    return await observabilityOnboardingApiClient.logMonitoringUser({
+      endpoint: 'POST /internal/observability_onboarding/custom_logs/{id}/step/{name}',
       params: {
         path: {
           id,
           name,
         },
-        query: {
+        body: {
           status,
         },
       },
@@ -59,15 +48,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       onboardingId = req.body.onboardingId;
     });
 
-    describe('when missing required privileges', () => {
+    describe("when onboardingId doesn't exists", () => {
       it('fails with a 404 error', async () => {
         const err = await expectToReject<ObservabilityOnboardingApiError>(
           async () =>
             await callApi({
-              id: onboardingId,
+              id: 'my-onboarding-id',
               name: 'ea-download',
               status: 'complete',
-              user: 'noAccessUser',
             })
         );
 
@@ -76,53 +64,35 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('when required privileges are set', () => {
-      describe("when onboardingId doesn't exists", () => {
-        it('fails with a 404 error', async () => {
-          const err = await expectToReject<ObservabilityOnboardingApiError>(
-            async () =>
-              await callApi({
-                id: 'my-onboarding-id',
-                name: 'ea-download',
-                status: 'complete',
-              })
-          );
+    describe('when onboardingId exists', () => {
+      const step = {
+        name: 'ea-download',
+        status: 'complete',
+      };
 
-          expect(err.res.status).to.be(404);
-          expect(err.res.body.message).to.contain('onboarding session not found');
+      before(async () => {
+        const savedState = await kibanaServer.savedObjects.get({
+          type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
+          id: onboardingId,
         });
+
+        expect(savedState.attributes.progress?.[step.name]).not.ok();
       });
 
-      describe('when onboardingId exists', () => {
-        const step = {
-          name: 'ea-download',
-          status: 'complete',
-        };
-
-        before(async () => {
-          const savedState = await kibanaServer.savedObjects.get({
-            type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-            id: onboardingId,
-          });
-
-          expect(savedState.attributes.progress?.[step.name]).not.ok();
+      it('updates step status', async () => {
+        const request = await callApi({
+          id: onboardingId,
+          ...step,
         });
 
-        it('updates step status', async () => {
-          const request = await callApi({
-            id: onboardingId,
-            ...step,
-          });
+        expect(request.status).to.be(200);
 
-          expect(request.status).to.be(200);
-
-          const savedState = await kibanaServer.savedObjects.get({
-            type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-            id: onboardingId,
-          });
-
-          expect(savedState.attributes.progress?.[step.name]).to.be(step.status);
+        const savedState = await kibanaServer.savedObjects.get({
+          type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
+          id: onboardingId,
         });
+
+        expect(savedState.attributes.progress?.[step.name]).to.be(step.status);
       });
     });
   });
