@@ -106,6 +106,7 @@ import {
   UnsecuredActionsClient,
 } from './unsecured_actions_client/unsecured_actions_client';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
+import { createSystemConnectors } from './create_system_actions';
 
 export interface PluginSetupContract {
   registerType<
@@ -200,7 +201,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private isESOCanEncrypt?: boolean;
   private usageCounter?: UsageCounter;
   private readonly telemetryLogger: Logger;
-  private readonly inMemoryConnectors: InMemoryConnector[];
+  private inMemoryConnectors: InMemoryConnector[];
   private inMemoryMetrics: InMemoryMetrics;
 
   constructor(initContext: PluginInitializerContext) {
@@ -384,7 +385,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       actionTypeRegistry,
       taskRunnerFactory,
       isESOCanEncrypt,
-      inMemoryConnectors,
       instantiateAuthorization,
       getUnsecuredSavedObjectsClient,
     } = this;
@@ -394,6 +394,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes,
     });
+
+    /**
+     * It maybe possible for the task manager to start before
+     * the system actions are being set.
+     * Issue: https://github.com/elastic/kibana/issues/160797
+     */
+    const systemConnectors = createSystemConnectors(this.actionTypeRegistry?.list() ?? []);
+    this.inMemoryConnectors = [...this.inMemoryConnectors, ...systemConnectors];
 
     const getActionsClientWithRequest = async (
       request: KibanaRequest,
@@ -416,7 +424,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         actionTypeRegistry: actionTypeRegistry!,
         kibanaIndices: core.savedObjects.getAllIndices(),
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
-        inMemoryConnectors,
+        inMemoryConnectors: this.inMemoryConnectors,
         request,
         authorization: instantiateAuthorization(
           request,
@@ -427,19 +435,19 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
-          inMemoryConnectors,
+          inMemoryConnectors: this.inMemoryConnectors,
         }),
         executionEnqueuer: createExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
-          inMemoryConnectors,
+          inMemoryConnectors: this.inMemoryConnectors,
         }),
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
-          inMemoryConnectors,
+          inMemoryConnectors: this.inMemoryConnectors,
         }),
         auditLogger: this.security?.audit.asScoped(request),
         usageCounter: this.usageCounter,
@@ -464,7 +472,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           connectorTypeRegistry: actionTypeRegistry!,
-          inMemoryConnectors,
+          inMemoryConnectors: this.inMemoryConnectors,
         }),
       });
     };
@@ -501,7 +509,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       ),
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
-      inMemoryConnectors,
+      inMemoryConnectors: this.inMemoryConnectors,
     });
 
     taskRunnerFactory!.initialize({
@@ -543,7 +551,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       },
       getActionsClientWithRequest: secureGetActionsClientWithRequest,
       getUnsecuredActionsClient,
-      inMemoryConnectors,
+      inMemoryConnectors: this.inMemoryConnectors,
       renderActionParameterTemplates: (...args) =>
         renderActionParameterTemplates(actionTypeRegistry, ...args),
     };

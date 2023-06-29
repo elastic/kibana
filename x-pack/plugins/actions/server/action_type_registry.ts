@@ -104,7 +104,7 @@ export class ActionTypeRegistry {
     ExecutorResultData = void
   >(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>) {
     // TODO: Remove when system action are supported
-    if (actionType.isSystemAction) {
+    if (actionType.isSystemActionType) {
       throw new Error(
         i18n.translate(
           'xpack.actions.actionTypeRegistry.register.systemActionsNotSupportedErrorMessage',
@@ -213,6 +213,7 @@ export class ActionTypeRegistry {
         enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
         enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
         supportedFeatureIds: actionType.supportedFeatureIds,
+        isSystemActionType: !!actionType.isSystemActionType,
       }));
   }
 

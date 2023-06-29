@@ -323,7 +323,7 @@ describe('Actions Plugin', () => {
       });
     });
 
-    describe('Preconfigured connectors', () => {
+    describe('inMemoryConnectors', () => {
       function getConfig(overrides = {}) {
         return {
           enabled: true,
@@ -370,78 +370,135 @@ describe('Actions Plugin', () => {
         };
       }
 
-      it('should handle preconfigured actions', async () => {
-        setup(getConfig());
-        // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
-        pluginSetup.registerType({
-          id: '.server-log',
-          name: 'Server log',
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['alerting'],
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          executor,
-        });
-
-        const pluginStart = await plugin.start(coreStart, pluginsStart);
-
-        expect(pluginStart.inMemoryConnectors.length).toEqual(1);
-        expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.server-log')).toBe(true);
-      });
-
-      it('should handle preconfiguredAlertHistoryEsIndex = true', async () => {
-        setup(getConfig({ preconfiguredAlertHistoryEsIndex: true }));
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
-        pluginSetup.registerType({
-          id: '.index',
-          name: 'ES Index',
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['alerting'],
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          executor,
-        });
-
-        const pluginStart = await plugin.start(coreStart, pluginsStart);
-
-        expect(pluginStart.inMemoryConnectors.length).toEqual(2);
-        expect(
-          pluginStart.isActionExecutable('preconfigured-alert-history-es-index', '.index')
-        ).toBe(true);
-      });
-
-      it('should not allow preconfigured connector with same ID as AlertHistoryEsIndexConnectorId', async () => {
-        setup(
-          getConfig({
-            preconfigured: {
-              [AlertHistoryEsIndexConnectorId]: {
-                actionTypeId: '.index',
-                name: 'clashing preconfigured index connector',
-                config: {},
-                secrets: {},
-              },
+      describe('Preconfigured connectors', () => {
+        it('should handle preconfigured actions', async () => {
+          setup(getConfig());
+          // coreMock.createSetup doesn't support Plugin generics
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          pluginSetup.registerType({
+            id: '.server-log',
+            name: 'Server log',
+            minimumLicenseRequired: 'basic',
+            supportedFeatureIds: ['alerting'],
+            validate: {
+              config: { schema: schema.object({}) },
+              secrets: { schema: schema.object({}) },
+              params: { schema: schema.object({}) },
             },
-          })
-        );
-        // coreMock.createSetup doesn't support Plugin generics
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await plugin.setup(coreSetup as any, pluginsSetup);
-        const pluginStart = await plugin.start(coreStart, pluginsStart);
+            executor,
+          });
 
-        expect(pluginStart.inMemoryConnectors.length).toEqual(0);
-        expect(context.logger.get().warn).toHaveBeenCalledWith(
-          `Preconfigured connectors cannot have the id "${AlertHistoryEsIndexConnectorId}" because this is a reserved id.`
-        );
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+          expect(pluginStart.inMemoryConnectors.length).toEqual(1);
+          expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.server-log')).toBe(
+            true
+          );
+        });
+
+        it('should handle preconfiguredAlertHistoryEsIndex = true', async () => {
+          setup(getConfig({ preconfiguredAlertHistoryEsIndex: true }));
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+          pluginSetup.registerType({
+            id: '.index',
+            name: 'ES Index',
+            minimumLicenseRequired: 'basic',
+            supportedFeatureIds: ['alerting'],
+            validate: {
+              config: { schema: schema.object({}) },
+              secrets: { schema: schema.object({}) },
+              params: { schema: schema.object({}) },
+            },
+            executor,
+          });
+
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+          expect(pluginStart.inMemoryConnectors.length).toEqual(2);
+          expect(
+            pluginStart.isActionExecutable('preconfigured-alert-history-es-index', '.index')
+          ).toBe(true);
+        });
+
+        it('should not allow preconfigured connector with same ID as AlertHistoryEsIndexConnectorId', async () => {
+          setup(
+            getConfig({
+              preconfigured: {
+                [AlertHistoryEsIndexConnectorId]: {
+                  actionTypeId: '.index',
+                  name: 'clashing preconfigured index connector',
+                  config: {},
+                  secrets: {},
+                },
+              },
+            })
+          );
+          // coreMock.createSetup doesn't support Plugin generics
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await plugin.setup(coreSetup as any, pluginsSetup);
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+          expect(pluginStart.inMemoryConnectors.length).toEqual(0);
+          expect(context.logger.get().warn).toHaveBeenCalledWith(
+            `Preconfigured connectors cannot have the id "${AlertHistoryEsIndexConnectorId}" because this is a reserved id.`
+          );
+        });
+      });
+
+      // TODO: Unskip when registering system actions is allowed
+      describe.skip('System actions', () => {
+        it('should handle system actions', async () => {
+          setup(getConfig());
+          // coreMock.createSetup doesn't support Plugin generics
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+          pluginSetup.registerType({
+            id: '.cases',
+            name: 'Cases',
+            minimumLicenseRequired: 'basic',
+            supportedFeatureIds: ['alerting'],
+            validate: {
+              config: { schema: schema.object({}) },
+              secrets: { schema: schema.object({}) },
+              params: { schema: schema.object({}) },
+            },
+            isSystemActionType: true,
+            executor,
+          });
+
+          const pluginStart = await plugin.start(coreStart, pluginsStart);
+
+          // inMemoryConnectors holds both preconfigure and system connectors
+          expect(pluginStart.inMemoryConnectors.length).toEqual(2);
+          expect(pluginStart.inMemoryConnectors).toEqual([
+            {
+              id: 'preconfiguredServerLog',
+              actionTypeId: '.server-log',
+              name: 'preconfigured-server-log',
+              config: {},
+              secrets: {},
+              isDeprecated: false,
+              isPreconfigured: true,
+              isSystemAction: false,
+            },
+            {
+              id: 'system-connector-.cases',
+              actionTypeId: '.cases',
+              name: 'system-connector-.cases',
+              config: {},
+              secrets: {},
+              isDeprecated: false,
+              isMissingSecrets: false,
+              isPreconfigured: false,
+              isSystemAction: true,
+            },
+          ]);
+          expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.cases')).toBe(true);
+        });
       });
     });
 
