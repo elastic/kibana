@@ -90,6 +90,7 @@ export const EsQueryExpression: React.FC<
   const { http, docLinks } = services;
 
   const [esFields, setEsFields] = useState<FieldOption[]>([]);
+  const [runtimeFields, setRuntimeFields] = useState<FieldOption[]>([]);
   const { convertToJson, setXJson, xJson } = useXJsonMode(DEFAULT_VALUES.QUERY);
 
   const setDefaultExpressionValues = async () => {
@@ -108,8 +109,7 @@ export const EsQueryExpression: React.FC<
 
   const refreshEsFields = async (indices: string[]) => {
     const currentEsFields = await getFields(http, indices);
-    const runtimeFields = getRuntimeFields();
-    setEsFields(currentEsFields.concat(runtimeFields));
+    setEsFields(currentEsFields);
   };
 
   const getRuntimeFields = () => {
@@ -119,7 +119,9 @@ export const EsQueryExpression: React.FC<
     } catch (e) {
       // ignore error
     }
-    return runtimeMappings ? convertRawRuntimeFieldtoFieldOption(runtimeMappings) : [];
+    if (runtimeMappings) {
+      setRuntimeFields(convertRawRuntimeFieldtoFieldOption(runtimeMappings));
+    }
   };
 
   const onTestQuery = useCallback(async () => {
@@ -264,9 +266,7 @@ export const EsQueryExpression: React.FC<
           onChange={(xjson: string) => {
             setXJson(xjson);
             setParam('esQuery', convertToJson(xjson));
-
-            const runtimeFields = getRuntimeFields();
-            setEsFields(esFields.concat(runtimeFields));
+            getRuntimeFields();
           }}
           options={{
             ariaLabel: i18n.translate('xpack.stackAlerts.esQuery.ui.queryEditor', {
@@ -291,7 +291,7 @@ export const EsQueryExpression: React.FC<
         timeWindowSize={timeWindowSize}
         timeWindowUnit={timeWindowUnit}
         size={size}
-        esFields={esFields}
+        esFields={esFields.concat(runtimeFields)}
         aggType={aggType}
         aggField={aggField}
         groupBy={groupBy}
