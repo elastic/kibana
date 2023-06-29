@@ -18,6 +18,8 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import type { SearchBarCustomization, TopNavCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
+import { dataViewComplexMock } from '../../../../__mocks__/data_view_complex';
+import { waitFor } from '@testing-library/react';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -91,6 +93,21 @@ describe('Discover topnav component', () => {
     const topNavMenu = component.find(TopNavMenu);
     const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
     expect(topMenuConfig).toEqual(['new', 'open', 'share', 'inspect', 'save']);
+  });
+
+  test('switching data views ', async () => {
+    const props = getProps(true);
+    const component = mountWithIntl(
+      <DiscoverMainProvider value={props.stateContainer}>
+        <DiscoverTopNav {...props} />
+      </DiscoverMainProvider>
+    );
+    props.stateContainer.internalState.transitions.setDataView(dataViewComplexMock);
+    // check if the component now stores 2 data views
+    await waitFor(() => {
+      const topNav = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
+      expect(topNav.prop('indexPatterns')?.length).toBe(2);
+    });
   });
 
   test('generated config of TopNavMenu config is correct when no discover save permissions are assigned', () => {
