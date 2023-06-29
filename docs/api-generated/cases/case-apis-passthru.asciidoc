@@ -860,7 +860,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of user actions to return per page. default: 20 </div><div class="param">sortOrder (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: desc </div><div class="param">types (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: asc </div><div class="param">types (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the types of user actions to return. default: null </div>
     </div>  <!-- field-items -->
@@ -952,7 +952,7 @@ Any modifications made to this file will be overwritten.
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; The number of user actions to return per page. default: 20 </div><div class="param">sortOrder (optional)</div>
 
-      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: desc </div><div class="param">types (optional)</div>
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the sort order. default: asc </div><div class="param">types (optional)</div>
 
       <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash; Determines the types of user actions to return. default: null </div>
     </div>  <!-- field-items -->

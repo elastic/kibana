@@ -24,7 +24,16 @@ get:
         type: string
         default: "20"
       example: "20"
-    - $ref: '../components/parameters/sortOrder.yaml'
+    - name: sortOrder
+      in: query
+      description: Determines the sort order.
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: asc
+      example: asc
     - $ref: '../components/parameters/types.yaml'
   responses:
     '200':

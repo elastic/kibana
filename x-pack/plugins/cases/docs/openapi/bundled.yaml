@@ -1053,7 +1053,16 @@ paths:
             type: string
             default: '20'
           example: '20'
-        - $ref: '#/components/parameters/sortOrder'
+        - name: sortOrder
+          in: query
+          description: Determines the sort order.
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: asc
+          example: asc
         - $ref: '#/components/parameters/types'
       responses:
         '200':
@@ -2254,7 +2263,16 @@ paths:
             type: string
             default: '20'
           example: '20'
-        - $ref: '#/components/parameters/sortOrder'
+        - name: sortOrder
+          in: query
+          description: Determines the sort order.
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+            default: asc
+          example: asc
         - $ref: '#/components/parameters/types'
       responses:
         '200':
