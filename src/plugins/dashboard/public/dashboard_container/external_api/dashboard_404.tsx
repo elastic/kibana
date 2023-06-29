@@ -36,7 +36,7 @@ export const Dashboard404Page = ({
                 onClick={() => dashboardRedirect({ destination: 'listing' })}
               >
                 {i18n.translate('dashboard.renderer.404Action', {
-                  defaultMessage: 'Return to the listing page',
+                  defaultMessage: 'View available dashboards',
                 })}
               </EuiButtonEmpty>,
             ]
