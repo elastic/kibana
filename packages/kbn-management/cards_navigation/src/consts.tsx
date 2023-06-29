@@ -23,6 +23,11 @@ export enum appIds {
   TAGS = 'tags',
   FILES_MANAGEMENT = 'filesManagement',
   API_KEYS = 'api_keys',
+  DATA_VIEWS = 'dataViews',
+  REPORTING = 'reporting',
+  CONNECTORS = 'triggersActionsConnectors',
+  RULES = 'triggersActions',
+  MAINTENANCE_WINDOWS = 'maintenanceWindows',
 }
 
 // Create new type that is a union of all the appId values
@@ -115,6 +120,45 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
       defaultMessage: 'Allow applications to access Elastic on your behalf.',
     }),
     icon: <EuiIcon size="l" type="lockOpen" />,
+  },
+  [appIds.DATA_VIEWS]: {
+    category: appCategories.DATA,
+    description: i18n.translate('management.landing.withCardNavigation.apiKeysDescription', {
+      defaultMessage:
+        'Create and manage the data views that help you retrieve your data from Elasticsearch.',
+    }),
+    icon: <EuiIcon size="l" type="indexEdit" />,
+  },
+  [appIds.CONNECTORS]: {
+    category: appCategories.OTHER,
+    description: i18n.translate('management.landing.withCardNavigation.dataViewsDescription', {
+      defaultMessage: 'Connect third-party software with your alerting data.',
+    }),
+    icon: <EuiIcon size="l" type="desktop" />,
+  },
+  [appIds.RULES]: {
+    category: appCategories.OTHER,
+    description: i18n.translate('management.landing.withCardNavigation.rulesDescription', {
+      defaultMessage: 'Detect conditions using rules.',
+    }),
+    icon: <EuiIcon size="l" type="editorChecklist" />,
+  },
+  [appIds.MAINTENANCE_WINDOWS]: {
+    category: appCategories.OTHER,
+    description: i18n.translate(
+      'management.landing.withCardNavigation.maintenanceWindowsDescription',
+      {
+        defaultMessage: 'Suppress rule notifications for scheduled periods of time.',
+      }
+    ),
+    icon: <EuiIcon size="l" type="wrench" />,
+  },
+  [appIds.REPORTING]: {
+    category: appCategories.CONTENT,
+    description: i18n.translate('management.landing.withCardNavigation.reportingDescription', {
+      defaultMessage: 'Get reports generated in applications.',
+    }),
+    icon: <EuiIcon size="l" type="visPie" />,
   },
 };
 
