@@ -34,6 +34,7 @@ export const useSendUploadEndpointRequest = (
 
       return http.post<ResponseActionApiResponse>(UPLOAD_ROUTE, {
         body: formData,
+        version: '2023-10-31',
         headers: {
           'Content-Type': undefined, // Important in order to let the browser set the appropriate content type
         },

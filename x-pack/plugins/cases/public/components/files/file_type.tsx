@@ -7,13 +7,14 @@
 import React, { Suspense, lazy } from 'react';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 import type {
+  AttachmentViewObject,
   ExternalReferenceAttachmentType,
   ExternalReferenceAttachmentViewProps,
 } from '../../client/attachment_framework/types';
 
 import { AttachmentActionType } from '../../client/attachment_framework/types';
-import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
 import * as i18n from './translations';
 import { isImage, isValidFileExternalReferenceMetadata } from './utils';
 
@@ -47,31 +48,29 @@ const getFileAttachmentActions = ({ caseId, fileId }: { caseId: string; fileId: 
   {
     type: AttachmentActionType.CUSTOM as const,
     render: () => getFileDownloadButton(fileId),
-    label: i18n.DOWNLOAD_FILE,
     isPrimary: false,
   },
   {
     type: AttachmentActionType.CUSTOM as const,
     render: () => getFileDeleteButton(caseId, fileId),
-    label: i18n.DELETE_FILE,
     isPrimary: false,
   },
 ];
 
-const getFileAttachmentViewObject = (props: ExternalReferenceAttachmentViewProps) => {
+const getFileAttachmentViewObject = (
+  props: ExternalReferenceAttachmentViewProps
+): AttachmentViewObject<ExternalReferenceAttachmentViewProps> => {
   const caseId = props.caseData.id;
   const fileId = props.externalReferenceId;
 
   if (!isValidFileExternalReferenceMetadata(props.externalReferenceMetadata)) {
     return {
-      type: 'regular',
       event: i18n.ADDED_UNKNOWN_FILE,
       timelineAvatar: 'document',
       getActions: () => [
         {
-          type: AttachmentActionType.CUSTOM as const,
+          type: AttachmentActionType.CUSTOM,
           render: () => getFileDeleteButton(caseId, fileId),
-          label: i18n.DELETE_FILE,
           isPrimary: false,
         },
       ],
@@ -100,7 +99,7 @@ const getFileAttachmentViewObject = (props: ExternalReferenceAttachmentViewProps
 export const getFileType = (): ExternalReferenceAttachmentType => ({
   id: FILE_ATTACHMENT_TYPE,
   icon: 'document',
-  displayName: 'File Attachment Type',
+  displayName: 'Files',
   getAttachmentViewObject: getFileAttachmentViewObject,
   getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_FILE }),
 });

@@ -376,7 +376,7 @@
             "section": "def-common.CaseSeverity",
             "text": "CaseSeverity"
           },
-          " | undefined; category?: string | undefined; }, \"description\" | \"title\"> | undefined; }"
+          " | undefined; category?: string | null | undefined; }, \"description\" | \"title\"> | undefined; }"
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_create_case_flyout.tsx",
         "deprecated": false,
@@ -2375,6 +2375,21 @@
           "\"/internal/cases/_bulk_get\""
         ],
         "path": "x-pack/plugins/cases/common/constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.LENS_ATTACHMENT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "LENS_ATTACHMENT_TYPE",
+        "description": [],
+        "signature": [
+          "\".lens\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants/visualizations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

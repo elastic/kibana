@@ -296,3 +296,38 @@ export const INVESTIGATION_GUIDE_TITLE = i18n.translate(
     defaultMessage: 'Investigation guide',
   }
 );
+
+export const SESSION_PREVIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.title',
+  {
+    defaultMessage: 'Session viewer preview',
+  }
+);
+
+export const SESSION_PREVIEW_PROCESS_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.processText',
+  {
+    defaultMessage: 'started',
+  }
+);
+
+export const SESSION_PREVIEW_TIME_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.timeText',
+  {
+    defaultMessage: 'at',
+  }
+);
+
+export const SESSION_PREVIEW_RULE_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.ruleText',
+  {
+    defaultMessage: 'with rule',
+  }
+);
+
+export const SESSION_PREVIEW_COMMAND_TEXT = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.sessionPreview.commandText',
+  {
+    defaultMessage: 'by',
+  }
+);

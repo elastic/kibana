@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createUsersAndRoles,
@@ -28,6 +30,29 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const browser = getService('browser');
 
   describe('View case', () => {
+    describe('page', () => {
+      createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+
+      it('should show the case view page correctly', async () => {
+        await testSubjects.existOrFail('case-view-title');
+        await testSubjects.existOrFail('header-page-supplements');
+
+        await testSubjects.existOrFail('case-view-tab-title-activity');
+        await testSubjects.existOrFail('case-view-tab-title-files');
+        await testSubjects.existOrFail('description');
+
+        await testSubjects.existOrFail('case-view-activity');
+
+        await testSubjects.existOrFail('case-view-assignees');
+        await testSubjects.existOrFail('sidebar-severity');
+        await testSubjects.existOrFail('case-view-user-list-reporter');
+        await testSubjects.existOrFail('case-view-user-list-participants');
+        await testSubjects.existOrFail('case-view-tag-list');
+        await testSubjects.existOrFail('cases-categories');
+        await testSubjects.existOrFail('sidebar-connectors');
+      });
+    });
+
     describe('properties', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
@@ -54,6 +79,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
         await commentArea.focus();
         await commentArea.type('Test comment from automation');
+
         await testSubjects.click('submit-comment');
 
         // validate user action
@@ -61,6 +87,29 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
         );
         expect(await newComment.getVisibleText()).equal('Test comment from automation');
+      });
+
+      it('adds a category to a case', async () => {
+        const category = uuidv4();
+        await testSubjects.click('category-edit-button');
+        await comboBox.setCustom('comboBoxInput', category);
+        await testSubjects.click('edit-category-submit');
+
+        // validate category was added
+        await testSubjects.existOrFail('category-viewer-' + category);
+
+        // validate user action
+        await find.byCssSelector('[data-test-subj*="category-update-action"]');
+      });
+
+      it('deletes a category from a case', async () => {
+        await find.byCssSelector('[data-test-subj*="category-viewer-"]');
+
+        await testSubjects.click('category-remove-button');
+
+        await testSubjects.existOrFail('no-categories');
+        // validate user action
+        await find.byCssSelector('[data-test-subj*="category-delete-action"]');
       });
 
       it('adds a tag to a case', async () => {
@@ -182,144 +231,218 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           );
         });
       });
+    });
 
-      describe('draft comments', () => {
-        createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
+    describe('draft comments', () => {
+      createOneCaseBeforeEachDeleteAllAfterEach(getPageObject, getService);
 
-        it('persists new comment when status is updated in dropdown', async () => {
-          const commentArea = await find.byCssSelector(
-            '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
-          );
-          await commentArea.focus();
-          await commentArea.type('Test comment from automation');
+      it('persists new comment when status is updated in dropdown', async () => {
+        const commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+        await commentArea.focus();
+        await commentArea.type('Test comment from automation');
 
-          await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
-          // validate user action
-          await find.byCssSelector(
-            '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-in-progress"]'
-          );
-          // validates dropdown tag
-          await testSubjects.existOrFail(
-            'case-view-status-dropdown > case-status-badge-popover-button-in-progress'
-          );
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+        // validate user action
+        await find.byCssSelector(
+          '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-in-progress"]'
+        );
+        // validates dropdown tag
+        await testSubjects.existOrFail(
+          'case-view-status-dropdown > case-status-badge-popover-button-in-progress'
+        );
 
-          await testSubjects.click('submit-comment');
+        await testSubjects.click('submit-comment');
 
-          // validate user action
-          const newComment = await find.byCssSelector(
-            '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
-          );
-          expect(await newComment.getVisibleText()).equal('Test comment from automation');
-        });
+        // validate user action
+        const newComment = await find.byCssSelector(
+          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+        );
+        expect(await newComment.getVisibleText()).equal('Test comment from automation');
+      });
 
-        it('persists new comment when case is closed through the close case button', async () => {
-          const commentArea = await find.byCssSelector(
-            '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
-          );
-          await commentArea.focus();
-          await commentArea.type('Test comment from automation');
+      it('persists new comment when case is closed through the close case button', async () => {
+        const commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+        await commentArea.focus();
+        await commentArea.type('Test comment from automation');
 
-          await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
-          await header.waitUntilLoadingHasFinished();
-          await testSubjects.click('case-view-status-action-button');
-          await header.waitUntilLoadingHasFinished();
+        await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('case-view-status-action-button');
+        await header.waitUntilLoadingHasFinished();
 
-          await testSubjects.existOrFail(
-            'header-page-supplements > case-status-badge-popover-button-closed',
-            {
-              timeout: 5000,
-            }
-          );
+        await testSubjects.existOrFail(
+          'header-page-supplements > case-status-badge-popover-button-closed',
+          {
+            timeout: 5000,
+          }
+        );
 
-          // validate user action
-          await find.byCssSelector(
-            '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-closed"]'
-          );
-          // validates dropdown tag
-          await testSubjects.existOrFail(
-            'case-view-status-dropdown >case-status-badge-popover-button-closed'
-          );
+        // validate user action
+        await find.byCssSelector(
+          '[data-test-subj*="status-update-action"] [data-test-subj="case-status-badge-closed"]'
+        );
+        // validates dropdown tag
+        await testSubjects.existOrFail(
+          'case-view-status-dropdown >case-status-badge-popover-button-closed'
+        );
 
-          await testSubjects.click('submit-comment');
+        await testSubjects.click('submit-comment');
 
-          // validate user action
-          const newComment = await find.byCssSelector(
-            '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
-          );
-          expect(await newComment.getVisibleText()).equal('Test comment from automation');
-        });
+        // validate user action
+        const newComment = await find.byCssSelector(
+          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+        );
+        expect(await newComment.getVisibleText()).equal('Test comment from automation');
+      });
 
-        it('persists new comment to the case when user goes to case list table and comes back to the case', async () => {
-          const commentArea = await find.byCssSelector(
-            '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
-          );
-          await commentArea.focus();
-          await commentArea.type('Test comment from automation');
+      it('persists new comment to the case when user goes to case list table and comes back to the case', async () => {
+        const comment = 'Test comment from automation';
 
-          await testSubjects.click('backToCases');
+        let commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+        await commentArea.focus();
+        await commentArea.type(comment);
 
-          const caseLink = await find.byCssSelector('[data-test-subj="case-details-link"');
+        /**
+         * We need to wait for some time to
+         * give the localStorage a change to persist
+         * the comment. Otherwise, the test navigates to
+         * fast to the cases table and the comment is not
+         * persisted
+         */
+        await setTimeoutAsync(2000);
 
-          caseLink.click();
+        await testSubjects.click('backToCases');
 
-          await testSubjects.click('submit-comment');
+        await cases.casesTable.waitForCasesToBeListed();
+        await cases.casesTable.goToFirstListedCase();
+        await header.waitUntilLoadingHasFinished();
 
-          // validate user action
-          const newComment = await find.byCssSelector(
-            '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
-          );
-          expect(await newComment.getVisibleText()).equal('Test comment from automation');
-        });
+        commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
 
-        it('shows unsaved comment message when page is refreshed', async () => {
-          await testSubjects.click('property-actions-user-action-ellipses');
+        expect(await commentArea.getVisibleText()).equal(comment);
 
-          await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('submit-comment');
 
-          await testSubjects.click('property-actions-user-action-pencil');
+        // validate user action
+        const newComment = await find.byCssSelector(
+          '[data-test-subj*="comment-create-action"] [data-test-subj="scrollable-markdown"]'
+        );
 
-          await header.waitUntilLoadingHasFinished();
+        expect(await newComment.getVisibleText()).equal(comment);
+      });
 
-          const editCommentTextArea = await find.byCssSelector(
-            '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
-          );
+      it('shows unsaved comment message when page is refreshed', async () => {
+        await cases.singleCase.addComment('my comment');
+        await header.waitUntilLoadingHasFinished();
 
-          await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('property-actions-user-action-ellipses');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('property-actions-user-action-pencil');
+        await header.waitUntilLoadingHasFinished();
 
-          await editCommentTextArea.focus();
-          await editCommentTextArea.type('Edited comment');
+        const editCommentTextArea = await find.byCssSelector(
+          '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
+        );
 
-          await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
-          await browser.refresh();
+        await editCommentTextArea.focus();
+        await editCommentTextArea.type('Edited comment');
 
-          await header.waitUntilLoadingHasFinished();
+        /**
+         * We need to wait for some time to
+         * give the localStorage a change to persist
+         * the comment. Otherwise, the test navigates to
+         * fast to the cases table and the comment is not
+         * persisted
+         */
+        await setTimeoutAsync(2000);
 
-          await testSubjects.existOrFail('user-action-comment-unsaved-draft');
-        });
+        await header.waitUntilLoadingHasFinished();
+        await browser.refresh();
 
-        it('shows unsaved description message when page is refreshed', async () => {
-          await testSubjects.click('description-edit-icon');
+        await header.waitUntilLoadingHasFinished();
 
-          await header.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('user-action-comment-unsaved-draft');
+      });
 
-          const editCommentTextArea = await find.byCssSelector(
-            '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
-          );
+      it('shows unsaved description message when page is refreshed', async () => {
+        await testSubjects.click('description-edit-icon');
 
-          await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
-          await editCommentTextArea.focus();
-          await editCommentTextArea.type('Edited description');
+        const editCommentTextArea = await find.byCssSelector(
+          '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
+        );
 
-          await header.waitUntilLoadingHasFinished();
+        await header.waitUntilLoadingHasFinished();
 
-          await browser.refresh();
+        await editCommentTextArea.focus();
+        await editCommentTextArea.type('Edited description');
 
-          await header.waitUntilLoadingHasFinished();
+        /**
+         * We need to wait for some time to
+         * give the localStorage a change to persist
+         * the comment. Otherwise, the test navigates to
+         * fast to the cases table and the comment is not
+         * persisted
+         */
+        await setTimeoutAsync(2000);
 
-          await testSubjects.existOrFail('description-unsaved-draft');
-        });
+        await header.waitUntilLoadingHasFinished();
+
+        await browser.refresh();
+
+        await header.waitUntilLoadingHasFinished();
+
+        await testSubjects.existOrFail('description-unsaved-draft');
+      });
+
+      /**
+       * There is this bug https://github.com/elastic/kibana/issues/157280
+       * where this test randomly reproduces thus making the test flaky.
+       * Skipping for now until we fix it.
+       */
+      it.skip('should persist the draft of new comment while description is updated', async () => {
+        let commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        await commentArea.focus();
+        await commentArea.type('Test comment from automation');
+
+        await testSubjects.click('description-edit-icon');
+
+        await header.waitUntilLoadingHasFinished();
+
+        const description = await find.byCssSelector(
+          '[data-test-subj*="editable-markdown-form"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        await header.waitUntilLoadingHasFinished();
+
+        await description.focus();
+        await description.type('Edited description');
+
+        await testSubjects.click('editable-save-markdown');
+        await header.waitUntilLoadingHasFinished();
+
+        await browser.refresh();
+        await header.waitUntilLoadingHasFinished();
+
+        commentArea = await find.byCssSelector(
+          '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
+        );
+
+        expect(await commentArea.getVisibleText()).to.be('Test comment from automation');
       });
     });
 
@@ -596,11 +719,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         it('shows the unknown assignee', async () => {
-          await testSubjects.existOrFail('user-profile-assigned-user-group-abc');
+          await testSubjects.existOrFail('user-profile-assigned-user-abc-remove-group');
         });
 
         it('removes the unknown assignee when selecting the remove all users in the popover', async () => {
-          await testSubjects.existOrFail('user-profile-assigned-user-group-abc');
+          await testSubjects.existOrFail('user-profile-assigned-user-abc-remove-group');
 
           await cases.singleCase.openAssigneesPopover();
           await cases.common.setSearchTextInAssigneesPopover('case');
@@ -608,7 +731,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           await (await find.byButtonText('Remove all assignees')).click();
           await cases.singleCase.closeAssigneesPopover();
-          await testSubjects.missingOrFail('user-profile-assigned-user-group-abc');
+          await testSubjects.missingOrFail('user-profile-assigned-user-abc-remove-group');
         });
       });
 
@@ -627,7 +750,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('assigns the case to the current user when clicking the assign to self link', async () => {
           await testSubjects.click('case-view-assign-yourself-link');
           await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
+          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
         });
       });
 
@@ -652,7 +775,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await cases.common.selectFirstRowInAssigneesPopover();
           await cases.singleCase.closeAssigneesPopover();
           await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
+          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
         });
 
         it('assigns multiple users', async () => {
@@ -662,8 +785,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
           await cases.singleCase.closeAssigneesPopover();
           await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
-          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user2');
+          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
+          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user2-remove-group');
         });
       });
 
@@ -678,17 +801,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           // navigate out of the modal
           await cases.singleCase.closeAssigneesPopover();
           await header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('user-profile-assigned-user-group-cases_all_user');
+          await testSubjects.existOrFail('user-profile-assigned-user-cases_all_user-remove-group');
 
           // hover over the assigned user
           await (
             await find.byCssSelector(
-              '[data-test-subj="user-profile-assigned-user-group-cases_all_user"]'
+              '[data-test-subj="user-profile-assigned-user-cases_all_user-remove-group"]'
             )
           ).moveMouseTo();
 
           // delete the user
-          await testSubjects.click('user-profile-assigned-user-cross-cases_all_user');
+          await testSubjects.click('user-profile-assigned-user-cases_all_user-remove-button');
 
           await testSubjects.existOrFail('case-view-assign-yourself-link');
         });
@@ -770,6 +893,23 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
     });
+
+    describe('breadcrumbs', () => {
+      after(async () => {
+        await cases.api.deleteAllCases();
+      });
+
+      it('should set the cases title', async () => {
+        const theCase = await createAndNavigateToCase(getPageObject, getService);
+        const firstBreadcrumb = await testSubjects.getVisibleText('breadcrumb first');
+        const middleBreadcrumb = await testSubjects.getVisibleText('breadcrumb');
+        const lastBreadcrumb = await testSubjects.getVisibleText('breadcrumb last');
+
+        expect(firstBreadcrumb).to.be('Management');
+        expect(middleBreadcrumb).to.be('Cases');
+        expect(lastBreadcrumb).to.be(theCase.title);
+      });
+    });
   });
 };
 
@@ -788,6 +928,21 @@ const createOneCaseBeforeDeleteAllAfter = (
   });
 };
 
+const createOneCaseBeforeEachDeleteAllAfterEach = (
+  getPageObject: FtrProviderContext['getPageObject'],
+  getService: FtrProviderContext['getService']
+) => {
+  const cases = getService('cases');
+
+  beforeEach(async () => {
+    await createAndNavigateToCase(getPageObject, getService);
+  });
+
+  afterEach(async () => {
+    await cases.api.deleteAllCases();
+  });
+};
+
 const createAndNavigateToCase = async (
   getPageObject: FtrProviderContext['getPageObject'],
   getService: FtrProviderContext['getService']
@@ -796,8 +951,10 @@ const createAndNavigateToCase = async (
   const cases = getService('cases');
 
   await cases.navigation.navigateToApp();
-  await cases.api.createNthRandomCases(1);
+  const theCase = await cases.api.createCase();
   await cases.casesTable.waitForCasesToBeListed();
   await cases.casesTable.goToFirstListedCase();
   await header.waitUntilLoadingHasFinished();
+
+  return theCase;
 };
