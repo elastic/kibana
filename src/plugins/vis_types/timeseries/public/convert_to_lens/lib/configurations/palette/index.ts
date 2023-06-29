@@ -11,8 +11,8 @@ import { uniqBy } from 'lodash';
 import { Panel, Series } from '../../../../../common/types';
 
 // This is used in substitution of the default color returned from the previously used `color` depenendency.
-// In the `color` dependency, a null or undefined passed argument is converted to a default black color.  
-const DEFAULT_MISSING_COLOR =  '#000000';
+// In the `color` dependency, a null or undefined passed argument is converted to a default black color.
+const DEFAULT_MISSING_COLOR = '#000000';
 
 const Operators = {
   GTE: 'gte',
@@ -80,7 +80,9 @@ const isGaugeColorRule = (
   return Boolean(metricRule.gauge);
 };
 
-const getColor = (rule: ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule): string => {
+const getColor = (
+  rule: ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule
+): string => {
   if (isMetricColorRule(rule)) {
     return rule.background_color ?? rule.color ?? DEFAULT_MISSING_COLOR;
   } else if (isGaugeColorRule(rule)) {

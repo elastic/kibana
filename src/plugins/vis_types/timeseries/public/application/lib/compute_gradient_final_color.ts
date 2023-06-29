@@ -8,8 +8,8 @@
 import chroma from 'chroma-js';
 
 export const computeGradientFinalColor = (color: string): string => {
-  let inputColor = chroma(color);
-  const [h,s,l] = inputColor.hsl();
+  const inputColor = chroma(color);
+  const [h, s, l] = inputColor.hsl();
   const lightness = l - inputColor.luminance();
-  return chroma.hsl(h,s,lightness).css();
+  return chroma.hsl(h, s, lightness).css();
 };

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import chroma from 'chroma-js';
 import { getUISettings } from '../../services';
 
 const isDarkTheme = () => getUISettings().get('theme:darkMode');
