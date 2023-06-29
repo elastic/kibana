@@ -20912,8 +20912,6 @@
     "xpack.lens.pie.wafflelabel": "华夫饼图",
     "xpack.lens.pie.waffleSuggestionLabel": "华夫饼图",
     "xpack.lens.pieChart.categoriesInLegendLabel": "隐藏标签",
-    "xpack.lens.pieChart.color": "颜色",
-    "xpack.lens.pieChart.colorPicker.auto": "自动",
     "xpack.lens.pieChart.colorPicker.disabledBecauseGroupBy": "图层包括一个或多个“分组依据”维度时，无法将定制颜色应用于单个切片。",
     "xpack.lens.pieChart.colorPicker.disabledBecauseSliceBy": "图层包括一个或多个“切片依据”维度时，无法将定制颜色应用于单个切片。",
     "xpack.lens.pieChart.emptySizeRatioLabel": "内部面积大小",
