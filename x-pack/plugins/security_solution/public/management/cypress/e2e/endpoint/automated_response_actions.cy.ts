@@ -11,7 +11,7 @@ import { closeAllToasts } from '../../tasks/toasts';
 import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import { login } from '../../tasks/login';
-import { visit } from '../../tasks/common';
+import { loadPage } from '../../tasks/common';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import { changeAlertsFilter } from '../../tasks/alerts';
@@ -80,7 +80,7 @@ describe('Automated Response Actions', () => {
     });
 
     it('should have generated endpoint and rule', () => {
-      visit(APP_ENDPOINTS_PATH);
+      loadPage(APP_ENDPOINTS_PATH);
       cy.contains(createdHost.hostname).should('exist');
 
       toggleRuleOffAndOn(ruleName);

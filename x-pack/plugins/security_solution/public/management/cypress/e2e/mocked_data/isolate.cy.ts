@@ -24,7 +24,7 @@ import type { ReturnTypeFromChainable } from '../../types';
 import { addAlertsToCase } from '../../tasks/add_alerts_to_case';
 import { APP_ALERTS_PATH, APP_CASES_PATH, APP_PATH } from '../../../../../common/constants';
 import { login } from '../../tasks/login';
-import { visit } from '../../tasks/common';
+import { loadPage } from '../../tasks/common';
 import { indexNewCase } from '../../tasks/index_new_case';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
@@ -79,7 +79,7 @@ describe('Isolate command', () => {
     });
 
     it('should allow filtering endpoint by Isolated status', () => {
-      visit(APP_PATH + getEndpointListPath({ name: 'endpointList' }));
+      loadPage(APP_PATH + getEndpointListPath({ name: 'endpointList' }));
       closeAllToasts();
       filterOutIsolatedHosts();
       isolatedEndpointHostnames.forEach(checkEndpointIsIsolated);
@@ -131,7 +131,7 @@ describe('Isolate command', () => {
       let isolateRequestResponse: ActionDetails;
       let releaseRequestResponse: ActionDetails;
 
-      visit(APP_ALERTS_PATH);
+      loadPage(APP_ALERTS_PATH);
       closeAllToasts();
 
       cy.getByTestSubj('alertsTable').within(() => {
@@ -257,7 +257,7 @@ describe('Isolate command', () => {
       const releaseComment = `Releasing ${hostname}`;
       const caseAlertId = caseAlertActions.comments[alertId];
 
-      visit(caseUrlPath);
+      loadPage(caseUrlPath);
       closeAllToasts();
       openCaseAlertDetails(caseAlertId);
 

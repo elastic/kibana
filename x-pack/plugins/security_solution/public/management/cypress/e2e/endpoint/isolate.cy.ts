@@ -23,7 +23,7 @@ import {
 } from '../../tasks/isolate';
 import { cleanupCase, cleanupRule, loadCase, loadRule } from '../../tasks/api_fixtures';
 import { login } from '../../tasks/login';
-import { visit } from '../../tasks/common';
+import { loadPage } from '../../tasks/common';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
@@ -76,7 +76,7 @@ describe('Isolate command', () => {
 
   describe('From manage', () => {
     it('should allow filtering endpoint by Isolated status', () => {
-      visit(APP_ENDPOINTS_PATH);
+      loadPage(APP_ENDPOINTS_PATH);
       closeAllToasts();
       cy.getByTestSubj('globalLoadingIndicator-hidden').should('exist');
       checkEndpointListForOnlyUnIsolatedHosts();
@@ -131,7 +131,7 @@ describe('Isolate command', () => {
     });
 
     it('should isolate and release host', () => {
-      visit(APP_ENDPOINTS_PATH);
+      loadPage(APP_ENDPOINTS_PATH);
       cy.contains(createdHost.hostname).should('exist');
 
       toggleRuleOffAndOn(ruleName);
@@ -196,7 +196,7 @@ describe('Isolate command', () => {
     });
 
     it('should isolate and release host', () => {
-      visit(APP_ENDPOINTS_PATH);
+      loadPage(APP_ENDPOINTS_PATH);
       cy.contains(createdHost.hostname).should('exist');
 
       toggleRuleOffAndOn(ruleName);
@@ -211,7 +211,7 @@ describe('Isolate command', () => {
       cy.contains(`An alert was added to \"Test ${caseOwner} case`);
 
       cy.intercept('GET', `/api/cases/${caseId}/user_actions/_find*`).as('case');
-      visit(`${APP_CASES_PATH}/${caseId}`);
+      loadPage(`${APP_CASES_PATH}/${caseId}`);
       cy.wait('@case', { timeout: 30000 }).then(({ response: res }) => {
         const caseAlertId = res?.body.userActions[1].id;
 

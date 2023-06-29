@@ -17,7 +17,7 @@ export const waitForPageToBeLoaded = () => {
   cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
 };
 
-export const visit = (url: string, options: Partial<Cypress.VisitOptions> = {}) => {
+export const loadPage = (url: string, options: Partial<Cypress.VisitOptions> = {}) => {
   cy.visit(url, options);
   waitForPageToBeLoaded();
 };

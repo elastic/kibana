@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { request, visit } from './common';
+import { request, loadPage } from './common';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { ACTION_DETAILS_ROUTE } from '../../../../common/endpoint/constants';
 import type { ActionDetails, ActionDetailsApiResponse } from '../../../../common/endpoint/types';
@@ -32,7 +32,7 @@ export const focusAndOpenCommandDropdown = (number = 0) => {
   });
 };
 export const fillUpNewRule = (name = 'Test', description = 'Test') => {
-  visit('app/security/rules/management');
+  loadPage('app/security/rules/management');
   cy.getByTestSubj('create-new-rule').click();
   cy.getByTestSubj('stepDefineRule').within(() => {
     cy.getByTestSubj('queryInput').first().type('_id:*{enter}');
@@ -48,7 +48,7 @@ export const fillUpNewRule = (name = 'Test', description = 'Test') => {
   cy.getByTestSubj('schedule-continue').click();
 };
 export const visitRuleActions = (ruleId: string) => {
-  visit(`app/security/rules/id/${ruleId}/edit`);
+  loadPage(`app/security/rules/id/${ruleId}/edit`);
   cy.getByTestSubj('edit-rule-actions-tab').should('exist');
   cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
   cy.getByTestSubj('stepPanelProgress').should('not.exist');

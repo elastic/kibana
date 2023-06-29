@@ -14,7 +14,7 @@ import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { removeAllArtifacts } from '../../tasks/artifacts';
 import { login } from '../../tasks/login';
 import { performUserActions } from '../../tasks/perform_user_actions';
-import { request, visit } from '../../tasks/common';
+import { request, loadPage } from '../../tasks/common';
 import {
   createAgentPolicyTask,
   getEndpointIntegrationVersion,
@@ -74,7 +74,7 @@ describe('Artifact pages', () => {
 
   beforeEach(() => {
     login();
-    visit(APP_ENDPOINTS_PATH);
+    loadPage(APP_ENDPOINTS_PATH);
   });
 
   after(() => {
@@ -101,7 +101,7 @@ describe('Artifact pages', () => {
           .invoke('text')
           .then(parseRevNumber)
           .then((initialRevisionNumber) => {
-            visit(`/app/security/administration/${testData.urlPath}`);
+            loadPage(`/app/security/administration/${testData.urlPath}`);
 
             cy.getByTestSubj(`${testData.pagePrefix}-emptyState-addButton`).click();
             performUserActions(testData.create.formActions);
@@ -112,7 +112,7 @@ describe('Artifact pages', () => {
               cy.getByTestSubj(checkResult.selector).should('have.text', checkResult.value);
             }
 
-            visit(APP_ENDPOINTS_PATH);
+            loadPage(APP_ENDPOINTS_PATH);
 
             // depends on the 10s auto refresh
             cy.getByTestSubj('policyListRevNo')

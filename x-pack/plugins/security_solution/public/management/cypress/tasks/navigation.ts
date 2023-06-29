@@ -6,13 +6,13 @@
  */
 
 import { TOGGLE_NAVIGATION_BTN } from '../screens/navigation';
-import { visit } from './common';
+import { loadPage } from './common';
 
 export const INTEGRATIONS = 'app/integrations#/';
 export const FLEET = 'app/fleet/';
 export const FLEET_AGENT_POLICIES = 'app/fleet/policies';
 export const navigateTo = (page: string, opts?: Partial<Cypress.VisitOptions>) => {
-  visit(page, opts);
+  loadPage(page, opts);
   cy.contains('Loading Elastic').should('exist');
   cy.contains('Loading Elastic').should('not.exist');
 

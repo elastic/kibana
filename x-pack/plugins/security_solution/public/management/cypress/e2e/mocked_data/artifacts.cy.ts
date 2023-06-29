@@ -12,7 +12,7 @@ import {
   loginWithRole,
   ROLE,
 } from '../../tasks/login';
-import { visit } from '../../tasks/common';
+import { loadPage } from '../../tasks/common';
 
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { removeAllArtifacts } from '../../tasks/artifacts';
@@ -21,18 +21,18 @@ import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoi
 
 const loginWithWriteAccess = (url: string) => {
   loginWithRole(ROLE.endpoint_security_policy_manager);
-  visit(url);
+  loadPage(url);
 };
 
 const loginWithReadAccess = (privilegePrefix: string, url: string) => {
   const roleWithArtifactReadPrivilege = getRoleWithArtifactReadPrivilege(privilegePrefix);
   loginWithCustomRole('roleWithArtifactReadPrivilege', roleWithArtifactReadPrivilege);
-  visit(url);
+  loadPage(url);
 };
 
 const loginWithoutAccess = (url: string) => {
   loginWithRole(ROLE.t1_analyst);
-  visit(url);
+  loadPage(url);
 };
 
 describe('Artifacts pages', () => {
