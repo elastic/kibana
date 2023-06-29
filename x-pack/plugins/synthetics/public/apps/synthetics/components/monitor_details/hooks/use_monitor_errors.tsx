@@ -107,7 +107,9 @@ export function useMonitorErrors(monitorIdArg?: string) {
 
     const hasActiveError: boolean =
       data?.aggregations?.latest.hits.hits.length === 1 &&
-      (data?.aggregations?.latest.hits.hits[0]._source as any).monitor.status === 'down';
+      (data?.aggregations?.latest.hits.hits[0]._source as { monitor: { status: string } }).monitor
+        .status === 'down' &&
+      !!errorStates?.length;
 
     return {
       errorStates,
