@@ -6,13 +6,14 @@
  */
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingLogo } from '@elastic/eui';
+import { SecurityProductTypes } from '../../../common/config';
 
 const GetStartedLazy = lazy(() => import('./get_started'));
 
 const centerLogoStyle = { display: 'flex', margin: 'auto' };
 
-export const GetStarted = () => (
+export const GetStarted = ({ productTypes }: { productTypes?: SecurityProductTypes }) => (
   <Suspense fallback={<EuiLoadingLogo logo="logoSecurity" size="xl" style={centerLogoStyle} />}>
-    <GetStartedLazy />
+    <GetStartedLazy productTypes={productTypes} />
   </Suspense>
 );

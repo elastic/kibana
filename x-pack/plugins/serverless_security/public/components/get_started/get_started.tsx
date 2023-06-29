@@ -17,8 +17,9 @@ import {
   GET_STARTED_PAGE_SUBTITLE,
   GET_STARTED_PAGE_TITLE,
 } from './translations';
+import { SecurityProductTypes } from '../../../common/config';
 
-export const GetStartedComponent: React.FC = () => {
+export const GetStartedComponent: React.FC<{ productTypes?: SecurityProductTypes }> = () => {
   const { euiTheme } = useEuiTheme();
 
   return (
