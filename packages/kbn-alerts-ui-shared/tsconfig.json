@@ -18,6 +18,8 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/rule-data-utils",
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/i18n-react",
+    "@kbn/alerting-plugin"
   ]
 }
