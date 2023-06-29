@@ -101,7 +101,7 @@ const IndicesContent = ({
         <EuiFlexItem grow={false}>
           <EuiStat
             // TODO: format count based on locale
-            title={selectedIndex ? selectedIndex.count : '--'}
+            title={selectedIndex ? selectedIndex.count.toLocaleString() : '--'}
             titleColor="primary"
             description={i18n.translate(
               'xpack.serverlessSearch.content.indexingApi.index.documentCount.description',
