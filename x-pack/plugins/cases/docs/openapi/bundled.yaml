@@ -61,13 +61,7 @@ paths:
         - cases
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-        - name: ids
-          description: The cases that you want to removed. All non-ASCII characters must be URL encoded.
-          in: query
-          required: true
-          schema:
-            type: string
-          example: d4e7abb0-b462-11ec-9a8d-698504725a43
+        - $ref: '#/components/parameters/ids'
       responses:
         '204':
           description: Indicates a successful call.
@@ -127,123 +121,22 @@ paths:
       tags:
         - cases
       parameters:
-        - name: assignees
-          in: query
-          description: Filters the returned cases by assignees. Valid values are `none` or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API.
-          schema:
-            oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-        - name: defaultSearchOperator
-          in: query
-          description: The default operator to use for the simple_query_string.
-          schema:
-            type: string
-            default: OR
-          example: OR
-        - name: fields
-          in: query
-          description: The fields in the entity to return in the response.
-          schema:
-            type: array
-            items:
-              type: string
-        - name: from
-          in: query
-          description: |
-            [preview] Returns only cases that were created after a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-          schema:
-            type: string
-          example: now-1d
+        - $ref: '#/components/parameters/assignees'
+        - $ref: '#/components/parameters/defaultSearchOperator'
+        - $ref: '#/components/parameters/fields'
+        - $ref: '#/components/parameters/from'
         - $ref: '#/components/parameters/owner'
-        - name: page
-          in: query
-          description: The page number to return.
-          schema:
-            type: integer
-            default: 1
-          example: 1
-        - name: perPage
-          in: query
-          description: The number of cases to return per page.
-          schema:
-            type: integer
-            default: 20
-          example: 20
-        - name: reporters
-          in: query
-          description: Filters the returned cases by the user name of the reporter.
-          schema:
-            oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-          example: elastic
-        - name: search
-          in: query
-          description: An Elasticsearch simple_query_string query that filters the objects in the response.
-          schema:
-            type: string
-        - name: searchFields
-          in: query
-          description: The fields to perform the simple_query_string parsed query against.
-          schema:
-            oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/perPage'
+        - $ref: '#/components/parameters/reporters'
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/searchFields'
         - $ref: '#/components/parameters/severity'
-        - name: sortField
-          in: query
-          description: Determines which field is used to sort the results.
-          schema:
-            type: string
-            enum:
-              - createdAt
-              - updatedAt
-            default: createdAt
-          example: updatedAt
-        - name: sortOrder
-          in: query
-          description: Determines the sort order.
-          schema:
-            type: string
-            enum:
-              - asc
-              - desc
-            default: desc
-          example: asc
-        - name: status
-          in: query
-          description: Filters the returned cases by state.
-          schema:
-            type: string
-            enum:
-              - closed
-              - in-progress
-              - open
-          example: open
-        - name: tags
-          in: query
-          description: Filters the returned cases by tags.
-          schema:
-            oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-          example: tag-1
-        - name: to
-          in: query
-          description: |
-            [preview] Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-          schema:
-            type: string
-          example: now+1d
+        - $ref: '#/components/parameters/sortField'
+        - $ref: '#/components/parameters/sortOrder'
+        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/tags'
+        - $ref: '#/components/parameters/to'
       responses:
         '200':
           description: Indicates a successful call.
@@ -908,13 +801,7 @@ paths:
         - cases
       parameters:
         - $ref: '#/components/parameters/case_id'
-        - in: query
-          name: includeComments
-          description: Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.
-          deprecated: true
-          schema:
-            type: boolean
-            default: true
+        - $ref: '#/components/parameters/includeComments'
       responses:
         '200':
           description: Indicates a successful call.
@@ -1241,40 +1128,8 @@ paths:
             type: string
             default: '20'
           example: '20'
-        - name: sortOrder
-          in: query
-          description: Determines the sort order.
-          schema:
-            type: string
-            enum:
-              - asc
-              - desc
-            default: asc
-          example: asc
-        - name: types
-          in: query
-          description: Determines the types of user actions to return.
-          schema:
-            type: array
-            items:
-              type: string
-              enum:
-                - action
-                - alert
-                - assignees
-                - attachment
-                - comment
-                - connector
-                - create_case
-                - description
-                - pushed
-                - settings
-                - severity
-                - status
-                - tags
-                - title
-                - user
-          example: create_case
+        - $ref: '#/components/parameters/sortOrder'
+        - $ref: '#/components/parameters/types'
       responses:
         '200':
           description: Indicates a successful call.
@@ -1407,13 +1262,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
-        - name: ids
-          description: The cases that you want to removed. All non-ASCII characters must be URL encoded.
-          in: query
-          required: true
-          schema:
-            type: string
-          example: d4e7abb0-b462-11ec-9a8d-698504725a43
+        - $ref: '#/components/parameters/ids'
       responses:
         '204':
           description: Indicates a successful call.
@@ -1475,123 +1324,22 @@ paths:
         - cases
       parameters:
         - $ref: '#/components/parameters/space_id'
-        - name: assignees
-          in: query
-          description: Filters the returned cases by assignees. Valid values are `none` or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API.
-          schema:
-            oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-        - name: defaultSearchOperator
-          in: query
-          description: The default operator to use for the simple_query_string.
-          schema:
-            type: string
-            default: OR
-          example: OR
-        - name: fields
-          in: query
-          description: The fields in the entity to return in the response.
-          schema:
-            type: array
-            items:
-              type: string
-        - name: from
-          in: query
-          description: |
-            [preview] Returns only cases that were created after a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-          schema:
-            type: string
-          example: now-1d
+        - $ref: '#/components/parameters/assignees'
+        - $ref: '#/components/parameters/defaultSearchOperator'
+        - $ref: '#/components/parameters/fields'
+        - $ref: '#/components/parameters/from'
         - $ref: '#/components/parameters/owner'
-        - name: page
-          in: query
-          description: The page number to return.
-          schema:
-            type: integer
-            default: 1
-          example: 1
-        - name: perPage
-          in: query
-          description: The number of cases to return per page.
-          schema:
-            type: integer
-            default: 20
-          example: 20
-        - name: reporters
-          in: query
-          description: Filters the returned cases by the user name of the reporter.
-          schema:
-            oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-          example: elastic
-        - name: search
-          in: query
-          description: An Elasticsearch simple_query_string query that filters the objects in the response.
-          schema:
-            type: string
-        - name: searchFields
-          in: query
-          description: The fields to perform the simple_query_string parsed query against.
-          schema:
-            oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/perPage'
+        - $ref: '#/components/parameters/reporters'
+        - $ref: '#/components/parameters/search'
+        - $ref: '#/components/parameters/searchFields'
         - $ref: '#/components/parameters/severity'
-        - name: sortField
-          in: query
-          description: Determines which field is used to sort the results.
-          schema:
-            type: string
-            enum:
-              - createdAt
-              - updatedAt
-            default: createdAt
-          example: updatedAt
-        - name: sortOrder
-          in: query
-          description: Determines the sort order.
-          schema:
-            type: string
-            enum:
-              - asc
-              - desc
-            default: desc
-          example: asc
-        - name: status
-          in: query
-          description: Filters the returned cases by state.
-          schema:
-            type: string
-            enum:
-              - closed
-              - in-progress
-              - open
-          example: open
-        - name: tags
-          in: query
-          description: Filters the returned cases by tags.
-          schema:
-            oneOf:
-              - type: string
-              - type: array
-                items:
-                  type: string
-          example: tag-1
-        - name: to
-          in: query
-          description: |
-            [preview] Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
-          schema:
-            type: string
-          example: now+1d
+        - $ref: '#/components/parameters/sortField'
+        - $ref: '#/components/parameters/sortOrder'
+        - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/tags'
+        - $ref: '#/components/parameters/to'
       responses:
         '200':
           description: Indicates a successful call.
@@ -2319,13 +2067,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/case_id'
         - $ref: '#/components/parameters/space_id'
-        - in: query
-          name: includeComments
-          description: Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.
-          deprecated: true
-          schema:
-            type: boolean
-            default: true
+        - $ref: '#/components/parameters/includeComments'
       responses:
         '200':
           description: Indicates a successful call.
@@ -2662,40 +2404,8 @@ paths:
             type: string
             default: '20'
           example: '20'
-        - name: sortOrder
-          in: query
-          description: Determines the sort order.
-          schema:
-            type: string
-            enum:
-              - asc
-              - desc
-            default: asc
-          example: asc
-        - name: types
-          in: query
-          description: Determines the types of user actions to return.
-          schema:
-            type: array
-            items:
-              type: string
-              enum:
-                - action
-                - alert
-                - assignees
-                - attachment
-                - comment
-                - connector
-                - create_case
-                - description
-                - pushed
-                - settings
-                - severity
-                - status
-                - tags
-                - title
-                - user
-          example: create_case
+        - $ref: '#/components/parameters/sortOrder'
+        - $ref: '#/components/parameters/types'
       responses:
         '200':
           description: Indicates a successful call.
@@ -2744,6 +2454,50 @@ components:
       name: kbn-xsrf
       description: Cross-site request forgery protection
       required: true
+    ids:
+      name: ids
+      description: |
+        The cases that you want to removed. All non-ASCII characters must be URL encoded.
+      in: query
+      required: true
+      schema:
+        type: string
+      example: d4e7abb0-b462-11ec-9a8d-698504725a43
+    assignees:
+      in: query
+      name: assignees
+      description: |
+        Filters the returned cases by assignees. Valid values are `none` or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API.
+      schema:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+    defaultSearchOperator:
+      in: query
+      name: defaultSearchOperator
+      description: he default operator to use for the simple_query_string.
+      schema:
+        type: string
+        default: OR
+      example: OR
+    fields:
+      name: fields
+      in: query
+      description: The fields in the entity to return in the response.
+      schema:
+        type: array
+        items:
+          type: string
+    from:
+      in: query
+      name: from
+      description: |
+        [preview] Returns only cases that were created after a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      schema:
+        type: string
+        example: now-1d
     owner:
       in: query
       name: owner
@@ -2756,6 +2510,49 @@ components:
             items:
               $ref: '#/components/schemas/owners'
       example: cases
+    page:
+      name: page
+      in: query
+      description: The page number to return.
+      schema:
+        type: integer
+        default: 1
+      example: 1
+    perPage:
+      name: perPage
+      in: query
+      description: The number of cases to return per page.
+      schema:
+        type: integer
+        default: 20
+      example: 20
+    reporters:
+      in: query
+      name: reporters
+      description: Filters the returned cases by the user name of the reporter.
+      schema:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+      example: elastic
+    search:
+      in: query
+      name: search
+      description: An Elasticsearch simple_query_string query that filters the objects in the response.
+      schema:
+        type: string
+    searchFields:
+      in: query
+      name: searchFields
+      description: The fields to perform the simple_query_string parsed query against.
+      schema:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
     severity:
       in: query
       name: severity
@@ -2767,6 +2564,58 @@ components:
           - high
           - low
           - medium
+    sortField:
+      in: query
+      name: sortField
+      description: Determines which field is used to sort the results.
+      schema:
+        type: string
+        enum:
+          - createdAt
+          - updatedAt
+        default: createdAt
+      example: updatedAt
+    sortOrder:
+      name: sortOrder
+      in: query
+      description: Determines the sort order.
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: desc
+      example: asc
+    status:
+      in: query
+      name: status
+      description: Filters the returned cases by state.
+      schema:
+        type: string
+        enum:
+          - closed
+          - in-progress
+          - open
+      example: open
+    tags:
+      in: query
+      name: tags
+      description: Filters the returned cases by tags.
+      schema:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+      example: tag-1
+    to:
+      in: query
+      name: to
+      description: |
+        [preview] Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+      schema:
+        type: string
+      example: now+1d
     alert_id:
       in: path
       name: alertId
@@ -2791,6 +2640,14 @@ components:
       schema:
         type: string
         example: 9c235210-6834-11ea-a78c-6ffb38a34414
+    includeComments:
+      in: query
+      name: includeComments
+      description: Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.
+      deprecated: true
+      schema:
+        type: boolean
+        default: true
     comment_id:
       in: path
       name: commentId
@@ -2808,6 +2665,31 @@ components:
       schema:
         type: string
         example: abed3a70-71bd-11ea-a0b2-c51ea50a58e2
+    types:
+      name: types
+      in: query
+      description: Determines the types of user actions to return.
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+            - action
+            - alert
+            - assignees
+            - attachment
+            - comment
+            - connector
+            - create_case
+            - description
+            - pushed
+            - settings
+            - severity
+            - status
+            - tags
+            - title
+            - user
+      example: create_case
     space_id:
       in: path
       name: spaceId

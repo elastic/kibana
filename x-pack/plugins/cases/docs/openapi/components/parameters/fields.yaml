@@ -1,0 +1,7 @@
+name: fields
+in: query
+description: The fields in the entity to return in the response.
+schema:
+  type: array
+  items:
+    type: string

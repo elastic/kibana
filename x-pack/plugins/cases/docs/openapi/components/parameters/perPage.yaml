@@ -1,0 +1,7 @@
+name: perPage
+in: query
+description: The number of cases to return per page.
+schema:
+  type: integer
+  default: 20
+example: 20

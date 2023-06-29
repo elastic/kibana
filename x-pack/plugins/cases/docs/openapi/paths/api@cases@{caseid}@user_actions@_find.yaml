@@ -23,40 +23,8 @@ get:
         type: string
         default: "20"
       example: "20"
-    - name: sortOrder
-      in: query
-      description: Determines the sort order.
-      schema:
-        type: string
-        enum:
-          - asc
-          - desc
-        default: asc
-      example: asc
-    - name: types
-      in: query
-      description: Determines the types of user actions to return.
-      schema:
-        type: array
-        items:
-          type: string
-          enum:
-            - action
-            - alert
-            - assignees
-            - attachment
-            - comment
-            - connector
-            - create_case
-            - description
-            - pushed
-            - settings
-            - severity
-            - status
-            - tags
-            - title
-            - user
-      example: create_case
+    - $ref: '../components/parameters/sortOrder.yaml'
+    - $ref: '../components/parameters/types.yaml'
   responses:
     '200':
       description: Indicates a successful call.

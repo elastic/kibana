@@ -1,5 +1,5 @@
-in: query
 name: types
+in: query
 description: Determines the types of user actions to return.
 schema:
   type: array

@@ -1,0 +1,10 @@
+name: sortOrder
+in: query
+description: Determines the sort order.
+schema:
+  type: string
+  enum:
+    - asc
+    - desc
+  default: desc
+example: asc
