@@ -152,7 +152,6 @@ describe('EmbeddableAnomalyChartsContainer', () => {
         onRenderComplete={onRenderComplete}
         onError={onError}
       />,
-      // @ts-expect-error upgrade to jest 28
       defaultOptions
     );
 
@@ -183,7 +182,6 @@ describe('EmbeddableAnomalyChartsContainer', () => {
         onRenderComplete={onRenderComplete}
         onError={onError}
       />,
-      // @ts-expect-error upgrade to jest 28
       defaultOptions
     );
     const errorMessage = await findByText('Unable to load the ML anomaly explorer data');
