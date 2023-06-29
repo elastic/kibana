@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export function getRulesDashboardDataRoute(): void {}
+export * from './v1';
