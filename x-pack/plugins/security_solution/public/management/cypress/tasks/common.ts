@@ -10,7 +10,7 @@ export const API_AUTH = Object.freeze({
   pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
 });
 
-export const API_HEADERS = Object.freeze({ 'kbn-xsrf': 'cypress' });
+export const COMMON_API_HEADERS = { 'kbn-xsrf': 'cypress' };
 
 export const waitForPageToBeLoaded = () => {
   cy.getByTestSubj('globalLoadingIndicator-hidden').should('exist');
@@ -22,11 +22,12 @@ export const loadPage = (url: string, options: Partial<Cypress.VisitOptions> = {
   waitForPageToBeLoaded();
 };
 
-export const request = <T = unknown>(
-  options: Partial<Cypress.RequestOptions>
-): Cypress.Chainable<Cypress.Response<T>> =>
+export const request = <T = unknown>({
+  headers,
+  ...options
+}: Partial<Cypress.RequestOptions>): Cypress.Chainable<Cypress.Response<T>> =>
   cy.request<T>({
     auth: API_AUTH,
-    headers: API_HEADERS,
+    headers: Object.freeze({ ...COMMON_API_HEADERS, ...headers }),
     ...options,
   });
