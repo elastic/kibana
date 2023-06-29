@@ -147,7 +147,7 @@ export function buildExplorerUrl(
     },
   };
 
-  const spacePathComponent: string = spaceId === 'default' ? '' : `/s/${spaceId}`;
+  const spacePathComponent: string = !spaceId || spaceId === 'default' ? '' : `/s/${spaceId}`;
 
   return `${spacePathComponent}/app/ml/explorer/?_g=${encodeURIComponent(
     rison.encode(globalState)
