@@ -245,22 +245,33 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       return;
     }
 
+    // refetching info only if status changed to completed
+
     if (refetchFieldsExistenceInfo) {
       refetchFieldsExistenceInfo();
     } else {
       scheduleFieldsExistenceInfoFetchRef.current = true;
     }
-    // refetching only if status changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sidebarState.status, scheduleFieldsExistenceInfoFetchRef]);
 
-  // As unifiedFieldListSidebarContainerRef ref can be empty in the beginning, we need to fetch the data once API becomes available
-  useEffect(() => {
-    if (refetchFieldsExistenceInfo && scheduleFieldsExistenceInfoFetchRef.current) {
-      scheduleFieldsExistenceInfoFetchRef.current = false;
-      refetchFieldsExistenceInfo();
-    }
-  }, [scheduleFieldsExistenceInfoFetchRef, refetchFieldsExistenceInfo]);
+  // As unifiedFieldListSidebarContainerRef ref can be empty in the beginning,
+  // we need to fetch the data once API becomes available and after documents are fetched
+  const initializeUnifiedFieldListSidebarContainerApi = useCallback(
+    (api) => {
+      if (!api) {
+        return;
+      }
+
+      if (scheduleFieldsExistenceInfoFetchRef.current) {
+        scheduleFieldsExistenceInfoFetchRef.current = false;
+        api.refetchFieldsExistenceInfo();
+      }
+
+      setUnifiedFieldListSidebarContainerApi(api);
+    },
+    [setUnifiedFieldListSidebarContainerApi, scheduleFieldsExistenceInfoFetchRef]
+  );
 
   const closeDataViewEditor = useRef<() => void | undefined>();
 
@@ -371,7 +382,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   return (
     <UnifiedFieldListSidebarContainer
-      ref={setUnifiedFieldListSidebarContainerApi}
+      ref={initializeUnifiedFieldListSidebarContainerApi}
       variant={fieldListVariant}
       getCreationOptions={getCreationOptions}
       isSidebarCollapsed={props.isClosed}
