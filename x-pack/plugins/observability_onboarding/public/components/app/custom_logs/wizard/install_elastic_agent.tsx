@@ -164,7 +164,7 @@ export function InstallElasticAgent() {
         onboardingId
       ) {
         return callApi(
-          'GET /api/observability_onboarding/elastic_agent/config 2023-05-24',
+          'GET /internal/observability_onboarding/elastic_agent/config',
           {
             headers: { authorization: `ApiKey ${apiKeyEncoded}` },
             params: { query: { onboardingId } },

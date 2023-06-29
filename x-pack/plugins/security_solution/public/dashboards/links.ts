@@ -9,18 +9,28 @@ import { DASHBOARDS_PATH, SecurityPageName, SERVER_APP_ID } from '../../common/c
 import { DASHBOARDS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 import { links as kubernetesLinks } from '../kubernetes/links';
-import {
-  dashboardLinks as cloudSecurityPostureLinks,
-  vulnerabilityDashboardLink,
-} from '../cloud_security_posture/links';
+import { cspDashboardLink, vulnerabilityDashboardLink } from '../cloud_security_posture/links';
 import {
   ecsDataQualityDashboardLinks,
   detectionResponseLinks,
   entityAnalyticsLinks,
   overviewLinks,
+  coverageOverviewDashboardLinks,
 } from '../overview/links';
+import { IconDashboards } from '../common/icons/dashboards';
 
-export const dashboardsLandingLinks: LinkItem = {
+const subLinks: LinkItem[] = [
+  overviewLinks,
+  detectionResponseLinks,
+  kubernetesLinks,
+  cspDashboardLink,
+  vulnerabilityDashboardLink,
+  entityAnalyticsLinks,
+  ecsDataQualityDashboardLinks,
+  coverageOverviewDashboardLinks,
+].map((link) => ({ ...link, sideNavIcon: IconDashboards }));
+
+export const dashboardsLinks: LinkItem = {
   id: SecurityPageName.dashboards,
   title: DASHBOARDS,
   path: DASHBOARDS_PATH,
@@ -31,14 +41,6 @@ export const dashboardsLandingLinks: LinkItem = {
       defaultMessage: 'Dashboards',
     }),
   ],
-  links: [
-    overviewLinks,
-    detectionResponseLinks,
-    kubernetesLinks,
-    cloudSecurityPostureLinks,
-    vulnerabilityDashboardLink,
-    entityAnalyticsLinks,
-    ecsDataQualityDashboardLinks,
-  ],
+  links: subLinks,
   skipUrlState: false,
 };
