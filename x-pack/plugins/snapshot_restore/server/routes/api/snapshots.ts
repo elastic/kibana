@@ -267,4 +267,56 @@ export function registerSnapshotsRoutes({
       }
     })
   );
+
+  // GET last successful managed snapshot
+  router.get(
+    {
+      path: addBasePath('snapshots/last_successful_managed_snapshot'),
+      validate: false,
+    },
+    license.guardApiRoute(async (ctx, req, res) => {
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
+      const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
+
+      if (managedRepository === undefined) {
+        return res.ok({
+          body: undefined,
+        });
+      }
+
+      try {
+        const response = await clusterClient.asCurrentUser.snapshot.get({
+          repository: managedRepository,
+          snapshot: '_all',
+          ignore_unavailable: true,
+          sort: 'start_time',
+          order: 'desc',
+        });
+
+        const { snapshots: managedSnapshotsList } = response;
+
+        if (!managedSnapshotsList || managedSnapshotsList.length === 0) {
+          return res.ok({
+            body: undefined,
+          });
+        }
+
+        const successfulManagedSnapshots = managedSnapshotsList.filter(
+          ({ state }) => state === 'SUCCESS'
+        ) as SnapshotDetailsEs[];
+
+        if (successfulManagedSnapshots.length === 0) {
+          return res.ok({
+            body: undefined,
+          });
+        }
+
+        return res.ok({
+          body: deserializeSnapshotDetails(successfulManagedSnapshots[0]),
+        });
+      } catch (e) {
+        return handleEsError({ error: e, response: res });
+      }
+    })
+  );
 }

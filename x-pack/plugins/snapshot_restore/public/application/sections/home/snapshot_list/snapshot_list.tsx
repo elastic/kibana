@@ -19,7 +19,7 @@ import {
   useExecutionContext,
 } from '../../../../shared_imports';
 import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
-import { useLoadSnapshots } from '../../../services/http';
+import { useLoadSnapshots, useLastSuccessfulManagedSnapshot } from '../../../services/http';
 import { linkToRepositories } from '../../../services/navigation';
 import { useAppContext, useServices } from '../../../app_context';
 import { useDecodedParams, SnapshotListParams, DEFAULT_SNAPSHOT_LIST_PARAMS } from '../../../lib';
@@ -41,10 +41,8 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   location: { search },
   history,
 }) => {
-  const unfilteredSnapshotsResponse = useLoadSnapshots(DEFAULT_SNAPSHOT_LIST_PARAMS);
-  const unfilteredSnapshots = unfilteredSnapshotsResponse.data.snapshots || [];
-
   const { repositoryName, snapshotId } = useDecodedParams<MatchParams>();
+  const lastSuccessfulManagedSnapshot = useLastSuccessfulManagedSnapshot().data;
   const [listParams, setListParams] = useState<SnapshotListParams>(DEFAULT_SNAPSHOT_LIST_PARAMS);
   const {
     error,
@@ -200,7 +198,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           setListParams={setListParams}
           totalItemCount={totalSnapshotsCount}
           isLoading={isLoading}
-          unfilteredSnapshots={unfilteredSnapshots}
+          lastSuccessfulManagedSnapshot={lastSuccessfulManagedSnapshot}
         />
       </section>
     );

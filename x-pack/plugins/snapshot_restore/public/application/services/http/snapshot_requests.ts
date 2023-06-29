@@ -50,3 +50,9 @@ export const deleteSnapshots = async (
   );
   return result;
 };
+
+export const useLastSuccessfulManagedSnapshot = () =>
+  useRequest({
+    path: `${API_BASE_PATH}snapshots/last_successful_managed_snapshot`,
+    method: 'get',
+  });

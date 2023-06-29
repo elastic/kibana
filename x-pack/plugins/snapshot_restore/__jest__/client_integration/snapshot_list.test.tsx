@@ -26,6 +26,9 @@ import { pageHelpers, getRandomString } from './helpers';
  */
 jest.mock('../../public/application/services/http', () => ({
   useLoadSnapshots: jest.fn(),
+  useLastSuccessfulManagedSnapshot: () => {
+    return { data: undefined };
+  },
   setUiMetricServiceSnapshot: () => {},
   setUiMetricService: () => {},
 }));

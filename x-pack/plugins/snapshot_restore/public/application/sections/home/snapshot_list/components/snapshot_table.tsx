@@ -30,21 +30,6 @@ import { SnapshotListParams, SortDirection, SortField } from '../../../../lib';
 import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
 import { SnapshotSearchBar } from './snapshot_search_bar';
 
-const getLastSuccessfulManagedSnapshot = (
-  snapshots: SnapshotDetails[]
-): SnapshotDetails | undefined => {
-  const successfulSnapshots = snapshots
-    .filter(
-      ({ state, repository, managedRepository }) =>
-        repository === managedRepository && state === 'SUCCESS'
-    )
-    .sort((a, b) => {
-      return +new Date(b.endTime) - +new Date(a.endTime);
-    });
-
-  return successfulSnapshots[0];
-};
-
 interface Props {
   snapshots: SnapshotDetails[];
   repositories: string[];
@@ -54,7 +39,7 @@ interface Props {
   setListParams: (listParams: SnapshotListParams) => void;
   totalItemCount: number;
   isLoading: boolean;
-  unfilteredSnapshots: SnapshotDetails[];
+  lastSuccessfulManagedSnapshot?: SnapshotDetails;
 }
 
 export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
@@ -67,12 +52,10 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
     setListParams,
     totalItemCount,
     isLoading,
-    unfilteredSnapshots,
+    lastSuccessfulManagedSnapshot,
   } = props;
   const { i18n, uiMetricService, history } = useServices();
   const [selectedItems, setSelectedItems] = useState<SnapshotDetails[]>([]);
-
-  const lastSuccessfulManagedSnapshot = getLastSuccessfulManagedSnapshot(unfilteredSnapshots);
 
   const columns = [
     {
