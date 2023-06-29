@@ -8,4 +8,5 @@
 
 export type { AppId, CardsNavigationComponentProps } from './src';
 
+export { appIds } from './src';
 export { CardsNavigation } from './src';

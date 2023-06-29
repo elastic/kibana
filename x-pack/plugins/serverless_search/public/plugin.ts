@@ -7,6 +7,7 @@
 
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { appIds } from '@kbn/management-cards-navigation';
 import { createServerlessSearchSideNavComponent as createComponent } from './layout/nav';
 import { docLinks } from '../common/doc_links';
 import {
@@ -72,7 +73,10 @@ export class ServerlessSearchPlugin
   ): ServerlessSearchPluginStart {
     serverless.setProjectHome('/app/elasticsearch');
     serverless.setSideNavComponent(createComponent(core, { serverless }));
-    management.setupCardsNavigation({ enabled: true });
+    management.setupCardsNavigation({
+      enabled: true,
+      hideLinksTo: [appIds.MAINTENANCE_WINDOWS],
+    });
     return {};
   }
 

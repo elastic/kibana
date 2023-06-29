@@ -6,6 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { appIds } from '@kbn/management-cards-navigation';
 import { getObservabilitySideNavComponent } from './components/side_navigation';
 import {
   ServerlessObservabilityPluginSetup,
@@ -32,7 +33,10 @@ export class ServerlessObservabilityPlugin
     observabilityShared.setIsSidebarEnabled(false);
     serverless.setProjectHome('/app/observability/landing');
     serverless.setSideNavComponent(getObservabilitySideNavComponent(core, { serverless }));
-    management.setupCardsNavigation({ enabled: true });
+    management.setupCardsNavigation({
+      enabled: true,
+      hideLinksTo: [appIds.RULES],
+    });
     return {};
   }
 

@@ -9,4 +9,5 @@
 export type { CardsNavigationComponentProps } from './types';
 export type { AppId } from './consts';
 
+export { appIds } from './consts';
 export { CardsNavigation } from './cards_navigation';
