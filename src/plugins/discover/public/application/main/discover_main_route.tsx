@@ -222,11 +222,31 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
     [loadSavedSearch]
   );
 
+  const determineState = useCallback(async () => {
+    setLoading(true);
+    setHasESData(false);
+    setHasUserDataView(false);
+    setShowNoDataPage(false);
+    setError(undefined);
+    // restore the previously selected data view for a new state
+    await loadSavedSearch(
+      !savedSearchId ? stateContainer.internalState.getState().dataView : undefined
+    );
+  }, [
+    loadSavedSearch,
+    savedSearchId,
+    stateContainer,
+    setLoading,
+    setHasESData,
+    setHasUserDataView,
+    setShowNoDataPage,
+    setError,
+  ]);
+
   // primary fetch: on initial search + triggered when id changes
   useEffect(() => {
-    // restore the previously selected data view for a new state
-    loadSavedSearch(!savedSearchId ? stateContainer.internalState.getState().dataView : undefined);
-  }, [loadSavedSearch, savedSearchId, stateContainer]);
+    determineState();
+  }, [determineState]);
 
   // secondary fetch: in case URL is set to `/`, used to reset to 'new' state, keeping the current data view
   useUrl({
@@ -264,7 +284,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
   }
 
   if (error) {
-    return <DiscoverError error={error} />;
+    return <DiscoverError error={error} onReset={determineState} />;
   }
 
   if (loading || !customizationService) {

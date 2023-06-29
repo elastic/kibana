@@ -12,12 +12,18 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
-export const DiscoverError = ({ error }: { error: Error }) => {
+export const DiscoverError = ({
+  error,
+  onReset,
+}: {
+  error: Error;
+  onReset?: () => Promise<void>;
+}) => {
   const { locator } = useDiscoverServices();
 
   const goToMain = async () => {
     await locator.navigate({});
-    window.location.reload();
+    await onReset?.();
   };
 
   return (
