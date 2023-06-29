@@ -21,6 +21,7 @@ import { EndpointAgentStatus } from '../../../../common/components/endpoint/endp
 import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import type { Platform } from './platforms';
 import { PlatformIcon } from './platforms';
+import { getEmptyValue } from '../../../../common/components/empty_value';
 
 const IconContainer = euiStyled.div`
   height: 100%;
@@ -28,6 +29,8 @@ const IconContainer = euiStyled.div`
   align-items: center;
   justify-content: center;
 `;
+
+const emptyValue = getEmptyValue();
 
 interface HeaderEndpointInfoProps {
   endpointId: string;
@@ -91,7 +94,7 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
                   date: endpointDetails.last_checkin ? (
                     <FormattedRelative value={endpointDetails.last_checkin} />
                   ) : (
-                    '-'
+                    emptyValue
                   ),
                 }}
               />

@@ -237,17 +237,13 @@ export const EndpointStatusActionResult = memo<
         ),
         description: (
           <ConsoleCodeBlock>
-            {endpointDetails.last_checkin ? (
-              <FormattedDate
-                fieldName={i18n.translate(
-                  'xpack.securitySolution.endpointResponseActions.status.lastActive',
-                  { defaultMessage: 'Last active' }
-                )}
-                value={endpointDetails.last_checkin}
-              />
-            ) : (
-              '-'
-            )}
+            <FormattedDate
+              fieldName={i18n.translate(
+                'xpack.securitySolution.endpointResponseActions.status.lastActive',
+                { defaultMessage: 'Last active' }
+              )}
+              value={endpointDetails.last_checkin}
+            />
           </ConsoleCodeBlock>
         ),
       },
