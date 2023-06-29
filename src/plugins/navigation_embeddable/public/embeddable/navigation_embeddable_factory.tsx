@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
 import { EmbeddableFactory, EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
-import { NavigationEmbeddable, NAVIGATION_EMBEDDABLE_TYPE } from './navigation_embeddable';
+import { NAVIGATION_EMBEDDABLE_TYPE, NavigationEmbeddable } from './navigation_embeddable';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
@@ -26,7 +26,7 @@ export class NavigationEmbeddableFactoryDefinition implements EmbeddableFactoryD
 
   public getDisplayName() {
     return i18n.translate('navigationEmbeddable.navigationEmbeddableFactory.displayName', {
-      defaultMessage: 'Navigation',
+      defaultMessage: 'Links',
     });
   }
 

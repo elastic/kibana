@@ -5,10 +5,14 @@
   "description": "An embeddable for quickly navigating between dashboards.",
   "plugin": {
     "id": "navigationEmbeddable",
-    "server": false,
+    "server": true,
     "browser": true,
     "requiredPlugins": [
-      "embeddable"
+      "contentManagement",
+      "dashboard",
+      "embeddable",
+      "kibanaReact",
+      "presentationUtil"
     ],
     "optionalPlugins": [],
     "requiredBundles": [
