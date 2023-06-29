@@ -44,6 +44,7 @@ import { createStateService } from '../services/state_service';
 import type {
   UnifiedFieldListSidebarContainerCreationOptions,
   UnifiedFieldListSidebarContainerStateService,
+  SearchMode,
 } from '../../types';
 
 export interface UnifiedFieldListSidebarContainerApi {
@@ -112,7 +113,6 @@ const UnifiedFieldListSidebarContainer = forwardRef<
   const {
     getCreationOptions,
     services,
-    searchMode,
     dataView,
     workspaceSelectedFieldNames,
     isSidebarCollapsed, // TODO later: pull the logic of collapsing the sidebar to this component
@@ -124,7 +124,6 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     createStateService({ options: getCreationOptions() })
   );
   const { data, dataViewFieldEditor } = services;
-  const isPlainRecord = searchMode === 'textBased';
   const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
 
   const canEditDataView =
@@ -139,9 +138,26 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     setIsFieldListFlyoutVisible(false);
   }, []);
 
+  const querySubscriberResult = useQuerySubscriber({
+    data,
+    timeRangeUpdatesType: stateService.creationOptions.timeRangeUpdatesType,
+  });
+  const searchMode: SearchMode | undefined = querySubscriberResult.searchMode;
+  const isAffectedByGlobalFilter = Boolean(querySubscriberResult.filters?.length);
+
+  const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
+    disableAutoFetching: stateService.creationOptions.disableFieldsExistenceAutoFetching,
+    dataViews: searchMode === 'documents' && dataView ? [dataView] : [],
+    query: querySubscriberResult.query,
+    filters: querySubscriberResult.filters,
+    fromDate: querySubscriberResult.fromDate,
+    toDate: querySubscriberResult.toDate,
+    services,
+  });
+
   const editField = useMemo(
     () =>
-      dataView && dataViewFieldEditor && !isPlainRecord && canEditDataView
+      dataView && dataViewFieldEditor && searchMode === 'documents' && canEditDataView
         ? (fieldName?: string) => {
             const ref = dataViewFieldEditor.openEditor({
               ctx: {
@@ -159,7 +175,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
           }
         : undefined,
     [
-      isPlainRecord,
+      searchMode,
       canEditDataView,
       dataViewFieldEditor,
       dataView,
@@ -210,22 +226,6 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     };
   }, []);
 
-  const querySubscriberResult = useQuerySubscriber({
-    data,
-    timeRangeUpdatesType: stateService.creationOptions.timeRangeUpdatesType,
-  });
-  const isAffectedByGlobalFilter = Boolean(querySubscriberResult.filters?.length);
-
-  const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
-    disableAutoFetching: stateService.creationOptions.disableFieldsExistenceAutoFetching,
-    dataViews: !isPlainRecord && dataView ? [dataView] : [],
-    query: querySubscriberResult.query,
-    filters: querySubscriberResult.filters,
-    fromDate: querySubscriberResult.fromDate,
-    toDate: querySubscriberResult.toDate,
-    services,
-  });
-
   useImperativeHandle(
     componentRef,
     () => ({
@@ -244,6 +244,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
 
   const commonSidebarProps: UnifiedFieldListSidebarProps = {
     ...props,
+    searchMode,
     stateService,
     isProcessing,
     isAffectedByGlobalFilter,

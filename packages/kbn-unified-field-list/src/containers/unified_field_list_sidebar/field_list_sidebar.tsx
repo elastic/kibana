@@ -30,7 +30,6 @@ const SEARCH_FIELDS_FROM_SOURCE = 'discover:searchFieldsFromSource';
 
 export type UnifiedFieldListSidebarCustomizableProps = Pick<
   UnifiedFieldListItemProps,
-  | 'searchMode'
   | 'services'
   | 'workspaceSelectedFieldNames'
   | 'dataView'
@@ -56,6 +55,11 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
 };
 
 interface UnifiedFieldListSidebarInternalProps {
+  /**
+   * Current search mode based on current query
+   */
+  searchMode: UnifiedFieldListItemProps['searchMode'];
+
   /**
    * Service for managing the state
    */
@@ -120,7 +124,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     () => !core.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
     [core.uiSettings]
   );
-  const isPlainRecord = searchMode === 'textBased';
 
   const [selectedFieldsState, setSelectedFieldsState] = useState<SelectedFieldsResult>(
     INITIAL_SELECTED_FIELDS_RESULT
@@ -134,7 +137,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       dataView,
       workspaceSelectedFieldNames: onSelectedFieldFilter ? [] : workspaceSelectedFieldNames,
       allFields,
-      isPlainRecord,
+      searchMode,
     });
     setSelectedFieldsState(result);
   }, [
@@ -142,13 +145,13 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     workspaceSelectedFieldNames,
     setSelectedFieldsState,
     allFields,
-    isPlainRecord,
+    searchMode,
     onSelectedFieldFilter,
   ]);
 
   useEffect(() => {
     if (
-      isPlainRecord ||
+      searchMode !== 'documents' ||
       !useNewFieldsApi ||
       stateService.creationOptions.disableMultiFieldsGroupingByParent
     ) {
@@ -162,7 +165,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     allFields,
     useNewFieldsApi,
     setMultiFieldsMap,
-    isPlainRecord,
+    searchMode,
   ]);
 
   const popularFieldsLimit = useMemo(
@@ -174,18 +177,20 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       (field) => {
         return shouldShowField(
           field,
-          isPlainRecord,
+          searchMode,
           stateService.creationOptions.disableMultiFieldsGroupingByParent
         );
       },
-      [isPlainRecord, stateService.creationOptions.disableMultiFieldsGroupingByParent]
+      [searchMode, stateService.creationOptions.disableMultiFieldsGroupingByParent]
     );
 
   const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields<DataViewField>({
-    dataViewId: (!isPlainRecord && dataView?.id) || null, // passing `null` for text-based queries
+    dataViewId: (searchMode === 'documents' && dataView?.id) || null, // passing `null` for text-based queries
     allFields,
     popularFieldsLimit:
-      isPlainRecord || stateService.creationOptions.disablePopularFields ? 0 : popularFieldsLimit,
+      searchMode !== 'documents' || stateService.creationOptions.disablePopularFields
+        ? 0
+        : popularFieldsLimit,
     isAffectedByGlobalFilter,
     services: {
       dataViews,

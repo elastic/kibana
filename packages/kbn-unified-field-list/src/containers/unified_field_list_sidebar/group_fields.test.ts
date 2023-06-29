@@ -16,7 +16,7 @@ describe('group_fields', function () {
       dataView,
       workspaceSelectedFieldNames: ['currency'],
       allFields: dataView.fields,
-      isPlainRecord: false,
+      searchMode: 'documents',
     });
     expect(actual).toMatchInlineSnapshot(`
       Object {
@@ -44,7 +44,7 @@ describe('group_fields', function () {
           type: 'nested',
         },
       ] as DataViewField[],
-      isPlainRecord: false,
+      searchMode: 'documents',
     });
     expect(actual.selectedFieldsMap).toMatchInlineSnapshot(`
       Object {
@@ -60,7 +60,7 @@ describe('group_fields', function () {
         dataView,
         workspaceSelectedFieldNames: [],
         allFields: dataView.fields,
-        isPlainRecord: false,
+        searchMode: 'documents',
       })
     ).toBe(INITIAL_SELECTED_FIELDS_RESULT);
     expect(
@@ -68,7 +68,7 @@ describe('group_fields', function () {
         dataView,
         workspaceSelectedFieldNames: ['_source'],
         allFields: dataView.fields,
-        isPlainRecord: false,
+        searchMode: 'documents',
       })
     ).toBe(INITIAL_SELECTED_FIELDS_RESULT);
   });
@@ -78,7 +78,7 @@ describe('group_fields', function () {
       dataView,
       workspaceSelectedFieldNames: ['bytes', '@timestamp'],
       allFields: dataView.fields,
-      isPlainRecord: false,
+      searchMode: 'documents',
     });
     expect(actual.selectedFields.map((field) => field.name)).toEqual(['bytes', '@timestamp']);
     expect(actual.selectedFieldsMap).toStrictEqual({
@@ -92,7 +92,7 @@ describe('group_fields', function () {
       dataView,
       workspaceSelectedFieldNames: ['machine.os', 'machine.os.raw'],
       allFields: dataView.fields,
-      isPlainRecord: false,
+      searchMode: 'documents',
     });
     expect(actual.selectedFields.map((field) => field.name)).toEqual([
       'machine.os',
@@ -109,7 +109,7 @@ describe('group_fields', function () {
       dataView,
       workspaceSelectedFieldNames: ['bytes', 'extension.keyword', 'unknown'],
       allFields: dataView.fields,
-      isPlainRecord: false,
+      searchMode: 'documents',
     });
     expect(actual1.selectedFields.map((field) => field.name)).toEqual([
       'bytes',
@@ -126,7 +126,7 @@ describe('group_fields', function () {
       dataView,
       workspaceSelectedFieldNames: ['extension', 'bytes', 'unknown'],
       allFields: dataView.fields,
-      isPlainRecord: false,
+      searchMode: 'documents',
     });
     expect(actual2.selectedFields.map((field) => field.name)).toEqual([
       'extension',
@@ -150,7 +150,7 @@ describe('group_fields', function () {
           type: 'text',
         },
       ] as DataViewField[],
-      isPlainRecord: true,
+      searchMode: 'text-based',
     });
     expect(actual).toMatchInlineSnapshot(`
       Object {
@@ -168,34 +168,38 @@ describe('group_fields', function () {
   });
 
   it('should show any fields if for text-based searches', function () {
-    expect(shouldShowField(dataView.getFieldByName('bytes'), true, false)).toBe(true);
+    expect(shouldShowField(dataView.getFieldByName('bytes'), 'text-based', false)).toBe(true);
     expect(
-      shouldShowField({ type: 'unknown', name: 'unknown' } as DataViewField, true, false)
+      shouldShowField({ type: 'unknown', name: 'unknown' } as DataViewField, 'text-based', false)
     ).toBe(true);
-    expect(shouldShowField({ type: '_source', name: 'source' } as DataViewField, true, false)).toBe(
-      false
-    );
+    expect(
+      shouldShowField({ type: '_source', name: 'source' } as DataViewField, 'text-based', false)
+    ).toBe(false);
   });
 
   it('should show fields excluding subfields', function () {
-    expect(shouldShowField(dataView.getFieldByName('extension'), false, false)).toBe(true);
-    expect(shouldShowField(dataView.getFieldByName('extension.keyword'), false, false)).toBe(false);
+    expect(shouldShowField(dataView.getFieldByName('extension'), 'documents', false)).toBe(true);
+    expect(shouldShowField(dataView.getFieldByName('extension.keyword'), 'documents', false)).toBe(
+      false
+    );
     expect(
-      shouldShowField({ type: 'unknown', name: 'unknown' } as DataViewField, false, false)
+      shouldShowField({ type: 'unknown', name: 'unknown' } as DataViewField, 'documents', false)
     ).toBe(true);
     expect(
-      shouldShowField({ type: '_source', name: 'source' } as DataViewField, false, false)
+      shouldShowField({ type: '_source', name: 'source' } as DataViewField, 'documents', false)
     ).toBe(false);
   });
 
   it('should show fields including subfields', function () {
-    expect(shouldShowField(dataView.getFieldByName('extension'), false, true)).toBe(true);
-    expect(shouldShowField(dataView.getFieldByName('extension.keyword'), false, true)).toBe(true);
-    expect(
-      shouldShowField({ type: 'unknown', name: 'unknown' } as DataViewField, false, true)
-    ).toBe(true);
-    expect(shouldShowField({ type: '_source', name: 'source' } as DataViewField, false, true)).toBe(
-      false
+    expect(shouldShowField(dataView.getFieldByName('extension'), 'documents', true)).toBe(true);
+    expect(shouldShowField(dataView.getFieldByName('extension.keyword'), 'documents', true)).toBe(
+      true
     );
+    expect(
+      shouldShowField({ type: 'unknown', name: 'unknown' } as DataViewField, 'documents', true)
+    ).toBe(true);
+    expect(
+      shouldShowField({ type: '_source', name: 'source' } as DataViewField, 'documents', true)
+    ).toBe(false);
   });
 });

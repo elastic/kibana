@@ -117,7 +117,7 @@ export interface UnifiedFieldListItemProps {
   /**
    * Current search mode
    */
-  searchMode: SearchMode;
+  searchMode: SearchMode | undefined;
   /**
    * Determines whether add/remove button is displayed not only when focused
    */

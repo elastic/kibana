@@ -12,16 +12,17 @@ import {
   type DataView,
   getFieldSubtypeMulti,
 } from '@kbn/data-views-plugin/public';
+import type { SearchMode } from '../../types';
 
 export function shouldShowField(
   field: DataViewField | undefined,
-  isPlainRecord: boolean,
+  searchMode: SearchMode | undefined,
   disableMultiFieldsGroupingByParent: boolean | undefined
 ): boolean {
   if (!field?.type || field.type === '_source') {
     return false;
   }
-  if (isPlainRecord) {
+  if (searchMode === 'text-based') {
     // exclude only `_source` for plain records
     return true;
   }
@@ -48,12 +49,12 @@ export function getSelectedFields({
   dataView,
   workspaceSelectedFieldNames,
   allFields,
-  isPlainRecord,
+  searchMode,
 }: {
   dataView: DataView | undefined;
   workspaceSelectedFieldNames?: string[];
   allFields: DataViewField[] | null;
-  isPlainRecord: boolean;
+  searchMode: SearchMode | undefined;
 }): SelectedFieldsResult {
   const result: SelectedFieldsResult = {
     selectedFields: [],
@@ -71,7 +72,7 @@ export function getSelectedFields({
   // add selected field names, that are not part of the data view, to be removable
   for (const selectedFieldName of workspaceSelectedFieldNames) {
     const selectedField =
-      (!isPlainRecord && dataView?.getFieldByName?.(selectedFieldName)) ||
+      (searchMode === 'documents' && dataView?.getFieldByName?.(selectedFieldName)) ||
       allFields.find((field) => field.name === selectedFieldName) || // for example to pick a `nested` root field or find a selected field in text-based response
       ({
         name: selectedFieldName,

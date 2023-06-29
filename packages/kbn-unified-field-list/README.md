@@ -44,7 +44,6 @@ Include the building block into your application:
   getCreationOptions={getCreationOptions}
   services={services}
   dataView={dataView}
-  searchMode="documents"
   allFields={dataView.fields}
   workspaceSelectedFieldNames={selectedFieldNames}
   onAddFieldToWorkspace={onAddFieldToWorkspace}

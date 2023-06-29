@@ -27,8 +27,6 @@ import {
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { FetchStatus } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
-import { getRawRecordType } from '../../utils/get_raw_record_type';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { getUiActions } from '../../../../kibana_services';
 import {
   discoverSidebarReducer,
@@ -145,9 +143,6 @@ export interface DiscoverSidebarResponsiveProps {
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
-  const isPlainRecord = useAppStateSelector(
-    (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
-  );
   const {
     fieldListVariant,
     selectedDataView,
@@ -386,7 +381,6 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       variant={fieldListVariant}
       getCreationOptions={getCreationOptions}
       isSidebarCollapsed={props.isClosed}
-      searchMode={isPlainRecord ? 'textBased' : 'documents'}
       services={fieldListSidebarServices}
       dataView={selectedDataView}
       trackUiMetric={trackUiMetric}

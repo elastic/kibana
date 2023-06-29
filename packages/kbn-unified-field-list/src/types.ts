@@ -111,7 +111,7 @@ export type OverrideFieldGroupDetails = (
 
 export type TimeRangeUpdatesType = 'search-session' | 'timefilter';
 
-export type SearchMode = 'documents' | 'textBased';
+export type SearchMode = 'documents' | 'text-based';
 
 export interface UnifiedFieldListSidebarContainerCreationOptions {
   /**
