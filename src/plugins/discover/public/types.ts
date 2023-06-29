@@ -43,4 +43,5 @@ export interface DataTableRecord {
 export interface RecordsFetchResponse {
   records: DataTableRecord[];
   textBasedQueryColumns?: DatatableColumn[];
+  warning?: string;
 }
