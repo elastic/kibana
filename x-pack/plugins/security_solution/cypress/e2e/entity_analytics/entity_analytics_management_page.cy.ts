@@ -54,7 +54,7 @@ describe(
     });
 
     it('renders page as expected', () => {
-      cy.get(`${PAGE_TITLE}`).should('have.text', 'Entity Analytics');
+      cy.get(`${PAGE_TITLE}`).should('have.text', 'Entity Risk Score');
     });
 
     describe('Risk preview', () => {
