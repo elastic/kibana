@@ -6,7 +6,6 @@
  */
 
 import type { AgentPolicy, NewAgentPolicy, FullAgentPolicy } from '../models';
-import type { UninstallToken } from '../models/uninstall_token';
 
 import type { ListResult, ListWithKuery, BulkGetResult } from './common';
 
@@ -83,9 +82,4 @@ export interface GetFullAgentConfigMapResponse {
 
 export interface GetFullAgentManifestResponse {
   item: string;
-}
-
-export interface GetUninstallTokensByPolicyIdResponse {
-  items: UninstallToken[];
-  total: number;
 }

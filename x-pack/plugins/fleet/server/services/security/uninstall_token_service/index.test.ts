@@ -225,68 +225,6 @@ describe('UninstallTokenService', () => {
         });
       });
 
-      describe('getTokenHistoryForPolicy', () => {
-        it('can correctly get token history', async () => {
-          const so = getDefaultSO(canEncrypt);
-          mockCreatePointInTimeFinderAsInternalUser([so]);
-
-          const tokens = await uninstallTokenService.getTokenHistoryForPolicy(
-            so.attributes.policy_id
-          );
-
-          const expectedItems: UninstallToken[] = [
-            {
-              id: so.id,
-              policy_id: so.attributes.policy_id,
-              token: getToken(so, canEncrypt),
-              created_at: so.created_at,
-            },
-          ];
-          expect(tokens.items).toEqual(expectedItems);
-
-          expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith(
-            {
-              type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
-              filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id: "${so.attributes.policy_id}"`,
-              perPage: SO_SEARCH_LIMIT,
-              sortField: 'created_at',
-              sortOrder: 'desc',
-            }
-          );
-        });
-
-        it('should throw error if `created_at` is missing', async () => {
-          const so = getDefaultSO(canEncrypt);
-          so.created_at = '';
-          mockCreatePointInTimeFinderAsInternalUser([so]);
-
-          await expect(
-            uninstallTokenService.getTokenHistoryForPolicy(so.attributes.policy_id)
-          ).rejects.toThrowError('Uninstall Token is missing creation date.');
-        });
-
-        it('should throw error if `policy_id` is missing', async () => {
-          const so = getDefaultSO(canEncrypt);
-          so.attributes.policy_id = '';
-          mockCreatePointInTimeFinderAsInternalUser([so]);
-
-          await expect(
-            uninstallTokenService.getTokenHistoryForPolicy(so.attributes.policy_id)
-          ).rejects.toThrowError('Uninstall Token is missing policy ID.');
-        });
-
-        it('should throw error if `token` and `token_plain` are missing', async () => {
-          const so = getDefaultSO(canEncrypt);
-          so.attributes.token = '';
-          so.attributes.token_plain = '';
-          mockCreatePointInTimeFinderAsInternalUser([so]);
-
-          await expect(
-            uninstallTokenService.getTokenHistoryForPolicy(so.attributes.policy_id)
-          ).rejects.toThrowError('Uninstall Token is missing the token.');
-        });
-      });
-
       describe('getTokenMetadata', () => {
         it('can correctly get token metadata', async () => {
           const so = getDefaultSO(canEncrypt);

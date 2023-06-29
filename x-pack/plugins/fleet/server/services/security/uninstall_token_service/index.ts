@@ -30,7 +30,6 @@ import type { AggregationsTermsInclude } from '@elastic/elasticsearch/lib/api/ty
 import { UninstallTokenError } from '../../../../common/errors';
 
 import type { GetUninstallTokensMetadataResponse } from '../../../../common/types/rest_spec/uninstall_token';
-import type { GetUninstallTokensByPolicyIdResponse } from '../../../../common/types/rest_spec/agent_policy';
 
 import type {
   UninstallToken,
@@ -64,13 +63,6 @@ export interface UninstallTokenServiceInterface {
    * @returns uninstall token if found, null if not found
    */
   getToken(id: string): Promise<UninstallToken | null>;
-  /**
-   * Get all uninstall tokens for given policy id
-   *
-   * @param policyId agent policy id
-   * @returns uninstall tokens for policyID
-   */
-  getTokenHistoryForPolicy(policyId: string): Promise<GetUninstallTokensByPolicyIdResponse>;
 
   /**
    * Get uninstall token metadata, optionally filtering by partial policyID, paginated
@@ -155,21 +147,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     const uninstallTokens = await this.getDecryptedTokens({ filter });
 
     return uninstallTokens.length === 1 ? uninstallTokens[0] : null;
-  }
-
-  public async getTokenHistoryForPolicy(
-    policyId: string
-  ): Promise<GetUninstallTokensByPolicyIdResponse> {
-    const decryptedTokens = await this.getDecryptedTokens({
-      filter: `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.attributes.policy_id: "${policyId}"`,
-      sortField: 'created_at',
-      sortOrder: 'desc',
-    });
-
-    return {
-      items: decryptedTokens,
-      total: decryptedTokens.length,
-    };
   }
 
   public async getTokenMetadata(

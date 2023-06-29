@@ -184,9 +184,6 @@ export const agentPolicyRouteService = {
   getResetAllPreconfiguredAgentPolicyPath: () => {
     return PRECONFIGURATION_API_ROUTES.RESET_PATTERN;
   },
-
-  getUninstallTokensPath: (agentPolicyId: string) =>
-    AGENT_POLICY_API_ROUTES.UNINSTALL_TOKENS_PATTERN.replace('{agentPolicyId}', agentPolicyId),
 };
 
 export const dataStreamRouteService = {

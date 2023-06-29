@@ -33,7 +33,6 @@ import type {
   FleetRequestHandler,
   BulkGetAgentPoliciesRequestSchema,
   AgentPolicy,
-  GetUninstallTokensByPolicyIdRequestSchema,
 } from '../../types';
 
 import type {
@@ -458,34 +457,6 @@ export const downloadK8sManifest: FleetRequestHandler<
         body: { message: 'Agent manifest not found' },
       });
     }
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
-};
-
-export const getUninstallTokensByPolicyIdHandler: FleetRequestHandler<
-  TypeOf<typeof GetUninstallTokensByPolicyIdRequestSchema.params>
-> = async (context, request, response) => {
-  const uninstallTokenService = appContextService.getUninstallTokenService();
-  if (!uninstallTokenService) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: 'Uninstall Token Service is unavailable.' },
-    });
-  }
-
-  try {
-    const { agentPolicyId } = request.params;
-
-    const tokensForOnePolicy = await uninstallTokenService.getTokenHistoryForPolicy(agentPolicyId);
-
-    if (tokensForOnePolicy.total === 0) {
-      return response.notFound({
-        body: { message: `Uninstall Token not found for Agent Policy ${agentPolicyId}` },
-      });
-    }
-
-    return response.ok({ body: tokensForOnePolicy });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }
