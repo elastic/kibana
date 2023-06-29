@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildCoverageOverviewModel } from './build_coverage_overview_model';
+import { buildCoverageOverviewMitreGraph } from './build_coverage_overview_mitre_graph';
 
 describe('buildCoverageOverviewModel', () => {
   it('builds domain model', () => {
@@ -52,7 +52,7 @@ describe('buildCoverageOverviewModel', () => {
       },
     ];
 
-    const model = buildCoverageOverviewModel(tactics, techniques, subtechniques);
+    const model = buildCoverageOverviewMitreGraph(tactics, techniques, subtechniques);
 
     expect(model).toEqual([
       {

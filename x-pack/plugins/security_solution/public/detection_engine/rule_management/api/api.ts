@@ -16,6 +16,7 @@ import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
+import type { CoverageOverviewResponse } from '../../../../common/detection_engine/rule_management/api/rules/coverage_overview/response_schema';
 import { convertRulesFilterToKQL } from '../../../../common/utils/kql';
 import type { UpgradeSpecificRulesRequest } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_request_schema';
 import type { PerformRuleUpgradeResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_upgrade/perform_rule_upgrade_response_schema';
@@ -23,7 +24,10 @@ import type { InstallSpecificRulesRequest } from '../../../../common/detection_e
 import type { PerformRuleInstallationResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_response_schema';
 import type { GetPrebuiltRulesStatusResponseBody } from '../../../../common/detection_engine/prebuilt_rules/api/get_prebuilt_rules_status/response_schema';
 import type { RuleManagementFiltersResponse } from '../../../../common/detection_engine/rule_management/api/rules/filters/response_schema';
-import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../common/detection_engine/rule_management/api/urls';
+import {
+  RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
+  RULE_MANAGEMENT_FILTERS_URL,
+} from '../../../../common/detection_engine/rule_management/api/urls';
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -59,6 +63,7 @@ import * as i18n from '../../../detections/pages/detection_engine/rules/translat
 import type {
   CreateRulesProps,
   ExportDocumentsProps,
+  FetchCoverageOverviewProps,
   FetchRuleProps,
   FetchRuleSnoozingProps,
   FetchRulesProps,
@@ -239,6 +244,18 @@ export const fetchRulesSnoozeSettings = async ({
     return result;
   }, {} as RulesSnoozeSettingsMap);
 };
+
+export const fetchCoverageOverview = async ({
+  filter,
+  signal,
+}: FetchCoverageOverviewProps): Promise<CoverageOverviewResponse> =>
+  KibanaServices.get().http.fetch<CoverageOverviewResponse>(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      filter,
+    }),
+    signal,
+  });
 
 export const fetchConnectors = (
   signal?: AbortSignal
