@@ -293,6 +293,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const case1 = await cases.api.createCase({
           title: caseTitle,
           tags: ['one'],
+          category: 'foobar',
           description: 'lots of information about an incident',
         });
         const case2 = await cases.api.createCase({ title: 'test2', tags: ['two'] });
@@ -426,6 +427,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const row = await cases.casesTable.getCaseByIndex(0);
         const tags = await row.findByTestSubject('case-table-column-tags-one');
         expect(await tags.getVisibleText()).to.be('one');
+      });
+
+      it('filters cases by category', async () => {
+        await cases.casesTable.filterByCategory('foobar');
+        await cases.casesTable.refreshTable();
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        const row = await cases.casesTable.getCaseByIndex(0);
+        const category = await row.findByTestSubject('case-table-column-category-foobar');
+        expect(await category.getVisibleText()).to.be('foobar');
       });
 
       it('filters cases by status', async () => {
@@ -592,7 +602,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Severity', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/160622
+      describe.skip('Severity', () => {
         before(async () => {
           await cases.api.createNthRandomCases(1);
           await header.waitUntilLoadingHasFinished();

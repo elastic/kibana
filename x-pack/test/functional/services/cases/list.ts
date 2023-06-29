@@ -142,6 +142,15 @@ export function CasesTableServiceProvider(
       await testSubjects.click(`options-filter-popover-item-${tag}`);
     },
 
+    async filterByCategory(category: string) {
+      await common.clickAndValidate(
+        'options-filter-popover-button-Categories',
+        `options-filter-popover-item-${category}`
+      );
+
+      await testSubjects.click(`options-filter-popover-item-${category}`);
+    },
+
     async filterByStatus(status: CaseStatuses) {
       await common.clickAndValidate('case-status-filter', `case-status-filter-${status}`);
 
