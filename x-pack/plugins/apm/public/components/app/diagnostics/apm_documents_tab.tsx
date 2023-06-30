@@ -53,7 +53,7 @@ export function DiagnosticsApmDocuments() {
     {
       name: 'Name',
       field: 'name',
-      width: '40%',
+      width: '30%',
     },
     {
       name: 'Doc count',
@@ -183,7 +183,7 @@ function IntervalDocCount({
         <EuiText
           css={{ fontStyle: 'italic', fontSize: '80%', display: 'inline' }}
         >
-          ({asBigNumber(interval.eventDocCount)})
+          ({asBigNumber(interval.eventDocCount)} events)
         </EuiText>
       </div>
     </EuiToolTip>
