@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import type { ChromeBreadcrumb } from '@kbn/core/public';
-import type { RouteSpyState } from '../../common/utils/route/types';
+import type { GetTrailingBreadcrumbs } from '../../common/components/navigation/breadcrumbs/types';
 
-export const getTrailingBreadcrumbs = (params: RouteSpyState): ChromeBreadcrumb[] => {
+/**
+ * This module should only export this function.
+ * All the `getTrailingBreadcrumbs` functions in Security are loaded into the main bundle.
+ * We should be careful to not import unnecessary modules in this file to avoid increasing the main app bundle size.
+ */
+export const getTrailingBreadcrumbs: GetTrailingBreadcrumbs = (params, getSecuritySolutionUrl) => {
   const breadcrumbName = params?.state?.dashboardName;
   if (breadcrumbName) {
     return [{ text: breadcrumbName }];

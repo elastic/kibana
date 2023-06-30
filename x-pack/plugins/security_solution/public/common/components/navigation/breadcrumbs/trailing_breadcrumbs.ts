@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { ChromeBreadcrumb } from '@kbn/core/public';
-import type { RouteSpyState } from '../../../utils/route/types';
-import type { GetSecuritySolutionUrl } from '../../link_to';
 import { SecurityPageName } from '../../../../../common';
+import type { GetTrailingBreadcrumbs } from './types';
 
 import { getTrailingBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../explore/hosts/pages/details/breadcrumbs';
 import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../explore/network/pages/details/breadcrumbs';
@@ -20,10 +18,10 @@ import { getTrailingBreadcrumbs as getKubernetesBreadcrumbs } from '../../../../
 import { getTrailingBreadcrumbs as getAlertDetailBreadcrumbs } from '../../../../detections/pages/alert_details/utils/breadcrumbs';
 import { getTrailingBreadcrumbs as getDashboardBreadcrumbs } from '../../../../dashboards/pages/breadcrumbs';
 
-export const getTrailingBreadcrumbs = (
-  spyState: RouteSpyState,
-  getSecuritySolutionUrl: GetSecuritySolutionUrl
-): ChromeBreadcrumb[] => {
+export const getTrailingBreadcrumbs: GetTrailingBreadcrumbs = (
+  spyState,
+  getSecuritySolutionUrl
+) => {
   switch (spyState.pageName) {
     case SecurityPageName.hosts:
       return getHostDetailsBreadcrumbs(spyState, getSecuritySolutionUrl);
@@ -44,7 +42,7 @@ export const getTrailingBreadcrumbs = (
     case SecurityPageName.cloudSecurityPostureBenchmarks:
       return getCSPBreadcrumbs(spyState, getSecuritySolutionUrl);
     case SecurityPageName.dashboards:
-      return getDashboardBreadcrumbs(spyState);
+      return getDashboardBreadcrumbs(spyState, getSecuritySolutionUrl);
   }
   return [];
 };

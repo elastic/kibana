@@ -11,10 +11,9 @@ import {
   getRuleDetailsUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import * as i18nRules from './translations';
-import type { RouteSpyState } from '../../../../common/utils/route/types';
 import { SecurityPageName } from '../../../../app/types';
 import { RULES_PATH } from '../../../../../common/constants';
-import type { GetSecuritySolutionUrl } from '../../../../common/components/link_to';
+import type { GetTrailingBreadcrumbs } from '../../../../common/components/navigation/breadcrumbs/types';
 import {
   RuleDetailTabs,
   RULE_DETAILS_TAB_NAME,
@@ -31,10 +30,12 @@ const isRuleCreatePage = (pathname: string) =>
 const isRuleEditPage = (pathname: string) =>
   pathname.includes(RULES_PATH) && pathname.includes('/edit');
 
-export const getTrailingBreadcrumbs = (
-  params: RouteSpyState,
-  getSecuritySolutionUrl: GetSecuritySolutionUrl
-): ChromeBreadcrumb[] => {
+/**
+ * This module should only export this function.
+ * All the `getTrailingBreadcrumbs` functions in Security are loaded into the main bundle.
+ * We should be careful to not import unnecessary modules in this file to avoid increasing the main app bundle size.
+ */
+export const getTrailingBreadcrumbs: GetTrailingBreadcrumbs = (params, getSecuritySolutionUrl) => {
   let breadcrumb: ChromeBreadcrumb[] = [];
 
   if (params.detailName && params.state?.ruleName) {

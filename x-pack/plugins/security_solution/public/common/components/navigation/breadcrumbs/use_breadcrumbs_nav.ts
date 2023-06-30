@@ -49,7 +49,7 @@ export const useBreadcrumbsNav = () => {
 const getLeadingBreadcrumbs = (
   { pageName }: RouteSpyState,
   getSecuritySolutionUrl: GetSecuritySolutionUrl
-) => {
+): ChromeBreadcrumb[] => {
   const landingBreadcrumb: ChromeBreadcrumb = {
     text: APP_NAME,
     href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.landing }),
