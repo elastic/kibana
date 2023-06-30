@@ -7,22 +7,4 @@
 
 export * from './defaults';
 export * from './errors';
-export {
-  type MetricsExplorerChartOptions,
-  type MetricsExplorerOptions,
-  type MetricsExplorerOptionsMetric,
-  type MetricsExplorerTimeOptions,
-  type MetricsExplorerView,
-  type MetricsExplorerViewAttributes,
-  type MetricsExplorerViewState,
-  type SingleMetricsExplorerView,
-  MetricsExplorerYAxisMode,
-  MetricsExplorerChartType,
-  metricsExplorerViewBasicAttributesRT,
-  metricsExplorerOptionsRT,
-  metricsExplorerChartOptionsRT,
-  metricsExplorerTimeOptionsRT,
-  metricsExplorerViewAttributesRT,
-  metricsExplorerViewRT,
-  singleMetricsExplorerViewRT,
-} from './types';
+export * from './types';
