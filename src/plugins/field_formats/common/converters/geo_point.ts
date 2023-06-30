@@ -35,7 +35,7 @@ const TRANSFORM_OPTIONS = [
   {
     kind: 'dms',
     text: i18n.translate('fieldFormats.geoPoint.transformOptions.dms', {
-      defaultMessage: 'Degrees Minute Seconds',
+      defaultMessage: 'Degrees Minutes Seconds',
     }),
   },
   {
