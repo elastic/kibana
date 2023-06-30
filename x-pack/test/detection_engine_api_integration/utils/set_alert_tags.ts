@@ -6,7 +6,7 @@
  */
 
 import { AlertTagQuery } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { SetAlertTagsSchema } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags';
+import { SetAlertTagsRequestBody } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 export const setAlertTags = ({
   tagsToAdd,
@@ -16,7 +16,7 @@ export const setAlertTags = ({
   tagsToAdd: string[];
   tagsToRemove: string[];
   query?: AlertTagQuery;
-}): SetAlertTagsSchema => ({
+}): SetAlertTagsRequestBody => ({
   tags: {
     tags_to_add: tagsToAdd,
     tags_to_remove: tagsToRemove,
