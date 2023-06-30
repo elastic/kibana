@@ -11,7 +11,6 @@ export type FormatterFn = (fields: Partial<MonitorFields>, key: ConfigKey) => st
 
 export const arrayToJsonFormatter: FormatterFn = (fields, key) => {
   const value = (fields[key] as string[]) ?? [];
-  console.log(value);
   return value.length ? JSON.stringify(value) : null;
 };
 
