@@ -34,7 +34,12 @@ export const metricsExplorerTimestampsRT = t.type({
   interval: t.string,
 });
 
-export type { MetricsExplorerOptions, MetricsExplorerTimeOptions, MetricsExplorerChartOptions };
+export type {
+  MetricsExplorerOptions,
+  MetricsExplorerTimeOptions,
+  MetricsExplorerChartOptions,
+  MetricsExplorerOptionsMetric,
+};
 
 export {
   MetricsExplorerYAxisMode,

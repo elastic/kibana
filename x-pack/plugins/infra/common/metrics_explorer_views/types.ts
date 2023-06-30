@@ -13,6 +13,11 @@ import {
   metricsExplorerMetricRT,
 } from '../http_api/metrics_explorer';
 
+export const inventorySortOptionRT = rt.type({
+  by: rt.keyof({ name: null, value: null }),
+  direction: rt.keyof({ asc: null, desc: null }),
+});
+
 export enum MetricsExplorerChartType {
   line = 'line',
   area = 'area',

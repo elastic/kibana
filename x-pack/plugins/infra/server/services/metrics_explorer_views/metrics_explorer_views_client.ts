@@ -147,8 +147,8 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
     });
   }
 
-  private mapSavedObjectToMetricsExplorerView(
-    savedObject: SavedObject | SavedObjectsUpdateResponse,
+  private mapSavedObjectToMetricsExplorerView<T>(
+    savedObject: SavedObject<T> | SavedObjectsUpdateResponse<T>,
     defaultViewId?: string
   ) {
     const metricsExplorerViewSavedObject = decodeOrThrow(metricsExplorerViewSavedObjectRT)(

@@ -13,6 +13,7 @@ export {
   type MetricsExplorerOptionsMetric,
   type MetricsExplorerTimeOptions,
   type MetricsExplorerView,
+  type MetricsExplorerViewAttributes,
   type MetricsExplorerViewState,
   MetricsExplorerYAxisMode,
   MetricsExplorerChartType,
