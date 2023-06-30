@@ -12,6 +12,7 @@ import { Key, Origin, WebDriver } from 'selenium-webdriver';
 import { modifyUrl } from '@kbn/std';
 
 import sharp from 'sharp';
+import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
 import { Browsers } from '../remote/browsers';
@@ -632,8 +633,31 @@ class BrowserService extends FtrService {
     return Boolean(result?.state === 'granted');
   }
 
-  public getClipboardValue(): Promise<string> {
+  public async getClipboardValue(): Promise<string> {
     return this.driver.executeAsyncScript('navigator.clipboard.readText().then(arguments[0])');
+  }
+
+  /**
+   * Checks if browser session is active and any browser window exists
+   * @returns {Promise<boolean>}
+   */
+  public async hasOpenWindow(): Promise<boolean> {
+    if (this.driver == null) {
+      return Promise.resolve(false);
+    } else {
+      try {
+        const windowHandles = await this.driver.getAllWindowHandles();
+        return windowHandles.length > 0;
+      } catch (err) {
+        if (err instanceof NoSuchSessionError) {
+          // https://developer.mozilla.org/en-US/docs/Web/WebDriver/Errors/InvalidSessionID
+          this.log.error(
+            `WebDriver session is no longer valid.\nProbably Chrome process crashed when it tried to use more memory than what was available.`
+          );
+        }
+        return false;
+      }
+    }
   }
 }
 

@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { initWebDriver, BrowserConfig } from './webdriver';
+
 import { Browsers } from './browsers';
 
 export async function RemoteProvider({ getService }: FtrProviderContext) {
@@ -23,6 +25,18 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     } catch (error) {
       if (!error.message.includes(`Failed to read the '${storageType}' property from 'Window'`)) {
         throw error;
+      }
+    }
+  };
+
+  const tryWebDriverCall = async (command: () => Promise<void>) => {
+    // Since WebDriver session may be deleted, we fail silently. Use only in after hooks.
+    try {
+      await command();
+    } catch (err) {
+      if (err instanceof NoSuchSessionError) {
+        // https://developer.mozilla.org/en-US/docs/Web/WebDriver/Errors/InvalidSessionID
+        log.error('WebDriver session is no longer valid');
       }
     }
   };
@@ -72,14 +86,18 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   });
 
   lifecycle.afterTestSuite.add(async () => {
-    const { width, height } = windowSizeStack.shift()!;
-    await driver.manage().window().setRect({ width, height });
-    await clearBrowserStorage('sessionStorage');
-    await clearBrowserStorage('localStorage');
+    await tryWebDriverCall(async () => {
+      const { width, height } = windowSizeStack.shift()!;
+      await driver.manage().window().setRect({ width, height });
+      await clearBrowserStorage('sessionStorage');
+      await clearBrowserStorage('localStorage');
+    });
   });
 
   lifecycle.cleanup.add(async () => {
-    await driver.quit();
+    await tryWebDriverCall(async () => {
+      await driver.quit();
+    });
   });
 
   return { driver, browserType, consoleLog$ };
