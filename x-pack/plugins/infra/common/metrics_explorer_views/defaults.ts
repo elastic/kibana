@@ -7,7 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import type { NonEmptyString } from '@kbn/io-ts-utils';
-import type { MetricsExplorerViewAttributes } from './types';
+import { Color } from '../color_palette';
+import {
+  MetricsExplorerChartType,
+  MetricsExplorerViewAttributes,
+  MetricsExplorerYAxisMode,
+} from './types';
 
 export const staticMetricsExplorerViewId = '0';
 
@@ -23,24 +28,24 @@ export const staticMetricsExplorerViewAttributes: MetricsExplorerViewAttributes 
       {
         aggregation: 'avg',
         field: 'system.cpu.total.norm.pct',
-        color: 'color0',
+        color: Color.color0,
       },
       {
         aggregation: 'avg',
         field: 'kubernetes.pod.cpu.usage.node.pct',
-        color: 'color1',
+        color: Color.color1,
       },
       {
         aggregation: 'avg',
         field: 'docker.cpu.total.pct',
-        color: 'color2',
+        color: Color.color2,
       },
     ],
     source: 'default',
   },
   chartOptions: {
-    type: 'line',
-    yAxisMode: 'fromZero',
+    type: MetricsExplorerChartType.line,
+    yAxisMode: MetricsExplorerYAxisMode.fromZero,
     stack: false,
   },
   currentTimerange: {
