@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { KPIChartProps, Tile } from './tile';
 import { TOOLTIP } from '../../translations';
-// import { HostMetricsDocsLink } from '../metric_explanation/host_metrics_docs_link';
 
 const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
   {
@@ -57,13 +56,12 @@ const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
 export const KPIGrid = ({ nodeName }: { nodeName: string }) => {
   return (
     <>
-      {/* <HostMetricsDocsLink /> */}
       <EuiSpacer size="s" />
       <EuiFlexGroup
         direction="row"
         gutterSize="s"
         style={{ flexGrow: 0 }}
-        data-test-subj="hostsViewKPIGrid"
+        data-test-subj="assetDetailsKPIGrid"
       >
         {KPI_CHARTS.map(({ ...chartProp }) => (
           <EuiFlexItem key={chartProp.type}>

@@ -17,6 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { useMetricsDataViewContext } from '../../../../pages/metrics/hosts/hooks/use_data_view';
 import { useLensAttributes } from '../../../../hooks/use_lens_attributes';
 import { useUnifiedSearchContext } from '../../../../pages/metrics/hosts/hooks/use_unified_search';
@@ -78,10 +79,14 @@ export const Tile = ({
     ];
   }, [dataView, nodeName]);
 
-  const extraActionOptions = getExtraActions({
-    timeRange: searchCriteria.dateRange,
-    filters,
-  });
+  const extraActions: Action[] = useMemo(
+    () =>
+      getExtraActions({
+        timeRange: searchCriteria.dateRange,
+        filters,
+      }),
+    [filters, getExtraActions, searchCriteria.dateRange]
+  );
 
   const loading = !attributes;
 
@@ -90,7 +95,7 @@ export const Tile = ({
       hasShadow={false}
       paddingSize={error ? 'm' : 'none'}
       style={{ minHeight: MIN_HEIGHT }}
-      data-test-subj={`hostsViewKPI-${type}`}
+      data-test-subj={`assetDetailsKPI-${type}`}
     >
       {error ? (
         <EuiFlexGroup
@@ -119,10 +124,10 @@ export const Tile = ({
           anchorClassName="eui-fullWidth"
         >
           <LensWrapper
-            id={`hostsViewKPIGrid${type}Tile`}
+            id={`assetDetailsKPIGrid${type}Tile`}
             attributes={attributes}
             style={{ height: MIN_HEIGHT }}
-            extraActions={[extraActionOptions.openInLens]}
+            extraActions={extraActions}
             dateRange={searchCriteria.dateRange}
             filters={filters}
             loading={loading}

@@ -247,7 +247,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     // FLAKY: https://github.com/elastic/kibana/issues/159368
     // FLAKY: https://github.com/elastic/kibana/issues/159369
-    describe.skip('#Single host Flyout', () => {
+    describe('#Single host Flyout', () => {
       before(async () => {
         await setHostViewEnabled(true);
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
@@ -268,11 +268,40 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
+      describe('Overview Tab', () => {
+        it('should render 4 metrics trend tiles', async () => {
+          const hosts = await pageObjects.infraHostsView.getAllKPITiles();
+          expect(hosts.length).to.equal(5);
+        });
+
+        [
+          { metric: 'cpuUsage', value: '13.9%' },
+          { metric: 'normalizedLoad1m', value: '18.8%' },
+          { metric: 'memoryUsage', value: '94.9%' },
+          { metric: 'diskSpaceUsage', value: 'N/A' },
+        ].forEach(({ metric, value }) => {
+          it(`${metric} tile should show ${value}`, async () => {
+            await retry.try(async () => {
+              const tileValue = await pageObjects.infraHostsView.getAssetDetailsKPITileValue(
+                metric
+              );
+              expect(tileValue).to.eql(value);
+            });
+          });
+        });
+        it('should navigate to metadata tab', async () => {
+          await pageObjects.infraHostsView.clickShowAllMetadataOverviewTab();
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.infraHostsView.metadataTableExist();
+        });
+      });
+
       describe('Metadata Tab', () => {
         it('should render metadata tab, add and remove filter', async () => {
           await pageObjects.infraHostsView.clickMetadataFlyoutTab();
           const metadataTab = await pageObjects.infraHostsView.getMetadataTabName();
           expect(metadataTab).to.contain('Metadata');
+          await pageObjects.infraHostsView.metadataTableExist();
 
           await pageObjects.infraHostsView.clickAddMetadataFilter();
           await pageObjects.header.waitUntilLoadingHasFinished();
