@@ -137,9 +137,6 @@ export function buildGeoShapeFilter({
     };
   }
 
-  // Currently no way to create an object with exclude property from index signature
-  // typescript error for "ignore_unmapped is not assignable to type 'estypes.QueryDslGeoShapeFieldQuery'" expected"
-  // @ts-expect-error
   return createMultiGeoFieldFilter(geoFieldNames, meta, createGeoFilter);
 }
 
@@ -220,8 +217,8 @@ function extractGeometryFromFilter(geoFieldName: string, filter: GeoFilter): Geo
     return circleFeature.geometry;
   }
 
-  if (filter.geo_shape && filter.geo_shape[geoFieldName] && filter.geo_shape[geoFieldName].shape) {
-    return filter.geo_shape[geoFieldName].shape;
+  if (filter.geo_shape && filter.geo_shape[geoFieldName] && (filter.geo_shape[geoFieldName] as estypes.QueryDslGeoShapeFieldQuery).shape) {
+    return (filter.geo_shape[geoFieldName] as estypes.QueryDslGeoShapeFieldQuery).shape;
   }
 }
 
