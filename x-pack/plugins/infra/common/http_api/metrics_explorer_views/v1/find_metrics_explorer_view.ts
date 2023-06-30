@@ -6,20 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import {
-  metricsExplorerViewBasicAttributesRT,
-  singleMetricsExplorerViewRT,
-} from '../../../metrics_explorer_views';
-
-export const findMetricsExplorerViewAttributesResponseRT = rt.exact(
-  rt.intersection([
-    metricsExplorerViewBasicAttributesRT,
-    rt.partial({
-      isDefault: rt.boolean,
-      isStatic: rt.boolean,
-    }),
-  ])
-);
+import { singleMetricsExplorerViewRT } from '../../../metrics_explorer_views';
 
 export const findMetricsExplorerViewResponsePayloadRT = rt.type({
   data: rt.array(singleMetricsExplorerViewRT),

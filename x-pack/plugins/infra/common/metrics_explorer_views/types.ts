@@ -97,10 +97,9 @@ export const metricsExplorerViewAttributesRT = rt.intersection([
   metricsExplorerViewFlagsRT,
 ]);
 
-const singleMetricsExplorerViewAttributesRT = rt.intersection([
-  metricsExplorerViewBasicAttributesRT,
-  metricsExplorerViewFlagsRT,
-]);
+const singleMetricsExplorerViewAttributesRT = rt.exact(
+  rt.intersection([metricsExplorerViewBasicAttributesRT, metricsExplorerViewFlagsRT])
+);
 
 export const metricsExplorerViewRT = rt.exact(
   rt.intersection([
