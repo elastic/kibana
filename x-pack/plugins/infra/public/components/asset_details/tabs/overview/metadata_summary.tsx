@@ -32,7 +32,7 @@ const columnTitles = {
   hostOsVersion: i18n.translate(
     'xpack.infra.assetDetailsEmbeddable.overview.metadataHostOsVersionHeading',
     {
-      defaultMessage: 'Host Os version',
+      defaultMessage: 'Host os version',
     }
   ),
 };

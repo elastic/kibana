@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { KPIChartProps, Tile } from './tile';
-import { TOOLTIP } from '../../translations';
+import { TOOLTIP } from './translations';
 
 const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
   {
