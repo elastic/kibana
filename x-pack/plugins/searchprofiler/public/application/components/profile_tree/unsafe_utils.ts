@@ -151,11 +151,9 @@ export function normalizeIndices(indices: IndexMap, target: Targets) {
 }
 
 export function normalizeTime(operation: Operation, totalTime: number) {
-  const timeRatio = (timeInMilliseconds(operation) / totalTime);
+  const timeRatio = timeInMilliseconds(operation) / totalTime;
   operation.timePercentage = (timeRatio * 100).toFixed(2);
-  operation.absoluteColor = chroma
-    .mix('#F5F5F5', '#FFAFAF', timeRatio)
-    .hex();
+  operation.absoluteColor = chroma.mix('#F5F5F5', '#FFAFAF', timeRatio).hex();
 }
 
 export function initTree<T>(
