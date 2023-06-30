@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../config.base';
-
-export default createTestConfig({
-  serverlessProject: undefined,
-  testFiles: [require.resolve('.')],
-  junit: {
-    reportName: 'Serverless Common Functional Tests',
-  },
-});
+export const API_KEY_PLACEHOLDER = 'your_api_key';
+export const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';
+export const INDEX_NAME_PLACEHOLDER = 'index_name';
