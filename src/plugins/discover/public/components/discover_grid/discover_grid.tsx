@@ -459,7 +459,6 @@ export const DiscoverGrid = ({
         ? visibleColumns.map((columnName) => {
             const field = dataView.getFieldByName(columnName);
             if (!field) {
-              // disable custom actions on object columns
               return {
                 name: '',
                 type: '',

@@ -10,7 +10,6 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isBoolean, isNumber, isString } from 'lodash/fp';
 import { Serializable, SerializableArray } from '@kbn/utility-types/src/serializable';
 import { DefaultActionsSupportedValue, NonNullableSerializable } from './types';
-import { CellActionFieldValue } from '../types';
 
 export const SUPPORTED_KBN_TYPES = [
   KBN_FIELD_TYPES.DATE,
@@ -23,10 +22,6 @@ export const SUPPORTED_KBN_TYPES = [
 export const isTypeSupportedByDefaultActions = (kbnFieldType: KBN_FIELD_TYPES) =>
   SUPPORTED_KBN_TYPES.includes(kbnFieldType);
 
-const isNonNullablePrimitiveValue = (
-  value: CellActionFieldValue
-): value is string | number | boolean => isString(value) || isNumber(value) || isBoolean(value);
-
 const isNonMixedTypeArray = (
   value: Array<string | number | boolean>
 ): value is string[] | number[] | boolean[] => value.every((v) => typeof v === typeof value[0]);
@@ -34,7 +29,8 @@ const isNonMixedTypeArray = (
 export const isValueSupportedByDefaultActions = (
   value: NonNullableSerializable[]
 ): value is DefaultActionsSupportedValue =>
-  value.every(isNonNullablePrimitiveValue) && isNonMixedTypeArray(value);
+  value.every((v): v is string | number | boolean => isString(v) || isNumber(v) || isBoolean(v)) &&
+  isNonMixedTypeArray(value);
 
 export const filterOutNullableValues = (value: SerializableArray): NonNullableSerializable[] =>
   value.filter<NonNullableSerializable>((v): v is NonNullableSerializable => v != null);
