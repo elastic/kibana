@@ -9,7 +9,9 @@ import { useReducer } from 'react';
 
 const CLOSED = 'closed' as const;
 const OPEN = 'open' as const;
-const toggleReducer = (state: unknown) => {
+
+type ToggleReducerState = typeof CLOSED | typeof OPEN;
+const toggleReducer = (state: ToggleReducerState) => {
   return state === CLOSED ? OPEN : CLOSED;
 };
 
