@@ -23,16 +23,21 @@ const renderWithProviders = (ui: any) => {
 jest.mock('../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-describe('Update Api Key', () => {
-  const onCancel = jest.fn();
-  const apiUpdateApiKeyCall = jest.fn();
-  const setIsLoadingState = jest.fn();
-  const onUpdated = jest.fn();
-  const onSearchPopulate = jest.fn();
-
+describe('Autocomplete component tests', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
 
+  const defaultMessageVariables = [
+    {
+      description: 'The action group of the alert that scheduled actions for the rule.',
+      name: 'alert.actionGroup',
+    },
+    { description: 'The ID of the alert that scheduled actions for the rule.', name: 'alert.id' },
+    {
+      description: 'List of tags associated with the entity where this alert triggered.',
+      name: 'context.tags',
+    },
+  ];
   beforeAll(() => {
     useKibanaMock().services.notifications.toasts = {
       addSuccess,
@@ -47,19 +52,16 @@ describe('Update Api Key', () => {
   it('Render modal text area with autocomplete', async () => {
     renderWithProviders(
       <TextAreaWithAutocomplete
-        messageVariables={}
-        paramsProperty={}
+        messageVariables={defaultMessageVariables}
+        paramsProperty="message"
         index={0}
-        inputTargetValue={}
         isDisabled={false}
-        editAction={}
-        label={}
+        editAction={() => {}}
+        label="Message"
         errors={[]}
       />
     );
 
-    expect(
-      await screen.findByText('You will not be able to recover the old API key')
-    ).toBeInTheDocument();
+    expect(await screen.findByText('')).toBeInTheDocument();
   });
 });
