@@ -28,11 +28,13 @@ export const limitedStringSchema = (fieldName: string, min: number, max: number)
     rt.string.is,
     (input, context) =>
       either.chain(rt.string.validate(input, context), (s) => {
-        if (s.trim().length === 0 && s.trim().length < min) {
+        const trimmedString = s.trim();
+
+        if (trimmedString.length === 0 && trimmedString.length < min) {
           return rt.failure(input, context, `The ${fieldName} field cannot be an empty string.`);
         }
 
-        if (s.trim().length < min) {
+        if (trimmedString.length < min) {
           return rt.failure(
             input,
             context,
@@ -40,7 +42,7 @@ export const limitedStringSchema = (fieldName: string, min: number, max: number)
           );
         }
 
-        if (s.trim().length > max) {
+        if (trimmedString.length > max) {
           return rt.failure(
             input,
             context,
