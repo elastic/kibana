@@ -35,9 +35,8 @@ import {
 } from '../../../../common/constants';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { buildGeoGridFilter } from '../../../../common/elasticsearch_util';
-import { AbstractESAggSource } from '../es_agg_source';
+import { AbstractESAggSource, ESAggsSourceSyncMeta } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
-import { registerSource } from '../source_registry';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
@@ -57,11 +56,10 @@ import { isMvt } from './is_mvt';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { getIconSize } from './get_icon_size';
 
-interface ESGeoGridSourceSyncMeta {
-  geogridPrecision: number;
-  requestType: RENDER_AS;
-  resolution: GRID_RESOLUTION;
-}
+type ESGeoGridSourceSyncMeta = ESAggsSourceSyncMeta &
+  Pick<ESGeoGridSourceDescriptor, 'requestType' | 'resolution'> & {
+    geogridPrecision: number;
+  };
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -161,6 +159,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 
   getSyncMeta(dataFilters: DataFilters): ESGeoGridSourceSyncMeta {
     return {
+      ...super.getSyncMeta(dataFilters),
       geogridPrecision: this.getGeoGridPrecision(dataFilters.zoom),
       requestType: this._descriptor.requestType,
       resolution: this._descriptor.resolution,
@@ -188,10 +187,6 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
 
   isMvt(): boolean {
     return isMvt(this._descriptor.requestType, this._descriptor.resolution);
-  }
-
-  getFieldNames() {
-    return this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName());
   }
 
   isGeoGridPrecisionAware(): boolean {
@@ -653,8 +648,3 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     ];
   }
 }
-
-registerSource({
-  ConstructorFunction: ESGeoGridSource,
-  type: SOURCE_TYPES.ES_GEO_GRID,
-});

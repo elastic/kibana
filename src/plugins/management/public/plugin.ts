@@ -22,7 +22,7 @@ import {
   AppNavLinkStatus,
   AppDeepLink,
 } from '@kbn/core/public';
-import { ManagementSetup, ManagementStart } from './types';
+import { ManagementSetup, ManagementStart, NavigationCardsSubject } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
 import { ManagementAppLocatorDefinition } from '../common/locator';
@@ -72,10 +72,17 @@ export class ManagementPlugin
   private hasAnyEnabledApps = true;
 
   private isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
+  private cardsNavigationConfig$ = new BehaviorSubject<NavigationCardsSubject>({
+    enabled: false,
+    hideLinksTo: [],
+  });
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { home, share }: ManagementSetupDependencies) {
+  public setup(
+    core: CoreSetup<ManagementStartDependencies>,
+    { home, share }: ManagementSetupDependencies
+  ) {
     const kibanaVersion = this.initializerContext.env.packageInfo.version;
     const locator = share.url.locators.create(new ManagementAppLocatorDefinition());
     const managementPlugin = this;
@@ -113,8 +120,10 @@ export class ManagementPlugin
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),
           kibanaVersion,
+          coreStart,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
+          cardsNavigationConfig$: managementPlugin.cardsNavigationConfig$,
         });
       },
     });
@@ -143,6 +152,8 @@ export class ManagementPlugin
     return {
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),
+      setupCardsNavigation: ({ enabled, hideLinksTo }) =>
+        this.cardsNavigationConfig$.next({ enabled, hideLinksTo }),
     };
   }
 }

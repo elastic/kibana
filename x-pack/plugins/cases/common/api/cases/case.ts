@@ -85,6 +85,10 @@ const CaseBasicRt = rt.strict({
    * The users assigned to this case
    */
   assignees: CaseAssigneesRt,
+  /**
+   * The category of the case.
+   */
+  category: rt.union([rt.string, rt.null]),
 });
 
 /**
@@ -162,6 +166,10 @@ export const CasePostRequestRt = rt.intersection([
        * default it to "low" if not provided.
        */
       severity: CaseSeverityRt,
+      /**
+       * The category of the case.
+       */
+      category: rt.union([rt.string, rt.null]),
     })
   ),
 ]);
@@ -250,7 +258,6 @@ export const CasesFindRequestRt = rt.exact(
     /**
      * The field to use for sorting the found objects.
      *
-     * This only supports, `create_at`, `closed_at`, and `status`
      */
     sortField: rt.string,
     /**
@@ -269,6 +276,10 @@ export const CasesFindRequestRt = rt.exact(
      */
 
     owner: rt.union([rt.array(rt.string), rt.string]),
+    /**
+     * The category of the case.
+     */
+    category: rt.union([rt.array(rt.string), rt.string]),
   })
 );
 
@@ -371,9 +382,20 @@ export const AllTagsFindRequestRt = rt.exact(
   })
 );
 
+export const AllCategoriesFindRequestRt = rt.exact(
+  rt.partial({
+    /**
+     * The owner of the cases to retrieve the categories from. If no owner is provided the categories
+     * from all cases that the user has access to will be returned.
+     */
+    owner: rt.union([rt.array(rt.string), rt.string]),
+  })
+);
+
 export const AllReportersFindRequestRt = AllTagsFindRequestRt;
 
 export const GetTagsResponseRt = rt.array(rt.string);
+export const GetCategoriesResponseRt = rt.array(rt.string);
 export const GetReportersResponseRt = rt.array(UserRt);
 
 export const CasesBulkGetRequestRt = rt.strict({
@@ -409,6 +431,7 @@ export type ExternalServiceResponse = rt.TypeOf<typeof ExternalServiceResponseRt
 export type CaseExternalServiceBasic = rt.TypeOf<typeof CaseExternalServiceBasicRt>;
 
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
+export type AllCategoriesFindRequest = rt.TypeOf<typeof AllCategoriesFindRequestRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;
 
 export type AttachmentTotals = rt.TypeOf<typeof AttachmentTotalsRt>;

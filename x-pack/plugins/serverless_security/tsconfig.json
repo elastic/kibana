@@ -29,5 +29,6 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/features-plugin",
     "@kbn/ess-security",
+    "@kbn/kibana-utils-plugin",
   ]
 }

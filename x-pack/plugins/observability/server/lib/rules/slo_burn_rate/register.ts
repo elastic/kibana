@@ -20,7 +20,7 @@ import {
   HIGH_PRIORITY_ACTION,
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
-  SLO_BURN_RATE_RULE_ID,
+  SLO_BURN_RATE_RULE_TYPE_ID,
 } from '../../../../common/constants';
 
 import { getRuleExecutor } from './executor';
@@ -48,7 +48,7 @@ export function sloBurnRateRuleType(
   alertsLocator?: LocatorPublic<AlertsLocatorParams>
 ) {
   return {
-    id: SLO_BURN_RATE_RULE_ID,
+    id: SLO_BURN_RATE_RULE_TYPE_ID,
     name: i18n.translate('xpack.observability.slo.rules.burnRate.name', {
       defaultMessage: 'SLO burn rate',
     }),

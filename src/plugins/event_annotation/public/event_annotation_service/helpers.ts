@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
 import {
   EventAnnotationConfig,
@@ -16,13 +15,6 @@ import {
 export const defaultAnnotationColor = euiLightVars.euiColorAccent;
 // Do not compute it live as dependencies will add tens of Kbs to the plugin
 export const defaultAnnotationRangeColor = `#F04E981A`; // defaultAnnotationColor with opacity 0.1
-
-export const defaultAnnotationLabel = i18n.translate(
-  'eventAnnotation.manualAnnotation.defaultAnnotationLabel',
-  {
-    defaultMessage: 'Event',
-  }
-);
 
 export const isRangeAnnotationConfig = (
   annotation?: EventAnnotationConfig

@@ -6,7 +6,6 @@
  */
 
 export * from './case';
-export * from './configure';
 export * from './comment';
 export * from './status';
 export * from './user_actions';

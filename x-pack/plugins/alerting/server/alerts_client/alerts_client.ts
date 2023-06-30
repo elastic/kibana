@@ -11,6 +11,7 @@ import { chunk, flatMap, isEmpty, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { DeepPartial } from '@kbn/utility-types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -30,6 +31,8 @@ import {
   ProcessAndLogAlertsOpts,
   TrackedAlerts,
   ReportedAlert,
+  ReportedAlertData,
+  UpdateableAlert,
 } from './types';
 import {
   buildNewAlert,
@@ -44,6 +47,7 @@ const CHUNK_SIZE = 10000;
 
 export interface AlertsClientParams extends CreateAlertsClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
+  kibanaVersion: string;
 }
 
 export class AlertsClient<
@@ -74,7 +78,7 @@ export class AlertsClient<
 
   private indexTemplateAndPattern: IIndexPatternString;
 
-  private reportedAlerts: Record<string, AlertData> = {};
+  private reportedAlerts: Record<string, DeepPartial<AlertData>> = {};
 
   constructor(private readonly options: AlertsClientParams) {
     this.legacyAlertsClient = new LegacyAlertsClient<
@@ -169,14 +173,14 @@ export class AlertsClient<
     return hits;
   }
 
-  public create(
+  public report(
     alert: ReportedAlert<
       AlertData,
       LegacyState,
       LegacyContext,
       WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
     >
-  ) {
+  ): ReportedAlertData {
     const context = alert.context ? alert.context : ({} as LegacyContext);
     const state = !isEmpty(alert.state) ? alert.state : null;
 
@@ -190,7 +194,36 @@ export class AlertsClient<
       legacyAlert.replaceState(state);
     }
 
-    // Save the reported alert data
+    // Save the alert payload
+    if (alert.payload) {
+      this.reportedAlerts[alert.id] = alert.payload;
+    }
+
+    return {
+      uuid: legacyAlert.getUuid(),
+      start: legacyAlert.getStart(),
+    };
+  }
+
+  public setAlertData(
+    alert: UpdateableAlert<AlertData, LegacyState, LegacyContext, ActionGroupIds>
+  ) {
+    const context = alert.context ? alert.context : ({} as LegacyContext);
+
+    // Allow setting context and payload on known alerts only
+    // Alerts are known if they have been reported in this execution or are recovered
+    const alertToUpdate = this.legacyAlertsClient.getAlert(alert.id);
+
+    if (!alertToUpdate) {
+      throw new Error(
+        `Cannot set alert data for alert ${alert.id} because it has not been reported and it is not recovered.`
+      );
+    }
+
+    // Set the alert context
+    alertToUpdate.setContext(context);
+
+    // Save the alert payload
     if (alert.payload) {
       this.reportedAlerts[alert.id] = alert.payload;
     }
@@ -248,6 +281,7 @@ export class AlertsClient<
             rule: this.rule,
             timestamp: currentTime,
             payload: this.reportedAlerts[id],
+            kibanaVersion: this.options.kibanaVersion,
           })
         );
       } else {
@@ -263,6 +297,7 @@ export class AlertsClient<
             rule: this.rule,
             timestamp: currentTime,
             payload: this.reportedAlerts[id],
+            kibanaVersion: this.options.kibanaVersion,
           })
         );
       }
@@ -286,7 +321,9 @@ export class AlertsClient<
                 legacyAlert: recoveredAlerts[id],
                 rule: this.rule,
                 timestamp: currentTime,
+                payload: this.reportedAlerts[id],
                 recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
+                kibanaVersion: this.options.kibanaVersion,
               })
             : buildUpdatedRecoveredAlert<AlertData>({
                 alert: this.fetchedAlerts.data[id],
@@ -367,20 +404,27 @@ export class AlertsClient<
 
   public client() {
     return {
-      create: (
+      report: (
         alert: ReportedAlert<
           AlertData,
           LegacyState,
           LegacyContext,
           WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
         >
-      ) => this.create(alert),
+      ) => this.report(alert),
+      setAlertData: (
+        alert: UpdateableAlert<AlertData, LegacyState, LegacyContext, RecoveryActionGroupId>
+      ) => this.setAlertData(alert),
       getAlertLimitValue: (): number => this.factory().alertLimit.getValue(),
       setAlertLimitReached: (reached: boolean) =>
         this.factory().alertLimit.setLimitReached(reached),
       getRecoveredAlerts: () => {
         const { getRecoveredAlerts } = this.factory().done();
-        return getRecoveredAlerts();
+        const recoveredLegacyAlerts = getRecoveredAlerts() ?? [];
+        return recoveredLegacyAlerts.map((alert) => ({
+          alert,
+          hit: this.fetchedAlerts.data[alert.getId()],
+        }));
       },
     };
   }

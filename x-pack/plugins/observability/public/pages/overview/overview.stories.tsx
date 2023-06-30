@@ -85,8 +85,10 @@ const withCore = makeDecorator({
           metrics: { enabled: false },
           uptime: { enabled: false },
         },
+        thresholdRule: { enabled: false },
       },
-      coPilot: {
+      compositeSlo: { enabled: false },
+      aiAssistant: {
         enabled: false,
       },
     };

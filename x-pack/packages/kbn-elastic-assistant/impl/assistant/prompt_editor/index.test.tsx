@@ -9,22 +9,34 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 
 import { mockAlertPromptContext, mockEventPromptContext } from '../../mock/prompt_context';
-import { mockSystemPrompt } from '../../mock/system_prompt';
 import { TestProviders } from '../../mock/test_providers/test_providers';
+import { SelectedPromptContext } from '../prompt_context/types';
 import { PromptEditor, Props } from '.';
 
+const mockSelectedAlertPromptContext: SelectedPromptContext = {
+  allow: [],
+  allowReplacement: [],
+  promptContextId: mockAlertPromptContext.id,
+  rawData: 'alert data',
+};
+
+const mockSelectedEventPromptContext: SelectedPromptContext = {
+  allow: [],
+  allowReplacement: [],
+  promptContextId: mockEventPromptContext.id,
+  rawData: 'event data',
+};
+
 const defaultProps: Props = {
+  conversation: undefined,
   isNewConversation: true,
   promptContexts: {
     [mockAlertPromptContext.id]: mockAlertPromptContext,
     [mockEventPromptContext.id]: mockEventPromptContext,
   },
   promptTextPreview: 'Preview text',
-  selectedPromptContextIds: [],
-  selectedSystemPromptId: null,
-  setSelectedPromptContextIds: jest.fn(),
-  setSelectedSystemPromptId: jest.fn(),
-  systemPrompts: [mockSystemPrompt],
+  selectedPromptContexts: {},
+  setSelectedPromptContexts: jest.fn(),
 };
 
 describe('PromptEditorComponent', () => {
@@ -55,16 +67,19 @@ describe('PromptEditorComponent', () => {
   });
 
   it('renders the selected prompt contexts', async () => {
-    const selectedPromptContextIds = [mockAlertPromptContext.id, mockEventPromptContext.id];
+    const selectedPromptContexts = {
+      [mockAlertPromptContext.id]: mockSelectedAlertPromptContext,
+      [mockEventPromptContext.id]: mockSelectedEventPromptContext,
+    };
 
     render(
       <TestProviders>
-        <PromptEditor {...defaultProps} selectedPromptContextIds={selectedPromptContextIds} />
+        <PromptEditor {...defaultProps} selectedPromptContexts={selectedPromptContexts} />
       </TestProviders>
     );
 
     await waitFor(() => {
-      selectedPromptContextIds.forEach((id) =>
+      Object.keys(selectedPromptContexts).forEach((id) =>
         expect(screen.queryByTestId(`selectedPromptContext-${id}`)).toBeInTheDocument()
       );
     });

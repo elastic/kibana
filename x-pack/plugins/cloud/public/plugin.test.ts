@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { decodeCloudIdMock, parseDeploymentIdFromDeploymentUrlMock } from './plugin.test.mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { CloudPlugin } from './plugin';
+import type { DecodedCloudId } from '../common/decode_cloud_id';
 
 const baseConfig = {
   base_url: 'https://cloud.elastic.co',
@@ -16,6 +18,11 @@ const baseConfig = {
 };
 
 describe('Cloud Plugin', () => {
+  beforeEach(() => {
+    parseDeploymentIdFromDeploymentUrlMock.mockReset().mockReturnValue('deployment-id');
+    decodeCloudIdMock.mockReset().mockReturnValue({});
+  });
+
   describe('#setup', () => {
     describe('interface', () => {
       const setupPlugin = () => {
@@ -75,6 +82,37 @@ describe('Cloud Plugin', () => {
       it('exposes registerCloudService', () => {
         const { setup } = setupPlugin();
         expect(setup.registerCloudService).toBeDefined();
+      });
+
+      it('exposes deploymentId', () => {
+        parseDeploymentIdFromDeploymentUrlMock.mockReturnValue('some-deployment-id');
+        const { setup } = setupPlugin();
+        expect(setup.deploymentId).toBe('some-deployment-id');
+        expect(parseDeploymentIdFromDeploymentUrlMock).toHaveBeenCalledTimes(2); // called when registering the analytic context too
+        expect(parseDeploymentIdFromDeploymentUrlMock).toHaveBeenCalledWith(
+          baseConfig.deployment_url
+        );
+      });
+
+      it('exposes components decoded from the cloudId', () => {
+        const decodedId: DecodedCloudId = {
+          defaultPort: '9000',
+          host: 'host',
+          elasticsearchUrl: 'elasticsearch-url',
+          kibanaUrl: 'kibana-url',
+        };
+        decodeCloudIdMock.mockReturnValue(decodedId);
+        const { setup } = setupPlugin();
+        expect(setup).toEqual(
+          expect.objectContaining({
+            cloudDefaultPort: '9000',
+            cloudHost: 'host',
+            elasticsearchUrl: 'elasticsearch-url',
+            kibanaUrl: 'kibana-url',
+          })
+        );
+        expect(decodeCloudIdMock).toHaveBeenCalledTimes(1);
+        expect(decodeCloudIdMock).toHaveBeenCalledWith('cloudId', expect.any(Object));
       });
     });
   });

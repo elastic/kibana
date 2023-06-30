@@ -11,7 +11,7 @@ import React, { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { EuiComboBox, EuiComboBoxProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FieldIcon } from '@kbn/unified-field-list-plugin/public';
+import { FieldIcon } from '@kbn/unified-field-list/src/components/field_icon';
 import classNames from 'classnames';
 import type { DataType } from './types';
 import { TruncatedLabel } from './truncated_label';
@@ -44,13 +44,11 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>({
     if (otherAttr.options) {
       return {
         ...otherAttr,
-        compatible,
-        exists,
-        options: otherAttr.options.map((fieldOption) => ({
+        options: otherAttr.options.map(({ exists: fieldOptionExists, ...fieldOption }) => ({
           ...fieldOption,
           className: classNames({
             'lnFieldPicker__option--incompatible': !fieldOption.compatible,
-            'lnFieldPicker__option--nonExistant': !fieldOption.exists,
+            'lnFieldPicker__option--nonExistant': !fieldOptionExists,
           }),
         })),
       };
@@ -58,7 +56,6 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>({
     return {
       ...otherAttr,
       compatible,
-      exists,
       className: classNames({
         'lnFieldPicker__option--incompatible': !compatible,
         'lnFieldPicker__option--nonExistant': !exists,

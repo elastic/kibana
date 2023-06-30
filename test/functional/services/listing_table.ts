@@ -204,6 +204,10 @@ export class ListingTableService extends FtrService {
     await this.testSubjects.click('deleteSelectedItems');
   }
 
+  public async selectFirstItemInList() {
+    await this.find.clickByCssSelector('.euiTableCellContent .euiCheckbox__input');
+  }
+
   public async clickItemCheckbox(id: string) {
     await this.testSubjects.click(`checkboxSelectRow-${id}`);
   }
@@ -213,9 +217,13 @@ export class ListingTableService extends FtrService {
    * @param name item name
    * @param id row id
    */
-  public async deleteItem(name: string, id: string) {
+  public async deleteItem(name: string, id?: string) {
     await this.searchForItemWithName(name);
-    await this.clickItemCheckbox(id);
+    if (id) {
+      await this.clickItemCheckbox(id);
+    } else {
+      await this.selectFirstItemInList();
+    }
     await this.clickDeleteSelected();
     await this.common.clickConfirmOnModal();
   }
@@ -248,9 +256,17 @@ export class ListingTableService extends FtrService {
     await this.testSubjects.click('newItemButton');
   }
 
+  public async isShowingEmptyPromptCreateNewButton(): Promise<void> {
+    await this.testSubjects.existOrFail('newItemButton');
+  }
+
   public async onListingPage(appName: AppName) {
     return await this.testSubjects.exists(`${appName}LandingPage`, {
       timeout: 5000,
     });
+  }
+
+  public async selectTab(which: number) {
+    await this.find.clickByCssSelector(`.euiTab:nth-child(${which})`);
   }
 }

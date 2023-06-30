@@ -8,7 +8,7 @@
 import type React from 'react';
 import type { AllTimelinesVariables } from '../../containers/all';
 import type { TimelineModel } from '../../store/timeline/model';
-import type { NoteResult } from '../../../../common/types/timeline/note';
+import type { Note } from '../../../../common/types/timeline/note/api';
 import type {
   RowRendererId,
   SingleTimelineResolveResponse,
@@ -219,7 +219,7 @@ export interface UpdateTimeline {
   id: string;
   forceNotes?: boolean;
   from: string;
-  notes: NoteResult[] | null | undefined;
+  notes: Note[] | null | undefined;
   resolveTimelineConfig?: ResolveTimelineConfig;
   timeline: TimelineModel;
   to: string;

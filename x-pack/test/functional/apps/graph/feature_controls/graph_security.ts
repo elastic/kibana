@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'graph', 'security', 'error']);
+  const PageObjects = getPageObjects(['common', 'graph', 'security', 'error', 'header']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
@@ -72,6 +72,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('landing page shows "Create new graph" button', async () => {
         await PageObjects.common.navigateToApp('graph');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('graphLandingPage', { timeout: 10000 });
         await testSubjects.existOrFail('graphCreateGraphPromptButton');
       });
@@ -82,6 +83,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('allows creating a new workspace', async () => {
         await PageObjects.common.navigateToApp('graph');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.click('graphCreateGraphPromptButton');
         const breadcrumb = await testSubjects.find('~graphCurrentGraphBreadcrumb');
         expect(await breadcrumb.getVisibleText()).to.equal('Unsaved graph');
@@ -135,6 +137,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('does not show a "Create new Workspace" button', async () => {
         await PageObjects.common.navigateToApp('graph');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await testSubjects.existOrFail('graphLandingPage', { timeout: 10000 });
         await testSubjects.missingOrFail('newItemButton');
       });

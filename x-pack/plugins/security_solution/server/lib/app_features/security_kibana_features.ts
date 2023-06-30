@@ -124,23 +124,10 @@ export const getSecurityBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
 
 export const getSecurityBaseKibanaSubFeatureIds = (
   _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
-): SecuritySubFeatureId[] => {
-  const subFeatureIds: SecuritySubFeatureId[] = [
-    SecuritySubFeatureId.endpointList,
-    SecuritySubFeatureId.trustedApplications,
-    SecuritySubFeatureId.hostIsolationExceptions,
-    SecuritySubFeatureId.blocklist,
-    SecuritySubFeatureId.eventFilters,
-    SecuritySubFeatureId.policyManagement,
-    SecuritySubFeatureId.responseActionsHistory,
-    SecuritySubFeatureId.hostIsolation,
-    SecuritySubFeatureId.processOperations,
-    SecuritySubFeatureId.fileOperations,
-    SecuritySubFeatureId.executeAction,
-  ];
-
-  return subFeatureIds;
-};
+): SecuritySubFeatureId[] => [
+  SecuritySubFeatureId.hostIsolationExceptions,
+  SecuritySubFeatureId.hostIsolation,
+];
 
 /**
  * Maps the AppFeatures keys to Kibana privileges that will be merged
@@ -151,7 +138,9 @@ export const getSecurityBaseKibanaSubFeatureIds = (
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
  */
-export const getSecurityAppFeaturesConfig = (): AppFeaturesSecurityConfig => {
+export const getSecurityAppFeaturesConfig = (
+  _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
+): AppFeaturesSecurityConfig => {
   return {
     [AppFeatureSecurityKey.advancedInsights]: {
       privileges: {
@@ -164,6 +153,47 @@ export const getSecurityAppFeaturesConfig = (): AppFeaturesSecurityConfig => {
           api: [`${APP_ID}-entity-analytics`],
         },
       },
+    },
+
+    [AppFeatureSecurityKey.endpointResponseActions]: {
+      subFeatureIds: [
+        SecuritySubFeatureId.processOperations,
+        SecuritySubFeatureId.fileOperations,
+        SecuritySubFeatureId.executeAction,
+      ],
+      subFeaturesPrivileges: [
+        {
+          id: 'host_isolation_all',
+          api: [`${APP_ID}-writeHostIsolation`],
+          ui: ['writeHostIsolation'],
+        },
+      ],
+    },
+
+    [AppFeatureSecurityKey.endpointExceptions]: {
+      subFeatureIds: [
+        SecuritySubFeatureId.trustedApplications,
+        SecuritySubFeatureId.blocklist,
+        SecuritySubFeatureId.eventFilters,
+        SecuritySubFeatureId.policyManagement,
+        SecuritySubFeatureId.endpointList,
+        SecuritySubFeatureId.responseActionsHistory,
+      ],
+      subFeaturesPrivileges: [
+        {
+          id: 'host_isolation_exceptions_all',
+          api: [
+            `${APP_ID}-accessHostIsolationExceptions`,
+            `${APP_ID}-writeHostIsolationExceptions`,
+          ],
+          ui: ['accessHostIsolationExceptions', 'writeHostIsolationExceptions'],
+        },
+        {
+          id: 'host_isolation_exceptions_read',
+          api: [`${APP_ID}-accessHostIsolationExceptions`],
+          ui: ['accessHostIsolationExceptions'],
+        },
+      ],
     },
   };
 };

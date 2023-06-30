@@ -245,7 +245,7 @@ const RESTRICTED_IMPORTS = [
   },
   {
     name: 'react-router-dom',
-    importNames: ['Route'],
+    importNames: ['Router', 'Switch', 'Route'],
     message: 'Please use @kbn/shared-ux-router instead',
   },
   {
@@ -604,6 +604,7 @@ module.exports = {
         '**/cypress.config.{js,ts}',
         'x-pack/test_serverless/**/config*.ts',
         'x-pack/test_serverless/*/test_suites/**/*',
+        'x-pack/test/profiling_api_integration/**/*.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -972,7 +973,7 @@ module.exports = {
 
     /**
      * Security Solution overrides. These rules below are maintained and owned by
-     * the people within the security-solution-platform team. Please see ping them
+     * the people within the security-detection-engine team. Please see ping them
      * or check with them if you are encountering issues, have suggestions, or would
      * like to add, change, or remove any particular rule. Linters, Typescript, and rules
      * evolve and change over time just like coding styles, so please do not hesitate to
@@ -1180,7 +1181,7 @@ module.exports = {
 
     /**
      * Lists overrides. These rules below are maintained and owned by
-     * the people within the security-solution-platform team. Please see ping them
+     * the people within the security-detection-engine team. Please see ping them
      * or check with them if you are encountering issues, have suggestions, or would
      * like to add, change, or remove any particular rule. Linters, Typescript, and rules
      * evolve and change over time just like coding styles, so please do not hesitate to

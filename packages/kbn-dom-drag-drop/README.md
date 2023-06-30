@@ -23,9 +23,7 @@ const context = useContext(DragContext);
 In your child application, place a `ChildDragDropProvider` at the root of that, and spread the context into it:
 
 ```js
-<ChildDragDropProvider {...context}>
-  ... your child app here ...
-</ChildDragDropProvider>
+<ChildDragDropProvider {...context}>... your child app here ...</ChildDragDropProvider>
 ```
 
 This enables your child application to share the same drag / drop context as the root application.
@@ -71,9 +69,7 @@ return (
 To create a reordering group, surround the elements from the same group with a `ReorderProvider`:
 
 ```js
-<ReorderProvider id="groupId">
-  ... elements from one group here ...
-</ReorderProvider>
+<ReorderProvider id="groupId">... elements from one group here ...</ReorderProvider>
 ```
 
 The children `DragDrop` components must have props defined as in the example:
@@ -85,8 +81,8 @@ The children `DragDrop` components must have props defined as in the example:
       <DragDrop
         key={f.id}
         draggable
-        dragTypes={["move"]}
-        dropType="reorder"
+        dragType="move"
+        dropTypes={["reorder"]} // generally shouldn't be set until a drag operation has started
         reorderableGroup={fields} // consists all reorderable elements in the group, eg. [{id:'3'}, {id:'5'}, {id:'1'}]
         value={{
           id: f.id,
@@ -102,4 +98,3 @@ The children `DragDrop` components must have props defined as in the example:
   </div>
 </ReorderProvider>
 ```
-

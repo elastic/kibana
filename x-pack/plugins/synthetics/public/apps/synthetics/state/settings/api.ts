@@ -14,8 +14,8 @@ import { apiService } from '../../../../utils/api_service';
 import {
   DynamicSettings,
   DynamicSettingsSaveResponse,
-  DynamicSettingsSaveType,
-  DynamicSettingsType,
+  DynamicSettingsSaveCodec,
+  DynamicSettingsCodec,
   LocationMonitorsResponse,
   LocationMonitorsType,
 } from '../../../../../common/runtime_types';
@@ -29,13 +29,13 @@ interface SaveApiRequest {
 }
 
 export const getDynamicSettings = async (): Promise<DynamicSettings> => {
-  return await apiService.get(apiPath, undefined, DynamicSettingsType);
+  return await apiService.get(apiPath, undefined, DynamicSettingsCodec);
 };
 
 export const setDynamicSettings = async ({
   settings,
 }: SaveApiRequest): Promise<DynamicSettingsSaveResponse> => {
-  return await apiService.post(apiPath, settings, DynamicSettingsSaveType);
+  return await apiService.post(apiPath, settings, DynamicSettingsSaveCodec);
 };
 
 export const fetchLocationMonitors = async (): Promise<LocationMonitor[]> => {

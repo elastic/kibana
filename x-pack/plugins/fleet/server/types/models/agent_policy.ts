@@ -48,6 +48,17 @@ export const AgentPolicyBaseSchema = {
     )
   ),
   is_protected: schema.maybe(schema.boolean()),
+  overrides: schema.maybe(
+    schema.nullable(
+      schema.recordOf(schema.string(), schema.any(), {
+        validate: (val) => {
+          if (Object.keys(val).some((key) => key.match(/^inputs(\.)?/))) {
+            return 'inputs overrides is not allowed';
+          }
+        },
+      })
+    )
+  ),
 };
 
 export const NewAgentPolicySchema = schema.object({
