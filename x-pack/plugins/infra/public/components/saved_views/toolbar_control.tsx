@@ -13,14 +13,14 @@ import { NonEmptyString } from '@kbn/io-ts-utils';
 import {
   SavedViewState,
   SavedViewOperations,
-  SingleSavedViewState,
+  SavedViewItem,
   BasicAttributes,
 } from '../../../common/saved_views';
 import { ManageViewsFlyout } from './manage_views_flyout';
 import { useBoolean } from '../../hooks/use_boolean';
 import { UpsertViewModal } from './upsert_modal';
 
-interface Props<TSavedViewState extends SingleSavedViewState, TViewState>
+interface Props<TSavedViewState extends SavedViewItem, TViewState>
   extends SavedViewState<TSavedViewState> {
   viewState: TViewState & BasicAttributes;
   onCreateView: SavedViewOperations<TSavedViewState>['createView'];
@@ -31,7 +31,7 @@ interface Props<TSavedViewState extends SingleSavedViewState, TViewState>
   onSwitchView: SavedViewOperations<TSavedViewState>['switchViewById'];
 }
 
-export function SavedViewsToolbarControls<TSavedViewState extends SingleSavedViewState, TViewState>(
+export function SavedViewsToolbarControls<TSavedViewState extends SavedViewItem, TViewState>(
   props: Props<TSavedViewState, TViewState>
 ) {
   const {
