@@ -38,7 +38,6 @@ export const getVegaInspectorView = (dependencies: VegaInspectorViewDependencies
       return Boolean(adapters.vega);
     },
     component: (props) => (
-      // TODO needs to provide theme for src/plugins/vis_types/vega/public/vega_inspector/components/spec_viewer.tsx, need CodeOwner help
       <KibanaContextProvider services={dependencies}>
         <Suspense fallback={<EuiLoadingSpinner />}>
           <VegaDataInspector {...(props as VegaDataInspectorProps)} />
