@@ -11,8 +11,9 @@ import { isEmpty } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import { distinctUntilChanged, skip, Subscription } from 'rxjs';
 
+import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { Container, ContainerOutput } from '@kbn/embeddable-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
@@ -22,15 +23,16 @@ import {
   NavigationContainerInput,
   NavigationContainerReduxState,
 } from '../../types';
+import { linksService } from '../../services/links_service';
+import { ExternalLinkInput } from '../../external_link/types';
+import { getNextPanelOrder } from '../navigation_container_helpers';
+import { DashboardItem, DashboardLinkInput } from '../../dashboard_link/types';
 import { navigationEmbeddableReducers } from '../navigation_container_reducers';
 import { coreServices, dashboardServices } from '../../services/kibana_services';
+import { NavigationEmbeddableEditor } from '../components/navigation_embeddable_editor';
 import { NavigationEmbeddableComponent } from '../components/navigation_embeddable_component';
-import { linksService } from '../../services/links_service';
-import { DashboardItem, DashboardLinkInput } from '../../dashboard_link/types';
-import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
-import { getNextPanelOrder } from '../navigation_container_helpers';
-import { ExternalLinkInput } from '../../external_link/types';
 import { EXTERNAL_LINK_EMBEDDABLE_TYPE } from '../../external_link/embeddable/external_link_embeddable_factory';
+import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
 
 export const NAVIGATION_EMBEDDABLE_TYPE = 'navigation';
 
@@ -47,6 +49,11 @@ type NavigationReduxEmbeddableTools = ReduxEmbeddableTools<
   NavigationContainerReduxState,
   typeof navigationEmbeddableReducers
 >;
+
+interface NavigationLinkEditorChanges {
+  type: string;
+  label?: string;
+}
 
 export class NavigationContainer extends Container<
   LinkInput,
@@ -66,6 +73,8 @@ export class NavigationContainer extends Container<
 
   private cleanupStateTools: () => void;
 
+  private editorFlyout?: OverlayRef;
+
   constructor(
     reduxToolsPackage: ReduxToolsPackage,
     // config: NavigationEmbeddableConfig,
@@ -76,6 +85,8 @@ export class NavigationContainer extends Container<
       initialInput,
       {
         embeddableLoaded: {},
+        editable: true,
+        editableWithExplicitInput: true,
       },
       linksService.getLinkFactory,
       parent
@@ -216,10 +227,47 @@ export class NavigationContainer extends Container<
     return simplifiedDashboardList;
   }
 
+  private closeEditorFlyout() {
+    if (this.editorFlyout) {
+      this.editorFlyout.close();
+      this.editorFlyout = undefined;
+    }
+  }
+
+  public openAddLinkFlyout(onSave?: (id: string) => void) {
+    const onCancel = (changes?: NavigationLinkEditorChanges) => {
+      this.closeEditorFlyout();
+    };
+
+    const onSaveFlyout = async (changes: NavigationLinkEditorChanges) => {
+      // this.closeAllFlyouts();
+      if (!changes.type) {
+        return;
+      }
+    };
+
+    this.editorFlyout = coreServices.overlays.openFlyout(
+      toMountPoint(
+        <NavigationEmbeddableContext.Provider value={this}>
+          <NavigationEmbeddableEditor onClose={() => this.closeEditorFlyout()} />
+        </NavigationEmbeddableContext.Provider>,
+        { theme$: coreServices.theme.theme$ }
+      ),
+      {
+        outsideClickCloses: false,
+        onClose: () => {
+          this.closeEditorFlyout();
+          onCancel();
+        },
+      }
+    );
+  }
+
   public async reload() {}
 
   public destroy() {
     super.destroy();
+    this.closeEditorFlyout();
     this.cleanupStateTools();
     this.subscriptions.unsubscribe();
     if (this.node) ReactDOM.unmountComponentAtNode(this.node);

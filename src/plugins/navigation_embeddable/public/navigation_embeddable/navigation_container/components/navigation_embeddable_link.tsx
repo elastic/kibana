@@ -33,7 +33,6 @@ export const useChildEmbeddable = ({
     let mounted = true;
     (async () => {
       const newEmbeddable = await untilEmbeddableLoaded(embeddableId);
-      // console.log(embeddableId, newEmbeddable);
       if (!mounted) return;
       setEmbeddable(newEmbeddable);
     })();

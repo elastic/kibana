@@ -8,24 +8,34 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import type { IContainer } from '@kbn/embeddable-plugin/public';
-import { EmbeddableFactory, EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import {
+  ACTION_ADD_PANEL,
+  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
+} from '@kbn/embeddable-plugin/public';
 
 import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_container';
-import { untilPluginStartServicesReady } from '../../services/kibana_services';
+import { coreServices, untilPluginStartServicesReady } from '../../services/kibana_services';
 import { NavigationContainerInput } from '../../types';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
 const getDefaultNavigationContainerInput = (): Omit<NavigationContainerInput, 'id'> => ({
   panels: {},
+  disabledActions: [ACTION_ADD_PANEL, 'OPEN_FLYOUT_ADD_DRILLDOWN'],
 });
 
-export class NavigationEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
+export class NavigationEmbeddableFactoryDefinition
+  implements EmbeddableFactoryDefinition<NavigationContainerInput>
+{
   public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
 
+  public isContainerType = false;
+
   public async isEditable() {
-    return true;
+    await untilPluginStartServicesReady();
+    return Boolean(coreServices.application.capabilities.dashboard?.showWriteControls);
   }
 
   public canCreateNew() {
@@ -36,7 +46,7 @@ export class NavigationEmbeddableFactoryDefinition implements EmbeddableFactoryD
     return getDefaultNavigationContainerInput();
   }
 
-  public async create(initialInput: NavigationContainerInput, parent?: IContainer) {
+  public async create(initialInput: NavigationContainerInput, parent: DashboardContainer) {
     await untilPluginStartServicesReady();
     const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
     const { NavigationContainer } = await import('./navigation_container');
@@ -56,9 +66,31 @@ export class NavigationEmbeddableFactoryDefinition implements EmbeddableFactoryD
     return new NavigationContainer(
       reduxEmbeddablePackage,
       // { editable: true },
-      { ...getDefaultNavigationContainerInput, ...initialInput },
+      { ...getDefaultNavigationContainerInput(), ...initialInput },
       parent
     );
+  }
+
+  public async getExplicitInput(initialInput: NavigationContainerInput) {
+    console.log('here');
+    return { ...getDefaultNavigationContainerInput(), ...initialInput };
+    // const { configureImage } = await import('../image_editor');
+    // const start = this.deps.start();
+    // const { files, overlays, theme, application, externalUrl, getUser } = start;
+    // const user = await getUser();
+    // const imageConfig = await configureImage(
+    //   {
+    //     files,
+    //     overlays,
+    //     theme,
+    //     user,
+    //     currentAppId$: application.currentAppId$,
+    //     validateUrl: createValidateUrl(externalUrl),
+    //     getImageDownloadHref: this.getImageDownloadHref,
+    //   },
+    //   initialInput ? initialInput.imageConfig : undefined
+    // );
+    // return { imageConfig };
   }
 
   public getDisplayName() {

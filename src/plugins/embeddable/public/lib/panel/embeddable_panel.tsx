@@ -436,14 +436,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
       })) ?? [];
 
     const { disabledActions } = this.props.embeddable.getInput();
-    if (disabledActions) {
-      const removeDisabledActions = removeById(disabledActions);
-      regularActions = regularActions.filter(removeDisabledActions);
-    }
 
     let sortedActions = regularActions
       .concat(Object.values(this.state.universalActions || {}) as Array<Action<object>>)
       .sort(sortByOrderField);
+
+    if (disabledActions) {
+      const removeDisabledActions = removeById(disabledActions);
+      sortedActions = sortedActions.filter(removeDisabledActions);
+    }
 
     if (this.props.actionPredicate) {
       sortedActions = sortedActions.filter(({ id }) => this.props.actionPredicate!(id));

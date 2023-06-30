@@ -13,14 +13,16 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiForm,
   EuiIcon,
+  EuiButton,
   EuiFormRow,
   EuiFlexItem,
   EuiFieldText,
   EuiFlexGroup,
   EuiRadioGroup,
-  EuiButtonEmpty,
-  EuiPopoverFooter,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiRadioGroupOption,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { useNavigationEmbeddable } from '../embeddable/navigation_container';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
@@ -33,7 +35,7 @@ const isValidUrl =
 
 type LinkType = 'dashboardLink' | 'externalLink';
 
-export const NavigationEmbeddableEditor = ({ closePopover }: { closePopover: () => void }) => {
+export const NavigationEmbeddableEditor = ({ onClose }: { onClose: () => void }) => {
   const navEmbeddable = useNavigationEmbeddable();
 
   const [linkLabel, setLinkLabel] = useState<string>('');
@@ -85,82 +87,89 @@ export const NavigationEmbeddableEditor = ({ closePopover }: { closePopover: () 
 
   return (
     <>
-      <EuiForm component="form">
-        <EuiFormRow label={NavEmbeddableStrings.editor.getLinkTypePickerLabel()}>
-          <EuiRadioGroup
-            options={linkTypes}
-            idSelected={selectedLinkType}
-            onChange={(id) => {
-              setSelectedLinkType(id as LinkType);
-              if (selectedDashboard) {
-                savedDashboardSelection.current = selectedDashboard;
-              }
-            }}
-          />
-        </EuiFormRow>
-        <EuiFormRow label={NavEmbeddableStrings.editor.getLinkDestinationLabel()}>
-          {isDashboardEditorSelected ? (
-            <NavigationEmbeddableDashboardList
-              initialSelection={savedDashboardSelection.current}
-              onDashboardSelected={setSelectedDashboard}
-            />
-          ) : (
-            <EuiFieldText
-              placeholder={NavEmbeddableStrings.editor.external.getPlaceholder()}
-              isInvalid={!validUrl}
-              onChange={(e) => {
-                const url = e.target.value;
-                const isValid = isValidUrl.test(url);
-                if (isValid) {
-                  setSelectedUrl(url);
+      <EuiFlyoutBody>
+        <EuiForm component="form">
+          <EuiFormRow label={NavEmbeddableStrings.editor.getLinkTypePickerLabel()}>
+            <EuiRadioGroup
+              options={linkTypes}
+              idSelected={selectedLinkType}
+              onChange={(id) => {
+                setSelectedLinkType(id as LinkType);
+                if (selectedDashboard) {
+                  savedDashboardSelection.current = selectedDashboard;
                 }
-                setValidUrl(isValid);
               }}
             />
-          )}
-        </EuiFormRow>
-        <EuiFormRow label={NavEmbeddableStrings.editor.getLinkTextLabel()}>
-          <EuiFieldText
-            placeholder={
-              isDashboardEditorSelected && selectedDashboard
-                ? selectedDashboard.attributes.title
-                : NavEmbeddableStrings.editor.getLinkTextPlaceholder()
-            }
-            value={linkLabel}
-            onChange={(e) => {
-              setLinkLabel(e.target.value);
-            }}
-          />
-        </EuiFormRow>
-        {/* TODO: As part of https://github.com/elastic/kibana/issues/154381, we should pull in the custom settings for each link type.
+          </EuiFormRow>
+          <EuiFormRow label={NavEmbeddableStrings.editor.getLinkDestinationLabel()}>
+            {isDashboardEditorSelected ? (
+              <NavigationEmbeddableDashboardList
+                initialSelection={savedDashboardSelection.current}
+                onDashboardSelected={setSelectedDashboard}
+              />
+            ) : (
+              <EuiFieldText
+                placeholder={NavEmbeddableStrings.editor.external.getPlaceholder()}
+                isInvalid={!validUrl}
+                onChange={(e) => {
+                  const url = e.target.value;
+                  const isValid = isValidUrl.test(url);
+                  if (isValid) {
+                    setSelectedUrl(url);
+                  }
+                  setValidUrl(isValid);
+                }}
+              />
+            )}
+          </EuiFormRow>
+          <EuiFormRow label={NavEmbeddableStrings.editor.getLinkTextLabel()}>
+            <EuiFieldText
+              placeholder={
+                isDashboardEditorSelected && selectedDashboard
+                  ? selectedDashboard.attributes.title
+                  : NavEmbeddableStrings.editor.getLinkTextPlaceholder()
+              }
+              value={linkLabel}
+              onChange={(e) => {
+                setLinkLabel(e.target.value);
+              }}
+            />
+          </EuiFormRow>
+          {/* TODO: As part of https://github.com/elastic/kibana/issues/154381, we should pull in the custom settings for each link type.
             Refer to `x-pack/examples/ui_actions_enhanced_examples/public/drilldowns/dashboard_to_discover_drilldown/collect_config_container.tsx`
             for the dashboard drilldown settings, for example. 
 
             Open question: It probably makes sense to re-use these components so any changes made to the drilldown architecture
             trickle down to the navigation embeddable - this would require some refactoring, though. Is this a goal for MVP?
          */}
-      </EuiForm>
-      <EuiPopoverFooter className="navEmbeddable-editorFooter">
-        <EuiFlexGroup justifyContent="flexEnd">
+        </EuiForm>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter className="navEmbeddable-editorFooter">
+        <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              size="s"
+              // aria-label={`cancel-${currentInput.title}`}
+              data-test-subj="control-editor-cancel"
+              iconType="cross"
+              onClick={onClose}
+            >
+              Cancel
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
               disabled={
                 isDashboardEditorSelected ? !selectedDashboard : !validUrl || isEmpty(selectedUrl)
               }
               onClick={() => {
+                onClose();
+
                 if (isDashboardEditorSelected && selectedDashboard) {
                   navEmbeddable.addDashboardLink({
                     id: uuidv4(),
                     label: linkLabel,
                     dashboardId: selectedDashboard.id,
                   });
-                  // navEmbeddable.dispatch.addDashboardLink({
-                  // label: linkLabel,
-                  // id: selectedDashboard.id,
-                  // title: selectedDashboard.attributes.title,
-                  // description: selectedDashboard.attributes.description,
-                  // });
                 } else if (validUrl && selectedUrl) {
                   navEmbeddable.addExternalLink({
                     id: uuidv4(),
@@ -169,14 +178,13 @@ export const NavigationEmbeddableEditor = ({ closePopover }: { closePopover: () 
                   });
                 }
                 setLinkLabel('');
-                closePopover();
               }}
             >
-              Apply
-            </EuiButtonEmpty>
+              Save
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPopoverFooter>
+      </EuiFlyoutFooter>
     </>
   );
 };
