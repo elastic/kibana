@@ -9,33 +9,3 @@
   // could be much higher than the available screenspace
   max-width: 686px;
 }
-
-.shardFailureModal__descTitle {
-  width: 20% !important;
-  margin-top: $euiSizeS;
-}
-
-.shardFailureModal__descValue {
-  width: 80% !important;
-  margin-top: $euiSizeS;
-}
-.shardFailureModal__keyValueTitle {
-  padding-right: $euiSizeS;
-}
-
-@include euiBreakpoint('xs','s') {
-  .shardFailureModal__keyValueTitle {
-    display: block;
-    width: 100%;
-  }
-
-  .shardFailureModal__descTitle {
-    display: block;
-    width: 100% !important;
-  }
-
-  .shardFailureModal__descValue {
-    display: block;
-    width: 100% !important;
-  }
-}

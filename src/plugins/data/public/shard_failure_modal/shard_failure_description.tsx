@@ -8,9 +8,8 @@
 
 import React from 'react';
 import { getFlattenedObject } from '@kbn/std';
-import { EuiCodeBlock, EuiDescriptionList, EuiSpacer } from '@elastic/eui';
+import { EuiCodeBlock, EuiDescriptionList } from '@elastic/eui';
 import { ShardFailure } from './shard_failure_types';
-import { ShardFailureDescriptionHeader } from './shard_failure_description_header';
 
 /**
  * Provides pretty formatting of a given key string
@@ -49,17 +48,6 @@ export function ShardFailureDescription(props: ShardFailure) {
   }));
 
   return (
-    <div>
-      <ShardFailureDescriptionHeader {...props} />
-      <EuiSpacer size="m" />
-      <EuiDescriptionList
-        listItems={listItems}
-        type="column"
-        compressed
-        className="shardFailureModal__desc"
-        titleProps={{ className: 'shardFailureModal__descTitle' }}
-        descriptionProps={{ className: 'shardFailureModal__descValue' }}
-      />
-    </div>
+    <EuiDescriptionList listItems={listItems} compressed className="shardFailureModal__desc" />
   );
 }

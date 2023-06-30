@@ -15,6 +15,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { getOverlays } from '../services';
 import { ShardFailureModal } from './shard_failure_modal';
 import type { ShardFailureRequest } from './shard_failure_types';
+import './_shard_failure_modal.scss';
 
 // @internal
 export interface ShardFailureOpenModalButtonProps {

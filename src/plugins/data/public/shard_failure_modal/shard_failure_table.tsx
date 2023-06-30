@@ -14,7 +14,6 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import { ShardFailureDescription } from './shard_failure_description';
 import { ShardFailure } from './shard_failure_types';
-import { getFailureSummaryText } from './shard_failure_description_header';
 
 export interface ListItem extends ShardFailure {
   id: string;
@@ -32,22 +31,18 @@ export function ShardFailureTable({ failures }: { failures: ShardFailure[] }) {
       width: '40px',
       isExpander: true,
       render: (item: ListItem) => {
-        const failureSummeryText = getFailureSummaryText(item);
         const collapseLabel = i18n.translate(
+          // TODO: redo
           'data.search.searchSource.fetch.shardsFailedModal.tableRowCollapse',
           {
-            defaultMessage: 'Collapse {rowDescription}',
-            description: 'Collapse a row of a table with failures',
-            values: { rowDescription: failureSummeryText },
+            defaultMessage: 'Collapse row',
           }
         );
 
         const expandLabel = i18n.translate(
           'data.search.searchSource.fetch.shardsFailedModal.tableRowExpand',
           {
-            defaultMessage: 'Expand {rowDescription}',
-            description: 'Expand a row of a table with failures',
-            values: { rowDescription: failureSummeryText },
+            defaultMessage: 'Expand row',
           }
         );
 
