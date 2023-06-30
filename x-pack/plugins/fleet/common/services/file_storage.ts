@@ -57,20 +57,15 @@ export const getFileDataIndexName = (
 };
 
 /**
- * Returns the write index name for a given file upload alias name, this is the same for metadata and chunks
- * @param aliasName
- */
-export const getFileWriteIndexName = (aliasName: string) => aliasName + '-000001';
-/**
  * Returns back the integration name for a given File Data (chunks) index name.
  *
  * @example
- * // Given a File data index pattern of `.fleet-file-data-*`:
+ * // Given a File data index pattern of `.fleet-fileds-fromhost-data-*`:
  *
- * getIntegrationNameFromFileDataIndexName('.fleet-file-data-agent');
+ * getIntegrationNameFromFileDataIndexName('.fleet-fileds-fromhost-data-agent');
  * // return 'agent'
  *
- * getIntegrationNameFromFileDataIndexName('.fleet-file-data-agent-00001');
+ * getIntegrationNameFromFileDataIndexName('.fleet-fileds-fromhost-data-agent-00001');
  * // return 'agent'
  */
 export const getIntegrationNameFromFileDataIndexName = (indexName: string): string => {
@@ -95,15 +90,3 @@ export const getIntegrationNameFromIndexName = (
 
   throw new Error(`Index name ${indexName} does not seem to be a File storage index`);
 };
-
-export const getFileStorageWriteIndexBody = (aliasName: string) => ({
-  aliases: {
-    [aliasName]: {
-      is_write_index: true,
-    },
-  },
-  settings: {
-    'index.lifecycle.rollover_alias': aliasName,
-    'index.hidden': true,
-  },
-});
