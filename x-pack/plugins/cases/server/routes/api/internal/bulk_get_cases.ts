@@ -6,7 +6,7 @@
  */
 
 import { INTERNAL_BULK_GET_CASES_URL } from '../../../../common/constants';
-import type { CasesBulkGetRequestCertainFields } from '../../../../common/api';
+import type { CasesBulkGetRequest } from '../../../../common/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { escapeHatch } from '../utils';
@@ -18,7 +18,7 @@ export const bulkGetCasesRoute = createCasesRoute({
     body: escapeHatch,
   },
   handler: async ({ context, request, response }) => {
-    const params = request.body as CasesBulkGetRequestCertainFields;
+    const params = request.body as CasesBulkGetRequest;
 
     try {
       const casesContext = await context.cases;

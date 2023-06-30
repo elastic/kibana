@@ -7,19 +7,20 @@
 import semver from 'semver';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigKey, HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { omit } from 'lodash';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
+import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('PrivateLocationMonitor', function () {
+  describe('PrivateLocationAddMonitor', function () {
     this.tags('skipCloud');
     const kibanaServer = getService('kibanaServer');
     const supertestAPI = getService('supertest');
@@ -34,12 +35,8 @@ export default function ({ getService }: FtrProviderContext) {
     const security = getService('security');
 
     before(async () => {
-      await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-      await supertestAPI
-        .post('/api/fleet/epm/packages/synthetics/0.12.0')
-        .set('kbn-xsrf', 'true')
-        .send({ force: true })
-        .expect(200);
+      await kibanaServer.savedObjects.clean({ types: [syntheticsMonitorType] });
+      await testPrivateLocations.installSyntheticsPackage();
 
       _httpMonitorJson = getFixtureJson('http_monitor');
     });
@@ -58,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('add a test private location', async () => {
       await testPrivateLocations.setTestLocations([testFleetPolicyID]);
 
-      const apiResponse = await supertestAPI.get(API_URLS.SERVICE_LOCATIONS);
+      const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
 
       expect(apiResponse.body.locations).eql([
         {
@@ -85,6 +82,39 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
     });
 
+    it('does not add a monitor if there is an error in creating integration', async () => {
+      const newMonitor = { ...httpMonitorJson };
+
+      const invalidName = '!@#$%^&*()_++[\\-\\]- wow';
+
+      newMonitor.locations.push({
+        id: testFleetPolicyID,
+        label: 'Test private location 0',
+        isServiceManaged: false,
+      });
+
+      newMonitor.name = invalidName;
+
+      const apiResponse = await supertestAPI
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(newMonitor)
+        .expect(500);
+
+      expect(apiResponse.body).eql({
+        statusCode: 500,
+        message:
+          'YAMLException: unknown escape sequence at line 3, column 34:\n    name: "!@#$,%,^,&,*,(,),_,+,+,[,\\,\\,-,\\,\\,],-, ,w,o,w,"\n                                     ^',
+        error: 'Internal Server Error',
+      });
+
+      const apiGetResponse = await supertestAPI
+        .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + `?query="${invalidName}"`)
+        .expect(200);
+      // verify that no monitor was added
+      expect(apiGetResponse.body.monitors?.length).eql(0);
+    });
+
     let newMonitorId: string;
 
     it('adds a monitor in private location', async () => {
@@ -97,7 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       const apiResponse = await supertestAPI
-        .post(API_URLS.SYNTHETICS_MONITORS)
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
         .send(newMonitor)
         .expect(200);
@@ -127,7 +157,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
 
-      comparePolicies(packagePolicy, getTestSyntheticsPolicy(httpMonitorJson.name, newMonitorId));
+      comparePolicies(
+        packagePolicy,
+        getTestSyntheticsPolicy({
+          name: httpMonitorJson.name,
+          id: newMonitorId,
+          location: { id: testFleetPolicyID },
+        })
+      );
     });
 
     let testFleetPolicyID2: string;
@@ -145,7 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       const apiResponse = await supertestAPI
-        .put(API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId)
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId)
         .set('kbn-xsrf', 'true')
         .send(httpMonitorJson);
 
@@ -174,7 +211,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
 
-      comparePolicies(packagePolicy, getTestSyntheticsPolicy(httpMonitorJson.name, newMonitorId));
+      comparePolicies(
+        packagePolicy,
+        getTestSyntheticsPolicy({
+          name: httpMonitorJson.name,
+          id: newMonitorId,
+          location: { id: testFleetPolicyID },
+        })
+      );
 
       packagePolicy = apiResponsePolicy.body.items.find(
         (pkgPolicy: PackagePolicy) =>
@@ -184,7 +228,14 @@ export default function ({ getService }: FtrProviderContext) {
       expect(packagePolicy.policy_id).eql(testFleetPolicyID2);
       comparePolicies(
         packagePolicy,
-        getTestSyntheticsPolicy(httpMonitorJson.name, newMonitorId, 'Test private location 1')
+        getTestSyntheticsPolicy({
+          name: httpMonitorJson.name,
+          id: newMonitorId,
+          location: {
+            name: 'Test private location 1',
+            id: testFleetPolicyID2,
+          },
+        })
       );
     });
 
@@ -194,7 +245,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await supertestAPI
-        .put(API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId)
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId)
         .set('kbn-xsrf', 'true')
         .send(httpMonitorJson)
         .expect(200);
@@ -210,7 +261,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
 
-      comparePolicies(packagePolicy, getTestSyntheticsPolicy(httpMonitorJson.name, newMonitorId));
+      comparePolicies(
+        packagePolicy,
+        getTestSyntheticsPolicy({
+          name: httpMonitorJson.name,
+          id: newMonitorId,
+          location: { id: testFleetPolicyID },
+        })
+      );
 
       packagePolicy = apiResponsePolicy.body.items.find(
         (pkgPolicy: PackagePolicy) =>
@@ -222,7 +280,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('deletes integration for a deleted monitor', async () => {
       await supertestAPI
-        .delete(API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId)
+        .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId)
         .set('kbn-xsrf', 'true')
         .send(httpMonitorJson)
         .expect(200);
@@ -266,8 +324,6 @@ export default function ({ getService }: FtrProviderContext) {
             {
               feature: {
                 uptime: ['all'],
-                fleet: ['all'],
-                fleetv2: ['all'],
                 actions: ['all'],
               },
               spaces: ['*'],
@@ -280,7 +336,7 @@ export default function ({ getService }: FtrProviderContext) {
           full_name: 'a kibana user',
         });
         const apiResponse = await supertestWithoutAuth
-          .post(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
           .send(monitor)
@@ -312,15 +368,15 @@ export default function ({ getService }: FtrProviderContext) {
         expect(packagePolicy.name).eql(`${monitor.name}-Test private location 0-${SPACE_ID}`);
         comparePolicies(
           packagePolicy,
-          getTestSyntheticsPolicy(
-            monitor.name,
-            monitorId,
-            undefined,
-            formatKibanaNamespace(SPACE_ID)
-          )
+          getTestSyntheticsPolicy({
+            name: monitor.name,
+            id: monitorId,
+            location: { id: testFleetPolicyID },
+            namespace: formatKibanaNamespace(SPACE_ID),
+          })
         );
         await supertestWithoutAuth
-          .delete(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
+          .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitorId}`)
           .auth(username, password)
           .set('kbn-xsrf', 'true')
           .send()
@@ -350,7 +406,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       try {
         const apiResponse = await supertestAPI
-          .post(API_URLS.SYNTHETICS_MONITORS)
+          .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .set('kbn-xsrf', 'true')
           .send(monitor)
           .expect(200);
@@ -367,11 +423,16 @@ export default function ({ getService }: FtrProviderContext) {
         );
         comparePolicies(
           packagePolicy,
-          getTestSyntheticsPolicy(monitor.name, monitorId, undefined, undefined, true)
+          getTestSyntheticsPolicy({
+            name: monitor.name,
+            id: monitorId,
+            location: { id: testFleetPolicyID },
+            isTLSEnabled: true,
+          })
         );
       } finally {
         await supertestAPI
-          .delete(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
+          .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -397,7 +458,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       try {
         const apiResponse = await supertestAPI
-          .post(API_URLS.SYNTHETICS_MONITORS)
+          .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .set('kbn-xsrf', 'true')
           .send(monitor)
           .expect(200);
@@ -412,10 +473,17 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
-        comparePolicies(packagePolicy, getTestSyntheticsPolicy(monitor.name, monitorId));
+        comparePolicies(
+          packagePolicy,
+          getTestSyntheticsPolicy({
+            name: monitor.name,
+            id: monitorId,
+            location: { id: testFleetPolicyID },
+          })
+        );
       } finally {
         await supertestAPI
-          .delete(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
+          .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -440,7 +508,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       try {
         const apiResponse = await supertestAPI
-          .post(API_URLS.SYNTHETICS_MONITORS)
+          .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
           .set('kbn-xsrf', 'true')
           .send(monitor)
           .expect(200);
@@ -455,7 +523,7 @@ export default function ({ getService }: FtrProviderContext) {
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
 
-        expect(packagePolicy.package.version).eql('0.12.0');
+        expect(packagePolicy.package.version).eql('1.0.1');
 
         await supertestAPI.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
         const policyResponseAfterUpgrade = await supertestAPI.get(
@@ -465,10 +533,10 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-default`
         );
-        expect(semver.gte(packagePolicyAfterUpgrade.package.version, '0.12.0')).eql(true);
+        expect(semver.gte(packagePolicyAfterUpgrade.package.version, '1.0.1')).eql(true);
       } finally {
         await supertestAPI
-          .delete(API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
+          .delete(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);

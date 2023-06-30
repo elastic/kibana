@@ -12,6 +12,7 @@ import {
   Alerts,
   AlertsTableConfigurationRegistry,
   BulkActionsConfig,
+  BulkActionsPanelConfig,
   BulkActionsState,
   BulkActionsVerbs,
   UseBulkActionsRegistry,
@@ -23,7 +24,6 @@ import {
 } from '../bulk_actions/get_leading_control_column';
 import { CasesService } from '../types';
 import {
-  ADD_TO_CASE_DISABLED,
   ADD_TO_EXISTING_CASE,
   ADD_TO_NEW_CASE,
   ALERTS_ALREADY_ATTACHED_TO_CASE,
@@ -43,7 +43,7 @@ export interface UseBulkActions {
   isBulkActionsColumnActive: boolean;
   getBulkActionsLeadingControlColumn: GetLeadingControlColumn;
   bulkActionsState: BulkActionsState;
-  bulkActions: BulkActionsConfig[];
+  bulkActions: BulkActionsPanelConfig[];
   setIsBulkActionsLoading: (isLoading: boolean) => void;
   clearSelection: () => void;
 }
@@ -70,6 +70,23 @@ const getCaseAttachments = ({
 }) => {
   const filteredAlerts = filterAlertsAlreadyAttachedToCase(alerts ?? [], caseId);
   return groupAlertsByRule?.(filteredAlerts) ?? [];
+};
+
+const addItemsToInitialPanel = ({
+  panels,
+  items,
+}: {
+  panels: BulkActionsPanelConfig[];
+  items: BulkActionsConfig[];
+}) => {
+  if (panels.length > 0) {
+    if (panels[0].items) {
+      panels[0].items.push(...items);
+    }
+    return panels;
+  } else {
+    return [{ id: 0, items }];
+  }
 };
 
 export const useBulkAddToCaseActions = ({
@@ -109,7 +126,7 @@ export const useBulkAddToCaseActions = ({
             key: 'attach-new-case',
             'data-test-subj': 'attach-new-case',
             disableOnQuery: true,
-            disabledLabel: ADD_TO_CASE_DISABLED,
+            disabledLabel: ADD_TO_NEW_CASE,
             onClick: (alerts?: TimelineItem[]) => {
               const caseAttachments = alerts
                 ? casesService?.helpers.groupAlertsByRule(alerts) ?? []
@@ -124,11 +141,15 @@ export const useBulkAddToCaseActions = ({
             label: ADD_TO_EXISTING_CASE,
             key: 'attach-existing-case',
             disableOnQuery: true,
-            disabledLabel: ADD_TO_CASE_DISABLED,
+            disabledLabel: ADD_TO_EXISTING_CASE,
             'data-test-subj': 'attach-existing-case',
             onClick: (alerts?: TimelineItem[]) => {
               selectCaseModal.open({
                 getAttachments: ({ theCase }) => {
+                  if (theCase == null) {
+                    return alerts ? casesService?.helpers.groupAlertsByRule(alerts) ?? [] : [];
+                  }
+
                   return getCaseAttachments({
                     alerts,
                     caseId: theCase.id,
@@ -158,14 +179,20 @@ export function useBulkActions({
   useBulkActionsConfig = () => [],
 }: BulkActionsProps): UseBulkActions {
   const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
-  const configBulkActions = useBulkActionsConfig(query);
+  const configBulkActionPanels = useBulkActionsConfig(query);
 
   const clearSelection = () => {
     updateBulkActionsState({ action: BulkActionsVerbs.clear });
   };
   const caseBulkActions = useBulkAddToCaseActions({ casesConfig, refresh, clearSelection });
 
-  const bulkActions = [...configBulkActions, ...caseBulkActions];
+  const bulkActions =
+    caseBulkActions.length !== 0
+      ? addItemsToInitialPanel({
+          panels: configBulkActionPanels,
+          items: caseBulkActions,
+        })
+      : configBulkActionPanels;
 
   const isBulkActionsColumnActive = bulkActions.length !== 0;
 

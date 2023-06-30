@@ -9,7 +9,7 @@ import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { ANOMALY_SEVERITY } from '@kbn/apm-plugin/common/ml_constants';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createAndRunApmMlJobs } from '../../common/utils/create_and_run_apm_ml_jobs';
 import { createApmRule } from './alerting_api_helper';
@@ -23,8 +23,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
 
   const synthtraceEsClient = getService('synthtraceEsClient');
-
-  // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/155930
+  // FLAKY https://github.com/elastic/kibana/issues/160298
   registry.when.skip(
     'fetching service anomalies with a trial license',
     { config: 'trial', archives: [] },
@@ -88,9 +87,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             name: 'Latency anomaly | service-a',
             params: {
               environment: 'production',
-              windowSize: 99,
-              windowUnit: 'y',
-              anomalySeverityType: ANOMALY_SEVERITY.WARNING,
+              windowSize: 5,
+              windowUnit: 'h',
+              anomalySeverityType: ML_ANOMALY_SEVERITY.WARNING,
             },
             ruleTypeId: ApmRuleType.Anomaly,
           });

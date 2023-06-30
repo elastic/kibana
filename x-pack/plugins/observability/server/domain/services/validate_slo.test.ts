@@ -24,17 +24,53 @@ describe('validateSLO', () => {
 
     it("throws when time window duration unit is 'm'", () => {
       const slo = createSLO({
-        timeWindow: { duration: new Duration(1, DurationUnit.Minute), isRolling: true },
+        timeWindow: { duration: new Duration(1, DurationUnit.Minute), type: 'rolling' },
       });
       expect(() => validateSLO(slo)).toThrowError('Invalid time_window.duration');
     });
 
     it("throws when time window duration unit is 'h'", () => {
       const slo = createSLO({
-        timeWindow: { duration: new Duration(1, DurationUnit.Hour), isRolling: true },
+        timeWindow: { duration: new Duration(1, DurationUnit.Hour), type: 'rolling' },
       });
       expect(() => validateSLO(slo)).toThrowError('Invalid time_window.duration');
     });
+
+    it.each([
+      { duration: new Duration(1, DurationUnit.Hour), shouldThrow: true },
+      { duration: new Duration(2, DurationUnit.Hour), shouldThrow: true },
+      { duration: new Duration(1, DurationUnit.Day), shouldThrow: true },
+      { duration: new Duration(7, DurationUnit.Day), shouldThrow: true },
+      { duration: new Duration(1, DurationUnit.Week), shouldThrow: false },
+      { duration: new Duration(2, DurationUnit.Week), shouldThrow: true },
+      { duration: new Duration(1, DurationUnit.Month), shouldThrow: false },
+      { duration: new Duration(2, DurationUnit.Month), shouldThrow: true },
+      { duration: new Duration(1, DurationUnit.Quarter), shouldThrow: true },
+      { duration: new Duration(3, DurationUnit.Quarter), shouldThrow: true },
+      { duration: new Duration(1, DurationUnit.Year), shouldThrow: true },
+      { duration: new Duration(3, DurationUnit.Year), shouldThrow: true },
+    ])(
+      'throws when time window calendar aligned is not 1 week or 1 month',
+      ({ duration, shouldThrow }) => {
+        if (shouldThrow) {
+          expect(() =>
+            validateSLO(
+              createSLO({
+                timeWindow: { duration, type: 'calendarAligned' },
+              })
+            )
+          ).toThrowError('Invalid time_window.duration');
+        } else {
+          expect(() =>
+            validateSLO(
+              createSLO({
+                timeWindow: { duration, type: 'calendarAligned' },
+              })
+            )
+          ).not.toThrowError();
+        }
+      }
+    );
 
     describe('settings', () => {
       it("throws when frequency is longer or equal than '1h'", () => {
@@ -155,7 +191,7 @@ describe('validateSLO', () => {
 
     it("throws when 'objective.timeslice_window' is longer than 'slo.time_window'", () => {
       const slo = createSLO({
-        timeWindow: { duration: new Duration(1, DurationUnit.Week), isRolling: true },
+        timeWindow: { duration: new Duration(1, DurationUnit.Week), type: 'rolling' },
         budgetingMethod: 'timeslices',
         objective: {
           target: 0.95,

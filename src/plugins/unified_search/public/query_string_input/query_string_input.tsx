@@ -286,7 +286,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
           signal: this.abortController.signal,
           useTimeRange: this.props.timeRangeForSuggestionsOverride,
           boolFilter: buildQueryFromFilters(this.props.filtersForSuggestions, undefined).filter,
-          method: this.props.filtersForSuggestions?.length ? 'terms_agg' : 'terms_enum',
+          method: this.props.filtersForSuggestions?.length ? 'terms_agg' : undefined,
         })) || [];
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {
@@ -832,8 +832,9 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
               >
                 {this.forwardNewValueIfNeeded(this.getQueryString())}
               </EuiTextArea>
+              {/* EUI TODO: This will need to be fixed before the Emotion conversion */}
               {this.props.iconType ? (
-                <div className="euiFormControlLayoutIcons">
+                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--absolute euiFormControlLayoutIcons--left">
                   <EuiIcon
                     className="euiFormControlLayoutCustomIcon__icon"
                     aria-hidden="true"
@@ -842,7 +843,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 </div>
               ) : null}
               {this.props.isClearable && !this.props.isDisabled && this.props.query.query ? (
-                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right">
+                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--absolute euiFormControlLayoutIcons--right">
                   <button
                     type="button"
                     className="euiFormControlLayoutClearButton"

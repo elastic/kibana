@@ -10,8 +10,6 @@ export const renameKeys = <T extends Record<string, unknown>, U extends Record<s
   obj: Record<string, unknown>
 ): T =>
   Object.keys(obj).reduce((acc, key) => {
-    return {
-      ...acc,
-      ...{ [keysMap[key] || key]: obj[key] },
-    };
+    acc[(keysMap[key] || key) as keyof T] = obj[key] as T[keyof T];
+    return acc;
   }, {} as T);

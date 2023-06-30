@@ -6,9 +6,8 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import { get, isEmpty } from 'lodash';
-import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { CombinedSummarizedAlerts } from '../types';
+import { isEmpty } from 'lodash';
+import { AlertHit, CombinedSummarizedAlerts } from '../types';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -40,6 +39,7 @@ export type PublicAlert<
   | 'getContext'
   | 'getState'
   | 'getUuid'
+  | 'getStart'
   | 'hasContext'
   | 'replaceState'
   | 'scheduleActions'
@@ -63,7 +63,7 @@ export class Alert<
     this.context = {} as Context;
     this.meta = meta;
     this.meta.uuid = meta.uuid ?? uuidV4();
-
+    this.meta.maintenanceWindowIds = meta.maintenanceWindowIds ?? [];
     if (!this.meta.flappingHistory) {
       this.meta.flappingHistory = [];
     }
@@ -75,6 +75,10 @@ export class Alert<
 
   getUuid() {
     return this.meta.uuid!;
+  }
+
+  getStart(): string | null {
+    return this.state.start ? `${this.state.start}` : null;
   }
 
   hasScheduledActions() {
@@ -229,6 +233,7 @@ export class Alert<
           // for a recovered alert, we only care to track the flappingHistory,
           // the flapping flag, and the UUID
           meta: {
+            maintenanceWindowIds: this.meta.maintenanceWindowIds,
             flappingHistory: this.meta.flappingHistory,
             flapping: this.meta.flapping,
             uuid: this.meta.uuid,
@@ -292,8 +297,16 @@ export class Alert<
     // Related issue: https://github.com/elastic/kibana/issues/144862
 
     return !summarizedAlerts.all.data.some(
-      (alert) =>
-        get(alert, ALERT_UUID) === this.getId() || get(alert, ALERT_UUID) === this.getUuid()
+      (alert: AlertHit) =>
+        alert?.kibana?.alert?.uuid === this.getId() || alert?.kibana?.alert?.uuid === this.getUuid()
     );
+  }
+
+  setMaintenanceWindowIds(maintenanceWindowIds: string[] = []) {
+    this.meta.maintenanceWindowIds = maintenanceWindowIds;
+  }
+
+  getMaintenanceWindowIds() {
+    return this.meta.maintenanceWindowIds ?? [];
   }
 }

@@ -14,6 +14,7 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
   Rule,
+  RuleAlertData,
 } from '../types';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -288,7 +289,8 @@ describe('Task Runner Cancel', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
@@ -356,7 +358,8 @@ describe('Task Runner Cancel', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
@@ -418,7 +421,8 @@ describe('Task Runner Cancel', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
@@ -525,6 +529,7 @@ describe('Task Runner Cancel', () => {
       },
       timings: {
         claim_to_start_duration_ms: 0,
+        persist_alerts_duration_ms: 0,
         prepare_rule_duration_ms: 0,
         process_alerts_duration_ms: 0,
         process_rule_duration_ms: 0,

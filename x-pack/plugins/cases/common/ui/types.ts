@@ -19,7 +19,7 @@ import type {
   ActionConnector,
   UserAction,
   SingleCaseMetricsResponse,
-  CommentResponse,
+  Comment,
   Case as CaseSnakeCase,
   UserActionFindResponse,
   FindTypeField as UserActionFindTypeField,
@@ -83,7 +83,7 @@ export type CaseViewRefreshPropInterface = null | {
   refreshCase: () => Promise<void>;
 };
 
-export type Comment = SnakeToCamelCase<CommentResponse>;
+export type CommentUI = SnakeToCamelCase<Comment>;
 export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
 export type ExternalReferenceComment = SnakeToCamelCase<CommentResponseExternalReferenceType>;
 export type PersistableComment = SnakeToCamelCase<CommentResponseTypePersistableState>;
@@ -92,8 +92,11 @@ export type FindCaseUserActions = Omit<SnakeToCamelCase<UserActionFindResponse>,
   userActions: UserActionUI[];
 };
 export type CaseUserActionsStats = SnakeToCamelCase<CaseUserActionStatsResponse>;
-export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & { comments: Comment[] };
-export type CasesUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: CaseUI[] };
+export type CaseUI = Omit<SnakeToCamelCase<CaseSnakeCase>, 'comments'> & { comments: CommentUI[] };
+export type CasesUI = CaseUI[];
+export type CasesFindResponseUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & {
+  cases: CasesUI;
+};
 export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
@@ -107,9 +110,13 @@ export interface ResolvedCase {
   aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
 }
 
+export type SortOrder = 'asc' | 'desc';
+
+export const SORT_ORDER_VALUES: SortOrder[] = ['asc', 'desc'];
+
 export interface SortingParams {
   sortField: SortFieldCase;
-  sortOrder: 'asc' | 'desc';
+  sortOrder: SortOrder;
 }
 
 export interface QueryParams extends SortingParams {
@@ -138,6 +145,7 @@ export interface FilterOptions {
   assignees: Array<string | null> | null;
   reporters: User[];
   owner: string[];
+  category: string[];
 }
 export type PartialFilterOptions = Partial<FilterOptions>;
 
@@ -157,6 +165,7 @@ export enum SortFieldCase {
   severity = 'severity',
   status = 'status',
   title = 'title',
+  category = 'category',
 }
 
 export type CaseUser = SnakeToCamelCase<User>;
@@ -167,7 +176,7 @@ export interface FetchCasesProps extends ApiProps {
 }
 
 export interface ApiProps {
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export interface ActionLicense {
@@ -185,7 +194,15 @@ export interface FieldMappings {
 
 export type UpdateKey = keyof Pick<
   CasePatchRequest,
-  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings' | 'severity' | 'assignees'
+  | 'connector'
+  | 'description'
+  | 'status'
+  | 'tags'
+  | 'title'
+  | 'settings'
+  | 'severity'
+  | 'assignees'
+  | 'category'
 >;
 
 export interface UpdateByKey {

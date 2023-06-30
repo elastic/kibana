@@ -38,6 +38,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": "uuid-1",
           },
@@ -51,6 +52,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": "uuid-1",
           },
@@ -60,6 +62,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": "uuid-2",
           },
@@ -105,6 +108,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 1,
             "uuid": Any<String>,
           },
@@ -123,18 +127,19 @@ describe('getAlertsForNotification', () => {
       ]
     `);
     expect(alertsWithAnyUUID(currentActiveAlerts)).toMatchInlineSnapshot(`
-          Object {
-            "3": Object {
-              "meta": Object {
-                "flapping": true,
-                "flappingHistory": Array [],
-                "pendingRecoveredCount": 1,
-                "uuid": Any<String>,
-              },
-              "state": Object {},
-            },
-          }
-      `);
+      Object {
+        "3": Object {
+          "meta": Object {
+            "flapping": true,
+            "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
+            "pendingRecoveredCount": 1,
+            "uuid": Any<String>,
+          },
+          "state": Object {},
+        },
+      }
+    `);
     expect(Object.values(currentActiveAlerts).map((a) => a.getScheduledActionOptions()))
       .toMatchInlineSnapshot(`
           Array [
@@ -151,6 +156,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -160,6 +166,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "uuid": Any<String>,
           },
           "state": Object {},
@@ -172,6 +179,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -181,6 +189,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "uuid": Any<String>,
           },
           "state": Object {},
@@ -231,6 +240,7 @@ describe('getAlertsForNotification', () => {
               false,
               true,
             ],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -244,6 +254,7 @@ describe('getAlertsForNotification', () => {
               false,
               true,
             ],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -257,6 +268,7 @@ describe('getAlertsForNotification', () => {
               false,
               true,
             ],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -274,6 +286,7 @@ describe('getAlertsForNotification', () => {
               false,
               true,
             ],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -287,6 +300,7 @@ describe('getAlertsForNotification', () => {
               false,
               true,
             ],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -300,6 +314,7 @@ describe('getAlertsForNotification', () => {
               false,
               true,
             ],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -345,6 +360,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 1,
             "uuid": Any<String>,
           },
@@ -372,6 +388,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -381,6 +398,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "uuid": Any<String>,
           },
           "state": Object {},
@@ -393,6 +411,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "pendingRecoveredCount": 0,
             "uuid": Any<String>,
           },
@@ -402,6 +421,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "maintenanceWindowIds": Array [],
             "uuid": Any<String>,
           },
           "state": Object {},

@@ -10,7 +10,7 @@
     "optionalPlugins": [
       "cloud",
       "security",
-      "guided_onboarding"
+      "guidedOnboarding"
     ]
   }
 }

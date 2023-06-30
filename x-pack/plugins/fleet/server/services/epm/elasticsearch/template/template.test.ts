@@ -849,13 +849,11 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, {
-      isIndexModeTimeSeries: true,
-    });
+    const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
   });
 
-  it('tests processing dimension field on an long', () => {
+  it('tests processing dimension field on a long', () => {
     const literalYml = `
 - name: example.id
   type: long
@@ -875,38 +873,11 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, {
-      isIndexModeTimeSeries: true,
-    });
+    const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
   });
 
-  it('tests processing dimension field on an long without timeserie enabled', () => {
-    const literalYml = `
-- name: example.id
-  type: long
-  dimension: true
-  `;
-    const expectedMapping = {
-      properties: {
-        example: {
-          properties: {
-            id: {
-              type: 'long',
-            },
-          },
-        },
-      },
-    };
-    const fields: Field[] = safeLoad(literalYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, {
-      isIndexModeTimeSeries: false,
-    });
-    expect(mappings).toEqual(expectedMapping);
-  });
-
-  it('tests processing metric_type field with index mode time series', () => {
+  it('tests processing metric_type field', () => {
     const literalYml = `
 - name: total.norm.pct
   type: scaled_float
@@ -936,44 +907,11 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, { isIndexModeTimeSeries: true });
+    const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
   });
 
-  it('tests processing metric_type field with index mode time series disabled', () => {
-    const literalYml = `
-- name: total.norm.pct
-  type: scaled_float
-  metric_type: gauge
-  unit: percent
-  format: percent
-`;
-    const expectedMapping = {
-      properties: {
-        total: {
-          properties: {
-            norm: {
-              properties: {
-                pct: {
-                  scaling_factor: 1000,
-                  type: 'scaled_float',
-                  meta: {
-                    unit: 'percent',
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-    const fields: Field[] = safeLoad(literalYml);
-    const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, { isIndexModeTimeSeries: false });
-    expect(mappings).toEqual(expectedMapping);
-  });
-
-  it('tests processing metric_type field with long field and index mode timeseries', () => {
+  it('tests processing metric_type field with long field', () => {
     const literalYml = `
     - name: total
       type: long
@@ -996,7 +934,7 @@ describe('EPM template', () => {
     };
     const fields: Field[] = safeLoad(literalYml);
     const processedFields = processFields(fields);
-    const mappings = generateMappings(processedFields, { isIndexModeTimeSeries: true });
+    const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(expectedMapping);
   });
 
@@ -1169,6 +1107,7 @@ describe('EPM template', () => {
       ]);
       expect(esClient.indices.getDataStream).toBeCalledWith({
         name: 'test.*-*',
+        expand_wildcards: ['open', 'hidden'],
       });
       const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
       expect(putMappingsCall).toHaveLength(1);

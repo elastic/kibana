@@ -15,17 +15,16 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import type { CaseUI, CaseStatusWithAllStatus } from '../../../../common/ui/types';
 import * as i18n from '../../../common/translations';
 import { AllCasesList } from '../all_cases_list';
-import { casesQueryClient } from '../../cases_context/query_client';
 
 export interface AllCasesSelectorModalProps {
   hiddenStatuses?: CaseStatusWithAllStatus[];
   onRowClick?: (theCase?: CaseUI) => void;
-  onClose?: () => void;
+  onClose?: (theCase?: CaseUI, isCreateCase?: boolean) => void;
+  onCreateCaseClicked?: () => void;
 }
 
 const Modal = styled(EuiModal)`
@@ -39,24 +38,22 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
   ({ hiddenStatuses, onRowClick, onClose }) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
     const closeModal = useCallback(() => {
-      if (onClose) {
-        onClose();
-      }
+      onClose?.();
       setIsModalOpen(false);
     }, [onClose]);
 
     const onClick = useCallback(
-      (theCase?: CaseUI) => {
-        closeModal();
-        if (onRowClick) {
-          onRowClick(theCase);
-        }
+      (theCase?: CaseUI, isCreateCase?: boolean) => {
+        onClose?.(theCase, isCreateCase);
+        setIsModalOpen(false);
+
+        onRowClick?.(theCase);
       },
-      [closeModal, onRowClick]
+      [onClose, onRowClick]
     );
 
     return isModalOpen ? (
-      <QueryClientProvider client={casesQueryClient}>
+      <>
         <ReactQueryDevtools initialIsOpen={false} />
         <Modal onClose={closeModal} data-test-subj="all-cases-modal">
           <EuiModalHeader>
@@ -79,7 +76,7 @@ export const AllCasesSelectorModal = React.memo<AllCasesSelectorModalProps>(
             </EuiButtonEmpty>
           </EuiModalFooter>
         </Modal>
-      </QueryClientProvider>
+      </>
     ) : null;
   }
 );

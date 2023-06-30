@@ -10,12 +10,14 @@ import { useValues } from 'kea';
 import { EuiBreadcrumb } from '@elastic/eui';
 
 import {
-  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
-  WORKPLACE_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
+  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  ESRE_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
+  VECTOR_SEARCH_PLUGIN,
+  WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 
 import { stripLeadingSlash } from '../../../../common/strip_slashes';
@@ -137,5 +139,11 @@ export const useSearchExperiencesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =
     ...breadcrumbs,
   ]);
 
-export const useEnterpriseSearchEnginesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+export const useEnterpriseSearchApplicationsBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEnterpriseSearchBreadcrumbs(breadcrumbs);
+
+export const useEsreBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useEnterpriseSearchBreadcrumbs([{ text: ESRE_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
+
+export const useVectorSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useEnterpriseSearchBreadcrumbs([{ text: VECTOR_SEARCH_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);

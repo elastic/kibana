@@ -28,7 +28,6 @@ import {
   patchRule,
   fetchRules,
   fetchRuleById,
-  createPrepackagedRules,
   importRules,
   exportRules,
   getPrePackagedRulesStatus,
@@ -185,7 +184,7 @@ describe('Detections Rules API', () => {
         method: 'GET',
         query: {
           filter:
-            '(alert.attributes.name: "\\" OR (foo:bar)" OR alert.attributes.params.index: "\\" OR (foo:bar)" OR alert.attributes.params.threat.tactic.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.tactic.name: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.name: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.subtechnique.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.subtechnique.name: "\\" OR (foo:bar)")',
+            '(alert.attributes.name: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.index: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.tactic.id: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.tactic.name: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.id: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.name: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.subtechnique.id: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.subtechnique.name: "\\" \\OR \\(foo\\:bar\\)")',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -396,7 +395,7 @@ describe('Detections Rules API', () => {
         method: 'GET',
         query: {
           filter:
-            'alert.attributes.tags:("hello" AND "world") AND (alert.attributes.name: "ruleName" OR alert.attributes.params.index: "ruleName" OR alert.attributes.params.threat.tactic.id: "ruleName" OR alert.attributes.params.threat.tactic.name: "ruleName" OR alert.attributes.params.threat.technique.id: "ruleName" OR alert.attributes.params.threat.technique.name: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.id: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.name: "ruleName")',
+            '(alert.attributes.name: "ruleName" OR alert.attributes.params.index: "ruleName" OR alert.attributes.params.threat.tactic.id: "ruleName" OR alert.attributes.params.threat.tactic.name: "ruleName" OR alert.attributes.params.threat.technique.id: "ruleName" OR alert.attributes.params.threat.technique.name: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.id: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.name: "ruleName") AND alert.attributes.tags:("hello" AND "world")',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -432,34 +431,6 @@ describe('Detections Rules API', () => {
     test('happy path', async () => {
       const ruleResp = await fetchRuleById({ id: 'mySuperRuleId', signal: abortCtrl.signal });
       expect(ruleResp).toEqual(getRulesSchemaMock());
-    });
-  });
-
-  describe('createPrepackagedRules', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue({
-        rules_installed: 0,
-        rules_updated: 0,
-        timelines_installed: 0,
-        timelines_updated: 0,
-      });
-    });
-
-    test('check parameter url when creating pre-packaged rules', async () => {
-      await createPrepackagedRules();
-      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/prepackaged', {
-        method: 'PUT',
-      });
-    });
-    test('happy path', async () => {
-      const resp = await createPrepackagedRules();
-      expect(resp).toEqual({
-        rules_installed: 0,
-        rules_updated: 0,
-        timelines_installed: 0,
-        timelines_updated: 0,
-      });
     });
   });
 
@@ -848,7 +819,7 @@ describe('Detections Rules API', () => {
             mute_all: false,
           },
           {
-            id: '1',
+            id: '2',
             mute_all: false,
             active_snoozes: [],
             is_snoozed_until: '2023-04-24T19:31:46.765Z',
@@ -856,21 +827,19 @@ describe('Detections Rules API', () => {
         ],
       });
 
-      const result = await fetchRulesSnoozeSettings({ ids: ['id1'] });
+      const result = await fetchRulesSnoozeSettings({ ids: ['1', '2'] });
 
-      expect(result).toEqual([
-        {
-          id: '1',
+      expect(result).toEqual({
+        '1': {
           muteAll: false,
           activeSnoozes: [],
         },
-        {
-          id: '1',
+        '2': {
           muteAll: false,
           activeSnoozes: [],
           isSnoozedUntil: new Date('2023-04-24T19:31:46.765Z'),
         },
-      ]);
+      });
     });
   });
 });

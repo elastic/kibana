@@ -9,30 +9,31 @@
 import React, { ReactNode } from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { AlertsPopover } from './open_alerts_popover';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../../../../__mocks__/data_view';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 const Context = ({ children }: { children: ReactNode }) => <>{children}</>;
 
-const mount = (dataView = dataViewMock) =>
-  mountWithIntl(
+const mount = (dataView = dataViewMock) => {
+  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+  stateContainer.actions.setDataView(dataView);
+  return mountWithIntl(
     <KibanaContextProvider services={discoverServiceMock}>
       <AlertsPopover
-        searchSource={createSearchSourceMock({ index: dataView })}
+        stateContainer={stateContainer}
         anchorElement={document.createElement('div')}
-        savedQueryId={undefined}
         adHocDataViews={[]}
         services={discoverServiceMock}
-        updateDataViewList={jest.fn()}
         onClose={jest.fn()}
         I18nContext={Context}
       />
     </KibanaContextProvider>
   );
+};
 
 describe('OpenAlertsPopover', () => {
   it('should render with the create search threshold rule button disabled if the data view has no time field', () => {

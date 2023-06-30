@@ -170,9 +170,10 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                   compressed={false}
                   isDropdown={true}
                   isLoading={false}
+                  side="right"
                 >
                   <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                   >
                     <EuiFormControlLayoutCustomIcon
                       size="m"
@@ -1135,9 +1136,10 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                                 compressed={false}
                                 isDropdown={true}
                                 isLoading={false}
+                                side="right"
                               >
                                 <div
-                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                                 >
                                   <EuiFormControlLayoutCustomIcon
                                     size="m"
@@ -1934,9 +1936,10 @@ exports[`CronEditor is rendered with a DAY frequency 1`] = `
                                 compressed={false}
                                 isDropdown={true}
                                 isLoading={false}
+                                side="right"
                               >
                                 <div
-                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                                 >
                                   <EuiFormControlLayoutCustomIcon
                                     size="m"
@@ -2149,9 +2152,10 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
                   compressed={false}
                   isDropdown={true}
                   isLoading={false}
+                  side="right"
                 >
                   <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                   >
                     <EuiFormControlLayoutCustomIcon
                       size="m"
@@ -3137,9 +3141,10 @@ exports[`CronEditor is rendered with a HOUR frequency 1`] = `
                     compressed={false}
                     isDropdown={true}
                     isLoading={false}
+                    side="right"
                   >
                     <div
-                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                     >
                       <EuiFormControlLayoutCustomIcon
                         size="m"
@@ -3346,9 +3351,10 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
                   compressed={false}
                   isDropdown={true}
                   isLoading={false}
+                  side="right"
                 >
                   <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                   >
                     <EuiFormControlLayoutCustomIcon
                       size="m"
@@ -3381,6 +3387,995 @@ exports[`CronEditor is rendered with a MINUTE frequency 1`] = `
       </div>
     </div>
   </EuiFormRow>
+  <CronMinutely
+    minute="10"
+    minuteOptions={
+      Array [
+        Object {
+          "text": "1",
+          "value": "*/1",
+        },
+        Object {
+          "text": "2",
+          "value": "*/2",
+        },
+        Object {
+          "text": "3",
+          "value": "*/3",
+        },
+        Object {
+          "text": "4",
+          "value": "*/4",
+        },
+        Object {
+          "text": "5",
+          "value": "*/5",
+        },
+        Object {
+          "text": "6",
+          "value": "*/6",
+        },
+        Object {
+          "text": "7",
+          "value": "*/7",
+        },
+        Object {
+          "text": "8",
+          "value": "*/8",
+        },
+        Object {
+          "text": "9",
+          "value": "*/9",
+        },
+        Object {
+          "text": "10",
+          "value": "*/10",
+        },
+        Object {
+          "text": "11",
+          "value": "*/11",
+        },
+        Object {
+          "text": "12",
+          "value": "*/12",
+        },
+        Object {
+          "text": "13",
+          "value": "*/13",
+        },
+        Object {
+          "text": "14",
+          "value": "*/14",
+        },
+        Object {
+          "text": "15",
+          "value": "*/15",
+        },
+        Object {
+          "text": "16",
+          "value": "*/16",
+        },
+        Object {
+          "text": "17",
+          "value": "*/17",
+        },
+        Object {
+          "text": "18",
+          "value": "*/18",
+        },
+        Object {
+          "text": "19",
+          "value": "*/19",
+        },
+        Object {
+          "text": "20",
+          "value": "*/20",
+        },
+        Object {
+          "text": "21",
+          "value": "*/21",
+        },
+        Object {
+          "text": "22",
+          "value": "*/22",
+        },
+        Object {
+          "text": "23",
+          "value": "*/23",
+        },
+        Object {
+          "text": "24",
+          "value": "*/24",
+        },
+        Object {
+          "text": "25",
+          "value": "*/25",
+        },
+        Object {
+          "text": "26",
+          "value": "*/26",
+        },
+        Object {
+          "text": "27",
+          "value": "*/27",
+        },
+        Object {
+          "text": "28",
+          "value": "*/28",
+        },
+        Object {
+          "text": "29",
+          "value": "*/29",
+        },
+        Object {
+          "text": "30",
+          "value": "*/30",
+        },
+        Object {
+          "text": "31",
+          "value": "*/31",
+        },
+        Object {
+          "text": "32",
+          "value": "*/32",
+        },
+        Object {
+          "text": "33",
+          "value": "*/33",
+        },
+        Object {
+          "text": "34",
+          "value": "*/34",
+        },
+        Object {
+          "text": "35",
+          "value": "*/35",
+        },
+        Object {
+          "text": "36",
+          "value": "*/36",
+        },
+        Object {
+          "text": "37",
+          "value": "*/37",
+        },
+        Object {
+          "text": "38",
+          "value": "*/38",
+        },
+        Object {
+          "text": "39",
+          "value": "*/39",
+        },
+        Object {
+          "text": "40",
+          "value": "*/40",
+        },
+        Object {
+          "text": "41",
+          "value": "*/41",
+        },
+        Object {
+          "text": "42",
+          "value": "*/42",
+        },
+        Object {
+          "text": "43",
+          "value": "*/43",
+        },
+        Object {
+          "text": "44",
+          "value": "*/44",
+        },
+        Object {
+          "text": "45",
+          "value": "*/45",
+        },
+        Object {
+          "text": "46",
+          "value": "*/46",
+        },
+        Object {
+          "text": "47",
+          "value": "*/47",
+        },
+        Object {
+          "text": "48",
+          "value": "*/48",
+        },
+        Object {
+          "text": "49",
+          "value": "*/49",
+        },
+        Object {
+          "text": "50",
+          "value": "*/50",
+        },
+        Object {
+          "text": "51",
+          "value": "*/51",
+        },
+        Object {
+          "text": "52",
+          "value": "*/52",
+        },
+        Object {
+          "text": "53",
+          "value": "*/53",
+        },
+        Object {
+          "text": "54",
+          "value": "*/54",
+        },
+        Object {
+          "text": "55",
+          "value": "*/55",
+        },
+        Object {
+          "text": "56",
+          "value": "*/56",
+        },
+        Object {
+          "text": "57",
+          "value": "*/57",
+        },
+        Object {
+          "text": "58",
+          "value": "*/58",
+        },
+        Object {
+          "text": "59",
+          "value": "*/59",
+        },
+      ]
+    }
+    onChange={[Function]}
+  >
+    <EuiFormRow
+      data-test-subj="cronFrequencyConfiguration"
+      describedByIds={Array []}
+      display="row"
+      fullWidth={true}
+      hasChildLabel={true}
+      hasEmptyLabelSpace={false}
+      label={
+        <FormattedMessage
+          defaultMessage="Minute"
+          id="xpack.enterpriseSearch.cronEditor.cronMinutely.fieldTimeLabel"
+          values={Object {}}
+        />
+      }
+      labelType="label"
+    >
+      <div
+        className="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
+        data-test-subj="cronFrequencyConfiguration"
+        id="generated-id-row"
+      >
+        <div
+          className="euiFormRow__labelWrapper"
+        >
+          <EuiFormLabel
+            className="euiFormRow__label"
+            htmlFor="generated-id"
+            id="generated-id-label"
+            isFocused={false}
+            type="label"
+          >
+            <label
+              className="euiFormLabel euiFormRow__label"
+              htmlFor="generated-id"
+              id="generated-id-label"
+            >
+              <FormattedMessage
+                defaultMessage="Minute"
+                id="xpack.enterpriseSearch.cronEditor.cronMinutely.fieldTimeLabel"
+                values={Object {}}
+              >
+                Minute
+              </FormattedMessage>
+            </label>
+          </EuiFormLabel>
+        </div>
+        <div
+          className="euiFormRow__fieldWrapper"
+        >
+          <EuiSelect
+            append="minutes"
+            data-test-subj="cronFrequencyMinutelyMinuteSelect"
+            fullWidth={true}
+            id="generated-id"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            options={
+              Array [
+                Object {
+                  "text": "1",
+                  "value": "*/1",
+                },
+                Object {
+                  "text": "2",
+                  "value": "*/2",
+                },
+                Object {
+                  "text": "3",
+                  "value": "*/3",
+                },
+                Object {
+                  "text": "4",
+                  "value": "*/4",
+                },
+                Object {
+                  "text": "5",
+                  "value": "*/5",
+                },
+                Object {
+                  "text": "6",
+                  "value": "*/6",
+                },
+                Object {
+                  "text": "7",
+                  "value": "*/7",
+                },
+                Object {
+                  "text": "8",
+                  "value": "*/8",
+                },
+                Object {
+                  "text": "9",
+                  "value": "*/9",
+                },
+                Object {
+                  "text": "10",
+                  "value": "*/10",
+                },
+                Object {
+                  "text": "11",
+                  "value": "*/11",
+                },
+                Object {
+                  "text": "12",
+                  "value": "*/12",
+                },
+                Object {
+                  "text": "13",
+                  "value": "*/13",
+                },
+                Object {
+                  "text": "14",
+                  "value": "*/14",
+                },
+                Object {
+                  "text": "15",
+                  "value": "*/15",
+                },
+                Object {
+                  "text": "16",
+                  "value": "*/16",
+                },
+                Object {
+                  "text": "17",
+                  "value": "*/17",
+                },
+                Object {
+                  "text": "18",
+                  "value": "*/18",
+                },
+                Object {
+                  "text": "19",
+                  "value": "*/19",
+                },
+                Object {
+                  "text": "20",
+                  "value": "*/20",
+                },
+                Object {
+                  "text": "21",
+                  "value": "*/21",
+                },
+                Object {
+                  "text": "22",
+                  "value": "*/22",
+                },
+                Object {
+                  "text": "23",
+                  "value": "*/23",
+                },
+                Object {
+                  "text": "24",
+                  "value": "*/24",
+                },
+                Object {
+                  "text": "25",
+                  "value": "*/25",
+                },
+                Object {
+                  "text": "26",
+                  "value": "*/26",
+                },
+                Object {
+                  "text": "27",
+                  "value": "*/27",
+                },
+                Object {
+                  "text": "28",
+                  "value": "*/28",
+                },
+                Object {
+                  "text": "29",
+                  "value": "*/29",
+                },
+                Object {
+                  "text": "30",
+                  "value": "*/30",
+                },
+                Object {
+                  "text": "31",
+                  "value": "*/31",
+                },
+                Object {
+                  "text": "32",
+                  "value": "*/32",
+                },
+                Object {
+                  "text": "33",
+                  "value": "*/33",
+                },
+                Object {
+                  "text": "34",
+                  "value": "*/34",
+                },
+                Object {
+                  "text": "35",
+                  "value": "*/35",
+                },
+                Object {
+                  "text": "36",
+                  "value": "*/36",
+                },
+                Object {
+                  "text": "37",
+                  "value": "*/37",
+                },
+                Object {
+                  "text": "38",
+                  "value": "*/38",
+                },
+                Object {
+                  "text": "39",
+                  "value": "*/39",
+                },
+                Object {
+                  "text": "40",
+                  "value": "*/40",
+                },
+                Object {
+                  "text": "41",
+                  "value": "*/41",
+                },
+                Object {
+                  "text": "42",
+                  "value": "*/42",
+                },
+                Object {
+                  "text": "43",
+                  "value": "*/43",
+                },
+                Object {
+                  "text": "44",
+                  "value": "*/44",
+                },
+                Object {
+                  "text": "45",
+                  "value": "*/45",
+                },
+                Object {
+                  "text": "46",
+                  "value": "*/46",
+                },
+                Object {
+                  "text": "47",
+                  "value": "*/47",
+                },
+                Object {
+                  "text": "48",
+                  "value": "*/48",
+                },
+                Object {
+                  "text": "49",
+                  "value": "*/49",
+                },
+                Object {
+                  "text": "50",
+                  "value": "*/50",
+                },
+                Object {
+                  "text": "51",
+                  "value": "*/51",
+                },
+                Object {
+                  "text": "52",
+                  "value": "*/52",
+                },
+                Object {
+                  "text": "53",
+                  "value": "*/53",
+                },
+                Object {
+                  "text": "54",
+                  "value": "*/54",
+                },
+                Object {
+                  "text": "55",
+                  "value": "*/55",
+                },
+                Object {
+                  "text": "56",
+                  "value": "*/56",
+                },
+                Object {
+                  "text": "57",
+                  "value": "*/57",
+                },
+                Object {
+                  "text": "58",
+                  "value": "*/58",
+                },
+                Object {
+                  "text": "59",
+                  "value": "*/59",
+                },
+              ]
+            }
+            prepend="Every"
+            value="10"
+          >
+            <EuiFormControlLayout
+              append="minutes"
+              compressed={false}
+              fullWidth={true}
+              inputId="generated-id"
+              isDropdown={true}
+              isLoading={false}
+              prepend="Every"
+            >
+              <div
+                className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+              >
+                <EuiFormLabel
+                  className="euiFormControlLayout__prepend"
+                  htmlFor="generated-id"
+                >
+                  <label
+                    className="euiFormLabel euiFormControlLayout__prepend"
+                    htmlFor="generated-id"
+                  >
+                    Every
+                  </label>
+                </EuiFormLabel>
+                <div
+                  className="euiFormControlLayout__childrenWrapper"
+                >
+                  <EuiValidatableControl>
+                    <select
+                      className="euiSelect euiFormControlLayout--1icons euiSelect--fullWidth euiSelect--inGroup"
+                      data-test-subj="cronFrequencyMinutelyMinuteSelect"
+                      id="generated-id"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      onMouseUp={[Function]}
+                      value="10"
+                    >
+                      <option
+                        key="0"
+                        value="*/1"
+                      >
+                        1
+                      </option>
+                      <option
+                        key="1"
+                        value="*/2"
+                      >
+                        2
+                      </option>
+                      <option
+                        key="2"
+                        value="*/3"
+                      >
+                        3
+                      </option>
+                      <option
+                        key="3"
+                        value="*/4"
+                      >
+                        4
+                      </option>
+                      <option
+                        key="4"
+                        value="*/5"
+                      >
+                        5
+                      </option>
+                      <option
+                        key="5"
+                        value="*/6"
+                      >
+                        6
+                      </option>
+                      <option
+                        key="6"
+                        value="*/7"
+                      >
+                        7
+                      </option>
+                      <option
+                        key="7"
+                        value="*/8"
+                      >
+                        8
+                      </option>
+                      <option
+                        key="8"
+                        value="*/9"
+                      >
+                        9
+                      </option>
+                      <option
+                        key="9"
+                        value="*/10"
+                      >
+                        10
+                      </option>
+                      <option
+                        key="10"
+                        value="*/11"
+                      >
+                        11
+                      </option>
+                      <option
+                        key="11"
+                        value="*/12"
+                      >
+                        12
+                      </option>
+                      <option
+                        key="12"
+                        value="*/13"
+                      >
+                        13
+                      </option>
+                      <option
+                        key="13"
+                        value="*/14"
+                      >
+                        14
+                      </option>
+                      <option
+                        key="14"
+                        value="*/15"
+                      >
+                        15
+                      </option>
+                      <option
+                        key="15"
+                        value="*/16"
+                      >
+                        16
+                      </option>
+                      <option
+                        key="16"
+                        value="*/17"
+                      >
+                        17
+                      </option>
+                      <option
+                        key="17"
+                        value="*/18"
+                      >
+                        18
+                      </option>
+                      <option
+                        key="18"
+                        value="*/19"
+                      >
+                        19
+                      </option>
+                      <option
+                        key="19"
+                        value="*/20"
+                      >
+                        20
+                      </option>
+                      <option
+                        key="20"
+                        value="*/21"
+                      >
+                        21
+                      </option>
+                      <option
+                        key="21"
+                        value="*/22"
+                      >
+                        22
+                      </option>
+                      <option
+                        key="22"
+                        value="*/23"
+                      >
+                        23
+                      </option>
+                      <option
+                        key="23"
+                        value="*/24"
+                      >
+                        24
+                      </option>
+                      <option
+                        key="24"
+                        value="*/25"
+                      >
+                        25
+                      </option>
+                      <option
+                        key="25"
+                        value="*/26"
+                      >
+                        26
+                      </option>
+                      <option
+                        key="26"
+                        value="*/27"
+                      >
+                        27
+                      </option>
+                      <option
+                        key="27"
+                        value="*/28"
+                      >
+                        28
+                      </option>
+                      <option
+                        key="28"
+                        value="*/29"
+                      >
+                        29
+                      </option>
+                      <option
+                        key="29"
+                        value="*/30"
+                      >
+                        30
+                      </option>
+                      <option
+                        key="30"
+                        value="*/31"
+                      >
+                        31
+                      </option>
+                      <option
+                        key="31"
+                        value="*/32"
+                      >
+                        32
+                      </option>
+                      <option
+                        key="32"
+                        value="*/33"
+                      >
+                        33
+                      </option>
+                      <option
+                        key="33"
+                        value="*/34"
+                      >
+                        34
+                      </option>
+                      <option
+                        key="34"
+                        value="*/35"
+                      >
+                        35
+                      </option>
+                      <option
+                        key="35"
+                        value="*/36"
+                      >
+                        36
+                      </option>
+                      <option
+                        key="36"
+                        value="*/37"
+                      >
+                        37
+                      </option>
+                      <option
+                        key="37"
+                        value="*/38"
+                      >
+                        38
+                      </option>
+                      <option
+                        key="38"
+                        value="*/39"
+                      >
+                        39
+                      </option>
+                      <option
+                        key="39"
+                        value="*/40"
+                      >
+                        40
+                      </option>
+                      <option
+                        key="40"
+                        value="*/41"
+                      >
+                        41
+                      </option>
+                      <option
+                        key="41"
+                        value="*/42"
+                      >
+                        42
+                      </option>
+                      <option
+                        key="42"
+                        value="*/43"
+                      >
+                        43
+                      </option>
+                      <option
+                        key="43"
+                        value="*/44"
+                      >
+                        44
+                      </option>
+                      <option
+                        key="44"
+                        value="*/45"
+                      >
+                        45
+                      </option>
+                      <option
+                        key="45"
+                        value="*/46"
+                      >
+                        46
+                      </option>
+                      <option
+                        key="46"
+                        value="*/47"
+                      >
+                        47
+                      </option>
+                      <option
+                        key="47"
+                        value="*/48"
+                      >
+                        48
+                      </option>
+                      <option
+                        key="48"
+                        value="*/49"
+                      >
+                        49
+                      </option>
+                      <option
+                        key="49"
+                        value="*/50"
+                      >
+                        50
+                      </option>
+                      <option
+                        key="50"
+                        value="*/51"
+                      >
+                        51
+                      </option>
+                      <option
+                        key="51"
+                        value="*/52"
+                      >
+                        52
+                      </option>
+                      <option
+                        key="52"
+                        value="*/53"
+                      >
+                        53
+                      </option>
+                      <option
+                        key="53"
+                        value="*/54"
+                      >
+                        54
+                      </option>
+                      <option
+                        key="54"
+                        value="*/55"
+                      >
+                        55
+                      </option>
+                      <option
+                        key="55"
+                        value="*/56"
+                      >
+                        56
+                      </option>
+                      <option
+                        key="56"
+                        value="*/57"
+                      >
+                        57
+                      </option>
+                      <option
+                        key="57"
+                        value="*/58"
+                      >
+                        58
+                      </option>
+                      <option
+                        key="58"
+                        value="*/59"
+                      >
+                        59
+                      </option>
+                    </select>
+                  </EuiValidatableControl>
+                  <EuiFormControlLayoutIcons
+                    compressed={false}
+                    isDropdown={true}
+                    isLoading={false}
+                    side="right"
+                  >
+                    <div
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
+                    >
+                      <EuiFormControlLayoutCustomIcon
+                        size="m"
+                        type="arrowDown"
+                      >
+                        <span
+                          className="euiFormControlLayoutCustomIcon"
+                        >
+                          <EuiIcon
+                            aria-hidden="true"
+                            className="euiFormControlLayoutCustomIcon__icon"
+                            size="m"
+                            type="arrowDown"
+                          >
+                            <span
+                              aria-hidden="true"
+                              className="euiFormControlLayoutCustomIcon__icon"
+                              data-euiicon-type="arrowDown"
+                              size="m"
+                            />
+                          </EuiIcon>
+                        </span>
+                      </EuiFormControlLayoutCustomIcon>
+                    </div>
+                  </EuiFormControlLayoutIcons>
+                </div>
+                <EuiFormLabel
+                  className="euiFormControlLayout__append"
+                  htmlFor="generated-id"
+                >
+                  <label
+                    className="euiFormLabel euiFormControlLayout__append"
+                    htmlFor="generated-id"
+                  >
+                    minutes
+                  </label>
+                </EuiFormLabel>
+              </div>
+            </EuiFormControlLayout>
+          </EuiSelect>
+        </div>
+      </div>
+    </EuiFormRow>
+  </CronMinutely>
 </CronEditor>
 `;
 
@@ -3554,9 +4549,10 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                   compressed={false}
                   isDropdown={true}
                   isLoading={false}
+                  side="right"
                 >
                   <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                   >
                     <EuiFormControlLayoutCustomIcon
                       size="m"
@@ -4482,9 +5478,10 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                     compressed={false}
                     isDropdown={true}
                     isLoading={false}
+                    side="right"
                   >
                     <div
-                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                     >
                       <EuiFormControlLayoutCustomIcon
                         size="m"
@@ -5114,9 +6111,10 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                                 compressed={false}
                                 isDropdown={true}
                                 isLoading={false}
+                                side="right"
                               >
                                 <div
-                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                                 >
                                   <EuiFormControlLayoutCustomIcon
                                     size="m"
@@ -5921,9 +6919,10 @@ exports[`CronEditor is rendered with a MONTH frequency 1`] = `
                                 compressed={false}
                                 isDropdown={true}
                                 isLoading={false}
+                                side="right"
                               >
                                 <div
-                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                                 >
                                   <EuiFormControlLayoutCustomIcon
                                     size="m"
@@ -6136,9 +7135,10 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                   compressed={false}
                   isDropdown={true}
                   isLoading={false}
+                  side="right"
                 >
                   <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                   >
                     <EuiFormControlLayoutCustomIcon
                       size="m"
@@ -6728,9 +7728,10 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                     compressed={false}
                     isDropdown={true}
                     isLoading={false}
+                    side="right"
                   >
                     <div
-                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                     >
                       <EuiFormControlLayoutCustomIcon
                         size="m"
@@ -7352,9 +8353,10 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                                 compressed={false}
                                 isDropdown={true}
                                 isLoading={false}
+                                side="right"
                               >
                                 <div
-                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                                 >
                                   <EuiFormControlLayoutCustomIcon
                                     size="m"
@@ -8155,9 +9157,10 @@ exports[`CronEditor is rendered with a WEEK frequency 1`] = `
                                 compressed={false}
                                 isDropdown={true}
                                 isLoading={false}
+                                side="right"
                               >
                                 <div
-                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                                 >
                                   <EuiFormControlLayoutCustomIcon
                                     size="m"
@@ -8370,9 +9373,10 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                   compressed={false}
                   isDropdown={true}
                   isLoading={false}
+                  side="right"
                 >
                   <div
-                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                   >
                     <EuiFormControlLayoutCustomIcon
                       size="m"
@@ -9161,9 +10165,10 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                     compressed={false}
                     isDropdown={true}
                     isLoading={false}
+                    side="right"
                   >
                     <div
-                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                     >
                       <EuiFormControlLayoutCustomIcon
                         size="m"
@@ -9611,9 +10616,10 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                     compressed={false}
                     isDropdown={true}
                     isLoading={false}
+                    side="right"
                   >
                     <div
-                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                     >
                       <EuiFormControlLayoutCustomIcon
                         size="m"
@@ -10251,9 +11257,10 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                                 compressed={false}
                                 isDropdown={true}
                                 isLoading={false}
+                                side="right"
                               >
                                 <div
-                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                                 >
                                   <EuiFormControlLayoutCustomIcon
                                     size="m"
@@ -11062,9 +12069,10 @@ exports[`CronEditor is rendered with a YEAR frequency 1`] = `
                                 compressed={false}
                                 isDropdown={true}
                                 isLoading={false}
+                                side="right"
                               >
                                 <div
-                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right euiFormControlLayoutIcons--absolute"
                                 >
                                   <EuiFormControlLayoutCustomIcon
                                     size="m"

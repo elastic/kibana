@@ -228,7 +228,7 @@ Object {
       "legend": Object {
         "isVisible": true,
         "legendSize": "xlarge",
-        "position": "left",
+        "position": "right",
       },
       "preferredSeriesType": "bar_stacked",
       "tickLabelsVisibilitySettings": Object {
@@ -237,6 +237,7 @@ Object {
         "yRight": true,
       },
       "valueLabels": "hide",
+      "valuesInLegend": true,
       "yLeftExtent": Object {
         "mode": "full",
       },

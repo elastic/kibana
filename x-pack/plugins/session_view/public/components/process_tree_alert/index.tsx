@@ -17,11 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_ICONS } from '../../../common/constants';
-import {
-  ProcessEvent,
-  ProcessEventAlert,
-  ProcessEventAlertCategory,
-} from '../../../common/types/process_tree';
+import type { ProcessEvent, ProcessEventAlert, ProcessEventAlertCategory } from '../../../common';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { getBadgeColorFromAlertStatus } from './helpers';
 import { useStyles } from './styles';
@@ -48,7 +44,7 @@ export const ProcessTreeAlert = ({
 
   const { event } = alert;
   const { uuid, rule, workflow_status: status } = alert.kibana?.alert || {};
-  const category = event?.category?.[0];
+  const category = event?.category?.[0] as ProcessEventAlertCategory;
   const alertIconType = useMemo(() => {
     if (category && category in ALERT_ICONS) return ALERT_ICONS[category];
     return ALERT_ICONS.process;
@@ -76,7 +72,7 @@ export const ProcessTreeAlert = ({
     return null;
   }
   const { name } = rule;
-  const processEventAlertCategory = category ?? ProcessEventAlertCategory.process;
+  const processEventAlertCategory: ProcessEventAlertCategory = category ?? 'process';
   const alertCategoryDetailDisplayText = getAlertCategoryDisplayText(alert, category);
   const alertIconTooltipContent = getAlertIconTooltipContent(processEventAlertCategory);
   const eventType = Array.isArray(event?.type) ? event?.type?.[0] : event?.type;

@@ -13,7 +13,7 @@ import path from 'path';
 
 import type { JobType, MlSavedObjectType } from '@kbn/ml-plugin/common/types/saved_objects';
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -176,7 +176,7 @@ export function MachineLearningStackManagementJobsProvider({
     async isSpaceSelectionRowSelected(spaceId: string): Promise<boolean> {
       const state = await testSubjects.getAttribute(
         `sts-space-selector-row-${spaceId}`,
-        'data-test-selected',
+        'aria-checked',
         1000
       );
       return state === 'true';
@@ -327,7 +327,7 @@ export function MachineLearningStackManagementJobsProvider({
 
     async getDownload(filePath: string) {
       return retry.tryForTime(5000, async () => {
-        expect(fs.existsSync(filePath)).to.be(true);
+        expect(fs.existsSync(filePath)).to.eql(true, `File path ${filePath} should exist`);
         return fs.readFileSync(filePath).toString();
       });
     },
@@ -357,8 +357,7 @@ export function MachineLearningStackManagementJobsProvider({
       const title: string = await titleElement.getVisibleText();
       expect(title).to.match(/^Your file is downloading in the background$/);
 
-      const dismissButton = await testSubjects.findDescendant('toastCloseButton', resultToast);
-      await dismissButton.click();
+      await toasts.dismissAllToastsWithChecks();
 
       // check that the flyout is closed
       await testSubjects.missingOrFail('mlJobMgmtExportJobsFlyout', { timeout: 60 * 1000 });

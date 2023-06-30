@@ -9,7 +9,6 @@ import * as t from 'io-ts';
 
 import type { CreateRuleExceptionListItemSchemaDecoded } from '@kbn/securitysolution-io-ts-list-types';
 import { createRuleExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import type { RequiredKeepUndefined } from '@kbn/osquery-plugin/common/types';
 
 import { RuleObjectId } from '../../../rule_schema';
 
@@ -39,7 +38,7 @@ export const CreateRuleExceptionsRequestBody = t.exact(
  * This type is used after a decode since some things are defaults after a decode.
  */
 export type CreateRuleExceptionsRequestBodyDecoded = Omit<
-  RequiredKeepUndefined<CreateRuleExceptionsRequestBody>,
+  CreateRuleExceptionsRequestBody,
   'items'
 > & {
   items: CreateRuleExceptionListItemSchemaDecoded[];

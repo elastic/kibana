@@ -150,14 +150,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await aiops.explainLogRateSpikesPage.clickRerunAnalysisButton(true);
       }
 
-      await aiops.explainLogRateSpikesPage.assertProgressTitle('Progress: 100% — Done.');
+      await aiops.explainLogRateSpikesPage.assertAnalysisComplete();
 
       // The group switch should be disabled by default
       await aiops.explainLogRateSpikesPage.assertSpikeAnalysisGroupSwitchExists(false);
 
       if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
         // Enabled grouping
-        await aiops.explainLogRateSpikesPage.clickSpikeAnalysisGroupSwitch(false);
+        await aiops.explainLogRateSpikesPage.clickSpikeAnalysisGroupSwitchOn();
 
         await aiops.explainLogRateSpikesAnalysisGroupsTable.assertSpikeAnalysisTableExists();
 
@@ -221,13 +221,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           );
 
           await ml.testExecution.logTestStep('check log pattern analysis page loaded correctly');
-          await aiops.logPatternAnalysisPageProvider.assertLogCategorizationPageExists();
-          await aiops.logPatternAnalysisPageProvider.assertTotalDocumentCount(
+          await aiops.logPatternAnalysisPage.assertLogPatternAnalysisPageExists();
+          await aiops.logPatternAnalysisPage.assertTotalDocumentCount(
             testData.action.expected.totalDocCount
           );
-          await aiops.logPatternAnalysisPageProvider.assertQueryInput(
-            testData.action.expected.queryBar
-          );
+          await aiops.logPatternAnalysisPage.assertQueryInput(testData.action.expected.queryBar);
         }
       }
     });

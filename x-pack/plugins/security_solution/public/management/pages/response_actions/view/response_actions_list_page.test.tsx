@@ -137,7 +137,7 @@ describe('Response actions history page', () => {
     ({ history } = mockedContext);
     render = () => (renderResult = mockedContext.render(<ResponseActionsListPage />));
     reactTestingLibrary.act(() => {
-      history.push(`${MANAGEMENT_PATH}/response_actions`);
+      history.push(`${MANAGEMENT_PATH}/response_actions_history`);
     });
 
     mockUseGetEndpointActionList = {
@@ -168,7 +168,7 @@ describe('Response actions history page', () => {
   describe('Hide/Show header', () => {
     it('should show header when data is in', () => {
       reactTestingLibrary.act(() => {
-        history.push('/administration/response_actions_history?page=3&pageSize=20');
+        history.push(`${MANAGEMENT_PATH}/response_actions_history?page=3&pageSize=20`);
       });
       render();
       const { getByTestId } = renderResult;
@@ -177,7 +177,7 @@ describe('Response actions history page', () => {
 
     it('should not show header when there is no actions index', () => {
       reactTestingLibrary.act(() => {
-        history.push('/administration/response_actions_history?page=3&pageSize=20');
+        history.push(`${MANAGEMENT_PATH}/response_actions_history?page=3&pageSize=20`);
       });
       mockUseGetEndpointActionList = {
         ...baseMockedActionList,
@@ -194,7 +194,7 @@ describe('Response actions history page', () => {
   describe('Read from URL params', () => {
     it('should read and set paging values from URL params', () => {
       reactTestingLibrary.act(() => {
-        history.push('/administration/response_actions_history?page=3&pageSize=20');
+        history.push(`${MANAGEMENT_PATH}/response_actions_history?page=3&pageSize=20`);
       });
       render();
       const { getByTestId } = renderResult;
@@ -207,7 +207,7 @@ describe('Response actions history page', () => {
     it('should read and set command filter values from URL params', () => {
       const filterPrefix = 'actions-filter';
       reactTestingLibrary.act(() => {
-        history.push('/administration/response_actions_history?commands=release,processes');
+        history.push(`${MANAGEMENT_PATH}/response_actions_history?commands=release,processes`);
       });
 
       render();
@@ -223,7 +223,10 @@ describe('Response actions history page', () => {
       }, []);
 
       expect(selectedFilterOptions.length).toEqual(2);
-      expect(selectedFilterOptions).toEqual(['release', 'processes']);
+      expect(selectedFilterOptions).toEqual([
+        'release. Checked option. To uncheck this option, press Enter.',
+        'processes. Checked option. To uncheck this option, press Enter.',
+      ]);
       expect(history.location.search).toEqual('?commands=release,processes');
     });
 
@@ -244,7 +247,7 @@ describe('Response actions history page', () => {
       const filterPrefix = 'hosts-filter';
       reactTestingLibrary.act(() => {
         history.push(
-          '/administration/response_actions_history?hosts=agent-id-1,agent-id-2,agent-id-4,agent-id-5'
+          `${MANAGEMENT_PATH}/response_actions_history?hosts=agent-id-1,agent-id-2,agent-id-4,agent-id-5`
         );
       });
 
@@ -263,10 +266,10 @@ describe('Response actions history page', () => {
 
       expect(selectedFilterOptions.length).toEqual(4);
       expect(selectedFilterOptions).toEqual([
-        'Host-name-0',
-        'Host-name-1',
-        'Host-name-3',
-        'Host-name-5',
+        'Host-name-0. Checked option. To uncheck this option, press Enter.',
+        'Host-name-1. Checked option. To uncheck this option, press Enter.',
+        'Host-name-3. Checked option. To uncheck this option, press Enter.',
+        'Host-name-5. Checked option. To uncheck this option, press Enter.',
       ]);
       expect(history.location.search).toEqual('?hosts=agent-id-1,agent-id-2,agent-id-4,agent-id-5');
     });
@@ -274,7 +277,7 @@ describe('Response actions history page', () => {
     it('should read and set status filter values from URL params', () => {
       const filterPrefix = 'statuses-filter';
       reactTestingLibrary.act(() => {
-        history.push('/administration/response_actions_history?statuses=pending,failed');
+        history.push(`${MANAGEMENT_PATH}/response_actions_history?statuses=pending,failed`);
       });
 
       render();
@@ -290,14 +293,17 @@ describe('Response actions history page', () => {
       }, []);
 
       expect(selectedFilterOptions.length).toEqual(2);
-      expect(selectedFilterOptions).toEqual(['Failed', 'Pending']);
+      expect(selectedFilterOptions).toEqual([
+        'Failed. Checked option.',
+        'Pending. Checked option.',
+      ]);
       expect(history.location.search).toEqual('?statuses=pending,failed');
     });
 
     it('should set selected users search input strings to URL params ', () => {
       const filterPrefix = 'users-filter';
       reactTestingLibrary.act(() => {
-        history.push('/administration/response_actions_history?users=userX,userY');
+        history.push(`${MANAGEMENT_PATH}/response_actions_history?users=userX,userY`);
       });
 
       render();
@@ -309,7 +315,9 @@ describe('Response actions history page', () => {
 
     it('should read and set relative date ranges filter values from URL params', () => {
       reactTestingLibrary.act(() => {
-        history.push('/administration/response_actions_history?startDate=now-23m&endDate=now-1m');
+        history.push(
+          `${MANAGEMENT_PATH}/response_actions_history?startDate=now-23m&endDate=now-1m`
+        );
       });
 
       render();
@@ -329,7 +337,7 @@ describe('Response actions history page', () => {
       const endDate = '2022-09-12T11:30:33.000Z';
       reactTestingLibrary.act(() => {
         history.push(
-          `/administration/response_actions_history?startDate=${startDate}&endDate=${endDate}`
+          `${MANAGEMENT_PATH}/response_actions_history?startDate=${startDate}&endDate=${endDate}`
         );
       });
 
@@ -342,6 +350,42 @@ describe('Response actions history page', () => {
         'Sep 12, 2022 @ 07:30:33.000'
       );
       expect(history.location.search).toEqual(`?startDate=${startDate}&endDate=${endDate}`);
+    });
+
+    it('should read and expand actions using `withOutputs`', () => {
+      const allActionIds = mockUseGetEndpointActionList.data?.data.map((action) => action.id) ?? [];
+      // select 5 actions to show details
+      const actionIdsWithDetails = allActionIds.filter((_, i) => [0, 2, 3, 4, 5].includes(i));
+      reactTestingLibrary.act(() => {
+        // load page 1 but with expanded actions.
+        history.push(
+          `${MANAGEMENT_PATH}/response_actions_history?withOutputs=${actionIdsWithDetails.join(
+            ','
+          )}&page=1&pageSize=10`
+        );
+      });
+
+      const { getByTestId, getAllByTestId } = render();
+
+      // verify on page 1
+      expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+        'Showing 1-10 of 43 response actions'
+      );
+
+      const traysOnPage1 = getAllByTestId(`${testPrefix}-details-tray`);
+      const expandButtonsOnPage1 = getAllByTestId(`${testPrefix}-expand-button`);
+      const expandedButtons = expandButtonsOnPage1.reduce<number[]>((acc, button, i) => {
+        // find expanded rows
+        if (button.getAttribute('aria-label') === 'Collapse') {
+          acc.push(i);
+        }
+        return acc;
+      }, []);
+
+      // verify 5 rows are expanded
+      expect(traysOnPage1.length).toEqual(5);
+      // verify 5 rows that are expanded are the ones from before
+      expect(expandedButtons).toEqual([0, 2, 3, 4, 5]);
     });
   });
 
@@ -379,7 +423,7 @@ describe('Response actions history page', () => {
       });
 
       expect(history.location.search).toEqual(
-        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute'
+        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file%2Cexecute%2Cupload'
       );
     });
 
@@ -441,6 +485,34 @@ describe('Response actions history page', () => {
       expect(startDatePopoverButton).toHaveTextContent('Last 15 minutes');
 
       expect(history.location.search).toEqual('?endDate=now&startDate=now-15m');
+    });
+
+    it('should set actionIds using `withOutputs` to URL params ', async () => {
+      const allActionIds = mockUseGetEndpointActionList.data?.data.map((action) => action.id) ?? [];
+      const actionIdsWithDetails = allActionIds
+        .reduce<string[]>((acc, e, i) => {
+          if ([0, 1].includes(i)) {
+            acc.push(e);
+          }
+          return acc;
+        }, [])
+        .join()
+        .split(',')
+        .join('%2C');
+
+      render();
+      const { getAllByTestId } = renderResult;
+
+      const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
+      // expand some rows
+      expandButtons.forEach((button, i) => {
+        if ([0, 1].includes(i)) {
+          userEvent.click(button);
+        }
+      });
+
+      // verify 2 rows are expanded and are the ones from before
+      expect(history.location.search).toEqual(`?withOutputs=${actionIdsWithDetails}`);
     });
   });
 });

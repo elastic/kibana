@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
+import type { CommentAttributes } from '../../../common/api';
+import { CommentAttributesRt, CommentPatchAttributesRt } from '../../../common/api';
 import type { User } from './user';
 
 interface AttachmentCommonPersistedAttributes {
@@ -46,3 +49,9 @@ export interface AttachmentRequestAttributes {
 
 export type AttachmentPersistedAttributes = AttachmentRequestAttributes &
   AttachmentCommonPersistedAttributes;
+
+export type AttachmentTransformedAttributes = CommentAttributes;
+export type AttachmentSavedObjectTransformed = SavedObject<AttachmentTransformedAttributes>;
+
+export const AttachmentTransformedAttributesRt = CommentAttributesRt;
+export const AttachmentPartialAttributesRt = CommentPatchAttributesRt;

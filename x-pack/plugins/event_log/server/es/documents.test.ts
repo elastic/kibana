@@ -24,12 +24,10 @@ describe('getIndexTemplate()', () => {
 
   test('returns the correct details of the index template', () => {
     const indexTemplate = getIndexTemplate(esNames);
-    expect(indexTemplate.index_patterns).toEqual([esNames.indexPatternWithVersion]);
+    expect(indexTemplate.index_patterns).toEqual([esNames.dataStream]);
     expect(indexTemplate.template.settings.number_of_shards).toBeGreaterThanOrEqual(0);
     expect(indexTemplate.template.settings.auto_expand_replicas).toBe('0-1');
     expect(indexTemplate.template.settings['index.lifecycle.name']).toBe(esNames.ilmPolicy);
-    expect(indexTemplate.template.settings['index.lifecycle.rollover_alias']).toBe(esNames.alias);
-    expect(indexTemplate.template.settings['index.hidden']).toBe(true);
     expect(indexTemplate.template.mappings).toMatchObject({});
   });
 });

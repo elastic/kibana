@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit, pickBy, mapValues } from 'lodash';
 import { buildRangeFilter, Filter } from '@kbn/es-query';
 import {
   DataView,
@@ -186,12 +187,15 @@ async function generateLink(
   const updatedFilters = updateFilterReferences(prevFilters, dataViewToUpdate.id!, newDataView.id!);
 
   const redirectUrlParams: DiscoverAppLocatorParams = {
-    dataViewSpec: newDataView.toSpec(false),
+    dataViewSpec: getSmallerDataViewSpec(newDataView),
     filters: updatedFilters,
     query: searchSource.getField('query'),
     timeRange: { from: dateStart, to: dateEnd },
     isAlertResults: true,
   };
+
+  // use `lzCompress` flag for making the link readable during debugging/testing
+  // const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { lzCompress: false });
   const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
   const [start, end] = redirectUrl.split('/app');
 
@@ -212,4 +216,24 @@ function updateFilterReferences(filters: Filter[], fromDataView: string, toDataV
       return filter;
     }
   });
+}
+
+export function getSmallerDataViewSpec(
+  dataView: DataView
+): DiscoverAppLocatorParams['dataViewSpec'] {
+  const dataViewSpec = dataView.toSpec(false);
+
+  if (dataViewSpec.fieldAttrs) {
+    // remove `count` props
+    dataViewSpec.fieldAttrs = pickBy(
+      mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => omit(fieldAttrs, 'count')),
+      (trimmedFieldAttrs) => Object.keys(trimmedFieldAttrs).length > 0
+    );
+
+    if (Object.keys(dataViewSpec.fieldAttrs).length === 0) {
+      dataViewSpec.fieldAttrs = undefined;
+    }
+  }
+
+  return dataViewSpec;
 }

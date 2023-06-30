@@ -22,11 +22,11 @@ type MockAuthzOptions =
       };
     };
 
-const actions = new Actions('1.0.0-zeta1');
+const actions = new Actions();
 const mockRequest = httpServerMock.createKibanaRequest();
 
 const createMockAuthz = (options: MockAuthzOptions) => {
-  const mock = authorizationMock.create({ version: '1.0.0-zeta1' });
+  const mock = authorizationMock.create();
   // plug actual ui actions into mock Actions with
   mock.actions = actions;
 

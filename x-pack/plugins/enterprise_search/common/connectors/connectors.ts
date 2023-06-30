@@ -11,12 +11,53 @@ export interface ConnectorServerSideDefinition {
   iconPath: string;
   isBeta: boolean;
   isNative: boolean;
+  isTechPreview?: boolean;
   keywords: string[];
   name: string;
   serviceType: string;
 }
 
 export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
+  {
+    iconPath: 'azure_blob_storage.svg',
+    isBeta: true,
+    isNative: true,
+    keywords: ['cloud', 'azure', 'blob', 's3', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.azureBlob.name', {
+      defaultMessage: 'Azure Blob Storage',
+    }),
+    serviceType: 'azure_blob_storage',
+  },
+  {
+    iconPath: 'confluence_cloud.svg',
+    isBeta: true,
+    isNative: true,
+    keywords: ['confluence', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.confluence.name', {
+      defaultMessage: 'Confluence Cloud & Server',
+    }),
+    serviceType: 'confluence',
+  },
+  {
+    iconPath: 'jira_cloud.svg',
+    isBeta: true,
+    isNative: true,
+    keywords: ['jira', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.jira.name', {
+      defaultMessage: 'Jira Cloud & Server',
+    }),
+    serviceType: 'jira',
+  },
+  {
+    iconPath: 'google_cloud_storage.svg',
+    isBeta: true,
+    isNative: true,
+    keywords: ['google', 'cloud', 'blob', 's3', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.googleCloud.name', {
+      defaultMessage: 'Google Cloud Storage',
+    }),
+    serviceType: 'google_cloud_storage',
+  },
   {
     iconPath: 'mongodb.svg',
     isBeta: false,
@@ -38,29 +79,9 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'mysql',
   },
   {
-    iconPath: 'azure_blob_storage.svg',
-    isBeta: true,
-    isNative: false,
-    keywords: ['cloud', 'azure', 'blob', 's3', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.azureBlob.name', {
-      defaultMessage: 'Azure Blob Storage',
-    }),
-    serviceType: 'azure_blob_storage',
-  },
-  {
-    iconPath: 'google_cloud_storage.svg',
-    isBeta: true,
-    isNative: false,
-    keywords: ['google', 'cloud', 'blob', 's3', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.googleCloud.name', {
-      defaultMessage: 'Google Cloud Storage',
-    }),
-    serviceType: 'google_cloud_storage',
-  },
-  {
     iconPath: 'mssql.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     keywords: ['mssql', 'microsoft', 'sql', 'database', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.microsoftSQL.name', {
       defaultMessage: 'Microsoft SQL',
@@ -70,12 +91,55 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'network_drive.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     keywords: ['network', 'drive', 'file', 'directory', 'connector'],
     name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.networkDrive.name', {
       defaultMessage: 'Network drive',
     }),
     serviceType: 'network_drive',
+  },
+  {
+    iconPath: 'postgresql.svg',
+    isBeta: true,
+    isNative: true,
+    keywords: ['postgresql', 'sql', 'database', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.postgresql.name', {
+      defaultMessage: 'PostgreSQL',
+    }),
+    serviceType: 'postgresql',
+  },
+  {
+    iconPath: 'sharepoint_online.svg',
+    isBeta: false,
+    isNative: true,
+    isTechPreview: false,
+    keywords: ['sharepoint', 'office365', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.sharepoint_online.name', {
+      defaultMessage: 'Sharepoint Online',
+    }),
+    serviceType: 'sharepoint_online',
+  },
+  {
+    iconPath: 'dropbox.svg',
+    isBeta: true,
+    isNative: false,
+    isTechPreview: false,
+    keywords: ['dropbox', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.dropbox.name', {
+      defaultMessage: 'Dropbox',
+    }),
+    serviceType: 'dropbox',
+  },
+  {
+    iconPath: 'github.svg',
+    isBeta: true,
+    isNative: false,
+    isTechPreview: false,
+    keywords: ['github', 'cloud', 'server', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.github.name', {
+      defaultMessage: 'GitHub',
+    }),
+    serviceType: 'github',
   },
   {
     iconPath: 'oracle.svg',
@@ -88,16 +152,6 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'oracle',
   },
   {
-    iconPath: 'postgresql.svg',
-    isBeta: true,
-    isNative: false,
-    keywords: ['postgresql', 'sql', 'database', 'connector'],
-    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.postgresql.name', {
-      defaultMessage: 'Postgresql',
-    }),
-    serviceType: 'postgresql',
-  },
-  {
     iconPath: 's3.svg',
     isBeta: true,
     isNative: false,
@@ -106,6 +160,17 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       defaultMessage: 'S3',
     }),
     serviceType: 's3',
+  },
+  {
+    iconPath: 'sharepoint_server.svg',
+    isBeta: true,
+    isNative: false,
+    isTechPreview: false,
+    keywords: ['sharepoint', 'cloud', 'connector'],
+    name: i18n.translate('xpack.enterpriseSearch.content.nativeConnectors.sharepointServer.name', {
+      defaultMessage: 'Sharepoint Server',
+    }),
+    serviceType: 'sharepoint_server',
   },
   {
     iconPath: 'custom.svg',

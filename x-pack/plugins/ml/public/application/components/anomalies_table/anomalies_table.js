@@ -205,6 +205,10 @@ export class AnomaliesTableInternal extends Component {
       this.props.sourceIndicesWithGeoFields
     );
 
+    // Use auto table layout, unless any columns (categorization examples) have truncateText
+    // set to true which only works with a fixed layout.
+    const tableLayout = columns.some((column) => column.truncateText === true) ? 'fixed' : 'auto';
+
     const sorting = {
       sort: {
         field: tableState.sortField,
@@ -237,6 +241,7 @@ export class AnomaliesTableInternal extends Component {
           className="ml-anomalies-table eui-textBreakWord"
           items={tableData.anomalies}
           columns={columns}
+          tableLayout={tableLayout}
           pagination={pagination}
           sorting={sorting}
           itemId="rowId"

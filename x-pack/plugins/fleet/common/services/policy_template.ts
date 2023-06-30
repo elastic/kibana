@@ -28,6 +28,17 @@ const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
   show_user: true,
 };
 
+export function packageHasNoPolicyTemplates(packageInfo: PackageInfo): boolean {
+  return (
+    !packageInfo.policy_templates ||
+    packageInfo.policy_templates.length === 0 ||
+    !packageInfo.policy_templates.find(
+      (policyTemplate) =>
+        isInputOnlyPolicyTemplate(policyTemplate) ||
+        (policyTemplate.inputs && policyTemplate.inputs.length > 0)
+    )
+  );
+}
 export function isInputOnlyPolicyTemplate(
   policyTemplate: RegistryPolicyTemplate
 ): policyTemplate is RegistryPolicyInputOnlyTemplate {
@@ -76,7 +87,7 @@ export const getNormalizedDataStreams = (
       release: packageInfo.release || 'ga',
       package: packageInfo.name,
       path: packageInfo.name,
-      elasticsearch: packageInfo.elasticsearch,
+      elasticsearch: packageInfo.elasticsearch || {},
       streams: [
         {
           input: policyTemplate.input,
@@ -88,6 +99,16 @@ export const getNormalizedDataStreams = (
         },
       ],
     };
+
+    if (packageInfo.type === 'input') {
+      dataStream.elasticsearch = {
+        ...dataStream.elasticsearch,
+        ...{
+          dynamic_dataset: true,
+          dynamic_namespace: true,
+        },
+      };
+    }
 
     return dataStream;
   });

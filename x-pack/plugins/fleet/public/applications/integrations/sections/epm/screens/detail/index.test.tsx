@@ -20,10 +20,7 @@ import type {
   GetSettingsResponse,
   GetVerificationKeyIdResponse,
 } from '../../../../../../../common/types/rest_spec';
-import type {
-  DetailViewPanelName,
-  KibanaAssetType,
-} from '../../../../../../../common/types/models';
+import type { KibanaAssetType } from '../../../../../../../common/types/models';
 import {
   agentPolicyRouteService,
   appRoutesService,
@@ -36,9 +33,11 @@ import { createIntegrationsTestRendererMock } from '../../../../../../mock';
 
 import { ExperimentalFeaturesService } from '../../../../services';
 
+import type { DetailViewPanelName } from '.';
+import { Detail } from '.';
+
 // @ts-ignore this saves us having to define all experimental features
 ExperimentalFeaturesService.init({});
-import { Detail } from '.';
 
 describe('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
@@ -46,6 +45,7 @@ describe('when on integration detail', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   let mockedApi: MockedApi<EpmPackageDetailsResponseProvidersMock>;
+
   const render = async () => {
     await act(async () => {
       renderResult = testRenderer.render(
@@ -67,16 +67,15 @@ describe('when on integration detail', () => {
   });
 
   describe('and the package is installed', () => {
-    beforeEach(async () => render());
+    beforeEach(async () => await render());
 
     it('should display agent policy usage count', async () => {
       await act(() => mockedApi.waitForApi());
-
       expect(renderResult.queryByTestId('agentPolicyCount')).not.toBeNull();
     });
 
     it('should show the Policies tab', async () => {
-      await mockedApi.waitForApi();
+      await act(() => mockedApi.waitForApi());
       expect(renderResult.queryByTestId('tab-policies')).not.toBeNull();
     });
   });
@@ -85,6 +84,7 @@ describe('when on integration detail', () => {
     const unInstalledPackage = mockedApi.responseProvider.epmGetInfo('nginx');
     unInstalledPackage.item.status = 'not_installed';
     unInstalledPackage.item.version = pkgVersion;
+
     mockedApi.responseProvider.epmGetInfo.mockImplementation((name, version, query) => {
       if (query?.prerelease === false) {
         const gaPackage = { item: { ...unInstalledPackage.item } };
@@ -95,7 +95,8 @@ describe('when on integration detail', () => {
     });
   }
 
-  describe('and the package is not installed and prerelease enabled', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/150607
+  describe.skip('and the package is not installed and prerelease enabled', () => {
     beforeEach(async () => {
       mockGAAndPrereleaseVersions('1.0.0-beta');
       await render();
@@ -783,6 +784,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         updated_at: '2020-12-09T13:46:31.840Z',
         updated_by: 'elastic',
         agents: 0,
+        is_protected: false,
       },
       {
         id: '125c1b70-3976-11eb-ad1c-3baa423085y6',
@@ -797,6 +799,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         updated_at: '2020-12-09T13:46:31.840Z',
         updated_by: 'elastic',
         agents: 100,
+        is_protected: false,
       },
     ],
     total: 2,

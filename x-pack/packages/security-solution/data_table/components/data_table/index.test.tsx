@@ -18,7 +18,7 @@ import { defaultHeaders } from '../../mock/header';
 import { mockGlobalState } from '../../mock/global_state';
 import { mockTimelineData } from '../../mock/mock_timeline_data';
 import { TestProviders } from '../../mock/test_providers';
-import { CellValueElementProps } from '@kbn/timelines-plugin/common';
+import { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
 import { mockBrowserFields } from '../../mock/mock_source';
 import { getMappedNonEcsValue } from './utils';
 
@@ -48,13 +48,6 @@ jest.mock('../../hooks/use_selector', () => ({
   useDeepEqualSelector: () => mockGlobalState.dataTable.tableById['table-test'],
 }));
 
-jest.mock(
-  'react-visibility-sensor',
-  () =>
-    ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
-      children({ isVisible: true })
-);
-
 window.matchMedia = jest.fn().mockImplementation((query) => {
   return {
     matches: false,
@@ -65,7 +58,7 @@ window.matchMedia = jest.fn().mockImplementation((query) => {
   };
 });
 
-export const TestCellRenderer: React.FC<CellValueElementProps> = ({ columnId, data }) => (
+export const TestCellRenderer: React.FC<DeprecatedCellValueElementProps> = ({ columnId, data }) => (
   <>
     {getMappedNonEcsValue({
       data,
@@ -181,11 +174,14 @@ describe('DataTable', () => {
         fields: [
           {
             name: '@timestamp',
-            values: [data[0]?.data[0]?.value],
             type: 'date',
             aggregatable: true,
+            esTypes: ['date'],
+            searchable: true,
+            subType: undefined,
           },
         ],
+        getCellValue: expect.any(Function),
         metadata: {
           scopeId: 'table-test',
         },
@@ -203,7 +199,8 @@ describe('DataTable', () => {
 
       expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
         expect.objectContaining({
-          fields: [],
+          triggerId: undefined,
+          fields: undefined,
         })
       );
     });

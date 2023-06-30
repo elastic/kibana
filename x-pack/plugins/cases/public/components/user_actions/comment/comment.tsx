@@ -12,7 +12,7 @@ import type { CommentUserAction } from '../../../../common/api';
 import { Actions, CommentType } from '../../../../common/api';
 import type { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from '../types';
 import { createCommonUpdateUserActionBuilder } from '../common';
-import type { Comment } from '../../../containers/types';
+import type { CommentUI } from '../../../containers/types';
 import * as i18n from './translations';
 import { createUserAttachmentUserActionBuilder } from './user';
 import { createAlertAttachmentUserActionBuilder } from './alert';
@@ -164,7 +164,7 @@ const getCreateCommentUserAction = ({
   actionsNavigation,
 }: {
   userAction: UserActionResponse<CommentUserAction>;
-  comment: Comment;
+  comment: CommentUI;
 } & Omit<
   UserActionBuilderArgs,
   'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'

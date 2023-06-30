@@ -13,10 +13,11 @@ import { FtrConfigProviderContext } from '@kbn/test';
 interface CreateTestConfigOptions {
   license: string;
   disabledPlugins?: string[];
+  testFiles?: string[];
 }
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
-  const { license, disabledPlugins = [] } = options;
+  const { license, disabledPlugins = [], testFiles } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const config = {
@@ -32,7 +33,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     return {
-      testFiles: [require.resolve(`../${name}/apis/`)],
+      testFiles: testFiles ?? [require.resolve(`../${name}/apis/`)],
       servers: config.xpack.api.get('servers'),
       services: {
         es: config.kibana.api.get('services.es'),

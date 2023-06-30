@@ -241,7 +241,7 @@ export const generateAlertOpts = ({
   group,
   state,
   id,
-  maintenanceWindowIds = [],
+  maintenanceWindowIds,
 }: GeneratorParams = {}) => {
   id = id ?? '1';
   let message: string = '';
@@ -264,7 +264,7 @@ export const generateAlertOpts = ({
     state,
     ...(group ? { group } : {}),
     flapping: false,
-    maintenanceWindowIds,
+    ...(maintenanceWindowIds ? { maintenanceWindowIds } : {}),
   };
 };
 
@@ -374,6 +374,7 @@ export const generateAlertInstance = (
       },
       flappingHistory,
       flapping: false,
+      maintenanceWindowIds: [],
       pendingRecoveredCount: 0,
     },
     state: {

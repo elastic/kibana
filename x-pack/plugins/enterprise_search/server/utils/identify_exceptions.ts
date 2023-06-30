@@ -39,3 +39,9 @@ export const isNotFoundException = (error: ElasticsearchResponseError) =>
 
 export const isIllegalArgumentException = (error: ElasticsearchResponseError) =>
   error.meta?.body?.error?.type === 'illegal_argument_exception';
+
+export const isVersionConflictEngineException = (error: ElasticsearchResponseError) =>
+  error.meta?.body?.error?.type === 'version_conflict_engine_exception';
+
+export const isInvalidSearchApplicationNameException = (error: ElasticsearchResponseError) =>
+  error.meta?.body?.error?.type === 'invalid_alias_name_exception';

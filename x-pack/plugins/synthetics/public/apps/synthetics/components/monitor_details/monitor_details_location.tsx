@@ -8,6 +8,7 @@ import React, { useCallback } from 'react';
 
 import { useParams, useRouteMatch } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useGetUrlParams } from '../../hooks';
 import { MONITOR_ERRORS_ROUTE, MONITOR_HISTORY_ROUTE } from '../../../../../common/constants';
 import { ClientPluginsStart } from '../../../../plugin';
 import { PLUGIN } from '../../../../../common/constants/plugin';
@@ -19,12 +20,16 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
   const { monitor } = useSelectedMonitor();
   const { monitorId } = useParams<{ monitorId: string }>();
 
+  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+
   const selectedLocation = useSelectedLocation();
 
   const { services } = useKibana<ClientPluginsStart>();
 
   const isErrorsTab = useRouteMatch(MONITOR_ERRORS_ROUTE);
   const isHistoryTab = useRouteMatch(MONITOR_HISTORY_ROUTE);
+
+  const params = `&dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`;
 
   return (
     <MonitorLocationSelect
@@ -36,19 +41,19 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
         (id, label) => {
           if (isErrorsTab) {
             services.application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
-              path: `/monitor/${monitorId}/errors?locationId=${id}`,
+              path: `/monitor/${monitorId}/errors?locationId=${id}${params}`,
             });
           } else if (isHistoryTab) {
             services.application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
-              path: `/monitor/${monitorId}/history/?locationId=${id}`,
+              path: `/monitor/${monitorId}/history/?locationId=${id}${params}`,
             });
           } else {
             services.application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
-              path: `/monitor/${monitorId}?locationId=${id}`,
+              path: `/monitor/${monitorId}?locationId=${id}${params}`,
             });
           }
         },
-        [isErrorsTab, isHistoryTab, monitorId, services.application]
+        [isErrorsTab, isHistoryTab, monitorId, params, services.application]
       )}
     />
   );

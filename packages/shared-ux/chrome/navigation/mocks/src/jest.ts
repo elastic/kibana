@@ -6,67 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { NavigationServices, SolutionProperties } from '../../types';
+import { ChromeNavLink, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { BehaviorSubject, of } from 'rxjs';
+import { NavigationServices } from '../../types';
+import { navLinksMock } from './navlinks';
 
-export const getServicesMock = (): NavigationServices => {
+const activeNodes: ChromeProjectNavigationNode[][] = [];
+
+export const getServicesMock = ({
+  navLinks = navLinksMock,
+}: { navLinks?: ChromeNavLink[] } = {}): NavigationServices => {
   const navigateToUrl = jest.fn().mockResolvedValue(undefined);
   const basePath = { prepend: jest.fn((path: string) => `/base${path}`) };
-  const loadingCount = 0;
+  const recentlyAccessed$ = new BehaviorSubject([]);
+  const navLinks$ = new BehaviorSubject(navLinks);
 
   return {
     basePath,
-    loadingCount,
+    recentlyAccessed$,
+    navLinks$,
     navIsOpen: true,
     navigateToUrl,
+    onProjectNavigationChange: jest.fn(),
+    activeNodes$: of(activeNodes),
   };
 };
-
-export const getSolutionPropertiesMock = (): SolutionProperties => ({
-  id: 'example_project',
-  icon: 'logoObservability',
-  name: 'Example project',
-  items: [
-    {
-      id: 'root',
-      name: '',
-      items: [
-        {
-          id: 'get_started',
-          name: 'Get started',
-          href: '/app/example_project/get_started',
-        },
-        {
-          id: 'alerts',
-          name: 'Alerts',
-          href: '/app/example_project/alerts',
-        },
-        {
-          id: 'cases',
-          name: 'Cases',
-          href: '/app/example_project/cases',
-        },
-      ],
-    },
-    {
-      id: 'example_settings',
-      name: 'Settings',
-      items: [
-        {
-          id: 'logs',
-          name: 'Logs',
-          href: '/app/management/logs',
-        },
-        {
-          id: 'signals',
-          name: 'Signals',
-          href: '/app/management/signals',
-        },
-        {
-          id: 'tracing',
-          name: 'Tracing',
-          href: '/app/management/tracing',
-        },
-      ],
-    },
-  ],
-});

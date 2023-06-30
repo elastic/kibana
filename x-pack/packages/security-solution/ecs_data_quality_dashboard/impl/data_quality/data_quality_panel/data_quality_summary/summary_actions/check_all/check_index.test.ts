@@ -87,8 +87,9 @@ describe('checkIndex', () => {
 
   const indexName = 'auditbeat-custom-index-1';
   const pattern = 'auditbeat-*';
+  const httpFetch = jest.fn();
 
-  describe('happy path', () => {
+  describe('when `checkIndex` successfully completes the check', () => {
     const onCheckCompleted = jest.fn();
 
     beforeEach(async () => {
@@ -99,6 +100,7 @@ describe('checkIndex', () => {
         ecsMetadata,
         formatBytes,
         formatNumber,
+        httpFetch,
         indexName,
         onCheckCompleted,
         pattern,
@@ -145,6 +147,7 @@ describe('checkIndex', () => {
         ecsMetadata,
         formatBytes,
         formatNumber,
+        httpFetch,
         indexName,
         onCheckCompleted,
         pattern,
@@ -166,6 +169,7 @@ describe('checkIndex', () => {
         ecsMetadata: null, // <--
         formatBytes,
         formatNumber,
+        httpFetch,
         indexName,
         onCheckCompleted,
         pattern,
@@ -218,6 +222,7 @@ describe('checkIndex', () => {
         ecsMetadata,
         formatBytes,
         formatNumber,
+        httpFetch,
         indexName,
         onCheckCompleted,
         pattern,
@@ -226,7 +231,7 @@ describe('checkIndex', () => {
     });
 
     test('it invokes onCheckCompleted with the expected `error`', () => {
-      expect(onCheckCompleted.mock.calls[0][0].error).toEqual(`Error: ${error}`);
+      expect(onCheckCompleted.mock.calls[0][0].error).toEqual(error);
     });
 
     test('it invokes onCheckCompleted with the expected `indexName`', () => {
@@ -268,6 +273,7 @@ describe('checkIndex', () => {
         ecsMetadata,
         formatBytes,
         formatNumber,
+        httpFetch,
         indexName,
         onCheckCompleted,
         pattern,
@@ -326,6 +332,7 @@ describe('checkIndex', () => {
         ecsMetadata,
         formatBytes,
         formatNumber,
+        httpFetch,
         indexName,
         onCheckCompleted,
         pattern,

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mockUseHasData, render } from '../../rtl_helpers';
+import { render } from '../../rtl_helpers';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { SeriesDatePicker } from '.';
 
@@ -41,7 +41,6 @@ describe('SeriesDatePicker', function () {
       ],
     };
 
-    const { onRefreshTimeRange } = mockUseHasData();
     const { getByTestId, setSeries } = render(
       <SeriesDatePicker seriesId={0} series={initSeries.data[0]} />,
       {
@@ -54,8 +53,6 @@ describe('SeriesDatePicker', function () {
     });
 
     fireEvent.click(getByTestId('superDatePickerCommonlyUsed_Today'));
-
-    expect(onRefreshTimeRange).toHaveBeenCalledTimes(1);
 
     expect(setSeries).toHaveBeenCalledWith(0, {
       name: 'uptime-pings-histogram',

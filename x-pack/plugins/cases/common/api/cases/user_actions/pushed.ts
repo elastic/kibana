@@ -10,20 +10,20 @@ import { CaseUserActionExternalServiceRt, CaseExternalServiceBasicRt } from '../
 import type { UserActionWithAttributes } from './common';
 import { ActionTypes } from './common';
 
-export const PushedUserActionPayloadWithoutConnectorIdRt = rt.type({
+export const PushedUserActionPayloadWithoutConnectorIdRt = rt.strict({
   externalService: CaseUserActionExternalServiceRt,
 });
 
-export const PushedUserActionPayloadRt = rt.type({
+export const PushedUserActionPayloadRt = rt.strict({
   externalService: CaseExternalServiceBasicRt,
 });
 
-export const PushedUserActionWithoutConnectorIdRt = rt.type({
+export const PushedUserActionWithoutConnectorIdRt = rt.strict({
   type: rt.literal(ActionTypes.pushed),
   payload: PushedUserActionPayloadWithoutConnectorIdRt,
 });
 
-export const PushedUserActionRt = rt.type({
+export const PushedUserActionRt = rt.strict({
   type: rt.literal(ActionTypes.pushed),
   payload: PushedUserActionPayloadRt,
 });

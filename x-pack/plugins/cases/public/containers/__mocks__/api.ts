@@ -7,8 +7,9 @@
 
 import type {
   ActionLicense,
-  CasesUI,
+  CasesFindResponseUI,
   CaseUI,
+  CasesUI,
   CasesStatus,
   FetchCasesProps,
   FindCaseUserActions,
@@ -25,6 +26,7 @@ import {
   casesStatus,
   pushedCase,
   tags,
+  categories,
   findCaseUserActionsResponse,
   getCaseUserActionsStatsResponse,
   getCaseUsersMockResponse,
@@ -93,6 +95,7 @@ export const getCases = async ({
     status: CaseStatuses.open,
     tags: [],
     owner: [],
+    category: [],
   },
   queryParams = {
     page: 1,
@@ -101,7 +104,7 @@ export const getCases = async ({
     sortOrder: 'desc',
   },
   signal,
-}: FetchCasesProps): Promise<CasesUI> => Promise.resolve(allCases);
+}: FetchCasesProps): Promise<CasesFindResponseUI> => Promise.resolve(allCases);
 
 export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): Promise<CaseUI> =>
   Promise.resolve(basicCasePost);
@@ -111,12 +114,12 @@ export const patchCase = async (
   updatedCase: Pick<CasePatchRequest, 'description' | 'status' | 'tags' | 'title'>,
   version: string,
   signal: AbortSignal
-): Promise<CaseUI[]> => Promise.resolve([basicCase]);
+): Promise<CasesUI> => Promise.resolve([basicCase]);
 
 export const updateCases = async (
   cases: CaseUpdateRequest[],
   signal: AbortSignal
-): Promise<CaseUI[]> => Promise.resolve(allCases.cases);
+): Promise<CasesUI> => Promise.resolve(allCases.cases);
 
 export const createAttachments = async (
   newComment: CommentRequest,
@@ -172,3 +175,6 @@ export const deleteFileAttachments = async ({
   fileIds: string[];
   signal: AbortSignal;
 }): Promise<void> => Promise.resolve(undefined);
+
+export const getCategories = async (signal: AbortSignal): Promise<string[]> =>
+  Promise.resolve(categories);

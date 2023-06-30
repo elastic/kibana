@@ -12,11 +12,7 @@ import { ReportingCore } from '../..';
 import { CancellationToken } from '@kbn/reporting-common';
 import { LocatorParams } from '../../../common/types';
 import { cryptoFactory } from '../../lib';
-import {
-  createMockConfig,
-  createMockConfigSchema,
-  createMockReportingCore,
-} from '../../test_helpers';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { generatePngObservable } from '../common';
 import { runTaskFnFactory } from './execute_job';
 import { TaskPayloadPNGV2 } from './types';
@@ -54,7 +50,6 @@ beforeEach(async () => {
   });
 
   mockReporting = await createMockReportingCore(mockReportingConfig);
-  mockReporting.setConfig(createMockConfig(mockReportingConfig));
 });
 
 afterEach(() => (generatePngObservable as jest.Mock).mockReset());
@@ -83,7 +78,7 @@ test(`passes browserTimezone to generatePng`, async () => {
     expect.objectContaining({
       urls: [
         [
-          'localhost:80undefined/app/reportingRedirect?forceNow=test',
+          'http://localhost:80/mock-server-basepath/app/reportingRedirect?forceNow=test',
           { id: 'test', params: {}, version: 'test' },
         ],
       ],

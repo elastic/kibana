@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { HttpHandler } from '@kbn/core-http-browser';
 import numeral from '@elastic/numeral';
 import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -18,6 +20,7 @@ import type {
 import React, { useCallback } from 'react';
 
 import { Body } from './data_quality_panel/body';
+import { DataQualityProvider } from './data_quality_panel/data_quality_context';
 import { EMPTY_STAT } from './helpers';
 
 interface Props {
@@ -38,7 +41,9 @@ interface Props {
     groupByField0: string;
     groupByField1: string;
   };
+  httpFetch: HttpHandler;
   ilmPhases: string[];
+  isAssistantEnabled: boolean;
   lastChecked: string;
   openCreateCaseFlyout: ({
     comments,
@@ -49,7 +54,8 @@ interface Props {
   }) => void;
   patterns: string[];
   setLastChecked: (lastChecked: string) => void;
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
 }
 
 /** Renders the `Data Quality` dashboard content */
@@ -59,12 +65,15 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   defaultBytesFormat,
   defaultNumberFormat,
   getGroupByFieldsOnClick,
+  httpFetch,
   ilmPhases,
+  isAssistantEnabled,
   lastChecked,
   openCreateCaseFlyout,
   patterns,
   setLastChecked,
   theme,
+  baseTheme,
 }) => {
   const formatBytes = useCallback(
     (value: number | undefined): string =>
@@ -79,19 +88,23 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   );
 
   return (
-    <Body
-      addSuccessToast={addSuccessToast}
-      canUserCreateAndReadCases={canUserCreateAndReadCases}
-      formatBytes={formatBytes}
-      formatNumber={formatNumber}
-      getGroupByFieldsOnClick={getGroupByFieldsOnClick}
-      ilmPhases={ilmPhases}
-      lastChecked={lastChecked}
-      openCreateCaseFlyout={openCreateCaseFlyout}
-      patterns={patterns}
-      setLastChecked={setLastChecked}
-      theme={theme}
-    />
+    <DataQualityProvider httpFetch={httpFetch}>
+      <Body
+        addSuccessToast={addSuccessToast}
+        canUserCreateAndReadCases={canUserCreateAndReadCases}
+        formatBytes={formatBytes}
+        formatNumber={formatNumber}
+        getGroupByFieldsOnClick={getGroupByFieldsOnClick}
+        ilmPhases={ilmPhases}
+        isAssistantEnabled={isAssistantEnabled}
+        lastChecked={lastChecked}
+        openCreateCaseFlyout={openCreateCaseFlyout}
+        patterns={patterns}
+        setLastChecked={setLastChecked}
+        theme={theme}
+        baseTheme={baseTheme}
+      />
+    </DataQualityProvider>
   );
 };
 

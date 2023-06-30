@@ -18,7 +18,7 @@ import { ProductAccess } from '../../../../common/types';
 
 import {
   useEnterpriseSearchNav,
-  useEnterpriseSearchEngineNav,
+  useEnterpriseSearchApplicationNav,
   useEnterpriseSearchAnalyticsNav,
 } from './nav';
 
@@ -52,6 +52,16 @@ describe('useEnterpriseSearchContentNav', () => {
             name: 'Elasticsearch',
           },
           {
+            href: '/app/enterprise_search/esre',
+            id: 'esre',
+            name: 'ESRE',
+          },
+          {
+            href: '/app/enterprise_search/vector_search',
+            id: 'vectorSearch',
+            name: 'Vector Search',
+          },
+          {
             href: '/app/enterprise_search/search_experiences',
             id: 'searchExperiences',
             name: 'Search Experiences',
@@ -80,7 +90,7 @@ describe('useEnterpriseSearchContentNav', () => {
         id: 'applications',
         items: [
           {
-            href: '/app/enterprise_search/content/engines',
+            href: '/app/enterprise_search/applications',
             id: 'searchApplications',
             name: 'Search Applications',
           },
@@ -188,7 +198,7 @@ describe('useEnterpriseSearchContentNav', () => {
   });
 });
 
-describe('useEnterpriseSearchEngineNav', () => {
+describe('useEnterpriseSearchApplicationNav', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockKibanaValues.uiSettings.get.mockReturnValue(true);
@@ -200,7 +210,7 @@ describe('useEnterpriseSearchEngineNav', () => {
   });
 
   it('returns an array of top-level Enterprise Search nav items', () => {
-    expect(useEnterpriseSearchEngineNav()).toEqual([
+    expect(useEnterpriseSearchApplicationNav()).toEqual([
       {
         href: '/app/enterprise_search/overview',
         id: 'es_overview',
@@ -209,6 +219,16 @@ describe('useEnterpriseSearchEngineNav', () => {
             href: '/app/enterprise_search/elasticsearch',
             id: 'elasticsearch',
             name: 'Elasticsearch',
+          },
+          {
+            href: '/app/enterprise_search/esre',
+            id: 'esre',
+            name: 'ESRE',
+          },
+          {
+            href: '/app/enterprise_search/vector_search',
+            id: 'vectorSearch',
+            name: 'Vector Search',
           },
           {
             href: '/app/enterprise_search/search_experiences',
@@ -238,7 +258,7 @@ describe('useEnterpriseSearchEngineNav', () => {
         id: 'applications',
         items: [
           {
-            href: '/app/enterprise_search/content/engines',
+            href: '/app/enterprise_search/applications',
             id: 'searchApplications',
             name: 'Search Applications',
           },
@@ -271,7 +291,7 @@ describe('useEnterpriseSearchEngineNav', () => {
 
   it('returns selected engine sub nav items', () => {
     const engineName = 'my-test-engine';
-    const navItems = useEnterpriseSearchEngineNav(engineName);
+    const navItems = useEnterpriseSearchApplicationNav(engineName);
     expect(navItems?.map((ni) => ni.name)).toEqual([
       'Overview',
       'Content',
@@ -291,33 +311,43 @@ describe('useEnterpriseSearchEngineNav', () => {
 
     // @ts-ignore
     const engineItem: EuiSideNavItemType<unknown> = enginesItem!.items[0];
-    expect(engineItem).toEqual({
-      href: `/app/enterprise_search/content/engines/${engineName}`,
-      id: 'engineId',
-      items: [
-        {
-          href: `/app/enterprise_search/content/engines/${engineName}/preview`,
-          id: 'enterpriseSearchEnginePreview',
-          name: 'Search Preview',
-        },
-        {
-          href: `/app/enterprise_search/content/engines/${engineName}/content`,
-          id: 'enterpriseSearchApplicationsContent',
-          name: 'Content',
-        },
-        {
-          href: `/app/enterprise_search/content/engines/${engineName}/connect`,
-          id: 'enterpriseSearchApplicationConnect',
-          name: 'Connect',
-        },
-      ],
-      name: engineName,
-    });
+    expect(engineItem).toMatchInlineSnapshot(`
+      Object {
+        "href": "/app/enterprise_search/applications/search_applications/my-test-engine",
+        "id": "searchApplicationId",
+        "items": Array [
+          Object {
+            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/preview",
+            "id": "enterpriseSearchApplicationPreview",
+            "items": undefined,
+            "name": "Search Preview",
+          },
+          Object {
+            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/content",
+            "id": "enterpriseSearchApplicationsContent",
+            "items": undefined,
+            "name": <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+            >
+              Content
+            </EuiFlexGroup>,
+          },
+          Object {
+            "href": "/app/enterprise_search/applications/search_applications/my-test-engine/connect",
+            "id": "enterpriseSearchApplicationConnect",
+            "items": undefined,
+            "name": "Connect",
+          },
+        ],
+        "name": "my-test-engine",
+      }
+    `);
   });
 
   it('returns selected engine without tabs when isEmpty', () => {
     const engineName = 'my-test-engine';
-    const navItems = useEnterpriseSearchEngineNav(engineName, true);
+    const navItems = useEnterpriseSearchApplicationNav(engineName, true);
     expect(navItems?.map((ni) => ni.name)).toEqual([
       'Overview',
       'Content',
@@ -338,10 +368,41 @@ describe('useEnterpriseSearchEngineNav', () => {
     // @ts-ignore
     const engineItem: EuiSideNavItemType<unknown> = enginesItem!.items[0];
     expect(engineItem).toEqual({
-      href: `/app/enterprise_search/content/engines/${engineName}`,
-      id: 'engineId',
+      href: `/app/enterprise_search/applications/search_applications/${engineName}`,
+      id: 'searchApplicationId',
       name: engineName,
     });
+  });
+
+  it('returns selected engine with conflict warning when hasSchemaConflicts', () => {
+    const engineName = 'my-test-engine';
+    const navItems = useEnterpriseSearchApplicationNav(engineName, false, true);
+
+    // @ts-ignore
+    const engineItem = navItems
+      .find((ni: EuiSideNavItemType<unknown>) => ni.id === 'applications')
+      .items.find((ni: EuiSideNavItemType<unknown>) => ni.id === 'searchApplications')
+      .items[0].items.find(
+        (ni: EuiSideNavItemType<unknown>) => ni.id === 'enterpriseSearchApplicationsContent'
+      );
+
+    expect(engineItem).toMatchInlineSnapshot(`
+      Object {
+        "href": "/app/enterprise_search/applications/search_applications/my-test-engine/content",
+        "id": "enterpriseSearchApplicationsContent",
+        "items": undefined,
+        "name": <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+        >
+          Content
+          <EuiIcon
+            color="danger"
+            type="warning"
+          />
+        </EuiFlexGroup>,
+      }
+    `);
   });
 });
 
@@ -355,6 +416,16 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
           href: '/app/enterprise_search/elasticsearch',
           id: 'elasticsearch',
           name: 'Elasticsearch',
+        },
+        {
+          href: '/app/enterprise_search/esre',
+          id: 'esre',
+          name: 'ESRE',
+        },
+        {
+          href: '/app/enterprise_search/vector_search',
+          id: 'vectorSearch',
+          name: 'Vector Search',
         },
         {
           href: '/app/enterprise_search/search_experiences',
@@ -379,7 +450,7 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
       id: 'applications',
       items: [
         {
-          href: '/app/enterprise_search/content/engines',
+          href: '/app/enterprise_search/applications',
           id: 'searchApplications',
           name: 'Search Applications',
         },

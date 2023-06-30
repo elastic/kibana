@@ -21,14 +21,13 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { EmptyPrompt } from './components/empty_prompt';
 import * as i18n from './translations';
 import { useCreateMaintenanceWindowNavigation } from '../../hooks/use_navigation';
-import { AlertingDeepLinkId } from '../../config';
 import { MaintenanceWindowsList } from './components/maintenance_windows_list';
 import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 import { ExperimentalBadge } from './components/page_header';
 import { useLicense } from '../../hooks/use_license';
 import { LicensePrompt } from './components/license_prompt';
-import { MAINTENANCE_WINDOW_FEATURE_ID } from '../../../common';
+import { MAINTENANCE_WINDOW_FEATURE_ID, MAINTENANCE_WINDOW_DEEP_LINK_IDS } from '../../../common';
 
 export const MaintenanceWindowsPage = React.memo(() => {
   const {
@@ -37,12 +36,15 @@ export const MaintenanceWindowsPage = React.memo(() => {
     docLinks,
   } = useKibana().services;
   const { isAtLeastPlatinum } = useLicense();
+  const hasLicense = isAtLeastPlatinum();
 
   const { navigateToCreateMaintenanceWindow } = useCreateMaintenanceWindowNavigation();
 
-  const { isLoading, maintenanceWindows, refetch } = useFindMaintenanceWindows();
+  const { isLoading, maintenanceWindows, refetch } = useFindMaintenanceWindows({
+    enabled: hasLicense,
+  });
 
-  useBreadcrumbs(AlertingDeepLinkId.maintenanceWindows);
+  useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows);
 
   const handleClickCreate = useCallback(() => {
     navigateToCreateMaintenanceWindow();
@@ -56,7 +58,6 @@ export const MaintenanceWindowsPage = React.memo(() => {
     maintenanceWindows.length === 0 &&
     showWindowMaintenance &&
     writeWindowMaintenance;
-  const hasLicense = isAtLeastPlatinum();
 
   const readOnly = showWindowMaintenance && !writeWindowMaintenance;
 

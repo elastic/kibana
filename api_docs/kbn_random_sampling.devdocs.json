@@ -1,0 +1,267 @@
+{
+  "id": "@kbn/random-sampling",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/random-sampling",
+        "id": "def-public.ControlSlider",
+        "type": "Function",
+        "tags": [],
+        "label": "ControlSlider",
+        "description": [],
+        "signature": [
+          "({\n  values,\n  currentValue,\n  disabled = false,\n  disabledReason = '',\n  onChange,\n  'data-test-subj': dataTestSubj,\n}: ",
+          {
+            "pluginId": "@kbn/random-sampling",
+            "scope": "public",
+            "docId": "kibKbnRandomSamplingPluginApi",
+            "section": "def-public.ControlSliderProps",
+            "text": "ControlSliderProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/random-sampling",
+            "id": "def-public.ControlSlider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  values,\n  currentValue,\n  disabled = false,\n  disabledReason = '',\n  onChange,\n  'data-test-subj': dataTestSubj,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/random-sampling",
+                "scope": "public",
+                "docId": "kibKbnRandomSamplingPluginApi",
+                "section": "def-public.ControlSliderProps",
+                "text": "ControlSliderProps"
+              }
+            ],
+            "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/random-sampling",
+        "id": "def-public.RandomSamplingIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "RandomSamplingIcon",
+        "description": [],
+        "signature": [
+          "({ title, titleId, ...props }: ",
+          {
+            "pluginId": "@kbn/random-sampling",
+            "scope": "public",
+            "docId": "kibKbnRandomSamplingPluginApi",
+            "section": "def-public.RandomSamplingIconProps",
+            "text": "RandomSamplingIconProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/packages/kbn-random-sampling/src/ui/icon/sampling_icon.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/random-sampling",
+            "id": "def-public.RandomSamplingIcon.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ title, titleId, ...props }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/random-sampling",
+                "scope": "public",
+                "docId": "kibKbnRandomSamplingPluginApi",
+                "section": "def-public.RandomSamplingIconProps",
+                "text": "RandomSamplingIconProps"
+              }
+            ],
+            "path": "x-pack/packages/kbn-random-sampling/src/ui/icon/sampling_icon.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/random-sampling",
+        "id": "def-public.ControlSliderProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ControlSliderProps",
+        "description": [],
+        "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/random-sampling",
+            "id": "def-public.ControlSliderProps.values",
+            "type": "Array",
+            "tags": [],
+            "label": "values",
+            "description": [
+              "Allowed values to show on the Control Slider"
+            ],
+            "signature": [
+              "number[]"
+            ],
+            "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/random-sampling",
+            "id": "def-public.ControlSliderProps.currentValue",
+            "type": "number",
+            "tags": [],
+            "label": "currentValue",
+            "description": [
+              "Current value set"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/random-sampling",
+            "id": "def-public.ControlSliderProps.disabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disabled",
+            "description": [
+              "When set will show the control in a disabled state"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/random-sampling",
+            "id": "def-public.ControlSliderProps.disabledReason",
+            "type": "string",
+            "tags": [],
+            "label": "disabledReason",
+            "description": [
+              "An explanation for the disabled state of the control"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/random-sampling",
+            "id": "def-public.ControlSliderProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "A way to pass the test id parameter"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/random-sampling",
+            "id": "def-public.ControlSliderProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [
+              "A callback for when the slider value changes"
+            ],
+            "signature": [
+              "(newValue: number) => void"
+            ],
+            "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/random-sampling",
+                "id": "def-public.ControlSliderProps.onChange.$1",
+                "type": "number",
+                "tags": [],
+                "label": "newValue",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/random-sampling",
+        "id": "def-public.RandomSamplingIconProps",
+        "type": "Type",
+        "tags": [],
+        "label": "RandomSamplingIconProps",
+        "description": [],
+        "signature": [
+          "React.SVGProps<SVGSVGElement> & CustomProps"
+        ],
+        "path": "x-pack/packages/kbn-random-sampling/src/ui/icon/sampling_icon.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

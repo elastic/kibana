@@ -52,7 +52,8 @@ const ruleType: NormalizedRuleType<
   AlertInstanceState,
   AlertInstanceContext,
   'default' | 'other-group',
-  'recovered'
+  'recovered',
+  {}
 > = {
   id: 'test',
   name: 'Test',
@@ -140,6 +141,7 @@ const generateAlert = ({
   scheduleActions = true,
   throttledActions = {},
   lastScheduledActionsGroup = 'default',
+  maintenanceWindowIds,
 }: {
   id: number;
   group?: ActiveActionGroup | 'recovered';
@@ -148,12 +150,14 @@ const generateAlert = ({
   scheduleActions?: boolean;
   throttledActions?: ThrottledActions;
   lastScheduledActionsGroup?: string;
+  maintenanceWindowIds?: string[];
 }) => {
   const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'default' | 'other-group'>(
     String(id),
     {
       state: state || { test: true },
       meta: {
+        maintenanceWindowIds,
         lastScheduledActions: {
           date: new Date(),
           group: lastScheduledActionsGroup,
@@ -270,8 +274,6 @@ describe('Execution Handler', () => {
     });
 
     expect(jest.requireMock('./inject_action_params').injectActionParams).toHaveBeenCalledWith({
-      ruleId: '1',
-      spaceId: 'test1',
       actionTypeId: 'test',
       actionParams: {
         alertVal: 'My 1 name-of-alert test1 tag-A,tag-B 1 goes here',
@@ -1299,7 +1301,7 @@ describe('Execution Handler', () => {
       `);
   });
 
-  test('does not schedule actions for the summarized alerts that are filtered out', async () => {
+  test('does not schedule actions for the summarized alerts that are filtered out (for each alert)', async () => {
     getSummarizedAlertsMock.mockResolvedValue({
       new: {
         count: 0,
@@ -1360,6 +1362,66 @@ describe('Execution Handler', () => {
     expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
       '(2) alerts have been filtered out for: testActionTypeId:111'
     );
+  });
+
+  test('does not schedule actions for the summarized alerts that are filtered out (summary of alerts onThrottleInterval)', async () => {
+    getSummarizedAlertsMock.mockResolvedValue({
+      new: {
+        count: 0,
+        data: [],
+      },
+      ongoing: {
+        count: 0,
+        data: [],
+      },
+      recovered: { count: 0, data: [] },
+    });
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        rule: {
+          ...defaultExecutionParams.rule,
+          mutedInstanceIds: ['foo'],
+          actions: [
+            {
+              id: '1',
+              uuid: '111',
+              group: null,
+              actionTypeId: 'testActionTypeId',
+              frequency: {
+                summary: true,
+                notifyWhen: 'onThrottleInterval',
+                throttle: '1h',
+              },
+              params: {
+                message:
+                  'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}}',
+              },
+              alertsFilter: {
+                query: { kql: 'kibana.alert.rule.name:foo', dsl: '{}', filters: [] },
+              },
+            },
+          ],
+        },
+      })
+    );
+
+    await executionHandler.run({
+      ...generateAlert({ id: 1 }),
+      ...generateAlert({ id: 2 }),
+    });
+
+    expect(getSummarizedAlertsMock).toHaveBeenCalledWith({
+      ruleId: '1',
+      spaceId: 'test1',
+      end: new Date('1970-01-01T00:01:30.000Z'),
+      start: new Date('1969-12-31T23:01:30.000Z'),
+      excludedAlertInstanceIds: ['foo'],
+      alertsFilter: {
+        query: { kql: 'kibana.alert.rule.name:foo', dsl: '{}', filters: [] },
+      },
+    });
+    expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+    expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
   });
 
   test('does not schedule actions for the for-each type alerts that are filtered out', async () => {
@@ -1439,6 +1501,91 @@ describe('Execution Handler', () => {
     );
   });
 
+  test('does not schedule summary actions when there is an active maintenance window', async () => {
+    getSummarizedAlertsMock.mockResolvedValue({
+      new: {
+        count: 2,
+        data: [
+          { ...mockAAD, kibana: { alert: { uuid: '1' } } },
+          { ...mockAAD, kibana: { alert: { uuid: '2' } } },
+        ],
+      },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+    });
+
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        rule: {
+          ...defaultExecutionParams.rule,
+          mutedInstanceIds: ['foo'],
+          actions: [
+            {
+              uuid: '1',
+              id: '1',
+              group: null,
+              actionTypeId: 'testActionTypeId',
+              frequency: {
+                summary: true,
+                notifyWhen: 'onActiveAlert',
+                throttle: null,
+              },
+              params: {
+                message:
+                  'New: {{alerts.new.count}} Ongoing: {{alerts.ongoing.count}} Recovered: {{alerts.recovered.count}}',
+              },
+            },
+          ],
+        },
+        maintenanceWindowIds: ['test-id-active'],
+      })
+    );
+
+    await executionHandler.run({
+      ...generateAlert({ id: 1, maintenanceWindowIds: ['test-id-1'] }),
+      ...generateAlert({ id: 2, maintenanceWindowIds: ['test-id-2'] }),
+      ...generateAlert({ id: 3, maintenanceWindowIds: ['test-id-3'] }),
+    });
+
+    expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(2);
+
+    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
+      1,
+      '(1) alert has been filtered out for: testActionTypeId:1'
+    );
+    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
+      2,
+      'no scheduling of summary actions "1" for rule "1": has active maintenance windows test-id-active.'
+    );
+  });
+
+  test('does not schedule actions for alerts with maintenance window IDs', async () => {
+    const executionHandler = new ExecutionHandler(generateExecutionParams());
+
+    await executionHandler.run({
+      ...generateAlert({ id: 1, maintenanceWindowIds: ['test-id-1'] }),
+      ...generateAlert({ id: 2, maintenanceWindowIds: ['test-id-2'] }),
+      ...generateAlert({ id: 3, maintenanceWindowIds: ['test-id-3'] }),
+    });
+
+    expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(3);
+
+    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
+      1,
+      'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-1.'
+    );
+    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
+      2,
+      'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-2.'
+    );
+    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
+      3,
+      'no scheduling of actions "1" for rule "1": has active maintenance windows test-id-3.'
+    );
+  });
+
   describe('rule url', () => {
     const ruleWithUrl = {
       ...rule,
@@ -1493,11 +1640,28 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
             },
             "actionTypeId": "test",
-            "ruleId": "1",
-            "spaceId": "test1",
+            "ruleUrl": "http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
           },
         ]
       `);
+    });
+
+    it('populates the rule.url in the action params when the base url contains pathname', async () => {
+      const execParams = {
+        ...defaultExecutionParams,
+        rule: ruleWithUrl,
+        taskRunnerContext: {
+          ...defaultExecutionParams.taskRunnerContext,
+          kibanaBaseUrl: 'http://localhost:12345/kbn',
+        },
+      };
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
+      await executionHandler.run(generateAlert({ id: 1 }));
+
+      expect(injectActionParamsMock.mock.calls[0][0].actionParams).toEqual({
+        val: 'rule url: http://localhost:12345/kbn/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1',
+      });
     });
 
     it('populates the rule.url with start and stop time when available', async () => {
@@ -1542,8 +1706,7 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/s/test1/app/test/rule/1?start=30000&end=90000",
             },
             "actionTypeId": "test",
-            "ruleId": "1",
-            "spaceId": "test1",
+            "ruleUrl": "http://localhost:12345/s/test1/app/test/rule/1?start=30000&end=90000",
           },
         ]
       `);
@@ -1572,8 +1735,7 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/app/management/insightsAndAlerting/triggersActions/rule/1",
             },
             "actionTypeId": "test",
-            "ruleId": "1",
-            "spaceId": "default",
+            "ruleUrl": "http://localhost:12345/app/management/insightsAndAlerting/triggersActions/rule/1",
           },
         ]
       `);
@@ -1599,8 +1761,7 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
             },
             "actionTypeId": "test",
-            "ruleId": "1",
-            "spaceId": "test1",
+            "ruleUrl": "http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
           },
         ]
       `);
@@ -1626,8 +1787,7 @@ describe('Execution Handler', () => {
               "val": "rule url: ",
             },
             "actionTypeId": "test",
-            "ruleId": "1",
-            "spaceId": "test1",
+            "ruleUrl": undefined,
           },
         ]
       `);
@@ -1656,8 +1816,7 @@ describe('Execution Handler', () => {
               "val": "rule url: ",
             },
             "actionTypeId": "test",
-            "ruleId": "1",
-            "spaceId": "test1",
+            "ruleUrl": undefined,
           },
         ]
       `);
@@ -1686,8 +1845,7 @@ describe('Execution Handler', () => {
               "val": "rule url: ",
             },
             "actionTypeId": "test",
-            "ruleId": "1",
-            "spaceId": "test1",
+            "ruleUrl": undefined,
           },
         ]
       `);
@@ -1719,8 +1877,7 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/s/test1/app/management/some/other/place",
             },
             "actionTypeId": "test",
-            "ruleId": "1",
-            "spaceId": "test1",
+            "ruleUrl": "http://localhost:12345/s/test1/app/management/some/other/place",
           },
         ]
       `);

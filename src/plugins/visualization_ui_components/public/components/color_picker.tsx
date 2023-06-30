@@ -7,7 +7,6 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -17,6 +16,7 @@ import {
   EuiIcon,
   euiPaletteColorBlind,
 } from '@elastic/eui';
+import { getColorAlpha, makeColorWithAlpha } from '@kbn/coloring';
 import { TooltipWrapper } from './tooltip_wrapper';
 
 const tooltipContent = {
@@ -26,41 +26,15 @@ const tooltipContent = {
   custom: i18n.translate('visualizationUiComponents.colorPicker.tooltip.custom', {
     defaultMessage: 'Clear the custom color to return to “Auto” mode.',
   }),
-  disabled: i18n.translate('visualizationUiComponents.colorPicker.tooltip.disabled', {
-    defaultMessage:
-      'You are unable to apply custom colors to individual series when the layer includes a "Break down by" field.',
-  }),
 };
 
-// copied from coloring package
-function isValidPonyfill(colorString: string) {
-  // we're using an old version of chroma without the valid function
-  try {
-    chroma(colorString);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-function isValidColor(colorString?: string) {
-  // chroma can handle also hex values with alpha channel/transparency
-  // chroma accepts also hex without #, so test for it
-  return (
-    colorString && colorString !== '' && /^#/.test(colorString) && isValidPonyfill(colorString)
-  );
-}
-
-const getColorAlpha = (color?: string | null) =>
-  (color && isValidColor(color) && chroma(color)?.alpha()) || 1;
-
 export const ColorPicker = ({
+  overwriteColor,
+  defaultColor,
+  setConfig,
   label,
   disableHelpTooltip,
-  disabled,
-  setConfig,
-  defaultColor,
-  overwriteColor,
+  disabledMessage,
   showAlpha,
 }: {
   overwriteColor?: string | null;
@@ -68,13 +42,15 @@ export const ColorPicker = ({
   setConfig: (config: { color?: string }) => void;
   label?: string;
   disableHelpTooltip?: boolean;
-  disabled?: boolean;
+  disabledMessage?: string;
   showAlpha?: boolean;
 }) => {
   const [colorText, setColorText] = useState(overwriteColor || defaultColor);
   const [validatedColor, setValidatedColor] = useState(overwriteColor || defaultColor);
   const [currentColorAlpha, setCurrentColorAlpha] = useState(getColorAlpha(colorText));
   const unflushedChanges = useRef(false);
+
+  const isDisabled = Boolean(disabledMessage);
 
   useEffect(() => {
     //  only the changes from outside the color picker should be applied
@@ -119,8 +95,8 @@ export const ColorPicker = ({
       compressed
       isClearable={Boolean(overwriteColor)}
       onChange={handleColor}
-      color={disabled ? '' : colorText}
-      disabled={disabled}
+      color={isDisabled ? '' : colorText}
+      disabled={isDisabled}
       placeholder={
         defaultColor?.toUpperCase() ||
         i18n.translate('visualizationUiComponents.colorPicker.seriesColor.auto', {
@@ -132,7 +108,7 @@ export const ColorPicker = ({
       swatches={
         currentColorAlpha === 1
           ? euiPaletteColorBlind()
-          : euiPaletteColorBlind().map((c) => chroma(c).alpha(currentColorAlpha).hex())
+          : euiPaletteColorBlind().map((c) => makeColorWithAlpha(c, currentColorAlpha).hex())
       }
     />
   );
@@ -145,7 +121,7 @@ export const ColorPicker = ({
         <TooltipWrapper
           delay="long"
           position="top"
-          tooltipContent={colorText && !disabled ? tooltipContent.custom : tooltipContent.auto}
+          tooltipContent={colorText && !isDisabled ? tooltipContent.custom : tooltipContent.auto}
           condition={!disableHelpTooltip}
         >
           <span>
@@ -164,10 +140,10 @@ export const ColorPicker = ({
         </TooltipWrapper>
       }
     >
-      {disabled ? (
+      {isDisabled ? (
         <EuiToolTip
           position="top"
-          content={tooltipContent.disabled}
+          content={disabledMessage}
           delay="long"
           anchorClassName="eui-displayBlock"
         >

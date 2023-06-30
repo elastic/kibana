@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineType } from '../../../../common/types';
+import { TimelineType } from '../../../../common/types/timeline/api';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../mock';

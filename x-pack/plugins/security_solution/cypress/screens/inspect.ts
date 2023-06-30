@@ -83,7 +83,7 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
       {
         title: 'Events Table',
         tab: EVENTS_TAB,
-        altInspectId: `[data-test-subj="events-viewer-panel"] ${INSPECT_BUTTON_ICON}`,
+        altInspectId: '[data-test-subj="events-viewer-panel"]',
         id: EVENT_CONTAINER_TABLE_NOT_LOADING,
       },
 
@@ -216,7 +216,7 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
         title: 'Events Table',
         tab: EVENTS_TAB,
         id: EVENT_CONTAINER_TABLE_NOT_LOADING,
-        altInspectId: `[data-test-subj="events-viewer-panel"] ${INSPECT_BUTTON_ICON}`,
+        altInspectId: '[data-test-subj="events-viewer-panel"]',
       },
     ],
   },

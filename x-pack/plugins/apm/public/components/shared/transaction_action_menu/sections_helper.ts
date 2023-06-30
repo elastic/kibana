@@ -6,12 +6,13 @@
  */
 
 import { isEmpty } from 'lodash';
+import { MouseEvent } from 'react';
 
 export interface Action {
   key: string;
-  label: string;
+  label: React.ReactNode;
   href?: string;
-  onClick?: () => void;
+  onClick?: (event: MouseEvent) => void;
   condition: boolean;
 }
 

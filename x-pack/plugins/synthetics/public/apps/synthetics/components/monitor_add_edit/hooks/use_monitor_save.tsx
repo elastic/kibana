@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
 import { useParams, useRouteMatch } from 'react-router-dom';
 import React, { useEffect } from 'react';
@@ -15,7 +15,7 @@ import { MONITOR_EDIT_ROUTE } from '../../../../../../common/constants';
 import { SyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { createMonitorAPI, updateMonitorAPI } from '../../../state/monitor_management/api';
 import { kibanaService } from '../../../../../utils/kibana_service';
-import { cleanMonitorListState } from '../../../state';
+import { cleanMonitorListState, IHttpSerializedFetchError } from '../../../state';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 
 export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonitor }) => {
@@ -28,7 +28,7 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
   const editRouteMatch = useRouteMatch({ path: MONITOR_EDIT_ROUTE });
   const isEdit = editRouteMatch?.isExact;
 
-  const { data, status, loading } = useFetcher(() => {
+  const { data, status, loading, error } = useFetcher(() => {
     if (monitorData) {
       if (isEdit) {
         return updateMonitorAPI({
@@ -44,11 +44,14 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
   }, [monitorData]);
 
   useEffect(() => {
-    if (status === FETCH_STATUS.FAILURE) {
-      kibanaService.toasts.addDanger({
-        title: MONITOR_FAILURE_LABEL,
-        toastLifeTimeMs: 3000,
-      });
+    if (status === FETCH_STATUS.FAILURE && error) {
+      kibanaService.toasts.addError(
+        {
+          ...error,
+          message: (error as unknown as IHttpSerializedFetchError).body.message ?? error.message,
+        },
+        { title: MONITOR_FAILURE_LABEL }
+      );
     } else if (status === FETCH_STATUS.SUCCESS && !loading) {
       refreshApp();
       dispatch(cleanMonitorListState());
@@ -63,7 +66,7 @@ export const useMonitorSave = ({ monitorData }: { monitorData?: SyntheticsMonito
         toastLifeTimeMs: 3000,
       });
     }
-  }, [data, status, monitorId, loading, refreshApp, dispatch, theme$]);
+  }, [data, status, monitorId, loading, refreshApp, dispatch, theme$, error]);
 
   return { status, loading, isEdit };
 };

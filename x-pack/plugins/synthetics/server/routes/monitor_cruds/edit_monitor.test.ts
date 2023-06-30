@@ -13,10 +13,10 @@ import {
   SyntheticsMonitor,
   SyntheticsMonitorWithSecrets,
 } from '../../../common/runtime_types';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
+import { SyntheticsServerSetup } from '../../types';
 
 jest.mock('../telemetry/monitor_upgrade_sender', () => ({
   sendTelemetryEvents: jest.fn(),
@@ -26,7 +26,7 @@ jest.mock('../telemetry/monitor_upgrade_sender', () => ({
 describe('syncEditedMonitor', () => {
   const logger = loggerMock.create();
 
-  const serverMock: UptimeServerSetup = {
+  const serverMock: SyntheticsServerSetup = {
     uptimeEsClient: { search: jest.fn() },
     stackVersion: null,
     authSavedObjectsClient: {
@@ -42,11 +42,6 @@ describe('syncEditedMonitor', () => {
       },
     },
     fleet: {
-      authz: {
-        fromRequest: jest
-          .fn()
-          .mockReturnValue({ integrations: { writeIntegrationPolicies: true } }),
-      },
       packagePolicyService: {
         get: jest.fn().mockReturnValue({}),
         getByIDs: jest.fn().mockReturnValue([]),
@@ -54,7 +49,7 @@ describe('syncEditedMonitor', () => {
       },
     },
     encryptedSavedObjects: mockEncryptedSO(),
-  } as unknown as UptimeServerSetup;
+  } as unknown as SyntheticsServerSetup;
 
   const editedMonitor = {
     type: 'http',
@@ -98,11 +93,13 @@ describe('syncEditedMonitor', () => {
       previousMonitor,
       decryptedPreviousMonitor:
         previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecrets>,
-      syntheticsMonitorClient,
-      server: serverMock,
-      request: {} as unknown as KibanaRequest,
-      savedObjectsClient:
-        serverMock.authSavedObjectsClient as unknown as SavedObjectsClientContract,
+      routeContext: {
+        syntheticsMonitorClient,
+        server: serverMock,
+        request: {} as unknown as KibanaRequest,
+        savedObjectsClient:
+          serverMock.authSavedObjectsClient as unknown as SavedObjectsClientContract,
+      } as any,
       spaceId: 'test-space',
     });
 

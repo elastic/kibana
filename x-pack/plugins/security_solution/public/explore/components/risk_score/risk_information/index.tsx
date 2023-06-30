@@ -21,15 +21,19 @@ import {
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
+  EuiBetaBadge,
+  useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { getRiskEntityTranslation } from '../translations';
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../../helper_hooks';
 import { RiskScore } from '../severity/common';
 import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreDocLink } from '../risk_score_onboarding/risk_score_doc_link';
+import { TECHNICAL_PREVIEW } from '../risk_score_onboarding/translations';
 
 const getTableColumns = (riskEntity: RiskScoreEntity): Array<EuiBasicTableColumn<TableItem>> => [
   {
@@ -109,6 +113,7 @@ const RiskInformationFlyout = ({
   handleOnClose: () => void;
   riskEntity: RiskScoreEntity;
 }) => {
+  const { euiTheme } = useEuiTheme();
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'RiskInformation',
   });
@@ -125,6 +130,14 @@ const RiskInformationFlyout = ({
         <EuiTitle size="m">
           <h2 id={simpleFlyoutTitleId}>{i18n.TITLE(riskEntity)}</h2>
         </EuiTitle>
+        <EuiBetaBadge
+          label={TECHNICAL_PREVIEW}
+          size="s"
+          css={css`
+            color: ${euiTheme.colors.text};
+            margin-top: ${euiTheme.size.xxs};
+          `}
+        />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiText size="s">

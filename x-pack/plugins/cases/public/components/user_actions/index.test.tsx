@@ -92,7 +92,7 @@ describe(`UserActions`, () => {
     jest.clearAllMocks();
     useUpdateCommentMock.mockReturnValue({
       isLoadingIds: [],
-      patchComment,
+      mutate: patchComment,
     });
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
     useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
@@ -222,12 +222,15 @@ describe(`UserActions`, () => {
         ).queryByTestId('editable-markdown-form')
       ).not.toBeInTheDocument();
 
-      expect(patchComment).toBeCalledWith({
-        commentUpdate: sampleData.content,
-        caseId: 'case-id',
-        commentId: defaultProps.data.comments[0].id,
-        version: defaultProps.data.comments[0].version,
-      });
+      expect(patchComment).toBeCalledWith(
+        {
+          commentUpdate: sampleData.content,
+          caseId: 'case-id',
+          commentId: defaultProps.data.comments[0].id,
+          version: defaultProps.data.comments[0].version,
+        },
+        { onSuccess: expect.anything(), onError: expect.anything() }
+      );
     });
   });
 

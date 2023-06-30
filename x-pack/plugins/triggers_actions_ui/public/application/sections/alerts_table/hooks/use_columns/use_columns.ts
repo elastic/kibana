@@ -5,23 +5,39 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGridColumn, EuiDataGridOnColumnResizeData } from '@elastic/eui';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { AlertsTableStorage } from '../../alerts_table_state';
 import { toggleColumn } from './toggle_column';
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
 
-interface UseColumnsArgs {
+export interface UseColumnsArgs {
   featureIds: AlertConsumers[];
   storageAlertsTable: React.MutableRefObject<AlertsTableStorage>;
   storage: React.MutableRefObject<IStorageWrapper>;
   id: string;
   defaultColumns: EuiDataGridColumn[];
   initialBrowserFields?: BrowserFields;
+}
+
+export interface UseColumnsResp {
+  columns: EuiDataGridColumn[];
+  visibleColumns: string[];
+  isBrowserFieldDataLoading: boolean | undefined;
+  browserFields: BrowserFields;
+  onColumnsChange: (newColumns: EuiDataGridColumn[]) => void;
+  onToggleColumn: (columnId: string) => void;
+  onResetColumns: () => void;
+  onChangeVisibleColumns: (columnIds: string[]) => void;
+  onColumnResize: (args: EuiDataGridOnColumnResizeData) => void;
+  fields: Array<{
+    field: string;
+    include_unmapped: boolean;
+  }>;
 }
 
 const EMPTY_FIELDS = [{ field: '*', include_unmapped: true }];
@@ -114,26 +130,23 @@ const getColumnByColumnId = (columns: EuiDataGridColumn[], columnId: string) => 
   return columns.find(({ id }: { id: string }) => id === columnId);
 };
 
-const getColumnsByColumnIds = (columns: EuiDataGridColumn[], columnIds: string[]) => {
-  return columnIds
-    .map((columnId: string) => columns.find((column: EuiDataGridColumn) => column.id === columnId))
-    .filter(Boolean) as EuiDataGridColumn[];
-};
-
 const persist = ({
   id,
   storageAlertsTable,
   columns,
   storage,
+  visibleColumns,
 }: {
   id: string;
   storageAlertsTable: React.MutableRefObject<AlertsTableStorage>;
   storage: React.MutableRefObject<IStorageWrapper>;
   columns: EuiDataGridColumn[];
+  visibleColumns: string[];
 }) => {
   storageAlertsTable.current = {
     ...storageAlertsTable.current,
     columns,
+    visibleColumns,
   };
   storage.current.set(id, storageAlertsTable.current);
 };
@@ -145,13 +158,30 @@ export const useColumns = ({
   id,
   defaultColumns,
   initialBrowserFields,
-}: UseColumnsArgs) => {
+}: UseColumnsArgs): UseColumnsResp => {
   const [isBrowserFieldDataLoading, browserFields] = useFetchBrowserFieldCapabilities({
     featureIds,
     initialBrowserFields,
   });
 
-  const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
+  const [columns, setColumns] = useState<EuiDataGridColumn[]>(() => {
+    let cols = storageAlertsTable.current.columns;
+
+    if (cols && cols.length === 0) {
+      cols = defaultColumns;
+    }
+    // before restoring from storage, enrich the column data
+    if (initialBrowserFields && defaultColumns) {
+      cols = populateColumns(cols, initialBrowserFields, defaultColumns);
+    }
+
+    return cols;
+  });
+
+  const [visibleColumns, setVisibleColumns] = useState(
+    storageAlertsTable.current.visibleColumns ?? getColumnIds(columns)
+  );
+
   const [isColumnsPopulated, setColumnsPopulated] = useState<boolean>(false);
 
   const defaultColumnsRef = useRef<typeof defaultColumns>(defaultColumns);
@@ -162,16 +192,18 @@ export const useColumns = ({
   );
 
   useEffect(() => {
-    // if defaultColumns have changed, populate again
+    // if defaultColumns have changed,
+    // get the latest columns provided by client and
     if (didDefaultColumnChange) {
       defaultColumnsRef.current = defaultColumns;
+      setColumnsPopulated(false);
       setColumns(storageAlertsTable.current.columns);
       return;
     }
   }, [didDefaultColumnChange, storageAlertsTable, defaultColumns]);
 
   useEffect(() => {
-    if (isBrowserFieldDataLoading !== false || isColumnsPopulated) return;
+    if (isEmpty(browserFields) || isColumnsPopulated) return;
 
     const populatedColumns = populateColumns(columns, browserFields, defaultColumns);
 
@@ -187,17 +219,24 @@ export const useColumns = ({
         storage,
         storageAlertsTable,
         columns: newColumns,
+        visibleColumns,
       });
     },
-    [id, storage, storageAlertsTable]
+    [id, storage, storageAlertsTable, visibleColumns]
   );
 
   const setColumnsByColumnIds = useCallback(
     (columnIds: string[]) => {
-      const newColumns = getColumnsByColumnIds(columns, columnIds);
-      setColumnsAndSave(newColumns);
+      setVisibleColumns(columnIds);
+      persist({
+        id,
+        storage,
+        storageAlertsTable,
+        columns,
+        visibleColumns: columnIds,
+      });
     },
-    [setColumnsAndSave, columns]
+    [columns, id, storage, storageAlertsTable]
   );
 
   const onToggleColumn = useCallback(
@@ -209,7 +248,7 @@ export const useColumns = ({
         columns,
         defaultColumns,
       });
-
+      setVisibleColumns(newColumns.map((nc) => nc.id));
       setColumnsAndSave(newColumns);
     },
     [browserFields, columns, defaultColumns, setColumnsAndSave]
@@ -219,6 +258,17 @@ export const useColumns = ({
     const populatedDefaultColumns = populateColumns(defaultColumns, browserFields, defaultColumns);
     setColumnsAndSave(populatedDefaultColumns);
   }, [browserFields, defaultColumns, setColumnsAndSave]);
+
+  const onColumnResize = useCallback(
+    ({ columnId, width }: EuiDataGridOnColumnResizeData) => {
+      const colIndex = columns.findIndex((c) => c.id === columnId);
+      if (colIndex > -1) {
+        columns.splice(colIndex, 1, { ...columns[colIndex], initialWidth: width });
+        setColumnsAndSave(columns);
+      }
+    },
+    [columns, setColumnsAndSave]
+  );
 
   /*
    * In some case such security, we need some special fields such as threat.enrichments which are
@@ -233,10 +283,6 @@ export const useColumns = ({
     [columns]
   );
 
-  const visibleColumns = useMemo(() => {
-    return getColumnIds(columns);
-  }, [columns]);
-
   return {
     columns,
     visibleColumns,
@@ -246,6 +292,7 @@ export const useColumns = ({
     onToggleColumn,
     onResetColumns,
     onChangeVisibleColumns: setColumnsByColumnIds,
+    onColumnResize,
     fields: fieldsToFetch,
   };
 };

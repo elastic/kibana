@@ -18,5 +18,6 @@ export function createRouter(): jest.Mocked<IRouter> {
     handleLegacyErrors: jest.fn(),
     patch: jest.fn(),
     routerPath: '',
+    versioned: {} as any,
   };
 }

@@ -14,6 +14,7 @@ import { ActionTaskParams } from '../types';
 import { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migrationMocks } from '@kbn/core/server/mocks';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -27,6 +28,7 @@ const preconfiguredActions = [
     secrets: {},
     isPreconfigured: true,
     isDeprecated: false,
+    isSystemAction: false,
   },
 ];
 
@@ -38,10 +40,9 @@ describe('successful migrations', () => {
 
   describe('7.16.0', () => {
     test('adds actionId to references array if actionId is not preconfigured', () => {
-      const migration716 = getActionTaskParamsMigrations(
-        encryptedSavedObjectsSetup,
-        preconfiguredActions
-      )['7.16.0'];
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+      );
       const actionTaskParam = getMockData();
       const migratedActionTaskParam = migration716(actionTaskParam, context);
       expect(migratedActionTaskParam).toEqual({
@@ -57,10 +58,9 @@ describe('successful migrations', () => {
     });
 
     test('does not add actionId to references array if actionId is preconfigured', () => {
-      const migration716 = getActionTaskParamsMigrations(
-        encryptedSavedObjectsSetup,
-        preconfiguredActions
-      )['7.16.0'];
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+      );
       const actionTaskParam = getMockData({ actionId: 'my-slack1' });
       const migratedActionTaskParam = migration716(actionTaskParam, context);
       expect(migratedActionTaskParam).toEqual({
@@ -70,10 +70,9 @@ describe('successful migrations', () => {
     });
 
     test('handles empty relatedSavedObjects array', () => {
-      const migration716 = getActionTaskParamsMigrations(
-        encryptedSavedObjectsSetup,
-        preconfiguredActions
-      )['7.16.0'];
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+      );
       const actionTaskParam = getMockData({ relatedSavedObjects: [] });
       const migratedActionTaskParam = migration716(actionTaskParam, context);
       expect(migratedActionTaskParam).toEqual({
@@ -93,10 +92,9 @@ describe('successful migrations', () => {
     });
 
     test('adds actionId and relatedSavedObjects to references array', () => {
-      const migration716 = getActionTaskParamsMigrations(
-        encryptedSavedObjectsSetup,
-        preconfiguredActions
-      )['7.16.0'];
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+      );
       const actionTaskParam = getMockData({
         relatedSavedObjects: [
           {
@@ -137,10 +135,9 @@ describe('successful migrations', () => {
     });
 
     test('only adds relatedSavedObjects to references array if action is preconfigured', () => {
-      const migration716 = getActionTaskParamsMigrations(
-        encryptedSavedObjectsSetup,
-        preconfiguredActions
-      )['7.16.0'];
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+      );
       const actionTaskParam = getMockData({
         actionId: 'my-slack1',
         relatedSavedObjects: [
@@ -177,10 +174,9 @@ describe('successful migrations', () => {
     });
 
     test('adds actionId and multiple relatedSavedObjects to references array', () => {
-      const migration716 = getActionTaskParamsMigrations(
-        encryptedSavedObjectsSetup,
-        preconfiguredActions
-      )['7.16.0'];
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+      );
       const actionTaskParam = getMockData({
         relatedSavedObjects: [
           {
@@ -236,10 +232,9 @@ describe('successful migrations', () => {
     });
 
     test('does not overwrite existing references', () => {
-      const migration716 = getActionTaskParamsMigrations(
-        encryptedSavedObjectsSetup,
-        preconfiguredActions
-      )['7.16.0'];
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+      );
       const actionTaskParam = getMockData(
         {
           relatedSavedObjects: [
@@ -294,10 +289,9 @@ describe('successful migrations', () => {
     });
 
     test('does not overwrite existing references if relatedSavedObjects is undefined', () => {
-      const migration716 = getActionTaskParamsMigrations(
-        encryptedSavedObjectsSetup,
-        preconfiguredActions
-      )['7.16.0'];
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+      );
       const actionTaskParam = getMockData({}, [
         {
           id: 'existing-ref-id',
@@ -324,10 +318,9 @@ describe('successful migrations', () => {
     });
 
     test('does not overwrite existing references if relatedSavedObjects is empty', () => {
-      const migration716 = getActionTaskParamsMigrations(
-        encryptedSavedObjectsSetup,
-        preconfiguredActions
-      )['7.16.0'];
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+      );
       const actionTaskParam = getMockData({ relatedSavedObjects: [] }, [
         {
           id: 'existing-ref-id',
@@ -360,7 +353,9 @@ describe('successful migrations', () => {
 
   describe('8.0.0', () => {
     test('no op migration for rules SO', () => {
-      const migration800 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup, [])['8.0.0'];
+      const migration800 = SavedObjectsUtils.getMigrationFunction(
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, [])['8.0.0']
+      );
       const actionTaskParam = getMockData();
       expect(migration800(actionTaskParam, context)).toEqual(actionTaskParam);
     });
@@ -377,10 +372,9 @@ describe('handles errors during migrations', () => {
 
   describe('7.16.0 throws if migration fails', () => {
     test('should show the proper exception', () => {
-      const migration716 = getActionTaskParamsMigrations(
-        encryptedSavedObjectsSetup,
-        preconfiguredActions
-      )['7.16.0'];
+      const migration716 = SavedObjectsUtils.getMigrationFunction(
+        getActionTaskParamsMigrations(encryptedSavedObjectsSetup, preconfiguredActions)['7.16.0']
+      );
       const actionTaskParam = getMockData();
       expect(() => {
         migration716(actionTaskParam, context);

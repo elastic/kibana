@@ -7,17 +7,9 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "observability_onboarding"],
-    "requiredPlugins": [
-      "data",
-      "observability",
-    ],
-    "optionalPlugins": [
-      "cloud",
-      "usageCollection",
-    ],
-    "requiredBundles": [
-      "kibanaReact"
-    ],
+    "requiredPlugins": ["data", "observability", "observabilityShared"],
+    "optionalPlugins": ["cloud", "usageCollection"],
+    "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": ["common"]
   }
 }

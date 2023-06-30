@@ -26,7 +26,7 @@ export function registerExploreRoute({
 }) {
   router.post(
     {
-      path: '/api/graph/graphExplore',
+      path: '/internal/graph/graphExplore',
       validate: {
         body: schema.object({
           index: schema.string(),

@@ -10,6 +10,7 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -60,6 +61,7 @@ export interface Props {
   };
   ilmPhase: IlmPhase | undefined;
   indexName: string;
+  isAssistantEnabled: boolean;
   openCreateCaseFlyout: ({
     comments,
     headerContent,
@@ -69,7 +71,8 @@ export interface Props {
   }) => void;
   pattern: string;
   patternRollup: PatternRollup | undefined;
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
   updatePatternRollup: (patternRollup: PatternRollup) => void;
 }
 
@@ -82,10 +85,12 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   getGroupByFieldsOnClick,
   ilmPhase,
   indexName,
+  isAssistantEnabled,
   openCreateCaseFlyout,
   pattern,
   patternRollup,
   theme,
+  baseTheme,
   updatePatternRollup,
 }) => {
   const { error: mappingsError, indexes, loading: loadingMappings } = useMappings(indexName);
@@ -143,6 +148,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         docsCount,
         getGroupByFieldsOnClick,
         ilmPhase,
+        isAssistantEnabled,
         indexName,
         onAddToNewCase,
         partitionedFieldMetadata: partitionedFieldMetadata ?? EMPTY_METADATA,
@@ -151,6 +157,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         setSelectedTabId,
         stats: patternRollup?.stats ?? null,
         theme,
+        baseTheme,
       }),
     [
       addSuccessToast,
@@ -161,12 +168,14 @@ const IndexPropertiesComponent: React.FC<Props> = ({
       getGroupByFieldsOnClick,
       ilmPhase,
       indexName,
+      isAssistantEnabled,
       onAddToNewCase,
       partitionedFieldMetadata,
       pattern,
       patternRollup?.docsCount,
       patternRollup?.stats,
       theme,
+      baseTheme,
     ]
   );
 

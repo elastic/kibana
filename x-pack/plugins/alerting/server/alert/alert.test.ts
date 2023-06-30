@@ -9,6 +9,7 @@ import sinon from 'sinon';
 import { Alert } from './alert';
 import { AlertInstanceState, AlertInstanceContext, DefaultActionGroupId } from '../../common';
 import { alertWithAnyUUID } from '../test_utils';
+import { CombinedSummarizedAlerts } from '../types';
 
 let clock: sinon.SinonFakeTimers;
 
@@ -249,6 +250,24 @@ describe('getUUID()', () => {
   });
 });
 
+describe('getStart()', () => {
+  test('returns null for new alert', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    expect(alert.getStart()).toBeNull();
+  });
+
+  test('returns start time if set in state', () => {
+    const uuid = 'previous-uuid';
+    const meta = { uuid };
+    const state = { foo: true, start: '2023-03-28T12:27:28.159Z', duration: '0' };
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      state,
+      meta,
+    });
+    expect(alert.getStart()).toEqual('2023-03-28T12:27:28.159Z');
+  });
+});
+
 describe('scheduleActions()', () => {
   test('makes hasScheduledActions() return true', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
@@ -344,6 +363,7 @@ describe('updateLastScheduledActions()', () => {
           group: 'default',
         },
         flappingHistory: [],
+        maintenanceWindowIds: [],
       },
     });
   });
@@ -357,6 +377,7 @@ describe('updateLastScheduledActions()', () => {
       state: {},
       meta: {
         flappingHistory: [],
+        maintenanceWindowIds: [],
         uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
@@ -373,6 +394,7 @@ describe('updateLastScheduledActions()', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
       meta: {
         flappingHistory: [],
+        maintenanceWindowIds: [],
         lastScheduledActions: {
           date: new Date(),
           group: 'default',
@@ -387,6 +409,7 @@ describe('updateLastScheduledActions()', () => {
       state: {},
       meta: {
         flappingHistory: [],
+        maintenanceWindowIds: [],
         uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
@@ -484,6 +507,7 @@ describe('toJSON', () => {
             group: 'default',
           },
           flappingHistory: [false, true],
+          maintenanceWindowIds: [],
           flapping: false,
           pendingRecoveredCount: 2,
         },
@@ -548,6 +572,7 @@ describe('toRaw', () => {
       meta: {
         flappingHistory: [false, true, true],
         flapping: false,
+        maintenanceWindowIds: [],
         uuid: expect.any(String),
       },
     });
@@ -570,6 +595,7 @@ describe('setFlappingHistory', () => {
           "flappingHistory": Array [
             false,
           ],
+          "maintenanceWindowIds": Array [],
           "uuid": Any<String>,
         },
         "state": Object {},
@@ -602,6 +628,7 @@ describe('setFlapping', () => {
         "meta": Object {
           "flapping": false,
           "flappingHistory": Array [],
+          "maintenanceWindowIds": Array [],
           "uuid": Any<String>,
         },
         "state": Object {},
@@ -660,8 +687,34 @@ describe('resetPendingRecoveredCount', () => {
 });
 
 describe('isFilteredOut', () => {
-  const summarizedAlerts = {
-    all: { count: 1, data: [{ kibana: { alert: { uuid: '1' } } }] },
+  const summarizedAlerts: CombinedSummarizedAlerts = {
+    all: {
+      count: 1,
+      data: [
+        {
+          _id: '1',
+          _index: '.alerts',
+          '@timestamp': '',
+          kibana: {
+            alert: {
+              instance: { id: 'a' },
+              rule: {
+                category: 'category',
+                consumer: 'consumer',
+                name: 'name',
+                producer: 'producer',
+                revision: 0,
+                rule_type_id: 'rule_type_id',
+                uuid: 'uuid',
+              },
+              status: 'status',
+              uuid: '1',
+            },
+            space_ids: ['default'],
+          },
+        },
+      ],
+    },
     new: { count: 0, data: [] },
     ongoing: { count: 0, data: [] },
     recovered: { count: 0, data: [] },

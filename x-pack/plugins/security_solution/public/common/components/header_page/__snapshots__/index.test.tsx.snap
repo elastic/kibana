@@ -4,7 +4,6 @@ exports[`HeaderPage it renders 1`] = `
 <Fragment>
   <EuiPageHeader
     alignItems="center"
-    bottomBorder={true}
   >
     <HeaderSection>
       <Memo(TitleComponent)
@@ -17,13 +16,12 @@ exports[`HeaderPage it renders 1`] = `
         }
         title="Test title"
       />
+      <EuiSpacer
+        size="s"
+      />
       <Subtitle
         data-test-subj="header-page-subtitle"
         items="Test subtitle"
-      />
-      <Subtitle
-        data-test-subj="header-page-subtitle-2"
-        items="Test subtitle 2"
       />
     </HeaderSection>
     <EuiPageHeaderSection
@@ -34,6 +32,17 @@ exports[`HeaderPage it renders 1`] = `
       </p>
     </EuiPageHeaderSection>
   </EuiPageHeader>
+  <EuiSpacer
+    size="xs"
+  />
+  <Subtitle
+    data-test-subj="header-page-subtitle-2"
+    items="Test subtitle 2"
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <Divider />
   <EuiSpacer
     size="l"
   />

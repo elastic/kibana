@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
   AppDeepLink,
@@ -26,6 +27,7 @@ import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
@@ -49,17 +51,27 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
-import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { RulesLocatorDefinition } from './locators/rules';
-import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
-import { registerDataHandler } from './data_handler';
+import { RuleDetailsLocatorDefinition } from './locators/rule_details';
+import { SloDetailsLocatorDefinition } from './locators/slo_details';
+import { observabilityAppId, observabilityFeatureId } from '../common';
+import { registerDataHandler } from './context/has_data_context/data_handler';
 import {
   createObservabilityRuleTypeRegistry,
   ObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
-import { createCallObservabilityApi } from './services/call_observability_api';
-import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import { createUseRulesLink } from './hooks/create_use_rules_link';
+import {
+  ALERTS_PATH,
+  CASES_PATH,
+  OBSERVABILITY_BASE_PATH,
+  OVERVIEW_PATH,
+  RULES_PATH,
+  SLOS_PATH,
+} from './routes/paths';
+import { createCoPilotService } from './context/co_pilot_context/create_co_pilot_service';
+import { type CoPilotService } from './typings/co_pilot';
 
 export interface ConfigSchema {
   unsafe: {
@@ -74,6 +86,13 @@ export interface ConfigSchema {
         enabled: boolean;
       };
     };
+    thresholdRule: {
+      enabled: boolean;
+    };
+  };
+  compositeSlo: { enabled: boolean };
+  aiAssistant?: {
+    enabled?: boolean;
   };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
@@ -93,6 +112,7 @@ export interface ObservabilityPublicPluginsStart {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
   exploratoryView: ExploratoryViewPublicStart;
@@ -108,6 +128,7 @@ export interface ObservabilityPublicPluginsStart {
   usageCollection: UsageCollectionSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
+  cloud?: CloudStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -125,6 +146,8 @@ export class Plugin
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
 
+  private coPilotService: CoPilotService | undefined;
+
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
   private readonly deepLinks: AppDeepLink[] = [
@@ -134,7 +157,7 @@ export class Plugin
         defaultMessage: 'Alerts',
       }),
       order: 8001,
-      path: '/alerts',
+      path: ALERTS_PATH,
       navLinkStatus: AppNavLinkStatus.hidden,
       deepLinks: [
         {
@@ -142,7 +165,7 @@ export class Plugin
           title: i18n.translate('xpack.observability.rulesLinkTitle', {
             defaultMessage: 'Rules',
           }),
-          path: '/alerts/rules',
+          path: RULES_PATH,
           navLinkStatus: AppNavLinkStatus.hidden,
         },
       ],
@@ -154,10 +177,10 @@ export class Plugin
       }),
       navLinkStatus: AppNavLinkStatus.hidden,
       order: 8002,
-      path: '/slos',
+      path: SLOS_PATH,
     },
     getCasesDeepLinks({
-      basePath: casesPath,
+      basePath: CASES_PATH,
       extend: {
         [CasesDeepLinkId.cases]: {
           order: 8003,
@@ -186,15 +209,19 @@ export class Plugin
     const config = this.initContext.config.get();
     const kibanaVersion = this.initContext.env.packageInfo.version;
 
-    createCallObservabilityApi(coreSetup.http);
-
     this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
 
-    const locator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
+    const rulesLocator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
 
-    pluginsSetup.share.url.locators.create(new RuleDetailsLocatorDefinition());
+    const ruleDetailsLocator = pluginsSetup.share.url.locators.create(
+      new RuleDetailsLocatorDefinition()
+    );
+
+    const sloDetailsLocator = pluginsSetup.share.url.locators.create(
+      new SloDetailsLocatorDefinition()
+    );
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
@@ -205,21 +232,21 @@ export class Plugin
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
 
       return renderApp({
-        core: coreStart,
-        config,
-        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         appMountParameters: params,
-        observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-        ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
-        usageCollection: pluginsSetup.usageCollection,
+        config,
+        core: coreStart,
         isDev: this.initContext.env.mode.dev,
         kibanaVersion,
+        observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
+        ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
+        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
+        usageCollection: pluginsSetup.usageCollection,
       });
     };
 
     const appUpdater$ = this.appUpdater$;
     const app = {
-      appRoute: '/app/observability',
+      appRoute: OBSERVABILITY_BASE_PATH,
       category,
       deepLinks: this.deepLinks,
       euiIconType,
@@ -261,7 +288,7 @@ export class Plugin
             'Consolidate your logs, metrics, application traces, and system availability with purpose-built UIs.',
         }),
         icon: 'logoObservability',
-        path: '/app/observability/',
+        path: `${OBSERVABILITY_BASE_PATH}/`,
         order: 200,
       });
     }
@@ -276,7 +303,7 @@ export class Plugin
               defaultMessage: 'Overview',
             }),
             app: observabilityAppId,
-            path: '/overview',
+            path: OVERVIEW_PATH,
           };
 
           // Reformat the visible links to be NavigationEntry objects instead of
@@ -310,11 +337,19 @@ export class Plugin
       )
     );
 
+    this.coPilotService = createCoPilotService({
+      enabled: !!config.aiAssistant?.enabled,
+      http: coreSetup.http,
+    });
+
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
-      rulesLocator: locator,
+      rulesLocator,
+      ruleDetailsLocator,
+      sloDetailsLocator,
+      getCoPilotService: () => this.coPilotService!,
     };
   }
 
@@ -344,6 +379,7 @@ export class Plugin
     return {
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
+      getCoPilotService: () => this.coPilotService!,
     };
   }
 }

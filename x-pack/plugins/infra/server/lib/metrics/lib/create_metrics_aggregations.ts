@@ -11,6 +11,6 @@ import { MetricsAPIRequest } from '../../../../common/http_api/metrics_api';
 export const createMetricsAggregations = (options: MetricsAPIRequest): MetricsUIAggregation => {
   const { metrics } = options;
   return metrics.reduce((aggs, metric) => {
-    return { ...aggs, ...metric.aggregations };
+    return Object.assign(aggs, metric.aggregations);
   }, {});
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiBadge, EuiDescriptionList, EuiLoadingContent } from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EncryptedSyntheticsMonitor } from '../../../../../../common/runtime_types';
 
@@ -53,7 +53,7 @@ export const MonitorStatus = ({
         {
           title: STATUS_LABEL,
           description: loadingContent ? (
-            <EuiLoadingContent lines={1} />
+            <EuiSkeletonText lines={1} />
           ) : (
             <BadgeStatus status={status} isBrowserType={isBrowserType} />
           ),

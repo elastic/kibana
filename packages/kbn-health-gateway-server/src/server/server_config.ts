@@ -40,6 +40,7 @@ const configSchema = schema.object(
       defaultValue: 120000,
     }),
     ssl: sslSchema,
+    restrictInternalApis: schema.boolean({ defaultValue: false }),
   },
   {
     validate: (rawConfig) => {
@@ -74,6 +75,7 @@ export class ServerConfig implements IHttpConfig {
   socketTimeout: number;
   ssl: ISslConfig;
   cors: ICorsConfig;
+  restrictInternalApis: boolean;
 
   constructor(rawConfig: ServerConfigType) {
     this.host = rawConfig.host;
@@ -88,5 +90,6 @@ export class ServerConfig implements IHttpConfig {
       allowCredentials: false,
       allowOrigin: ['*'],
     };
+    this.restrictInternalApis = rawConfig.restrictInternalApis;
   }
 }

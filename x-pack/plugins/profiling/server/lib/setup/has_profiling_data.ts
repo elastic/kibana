@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import { ProfilingESClient } from '../../utils/create_profiling_es_client';
+import { ProfilingSetupOptions } from './types';
 
-export async function hasProfilingData({
-  client,
-}: {
-  client: ProfilingESClient;
-}): Promise<boolean> {
+export async function hasProfilingData({ client }: ProfilingSetupOptions): Promise<boolean> {
   const hasProfilingDataResponse = await client.search('has_any_profiling_data', {
     index: 'profiling*',
     size: 0,
     track_total_hits: 1,
     terminate_after: 1,
   });
-
   return hasProfilingDataResponse.hits.total.value > 0;
 }

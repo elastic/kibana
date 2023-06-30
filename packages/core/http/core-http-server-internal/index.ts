@@ -18,8 +18,12 @@ export type {
 } from './src/types';
 export { BasePath } from './src/base_path_service';
 
-export { cspConfig, CspConfig } from './src/csp';
+export { cspConfig, CspConfig, type CspConfigType } from './src/csp';
 
-export { externalUrlConfig, ExternalUrlConfig } from './src/external_url';
+export {
+  externalUrlConfig,
+  ExternalUrlConfig,
+  type ExternalUrlConfigType,
+} from './src/external_url';
 
 export { createCookieSessionStorageFactory } from './src/cookie_session_storage';

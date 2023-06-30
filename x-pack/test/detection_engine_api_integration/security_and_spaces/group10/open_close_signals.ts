@@ -18,9 +18,9 @@ import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_e
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   setSignalStatus,
-  getSignalStatusEmptyResponse,
+  getAlertUpdateEmptyResponse,
   getQuerySignalIds,
   deleteAllRules,
   createRule,
@@ -37,6 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const log = getService('log');
+  const es = getService('es');
 
   describe('open_close_signals', () => {
     describe('validation checks', () => {
@@ -50,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
         // remove any server generated items that are indeterministic
         delete body.took;
 
-        expect(body).to.eql(getSignalStatusEmptyResponse());
+        expect(body).to.eql(getAlertUpdateEmptyResponse());
       });
 
       it('should not give errors when querying and the signals index does exist and is empty', async () => {
@@ -64,9 +65,9 @@ export default ({ getService }: FtrProviderContext) => {
         // remove any server generated items that are indeterministic
         delete body.took;
 
-        expect(body).to.eql(getSignalStatusEmptyResponse());
+        expect(body).to.eql(getAlertUpdateEmptyResponse());
 
-        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
       });
 
       describe('tests with auditbeat data', () => {
@@ -84,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
         });
 

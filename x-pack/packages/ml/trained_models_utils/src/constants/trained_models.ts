@@ -40,16 +40,13 @@ export const BUILT_IN_MODEL_TYPE = i18n.translate(
   { defaultMessage: 'built-in' }
 );
 
-export const CURATED_MODEL_TYPE = i18n.translate(
-  'xpack.ml.trainedModels.modelsList.curatedModelLabel',
-  { defaultMessage: 'curated' }
-);
+export const ELASTIC_MODEL_TYPE = 'elastic';
 
 export const BUILT_IN_MODEL_TAG = 'prepackaged';
 
-export const CURATED_MODEL_TAG = 'curated';
+export const ELASTIC_MODEL_TAG = 'elastic';
 
-export const CURATED_MODEL_DEFINITIONS = {
+export const ELASTIC_MODEL_DEFINITIONS = {
   '.elser_model_1': {
     config: {
       input: {
@@ -64,10 +61,8 @@ export const CURATED_MODEL_DEFINITIONS = {
 
 export const MODEL_STATE = {
   ...DEPLOYMENT_STATE,
-  DOWNLOADING: i18n.translate('xpack.ml.trainedModels.modelsList.downloadingStateLabel', {
-    defaultMessage: 'downloading',
-  }),
-  DOWNLOADED: i18n.translate('xpack.ml.trainedModels.modelsList.downloadedStateLabel', {
-    defaultMessage: 'downloaded',
-  }),
+  DOWNLOADING: 'downloading',
+  DOWNLOADED: 'downloaded',
 } as const;
+
+export type ModelState = typeof MODEL_STATE[keyof typeof MODEL_STATE] | null;

@@ -32,7 +32,7 @@ import {
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   IEventLogClientService,
   IEventLogger,
@@ -67,7 +67,7 @@ import {
   ActionsRequestHandlerContext,
 } from './types';
 
-import { getActionsConfigurationUtilities } from './actions_config';
+import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
@@ -129,6 +129,7 @@ export interface PluginSetupContract {
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
+  getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
 }
 
 export interface PluginStartContract {
@@ -176,6 +177,7 @@ export interface ActionsPluginsStart {
   licensing: LicensingPluginStart;
   eventLog: IEventLogClientService;
   spaces?: SpacesPluginStart;
+  security?: SecurityPluginStart;
 }
 
 const includedHiddenTypes = [
@@ -251,6 +253,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           ...this.actionsConfig.preconfigured[preconfiguredId],
           id: preconfiguredId,
           isPreconfigured: true,
+          isSystemAction: false,
         };
         this.preconfiguredActions.push({
           ...rawPreconfiguredConnector,
@@ -369,6 +372,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           hasPermanentEncryptionKey: plugins.encryptedSavedObjects.canEncrypt,
         };
       },
+      getActionsConfigurationUtilities: () => actionsConfigUtils,
     };
   }
 
@@ -488,6 +492,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       logger,
       eventLogger: this.eventLogger!,
       spaces: plugins.spaces?.spacesService,
+      security: plugins.security,
       getServices: this.getServicesFactory(
         getScopedSavedObjectsClientWithoutAccessToActions,
         core.elasticsearch,

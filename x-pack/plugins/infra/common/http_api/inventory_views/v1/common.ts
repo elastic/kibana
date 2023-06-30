@@ -29,8 +29,6 @@ export const inventoryViewRequestParamsRT = rt.type({
   inventoryViewId: inventoryViewIdRT,
 });
 
-export type InventoryViewRequestParams = rt.TypeOf<typeof inventoryViewRequestParamsRT>;
-
 export const inventoryViewRequestQueryRT = rt.partial({
   sourceId: rt.string,
 });
@@ -62,5 +60,3 @@ const inventoryViewResponseRT = rt.exact(
 export const inventoryViewResponsePayloadRT = rt.type({
   data: inventoryViewResponseRT,
 });
-
-export type InventoryViewResponsePayload = rt.TypeOf<typeof inventoryViewResponsePayloadRT>;

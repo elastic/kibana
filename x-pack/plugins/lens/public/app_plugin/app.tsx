@@ -72,6 +72,7 @@ export function App({
   initialContext,
   theme$,
   coreStart,
+  savedObjectStore,
 }: LensAppProps) {
   const lensAppServices = useKibana<LensAppServices>().services;
 
@@ -112,6 +113,7 @@ export function App({
     isLoading,
     isSaveable,
     visualization,
+    annotationGroups,
   } = useLensSelector((state) => state.lens);
 
   const selectorDependencies = useMemo(
@@ -179,7 +181,9 @@ export function App({
           persistedDoc,
           lastKnownDoc,
           data.query.filterManager.inject.bind(data.query.filterManager),
-          datasourceMap
+          datasourceMap,
+          visualizationMap,
+          annotationGroups
         ) &&
         (isSaveable || persistedDoc)
       ) {
@@ -208,6 +212,8 @@ export function App({
     application.capabilities.visualize.save,
     data.query.filterManager,
     datasourceMap,
+    visualizationMap,
+    annotationGroups,
   ]);
 
   const getLegacyUrlConflictCallout = useCallback(() => {
@@ -373,7 +379,14 @@ export function App({
         initialDocFromContext,
         persistedDoc,
       ].map((refDoc) =>
-        isLensEqual(refDoc, lastKnownDoc, data.query.filterManager.inject, datasourceMap)
+        isLensEqual(
+          refDoc,
+          lastKnownDoc,
+          data.query.filterManager.inject,
+          datasourceMap,
+          visualizationMap,
+          annotationGroups
+        )
       );
       if (initialDocFromContextUnchanged || currentDocHasBeenSavedInLens) {
         onAppLeave((actions) => {
@@ -385,6 +398,7 @@ export function App({
       }
     }
   }, [
+    annotationGroups,
     application,
     data.query.filterManager.inject,
     datasourceMap,
@@ -393,6 +407,7 @@ export function App({
     lastKnownDoc,
     onAppLeave,
     persistedDoc,
+    visualizationMap,
   ]);
 
   const navigateToVizEditor = useCallback(() => {
@@ -421,7 +436,6 @@ export function App({
         dataViews,
         uiActions,
         core: { http, notifications, uiSettings },
-        data,
         contextDataViewSpec: (initialContext as VisualizeFieldContext | undefined)?.dataViewSpec,
         updateIndexPatterns: (newIndexPatternsState, options) => {
           dispatch(updateIndexPatterns(newIndexPatternsState));
@@ -436,7 +450,7 @@ export function App({
           }
         },
       }),
-    [dataViews, uiActions, http, notifications, uiSettings, data, initialContext, dispatch]
+    [dataViews, uiActions, http, notifications, uiSettings, initialContext, dispatch]
   );
 
   const onTextBasedSavedAndExit = useCallback(async ({ onSave, onCancel }) => {
@@ -596,7 +610,9 @@ export function App({
               persistedDoc,
               lastKnownDoc,
               data.query.filterManager.inject.bind(data.query.filterManager),
-              datasourceMap
+              datasourceMap,
+              visualizationMap,
+              annotationGroups
             )
           }
           goBackToOriginatingApp={goBackToOriginatingApp}

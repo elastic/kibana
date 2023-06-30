@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlyoutHeader, EuiLoadingContent, EuiToolTip, EuiTitle } from '@elastic/eui';
+import { EuiFlyoutHeader, EuiSkeletonText, EuiToolTip, EuiTitle } from '@elastic/eui';
 import { useEndpointSelector } from '../../hooks';
 import { detailsLoading } from '../../../store/selectors';
 import { BackToEndpointDetailsFlyoutSubHeader } from './back_to_endpoint_details_flyout_subheader';
@@ -30,7 +30,7 @@ export const EndpointDetailsFlyoutHeader = memo(
         {endpointId && <BackToEndpointDetailsFlyoutSubHeader endpointId={endpointId} />}
 
         {hostDetailsLoading ? (
-          <EuiLoadingContent lines={1} />
+          <EuiSkeletonText lines={1} />
         ) : (
           <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">
             <EuiTitle size="s">

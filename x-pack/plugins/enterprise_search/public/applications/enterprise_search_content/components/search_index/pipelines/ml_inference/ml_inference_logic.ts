@@ -40,6 +40,10 @@ import {
   TrainedModelsApiLogic,
 } from '../../../../api/ml_models/ml_trained_models_logic';
 import {
+  StartTextExpansionModelApiLogic,
+  StartTextExpansionModelApiLogicActions,
+} from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
+import {
   AttachMlInferencePipelineApiLogic,
   AttachMlInferencePipelineApiLogicArgs,
   AttachMlInferencePipelineResponse,
@@ -58,6 +62,11 @@ import {
   FetchMlInferencePipelinesArgs,
   FetchMlInferencePipelinesResponse,
 } from '../../../../api/pipelines/fetch_ml_inference_pipelines';
+import {
+  FetchPipelineApiLogic,
+  FetchPipelineResponse,
+  FetchPipelineApiLogicActions,
+} from '../../../../api/pipelines/fetch_pipeline';
 
 import { isConnectorIndex } from '../../../../utils/indices';
 import {
@@ -78,6 +87,7 @@ import {
   getDisabledReason,
   validateInferencePipelineConfiguration,
   validateInferencePipelineFields,
+  validatePipelineNameIsAvailable,
 } from './utils';
 
 export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
@@ -115,6 +125,7 @@ interface MLInferenceProcessorsActions {
     AttachMlInferencePipelineResponse
   >['apiSuccess'];
   attachPipeline: () => void;
+  clearFetchedPipeline: FetchPipelineApiLogicActions['apiReset'];
   createApiError: Actions<
     CreateMlInferencePipelineApiLogicArgs,
     CreateMlInferencePipelineResponse
@@ -124,6 +135,8 @@ interface MLInferenceProcessorsActions {
     CreateMlInferencePipelineResponse
   >['apiSuccess'];
   createPipeline: () => void;
+  fetchPipelineByName: FetchPipelineApiLogicActions['makeRequest'];
+  fetchPipelineSuccess: FetchPipelineApiLogicActions['apiSuccess'];
   makeAttachPipelineRequest: Actions<
     AttachMlInferencePipelineApiLogicArgs,
     AttachMlInferencePipelineResponse
@@ -144,6 +157,9 @@ interface MLInferenceProcessorsActions {
     FetchMlInferencePipelinesResponse
   >['apiSuccess'];
   mlModelsApiError: TrainedModelsApiLogicActions['apiError'];
+  onAddInferencePipelineStepChange: (step: AddInferencePipelineSteps) => {
+    step: AddInferencePipelineSteps;
+  };
   removeFieldFromMapping: (fieldName: string) => { fieldName: string };
   selectExistingPipeline: (pipelineName: string) => {
     pipelineName: string;
@@ -156,6 +172,7 @@ interface MLInferenceProcessorsActions {
   setInferencePipelineConfiguration: (configuration: InferencePipelineConfiguration) => {
     configuration: InferencePipelineConfiguration;
   };
+  startTextExpansionModelSuccess: StartTextExpansionModelApiLogicActions['apiSuccess'];
 }
 
 export interface AddInferencePipelineModal {
@@ -168,6 +185,7 @@ export interface AddInferencePipelineModal {
 export interface MLInferenceProcessorsValues {
   addInferencePipelineModal: AddInferencePipelineModal;
   createErrors: string[];
+  existingPipeline: FetchPipelineResponse | undefined;
   existingInferencePipelines: MLInferencePipelineOption[];
   formErrors: AddInferencePipelineFormErrors;
   index: CachedFetchIndexApiLogicValues['indexData'];
@@ -195,6 +213,7 @@ export const MLInferenceLogic = kea<
     attachPipeline: true,
     clearFormErrors: true,
     createPipeline: true,
+    onAddInferencePipelineStepChange: (step: AddInferencePipelineSteps) => ({ step }),
     removeFieldFromMapping: (fieldName: string) => ({ fieldName }),
     selectExistingPipeline: (pipelineName: string) => ({ pipelineName }),
     selectFields: (fieldNames: string[]) => ({ fieldNames }),
@@ -230,6 +249,14 @@ export const MLInferenceLogic = kea<
       ],
       PipelinesLogic,
       ['closeAddMlInferencePipelineModal as closeAddMlInferencePipelineModal'],
+      StartTextExpansionModelApiLogic,
+      ['apiSuccess as startTextExpansionModelSuccess'],
+      FetchPipelineApiLogic,
+      [
+        'apiReset as clearFetchedPipeline',
+        'makeRequest as fetchPipelineByName',
+        'apiSuccess as fetchPipelineSuccess',
+      ],
     ],
     values: [
       CachedFetchIndexApiLogic,
@@ -242,6 +269,8 @@ export const MLInferenceLogic = kea<
       ['data as mlModelsData', 'status as mlModelsStatus'],
       FetchMlInferencePipelineProcessorsApiLogic,
       ['data as mlInferencePipelineProcessors'],
+      FetchPipelineApiLogic,
+      ['data as existingPipeline'],
     ],
   },
   events: {},
@@ -315,6 +344,31 @@ export const MLInferenceLogic = kea<
           existingPipeline: false,
         });
       }
+    },
+    startTextExpansionModelSuccess: () => {
+      // Refresh ML models list when the text expansion model is started
+      actions.makeMLModelsRequest(undefined);
+    },
+    onAddInferencePipelineStepChange: ({ step }) => {
+      const {
+        addInferencePipelineModal: {
+          configuration: { pipelineName, existingPipeline },
+          step: currentStep,
+        },
+      } = values;
+      if (currentStep === AddInferencePipelineSteps.Configuration && !existingPipeline) {
+        // Validate name is not in use
+        actions.fetchPipelineByName({
+          pipelineName: `ml-inference-${formatPipelineName(pipelineName)}`,
+        });
+        // Continue to the next step so we don't have to save it to state, we will change
+        // back to the Configuration step if we find a pipeline with the same name
+      }
+      actions.setAddInferencePipelineStep(step);
+    },
+    fetchPipelineSuccess: () => {
+      // We found a pipeline with the name go back to configuration step
+      actions.setAddInferencePipelineStep(AddInferencePipelineSteps.Configuration);
     },
   }),
   path: ['enterprise_search', 'content', 'pipelines_add_ml_inference_pipeline'],
@@ -409,10 +463,14 @@ export const MLInferenceLogic = kea<
   },
   selectors: ({ selectors }) => ({
     formErrors: [
-      () => [selectors.addInferencePipelineModal],
-      (modal: AddInferencePipelineModal) => ({
+      () => [selectors.addInferencePipelineModal, selectors.existingPipeline],
+      (
+        modal: AddInferencePipelineModal,
+        existingPipeline: MLInferenceProcessorsValues['existingPipeline']
+      ) => ({
         ...validateInferencePipelineConfiguration(modal.configuration),
         ...validateInferencePipelineFields(modal.configuration),
+        ...validatePipelineNameIsAvailable(existingPipeline),
       }),
     ],
     isConfigureStepValid: [

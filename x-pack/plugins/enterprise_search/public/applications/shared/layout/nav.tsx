@@ -5,26 +5,27 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import { useValues } from 'kea';
 
-import { EuiSideNavItemType } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiSideNavItemType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {
   ANALYTICS_PLUGIN,
+  APPLICATIONS_PLUGIN,
   APP_SEARCH_PLUGIN,
   ELASTICSEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  ESRE_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
+  VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
-import {
-  ENGINES_PATH,
-  SEARCH_INDICES_PATH,
-  SETTINGS_PATH,
-  EngineViewTabs,
-} from '../../enterprise_search_content/routes';
+import { SEARCH_APPLICATIONS_PATH, SearchApplicationViewTabs } from '../../applications/routes';
+import { SEARCH_INDICES_PATH, SETTINGS_PATH } from '../../enterprise_search_content/routes';
 import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
@@ -52,6 +53,24 @@ export const useEnterpriseSearchNav = () => {
           ...generateNavLink({
             shouldNotCreateHref: true,
             to: ELASTICSEARCH_PLUGIN.URL,
+          }),
+        },
+        {
+          id: 'esre',
+          name: i18n.translate('xpack.enterpriseSearch.nav.esreTitle', {
+            defaultMessage: 'ESRE',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: ESRE_PLUGIN.URL,
+          }),
+        },
+        {
+          id: 'vectorSearch',
+          name: VECTOR_SEARCH_PLUGIN.NAME,
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            to: VECTOR_SEARCH_PLUGIN.URL,
           }),
         },
         {
@@ -110,7 +129,7 @@ export const useEnterpriseSearchNav = () => {
           }),
           ...generateNavLink({
             shouldNotCreateHref: true,
-            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + ENGINES_PATH,
+            to: APPLICATIONS_PLUGIN.URL,
           }),
         },
         {
@@ -173,47 +192,59 @@ export const useEnterpriseSearchNav = () => {
   return navItems;
 };
 
-export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?: boolean) => {
+export const useEnterpriseSearchApplicationNav = (
+  searchApplicationName?: string,
+  isEmptyState?: boolean,
+  hasSchemaConflicts?: boolean
+) => {
   const navItems = useEnterpriseSearchNav();
   if (!navItems) return undefined;
-  if (!engineName) return navItems;
+  if (!searchApplicationName) return navItems;
   const applicationsItem = navItems.find((item) => item.id === 'applications');
   if (!applicationsItem || !applicationsItem.items) return navItems;
-  const enginesItem = applicationsItem.items?.find((item) => item.id === 'searchApplications');
-  if (!enginesItem || enginesItem.id !== 'searchApplications') return navItems;
+  const searchApplicationsItem = applicationsItem.items?.find(
+    (item) => item.id === 'searchApplications'
+  );
+  if (!searchApplicationsItem || searchApplicationsItem.id !== 'searchApplications')
+    return navItems;
 
-  const enginePath = `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}${ENGINES_PATH}/${engineName}`;
+  const searchApplicationPath = `${APPLICATIONS_PLUGIN.URL}${SEARCH_APPLICATIONS_PATH}/${searchApplicationName}`;
 
-  enginesItem.items = !isEmptyState
+  searchApplicationsItem.items = !isEmptyState
     ? [
         {
-          id: 'engineId',
-          name: engineName,
+          id: 'searchApplicationId',
+          name: searchApplicationName,
           ...generateNavLink({
             shouldNotCreateHref: true,
-            shouldShowActiveForSubroutes: true,
-            to: enginePath,
+            shouldShowActiveForSubroutes: false,
+            to: searchApplicationPath,
           }),
           items: [
             {
-              id: 'enterpriseSearchEnginePreview',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.previewTitle', {
+              id: 'enterpriseSearchApplicationPreview',
+              name: i18n.translate('xpack.enterpriseSearch.nav.searchApplication.previewTitle', {
                 defaultMessage: 'Search Preview',
               }),
               ...generateNavLink({
                 shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.PREVIEW}`,
+                to: `${searchApplicationPath}/${SearchApplicationViewTabs.PREVIEW}`,
               }),
             },
             {
               id: 'enterpriseSearchApplicationsContent',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.contentTitle', {
-                defaultMessage: 'Content',
-              }),
+              name: (
+                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                  {i18n.translate('xpack.enterpriseSearch.nav.searchApplication.contentTitle', {
+                    defaultMessage: 'Content',
+                  })}
+                  {hasSchemaConflicts && <EuiIcon type="warning" color="danger" />}
+                </EuiFlexGroup>
+              ),
               ...generateNavLink({
                 shouldNotCreateHref: true,
                 shouldShowActiveForSubroutes: true,
-                to: `${enginePath}/${EngineViewTabs.CONTENT}`,
+                to: `${searchApplicationPath}/${SearchApplicationViewTabs.CONTENT}`,
               }),
             },
             {
@@ -227,7 +258,7 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
               ...generateNavLink({
                 shouldNotCreateHref: true,
                 shouldShowActiveForSubroutes: true,
-                to: `${enginePath}/${EngineViewTabs.CONNECT}`,
+                to: `${searchApplicationPath}/${SearchApplicationViewTabs.CONNECT}`,
               }),
             },
           ],
@@ -235,12 +266,12 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
       ]
     : [
         {
-          id: 'engineId',
-          name: engineName,
+          id: 'searchApplicationId',
+          name: searchApplicationName,
           ...generateNavLink({
             shouldNotCreateHref: true,
             shouldShowActiveForSubroutes: true,
-            to: enginePath,
+            to: searchApplicationPath,
           }),
         },
       ];

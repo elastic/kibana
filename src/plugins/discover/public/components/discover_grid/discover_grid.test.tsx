@@ -11,7 +11,7 @@ import { EuiCopy } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { esHits } from '../../__mocks__/es_hits';
-import { dataViewMock } from '../../__mocks__/data_view';
+import { buildDataViewMock, fields } from '../../__mocks__/data_view';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -19,6 +19,18 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import { buildDataTableRecord } from '../../utils/build_data_record';
 import { getDocId } from '../../utils/get_doc_id';
 import { EsHitRecord } from '../../types';
+
+const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
+jest.mock('@kbn/cell-actions', () => ({
+  ...jest.requireActual('@kbn/cell-actions'),
+  useDataGridColumnsCellActions: (prop: unknown) => mockUseDataGridColumnsCellActions(prop),
+}));
+
+export const dataViewMock = buildDataViewMock({
+  name: 'the-data-view',
+  fields,
+  timeFieldName: '@timestamp',
+});
 
 function getProps() {
   const services = discoverServiceMock;
@@ -49,14 +61,19 @@ function getProps() {
   };
 }
 
-function getComponent(props: DiscoverGridProps = getProps()) {
+async function getComponent(props: DiscoverGridProps = getProps()) {
   const Proxy = (innerProps: DiscoverGridProps) => (
     <KibanaContextProvider services={discoverServiceMock}>
       <DiscoverGrid {...innerProps} />
     </KibanaContextProvider>
   );
 
-  return mountWithIntl(<Proxy {...props} />);
+  const component = mountWithIntl(<Proxy {...props} />);
+  await act(async () => {
+    // needed by cell actions to complete async loading
+    component.update();
+  });
+  return component;
 }
 
 function getSelectedDocNr(component: ReactWrapper<DiscoverGridProps>) {
@@ -89,10 +106,14 @@ async function toggleDocSelection(
 }
 
 describe('DiscoverGrid', () => {
+  afterEach(async () => {
+    jest.clearAllMocks();
+  });
+
   describe('Document selection', () => {
     let component: ReactWrapper<DiscoverGridProps>;
-    beforeEach(() => {
-      component = getComponent();
+    beforeEach(async () => {
+      component = await getComponent();
     });
 
     test('no documents are selected initially', async () => {
@@ -178,8 +199,8 @@ describe('DiscoverGrid', () => {
   });
 
   describe('edit field button', () => {
-    it('should render the edit field button if onFieldEdited is provided', () => {
-      const component = getComponent({
+    it('should render the edit field button if onFieldEdited is provided', async () => {
+      const component = await getComponent({
         ...getProps(),
         columns: ['message'],
         onFieldEdited: jest.fn(),
@@ -194,8 +215,8 @@ describe('DiscoverGrid', () => {
       expect(findTestSubject(component, 'gridEditFieldButton').exists()).toBe(true);
     });
 
-    it('should not render the edit field button if onFieldEdited is not provided', () => {
-      const component = getComponent({
+    it('should not render the edit field button if onFieldEdited is not provided', async () => {
+      const component = await getComponent({
         ...getProps(),
         columns: ['message'],
       });
@@ -207,6 +228,75 @@ describe('DiscoverGrid', () => {
         true
       );
       expect(findTestSubject(component, 'gridEditFieldButton').exists()).toBe(false);
+    });
+  });
+
+  describe('cellActionsTriggerId', () => {
+    it('should call useDataGridColumnsCellActions with empty params when no cellActionsTriggerId is provided', async () => {
+      await getComponent({
+        ...getProps(),
+        columns: ['message'],
+        onFieldEdited: jest.fn(),
+      });
+      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          triggerId: undefined,
+          getCellValue: expect.any(Function),
+          fields: undefined,
+        })
+      );
+    });
+
+    it('should call useDataGridColumnsCellActions properly when cellActionsTriggerId defined', async () => {
+      await getComponent({
+        ...getProps(),
+        columns: ['message'],
+        onFieldEdited: jest.fn(),
+        cellActionsTriggerId: 'test',
+      });
+      expect(mockUseDataGridColumnsCellActions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          triggerId: 'test',
+          getCellValue: expect.any(Function),
+          fields: [
+            {
+              name: '@timestamp',
+              type: 'date',
+              aggregatable: true,
+              searchable: undefined,
+            },
+            {
+              name: 'message',
+              type: 'string',
+              aggregatable: false,
+              searchable: undefined,
+            },
+          ],
+        })
+      );
+    });
+  });
+
+  describe('sorting', () => {
+    it('should enable in memory sorting with plain records', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        columns: ['message'],
+        isPlainRecord: true,
+      });
+
+      expect(
+        (
+          findTestSubject(component, 'docTable')
+            .find('EuiDataGridInMemoryRenderer')
+            .first()
+            .props() as Record<string, string>
+        ).inMemory
+      ).toMatchInlineSnapshot(`
+        Object {
+          "level": "sorting",
+        }
+      `);
     });
   });
 });

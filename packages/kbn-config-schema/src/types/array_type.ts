@@ -8,7 +8,7 @@
 
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { Type, TypeOptions } from './type';
+import { Type, TypeOptions, ExtendsDeepOptions } from './type';
 
 export type ArrayOptions<T> = TypeOptions<T[]> & {
   minSize?: number;
@@ -16,6 +16,9 @@ export type ArrayOptions<T> = TypeOptions<T[]> & {
 };
 
 export class ArrayType<T> extends Type<T[]> {
+  private readonly arrayType: Type<T>;
+  private readonly arrayOptions: ArrayOptions<T>;
+
   constructor(type: Type<T>, options: ArrayOptions<T> = {}) {
     let schema = internals.array().items(type.getSchema().optional()).sparse(false);
 
@@ -28,6 +31,12 @@ export class ArrayType<T> extends Type<T[]> {
     }
 
     super(schema, options);
+    this.arrayType = type;
+    this.arrayOptions = options;
+  }
+
+  public extendsDeep(options: ExtendsDeepOptions) {
+    return new ArrayType(this.arrayType.extendsDeep(options), this.arrayOptions);
   }
 
   protected handleError(type: string, { limit, reason, value }: Record<string, any>) {

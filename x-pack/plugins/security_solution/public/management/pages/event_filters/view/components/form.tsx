@@ -419,6 +419,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                 comments: exception?.comments ?? [],
                 os_types: exception?.os_types ?? [OperatingSystem.WINDOWS],
                 tags: exception?.tags ?? [],
+                meta: exception.meta,
               }
             : exception;
         const hasValidConditions =
@@ -532,16 +533,17 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           isLoading={policiesIsLoading}
           isPlatinumPlus={isPlatinumPlus}
           onChange={handleOnPolicyChange}
-          data-test-subj={'effectedPolicies-select'}
+          data-test-subj={getTestId('effectedPolicies')}
         />
       ),
       [
-        policies,
         selectedPolicies,
+        policies,
         isGlobal,
+        policiesIsLoading,
         isPlatinumPlus,
         handleOnPolicyChange,
-        policiesIsLoading,
+        getTestId,
       ]
     );
 

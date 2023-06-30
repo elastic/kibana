@@ -112,7 +112,6 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
         ? [
             {
               name: 'submitOnCmdEnter',
-              bindKey: { win: 'ctrl+enter', mac: 'cmd+enter' },
               exec: handleSubmitForm,
             },
           ]

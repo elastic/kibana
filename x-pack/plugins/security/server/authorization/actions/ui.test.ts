@@ -7,32 +7,28 @@
 
 import { UIActions } from './ui';
 
-const version = '1.0.0-zeta1';
-
 describe('#get', () => {
   [null, undefined, '', 1, true, {}].forEach((featureId: any) => {
     test(`featureId of ${JSON.stringify(featureId)} throws error`, () => {
-      const uiActions = new UIActions(version);
+      const uiActions = new UIActions();
       expect(() => uiActions.get(featureId, 'foo-capability')).toThrowErrorMatchingSnapshot();
     });
   });
 
   [null, undefined, '', 1, true, '!'].forEach((uiCapability: any) => {
     test(`uiCapability of ${JSON.stringify(uiCapability)} throws error`, () => {
-      const uiActions = new UIActions(version);
+      const uiActions = new UIActions();
       expect(() => uiActions.get('foo', uiCapability)).toThrowErrorMatchingSnapshot();
     });
   });
 
-  test('returns `ui:${version}:${featureId}/${uiCapaility}`', () => {
-    const uiActions = new UIActions(version);
-    expect(uiActions.get('foo', 'foo-capability')).toBe('ui:1.0.0-zeta1:foo/foo-capability');
+  test('returns `ui:${featureId}/${uiCapaility}`', () => {
+    const uiActions = new UIActions();
+    expect(uiActions.get('foo', 'foo-capability')).toBe('ui:foo/foo-capability');
   });
 
-  test('returns `ui:${version}:${featureId}/${uiCapabilityPart}/${uiCapabilitySubPart}', () => {
-    const uiActions = new UIActions(version);
-    expect(uiActions.get('foo', 'fooCapability', 'subFoo')).toBe(
-      'ui:1.0.0-zeta1:foo/fooCapability/subFoo'
-    );
+  test('returns `ui:${featureId}/${uiCapabilityPart}/${uiCapabilitySubPart}', () => {
+    const uiActions = new UIActions();
+    expect(uiActions.get('foo', 'fooCapability', 'subFoo')).toBe('ui:foo/fooCapability/subFoo');
   });
 });

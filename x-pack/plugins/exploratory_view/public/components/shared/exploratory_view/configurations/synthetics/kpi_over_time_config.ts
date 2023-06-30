@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ColumnFilter, ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
@@ -99,7 +100,7 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         label: 'Monitor Errors',
         id: 'monitor_errors',
         columnType: OPERATION_COLUMN,
-        field: 'state.id',
+        field: 'monitor.check_group',
         columnFilters: [
           {
             language: 'kuery',
@@ -108,9 +109,11 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         ],
       },
       {
-        label: 'Monitor Complete',
-        id: 'state.up',
-        field: 'state.up',
+        label: i18n.translate('xpack.exploratoryView.expView.successful', {
+          defaultMessage: 'Successful count',
+        }),
+        id: 'monitor_successful',
+        field: 'monitor.check_group',
         columnType: OPERATION_COLUMN,
         columnFilters: [
           {

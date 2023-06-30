@@ -62,7 +62,7 @@ export interface VisualizeEmbeddableConfiguration {
   indexPatterns?: DataView[];
   editPath: string;
   editUrl: string;
-  capabilities: { visualizeSave: boolean; dashboardSave: boolean };
+  capabilities: { visualizeSave: boolean; dashboardSave: boolean; visualizeOpen: boolean };
   deps: VisualizeEmbeddableFactoryDeps;
 }
 
@@ -170,8 +170,12 @@ export class VisualizeEmbeddable
     this.attributeService = attributeService;
 
     if (this.attributeService) {
+      const readOnly = Boolean(vis.type.disableEdit);
       const isByValue = !this.inputIsRefType(initialInput);
-      const editable = capabilities.visualizeSave || (isByValue && capabilities.dashboardSave);
+      const editable = readOnly
+        ? false
+        : capabilities.visualizeSave ||
+          (isByValue && capabilities.dashboardSave && capabilities.visualizeOpen);
       this.updateOutput({ ...this.getOutput(), editable });
     }
 
@@ -656,10 +660,8 @@ export class VisualizeEmbeddable
   };
 
   getInputAsRefType = async (): Promise<VisualizeByReferenceInput> => {
-    const { savedObjectsClient, data, spaces, savedObjectsTaggingOss } = await this.deps.start()
-      .plugins;
+    const { data, spaces, savedObjectsTaggingOss } = await this.deps.start().plugins;
     const savedVis = await getSavedVisualization({
-      savedObjectsClient,
       search: data.search,
       dataViews: data.dataViews,
       spaces,

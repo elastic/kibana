@@ -28,6 +28,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
+import {
+  DATA_FRAME_TASK_STATE,
+  type DataFrameAnalyticsConfig,
+  type UpdateDataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
+
 import { useMlKibana, useMlApiContext } from '../../../../../contexts/kibana';
 import { ml } from '../../../../../services/ml_api_service';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
@@ -35,13 +42,7 @@ import {
   memoryInputValidator,
   MemoryInputValidatorResult,
 } from '../../../../../../../common/util/validators';
-import { DATA_FRAME_TASK_STATE } from '../analytics_list/common';
 import { useRefreshAnalyticsList } from '../../../../common/analytics';
-import {
-  UpdateDataFrameAnalyticsConfig,
-  type DataFrameAnalyticsConfig,
-} from '../../../../../../../common/types/data_frame_analytics';
-import type { UrlConfig } from '../../../../../../../common/types/custom_urls';
 
 import { EditAction } from './use_edit_action';
 import { CustomUrlsWrapper, isValidCustomUrls } from '../../../../../components/custom_urls';
@@ -62,7 +63,7 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
   const [mmlValidationError, setMmlValidationError] = useState<string | undefined>();
   const [maxNumThreads, setMaxNumThreads] = useState<number | undefined>(config.max_num_threads);
   const [activeTabId, setActiveTabId] = useState<string>('job-details');
-  const [customUrls, setCustomUrls] = useState<UrlConfig[]>([]);
+  const [customUrls, setCustomUrls] = useState<MlUrlConfig[]>([]);
   const [analyticsJob, setAnalyticsJob] = useState<DataFrameAnalyticsConfig | undefined>();
 
   const {

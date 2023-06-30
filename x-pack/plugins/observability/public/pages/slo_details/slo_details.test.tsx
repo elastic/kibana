@@ -20,7 +20,7 @@ import { useDeleteSlo } from '../../hooks/slo/use_delete_slo';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
 import { buildSlo } from '../../data/slo/slo';
-import { paths } from '../../config/paths';
+import { paths } from '../../routes/paths';
 import {
   HEALTHY_STEP_DOWN_ROLLING_SLO,
   historicalSummaryData,
@@ -33,8 +33,8 @@ jest.mock('react-router-dom', () => ({
   useParams: jest.fn(),
 }));
 
+jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../utils/kibana_react');
-jest.mock('../../hooks/use_breadcrumbs');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/slo/use_capabilities');
 jest.mock('../../hooks/slo/use_fetch_active_alerts');
@@ -234,10 +234,10 @@ describe('SLO Details Page', () => {
 
     fireEvent.click(button!);
 
-    const { id, createdAt, enabled, revision, summary, updatedAt, ...newSlo } = slo;
+    const { id, createdAt, enabled, revision, summary, settings, updatedAt, ...newSlo } = slo;
 
     expect(mockClone).toBeCalledWith({
-      idToCopyFrom: slo.id,
+      originalSloId: slo.id,
       slo: {
         ...newSlo,
         name: `[Copy] ${newSlo.name}`,

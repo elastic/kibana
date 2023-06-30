@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 
 const API_ENDPOINT_ACTION_PATH = '/api/endpoint/action/*';
@@ -108,18 +107,6 @@ export const filterOutEndpoints = (endpointHostname: string): void => {
   cy.getByTestSubj('filters-global-container').within(() => {
     cy.getByTestSubj('queryInput').click().type(`host.hostname : "${endpointHostname}"`);
     cy.getByTestSubj('querySubmitButton').click();
-  });
-};
-
-export const createAgentPolicyTask = (
-  version: string
-): Cypress.Chainable<IndexedFleetEndpointPolicyResponse> => {
-  const policyName = `Reassign ${Math.random().toString(36).substring(2, 7)}`;
-
-  return cy.task<IndexedFleetEndpointPolicyResponse>('indexFleetEndpointPolicy', {
-    policyName,
-    endpointPackageVersion: version,
-    agentPolicyName: policyName,
   });
 };
 

@@ -17,7 +17,6 @@ export const navigateTo = (page: string, opts?: Partial<Cypress.VisitOptions>) =
 
   // There's a security warning toast that seemingly makes ui elements in the bottom right unavailable, so we close it
   cy.get('[data-test-subj="toastCloseButton"]', { timeout: 30000 }).click();
-  cy.waitForReact();
 };
 
 export const openNavigationFlyout = () => {

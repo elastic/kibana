@@ -9,10 +9,10 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import { range } from 'lodash';
-import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import '../jest_matchers';
-import { getKibanaMigratorTestKit } from '../kibana_migrator_test_kit';
+import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
 import { delay, parseLogFile } from '../test_utils';
 import {
   getBaseMigratorParams,
@@ -24,18 +24,6 @@ export const logFilePath = Path.join(__dirname, 'conversion_failures.test.log');
 
 describe('ZDT upgrades - encountering conversion failures', () => {
   let esServer: TestElasticsearchUtils['es'];
-
-  const startElasticsearch = async () => {
-    const { startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-      settings: {
-        es: {
-          license: 'basic',
-        },
-      },
-    });
-    return await startES();
-  };
 
   beforeAll(async () => {
     esServer = await startElasticsearch();
@@ -75,7 +63,7 @@ describe('ZDT upgrades - encountering conversion failures', () => {
 
   describe('when discardCorruptObjects is false', () => {
     it('fails the migration with an explicit message and keep the documents', async () => {
-      const { runMigrations, savedObjectsRepository } = await prepareScenario({
+      const { client, runMigrations } = await prepareScenario({
         discardCorruptObjects: false,
       });
 
@@ -96,15 +84,13 @@ describe('ZDT upgrades - encountering conversion failures', () => {
       const records = await parseLogFile(logFilePath);
       expect(records).toContainLogEntry('OUTDATED_DOCUMENTS_SEARCH_READ -> FATAL');
 
-      const { saved_objects: sampleADocs } = await savedObjectsRepository.find({
-        type: 'sample_a',
-      });
-      const { saved_objects: sampleBDocs } = await savedObjectsRepository.find({
-        type: 'sample_b',
-      });
-
-      expect(sampleADocs).toHaveLength(5);
-      expect(sampleBDocs).toHaveLength(5);
+      const { kibanaIndex: index } = getBaseMigratorParams();
+      await expect(
+        client.count({ index, query: { term: { type: 'sample_a' } } })
+      ).resolves.toHaveProperty('count', 5);
+      await expect(
+        client.count({ index, query: { term: { type: 'sample_b' } } })
+      ).resolves.toHaveProperty('count', 5);
     });
   });
 
@@ -118,15 +104,14 @@ describe('ZDT upgrades - encountering conversion failures', () => {
     typeA.modelVersions = {
       ...typeA.modelVersions,
       '2': {
-        modelChange: {
-          type: 'expansion',
-          transformation: {
-            up: (doc) => {
+        changes: [
+          {
+            type: 'data_backfill',
+            transform: (doc) => {
               throw new Error(`error from ${doc.id}`);
             },
-            down: jest.fn(),
           },
-        },
+        ],
       },
     };
 
@@ -134,18 +119,17 @@ describe('ZDT upgrades - encountering conversion failures', () => {
     typeB.modelVersions = {
       ...typeB.modelVersions,
       '2': {
-        modelChange: {
-          type: 'expansion',
-          transformation: {
-            up: (doc) => {
+        changes: [
+          {
+            type: 'data_backfill',
+            transform: (doc) => {
               if (doc.id === 'b-0') {
                 throw new Error(`error from ${doc.id}`);
               }
               return { document: doc };
             },
-            down: jest.fn(),
           },
-        },
+        ],
       },
     };
 

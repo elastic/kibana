@@ -27,11 +27,11 @@ import {
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
 
+import { DatePickerContextProvider } from '@kbn/observability-plugin/public';
 import {
-  DatePickerContextProvider,
   InspectorContextProvider,
   useBreadcrumbs,
-} from '@kbn/observability-plugin/public';
+} from '@kbn/observability-shared-plugin/public';
 import { CsmSharedContextProvider } from '../components/app/rum_dashboard/csm_shared_context';
 import {
   DASHBOARD_LABEL,
@@ -160,6 +160,7 @@ export function UXAppRoot({
             value={{
               appMountParameters,
               exploratoryView,
+              observabilityShared,
             }}
           >
             <i18nCore.Context>

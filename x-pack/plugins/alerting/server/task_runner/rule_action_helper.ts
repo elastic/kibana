@@ -28,13 +28,6 @@ export const isActionOnInterval = (action?: RuleAction) => {
   );
 };
 
-export const isSummaryActionPerRuleRun = (action: RuleAction) => {
-  if (!action.frequency) {
-    return false;
-  }
-  return action.frequency.notifyWhen === RuleNotifyWhenTypeValues[1] && action.frequency.summary;
-};
-
 export const isSummaryActionOnInterval = (action: RuleAction) => {
   return isActionOnInterval(action) && action.frequency?.summary;
 };
@@ -94,11 +87,11 @@ export const getSummaryActionsFromTaskState = ({
         action.frequency?.summary && (action.uuid === key || generateActionHash(action) === key)
     );
     if (actionExists) {
-      return { ...newObj, [actionExists.uuid!]: val }; // replace hash with uuid
-    } else {
-      return newObj;
+      // replace hash with uuid
+      newObj[actionExists.uuid!] = val;
     }
-  }, {});
+    return newObj;
+  }, {} as ThrottledActions);
 };
 
 export const getSummaryActionTimeBounds = (

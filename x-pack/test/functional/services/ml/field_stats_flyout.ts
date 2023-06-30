@@ -8,11 +8,14 @@
 import { ProvidedType } from '@kbn/test';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlCommonUI } from './common_ui';
 
 export type MlCommonFieldStatsFlyout = ProvidedType<typeof MachineLearningFieldStatsFlyoutProvider>;
 
-export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProviderContext) {
-  const browser = getService('browser');
+export function MachineLearningFieldStatsFlyoutProvider(
+  { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI
+) {
   const comboBox = getService('comboBox');
   const find = getService('find');
   const retry = getService('retry');
@@ -20,14 +23,10 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
 
   return {
     async assertFieldStatContentByType(
-      testSubj: string,
       fieldName: string,
       fieldType: 'keyword' | 'date' | 'number'
     ) {
       await retry.tryForTime(2000, async () => {
-        // escape popover
-        await browser.pressKeys(browser.keys.ESCAPE);
-
         if (fieldType === 'date') {
           await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-histogram`);
         }
@@ -70,15 +69,19 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
     ) {
       const selector = `~${testSubj} > ~mlInspectFieldStatsButton-${fieldName}`;
 
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(10 * 1000, async () => {
         await testSubjects.existOrFail(selector);
         await testSubjects.click(selector);
-        await testSubjects.existOrFail('mlFieldStatsFlyout');
-        await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-title`);
+        await mlCommonUI.ensureComboBoxClosed();
+
+        await testSubjects.existOrFail('mlFieldStatsFlyout', { timeout: 500 });
+        await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-title`, {
+          timeout: 500,
+        });
       });
-      await this.assertFieldStatContentByType(testSubj, fieldName, fieldType);
+      await this.assertFieldStatContentByType(fieldName, fieldType);
       if (Array.isArray(expectedTopValuesContent)) {
-        await this.assertTopValuesContent(fieldName, fieldType, expectedTopValuesContent);
+        await this.assertTopValuesContent(fieldName, expectedTopValuesContent);
       }
       await this.ensureFieldStatsFlyoutClosed();
     },
@@ -90,27 +93,29 @@ export function MachineLearningFieldStatsFlyoutProvider({ getService }: FtrProvi
       expectedTopValuesContent?: string[]
     ) {
       const selector = `mlInspectFieldStatsButton-${fieldName}`;
-
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(30 * 1000, async () => {
         const fieldTarget = await testSubjects.find(parentComboBoxSelector);
         await comboBox.openOptionsList(fieldTarget);
 
         await testSubjects.existOrFail(selector);
         await testSubjects.click(selector);
-        await testSubjects.existOrFail('mlFieldStatsFlyout');
+        await mlCommonUI.ensureComboBoxClosed();
 
-        await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-title`);
+        await testSubjects.existOrFail('mlFieldStatsFlyout', { timeout: 500 });
+        await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-title`, {
+          timeout: 500,
+        });
 
-        await this.assertFieldStatContentByType(parentComboBoxSelector, fieldName, fieldType);
+        await this.assertFieldStatContentByType(fieldName, fieldType);
 
         if (Array.isArray(expectedTopValuesContent)) {
-          await this.assertTopValuesContent(fieldName, fieldType, expectedTopValuesContent);
+          await this.assertTopValuesContent(fieldName, expectedTopValuesContent);
         }
         await this.ensureFieldStatsFlyoutClosed();
       });
     },
 
-    async assertTopValuesContent(fieldName: string, fieldType: string, expectedValues: string[]) {
+    async assertTopValuesContent(fieldName: string, expectedValues: string[]) {
       await retry.tryForTime(2000, async () => {
         // check for top values rows
         await testSubjects.existOrFail(`mlFieldStatsFlyoutContent ${fieldName}-topValues`);

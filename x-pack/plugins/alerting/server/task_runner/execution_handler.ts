@@ -36,6 +36,7 @@ import {
   RuleTypeParams,
   RuleTypeState,
   SanitizedRule,
+  RuleAlertData,
 } from '../../common';
 import {
   generateActionHash,
@@ -44,7 +45,6 @@ import {
   isActionOnInterval,
   isSummaryAction,
   isSummaryActionOnInterval,
-  isSummaryActionPerRuleRun,
   isSummaryActionThrottled,
 } from './rule_action_helper';
 
@@ -65,7 +65,8 @@ export class ExecutionHandler<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
+  AlertData extends RuleAlertData
 > {
   private logger: Logger;
   private alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
@@ -77,7 +78,8 @@ export class ExecutionHandler<
     State,
     Context,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >;
   private taskRunnerContext: TaskRunnerContext;
   private taskInstance: RuleTaskInstance;
@@ -93,6 +95,7 @@ export class ExecutionHandler<
   private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
   private mutedAlertIdsSet: Set<string> = new Set();
   private previousStartedAt: Date | null;
+  private maintenanceWindowIds: string[] = [];
 
   constructor({
     rule,
@@ -108,6 +111,7 @@ export class ExecutionHandler<
     ruleLabel,
     previousStartedAt,
     actionsClient,
+    maintenanceWindowIds,
   }: ExecutionHandlerOptions<
     Params,
     ExtractedParams,
@@ -115,7 +119,8 @@ export class ExecutionHandler<
     State,
     Context,
     ActionGroupIds,
-    RecoveryActionGroupId
+    RecoveryActionGroupId,
+    AlertData
   >) {
     this.logger = logger;
     this.alertingEventLogger = alertingEventLogger;
@@ -135,6 +140,7 @@ export class ExecutionHandler<
     );
     this.previousStartedAt = previousStartedAt;
     this.mutedAlertIdsSet = new Set(rule.mutedInstanceIds);
+    this.maintenanceWindowIds = maintenanceWindowIds ?? [];
   }
 
   public async run(
@@ -214,12 +220,12 @@ export class ExecutionHandler<
             this.rule.schedule,
             this.previousStartedAt
           );
+          const ruleUrl = this.buildRuleUrl(spaceId, start, end);
           const actionToRun = {
             ...action,
             params: injectActionParams({
-              ruleId,
-              spaceId,
               actionTypeId,
+              ruleUrl,
               actionParams: transformSummaryActionParams({
                 alerts: summarizedAlerts,
                 rule: this.rule,
@@ -230,7 +236,7 @@ export class ExecutionHandler<
                 actionsPlugin,
                 actionTypeId,
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                ruleUrl: this.buildRuleUrl(spaceId, start, end),
+                ruleUrl,
               }),
             }),
           };
@@ -255,12 +261,12 @@ export class ExecutionHandler<
           });
         } else {
           const executableAlert = alert!;
+          const ruleUrl = this.buildRuleUrl(spaceId);
           const actionToRun = {
             ...action,
             params: injectActionParams({
-              ruleId,
-              spaceId,
               actionTypeId,
+              ruleUrl,
               actionParams: transformActionParams({
                 actionsPlugin,
                 alertId: ruleId,
@@ -280,7 +286,7 @@ export class ExecutionHandler<
                 alertParams: this.rule.params,
                 actionParams: action.params,
                 flapping: executableAlert.getFlapping(),
-                ruleUrl: this.buildRuleUrl(spaceId),
+                ruleUrl,
               }),
             }),
           };
@@ -438,8 +444,12 @@ export class ExecutionHandler<
       : `${triggersActionsRoute}${getRuleDetailsRoute(this.rule.id)}`;
 
     try {
+      const basePathname = new URL(this.taskRunnerContext.kibanaBaseUrl).pathname;
+      const basePathnamePrefix = basePathname !== '/' ? `${basePathname}` : '';
+      const spaceIdSegment = spaceId !== 'default' ? `/s/${spaceId}` : '';
+
       const ruleUrl = new URL(
-        `${spaceId !== 'default' ? `/s/${spaceId}` : ''}${relativePath}`,
+        [basePathnamePrefix, spaceIdSegment, relativePath].join(''),
         this.taskRunnerContext.kibanaBaseUrl
       );
 
@@ -510,11 +520,17 @@ export class ExecutionHandler<
         }
       }
 
-      if (isSummaryAction(action)) {
-        if (summarizedAlerts) {
-          if (isSummaryActionPerRuleRun(action) && summarizedAlerts.all.count === 0) {
-            continue;
-          }
+      // By doing that we are not cancelling the summary action but just waiting
+      // for the window maintenance to be over before sending the summary action
+      if (isSummaryAction(action) && this.maintenanceWindowIds.length > 0) {
+        this.logger.debug(
+          `no scheduling of summary actions "${action.id}" for rule "${
+            this.taskInstance.params.alertId
+          }": has active maintenance windows ${this.maintenanceWindowIds.join()}.`
+        );
+        continue;
+      } else if (isSummaryAction(action)) {
+        if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
           executables.push({ action, summarizedAlerts });
         }
         continue;
@@ -524,6 +540,16 @@ export class ExecutionHandler<
         if (alert.isFilteredOut(summarizedAlerts)) {
           continue;
         }
+
+        if (alert.getMaintenanceWindowIds().length > 0) {
+          this.logger.debug(
+            `no scheduling of actions "${action.id}" for rule "${
+              this.taskInstance.params.alertId
+            }": has active maintenance windows ${alert.getMaintenanceWindowIds().join()}.`
+          );
+          continue;
+        }
+
         const actionGroup = this.getActionGroup(alert);
 
         if (!this.ruleTypeActionGroups!.has(actionGroup)) {

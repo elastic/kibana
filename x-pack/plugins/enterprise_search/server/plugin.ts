@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   Plugin,
   PluginInitializerContext,
@@ -82,6 +83,7 @@ import { getSearchResultProvider } from './utils/search_result_provider';
 import { ConfigType } from '.';
 
 interface PluginsSetup {
+  cloud: CloudSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
   features: FeaturesPluginSetup;
   globalSearch: GlobalSearchPluginSetup;
@@ -127,6 +129,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       customIntegrations,
       ml,
       guidedOnboarding,
+      cloud,
     }: PluginsSetup
   ) {
     const config = this.config;
@@ -139,9 +142,10 @@ export class EnterpriseSearchPlugin implements Plugin {
       ...(config.canDeployEntSearch ? [APP_SEARCH_PLUGIN.ID, WORKPLACE_SEARCH_PLUGIN.ID] : []),
       SEARCH_EXPERIENCES_PLUGIN.ID,
     ];
+    const isCloud = !!cloud.cloudId;
 
     if (customIntegrations) {
-      registerEnterpriseSearchIntegrations(config, http, customIntegrations);
+      registerEnterpriseSearchIntegrations(config, http, customIntegrations, isCloud);
     }
 
     /*
@@ -184,6 +188,9 @@ export class EnterpriseSearchPlugin implements Plugin {
           enterpriseSearch: showEnterpriseSearch,
           enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchAnalytics: showEnterpriseSearch,
+          enterpriseSearchApplications: showEnterpriseSearch,
+          enterpriseSearchEsre: showEnterpriseSearch,
+          enterpriseSearchVectorSearch: showEnterpriseSearch,
           elasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess && config.canDeployEntSearch,
           workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
@@ -193,6 +200,9 @@ export class EnterpriseSearchPlugin implements Plugin {
           enterpriseSearch: showEnterpriseSearch,
           enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchAnalytics: showEnterpriseSearch,
+          enterpriseSearchApplications: showEnterpriseSearch,
+          enterpriseSearchEsre: showEnterpriseSearch,
+          enterpriseSearchVectorSearch: showEnterpriseSearch,
           elasticsearch: showEnterpriseSearch,
           appSearch: hasAppSearchAccess && config.canDeployEntSearch,
           workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
@@ -213,7 +223,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerEnterpriseSearchRoutes(dependencies);
     if (config.canDeployEntSearch) registerWorkplaceSearchRoutes(dependencies);
     // Enterprise Search Routes
-    if (config.hasNativeConnectors) registerConnectorRoutes(dependencies);
+    if (config.hasConnectors) registerConnectorRoutes(dependencies);
     if (config.hasWebCrawler) registerCrawlerRoutes(dependencies);
     registerStatsRoutes(dependencies);
 
@@ -286,7 +296,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (config.hasWebCrawler) {
       guidedOnboarding.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
     }
-    if (config.hasNativeConnectors) {
+    if (config.hasConnectors) {
       guidedOnboarding.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
     }
 

@@ -38,6 +38,7 @@ import type { UserActivityParams } from '../../user_actions_activity_bar/types';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { CaseViewTabs } from '../case_view_tabs';
 import { Description } from '../../description';
+import { EditCategory } from './edit_category';
 
 const buildUserProfilesMap = (users?: CaseUsers): Map<string, UserProfileWithAvatar> => {
   const userProfiles = new Map();
@@ -146,6 +147,11 @@ export const CaseViewActivity = ({
     [onUpdateField]
   );
 
+  const onSubmitCategory = useCallback(
+    (newCategory) => onUpdateField({ key: 'category', value: newCategory }),
+    [onUpdateField]
+  );
+
   const onUpdateSeverity = useCallback(
     (newSeverity: CaseSeverity) => onUpdateField({ key: 'severity', value: newSeverity }),
     [onUpdateField]
@@ -165,12 +171,10 @@ export const CaseViewActivity = ({
     useGetSupportedActionConnectors();
 
   const onSubmitConnector = useCallback(
-    (connector, onError, onSuccess) => {
+    (connector) => {
       onUpdateField({
         key: 'connector',
         value: connector,
-        onSuccess,
-        onError,
       });
     },
     [onUpdateField]
@@ -258,7 +262,7 @@ export const CaseViewActivity = ({
           </EuiFlexGroup>
         ) : null}
       </EuiFlexItem>
-      <EuiFlexItem grow={2}>
+      <EuiFlexItem grow={2} data-test-subj="case-view-page-sidebar">
         <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
           {caseAssignmentAuthorized ? (
             <>
@@ -273,7 +277,7 @@ export const CaseViewActivity = ({
           ) : null}
           <SeveritySidebarSelector
             isDisabled={!permissions.update}
-            isLoading={isLoading}
+            isLoading={isLoading && loadingKey === 'severity'}
             selectedSeverity={caseData.severity}
             onSeverityChange={onUpdateSeverity}
           />
@@ -298,6 +302,11 @@ export const CaseViewActivity = ({
             tags={caseData.tags}
             onSubmit={onSubmitTags}
             isLoading={isLoading && loadingKey === 'tags'}
+          />
+          <EditCategory
+            category={caseData.category}
+            onSubmit={onSubmitCategory}
+            isLoading={isLoading && loadingKey === 'category'}
           />
           {showConnectorSidebar ? (
             <EditConnector

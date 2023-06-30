@@ -171,7 +171,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // skip count for now as it's a special function and will
       // change automatically the unsupported field to Records when detected
-      const operationsByFieldSupport = [
+      const allOperations = [
         'average',
         'max',
         'last_value',
@@ -181,11 +181,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'standard_deviation',
         'sum',
         'unique_count',
-      ].map((name) => ({
+      ];
+      const counterFieldsSupportedOps = ['min', 'max', 'counter_rate', 'last_value'];
+      const gaugeFieldsSupportedOps = allOperations;
+
+      const operationsByFieldSupport = allOperations.map((name) => ({
         name,
+        // Quick way to make it match the UI name
         label: `${name[0].toUpperCase()}${name.slice(1).replace('_', ' ')}`,
-        counter: ['max', 'counter_rate'].includes(name),
-        gauge: true,
+        counter: counterFieldsSupportedOps.includes(name),
+        gauge: gaugeFieldsSupportedOps.includes(name),
       }));
 
       for (const fieldType of ['counter', 'gauge'] as const) {

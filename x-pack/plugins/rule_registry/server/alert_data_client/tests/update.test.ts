@@ -29,6 +29,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   esClient: esClientMock,
   auditLogger,
   ruleDataService: ruleDataServiceMock.create(),
+  getRuleType: jest.fn(),
 };
 
 const DEFAULT_SPACE = 'test_default_space_id';

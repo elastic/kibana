@@ -17,12 +17,13 @@ import {
   TooltipInfo,
   TooltipProps,
   TooltipType,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '@kbn/observability-plugin/public';
+import { useChartTheme } from '@kbn/observability-shared-plugin/public';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { SERVICE_NODE_NAME } from '../../../../../common/es_fields/apm';
 import {
@@ -123,10 +124,10 @@ export function InstancesLatencyDistributionChart({
         id="instancesLatencyDistribution"
       >
         <Chart>
+          <Tooltip {...tooltip} />
           <Settings
             legendPosition={Position.Bottom}
             onElementClick={handleElementClick}
-            tooltip={tooltip}
             showLegend
             theme={chartTheme}
             xDomain={xDomain}

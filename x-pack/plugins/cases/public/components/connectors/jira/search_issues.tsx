@@ -5,92 +5,82 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useCallback, useState, memo } from 'react';
+import React, { useState, memo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 
+import {
+  getFieldValidityAndErrorMessage,
+  UseField,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ActionConnector } from '../../../../common/api';
 import { useGetIssues } from './use_get_issues';
-import { useGetSingleIssue } from './use_get_single_issue';
 import * as i18n from './translations';
 
 interface Props {
-  selectedValue: string | null;
   actionConnector?: ActionConnector;
-  onChange: (parentIssueKey: string) => void;
 }
 
-const SearchIssuesComponent: React.FC<Props> = ({ selectedValue, actionConnector, onChange }) => {
+const SearchIssuesComponent: React.FC<Props> = ({ actionConnector }) => {
   const [query, setQuery] = useState<string | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     []
   );
-  const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
-  const { http, notifications } = useKibana().services;
+  const { http } = useKibana().services;
 
-  const { isLoading: isLoadingIssues, issues } = useGetIssues({
+  const { isFetching: isLoadingIssues, data: issuesData } = useGetIssues({
     http,
-    toastNotifications: notifications.toasts,
     actionConnector,
     query,
   });
 
-  const { isLoading: isLoadingSingleIssue, issue: singleIssue } = useGetSingleIssue({
-    http,
-    toastNotifications: notifications.toasts,
-    actionConnector,
-    id: selectedValue,
-  });
+  const issues = issuesData?.data ?? [];
 
-  useEffect(
-    () => setOptions(issues.map((issue) => ({ label: issue.title, value: issue.key }))),
-    [issues]
-  );
-
-  useEffect(() => {
-    if (isLoadingSingleIssue || singleIssue == null) {
-      return;
-    }
-
-    const singleIssueAsOptions = [{ label: singleIssue.title, value: singleIssue.key }];
-    setOptions(singleIssueAsOptions);
-    setSelectedOptions(singleIssueAsOptions);
-  }, [singleIssue, isLoadingSingleIssue]);
-
-  const onSearchChange = useCallback((searchVal: string) => {
-    setQuery(searchVal);
-  }, []);
-
-  const onChangeComboBox = useCallback(
-    (changedOptions) => {
-      setSelectedOptions(changedOptions);
-      onChange(changedOptions[0].value);
-    },
-    [onChange]
-  );
-
-  const inputPlaceholder = useMemo(
-    (): string =>
-      isLoadingIssues || isLoadingSingleIssue
-        ? i18n.SEARCH_ISSUES_LOADING
-        : i18n.SEARCH_ISSUES_PLACEHOLDER,
-    [isLoadingIssues, isLoadingSingleIssue]
-  );
+  const options = issues.map((issue) => ({ label: issue.title, value: issue.key }));
 
   return (
-    <EuiComboBox
-      singleSelection
-      fullWidth
-      placeholder={inputPlaceholder}
-      data-test-subj={'search-parent-issues'}
-      aria-label={i18n.SEARCH_ISSUES_COMBO_BOX_ARIA_LABEL}
-      options={options}
-      isLoading={isLoadingIssues || isLoadingSingleIssue}
-      onSearchChange={onSearchChange}
-      selectedOptions={selectedOptions}
-      onChange={onChangeComboBox}
-    />
+    <UseField path="fields.parent">
+      {(field) => {
+        const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+
+        const onSearchChange = (searchVal: string) => {
+          setQuery(searchVal);
+        };
+
+        const onChangeComboBox = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+          setSelectedOptions(changedOptions);
+          field.setValue(changedOptions[0].value ?? '');
+        };
+
+        return (
+          <EuiFormRow
+            id="indexConnectorSelectSearchBox"
+            fullWidth
+            label={i18n.PARENT_ISSUE}
+            isInvalid={isInvalid}
+            error={errorMessage}
+          >
+            <EuiComboBox
+              fullWidth
+              singleSelection
+              async
+              placeholder={i18n.SEARCH_ISSUES_PLACEHOLDER}
+              aria-label={i18n.SEARCH_ISSUES_COMBO_BOX_ARIA_LABEL}
+              isLoading={isLoadingIssues}
+              isInvalid={isInvalid}
+              noSuggestions={!options.length}
+              options={options}
+              data-test-subj="search-parent-issues"
+              data-testid="search-parent-issues"
+              selectedOptions={selectedOptions}
+              onChange={onChangeComboBox}
+              onSearchChange={onSearchChange}
+            />
+          </EuiFormRow>
+        );
+      }}
+    </UseField>
   );
 };
 SearchIssuesComponent.displayName = 'SearchIssues';

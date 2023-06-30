@@ -8,15 +8,16 @@
 
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { action } from '@storybook/addon-actions';
-import { NavigationProps, NavigationServices } from '../../types';
+import { BehaviorSubject } from 'rxjs';
+import { NavigationServices } from '../../types';
 
-type Arguments = NavigationProps & NavigationServices;
+type Arguments = NavigationServices;
 export type Params = Pick<
   Arguments,
-  'activeNavItemId' | 'loadingCount' | 'navIsOpen' | 'platformConfig' | 'solutions'
+  'navIsOpen' | 'recentlyAccessed$' | 'navLinks$' | 'onProjectNavigationChange'
 >;
 
-export class StorybookMock extends AbstractStorybookMock<NavigationProps, NavigationServices> {
+export class StorybookMock extends AbstractStorybookMock<{}, NavigationServices> {
   propArguments = {};
 
   serviceArguments = {
@@ -24,17 +25,11 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
       control: 'boolean',
       defaultValue: true,
     },
-    loadingCount: {
-      control: 'number',
-      defaultValue: 0,
-    },
   };
 
   dependencies = [];
 
   getServices(params: Params): NavigationServices {
-    const { navIsOpen } = params;
-
     const navAction = action('Navigate to');
     const navigateToUrl = (url: string) => {
       navAction(url);
@@ -45,15 +40,14 @@ export class StorybookMock extends AbstractStorybookMock<NavigationProps, Naviga
       ...params,
       basePath: { prepend: (suffix: string) => `/basepath${suffix}` },
       navigateToUrl,
-      navIsOpen,
+      recentlyAccessed$: params.recentlyAccessed$ ?? new BehaviorSubject([]),
+      navLinks$: params.navLinks$ ?? new BehaviorSubject([]),
+      onProjectNavigationChange: params.onProjectNavigationChange ?? (() => undefined),
+      activeNodes$: new BehaviorSubject([]),
     };
   }
 
-  getProps(params: Params): NavigationProps {
-    return {
-      ...params,
-      homeHref: '#',
-      linkToCloud: 'projects',
-    };
+  getProps(params: Params) {
+    return params;
   }
 }

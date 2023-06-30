@@ -7,11 +7,11 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DataDocuments$ } from '../../services/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
@@ -26,7 +26,7 @@ import { DiscoverAppState } from '../../services/discover_app_state_container';
 
 setHeaderActionMenuMounter(jest.fn());
 
-function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
+async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   const services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
@@ -41,42 +41,40 @@ function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {
-    expandedDoc: undefined,
     dataView: dataViewMock,
     onAddFilter: jest.fn(),
-    savedSearch: savedSearchMock,
-    searchSource: savedSearchMock.searchSource,
-    setExpandedDoc: jest.fn(),
-    state: { columns: [] },
     stateContainer,
-    navigateTo: jest.fn(),
     onFieldEdited: jest.fn(),
   };
 
-  return mountWithIntl(
+  const component = mountWithIntl(
     <KibanaContextProvider services={services}>
       <DiscoverMainProvider value={stateContainer}>
         <DiscoverDocuments {...props} />
       </DiscoverMainProvider>
     </KibanaContextProvider>
   );
+  await act(async () => {
+    component.update();
+  });
+  return component;
 }
 
 describe('Discover documents layout', () => {
-  test('render loading when loading and no documents', () => {
-    const component = mountComponent(FetchStatus.LOADING, []);
+  test('render loading when loading and no documents', async () => {
+    const component = await mountComponent(FetchStatus.LOADING, []);
     expect(component.find('.dscDocuments__loading').exists()).toBeTruthy();
     expect(component.find('.dscTable').exists()).toBeFalsy();
   });
 
-  test('render complete when loading but documents were already fetched', () => {
-    const component = mountComponent(FetchStatus.LOADING, esHits);
+  test('render complete when loading but documents were already fetched', async () => {
+    const component = await mountComponent(FetchStatus.LOADING, esHits);
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
   });
 
-  test('render complete', () => {
-    const component = mountComponent(FetchStatus.COMPLETE, esHits);
+  test('render complete', async () => {
+    const component = await mountComponent(FetchStatus.COMPLETE, esHits);
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
     expect(component.find('.dscTable').exists()).toBeTruthy();
   });

@@ -556,7 +556,10 @@ export interface HostMetadataInterface {
   data_stream: DataStream;
 }
 
-export type UnitedAgentMetadata = Immutable<{
+/**
+ * The persisted data (to the index) for both endpoint and agent data.
+ * */
+export type UnitedAgentMetadataPersistedData = Immutable<{
   agent: {
     id: string;
   };
@@ -772,6 +775,7 @@ export type SafeEndpointEvent = Partial<{
       entity_id: ECSField<string>;
       name: ECSField<string>;
       pid: ECSField<number>;
+      start: ECSField<string[]>;
     }>;
     group_leader: Partial<{
       entity_id: ECSField<string>;

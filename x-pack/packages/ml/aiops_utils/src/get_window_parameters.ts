@@ -5,15 +5,47 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
 /**
  * Time range definition for baseline and deviation to be used by spike log analysis.
+ *
+ * @export
+ * @interface WindowParameters
+ * @typedef {WindowParameters}
  */
 export interface WindowParameters {
+  /**
+   * Baseline minimum value
+   * @type {number}
+   */
   baselineMin: number;
+  /**
+   * Baseline maximum value
+   * @type {number}
+   */
   baselineMax: number;
+  /**
+   * Deviation minimum value
+   * @type {number}
+   */
   deviationMin: number;
+  /**
+   * Deviation maximum value
+   * @type {number}
+   */
   deviationMax: number;
 }
+
+/**
+ * Type guard for WindowParameters
+ *
+ * @param {unknown} arg - The argument to be checked.
+ * @returns {arg is WindowParameters}
+ */
+export const isWindowParameters = (arg: unknown): arg is WindowParameters =>
+  isPopulatedObject(arg, ['baselineMin', 'baselineMax', 'deviationMin', 'deviationMax']) &&
+  Object.values(arg).every((d) => typeof d === 'number');
 
 /**
  * Given a point in time (e.g. where a user clicks), use simple heuristics to compute:

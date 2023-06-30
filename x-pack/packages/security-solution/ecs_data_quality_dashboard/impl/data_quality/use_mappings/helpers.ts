@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { HttpHandler } from '@kbn/core-http-browser';
 import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
 import * as i18n from '../translations';
@@ -13,23 +14,24 @@ export const MAPPINGS_API_ROUTE = '/internal/ecs_data_quality_dashboard/mappings
 
 export async function fetchMappings({
   abortController,
+  httpFetch,
   patternOrIndexName,
 }: {
   abortController: AbortController;
+  httpFetch: HttpHandler;
   patternOrIndexName: string;
 }): Promise<Record<string, IndicesGetMappingIndexMappingRecord>> {
   const encodedIndexName = encodeURIComponent(`${patternOrIndexName}`);
 
-  const response = await fetch(`${MAPPINGS_API_ROUTE}/${encodedIndexName}`, {
-    method: 'GET',
-    signal: abortController.signal,
-  });
-
-  if (response.ok) {
-    return response.json();
+  try {
+    return await httpFetch<Record<string, IndicesGetMappingIndexMappingRecord>>(
+      `${MAPPINGS_API_ROUTE}/${encodedIndexName}`,
+      {
+        method: 'GET',
+        signal: abortController.signal,
+      }
+    );
+  } catch (e) {
+    throw new Error(i18n.ERROR_LOADING_MAPPINGS({ details: e.message, patternOrIndexName }));
   }
-
-  throw new Error(
-    i18n.ERROR_LOADING_MAPPINGS({ details: response.statusText, patternOrIndexName })
-  );
 }

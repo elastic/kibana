@@ -69,7 +69,6 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({
           onConfirm={handleConfirmExceptionFlyout}
           data-test-subj="addExceptionItemFlyoutInList"
           showAlertCloseOptions={false} // TODO ask if we need it
-          isNonTimeline={true}
           // ask if we need the add to rule/list section and which list should we link the exception here
         />
       ) : viewerStatus === ViewerStatus.EMPTY || viewerStatus === ViewerStatus.LOADING ? (

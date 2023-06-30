@@ -11,27 +11,26 @@ import {
   EuiEmptyPrompt,
   EuiIcon,
   EuiMarkdownFormat,
-  EuiLink,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedHTMLMessage, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { VULN_MGMT_POLICY_TEMPLATE } from '../../common/constants';
 import { FullSizeCenteredPage } from './full_size_centered_page';
-import {
-  CloudPosturePage,
-  VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT,
-} from './cloud_posture_page';
+import { CloudPosturePage } from './cloud_posture_page';
 import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
 import type { IndexDetails } from '../../common/types';
 import { NO_VULNERABILITIES_STATUS_TEST_SUBJ } from './test_subjects';
 import noDataIllustration from '../assets/illustrations/no_data_illustration.svg';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
+import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
+import { useCspBenchmarkIntegrations } from '../pages/benchmarks/use_csp_benchmark_integrations';
 
 const REFETCH_INTERVAL_MS = 20000;
 
@@ -59,14 +58,14 @@ const ScanningVulnerabilitiesEmptyPrompt = () => (
   />
 );
 
-const VulnerabilitiesFindingsInstalledEmptyPrompt = ({
+const CnvmIntegrationNotInstalledEmptyPrompt = ({
   vulnMgmtIntegrationLink,
 }: {
   vulnMgmtIntegrationLink?: string;
 }) => {
   return (
     <EuiEmptyPrompt
-      data-test-subj={VULN_MGMT_INTEGRATION_NOT_INSTALLED_TEST_SUBJECT}
+      data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED}
       icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no-data-illustration" />}
       title={
         <h2>
@@ -111,7 +110,7 @@ const VulnerabilitiesFindingsInstalledEmptyPrompt = ({
   );
 };
 
-const IndexTimeout = () => (
+const CnvmIndexTimeout = () => (
   <EuiEmptyPrompt
     data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.INDEX_TIMEOUT}
     color="plain"
@@ -128,13 +127,13 @@ const IndexTimeout = () => (
       <p>
         <FormattedMessage
           id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDescription"
-          defaultMessage="Data should appear in less than 10 minutes after elastic-agent is successfully deployed. {docs}"
+          defaultMessage="Scanning workloads is taking longer than expected. Please check {docs}"
           values={{
             docs: (
-              <EuiLink href="https://ela.st/findings" target="_blank">
+              <EuiLink href="https://ela.st/cnvm-faq" target="_blank">
                 <FormattedMessage
                   id="xpack.csp.noVulnerabilitiesStates.indexTimeout.indexTimeoutDocLink"
-                  defaultMessage="Learn more"
+                  defaultMessage="CNVM FAQ"
                 />
               </EuiLink>
             ),
@@ -184,6 +183,55 @@ const Unprivileged = ({ unprivilegedIndices }: { unprivilegedIndices: string[] }
     }
   />
 );
+const AgentNotDeployedEmptyPrompt = () => {
+  // using an existing hook to get agent id and package policy id
+  const benchmarks = useCspBenchmarkIntegrations({
+    name: '',
+    page: 1,
+    perPage: 1,
+    sortField: 'package_policy.name',
+    sortOrder: 'asc',
+  });
+
+  // the ids are not a must, but as long as we have them we can open the add agent flyout
+  const firstBenchmark = benchmarks.data?.items?.[0];
+  const integrationPoliciesLink = useCISIntegrationPoliciesLink({
+    addAgentToPolicyId: firstBenchmark?.agent_policy.id || '',
+    integration: firstBenchmark?.package_policy.id || '',
+  });
+
+  return (
+    <EuiEmptyPrompt
+      data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_DEPLOYED}
+      color="plain"
+      iconType="fleetApp"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.csp.noVulnerabilitiesStates.noAgentsDeployed.noAgentsDeployedTitle"
+            defaultMessage="No Agents Installed"
+          />
+        </h2>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.csp.noVulnerabilitiesStates.noAgentsDeployed.noAgentsDeployedDescription"
+            defaultMessage="In order to begin detecting vulnerabilities, you'll need to deploy elastic-agent into the cloud account or Kubernetes cluster you want to monitor."
+          />
+        </p>
+      }
+      actions={[
+        <EuiButton fill href={integrationPoliciesLink} isDisabled={!integrationPoliciesLink}>
+          <FormattedMessage
+            id="xpack.csp.noVulnerabilitiesStates.noAgentsDeployed.noAgentsDeployedButtonTitle"
+            defaultMessage="Install Agent"
+          />
+        </EuiButton>,
+      ]}
+    />
+  );
+};
 
 /**
  * This component will return the render states based on cloud posture setup status API
@@ -206,14 +254,13 @@ export const NoVulnerabilitiesStates = () => {
 
   const render = () => {
     if (status === 'indexing' || status === 'waiting_for_results')
-      return <ScanningVulnerabilitiesEmptyPrompt />; // integration installed, but no agents added
-    if (status === 'index-timeout') return <IndexTimeout />; // agent added, index timeout has passed
-    if (status === 'not-deployed' || status === 'not-installed')
+      return <ScanningVulnerabilitiesEmptyPrompt />; // integration installed, but no agents added// agent added, index timeout has passed
+    if (status === 'index-timeout') return <CnvmIndexTimeout />;
+    if (status === 'not-installed')
       return (
-        <VulnerabilitiesFindingsInstalledEmptyPrompt
-          vulnMgmtIntegrationLink={vulnMgmtIntegrationLink}
-        />
+        <CnvmIntegrationNotInstalledEmptyPrompt vulnMgmtIntegrationLink={vulnMgmtIntegrationLink} />
       );
+    if (status === 'not-deployed') return <AgentNotDeployedEmptyPrompt />;
     if (status === 'unprivileged')
       return <Unprivileged unprivilegedIndices={unprivilegedIndices || []} />; // user has no privileges for our indices
   };

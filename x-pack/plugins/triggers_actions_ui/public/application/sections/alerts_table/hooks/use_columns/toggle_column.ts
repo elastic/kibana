@@ -6,7 +6,7 @@
  */
 
 import { EuiDataGridColumn } from '@elastic/eui';
-import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
+import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import * as i18n from '../../translations';
 
 const remove = ({ columns, index }: { columns: EuiDataGridColumn[]; index: number }) => {
@@ -33,6 +33,10 @@ const insert = ({
     return [...columns.slice(0, defaultIndex), column, ...columns.slice(defaultIndex)];
   }
 
+  if (columns.length === 0) {
+    return [column];
+  }
+
   // if the column isn't shown and it's not part of the default config
   // push it into the second position. Behaviour copied by t_grid, security
   // does this to insert right after the timestamp column
@@ -52,6 +56,14 @@ const formatSystemColumn = (column: EuiDataGridColumn): EuiDataGridColumn => {
      */
     if (!newColumn.displayAsText) {
       newColumn.displayAsText = i18n.CASES;
+    }
+  }
+
+  if (newColumn.id === ALERT_MAINTENANCE_WINDOW_IDS) {
+    newColumn.isSortable = false;
+
+    if (!newColumn.displayAsText) {
+      newColumn.displayAsText = i18n.MAINTENANCE_WINDOWS;
     }
   }
 

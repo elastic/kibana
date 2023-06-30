@@ -127,7 +127,7 @@ Object {
                         >
                           <div
                             aria-label=""
-                            class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-m-user-subdued"
+                            class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-user-m-uppercase-subdued"
                             role="img"
                             title=""
                           >
@@ -166,7 +166,7 @@ Object {
                         >
                           <div
                             aria-label=""
-                            class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-m-user-subdued"
+                            class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-user-m-uppercase-subdued"
                             role="img"
                             title=""
                           >
@@ -265,7 +265,7 @@ Object {
                       >
                         <div
                           aria-label=""
-                          class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-m-user-subdued"
+                          class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-user-m-uppercase-subdued"
                           role="img"
                           title=""
                         >
@@ -304,7 +304,7 @@ Object {
                       >
                         <div
                           aria-label=""
-                          class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-m-user-subdued"
+                          class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-user-m-uppercase-subdued"
                           role="img"
                           title=""
                         >
@@ -460,7 +460,7 @@ Object {
                         >
                           <div
                             aria-label=""
-                            class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-m-user-subdued"
+                            class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-user-m-uppercase-subdued"
                             role="img"
                             title=""
                           >
@@ -499,7 +499,7 @@ Object {
                         >
                           <div
                             aria-label=""
-                            class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-m-user-subdued"
+                            class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-user-m-uppercase-subdued"
                             role="img"
                             title=""
                           >
@@ -598,7 +598,7 @@ Object {
                       >
                         <div
                           aria-label=""
-                          class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-m-user-subdued"
+                          class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-user-m-uppercase-subdued"
                           role="img"
                           title=""
                         >
@@ -637,7 +637,7 @@ Object {
                       >
                         <div
                           aria-label=""
-                          class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-m-user-subdued"
+                          class="euiAvatar euiAvatar--m euiAvatar--user euiCommentAvatar emotion-euiAvatar-user-m-uppercase-subdued"
                           role="img"
                           title=""
                         >

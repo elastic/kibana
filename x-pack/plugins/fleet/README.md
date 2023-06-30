@@ -40,16 +40,21 @@ These are some additional recommendations to the steps detailed in the [Kibana D
 
 1. Create a `config/kibana.dev.yml` file by copying the existing `config/kibana.yml` file.
 2. It is recommended to explicitly set a base path for Kibana (refer to [Considerations for basepath](https://www.elastic.co/guide/en/kibana/current/development-basepath.html) for details). To do this, add the following to your `kibana.dev.yml`:
-  ```yml
-  server.basePath: /<yourPath>
-  ```
-  where `yourPath` is a path of your choice (e.g. your name).
+
+```yml
+server.basePath: /<yourPath>
+```
+
+where `yourPath` is a path of your choice (e.g. your name).
+
 3. Bootstrap Kibana:
-    ```
-    yarn kbn bootstrap
-    ```
+
+```bash
+yarn kbn bootstrap
+```
 
 #### Running Elasticsearch and Kibana
+
 - Start Elasticsearch in one shell (NB: you might want to add other flags to enable data persistency and/or running Fleet Server locally, see below):
   ```
   yarn es snapshot -E xpack.security.authc.api_key.enabled=true -E xpack.security.authc.token.enabled=true
@@ -63,11 +68,13 @@ These are some additional recommendations to the steps detailed in the [Kibana D
 #### Useful tips
 
 If Kibana fails to start, it is possible that your local setup got corrupted. An easy fix is to run:
+
 ```
 yarn kbn clean && yarn kbn bootstrap
 ```
 
 To avoid losing all your data when you restart Elasticsearch, you can provide a path to store the data when running the `yarn es snapshot ` command, e.g.:
+
 ```
 -E path.data=/tmp/es-data
 ```
@@ -144,11 +151,13 @@ Once the Fleet Server container is running, you should be able to treat it as if
 #### Unit tests
 
 Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends a preset provided by the `@kbn/test` package. Unless you intend to run all unit tests within the project, you should provide the Jest configuration for Fleet. The following command runs all Fleet unit tests:
+
 ```
 yarn jest --config x-pack/plugins/fleet/jest.config.js
 ```
 
 You can also run a specific test by passing the filepath as an argument, e.g.:
+
 ```
 yarn jest --config x-pack/plugins/fleet/jest.config.js x-pack/plugins/fleet/common/services/validate_package_policy.test.ts
 ```
@@ -180,6 +189,30 @@ You need to have `docker` to run ingest manager api integration tests
 ```
 FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE='docker.elastic.co/package-registry/distribution:production' FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner
 ```
+
+#### Cypress tests
+
+We support testing UI end to end with cypress, you can find more information on how to run those tests [fleet/cypress/README.md](./fleet/cypress/README.md).
+
+#### Jest integration tests
+
+Some features need to test different Kibana configuration, test with multiple Kibana instances, ... For this purpose, Jest integration tests can be used, which allow starting ES and Kibana as required for each test
+
+To run these tests `docker` needs to be running on your environment.
+
+You can run the tests with the following commands:
+
+```bash
+node scripts/jest_integration.js x-pack/plugins/fleet/server/integration_tests/<YOUR_TEST_FILE>
+```
+
+You could also use node debugger to inspect ES indices (add the `debugger` directive in your test)
+
+```bash
+node --inspect scripts/jest_integration.js x-pack/plugins/fleet/server/integration_tests/<YOUR_TEST_FILE>
+```
+
+However, these tests are slow and harder to maintain. Therefore, we should try to avoid them and use API integration tests instead whenever possible.
 
 ### Storybook
 

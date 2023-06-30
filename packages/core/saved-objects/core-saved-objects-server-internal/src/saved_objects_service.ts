@@ -9,6 +9,7 @@
 import { Subject, Observable, firstValueFrom, of } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
 import type { Logger } from '@kbn/logging';
+import { stripVersionQualifier } from '@kbn/std';
 import type { ServiceStatus } from '@kbn/core-status-common';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
@@ -38,6 +39,7 @@ import {
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
   type IKibanaMigrator,
+  DEFAULT_INDEX_TYPES_MAP,
 } from '@kbn/core-saved-objects-base-server-internal';
 import {
   SavedObjectsClient,
@@ -57,6 +59,7 @@ import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
+import { applyTypeDefaults } from './apply_type_defaults';
 
 /**
  * @internal
@@ -104,9 +107,7 @@ export class SavedObjectsService
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
-    this.kibanaVersion = SavedObjectsService.stripVersionQualifier(
-      this.coreContext.env.packageInfo.version
-    );
+    this.kibanaVersion = stripVersionQualifier(this.coreContext.env.packageInfo.version);
   }
 
   public async setup(setupDeps: SavedObjectsSetupDeps): Promise<InternalSavedObjectsServiceSetup> {
@@ -194,7 +195,7 @@ export class SavedObjectsService
         if (this.started) {
           throw new Error('cannot call `registerType` after service startup.');
         }
-        this.typeRegistry.registerType(type);
+        this.typeRegistry.registerType(applyTypeDefaults(type));
       },
       getTypeRegistry: () => this.typeRegistry,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
@@ -221,7 +222,8 @@ export class SavedObjectsService
       this.config.migration,
       elasticsearch.client.asInternalUser,
       docLinks,
-      waitForMigrationCompletion
+      waitForMigrationCompletion,
+      node
     );
 
     this.migrator$.next(migrator);
@@ -365,7 +367,8 @@ export class SavedObjectsService
     soMigrationsConfig: SavedObjectsMigrationConfigType,
     client: ElasticsearchClient,
     docLinks: DocLinksServiceStart,
-    waitForMigrationCompletion: boolean
+    waitForMigrationCompletion: boolean,
+    nodeInfo: NodeInfo
   ): IKibanaMigrator {
     return new KibanaMigrator({
       typeRegistry: this.typeRegistry,
@@ -373,17 +376,11 @@ export class SavedObjectsService
       kibanaVersion: this.kibanaVersion,
       soMigrationsConfig,
       kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
+      defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
       client,
       docLinks,
       waitForMigrationCompletion,
+      nodeRoles: nodeInfo.roles,
     });
-  }
-
-  /**
-   * Coerce a semver-like string (x.y.z-SNAPSHOT) or prerelease version (x.y.z-alpha)
-   * to regular semver (x.y.z).
-   */
-  private static stripVersionQualifier(version: string) {
-    return version.split('-')[0];
   }
 }

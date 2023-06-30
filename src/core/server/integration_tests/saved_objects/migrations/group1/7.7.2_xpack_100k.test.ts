@@ -99,7 +99,7 @@ describe('migration from 7.7.2-xpack with 100k objects', () => {
       await esServer.stop();
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 10000));
+    await new Promise((resolve) => setTimeout(resolve, 20000));
   };
 
   beforeAll(async () => {

@@ -13,6 +13,7 @@ import {
   MAINTENANCE_WINDOW_FEATURE_ID,
 } from '@kbn/alerting-plugin/common';
 import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import type { AsApiContract } from '@kbn/alerting-plugin/server/routes/lib';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
@@ -29,17 +30,36 @@ jest.mock('./api', () => ({
 jest.mock('../../../../common/lib/kibana');
 
 const RUNNING_MAINTENANCE_WINDOW_1: Partial<MaintenanceWindow> = {
-  title: 'Maintenance window 1',
+  title: 'Running maintenance window 1',
   id: '63057284-ac31-42ba-fe22-adfe9732e5ae',
   status: MaintenanceWindowStatus.Running,
   events: [{ gte: '2023-04-20T16:27:30.753Z', lte: '2023-04-20T16:57:30.753Z' }],
 };
 
 const RUNNING_MAINTENANCE_WINDOW_2: Partial<MaintenanceWindow> = {
-  title: 'Maintenance window 2',
+  title: 'Running maintenance window 2',
   id: '45894340-df98-11ed-ac81-bfcb4982b4fd',
   status: MaintenanceWindowStatus.Running,
   events: [{ gte: '2023-04-20T16:47:42.871Z', lte: '2023-04-20T17:11:32.192Z' }],
+};
+
+const RECURRING_RUNNING_MAINTENANCE_WINDOW: Partial<AsApiContract<MaintenanceWindow>> = {
+  title: 'Recurring running maintenance window',
+  id: 'e2228300-e9ad-11ed-ba37-db17c6e6182b',
+  status: MaintenanceWindowStatus.Running,
+  events: [
+    { gte: '2023-05-03T12:27:18.569Z', lte: '2023-05-03T12:57:18.569Z' },
+    { gte: '2023-05-10T12:27:18.569Z', lte: '2023-05-10T12:57:18.569Z' },
+  ],
+  expiration_date: '2024-05-03T12:27:35.088Z',
+  r_rule: {
+    dtstart: '2023-05-03T12:27:18.569Z',
+    tzid: 'Europe/Amsterdam',
+    freq: 3,
+    interval: 1,
+    count: 2,
+    byweekday: ['WE'],
+  },
 };
 
 const UPCOMING_MAINTENANCE_WINDOW: Partial<MaintenanceWindow> = {
@@ -85,9 +105,10 @@ describe('MaintenanceWindowCallout', () => {
   it('should be visible if currently there is at least one "running" maintenance window', async () => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
 
-    const { findByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
+    const { findAllByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
 
-    expect(await findByText('A maintenance window is currently running')).toBeInTheDocument();
+    expect(await findAllByText('Maintenance window is running')).toHaveLength(1);
+    expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
   it('should be visible if currently there are multiple "running" maintenance windows', async () => {
@@ -98,23 +119,37 @@ describe('MaintenanceWindowCallout', () => {
 
     const { findAllByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
 
-    expect(await findAllByText('A maintenance window is currently running')).toHaveLength(1);
+    expect(await findAllByText('Maintenance window is running')).toHaveLength(1);
+    expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('should be visible if currently there is a recurring "running" maintenance window', async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([RECURRING_RUNNING_MAINTENANCE_WINDOW]);
+
+    const { findByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
+
+    expect(await findByText('Maintenance window is running')).toBeInTheDocument();
+    expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
   it('should NOT be visible if currently there are no active (running or upcoming) maintenance windows', async () => {
-    fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue(
+      [] // API returns an empty array if there are no active maintenance windows
+    );
 
     const { container } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
 
     expect(container).toBeEmptyDOMElement();
+    expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
-  it('should NOT be visible if currently there are no "running" maintenance windows', async () => {
+  it('should NOT be visible if currently there are only "upcoming" maintenance windows', async () => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([UPCOMING_MAINTENANCE_WINDOW]);
 
     const { container } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
 
     expect(container).toBeEmptyDOMElement();
+    expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
   it('should see an error toast if there was an error while fetching maintenance windows', async () => {
@@ -149,8 +184,8 @@ describe('MaintenanceWindowCallout', () => {
     await waitFor(() => {
       expect(appToastsMock.addError).toHaveBeenCalledTimes(1);
       expect(appToastsMock.addError).toHaveBeenCalledWith(mockError, {
-        title: 'Failed to check if any maintenance window is currently running',
-        toastMessage: "Notification actions won't run while a maintenance window is running.",
+        title: 'Failed to check if maintenance windows are active',
+        toastMessage: 'Rule notifications are stopped while the maintenance window is running.',
       });
     });
   });
@@ -192,6 +227,6 @@ describe('MaintenanceWindowCallout', () => {
 
     const { findByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
 
-    expect(await findByText('A maintenance window is currently running')).toBeInTheDocument();
+    expect(await findByText('Maintenance window is running')).toBeInTheDocument();
   });
 });

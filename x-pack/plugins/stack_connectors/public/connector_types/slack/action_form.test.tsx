@@ -100,6 +100,7 @@ const baseProps = {
   recoveryActionGroup: 'recovered',
   actionTypeRegistry,
   minimumThrottleInterval: [1, 'm'] as [number | undefined, string],
+  producerId: 'infratstructure',
   setActions: jest.fn(),
   setActionIdByIndex: jest.fn(),
   setActionParamsProperty: jest.fn(),
@@ -172,6 +173,6 @@ describe('ActionForm - Slack API Connector', () => {
       </IntlProvider>
     );
 
-    expect(await screen.findByText('Selected channel is required.')).toBeInTheDocument();
+    expect(await screen.findByText('Channel is required.')).toBeInTheDocument();
   });
 });

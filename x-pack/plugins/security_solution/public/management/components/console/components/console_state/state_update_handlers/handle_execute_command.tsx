@@ -343,6 +343,12 @@ export const handleExecuteCommand: ConsoleStoreReducer<
                 }
                 break;
 
+              case 'truthy':
+                if (!argValue) {
+                  dataValidationError = executionTranslations.mustHaveValue(argName);
+                }
+                break;
+
               case 'number':
               case 'number-greater-than-zero':
                 {

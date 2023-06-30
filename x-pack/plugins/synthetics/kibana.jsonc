@@ -30,17 +30,14 @@
       "taskManager",
       "triggersActionsUi",
       "usageCollection",
-      "unifiedSearch",
       "bfetch"
     ],
     "optionalPlugins": ["cloud", "data", "fleet", "home", "ml", "spaces", "telemetry"],
     "requiredBundles": [
       "data",
-      "unifiedSearch",
       "fleet",
       "kibanaReact",
       "kibanaUtils",
-      "ml",
       "observability",
       "spaces",
       "indexLifecycleManagement"

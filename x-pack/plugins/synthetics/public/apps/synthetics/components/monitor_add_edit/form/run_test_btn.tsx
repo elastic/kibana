@@ -10,7 +10,7 @@ import { EuiButton, EuiToolTip } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { TestNowModeFlyout, TestRun } from '../../test_now_mode/test_now_mode_flyout';
 import { format } from './formatter';
 import {

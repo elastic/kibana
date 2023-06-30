@@ -164,7 +164,7 @@ Object {
       "legend": Object {
         "isVisible": true,
         "legendSize": "xlarge",
-        "position": "left",
+        "position": "right",
       },
       "preferredSeriesType": "bar_stacked",
       "title": "Empty XY chart",
@@ -323,7 +323,7 @@ Object {
       "legend": Object {
         "isVisible": true,
         "legendSize": "xlarge",
-        "position": "left",
+        "position": "right",
       },
       "preferredSeriesType": "bar_stacked",
       "title": "Empty XY chart",
