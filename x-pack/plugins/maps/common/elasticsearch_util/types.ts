@@ -20,13 +20,8 @@ export interface ESGeometry {
 }
 
 export type GeoFilter = Filter & {
-  geo_bounding_box?: {
-    [geoFieldName: string]: estypes.TopLeftBottomRightGeoBounds;
-  };
-  geo_distance?: {
-    distance: string;
-    [geoFieldName: string]: Position | { lat: number; lon: number } | string;
-  };
+  geo_bounding_box?: estypes.QueryDslGeoBoundingBoxQuery;
+  geo_distance?: estypes.QueryDslGeoDistanceQuery;
   geo_grid?: {
     [geoFieldName: string]: {
       geohex?: string;

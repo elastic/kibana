@@ -210,7 +210,7 @@ export function createDistanceFilterWithMeta({
 }
 
 function extractGeometryFromFilter(geoFieldName: string, filter: GeoFilter): Geometry | undefined {
-  if (filter.geo_distance && filter.geo_distance[geoFieldName]) {
+  if (filter.geo_distance && filter.geo_distance[geoFieldName] && filter.geo_distance.distance) {
     const distanceSplit = filter.geo_distance.distance.split('km');
     const distance = parseFloat(distanceSplit[0]);
     const circleFeature = turfCircle(filter.geo_distance[geoFieldName], distance);
