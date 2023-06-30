@@ -271,7 +271,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
                 background: '#fbfcfd',
                 zIndex: 3000,
               }}
-              height={32 * 5.5}
+              height={matches.length > 5 ? 32 * 5.5 : matches.length * 32}
               options={optionsToShow}
               onChange={onOptionPick}
               singleSelection
