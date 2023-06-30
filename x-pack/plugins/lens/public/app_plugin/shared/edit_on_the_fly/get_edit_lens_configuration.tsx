@@ -54,6 +54,7 @@ export function getEditLensConfiguration(
     datasourceId,
     adaptersTables,
   }: EditLensConfigurationProps) => {
+    console.dir(attributes);
     const [lensServices, setLensServices] = useState<LensAppServices>();
     useEffect(() => {
       async function loadLensService() {
@@ -74,10 +75,12 @@ export function getEditLensConfiguration(
     if (!lensServices || !datasourceMap || !visualizationMap || !dataView.id) {
       return <LoadingSpinnerWithOverlay />;
     }
+    const datasourceState = attributes.state.datasourceStates[datasourceId];
     const storeDeps = {
       lensServices,
       datasourceMap,
       visualizationMap,
+      initialContext: datasourceState && 'initialContext' in datasourceState ? datasourceState.initialContext : undefined,
     };
     const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
       lens: getPreloadedState(storeDeps) as LensAppState,
