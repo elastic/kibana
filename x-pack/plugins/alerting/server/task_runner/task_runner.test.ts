@@ -17,6 +17,7 @@ import {
   Rule,
   RuleAction,
   MaintenanceWindow,
+  RuleAlertData,
 } from '../types';
 import { ConcreteTaskInstance, isUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
@@ -339,7 +340,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           return { state: {} };
@@ -422,7 +424,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
@@ -548,7 +551,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           return { state: {} };
@@ -594,7 +598,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
@@ -672,7 +677,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           executorServices.alertFactory.create('2').scheduleActions('default');
@@ -739,7 +745,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           executorServices.alertFactory.create('2').scheduleActions('default');
@@ -802,7 +809,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           executorServices.alertFactory.create('2').scheduleActions('default');
@@ -844,7 +852,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
@@ -917,7 +926,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           return { state: {} };
@@ -993,7 +1003,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           return { state: {} };
@@ -1085,7 +1096,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           return { state: {} };
@@ -1226,7 +1238,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
 
@@ -1335,7 +1348,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           return { state: {} };
@@ -1435,7 +1449,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           return { state: {} };
@@ -1512,7 +1527,8 @@ describe('Task Runner', () => {
           RuleTypeState,
           AlertInstanceState,
           AlertInstanceContext,
-          string
+          string,
+          RuleAlertData
         >) => {
           executorServices.alertFactory.create('1').scheduleActions('default');
           return { state: {} };
@@ -1584,7 +1600,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
@@ -1699,7 +1716,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         throw new Error(GENERIC_ERROR_MESSAGE);
       }
@@ -1807,7 +1825,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         throw new Error(GENERIC_ERROR_MESSAGE);
       }
@@ -1975,7 +1994,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
@@ -2066,7 +2086,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
@@ -2150,7 +2171,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
@@ -2299,7 +2321,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         return { state: {} };
       }
@@ -2469,7 +2492,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         throw new Error(GENERIC_ERROR_MESSAGE);
       }
@@ -2501,7 +2525,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         throw new Error(GENERIC_ERROR_MESSAGE);
       }
@@ -2557,7 +2582,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         throw new Error(GENERIC_ERROR_MESSAGE);
       }
@@ -2627,7 +2653,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
@@ -2795,7 +2822,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         executorServices.alertFactory.create('2').scheduleActions('default');
@@ -2961,7 +2989,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         throw new Error('OMG');
       }
@@ -2988,7 +3017,8 @@ describe('Task Runner', () => {
         RuleTypeState,
         AlertInstanceState,
         AlertInstanceContext,
-        string
+        string,
+        RuleAlertData
       >) => {
         executorServices.alertFactory.create('1').scheduleActions('default');
         return { state: {} };
