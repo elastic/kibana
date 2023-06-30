@@ -186,7 +186,6 @@ export const NavigationEmbeddableEditor = ({
                   onSave(initialInput);
                 }
                 onClose();
-                // setLinkLabel('');
               }}
             >
               Save

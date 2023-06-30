@@ -25,7 +25,6 @@ export const DashboardLinkComponent = () => {
 
   const parentDashboardTitle = parentDashboard.select((state) => state.explicitInput.title);
   const parentDashboardId = parentDashboard.select((state) => state.componentState.lastSavedId);
-
   return (
     <EuiButtonEmpty
       id={'test1' + embeddable.id}
@@ -40,9 +39,8 @@ export const DashboardLinkComponent = () => {
             onClick: () => {}, // TODO: As part of https://github.com/elastic/kibana/issues/154381, connect to drilldown
           })}
     >
-      {dashboardLinkLabel || dashboardLinkId === parentDashboardId
-        ? parentDashboardTitle
-        : dashboardTitle}
+      {dashboardLinkLabel ||
+        (dashboardLinkId === parentDashboardId ? parentDashboardTitle : dashboardTitle)}
     </EuiButtonEmpty>
   );
 };
