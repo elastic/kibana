@@ -35,7 +35,6 @@ export function useDeleteRules() {
       }
     },
     {
-      // If the mutation fails, use the context returned from onMutate to roll back
       onError: (_err, rule, context) => {
         toasts.addDanger(
           i18n.translate(

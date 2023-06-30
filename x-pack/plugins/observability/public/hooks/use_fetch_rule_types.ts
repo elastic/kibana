@@ -62,7 +62,6 @@ export function useFetchRuleTypes({
         }
       },
       keepPreviousData: true,
-      enabled: Boolean(filterByRuleTypeIds),
       refetchOnWindowFocus: false,
       onError: (error: Error) => {
         toasts.addError(error, {
