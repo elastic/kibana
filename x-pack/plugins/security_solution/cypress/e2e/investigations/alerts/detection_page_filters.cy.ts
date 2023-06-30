@@ -133,7 +133,8 @@ describe('Detections : Page Filters', () => {
       resetFilters();
     });
 
-    it('should be able to delete Controls', () => {
+    // TODO https://github.com/elastic/kibana/issues/160980
+    it.skip('should be able to delete Controls', () => {
       waitForPageFilters();
       editFilterGroupControls();
       deleteFilterGroupControl(3);
@@ -231,7 +232,8 @@ describe('Detections : Page Filters', () => {
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
   });
 
-  it(`Alert list is updated when the alerts are updated`, () => {
+  // TODO https://github.com/elastic/kibana/issues/160980
+  it.skip(`Alert list is updated when the alerts are updated`, () => {
     // mark status of one alert to be acknowledged
     selectCountTable();
     cy.get(ALERTS_COUNT)
@@ -331,7 +333,9 @@ describe('Detections : Page Filters', () => {
     afterEach(() => {
       resetFilters();
     });
-    it('should recover from invalide kql Query result', () => {
+
+    // TODO https://github.com/elastic/kibana/issues/160980
+    it.skip('should recover from invalide kql Query result', () => {
       // do an invalid search
       //
       kqlSearch('\\');

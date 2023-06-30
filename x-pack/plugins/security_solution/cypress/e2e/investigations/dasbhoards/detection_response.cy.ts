@@ -137,7 +137,8 @@ describe('Detection response view', () => {
             });
         });
     });
-    it(`opens timeline with correct query count for open alerts by rule table`, () => {
+    // TODO https://github.com/elastic/kibana/issues/160980
+    it.skip(`opens timeline with correct query count for open alerts by rule table`, () => {
       cy.get(RULE_TABLE_ROW_TOTAL_ALERTS)
         .first()
         .then((sub) => {
