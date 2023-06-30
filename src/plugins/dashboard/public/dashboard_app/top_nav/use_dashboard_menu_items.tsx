@@ -96,13 +96,6 @@ export const useDashboardMenuItems = ({
   }, [dashboard]);
 
   /**
-   * Show the dashboard's save modal
-   */
-  const saveDashboardAs = useCallback(() => {
-    dashboard.runSaveAs().then((result) => maybeRedirect(result));
-  }, [maybeRedirect, dashboard]);
-
-  /**
    * Clone the dashboard
    */
   const clone = useCallback(() => {
@@ -140,6 +133,7 @@ export const useDashboardMenuItems = ({
         ...topNavStrings.fullScreen,
         id: 'full-screen',
         testId: 'dashboardFullScreenMode',
+        disableButton: isSaveInProgress || hasOverlays,
         run: () => dashboard.dispatch.setFullScreenMode(true),
       } as TopNavMenuData,
 
@@ -174,17 +168,6 @@ export const useDashboardMenuItems = ({
         run: () => quickSaveDashboard(),
       } as TopNavMenuData,
 
-      saveAs: {
-        description: topNavStrings.saveAs.description,
-        disableButton: isSaveInProgress || hasOverlays,
-        id: 'save',
-        emphasize: !Boolean(lastSavedId),
-        testId: 'dashboardSaveMenuItem',
-        iconType: Boolean(lastSavedId) ? undefined : 'save',
-        label: Boolean(lastSavedId) ? topNavStrings.saveAs.label : topNavStrings.quickSave.label,
-        run: () => saveDashboardAs(),
-      } as TopNavMenuData,
-
       switchToViewMode: {
         ...topNavStrings.switchToViewMode,
         id: 'cancel',
@@ -213,23 +196,22 @@ export const useDashboardMenuItems = ({
         ...topNavStrings.clone,
         id: 'clone',
         testId: 'dashboardClone',
-        disableButton: isSaveInProgress,
-        run: () => clone(),
+        disableButton: isSaveInProgress || hasOverlays,
+        run: () => dashboard.runClone().then((result) => maybeRedirect(result)),
       } as TopNavMenuData,
     };
   }, [
-    quickSaveDashboard,
-    hasUnsavedChanges,
     isSaveInProgress,
-    saveDashboardAs,
-    setIsLabsShown,
-    resetChanges,
     hasOverlays,
+    hasUnsavedChanges,
     lastSavedId,
-    isLabsShown,
     showShare,
     dashboard,
-    clone,
+    setIsLabsShown,
+    isLabsShown,
+    quickSaveDashboard,
+    resetChanges,
+    maybeRedirect,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
@@ -272,7 +254,7 @@ export const useDashboardMenuItems = ({
     }
     return [
       menuItems.switchToViewMode,
-      // menuItems.settings,
+      menuItems.settings,
       ...labsMenuItem,
       menuItems.fullScreen,
       ...shareMenuItem,

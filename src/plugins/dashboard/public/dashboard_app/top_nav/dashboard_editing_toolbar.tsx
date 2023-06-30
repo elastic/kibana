@@ -116,7 +116,6 @@ export function DashboardEditingToolbar() {
   if (dashboard.controlGroup) {
     extraButtons.push(<ControlsToolbarButton controlGroup={dashboard.controlGroup} />);
   }
-  extraButtons.push(<ToolbarButton size="s" label="Settings" iconType="gear" />);
 
   return (
     <div
