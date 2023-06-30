@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink, PopoverAnchorPosition } from '@elastic/eui';
-import tinycolor from 'tinycolor2';
+import chroma from 'chroma-js';
 import { Popover } from '../popover';
 import { ColorDot } from '../color_dot';
 import { ColorPicker, Props as ColorPickerProps } from '../color_picker';
@@ -22,7 +22,7 @@ export const ColorPickerPopover: FC<Props> = (props: Props) => {
   const { value, anchorPosition, ariaLabel, ...rest } = props;
   const button = (handleClick: React.MouseEventHandler<HTMLButtonElement>) => (
     <EuiLink
-      aria-label={`${ariaLabel} ${tinycolor(value).toName() || value}`}
+      aria-label={`${ariaLabel} ${value ? chroma(value).name() : ''}`}
       style={{ fontSize: 0 }}
       onClick={handleClick}
     >

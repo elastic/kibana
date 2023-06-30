@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import tinycolor from 'tinycolor2';
+import chroma from 'chroma-js';
 import {
   // @ts-ignore
   colorPalette as colorPaletteGenerator,
@@ -33,7 +33,7 @@ export const DEFAULT_HEATMAP_COLOR_RAMP_NAME = 'theclassic';
 
 export const DEFAULT_FILL_COLORS: string[] = euiPaletteColorBlind();
 export const DEFAULT_LINE_COLORS: string[] = [
-  ...DEFAULT_FILL_COLORS.map((color: string) => tinycolor(color).darken().toHexString()),
+  ...DEFAULT_FILL_COLORS.map((color: string) => chroma(color).darken().hex()),
   // Explicitly add black & white as border color options
   '#000',
   '#FFF',
