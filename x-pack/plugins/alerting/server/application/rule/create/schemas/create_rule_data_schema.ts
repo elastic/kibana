@@ -16,7 +16,7 @@ export const createRuleDataSchema = schema.object({
   consumer: schema.string(),
   tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
   throttle: schema.maybe(schema.nullable(schema.string({ validate: validateDuration }))),
-  params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
   schedule: schema.object({
     interval: schema.string({ validate: validateDuration }),
   }),
@@ -24,7 +24,7 @@ export const createRuleDataSchema = schema.object({
     schema.object({
       group: schema.string(),
       id: schema.string(),
-      params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+      params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
       frequency: schema.maybe(
         schema.object({
           summary: schema.boolean(),

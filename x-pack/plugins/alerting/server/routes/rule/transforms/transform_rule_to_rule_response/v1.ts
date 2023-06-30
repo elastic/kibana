@@ -56,6 +56,7 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   ...(rule.apiKeyCreatedByUser !== undefined
     ? { api_key_created_by_user: rule.apiKeyCreatedByUser }
     : {}),
+  ...(rule.throttle !== undefined ? { throttle: rule.throttle } : {}),
   notify_when: rule.notifyWhen,
   mute_all: rule.muteAll,
   muted_alert_ids: rule.mutedInstanceIds,
@@ -73,4 +74,5 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   ...(rule.lastRun ? { last_run: transformRuleLastRun(rule.lastRun) } : {}),
   ...(rule.nextRun ? { next_run: rule.nextRun.toISOString() } : {}),
   revision: rule.revision,
+  ...(rule.running !== undefined ? { running: rule.running } : {}),
 });

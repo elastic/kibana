@@ -14,9 +14,9 @@ import {
   ruleLastRunOutcomeValues as ruleLastRunOutcomeValuesV1,
 } from '../constants/v1';
 
-export const ruleParamsSchema = schema.recordOf(schema.string(), schema.any());
-export const actionParamsSchema = schema.recordOf(schema.string(), schema.any());
-export const mappedParamsSchema = schema.recordOf(schema.string(), schema.any());
+export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
+export const actionParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
+export const mappedParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 
 const notifyWhenSchema = schema.oneOf([
   schema.literal(ruleNotifyWhenV1.CHANGE),
