@@ -40,12 +40,10 @@ export const HostsTable = () => {
 
   return (
     <>
-      {selectedItemsCount > 0 && (
-        <FilterAction
-          selectedItemsCount={selectedItemsCount}
-          filterSelectedHosts={filterSelectedHosts}
-        />
-      )}
+      <FilterAction
+        selectedItemsCount={selectedItemsCount}
+        filterSelectedHosts={filterSelectedHosts}
+      />
       <EuiBasicTable
         ref={refs.tableRef}
         data-test-subj="hostsView-table"
