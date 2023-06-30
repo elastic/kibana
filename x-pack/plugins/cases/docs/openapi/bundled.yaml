@@ -2323,6 +2323,7 @@ components:
           - type: array
             items:
               type: string
+            maxItems: 100
     category:
       in: query
       name: category
@@ -2389,6 +2390,7 @@ components:
           - type: array
             items:
               type: string
+            maxItems: 100
       example: elastic
     search:
       in: query
@@ -2460,6 +2462,7 @@ components:
           - type: array
             items:
               type: string
+            maxItems: 100
       example: tag-1
     to:
       in: query
