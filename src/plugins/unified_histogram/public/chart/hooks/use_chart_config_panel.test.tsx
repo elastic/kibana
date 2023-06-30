@@ -33,6 +33,9 @@ describe('useChartConfigPanel', () => {
         setIsFlyoutVisible: jest.fn(),
         isPlainRecord: true,
         lensTablesAdapter: lensTablesAdapterMock,
+        query: {
+          sql: 'Select * from test',
+        },
       })
     );
     await act(() => setTimeout(0));
