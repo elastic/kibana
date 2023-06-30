@@ -13,6 +13,8 @@ import type { Filter, Query } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { inputsActions } from '../../common/store/inputs';
+import { useKibana } from '../../common/lib/kibana';
+import { APP_ID } from '../../../common';
 
 const DashboardRendererComponent = ({
   canReadDashboard,
@@ -42,13 +44,16 @@ const DashboardRendererComponent = ({
   };
   viewMode?: ViewMode;
 }) => {
+  const { embeddable } = useKibana().services;
   const dispatch = useDispatch();
   const getCreationOptions = useCallback(
     () =>
       Promise.resolve({
         getInitialInput: () => ({ timeRange, viewMode, query, filters }),
+        getIncomingEmbeddable: () =>
+          embeddable.getStateTransfer().getIncomingEmbeddablePackage(APP_ID, true),
       }),
-    [filters, query, timeRange, viewMode]
+    [embeddable, filters, query, timeRange, viewMode]
   );
 
   const refetchByForceRefresh = useCallback(() => {
