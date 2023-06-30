@@ -312,7 +312,6 @@ exports.Cluster = class Cluster {
    */
   _exec(installPath, opts = {}) {
     const {
-      isDocker = false,
       skipNativeRealmSetup = false,
       reportTime = () => {},
       startTime,
@@ -321,6 +320,8 @@ exports.Cluster = class Cluster {
       writeLogsToPath,
       ...options
     } = opts;
+
+    const isDocker = installPath === 'docker';
 
     if (this._process || this._outcome) {
       throw new Error('ES has already been started');
@@ -400,7 +401,7 @@ exports.Cluster = class Cluster {
             '9200:9200',
             '-p',
             '9300:9300',
-            '-t',
+            '-itd',
             'docker.elastic.co/elasticsearch/elasticsearch:8.8.1',
           ],
           {
