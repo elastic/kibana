@@ -2536,7 +2536,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "Readonly<{ prebuiltRulesPackageVersion?: string | undefined; } & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; maxUploadResponseActionFileBytes: number; }> & { experimentalFeatures: ",
+          "Readonly<{ prebuiltRulesPackageVersion?: string | undefined; } & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; packagerTaskPackagePolicyUpdateBatchSize: number; maxUploadResponseActionFileBytes: number; }> & { experimentalFeatures: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
