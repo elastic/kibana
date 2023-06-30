@@ -42,7 +42,8 @@ import {
 } from '../../../common/constants';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { DimensionDataExtraEditor, DimensionEditor, PieToolbar } from './toolbar';
+import { PieToolbar } from './toolbar';
+import { DimensionDataExtraEditor, DimensionEditor } from './dimension_editor';
 import { LayerSettings } from './layer_settings';
 import { checkTableForContainsSmallValues } from './render_helpers';
 import { DatasourcePublicAPI } from '../..';
@@ -79,21 +80,29 @@ const numberMetricOperations = (op: OperationMetadata) =>
 export const isCollapsed = (columnId: string, layer: PieLayerState) =>
   Boolean(layer.collapseFns?.[columnId]);
 
+export const hasNonCollapsedSliceBy = (l: PieLayerState) => {
+  const sliceByLength = l.primaryGroups.length;
+  const collapsedGroupsLength =
+    (l.collapseFns && Object.values(l.collapseFns).filter(Boolean).length) ?? 0;
+  return sliceByLength - collapsedGroupsLength > 0;
+};
+
 export const getDefaultColorForMultiMetricDimension = ({
   layer,
   columnId,
   paletteService,
   datasource,
+  palette,
 }: {
   layer: PieLayerState;
   columnId: string;
   paletteService: PaletteRegistry;
   datasource: DatasourcePublicAPI | undefined;
+  palette?: PieVisualizationState['palette'];
 }) => {
   const columnToLabelMap = datasource ? getColumnToLabelMap(layer.metrics, datasource) : {};
   const sortedMetrics = getSortedAccessorsForGroup(datasource, layer, 'metrics');
-
-  return paletteService.get('default').getCategoricalColor([
+  return paletteService.get(palette?.name || 'default').getCategoricalColor([
     {
       name: columnToLabelMap[columnId],
       rankAtDepth: sortedMetrics.indexOf(columnId),
@@ -320,8 +329,6 @@ export const getPieVisualization = ({
     };
 
     const getMetricGroupConfig = (): VisualizationDimensionGroupConfig => {
-      const hasSliceBy = layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0);
-
       const accessors: AccessorConfig[] = getSortedAccessorsForGroup(
         datasource,
         layer,
@@ -329,7 +336,7 @@ export const getPieVisualization = ({
       ).map<AccessorConfig>((columnId) => ({
         columnId,
         ...(layer.allowMultipleMetrics
-          ? hasSliceBy
+          ? hasNonCollapsedSliceBy(layer)
             ? {
                 triggerIconType: 'disabled',
               }
@@ -342,6 +349,7 @@ export const getPieVisualization = ({
                     columnId,
                     paletteService,
                     datasource,
+                    palette: state.palette,
                   }) ??
                   undefined,
               }
@@ -671,10 +679,11 @@ export const getPieVisualization = ({
                 columnId,
                 paletteService,
                 datasource,
+                palette: state.palette,
               })
           )
         );
-      } else if (!layer.primaryGroups?.length) {
+      } else if (!hasNonCollapsedSliceBy(layer)) {
         // This is a logic integrated in the renderer, here simulated
         // In the particular case of no color assigned (as no sliceBy dimension defined)
         // the color is generated on the fly from the default palette
@@ -733,7 +742,7 @@ export const getPieVisualization = ({
         });
       });
 
-      if (layer.primaryGroups.some((id) => !isCollapsed(id, layer))) {
+      if (hasNonCollapsedSliceBy(layer)) {
         palette.push(
           ...paletteService
             .get(state.palette?.name || 'default')
