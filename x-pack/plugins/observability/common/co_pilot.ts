@@ -211,19 +211,17 @@ export const coPilotPrompts = {
 
           The request it occurred for is called ${transactionName}.
 
-          ${
-            logStacktrace
+          ${logStacktrace
               ? `The log stacktrace:
           ${logStacktrace}`
               : ''
-          }
+            }
 
-          ${
-            exceptionStacktrace
+          ${exceptionStacktrace
               ? `The exception stacktrace:
           ${exceptionStacktrace}`
               : ''
-          }
+            }
           `,
           role: 'user',
         },
@@ -390,38 +388,39 @@ export const coPilotPrompts = {
 
       const content = `Use a temperature of 0.3
 
-Only respond with the info requested on the sentences that start with the word Display, do not show original Display sentence.
+Only respond with the info requested on the sentences that start with the word Display, do not show original Display sentence.  
+  
+The current active alerts in the system are represented in the following table with csv format separated by semicolon. Order the table by:
+- If column "Case ids" is the value "undefined" those alerts go first
+- Then order by ascending Start time
 
-The current active alerts in the system are represented in the following table with csv format separated by semicolon. Each row contains the following columns:
+Display only the first row usign the following template, if any of the variables are empty, do not print that line:  
+"  
+🥇 The the alert with the highest priority right now has the following Reason: A  
+        🧯 Possible next steps: B
+        🔗 Alert id: C
+        ︖ The reason this issue is has the highest priority is: D
+        📂 Assigned to Case ids: E
+        👀 Case status: F
+        🚨 Case severity: G
+        🗓️ Last update of the Case: H
+        📝 Case general summary: I    
+"  
+A being the alert Reason column value  
+B being a way to start a remediation of the alert for an SRE  
+C being the Alert uuid value  
+D being the reasoning why this alert was chosen
+E being the Case ids values  
+F being the Case status column value  
+G being the Case severity column values  
+H being the Case updatedAt column values
+I being a summary you generate about the Case
 
 ${header}
 ${rows}
 
-Assign a ranking position to the each alert within the group of total alerts, base the ranking only on the following priority rules:
-- If an the alert has been active for more than 2 days, remove them from the ranking
-- Else, if an alert column "Case ids" is empty or "unnasigned", they have the higher positions in the ranking
-- Else, if an alert has values in the column "Case ids" they have the intermediate positions in the ranking
-- In case of tie between alerts in the position in ranking, alerts with be ordered from higher to lower alert Duration in the ranking
-- Do not consider other external factors outside from the above
-
-Display following template filled with the info of the single alert with the highest position in rank based on the above priority rules not using other factors:
-"
-🥇 The the alert with the highest priority right now has the following Reason: A
-        📂 Assigned to Case ids: B
-        🧯 Possible next steps: C
-        🔗 Alert id: D
-        ︖ The reason this issue is has the highest priority is: E
-"
-A being the alert Reason column value
-B being the Case ids values
-C being a way to start a remediation of the alert for an SRE
-D being the Alert uuid value
-E being the reasoning why this alert has the lowest numerical value in rank based on the mentioned priority rules
-
-
-At the end of the response, display the following template sustituting X and Y
+At the end of the response, display the following template substituting X and Y 
 "🔍 There are X total active alerts in the system, and Y of them are not yet assigned to a case and show be reviewed as soon as possible", X beign the total current active alerts and Y being how many do not have values in the column "Case ids". Do not display the template.
-
 `;
 
       console.log('content:', content);
