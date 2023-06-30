@@ -127,7 +127,7 @@ import {
 } from './services/security/uninstall_token_service';
 import { FleetActionsClient, type FleetActionsClientInterface } from './services/actions';
 import type { FilesClientFactory } from './services/files/types';
-import { PolicyWatcher } from './services/policy_watch';
+import { PolicyWatcher } from './services/agent_policy_watch';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;

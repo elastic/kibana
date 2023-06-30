@@ -26,15 +26,6 @@ export function generateNewAgentPolicyWithDefaults(
   };
 }
 
-export function agentPolicyWithSupportedFeatures(
-  agentPolicy: Partial<AgentPolicy>
-): Partial<AgentPolicy> {
-  return {
-    ...agentPolicy,
-    is_protected: true,
-  };
-}
-
 export function agentPolicyWithoutPaidFeatures(
   agentPolicy: Partial<AgentPolicy>
 ): Partial<AgentPolicy> {
