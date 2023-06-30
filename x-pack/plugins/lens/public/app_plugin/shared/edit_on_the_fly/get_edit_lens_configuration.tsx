@@ -54,7 +54,6 @@ export function getEditLensConfiguration(
     datasourceId,
     adaptersTables,
   }: EditLensConfigurationProps) => {
-    console.dir(attributes);
     const [lensServices, setLensServices] = useState<LensAppServices>();
     useEffect(() => {
       async function loadLensService() {
