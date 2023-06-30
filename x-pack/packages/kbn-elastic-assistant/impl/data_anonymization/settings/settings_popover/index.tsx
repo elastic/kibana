@@ -17,7 +17,9 @@ import { AnonymizationSettingsModal } from '../anonymization_settings_modal';
 
 import * as i18n from './translations';
 
-const SettingsPopoverComponent: React.FC = () => {
+export const SettingsPopover: ({ isDisabled }: { isDisabled: boolean }) => JSX.Element = ({
+  isDisabled,
+}) => {
   const [showAnonymizationSettingsModal, setShowAnonymizationSettingsModal] = useState(false);
   const closeAnonymizationSettingsModal = useCallback(
     () => setShowAnonymizationSettingsModal(false),
@@ -33,13 +35,14 @@ const SettingsPopoverComponent: React.FC = () => {
   const button = useMemo(
     () => (
       <EuiButtonIcon
+        isDisabled={isDisabled}
         aria-label={i18n.SETTINGS}
         data-test-subj="settings"
         iconType="gear"
         onClick={onButtonClick}
       />
     ),
-    [onButtonClick]
+    [isDisabled, onButtonClick]
   );
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
@@ -83,7 +86,3 @@ const SettingsPopoverComponent: React.FC = () => {
     </>
   );
 };
-
-SettingsPopoverComponent.displayName = 'SettingsPopoverComponent';
-
-export const SettingsPopover = React.memo(SettingsPopoverComponent);

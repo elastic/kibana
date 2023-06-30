@@ -30,7 +30,7 @@ import { css } from '@emotion/react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { UpgradeButtons } from '../upgrade/upgrade_buttons';
-import { getMessageFromRawResponse, getTitleAndIcon } from './helpers';
+import { getMessageFromRawResponse } from './helpers';
 
 import { ConversationSettingsPopover } from './conversation_settings_popover/conversation_settings_popover';
 import { useAssistantContext } from '../assistant_context';
@@ -51,7 +51,7 @@ import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { useConnectorSetup } from '../connectorland/connector_setup';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
-import { BASE_CONVERSATIONS } from './use_conversation/sample_conversations';
+import { BASE_CONVERSATIONS, enterpriseMessaging } from './use_conversation/sample_conversations';
 
 export interface Props {
   conversationId?: string;
@@ -124,27 +124,22 @@ const AssistantComponent: React.FC<Props> = ({
     actionTypeRegistry,
     http,
     refetchConnectors,
+    onSetupComplete: () => {
+      bottomRef.current?.scrollIntoView({ behavior: 'auto' });
+    },
+    conversation: !isAssistantEnabled
+      ? {
+          ...welcomeConversation,
+          messages: enterpriseMessaging,
+        }
+      : welcomeConversation,
     isConnectorConfigured: !!connectors?.length,
   });
-  const currentTitle: { title: string | JSX.Element; titleIcon: string } = useMemo(() => {
-    const defaultTitle = { title, titleIcon: 'logoSecurity' };
 
-    if (!isAssistantEnabled && BASE_CONVERSATIONS.enterprise.theme) {
-      return getTitleAndIcon({
-        title: BASE_CONVERSATIONS.enterprise.theme.title,
-        titleIcon: BASE_CONVERSATIONS.enterprise.theme.titleIcon,
-        defaultTitle,
-      });
-    }
-    if (isWelcomeSetup && welcomeConversation.theme) {
-      return getTitleAndIcon({
-        title: welcomeConversation.theme.title,
-        titleIcon: welcomeConversation.theme.titleIcon,
-        defaultTitle,
-      });
-    }
-    return defaultTitle;
-  }, [isAssistantEnabled, isWelcomeSetup, title, welcomeConversation.theme]);
+  const currentTitle: { title: string | JSX.Element; titleIcon: string } =
+    isWelcomeSetup && welcomeConversation.theme?.title && welcomeConversation.theme?.titleIcon
+      ? { title: welcomeConversation.theme?.title, titleIcon: welcomeConversation.theme?.titleIcon }
+      : { title, titleIcon: 'logoSecurity' };
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const lastCommentRef = useRef<HTMLDivElement | null>(null);
@@ -394,40 +389,22 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const dialog = useMemo(() => {
-    if (!isAssistantEnabled) {
+    if (isDisabled) {
       return (
-        <EuiCommentList
-          comments={getComments({
-            currentConversation: BASE_CONVERSATIONS.enterprise,
-            lastCommentRef,
-            showAnonymizedValues,
-          })}
-          css={css`
-            margin-right: 20px;
-          `}
-        />
-      );
-    }
-    if (isWelcomeSetup) {
-      return (
-        <EuiCommentList
-          comments={connectorDialog}
-          css={css`
-            margin-right: 20px;
-          `}
-        />
+        <>
+          <EuiCommentList
+            comments={connectorDialog}
+            css={css`
+              margin-right: 20px;
+            `}
+          />
+          <span data-test-subj={`boo!${connectorDialog.length}`} ref={bottomRef} />
+        </>
       );
     }
 
     return standardDialog;
-  }, [
-    connectorDialog,
-    getComments,
-    isAssistantEnabled,
-    isWelcomeSetup,
-    showAnonymizedValues,
-    standardDialog,
-  ]);
+  }, [connectorDialog, isDisabled, standardDialog]);
 
   return (
     <>
@@ -496,7 +473,7 @@ const AssistantComponent: React.FC<Props> = ({
                     </EuiFlexItem>
 
                     <EuiFlexItem grow={false}>
-                      <SettingsPopover />
+                      <SettingsPopover isDisabled={currentConversation.replacements == null} />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </>
