@@ -23,7 +23,7 @@ import { useTogglePanel } from './use_toggle_panel';
 
 const CONTENT_WIDTH = 1150;
 
-export const GetStartedComponent: React.FC<{ productTypes?: SecurityProductTypes }> = ({
+export const GetStartedComponent: React.FC<{ productTypes: SecurityProductTypes }> = ({
   productTypes,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -61,18 +61,7 @@ export const GetStartedComponent: React.FC<{ productTypes?: SecurityProductTypes
               padding-left: ${euiTheme.size.xs};
             `}
           >
-            <>
-              <span>{GET_STARTED_PAGE_TITLE}</span>
-              <span
-                role="img"
-                aria-label="emoji-wave"
-                css={css`
-                  padding: 0 ${euiTheme.size.xs};
-                `}
-              >
-                👋
-              </span>
-            </>
+            <span>{GET_STARTED_PAGE_TITLE}</span>
           </EuiTitle>
         }
         description={

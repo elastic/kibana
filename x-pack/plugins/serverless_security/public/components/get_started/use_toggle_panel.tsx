@@ -16,7 +16,7 @@ import {
 } from './reducer';
 import { CardId, GetStartedPageActions, ProductId, SectionId, StepId, Switch } from './types';
 
-export const useTogglePanel = ({ productTypes }: { productTypes?: SecurityProductTypes }) => {
+export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProductTypes }) => {
   const {
     getAllFinishedStepsFromStorage,
     getActiveProductsFromStorage,
@@ -35,7 +35,7 @@ export const useTogglePanel = ({ productTypes }: { productTypes?: SecurityProduc
     });
     return activeProductsFromStorage.size > 0
       ? activeProductsFromStorage
-      : new Set(productTypes?.map(({ product_line: productLine }) => ProductId[productLine])) ??
+      : new Set(productTypes.map(({ product_line: productLine }) => ProductId[productLine])) ??
           new Set([ProductId.security, ProductId.endpoint, ProductId.cloud]);
   }, [getActiveProductsFromStorage, productTypes]);
 
