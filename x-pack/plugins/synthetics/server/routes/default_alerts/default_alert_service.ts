@@ -92,7 +92,7 @@ export class DefaultAlertService {
       return alert;
     }
 
-    const actions = await this.getAlertActions();
+    const actions = await this.getAlertActions(ruleType);
 
     const rulesClient = (await this.context.alerting)?.getRulesClient();
     const newAlert = await rulesClient.create<{}>({
@@ -127,7 +127,7 @@ export class DefaultAlertService {
 
     const alert = await this.getExistingAlert(ruleType);
     if (alert) {
-      const actions = await this.getAlertActions();
+      const actions = await this.getAlertActions(ruleType);
       const updatedAlert = await rulesClient.update({
         id: alert.id,
         data: {
@@ -136,7 +136,6 @@ export class DefaultAlertService {
           tags: alert.tags,
           schedule: alert.schedule,
           params: alert.params,
-          notifyWhen: alert.notifyWhen,
         },
       });
       return { ...updatedAlert, ruleTypeId: updatedAlert.alertTypeId };
@@ -145,7 +144,7 @@ export class DefaultAlertService {
     return await this.createDefaultAlertIfNotExist(ruleType, name, interval);
   }
 
-  async getAlertActions() {
+  async getAlertActions(ruleType: DefaultRuleType) {
     const { actionConnectors, settings } = await this.getActionConnectors();
 
     const defaultActions = (actionConnectors ?? []).filter((act) =>
@@ -153,7 +152,10 @@ export class DefaultAlertService {
     );
 
     return populateAlertActions({
-      groupId: ACTION_GROUP_DEFINITIONS.MONITOR_STATUS.id,
+      groupId:
+        ruleType === SYNTHETICS_STATUS_RULE
+          ? ACTION_GROUP_DEFINITIONS.MONITOR_STATUS.id
+          : ACTION_GROUP_DEFINITIONS.TLS_CERTIFICATE.id,
       defaultActions,
       defaultEmail: settings?.defaultEmail!,
       translations: {
