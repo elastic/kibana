@@ -100,7 +100,8 @@ import {
   UserMessagesGetter,
   UserMessagesDisplayLocationId,
 } from '../types';
-
+import type { TypedLensByValueInput } from './embeddable_component';
+import type { LensPluginStartDependencies } from '../plugin';
 import type {
   AllowedPartitionOverrides,
   AllowedSettingsOverrides,
@@ -714,6 +715,56 @@ export class Embeddable
 
   public getFullAttributes() {
     return this.fullAttributes;
+  }
+
+  public isTextBasedLanguage() {
+    if (!this.savedVis) {
+      return;
+    }
+    const query = this.savedVis.state.query;
+    return !isOfQueryType(query);
+  }
+
+  async updateVisualization(datasourceState: unknown, visualizationState: unknown) {
+    const viz = this.savedVis;
+    if (viz?.state) {
+      const attrs = {
+        ...viz,
+        state: {
+          ...viz.state,
+          visualization: visualizationState,
+          datasourceStates: {
+            ...viz.state.datasourceStates,
+            textBased: datasourceState,
+          },
+        },
+      };
+      this.updateInput({ attributes: attrs });
+    }
+  }
+
+  async openConfingPanel(startDependencies: LensPluginStartDependencies) {
+    const { getEditLensConfiguration } = await import('../async_services');
+    const Component = getEditLensConfiguration(
+      this.deps.coreStart,
+      startDependencies,
+      this.deps.visualizationMap,
+      this.deps.datasourceMap
+    );
+    const attributes = this.savedVis as TypedLensByValueInput['attributes'];
+    const dataView = this.dataViews[0];
+    if (attributes) {
+      return (
+        <Component
+          attributes={attributes}
+          dataView={dataView}
+          updateAll={this.updateVisualization.bind(this)}
+          datasourceId={this.isTextBasedLanguage() ? 'textBased' : 'formBased'}
+          adaptersTables={this.lensInspector.adapters.tables?.tables}
+        />
+      );
+    }
+    return null;
   }
 
   async initializeSavedVis(input: LensEmbeddableInput) {
@@ -1344,7 +1395,7 @@ export class Embeddable
     this.updateOutput({
       defaultTitle: this.savedVis.title,
       defaultDescription: this.savedVis.description,
-      editable: this.getIsEditable(),
+      editable: this.getIsEditable() && !this.isTextBasedLanguage(),
       title,
       description,
       editPath: getEditPath(savedObjectId),

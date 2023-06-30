@@ -91,6 +91,27 @@ export function getEditLensConfiguration(
       setIsFlyoutVisible?.(false);
     };
 
+    const getWrapper = (children: JSX.Element) => {
+      if (setIsFlyoutVisible) {
+        return (
+          <EuiFlyout
+            type="push"
+            ownFocus
+            onClose={closeFlyout}
+            aria-labelledby={i18n.translate('xpack.lens.config.editLabel', {
+              defaultMessage: 'Edit configuration',
+            })}
+            size="s"
+            hideCloseButton
+          >
+            {children}
+          </EuiFlyout>
+        );
+      } else {
+        return children;
+      }
+    };
+
     const configPanelProps = {
       attributes,
       dataView,
@@ -104,20 +125,10 @@ export function getEditLensConfiguration(
       datasourceMap,
     };
 
-    return (
-      <EuiFlyout
-        type="push"
-        ownFocus
-        onClose={closeFlyout}
-        aria-labelledby={i18n.translate('xpack.lens.config.editLabel', {
-          defaultMessage: 'Edit configuration',
-        })}
-        size="s"
-      >
-        <Provider store={lensStore}>
-          <LensEditConfifurationFlyout {...configPanelProps} />
-        </Provider>
-      </EuiFlyout>
+    return getWrapper(
+      <Provider store={lensStore}>
+        <LensEditConfifurationFlyout {...configPanelProps} />
+      </Provider>
     );
   };
 }

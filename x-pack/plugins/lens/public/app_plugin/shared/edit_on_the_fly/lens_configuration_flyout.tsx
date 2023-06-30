@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiFlyout,
   EuiFlyoutBody,
   EuiSpacer,
   EuiFlexGroup,
@@ -126,25 +125,16 @@ export function LensEditConfifurationFlyout({
     onUpdateStateCb: updateAll,
   };
   return (
-    <EuiFlyout
-      type="push"
-      ownFocus
-      onClose={closeFlyout}
-      aria-labelledby={i18n.translate('xpack.lens.config.editLabel', {
-        defaultMessage: 'Edit configuration',
-      })}
-      size="s"
-      hideCloseButton
+    <EuiFlyoutBody
+      className="lnsEditFlyoutBody"
+      css={css`
+        .euiFlyoutBody__overflowContent {
+          padding: ${euiTheme.size.s};
+        }
+      `}
     >
-      <EuiFlyoutBody
-        className="lnsEditFlyoutBody"
-        css={css`
-          .euiFlyoutBody__overflowContent {
-            padding: ${euiTheme.size.s};
-          }
-        `}
-      >
-        <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s">
+        {setIsFlyoutVisible && (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               iconType="menuRight"
@@ -159,24 +149,24 @@ export function LensEditConfifurationFlyout({
               })}
             />
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCallOut
-              title={i18n.translate('xpack.lens.config.configFlyoutCallout', {
-                defaultMessage: 'SQL currently offers limited configuration options',
-              })}
-              iconType="iInCircle"
-            />
-            <EuiSpacer size="m" />
-            <VisualizationToolbar
-              activeVisualization={activeVisualization}
-              framePublicAPI={framePublicAPI}
-              onUpdateStateCb={updateAll}
-            />
-            <EuiSpacer size="m" />
-            <ConfigPanelWrapper {...layerPanelsProps} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutBody>
-    </EuiFlyout>
+        )}
+        <EuiFlexItem>
+          <EuiCallOut
+            title={i18n.translate('xpack.lens.config.configFlyoutCallout', {
+              defaultMessage: 'SQL currently offers limited configuration options',
+            })}
+            iconType="iInCircle"
+          />
+          <EuiSpacer size="m" />
+          <VisualizationToolbar
+            activeVisualization={activeVisualization}
+            framePublicAPI={framePublicAPI}
+            onUpdateStateCb={updateAll}
+          />
+          <EuiSpacer size="m" />
+          <ConfigPanelWrapper {...layerPanelsProps} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlyoutBody>
   );
 }
