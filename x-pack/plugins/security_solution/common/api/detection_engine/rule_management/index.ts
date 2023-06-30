@@ -8,6 +8,7 @@
 export * from './bulk_actions/bulk_actions_route';
 export * from './bulk_crud/bulk_create_rules/bulk_create_rules_route';
 export * from './bulk_crud/bulk_delete_rules/bulk_delete_rules_route';
+export * from './bulk_crud/bulk_patch_rules/bulk_patch_rules_route';
 export * from './bulk_crud/bulk_update_rules/bulk_update_rules_route';
 export * from './bulk_crud/response_schema';
 export * from './crud/create_rule/request_schema_validation';
