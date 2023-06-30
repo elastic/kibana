@@ -21,6 +21,8 @@
     "@kbn/ui-actions-plugin",
     "@kbn/field-types",
     "@kbn/data-views-plugin",
+    "@kbn/core-notifications-browser",
+    "@kbn/utility-types",
   ],
   "exclude": ["target/**/*"]
 }

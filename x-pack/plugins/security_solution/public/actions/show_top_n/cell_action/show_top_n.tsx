@@ -29,7 +29,7 @@ const SHOW_TOP = (fieldName: string) =>
   });
 
 const ICON = 'visBarVertical';
-const UNSUPPORTED_FIELD_TYPES = [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.TEXT];
+const UNSUPPORTED_ES_FIELD_TYPES = [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.TEXT];
 
 export const createShowTopNCellActionFactory = createCellActionFactory(
   ({
@@ -52,7 +52,7 @@ export const createShowTopNCellActionFactory = createCellActionFactory(
         data.length === 1 &&
         fieldHasCellActions(field.name) &&
         (field.esTypes ?? []).every(
-          (esType) => !UNSUPPORTED_FIELD_TYPES.includes(esType as ES_FIELD_TYPES)
+          (esType) => !UNSUPPORTED_ES_FIELD_TYPES.includes(esType as ES_FIELD_TYPES)
         ) &&
         !!field.aggregatable
       );
