@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlyout } from '@elastic/eui';
+import { EuiFlyoutBody } from '@elastic/eui';
 import { mountWithProvider } from '../../../mocks';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -43,7 +43,6 @@ afterEach(() => {
 });
 
 describe('LensEditConfifurationFlyout', () => {
-  // const frame = createMockFramePublicAPI();
   const mockStartDependencies =
     createMockStartDependencies() as unknown as LensPluginStartDependencies;
   const data = mockDataPlugin();
@@ -134,7 +133,7 @@ describe('LensEditConfifurationFlyout', () => {
       setIsFlyoutVisible: setIsFlyoutVisibleSpy,
     };
     const { instance } = await prepareAndMountComponent(newProps);
-    expect(instance.find(EuiFlyout).exists()).toBe(true);
+    expect(instance.find(EuiFlyoutBody).exists()).toBe(true);
     instance.find('[data-test-subj="collapseFlyoutButton"]').at(1).simulate('click');
     expect(setIsFlyoutVisibleSpy).toHaveBeenCalled();
   });
