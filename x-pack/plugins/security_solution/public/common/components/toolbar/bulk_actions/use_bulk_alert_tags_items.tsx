@@ -54,6 +54,7 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
     {
       id: 1,
       title: TitleContent,
+      'data-test-subj': 'alert-tags-context-menu-panel',
       renderContent: ({
         alertItems,
         refresh,

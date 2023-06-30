@@ -241,6 +241,13 @@ describe('take action dropdown', () => {
         ).toEqual('Respond');
       });
     });
+    test('should render "Apply alert tags"', async () => {
+      await waitFor(() => {
+        expect(
+          wrapper.find('[data-test-subj="alert-tags-context-menu-item"]').first().text()
+        ).toEqual('Apply alert tags');
+      });
+    });
   });
 
   describe('for Endpoint related actions', () => {
