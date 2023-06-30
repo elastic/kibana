@@ -398,7 +398,7 @@ const AssistantComponent: React.FC<Props> = ({
               margin-right: 20px;
             `}
           />
-          <span data-test-subj={`boo!${connectorDialog.length}`} ref={bottomRef} />
+          <span ref={bottomRef} />
         </>
       );
     }

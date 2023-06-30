@@ -141,20 +141,24 @@ const PinnedTab: React.FC<{
 PinnedTab.displayName = 'PinnedTab';
 
 const AssistantTab: React.FC<{
+  isAssistantEnabled: boolean;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
   timelineId: TimelineId;
   shouldRefocusPrompt: boolean;
-}> = memo(({ renderCellValue, rowRenderers, timelineId, shouldRefocusPrompt }) => (
-  <Suspense fallback={<EuiSkeletonText lines={10} />}>
-    <AssistantTabContainer>
-      <Assistant
-        conversationId={TIMELINE_CONVERSATION_TITLE}
-        shouldRefocusPrompt={shouldRefocusPrompt}
-      />
-    </AssistantTabContainer>
-  </Suspense>
-));
+}> = memo(
+  ({ isAssistantEnabled, renderCellValue, rowRenderers, timelineId, shouldRefocusPrompt }) => (
+    <Suspense fallback={<EuiSkeletonText lines={10} />}>
+      <AssistantTabContainer>
+        <Assistant
+          isAssistantEnabled={isAssistantEnabled}
+          conversationId={TIMELINE_CONVERSATION_TITLE}
+          shouldRefocusPrompt={shouldRefocusPrompt}
+        />
+      </AssistantTabContainer>
+    </Suspense>
+  )
+);
 
 AssistantTab.displayName = 'AssistantTab';
 
@@ -172,7 +176,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     timelineType,
     showTimeline,
   }) => {
-    const { isAssistantEnabled } = useAssistantAvailability();
+    const { isAssistantHidden, isAssistantEnabled } = useAssistantAvailability();
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -241,7 +245,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
         >
           {isGraphOrNotesTabs && getTab(activeTimelineTab)}
         </HideShowContainer>
-        {isAssistantEnabled && (
+        {isAssistantHidden && (
           <HideShowContainer
             $isVisible={activeTimelineTab === TimelineTabs.securityAssistant}
             isOverflowYScroll={activeTimelineTab === TimelineTabs.securityAssistant}
@@ -251,6 +255,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             `}
           >
             <AssistantTab
+              isAssistantEnabled={isAssistantEnabled}
               renderCellValue={renderCellValue}
               rowRenderers={rowRenderers}
               timelineId={timelineId}
@@ -297,7 +302,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   sessionViewConfig,
   timelineDescription,
 }) => {
-  const { isAssistantEnabled } = useAssistantAvailability();
+  const { isAssistantHidden } = useAssistantAvailability();
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
   const getShowTimeline = useMemo(() => getShowTimelineSelector(), []);
@@ -452,7 +457,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               </div>
             )}
           </StyledEuiTab>
-          {isAssistantEnabled && (
+          {isAssistantHidden && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.securityAssistant}`}
               onClick={setSecurityAssistantAsActiveTab}
