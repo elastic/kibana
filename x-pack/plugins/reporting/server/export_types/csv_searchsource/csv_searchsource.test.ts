@@ -25,6 +25,7 @@ import { createMockConfigSchema, createMockReportingCore } from '../../test_help
 import { CsvSearchsourceExportType } from './csv_searchsource';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 
 const mockLogger = loggingSystemMock.createLogger();
 const encryptionKey = 'tetkey';
@@ -70,6 +71,7 @@ beforeAll(async () => {
     uiSettings: mockCoreStart.uiSettings,
     discover: discoverPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
+    screenshotting: createMockScreenshottingStart(),
     reporting: mockReportingCore.getContract(),
   });
 });

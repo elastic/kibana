@@ -18,6 +18,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
+  IClusterClient,
 } from '@kbn/core/server';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
