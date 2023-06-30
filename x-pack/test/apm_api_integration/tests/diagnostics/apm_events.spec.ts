@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -95,6 +96,60 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           },
           { kuery: 'processor.event: "transaction"', docCount: 450 },
         ]);
+      });
+
+      describe.only('transactions', async () => {
+        let body: APIReturnType<'GET /internal/apm/diagnostics'>;
+
+        const expectedDocCount = 450;
+
+        beforeEach(async () => {
+          const res = await apmApiClient.adminUser({
+            endpoint: 'GET /internal/apm/diagnostics',
+            params: {
+              query: { start: new Date(start).toISOString(), end: new Date(end).toISOString() },
+            },
+          });
+
+          body = res.body;
+        });
+
+        it('raw transaction events', () => {
+          const rawTransactions = body.apmEvents.find(({ kuery }) =>
+            kuery.includes('processor.event: "transaction"')
+          );
+
+          expect(rawTransactions?.docCount).to.be(expectedDocCount);
+        });
+
+        it('transaction metrics', () => {
+          const transactionMetrics = body.apmEvents.find(({ kuery }) =>
+            kuery.includes('metricset.name: "transaction"')
+          );
+
+          expect(transactionMetrics?.docCount).to.be(21);
+          expect(transactionMetrics?.intervals).to.eql({
+            '1m': { metricDocCount: 15, eventDocCount: expectedDocCount },
+            '10m': { metricDocCount: 4, eventDocCount: expectedDocCount },
+            '60m': { metricDocCount: 2, eventDocCount: expectedDocCount },
+          });
+        });
+
+        it('service transactions', () => {
+          const serviceTransactionMetrics = body.apmEvents.find(({ kuery }) =>
+            kuery.includes('metricset.name: "service_transaction"')
+          );
+          expect(serviceTransactionMetrics?.docCount).to.be(21);
+          expect(serviceTransactionMetrics?.kuery).to.be(
+            'processor.event: "metric" AND metricset.name: "service_transaction" AND transaction.duration.summary :* '
+          );
+
+          expect(serviceTransactionMetrics?.intervals).to.eql({
+            '1m': { metricDocCount: 15, eventDocCount: expectedDocCount },
+            '10m': { metricDocCount: 4, eventDocCount: expectedDocCount },
+            '60m': { metricDocCount: 2, eventDocCount: expectedDocCount },
+          });
+        });
       });
 
       it('returns zero doc_counts when filtering by a non-existing service', async () => {
