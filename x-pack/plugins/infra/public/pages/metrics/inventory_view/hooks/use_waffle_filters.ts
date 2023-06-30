@@ -13,8 +13,8 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import createContainter from 'constate';
 import {
-  InventoryFiltersState,
-  InventoryFiltersStateRT,
+  type InventoryFiltersState,
+  inventoryFiltersStateRT,
 } from '../../../../../common/inventory_views';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useUrlState } from '../../../../utils/use_url_state';
@@ -94,8 +94,10 @@ export const useWaffleFilters = () => {
   };
 };
 
-const encodeUrlState = InventoryFiltersStateRT.encode;
+// temporary
+export type WaffleFiltersState = InventoryFiltersState;
+const encodeUrlState = inventoryFiltersStateRT.encode;
 const decodeUrlState = (value: unknown) =>
-  pipe(InventoryFiltersStateRT.decode(value), fold(constant(undefined), identity));
+  pipe(inventoryFiltersStateRT.decode(value), fold(constant(undefined), identity));
 export const WaffleFilters = createContainter(useWaffleFilters);
 export const [WaffleFiltersProvider, useWaffleFiltersContext] = WaffleFilters;

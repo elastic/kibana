@@ -10,28 +10,29 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import createContainer from 'constate';
+import { InventoryViewOptions } from '../../../../../common/inventory_views/types';
 import {
-  InventoryLegendOptions,
-  InventoryOptionsState,
+  type InventoryLegendOptions,
+  type InventoryOptionsState,
+  type InventorySortOption,
   inventoryOptionsStateRT,
-  InventorySortOption,
 } from '../../../../../common/inventory_views';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
-import {
+import type {
   SnapshotMetricInput,
   SnapshotGroupBy,
   SnapshotCustomMetricInput,
 } from '../../../../../common/http_api/snapshot_api';
 import { useUrlState } from '../../../../utils/use_url_state';
-import { InventoryItemType } from '../../../../../common/inventory_models/types';
+import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 
-export const DEFAULT_LEGEND: InventoryLegendOptions = {
+export const DEFAULT_LEGEND: WaffleLegendOptions = {
   palette: 'cool',
   steps: 10,
   reverseColors: false,
 };
 
-export const DEFAULT_WAFFLE_OPTIONS_STATE: InventoryOptionsState = {
+export const DEFAULT_WAFFLE_OPTIONS_STATE: WaffleOptionsState = {
   metric: { type: 'cpu' },
   groupBy: [],
   nodeType: 'host',
@@ -49,14 +50,14 @@ export const DEFAULT_WAFFLE_OPTIONS_STATE: InventoryOptionsState = {
 };
 
 export const useWaffleOptions = () => {
-  const [urlState, setUrlState] = useUrlState<InventoryOptionsState>({
+  const [urlState, setUrlState] = useUrlState<WaffleOptionsState>({
     defaultState: DEFAULT_WAFFLE_OPTIONS_STATE,
     decodeUrlState,
     encodeUrlState,
     urlStateKey: 'waffleOptions',
   });
 
-  const [state, setState] = useState<InventoryOptionsState>(urlState);
+  const [state, setState] = useState<WaffleOptionsState>(urlState);
 
   useEffect(() => setUrlState(state), [setUrlState, state]);
 
@@ -76,7 +77,7 @@ export const useWaffleOptions = () => {
   );
 
   const changeView = useCallback(
-    (view: string) => setState((previous) => ({ ...previous, view })),
+    (view: string) => setState((previous) => ({ ...previous, view: view as InventoryViewOptions })),
     [setState]
   );
 
@@ -115,14 +116,14 @@ export const useWaffleOptions = () => {
   );
 
   const changeLegend = useCallback(
-    (legend: InventoryLegendOptions) => {
+    (legend: WaffleLegendOptions) => {
       setState((previous) => ({ ...previous, legend }));
     },
     [setState]
   );
 
   const changeSort = useCallback(
-    (sort: InventorySortOption) => {
+    (sort: WaffleSortOption) => {
       setState((previous) => ({ ...previous, sort }));
     },
     [setState]
@@ -160,6 +161,10 @@ export const useWaffleOptions = () => {
     setWaffleOptionsState: setState,
   };
 };
+
+export type WaffleLegendOptions = InventoryLegendOptions;
+export type WaffleSortOption = InventorySortOption;
+export type WaffleOptionsState = InventoryOptionsState;
 
 const encodeUrlState = (state: InventoryOptionsState) => {
   return inventoryOptionsStateRT.encode(state);

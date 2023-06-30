@@ -131,8 +131,8 @@ export class InventoryViewsClient implements IInventoryViewsClient {
     return this.savedObjectsClient.delete(inventoryViewSavedObjectName, inventoryViewId);
   }
 
-  private mapSavedObjectToInventoryView(
-    savedObject: SavedObject | SavedObjectsUpdateResponse,
+  private mapSavedObjectToInventoryView<T>(
+    savedObject: SavedObject<T> | SavedObjectsUpdateResponse<T>,
     defaultViewId?: string
   ) {
     const inventoryViewSavedObject = decodeOrThrow(inventoryViewSavedObjectRT)(savedObject);

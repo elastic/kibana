@@ -24,18 +24,22 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
-import { SavedViewBasicState, SavedViewResult, SavedViewState } from '../../../common/saved_views';
+import {
+  SavedViewState,
+  SavedViewOperations,
+  SavedViewItemState,
+} from '../../../common/saved_views';
 
 export interface ManageViewsFlyoutProps<
-  TSavedViewState extends SavedViewBasicState<TViewState>,
+  TSavedViewState extends SavedViewItemState<TViewState>,
   TViewState
 > {
   views: SavedViewState<TSavedViewState>['views'];
   loading: boolean;
   onClose(): void;
-  onMakeDefaultView: SavedViewResult<TSavedViewState>['setDefaultViewById'];
-  onSwitchView: SavedViewResult<TSavedViewState>['switchViewById'];
-  onDeleteView: SavedViewResult<TSavedViewState>['deleteViewById'];
+  onMakeDefaultView: SavedViewOperations<TSavedViewState>['setDefaultViewById'];
+  onSwitchView: SavedViewOperations<TSavedViewState>['switchViewById'];
+  onDeleteView: SavedViewOperations<TSavedViewState>['deleteViewById'];
 }
 
 interface DeleteConfimationProps {
@@ -48,7 +52,7 @@ const searchConfig = {
 };
 
 export function ManageViewsFlyout<
-  TSavedViewState extends SavedViewBasicState<TViewState>,
+  TSavedViewState extends SavedViewItemState<TViewState>,
   TViewState
 >({
   onClose,
@@ -193,7 +197,7 @@ const DeleteConfimation = ({ isDisabled, onConfirm }: DeleteConfimationProps) =>
 /**
  * Helpers
  */
-const addOwnName = <TSavedViewState extends SavedViewBasicState<TViewState>, TViewState>(
+const addOwnName = <TSavedViewState extends SavedViewItemState<TViewState>, TViewState>(
   view: TSavedViewState
 ) => ({
   ...view,

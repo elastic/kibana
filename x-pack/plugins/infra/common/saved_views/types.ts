@@ -12,8 +12,6 @@ import {
 } from '@tanstack/react-query';
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import { MetricsExplorerViewAttributes } from '../metrics_explorer_views';
-import { InventoryViewAttributes } from '../inventory_views';
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
 
@@ -26,19 +24,27 @@ export interface SavedViewState<TView> {
   isUpdatingView: boolean;
 }
 
-export interface SavedViewResult<
-  TView,
-  TId extends string = any,
-  TRequestPayload = any,
-  TSourceConfig = any
-> extends SavedViewState<TView> {
-  createView: UseMutateAsyncFunction<TView, ServerError, TRequestPayload>;
+export interface SavedViewOperations<
+  TView extends { id: TView['id'] },
+  TId extends TView['id'] = TView['id'],
+  TPayload = any,
+  TConfig = any
+> {
+  createView: UseMutateAsyncFunction<TView, ServerError, TPayload>;
   deleteViewById: UseMutateFunction<null, ServerError, string, MutationContext<TView>>;
   fetchViews: QueryObserverBaseResult<TView[]>['refetch'];
-  updateViewById: UseMutateAsyncFunction<TView, ServerError, UpdateViewParams<TRequestPayload>>;
+  updateViewById: UseMutateAsyncFunction<TView, ServerError, UpdateViewParams<TPayload>>;
   switchViewById: (id: TId) => void;
-  setDefaultViewById: UseMutateFunction<TSourceConfig, ServerError, string, MutationContext<TView>>;
+  setDefaultViewById: UseMutateFunction<TConfig, ServerError, string, MutationContext<TView>>;
 }
+
+export interface SavedViewResult<
+  TView extends { id: TView['id'] },
+  TId extends string = '',
+  TPayload = any,
+  TConfig = any
+> extends SavedViewState<TView>,
+    SavedViewOperations<TView, TId, TPayload, TConfig> {}
 
 export interface UpdateViewParams<TRequestPayload> {
   id: string;
@@ -50,15 +56,13 @@ export interface MutationContext<TView> {
   previousViews?: TView[];
 }
 
-export interface SavedViewAttribute
-  extends MetricsExplorerViewAttributes,
-    InventoryViewAttributes {}
-export interface SavedViewBasicState<TSavedViewAttribute> {
+export interface BasicAttributes {
+  name?: string;
+  time?: number;
+  isDefault?: boolean;
+  isStatic?: boolean;
+}
+export interface SavedViewItemState<TView> {
   id: string;
-  attributes: TSavedViewAttribute & {
-    name: string;
-    time?: number;
-    isStatic: boolean;
-    isDefault: boolean;
-  };
+  attributes: TView & BasicAttributes;
 }

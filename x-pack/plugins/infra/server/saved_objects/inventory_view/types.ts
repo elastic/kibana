@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import { isoToEpochRt, nonEmptyStringRt } from '@kbn/io-ts-utils';
+import { isoToEpochRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-
-export const inventoryViewSavedObjectAttributesRT = rt.intersection([
-  rt.strict({
-    name: nonEmptyStringRt,
-  }),
-  rt.UnknownRecord,
-]);
+import { inventoryViewAttributesRT } from '../../../common/inventory_views';
 
 export const inventoryViewSavedObjectRT = rt.intersection([
   rt.type({
     id: rt.string,
-    attributes: inventoryViewSavedObjectAttributesRT,
+    attributes: inventoryViewAttributesRT,
   }),
   rt.partial({
     version: rt.string,

@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 import { inventoryViewAttributesRT } from '../../../inventory_views';
 
-export const updateInventoryViewAttributesRequestPayloadRT = rt.union([
+export const updateInventoryViewAttributesRequestPayloadRT = rt.intersection([
   inventoryViewAttributesRT,
   rt.partial({
     isDefault: rt.undefined,

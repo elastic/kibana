@@ -6,29 +6,8 @@
  */
 
 import * as rt from 'io-ts';
-import { inventoryViewAttributesRT } from '../../../inventory_views';
-
-export const findInventoryViewAttributesResponseRT = rt.intersection([
-  inventoryViewAttributesRT,
-  rt.type({
-    isDefault: rt.boolean,
-    isStatic: rt.boolean,
-  }),
-]);
-
-const findInventoryViewResponseRT = rt.exact(
-  rt.intersection([
-    rt.type({
-      id: rt.string,
-      attributes: findInventoryViewAttributesResponseRT,
-    }),
-    rt.partial({
-      updatedAt: rt.number,
-      version: rt.string,
-    }),
-  ])
-);
+import { inventoryViewRT } from '../../../inventory_views';
 
 export const findInventoryViewResponsePayloadRT = rt.type({
-  data: rt.array(findInventoryViewResponseRT),
+  data: rt.array(inventoryViewRT),
 });

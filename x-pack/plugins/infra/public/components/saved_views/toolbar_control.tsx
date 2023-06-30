@@ -10,24 +10,29 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NonEmptyString } from '@kbn/io-ts-utils';
-import { SavedViewBasicState, SavedViewState, SavedViewResult } from '../../../common/saved_views';
+import {
+  SavedViewState,
+  SavedViewOperations,
+  SavedViewItemState,
+  BasicAttributes,
+} from '../../../common/saved_views';
 import { ManageViewsFlyout } from './manage_views_flyout';
 import { useBoolean } from '../../hooks/use_boolean';
 import { UpsertViewModal } from './upsert_modal';
 
-interface Props<TSavedViewState extends SavedViewBasicState<TViewState>, TViewState>
+interface Props<TSavedViewState extends SavedViewItemState<TViewState>, TViewState>
   extends SavedViewState<TSavedViewState> {
-  viewState: TViewState & { time?: number };
-  onCreateView: SavedViewResult<TSavedViewState>['createView'];
-  onDeleteView: SavedViewResult<TSavedViewState>['deleteViewById'];
-  onUpdateView: SavedViewResult<TSavedViewState>['updateViewById'];
-  onLoadViews: SavedViewResult<TSavedViewState>['fetchViews'];
-  onSetDefaultView: SavedViewResult<TSavedViewState>['setDefaultViewById'];
-  onSwitchView: SavedViewResult<TSavedViewState>['switchViewById'];
+  viewState: TViewState & BasicAttributes;
+  onCreateView: SavedViewOperations<TSavedViewState>['createView'];
+  onDeleteView: SavedViewOperations<TSavedViewState>['deleteViewById'];
+  onUpdateView: SavedViewOperations<TSavedViewState>['updateViewById'];
+  onLoadViews: SavedViewOperations<TSavedViewState>['fetchViews'];
+  onSetDefaultView: SavedViewOperations<TSavedViewState>['setDefaultViewById'];
+  onSwitchView: SavedViewOperations<TSavedViewState>['switchViewById'];
 }
 
 export function SavedViewsToolbarControls<
-  TSavedViewState extends SavedViewBasicState<TViewState>,
+  TSavedViewState extends SavedViewItemState<TViewState>,
   TViewState
 >(props: Props<TSavedViewState, TViewState>) {
   const {
