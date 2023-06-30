@@ -88,6 +88,7 @@ export const SuggestionSelector = ({
         onChange={onSelectionChange}
         fullWidth={true}
         isClearable={false}
+        compressed
         onFocus={disableFieldPopover}
         onBlur={enableFieldPopover}
         renderOption={(option) => {
