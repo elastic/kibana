@@ -22,7 +22,7 @@ import { getPreloadedState } from '../../../state_management/lens_slice';
 
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import {
-  LensEditCongifurationFlyout,
+  LensEditConfifurationFlyout,
   type EditConfigPanelProps,
 } from './lens_configuration_flyout';
 import type { LensAppServices } from '../../types';
@@ -110,7 +110,7 @@ export function getEditLensConfiguration(
         size="s"
       >
         <Provider store={lensStore}>
-          <LensEditCongifurationFlyout {...configPanelProps} />
+          <LensEditConfifurationFlyout {...configPanelProps} />
         </Provider>
       </EuiFlyout>
     );

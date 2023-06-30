@@ -57,7 +57,7 @@ jest.mock('lodash', () => {
 const dataPluginMockValue = dataPluginMock.createStartContract();
 const unifiedSearchPluginMockValue = unifiedSearchPluginMock.createStartContract();
 const fieldFormatsPluginMockValue = fieldFormatsServiceMock.createStartContract();
-const uginMockValue = dataViewPluginMocks.createStartContract();
+const dataViewsPluginMockValue = dataViewPluginMocks.createStartContract();
 // need to overwrite the formatter field first
 dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ id, params }) => {
   return {
@@ -92,7 +92,7 @@ const defaultOptions = {
   data: dataPluginMockValue,
   fieldFormats: fieldFormatsPluginMockValue,
   unifiedSearch: unifiedSearchPluginMockValue,
-  dataViews: uginMockValue,
+  dataViews: dataViewsPluginMockValue,
   http: {} as HttpSetup,
   indexPattern: {
     id: '1',
