@@ -22,7 +22,7 @@ import { getPreloadedState } from '../../../state_management/lens_slice';
 
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import {
-  LensEditConfifurationFlyout,
+  LensEditConfigurationFlyout,
   type EditConfigPanelProps,
 } from './lens_configuration_flyout';
 import type { LensAppServices } from '../../types';
@@ -116,7 +116,7 @@ export function getEditLensConfiguration(
         hideCloseButton
       >
         <Provider store={lensStore}>
-          <LensEditConfifurationFlyout {...configPanelProps} />
+          <LensEditConfigurationFlyout {...configPanelProps} />
         </Provider>
       </EuiFlyout>
     );

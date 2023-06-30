@@ -46,7 +46,7 @@ export interface EditConfigPanelProps {
   adaptersTables?: Record<string, Datatable>;
 }
 
-export function LensEditConfifurationFlyout({
+export function LensEditConfigurationFlyout({
   attributes,
   dataView,
   coreStart,

@@ -22,7 +22,7 @@ import type { TypedLensByValueInput } from '../../../embeddable/embeddable_compo
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
 import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
 import {
-  LensEditConfifurationFlyout,
+  LensEditConfigurationFlyout,
   type EditConfigPanelProps,
 } from './lens_configuration_flyout';
 
@@ -42,7 +42,7 @@ afterEach(() => {
   container = undefined;
 });
 
-describe('LensEditConfifurationFlyout', () => {
+describe('LensEditConfigurationFlyout', () => {
   const mockStartDependencies =
     createMockStartDependencies() as unknown as LensPluginStartDependencies;
   const data = mockDataPlugin();
@@ -60,7 +60,7 @@ describe('LensEditConfifurationFlyout', () => {
     query?: Query | AggregateQuery
   ) {
     return mountWithProvider(
-      <LensEditConfifurationFlyout {...props} />,
+      <LensEditConfigurationFlyout {...props} />,
       {
         preloadedState: {
           datasourceStates: {
