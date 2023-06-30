@@ -15,6 +15,7 @@ import {
   EuiSelectableOption,
   EuiPortal,
   EuiOutsideClickDetector,
+  EuiHighlight,
 } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
@@ -64,6 +65,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   const [caretPosition, setCaretPosition] = useState({ top: 0, left: 0, height: 0, width: 0 });
   const [isListOpen, setListOpen] = useState(false);
   const [selectableHasFocus, setSelectableHasFocus] = useState(false);
+  const [searchWord, setSearchWord] = useState<string | null>(null);
   const optionsToShow: EuiSelectableOption[] = useMemo(() => {
     return matches?.map((variable) => ({
       label: variable,
@@ -139,6 +141,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
       .trim();
     if (currentWord.startsWith('{{')) {
       const filteredMatches = filterSuggestions(messageVariables, currentWord.slice(2));
+      setSearchWord(currentWord.slice(2));
       setMatches(filteredMatches);
       setListOpen((prevVal) => {
         if (!prevVal) {
@@ -221,6 +224,13 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
     setListOpen(false);
   }, []);
 
+  const renderSelectableOption = (option: any) => {
+    if (searchWord) {
+      return <EuiHighlight search={searchWord}>{option.label}</EuiHighlight>;
+    }
+    return option.label;
+  };
+
   return (
     <EuiFormRow
       fullWidth
@@ -268,6 +278,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
               options={optionsToShow}
               onChange={onOptionPick}
               singleSelection
+              renderOption={renderSelectableOption}
             >
               {(list) => list}
             </EuiSelectable>
