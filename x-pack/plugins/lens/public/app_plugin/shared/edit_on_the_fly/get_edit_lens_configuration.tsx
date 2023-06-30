@@ -79,7 +79,10 @@ export function getEditLensConfiguration(
       lensServices,
       datasourceMap,
       visualizationMap,
-      initialContext: datasourceState && 'initialContext' in datasourceState ? datasourceState.initialContext : undefined,
+      initialContext:
+        datasourceState && 'initialContext' in datasourceState
+          ? datasourceState.initialContext
+          : undefined,
     };
     const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
       lens: getPreloadedState(storeDeps) as LensAppState,
