@@ -23,7 +23,15 @@ export interface CellActionsProviderProps {
 
 type Metadata = Record<string, unknown>;
 
-export type CellActionFieldValue = string | string[] | null | undefined;
+export type CellActionFieldValue =
+  | string
+  | number
+  | boolean
+  | string[]
+  | number[]
+  | boolean[]
+  | null
+  | undefined;
 
 export interface CellActionsData {
   /**

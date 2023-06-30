@@ -328,6 +328,7 @@ packages/kbn-dev-utils @elastic/kibana-operations
 examples/developer_examples @elastic/appex-sharedux
 examples/discover_customization_examples @elastic/kibana-data-discovery
 x-pack/plugins/discover_enhanced @elastic/kibana-data-discovery
+x-pack/plugins/discover_log_explorer @elastic/infra-monitoring-ui
 src/plugins/discover @elastic/kibana-data-discovery
 packages/kbn-doc-links @elastic/docs
 packages/kbn-docs-utils @elastic/kibana-operations
@@ -470,7 +471,9 @@ packages/kbn-logging-mocks @elastic/kibana-core
 x-pack/plugins/logstash @elastic/logstash
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
+packages/kbn-management/cards_navigation @elastic/platform-deployment-management
 src/plugins/management @elastic/platform-deployment-management
+packages/kbn-management/storybook/config @elastic/platform-deployment-management
 test/plugin_functional/plugins/management_test_plugin @elastic/kibana-app-services
 packages/kbn-mapbox-gl @elastic/kibana-gis
 x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
@@ -726,6 +729,7 @@ examples/unified_field_list_examples @elastic/kibana-data-discovery
 src/plugins/unified_histogram @elastic/kibana-data-discovery
 src/plugins/unified_search @elastic/kibana-visualizations
 x-pack/plugins/upgrade_assistant @elastic/platform-deployment-management
+x-pack/plugins/uptime @elastic/uptime
 x-pack/plugins/drilldowns/url_drilldown @elastic/kibana-app-services
 src/plugins/url_forwarding @elastic/kibana-visualizations
 packages/kbn-url-state @elastic/security-threat-hunting-investigations
@@ -960,6 +964,9 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 #CC# /x-pack/plugins/global_search/ @elastic/kibana-core
 #CC# /src/plugins/newsfeed @elastic/kibana-core
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
+
+# AppEx Platform Services Security
+x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
 
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core

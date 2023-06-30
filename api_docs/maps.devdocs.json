@@ -3097,22 +3097,6 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.IVectorSource.getFieldNames",
-            "type": "Function",
-            "tags": [],
-            "label": "getFieldNames",
-            "description": [],
-            "signature": [
-              "() => string[]"
-            ],
-            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "maps",
             "id": "def-public.IVectorSource.createField",
             "type": "Function",
             "tags": [],
