@@ -27,13 +27,10 @@ import { EuiButtonIcon } from '@elastic/eui';
 import {
   SavedViewState,
   SavedViewOperations,
-  SavedViewItemState,
+  SingleSavedViewState,
 } from '../../../common/saved_views';
 
-export interface ManageViewsFlyoutProps<
-  TSavedViewState extends SavedViewItemState<TViewState>,
-  TViewState
-> {
+export interface ManageViewsFlyoutProps<TSavedViewState extends SingleSavedViewState, TViewState> {
   views: SavedViewState<TSavedViewState>['views'];
   loading: boolean;
   onClose(): void;
@@ -51,10 +48,7 @@ const searchConfig = {
   box: { incremental: true },
 };
 
-export function ManageViewsFlyout<
-  TSavedViewState extends SavedViewItemState<TViewState>,
-  TViewState
->({
+export function ManageViewsFlyout<TSavedViewState extends SingleSavedViewState, TViewState>({
   onClose,
   views = [],
   onSwitchView,
@@ -197,9 +191,7 @@ const DeleteConfimation = ({ isDisabled, onConfirm }: DeleteConfimationProps) =>
 /**
  * Helpers
  */
-const addOwnName = <TSavedViewState extends SavedViewItemState<TViewState>, TViewState>(
-  view: TSavedViewState
-) => ({
+const addOwnName = <TSavedViewState extends SingleSavedViewState>(view: TSavedViewState) => ({
   ...view,
   name: view.attributes.name,
 });

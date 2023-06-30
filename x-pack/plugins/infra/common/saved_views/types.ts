@@ -62,7 +62,7 @@ export interface BasicAttributes {
   isDefault?: boolean;
   isStatic?: boolean;
 }
-export interface SavedViewItemState<TView> {
+export interface SingleSavedViewState {
   id: string;
-  attributes: TView & BasicAttributes;
+  attributes: BasicAttributes;
 }

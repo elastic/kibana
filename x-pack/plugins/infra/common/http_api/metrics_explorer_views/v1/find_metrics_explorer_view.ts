@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { nonEmptyStringRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
+import {
+  metricsExplorerViewBasicAttributesRT,
+  singleMetricsExplorerViewRT,
+} from '../../../metrics_explorer_views';
 
 export const findMetricsExplorerViewAttributesResponseRT = rt.exact(
   rt.intersection([
-    rt.type({
-      name: nonEmptyStringRt,
-    }),
+    metricsExplorerViewBasicAttributesRT,
     rt.partial({
       isDefault: rt.boolean,
       isStatic: rt.boolean,
@@ -20,21 +21,8 @@ export const findMetricsExplorerViewAttributesResponseRT = rt.exact(
   ])
 );
 
-const findMetricsExplorerViewResponseRT = rt.exact(
-  rt.intersection([
-    rt.type({
-      id: rt.string,
-      attributes: findMetricsExplorerViewAttributesResponseRT,
-    }),
-    rt.partial({
-      updatedAt: rt.number,
-      version: rt.string,
-    }),
-  ])
-);
-
 export const findMetricsExplorerViewResponsePayloadRT = rt.type({
-  data: rt.array(findMetricsExplorerViewResponseRT),
+  data: rt.array(singleMetricsExplorerViewRT),
 });
 
 export type FindMetricsExplorerViewResponsePayload = rt.TypeOf<

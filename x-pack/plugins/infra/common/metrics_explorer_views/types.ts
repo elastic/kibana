@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { nonEmptyStringRt } from '@kbn/io-ts-utils';
+import { isoToEpochRt, nonEmptyStringRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 import { Color } from '../color_palette';
 import {
@@ -85,12 +85,21 @@ export const metricExplorerViewStateRT = rt.type({
   options: metricsExplorerOptionsRT,
 });
 
+export const metricsExplorerViewBasicAttributesRT = rt.type({
+  name: nonEmptyStringRt,
+});
+
+const metricsExplorerViewFlagsRT = rt.partial({ isDefault: rt.boolean, isStatic: rt.boolean });
+
 export const metricsExplorerViewAttributesRT = rt.intersection([
   metricExplorerViewStateRT,
-  rt.type({
-    name: nonEmptyStringRt,
-  }),
-  rt.partial({ isDefault: rt.boolean, isStatic: rt.boolean }),
+  metricsExplorerViewBasicAttributesRT,
+  metricsExplorerViewFlagsRT,
+]);
+
+const singleMetricsExplorerViewAttributesRT = rt.intersection([
+  metricsExplorerViewBasicAttributesRT,
+  metricsExplorerViewFlagsRT,
 ]);
 
 export const metricsExplorerViewRT = rt.exact(
@@ -100,7 +109,20 @@ export const metricsExplorerViewRT = rt.exact(
       attributes: metricsExplorerViewAttributesRT,
     }),
     rt.partial({
-      updatedAt: rt.number,
+      updatedAt: isoToEpochRt,
+      version: rt.string,
+    }),
+  ])
+);
+
+export const singleMetricsExplorerViewRT = rt.exact(
+  rt.intersection([
+    rt.type({
+      id: rt.string,
+      attributes: singleMetricsExplorerViewAttributesRT,
+    }),
+    rt.partial({
+      updatedAt: isoToEpochRt,
       version: rt.string,
     }),
   ])
@@ -113,3 +135,4 @@ export type MetricsExplorerViewState = rt.TypeOf<typeof metricExplorerViewStateR
 export type MetricsExplorerTimeOptions = rt.TypeOf<typeof metricsExplorerTimeOptionsRT>;
 export type MetricsExplorerViewAttributes = rt.TypeOf<typeof metricsExplorerViewAttributesRT>;
 export type MetricsExplorerView = rt.TypeOf<typeof metricsExplorerViewRT>;
+export type SingleMetricsExplorerView = rt.TypeOf<typeof singleMetricsExplorerViewRT>;

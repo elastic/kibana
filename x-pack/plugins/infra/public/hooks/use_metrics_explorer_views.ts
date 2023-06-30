@@ -20,14 +20,17 @@ import {
 } from '../../common/saved_views';
 import { MetricsSourceConfigurationResponse } from '../../common/metrics_sources';
 import { CreateMetricsExplorerViewAttributesRequestPayload } from '../../common/http_api/latest';
-import { MetricsExplorerView } from '../../common/metrics_explorer_views';
+import {
+  MetricsExplorerView,
+  SingleMetricsExplorerView,
+} from '../../common/metrics_explorer_views';
 import { useKibanaContextForPlugin } from './use_kibana';
 import { useUrlState } from '../utils/use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
 import { useSourceContext } from '../containers/metrics_source';
 
 export type UseMetricsExplorerViewsResult = SavedViewResult<
-  MetricsExplorerView,
+  SingleMetricsExplorerView,
   MetricsExplorerViewId,
   CreateMetricsExplorerViewAttributesRequestPayload,
   MetricsSourceConfigurationResponse
