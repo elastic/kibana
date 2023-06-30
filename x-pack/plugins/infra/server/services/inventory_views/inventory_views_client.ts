@@ -134,7 +134,7 @@ export class InventoryViewsClient implements IInventoryViewsClient {
   private mapSavedObjectToInventoryView<T>(
     savedObject: SavedObject<T> | SavedObjectsUpdateResponse<T>,
     defaultViewId?: string
-  ) {
+  ): InventoryView {
     const inventoryViewSavedObject = decodeOrThrow(inventoryViewSavedObjectRT)(savedObject);
 
     return {
@@ -143,6 +143,11 @@ export class InventoryViewsClient implements IInventoryViewsClient {
       updatedAt: inventoryViewSavedObject.updated_at,
       attributes: {
         ...inventoryViewSavedObject.attributes,
+        customMetrics: inventoryViewSavedObject.attributes
+          .customMetrics as InventoryView['attributes']['customMetrics'],
+        groupBy: inventoryViewSavedObject.attributes
+          .groupBy as InventoryView['attributes']['groupBy'],
+        metric: inventoryViewSavedObject.attributes.metric as InventoryView['attributes']['metric'],
         isDefault: inventoryViewSavedObject.id === defaultViewId,
         isStatic: false,
       },

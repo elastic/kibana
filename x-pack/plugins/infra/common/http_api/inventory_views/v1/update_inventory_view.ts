@@ -8,13 +8,15 @@
 import * as rt from 'io-ts';
 import { inventoryViewAttributesRT } from '../../../inventory_views';
 
-export const updateInventoryViewAttributesRequestPayloadRT = rt.intersection([
-  inventoryViewAttributesRT,
-  rt.partial({
-    isDefault: rt.undefined,
-    isStatic: rt.undefined,
-  }),
-]);
+export const updateInventoryViewAttributesRequestPayloadRT = rt.exact(
+  rt.intersection([
+    inventoryViewAttributesRT,
+    rt.partial({
+      isDefault: rt.undefined,
+      isStatic: rt.undefined,
+    }),
+  ])
+);
 
 export type UpdateInventoryViewAttributesRequestPayload = rt.TypeOf<
   typeof updateInventoryViewAttributesRequestPayloadRT

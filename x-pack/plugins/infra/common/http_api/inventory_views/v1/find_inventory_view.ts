@@ -5,9 +5,32 @@
  * 2.0.
  */
 
+import { nonEmptyStringRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { inventoryViewRT } from '../../../inventory_views';
+
+export const findInventoryViewAttributesResponseRT = rt.exact(
+  rt.intersection([
+    rt.type({ name: nonEmptyStringRt }),
+    rt.partial({
+      isDefault: rt.boolean,
+      isStatic: rt.boolean,
+    }),
+  ])
+);
+
+const findInventoryViewResponseRT = rt.exact(
+  rt.intersection([
+    rt.type({
+      id: rt.string,
+      attributes: findInventoryViewAttributesResponseRT,
+    }),
+    rt.partial({
+      updatedAt: rt.number,
+      version: rt.string,
+    }),
+  ])
+);
 
 export const findInventoryViewResponsePayloadRT = rt.type({
-  data: rt.array(inventoryViewRT),
+  data: rt.array(findInventoryViewResponseRT),
 });

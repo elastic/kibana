@@ -14,14 +14,14 @@ import {
 } from '../http_api/snapshot_api';
 import { ItemTypeRT } from '../inventory_models/types';
 
-export const inventoryColorPaletteRT = rt.union([
-  rt.literal('status'),
-  rt.literal('temperature'),
-  rt.literal('cool'),
-  rt.literal('warm'),
-  rt.literal('positive'),
-  rt.literal('negative'),
-]);
+export const inventoryColorPaletteRT = rt.keyof({
+  status: null,
+  temperature: null,
+  cool: null,
+  warm: null,
+  positive: null,
+  negative: null,
+});
 
 const inventoryLegendOptionsRT = rt.type({
   palette: inventoryColorPaletteRT,
