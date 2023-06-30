@@ -987,12 +987,8 @@ export class DataViewsService {
     }
     const dupe = await findByName(this.savedObjectsClient, dataView.getName());
 
-    if (dupe) {
-      if (override) {
-        await this.delete(dupe.id);
-      } else {
-        throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
-      }
+    if (dupe && !override) {
+      throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
     }
 
     const body = dataView.getAsSavedObjectBody();
@@ -1000,6 +996,7 @@ export class DataViewsService {
     const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(body, {
       id: dataView.id,
       initialNamespaces: dataView.namespaces.length > 0 ? dataView.namespaces : undefined,
+      overwrite: override,
     })) as SavedObject<DataViewAttributes>;
 
     const createdIndexPattern = await this.initFromSavedObject(response, displayErrors);
