@@ -34,8 +34,10 @@ export interface NewAgentPolicy {
   schema_version?: string;
   agent_features?: Array<{ name: string; enabled: boolean }>;
   is_protected?: boolean;
+  overrides?: { [key: string]: any } | null;
 }
 
+// SO definition for this type is declared in server/types/interfaces
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   status: ValueOf<AgentPolicyStatus>;
@@ -47,8 +49,6 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   agents?: number;
   is_protected: boolean;
 }
-
-export type AgentPolicySOAttributes = Omit<AgentPolicy, 'id'>;
 
 export interface FullAgentPolicyInputStream {
   id: string;

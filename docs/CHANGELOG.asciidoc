@@ -10,6 +10,8 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.8.2>>
+* <<release-notes-8.8.1>>
 * <<release-notes-8.8.0>>
 * <<release-notes-8.7.1>>
 * <<release-notes-8.7.0>>
@@ -42,12 +44,260 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.8.2]]
+== {kib} 8.8.2
+
+Review the following information about the {kib} 8.8.2 release.
+
+[float]
+[[fixes-v8.8.2]]
+=== Bug Fixes
+
+APM::
+* Circuit breaker and performance improvements for service map {kibana-pull}159883[#159883]
+* Fixes the latency graph displaying all service transactions, rather than the selected one, on the transaction detail page {kibana-pull}159085[#159085]
+
+Dashboard::
+* Fixes styling of top nav bar {kibana-pull}159754[#159754]
+* Fixes alias redirect and update error handling {kibana-pull}159742[#159742]
+* Fixes time range regression {kibana-pull}159337[#159337]
+
+Elastic Security::
+For the Elastic Security 8.8.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Enterprise Search::
+For the Elastic Enterprise Search 8.8.2 release information, refer to {enterprise-search-ref}/changelog.html[_Elastic Enterprise Search Documentation Release notes_].
+
+Fleet::
+* Fixes usage of AsyncLocalStorage for audit log {kibana-pull}159807[#159807]
+* Fixing issue of returning output API key {kibana-pull}159179[#159179]
+
+Logs::
+* Fixes log categorization UI failure due to an infinite loop {kibana-pull}159090[#159090]
+
+Machine Learning::
+* Hiding pattern analysis button for non-time series data {kibana-pull}160051[#160051]
+* Fixes blocking forced downgrades/installation if indices can't be deleted {kibana-pull}159814[#159814]
+
+Maps::
+* Fixes layer group loading indicator always on when group has non-visible layer {kibana-pull}159517[#159517]
+* Fixes geo line source not loading unless the Maps application is open {kibana-pull}159432[#159432]
+* Fixes Maps orphan sources on layer deletion {kibana-pull}159067[#159067]
+
+Monitoring::
+* Permanently hide the telemetry notice on dismissal {kibana-pull}159893[#159893]
+
+Observability::
+* Handle buildEsQuery error (such as leading wildcard) in status change {kibana-pull}159891[#159891]
+
+Platform::
+* Fixes global search crash on missing tag {kibana-pull}159196[#159196]
+* Fixes a regression where the "saved_object_resolve" audit action was not being logged per object {kibana-pull}160014[#160014]
+
+Uptime::
+* Ensures that users can configure custom `Content-Type` headers for HTTP monitors in the Synthetics app {kibana-pull}159737[#159737]
+* Fixes an issue where alerting on Synthetics monitors was sometimes delayed {kibana-pull}159511[#159511]
+
+[[release-notes-8.8.1]]
+== {kib} 8.8.1
+
+Review the following information about the {kib} 8.8.1 release.
+
+[float]
+[[known-issues-8.8.1]]
+=== Known issues
+
+// tag::known-issue-159807[]
+[discrete]
+.Memory leak in {fleet} audit logging.
+[%collapsible]
+====
+*Details* +
+{fleet} introduced audit logging for various CRUD (create, read, update, and delete) operations in version 8.8.0.
+
+While audit logging is not enabled by default, we have identified an off-heap memory leak in the implementation of {fleet} audit logging that can result in poor {kib} performance, and in some cases {kib} instances being terminated by the OS kernel's oom-killer. This memory leak can occur even when {kib} audit logging is not explicitly enabled (regardless of whether `xpack.security.audit.enabled` is set in the `kibana.yml` settings file).
+
+*Impact* +
+The version 8.8.2 release includes in {kibana-pull}159807[a fix] for this problem. If you are using {fleet} integrations
+and {kib} audit logging in version 8.8.0 or 8.8.1, you should upgrade to 8.8.2 or above to obtain the fix.
+====
+// end::known-issue-159807[]
+
+[float]
+[[breaking-changes-8.8.1]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 8.8.1, review the breaking changes, then mitigate the impact to your application.
+
+There are no breaking changes in the {kib} 8.8.1 release.
+
+To review the breaking changes in the previous release, check {kibana-ref-all}/8.8/release-notes-8.8.0.html#breaking-changes-8.8.0[8.8.0].
+
+[float]
+[[enhancement-v8.8.1]]
+=== Enhancements
+
+Elastic Security::
+For the Elastic Security 8.8.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+* Add Elastic Agent UI instructions for Universal Profile {kibana-pull}158936[#158936]
+
+[float]
+[[fixes-v8.8.1]]
+=== Bug Fixes
+
+Alerting::
+* Fixes a bug where ML embeddables, OsQuery, and IoCs attachments in a case render the wrong view {kibana-pull}158441[#158441]
+* Makes alert links shorter {kibana-pull}158582[#158582]
+* Throws a Mustache error when validating action message for warnings {kibana-pull}158668[#158668]
+* Adds null checks when iterating through an index template list {kibana-pull}158742[#158742]
+
+APM::
+* Displays the size of hidden indices in storage explorer {kibana-pull}158746[#158746]
+* Changes the APM latency value and latency threshold to microseconds {kibana-pull}158703[#158703]
+* Fixes service transaction metrics by using `transaction.duration.histogram` for percentile aggregations {kibana-pull}158909[#158909]
+
+Discover::
+* Update single doc view locator to URL encode `rowId` {kibana-pull}158635[#158635]
+* Fixes the display of grid row selection when in dark mode {kibana-pull}158231[#158231]
+
+Elastic Security::
+For the Elastic Security 8.8.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Fleet::
+* Include hidden data streams in package upgrade {kibana-pull}158654[#158654]
+
+Logs::
+* Fixes Log Categorization UI failure due to an infinite loop {kibana-pull}159090[#159090]
+
+Machine Learning::
+* Increases calendar events request limit {kibana-pull}158726[#158726]
+* Disables the delete option for deployed models {kibana-pull}158533[#158533]
+* Applies theme based on the User Profile settings {kibana-pull}158258[#158258]
+
+Maps::
+* Fixes toolbar action button not filled when selected {kibana-pull}158284[#158284]
+* Fixes Maps to display dark theme when enabled {kibana-pull}158219[#158219]
+
+Operations::
+* Fixes configuration stacking order {kibana-pull}158827[#158827]
+
+Platform::
+* Fixes {kib} crashing on Safari versions prior to 16.4 {kibana-pull}158825[#158825]
+* Updates all aliases with a single `updateAliases()` when relocating saved objects {kibana-pull}158940[#158940]
+* Fixes a race condition that could cause intermittent upgrade migration failures when {kib} connects to a single node {es} cluster {kibana-pull}158182[#158182]
+* Dynamically reduces the `migrations.batchSize` value when {kib} encounters a migration batch that's too big to process {kibana-pull}157494[#157494]
+
 [[release-notes-8.8.0]]
 == {kib} 8.8.0
 
-coming::[8.8.0]
-
 Review the following information about the {kib} 8.8.0 release.
+
+[float]
+[[known-issues-8.8.0]]
+=== Known issues
+
+// tag::known-issue-158940[]
+[discrete]
+.Failed upgrades to 8.8.0 can cause bootlooping and data loss
+[%collapsible]
+====
+*Details* +
+The 8.8.0 release splits the `.kibana` index into multiple saved object indices. If an upgrade to 8.8.0 partially succeeds, but not all the indices are created successfully, {kib} may be unable to successfully complete the upgrade on the next restart.
+
+This can result in a loss of saved objects during the upgrade. This can also leave {kib} in a bootlooping state where it's unable to start due to `write_blocked` indices.
+
+*Impact* +
+The 8.8.1 release includes in {kibana-pull}158940[a fix] for this problem. Customers affected by a failed 8.8.0 upgrade should contact Elastic support. For more information, see the {kibana-issue}158733[related issue].
+====
+// end::known-issue-158940[]
+
+// tag::known-issue-159807[]
+[discrete]
+.Memory leak in {fleet} audit logging.
+[%collapsible]
+====
+*Details* +
+{fleet} introduced audit logging for various CRUD (create, read, update, and delete) operations in version 8.8.0.
+While audit logging is not enabled by default, we have identified an off-heap memory leak in the implementation of {fleet} audit logging that can result in poor {kib} performance, and in some cases {kib} instances being terminated by the OS kernel's oom-killer. This memory leak can occur even when {kib} audit logging is not explicitly enabled (regardless of whether `xpack.security.audit.enabled` is set in the `kibana.yml` settings file).
+*Impact* +
+The version 8.8.2 release includes in {kibana-pull}159807[a fix] for this problem. If you are using {fleet} integrations
+and {kib} audit logging in version 8.8.0 or 8.8.1, you should upgrade to 8.8.2 or above to obtain the fix.
+====
+// end::known-issue-159807[]
+
+// tag::known-issue-155203[]
+[discrete]
+.Monitors in Synthetics may stop running
+[%collapsible]
+====
+*Details* +
+If Monitor Management was enabled prior to 8.6.0, the API key generated internally will not contain the required permissions. The Synthetics app will attempt to fix this automatically in {kibana-pull}155203[#155203] when a user with https://www.elastic.co/guide/en/observability/8.8/synthetics-role-setup.html[sufficient privileges] visits this page for the first time after upgrading to 8.8.0.
+
+*Impact* +
+All monitors configured to run on Elastic's global managed testing infrastructure will stop running until a user with permissions has loaded the Synthetics app.
+====
+// end::known-issue-155203[]
+
+// tag::known-issue-156798[]
+[discrete]
+.Network throttling disabled for browser monitors in Synthetics
+[%collapsible]
+====
+*Details* +
+Network throttling has been temporarily disabled for browser-based Synthetics monitors running on Elastic's global managed testing infrastructure and private locations. This will be enabled again at some point in the future. We're providing frequent updates on this issue in https://github.com/elastic/synthetics/blob/main/docs/throttling.md[this document].
+
+*Impact* +
+With network throttling being disabled, your monitors may run more quickly (i.e. have a lower duration) than you observed previously and than when network throttling is enabled again in the future. No monitor configurations have been changed, but the network throttling settings are ignored at the moment.
+====
+// end::known-issue-156798[]
+
+// tag::known-issue-120[]
+[discrete]
+.Alert failures when migrating to 8.8.0 from 8.6 or earlier
+[%collapsible]
+====
+*Details* +
+If a cluster meets all of the following conditions, its {elastic-sec} and {observability} rules will fail and no actions will be sent:
+
+- The {elastic-sec} and {observability} rules were created in version 8.6 or earlier releases.
+- There must be an {ref}/index-templates.html[index template] (for any index) that isn't composed of component templates.
+
+The following error messages in the {kib} log occur when {kib} starts or when the rules run:
+
+[source,sh]
+----
+Error installing component template .alerts-ecs-mappings - Cannot read properties of undefined (reading 'includes')
+
+Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted. - Failure during installation. Cannot read properties of undefined (reading 'includes')
+----
+
+*Impact* +
+If you have upgraded to 8.8.0 and your alerting rules fail, upgrade to 8.8.1.
+====
+// end::known-issue-120[]
+
+// tag::known-issue-158447[]
+[discrete]
+.Incorrect attachments are added to cases
+[%collapsible]
+====
+*Details* +
+When you attach {ml} visualizations, OsQuery, or Indicators of Compromise (IoCs) to a case, each attachment has its own view which renders in the *Activity* tab.
+For these attachments, a bug was introduced in 8.8.0:
+
+. If you add two different attachments on a case, the view will be the same for both.
+. If you add one attachment to one case and another to a different case, in the second case you will view the attachment of the first case.
+
+Alerts are not affected.
+
+*Impact* +
+There are no mitigations for the first scenario, other than upgrading to 8.8.1.
+For the second scenario, refreshing the case fixes the issue.
+====
+// end::known-issue-158447[]
 
 [float]
 [[breaking-changes-8.8.0]]
@@ -170,13 +420,9 @@ To monitor endpoints, pages, and user journeys, go to **{observability}** -> **S
 
 Alerting::
 * Adds Maintenance Window Task Runner Integration + New AAD/Event Log Fields {kibana-pull}154761[#154761]
-* Adds support for file attachments in Cases {kibana-pull}154436[#154436]
 * Adds support for users authenticated with API keys to manage alerting rules {kibana-pull}154189[#154189]
 * Adds the ability to control allowed attached file mime types and the maximum file size {kibana-pull}154013[#154013]
 * Adds query and timeframe params to RuleAction to filter alerts {kibana-pull}152360[#152360]
-* Adds the Cases column to the alerts table {kibana-pull}150963[#150963]
-* Adds filtering and sorting for the case activity {kibana-pull}149396[#149396]
-* Adds the ability to filter user activities with pagination {kibana-pull}152702[#152702]
 
 APM::
 * Adds group-by feature in APM rules {kibana-pull}155001[#155001]
@@ -184,6 +430,12 @@ APM::
 * Adds the ability to display the latest agent version in agent explorer {kibana-pull}153643[#153643]
 * Adds table tabs showing summary of metrics {kibana-pull}153044[#153044]
 * Adds warning to Edit Rule Flyout when publicUrl is not configured {kibana-pull}149832[#149832]
+
+Cases::
+* Adds support for file attachments in Cases {kibana-pull}154436[#154436]
+* Adds the Cases column to the alerts table {kibana-pull}150963[#150963]
+* Adds filtering and sorting for the case activity {kibana-pull}149396[#149396]
+* Adds the ability to filter user activities with pagination {kibana-pull}152702[#152702]
 
 Dashboard::
 Pins the unified search bar and dashboard toolbar to the top of the dashboard page when scrolling {kibana-pull}145628[#145628]
@@ -478,8 +730,6 @@ Uptime::
 [[release-notes-8.7.1]]
 == {kib} 8.7.1
 
-coming::[8.7.1]
-
 Review the following information about the {kib} 8.7.1 release.
 
 [float]
@@ -746,15 +996,7 @@ For detailed information about the 8.7.0 release, review the enhancements and bu
 === Enhancements
 Alerting::
 * Bring flapping status and settings in o11y {kibana-pull}150483[#150483]
-* Redesign all cases list select modal {kibana-pull}149851[#149851]
 * RenderCustomActionsRow with named params instead of args {kibana-pull}149304[#149304]
-* Adds new column `Updated on ` in `all cases list ` table. This column can be sorted and can persist sorting options {kibana-pull}149116[#149116]
-* Users can now click a button on Case Detail and All Cases List to copy a case's UUID to the clipboard {kibana-pull}148962[#148962]
-* Sorting, severity filter and status filter are now persisted in the URL and local storage for the all cases list {kibana-pull}148549[#148549]
-* Sorting by status, severity, and title is now allowed in the all-cases list {kibana-pull}148193[#148193]
-* See "My recently assigned cases" to the recent cases widget of Security Solution dashboard {kibana-pull}147763[#147763]
-* Adds the ability to bulk edit assignees on multiple cases {kibana-pull}146907[#146907]
-* Save draft user comment {kibana-pull}146327[#146327]
 * Ram 145739 use bulk enable disable in UI {kibana-pull}145928[#145928]
 * Create generic retry if function {kibana-pull}145713[#145713]
 * Return rules from bulk enable {kibana-pull}145391[#145391]
@@ -779,6 +1021,16 @@ APM::
 * Updates default refresh interval to 60 seconds {kibana-pull}146791[#146791]
 * Adds pagination to source map API {kibana-pull}145959[#145959]
 * Adds ability to offset point labels on maps {kibana-pull}145773[#145773]
+
+Cases::
+* Adds new column `Updated on ` in `all cases list ` table. This column can be sorted and can persist sorting options {kibana-pull}149116[#149116]
+* Improves the design of all cases list select modal {kibana-pull}149851[#149851]
+* Adds a button to Case Detail and All Cases List to copy case UUIDs to the clipboard {kibana-pull}148962[#148962]
+* Adds the ability to persist sorting, severity filter, and status filter in the URL and local storage for the all cases list {kibana-pull}148549[#148549]
+* Adds the ability to allow sorting by status, severity, and title in the all-cases list {kibana-pull}148193[#148193]
+* See "My recently assigned cases" to the recent cases widget of Overview dashboard in Security {kibana-pull}147763[#147763]
+* Adds the ability to bulk edit assignees on multiple cases {kibana-pull}146907[#146907]
+* Adds the ability to save draft comments {kibana-pull}146327[#146327]
 
 Dashboard::
 * Add new panel settings option to change the title, description, and time range for panels {kibana-pull}148301[#148301]
@@ -1060,6 +1312,7 @@ Review the following information about the {kib} 8.6.0 release.
 ====
 *Details* +
 When you attempt to create an APM latency threshold rule in **Observability** > **Alerts** > **Rules** for all services or all transaction types, the request will fail with a `params invalid` error.
+
 *Impact* +
 This known issue only impacts the Observability Rules page. To work around this issue, create APM latency threshold rules in the APM Alerts and Rules dialog. See {kibana-ref}/apm-alerts.html[Alerts and rules] for detailed instructions.
 ====
@@ -1085,6 +1338,18 @@ For each {kibana-ref}/xpack-spaces.html[space], complete the following to change
 . Open the main menu, then click *Stack Management > Advanced Settings*.
 . Scroll or search for *histogram:maxBars*.
 . Enter `100`, then click *Save changes*.
+====
+
+[discrete]
+[[breaking-158338]]
+.CSV reports use PIT instead of Scroll
+[%collapsible]
+====
+*Details* +
+CSV reports now use PIT instead of Scroll. Previously generated CSV reports that used an index alias with alias-only privileges, but without privileges on the alias referenced-indices will no longer generate. For more information, refer to {kibana-pull}158338[#158338].
+
+*Impact* +
+To generate CSV reports, grant `read` privileges to the underlying indices.
 ====
 
 To review the breaking changes in previous versions, refer to the following:

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useEffect, useState, useRef } from 'react';
-import { createEsParams, useEsSearch, useFetcher } from '@kbn/observability-plugin/public';
+import { createEsParams, useEsSearch, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useTickTick } from './use_tick_tick';
 import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';

@@ -15,14 +15,14 @@ import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
 import { ThreadButton } from '@kbn/cloud-collaboration-threads';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { DashboardRedirect } from '../types';
 import { UI_SETTINGS } from '../../../common';
 import { useDashboardAPI } from '../dashboard_app';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
 import { pluginServices } from '../../services/plugin_services';
 import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
-import { SaveDashboardReturn } from '../../services/dashboard_saved_object/types';
+import { DashboardRedirect } from '../../dashboard_container/types';
+import { SaveDashboardReturn } from '../../services/dashboard_content_management/types';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 
 export const useDashboardMenuItems = ({
@@ -171,7 +171,7 @@ export const useDashboardMenuItems = ({
       threads: {
         ...topNavStrings.threads,
         id: 'threads',
-        run: () => {},
+        run: () => { },
         render: () => {
           return lastSavedId ? (
             <CollaborationContextProvider>

@@ -38,7 +38,7 @@
       "checkpoint": 1,
       "timestamp_millis": 1564388281199
     },
-    "operations_behind": 0
+    "changes_last_detected_at": 1564388281199
   },
   "mode": "batch",
   "stats": {
@@ -61,7 +61,7 @@
         "checkpoint": 1,
         "timestamp_millis": 1564388281199
       },
-      "operations_behind": 0
+      "changes_last_detected_at": 1564388281199
     }
   }
 }

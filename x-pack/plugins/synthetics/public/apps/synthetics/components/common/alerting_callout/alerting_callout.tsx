@@ -43,7 +43,7 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
   const hasAlertingConfigured =
     isAlertingEnabled ??
     (monitorsLoaded &&
-      monitors.some((monitor) => monitor.attributes[ConfigKey.ALERT_CONFIG]?.status?.enabled));
+      monitors.some((monitor) => monitor[ConfigKey.ALERT_CONFIG]?.status?.enabled));
 
   const showCallout = url && !hasDefaultConnector && hasAlertingConfigured;
 

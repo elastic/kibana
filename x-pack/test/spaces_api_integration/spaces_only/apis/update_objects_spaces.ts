@@ -183,7 +183,10 @@ export default function ({ getService }: FtrProviderContext) {
     return createTestDefinitions(testCases, false);
   };
 
-  describe('_update_objects_spaces', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/156739, https://github.com/elastic/kibana/issues/157673
+  // Also, https://github.com/elastic/kibana/issues/158918
+  // esArchiver fails with no_shard_available_action_exception after deleting indexes
+  describe.skip('_update_objects_spaces', () => {
     getTestScenarios().spaces.forEach(({ spaceId }) => {
       const tests = createSinglePartTests(spaceId);
       addTests(`targeting the ${spaceId} space`, { spaceId, tests });

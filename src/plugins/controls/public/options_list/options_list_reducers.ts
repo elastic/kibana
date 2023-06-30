@@ -103,6 +103,12 @@ export const optionsListReducers = {
     state.componentState.invalidSelections = invalidSelections;
     state.componentState.validSelections = validSelections;
   },
+  setErrorMessage: (
+    state: WritableDraft<OptionsListReduxState>,
+    action: PayloadAction<string | undefined>
+  ) => {
+    state.componentState.error = action.payload;
+  },
   setLoading: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     state.output.loading = action.payload;
   },

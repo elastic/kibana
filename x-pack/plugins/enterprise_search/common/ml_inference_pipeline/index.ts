@@ -57,7 +57,7 @@ export const generateMlInferencePipelineBody = ({
   model,
   pipelineName,
 }: MlInferencePipelineParams): MlInferencePipeline => {
-  const inferenceType = Object.keys(model.inference_config)[0];
+  const inferenceType = Object.keys(model.inference_config || {})[0];
   const pipelineDefinition: MlInferencePipeline = {
     description: description ?? '',
     processors: [],
@@ -133,9 +133,10 @@ export const getInferenceProcessor = (
       {
         append: {
           field: '_source._ingest.inference_errors',
+          allow_duplicates: false,
           value: [
             {
-              message: `Processor 'inference' in pipeline '${pipelineName}' failed with message '{{ _ingest.on_failure_message }}'`,
+              message: `Processor 'inference' in pipeline '${pipelineName}' failed for field '${sourceField}' with message '{{ _ingest.on_failure_message }}'`,
               pipeline: pipelineName,
               timestamp: '{{{ _ingest.timestamp }}}',
             },

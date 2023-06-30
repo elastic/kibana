@@ -13,7 +13,6 @@ import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import { BATCH_SIZE } from './constants';
 
 export interface UpdateByQueryResponse {
   taskId: string;
@@ -35,7 +34,8 @@ export interface UpdateByQueryResponse {
 export const pickupUpdatedMappings =
   (
     client: ElasticsearchClient,
-    index: string
+    index: string,
+    batchSize: number
   ): TaskEither.TaskEither<RetryableEsClientError, UpdateByQueryResponse> =>
   () => {
     return client
@@ -46,7 +46,7 @@ export const pickupUpdatedMappings =
         allow_no_indices: false,
         index,
         // How many documents to update per batch
-        scroll_size: BATCH_SIZE,
+        scroll_size: batchSize,
         // force a refresh so that we can query the updated index immediately
         // after the operation completes
         refresh: true,

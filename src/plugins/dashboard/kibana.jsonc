@@ -18,6 +18,7 @@
       "savedObjects",
       "savedObjectsFinder",
       "savedObjectsManagement",
+      "contentManagement",
       "share",
       "screenshotMode",
       "uiActions",

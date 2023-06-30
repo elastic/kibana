@@ -10,13 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import {
   createKbnUrlStateStorage,
-  IKbnUrlStateStorage,
   StateContainer,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
 import {
   DataPublicPluginStart,
-  QueryState,
+  noSearchSessionStorageCapabilityMessage,
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
 import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
@@ -38,7 +37,6 @@ import {
   DiscoverAppState,
   DiscoverAppStateContainer,
   getDiscoverAppStateContainer,
-  GLOBAL_STATE_URL_KEY,
 } from './discover_app_state_container';
 import {
   DiscoverInternalStateContainer,
@@ -51,6 +49,7 @@ import {
   DiscoverSavedSearchContainer,
 } from './discover_saved_search_container';
 import { updateFiltersReferences } from '../utils/update_filter_references';
+import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 interface DiscoverStateContainerParams {
   /**
    * Browser history
@@ -100,10 +99,6 @@ export interface DiscoverStateContainer {
    */
   internalState: DiscoverInternalStateContainer;
   /**
-   * kbnUrlStateStorage - it keeps the state in sync with the URL
-   */
-  kbnUrlStateStorage: IKbnUrlStateStorage;
-  /**
    * State of saved search, the saved object of Discover
    */
   savedSearchState: DiscoverSavedSearchContainer;
@@ -139,7 +134,7 @@ export interface DiscoverStateContainer {
      * Used by the Data View Picker
      * @param pattern
      */
-    onCreateDefaultAdHocDataView: (pattern: string) => Promise<void>;
+    onCreateDefaultAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<void>;
     /**
      * Triggered when a new data view is created
      * @param dataView
@@ -170,11 +165,6 @@ export interface DiscoverStateContainer {
      */
     onChangeDataView: (id: string) => Promise<void>;
     /**
-     * Triggered when an ad-hoc data view is persisted to allow sharing links and CSV
-     * @param dataView
-     */
-    persistAdHocDataView: (dataView: DataView) => Promise<DataView>;
-    /**
      * Set the currently selected data view
      * @param dataView
      */
@@ -201,6 +191,7 @@ export function getDiscoverStateContainer({
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
+
   /**
    * state storage for state in the URL
    */
@@ -217,11 +208,18 @@ export function getDiscoverStateContainer({
     history,
     session: services.data.search.session,
   });
+
+  /**
+   * Global State Container, synced with the _g part URL
+   */
+  const globalStateContainer = getDiscoverGlobalStateContainer(stateStorage);
+
   /**
    * Saved Search State Container, the persisted saved object of Discover
    */
   const savedSearchContainer = getSavedSearchContainer({
     services,
+    globalStateContainer,
   });
 
   /**
@@ -232,36 +230,36 @@ export function getDiscoverStateContainer({
     savedSearch: savedSearchContainer.getState(),
     services,
   });
+
   /**
    * Internal State Container, state that's not persisted and not part of the URL
    */
   const internalStateContainer = getInternalStateContainer();
+
+  const pauseAutoRefreshInterval = async (dataView: DataView) => {
+    if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
+      const state = globalStateContainer.get();
+      if (state?.refreshInterval && !state.refreshInterval.pause) {
+        await globalStateContainer.set({
+          ...state,
+          refreshInterval: { ...state?.refreshInterval, pause: true },
+        });
+      }
+    }
+  };
+  const setDataView = (dataView: DataView) => {
+    internalStateContainer.transitions.setDataView(dataView);
+    pauseAutoRefreshInterval(dataView);
+    savedSearchContainer.getState().searchSource.setField('index', dataView);
+  };
 
   const dataStateContainer = getDataStateContainer({
     services,
     searchSessionManager,
     getAppState: appStateContainer.getState,
     getSavedSearch: savedSearchContainer.getState,
+    setDataView,
   });
-
-  const pauseAutoRefreshInterval = async (dataView: DataView) => {
-    if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
-      const state = stateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY);
-      if (state?.refreshInterval && !state.refreshInterval.pause) {
-        await stateStorage.set(
-          GLOBAL_STATE_URL_KEY,
-          { ...state, refreshInterval: { ...state?.refreshInterval, pause: true } },
-          { replace: true }
-        );
-      }
-    }
-  };
-
-  const setDataView = (dataView: DataView) => {
-    internalStateContainer.transitions.setDataView(dataView);
-    pauseAutoRefreshInterval(dataView);
-    savedSearchContainer.getState().searchSource.setField('index', dataView);
-  };
 
   const loadDataViewList = async () => {
     const dataViewList = await services.dataViews.getIdsWithTitle(true);
@@ -296,7 +294,9 @@ export function getDiscoverStateContainer({
       await undoSavedSearchChanges();
     } else {
       addLog('[discoverState] onOpenSavedSearch open view URL');
-      history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
+      services.locator.navigate({
+        savedSearchId: newSavedSearchId,
+      });
     }
   };
 
@@ -322,18 +322,6 @@ export function getDiscoverStateContainer({
     }
     loadDataViewList();
     fetchData();
-  };
-
-  const persistAdHocDataView = async (adHocDataView: DataView) => {
-    const persistedDataView = await services.dataViews.createAndSave({
-      ...adHocDataView.toSpec(),
-      id: uuidv4(),
-    });
-    services.dataViews.clearInstanceCache(adHocDataView.id);
-    updateFiltersReferences(adHocDataView, persistedDataView);
-    internalStateContainer.transitions.removeAdHocDataViewById(adHocDataView.id!);
-    await appStateContainer.update({ index: persistedDataView.id }, true);
-    return persistedDataView;
   };
 
   const loadSavedSearch = async (params?: LoadParams): Promise<SavedSearch> => {
@@ -370,17 +358,31 @@ export function getDiscoverStateContainer({
     const unsubscribeData = dataStateContainer.subscribe();
 
     // updates saved search when query or filters change, triggers data fetching
-    const filterUnsubscribe = merge(
-      services.data.query.queryString.getUpdates$(),
-      services.filterManager.getFetches$()
-    ).subscribe(async () => {
-      await savedSearchContainer.update({
+    const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(() => {
+      savedSearchContainer.update({
         nextDataView: internalStateContainer.getState().dataView,
         nextState: appStateContainer.getState(),
         useFilterAndQueryServices: true,
       });
       fetchData();
     });
+
+    services.data.search.session.enableStorage(
+      createSearchSessionRestorationDataProvider({
+        appStateContainer,
+        data: services.data,
+        getSavedSearch: () => savedSearchContainer.getState(),
+      }),
+      {
+        isDisabled: () =>
+          services.capabilities.discover.storeSearchSession
+            ? { disabled: false }
+            : {
+                disabled: true,
+                reasonText: noSearchSessionStorageCapabilityMessage,
+              },
+      }
+    );
 
     return () => {
       unsubscribeData();
@@ -390,10 +392,8 @@ export function getDiscoverStateContainer({
     };
   };
 
-  const onCreateDefaultAdHocDataView = async (pattern: string) => {
-    const newDataView = await services.dataViews.create({
-      title: pattern,
-    });
+  const onCreateDefaultAdHocDataView = async (dataViewSpec: DataViewSpec) => {
+    const newDataView = await services.dataViews.create(dataViewSpec);
     if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
       newDataView.timeFieldName = '@timestamp';
     }
@@ -431,7 +431,7 @@ export function getDiscoverStateContainer({
   const undoSavedSearchChanges = async () => {
     addLog('undoSavedSearchChanges');
     const nextSavedSearch = savedSearchContainer.getInitial$().getValue();
-    await savedSearchContainer.set(nextSavedSearch);
+    savedSearchContainer.set(nextSavedSearch);
     restoreStateFromSavedSearch({
       savedSearch: nextSavedSearch,
       timefilter: services.timefilter,
@@ -448,7 +448,6 @@ export function getDiscoverStateContainer({
   };
 
   return {
-    kbnUrlStateStorage: stateStorage,
     appState: appStateContainer,
     internalState: internalStateContainer,
     dataState: dataStateContainer,
@@ -465,7 +464,6 @@ export function getDiscoverStateContainer({
       onDataViewEdited,
       onOpenSavedSearch,
       onUpdateQuery,
-      persistAdHocDataView,
       setDataView,
       undoSavedSearchChanges,
       updateAdHocDataViewId,

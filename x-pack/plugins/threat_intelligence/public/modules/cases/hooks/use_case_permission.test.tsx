@@ -10,8 +10,8 @@ import { Renderer, renderHook, RenderHookResult } from '@testing-library/react-h
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { KibanaContext } from '../../../hooks/use_kibana';
 import { useCaseDisabled } from './use_case_permission';
-import { TestProvidersComponent } from '../../../common/mocks/test_providers';
-import { EMPTY_VALUE } from '../../../common/constants';
+import { TestProvidersComponent } from '../../../mocks/test_providers';
+import { EMPTY_VALUE } from '../../../constants/common';
 
 const casesServiceMock = casesPluginMock.createStartContract();
 

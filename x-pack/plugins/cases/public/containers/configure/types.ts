@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ClosureType, ConfigurationAttributes } from '../../../common/types/domain';
 import type { CaseUser } from '../types';
 import type {
   ActionConnector,
@@ -12,8 +13,6 @@ import type {
   ActionType,
   CaseConnector,
   CaseField,
-  CasesConfigure,
-  ClosureType,
   ThirdPartyField,
 } from '../../../common/api';
 
@@ -36,7 +35,7 @@ export interface CaseConnectorMapping {
 export interface CaseConfigure {
   id: string;
   closureType: ClosureType;
-  connector: CasesConfigure['connector'];
+  connector: ConfigurationAttributes['connector'];
   createdAt: string;
   createdBy: CaseUser;
   error: string | null;

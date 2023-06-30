@@ -13,7 +13,7 @@ export class CasesClientInternal {
   private readonly _configuration: InternalConfigureSubClient;
 
   constructor(args: CasesClientArgs) {
-    this._configuration = createInternalConfigurationSubClient(args, this);
+    this._configuration = createInternalConfigurationSubClient(args);
   }
 
   public get configuration() {

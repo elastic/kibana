@@ -87,7 +87,7 @@ export interface UserProfileAvatarData {
   /**
    * Base64 data URL for the user avatar image.
    */
-  imageUrl?: string;
+  imageUrl?: string | null;
 }
 
 /**

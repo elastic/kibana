@@ -263,7 +263,7 @@ This error happens when the `xpack.encryptedSavedObjects.encryptionKey` value us
 | The other {kib} instance might be trying to run the rule using a different encryption key than what the rule was created with. Ensure the encryption keys among all the {kib} instances are the same, and setting <<xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys, decryption only keys>> for previously used encryption keys.
 
 | If other scenarios don't apply.
-| Generate a new API key for the rule by disabling then enabling the rule.
+| Generate a new API key for the rule. For example, in *{stack-manage-app} > {rules-ui}*, select *Update API key* from the action menu.
 
 |===
 

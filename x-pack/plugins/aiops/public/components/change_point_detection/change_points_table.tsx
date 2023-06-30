@@ -94,7 +94,9 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
 
   const columns: Array<EuiBasicTableColumn<ChangePointAnnotation>> = [
     {
+      id: 'timestamp',
       field: 'timestamp',
+      'data-test-subj': 'aiopsChangePointTimestamp',
       name: i18n.translate('xpack.aiops.changePointDetection.timeColumn', {
         defaultMessage: 'Time',
       }),
@@ -104,6 +106,8 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       render: (timestamp: ChangePointAnnotation['timestamp']) => dateFormatter.convert(timestamp),
     },
     {
+      id: 'preview',
+      'data-test-subj': 'aiopsChangePointPreview',
       name: i18n.translate('xpack.aiops.changePointDetection.previewColumn', {
         defaultMessage: 'Preview',
       }),
@@ -118,6 +122,8 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       },
     },
     {
+      id: 'type',
+      'data-test-subj': 'aiopsChangePointType',
       field: 'type',
       name: i18n.translate('xpack.aiops.changePointDetection.typeColumn', {
         defaultMessage: 'Type',
@@ -127,6 +133,8 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       render: (type: ChangePointAnnotation['type']) => <EuiBadge color="hollow">{type}</EuiBadge>,
     },
     {
+      id: 'pValue',
+      'data-test-subj': 'aiopsChangePointPValue',
       field: 'p_value',
       name: (
         <EuiToolTip
@@ -153,6 +161,8 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
     ...(fieldConfig.splitField
       ? [
           {
+            id: 'groupName',
+            'data-test-subj': 'aiopsChangePointGroupName',
             field: 'group.name',
             name: i18n.translate('xpack.aiops.changePointDetection.fieldNameColumn', {
               defaultMessage: 'Field name',
@@ -160,6 +170,8 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             truncateText: false,
           },
           {
+            id: 'groupValue',
+            'data-test-subj': 'aiopsChangePointGroupValue',
             field: 'group.value',
             name: i18n.translate('xpack.aiops.changePointDetection.fieldValueColumn', {
               defaultMessage: 'Field value',
@@ -218,7 +230,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
                   );
                 },
                 isPrimary: true,
-                'data-test-subj': 'aiopsChangePointFilterForValue',
+                'data-test-subj': 'aiopsChangePointFilterOutValue',
               },
             ] as Array<DefaultItemAction<ChangePointAnnotation>>,
           },
@@ -247,11 +259,15 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
       itemId={'id'}
       selection={selectionValue}
       loading={isLoading}
+      data-test-subj={`aiopsChangePointResultsTable ${isLoading ? 'loading' : 'loaded'}`}
       items={annotations}
       columns={columns}
       pagination={{ pageSizeOptions: [5, 10, 15] }}
       sorting={defaultSorting}
       hasActions={hasActions}
+      rowProps={(item) => ({
+        'data-test-subj': `aiopsChangePointResultsTableRow row-${item.id}`,
+      })}
       message={
         isLoading ? (
           <EuiEmptyPrompt
@@ -303,7 +319,7 @@ export const MiniChartPreview: FC<ChartComponentProps> = ({ fieldConfig, annotat
   });
 
   return (
-    <div>
+    <div data-test-subj={'aiopChangePointPreviewChart'}>
       <EmbeddableComponent
         id={`mini_changePointChart_${annotation.group ? annotation.group.value : annotation.label}`}
         style={{ height: 80 }}

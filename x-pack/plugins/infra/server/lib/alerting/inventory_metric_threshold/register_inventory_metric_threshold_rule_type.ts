@@ -41,11 +41,7 @@ import {
   valueActionVariableDescription,
   viewInAppUrlActionVariableDescription,
 } from '../common/messages';
-import {
-  getAlertDetailsPageEnabledForApp,
-  oneOfLiterals,
-  validateIsStringElasticsearchJSONFilter,
-} from '../common/utils';
+import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
 import {
   createInventoryMetricThresholdExecutor,
   FIRED_ACTIONS,
@@ -53,6 +49,7 @@ import {
   WARNING_ACTIONS,
 } from './inventory_metric_threshold_executor';
 import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
+import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
@@ -86,8 +83,6 @@ export async function registerMetricInventoryThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
 ) {
-  const config = libs.getAlertDetailsConfig();
-
   alertingPlugin.registerType({
     id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
     name: i18n.translate('xpack.infra.metrics.inventory.alertName', {
@@ -118,15 +113,11 @@ export async function registerMetricInventoryThresholdRuleType(
       context: [
         { name: 'group', description: groupActionVariableDescription },
         { name: 'alertState', description: alertStateActionVariableDescription },
-        ...(getAlertDetailsPageEnabledForApp(config, 'metrics')
-          ? [
-              {
-                name: 'alertDetailsUrl',
-                description: alertDetailUrlActionVariableDescription,
-                usesPublicBaseUrl: true,
-              },
-            ]
-          : []),
+        {
+          name: 'alertDetailsUrl',
+          description: alertDetailUrlActionVariableDescription,
+          usesPublicBaseUrl: true,
+        },
         { name: 'reason', description: reasonActionVariableDescription },
         { name: 'timestamp', description: timestampActionVariableDescription },
         { name: 'value', description: valueActionVariableDescription },
@@ -156,5 +147,6 @@ export async function registerMetricInventoryThresholdRuleType(
     },
     getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
     alerts: MetricsRulesTypeAlertDefinition,
+    fieldsForAAD: O11Y_AAD_FIELDS,
   });
 }

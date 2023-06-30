@@ -18,6 +18,7 @@ import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public'
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { DISCOVER_APP_TARGET, LOGS_APP_TARGET } from '../common/constants';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
@@ -28,6 +29,13 @@ import { createLazyHostMetricsTable } from './components/infrastructure_node_met
 import { createLazyPodMetricsTable } from './components/infrastructure_node_metrics_tables/pod/create_lazy_pod_metrics_table';
 import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
+import {
+  DiscoverLogsLocatorDefinition,
+  DiscoverNodeLogsLocatorDefinition,
+  InfraLocators,
+  LogsLocatorDefinition,
+  NodeLogsLocatorDefinition,
+} from '../common/locators';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
 import { registerFeatures } from './register_feature';
 import { InventoryViewsService } from './services/inventory_views';
@@ -51,10 +59,14 @@ export class Plugin implements InfraClientPluginClass {
   private logViews: LogViewsService;
   private metricsExplorerViews: MetricsExplorerViewsService;
   private telemetry: TelemetryService;
+  private locators?: InfraLocators;
+  private appTarget: string;
+  private kibanaVersion: string;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<InfraPublicConfig>) {
     this.config = context.config.get();
+
     this.inventoryViews = new InventoryViewsService();
     this.logViews = new LogViewsService({
       messageFields:
@@ -62,6 +74,8 @@ export class Plugin implements InfraClientPluginClass {
     });
     this.metricsExplorerViews = new MetricsExplorerViewsService();
     this.telemetry = new TelemetryService();
+    this.appTarget = this.config.logs.app_target;
+    this.kibanaVersion = context.env.packageInfo.version;
   }
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
@@ -77,9 +91,6 @@ export class Plugin implements InfraClientPluginClass {
       createInventoryMetricRuleType()
     );
 
-    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createLogThresholdRuleType(core)
-    );
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
       createMetricThresholdRuleType()
     );
@@ -104,7 +115,7 @@ export class Plugin implements InfraClientPluginClass {
     const infraEntries = [
       { label: 'Inventory', app: 'metrics', path: '/inventory' },
       { label: 'Metrics Explorer', app: 'metrics', path: '/explorer' },
-      { label: 'Hosts', isTechnicalPreview: true, app: 'metrics', path: '/hosts' },
+      { label: 'Hosts', isBetaFeature: true, app: 'metrics', path: '/hosts' },
     ];
     pluginsSetup.observabilityShared.navigation.registerSections(
       startDep$AndHostViewFlag$.pipe(
@@ -148,7 +159,21 @@ export class Plugin implements InfraClientPluginClass {
       new LogStreamEmbeddableFactoryDefinition(core.getStartServices)
     );
 
-    if (this.config.logs.app_target === 'discover') {
+    // Register Locators
+    let logsLocator = pluginsSetup.share.url.locators.create(new LogsLocatorDefinition({ core }));
+    let nodeLogsLocator = pluginsSetup.share.url.locators.create(
+      new NodeLogsLocatorDefinition({ core })
+    );
+
+    if (this.appTarget === DISCOVER_APP_TARGET) {
+      // Register Locators
+      logsLocator = pluginsSetup.share.url.locators.create(
+        new DiscoverLogsLocatorDefinition({ core })
+      );
+      nodeLogsLocator = pluginsSetup.share.url.locators.create(
+        new DiscoverNodeLogsLocatorDefinition({ core })
+      );
+
       core.application.register({
         id: 'logs-to-discover',
         title: '',
@@ -156,16 +181,19 @@ export class Plugin implements InfraClientPluginClass {
         appRoute: '/app/logs',
         mount: async (params: AppMountParameters) => {
           // mount callback should not use setup dependencies, get start dependencies instead
-          const [coreStart, plugins, pluginStart] = await core.getStartServices();
-
+          const [coreStart, , pluginStart] = await core.getStartServices();
           const { renderApp } = await import('./apps/discover_app');
 
-          return renderApp(coreStart, plugins, pluginStart, params);
+          return renderApp(coreStart, pluginStart, params);
         },
       });
     }
 
-    if (this.config.logs.app_target === 'logs-ui') {
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
+      createLogThresholdRuleType(core, logsLocator)
+    );
+
+    if (this.appTarget === LOGS_APP_TARGET) {
       core.application.register({
         id: 'logs',
         title: i18n.translate('xpack.infra.logs.pluginTitle', {
@@ -260,10 +288,15 @@ export class Plugin implements InfraClientPluginClass {
       deepLinks: infraDeepLinks,
       mount: async (params: AppMountParameters) => {
         // mount callback should not use setup dependencies, get start dependencies instead
-        const [coreStart, pluginsStart, pluginStart] = await core.getStartServices();
+        const [coreStart, plugins, pluginStart] = await core.getStartServices();
         const { renderApp } = await import('./apps/metrics_app');
 
-        return renderApp(coreStart, pluginsStart, pluginStart, params);
+        return renderApp(
+          coreStart,
+          { ...plugins, kibanaVersion: this.kibanaVersion },
+          pluginStart,
+          params
+        );
       },
     });
 
@@ -291,6 +324,15 @@ export class Plugin implements InfraClientPluginClass {
 
     // Setup telemetry events
     this.telemetry.setup({ analytics: core.analytics });
+
+    this.locators = {
+      logsLocator,
+      nodeLogsLocator,
+    };
+
+    return {
+      locators: this.locators,
+    };
   }
 
   start(core: InfraClientCoreStart, plugins: InfraClientStartDeps) {
@@ -317,6 +359,7 @@ export class Plugin implements InfraClientPluginClass {
       logViews,
       metricsExplorerViews,
       telemetry,
+      locators: this.locators!,
       ContainerMetricsTable: createLazyContainerMetricsTable(getStartServices),
       HostMetricsTable: createLazyHostMetricsTable(getStartServices),
       PodMetricsTable: createLazyPodMetricsTable(getStartServices),

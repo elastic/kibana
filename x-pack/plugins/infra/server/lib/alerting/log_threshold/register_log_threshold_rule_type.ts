@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { PluginSetupContract } from '@kbn/alerting-plugin/server';
+import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import { extractReferences, injectReferences } from './log_threshold_references_manager';
 import {
@@ -15,7 +16,6 @@ import {
 } from '../../../../common/alerting/logs/log_threshold';
 import { InfraBackendLibs } from '../../infra_types';
 import { decodeOrThrow } from '../../../../common/runtime_types';
-import { getAlertDetailsPageEnabledForApp } from '../common/utils';
 import {
   alertDetailUrlActionVariableDescription,
   groupByKeysActionVariableDescription,
@@ -95,8 +95,7 @@ const alertReasonMessageActionVariableDescription = i18n.translate(
 const viewInAppUrlActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.viewInAppUrlActionVariableDescription',
   {
-    defaultMessage:
-      'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
+    defaultMessage: 'Link to the alert source',
   }
 );
 
@@ -109,8 +108,6 @@ export async function registerLogThresholdRuleType(
       'Cannot register log threshold alert type.  Both the actions and alerting plugins need to be enabled.'
     );
   }
-
-  const config = libs.getAlertDetailsConfig();
 
   alertingPlugin.registerType({
     id: LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
@@ -144,15 +141,11 @@ export async function registerLogThresholdRuleType(
           name: 'denominatorConditions',
           description: denominatorConditionsActionVariableDescription,
         },
-        ...(getAlertDetailsPageEnabledForApp(config, 'logs')
-          ? [
-              {
-                name: 'alertDetailsUrl',
-                description: alertDetailUrlActionVariableDescription,
-                usesPublicBaseUrl: true,
-              },
-            ]
-          : []),
+        {
+          name: 'alertDetailsUrl',
+          description: alertDetailUrlActionVariableDescription,
+          usesPublicBaseUrl: true,
+        },
         {
           name: 'viewInAppUrl',
           description: viewInAppUrlActionVariableDescription,
@@ -173,5 +166,6 @@ export async function registerLogThresholdRuleType(
       injectReferences,
     },
     alerts: LogsRulesTypeAlertDefinition,
+    fieldsForAAD: O11Y_AAD_FIELDS,
   });
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createEsParams, useEsSearch } from '@kbn/observability-plugin/public';
+import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { Ping } from '../../../../../../common/runtime_types';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 

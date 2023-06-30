@@ -166,6 +166,7 @@ export function getTopNavConfig({
           <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
             initialSelection={selectedTags}
             onTagsSelected={onTagsSelected}
+            markOptional
           />
         ) : undefined;
 

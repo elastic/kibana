@@ -12,53 +12,55 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
 
+import { logEntriesV1 } from '../../../common/http_api';
 import { throwErrors } from '../../../common/runtime_types';
 
 import { InfraBackendLibs } from '../../lib/infra_types';
-import {
-  LOG_ENTRIES_SUMMARY_PATH,
-  logEntriesSummaryRequestRT,
-  logEntriesSummaryResponseRT,
-} from '../../../common/http_api/log_entries';
+
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { UsageCollector } from '../../usage/usage_collector';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initLogEntriesSummaryRoute = ({ framework, logEntries }: InfraBackendLibs) => {
-  framework.registerRoute(
-    {
+  framework
+    .registerVersionedRoute({
+      access: 'internal',
       method: 'post',
-      path: LOG_ENTRIES_SUMMARY_PATH,
-      validate: { body: escapeHatch },
-    },
-    async (requestContext, request, response) => {
-      const payload = pipe(
-        logEntriesSummaryRequestRT.decode(request.body),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
-      const { logView, startTimestamp, endTimestamp, bucketSize, query } = payload;
+      path: logEntriesV1.LOG_ENTRIES_SUMMARY_PATH,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: { request: { body: escapeHatch } },
+      },
+      async (requestContext, request, response) => {
+        const payload = pipe(
+          logEntriesV1.logEntriesSummaryRequestRT.decode(request.body),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
+        const { logView, startTimestamp, endTimestamp, bucketSize, query } = payload;
 
-      const buckets = await logEntries.getLogSummaryBucketsBetween(
-        requestContext,
-        logView,
-        startTimestamp,
-        endTimestamp,
-        bucketSize,
-        parseFilterQuery(query)
-      );
+        const buckets = await logEntries.getLogSummaryBucketsBetween(
+          requestContext,
+          logView,
+          startTimestamp,
+          endTimestamp,
+          bucketSize,
+          parseFilterQuery(query)
+        );
 
-      UsageCollector.countLogs();
+        UsageCollector.countLogs();
 
-      return response.ok({
-        body: logEntriesSummaryResponseRT.encode({
-          data: {
-            start: startTimestamp,
-            end: endTimestamp,
-            buckets,
-          },
-        }),
-      });
-    }
-  );
+        return response.ok({
+          body: logEntriesV1.logEntriesSummaryResponseRT.encode({
+            data: {
+              start: startTimestamp,
+              end: endTimestamp,
+              buckets,
+            },
+          }),
+        });
+      }
+    );
 };

@@ -39,6 +39,9 @@ export const JSON_EDITOR = "[data-test-subj='actionJsonEditor']";
 
 export const INDEX_SELECTOR = "[data-test-subj='.index-siem-ActionTypeSelectOption']";
 
+export const INDEX_CONNECTOR_COMBO_BOX_INPUT =
+  '[data-test-subj="connectorIndexesComboBox"] [data-test-subj="comboBoxInput"]';
+
 export const actionFormSelector = (position: number) =>
   `[data-test-subj="alertActionAccordion-${position}"]`;
 

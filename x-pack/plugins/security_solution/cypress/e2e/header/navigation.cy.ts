@@ -28,7 +28,7 @@ import {
   CSP_FINDINGS,
   POLICIES,
   EXPLORE,
-  MANAGE,
+  SETTINGS,
   ENTITY_ANALYTICS,
 } from '../../screens/security_header';
 
@@ -78,11 +78,8 @@ import {
 } from '../../screens/kibana_navigation';
 
 describe('top-level navigation common to all pages in the Security app', () => {
-  before(() => {
-    login();
-  });
-
   beforeEach(() => {
+    login();
     visit(TIMELINES_URL);
   });
 
@@ -172,7 +169,7 @@ describe('top-level navigation common to all pages in the Security app', () => {
   });
 
   it('navigates to the Manage landing page', () => {
-    navigateFromHeaderTo(MANAGE);
+    navigateFromHeaderTo(SETTINGS);
     cy.url().should('include', MANAGE_URL);
   });
 
@@ -204,6 +201,7 @@ describe('top-level navigation common to all pages in the Security app', () => {
 
 describe('Kibana navigation to all pages in the Security app ', () => {
   beforeEach(() => {
+    login();
     visit(KIBANA_HOME);
     openKibanaNavigation();
   });

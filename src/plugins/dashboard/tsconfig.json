@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "*.ts",
@@ -38,7 +38,8 @@
     "@kbn/data-view-editor-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/shared-ux-page-analytics-no-data",
-    "@kbn/content-management-table-list",
+    "@kbn/content-management-plugin",
+    "@kbn/content-management-utils",
     "@kbn/i18n-react",
     "@kbn/expressions-plugin",
     "@kbn/field-formats-plugin",
@@ -54,7 +55,6 @@
     "@kbn/core-overlays-browser-mocks",
     "@kbn/core-theme-browser-mocks",
     "@kbn/core-ui-settings-browser-mocks",
-    "@kbn/core-saved-objects-common",
     "@kbn/task-manager-plugin",
     "@kbn/core-execution-context-common",
     "@kbn/core-custom-branding-browser",
@@ -63,12 +63,16 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/core-saved-objects-server",
-    "@kbn/cloud-plugin",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/object-versioning",
     "@kbn/cloud-collaboration-plugin",
     "@kbn/cloud-collaboration-threads",
-    "@kbn/core-chrome-browser",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/content-management-table-list-view",
+    "@kbn/content-management-table-list-view-table",
+    "@kbn/shared-ux-prompt-not-found"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

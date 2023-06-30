@@ -37,6 +37,7 @@ import {
   getAlertInfoFromComments,
   getIDsAndIndicesAsArrays,
 } from '../utils';
+import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
 type CommentRequestWithId = Array<{ id: string } & CommentRequest>;
@@ -448,7 +449,7 @@ export class CaseCommentModel {
         ...this.formatForEncoding(comments.total),
       };
 
-      return CaseRt.encode(caseResponse);
+      return decodeOrThrow(CaseRt)(caseResponse);
     } catch (error) {
       throw createCaseError({
         message: `Failed encoding the commentable case, case id: ${this.caseInfo.id}: ${error}`,

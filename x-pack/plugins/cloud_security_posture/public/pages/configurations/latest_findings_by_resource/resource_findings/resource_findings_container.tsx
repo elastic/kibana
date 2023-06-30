@@ -5,16 +5,12 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import {
-  EuiSpacer,
-  EuiButtonEmpty,
-  EuiPageHeader,
-  type EuiDescriptionListProps,
-} from '@elastic/eui';
+import { EuiSpacer, EuiButtonEmpty, type EuiDescriptionListProps } from '@elastic/eui';
 import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { CspInlineDescriptionList } from '../../../../components/csp_inline_description_list';
 import type { Evaluation } from '../../../../../common/types';
 import { CspFinding } from '../../../../../common/schemas/csp_finding';
@@ -49,7 +45,14 @@ const getDefaultQuery = ({
 
 const BackToResourcesButton = () => (
   <Link to={generatePath(findingsNavigation.findings_by_resource.path)}>
-    <EuiButtonEmpty iconType={'arrowLeft'}>
+    <EuiButtonEmpty
+      iconType="arrowLeft"
+      css={css`
+        & .euiButtonEmpty__content {
+          padding: 0;
+        }
+      `}
+    >
       <FormattedMessage
         id="xpack.csp.findings.resourceFindings.backToResourcesPageButtonLabel"
         defaultMessage="Back to resources"
@@ -195,8 +198,9 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         }}
         loading={resourceFindings.isFetching}
       />
+      <BackToResourcesButton />
+      <EuiSpacer size="xs" />
       <PageTitle>
-        <BackToResourcesButton />
         <PageTitleText
           title={
             <CloudPosturePageTitle
@@ -214,21 +218,19 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
           }
         />
       </PageTitle>
-      <EuiPageHeader
-        description={
-          resourceFindings.data && (
-            <CspInlineDescriptionList
-              listItems={getResourceFindingSharedValues({
-                resourceId: decodedResourceId,
-                resourceName: resourceFindings.data?.resourceName || '',
-                resourceSubType: resourceFindings.data?.resourceSubType || '',
-                clusterId: resourceFindings.data?.clusterId || '',
-                cloudAccountName: resourceFindings.data?.cloudAccountName || '',
-              })}
-            />
-          )
-        }
-      />
+      <EuiSpacer />
+      {resourceFindings.data && (
+        <CspInlineDescriptionList
+          listItems={getResourceFindingSharedValues({
+            resourceId: decodedResourceId,
+            resourceName: resourceFindings.data?.resourceName || '',
+            resourceSubType: resourceFindings.data?.resourceSubType || '',
+            clusterId: resourceFindings.data?.clusterId || '',
+            cloudAccountName: resourceFindings.data?.cloudAccountName || '',
+          })}
+        />
+      )}
+
       <EuiSpacer />
       {error && <ErrorCallout error={error} />}
       {!error && (

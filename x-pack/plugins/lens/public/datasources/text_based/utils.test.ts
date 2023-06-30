@@ -191,8 +191,9 @@ describe('Text based languages utils', () => {
           ),
           create: jest.fn().mockReturnValue(
             Promise.resolve({
-              id: '1',
-              title: 'my-fake-index-pattern',
+              id: '4',
+              title: 'my-adhoc-index-pattern',
+              name: 'my-adhoc-index-pattern',
               timeFieldName: 'timeField',
               isPersisted: () => false,
             })
@@ -252,6 +253,11 @@ describe('Text based languages utils', () => {
             timeField: 'timeField',
             title: 'my-fake-restricted-pattern',
           },
+          {
+            id: '4',
+            timeField: 'timeField',
+            title: 'my-adhoc-index-pattern',
+          },
         ],
         layers: {
           first: {
@@ -280,7 +286,7 @@ describe('Text based languages utils', () => {
             ],
             columns: [],
             errors: [],
-            index: '1',
+            index: '4',
             query: {
               sql: 'SELECT * FROM my-fake-index-pattern',
             },

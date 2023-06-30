@@ -40,9 +40,13 @@ export const addsHostGeoContinentNameToTimeline = () => {
 };
 
 export const clearFieldsBrowser = () => {
-  cy.get(FIELDS_BROWSER_FILTER_INPUT)
-    .type('{selectall}{backspace}')
-    .waitUntil((subject) => !subject.hasClass('euiFieldSearch-isLoading'));
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).type('{selectall}{backspace}');
+
+  cy.waitUntil(() =>
+    cy
+      .get(FIELDS_BROWSER_FILTER_INPUT)
+      .then((subject) => !subject.hasClass('euiFieldSearch-isLoading'))
+  );
 };
 
 export const closeFieldsBrowser = () => {
@@ -51,10 +55,14 @@ export const closeFieldsBrowser = () => {
 };
 
 export const filterFieldsBrowser = (fieldName: string) => {
-  cy.get(FIELDS_BROWSER_FILTER_INPUT)
-    .clear()
-    .type(fieldName)
-    .waitUntil((subject) => !subject.hasClass('euiFieldSearch-isLoading'));
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).clear();
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).type(fieldName);
+
+  cy.waitUntil(() =>
+    cy
+      .get(FIELDS_BROWSER_FILTER_INPUT)
+      .then((subject) => !subject.hasClass('euiFieldSearch-isLoading'))
+  );
 };
 
 export const toggleCategoryFilter = () => {
@@ -63,8 +71,9 @@ export const toggleCategoryFilter = () => {
 
 export const toggleCategory = (category: string) => {
   toggleCategoryFilter();
-  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_SEARCH).clear().type(category);
-  cy.get(FIELDS_BROWSER_CATEGORY_FILTER_OPTION(category)).click({ force: true });
+  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_SEARCH).clear();
+  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_SEARCH).type(category);
+  cy.get(FIELDS_BROWSER_CATEGORY_FILTER_OPTION(category)).click();
   toggleCategoryFilter();
 };
 

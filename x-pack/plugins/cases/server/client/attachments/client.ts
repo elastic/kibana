@@ -23,7 +23,7 @@ import type {
   AddArgs,
   DeleteAllArgs,
   DeleteArgs,
-  FindArgs,
+  FindCommentsArgs,
   GetAllAlertsAttachToCase,
   GetAllArgs,
   GetArgs,
@@ -60,7 +60,7 @@ export interface AttachmentsSubClient {
   /**
    * Retrieves all comments matching the search criteria.
    */
-  find(findArgs: FindArgs): Promise<CommentsFindResponse>;
+  find(findArgs: FindCommentsArgs): Promise<CommentsFindResponse>;
   /**
    * Retrieves all alerts attach to a case given a single case ID
    */

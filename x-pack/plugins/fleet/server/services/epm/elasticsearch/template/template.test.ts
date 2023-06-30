@@ -1107,6 +1107,7 @@ describe('EPM template', () => {
       ]);
       expect(esClient.indices.getDataStream).toBeCalledWith({
         name: 'test.*-*',
+        expand_wildcards: ['open', 'hidden'],
       });
       const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
       expect(putMappingsCall).toHaveLength(1);

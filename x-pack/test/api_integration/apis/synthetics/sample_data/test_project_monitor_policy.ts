@@ -13,6 +13,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
     inputs = {},
     configId,
     id,
+    locationId,
     projectId = 'test-suite',
     locationName = 'Fleet Managed',
   }: {
@@ -21,12 +22,14 @@ export const getTestProjectSyntheticsPolicyLightweight = (
     configId: string;
     id: string;
     projectId?: string;
+    locationId: string;
     locationName?: string;
   } = {
     name: 'My Monitor 3',
     inputs: {},
     configId: '',
     id: '',
+    locationId: 'fleet_managed',
     locationName: 'Fleet Managed',
   }
 ): PackagePolicy => ({
@@ -34,7 +37,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
   version: 'WzEzMDksMV0=',
   name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-Test private location 0`,
   namespace: 'default',
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.12.0' },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '1.0.1' },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   inputs: [
@@ -101,7 +104,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             id: {
               type: 'text',
-              value: id,
+              value: JSON.stringify(id),
             },
             ipv4: {
               type: 'bool',
@@ -111,9 +114,13 @@ export const getTestProjectSyntheticsPolicyLightweight = (
               type: 'bool',
               value: true,
             },
+            location_id: {
+              type: 'text',
+              value: locationId ?? 'fleet_managed',
+            },
             location_name: {
               type: 'text',
-              value: 'Test private location 0',
+              value: '"Test private location 0"',
             },
             max_redirects: {
               type: 'integer',
@@ -125,15 +132,15 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             'monitor.project.id': {
               type: 'text',
-              value: projectId,
+              value: JSON.stringify(projectId),
             },
             'monitor.project.name': {
               type: 'text',
-              value: projectId,
+              value: JSON.stringify(projectId),
             },
             name: {
               type: 'text',
-              value: name,
+              value: JSON.stringify(name),
             },
             origin: {
               type: 'text',
@@ -141,7 +148,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             password: {
               type: 'password',
-              value: '',
+              value: null,
             },
             proxy_headers: {
               type: 'yaml',
@@ -149,7 +156,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             proxy_url: {
               type: 'text',
-              value: 'testGlobalParamOverwrite',
+              value: JSON.stringify('testGlobalParamOverwrite'),
             },
             'response.include_body': {
               type: 'text',
@@ -173,7 +180,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             'service.name': {
               type: 'text',
-              value: '',
+              value: null,
             },
             'ssl.certificate': {
               type: 'yaml',
@@ -213,11 +220,11 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             },
             urls: {
               type: 'text',
-              value: 'http://localhost:9200',
+              value: '"http://localhost:9200"',
             },
             username: {
               type: 'text',
-              value: '',
+              value: null,
             },
           },
           compiled_stream: {
@@ -236,9 +243,10 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             tags: ['tag2', 'tag2'],
             proxy_url: 'testGlobalParamOverwrite',
             'run_from.geo.name': locationName ?? 'Test private location 0',
-            'run_from.id': locationName ?? 'Test private location 0',
+            'run_from.id': locationId ?? 'Test private location 0',
             'response.include_headers': false,
             'response.include_body': 'always',
+            'response.include_body_max_bytes': 900,
             'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
             'ssl.verification_mode': 'strict',
             'check.request.method': 'POST',
@@ -304,6 +312,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             'ssl.key_passphrase': { type: 'text' },
             'ssl.verification_mode': { type: 'text' },
             'ssl.supported_protocols': { type: 'yaml' },
+            location_id: { value: 'fleet_managed', type: 'text' },
             location_name: { value: 'Fleet managed', type: 'text' },
             id: { type: 'text' },
             config_id: { type: 'text' },
@@ -341,6 +350,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             'service.name': { type: 'text' },
             timeout: { type: 'text' },
             tags: { type: 'yaml' },
+            location_id: { value: 'fleet_managed', type: 'text' },
             location_name: { value: 'Fleet managed', type: 'text' },
             id: { type: 'text' },
             config_id: { type: 'text' },
@@ -412,6 +422,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
             'source.zip_url.ssl.verification_mode': { type: 'text' },
             'source.zip_url.ssl.supported_protocols': { type: 'yaml' },
             'source.zip_url.proxy_url': { type: 'text' },
+            location_id: { value: 'fleet_managed', type: 'text' },
             location_name: { value: 'Fleet managed', type: 'text' },
             id: { type: 'text' },
             config_id: { type: 'text' },
@@ -498,6 +509,7 @@ export const getTestProjectSyntheticsPolicy = (
     configId,
     id,
     projectId = 'test-suite',
+    locationId,
     locationName = 'Fleet Managed',
   }: {
     name?: string;
@@ -506,11 +518,13 @@ export const getTestProjectSyntheticsPolicy = (
     id: string;
     projectId?: string;
     locationName?: string;
+    locationId: string;
   } = {
     name: 'check if title is present-Test private location 0',
     inputs: {},
     configId: '',
     id: '',
+    locationId: 'fleet_managed',
     locationName: 'Fleet Managed',
   }
 ): PackagePolicy => ({
@@ -518,7 +532,7 @@ export const getTestProjectSyntheticsPolicy = (
   version: 'WzEzMDksMV0=',
   name: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-Test private location 0`,
   namespace: 'default',
-  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '0.12.0' },
+  package: { name: 'synthetics', title: 'Elastic Synthetics', version: '1.0.1' },
   enabled: true,
   policy_id: '46034710-0ba6-11ed-ba04-5f123b9faa8b',
   inputs: [
@@ -565,6 +579,7 @@ export const getTestProjectSyntheticsPolicy = (
             'ssl.key_passphrase': { type: 'text' },
             'ssl.verification_mode': { type: 'text' },
             'ssl.supported_protocols': { type: 'yaml' },
+            location_id: { value: 'fleet_managed', type: 'text' },
             location_name: { value: 'Fleet managed', type: 'text' },
             id: { type: 'text' },
             config_id: { type: 'text' },
@@ -686,9 +701,9 @@ export const getTestProjectSyntheticsPolicy = (
             },
             enabled: { value: true, type: 'bool' },
             type: { value: 'browser', type: 'text' },
-            name: { value: 'check if title is present', type: 'text' },
+            name: { value: '"check if title is present"', type: 'text' },
             schedule: { value: '"@every 10m"', type: 'text' },
-            'service.name': { value: '', type: 'text' },
+            'service.name': { value: null, type: 'text' },
             timeout: { value: null, type: 'text' },
             tags: { value: null, type: 'yaml' },
             'source.zip_url.url': { type: 'text' },
@@ -727,12 +742,13 @@ export const getTestProjectSyntheticsPolicy = (
             'source.zip_url.ssl.supported_protocols': { type: 'yaml' },
             'source.zip_url.proxy_url': { type: 'text' },
             location_name: { value: 'Test private location 0', type: 'text' },
+            location_id: { value: 'fleet_managed', type: 'text' },
             id: { value: id, type: 'text' },
             config_id: { value: configId, type: 'text' },
             run_once: { value: false, type: 'bool' },
             origin: { value: 'project', type: 'text' },
-            'monitor.project.id': { value: projectId, type: 'text' },
-            'monitor.project.name': { value: projectId, type: 'text' },
+            'monitor.project.id': { value: JSON.stringify(projectId), type: 'text' },
+            'monitor.project.name': { value: JSON.stringify(projectId), type: 'text' },
             ...inputs,
           },
           id: `synthetics/browser-browser-4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
@@ -747,7 +763,7 @@ export const getTestProjectSyntheticsPolicy = (
             enabled: true,
             schedule: '@every 10m',
             'run_from.geo.name': locationName,
-            'run_from.id': locationName,
+            'run_from.id': locationId,
             timeout: null,
             throttling: { download: 5, upload: 3, latency: 20 },
             'source.project.content':

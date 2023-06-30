@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 import { JobsTableFiltersComponent } from './jobs_table_filters';
 import type { SecurityJob } from '../../types';
@@ -17,13 +17,6 @@ describe('JobsTableFilters', () => {
 
   beforeEach(() => {
     securityJobs = cloneDeep(mockSecurityJobs);
-  });
-
-  test('renders correctly against snapshot', () => {
-    const wrapper = shallow(
-      <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={jest.fn()} />
-    );
-    expect(wrapper).toMatchSnapshot();
   });
 
   test('when you click Elastic Jobs filter, state is updated and it is selected', () => {

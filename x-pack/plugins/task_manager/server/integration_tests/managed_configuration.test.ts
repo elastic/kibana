@@ -43,6 +43,7 @@ describe('managed configuration', () => {
       max_workers: 10,
       max_attempts: 9,
       poll_interval: 3000,
+      allow_reading_invalid_state: false,
       version_conflict_threshold: 80,
       monitored_aggregated_stats_refresh_rate: 60000,
       monitored_stats_health_verbose_log: {
@@ -66,6 +67,7 @@ describe('managed configuration', () => {
       },
       unsafe: {
         exclude_task_types: [],
+        authenticate_background_task_utilization: true,
       },
       event_loop_delay: {
         monitor: true,

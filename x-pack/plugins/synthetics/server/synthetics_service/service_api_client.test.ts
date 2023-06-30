@@ -10,11 +10,11 @@ import { CoreStart } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { Logger } from '@kbn/core/server';
 import { ServiceAPIClient } from './service_api_client';
-import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import { ServiceConfig } from '../../common/config';
 import axios from 'axios';
 import { LocationStatus, PublicLocations } from '../../common/runtime_types';
 import { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SyntheticsServerSetup } from '../types';
 
 const licenseMock: LicenseGetResponse = {
   license: {
@@ -63,7 +63,7 @@ describe('getHttpsAgent', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { username: 'u', password: 'p' },
-      { isDev: true, coreStart: mockCoreStart } as UptimeServerSetup
+      { isDev: true, coreStart: mockCoreStart } as SyntheticsServerSetup
     );
     const { options: result } = apiClient.getHttpsAgent('https://localhost:10001');
     expect(result).not.toHaveProperty('cert');
@@ -74,7 +74,7 @@ describe('getHttpsAgent', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
-      { isDev: true, coreStart: mockCoreStart } as UptimeServerSetup
+      { isDev: true, coreStart: mockCoreStart } as SyntheticsServerSetup
     );
 
     const { options: result } = apiClient.getHttpsAgent('https://example.com');
@@ -85,7 +85,7 @@ describe('getHttpsAgent', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
-      { isDev: false, coreStart: mockCoreStart } as UptimeServerSetup
+      { isDev: false, coreStart: mockCoreStart } as SyntheticsServerSetup
     );
 
     const { options: result } = apiClient.getHttpsAgent('https://localhost:10001');
@@ -96,7 +96,7 @@ describe('getHttpsAgent', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
-      { isDev: false, coreStart: mockCoreStart } as UptimeServerSetup
+      { isDev: false, coreStart: mockCoreStart } as SyntheticsServerSetup
     );
 
     const { options: result } = apiClient.getHttpsAgent('https://localhost:10001');
@@ -115,7 +115,7 @@ describe('checkAccountAccessStatus', () => {
     const apiClient = new ServiceAPIClient(
       jest.fn() as unknown as Logger,
       { tls: { certificate: 'crt', key: 'k' } } as ServiceConfig,
-      { isDev: false, stackVersion: '8.4', coreStart: mockCoreStart } as UptimeServerSetup
+      { isDev: false, stackVersion: '8.4', coreStart: mockCoreStart } as SyntheticsServerSetup
     );
 
     apiClient.locations = [
@@ -174,7 +174,7 @@ describe('callAPI', () => {
       isDev: true,
       stackVersion: '8.7.0',
       coreStart: mockCoreStart,
-    } as UptimeServerSetup);
+    } as SyntheticsServerSetup);
 
     const spy = jest.spyOn(apiClient, 'callServiceEndpoint');
 
@@ -182,55 +182,42 @@ describe('callAPI', () => {
 
     const output = { hosts: ['https://localhost:9200'], api_key: '12345' };
 
-    await apiClient.callAPI('POST', {
+    const serviceData = {
       monitors: testMonitors,
       output,
       license: licenseMock.license,
-    });
+      endpoint: 'monitors' as const,
+    };
+
+    await apiClient.callAPI('POST', serviceData);
 
     expect(spy).toHaveBeenCalledTimes(3);
     const devUrl = 'https://service.dev';
 
+    const monitorsByLocation = apiClient.processServiceData(serviceData);
+
     expect(spy).toHaveBeenNthCalledWith(
       1,
-      {
-        isEdit: undefined,
-        monitors: testMonitors.filter((monitor: any) =>
-          monitor.locations.some((loc: any) => loc.id === 'us_central')
-        ),
-        output,
-        license: licenseMock.license,
-      },
+      monitorsByLocation.find(({ location: { id } }) => id === 'us_central')?.data,
       'POST',
-      devUrl
+      devUrl,
+      'monitors'
     );
 
     expect(spy).toHaveBeenNthCalledWith(
       2,
-      {
-        isEdit: undefined,
-        monitors: testMonitors.filter((monitor: any) =>
-          monitor.locations.some((loc: any) => loc.id === 'us_central_qa')
-        ),
-        output,
-        license: licenseMock.license,
-      },
+      monitorsByLocation.find(({ location: { id } }) => id === 'us_central_qa')?.data,
       'POST',
-      'https://qa.service.elstc.co'
+      'https://qa.service.elstc.co',
+      'monitors'
     );
 
     expect(spy).toHaveBeenNthCalledWith(
       3,
-      {
-        isEdit: undefined,
-        monitors: testMonitors.filter((monitor: any) =>
-          monitor.locations.some((loc: any) => loc.id === 'us_central_staging')
-        ),
-        output,
-        license: licenseMock.license,
-      },
+      monitorsByLocation.find(({ location: { id } }) => id === 'us_central_staging')?.data,
       'POST',
-      'https://qa.service.stg.co'
+      'https://qa.service.stg.co',
+      'monitors'
     );
 
     expect(axiosSpy).toHaveBeenCalledTimes(3);
@@ -336,7 +323,7 @@ describe('callAPI', () => {
         isDev: true,
         stackVersion: '8.7.0',
         coreStart: mockCoreStart,
-      } as UptimeServerSetup
+      } as SyntheticsServerSetup
     );
     apiClient.locations = testLocations;
 
@@ -388,7 +375,7 @@ describe('callAPI', () => {
         manifestUrl: 'http://localhost:8080/api/manifest',
         tls: { certificate: 'test-certificate', key: 'test-key' } as any,
       },
-      { isDev: true, stackVersion: '8.7.0' } as UptimeServerSetup
+      { isDev: true, stackVersion: '8.7.0' } as SyntheticsServerSetup
     );
 
     apiClient.locations = testLocations;
@@ -445,7 +432,7 @@ describe('callAPI', () => {
         isDev: true,
         stackVersion: '8.7.0',
         cloud: { cloudId: 'test-id', deploymentId: 'deployment-id' },
-      } as UptimeServerSetup
+      } as SyntheticsServerSetup
     );
 
     apiClient.locations = testLocations;

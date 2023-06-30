@@ -22,7 +22,8 @@
       "savedObjectsTagging",
       "taskManager",
       "guidedOnboarding",
-      "files"
+      "files",
+      "uiActions"
     ],
     "optionalPlugins": [
       "features",

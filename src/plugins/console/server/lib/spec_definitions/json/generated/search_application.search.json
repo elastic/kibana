@@ -1,0 +1,12 @@
+{
+  "search_application.search": {
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_application/search_application/{name}/_search"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-application-search.html"
+  }
+}

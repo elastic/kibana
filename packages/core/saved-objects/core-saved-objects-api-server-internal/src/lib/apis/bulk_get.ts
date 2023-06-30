@@ -46,12 +46,21 @@ type ExpectedBulkGetResult = Either<
 
 export const performBulkGet = async <T>(
   { objects, options }: PerformBulkGetParams<T>,
-  { helpers, allowedTypes, client, serializer, registry, extensions = {} }: ApiExecutionContext
+  {
+    helpers,
+    allowedTypes,
+    client,
+    migrator,
+    serializer,
+    registry,
+    extensions = {},
+  }: ApiExecutionContext
 ): Promise<SavedObjectsBulkResponse<T>> => {
   const {
     common: commonHelper,
     validation: validationHelper,
     encryption: encryptionHelper,
+    migration: migrationHelper,
   } = helpers;
   const { securityExtension, spacesExtension } = extensions;
 
@@ -192,9 +201,12 @@ export const performBulkGet = async <T>(
       }
 
       // @ts-expect-error MultiGetHit._source is optional
-      return getSavedObjectFromSource(registry, type, id, doc, {
+      const document = getSavedObjectFromSource(registry, type, id, doc, {
         migrationVersionCompatibility,
       });
+      const migrated = migrationHelper.migrateStorageDocument(document);
+
+      return migrated;
     }),
   };
 

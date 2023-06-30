@@ -18,9 +18,9 @@ import React from 'react';
 import { LEARN_MORE_LABEL } from '../../../../common/i18n_string';
 
 interface OverviewPanelProps {
-  description: React.ReactNode | string;
+  description?: React.ReactNode | string;
   leftPanelContent: React.ReactNode;
-  links: Array<{ label: string; href: string }>;
+  links?: Array<{ label: string; href: string }>;
   title: string;
 }
 
@@ -35,16 +35,16 @@ export const OverviewPanel: React.FC<OverviewPanelProps> = ({
     <>
       <EuiSpacer size="xxl" />
       <EuiFlexGroup alignItems="center">
-        <EuiFlexItem grow={3}>{leftPanelContent}</EuiFlexItem>
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={6}>{leftPanelContent}</EuiFlexItem>
+        <EuiFlexItem grow={4}>
           <EuiPanel color="subdued">
             <EuiTitle>
               <h2>{title}</h2>
             </EuiTitle>
             <EuiSpacer />
-            <EuiText>{description}</EuiText>
+            {description && <EuiText>{description}</EuiText>}
             {children}
-            {links.length > 0 ? (
+            {links && links.length > 0 ? (
               <>
                 <EuiSpacer />
                 <EuiTitle size="xxs">
@@ -52,7 +52,7 @@ export const OverviewPanel: React.FC<OverviewPanelProps> = ({
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 {links.map(({ label, href }, index) => (
-                  <EuiText size="s">
+                  <EuiText size="s" key={`overviewPanel.link.${index}`}>
                     <EuiLink key={index} href={href} target="_blank">
                       {label}
                     </EuiLink>

@@ -31,8 +31,9 @@ export interface ConnectorConfiguration {
 
 export interface CaseConnector<UIProps = unknown> {
   id: string;
-  fieldsComponent: React.LazyExoticComponent<
-    React.ComponentType<ConnectorFieldsProps<UIProps>>
+  fieldsComponent: React.LazyExoticComponent<React.ComponentType<ConnectorFieldsProps>> | null;
+  previewComponent: React.LazyExoticComponent<
+    React.ComponentType<ConnectorFieldsPreviewProps<UIProps>>
   > | null;
 }
 
@@ -45,9 +46,11 @@ export interface CaseConnectorsRegistry {
   list: () => CaseConnector[];
 }
 
-export interface ConnectorFieldsProps<TFields> {
-  isEdit?: boolean;
+export interface ConnectorFieldsProps {
+  connector: CaseActionConnector;
+}
+
+export interface ConnectorFieldsPreviewProps<TFields> {
   connector: CaseActionConnector;
   fields: TFields;
-  onChange: (fields: TFields) => void;
 }

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { BulkResponse, DeleteResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { keyBy, partition } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
@@ -17,7 +17,9 @@ import type {
   NewPackagePolicy,
   PackagePolicyConfigRecordEntry,
   RegistryStream,
+  UpdatePackagePolicy,
 } from '../../common';
+import { SO_SEARCH_LIMIT } from '../../common';
 
 import {
   doesPackageHaveIntegrations,
@@ -40,6 +42,7 @@ import { SECRETS_INDEX } from '../constants';
 import { auditLoggingService } from './audit_logging';
 
 import { appContextService } from './app_context';
+import { packagePolicyService } from './package_policy';
 
 interface SecretPath {
   path: string;
@@ -102,47 +105,138 @@ export async function createSecrets(opts: {
   }
 }
 
-export async function deleteSecret(opts: {
+export async function deleteSecretsIfNotReferenced(opts: {
   esClient: ElasticsearchClient;
-  id: string;
-}): Promise<DeleteResponse['result']> {
-  const { esClient, id } = opts;
-  let res: DeleteResponse;
-  try {
-    res = await esClient.delete({
-      index: getSecretsIndex(),
-      id,
-    });
+  soClient: SavedObjectsClientContract;
+  ids: string[];
+}): Promise<void> {
+  const { esClient, soClient, ids } = opts;
+  const logger = appContextService.getLogger();
+  const packagePoliciesUsingSecrets = await findPackagePoliciesUsingSecrets({
+    soClient,
+    ids,
+  });
 
-    auditLoggingService.writeCustomAuditLog({
-      message: `secret deleted: ${id}`,
-      event: {
-        action: 'secret_delete',
-        category: ['database'],
-        type: ['access'],
-        outcome: 'success',
-      },
+  if (packagePoliciesUsingSecrets.length) {
+    packagePoliciesUsingSecrets.forEach(({ id, policyIds }) => {
+      logger.debug(
+        `Not deleting secret with id ${id} is still in use by package policies: ${policyIds.join(
+          ', '
+        )}`
+      );
+    });
+  }
+
+  const secretsToDelete = ids.filter((id) => {
+    return !packagePoliciesUsingSecrets.some((packagePolicy) => packagePolicy.id === id);
+  });
+
+  if (!secretsToDelete.length) {
+    return;
+  }
+  try {
+    await _deleteSecrets({
+      esClient,
+      ids: secretsToDelete,
     });
   } catch (e) {
-    const logger = appContextService.getLogger();
-    const msg = `Error deleting secret '${id}' from ${getSecretsIndex()} index: ${e}`;
+    logger.warn(`Error cleaning up secrets ${ids.join(', ')}: ${e}`);
+  }
+}
+
+export async function findPackagePoliciesUsingSecrets(opts: {
+  soClient: SavedObjectsClientContract;
+  ids: string[];
+}): Promise<Array<{ id: string; policyIds: string[] }>> {
+  const { soClient, ids } = opts;
+  const packagePolicies = await packagePolicyService.list(soClient, {
+    kuery: `ingest-package-policies.secret_references.id: (${ids.join(' or ')})`,
+    perPage: SO_SEARCH_LIMIT,
+    page: 1,
+  });
+
+  if (!packagePolicies.total) {
+    return [];
+  }
+
+  // create a map of secret_references.id to package policy id
+  const packagePoliciesBySecretId = packagePolicies.items.reduce((acc, packagePolicy) => {
+    packagePolicy?.secret_references?.forEach((secretReference) => {
+      if (!acc[secretReference.id]) {
+        acc[secretReference.id] = [];
+      }
+      acc[secretReference.id].push(packagePolicy.id);
+    });
+    return acc;
+  }, {} as Record<string, string[]>);
+
+  const res = [];
+
+  for (const id of ids) {
+    if (packagePoliciesBySecretId[id]) {
+      res.push({
+        id,
+        policyIds: packagePoliciesBySecretId[id],
+      });
+    }
+  }
+
+  return res;
+}
+
+export async function _deleteSecrets(opts: {
+  esClient: ElasticsearchClient;
+  ids: string[];
+}): Promise<void> {
+  const { esClient, ids } = opts;
+  const logger = appContextService.getLogger();
+  const body = ids.flatMap((id) => [
+    {
+      delete: { _index: getSecretsIndex(), _id: id },
+    },
+  ]);
+
+  let res: BulkResponse;
+
+  try {
+    res = await esClient.bulk({
+      body,
+    });
+
+    const [errorItems, successItems] = partition(res.items, (a) => a.delete?.error);
+
+    successItems.forEach((item) => {
+      auditLoggingService.writeCustomAuditLog({
+        message: `secret deleted: ${item.delete!._id}`,
+        event: {
+          action: 'secret_delete',
+          category: ['database'],
+          type: ['access'],
+          outcome: 'success',
+        },
+      });
+    });
+
+    if (errorItems.length) {
+      throw new Error(JSON.stringify(errorItems));
+    }
+  } catch (e) {
+    const msg = `Error deleting secrets from ${getSecretsIndex()} index: ${e}`;
     logger.error(msg);
     throw new FleetError(msg);
   }
-
-  return res.result;
 }
 
 export async function extractAndWriteSecrets(opts: {
   packagePolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
   esClient: ElasticsearchClient;
-}): Promise<{ packagePolicy: NewPackagePolicy; secret_references: PolicySecretReference[] }> {
+}): Promise<{ packagePolicy: NewPackagePolicy; secretReferences: PolicySecretReference[] }> {
   const { packagePolicy, packageInfo, esClient } = opts;
   const secretPaths = getPolicySecretPaths(packagePolicy, packageInfo);
 
   if (!secretPaths.length) {
-    return { packagePolicy, secret_references: [] };
+    return { packagePolicy, secretReferences: [] };
   }
 
   const secrets = await createSecrets({
@@ -157,7 +251,49 @@ export async function extractAndWriteSecrets(opts: {
 
   return {
     packagePolicy: policyWithSecretRefs,
-    secret_references: secrets.map(({ id }) => ({ id })),
+    secretReferences: secrets.map(({ id }) => ({ id })),
+  };
+}
+
+export async function extractAndUpdateSecrets(opts: {
+  oldPackagePolicy: PackagePolicy;
+  packagePolicyUpdate: UpdatePackagePolicy;
+  packageInfo: PackageInfo;
+  esClient: ElasticsearchClient;
+}): Promise<{
+  packagePolicyUpdate: UpdatePackagePolicy;
+  secretReferences: PolicySecretReference[];
+  secretsToDelete: PolicySecretReference[];
+}> {
+  const { oldPackagePolicy, packagePolicyUpdate, packageInfo, esClient } = opts;
+  const oldSecretPaths = getPolicySecretPaths(oldPackagePolicy, packageInfo);
+  const updatedSecretPaths = getPolicySecretPaths(packagePolicyUpdate, packageInfo);
+
+  if (!oldSecretPaths.length && !updatedSecretPaths.length) {
+    return { packagePolicyUpdate, secretReferences: [], secretsToDelete: [] };
+  }
+
+  const { toCreate, toDelete, noChange } = diffSecretPaths(oldSecretPaths, updatedSecretPaths);
+
+  const createdSecrets = await createSecrets({
+    esClient,
+    values: toCreate.map((secretPath) => secretPath.value.value),
+  });
+
+  const policyWithSecretRefs = JSON.parse(JSON.stringify(packagePolicyUpdate));
+  toCreate.forEach((secretPath, i) => {
+    set(policyWithSecretRefs, secretPath.path + '.value', toVarSecretRef(createdSecrets[i].id));
+  });
+
+  const secretReferences = [
+    ...noChange.map((secretPath) => ({ id: secretPath.value.value.id })),
+    ...createdSecrets.map(({ id }) => ({ id })),
+  ];
+
+  return {
+    packagePolicyUpdate: policyWithSecretRefs,
+    secretReferences,
+    secretsToDelete: toDelete.map((secretPath) => ({ id: secretPath.value.value.id })),
   };
 }
 
@@ -179,10 +315,42 @@ export function toCompiledSecretRef(id: string) {
   return `$co.elastic.secret{${id}}`;
 }
 
+export function diffSecretPaths(
+  oldPaths: SecretPath[],
+  newPaths: SecretPath[]
+): { toCreate: SecretPath[]; toDelete: SecretPath[]; noChange: SecretPath[] } {
+  const toCreate: SecretPath[] = [];
+  const toDelete: SecretPath[] = [];
+  const noChange: SecretPath[] = [];
+  const newPathsByPath = keyBy(newPaths, 'path');
+
+  for (const oldPath of oldPaths) {
+    if (!newPathsByPath[oldPath.path]) {
+      toDelete.push(oldPath);
+    }
+
+    const newPath = newPathsByPath[oldPath.path];
+    if (newPath && newPath.value.value) {
+      const newValue = newPath.value?.value;
+      if (!newValue?.isSecretRef) {
+        toCreate.push(newPath);
+        toDelete.push(oldPath);
+      } else {
+        noChange.push(newPath);
+      }
+      delete newPathsByPath[oldPath.path];
+    }
+  }
+
+  const remainingNewPaths = Object.values(newPathsByPath);
+
+  return { toCreate: [...toCreate, ...remainingNewPaths], toDelete, noChange };
+}
+
 // Given a package policy and a package,
 // returns an array of lodash style paths to all secrets and their current values
 export function getPolicySecretPaths(
-  packagePolicy: PackagePolicy | NewPackagePolicy,
+  packagePolicy: PackagePolicy | NewPackagePolicy | UpdatePackagePolicy,
   packageInfo: PackageInfo
 ): SecretPath[] {
   const packageLevelVarPaths = _getPackageLevelSecretPaths(packagePolicy, packageInfo);

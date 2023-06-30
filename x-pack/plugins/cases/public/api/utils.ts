@@ -32,12 +32,13 @@ import type {
 export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
   arrayOfSnakes.reduce((acc: unknown[], value) => {
     if (isArray(value)) {
-      return [...acc, convertArrayToCamelCase(value)];
+      acc.push(convertArrayToCamelCase(value));
     } else if (isObject(value)) {
-      return [...acc, convertToCamelCase(value)];
+      acc.push(convertToCamelCase(value));
     } else {
-      return [...acc, value];
+      acc.push(value);
     }
+    return acc;
   }, []);
 
 export const convertToCamelCase = <T, U extends {}>(obj: T): U =>

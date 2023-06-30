@@ -11,6 +11,7 @@ import { map } from 'rxjs/operators';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import {
   AppMountParameters,
+  AppNavLinkStatus,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -60,6 +61,11 @@ import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
+import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
+import {
+  DiscoverStart,
+  DiscoverSetup,
+} from '@kbn/discover-plugin/public/plugin';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
   getApmEnrollmentFlyoutData,
@@ -79,11 +85,13 @@ export type ApmPluginStart = void;
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
+  discover?: DiscoverSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
+  licenseManagement?: LicenseManagementUIPluginSetup;
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
@@ -96,6 +104,7 @@ export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
   charts?: ChartsPluginStart;
   data: DataPublicPluginStart;
+  discover?: DiscoverStart;
   embeddable: EmbeddableStart;
   home: void;
   inspector: InspectorPluginStart;
@@ -109,7 +118,7 @@ export interface ApmPluginStartDeps {
   fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  infra?: InfraClientStartExports;
+  infra: InfraClientStartExports;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   storage: IStorageWrapper;
@@ -313,6 +322,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
+      navLinkStatus: AppNavLinkStatus.visible,
       deepLinks: [
         {
           id: 'service-groups-list',
@@ -323,13 +333,26 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           id: 'services',
           title: servicesTitle,
           path: '/services',
+          navLinkStatus: config.serverless.enabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.default,
         },
-        { id: 'traces', title: tracesTitle, path: '/traces' },
+        {
+          id: 'traces',
+          title: tracesTitle,
+          path: '/traces',
+          navLinkStatus: config.serverless.enabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.default,
+        },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
         {
           id: 'dependencies',
           title: dependenciesTitle,
           path: '/dependencies/inventory',
+          navLinkStatus: config.serverless.enabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.default,
         },
         { id: 'settings', title: apmSettingsTitle, path: '/settings' },
         {

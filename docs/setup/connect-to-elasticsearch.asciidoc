@@ -31,7 +31,7 @@ Discover, extract, and index your web content into App Search engines using the
 Search across Google Drive, GitHub, Salesforce, and many other web services using
 {workplace-search-ref}/workplace-search-content-sources.html[Workplace Search content sources].
 
-* *Elastic APM.*
+* *Elastic Observability.*
 Get logs, metrics, traces, and uptime data into the Elastic Stack.
 Integrations are available for popular services and platforms,
 such as Nginx, AWS, and MongoDB,

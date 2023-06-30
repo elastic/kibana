@@ -11,12 +11,10 @@
   ],
   "kbn_references": [
     "@kbn/core",
-
     // optionalPlugins from ./kibana.json
     "@kbn/lens-plugin",
     "@kbn/security-plugin",
     "@kbn/spaces-plugin",
-
     // Required from './kibana.json'
     "@kbn/actions-plugin",
     "@kbn/rule-registry-plugin",
@@ -64,6 +62,10 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/utility-types-jest",
     "@kbn/cloud-collaboration-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-theme-browser",
   ],
   "exclude": [
     "target/**/*",

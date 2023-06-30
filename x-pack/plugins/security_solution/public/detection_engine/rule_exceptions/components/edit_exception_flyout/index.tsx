@@ -19,7 +19,7 @@ import {
   EuiTitle,
   EuiFlyout,
   EuiFlyoutFooter,
-  EuiLoadingContent,
+  EuiSkeletonText,
 } from '@elastic/eui';
 
 import type {
@@ -109,7 +109,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   const rules = useMemo(() => (rule != null ? [rule] : null), [rule]);
   const listType = useMemo((): ExceptionListTypeEnum => list.type as ExceptionListTypeEnum, [list]);
 
-  const { isLoading, indexPatterns } = useFetchIndexPatterns(rules);
+  const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
   const [isSubmitting, submitEditExceptionItems] = useEditExceptionItems();
   const [isClosingAlerts, closeAlerts] = useCloseAlertsFromExceptions();
 
@@ -350,7 +350,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         </EuiTitle>
         <EuiSpacer size="m" />
       </FlyoutHeader>
-      {isLoading && <EuiLoadingContent data-test-subj="loadingEditExceptionFlyout" lines={4} />}
+      {isLoading && <EuiSkeletonText data-test-subj="loadingEditExceptionFlyout" lines={4} />}
       <FlyoutBodySection className="builder-section">
         <ExceptionsFlyoutMeta
           exceptionItemName={exceptionItemName}
@@ -370,6 +370,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           onExceptionItemAdd={setExceptionItemsToAdd}
           onSetErrorExists={setConditionsValidationError}
           onFilterIndexPatterns={filterIndexPatterns}
+          getExtendedFields={getExtendedFields}
         />
         {!openedFromListDetailPage && listType === ExceptionListTypeEnum.DETECTION && (
           <>

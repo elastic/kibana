@@ -16,10 +16,10 @@ import { useLicense } from '../../hooks/use_license';
 import { SlosWelcomePage } from './slos_welcome';
 import { emptySloList, sloList } from '../../data/slo/slo';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { paths } from '../../config/paths';
+import { paths } from '../../routes/paths';
 
+jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../utils/kibana_react');
-jest.mock('../../hooks/use_breadcrumbs');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/slo/use_fetch_slo_list');
 jest.mock('../../hooks/slo/use_capabilities');

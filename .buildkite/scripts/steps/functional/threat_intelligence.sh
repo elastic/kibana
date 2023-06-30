@@ -5,12 +5,12 @@ set -euo pipefail
 source .buildkite/scripts/steps/functional/common.sh
 
 export JOB=kibana-threat-intelligence-chrome
-export CLI_NUMBER=${CLI_NUMBER:-$((BUILDKITE_PARALLEL_JOB+1))}
-export CLI_COUNT=${CLI_COUNT:-$BUILDKITE_PARALLEL_JOB_COUNT}
+export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
+
+Xvfb :99 -screen 0 1600x1200x24 &
+
+export DISPLAY=:99
 
 echo "--- Threat Intelligence tests (Chrome)"
 
-node scripts/functional_tests \
-  --debug --bail \
-  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-  --config x-pack/test/threat_intelligence_cypress/cli_config_parallel.ts
+yarn --cwd x-pack/plugins/threat_intelligence cypress:run

@@ -16,10 +16,20 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const config = defendWorkflowsCypressConfig.getAll();
   const hostIp = getLocalhostRealIp();
 
-  const enabledFeatureFlags: Array<keyof ExperimentalFeatures> = ['responseActionExecuteEnabled'];
+  const enabledFeatureFlags: Array<keyof ExperimentalFeatures> = [];
 
   return {
     ...config,
+
+    servers: {
+      ...config.servers,
+      fleetserver: {
+        protocol: 'https',
+        hostname: hostIp,
+        port: 8220,
+      },
+    },
+
     kbnTestServer: {
       ...config.kbnTestServer,
       serverArgs: [

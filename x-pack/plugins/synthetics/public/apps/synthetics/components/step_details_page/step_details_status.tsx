@@ -6,7 +6,7 @@
  */
 import React from 'react';
 
-import { EuiDescriptionList, EuiLoadingContent } from '@elastic/eui';
+import { EuiDescriptionList, EuiSkeletonText } from '@elastic/eui';
 import { parseBadgeStatus, StatusBadge } from '../common/monitor_test_result/status_badge';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
 import { STATUS_LABEL } from '../common/components/monitor_status';
@@ -14,7 +14,7 @@ import { STATUS_LABEL } from '../common/components/monitor_status';
 export const StepDetailsStatus = () => {
   const { currentStep } = useJourneySteps();
 
-  let content = <EuiLoadingContent lines={1} />;
+  let content = <EuiSkeletonText lines={1} />;
 
   if (currentStep?.synthetics.step?.status) {
     content = <StatusBadge status={parseBadgeStatus(currentStep.synthetics.step?.status)} />;

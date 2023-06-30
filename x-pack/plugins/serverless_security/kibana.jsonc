@@ -18,7 +18,9 @@
       "securitySolution",
       "kibanaReact"
     ],
-    "optionalPlugins": [],
-    "requiredBundles": []
+    "optionalPlugins": [
+      "essSecurity"
+    ],
+    "requiredBundles": ["kibanaUtils"]
   }
 }

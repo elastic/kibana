@@ -56,3 +56,10 @@ export const setMetaDocMigrationComplete = ({
     },
   };
 };
+
+export const removePropertiesFromV2 = (meta: IndexMappingMeta): IndexMappingMeta => {
+  const cleaned = { ...meta };
+  delete cleaned.indexTypesMap;
+  delete cleaned.migrationMappingPropertyHashes;
+  return cleaned;
+};

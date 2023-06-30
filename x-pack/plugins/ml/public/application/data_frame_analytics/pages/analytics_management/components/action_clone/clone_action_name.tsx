@@ -12,10 +12,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import {
+  isClassificationAnalysis,
+  isOutlierAnalysis,
+  isRegressionAnalysis,
+  DEFAULT_RESULTS_FIELD,
+  type DataFrameAnalyticsConfig,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { DeepReadonly } from '../../../../../../../common/types/common';
-import { DataFrameAnalyticsConfig, isOutlierAnalysis } from '../../../../common';
-import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
-import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES } from '../../hooks/use_create_analytics_form';
 import { State } from '../../hooks/use_create_analytics_form/state';

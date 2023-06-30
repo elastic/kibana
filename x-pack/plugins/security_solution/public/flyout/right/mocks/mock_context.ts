@@ -6,6 +6,8 @@
  */
 
 import { ALERT_RISK_SCORE, ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import type { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import type { State } from '@kbn/expandable-flyout/src/reducer';
 import type { RightPanelContext } from '../context';
 
 /**
@@ -146,9 +148,25 @@ export const mockContextValue: RightPanelContext = {
   indexName: 'index',
   scopeId: 'scopeId',
   getFieldsData: mockGetFieldsData,
-  dataFormattedForFieldBrowser: null,
+  dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
   browserFields: null,
   dataAsNestedObject: null,
   searchHit: undefined,
   refetchFlyoutData: jest.fn(),
+};
+
+/**
+ * Mock flyout context
+ */
+export const mockFlyoutContextValue: ExpandableFlyoutContext = {
+  panels: {} as State,
+  openFlyout: jest.fn(),
+  openRightPanel: jest.fn(),
+  openLeftPanel: jest.fn(),
+  openPreviewPanel: jest.fn(),
+  closeRightPanel: jest.fn(),
+  closeLeftPanel: jest.fn(),
+  closePreviewPanel: jest.fn(),
+  previousPreviewPanel: jest.fn(),
+  closeFlyout: jest.fn(),
 };
