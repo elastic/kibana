@@ -45,6 +45,7 @@ export const usePackagePolicyList = (packageInfoName: string, { enabled = true }
       enabled,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
+      cacheTime: 0,
     }
   );
 
