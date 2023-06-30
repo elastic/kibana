@@ -242,7 +242,7 @@ export const EndpointStatusActionResult = memo<
                 'xpack.securitySolution.endpointResponseActions.status.lastActive',
                 { defaultMessage: 'Last active' }
               )}
-              value={endpointDetails.last_checkin || endpointDetails.metadata['@timestamp']}
+              value={endpointDetails.last_checkin}
             />
           </ConsoleCodeBlock>
         ),

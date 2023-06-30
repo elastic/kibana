@@ -88,11 +88,7 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
                 id="xpack.securitySolution.responder.header.lastSeen"
                 defaultMessage="Last seen {date}"
                 values={{
-                  date: (
-                    <FormattedRelative
-                      value={endpointDetails.last_checkin || endpointDetails.metadata['@timestamp']}
-                    />
-                  ),
+                  date: <FormattedRelative value={endpointDetails.last_checkin} />,
                 }}
               />
             </EuiText>

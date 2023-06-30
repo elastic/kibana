@@ -62,7 +62,7 @@ import { getEndpointPrivilegesInitialStateMock } from '../../../../common/compon
 
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
-// but sure enough it needs to be inline in this one file
+// but sure enough, it needs to be inline in this one file
 jest.mock('@kbn/i18n-react', () => {
   const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
@@ -310,6 +310,7 @@ describe('when on the endpoint list page', () => {
                 hostListData[index].metadata.Endpoint.policy.applied,
                 setup.policy
               ),
+              last_checkin: hostListData[index].last_checkin,
             };
           });
           hostListData.forEach((item, index) => {
@@ -1020,6 +1021,7 @@ describe('when on the endpoint list page', () => {
               version: '7.14.0',
             },
           },
+          last_checkin: hosts[0].last_checkin,
         },
         {
           host_status: hosts[1].host_status,
@@ -1045,6 +1047,7 @@ describe('when on the endpoint list page', () => {
               version: '8.4.0',
             },
           },
+          last_checkin: hosts[1].last_checkin,
         },
       ];
 
@@ -1334,7 +1337,7 @@ describe('when on the endpoint list page', () => {
 
     beforeEach(async () => {
       const { data: hosts } = mockEndpointResultList({ total: 2 });
-      // second host is isolated, for unisolate testing
+      // the second host is isolated, for unisolate testing
       const hostInfo: HostInfo[] = [
         {
           host_status: hosts[0].host_status,
@@ -1360,6 +1363,7 @@ describe('when on the endpoint list page', () => {
               version: '7.14.0',
             },
           },
+          last_checkin: hosts[0].last_checkin,
         },
         {
           host_status: hosts[1].host_status,
@@ -1385,6 +1389,7 @@ describe('when on the endpoint list page', () => {
               version: '8.4.0',
             },
           },
+          last_checkin: hosts[1].last_checkin,
         },
       ];
       setEndpointListApiMockImplementation(coreStart.http, {

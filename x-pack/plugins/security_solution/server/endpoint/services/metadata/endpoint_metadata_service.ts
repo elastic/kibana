@@ -251,7 +251,7 @@ export class EndpointMetadataService {
       }
     }
 
-    // The fleetAgentPolicy might have the endpoint policy in the `package_policies`, lets check that first
+    // The fleetAgentPolicy might have the endpoint policy in the `package_policies`, let's check that first
     if (
       !endpointPackagePolicy &&
       fleetAgentPolicy &&
@@ -262,7 +262,7 @@ export class EndpointMetadataService {
       );
     }
 
-    // if we still don't have an endpoint package policy, try retrieving it from fleet
+    // if we still don't have an endpoint package policy, try retrieving it from `fleet`
     if (!endpointPackagePolicy) {
       try {
         endpointPackagePolicy = await this.getFleetEndpointPackagePolicy(
@@ -294,7 +294,8 @@ export class EndpointMetadataService {
           id: endpointPackagePolicy?.id ?? '',
         },
       },
-      last_checkin: _fleetAgent?.last_checkin,
+      last_checkin:
+        _fleetAgent?.last_checkin || new Date(endpointMetadata['@timestamp']).toISOString(),
     };
   }
 
