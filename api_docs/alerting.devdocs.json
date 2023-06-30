@@ -4084,7 +4084,7 @@
         "label": "PublicAlert",
         "description": [],
         "signature": [
-          "{ getContext: () => Context; getState: () => State; getUuid: () => string; hasContext: () => boolean; replaceState: (state: State) => ",
+          "{ getContext: () => Context; getState: () => State; getUuid: () => string; getStart: () => string | null; hasContext: () => boolean; replaceState: (state: State) => ",
           "Alert",
           "<State, Context, ActionGroupIds>; scheduleActions: (actionGroup: ActionGroupIds, context?: Context) => ",
           "Alert",
