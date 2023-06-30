@@ -96,8 +96,8 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
         });
         return;
       }
-      setLoading(true);
 
+      setLoading(true);
       let canceled = false;
       (async () => {
         const creationOptions = await getCreationOptions?.();
@@ -117,9 +117,11 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
         );
 
         if (canceled) {
+          setDashboardContainer(undefined);
           container.destroy();
           return;
         }
+
         setLoading(false);
 
         if (isErrorEmbeddable(container)) {
