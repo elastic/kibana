@@ -4630,7 +4630,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/management-cards-navigation@link:packages/kbn-management/cards_navigation":
+  version "0.0.0"
+  uid ""
+
 "@kbn/management-plugin@link:src/plugins/management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/management-storybook-config@link:packages/kbn-management/storybook/config":
   version "0.0.0"
   uid ""
 
