@@ -211,17 +211,19 @@ export const coPilotPrompts = {
 
           The request it occurred for is called ${transactionName}.
 
-          ${logStacktrace
+          ${
+            logStacktrace
               ? `The log stacktrace:
           ${logStacktrace}`
               : ''
-            }
+          }
 
-          ${exceptionStacktrace
+          ${
+            exceptionStacktrace
               ? `The exception stacktrace:
           ${exceptionStacktrace}`
               : ''
-            }
+          }
           `,
           role: 'user',
         },
@@ -362,26 +364,37 @@ export const coPilotPrompts = {
       alertCaseData: alertCaseRt,
     }),
     messages: ({ alertCaseData }) => {
-      const header = 'Alert uuid;Start time;Reason;Case ids';
-      const casesHeader =
-        'Case id;Case status;Case createdAt;Case updatedAt;Case duration;Case severity;Case assignees;Case totalAlerts;Case category;Case tags;Case totalComments';
-      const casesRowsArray: string[] = [];
+      const header =
+        'Alert uuid;Start time;Reason;Case ids;Case status;Case updatedAt;Case severity;Case totalComments;Case tags;Case categories;Case assignees';
+      const add = (accumulator: number, a: number) => {
+        return accumulator + a;
+      };
       const rows = alertCaseData
         .map(({ id, reason, start, caseIds, cases }) => {
+          let casesRow: string = '';
           if (cases) {
-            cases.map((item: any) => casesRowsArray.push(Object.values(item).join(';')));
+            const casesStatus = cases.map((item: any) => item.status).join(',');
+            const casesUpdatedAt = cases.map((item: any) => item.updatedAt).join(',');
+            const casesSeverity = cases.map((item: any) => item.severity).join(',');
+            const casesTotalComments = cases.map((item: any) => item.totalComment).reduce(add, 0);
+            const casesTags = cases.map((item: any) => item.tags).join(',');
+            const casesCategories = cases.map((item: any) => item.category).join(',');
+            const casesAssignees = cases.map((item: any) => item.assignees).reduce(add, 0);
+            casesRow = `${casesStatus};${casesUpdatedAt};${casesSeverity};${casesTotalComments};${casesTags};${casesCategories};${casesAssignees}`;
+          } else {
+            casesRow = ';;;;;;';
           }
-          return `${id};${start};${reason};${caseIds}`;
+          return `${id};${start};${reason};${caseIds};${casesRow}`;
         })
         .join('\n');
-      const casesRows = casesRowsArray.join('\n');
 
       const content = `Use a temperature of 0.3
 
-Only respond with the info requested on the sentences that start with the word Display, do not show original Display sentence. 
+Only respond with the info requested on the sentences that start with the word Display, do not show original Display sentence.
 
-The current active alerts in the system are represented in the following table with csv format separated by semicolon. Each row contains the following columns: ${header}
+The current active alerts in the system are represented in the following table with csv format separated by semicolon. Each row contains the following columns:
 
+${header}
 ${rows}
 
 Assign a ranking position to the each alert within the group of total alerts, base the ranking only on the following priority rules:
@@ -406,7 +419,7 @@ D being the Alert uuid value
 E being the reasoning why this alert has the lowest numerical value in rank based on the mentioned priority rules
 
 
-At the end of the response, display the following template sustituting X and Y 
+At the end of the response, display the following template sustituting X and Y
 "🔍 There are X total active alerts in the system, and Y of them are not yet assigned to a case and show be reviewed as soon as possible", X beign the total current active alerts and Y being how many do not have values in the column "Case ids". Do not display the template.
 
 `;
