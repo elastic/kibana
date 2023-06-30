@@ -86,8 +86,6 @@ Review important information about the {kib} 7.17.x releases.
 
 Review the following information about the {kib} 7.17.11 release.
 
-coming::[7.17.11]
-
 [float]
 [[fixes-v7.17.11]]
 === Bug Fixes
