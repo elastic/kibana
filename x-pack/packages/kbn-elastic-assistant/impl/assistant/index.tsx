@@ -79,6 +79,7 @@ const AssistantComponent: React.FC<Props> = ({
     http,
     promptContexts,
     title,
+    allSystemPrompts,
   } = useAssistantContext();
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
@@ -187,6 +188,21 @@ const AssistantComponent: React.FC<Props> = ({
     }, 0);
   }, [currentConversation.messages.length, selectedPromptContextsCount]);
   ////
+  //
+
+  const defaultSystemPrompt = useMemo(
+    () => allSystemPrompts.find((prompt) => prompt.isNewConversationDefault),
+    [allSystemPrompts]
+  );
+
+  const selectedSystemPrompt = useMemo(() => {
+    if (currentConversation.apiConfig.defaultSystemPrompt) {
+      return allSystemPrompts.find(
+        (prompt) => prompt.id === currentConversation.apiConfig.defaultSystemPrompt
+      );
+    }
+    return defaultSystemPrompt;
+  }, [allSystemPrompts, currentConversation.apiConfig.defaultSystemPrompt, defaultSystemPrompt]);
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
@@ -203,7 +219,7 @@ const AssistantComponent: React.FC<Props> = ({
         onNewReplacements,
         promptText,
         selectedPromptContexts,
-        selectedSystemPrompt: currentConversation.apiConfig.defaultSystemPrompt,
+        selectedSystemPrompt,
       });
 
       const updatedMessages = appendMessage({
@@ -224,6 +240,7 @@ const AssistantComponent: React.FC<Props> = ({
       appendMessage({ conversationId: selectedConversationId, message: responseMessage });
     },
     [
+      selectedSystemPrompt,
       appendMessage,
       appendReplacements,
       currentConversation.apiConfig,
@@ -561,6 +578,7 @@ const AssistantComponent: React.FC<Props> = ({
                   conversation={currentConversation}
                   isDisabled={isWelcomeSetup}
                   http={http}
+                  allSystemPrompts={allSystemPrompts}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

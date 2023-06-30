@@ -9,6 +9,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@
 import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
+import { useAssistantContext } from '../../../assistant_context';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
 import type { Prompt } from '../../types';
@@ -20,12 +21,21 @@ interface Props {
 }
 
 const SystemPromptComponent: React.FC<Props> = ({ conversation }) => {
+  const { allSystemPrompts } = useAssistantContext();
   const { setApiConfig } = useConversation();
 
-  const selectedPrompt: Prompt | undefined = useMemo(
-    () => conversation?.apiConfig.defaultSystemPrompt,
-    [conversation]
+  const defaultSystemPrompt = useMemo(
+    () => allSystemPrompts?.find((p) => p.isNewConversationDefault),
+    [allSystemPrompts]
   );
+
+  const selectedPrompt: Prompt | undefined = useMemo(() => {
+    if (conversation?.apiConfig.defaultSystemPrompt) {
+      return allSystemPrompts.find((p) => p.id === conversation.apiConfig.defaultSystemPrompt);
+    }
+    return defaultSystemPrompt;
+  }, [conversation, defaultSystemPrompt, allSystemPrompts]);
+
   const [isEditing, setIsEditing] = React.useState<boolean>(false);
 
   const handleClearSystemPrompt = useCallback(() => {

@@ -33,6 +33,7 @@ import {
   SYSTEM_PROMPT_SELECTOR_CLASSNAME,
   SystemPromptSelector,
 } from './system_prompt_selector/system_prompt_selector';
+import { TEST_IDS } from '../../../constants';
 
 const StyledEuiModal = styled(EuiModal)`
   min-width: 400px;
@@ -45,7 +46,7 @@ interface Props {
   onClose: (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
   ) => void;
-  onSystemPromptsChange: (systemPrompts: Prompt[]) => void;
+  onSystemPromptsChange: (systemPrompts: Prompt[], newConversation?: Conversation[]) => void;
 }
 
 /**
@@ -66,23 +67,51 @@ export const SystemPromptModal: React.FC<Props> = React.memo(
     }, []);
     // Conversations this system prompt should be a default for
     const [selectedConversations, setSelectedConversations] = useState<Conversation[]>([]);
-    const onConversationSelectionChange = useCallback((newConversations: Conversation[]) => {
-      setSelectedConversations(newConversations);
-    }, []);
+
+    const onConversationSelectionChange = useCallback(
+      (newConversations: Conversation[]) => {
+        let conversationsToBeProcessed = newConversations;
+        if (newConversations.length === 0) {
+          // then selected prompt if associated with a
+          // conversation must be removed.
+          conversationsToBeProcessed = Object.values(conversations).map((convo) => ({
+            ...convo,
+            apiConfig: {
+              defaultSystemPrompt:
+                convo.apiConfig.defaultSystemPrompt === selectedSystemPrompt?.id
+                  ? undefined
+                  : convo.apiConfig.defaultSystemPrompt,
+            },
+          }));
+        } else {
+          conversationsToBeProcessed = newConversations.map((convo) => ({
+            ...convo,
+            apiConfig: {
+              defaultSystemPrompt: selectedSystemPrompt?.id,
+            },
+          }));
+        }
+        setSelectedConversations(conversationsToBeProcessed);
+      },
+      [selectedSystemPrompt, conversations]
+    );
     // Whether this system prompt should be the default for new conversations
     const [isNewConversationDefault, setIsNewConversationDefault] = useState(false);
     const handleNewConversationDefaultChange = useCallback(
       (e) => {
-        setIsNewConversationDefault(e.target.checked);
+        const isChecked = e.target.checked;
+        setIsNewConversationDefault(isChecked);
         if (selectedSystemPrompt != null) {
           setUpdatedSystemPrompts((prev) => {
-            return prev.map((pp) => ({
-              ...pp,
-              isNewConversationDefault: selectedSystemPrompt.id === pp.id && e.target.checked,
-            }));
+            return prev.map((pp) => {
+              return {
+                ...pp,
+                isNewConversationDefault: selectedSystemPrompt.id === pp.id && isChecked,
+              };
+            });
           });
           setSelectedSystemPrompt((prev) =>
-            prev != null ? { ...prev, isNewConversationDefault: e.target.checked } : prev
+            prev != null ? { ...prev, isNewConversationDefault: isChecked } : prev
           );
         }
       },
@@ -109,7 +138,7 @@ export const SystemPromptModal: React.FC<Props> = React.memo(
         setSelectedConversations(
           newPrompt != null
             ? Object.values(conversations).filter(
-                (conversation) => conversation?.apiConfig.defaultSystemPrompt?.id === newPrompt?.id
+                (conversation) => conversation?.apiConfig.defaultSystemPrompt === newPrompt?.id
               )
             : []
         );
@@ -122,8 +151,8 @@ export const SystemPromptModal: React.FC<Props> = React.memo(
     }, []);
 
     const handleSave = useCallback(() => {
-      onSystemPromptsChange(updatedSystemPrompts);
-    }, [onSystemPromptsChange, updatedSystemPrompts]);
+      onSystemPromptsChange(updatedSystemPrompts, selectedConversations);
+    }, [onSystemPromptsChange, updatedSystemPrompts, selectedConversations]);
 
     // useEffects
     // Update system prompts on any field change since editing is in place
@@ -157,7 +186,11 @@ export const SystemPromptModal: React.FC<Props> = React.memo(
     }, [prompt, selectedSystemPrompt]);
 
     return (
-      <StyledEuiModal onClose={onClose} initialFocus={`.${SYSTEM_PROMPT_SELECTOR_CLASSNAME}`}>
+      <StyledEuiModal
+        onClose={onClose}
+        initialFocus={`.${SYSTEM_PROMPT_SELECTOR_CLASSNAME}`}
+        data-test-subj={TEST_IDS.SYSTEM_PROMPT_MODAL.ID}
+      >
         <EuiModalHeader>
           <EuiModalHeaderTitle>{i18n.ADD_SYSTEM_PROMPT_MODAL_TITLE}</EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -173,7 +206,11 @@ export const SystemPromptModal: React.FC<Props> = React.memo(
           </EuiFormRow>
 
           <EuiFormRow label={i18n.SYSTEM_PROMPT_PROMPT}>
-            <EuiTextArea onChange={handlePromptTextChange} value={prompt} />
+            <EuiTextArea
+              data-test-subj={TEST_IDS.SYSTEM_PROMPT_MODAL.PROMPT_TEXT}
+              onChange={handlePromptTextChange}
+              value={prompt}
+            />
           </EuiFormRow>
 
           <EuiFormRow
@@ -189,6 +226,7 @@ export const SystemPromptModal: React.FC<Props> = React.memo(
           <EuiFormRow>
             <EuiCheckbox
               id={'defaultNewConversation'}
+              data-test-subj={TEST_IDS.SYSTEM_PROMPT_MODAL.TOGGLE_ALL_DEFAULT_CONVERSATIONS}
               label={
                 <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
                   <EuiFlexItem>{i18n.SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}</EuiFlexItem>
@@ -205,9 +243,16 @@ export const SystemPromptModal: React.FC<Props> = React.memo(
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={onClose}>{i18n.CANCEL}</EuiButtonEmpty>
+          <EuiButtonEmpty onClick={onClose} data-test-subj={TEST_IDS.SYSTEM_PROMPT_MODAL.CANCEL}>
+            {i18n.CANCEL}
+          </EuiButtonEmpty>
 
-          <EuiButton type="submit" onClick={handleSave} fill>
+          <EuiButton
+            type="submit"
+            onClick={handleSave}
+            fill
+            data-test-subj={TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE}
+          >
             {i18n.SAVE}
           </EuiButton>
         </EuiModalFooter>

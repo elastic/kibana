@@ -6,17 +6,37 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { mockSystemPrompt } from '../../../mock/system_prompt';
 import { SystemPrompt } from '.';
 import { BASE_CONVERSATIONS, Conversation } from '../../../..';
 import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
+import { Prompt } from '../../types';
+import { TestProviders } from '../../../mock/test_providers/test_providers';
+import { TEST_IDS } from '../../constants';
+
+const BASE_CONVERSATION: Conversation = {
+  ...BASE_CONVERSATIONS[DEFAULT_CONVERSATION_TITLE],
+  apiConfig: {
+    defaultSystemPrompt: mockSystemPrompt.id,
+  },
+};
+
+const mockConversations = {
+  [DEFAULT_CONVERSATION_TITLE]: BASE_CONVERSATION,
+};
+
+const mockSystemPrompts: Prompt[] = [mockSystemPrompt];
 
 const mockUseAssistantContext = {
+  conversations: mockConversations,
   setConversations: jest.fn(),
+  setAllSystemPrompts: jest.fn(),
+  allSystemPrompts: mockSystemPrompts,
 };
+
 jest.mock('../../../assistant_context', () => {
   const original = jest.requireActual('../../../assistant_context');
 
@@ -37,13 +57,6 @@ jest.mock('../../use_conversation', () => {
     useConversation: () => mockUseConversation,
   };
 });
-
-const BASE_CONVERSATION: Conversation = {
-  ...BASE_CONVERSATIONS[DEFAULT_CONVERSATION_TITLE],
-  apiConfig: {
-    defaultSystemPrompt: mockSystemPrompt,
-  },
-};
 
 describe('SystemPrompt', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -94,8 +107,219 @@ describe('SystemPrompt', () => {
     });
   });
 
+  describe('when a new prompt is saved', () => {
+    it('should save new prompt correctly', async () => {
+      const customPromptName = 'custom prompt';
+      const customPromptText = 'custom prompt text';
+      render(
+        <TestProviders>
+          <SystemPrompt conversation={BASE_CONVERSATION} />
+        </TestProviders>
+      );
+      userEvent.click(screen.getByTestId('edit'));
+      userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
+
+      expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
+
+      userEvent.type(
+        within(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_SELECTOR)).getByTestId('comboBoxInput'),
+        `${customPromptName}[Enter]`
+      );
+
+      userEvent.type(
+        screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.PROMPT_TEXT),
+        customPromptText
+      );
+
+      userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
+
+      await waitFor(() => {
+        expect(mockUseAssistantContext.setAllSystemPrompts).toHaveBeenCalledTimes(1);
+        expect(mockUseAssistantContext.setAllSystemPrompts).toHaveBeenNthCalledWith(1, [
+          mockSystemPrompt,
+          {
+            id: customPromptName,
+            content: customPromptText,
+            name: customPromptName,
+            promptType: 'system',
+          },
+        ]);
+        expect(screen.queryByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeFalsy();
+      });
+    });
+
+    it('should save new prompt as a default prompt', async () => {
+      const customPromptName = 'custom prompt';
+      const customPromptText = 'custom prompt text';
+      render(
+        <TestProviders>
+          <SystemPrompt conversation={BASE_CONVERSATION} />
+        </TestProviders>
+      );
+      userEvent.click(screen.getByTestId('edit'));
+      userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
+
+      expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
+
+      userEvent.type(
+        within(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_SELECTOR)).getByTestId('comboBoxInput'),
+        `${customPromptName}[Enter]`
+      );
+
+      userEvent.type(
+        screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.PROMPT_TEXT),
+        customPromptText
+      );
+
+      userEvent.click(
+        screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.TOGGLE_ALL_DEFAULT_CONVERSATIONS)
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.TOGGLE_ALL_DEFAULT_CONVERSATIONS)
+        ).toBeChecked();
+      });
+
+      userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
+
+      await waitFor(() => {
+        expect(mockUseAssistantContext.setAllSystemPrompts).toHaveBeenCalledTimes(1);
+        expect(mockUseAssistantContext.setAllSystemPrompts).toHaveBeenNthCalledWith(1, [
+          {
+            ...mockSystemPrompt,
+            isNewConversationDefault: false,
+          },
+          {
+            id: customPromptName,
+            content: customPromptText,
+            name: customPromptName,
+            promptType: 'system',
+            isNewConversationDefault: true,
+          },
+        ]);
+        expect(screen.queryByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeFalsy();
+      });
+    });
+
+    it('should save new prompt as a default prompt for selected conversations', async () => {
+      const customPromptName = 'custom prompt';
+      const customPromptText = 'custom prompt text';
+      render(
+        <TestProviders>
+          <SystemPrompt conversation={BASE_CONVERSATION} />
+        </TestProviders>
+      );
+      userEvent.click(screen.getByTestId('edit'));
+      userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
+
+      expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
+
+      userEvent.type(
+        within(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_SELECTOR)).getByTestId('comboBoxInput'),
+        `${customPromptName}[Enter]`
+      );
+
+      userEvent.type(
+        screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.PROMPT_TEXT),
+        customPromptText
+      );
+
+      userEvent.click(
+        within(screen.getByTestId(TEST_IDS.CONVERSATIONS_MULTISELECTOR)).getByTestId(
+          'comboBoxInput'
+        )
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId(
+            TEST_IDS.CONVERSATIONS_MULTISELECTOR_OPTION(DEFAULT_CONVERSATION_TITLE)
+          )
+        ).toBeVisible();
+      });
+
+      // select Default Conversation
+      userEvent.click(
+        screen.getByTestId(TEST_IDS.CONVERSATIONS_MULTISELECTOR_OPTION(DEFAULT_CONVERSATION_TITLE))
+      );
+
+      userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeFalsy();
+      });
+
+      expect(mockUseAssistantContext.setAllSystemPrompts).toHaveBeenCalledTimes(1);
+      expect(mockUseAssistantContext.setConversations).toHaveBeenCalledTimes(1);
+      expect(mockUseAssistantContext.setConversations).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          [DEFAULT_CONVERSATION_TITLE]: expect.objectContaining({
+            id: DEFAULT_CONVERSATION_TITLE,
+            apiConfig: expect.objectContaining({
+              defaultSystemPrompt: customPromptName,
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should save new prompt correctly when prompt is removed from selected conversation', async () => {
+      render(
+        <TestProviders>
+          <SystemPrompt conversation={BASE_CONVERSATION} />
+        </TestProviders>
+      );
+      userEvent.click(screen.getByTestId('edit'));
+      userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
+
+      expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
+
+      userEvent.type(
+        within(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_SELECTOR)).getByTestId('comboBoxInput'),
+        `${mockSystemPrompt.name}[Enter]`
+      );
+
+      expect(
+        within(screen.getByTestId(TEST_IDS.CONVERSATIONS_MULTISELECTOR)).getByText(
+          DEFAULT_CONVERSATION_TITLE
+        )
+      ).toBeVisible();
+
+      userEvent.click(
+        within(screen.getByTestId(TEST_IDS.CONVERSATIONS_MULTISELECTOR)).getByTestId(
+          'comboBoxClearButton'
+        )
+      );
+
+      userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeFalsy();
+      });
+      expect(mockUseAssistantContext.setAllSystemPrompts).toHaveBeenCalledTimes(1);
+      expect(mockUseAssistantContext.setConversations).toHaveBeenCalledTimes(1);
+      expect(mockUseAssistantContext.setConversations).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          [DEFAULT_CONVERSATION_TITLE]: expect.objectContaining({
+            id: DEFAULT_CONVERSATION_TITLE,
+            apiConfig: expect.objectContaining({
+              defaultSystemPrompt: undefined,
+            }),
+          }),
+        })
+      );
+    });
+  });
+
   it('shows the system prompt select when the edit button is clicked', () => {
-    render(<SystemPrompt conversation={BASE_CONVERSATION} />);
+    render(
+      <TestProviders>
+        <SystemPrompt conversation={BASE_CONVERSATION} />
+      </TestProviders>
+    );
 
     userEvent.click(screen.getByTestId('edit'));
 
@@ -112,7 +336,11 @@ describe('SystemPrompt', () => {
   });
 
   it('shows the system prompt select when system prompt text is clicked', () => {
-    render(<SystemPrompt conversation={BASE_CONVERSATION} />);
+    render(
+      <TestProviders>
+        <SystemPrompt conversation={BASE_CONVERSATION} />
+      </TestProviders>
+    );
 
     fireEvent.click(screen.getByTestId('systemPromptText'));
 
