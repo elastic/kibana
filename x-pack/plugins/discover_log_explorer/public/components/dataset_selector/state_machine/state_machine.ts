@@ -6,6 +6,7 @@
  */
 
 import { actions, assign, createMachine, raise } from 'xstate';
+import { AllDatasetSelection, SingleDatasetSelection } from '../../../utils/dataset_selection';
 import { UNMANAGED_STREAMS_PANEL_ID } from '../constants';
 import { defaultSearch, DEFAULT_CONTEXT } from './defaults';
 import {
@@ -107,18 +108,18 @@ export const createPureDatasetsSelectorStateMachine = (
             single: {
               on: {
                 SELECT_ALL_LOGS_DATASET: {
-                  actions: ['storeSelection', 'notifySelectionChanged'],
+                  actions: ['storeAllSelection', 'notifySelectionChanged'],
                   target: 'all',
                 },
                 SELECT_DATASET: {
-                  actions: ['storeSelection', 'notifySelectionChanged'],
+                  actions: ['storeSingleSelection', 'notifySelectionChanged'],
                 },
               },
             },
             all: {
               on: {
                 SELECT_DATASET: {
-                  actions: ['storeSelection', 'notifySelectionChanged'],
+                  actions: ['storeSingleSelection', 'notifySelectionChanged'],
                   target: 'single',
                 },
               },
@@ -142,8 +143,11 @@ export const createPureDatasetsSelectorStateMachine = (
           }
           return {};
         }),
-        storeSelection: assign((_context, event) =>
-          'dataset' in event ? { selected: event.dataset } : {}
+        storeAllSelection: assign((_context) => ({
+          selection: AllDatasetSelection.create(),
+        })),
+        storeSingleSelection: assign((_context, event) =>
+          'dataset' in event ? { selection: SingleDatasetSelection.create(event.dataset) } : {}
         ),
         retrieveSearchFromCache: assign((context, event) =>
           'panelId' in event
@@ -174,15 +178,13 @@ export const createDatasetsSelectorStateMachine = ({
   onIntegrationsStreamsSort,
   onUnmanagedStreamsSearch,
   onUnmanagedStreamsSort,
-  onDatasetSelected,
+  onSelectionChange,
   onUnmanagedStreamsReload,
 }: DatasetsSelectorStateMachineDependencies) =>
   createPureDatasetsSelectorStateMachine(initialContext).withConfig({
     actions: {
-      notifySelectionChanged: (_context, event) => {
-        if ('dataset' in event) {
-          return onDatasetSelected(event.dataset);
-        }
+      notifySelectionChanged: (context) => {
+        return onSelectionChange(context.selection);
       },
       loadMoreIntegrations: onIntegrationsLoadMore,
       relaodIntegrations: onIntegrationsReload,

@@ -19,7 +19,7 @@ export class Dataset {
   id: DatasetId;
   iconType?: IconType;
   name: DatasetType['name'];
-  title: DatasetType['title'];
+  title: string;
   parentIntegration?: IntegrationBase;
 
   private constructor(dataset: DatasetDeps, parentIntegration?: IntegrationBase) {
@@ -33,13 +33,17 @@ export class Dataset {
     };
   }
 
+  getFullTitle(): string {
+    return this.parentIntegration?.name
+      ? `[${this.parentIntegration.name}] ${this.title}`
+      : this.title;
+  }
+
   toDataviewSpec(): DataViewSpec {
     // Invert the property because the API returns the index pattern as `name` and a readable name as `title`
     return {
       id: this.id,
-      name: this.parentIntegration?.name
-        ? `[${this.parentIntegration.name}] ${this.title}`
-        : this.title,
+      name: this.getFullTitle(),
       title: this.name as string,
     };
   }

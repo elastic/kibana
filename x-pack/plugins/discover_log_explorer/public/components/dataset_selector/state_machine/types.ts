@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { DatasetSelection, DatasetSelectionChange } from '../../../utils/dataset_selection';
 import { Dataset } from '../../../../common/datasets/models/dataset';
 import { ReloadDatasets, SearchDatasets } from '../../../hooks/use_datasets';
 import {
@@ -12,10 +13,10 @@ import {
   SearchIntegrations,
 } from '../../../hooks/use_integrations';
 import type { IHashedCache } from '../../../../common/hashed_cache';
-import { DatasetSelectionHandler, DatasetsSelectorSearchParams, PanelId } from '../types';
+import { DatasetsSelectorSearchParams, PanelId } from '../types';
 
 export interface DefaultDatasetsSelectorContext {
-  selected?: Dataset;
+  selection: DatasetSelection;
   panelId: PanelId;
   searchCache: IHashedCache<PanelId, DatasetsSelectorSearchParams>;
   search: DatasetsSelectorSearchParams;
@@ -82,7 +83,6 @@ export type DatasetsSelectorEvent =
     }
   | {
       type: 'SELECT_ALL_LOGS_DATASET';
-      dataset: Dataset;
     }
   | {
       type: 'SCROLL_TO_INTEGRATIONS_BOTTOM';
@@ -104,7 +104,7 @@ export interface DatasetsSelectorStateMachineDependencies {
   onIntegrationsSort: SearchIntegrations;
   onIntegrationsStreamsSearch: SearchIntegrations;
   onIntegrationsStreamsSort: SearchIntegrations;
-  onDatasetSelected: DatasetSelectionHandler;
+  onSelectionChange: DatasetSelectionChange;
   onUnmanagedStreamsReload: ReloadDatasets;
   onUnmanagedStreamsSearch: SearchDatasets;
   onUnmanagedStreamsSort: SearchDatasets;

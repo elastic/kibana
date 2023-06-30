@@ -39,7 +39,7 @@ const DatasetsList = dynamic(() => import('./sub_components/datasets_list'), {
 export function DatasetSelector({
   datasets,
   datasetsError,
-  initialSelected,
+  datasetSelection,
   integrations,
   integrationsError,
   isLoadingIntegrations,
@@ -50,7 +50,7 @@ export function DatasetSelector({
   onIntegrationsSort,
   onIntegrationsStreamsSearch,
   onIntegrationsStreamsSort,
-  onDatasetSelected,
+  onSelectionChange,
   onStreamsEntryClick,
   onUnmanagedStreamsReload,
   onUnmanagedStreamsSearch,
@@ -60,7 +60,6 @@ export function DatasetSelector({
     isOpen,
     panelId,
     search,
-    selected,
     closePopover,
     changePanel,
     scrollToIntegrationsBottom,
@@ -70,7 +69,7 @@ export function DatasetSelector({
     sortByOrder,
     togglePopover,
   } = useDatasetSelector({
-    initialContext: { selected: initialSelected },
+    initialContext: { selection: datasetSelection },
     onIntegrationsLoadMore,
     onIntegrationsReload,
     onIntegrationsSearch,
@@ -80,7 +79,7 @@ export function DatasetSelector({
     onUnmanagedStreamsSearch,
     onUnmanagedStreamsSort,
     onUnmanagedStreamsReload,
-    onDatasetSelected,
+    onSelectionChange,
   });
 
   const [setSpyRef] = useIntersectionRef({ onIntersecting: scrollToIntegrationsBottom });
@@ -150,7 +149,7 @@ export function DatasetSelector({
 
   return (
     <DatasetsPopover
-      selected={selected}
+      selection={datasetSelection.selection}
       isOpen={isOpen}
       closePopover={closePopover}
       onClick={togglePopover}

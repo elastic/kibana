@@ -81,12 +81,12 @@ export const buildIntegrationsTree = ({
   );
 };
 
-export const createAllLogDatasetsItem = ({ onClick }: { onClick: DatasetSelectionHandler }) => {
+export const createAllLogDatasetsItem = ({ onClick }: { onClick(): void }) => {
   const allLogDataset = Dataset.createAllLogsDataset();
   return {
     name: allLogDataset.title,
     icon: allLogDataset.iconType && <EuiIcon type={allLogDataset.iconType} />,
-    onClick: () => onClick(allLogDataset),
+    onClick,
   };
 };
 
