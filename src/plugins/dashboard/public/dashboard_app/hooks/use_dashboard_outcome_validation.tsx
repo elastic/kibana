@@ -40,9 +40,11 @@ export const useDashboardOutcomeValidation = () => {
         if (loadOutcome === 'aliasMatch' && dashboardId && alias) {
           const path = scopedHistory.location.hash.replace(dashboardId, alias);
           if (screenshotMode.isScreenshotMode()) {
-            scopedHistory.replace(path);
+            // navigate on next tick to allow Dashboard to finish entering error state.
+            setTimeout(() => scopedHistory.replace(path), 1);
           } else {
-            spaces.redirectLegacyUrl?.({ path, aliasPurpose });
+            // navigate on next tick to allow Dashboard to finish entering error state.
+            setTimeout(() => spaces.redirectLegacyUrl?.({ path, aliasPurpose }), 1);
             return false; // redirected. Stop loading dashboard.
           }
         }

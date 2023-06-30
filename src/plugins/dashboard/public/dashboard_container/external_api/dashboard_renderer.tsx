@@ -116,12 +116,12 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
           savedObjectId
         );
 
+        setLoading(false);
+
         if (canceled) {
           container.destroy();
           return;
         }
-
-        setLoading(false);
 
         if (isErrorEmbeddable(container)) {
           setFatalError(container);
