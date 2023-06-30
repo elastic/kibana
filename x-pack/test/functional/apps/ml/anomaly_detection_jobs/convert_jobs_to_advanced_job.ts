@@ -224,6 +224,185 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.deleteIndexPatternByTitle('ft_categorization_small');
     });
 
+    describe('from multi-metric job creation wizard', function () {
+      const jobGroups = ['automated', 'farequote', 'multi-metric'];
+      const splitField = 'customer_gender';
+      const multiMetricDetectors = [
+        {
+          identifier: 'High count(Event rate)',
+          advancedJobIdentifier: 'high_count partition_field_name=customer_gender',
+        },
+        {
+          identifier: 'Low mean(products.base_price)',
+          advancedJobIdentifier:
+            'low_mean("products.base_price") partition_field_name=customer_gender',
+        },
+      ];
+      const multiMetricInfluencers = ['customer_gender'];
+
+      const bucketSpan = '2h';
+      const memoryLimit = '8mb';
+
+      const testData = {
+        suiteTitle: 'multi-metric job to advanced job wizard',
+        jobSource: 'ft_ecommerce',
+        jobId: `ec_multimetric_to_advanced_1_${Date.now()}`,
+        jobDescription: 'advanced job from multi-metric wizard',
+        jobGroups: ['advanced'],
+        pickFieldsConfig: {
+          detectors: [],
+          influencers: ['geoip.region_name'],
+          bucketSpan: '1h',
+          memoryLimit: '10mb',
+        } as PickFieldsConfig,
+        datafeedConfig: {
+          queryDelay: '55s',
+          frequency: '350s',
+          scrollSize: '999',
+        } as DatafeedConfig,
+      };
+
+      it('multi-metric job creation loads the population wizard for the source data', async () => {
+        await ml.testExecution.logTestStep(
+          'multi-metric job creation loads the job management page'
+        );
+        await ml.navigation.navigateToMl();
+        await ml.navigation.navigateToJobManagement();
+
+        await ml.testExecution.logTestStep('job creation loads the new job source selection page');
+        await ml.jobManagement.navigateToNewJobSourceSelection();
+
+        await ml.testExecution.logTestStep('job creation loads the job type selection page');
+        await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('ft_ecommerce');
+
+        await ml.testExecution.logTestStep('job creation loads the population job wizard page');
+        await ml.jobTypeSelection.selectMultiMetricJob();
+      });
+
+      it('multi-metric job creation navigates through the population wizard and sets all needed fields', async () => {
+        await ml.testExecution.logTestStep('job creation displays the time range step');
+        await ml.jobWizardCommon.assertTimeRangeSectionExists();
+
+        await ml.testExecution.logTestStep('job creation sets the time range');
+        await ml.jobWizardCommon.clickUseFullDataButton(
+          'Jun 12, 2019 @ 00:04:19.000',
+          'Jul 12, 2019 @ 23:45:36.000'
+        );
+
+        await ml.testExecution.logTestStep(
+          'multi-metric job creation displays the event rate chart'
+        );
+        await ml.jobWizardCommon.assertEventRateChartExists();
+        await ml.jobWizardCommon.assertEventRateChartHasData();
+
+        await ml.testExecution.logTestStep(
+          'multi-metric job creation displays the pick fields step'
+        );
+        await ml.jobWizardCommon.advanceToPickFieldsSection();
+
+        for (const [
+          index,
+          { identifier: aggAndFieldIdentifier },
+        ] of multiMetricDetectors.entries()) {
+          await ml.jobWizardCommon.assertAggAndFieldInputExists();
+          await ml.jobWizardCommon.selectAggAndField(aggAndFieldIdentifier, false);
+          await ml.jobWizardCommon.assertDetectorPreviewExists(
+            aggAndFieldIdentifier,
+            index,
+            'LINE'
+          );
+        }
+
+        await ml.testExecution.logTestStep(
+          'multi-metric job creation inputs the split field and displays split cards'
+        );
+        await ml.jobWizardMultiMetric.assertSplitFieldInputExists();
+        await ml.jobWizardMultiMetric.selectSplitField(splitField);
+
+        await ml.jobWizardMultiMetric.assertDetectorSplitExists(splitField);
+        await ml.jobWizardMultiMetric.assertDetectorSplitFrontCardTitle('FEMALE');
+        await ml.jobWizardMultiMetric.assertDetectorSplitNumberOfBackCards(1);
+
+        await ml.testExecution.logTestStep(
+          'multi-metric job creation displays the influencer field'
+        );
+        await ml.jobWizardCommon.assertInfluencerInputExists();
+        await ml.jobWizardCommon.assertInfluencerSelection(multiMetricInfluencers);
+
+        await ml.testExecution.logTestStep('multi-metric job creation inputs the bucket span');
+        await ml.jobWizardCommon.assertBucketSpanInputExists();
+        await ml.jobWizardCommon.setBucketSpan(bucketSpan);
+
+        await ml.testExecution.logTestStep(
+          'multi-metric job creation displays the job details step'
+        );
+        await ml.jobWizardCommon.advanceToJobDetailsSection();
+
+        await ml.testExecution.logTestStep('multi-metric job creation inputs the job id');
+        await ml.jobWizardCommon.assertJobIdInputExists();
+        await ml.jobWizardCommon.setJobId(testData.jobId);
+
+        await ml.testExecution.logTestStep('multi-metric job creation inputs the job description');
+        await ml.jobWizardCommon.assertJobDescriptionInputExists();
+        await ml.jobWizardCommon.setJobDescription(testData.jobDescription);
+
+        await ml.testExecution.logTestStep('multi-metric job creation inputs job groups');
+        await ml.jobWizardCommon.assertJobGroupInputExists();
+        for (const jobGroup of jobGroups) {
+          await ml.jobWizardCommon.addJobGroup(jobGroup);
+        }
+        await ml.jobWizardCommon.assertJobGroupSelection(jobGroups);
+
+        await ml.testExecution.logTestStep(
+          'multi-metric job creation opens the additional settings section'
+        );
+        await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
+
+        await ml.testExecution.logTestStep('multi-metric job creation adds a new custom url');
+        await ml.jobWizardCommon.addCustomUrl({ label: 'check-kibana-dashboard' });
+
+        await ml.testExecution.logTestStep('multi-metric job creation assigns calendars');
+        await ml.jobWizardCommon.addCalendar(calendarId);
+
+        await ml.testExecution.logTestStep('multi-metric job creation opens the advanced section');
+        await ml.jobWizardCommon.ensureAdvancedSectionOpen();
+
+        await ml.testExecution.logTestStep(
+          'multi-metric job creation displays the model plot switch'
+        );
+        await ml.jobWizardCommon.assertModelPlotSwitchExists();
+
+        await ml.testExecution.logTestStep(
+          'multi-metric job creation enables the dedicated index switch'
+        );
+        await ml.jobWizardCommon.assertDedicatedIndexSwitchExists();
+        await ml.jobWizardCommon.activateDedicatedIndexSwitch();
+
+        await ml.testExecution.logTestStep(
+          'multi-metric job creation inputs the model memory limit'
+        );
+        await ml.jobWizardCommon.assertModelMemoryLimitInputExists();
+        await ml.jobWizardCommon.setModelMemoryLimit(memoryLimit);
+
+        await ml.testExecution.logTestStep(
+          'multi-metric job creation displays the validation step'
+        );
+        await ml.jobWizardCommon.advanceToValidationSection();
+
+        await ml.testExecution.logTestStep('multi-metric job creation displays the summary step');
+        await ml.jobWizardCommon.advanceToSummarySection();
+      });
+
+      assertConversionToAdvancedJobWizardRetainsSettingsAndRuns({
+        testSuite: 'multi-metric',
+        testData,
+        bucketSpan,
+        previousInfluencers: multiMetricInfluencers,
+        previousDetectors: multiMetricDetectors,
+        previousJobGroups: jobGroups,
+      });
+    });
+
     describe('from population job creation wizard', function () {
       const jobGroups = ['automated', 'ecommerce', 'population'];
       const populationField = 'customer_id';
