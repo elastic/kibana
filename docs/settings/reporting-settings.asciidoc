@@ -216,7 +216,9 @@ The following deployment configurations may lead to failed report jobs or incomp
 * Network latency between nodes is high.
 * Cross-cluster search is used. 
 
-For exporting large amounts of data we recommend using {es} APIs directly, or Logstash CSV export. See {{search}}, {{eql}}, and {{logstash}}.
+For exporting large amounts of data we recommend using {es} APIs directly, or Logstash CSV export. See {{search}} https://www.elastic.co/guide/en/elasticsearch/reference/current/scroll-api.html and https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html, {ref}/sql-rest-format.html#_csv[sql] 
+
+and {{logstash}} https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html.
 ============
 
 `xpack.reporting.csv.scroll.size`::
