@@ -12,7 +12,6 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { useDashboardLinkEmbeddable } from '../embeddable/dashboard_link_embeddable';
-// import { useNavigationEmbeddable } from '../../navigation_container/embeddable/navigation_container';
 
 export const DashboardLinkComponent = () => {
   const embeddable = useDashboardLinkEmbeddable();
@@ -24,8 +23,8 @@ export const DashboardLinkComponent = () => {
   const dashboardLinkId = embeddable.select((state) => state.explicitInput.dashboardId);
   const dashboardTitle = embeddable.select((state) => state.componentState.dashboardTitle);
 
-  const parentDashboardId = parentDashboard.select((state) => state.componentState.lastSavedId);
   const parentDashboardTitle = parentDashboard.select((state) => state.explicitInput.title);
+  const parentDashboardId = parentDashboard.select((state) => state.componentState.lastSavedId);
 
   return (
     <EuiButtonEmpty

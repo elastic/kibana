@@ -9,7 +9,7 @@
 import ReactDOM from 'react-dom';
 import { isEmpty } from 'lodash';
 import React, { createContext, useContext } from 'react';
-import { distinctUntilChanged, skip, Subject, Subscription } from 'rxjs';
+import { distinctUntilChanged, skip, Subscription } from 'rxjs';
 
 import { Container, ContainerOutput } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -48,10 +48,6 @@ type NavigationReduxEmbeddableTools = ReduxEmbeddableTools<
   typeof navigationEmbeddableReducers
 >;
 
-// interface NavigationEmbeddableConfig {
-//   editable: boolean;
-// }
-
 export class NavigationContainer extends Container<
   LinkInput,
   NavigationContainerInput,
@@ -61,10 +57,6 @@ export class NavigationContainer extends Container<
 
   private node?: HTMLElement;
   private subscriptions: Subscription = new Subscription();
-
-  // public parentDashboardId?: string;
-
-  private parentDashboardSubject = new Subject<string>();
 
   // state management
   public select: NavigationReduxEmbeddableTools['select'];
@@ -106,22 +98,14 @@ export class NavigationContainer extends Container<
     this.dispatch = reduxEmbeddableTools.dispatch;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
-    console.log('INITIALIZE CONTAINER');
     this.initialize();
   }
 
   protected getInheritedInput(id: string): LinkInput {
-    // console.log('get inherited input');
-    // const { viewMode } = this.getInput();
     return { id };
   }
 
   private async initialize() {
-    // currentDashboardId
-
-    // this.parentDashboardId = (
-    //   this.parent as DashboardContainer
-    // ).getState().componentState.lastSavedId;
     this.setupSubscriptions();
     this.setInitializationFinished();
   }
@@ -143,37 +127,29 @@ export class NavigationContainer extends Container<
     };
     return this.createAndSaveEmbeddable(panelState.type, panelState);
   }
-
-  // public getParentDashboardId(): string | undefined {
-  //   const parentDashboardId = (this.parent as DashboardContainer).getState().componentState
-  //     .lastSavedId;
-  //   this.parentDashboardId = (this.parent as DashboardContainer).getState().componentState
-  //   .lastSavedId;
-  // }
-
   private setupSubscriptions() {
-    // this.parent.
-    // this.parentDashboardSubject.next()
     /**
      * If this embeddable is contained in a parent dashboard, it should refetch its parent's saved object info in response
-     * to changes to its parent's id (which means the parent dashboard was cloned/"saved as"), title, and/or description
+     * to changes to its parent's id (which means the parent dashboard was cloned/"saved as"), title, and/or description. This
+     * is so that the dashboard list can be populated with the updated information, including updating the "Current" badge
      **/
-    //   if (this.parent) {
-    //     this.subscriptions.add(
-    //       this.parent
-    //         .getInput$()
-    //         .pipe(
-    //           skip(1),
-    //           distinctUntilChanged(
-    //             (a, b) => a.id === b.id && a.title === b.title && a.description === b.description
-    //           )
-    //         )
-    //         .subscribe(async (input) => {
-    //           this.parentDashboardSubject.next();
-    //         })
-    //     );
-    //   }
-    // }
+    if (this.parent) {
+      this.subscriptions.add(
+        this.parent
+          .getInput$()
+          .pipe(
+            skip(1),
+            distinctUntilChanged(
+              (a, b) => a.id === b.id && a.title === b.title && a.description === b.description
+            )
+          )
+          .subscribe(async () => {
+            this.dispatch.setCurrentDashboardId(
+              (this.parent as DashboardContainer).getState().componentState.lastSavedId
+            );
+          })
+      );
+    }
   }
 
   private async fetchCurrentDashboard(): Promise<DashboardItem> {
@@ -240,13 +216,7 @@ export class NavigationContainer extends Container<
     return simplifiedDashboardList;
   }
 
-  // public getParentDashboard(): DashboardContainer {
-  //   return this.parent as DashboardContainer;
-  // }
-
-  public async reload() {
-    // await this.updateDashboardLinks();
-  }
+  public async reload() {}
 
   public destroy() {
     super.destroy();
@@ -260,8 +230,6 @@ export class NavigationContainer extends Container<
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = node;
-
-    // console.log('render');
 
     ReactDOM.render(
       <KibanaThemeProvider theme$={coreServices.theme.theme$}>
