@@ -19,12 +19,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
-  describe('creating and deleting default index', function describeIndexTests() {
+  describe('creating and deleting default data view', function describeIndexTests() {
     before(async function () {
       await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded(
         'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
       );
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
@@ -34,6 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload(
         'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
       );
+
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     describe('can open and close editor', function () {
@@ -58,6 +61,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await new Promise((e) => setTimeout(e, 500));
         await (await PageObjects.settings.getSaveDataViewButtonActive()).click();
         await PageObjects.settings.removeIndexPattern();
+      });
+
+      it('correctly validates timestamp after index pattern changes', async function () {
+        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickAddNewIndexPatternButton();
+        // setting the index pattern also sets the time field
+        await PageObjects.settings.setIndexPatternField('log*');
+        // wait for timestamp fields to load
+        await new Promise((e) => setTimeout(e, 1000));
+        // this won't have 'timestamp' field
+        await PageObjects.settings.setIndexPatternField('kibana*');
+        // wait for timestamp fields to load
+        await new Promise((e) => setTimeout(e, 1000));
+        await (await PageObjects.settings.getSaveIndexPatternButton()).click();
+        // verify an error is displayed
+        await find.byClassName('euiFormErrorText');
+        await testSubjects.click('closeFlyoutButton');
       });
     });
 
