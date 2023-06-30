@@ -131,14 +131,6 @@ describe('Dashboards landing', () => {
       expect(screen.getByTestId('dashboardsTable')).toBeInTheDocument();
     });
 
-    it('should call DashboardListingTable with withoutPageTemplateWrapper equals to true', async () => {
-      await renderDashboardLanding();
-
-      expect(
-        (DashboardListingTable as jest.Mock).mock.calls[0][0].withoutPageTemplateWrapper
-      ).toEqual(true);
-    });
-
     it('should call DashboardListingTable with correct initialFilter', async () => {
       await renderDashboardLanding();
 
