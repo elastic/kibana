@@ -160,6 +160,7 @@ describe('Connector', () => {
         referencedByCount: 0,
         config: { foo: 'bar' },
         isMissingSecrets: false,
+        isSystemAction: false,
       },
       {
         id: 'test-2',
@@ -167,6 +168,7 @@ describe('Connector', () => {
         name: 'My connector 2',
         isDeprecated: false,
         isPreconfigured: false,
+        isSystemAction: false,
         referencedByCount: 0,
       },
     ];

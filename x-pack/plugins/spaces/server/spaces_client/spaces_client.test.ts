@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 
-import type { GetAllSpacesPurpose } from '../../common';
+import type { GetAllSpacesPurpose, Space } from '../../common';
 import type { ConfigType } from '../config';
 import { ConfigSchema } from '../config';
 import { SpacesClient } from './spaces_client';
@@ -21,51 +22,72 @@ const createMockConfig = (mockConfig: ConfigType = { enabled: true, maxSpaces: 1
 };
 
 describe('#getAll', () => {
-  const savedObjects = [
+  const savedObjects: Array<SavedObject<unknown>> = [
     {
+      // foo has all of the attributes expected by the space interface
       id: 'foo',
+      type: 'space',
+      references: [],
       attributes: {
         name: 'foo-name',
         description: 'foo-description',
-        bar: 'foo-bar',
+        color: '#FFFFFF',
+        initials: 'FB',
+        imageUrl: 'go-bots/predates/transformers',
+        disabledFeatures: [],
+        _reserved: true,
+        bar: 'foo-bar', // an extra attribute that will be ignored during conversion
       },
     },
     {
+      // bar his missing attributes of color and image url
       id: 'bar',
+      type: 'space',
+      references: [],
       attributes: {
         name: 'bar-name',
         description: 'bar-description',
-        bar: 'bar-bar',
+        initials: 'BA',
+        disabledFeatures: [],
+        bar: 'bar-bar', // an extra attribute that will be ignored during conversion
       },
     },
     {
+      // baz only has the bare minumum atributes
       id: 'baz',
+      type: 'space',
+      references: [],
       attributes: {
         name: 'baz-name',
         description: 'baz-description',
-        bar: 'baz-bar',
+        bar: 'baz-bar', // an extra attribute that will be ignored during conversion
       },
     },
   ];
 
-  const expectedSpaces = [
+  const expectedSpaces: Space[] = [
     {
       id: 'foo',
       name: 'foo-name',
       description: 'foo-description',
-      bar: 'foo-bar',
+      color: '#FFFFFF',
+      initials: 'FB',
+      imageUrl: 'go-bots/predates/transformers',
+      disabledFeatures: [],
+      _reserved: true,
     },
     {
       id: 'bar',
       name: 'bar-name',
       description: 'bar-description',
-      bar: 'bar-bar',
+      initials: 'BA',
+      disabledFeatures: [],
     },
     {
       id: 'baz',
       name: 'baz-name',
       description: 'baz-description',
-      bar: 'baz-bar',
+      disabledFeatures: [],
     },
   ];
 
@@ -101,22 +123,31 @@ describe('#getAll', () => {
 });
 
 describe('#get', () => {
-  const savedObject = {
+  const savedObject: SavedObject = {
     id: 'foo',
-    type: 'foo',
+    type: 'space',
     references: [],
     attributes: {
       name: 'foo-name',
       description: 'foo-description',
-      bar: 'foo-bar',
+      color: '#FFFFFF',
+      initials: 'FB',
+      imageUrl: 'go-bots/predates/transformers',
+      disabledFeatures: [],
+      _reserved: true,
+      bar: 'foo-bar', // an extra attribute that will be ignored during conversion
     },
   };
 
-  const expectedSpace = {
+  const expectedSpace: Space = {
     id: 'foo',
     name: 'foo-name',
     description: 'foo-description',
-    bar: 'foo-bar',
+    color: '#FFFFFF',
+    initials: 'FB',
+    imageUrl: 'go-bots/predates/transformers',
+    disabledFeatures: [],
+    _reserved: true,
   };
 
   test(`gets space using callWithRequestRepository`, async () => {
@@ -136,41 +167,35 @@ describe('#get', () => {
 
 describe('#create', () => {
   const id = 'foo';
-
-  const spaceToCreate = {
-    id,
-    name: 'foo-name',
-    description: 'foo-description',
-    bar: 'foo-bar',
-    _reserved: true,
-    disabledFeatures: [],
-  };
-
   const attributes = {
     name: 'foo-name',
     description: 'foo-description',
-    bar: 'foo-bar',
+    color: '#FFFFFF',
+    initials: 'FB',
+    imageUrl: 'go-bots/predates/transformers',
     disabledFeatures: [],
   };
 
-  const savedObject = {
+  const spaceToCreate = {
     id,
-    type: 'foo',
+    ...attributes,
+    _reserved: true,
+    bar: 'foo-bar', // will not make it to the saved object attributes
+  };
+
+  const savedObject: SavedObject = {
+    id,
+    type: 'space',
     references: [],
     attributes: {
-      name: 'foo-name',
-      description: 'foo-description',
-      bar: 'foo-bar',
-      disabledFeatures: [],
+      ...attributes,
+      foo: 'bar', // will get stripped in conversion
     },
   };
 
-  const expectedReturnedSpace = {
+  const expectedReturnedSpace: Space = {
     id,
-    name: 'foo-name',
-    description: 'foo-description',
-    bar: 'foo-bar',
-    disabledFeatures: [],
+    ...attributes,
   };
 
   test(`creates space using callWithRequestRepository when we're under the max`, async () => {
@@ -226,42 +251,37 @@ describe('#create', () => {
 });
 
 describe('#update', () => {
-  const spaceToUpdate = {
-    id: 'foo',
-    name: 'foo-name',
-    description: 'foo-description',
-    bar: 'foo-bar',
-    _reserved: false,
-    disabledFeatures: [],
-  };
-
   const attributes = {
     name: 'foo-name',
     description: 'foo-description',
-    bar: 'foo-bar',
+    color: '#FFFFFF',
+    initials: 'FB',
+    imageUrl: 'go-bots/predates/transformers',
     disabledFeatures: [],
   };
 
-  const savedObject = {
+  const spaceToUpdate = {
     id: 'foo',
-    type: 'foo',
+    ...attributes,
+    _reserved: false, // will have no affect
+    bar: 'foo-bar', // will not make it to the saved object attributes
+  };
+
+  const savedObject: SavedObject = {
+    id: 'foo',
+    type: 'space',
     references: [],
     attributes: {
-      name: 'foo-name',
-      description: 'foo-description',
-      bar: 'foo-bar',
+      ...attributes,
       _reserved: true,
-      disabledFeatures: [],
+      foo: 'bar', // will get stripped in conversion
     },
   };
 
-  const expectedReturnedSpace = {
+  const expectedReturnedSpace: Space = {
     id: 'foo',
-    name: 'foo-name',
-    description: 'foo-description',
-    bar: 'foo-bar',
+    ...attributes,
     _reserved: true,
-    disabledFeatures: [],
   };
 
   test(`updates space using callWithRequestRepository`, async () => {
@@ -283,9 +303,9 @@ describe('#update', () => {
 describe('#delete', () => {
   const id = 'foo';
 
-  const reservedSavedObject = {
+  const reservedSavedObject: SavedObject = {
     id,
-    type: 'foo',
+    type: 'space',
     references: [],
     attributes: {
       name: 'foo-name',
@@ -295,9 +315,9 @@ describe('#delete', () => {
     },
   };
 
-  const notReservedSavedObject = {
+  const notReservedSavedObject: SavedObject = {
     id,
-    type: 'foo',
+    type: 'space',
     references: [],
     attributes: {
       name: 'foo-name',
@@ -335,30 +355,25 @@ describe('#delete', () => {
     expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', id);
     expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith(id);
   });
+});
 
-  describe('#disableLegacyUrlAliases', () => {
-    test(`updates legacy URL aliases using callWithRequestRepository`, async () => {
-      const mockDebugLogger = createMockDebugLogger();
-      const mockConfig = createMockConfig();
-      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+describe('#disableLegacyUrlAliases', () => {
+  test(`updates legacy URL aliases using callWithRequestRepository`, async () => {
+    const mockDebugLogger = createMockDebugLogger();
+    const mockConfig = createMockConfig();
+    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
 
-      const client = new SpacesClient(
-        mockDebugLogger,
-        mockConfig,
-        mockCallWithRequestRepository,
-        []
-      );
-      const aliases = [
-        { targetSpace: 'space1', targetType: 'foo', sourceId: '123' },
-        { targetSpace: 'space2', targetType: 'bar', sourceId: '456' },
-      ];
-      await client.disableLegacyUrlAliases(aliases);
+    const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
+    const aliases = [
+      { targetSpace: 'space1', targetType: 'foo', sourceId: '123' },
+      { targetSpace: 'space2', targetType: 'bar', sourceId: '456' },
+    ];
+    await client.disableLegacyUrlAliases(aliases);
 
-      expect(mockCallWithRequestRepository.bulkUpdate).toHaveBeenCalledTimes(1);
-      expect(mockCallWithRequestRepository.bulkUpdate).toHaveBeenCalledWith([
-        { type: 'legacy-url-alias', id: 'space1:foo:123', attributes: { disabled: true } },
-        { type: 'legacy-url-alias', id: 'space2:bar:456', attributes: { disabled: true } },
-      ]);
-    });
+    expect(mockCallWithRequestRepository.bulkUpdate).toHaveBeenCalledTimes(1);
+    expect(mockCallWithRequestRepository.bulkUpdate).toHaveBeenCalledWith([
+      { type: 'legacy-url-alias', id: 'space1:foo:123', attributes: { disabled: true } },
+      { type: 'legacy-url-alias', id: 'space2:bar:456', attributes: { disabled: true } },
+    ]);
   });
 });
