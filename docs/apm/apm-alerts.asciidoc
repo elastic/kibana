@@ -15,7 +15,7 @@ The following **rules** are supported:
 Alert when the latency or failed transaction rate is abnormal.
 Threshold rules can be as broad or as granular as you'd like, enabling you to define exactly when you want to be alerted--whether that's at the environment level, service name level, transaction type level, and/or transaction name level.
 * **Anomaly rule**:
-Alert when either the latency, throughput, or failed transaction rate of a service is anomalous. Anomaly rules can be set at the environment level, service level, and/or transaction type level.
+Alert when either the latency of a service is anomalous. Anomaly rules can be set at the environment level, service level, and/or transaction type level.
 * **Error count rule**:
 Alert when the number of errors in a service exceeds a defined threshold. Error count rules can be set at the environment level, service level, and error group level.
 
