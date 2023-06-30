@@ -57,7 +57,6 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
     },
     chrome: {
       setBreadcrumbs,
-      setBreadcrumbsAppendExtension,
       setIsVisible: setChromeVisibility,
       getIsVisible$: getChromeIsVisible$,
       recentlyAccessed: chromeRecentlyAccessed,
