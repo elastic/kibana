@@ -26,11 +26,11 @@ import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { FlyoutTabIds, type TabIds } from '../../types';
 
 const columnTitles = {
-  hostIp: i18n.translate('xpack.assetDetailsEmbeddable.overview.metadataHostIpHeading', {
+  hostIp: i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.metadataHostIpHeading', {
     defaultMessage: 'Host IP',
   }),
   hostOsVersion: i18n.translate(
-    'xpack.assetDetailsEmbeddable.overview.metadataHostOsVersionHeading',
+    'xpack.infra.assetDetailsEmbeddable.overview.metadataHostOsVersionHeading',
     {
       defaultMessage: 'Host Os version',
     }

@@ -51,7 +51,7 @@ export const TOOLTIP = {
 };
 
 export const NOT_AVAILABLE_LABEL = i18n.translate(
-  'xpack.assetDetailsEmbeddable.notApplicableLabel',
+  'xpack.infra.assetDetailsEmbeddable.notApplicableLabel',
   {
     defaultMessage: 'N/A',
   }
