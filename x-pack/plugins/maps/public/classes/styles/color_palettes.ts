@@ -37,8 +37,8 @@ export const DEFAULT_HEATMAP_COLOR_RAMP_NAME = 'theclassic';
  * the same functionality.
  */
 function darken(color: string): string {
-  const [h,s,l] = chroma(color).hsl();
-  return chroma.hsl(h,s,Math.min(1, Math.max(0, l - 0.1))).hex();
+  const [h, s, l] = chroma(color).hsl();
+  return chroma.hsl(h, s, Math.min(1, Math.max(0, l - 0.1))).hex();
 }
 
 export const DEFAULT_FILL_COLORS: string[] = euiPaletteColorBlind();

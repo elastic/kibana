@@ -50,7 +50,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
   if (!meta) {
     meta = get(resp, `aggregations.${series.id}.meta`);
   }
-  
+
   // FIXME: the series.color could be undefined even if it is typed as required. This happen due to
   // a partially implemented Mock of Series and Panel in the process_bucket.test.ts
   // The fallback follows the preexisting fallback used from the `color` library

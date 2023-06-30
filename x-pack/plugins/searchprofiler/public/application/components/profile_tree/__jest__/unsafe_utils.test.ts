@@ -13,8 +13,8 @@ import { inputIndices, normalizedIndices } from './fixtures/normalize_indices';
 describe('normalizeBreakdown', function () {
   it('returns correct breakdown', function () {
     const result = util.normalizeBreakdown(breakdown);
-    console.log(JSON.stringify(result, null, 2))
-    console.log(JSON.stringify(normalized, null, 2))
+    console.log(JSON.stringify(result, null, 2));
+    console.log(JSON.stringify(normalized, null, 2));
     expect(result).toEqual(normalized);
   });
 });
