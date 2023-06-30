@@ -16,10 +16,9 @@ export interface UseAssistantAvailability {
 
 export const useAssistantAvailability = (): UseAssistantAvailability => {
   const isEnterprise = useLicense().isEnterprise();
-  console.log('isEnterprise???', isEnterprise);
   return {
     // TODO: Before merging, make it return the real value
-    isAssistantEnabled: true, // isEnterprise,
+    isAssistantEnabled: false, // isEnterprise,
     // TODO: RBAC check (https://github.com/elastic/security-team/issues/6932)
     // Leaving as a placeholder for RBAC as the same behavior will be required
     // When true, the Assistant is hidden and unavailable

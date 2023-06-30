@@ -65,8 +65,7 @@ export const useConnectorSetup = ({
   connectorPrompt: React.ReactElement;
 } => {
   const { appendMessage, setApiConfig, setConversation } = useConversation();
-  const lastCommentRef = useRef<HTMLDivElement | null>(null);
-
+  const bottomRef = useRef<HTMLDivElement | null>(null);
   // Access all conversations so we can add connector to all on initial setup
   const { conversations } = useAssistantContext();
 
@@ -103,17 +102,17 @@ export const useConnectorSetup = ({
 
   // Once streaming of previous message is complete, proceed to next message
   const onHandleMessageStreamingComplete = useCallback(() => {
-    const timeoutId = setTimeout(
-      () => setCurrentMessageIndex(currentMessageIndex + 1),
-      conversation.messages[currentMessageIndex].presentation?.delay ?? 0
-    );
-
+    const timeoutId = setTimeout(() => {
+      bottomRef.current?.scrollIntoView({ block: 'end' });
+      return setCurrentMessageIndex(currentMessageIndex + 1);
+    }, conversation.messages[currentMessageIndex].presentation?.delay ?? 0);
     return () => clearTimeout(timeoutId);
   }, [conversation.messages, currentMessageIndex]);
 
   // Show button to add connector after last message has finished streaming
   const onHandleLastMessageStreamingComplete = useCallback(() => {
     setShowAddConnectorButton(true);
+    bottomRef.current?.scrollIntoView({ block: 'end' });
     onSetupComplete?.();
     setConversation({ conversation: clearPresentationData(conversation) });
   }, [conversation, onSetupComplete, setConversation]);
@@ -144,7 +143,7 @@ export const useConnectorSetup = ({
           {(streamedText, isStreamingComplete) => (
             <EuiText>
               <EuiMarkdownFormat className={`message-${index}`}>{streamedText}</EuiMarkdownFormat>
-              {isLastMessage && isStreamingComplete && <span ref={lastCommentRef} />}
+              <span ref={bottomRef} />
             </EuiText>
           )}
         </StreamingText>
