@@ -116,7 +116,7 @@ export const createAgentPolicyMock = (overrideProps?: Partial<AgentPolicy>): Age
     id: 'agent-policy-1',
     name: 'agent-policy-1',
     description: 'an agent policy',
-    status: "active",
+    status: 'active',
     namespace: 'default',
     monitoring_enabled: Object.values(dataTypes),
     inactivity_timeout: 1209600,
