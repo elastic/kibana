@@ -50,7 +50,7 @@ export const DiscoverTopNav = ({
   const [dataViewList, setDataViewList] = useState([dataView]);
   useEffect(() => {
     if (!dataViewList.includes(dataView)) {
-      setDataViewList([...dataViewList, dataView]);
+      setDataViewList([dataView, ...dataViewList]);
     }
   }, [dataView, dataViewList, setDataViewList]);
   const showDatePicker = useMemo(() => {

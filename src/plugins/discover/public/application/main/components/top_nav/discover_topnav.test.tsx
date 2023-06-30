@@ -20,6 +20,7 @@ import type { SearchBarCustomization, TopNavCustomization } from '../../../../cu
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { dataViewComplexMock } from '../../../../__mocks__/data_view_complex';
 import { waitFor } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -93,21 +94,6 @@ describe('Discover topnav component', () => {
     const topNavMenu = component.find(TopNavMenu);
     const topMenuConfig = topNavMenu.props().config?.map((obj: TopNavMenuData) => obj.id);
     expect(topMenuConfig).toEqual(['new', 'open', 'share', 'inspect', 'save']);
-  });
-
-  test('switching data views ', async () => {
-    const props = getProps(true);
-    const component = mountWithIntl(
-      <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNav {...props} />
-      </DiscoverMainProvider>
-    );
-    props.stateContainer.internalState.transitions.setDataView(dataViewComplexMock);
-    // check if the component now stores 2 data views
-    await waitFor(() => {
-      const topNav = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
-      expect(topNav.prop('indexPatterns')?.length).toBe(2);
-    });
   });
 
   test('generated config of TopNavMenu config is correct when no discover save permissions are assigned', () => {
@@ -206,6 +192,41 @@ describe('Discover topnav component', () => {
         topNav.prop('dataViewPickerOverride') as ReactElement
       ).find(mockSearchBarCustomization.CustomDataViewPicker!);
       expect(dataViewPickerOverride.length).toBe(1);
+    });
+  });
+  test('switching data views should add the new data view to given data view list of the top nav menu', async () => {
+    mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu = jest.fn(() => (
+      <div className="topNavMenu" />
+    ));
+
+    const props = getProps(true);
+    const component = mountWithIntl(
+      <DiscoverMainProvider value={props.stateContainer}>
+        <DiscoverTopNav {...props} />
+      </DiscoverMainProvider>
+    );
+    act(() => {
+      props.stateContainer.internalState.transitions.setDataView(dataViewComplexMock);
+      component.update();
+    });
+
+    // check if the component now stores 2 data views
+    await waitFor(() => {
+      expect(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
+        expect.objectContaining({ indexPatterns: [dataViewComplexMock, dataViewMock] }),
+        {}
+      );
+    });
+    // check if switching back doesn't add the data view again
+    act(() => {
+      props.stateContainer.internalState.transitions.setDataView(dataViewMock);
+      component.update();
+    });
+    await waitFor(() => {
+      expect(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
+        expect.objectContaining({ indexPatterns: [dataViewComplexMock, dataViewMock] }),
+        {}
+      );
     });
   });
 });
