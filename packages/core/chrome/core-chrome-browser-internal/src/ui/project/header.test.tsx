@@ -8,6 +8,7 @@
 
 import { EuiHeader } from '@elastic/eui';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
@@ -20,7 +21,7 @@ describe('Header', () => {
     application: mockApplication,
     breadcrumbs$: Rx.of([]),
     actionMenu$: Rx.of(undefined),
-    kibanaDocLink: 'app/help/doclinks',
+    docLinks: docLinksServiceMock.createStartContract(),
     globalHelpExtensionMenuLinks$: Rx.of([]),
     helpExtension$: Rx.of(undefined),
     helpSupportUrl$: Rx.of('app/help'),

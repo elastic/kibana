@@ -10,6 +10,8 @@ import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+
 import { HeaderHelpMenu } from './header_help_menu';
 
 describe('HeaderHelpMenu', () => {
@@ -26,6 +28,7 @@ describe('HeaderHelpMenu', () => {
         helpSupportUrl$={helpSupportUrl$}
         kibanaVersion={'version'}
         kibanaDocLink={''}
+        docLinks={docLinksServiceMock.createStartContract()}
         defaultContentLinks$={of([])}
       />
     );
@@ -71,6 +74,7 @@ describe('HeaderHelpMenu', () => {
         helpSupportUrl$={helpSupportUrl$}
         kibanaVersion={'version'}
         kibanaDocLink={''}
+        docLinks={docLinksServiceMock.createStartContract()}
         defaultContentLinks$={of([])}
       />
     );
