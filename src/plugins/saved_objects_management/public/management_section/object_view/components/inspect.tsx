@@ -51,7 +51,7 @@ export const Inspect: FC<InspectProps> = ({ object }) => {
           </EuiCopy>
           <EuiSpacer size="s" />
         </div>
-        <CodeEditor // TODO theme provided in src/plugins/saved_objects_management/public/management_section/object_view/saved_object_view.tsx
+        <CodeEditor
           languageId={XJsonLang.ID}
           value={objectAsJsonString}
           aria-label={codeEditorAriaLabel(title)}
