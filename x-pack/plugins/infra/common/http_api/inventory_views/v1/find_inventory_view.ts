@@ -34,3 +34,5 @@ const findInventoryViewResponseRT = rt.exact(
 export const findInventoryViewResponsePayloadRT = rt.type({
   data: rt.array(findInventoryViewResponseRT),
 });
+
+export type FindInventoryViewResponsePayload = rt.TypeOf<typeof findInventoryViewResponsePayloadRT>;
