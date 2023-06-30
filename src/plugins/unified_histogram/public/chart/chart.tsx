@@ -248,6 +248,15 @@ export function Chart({
     }
   }, [chartVisible, isFlyoutVisible]);
 
+  useEffect(() => {
+    return () => {
+      // Close the flyout while unmounting
+      if (isFlyoutVisible) {
+        setIsFlyoutVisible(false);
+      }
+    };
+  }, [isFlyoutVisible]);
+
   const onEditVisualization = useEditVisualization({
     services,
     dataView,
