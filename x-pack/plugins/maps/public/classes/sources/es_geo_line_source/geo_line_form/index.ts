@@ -5,12 +5,5 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../../config.base';
-
-export default createTestConfig({
-  serverlessProject: undefined,
-  testFiles: [require.resolve('.')],
-  junit: {
-    reportName: 'Serverless Common API Integration Tests',
-  },
-});
+export { ENTITY_INPUT_LABEL, SORT_INPUT_LABEL } from './i18n_constants';
+export { GeoLineForm } from './geo_line_form';
