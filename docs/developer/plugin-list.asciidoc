@@ -467,6 +467,10 @@ for inventory and topology purposes.
 |This plugin exists as a workaround for using cloudChat plugin in plugins which can't have a direct dependency on security plugin.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_collaboration/README.md[cloudCollaboration]
+|A Kibana plugin
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_data_migration/README.md[cloudDataMigration]
 |Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud
 
@@ -514,6 +518,10 @@ Plugin server-side only. Plugin has three main functions:
 
 |{kib-repo}blob/{branch}/x-pack/plugins/discover_enhanced/README.md[discoverEnhanced]
 |Contains the enhancements to the OSS discover app.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/discover_log_explorer/README.md[discoverLogExplorer]
+|This plugin registers a log-explorer profile using the Discover customization framework, offering several affordances specifically designed for log consumption.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ecs_data_quality_dashboard/README.md[ecsDataQualityDashboard]

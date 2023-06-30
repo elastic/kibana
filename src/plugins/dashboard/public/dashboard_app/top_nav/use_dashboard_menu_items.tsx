@@ -171,7 +171,7 @@ export const useDashboardMenuItems = ({
       threads: {
         ...topNavStrings.threads,
         id: 'threads',
-        run: () => { },
+        run: () => {},
         render: () => {
           return lastSavedId ? (
             <CollaborationContextProvider>
