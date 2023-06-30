@@ -1440,7 +1440,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       } else if (isTypeof(left, 'compared_mappings_changed')) {
         if (left.updatedRootFields.length) {
-          // compatible migration, some core fields have been updated
+          // compatible migration: some core fields have been updated
           return {
             ...stateP,
             controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
@@ -1455,7 +1455,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             ],
           };
         } else {
-          // compatible migration, all updated hashes correspond to SO types
+          // compatible migration: some fields have been updated, and they all correspond to SO types
           return {
             ...stateP,
             controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
