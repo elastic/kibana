@@ -155,7 +155,6 @@ export class ReportingCore {
     this.pngExport.setup(setupDeps);
     this.pdfExport.setup(setupDeps);
 
-
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
       [executeTask.TYPE]: executeTask.getTaskDefinition(),
@@ -169,7 +168,7 @@ export class ReportingCore {
   public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
-    this.pngExport.start({...startDeps, reporting: this.getContract()});
+    this.pngExport.start({ ...startDeps, reporting: this.getContract() });
     this.pdfExport.start({ ...startDeps, reporting: this.getContract() });
 
     await this.assertKibanaIsAvailable();
@@ -345,7 +344,7 @@ export class ReportingCore {
     }
     return this.pluginSetupDeps;
   }
-  
+
   public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
     const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
     if (spacesService) {
