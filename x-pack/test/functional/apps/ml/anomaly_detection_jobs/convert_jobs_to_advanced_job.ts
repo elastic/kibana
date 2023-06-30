@@ -49,12 +49,14 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('advanced job creation advances to the pick fields step');
       await ml.jobWizardCommon.advanceToPickFieldsSection();
 
-      await ml.testExecution.logTestStep('advanced job creation selects the categorization field');
+      await ml.testExecution.logTestStep('advanced job creation retains the categorization field');
       await ml.jobWizardAdvanced.assertCategorizationFieldSelection(
         testData.categorizationFieldIdentifier ? [testData.categorizationFieldIdentifier] : []
       );
 
-      await ml.testExecution.logTestStep('advanced job creation selects the summary count field');
+      await ml.testExecution.logTestStep(
+        'advanced job creation retains or inputs the summary count field'
+      );
       await ml.jobWizardAdvanced.assertSummaryCountFieldInputExists();
       if (testData.pickFieldsConfig.hasOwnProperty('summaryCountField')) {
         await ml.jobWizardAdvanced.selectSummaryCountField(
@@ -121,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       }
 
-      await ml.testExecution.logTestStep('advanced job creation inputs the bucket span');
+      await ml.testExecution.logTestStep('advanced job creation retains the bucket span');
       await ml.jobWizardCommon.assertBucketSpanInputExists();
       await ml.jobWizardCommon.assertBucketSpanValue(bucketSpan);
 

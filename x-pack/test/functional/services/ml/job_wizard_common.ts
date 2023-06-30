@@ -599,30 +599,24 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async assertConvertToMultiMetricButtonExist(bucketSpan: string) {
-      await testSubjects.existOrFail('mlJobWizardButtonConvertToMultiMetric', {
-        timeout: 2 * 60 * 1000,
-      });
+      await testSubjects.existOrFail('mlJobWizardButtonConvertToMultiMetric');
     },
 
     async convertToMultiMetricJobWizard() {
-      await retry.tryForTime(30 * 1000 * 5, async () => {
+      await retry.tryForTime(5 * 1000, async () => {
         await testSubjects.click('mlJobWizardButtonConvertToMultiMetric');
         await headerPage.waitUntilLoadingHasFinished();
 
-        await testSubjects.existOrFail('mlPageJobWizardHeader-multi_metric', {
-          timeout: 30 * 1000,
-        });
+        await testSubjects.existOrFail('mlPageJobWizardHeader-multi_metric');
       });
     },
 
     async navigateToPreviousJobWizardPage(expectedSelector: string) {
-      await retry.tryForTime(30 * 1000 * 5, async () => {
+      await retry.tryForTime(5 * 1000, async () => {
         await testSubjects.click('mlJobWizardNavButtonPrevious');
         await headerPage.waitUntilLoadingHasFinished();
 
-        await testSubjects.existOrFail(expectedSelector, {
-          timeout: 30 * 1000,
-        });
+        await testSubjects.existOrFail(expectedSelector);
       });
     },
   };
