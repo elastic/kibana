@@ -384,14 +384,14 @@ The current active alerts in the system are represented in the following table w
 
 ${rows}
 
-Assign a ranking position to the each alert within the group of total alerts, basing the ranking only in the following rules:
+Assign a ranking position to the each alert within the group of total alerts, base the ranking only on the following priority rules:
 - If an alert Start column value is more than 2 days ago, they have the lower positions in the ranking
 - Else, if an alert column "Case ids" is empty or "unnasigned", they have the higher positions in the ranking
 - Else, if an alert has values in the column "Case ids" they have the intermediate positions in the ranking
 - In case of tie between alerts in the position in ranking, alerts with be ordered from higher to lower alert Duration in the ranking
 - Do not consider other external factors outside from the above
 
-Using the following template, display the info filling the columns with the values of the single alert with the highest position in rank, using only the above priority rules, not using other factors:
+Display following template filled with the info of the single alert with the highest position in rank based on the above priority rules not using other factors:
 "
 🥇 The the alert with the highest priority right now has the following Reason: A
         📂 Assigned to Case ids: B
