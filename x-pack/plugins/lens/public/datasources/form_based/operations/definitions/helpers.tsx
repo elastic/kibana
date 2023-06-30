@@ -6,8 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isEqual } from 'lodash';
+import { LastValueColumn } from '@kbn/visualizations-plugin/common';
 import type { IndexPattern, IndexPatternField } from '../../../../types';
 import {
   type FieldBasedOperationErrorMessage,
@@ -19,7 +21,7 @@ import {
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './column_types';
-import type { FormBasedLayer } from '../../types';
+import type { FormBasedLayer, LastValueIndexPatternColumn } from '../../types';
 import { hasField } from '../../pure_utils';
 
 export function getInvalidFieldMessage(
@@ -103,10 +105,10 @@ export const generateMissingFieldMessage = (
         missingFields: (
           <>
             {missingFields.map((field, index) => (
-              <>
+              <Fragment key={field}>
                 <strong>{field}</strong>
                 {index + 1 === missingFields.length ? '' : ', '}
-              </>
+              </Fragment>
             ))}
           </>
         ),
@@ -127,8 +129,8 @@ export function combineErrorMessages(
   return messages.length ? messages : undefined;
 }
 
-export function getSafeName(name: string, indexPattern: IndexPattern): string {
-  const field = indexPattern.getFieldByName(name);
+export function getSafeName(name: string, indexPattern: IndexPattern | undefined): string {
+  const field = indexPattern?.getFieldByName(name);
   return field
     ? field.displayName
     : i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
@@ -190,11 +192,25 @@ export function getFormatFromPreviousColumn(
     : undefined;
 }
 
+export function getExistsFilter(field: string) {
+  return {
+    query: `${field}: *`,
+    language: 'kuery',
+  };
+}
+
 export function getFilter(
   previousColumn: GenericIndexPatternColumn | undefined,
   columnParams: { kql?: string | undefined; lucene?: string | undefined } | undefined
 ) {
   let filter = previousColumn?.filter;
+  if (
+    previousColumn &&
+    isColumnOfType<LastValueIndexPatternColumn>('last_value', previousColumn) &&
+    isEqual(filter, getExistsFilter((previousColumn as LastValueColumn)?.sourceField))
+  ) {
+    return;
+  }
   if (columnParams) {
     if ('kql' in columnParams) {
       filter = { query: columnParams.kql ?? '', language: 'kuery' };

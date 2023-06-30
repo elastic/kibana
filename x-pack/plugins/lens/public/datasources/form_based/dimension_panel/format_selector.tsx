@@ -296,7 +296,7 @@ export function FormatSelector(props: FormatSelectorProps) {
         </div>
       </EuiFormRow>
       {currentFormat?.id === 'custom' ? (
-        <EuiFormRow display="columnCompressed" hasEmptyLabelSpace>
+        <EuiFormRow display="columnCompressed" hasEmptyLabelSpace label=" ">
           <EuiFieldText
             data-test-subj={'numberEditorFormatPattern'}
             prepend={i18n.translate('xpack.lens.indexPattern.custom.patternLabel', {

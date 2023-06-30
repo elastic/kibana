@@ -16,7 +16,7 @@ import {
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { VISUALIZE_APP_NAME } from '@kbn/visualizations-plugin/common/constants';
 import { ANNOTATIONS_LISTING_VIEW_ID, EVENT_ANNOTATION_GROUP_TYPE } from '../common/constants';
-import { EventAnnotationGroupAttributes } from '../common/types';
+import { EventAnnotationGroupSavedObjectAttributes } from '../common';
 
 export function setupSavedObjects(coreSetup: CoreSetup) {
   coreSetup.savedObjects.registerType({
@@ -28,7 +28,8 @@ export function setupSavedObjects(coreSetup: CoreSetup) {
       icon: 'flag',
       defaultSearchField: 'title',
       importableAndExportable: true,
-      getTitle: (obj: { attributes: EventAnnotationGroupAttributes }) => obj.attributes.title,
+      getTitle: (obj: { attributes: EventAnnotationGroupSavedObjectAttributes }) =>
+        obj.attributes.title,
       getInAppUrl: (obj: { id: string }) => ({
         // TODO link to specific object
         path: `/app/${VISUALIZE_APP_NAME}#/${ANNOTATIONS_LISTING_VIEW_ID}`,

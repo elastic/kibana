@@ -92,6 +92,10 @@ export function MonitoringClusterOverviewProvider({ getService }) {
       return testSubjects.click('alerts-modal-button');
     }
 
+    confirmWatcherMigrationDone() {
+      return testSubjects.click('alerts-modal-create-button');
+    }
+
     async getPresentPanels() {
       const panelElements = await find.allByCssSelector(
         `[data-test-subj^="${SUBJ_CLUSTER_ITEM_CONTAINER_PREFIX}"]`

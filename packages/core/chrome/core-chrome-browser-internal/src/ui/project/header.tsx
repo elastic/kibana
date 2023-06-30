@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import {
   ChromeBreadcrumb,
   ChromeGlobalHelpExtensionMenuLink,
@@ -28,8 +29,8 @@ import {
 import type { HttpStart } from '@kbn/core-http-browser';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
-import React, { createRef, useState } from 'react';
-import { Router } from 'react-router-dom';
+import React, { createRef, useCallback, useState } from 'react';
+import { Router } from '@kbn/shared-ux-router';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable, debounceTime } from 'rxjs';
@@ -83,7 +84,7 @@ const headerStrings = {
   },
 };
 
-interface Props {
+export interface Props {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   actionMenu$: Observable<MountPoint | undefined>;
   kibanaDocLink: string;
@@ -120,12 +121,15 @@ const Logo = (
     fullHref = props.prependBasePath(homeHref);
   }
 
-  const navigateHome = (event: React.MouseEvent) => {
-    if (fullHref) {
-      props.application.navigateToUrl(fullHref);
-    }
-    event.preventDefault();
-  };
+  const navigateHome = useCallback(
+    (event: React.MouseEvent) => {
+      if (fullHref) {
+        props.application.navigateToUrl(fullHref);
+      }
+      event.preventDefault();
+    },
+    [fullHref, props.application]
+  );
 
   return (
     <span css={logo.container}>
@@ -218,7 +222,9 @@ export const ProjectHeader = ({
           </EuiHeaderSectionItem>
 
           <EuiHeaderSectionItem>
-            <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+            <RedirectAppLinks coreStart={{ application }}>
+              <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+            </RedirectAppLinks>
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
 

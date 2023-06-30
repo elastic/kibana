@@ -22,10 +22,14 @@ import type { Readable } from 'stream';
 import type { Immutable } from '../common/endpoint/types';
 import { AppClient } from './client';
 import type { ConfigType } from './config';
-import type { IRuleExecutionLogForRoutes } from './lib/detection_engine/rule_monitoring';
+import type {
+  IDetectionEngineHealthClient,
+  IRuleExecutionLogForRoutes,
+} from './lib/detection_engine/rule_monitoring';
 import type { FrameworkRequest } from './lib/framework';
 import type { EndpointAuthz } from '../common/endpoint/types/authz';
 import type { EndpointInternalFleetServicesInterface } from './endpoint/services/fleet';
+import type { RiskEngineDataClient } from './lib/risk_engine/risk_engine_data_client';
 
 export { AppClient };
 
@@ -38,10 +42,12 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getAppClient: () => AppClient;
   getSpaceId: () => string;
   getRuleDataService: () => IRuleDataService;
+  getDetectionEngineHealthClient: () => IDetectionEngineHealthClient;
   getRuleExecutionLog: () => IRuleExecutionLogForRoutes;
   getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
+  getRiskEngineDataClient: () => RiskEngineDataClient;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

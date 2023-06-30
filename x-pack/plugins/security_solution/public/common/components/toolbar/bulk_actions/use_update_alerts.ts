@@ -15,8 +15,6 @@ import type { AlertWorkflowStatus } from '../../../types';
 /**
  * Update alert status by query
  *
- * @param useDetectionEngine logic flag for using the regular Detection Engine URL or the RAC URL
- *
  * @param status to update to('open' / 'closed' / 'acknowledged')
  * @param index index to be updated
  * @param query optional query object to update alerts by query.
