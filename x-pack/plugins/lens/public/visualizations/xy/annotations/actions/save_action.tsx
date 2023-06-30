@@ -243,30 +243,29 @@ export const onSave = async ({
         },
       }
     ),
+    toastLifeTimeMs: 10000000,
     text: ((element) =>
       render(
         <I18nProvider>
-          <p>
-            <FormattedMessage
-              id="xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastBody"
-              defaultMessage="View or manage in the {link}."
-              values={{
-                link: (
-                  <EuiLink
-                    data-test-subj="lnsAnnotationLibraryLink"
-                    onClick={() => goToAnnotationLibrary()}
-                  >
-                    {i18n.translate(
-                      'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.annotationLibrary',
-                      {
-                        defaultMessage: 'annotation library',
-                      }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
+          <FormattedMessage
+            id="xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastBody"
+            defaultMessage="View or manage in the {link}."
+            values={{
+              link: (
+                <EuiLink
+                  data-test-subj="lnsAnnotationLibraryLink"
+                  onClick={() => goToAnnotationLibrary()}
+                >
+                  {i18n.translate(
+                    'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.annotationLibrary',
+                    {
+                      defaultMessage: 'annotation library',
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
         </I18nProvider>,
         element
       )) as MountPoint,
