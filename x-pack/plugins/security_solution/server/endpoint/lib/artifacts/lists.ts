@@ -99,6 +99,7 @@ export async function getFilteredEndpointExceptionListRaw({
   filter: string;
   listId: ArtifactListId;
 }): Promise<ExceptionListItemSchema[]> {
+  const perPage = 1000;
   let exceptions: ExceptionListItemSchema[] = [];
   let page = 1;
   let paging = true;
@@ -108,7 +109,7 @@ export async function getFilteredEndpointExceptionListRaw({
       listId,
       namespaceType: 'agnostic',
       filter,
-      perPage: 1000,
+      perPage,
       page,
       sortField: 'created_at',
       sortOrder: 'desc',
@@ -117,7 +118,7 @@ export async function getFilteredEndpointExceptionListRaw({
     if (response?.data !== undefined) {
       exceptions = exceptions.concat(response.data);
 
-      paging = (page - 1) * 1000 + response.data.length < response.total;
+      paging = (page - 1) * perPage + response.data.length < response.total;
       page++;
     } else {
       break;
