@@ -95,6 +95,7 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
     await waitFor(() => {
       expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalledWith({
         path: '/api/endpoint/action/123/file/123.agent-a',
+        version: '2023-10-31',
       });
     });
 

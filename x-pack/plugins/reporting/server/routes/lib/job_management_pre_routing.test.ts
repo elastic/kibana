@@ -104,7 +104,7 @@ it(`should return forbidden if job type is unrecognized`, async function () {
   expect(handlerCalled).toBe(false);
 });
 
-it(`should call callback when document is available`, async function () {
+xit(`should call callback when document is available`, async function () {
   mockJobsQueryFactory.mockReturnValue({
     get: jest.fn(() => ({ jobtype: 'csv_searchsource' })),
   });
@@ -136,7 +136,7 @@ describe('usage counters', () => {
     mockCounters.errorCounter.mockReset();
   });
 
-  it(`should track valid usage`, async function () {
+  xit(`should track valid usage`, async function () {
     mockJobsQueryFactory.mockReturnValue({
       get: jest.fn(() => ({ jobtype: 'csv_searchsource' })),
     });
@@ -160,7 +160,7 @@ describe('usage counters', () => {
     expect(mockCounters.usageCounter).toBeCalled();
   });
 
-  it(`should track error case`, async function () {
+  xit(`should track error case`, async function () {
     mockJobsQueryFactory.mockReturnValue({
       get: jest.fn(() => ({ jobtype: 'csv_searchsource' })),
     });

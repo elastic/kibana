@@ -121,9 +121,7 @@ export class ExecuteReportTask implements ReportingTask {
   }
 
   private getJobContentEncoding(jobType: string) {
-    const exportType = this.exportTypesRegistry.get(
-      ({ jobType: _jobType }) => _jobType === jobType
-    );
+    const exportType = this.exportTypesRegistry.get((e) => e.jobType === jobType);
     return exportType.jobContentEncoding;
   }
 
@@ -245,7 +243,8 @@ export class ExecuteReportTask implements ReportingTask {
     cancellationToken: CancellationToken,
     stream: Writable
   ): Promise<TaskRunResult> {
-    const exportType = this.exportTypesRegistry.get(({ jobType }) => jobType === task.jobtype);
+    const exportType = this.exportTypesRegistry.get((e) => e.jobType === task.jobtype);
+
     if (!exportType) {
       throw new Error(`No export type from ${task.jobtype} found to execute report`);
     }
@@ -253,7 +252,7 @@ export class ExecuteReportTask implements ReportingTask {
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
     return Rx.lastValueFrom(
-      Rx.from(exportType.runTask(task.payload, task.id, cancellationToken, stream)).pipe(
+      Rx.from(exportType.runTask(task.id, task.payload, cancellationToken, stream)).pipe(
         timeout(queueTimeout)
       ) // throw an error if a value is not emitted before timeout
     );

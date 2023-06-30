@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { euiThemeVars } from '@kbn/ui-theme';
 import { Conversation } from '../../../../..';
 import { getOptions } from '../helpers';
 import * as i18n from '../translations';
@@ -149,6 +150,9 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
             `}
           >
             <EuiSuperSelect
+              // Limits popover z-index to prevent it from getting too high and covering tooltips.
+              // If the z-index is not defined, when a popover is opened, it sets the target z-index + 2000
+              popoverProps={{ zIndex: euiThemeVars.euiZLevel8 }}
               data-test-subj="promptSuperSelect"
               fullWidth={fullWidth}
               hasDividers

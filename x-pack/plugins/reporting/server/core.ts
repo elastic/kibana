@@ -31,7 +31,7 @@ import {
   ScreenshottingStart,
 } from '@kbn/screenshotting-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -44,6 +44,7 @@ import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
 import { PngExportType } from './export_types/png_v2';
+import { PdfExportType } from './export_types/printable_pdf_v2';
 import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
@@ -105,6 +106,7 @@ export class ReportingCore {
   private config: ReportingConfigType;
   private executing: Set<string>;
   private pngExport: PngExportType;
+  private pdfExport: PdfExportType;
   private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
@@ -122,6 +124,8 @@ export class ReportingCore {
 
     this.pngExport = new PngExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.pngExport);
+    this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
+    this.exportTypesRegistry.register(this.pdfExport);
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
@@ -130,6 +134,8 @@ export class ReportingCore {
     this.getContract = () => ({
       usesUiCapabilities: () => config.roles.enabled === false,
       registerExportTypes: (id) => id,
+      getScreenshots: this.getScreenshots.bind(this),
+      getSpaceId: this.getSpaceId.bind(this),
     });
 
     this.executing = new Set();
@@ -147,6 +153,8 @@ export class ReportingCore {
     this.pluginSetupDeps = setupDeps; // cache
 
     this.pngExport.setup(setupDeps);
+    this.pdfExport.setup(setupDeps);
+
 
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
@@ -161,7 +169,8 @@ export class ReportingCore {
   public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
-    this.pngExport.start(startDeps);
+    this.pngExport.start({...startDeps, reporting: this.getContract()});
+    this.pdfExport.start({ ...startDeps, reporting: this.getContract() });
 
     await this.assertKibanaIsAvailable();
 
@@ -336,7 +345,7 @@ export class ReportingCore {
     }
     return this.pluginSetupDeps;
   }
-
+  
   public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
     const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
     if (spacesService) {
@@ -369,6 +378,20 @@ export class ReportingCore {
   public async getEsClient() {
     const startDeps = await this.getPluginStartDeps();
     return startDeps.esClient;
+  }
+
+  public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
+    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
+    if (spacesService) {
+      const spaceId = spacesService?.getSpaceId(request);
+
+      if (spaceId !== DEFAULT_SPACE_ID) {
+        logger.info(`Request uses Space ID: ${spaceId}`);
+        return spaceId;
+      } else {
+        logger.debug(`Request uses default Space`);
+      }
+    }
   }
 
   public getScreenshots(options: PdfScreenshotOptions): Rx.Observable<PdfScreenshotResult>;
