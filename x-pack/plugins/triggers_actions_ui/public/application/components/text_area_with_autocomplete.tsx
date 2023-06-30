@@ -84,20 +84,15 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
       const lastDoubleCurlyBracket = value.slice(0, selectionStart).lastIndexOf('{{');
       const currentWordStartIndex = Math.max(lastCloseBracketIndex, lastDoubleCurlyBracket);
 
-      const words = value
-        .slice(currentWordStartIndex === -1 ? 0 : currentWordStartIndex + 2, selectionStart)
-        .trim()
-        .split('.');
-
       const checkedElement = newOptions.find(({ checked }) => checked === 'on');
       if (checkedElement) {
-        words[words.length - 1] = checkedElement.label;
         const newInputText =
           value.slice(0, currentWordStartIndex) +
           '{{' +
-          words.join('.') +
+          checkedElement.label +
           '}}' +
           value.slice(selectionStart);
+
         editAction(paramsProperty, newInputText, index);
         setMatches([]);
       }
