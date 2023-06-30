@@ -39,6 +39,7 @@ import {
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
+import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 import type { StartPlugins } from '../types';
 import { cloudDefendLink } from '../cloud_defend/links';
 import { IconConsole } from '../common/icons/console';
@@ -53,12 +54,6 @@ import { IconEntityAnalytics } from '../common/icons/entity_analytics';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 
 const categories = [
-  {
-    label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
-      defaultMessage: 'Entity Analytics',
-    }),
-    linkIds: [SecurityPageName.entityAnalyticsManagement],
-  },
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
       defaultMessage: 'Endpoints',
@@ -225,6 +220,19 @@ export const getManagementFilteredLinks = async (
     // however, in this situation we allow to access only when there is data, otherwise the link won't be accessible.
     (canReadHostIsolationExceptions &&
       (await checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(core.http))));
+
+  if (ExperimentalFeaturesService.get()?.riskScoringRoutesEnabled) {
+    const existingCategories = links.categories ?? [];
+    links.categories = [
+      {
+        label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
+          defaultMessage: 'Entity Analytics',
+        }),
+        linkIds: [SecurityPageName.entityAnalyticsManagement],
+      },
+      ...existingCategories,
+    ];
+  }
 
   const linksToExclude: SecurityPageName[] = [];
 
