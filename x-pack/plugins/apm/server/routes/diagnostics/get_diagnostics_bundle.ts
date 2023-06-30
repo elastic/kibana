@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 import { getDataStreams } from './bundle/get_data_streams';
 import { getNonDataStreamIndices } from './bundle/get_non_data_stream_indices';
-import { getApmIndexTemplateNames } from './get_apm_index_template_names';
 import { getElasticsearchVersion } from './get_elasticsearch_version';
 import { getIndexTemplatesByIndexPattern } from './bundle/get_index_templates_by_index_pattern';
 import { getExistingApmIndexTemplates } from './bundle/get_existing_index_templates';
@@ -18,6 +16,7 @@ import { getFieldCaps } from './bundle/get_field_caps';
 import { getIndicesAndIngestPipelines } from './bundle/get_indices';
 import { getIndicesStates } from './bundle/get_indices_states';
 import { getApmEvents } from './bundle/get_apm_events';
+import { getApmIndexTemplates } from './helpers/get_apm_index_template_names';
 
 const DEFEAULT_START = Date.now() - 60 * 5 * 1000; // 5 minutes
 const DEFAULT_END = Date.now();
@@ -35,8 +34,6 @@ export async function getDiagnosticsBundle({
   end: number | undefined;
   kuery: string | undefined;
 }) {
-  const apmIndexTemplateNames = getApmIndexTemplateNames();
-
   const { indices, ingestPipelines } = await getIndicesAndIngestPipelines({
     esClient,
     apmIndices,
@@ -49,7 +46,6 @@ export async function getDiagnosticsBundle({
 
   const existingIndexTemplates = await getExistingApmIndexTemplates({
     esClient,
-    apmIndexTemplateNames,
   });
 
   const fieldCaps = await getFieldCaps({ esClient, apmIndices });
@@ -75,6 +71,7 @@ export async function getDiagnosticsBundle({
 
   return {
     created_at: new Date().toISOString(),
+    apmIndices,
     elasticsearchVersion: await getElasticsearchVersion(esClient),
     esResponses: {
       fieldCaps,
@@ -82,10 +79,7 @@ export async function getDiagnosticsBundle({
       ingestPipelines,
       existingIndexTemplates,
     },
-    apmIndexTemplates: getApmIndexTemplates(
-      apmIndexTemplateNames,
-      existingIndexTemplates
-    ),
+    apmIndexTemplates: getApmIndexTemplates(existingIndexTemplates),
     invalidIndices,
     validIndices,
     indexTemplatesByIndexPattern,
@@ -94,36 +88,4 @@ export async function getDiagnosticsBundle({
     apmEvents,
     params: { start, end, kuery },
   };
-}
-
-function getApmIndexTemplates(
-  apmIndexTemplateNames: string[],
-  existingIndexTemplates: IndicesGetIndexTemplateIndexTemplateItem[]
-) {
-  const standardIndexTemplates = apmIndexTemplateNames.map((templateName) => {
-    const matchingTemplate = existingIndexTemplates.find(
-      ({ name }) => name === templateName
-    );
-
-    return {
-      name: templateName,
-      exists: Boolean(matchingTemplate),
-      isNonStandard: false,
-    };
-  });
-
-  const nonStandardIndexTemplates = existingIndexTemplates
-    .filter(
-      (indexTemplate) =>
-        standardIndexTemplates.some(
-          ({ name }) => name === indexTemplate.name
-        ) === false
-    )
-    .map((indexTemplate) => ({
-      name: indexTemplate.name,
-      isNonStandard: true,
-      exists: true,
-    }));
-
-  return [...standardIndexTemplates, ...nonStandardIndexTemplates];
 }

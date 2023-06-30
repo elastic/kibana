@@ -855,7 +855,15 @@
             "label": "onCreateDefaultAdHocDataView",
             "description": [],
             "signature": [
-              "((pattern: string) => void) | undefined"
+              "((dataViewSpec: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ") => void) | undefined"
             ],
             "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
             "deprecated": false,
@@ -864,12 +872,18 @@
               {
                 "parentPluginId": "unifiedSearch",
                 "id": "def-public.DataViewPickerProps.onCreateDefaultAdHocDataView.$1",
-                "type": "string",
+                "type": "Object",
                 "tags": [],
-                "label": "pattern",
+                "label": "dataViewSpec",
                 "description": [],
                 "signature": [
-                  "string"
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewSpec",
+                    "text": "DataViewSpec"
+                  }
                 ],
                 "path": "src/plugins/unified_search/public/dataview_picker/data_view_picker.tsx",
                 "deprecated": false,

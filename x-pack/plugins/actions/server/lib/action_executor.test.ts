@@ -64,6 +64,7 @@ actionExecutor.initialize({
       },
       isPreconfigured: true,
       isDeprecated: false,
+      isSystemAction: false,
     },
   ],
 });
@@ -988,6 +989,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
         },
         isPreconfigured: true,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ],
   });
