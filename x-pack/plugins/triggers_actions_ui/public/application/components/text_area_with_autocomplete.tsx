@@ -30,9 +30,12 @@ interface Props {
   errors?: string[];
 }
 
-const filterSuggestions = (obj: ActionVariable[] | undefined, propertyPath: string) => {
-  if (!obj) return [];
-  const suggections = obj.map(({ name }) => name);
+const filterSuggestions = (
+  actionVariablesList: ActionVariable[] | undefined,
+  propertyPath: string
+) => {
+  if (!actionVariablesList) return [];
+  const suggections = actionVariablesList.map(({ name }) => name);
   const firstLineSuggestions = suggections.reduce((acc: string[], suggection: string) => {
     const splittedWords = suggection.split('.');
     if (splittedWords.length > 1 && !acc.includes(splittedWords[0])) {
@@ -46,14 +49,14 @@ const filterSuggestions = (obj: ActionVariable[] | undefined, propertyPath: stri
 };
 
 export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
-  messageVariables,
-  paramsProperty,
+  editAction,
+  errors,
   index,
   inputTargetValue,
   isDisabled = false,
-  editAction,
   label,
-  errors,
+  messageVariables,
+  paramsProperty,
 }) => {
   const [matches, setMatches] = useState<string[]>([]);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -100,7 +103,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
     [editAction, index, paramsProperty]
   );
 
-  const onChangeWithMessageVariable = () => {
+  const onChangeWithMessageVariable = useCallback(() => {
     if (!textAreaRef.current) return;
     const { value, selectionStart } = textAreaRef.current; // check for selectionEnd, should be when the start is?
 
@@ -148,7 +151,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
     }
 
     editAction(paramsProperty, value, index);
-  };
+  }, [editAction, index, messageVariables, paramsProperty]);
 
   const textareaOnKeyPress = useCallback(
     (event) => {
@@ -236,16 +239,12 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
           name={paramsProperty}
           value={inputTargetValue || ''}
           data-test-subj={`${paramsProperty}TextArea`}
-          onChange={() => onChangeWithMessageVariable()}
+          onChange={onChangeWithMessageVariable}
           onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
             setListOpen(true);
           }}
           onKeyDown={textareaOnKeyPress}
-          // onWheel={() => {
-          //   setListOpen(false);
-          // }}
           onBlur={() => {
-            // setListOpen(false);
             if (!inputTargetValue && !isListOpen) {
               editAction(paramsProperty, '', index);
             }
@@ -268,7 +267,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
               height={32 * 5.5}
               options={optionsToShow}
               onChange={onOptionPick}
-              singleSelection={true}
+              singleSelection
             >
               {(list) => list}
             </EuiSelectable>
