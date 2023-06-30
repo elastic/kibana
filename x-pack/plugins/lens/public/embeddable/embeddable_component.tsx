@@ -23,7 +23,7 @@ import {
 import type { LensByReferenceInput, LensByValueInput } from './embeddable';
 import type { Document } from '../persistence';
 import type { FormBasedPersistedState } from '../datasources/form_based/types';
-import type { TextBasedPrivateState } from '../datasources/text_based/types';
+import type { TextBasedPersistedState } from '../datasources/text_based/types';
 import type { XYState } from '../visualizations/xy/types';
 import type {
   PieVisualizationState,
@@ -46,7 +46,7 @@ type LensAttributes<TVisType, TVisState> = Omit<
   state: Omit<Document['state'], 'datasourceStates' | 'visualization'> & {
     datasourceStates: {
       formBased: FormBasedPersistedState;
-      textBased?: TextBasedPrivateState;
+      textBased?: TextBasedPersistedState;
     };
     visualization: TVisState;
   };
