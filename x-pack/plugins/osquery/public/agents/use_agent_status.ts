@@ -25,17 +25,16 @@ export const useAgentStatus = ({ policyId, skip }: UseAgentStatus) => {
   return useQuery<GetAgentStatusResponse, unknown, GetAgentStatusResponse['results']>(
     ['agentStatus', policyId],
     () =>
-      http.get(
-        `/internal/osquery/fleet_wrapper/agent_status`,
-        policyId
+      http.get(`/internal/osquery/fleet_wrapper/agent_status`, {
+        version: API_VERSIONS.internal.v1,
+        ...(policyId
           ? {
-              version: API_VERSIONS.internal.v1,
               query: {
                 policyId,
               },
             }
-          : { version: API_VERSIONS.internal.v1 }
-      ),
+          : {}),
+      }),
     {
       enabled: !skip,
       select: (response) => response.results,

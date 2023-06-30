@@ -22,7 +22,6 @@ export const privilegesCheckRoute = (router: IRouter, osqueryContext: OsqueryApp
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
-        validate: {},
       },
       async (context, request, response) => {
         if (osqueryContext.security.authz.mode.useRbacForRequest(request)) {
