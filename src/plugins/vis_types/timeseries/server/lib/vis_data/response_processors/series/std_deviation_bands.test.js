@@ -80,7 +80,7 @@ describe('stdDeviationBands(resp, panel, series)', () => {
     expect(results[0]).toEqual({
       id: 'test',
       label: 'Std. Deviation of cpu',
-      color: 'rgb(255, 0, 0)',
+      color: '#ff0000',
       lines: { show: true, fill: 0.5, lineWidth: 0, mode: 'band' },
       bars: { show: false, fill: 0.5, mode: 'band' },
       points: { show: false },

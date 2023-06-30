@@ -92,6 +92,7 @@ export function normalizeBreakdown(breakdown: Record<string, number>) {
     }
     return partialTotal;
   }, 0);
+  
   Object.keys(breakdown)
     .sort()
     .forEach((key) => {
@@ -144,8 +145,9 @@ export function normalizeIndices(indices: IndexMap, target: Targets) {
   for (const index of Object.values(indices)) {
     index.shards.sort(sortQueryComponents);
     for (const shard of index.shards) {
-      shard.relative = ((shard.time / index.time) * 100).toFixed(2);
-      shard.color = chroma.mix('#F5F5F5', '#FFAFAF', shard.relative as any).hex();
+      const relativeTimeRatio = shard.time / index.time
+      shard.relative = (relativeTimeRatio * 100).toFixed(2);
+      shard.color = chroma.mix('#F5F5F5', '#FFAFAF', relativeTimeRatio).hex();
     }
   }
 }

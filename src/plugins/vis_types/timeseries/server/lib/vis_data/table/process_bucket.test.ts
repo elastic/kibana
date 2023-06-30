@@ -10,6 +10,8 @@ import { processBucket } from './process_bucket';
 
 import type { Panel, Series } from '../../../../common/types';
 import { createFieldsFetcher } from '../../search_strategies/lib/fields_fetcher';
+import {PANEL_TYPES} from '../../../../common/enums/panel_types';
+import {METRIC_TYPES} from '../../../../../../data/common/search/aggs/metrics/metric_agg_types';
 
 function createValueObject(key: string | number, value: string | number, seriesId: string) {
   return { key_as_string: `${key}`, doc_count: value, key, [seriesId]: { value } };

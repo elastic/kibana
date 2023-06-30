@@ -403,7 +403,7 @@ describe('getLayers', () => {
             {
               forAccessor: 'column-id-1',
               axisMode: 'right',
-              color: '#68bc00',
+              color: '#68BC00',
             },
           ],
         },
@@ -424,7 +424,7 @@ describe('getLayers', () => {
             {
               forAccessor: 'column-id-1',
               axisMode: 'left',
-              color: '#68bc00',
+              color: '#68BC00',
             },
           ],
         },
@@ -442,7 +442,7 @@ describe('getLayers', () => {
             {
               forAccessor: 'column-id-1',
               axisMode: 'left',
-              color: '#68bc00',
+              color: '#68BC00',
               fill: 'below',
               lineWidth: 1,
             },
@@ -507,7 +507,7 @@ describe('getLayers', () => {
             {
               forAccessor: 'column-id-1',
               axisMode: 'left',
-              color: '#68bc00',
+              color: '#68BC00',
               fill: 'below',
               lineWidth: 1,
             },
@@ -558,7 +558,7 @@ describe('getLayers', () => {
             {
               forAccessor: 'column-id-1',
               axisMode: 'left',
-              color: '#68bc00',
+              color: '#68BC00',
               fill: 'below',
               lineWidth: 1,
             },
@@ -626,7 +626,7 @@ describe('getLayers', () => {
             {
               forAccessor: 'column-id-1',
               axisMode: 'left',
-              color: '#68bc00',
+              color: '#68BC00',
               fill: 'below',
               lineWidth: 1,
             },
@@ -736,7 +736,7 @@ describe('getLayers', () => {
             {
               forAccessor: 'column-id-1',
               axisMode: 'left',
-              color: '#68bc00',
+              color: '#68BC00',
               fill: 'below',
               lineWidth: 1,
             },

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import * as util from '../unsafe_utils';
 import { normalized, breakdown } from './fixtures/breakdown';
 import { inputTimes, normalizedTimes } from './fixtures/normalize_times';
@@ -14,7 +13,9 @@ import { inputIndices, normalizedIndices } from './fixtures/normalize_indices';
 describe('normalizeBreakdown', function () {
   it('returns correct breakdown', function () {
     const result = util.normalizeBreakdown(breakdown);
-    expect(result).to.eql(normalized);
+    console.log(JSON.stringify(result, null, 2))
+    console.log(JSON.stringify(normalized, null, 2))
+    expect(result).toEqual(normalized);
   });
 });
 
@@ -30,7 +31,7 @@ describe('normalizeTime', function () {
     input[0].children.forEach((i: any) => util.normalizeTime(i, totalTime));
 
     // Modifies in place, so inputTimes will change
-    expect(input).to.eql(normalizedTimes);
+    expect(input).toEqual(normalizedTimes);
   });
 });
 
@@ -40,6 +41,6 @@ describe('normalizeIndices', function () {
     const input = JSON.parse(JSON.stringify(inputIndices));
     util.normalizeIndices(input, 'searches');
     const result = util.sortIndices(input);
-    expect(result).to.eql(normalizedIndices);
+    expect(result).toEqual(normalizedIndices);
   });
 });

@@ -83,7 +83,7 @@ describe('stdSibling(resp, panel, series)', () => {
     expect(results[0]).toEqual({
       id: 'test',
       label: 'Overall Std. Deviation of Average of cpu',
-      color: 'rgb(255, 0, 0)',
+      color: '#ff0000',
       stack: false,
       seriesId: 'test',
       lines: { show: true, fill: 0, lineWidth: 1, steps: false },

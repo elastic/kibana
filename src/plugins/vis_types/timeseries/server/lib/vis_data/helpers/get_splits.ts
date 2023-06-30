@@ -50,8 +50,12 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
   if (!meta) {
     meta = get(resp, `aggregations.${series.id}.meta`);
   }
-
-  const color = chroma(series.color).hex();
+  
+  // FIXME: the series.color could be undefined even if it is typed as required. This happen due to
+  // a partially implemented Mock of Series and Panel in the process_bucket.test.ts
+  // The fallback follows the preexisting fallback used from the `color` library
+  // https://github.com/Qix-/color/blob/e188999dee229c902102ec37e398ff4d868616e5/index.js#L38-L41
+  const color = chroma.valid(series.color) ? chroma(series.color).hex() : '#000000';
   const metric = getLastMetric(series);
   const buckets = get(resp, `aggregations.${series.id}.buckets`);
 
