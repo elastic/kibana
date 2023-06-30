@@ -268,6 +268,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('Metadata Tab', () => {
         it('should render metadata tab, add and remove filter', async () => {
+          await pageObjects.infraHostsView.clickMetadataFlyoutTab();
           const metadataTab = await pageObjects.infraHostsView.getMetadataTabName();
           expect(metadataTab).to.contain('Metadata');
 
