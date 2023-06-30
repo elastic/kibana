@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PatchRuleRequestBody, ThresholdPatchRuleRequestBody } from './request_schema';
-import { getPatchRulesSchemaMock, getPatchThresholdRulesSchemaMock } from './request_schema.mock';
+import type { PatchRuleRequestBody, ThresholdPatchRuleRequestBody } from './patch_rule_route';
+import { getPatchRulesSchemaMock, getPatchThresholdRulesSchemaMock } from './patch_rule_route.mock';
 import { validatePatchRuleRequestBody } from './request_schema_validation';
 
 describe('Patch rule request schema, additional validation', () => {

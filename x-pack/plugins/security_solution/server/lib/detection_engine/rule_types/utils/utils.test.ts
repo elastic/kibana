@@ -64,7 +64,7 @@ import {
 import type { ShardError } from '../../../types';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { GenericBulkCreateResponse } from '../factories';
-import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/alerts';
+import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';

@@ -12,8 +12,8 @@ import type {
   ReviewRuleUpgradeResponseBody,
   RuleUpgradeInfoForReview,
   RuleUpgradeStatsForReview,
+  ThreeWayDiff,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import type { ThreeWayDiff } from '../../../../../../common/api/detection_engine/prebuilt_rules/diff/three_way_diff/three_way_diff';
 import { invariant } from '../../../../../../common/utils/invariant';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';

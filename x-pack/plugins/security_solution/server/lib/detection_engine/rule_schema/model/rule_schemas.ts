@@ -76,14 +76,14 @@ import {
   TimestampField,
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
-} from '../../../../../common/api/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import {
   savedIdOrUndefined,
   saved_id,
   anomaly_threshold,
 } from '../../../../../common/api/detection_engine';
 import { SERVER_APP_ID } from '../../../../../common/constants';
-import { ResponseActionRuleParamsOrUndefined } from '../../../../../common/api/detection_engine/rule_response_actions';
+import { ResponseActionRuleParamsOrUndefined } from '../../../../../common/api/detection_engine/model/rule_response_actions';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 

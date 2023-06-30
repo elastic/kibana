@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RuleUpdateProps } from '../../../rule_schema';
-import { getUpdateRulesSchemaMock } from '../../../rule_schema/mocks';
+import type { RuleUpdateProps } from '../../../model/rule_schema';
+import { getUpdateRulesSchemaMock } from '../../../model/rule_schema/mocks';
 import { validateUpdateRuleProps } from './request_schema_validation';
 
 describe('Update rule request schema, additional validation', () => {

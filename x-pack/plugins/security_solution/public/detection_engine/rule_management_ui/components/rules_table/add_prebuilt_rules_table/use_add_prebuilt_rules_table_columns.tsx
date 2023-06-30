@@ -20,7 +20,7 @@ import { useUserData } from '../../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import type { AddPrebuiltRulesTableActions } from './add_prebuilt_rules_table_context';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
-import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/rule_schema';
+import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { getNormalizedSeverity } from '../helpers';
 
 export type TableColumn = EuiBasicTableColumn<RuleInstallationInfoForReview>;

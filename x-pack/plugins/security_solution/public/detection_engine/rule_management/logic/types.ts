@@ -73,14 +73,14 @@ import {
   TimestampField,
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
-} from '../../../../common/api/detection_engine/rule_schema';
+} from '../../../../common/api/detection_engine/model/rule_schema';
 
 import type { PatchRuleRequestBody } from '../../../../common/api/detection_engine/rule_management';
 import { FindRulesSortField } from '../../../../common/api/detection_engine/rule_management';
 import type {
   RuleCreateProps,
   RuleUpdateProps,
-} from '../../../../common/api/detection_engine/rule_schema';
+} from '../../../../common/api/detection_engine/model/rule_schema';
 import { SortOrder } from '../../../../common/api/detection_engine';
 
 /**

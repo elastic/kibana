@@ -14,11 +14,11 @@ import {
   getCreateRulesSchemaMock,
   getUpdateRulesSchemaMock,
   getRulesSchemaMock,
-} from '../../../../common/api/detection_engine/rule_schema/mocks';
+} from '../../../../common/api/detection_engine/model/rule_schema/mocks';
 import {
   BulkActionType,
   BulkActionEditType,
-} from '../../../../common/api/detection_engine/rule_management/bulk_actions/request_schema';
+} from '../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import { rulesMock } from '../logic/mock';
 import type { FindRulesReferencedByExceptionsListProp } from '../logic/types';
 

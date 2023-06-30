@@ -10,7 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import {
-  QueryRuleByIds,
+  ReadRuleRequestQuery,
   validateQueryRuleByIds,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 
@@ -26,7 +26,7 @@ export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logg
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        query: buildRouteValidation(QueryRuleByIds),
+        query: buildRouteValidation(ReadRuleRequestQuery),
       },
       options: {
         tags: ['access:securitySolution'],

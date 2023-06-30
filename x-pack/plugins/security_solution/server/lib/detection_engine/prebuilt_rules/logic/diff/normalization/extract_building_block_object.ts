@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../../common/api/detection_engine/rule_schema';
+import type { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { BuildingBlockObject } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { PrebuiltRuleAsset } from '../../../model/rule_assets/prebuilt_rule_asset';
 

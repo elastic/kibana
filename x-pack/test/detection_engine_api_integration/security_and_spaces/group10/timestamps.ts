@@ -11,7 +11,7 @@ import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/api/de
 import {
   EqlRuleCreateProps,
   QueryRuleCreateProps,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';

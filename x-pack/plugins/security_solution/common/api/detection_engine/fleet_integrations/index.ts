@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './get_installed_integrations/response_schema';
+export * from './get_installed_integrations/get_installed_integrations_route';
 export * from './urls';
 
-export * from './installed_integrations';
+export * from './model/installed_integrations';

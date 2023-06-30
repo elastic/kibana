@@ -13,7 +13,7 @@ import type {
   RuleExecutionStatus,
   SortFieldOfRuleExecutionResult,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
-import type { RuleObjectId } from '../../../../../../../common/api/detection_engine/rule_schema';
+import type { RuleObjectId } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../../../../../common/api/detection_engine';
 
 /**

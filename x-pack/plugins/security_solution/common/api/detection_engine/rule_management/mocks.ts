@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export * from './bulk_actions/request_schema.mock';
-export * from './crud/patch_rule/request_schema.mock';
+export * from './bulk_actions/bulk_actions_route.mock';
+export * from './crud/patch_rule/patch_rule_route.mock';
 
 export * from './export_rules/export_rules_details_schema.mock';
 export * from './import_rules/rule_to_import.mock';

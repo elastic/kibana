@@ -34,13 +34,13 @@ import type {
   SetupGuide,
   TimestampOverride,
   AlertSuppressionMissingFields,
-} from '../../../../../common/api/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../../../common/api/detection_engine';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import type {
   RuleResponseAction,
   ResponseAction,
-} from '../../../../../common/api/detection_engine/rule_response_actions';
+} from '../../../../../common/api/detection_engine/model/rule_response_actions';
 
 export interface EuiBasicTableSortTypes {
   field: string;

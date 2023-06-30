@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PatchRuleRequestBody } from './request_schema';
+import type { PatchRuleRequestBody } from './patch_rule_route';
 
 /**
  * Additional validation that is implemented outside of the schema itself.

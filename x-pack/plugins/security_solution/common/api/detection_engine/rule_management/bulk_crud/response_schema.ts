@@ -7,8 +7,7 @@
 
 import * as t from 'io-ts';
 
-import { RuleResponse } from '../../rule_schema';
-import { errorSchema } from '../../error_schema';
+import { RuleResponse, errorSchema } from '../../model';
 
 export type BulkCrudRulesResponse = t.TypeOf<typeof BulkCrudRulesResponse>;
 export const BulkCrudRulesResponse = t.array(t.union([RuleResponse, errorSchema]));

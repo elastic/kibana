@@ -8,7 +8,7 @@
 import type {
   DataViewId,
   IndexPatternArray,
-} from '../../../../../../../common/api/detection_engine/rule_schema';
+} from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { RuleDataSource } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 import { DataSourceType } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 

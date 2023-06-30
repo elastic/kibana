@@ -11,7 +11,7 @@ import {
   DETECTION_ENGINE_RULES_URL,
   NOTIFICATION_THROTTLE_RULE,
 } from '@kbn/security-solution-plugin/common/constants';
-import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_schema';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   BulkActionType,
   BulkActionEditType,

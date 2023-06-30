@@ -18,7 +18,7 @@ import { makeFloatString } from '../../utils/utils';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
-} from '../../../../../../common/api/detection_engine/alerts';
+} from '../../../../../../common/api/detection_engine/model/alerts';
 import type { RuleServices } from '../../types';
 import { createEnrichEventsFunction } from '../../utils/enrichments';
 

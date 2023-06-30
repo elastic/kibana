@@ -34,7 +34,7 @@ import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map'
 import type { Filter, DataViewFieldBase } from '@kbn/es-query';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { RuleResponseAction } from '../../../../common/api/detection_engine/rule_response_actions';
+import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
 import type { CompleteRule, RuleParams } from '../rule_schema';
@@ -56,8 +56,8 @@ import type {
   BaseFieldsLatest,
   DetectionAlert,
   WrappedFieldsLatest,
-} from '../../../../common/api/detection_engine/alerts';
-import type { RuleResponse } from '../../../../common/api/detection_engine/rule_schema';
+} from '../../../../common/api/detection_engine/model/alerts';
+import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import type { EnrichEvents } from './utils/enrichments/types';
 import type { ThresholdResult } from './threshold/types';
 

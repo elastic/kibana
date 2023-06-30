@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export * from './create_rule_exceptions/request_schema';
-export * from './find_exception_references/request_schema';
-export * from './find_exception_references/response_schema';
+export * from './create_rule_exceptions/create_rule_exceptions_route';
+export * from './find_exception_references/find_exception_references_route';
 export * from './urls';

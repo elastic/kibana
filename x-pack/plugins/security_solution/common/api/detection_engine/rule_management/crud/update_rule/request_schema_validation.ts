@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleUpdateProps } from '../../../rule_schema';
+import type { RuleUpdateProps } from '../../../model';
 
 /**
  * Additional validation that is implemented outside of the schema itself.

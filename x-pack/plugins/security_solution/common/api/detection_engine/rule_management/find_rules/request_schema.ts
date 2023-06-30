@@ -7,9 +7,8 @@
 
 import * as t from 'io-ts';
 import { DefaultPerPage, DefaultPage } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { PerPage, Page } from '../..';
-import { queryFilter, fields, SortOrder } from '../..';
-import type { RuleResponse } from '../../rule_schema';
+import type { PerPage, Page, RuleResponse } from '../../model';
+import { SortOrder, queryFilter, fields } from '../../model';
 
 export type FindRulesSortField = t.TypeOf<typeof FindRulesSortField>;
 export const FindRulesSortField = t.union([

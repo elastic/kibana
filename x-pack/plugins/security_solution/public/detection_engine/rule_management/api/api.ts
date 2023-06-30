@@ -25,7 +25,7 @@ import type {
   ReviewRuleUpgradeResponseBody,
   ReviewRuleInstallationResponseBody,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
-import type { RuleManagementFiltersResponse } from '../../../../common/api/detection_engine/rule_management';
+import type { GetRuleManagementFiltersResponse } from '../../../../common/api/detection_engine/rule_management';
 import { RULE_MANAGEMENT_FILTERS_URL } from '../../../../common/api/detection_engine/rule_management';
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
@@ -50,12 +50,12 @@ import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../com
 import type {
   BulkActionDuplicatePayload,
   BulkActionEditPayload,
-} from '../../../../common/api/detection_engine/rule_management/bulk_actions/request_schema';
-import { BulkActionType } from '../../../../common/api/detection_engine/rule_management/bulk_actions/request_schema';
+} from '../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import { BulkActionType } from '../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
 import type {
   PreviewResponse,
   RuleResponse,
-} from '../../../../common/api/detection_engine/rule_schema';
+} from '../../../../common/api/detection_engine/model/rule_schema';
 
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from '../../../detections/pages/detection_engine/rules/translations';
@@ -455,8 +455,8 @@ export const fetchRuleManagementFilters = async ({
   signal,
 }: {
   signal?: AbortSignal;
-}): Promise<RuleManagementFiltersResponse> =>
-  KibanaServices.get().http.fetch<RuleManagementFiltersResponse>(RULE_MANAGEMENT_FILTERS_URL, {
+}): Promise<GetRuleManagementFiltersResponse> =>
+  KibanaServices.get().http.fetch<GetRuleManagementFiltersResponse>(RULE_MANAGEMENT_FILTERS_URL, {
     method: 'GET',
     signal,
   });

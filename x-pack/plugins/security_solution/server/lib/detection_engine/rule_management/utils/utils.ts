@@ -22,7 +22,7 @@ import type {
   AlertSuppression,
   RuleResponse,
   AlertSuppressionCamel,
-} from '../../../../../common/api/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import type { RuleAlertType, RuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';

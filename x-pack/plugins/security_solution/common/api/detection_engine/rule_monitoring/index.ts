@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-export * from './detection_engine_health/get_cluster_health_schemas';
-export * from './detection_engine_health/get_rule_health_schemas';
-export * from './detection_engine_health/get_space_health_schemas';
-export * from './rule_execution_logs/get_rule_execution_events_schemas';
-export * from './rule_execution_logs/get_rule_execution_results_schemas';
+export * from './detection_engine_health/get_cluster_health/get_cluster_health_route';
+export * from './detection_engine_health/get_rule_health/get_rule_health_route';
+export * from './detection_engine_health/get_space_health/get_space_health_route';
+export * from './detection_engine_health/model';
+export * from './rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route';
+export * from './rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route';
 export * from './urls';
 
-export * from './model/detection_engine_health/cluster_health';
-export * from './model/detection_engine_health/health_interval';
-export * from './model/detection_engine_health/health_metadata';
-export * from './model/detection_engine_health/health_stats';
-export * from './model/detection_engine_health/rule_health';
-export * from './model/detection_engine_health/space_health';
 export * from './model/execution_event';
 export * from './model/execution_metrics';
 export * from './model/execution_result';

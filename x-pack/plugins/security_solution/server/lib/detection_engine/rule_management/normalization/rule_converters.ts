@@ -27,7 +27,7 @@ import type {
   RuleResponse,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
-} from '../../../../../common/api/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 import {
   EqlPatchParams,
   MachineLearningPatchParams,
@@ -36,7 +36,7 @@ import {
   SavedQueryPatchParams,
   ThreatMatchPatchParams,
   ThresholdPatchParams,
-} from '../../../../../common/api/detection_engine/rule_schema';
+} from '../../../../../common/api/detection_engine/model/rule_schema';
 
 import {
   transformAlertToRuleAction,

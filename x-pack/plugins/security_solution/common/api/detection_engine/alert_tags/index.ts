@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './set_alert_tags';
+export * from './set_alert_tags/set_alert_tags_route';

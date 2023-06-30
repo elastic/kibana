@@ -18,7 +18,7 @@ import {
   SavedObjectResolveAliasPurpose,
   SavedObjectResolveAliasTargetId,
   SavedObjectResolveOutcome,
-} from '../detection_engine/rule_schema';
+} from '../detection_engine/model/rule_schema';
 import { errorSchema, success, success_count as successCount } from '../detection_engine';
 
 export const BareNoteSchema = runtimeTypes.intersection([

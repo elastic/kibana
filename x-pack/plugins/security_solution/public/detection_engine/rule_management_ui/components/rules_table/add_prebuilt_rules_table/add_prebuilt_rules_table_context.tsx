@@ -8,7 +8,7 @@
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { RuleInstallationInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/rule_schema';
+import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import {
   usePerformInstallAllRules,

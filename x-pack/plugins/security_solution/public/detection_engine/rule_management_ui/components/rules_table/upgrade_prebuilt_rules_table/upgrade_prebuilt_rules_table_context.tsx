@@ -11,7 +11,7 @@ import { useInstalledSecurityJobs } from '../../../../../common/components/ml/ho
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { affectedJobIds } from '../../../../../detections/components/callouts/ml_job_compatibility_callout/affected_job_ids';
 import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/rule_schema';
+import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import {
   usePerformUpgradeAllRules,

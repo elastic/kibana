@@ -35,7 +35,7 @@ import {
   getPerformBulkActionEditSchemaMock,
 } from '../../../../../common/api/detection_engine/rule_management/mocks';
 
-import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/rule_schema/mocks';
+import { getCreateRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import type {
   QuerySignalsSchemaDecoded,
   SetSignalsStatusSchemaDecoded,

@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-export * from './pagination';
-export * from './schemas';
-export * from './sorting';
-export * from './error_schema';
-export * from './warning_schema';
+export * from './alert_tags';
+export * from './fleet_integrations';
+export * from './model';
+export * from './prebuilt_rules';
+export * from './rule_exceptions';
+export * from './rule_management';
+export * from './rule_monitoring';
+export * from './signals';
+export * from './signals_migration';

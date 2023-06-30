@@ -16,7 +16,7 @@ import type { RefreshTypes } from '../../types';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
-} from '../../../../../common/api/detection_engine/alerts';
+} from '../../../../../common/api/detection_engine/model/alerts';
 
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;
