@@ -267,10 +267,3 @@ export const rawRuleSchema = schema.object({
   ),
   params: schema.recordOf(schema.string(), schema.any()),
 });
-
-// export type RawRule = TypeOf<typeof rawRuleSchema>;
-// export type RawRuleExecutionStatus = TypeOf<typeof rawRuleExecutionStatusSchema>;
-// export type RawRuleLastRun = TypeOf<typeof rawRuleLastRunSchema>;
-// export type RawRuleMonitoring = TypeOf<typeof rawRuleMonitoringSchema>;
-// export type RawRuleAlertsFilter = TypeOf<typeof rawRuleAlertsFilterSchema>;
-// export type RawRuleAction = TypeOf<typeof rawRuleActionSchema>;

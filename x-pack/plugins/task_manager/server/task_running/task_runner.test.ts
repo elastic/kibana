@@ -1570,6 +1570,10 @@ describe('TaskManagerRunner', () => {
             },
           })
         );
+        expect(logger.warn).toHaveBeenCalledTimes(2);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Task (bar/foo) has a validation error: [baz]: expected value of type [string] but got [undefined]'
+        );
         expect(logger.warn).toHaveBeenCalledWith(
           'Task Manager has skipped executing the Task (bar/foo) 1 times as it has invalid params.'
         );
@@ -1621,6 +1625,10 @@ describe('TaskManagerRunner', () => {
         expect(instance.schedule).toEqual(mockTaskInstance.schedule);
         expect(instance.attempts).toBe(0);
         expect(instance.numSkippedRuns).toBe(1);
+        expect(logger.warn).toHaveBeenCalledTimes(2);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Task (bar/foo) has a validation error in its indirect params: [baz]: expected value of type [string] but got [undefined]'
+        );
         expect(logger.warn).toHaveBeenCalledWith(
           'Task Manager has skipped executing the Task (bar/foo) 1 times as it has invalid params.'
         );
@@ -1873,8 +1881,8 @@ describe('TaskManagerRunner', () => {
           enabled: true,
           state: { existingStateParam: 'foo' },
           runAt: new Date(),
-          numSkippedRuns: 10,
-          attempts: 2,
+          numSkippedRuns: 20,
+          attempts: 3,
         };
         const error = new Error('test');
 
@@ -1907,8 +1915,8 @@ describe('TaskManagerRunner', () => {
 
         expect(store.update).toHaveBeenCalledWith(
           expect.objectContaining({
-            attempts: 2,
-            numSkippedRuns: 10,
+            attempts: 3,
+            numSkippedRuns: 20,
             state: {},
             status: TaskStatus.Idle,
           }),
@@ -1969,6 +1977,63 @@ describe('TaskManagerRunner', () => {
         );
         expect(store.remove).not.toHaveBeenCalled();
         expect(result).toEqual(asErr({ state: {}, error }));
+      });
+
+      test('stops skipping when the max skip limit is reached', async () => {
+        const mockTaskInstance: Partial<ConcreteTaskInstance> = {
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+          schedule: { interval: '3s' },
+          enabled: true,
+          state: { existingStateParam: 'foo' },
+          runAt: new Date(),
+          numSkippedRuns: 20,
+          attempts: 0,
+        };
+
+        const { runner, store, logger } = await readyToRunStageSetup({
+          instance: mockTaskInstance,
+          requeueInvalidTasksConfig: {
+            enabled: true,
+            delay: 3000,
+            max_attempts: 20,
+          },
+          definitions: {
+            bar: {
+              title: 'Bar!',
+              createTaskRunner: () => ({
+                async beforeRun() {
+                  return { data: { baz: 'bar' } };
+                },
+                async run() {
+                  return { state: {}, hasError: true };
+                },
+              }),
+              indirectParamsSchema: schema.object({
+                foo: schema.string(),
+              }),
+            },
+          },
+        });
+
+        const result = await runner.run();
+
+        expect(store.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attempts: 0,
+            numSkippedRuns: 20,
+            state: {},
+            status: TaskStatus.Idle,
+          }),
+          { validate: true }
+        );
+        expect(store.remove).not.toHaveBeenCalled();
+        expect(logger.warn).toHaveBeenCalledTimes(2);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Task (bar/foo) has a validation error in its indirect params: [foo]: expected value of type [string] but got [undefined]'
+        );
+        expect(logger.warn).toHaveBeenCalledWith('Task Manager has reached the max skip attempts');
+        expect(result).toEqual(asOk({ state: {}, hasError: true }));
       });
     });
   });

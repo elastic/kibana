@@ -55,6 +55,10 @@ export interface TaskRunnerContext {
   savedObjectsRepository: ISavedObjectsRepository;
 }
 
+export type ActionData =
+  | { data: { actionInfo: ActionInfo; taskParams: TaskParams }; error?: never }
+  | { data?: never; error: Error };
+
 type TaskParams = Omit<SavedObject<ActionTaskParams>, 'id' | 'type'>;
 
 export class TaskRunnerFactory {
@@ -98,34 +102,41 @@ export class TaskRunnerFactory {
     const actionExecutionId = uuidv4();
     const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
 
-    let actionInfo: ActionInfo;
-    let taskParams: TaskParams;
+    let actionData: ActionData;
 
     return {
       async beforeRun(): Promise<BeforeRunResult<RawAction>> {
         try {
-          taskParams = await getActionTaskParams(
+          const taskParams = await getActionTaskParams(
             actionTaskExecutorParams,
             encryptedSavedObjectsClient,
             spaceIdToNamespace
           );
 
           const request = getFakeRequest(taskParams.attributes.apiKey);
-          actionInfo = await actionExecutor.getActionInfoInternal(
+          const actionInfo = await actionExecutor.getActionInfoInternal(
             taskParams.attributes.actionId,
             request
           );
-
+          actionData = {
+            data: { taskParams, actionInfo },
+          };
           return { data: actionInfo.rawAction };
         } catch (error) {
+          actionData = { error };
           return { error };
         }
       },
       async run() {
-        if (!actionInfo) {
+        if (!actionData) {
           await this.beforeRun();
         }
+        if (actionData.error) {
+          throwRetryableError(actionData.error, true);
+        }
+
         const { spaceId } = actionTaskExecutorParams;
+        const { taskParams, actionInfo } = actionData.data!;
         const {
           attributes: {
             actionId,
@@ -137,7 +148,7 @@ export class TaskRunnerFactory {
             relatedSavedObjects,
           },
           references,
-        } = taskParams!;
+        } = taskParams;
 
         const path = addSpaceIdToPath('/', spaceId);
 

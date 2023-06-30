@@ -381,6 +381,7 @@ export class TaskManagerRunner implements TaskRunner {
       if (numSkippedRuns < maxAttempts) {
         error = createSkipError(err);
       } else {
+        this.logger.warn(`Task Manager has reached the max skip attempts`);
         error = createRetryableError(err, true);
       }
     }
@@ -405,6 +406,8 @@ export class TaskManagerRunner implements TaskRunner {
           );
           if (numSkippedRuns < maxAttempts) {
             error = createSkipError(err);
+          } else {
+            this.logger.warn(`Task Manager has reached the max skip attempts`);
           }
         }
       }
@@ -584,7 +587,7 @@ export class TaskManagerRunner implements TaskRunner {
   ): Result<SuccessfulRunResult, FailedTaskResult> => {
     const { state, error } = failureResult;
     const { schedule, attempts } = this.instance.task;
-    const { max_attempts: maxSkipAttempts, enabled, delay } = this.requeueInvalidTasksConfig;
+    const { max_attempts: maxSkipAttempts, delay } = this.requeueInvalidTasksConfig;
     let skipAttempts = this.instance.task.numSkippedRuns ?? 0;
 
     if (isSkipError(error)) {
@@ -628,7 +631,7 @@ export class TaskManagerRunner implements TaskRunner {
       }
     }
 
-    if (skipAttempts >= maxSkipAttempts && enabled) {
+    if (skipAttempts >= maxSkipAttempts) {
       return asErr({ status: TaskStatus.DeadLetter });
     }
 
