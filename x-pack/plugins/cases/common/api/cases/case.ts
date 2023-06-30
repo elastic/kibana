@@ -17,9 +17,9 @@ import { limitedArraySchema, limitedStringSchema } from '../../schema';
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_TITLE_LENGTH,
-  MAX_TAG_LENGTH,
+  MAX_LENGTH_PER_TAG,
   MAX_CATEGORY_LENGTH,
-  MAX_TAGS,
+  MAX_TAGS_PER_CASE,
 } from '../../constants';
 
 export const AttachmentTotalsRt = rt.strict({
@@ -144,7 +144,12 @@ export const CasePostRequestRt = rt.intersection([
     /**
      * Identifiers for the case.
      */
-    tags: limitedArraySchema(limitedStringSchema('tag', 1, MAX_TAG_LENGTH), 0, MAX_TAGS, 'tags'),
+    tags: limitedArraySchema(
+      limitedStringSchema('tag', 1, MAX_LENGTH_PER_TAG),
+      0,
+      MAX_TAGS_PER_CASE,
+      'tags'
+    ),
     /**
      * Title of the case
      */
@@ -356,7 +361,12 @@ export const CasePatchRequestRt = rt.intersection([
       /**
        * The identifying strings for filter a case
        */
-      tags: limitedArraySchema(limitedStringSchema('tag', 1, MAX_TAG_LENGTH), 0, MAX_TAGS, 'tags'),
+      tags: limitedArraySchema(
+        limitedStringSchema('tag', 1, MAX_LENGTH_PER_TAG),
+        0,
+        MAX_TAGS_PER_CASE,
+        'tags'
+      ),
       /**
        * The title of a case
        */

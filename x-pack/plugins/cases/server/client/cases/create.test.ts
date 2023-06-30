@@ -7,8 +7,8 @@
 
 import {
   MAX_DESCRIPTION_LENGTH,
-  MAX_TAGS,
-  MAX_TAG_LENGTH,
+  MAX_TAGS_PER_CASE,
+  MAX_LENGTH_PER_TAG,
   MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
@@ -133,13 +133,13 @@ describe('create', () => {
 
     it('should throw an error if the title is an empty string', async () => {
       await expect(create({ ...theCase, title: '' }, clientArgs)).rejects.toThrow(
-        'Failed to create case: Error: The length of the title is too short. The minimum length is 1.'
+        'Failed to create case: Error: The title field cannot be an empty string.'
       );
     });
 
     it('should throw an error if the title is a string with empty characters', async () => {
       await expect(create({ ...theCase, title: '   ' }, clientArgs)).rejects.toThrow(
-        'Failed to create case: Error: The length of the title is too short. The minimum length is 1.'
+        'Failed to create case: Error: The title field cannot be an empty string.'
       );
     });
   });
@@ -170,13 +170,13 @@ describe('create', () => {
 
     it('should throw an error if the description is an empty string', async () => {
       await expect(create({ ...theCase, description: '' }, clientArgs)).rejects.toThrow(
-        'Failed to create case: Error: The length of the description is too short. The minimum length is 1.'
+        'Failed to create case: Error: The description field cannot be an empty string.'
       );
     });
 
     it('should throw an error if the description is a string with empty characters', async () => {
       await expect(create({ ...theCase, description: '   ' }, clientArgs)).rejects.toThrow(
-        'Failed to create case: Error: The length of the description is too short. The minimum length is 1.'
+        'Failed to create case: Error: The description field cannot be an empty string.'
       );
     });
   });
@@ -198,26 +198,32 @@ describe('create', () => {
     });
 
     it('should throw an error if the tags array length is too long', async () => {
-      const tags = Array(MAX_TAGS + 1).fill('foo');
+      const tags = Array(MAX_TAGS_PER_CASE + 1).fill('foo');
 
       await expect(create({ ...theCase, tags }, clientArgs)).rejects.toThrow(
-        `Failed to create case: Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS}.`
+        `Failed to create case: Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
       );
     });
 
     it('should throw an error if the tags array has empty string', async () => {
       await expect(create({ ...theCase, tags: [''] }, clientArgs)).rejects.toThrow(
-        'Failed to create case: Error: The length of the tag is too short. The minimum length is 1.'
+        'Failed to create case: Error: The tag field cannot be an empty string.'
+      );
+    });
+
+    it('should throw an error if the tags array has string with empty characters', async () => {
+      await expect(create({ ...theCase, tags: ['  '] }, clientArgs)).rejects.toThrow(
+        'Failed to create case: Error: The tag field cannot be an empty string.'
       );
     });
 
     it('should throw an error if the tag length is too long', async () => {
-      const tag = Array(MAX_TAG_LENGTH + 1)
+      const tag = Array(MAX_LENGTH_PER_TAG + 1)
         .fill('f')
         .toString();
 
       await expect(create({ ...theCase, tags: [tag] }, clientArgs)).rejects.toThrow(
-        `Failed to create case: Error: The length of the tag is too long. The maximum length is ${MAX_TAG_LENGTH}.`
+        `Failed to create case: Error: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
       );
     });
   });
@@ -245,13 +251,13 @@ describe('create', () => {
 
     it('should throw an error if the category is an empty string', async () => {
       await expect(create({ ...theCase, category: '' }, clientArgs)).rejects.toThrow(
-        'Failed to create case: Error: The length of the category is too short. The minimum length is 1.,Invalid value "" supplied to "category"'
+        'Failed to create case: Error: The category field cannot be an empty string.,Invalid value "" supplied to "category"'
       );
     });
 
     it('should throw an error if the category is a string with empty characters', async () => {
       await expect(create({ ...theCase, category: '   ' }, clientArgs)).rejects.toThrow(
-        'Failed to create case: Error: The length of the category is too short. The minimum length is 1.,Invalid value "   " supplied to "category"'
+        'Failed to create case: Error: The category field cannot be an empty string.,Invalid value "   " supplied to "category"'
       );
     });
   });

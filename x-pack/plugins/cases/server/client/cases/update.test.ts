@@ -8,8 +8,8 @@
 import {
   MAX_CATEGORY_LENGTH,
   MAX_DESCRIPTION_LENGTH,
-  MAX_TAGS,
-  MAX_TAG_LENGTH,
+  MAX_TAGS_PER_CASE,
+  MAX_LENGTH_PER_TAG,
   MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 import { mockCases } from '../../mocks';
@@ -333,7 +333,7 @@ describe('update', () => {
       );
     });
 
-    it('does not update the category if it is just an empty string', async () => {
+    it('throws error if category is just an empty string', async () => {
       await expect(
         update(
           {
@@ -348,11 +348,11 @@ describe('update', () => {
           clientArgs
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the category is too short. The minimum length is 1.,Invalid value "" supplied to "cases,category"'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The category field cannot be an empty string.,Invalid value "" supplied to "cases,category"'
       );
     });
 
-    it('does not update the category if it is a string with empty characters', async () => {
+    it('throws error if category is a string with empty characters', async () => {
       await expect(
         update(
           {
@@ -367,7 +367,7 @@ describe('update', () => {
           clientArgs
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the category is too short. The minimum length is 1.,Invalid value "   " supplied to "cases,category"'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The category field cannot be an empty string.,Invalid value "   " supplied to "cases,category"'
       );
     });
   });
@@ -442,7 +442,7 @@ describe('update', () => {
           clientArgs
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the title is too short. The minimum length is 1.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The title field cannot be an empty string.'
       );
     });
 
@@ -461,7 +461,7 @@ describe('update', () => {
           clientArgs
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the title is too short. The minimum length is 1.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The title field cannot be an empty string.'
       );
     });
   });
@@ -539,7 +539,7 @@ describe('update', () => {
           clientArgs
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the description is too short. The minimum length is 1.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The description field cannot be an empty string.'
       );
     });
 
@@ -558,7 +558,7 @@ describe('update', () => {
           clientArgs
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the description is too short. The minimum length is 1.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The description field cannot be an empty string.'
       );
     });
   });
@@ -598,7 +598,7 @@ describe('update', () => {
       ).resolves.not.toThrow();
     });
 
-    it(`does not throw error when tags array length is less than ${MAX_TAGS} and tag has ${MAX_TAG_LENGTH} characters`, async () => {
+    it(`does not throw error when tags array length is less than ${MAX_TAGS_PER_CASE} and tag has ${MAX_LENGTH_PER_TAG} characters`, async () => {
       clientArgs.services.caseService.patchCases.mockResolvedValue({
         saved_objects: [{ ...mockCases[0] }],
       });
@@ -620,7 +620,7 @@ describe('update', () => {
     });
 
     it('throws error if the tags array length is too long', async () => {
-      const tags = Array(MAX_TAGS + 1).fill('foo');
+      const tags = Array(MAX_TAGS_PER_CASE + 1).fill('foo');
 
       await expect(
         update(
@@ -636,12 +636,12 @@ describe('update', () => {
           clientArgs
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS}.`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_PER_CASE}.`
       );
     });
 
     it('throws error if the tag length is too long', async () => {
-      const tag = Array(MAX_TAG_LENGTH + 1)
+      const tag = Array(MAX_LENGTH_PER_TAG + 1)
         .fill('f')
         .toString();
 
@@ -659,7 +659,7 @@ describe('update', () => {
           clientArgs
         )
       ).rejects.toThrow(
-        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the tag is too long. The maximum length is ${MAX_TAG_LENGTH}.`
+        `Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the tag is too long. The maximum length is ${MAX_LENGTH_PER_TAG}.`
       );
     });
 
@@ -678,7 +678,7 @@ describe('update', () => {
           clientArgs
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the tag is too short. The minimum length is 1.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The tag field cannot be an empty string.'
       );
     });
 
@@ -697,7 +697,7 @@ describe('update', () => {
           clientArgs
         )
       ).rejects.toThrow(
-        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the tag is too short. The minimum length is 1.'
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The tag field cannot be an empty string.'
       );
     });
   });

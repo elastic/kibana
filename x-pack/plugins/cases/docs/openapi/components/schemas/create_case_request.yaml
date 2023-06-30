@@ -24,7 +24,7 @@ properties:
   description:
     description: The description for the case.
     type: string
-    maximum: 30000
+    maxLength: 30000
   owner:
     $ref: 'owners.yaml'
   settings:
@@ -37,12 +37,12 @@ properties:
     maxItems: 200
     items:
       type: string
-      maximum: 256
+      maxLength: 256
   category:
     description: Category for the case. It could be a word or a phrase to categorize the case.
     type: string
-    maximum: 50
+    maxLength: 50
   title:
     description: A title for the case.
     type: string
-    maximum: 160
+    maxLength: 160
