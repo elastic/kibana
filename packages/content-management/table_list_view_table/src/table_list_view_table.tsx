@@ -91,7 +91,7 @@ export interface TableListViewTableProps<
    */
   editItem?(item: T): void;
   /**
-   * Handler to set edit action visibility per item.
+   * Handler to set edit action visiblity per item.
    */
   showEditActionForItem?(item: T): boolean;
   /**
@@ -105,7 +105,6 @@ export interface TableListViewTableProps<
    * @deprecated
    */
   withoutPageTemplateWrapper?: boolean;
-  withPageTemplateHeader?: boolean;
   contentEditor?: ContentEditorConfig;
 
   tableCaption: string;
@@ -185,7 +184,7 @@ const urlStateDeserializer = (params: URLQueryParams): URLState => {
     }
   });
 
-  // For backward compatibility with the Dashboard app we will support both "s" and "title" passed
+  // For backward compability with the Dashboard app we will support both "s" and "title" passed
   // in the query params. We might want to stop supporting both in a future release (v9.0?)
   stateFromURL.s = sanitizedParams.s ?? sanitizedParams.title;
 
@@ -804,12 +803,12 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   useDebounce(fetchItems, 300, [fetchItems]);
 
   useEffect(() => {
-    if (!urlStateEnabled && !initialQuery) {
+    if (!urlStateEnabled) {
       return;
     }
 
     // Update our Query instance based on the URL "s" text
-    const updateQueryFilter = async (text: string = '') => {
+    const updateQueryFromURL = async (text: string = '') => {
       let ast = Ast.create([]);
       let termMatch = text;
 
@@ -878,15 +877,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       });
     };
 
-    if (urlStateEnabled) {
-      updateQueryFilter(urlState.s);
-      updateSortFromURL(urlState.sort);
-    }
-
-    if (initialQuery) {
-      updateQueryFilter(initialQuery);
-    }
-  }, [urlState, searchQueryParser, getTagList, urlStateEnabled, initialQuery]);
+    updateQueryFromURL(urlState.s);
+    updateSortFromURL(urlState.sort);
+  }, [urlState, searchQueryParser, getTagList, urlStateEnabled]);
 
   useEffect(() => {
     isMounted.current = true;

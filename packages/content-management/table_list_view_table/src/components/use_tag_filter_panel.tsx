@@ -53,7 +53,6 @@ export const useTagFilterPanel = ({
   const [isInUse, setIsInUse] = useState(false);
   const [options, setOptions] = useState<TagOptionItem[]>([]);
   const [tagSelection, setTagSelection] = useState<TagSelection>({});
-
   const totalActiveFilters = Object.keys(tagSelection).length;
 
   const onSelectChange = useCallback(
@@ -77,7 +76,7 @@ export const useTagFilterPanel = ({
         addOrRemoveIncludeTagFilter(tag);
       }
     },
-    [addOrRemoveExcludeTagFilter, addOrRemoveIncludeTagFilter]
+    [addOrRemoveIncludeTagFilter, addOrRemoveExcludeTagFilter]
   );
 
   const updateTagList = useCallback(() => {

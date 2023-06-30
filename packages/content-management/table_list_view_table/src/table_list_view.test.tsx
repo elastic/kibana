@@ -612,7 +612,7 @@ describe('TableListView', () => {
       },
     ];
 
-    test('should have an "inspect" button if the content editor is enabled', async () => {
+    test('should have an "inpect" button if the content editor is enabled', async () => {
       let testBed: TestBed;
 
       await act(async () => {
@@ -1067,65 +1067,6 @@ describe('TableListView', () => {
         ['Item 1tag-1', yesterdayToString],
       ]);
       expect(router?.history.location?.search).toBe('?sort=title&sortdir=desc');
-    });
-  });
-
-  describe('initialFilter', () => {
-    const setupTagFiltering = registerTestBed<string, TableListViewTableProps>(
-      WithServices<TableListViewTableProps>(TableListViewTable, {
-        getTagList: () => [
-          { id: 'id-tag-1', name: 'tag-1', type: 'tag', description: '', color: '' },
-          { id: 'id-tag-2', name: 'tag-2', type: 'tag', description: '', color: '' },
-        ],
-      }),
-      {
-        defaultProps: { ...requiredProps, initialFilter: `tag:("tag-1")`, urlStateEnabled: false },
-        memoryRouter: {
-          wrapComponent: true,
-        },
-      }
-    );
-
-    const hits: UserContentCommonSchema[] = [
-      {
-        id: '123',
-        updatedAt: yesterday.toISOString(),
-        type: 'dashboard',
-        attributes: {
-          title: 'Item 1',
-          description: '',
-        },
-        references: [{ id: 'id-tag-1', name: 'tag-1', type: 'tag' }],
-      },
-      {
-        id: '456',
-        updatedAt: twoDaysAgo.toISOString(),
-        type: 'dashboard',
-        attributes: {
-          title: 'Item 2',
-          description: '',
-        },
-        references: [{ id: 'id-tag-2', name: 'tag-2', type: 'tag' }],
-      },
-    ];
-
-    test('should read search term from initialFilter', async () => {
-      let testBed: TestBed;
-
-      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
-
-      await act(async () => {
-        testBed = await setupTagFiltering({
-          findItems,
-        });
-      });
-
-      const { component, find } = testBed!;
-      component.update();
-
-      const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
-
-      expect(getSearchBoxValue()).toBe('tag:("tag-1")');
     });
   });
 
