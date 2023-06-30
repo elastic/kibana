@@ -16,7 +16,7 @@ import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export interface SavedViewState<TView> {
-  views?: TView[];
+  views?: SavedViewItem[];
   currentView?: TView | null;
   isCreatingView: boolean;
   isFetchingCurrentView: boolean;
@@ -32,7 +32,7 @@ export interface SavedViewOperations<
 > {
   createView: UseMutateAsyncFunction<TView, ServerError, TPayload>;
   deleteViewById: UseMutateFunction<null, ServerError, string, MutationContext<TView>>;
-  fetchViews: QueryObserverBaseResult<TView[]>['refetch'];
+  fetchViews: QueryObserverBaseResult<SavedViewItem[]>['refetch'];
   updateViewById: UseMutateAsyncFunction<TView, ServerError, UpdateViewParams<TPayload>>;
   switchViewById: (id: TId) => void;
   setDefaultViewById: UseMutateFunction<TConfig, ServerError, string, MutationContext<TView>>;
@@ -64,7 +64,7 @@ export interface BasicAttributes {
   isDefault?: boolean;
   isStatic?: boolean;
 }
-export interface SingleSavedViewState {
+export interface SavedViewItem {
   id: string;
   attributes: BasicAttributes;
 }

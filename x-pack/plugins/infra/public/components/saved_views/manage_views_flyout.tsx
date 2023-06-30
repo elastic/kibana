@@ -24,14 +24,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
-import {
-  SavedViewState,
-  SavedViewOperations,
-  SingleSavedViewState,
-} from '../../../common/saved_views';
+import { SavedViewOperations, SavedViewItem } from '../../../common/saved_views';
 
-export interface ManageViewsFlyoutProps<TSavedViewState extends SingleSavedViewState, TViewState> {
-  views: SavedViewState<TSavedViewState>['views'];
+export interface ManageViewsFlyoutProps<TSavedViewState extends SavedViewItem> {
+  views?: SavedViewItem[];
   loading: boolean;
   onClose(): void;
   onMakeDefaultView: SavedViewOperations<TSavedViewState>['setDefaultViewById'];
@@ -48,18 +44,18 @@ const searchConfig = {
   box: { incremental: true },
 };
 
-export function ManageViewsFlyout<TSavedViewState extends SingleSavedViewState, TViewState>({
+export function ManageViewsFlyout<TSavedViewState extends SavedViewItem>({
   onClose,
   views = [],
   onSwitchView,
   onMakeDefaultView,
   onDeleteView,
   loading,
-}: ManageViewsFlyoutProps<TSavedViewState, TViewState>) {
+}: ManageViewsFlyoutProps<TSavedViewState>) {
   // Add name as top level property to allow in memory search
   const namedViews = useMemo(() => views.map(addOwnName), [views]);
 
-  const renderName = (name: string, item: TSavedViewState) => (
+  const renderName = (name: string, item: SavedViewItem) => (
     <EuiButtonEmpty
       key={item.id}
       data-test-subj="infraRenderNameButton"
@@ -72,7 +68,7 @@ export function ManageViewsFlyout<TSavedViewState extends SingleSavedViewState, 
     </EuiButtonEmpty>
   );
 
-  const renderDeleteAction = (item: TSavedViewState) => {
+  const renderDeleteAction = (item: SavedViewItem) => {
     return (
       <DeleteConfimation
         key={item.id}
@@ -84,7 +80,7 @@ export function ManageViewsFlyout<TSavedViewState extends SingleSavedViewState, 
     );
   };
 
-  const renderMakeDefaultAction = (item: TSavedViewState) => {
+  const renderMakeDefaultAction = (item: SavedViewItem) => {
     return (
       <EuiButtonIcon
         key={item.id}
@@ -98,7 +94,7 @@ export function ManageViewsFlyout<TSavedViewState extends SingleSavedViewState, 
     );
   };
 
-  const columns: Array<EuiBasicTableColumn<TSavedViewState>> = [
+  const columns: Array<EuiBasicTableColumn<SavedViewItem>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.infra.openView.columnNames.name', { defaultMessage: 'Name' }),
@@ -191,7 +187,7 @@ const DeleteConfimation = ({ isDisabled, onConfirm }: DeleteConfimationProps) =>
 /**
  * Helpers
  */
-const addOwnName = <TSavedViewState extends SingleSavedViewState>(view: TSavedViewState) => ({
+const addOwnName = <TSavedViewState extends SavedViewItem>(view: TSavedViewState) => ({
   ...view,
   name: view.attributes.name,
 });

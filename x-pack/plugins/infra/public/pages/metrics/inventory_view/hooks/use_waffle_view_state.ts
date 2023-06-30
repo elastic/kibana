@@ -58,8 +58,8 @@ export const useWaffleViewState = () => {
   };
 
   const onViewChange = useCallback(
-    (newState) => {
-      const attributes = newState.attributes as WaffleViewState;
+    (newState: { attributes: WaffleViewState }) => {
+      const attributes = newState.attributes;
 
       setWaffleOptionsState({
         sort: attributes.sort,

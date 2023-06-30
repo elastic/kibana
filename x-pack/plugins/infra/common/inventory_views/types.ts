@@ -78,13 +78,16 @@ export const inventoryViewAttributesRT = rt.intersection([
   inventoryOptionsStateRT,
   inventoryViewBasicAttributesRT,
   inventoryViewFlagsRT,
+  rt.type({
+    autoReload: rt.boolean,
+    filterQuery: inventoryFiltersStateRT,
+  }),
   rt.partial({ time: rt.number }),
 ]);
 
-const singleInventoryViewAttributesRT = rt.intersection([
-  inventoryViewBasicAttributesRT,
-  inventoryViewFlagsRT,
-]);
+const singleInventoryViewAttributesRT = rt.exact(
+  rt.intersection([inventoryViewBasicAttributesRT, inventoryViewFlagsRT])
+);
 
 export const inventoryViewRT = rt.exact(
   rt.intersection([
@@ -121,4 +124,3 @@ export type InventorySortOption = rt.TypeOf<typeof inventorySortOptionRT>;
 export type InventoryView = rt.TypeOf<typeof inventoryViewRT>;
 export type InventoryViewAttributes = rt.TypeOf<typeof inventoryViewAttributesRT>;
 export type InventoryViewOptions = rt.TypeOf<typeof inventoryViewOptionsRT>;
-export type SingleInventoryViewItem = rt.TypeOf<typeof singleInventoryViewRT>;
