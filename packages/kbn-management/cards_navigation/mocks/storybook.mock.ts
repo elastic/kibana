@@ -6,4 +6,14 @@
  * Side Public License, v 1.
  */
 
-export const API_BASE_PATH = '/api/index_pattern_field_editor';
+import { action } from '@storybook/addon-actions';
+import { APP_BASE_PATH, sectionsMock } from './mocks';
+
+export const mockProps = {
+  appBasePath: APP_BASE_PATH,
+  sections: sectionsMock,
+  onCardClick: (e: any) => {
+    e.preventDefault();
+    action('Navigate to: ', e.target.href);
+  },
+};
