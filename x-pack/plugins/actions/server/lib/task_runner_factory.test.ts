@@ -1082,7 +1082,8 @@ describe('Task Runner Factory', () => {
     );
     expect(mockedActionExecutor.getActionInfoInternal).toHaveBeenCalledWith(
       '9',
-      expect.any(CoreKibanaRequest)
+      expect.any(CoreKibanaRequest),
+      'test'
     );
 
     expect(result).toEqual({ data: mockActionInfo.rawAction });
