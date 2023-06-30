@@ -15,8 +15,11 @@ export {
   type InventorySortOption,
   type InventoryView,
   type InventoryViewAttributes,
-  inventoryViewAttributesRT,
+  type SingleInventoryViewItem,
   inventoryFiltersStateRT,
   inventoryOptionsStateRT,
   inventoryViewRT,
+  inventoryViewAttributesRT,
+  inventoryViewBasicAttributesRT,
+  singleInventoryViewRT,
 } from './types';

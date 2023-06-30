@@ -20,14 +20,14 @@ import {
 } from '../../common/saved_views';
 import { MetricsSourceConfigurationResponse } from '../../common/metrics_sources';
 import { CreateInventoryViewAttributesRequestPayload } from '../../common/http_api/latest';
-import type { InventoryView } from '../../common/inventory_views';
+import type { InventoryView, SingleInventoryViewItem } from '../../common/inventory_views';
 import { useKibanaContextForPlugin } from './use_kibana';
 import { useUrlState } from '../utils/use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
 import { useSourceContext } from '../containers/metrics_source';
 
 export type UseInventoryViewsResult = SavedViewResult<
-  InventoryView,
+  SingleInventoryViewItem,
   InventoryViewId,
   CreateInventoryViewAttributesRequestPayload,
   MetricsSourceConfigurationResponse

@@ -68,14 +68,22 @@ export const inventoryOptionsStateRT = rt.intersection([
   rt.partial({ legend: inventoryLegendOptionsRT, source: rt.string, timelineOpen: rt.boolean }),
 ]);
 
+export const inventoryViewBasicAttributesRT = rt.type({
+  name: nonEmptyStringRt,
+});
+
+const inventoryViewFlagsRT = rt.partial({ isDefault: rt.boolean, isStatic: rt.boolean });
+
 export const inventoryViewAttributesRT = rt.intersection([
   inventoryOptionsStateRT,
-  rt.type({
-    name: nonEmptyStringRt,
-    autoReload: rt.boolean,
-    filterQuery: inventoryFiltersStateRT,
-  }),
-  rt.partial({ time: rt.number, isDefault: rt.boolean, isStatic: rt.boolean }),
+  inventoryViewBasicAttributesRT,
+  inventoryViewFlagsRT,
+  rt.partial({ time: rt.number }),
+]);
+
+const singleInventoryViewAttributesRT = rt.intersection([
+  inventoryViewBasicAttributesRT,
+  inventoryViewFlagsRT,
 ]);
 
 export const inventoryViewRT = rt.exact(
@@ -83,6 +91,19 @@ export const inventoryViewRT = rt.exact(
     rt.type({
       id: rt.string,
       attributes: inventoryViewAttributesRT,
+    }),
+    rt.partial({
+      updatedAt: isoToEpochRt,
+      version: rt.string,
+    }),
+  ])
+);
+
+export const singleInventoryViewRT = rt.exact(
+  rt.intersection([
+    rt.type({
+      id: rt.string,
+      attributes: singleInventoryViewAttributesRT,
     }),
     rt.partial({
       updatedAt: isoToEpochRt,
@@ -100,3 +121,4 @@ export type InventorySortOption = rt.TypeOf<typeof inventorySortOptionRT>;
 export type InventoryView = rt.TypeOf<typeof inventoryViewRT>;
 export type InventoryViewAttributes = rt.TypeOf<typeof inventoryViewAttributesRT>;
 export type InventoryViewOptions = rt.TypeOf<typeof inventoryViewOptionsRT>;
+export type SingleInventoryViewItem = rt.TypeOf<typeof singleInventoryViewRT>;
