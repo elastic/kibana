@@ -14,16 +14,16 @@ import {
   EuiHorizontalRule,
   EuiCommentList,
   EuiToolTip,
-  EuiSplitPanel,
   EuiSwitchEvent,
   EuiSwitch,
   EuiCallOut,
   EuiIcon,
-  EuiTitle,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalBody,
+  EuiModalHeaderTitle,
 } from '@elastic/eui';
 
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 
@@ -48,25 +48,9 @@ import { getCombinedMessage } from './prompt/helpers';
 import * as i18n from './translations';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
-import { ConnectorSetup } from '../connectorland/connector_setup';
+import { useConnectorSetup } from '../connectorland/connector_setup';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import { BASE_CONVERSATIONS } from './use_conversation/sample_conversations';
-
-const CommentsContainer = styled.div`
-  max-height: 600px;
-  max-width: 100%;
-  overflow-y: scroll;
-`;
-
-const ChatOptionsFlexItem = styled(EuiFlexItem)`
-  left: -34px;
-  position: relative;
-  top: 11px;
-`;
-
-const StyledCommentList = styled(EuiCommentList)`
-  margin-right: 20px;
-`;
 
 export interface Props {
   promptContextId?: string;
@@ -131,6 +115,13 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const isWelcomeSetup = (connectors?.length ?? 0) === 0;
+
+  const { connectorDialog, connectorPrompt } = useConnectorSetup({
+    actionTypeRegistry,
+    http,
+    refetchConnectors,
+    isConnectorConfigured: !!connectors?.length,
+  });
   const currentTitle: { title: string | JSX.Element; titleIcon: string } =
     isWelcomeSetup && welcomeConversation.theme?.title && welcomeConversation.theme?.titleIcon
       ? { title: welcomeConversation.theme?.title, titleIcon: welcomeConversation.theme?.titleIcon }
@@ -336,29 +327,49 @@ const AssistantComponent: React.FC<Props> = ({
     setShowMissingConnectorCallout(!connectorExists);
   }, [connectors, currentConversation]);
 
+  const CodeBlockPortals = useMemo(
+    () =>
+      messageCodeBlocks.map((codeBlocks: CodeBlockDetails[]) => {
+        return codeBlocks.map((codeBlock: CodeBlockDetails) => {
+          const element: Element = codeBlock.controlContainer as Element;
+
+          return codeBlock.controlContainer != null ? (
+            createPortal(codeBlock.button, element)
+          ) : (
+            <></>
+          );
+        });
+      }),
+    [messageCodeBlocks]
+  );
   return (
-    <EuiSplitPanel.Outer
-      grow={false}
-      css={css`
-        width: 100%;
-      `}
-    >
-      <EuiSplitPanel.Inner grow={false}>
+    <>
+      <EuiModalHeader
+        css={css`
+          align-items: flex-start;
+          flex-direction: column;
+        `}
+      >
         {showTitle && (
           <>
-            <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'}>
+            <EuiFlexGroup
+              css={css`
+                width: 100%;
+              `}
+              alignItems={'center'}
+              justifyContent={'spaceBetween'}
+            >
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems={'center'}>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type={currentTitle.titleIcon} size="xl" />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle>
-                      <span>{currentTitle.title}</span>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiModalHeaderTitle>
+                  <EuiFlexGroup alignItems={'center'}>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type={currentTitle.titleIcon} size="xl" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>{currentTitle.title}</EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiModalHeaderTitle>
               </EuiFlexItem>
+
               <EuiFlexItem
                 grow={false}
                 css={css`
@@ -422,17 +433,7 @@ const AssistantComponent: React.FC<Props> = ({
         )}
 
         {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
-        {messageCodeBlocks.map((codeBlocks: CodeBlockDetails[]) => {
-          return codeBlocks.map((codeBlock: CodeBlockDetails) => {
-            const element: Element = codeBlock.controlContainer as Element;
-
-            return codeBlock.controlContainer != null ? (
-              createPortal(codeBlock.button, element)
-            ) : (
-              <></>
-            );
-          });
-        })}
+        {CodeBlockPortals}
 
         {!isWelcomeSetup && (
           <>
@@ -446,43 +447,59 @@ const AssistantComponent: React.FC<Props> = ({
             {Object.keys(promptContexts).length > 0 && <EuiSpacer size={'s'} />}
           </>
         )}
+      </EuiModalHeader>
+      <EuiModalBody>
+        {isWelcomeSetup ? (
+          connectorDialog
+        ) : (
+          <>
+            <EuiCommentList
+              comments={comments}
+              css={css`
+                margin-right: 20px;
+              `}
+            />
 
-        {isWelcomeSetup && (
-          <ConnectorSetup
-            actionTypeRegistry={actionTypeRegistry}
-            http={http}
-            refetchConnectors={refetchConnectors}
-            isConnectorConfigured={!!connectors?.length}
-          />
-        )}
+            <EuiSpacer size={'m'} />
 
-        {!isWelcomeSetup && (
-          <CommentsContainer className="eui-scrollBar">
-            <>
-              <StyledCommentList comments={comments} />
+            {(currentConversation.messages.length === 0 ||
+              Object.keys(selectedPromptContexts).length > 0) && (
+              <PromptEditor
+                conversation={currentConversation}
+                isNewConversation={currentConversation.messages.length === 0}
+                promptContexts={promptContexts}
+                promptTextPreview={promptTextPreview}
+                selectedPromptContexts={selectedPromptContexts}
+                setSelectedPromptContexts={setSelectedPromptContexts}
+              />
+            )}
 
-              <EuiSpacer size={'m'} />
-
-              {(currentConversation.messages.length === 0 ||
-                Object.keys(selectedPromptContexts).length > 0) && (
-                <PromptEditor
-                  conversation={currentConversation}
-                  isNewConversation={currentConversation.messages.length === 0}
-                  promptContexts={promptContexts}
-                  promptTextPreview={promptTextPreview}
-                  selectedPromptContexts={selectedPromptContexts}
-                  setSelectedPromptContexts={setSelectedPromptContexts}
-                />
-              )}
-
-              <div ref={bottomRef} />
-            </>
-          </CommentsContainer>
+            <div ref={bottomRef} />
+          </>
         )}
 
         <EuiSpacer />
-
-        <EuiFlexGroup gutterSize="none">
+      </EuiModalBody>
+      <EuiModalFooter
+        css={css`
+          align-items: flex-start;
+          flex-direction: column;
+        `}
+      >
+        <EuiFlexGroup
+          gutterSize="none"
+          css={css`
+            width: 100%;
+          `}
+        >
+          {isWelcomeSetup && <EuiFlexItem>{connectorPrompt}</EuiFlexItem>}
+        </EuiFlexGroup>
+        <EuiFlexGroup
+          gutterSize="none"
+          css={css`
+            width: 100%;
+          `}
+        >
           <EuiFlexItem>
             <PromptTextArea
               onPromptSubmit={handleSendMessage}
@@ -493,7 +510,14 @@ const AssistantComponent: React.FC<Props> = ({
             />
           </EuiFlexItem>
 
-          <ChatOptionsFlexItem grow={false}>
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              left: -34px;
+              position: relative;
+              top: 11px;
+            `}
+          >
             <EuiFlexGroup
               direction="column"
               gutterSize="xs"
@@ -540,21 +564,11 @@ const AssistantComponent: React.FC<Props> = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </ChatOptionsFlexItem>
+          </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiSplitPanel.Inner>
-      {!isWelcomeSetup && (
-        <EuiSplitPanel.Inner
-          grow={false}
-          color="subdued"
-          css={css`
-            padding: 8px;
-          `}
-        >
-          <QuickPrompts setInput={setSuggestedUserPrompt} />
-        </EuiSplitPanel.Inner>
-      )}
-    </EuiSplitPanel.Outer>
+        {!isWelcomeSetup && <QuickPrompts setInput={setSuggestedUserPrompt} />}
+      </EuiModalFooter>
+    </>
   );
 };
 
