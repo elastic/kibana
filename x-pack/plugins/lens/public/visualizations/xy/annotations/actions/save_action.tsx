@@ -243,7 +243,6 @@ export const onSave = async ({
         },
       }
     ),
-    toastLifeTimeMs: 10000000,
     text: ((element) =>
       render(
         <I18nProvider>
