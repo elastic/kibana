@@ -35,6 +35,7 @@ import type {
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { LoadingIndicator } from '../loading_indicator';
 import type { OnIsLockedUpdate } from './types';
 import { CollapsibleNav } from './collapsible_nav';
@@ -60,6 +61,7 @@ export interface HeaderProps {
   homeHref: string;
   isVisible$: Observable<boolean>;
   kibanaDocLink: string;
+  docLinks: DocLinksStart;
   navLinks$: Observable<ChromeNavLink[]>;
   recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Observable<boolean>;
@@ -81,6 +83,7 @@ export interface HeaderProps {
 export function Header({
   kibanaVersion,
   kibanaDocLink,
+  docLinks,
   application,
   basePath,
   onIsLockedUpdate,
@@ -167,6 +170,7 @@ export function Header({
                     helpSupportUrl$={observables.helpSupportUrl$}
                     defaultContentLinks$={observables.helpMenuLinks$}
                     kibanaDocLink={kibanaDocLink}
+                    docLinks={docLinks}
                     kibanaVersion={kibanaVersion}
                     navigateToUrl={application.navigateToUrl}
                   />,

@@ -35,6 +35,8 @@ import { Router } from '@kbn/shared-ux-router';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable, debounceTime } from 'rxjs';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+
 import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
 import { HeaderBreadcrumbs } from '../header/header_breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
@@ -88,7 +90,7 @@ const headerStrings = {
 export interface Props {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   actionMenu$: Observable<MountPoint | undefined>;
-  kibanaDocLink: string;
+  docLinks: DocLinksStart;
   children: React.ReactNode;
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
@@ -160,10 +162,10 @@ const Logo = (
 
 export const ProjectHeader = ({
   application,
-  kibanaDocLink,
   kibanaVersion,
   children,
   prependBasePath,
+  docLinks,
   ...observables
 }: Props) => {
   const [navId] = useState(htmlIdGenerator()());
@@ -242,7 +244,8 @@ export const ProjectHeader = ({
               helpExtension$={observables.helpExtension$}
               helpSupportUrl$={observables.helpSupportUrl$}
               defaultContentLinks$={observables.helpMenuLinks$}
-              kibanaDocLink={kibanaDocLink}
+              kibanaDocLink={docLinks.links.elasticStackGetStarted}
+              docLinks={docLinks}
               kibanaVersion={kibanaVersion}
               navigateToUrl={application.navigateToUrl}
             />

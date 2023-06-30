@@ -30,16 +30,18 @@ import type {
   ChromeGlobalHelpExtensionMenuLink,
 } from '@kbn/core-chrome-browser';
 import type { ChromeHelpMenuLink } from '@kbn/core-chrome-browser/src';
-import { GITHUB_CREATE_ISSUE_LINK, KIBANA_FEEDBACK_LINK } from '@kbn/core-doc-links-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import { HeaderExtension } from './header_extension';
 import { isModifiedOrPrevented } from './nav_link';
 
 const buildDefaultContentLinks = ({
   kibanaDocLink,
+  docLinks,
   helpSupportUrl,
 }: {
   kibanaDocLink: string;
+  docLinks: DocLinksStart;
   helpSupportUrl: string;
 }): ChromeHelpMenuLink[] => [
   {
@@ -58,13 +60,13 @@ const buildDefaultContentLinks = ({
     title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle', {
       defaultMessage: 'Give feedback',
     }),
-    href: KIBANA_FEEDBACK_LINK,
+    href: docLinks.links.kibana.feedback,
   },
   {
     title: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuOpenGitHubIssueTitle', {
       defaultMessage: 'Open an issue in GitHub',
     }),
-    href: GITHUB_CREATE_ISSUE_LINK,
+    href: docLinks.links.kibana.createGithubIssue,
   },
 ];
 
@@ -76,6 +78,7 @@ interface Props {
   defaultContentLinks$: Observable<ChromeHelpMenuLink[]>;
   kibanaVersion: string;
   kibanaDocLink: string;
+  docLinks: DocLinksStart;
 }
 
 interface State {

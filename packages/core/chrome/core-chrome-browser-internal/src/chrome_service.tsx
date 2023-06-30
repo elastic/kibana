@@ -15,7 +15,7 @@ import { EuiLink } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import { type DocLinksStart, KIBANA_ASK_ELASTIC_LINK } from '@kbn/core-doc-links-browser';
+import { type DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
@@ -138,7 +138,7 @@ export class ChromeService {
     >(undefined);
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
-    const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
+    const helpSupportUrl$ = new BehaviorSubject<string>(docLinks.links.kibana.askElastic);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
     const chromeStyle$ = new BehaviorSubject<ChromeStyle>('classic');
 
@@ -311,7 +311,7 @@ export class ChromeService {
               navControlsRight$={navControls.getRight$()}
               loadingCount$={http.getLoadingCount$()}
               homeHref$={projectNavigation.getProjectHome$()}
-              kibanaDocLink={docLinks.links.elasticStackGetStarted}
+              docLinks={docLinks}
               kibanaVersion={injectedMetadata.getKibanaVersion()}
               prependBasePath={http.basePath.prepend}
             >
@@ -334,6 +334,7 @@ export class ChromeService {
           breadcrumbsAppendExtension$={breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$))}
           customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
           kibanaDocLink={docLinks.links.kibana.guide}
+          docLinks={docLinks}
           forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
           globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
           helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}

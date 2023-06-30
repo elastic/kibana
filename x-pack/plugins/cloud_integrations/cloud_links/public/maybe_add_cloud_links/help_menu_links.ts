@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { ChromeHelpMenuLink } from '@kbn/core-chrome-browser';
-import { DocLinksStart, KIBANA_FEEDBACK_LINK } from '@kbn/core-doc-links-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 export const createHelpMenuLinks = ({
   docLinks,
@@ -32,7 +32,7 @@ export const createHelpMenuLinks = ({
       title: i18n.translate('xpack.cloudLinks.helpMenuLinks.giveFeedback', {
         defaultMessage: 'Give feedback',
       }),
-      href: KIBANA_FEEDBACK_LINK,
+      href: docLinks.links.kibana.feedback,
     },
   ];
 
