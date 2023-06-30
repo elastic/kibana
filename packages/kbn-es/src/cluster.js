@@ -402,11 +402,11 @@ exports.Cluster = class Cluster {
             '-p',
             '9300:9300',
             '-itd',
+            '--rm',
             'docker.elastic.co/elasticsearch/elasticsearch:8.8.1',
           ],
           {
             stdio: ['ignore', 'pipe', 'pipe'],
-            encoding: 'utf16',
           }
         )
       : execa(ES_BIN, args, {
