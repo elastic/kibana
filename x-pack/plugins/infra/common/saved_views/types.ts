@@ -39,7 +39,9 @@ export interface SavedViewOperations<
 }
 
 export interface SavedViewResult<
-  TView extends { id: TView['id'] },
+  TView extends {
+    id: TView['id'];
+  },
   TId extends string = '',
   TPayload = any,
   TConfig = any
@@ -62,7 +64,7 @@ export interface BasicAttributes {
   isDefault?: boolean;
   isStatic?: boolean;
 }
-export interface SavedViewItemState<TView> {
+export interface SingleSavedViewState {
   id: string;
-  attributes: TView & BasicAttributes;
+  attributes: BasicAttributes;
 }

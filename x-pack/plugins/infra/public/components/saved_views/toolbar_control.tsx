@@ -13,28 +13,28 @@ import { NonEmptyString } from '@kbn/io-ts-utils';
 import {
   SavedViewState,
   SavedViewOperations,
-  SavedViewItemState,
+  SingleSavedViewState,
   BasicAttributes,
 } from '../../../common/saved_views';
 import { ManageViewsFlyout } from './manage_views_flyout';
 import { useBoolean } from '../../hooks/use_boolean';
 import { UpsertViewModal } from './upsert_modal';
 
-interface Props<TSavedViewState extends SavedViewItemState<TViewState>, TViewState>
-  extends SavedViewState<TSavedViewState> {
+interface Props<TSingleSavedViewState extends SingleSavedViewState, TViewState>
+  extends SavedViewState<TSingleSavedViewState> {
   viewState: TViewState & BasicAttributes;
-  onCreateView: SavedViewOperations<TSavedViewState>['createView'];
-  onDeleteView: SavedViewOperations<TSavedViewState>['deleteViewById'];
-  onUpdateView: SavedViewOperations<TSavedViewState>['updateViewById'];
-  onLoadViews: SavedViewOperations<TSavedViewState>['fetchViews'];
-  onSetDefaultView: SavedViewOperations<TSavedViewState>['setDefaultViewById'];
-  onSwitchView: SavedViewOperations<TSavedViewState>['switchViewById'];
+  onCreateView: SavedViewOperations<TSingleSavedViewState>['createView'];
+  onDeleteView: SavedViewOperations<TSingleSavedViewState>['deleteViewById'];
+  onUpdateView: SavedViewOperations<TSingleSavedViewState>['updateViewById'];
+  onLoadViews: SavedViewOperations<TSingleSavedViewState>['fetchViews'];
+  onSetDefaultView: SavedViewOperations<TSingleSavedViewState>['setDefaultViewById'];
+  onSwitchView: SavedViewOperations<TSingleSavedViewState>['switchViewById'];
 }
 
 export function SavedViewsToolbarControls<
-  TSavedViewState extends SavedViewItemState<TViewState>,
+  TSingleSavedViewState extends SingleSavedViewState,
   TViewState
->(props: Props<TSavedViewState, TViewState>) {
+>(props: Props<TSingleSavedViewState, TViewState>) {
   const {
     currentView,
     views,
