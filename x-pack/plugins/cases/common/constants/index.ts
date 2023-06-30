@@ -106,6 +106,9 @@ export const MAX_CONCURRENT_SEARCHES = 10 as const;
 export const MAX_BULK_GET_CASES = 1000 as const;
 export const MAX_COMMENTS_PER_PAGE = 100 as const;
 export const MAX_CATEGORY_FILTER_LENGTH = 100 as const;
+export const MAX_TAGS_FILTER_LENGTH = 100 as const;
+export const MAX_ASSIGNEES_FILTER_LENGTH = 100 as const;
+export const MAX_REPORTERS_FILTER_LENGTH = 100 as const;
 
 /**
  * Validation
@@ -113,6 +116,7 @@ export const MAX_CATEGORY_FILTER_LENGTH = 100 as const;
 
 export const MAX_TITLE_LENGTH = 160 as const;
 export const MAX_CATEGORY_LENGTH = 50 as const;
+export const MAX_DELETE_IDS_LENGTH = 100 as const;
 
 /**
  * Cases features

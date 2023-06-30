@@ -13,6 +13,13 @@ import { CommentRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt } from '../connectors/connector';
 import { CaseAssigneesRt } from './assignee';
+import { limitedArraySchema, NonEmptyString } from '../../schema';
+import {
+  MAX_DELETE_IDS_LENGTH,
+  MAX_ASSIGNEES_FILTER_LENGTH,
+  MAX_REPORTERS_FILTER_LENGTH,
+  MAX_TAGS_FILTER_LENGTH,
+} from '../../constants';
 
 export const AttachmentTotalsRt = rt.strict({
   alerts: rt.number,
@@ -207,7 +214,7 @@ export const CasesFindRequestRt = rt.exact(
     /**
      * Tags to filter by
      */
-    tags: rt.union([rt.array(rt.string), rt.string]),
+    tags: rt.union([limitedArraySchema(rt.string, 0, MAX_TAGS_FILTER_LENGTH, 'tags'), rt.string]),
     /**
      * The status of the case (open, closed, in-progress)
      */
@@ -219,11 +226,17 @@ export const CasesFindRequestRt = rt.exact(
     /**
      * The uids of the user profiles to filter by
      */
-    assignees: rt.union([rt.array(rt.string), rt.string]),
+    assignees: rt.union([
+      limitedArraySchema(rt.string, 0, MAX_ASSIGNEES_FILTER_LENGTH, 'assignees'),
+      rt.string,
+    ]),
     /**
      * The reporters to filter by
      */
-    reporters: rt.union([rt.array(rt.string), rt.string]),
+    reporters: rt.union([
+      limitedArraySchema(rt.string, 0, MAX_REPORTERS_FILTER_LENGTH, 'reporters'),
+      rt.string,
+    ]),
     /**
      * Operator to use for the `search` field
      */
@@ -281,6 +294,13 @@ export const CasesFindRequestRt = rt.exact(
      */
     category: rt.union([rt.array(rt.string), rt.string]),
   })
+);
+
+export const CasesDeleteRequestRt = limitedArraySchema(
+  NonEmptyString,
+  1,
+  MAX_DELETE_IDS_LENGTH,
+  'ids'
 );
 
 export const CasesByAlertIDRequestRt = rt.exact(
@@ -420,6 +440,7 @@ export type CasePostRequest = rt.TypeOf<typeof CasePostRequestRt>;
 export type Case = rt.TypeOf<typeof CaseRt>;
 export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
 export type Cases = rt.TypeOf<typeof CasesRt>;
+export type CasesDeleteRequest = rt.TypeOf<typeof CasesDeleteRequestRt>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
 export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;

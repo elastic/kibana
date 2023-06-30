@@ -19,7 +19,7 @@ import {
   toggleTestNowFlyoutAction,
 } from './actions';
 import {
-  Locations,
+  MonitorFields,
   ScheduleUnit,
   ServiceLocationErrors,
   SyntheticsMonitorSchedule,
@@ -40,7 +40,7 @@ export interface ManualTestRun {
   testRunId?: string;
   status: TestRunStatus;
   schedule: SyntheticsMonitorSchedule;
-  locations: Locations;
+  locations: MonitorFields['locations'];
   errors?: ServiceLocationErrors;
   fetchError?: { name: string; message: string };
   isTestNowFlyoutOpen: boolean;
