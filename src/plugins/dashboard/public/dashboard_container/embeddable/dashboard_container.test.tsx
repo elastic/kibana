@@ -264,47 +264,43 @@ describe('getInheritedInput', () => {
   };
   const dashboardTimeslice = [1688061910000, 1688062209000] as [number, number];
 
-  test('Should pass dashboard timeRange and timeslice to panel when panel does not have custom time range', () => {
+  test('Should pass dashboard timeRange and timeslice to panel when panel does not have custom time range', async () => {
     const container = buildMockDashboard({
       timeRange: dashboardTimeRange,
       timeslice: dashboardTimeslice,
-      panels: {
-        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-          explicitInput: {
-            id: '123',
-          },
-          type: CONTACT_CARD_EMBEDDABLE,
-        }),
-      },
     });
+    const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
+      CONTACT_CARD_EMBEDDABLE,
+      {
+        firstName: 'Kibana',
+      }
+    );
+    expect(embeddable).toBeDefined();
 
-    // @ts-expect-error getInheritedInput is protected
-    const inheritedInput = container.getInheritedInput('123');
-    expect(inheritedInput.timeRange).toEqual(dashboardTimeRange);
-    expect(inheritedInput.timeslice).toEqual(dashboardTimeslice);
+    const embeddableInput = container.getChild<ContactCardEmbeddable>(embeddable.id).getInput();
+    expect(embeddableInput.timeRange).toEqual(dashboardTimeRange);
+    expect(embeddableInput.timeslice).toEqual(dashboardTimeslice);
   });
 
-  test('Should not pass dashboard timeRange and timeslice to panel when panel has custom time range', () => {
+  test('Should not pass dashboard timeRange and timeslice to panel when panel has custom time range', async () => {
     const container = buildMockDashboard({
       timeRange: dashboardTimeRange,
       timeslice: dashboardTimeslice,
-      panels: {
-        '123': getSampleDashboardPanel<ContactCardEmbeddableInput & { timeRange: TimeRange }>({
-          explicitInput: {
-            id: '123',
-            timeRange: {
-              to: 'now',
-              from: 'now-24h',
-            },
-          },
-          type: CONTACT_CARD_EMBEDDABLE,
-        }),
-      },
     });
+    const embeddableTimeRange = {
+      to: 'now',
+      from: 'now-24h',
+    };
+    const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput & { timeRange: TimeRange }>(
+      CONTACT_CARD_EMBEDDABLE,
+      {
+        firstName: 'Kibana',
+        timeRange: embeddableTimeRange
+      }
+    );
 
-    // @ts-expect-error getInheritedInput is protected
-    const inheritedInput = container.getInheritedInput('123');
-    expect(inheritedInput.timeRange).toBeUndefined();
-    expect(inheritedInput.timeslice).toBeUndefined();
+    const embeddableInput = container.getChild<ContactCardEmbeddable>(embeddable.id).getInput();
+    expect(embeddableInput.timeRange).toEqual(embeddableTimeRange);
+    expect(embeddableInput.timeslice).toBeUndefined();
   });
 });
