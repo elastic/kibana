@@ -277,7 +277,12 @@ describe('getInheritedInput', () => {
     );
     expect(embeddable).toBeDefined();
 
-    const embeddableInput = container.getChild<ContactCardEmbeddable>(embeddable.id).getInput() as ContactCardEmbeddableInput & { timeRange: TimeRange; timeslice: [number, number]; };
+    const embeddableInput = container
+      .getChild<ContactCardEmbeddable>(embeddable.id)
+      .getInput() as ContactCardEmbeddableInput & {
+      timeRange: TimeRange;
+      timeslice: [number, number];
+    };
     expect(embeddableInput.timeRange).toEqual(dashboardTimeRange);
     expect(embeddableInput.timeslice).toEqual(dashboardTimeslice);
   });
@@ -298,7 +303,12 @@ describe('getInheritedInput', () => {
       timeRange: embeddableTimeRange,
     });
 
-    const embeddableInput = container.getChild<ContactCardEmbeddable>(embeddable.id).getInput() as ContactCardEmbeddableInput & { timeRange: TimeRange; timeslice: [number, number]; };
+    const embeddableInput = container
+      .getChild<ContactCardEmbeddable>(embeddable.id)
+      .getInput() as ContactCardEmbeddableInput & {
+      timeRange: TimeRange;
+      timeslice: [number, number];
+    };
     expect(embeddableInput.timeRange).toEqual(embeddableTimeRange);
     expect(embeddableInput.timeslice).toBeUndefined();
   });
