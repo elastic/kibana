@@ -137,7 +137,7 @@ const navigationTree: NavigationTreeDefinition = {
           id: 'settings',
           children: [
             {
-              link: 'monitoring',
+              link: 'management',
               title: i18n.translate('xpack.serverlessObservability.nav.mngt', {
                 defaultMessage: 'Management',
               }),
