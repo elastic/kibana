@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useMemo, useRef, useCallback } from 'react';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import getCaretCoordinates from 'textarea-caret';
 import {
   EuiTextArea,
@@ -13,6 +14,7 @@ import {
   EuiSelectable,
   EuiSelectableOption,
   EuiPortal,
+  EuiHighlight,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
 import './add_message_variables.scss';
@@ -29,71 +31,41 @@ interface Props {
   errors?: string[];
 }
 
-const convertArrayToObject = (arr?: string[]) => {
-  if (!arr) return {};
-  const result: any = {};
-
-  for (const item of arr) {
-    let currentObj = result;
-    const keys = item.split('.');
-
-    for (let i = 0; i < keys.length - 1; i++) {
-      const key = keys[i];
-
-      if (!currentObj[key]) {
-        currentObj[key] = {};
-      }
-
-      currentObj = currentObj[key];
+const filterSuggestions = (
+  actionVariablesList: ActionVariable[] | undefined,
+  propertyPath: string
+) => {
+  if (!actionVariablesList) return [];
+  const suggections = actionVariablesList.map(({ name }) => name);
+  const firstLineSuggestions = suggections.reduce((acc: string[], suggection: string) => {
+    const splittedWords = suggection.split('.');
+    if (splittedWords.length > 1 && !acc.includes(splittedWords[0])) {
+      return [...acc, splittedWords[0]];
     }
+    return acc;
+  }, [] as string[]);
 
-    const lastKey = keys[keys.length - 1];
-    currentObj[lastKey] = {};
-  }
-
-  return result;
-};
-
-const filterSuggestions = (obj: Record<string, unknown>, propertyPath: string) => {
-  const keys = propertyPath.split('.');
-
-  if (keys.length === 1) {
-    return Object.keys(obj).filter((suggestion) =>
-      suggestion.toLowerCase().startsWith(keys[0].toLowerCase())
-    );
-  }
-  let currentObj: Record<string, unknown> = obj;
-
-  for (const key of keys.slice(0, -1)) {
-    currentObj = currentObj[key] as Record<string, unknown>;
-
-    if (!currentObj) {
-      return [];
-    }
-  }
-  return Object.keys(currentObj).filter((suggestion) =>
-    suggestion.toLowerCase().startsWith(keys[keys.length - 1].toLowerCase())
-  );
+  const allSuggestions = suggections.concat(firstLineSuggestions).sort();
+  return allSuggestions.filter((suggestion) => suggestion.startsWith(propertyPath));
 };
 
 export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
-  messageVariables,
-  paramsProperty,
+  editAction,
+  errors,
   index,
   inputTargetValue,
   isDisabled = false,
-  editAction,
   label,
-  errors,
+  messageVariables,
+  paramsProperty,
 }) => {
-  const suggestions = convertArrayToObject(messageVariables?.map(({ name }) => name));
   const [matches, setMatches] = useState<string[]>([]);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   const selectableRef = useRef<EuiSelectable | null>(null);
   const [caretPosition, setCaretPosition] = useState({ top: 0, left: 0, height: 0, width: 0 });
   const [isListOpen, setListOpen] = useState(false);
   const [selectableHasFocus, setSelectableHasFocus] = useState(false);
-
+  const [searchWord, setSearchWord] = useState<string | null>(null);
   const optionsToShow: EuiSelectableOption[] = useMemo(() => {
     return matches?.map((variable) => ({
       label: variable,
@@ -112,20 +84,15 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
       const lastDoubleCurlyBracket = value.slice(0, selectionStart).lastIndexOf('{{');
       const currentWordStartIndex = Math.max(lastCloseBracketIndex, lastDoubleCurlyBracket);
 
-      const words = value
-        .slice(currentWordStartIndex === -1 ? 0 : currentWordStartIndex + 2, selectionStart)
-        .trim()
-        .split('.');
-
       const checkedElement = newOptions.find(({ checked }) => checked === 'on');
       if (checkedElement) {
-        words[words.length - 1] = checkedElement.label;
         const newInputText =
           value.slice(0, currentWordStartIndex) +
           '{{' +
-          words.join('.') +
+          checkedElement.label +
           '}}' +
           value.slice(selectionStart);
+
         editAction(paramsProperty, newInputText, index);
         setMatches([]);
       }
@@ -133,7 +100,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
     [editAction, index, paramsProperty]
   );
 
-  const onChangeWithMessageVariable = () => {
+  const onChangeWithMessageVariable = useCallback(() => {
     if (!textAreaRef.current) return;
     const { value, selectionStart } = textAreaRef.current; // check for selectionEnd, should be when the start is?
 
@@ -168,7 +135,8 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
       .slice(currentWordStartIndex === -1 ? 0 : currentWordStartIndex, selectionStart)
       .trim();
     if (currentWord.startsWith('{{')) {
-      const filteredMatches = filterSuggestions(suggestions, currentWord.slice(2));
+      const filteredMatches = filterSuggestions(messageVariables, currentWord.slice(2));
+      setSearchWord(currentWord.slice(2));
       setMatches(filteredMatches);
       setListOpen((prevVal) => {
         if (!prevVal) {
@@ -181,7 +149,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
     }
 
     editAction(paramsProperty, value, index);
-  };
+  }, [editAction, index, messageVariables, paramsProperty]);
 
   const textareaOnKeyPress = useCallback(
     (event) => {
@@ -253,6 +221,13 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
     setListOpen(false);
   }, []);
 
+  const renderSelectableOption = (option: any) => {
+    if (searchWord) {
+      return <EuiHighlight search={searchWord}>{option.label}</EuiHighlight>;
+    }
+    return option.label;
+  };
+
   return (
     <EuiFormRow
       fullWidth
@@ -271,16 +246,12 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
             name={paramsProperty}
             value={inputTargetValue || ''}
             data-test-subj={`${paramsProperty}TextArea`}
-            onChange={() => onChangeWithMessageVariable()}
+            onChange={onChangeWithMessageVariable}
             onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
               setListOpen(true);
             }}
             onKeyDown={textareaOnKeyPress}
-            // onWheel={() => {
-            //   setListOpen(false);
-            // }}
             onBlur={() => {
-              // setListOpen(false);
               if (!inputTargetValue && !isListOpen) {
                 editAction(paramsProperty, '', index);
               }
@@ -303,7 +274,8 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
               height={32 * 5.5}
               options={optionsToShow}
               onChange={onOptionPick}
-              singleSelection={true}
+              singleSelection
+              renderOption={renderSelectableOption}
               listProps={{ className: 'euiSelectableMsgAutoComplete' }}
             >
               {(list) => list}
