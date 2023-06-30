@@ -13,7 +13,10 @@ import { expectRulesWithExecutionStatus, filterByExecutionStatus } from '../../t
 
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 
-import { RULES_MANAGEMENT_TABLE } from '../../screens/alerts_detection_rules';
+import {
+  RULES_MANAGEMENT_TABLE,
+  RULE_EXECUTION_STATUS,
+} from '../../screens/alerts_detection_rules';
 
 import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 
@@ -47,10 +50,14 @@ describe('Rule management filters', () => {
       },
     });
 
-    indexDocument('test_index');
+    indexDocument('test_index', {});
 
     createRule(
-      getNewRule({ name: 'Successful rule', rule_id: 'successful_rule', index: ['test_index'] })
+      getNewRule({
+        name: 'Successful rule',
+        rule_id: 'successful_rule',
+        index: ['test_index'],
+      })
     );
 
     createRule(
@@ -82,11 +89,11 @@ describe('Rule management filters', () => {
     it('Filters rules by last response', () => {
       findRuleRowInTable(RULES_MANAGEMENT_TABLE, 'Successful rule').should('exist');
 
-      cy.get('[data-test-subj="ruleExecutionStatus"]').should('have.length', 3);
+      cy.get(RULE_EXECUTION_STATUS).should('have.length', 3);
 
-      expectRulesWithExecutionStatus('Succeeded', 1);
-      expectRulesWithExecutionStatus('Warning', 1);
-      expectRulesWithExecutionStatus('Failed', 1);
+      expectRulesWithExecutionStatus(1, 'Succeeded');
+      expectRulesWithExecutionStatus(1, 'Warning');
+      expectRulesWithExecutionStatus(1, 'Failed');
 
       filterByExecutionStatus('Succeeded');
       filterByExecutionStatus('Warning');

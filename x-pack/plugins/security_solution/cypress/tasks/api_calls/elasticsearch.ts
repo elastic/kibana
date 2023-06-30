@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { RuleLastRun } from '@kbn/alerting-plugin/common';
 import { rootRequest } from '../common';
 
 export const deleteIndex = (index: string) => {
@@ -27,7 +28,7 @@ export const createIndex = (indexName: string, properties: Record<string, unknow
     },
   });
 
-export const indexDocument = (indexName: string, document: Record<string, unknown> = {}) =>
+export const indexDocument = (indexName: string, document: Record<string, unknown>) =>
   cy.request({
     method: 'POST',
     url: `${Cypress.env('ELASTICSEARCH_URL')}/${indexName}/_doc`,
@@ -39,7 +40,11 @@ export const waitForRulesToFinishExecution = (ruleIds: string[]) => {
   return cy.waitUntil(
     () =>
       rootRequest<{
-        hits: { hits: Array<{ _source: { alert: { params: { ruleId: string } } } }> };
+        hits: {
+          hits: Array<{
+            _source: { alert: { params: { ruleId: string }; lastRun?: RuleLastRun } };
+          }>;
+        };
       }>({
         method: 'GET',
         url: `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_alerting_cases/_search`,
@@ -55,7 +60,9 @@ export const waitForRulesToFinishExecution = (ruleIds: string[]) => {
       }).then((response) => {
         const areAllRulesFinished = ruleIds.every((ruleId) =>
           response.body.hits.hits.some(
-            (ruleExecution) => ruleExecution._source.alert.params.ruleId === ruleId
+            (ruleHit) =>
+              ruleHit._source.alert.params.ruleId === ruleId &&
+              typeof ruleHit._source.alert.lastRun !== 'undefined'
           )
         );
         return areAllRulesFinished;

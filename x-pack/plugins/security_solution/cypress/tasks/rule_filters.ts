@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-export const expectRulesWithExecutionStatus = (status: string, expectedCount: number) => {
-  cy.get(`[data-test-subj="ruleExecutionStatus"]:contains("${status}")`).should(
-    'have.length',
-    expectedCount
-  );
+import {
+  RULE_EXECUTION_STATUS,
+  RULE_NAME,
+  EXECUTION_STATUS_FILTER_BUTTON,
+  EXECUTION_STATUS_FILTER_OPTION,
+} from '../screens/alerts_detection_rules';
+
+export const expectRulesWithExecutionStatus = (expectedCount: number, status: string) => {
+  cy.get(`${RULE_EXECUTION_STATUS}:contains("${status}")`).should('have.length', expectedCount);
 };
 
 export const filterByExecutionStatus = (status: string) => {
-  cy.get('[data-test-subj="executionStatusFilterButton"]').click();
-  cy.get(`[data-test-subj="executionStatusFilterOption"]:contains("${status}")`).click();
-  cy.get('[data-test-subj="ruleName"]').should('have.length', 1);
-  expectRulesWithExecutionStatus(status, 1);
+  cy.get(EXECUTION_STATUS_FILTER_BUTTON).click();
+  cy.get(`${EXECUTION_STATUS_FILTER_OPTION}:contains("${status}")`).click();
+  cy.get(RULE_NAME).should('have.length', 1);
+  expectRulesWithExecutionStatus(1, status);
 };
