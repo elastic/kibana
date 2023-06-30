@@ -153,7 +153,7 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
           />
         )}
         <div css={styles.yamlEditor}>
-          <CodeEditor // TODO theme provided in context by x-pack/plugins/cloud_defend/public/plugin.tsx
+          <CodeEditor
             width="100%"
             languageId={YamlLang}
             options={{
