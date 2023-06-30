@@ -920,7 +920,6 @@
     "react": "^17.0.2",
     "react-ace": "^7.0.5",
     "react-beautiful-dnd": "^13.1.0",
-    "react-color": "^2.13.8",
     "react-dom": "^17.0.2",
     "react-dropzone": "^4.2.9",
     "react-fast-compare": "^2.0.4",
