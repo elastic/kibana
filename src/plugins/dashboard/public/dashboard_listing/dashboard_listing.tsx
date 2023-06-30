@@ -7,7 +7,7 @@
  */
 
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import {
   type TableListViewKibanaDependencies,
@@ -57,6 +57,14 @@ export const DashboardListing = ({
       initialFilter,
     });
 
+  const savedObjectsTaggingFakePlugin = useMemo(() => {
+    return savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
+      ? ({
+          ui: savedObjectsTagging,
+        } as TableListViewKibanaDependencies['savedObjectsTagging'])
+      : undefined;
+  }, [savedObjectsTagging]);
+
   return (
     <I18nProvider>
       <TableListViewKibanaProvider
@@ -68,11 +76,7 @@ export const DashboardListing = ({
             http,
           },
           toMountPoint,
-          savedObjectsTagging: savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
-            ? ({
-                ui: savedObjectsTagging,
-              } as TableListViewKibanaDependencies['savedObjectsTagging'])
-            : undefined,
+          savedObjectsTagging: savedObjectsTaggingFakePlugin,
           FormattedRelative,
         }}
       >
