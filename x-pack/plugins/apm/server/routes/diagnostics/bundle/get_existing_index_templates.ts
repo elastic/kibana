@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { getApmIndexTemplateNames } from '../helpers/get_apm_index_template_names';
 import { getIndexTemplate } from './get_index_template';
 
 export type ApmIndexTemplateStates = Record<
@@ -16,11 +17,10 @@ export type ApmIndexTemplateStates = Record<
 // Check whether the default APM index templates exist
 export async function getExistingApmIndexTemplates({
   esClient,
-  apmIndexTemplateNames,
 }: {
   esClient: ElasticsearchClient;
-  apmIndexTemplateNames: string[];
 }) {
+  const apmIndexTemplateNames = getApmIndexTemplateNames();
   const values = await Promise.all(
     apmIndexTemplateNames.map(async (indexTemplateName) => {
       const res = await getIndexTemplate(esClient, { name: indexTemplateName });

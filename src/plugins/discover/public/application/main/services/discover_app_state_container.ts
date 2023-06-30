@@ -259,8 +259,6 @@ export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
   sort?: string[][] | [string, string];
 }
 
-export const GLOBAL_STATE_URL_KEY = '_g';
-
 export function getInitialState(
   stateStorage: IKbnUrlStateStorage | undefined,
   savedSearch: SavedSearch,
