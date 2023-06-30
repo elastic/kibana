@@ -7,21 +7,19 @@
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { FindActionResult } from '@kbn/actions-plugin/server';
-import { TLSParams } from '../../../common/runtime_types/alerts/tls';
 import { savedObjectsAdapter } from '../../legacy_uptime/lib/saved_objects';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
-import { TlsTranslations } from '../../../common/rules/synthetics/translations';
+import { SyntheticsMonitorStatusTranslations } from '../../../common/rules/synthetics/translations';
 import { UptimeRequestHandlerContext } from '../../types';
 import {
   ACTION_GROUP_DEFINITIONS,
-  SYNTHETICS_ALERT_RULE_TYPES,
+  SYNTHETICS_STATUS_RULE,
+  SYNTHETICS_TLS_RULE,
 } from '../../../common/constants/synthetics_alerts';
 
-// uuid based on the string 'uptime-tls-default-alert'
-const TLS_DEFAULT_ALERT_ID = '7a532181-ff1d-4317-9367-7ca789133920';
-
-export class TLSAlertService {
+type DefaultRuleType = typeof SYNTHETICS_STATUS_RULE | typeof SYNTHETICS_TLS_RULE;
+export class DefaultAlertService {
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
   server: UptimeServerSetup;
@@ -36,17 +34,61 @@ export class TLSAlertService {
     this.soClient = soClient;
   }
 
-  async getExistingAlert() {
-    const rulesClient = (await this.context.alerting)?.getRulesClient();
-    try {
-      const alert = await rulesClient.get({ id: TLS_DEFAULT_ALERT_ID });
-      return { ...alert, ruleTypeId: alert.alertTypeId };
-    } catch (e) {
-      return null;
+  async setupDefaultAlerts() {
+    const [statusRule, tlsRule] = await Promise.allSettled([
+      this.setupStatusRule(),
+      this.setupTlsRule(),
+    ]);
+
+    if (statusRule.status === 'rejected') {
+      throw statusRule.reason;
     }
+    if (tlsRule.status === 'rejected') {
+      throw tlsRule.reason;
+    }
+
+    return {
+      statusRule: statusRule.status === 'fulfilled' ? statusRule.value : null,
+      tlsRule: tlsRule.status === 'fulfilled' ? tlsRule.value : null,
+    };
   }
-  async createDefaultAlertIfNotExist() {
-    const alert = await this.getExistingAlert();
+
+  setupStatusRule() {
+    return this.createDefaultAlertIfNotExist(
+      SYNTHETICS_STATUS_RULE,
+      `Synthetics status internal alert`,
+      '1m'
+    );
+  }
+
+  setupTlsRule() {
+    return this.createDefaultAlertIfNotExist(
+      SYNTHETICS_TLS_RULE,
+      `Synthetics internal TLS alert`,
+      '10m'
+    );
+  }
+
+  async getExistingAlert(ruleType: DefaultRuleType) {
+    const rulesClient = (await this.context.alerting)?.getRulesClient();
+
+    const { data } = await rulesClient.find({
+      options: {
+        page: 1,
+        perPage: 1,
+        filter: `alert.attributes.alertTypeId:(${ruleType})`,
+      },
+    });
+
+    const alert = data?.[0];
+    if (!alert) {
+      return;
+    }
+
+    return { ...alert, ruleTypeId: alert.alertTypeId };
+  }
+  async createDefaultAlertIfNotExist(ruleType: DefaultRuleType, name: string, interval: string) {
+    const alert = await this.getExistingAlert(ruleType);
     if (alert) {
       return alert;
     }
@@ -54,29 +96,37 @@ export class TLSAlertService {
     const actions = await this.getAlertActions();
 
     const rulesClient = (await this.context.alerting)?.getRulesClient();
-    const newAlert = await rulesClient.create<TLSParams>({
+    const newAlert = await rulesClient.create<{}>({
       data: {
         actions,
         params: {},
         consumer: 'uptime',
-        alertTypeId: SYNTHETICS_ALERT_RULE_TYPES.TLS,
-        schedule: { interval: '1m' },
-        tags: ['SYNTHETICS_TLS_DEFAULT_ALERT'],
-        name: `Synthetics internal TLS alert`,
+        alertTypeId: ruleType,
+        schedule: { interval },
+        tags: ['SYNTHETICS_DEFAULT_ALERT'],
+        name,
         enabled: true,
         throttle: null,
-      },
-      options: {
-        id: TLS_DEFAULT_ALERT_ID,
       },
     });
     return { ...newAlert, ruleTypeId: newAlert.alertTypeId };
   }
 
-  async updateDefaultAlert() {
+  updateStatusRule() {
+    return this.updateDefaultAlert(
+      SYNTHETICS_STATUS_RULE,
+      `Synthetics status internal alert`,
+      '1m'
+    );
+  }
+  updateTlsRule() {
+    return this.updateDefaultAlert(SYNTHETICS_TLS_RULE, `Synthetics internal TLS alert`, '10m');
+  }
+
+  async updateDefaultAlert(ruleType: DefaultRuleType, name: string, interval: string) {
     const rulesClient = (await this.context.alerting)?.getRulesClient();
 
-    const alert = await this.getExistingAlert();
+    const alert = await this.getExistingAlert(ruleType);
     if (alert) {
       const actions = await this.getAlertActions();
       const updatedAlert = await rulesClient.update({
@@ -93,7 +143,7 @@ export class TLSAlertService {
       return { ...updatedAlert, ruleTypeId: updatedAlert.alertTypeId };
     }
 
-    return await this.createDefaultAlertIfNotExist();
+    return await this.createDefaultAlertIfNotExist(ruleType, name, interval);
   }
 
   async getAlertActions() {
@@ -104,14 +154,15 @@ export class TLSAlertService {
     );
 
     return populateAlertActions({
-      groupId: ACTION_GROUP_DEFINITIONS.TLS_CERTIFICATE.id,
+      groupId: ACTION_GROUP_DEFINITIONS.MONITOR_STATUS.id,
       defaultActions,
       defaultEmail: settings?.defaultEmail!,
       translations: {
-        defaultActionMessage: TlsTranslations.defaultActionMessage,
-        defaultRecoveryMessage: TlsTranslations.defaultRecoveryMessage,
-        defaultSubjectMessage: TlsTranslations.defaultSubjectMessage,
-        defaultRecoverySubjectMessage: TlsTranslations.defaultRecoverySubjectMessage,
+        defaultActionMessage: SyntheticsMonitorStatusTranslations.defaultActionMessage,
+        defaultRecoveryMessage: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
+        defaultSubjectMessage: SyntheticsMonitorStatusTranslations.defaultSubjectMessage,
+        defaultRecoverySubjectMessage:
+          SyntheticsMonitorStatusTranslations.defaultRecoverySubjectMessage,
       },
     });
   }

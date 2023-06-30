@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { StatusAlertService } from './status_alert_service';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes';
+import { SYNTHETICS_STATUS_RULE } from '../../../common/constants/synthetics_alerts';
+import { DefaultAlertService } from './default_alert_service';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const getDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -14,7 +15,7 @@ export const getDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
   path: SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING,
   validate: {},
   handler: async ({ context, server, savedObjectsClient }): Promise<any> => {
-    const statusAlertService = new StatusAlertService(context, server, savedObjectsClient);
-    return await statusAlertService.getExistingAlert();
+    const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
+    return await defaultAlertService.getExistingAlert(SYNTHETICS_STATUS_RULE);
   },
 });
