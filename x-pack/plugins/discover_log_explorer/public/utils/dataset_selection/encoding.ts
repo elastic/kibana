@@ -24,7 +24,7 @@ export const encodeDatasetSelection = (datasetSelectionPlain: DatasetSelectionPl
 export const decodeDatasetSelectionId = (datasetSelectionId: string): DatasetSelectionPlain => {
   const risonDatasetSelection: RisonValue = lz.decompressFromBase64(datasetSelectionId);
 
-  if (risonDatasetSelection === null) {
+  if (risonDatasetSelection === null || risonDatasetSelection === '') {
     throw new DatasetEncodingError('The stored id is not a valid compressed value.');
   }
 
