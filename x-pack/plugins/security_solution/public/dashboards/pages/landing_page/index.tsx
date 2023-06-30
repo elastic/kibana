@@ -122,12 +122,8 @@ export const DashboardsLandingPage = () => {
             disableCreateDashboardButton={loadingCreateDashboardUrl}
             getDashboardUrl={getSecuritySolutionDashboardUrl}
             goToDashboard={goToDashboard}
-            pageSectionPadding="none"
-            restrictPageSectionWidth={false}
-            withPageTemplateHeader={false}
             initialFilter={initialFilter}
             urlStateEnabled={false}
-            withoutPageTemplateWrapper={true}
           >
             <EuiTitle size="xxxs">
               <h2>{i18n.DASHBOARDS_PAGE_SECTION_CUSTOM}</h2>

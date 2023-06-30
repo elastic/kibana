@@ -12,8 +12,8 @@ import React from 'react';
 import {
   type TableListViewKibanaDependencies,
   TableListViewKibanaProvider,
+  TableListViewTable,
 } from '@kbn/content-management-table-list-view-table';
-import { TableListView } from '@kbn/content-management-table-list-view';
 
 import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
@@ -27,12 +27,13 @@ import {
   TableListViewApplicationService,
 } from './types';
 
-export const DashboardListing = ({
-  children,
+export const DashboardListingTable = ({
+  disableCreateDashboardButton,
   initialFilter,
   goToDashboard,
   getDashboardUrl,
   useSessionStorageIntegration,
+  urlStateEnabled,
 }: DashboardListingProps) => {
   const {
     application,
@@ -49,13 +50,18 @@ export const DashboardListing = ({
     page: 'list',
   });
 
-  const { unsavedDashboardIds, refreshUnsavedDashboards, tableListViewTableProps } =
-    useDashboardListingTable({
-      goToDashboard,
-      getDashboardUrl,
-      useSessionStorageIntegration,
-      initialFilter,
-    });
+  const {
+    unsavedDashboardIds,
+    refreshUnsavedDashboards,
+    tableListViewTableProps: { title: tableCaption, ...tableListViewTable },
+  } = useDashboardListingTable({
+    disableCreateDashboardButton,
+    goToDashboard,
+    getDashboardUrl,
+    urlStateEnabled,
+    useSessionStorageIntegration,
+    initialFilter,
+  });
 
   return (
     <I18nProvider>
@@ -76,20 +82,21 @@ export const DashboardListing = ({
           FormattedRelative,
         }}
       >
-        <TableListView<DashboardSavedObjectUserContent> {...tableListViewTableProps}>
-          <>
-            {children}
-            <DashboardUnsavedListing
-              goToDashboard={goToDashboard}
-              unsavedDashboardIds={unsavedDashboardIds}
-              refreshUnsavedDashboards={refreshUnsavedDashboards}
-            />
-          </>
-        </TableListView>
+        <>
+          <DashboardUnsavedListing
+            goToDashboard={goToDashboard}
+            unsavedDashboardIds={unsavedDashboardIds}
+            refreshUnsavedDashboards={refreshUnsavedDashboards}
+          />
+          <TableListViewTable<DashboardSavedObjectUserContent>
+            tableCaption={tableCaption}
+            {...tableListViewTable}
+          />
+        </>
       </TableListViewKibanaProvider>
     </I18nProvider>
   );
 };
 
 // eslint-disable-next-line import/no-default-export
-export default DashboardListing;
+export default DashboardListingTable;
