@@ -55,8 +55,7 @@ const createMockStorage = () => ({
   clear: jest.fn(),
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/150777
-describe.skip('Transform: <DefinePivotForm />', () => {
+describe('Transform: <DefinePivotForm />', () => {
   test('Minimal initialization', async () => {
     // Arrange
     const mlSharedImports = await getMlSharedImports();
@@ -76,12 +75,14 @@ describe.skip('Transform: <DefinePivotForm />', () => {
       storage: createMockStorage(),
     };
 
+    const mockOnChange = jest.fn();
+
     const { getByText } = render(
       <I18nProvider>
         <KibanaContextProvider services={services}>
           <MlSharedContext.Provider value={mlSharedImports}>
             <DatePickerContextProvider {...getMockedDatePickerDependencies()}>
-              <StepDefineForm onChange={jest.fn()} searchItems={searchItems as SearchItems} />
+              <StepDefineForm onChange={mockOnChange} searchItems={searchItems as SearchItems} />
             </DatePickerContextProvider>
           </MlSharedContext.Provider>
         </KibanaContextProvider>
@@ -95,6 +96,7 @@ describe.skip('Transform: <DefinePivotForm />', () => {
     await waitFor(() => {
       expect(getByText('Data view')).toBeInTheDocument();
       expect(getByText(searchItems.dataView.getIndexPattern())).toBeInTheDocument();
+      expect(mockOnChange).toBeCalled();
     });
-  });
+  }, 10000);
 });

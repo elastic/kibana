@@ -88,8 +88,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/160299
-    describe.skip('create alert', () => {
+    describe('create alert', () => {
       before(async () => {
         actionId = await createIndexConnector({
           supertest,
