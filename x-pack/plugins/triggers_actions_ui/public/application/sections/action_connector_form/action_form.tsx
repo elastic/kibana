@@ -80,7 +80,7 @@ export interface ActionAccordionFormProps {
   hideActionHeader?: boolean;
   hideNotifyWhen?: boolean;
   defaultSummaryMessage?: string;
-  hasSummary?: boolean;
+  hasAlertsMappings?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   defaultRuleFrequency?: RuleActionFrequency;
@@ -115,7 +115,7 @@ export const ActionForm = ({
   hideActionHeader,
   hideNotifyWhen,
   defaultSummaryMessage,
-  hasSummary,
+  hasAlertsMappings,
   minimumThrottleInterval,
   notifyWhenSelectOptions,
   defaultRuleFrequency = DEFAULT_FREQUENCY,
@@ -491,7 +491,7 @@ export const ActionForm = ({
               }}
               hideNotifyWhen={hideNotifyWhen}
               defaultSummaryMessage={defaultSummaryMessage}
-              hasSummary={hasSummary}
+              hasAlertsMappings={hasAlertsMappings}
               minimumThrottleInterval={minimumThrottleInterval}
               notifyWhenSelectOptions={notifyWhenSelectOptions}
               defaultNotifyWhenValue={defaultRuleFrequency.notifyWhen}

@@ -13,14 +13,9 @@ import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plu
 import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/server/create_execute_function';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
+import { GetPersistentAlertsParams, IAlertsClient } from '../alerts_client/types';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import {
-  GetSummarizedAlertsFnOpts,
-  parseDuration,
-  RawRule,
-  CombinedSummarizedAlerts,
-  ThrottledActions,
-} from '../types';
+import { parseDuration, RawRule, CombinedPersistentAlerts, ThrottledActions } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
 import { Executable, ExecutionHandlerOptions, RuleTaskInstance } from './types';
@@ -96,6 +91,13 @@ export class ExecutionHandler<
   private mutedAlertIdsSet: Set<string> = new Set();
   private previousStartedAt: Date | null;
   private maintenanceWindowIds: string[] = [];
+  private alertsClient: IAlertsClient<
+    AlertData,
+    State,
+    Context,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >;
 
   constructor({
     rule,
@@ -112,6 +114,7 @@ export class ExecutionHandler<
     previousStartedAt,
     actionsClient,
     maintenanceWindowIds,
+    alertsClient,
   }: ExecutionHandlerOptions<
     Params,
     ExtractedParams,
@@ -141,6 +144,7 @@ export class ExecutionHandler<
     this.previousStartedAt = previousStartedAt;
     this.mutedAlertIdsSet = new Set(rule.mutedInstanceIds);
     this.maintenanceWindowIds = maintenanceWindowIds ?? [];
+    this.alertsClient = alertsClient;
   }
 
   public async run(
@@ -169,7 +173,7 @@ export class ExecutionHandler<
 
       this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
 
-      for (const { action, alert, summarizedAlerts } of executables) {
+      for (const { action, alert, persistentAlerts } of executables) {
         const { actionTypeId } = action;
         const actionGroup = action.group as ActionGroupIds;
 
@@ -214,7 +218,7 @@ export class ExecutionHandler<
         ruleRunMetricsStore.incrementNumberOfTriggeredActions();
         ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
-        if (isSummaryAction(action) && summarizedAlerts) {
+        if (persistentAlerts) {
           const { start, end } = getSummaryActionTimeBounds(
             action,
             this.rule.schedule,
@@ -227,7 +231,7 @@ export class ExecutionHandler<
               actionTypeId,
               ruleUrl,
               actionParams: transformSummaryActionParams({
-                alerts: summarizedAlerts,
+                alerts: persistentAlerts,
                 rule: this.rule,
                 ruleTypeId: this.ruleType.id,
                 actionId: action.id,
@@ -254,13 +258,12 @@ export class ExecutionHandler<
             id: action.id,
             typeId: action.actionTypeId,
             alertSummary: {
-              new: summarizedAlerts.new.count,
-              ongoing: summarizedAlerts.ongoing.count,
-              recovered: summarizedAlerts.recovered.count,
+              new: persistentAlerts.new.count,
+              ongoing: persistentAlerts.ongoing.count,
+              recovered: persistentAlerts.recovered.count,
             },
           });
         } else {
-          const executableAlert = alert!;
           const ruleUrl = this.buildRuleUrl(spaceId);
           const actionToRun = {
             ...action,
@@ -275,17 +278,17 @@ export class ExecutionHandler<
                 alertName: this.rule.name,
                 spaceId,
                 tags: this.rule.tags,
-                alertInstanceId: executableAlert.getId(),
-                alertUuid: executableAlert.getUuid(),
+                alertInstanceId: alert.getId(),
+                alertUuid: alert.getUuid(),
                 alertActionGroup: actionGroup,
                 alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
-                context: executableAlert.getContext(),
+                context: alert.getContext(),
                 actionId: action.id,
-                state: executableAlert.getScheduledActionOptions()?.state || {},
+                state: alert.getScheduledActionOptions()?.state || {},
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
                 alertParams: this.rule.params,
                 actionParams: action.params,
-                flapping: executableAlert.getFlapping(),
+                flapping: alert.getFlapping(),
                 ruleUrl,
               }),
             }),
@@ -299,21 +302,21 @@ export class ExecutionHandler<
           logActions.push({
             id: action.id,
             typeId: action.actionTypeId,
-            alertId: executableAlert.getId(),
+            alertId: alert.getId(),
             alertGroup: action.group,
           });
 
           if (!this.isRecoveredAlert(actionGroup)) {
             if (isActionOnInterval(action)) {
-              executableAlert.updateLastScheduledActions(
+              alert.updateLastScheduledActions(
                 action.group as ActionGroupIds,
                 generateActionHash(action),
                 action.uuid
               );
             } else {
-              executableAlert.updateLastScheduledActions(action.group as ActionGroupIds);
+              alert.updateLastScheduledActions(action.group as ActionGroupIds);
             }
-            executableAlert.unscheduleActions();
+            alert.unscheduleActions();
           }
         }
       }
@@ -503,10 +506,10 @@ export class ExecutionHandler<
 
     for (const action of this.rule.actions) {
       const alertsArray = Object.entries(alerts);
-      let summarizedAlerts = null;
+      let persistentAlerts = null;
 
-      if (this.shouldGetSummarizedAlerts({ action, throttledSummaryActions })) {
-        summarizedAlerts = await this.getSummarizedAlerts({
+      if (this.shouldGetPersistentAlerts({ action, throttledSummaryActions })) {
+        persistentAlerts = await this.getPersistentAlerts({
           action,
           spaceId: this.taskInstance.params.spaceId,
           ruleId: this.taskInstance.params.alertId,
@@ -514,7 +517,7 @@ export class ExecutionHandler<
         if (!isSummaryActionOnInterval(action)) {
           this.logNumberOfFilteredAlerts({
             numberOfAlerts: alertsArray.length,
-            numberOfSummarizedAlerts: summarizedAlerts.all.count,
+            numberOfSummarizedAlerts: persistentAlerts.all.count,
             action,
           });
         }
@@ -530,14 +533,14 @@ export class ExecutionHandler<
         );
         continue;
       } else if (isSummaryAction(action)) {
-        if (summarizedAlerts && summarizedAlerts.all.count !== 0) {
-          executables.push({ action, summarizedAlerts });
+        if (persistentAlerts && persistentAlerts.all.count !== 0) {
+          executables.push({ action, persistentAlerts });
         }
         continue;
       }
 
       for (const [alertId, alert] of alertsArray) {
-        if (alert.isFilteredOut(summarizedAlerts)) {
+        if (alert.isFilteredOut(persistentAlerts)) {
           continue;
         }
 
@@ -572,29 +575,27 @@ export class ExecutionHandler<
     return executables;
   }
 
-  private canFetchSummarizedAlerts(action: RuleAction) {
-    const hasGetSummarizedAlerts = this.ruleType.getSummarizedAlerts !== undefined;
-
-    if (action.frequency?.summary && !hasGetSummarizedAlerts) {
-      this.logger.error(
-        `Skipping action "${action.id}" for rule "${this.rule.id}" because the rule type "${this.ruleType.name}" does not support alert-as-data.`
-      );
-    }
-    return hasGetSummarizedAlerts;
+  private canGetPersistentAlerts() {
+    return this.ruleType.alerts !== undefined;
   }
 
-  private shouldGetSummarizedAlerts({
+  private shouldGetPersistentAlerts({
     action,
     throttledSummaryActions,
   }: {
     action: RuleAction;
     throttledSummaryActions: ThrottledActions;
   }) {
-    if (!this.canFetchSummarizedAlerts(action)) {
+    if (!this.canGetPersistentAlerts()) {
+      if (action.frequency?.summary) {
+        this.logger.error(
+          `Skipping action "${action.id}" for rule "${this.rule.id}" because the rule type "${this.ruleType.name}" does not support alert-as-data.`
+        );
+      }
       return false;
     }
 
-    // we fetch summarizedAlerts to filter alerts in memory as well
+    // we fetch persistentAlerts to filter alerts in memory as well
     if (!isSummaryAction(action) && !action.alertsFilter) {
       return false;
     }
@@ -613,7 +614,7 @@ export class ExecutionHandler<
     return true;
   }
 
-  private async getSummarizedAlerts({
+  private async getPersistentAlerts({
     action,
     ruleId,
     spaceId,
@@ -621,31 +622,36 @@ export class ExecutionHandler<
     action: RuleAction;
     ruleId: string;
     spaceId: string;
-  }): Promise<CombinedSummarizedAlerts> {
-    let options: GetSummarizedAlertsFnOpts = {
+  }): Promise<CombinedPersistentAlerts> {
+    const formatAlert = this.ruleType.alerts?.formatAlert;
+
+    const optionsBase = {
       ruleId,
       spaceId,
       excludedAlertInstanceIds: this.rule.mutedInstanceIds,
       alertsFilter: action.alertsFilter,
+      isLifecycleAlert: this.ruleType.autoRecoverAlerts || false,
+      ...(formatAlert ? { formatAlert } : {}),
     };
+
+    let options: GetPersistentAlertsParams;
 
     if (isActionOnInterval(action)) {
       const throttleMills = parseDuration(action.frequency!.throttle!);
       const start = new Date(Date.now() - throttleMills);
 
       options = {
+        ...optionsBase,
         start,
         end: new Date(),
-        ...options,
       };
     } else {
       options = {
+        ...optionsBase,
         executionUuid: this.executionId,
-        ...options,
       };
     }
-
-    const alerts = await this.ruleType.getSummarizedAlerts!(options);
+    const alerts = await this.alertsClient.getPersistentAlerts!(options);
 
     const total = alerts.new.count + alerts.ongoing.count + alerts.recovered.count;
     return {

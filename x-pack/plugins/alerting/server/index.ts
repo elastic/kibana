@@ -28,8 +28,7 @@ export type {
   AlertInstanceContext,
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
-  GetSummarizedAlertsFnOpts,
-  SummarizedAlertsChunk,
+  PersistentAlertsChunk,
   ExecutorType,
   IRuleTypeAlerts,
 } from './types';

@@ -63,7 +63,6 @@ import {
   DATE_1970,
   DATE_1970_5_MIN,
   DATE_9999,
-  getSummarizedAlertsMock,
   mockAAD,
 } from './fixtures';
 import { EVENT_LOG_ACTIONS } from '../plugin';
@@ -1441,29 +1440,31 @@ describe('Task Runner', () => {
         true
       );
       actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(mockRunNowResponse);
-      ruleType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: RuleExecutorOptions<
-          RuleTypeParams,
-          RuleTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string,
-          RuleAlertData
-        >) => {
-          executorServices.alertFactory.create('1').scheduleActions('default');
-          return { state: {} };
-        }
-      );
+      ruleType.executor.mockImplementation(async () => {
+        return { state: {} };
+      });
 
-      getSummarizedAlertsMock.mockResolvedValue({
-        new: {
-          count: 1,
-          data: [mockAAD],
-        },
-        ongoing: { count: 1, data: [] },
-        recovered: { count: 0, data: [] },
+      alertsService.createAlertsClient.mockImplementation(() => {
+        return {
+          initializeExecution: jest.fn(),
+          processAndLogAlerts: jest.fn(),
+          getTrackedAlerts: jest.fn(),
+          getProcessedAlerts: jest.fn(),
+          getAlertsToSerialize: jest.fn(),
+          hasReachedAlertLimit: jest.fn(),
+          checkLimitUsage: jest.fn(),
+          persistAlerts: jest.fn(),
+          getPersistentAlerts: jest.fn().mockResolvedValue({
+            new: {
+              count: 1,
+              data: [mockAAD],
+            },
+            ongoing: { count: 0, data: [] },
+            recovered: { count: 0, data: [] },
+          }),
+          factory: jest.fn(),
+          client: jest.fn(),
+        };
       });
 
       const taskRunner = new TaskRunner(
@@ -1496,12 +1497,6 @@ describe('Task Runner', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
       await taskRunner.run();
 
-      expect(ruleType.getSummarizedAlerts).toHaveBeenCalledWith({
-        executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-        ruleId: '1',
-        spaceId: 'default',
-        excludedAlertInstanceIds: [],
-      });
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(enqueueFunction).toHaveBeenCalledWith(
         generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
@@ -1519,29 +1514,8 @@ describe('Task Runner', () => {
         true
       );
       actionsClient.ephemeralEnqueuedExecution.mockResolvedValue(mockRunNowResponse);
-      ruleType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: RuleExecutorOptions<
-          RuleTypeParams,
-          RuleTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string,
-          RuleAlertData
-        >) => {
-          executorServices.alertFactory.create('1').scheduleActions('default');
-          return { state: {} };
-        }
-      );
-
-      getSummarizedAlertsMock.mockResolvedValue({
-        new: {
-          count: 1,
-          data: [mockAAD],
-        },
-        ongoing: { count: 1, data: [] },
-        recovered: { count: 0, data: [] },
+      ruleType.executor.mockImplementation(async () => {
+        return { state: {} };
       });
 
       const taskRunner = new TaskRunner(
@@ -1571,16 +1545,33 @@ describe('Task Runner', () => {
           },
         ],
       });
+
+      alertsService.createAlertsClient.mockImplementation(() => {
+        return {
+          initializeExecution: jest.fn(),
+          processAndLogAlerts: jest.fn(),
+          getTrackedAlerts: jest.fn(),
+          getProcessedAlerts: jest.fn(),
+          getAlertsToSerialize: jest.fn().mockResolvedValueOnce({ state: {}, meta: {} }),
+          hasReachedAlertLimit: jest.fn(),
+          checkLimitUsage: jest.fn(),
+          persistAlerts: jest.fn(),
+          getPersistentAlerts: jest.fn().mockResolvedValue({
+            new: {
+              count: 1,
+              data: [mockAAD],
+            },
+            ongoing: { count: 0, data: [] },
+            recovered: { count: 0, data: [] },
+          }),
+          factory: jest.fn(),
+          client: jest.fn(),
+        };
+      });
+
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
       const result = await taskRunner.run();
 
-      expect(ruleType.getSummarizedAlerts).toHaveBeenCalledWith({
-        start: new Date('1969-12-31T23:00:00.000Z'),
-        end: new Date(DATE_1970),
-        ruleId: '1',
-        spaceId: 'default',
-        excludedAlertInstanceIds: [],
-      });
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(enqueueFunction).toHaveBeenCalledWith(
         generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })

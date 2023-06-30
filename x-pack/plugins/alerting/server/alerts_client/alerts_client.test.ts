@@ -6,15 +6,31 @@
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { DEFAULT_FLAPPING_SETTINGS, RecoveredActionGroup, RuleNotifyWhen } from '../types';
+import {
+  AlertsFilter,
+  DEFAULT_FLAPPING_SETTINGS,
+  RecoveredActionGroup,
+  RuleAlertData,
+  RuleNotifyWhen,
+} from '../types';
 import * as LegacyAlertsClientModule from './legacy_alerts_client';
 import { Alert } from '../alert/alert';
 import { AlertsClient, AlertsClientParams } from './alerts_client';
-import { AlertRuleData, ProcessAndLogAlertsOpts } from './types';
+import { GetPersistentAlertsParams, ProcessAndLogAlertsOpts } from './types';
 import { legacyAlertsClientMock } from './legacy_alerts_client.mock';
 import { keys, range } from 'lodash';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
+import { expandFlattenedAlert } from './lib/get_persistent_alerts_query';
+import {
+  alertRuleData,
+  getExpectedQueryByExecutionUuid,
+  getExpectedQueryByTimeRange,
+  getParamsByExecutionUuid,
+  getParamsByTimeQuery,
+  mockAAD,
+} from './alerts_client_fixtures';
+import { DeepPartial } from '@kbn/utility-types';
 
 const date = '2023-03-28T22:27:28.159Z';
 const maxAlerts = 1000;
@@ -62,18 +78,6 @@ const mockCreate = jest.fn().mockImplementation(() => ({
   getStart: mockGetStart,
 }));
 const mockSetContext = jest.fn();
-const alertRuleData: AlertRuleData = {
-  consumer: 'bar',
-  executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-  id: '1',
-  name: 'rule-name',
-  parameters: {
-    bar: true,
-  },
-  revision: 0,
-  spaceId: 'default',
-  tags: ['rule-', '-tags'],
-};
 
 describe('Alerts Client', () => {
   let alertsClientParams: AlertsClientParams;
@@ -1072,6 +1076,346 @@ describe('Alerts Client', () => {
       expect(logger.error).toHaveBeenCalledWith(
         `Error writing 2 alerts to .alerts-test.alerts-default - fail`
       );
+    });
+
+    test('should not persist alerts if shouldWrite is false', async () => {
+      alertsClientParams = {
+        logger,
+        elasticsearchClientPromise: Promise.resolve(clusterClient),
+        ruleType: {
+          ...ruleType,
+          alerts: {
+            ...ruleType.alerts!,
+            shouldWrite: false,
+          },
+        },
+        namespace: 'default',
+        rule: alertRuleData,
+        kibanaVersion: '8.9.0',
+      };
+      const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(alertsClientParams);
+
+      expect(await alertsClient.persistAlerts()).toBe(void 0);
+
+      expect(logger.error).toHaveBeenCalledWith(
+        `Resources registered and installed for test context but "shouldWrite" is set to false.`
+      );
+      expect(clusterClient.bulk).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getPersistentAlerts', () => {
+    let alertsClient: AlertsClient<{}, {}, {}, 'default', 'recovered'>;
+
+    beforeEach(() => {
+      alertsClient = new AlertsClient(alertsClientParams);
+      clusterClient.search.mockReturnValue({
+        // @ts-ignore
+        hits: { total: { value: 0 }, hits: [] },
+      });
+    });
+
+    const excludedAlertInstanceIds = ['1', '2'];
+    const alertsFilter: AlertsFilter = {
+      query: {
+        kql: 'kibana.alert.rule.name:test',
+        dsl: '{"bool":{"minimum_should_match":1,"should":[{"match":{"kibana.alert.rule.name":"test"}}]}}',
+        filters: [],
+      },
+      timeframe: {
+        days: [1, 2, 3, 4, 5, 6, 7],
+        hours: { start: '08:00', end: '17:00' },
+        timezone: 'UTC',
+      },
+    };
+
+    test('should get the persistent LifeCycle Alerts successfully', async () => {
+      clusterClient.search
+        .mockReturnValueOnce({
+          // @ts-ignore
+          hits: { total: { value: 1 }, hits: [mockAAD] },
+        })
+        .mockReturnValueOnce({
+          // @ts-ignore
+          hits: { total: { value: 1 }, hits: [mockAAD, mockAAD] },
+        })
+        .mockReturnValueOnce({
+          // @ts-ignore
+          hits: { total: { value: 0 }, hits: [] },
+        });
+
+      const result = await alertsClient.getPersistentAlerts(getParamsByExecutionUuid);
+
+      expect(clusterClient.search).toHaveBeenCalledTimes(3);
+
+      expect(result).toEqual({
+        new: {
+          count: 1,
+          data: [
+            {
+              _id: mockAAD._id,
+              _index: mockAAD._index,
+              ...expandFlattenedAlert(mockAAD._source),
+            },
+          ],
+        },
+        ongoing: {
+          count: 1,
+          data: [
+            {
+              _id: mockAAD._id,
+              _index: mockAAD._index,
+              ...expandFlattenedAlert(mockAAD._source),
+            },
+            {
+              _id: mockAAD._id,
+              _index: mockAAD._index,
+              ...expandFlattenedAlert(mockAAD._source),
+            },
+          ],
+        },
+        recovered: { count: 0, data: [] },
+      });
+    });
+
+    test('should get the persistent Continual Alerts successfully', async () => {
+      clusterClient.search.mockReturnValueOnce({
+        // @ts-ignore
+        hits: { total: { value: 1 }, hits: [mockAAD] },
+      });
+
+      const result = await alertsClient.getPersistentAlerts({
+        ...getParamsByExecutionUuid,
+        isLifecycleAlert: false,
+      });
+
+      expect(clusterClient.search).toHaveBeenCalledTimes(1);
+
+      expect(result).toEqual({
+        new: {
+          count: 1,
+          data: [
+            {
+              _id: mockAAD._id,
+              _index: mockAAD._index,
+              ...expandFlattenedAlert(mockAAD._source),
+            },
+          ],
+        },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      });
+    });
+
+    test('formats alerts with formatAlert when provided', async () => {
+      type Alert = typeof mockAAD._source;
+      interface AlertData extends RuleAlertData {
+        'signal.rule.consumer': string;
+      }
+      const newAlertsClient = new AlertsClient<AlertData, {}, {}, 'default', 'recovered'>(
+        alertsClientParams
+      );
+
+      clusterClient.search.mockReturnValueOnce({
+        // @ts-ignore
+        hits: {
+          total: { value: 1 },
+          hits: [
+            {
+              ...mockAAD,
+              _source: { ...mockAAD._source, 'signal.rule.consumer': 'signalConsumer' },
+            },
+          ],
+        },
+      });
+
+      const result = await newAlertsClient.getPersistentAlerts({
+        ...getParamsByExecutionUuid,
+        isLifecycleAlert: false,
+        formatAlert: (alert) => {
+          const alertCopy = { ...alert } as Partial<Alert & AlertData>;
+          alertCopy['kibana.alert.rule.consumer'] = alertCopy['signal.rule.consumer'];
+          delete alertCopy['signal.rule.consumer'];
+          return alertCopy as DeepPartial<typeof alert>;
+        },
+      });
+
+      expect(clusterClient.search).toHaveBeenCalledTimes(1);
+
+      const expectedResult = { ...mockAAD._source };
+      expectedResult['kibana.alert.rule.consumer'] = 'signalConsumer';
+
+      expect(result).toEqual({
+        new: {
+          count: 1,
+          data: [
+            {
+              _id: mockAAD._id,
+              _index: mockAAD._index,
+              ...expandFlattenedAlert(expectedResult),
+            },
+          ],
+        },
+        ongoing: { count: 0, data: [] },
+        recovered: { count: 0, data: [] },
+      });
+    });
+
+    describe.each([
+      { alertType: 'LifeCycle Alerts Query', isLifecycleAlert: true },
+      { alertType: 'Continual Alerts Query', isLifecycleAlert: false },
+    ])('$alertType', ({ isLifecycleAlert }) => {
+      describe.each([
+        {
+          queryByType: 'ByExecutionUuid',
+          baseParams: getParamsByExecutionUuid,
+          getQuery: getExpectedQueryByExecutionUuid,
+        },
+        {
+          queryByType: 'ByTimeRange',
+          baseParams: getParamsByTimeQuery,
+          getQuery: getExpectedQueryByTimeRange,
+        },
+      ])('$queryByType', ({ baseParams, getQuery }) => {
+        test.each([
+          {
+            text: 'should generate the correct query',
+            params: baseParams,
+            call1: getQuery({
+              alertType: 'new',
+              isLifecycleAlert,
+            }),
+            call2: getQuery({
+              alertType: 'ongoing',
+            }),
+            call3: getQuery({
+              alertType: 'recovered',
+            }),
+          },
+          {
+            text: 'should filter by excludedAlertInstanceIds',
+            params: {
+              ...baseParams,
+              excludedAlertInstanceIds,
+            },
+            call1: getQuery({
+              alertType: 'new',
+              isLifecycleAlert,
+              excludedAlertInstanceIds,
+            }),
+            call2: getQuery({
+              alertType: 'ongoing',
+              excludedAlertInstanceIds,
+            }),
+            call3: getQuery({
+              alertType: 'recovered',
+              excludedAlertInstanceIds,
+            }),
+          },
+          {
+            text: 'should filter by alertsFilter',
+            params: {
+              ...baseParams,
+              alertsFilter,
+            },
+            call1: getQuery({
+              alertType: 'new',
+              isLifecycleAlert,
+              alertsFilter,
+            }),
+            call2: getQuery({
+              alertType: 'ongoing',
+              alertsFilter,
+            }),
+            call3: getQuery({
+              alertType: 'recovered',
+              alertsFilter,
+            }),
+          },
+          {
+            text: 'alertsFilter uses the all the days (ISO_WEEKDAYS) when no day is selected',
+            params: {
+              ...baseParams,
+              alertsFilter: {
+                ...alertsFilter,
+                timeframe: {
+                  ...alertsFilter.timeframe!,
+                  days: [],
+                },
+              },
+            },
+            call1: getQuery({
+              alertType: 'new',
+              isLifecycleAlert,
+              alertsFilter,
+            }),
+            call2: getQuery({
+              alertType: 'ongoing',
+              alertsFilter,
+            }),
+            call3: getQuery({
+              alertType: 'recovered',
+              alertsFilter,
+            }),
+          },
+        ])('$text', async ({ params, call1, call2, call3 }) => {
+          await alertsClient.getPersistentAlerts({ ...params, isLifecycleAlert });
+          expect(clusterClient.search).toHaveBeenCalledTimes(isLifecycleAlert ? 3 : 1);
+          expect(clusterClient.search).toHaveBeenNthCalledWith(1, call1);
+          if (isLifecycleAlert) {
+            expect(clusterClient.search).toHaveBeenNthCalledWith(2, call2);
+            expect(clusterClient.search).toHaveBeenNthCalledWith(3, call3);
+          }
+        });
+      });
+    });
+
+    describe('throws error', () => {
+      test('if ruleId is not specified', async () => {
+        const { ruleId, ...paramsWithoutRuleId } = getParamsByExecutionUuid;
+
+        await expect(
+          alertsClient.getPersistentAlerts(paramsWithoutRuleId as GetPersistentAlertsParams)
+        ).rejects.toThrowError(`Must specify both rule ID and space ID for AAD alert query.`);
+      });
+
+      test('if spaceId is not specified', async () => {
+        const { spaceId, ...paramsWithoutSpaceId } = getParamsByExecutionUuid;
+
+        await expect(
+          alertsClient.getPersistentAlerts(paramsWithoutSpaceId as GetPersistentAlertsParams)
+        ).rejects.toThrowError(`Must specify both rule ID and space ID for AAD alert query.`);
+      });
+
+      test('if executionUuid or start date are not specified', async () => {
+        const { executionUuid, ...paramsWithoutExecutionUuid } = getParamsByExecutionUuid;
+
+        await expect(
+          alertsClient.getPersistentAlerts(paramsWithoutExecutionUuid as GetPersistentAlertsParams)
+        ).rejects.toThrowError(
+          'Must specify either execution UUID or time range for AAD alert query.'
+        );
+      });
+
+      test('if start date is not specified for a TimeRange query', async () => {
+        const { start, ...paramsWithoutStart } = getParamsByTimeQuery;
+
+        await expect(
+          alertsClient.getPersistentAlerts(paramsWithoutStart as GetPersistentAlertsParams)
+        ).rejects.toThrowError(
+          'Must specify either execution UUID or time range for AAD alert query.'
+        );
+      });
+
+      test('if end date is not specified for a TimeRange query', async () => {
+        const { end, ...paramsWithoutEnd } = getParamsByTimeQuery;
+
+        await expect(
+          alertsClient.getPersistentAlerts(paramsWithoutEnd as GetPersistentAlertsParams)
+        ).rejects.toThrowError(
+          'Must specify either execution UUID or time range for AAD alert query.'
+        );
+      });
     });
   });
 

@@ -3277,9 +3277,13 @@ describe('create()', () => {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
       },
-      getSummarizedAlerts: jest.fn().mockResolvedValue({}),
       validate: {
         params: { validate: (params) => params },
+      },
+      alerts: {
+        context: 'test',
+        mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+        shouldWrite: true,
       },
     }));
 

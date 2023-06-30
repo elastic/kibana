@@ -37,7 +37,7 @@ interface TransformActionParamsOptions {
   flapping: boolean;
 }
 
-interface SummarizedAlertsWithAll {
+interface PersistentAlertsWithAll {
   new: {
     count: number;
     data: unknown[];
@@ -130,7 +130,7 @@ export function transformSummaryActionParams({
   ruleUrl,
   kibanaBaseUrl,
 }: {
-  alerts: SummarizedAlertsWithAll;
+  alerts: PersistentAlertsWithAll;
   rule: SanitizedRule<RuleTypeParams>;
   ruleTypeId: string;
   actionsPlugin: ActionsPluginStartContract;

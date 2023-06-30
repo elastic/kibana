@@ -20,9 +20,11 @@ import {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
+import { DeepPartial } from '@kbn/utility-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import { Alert, type FieldMap } from '@kbn/alerts-as-data-utils';
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import { Alert } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -164,33 +166,23 @@ export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
 
-export interface GetSummarizedAlertsFnOpts {
-  start?: Date;
-  end?: Date;
-  executionUuid?: string;
-  ruleId: string;
-  spaceId: string;
-  excludedAlertInstanceIds: string[];
-  alertsFilter?: AlertsFilter | null;
-}
-
 export type AlertHit = Alert & {
   _id: string;
   _index: string;
 };
-export interface SummarizedAlertsChunk {
+export interface PersistentAlertsChunk {
   count: number;
   data: AlertHit[];
 }
-export interface SummarizedAlerts {
-  new: SummarizedAlertsChunk;
-  ongoing: SummarizedAlertsChunk;
-  recovered: SummarizedAlertsChunk;
+
+export interface PersistentAlerts {
+  new: PersistentAlertsChunk;
+  ongoing: PersistentAlertsChunk;
+  recovered: PersistentAlertsChunk;
 }
-export interface CombinedSummarizedAlerts extends SummarizedAlerts {
-  all: SummarizedAlertsChunk;
+export interface CombinedPersistentAlerts extends PersistentAlerts {
+  all: PersistentAlertsChunk;
 }
-export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
 export interface GetViewInAppRelativeUrlFnOpts<Params extends RuleTypeParams> {
   rule: Pick<SanitizedRule<Params>, 'id'> &
     Omit<Partial<SanitizedRule<Params>>, 'viewInAppRelativeUrl'>;
@@ -206,6 +198,10 @@ interface ComponentTemplateSpec {
   dynamic?: 'strict' | false; // defaults to 'strict'
   fieldMap: FieldMap;
 }
+
+export type FormatAlert = <AlertData extends RuleAlertData>(
+  alert: Alert & AlertData
+) => DeepPartial<Alert & AlertData>;
 
 export interface IRuleTypeAlerts {
   /**
@@ -256,6 +252,8 @@ export interface IRuleTypeAlerts {
    * Optional secondary alias to use. This alias should not include the namespace.
    */
   secondaryAlias?: string;
+
+  formatAlert?: FormatAlert;
 }
 
 export interface RuleType<
@@ -304,7 +302,6 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
-  getSummarizedAlerts?: GetSummarizedAlertsFn;
   alerts?: IRuleTypeAlerts;
   /**
    * Determines whether framework should

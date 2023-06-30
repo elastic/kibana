@@ -95,7 +95,7 @@ actionTypeRegistry.register(getSlackApiConnectorType());
 const baseProps = {
   actions: [],
   defaultActionGroupId: 'metrics.inventory_threshold.fired',
-  hasSummary: true,
+  hasAlertsMappings: true,
   featureId: 'alerting',
   recoveryActionGroup: 'recovered',
   actionTypeRegistry,
