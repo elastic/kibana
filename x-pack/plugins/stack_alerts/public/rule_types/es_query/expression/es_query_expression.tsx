@@ -91,6 +91,7 @@ export const EsQueryExpression: React.FC<
 
   const [esFields, setEsFields] = useState<FieldOption[]>([]);
   const [runtimeFields, setRuntimeFields] = useState<FieldOption[]>([]);
+  const [combinedFields, setCombinedFields] = useState<FieldOption[]>([]);
   const { convertToJson, setXJson, xJson } = useXJsonMode(DEFAULT_VALUES.QUERY);
 
   const setDefaultExpressionValues = async () => {
@@ -110,6 +111,7 @@ export const EsQueryExpression: React.FC<
   const refreshEsFields = async (indices: string[]) => {
     const currentEsFields = await getFields(http, indices);
     setEsFields(currentEsFields);
+    setCombinedFields(currentEsFields.concat(runtimeFields));
   };
 
   const getRuntimeFields = () => {
@@ -120,7 +122,9 @@ export const EsQueryExpression: React.FC<
       // ignore error
     }
     if (runtimeMappings) {
-      setRuntimeFields(convertRawRuntimeFieldtoFieldOption(runtimeMappings));
+      const currentRuntimeFields = convertRawRuntimeFieldtoFieldOption(runtimeMappings);
+      setRuntimeFields(currentRuntimeFields);
+      setCombinedFields(esFields.concat(currentRuntimeFields));
     }
   };
 
@@ -291,7 +295,7 @@ export const EsQueryExpression: React.FC<
         timeWindowSize={timeWindowSize}
         timeWindowUnit={timeWindowUnit}
         size={size}
-        esFields={esFields.concat(runtimeFields)}
+        esFields={combinedFields}
         aggType={aggType}
         aggField={aggField}
         groupBy={groupBy}
