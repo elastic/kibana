@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-export const FILTER_CELL_ACTION_TYPE = 'cellAction-filter';
-export const COPY_CELL_ACTION_TYPE = 'cellAction-copy';
+import { SerializableRecord } from '@kbn/utility-types';
+import { SerializableArray } from '@kbn/utility-types/src/serializable';
 
-export enum CellActionsMode {
-  HOVER_DOWN = 'hover-down',
-  HOVER_RIGHT = 'hover-right',
-  INLINE = 'inline',
-}
+export type DefaultActionsSupportedValue = string[] | number[] | boolean[];
+
+export type NonNullableSerializable =
+  | string
+  | number
+  | boolean
+  | SerializableArray
+  | SerializableRecord;
