@@ -386,7 +386,7 @@ export const coPilotPrompts = {
         })
         .join('\n');
 
-      const content = `Use a temperature of 0.3
+      const content = `Use a temperature of 0.3. For this response, do not use previous context given by me.
 
 Only respond with the info requested on the sentences that start with the word Display, do not show original Display sentence.  
   
@@ -414,13 +414,15 @@ E being the Case ids values
 F being the Case status column value  
 G being the Case severity column values  
 H being the Case updatedAt column values
-I being a summary you generate about the Case
+I being a summary you generate about the properties of the Case
 
 ${header}
 ${rows}
 
-At the end of the response, display the following template substituting X and Y 
-"🔍 There are X total active alerts in the system, and Y of them are not yet assigned to a case and show be reviewed as soon as possible", X beign the total current active alerts and Y being how many do not have values in the column "Case ids". Do not display the template.
+At the end of the response, display the following template substituting X and Y using info from the above table:
+"🔍 There are X total active alerts in the system, and Y of them are not yet assigned to a case and show be reviewed as soon as possible"
+- X being the total current active alerts in the table
+- Y being how many alerts have "undefined" value in column "Case ids"
 `;
 
       console.log('content:', content);
