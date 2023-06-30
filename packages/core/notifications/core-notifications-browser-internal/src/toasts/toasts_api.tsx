@@ -22,6 +22,7 @@ import type {
   ToastInputFields,
   ToastOptions,
 } from '@kbn/core-notifications-browser';
+import { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { ErrorToast } from './error_toast';
 
 const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
@@ -44,15 +45,25 @@ export class ToastsApi implements IToasts {
 
   private overlays?: OverlayStart;
   private i18n?: I18nStart;
+  private theme?: ThemeServiceStart;
 
   constructor(deps: { uiSettings: IUiSettingsClient }) {
     this.uiSettings = deps.uiSettings;
   }
 
   /** @internal */
-  public start({ overlays, i18n }: { overlays: OverlayStart; i18n: I18nStart }) {
+  public start({
+    overlays,
+    i18n,
+    theme,
+  }: {
+    overlays: OverlayStart;
+    i18n: I18nStart;
+    theme: ThemeServiceStart;
+  }) {
     this.overlays = overlays;
     this.i18n = i18n;
+    this.theme = theme;
   }
 
   /** Observable of the toast messages to show to the user. */
@@ -176,7 +187,8 @@ export class ToastsApi implements IToasts {
           error={error}
           title={options.title}
           toastMessage={message}
-          i18nContext={() => this.i18n!.Context}
+          i18n={this.i18n!}
+          theme={this.theme!}
         />
       ),
       ...options,
