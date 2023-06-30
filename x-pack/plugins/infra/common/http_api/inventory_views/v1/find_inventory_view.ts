@@ -6,17 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { inventoryViewBasicAttributesRT, singleInventoryViewRT } from '../../../inventory_views';
-
-export const findInventoryViewAttributesResponseRT = rt.exact(
-  rt.intersection([
-    inventoryViewBasicAttributesRT,
-    rt.partial({
-      isDefault: rt.boolean,
-      isStatic: rt.boolean,
-    }),
-  ])
-);
+import { singleInventoryViewRT } from '../../../inventory_views';
 
 export const findInventoryViewResponsePayloadRT = rt.type({
   data: rt.array(singleInventoryViewRT),
