@@ -11,7 +11,7 @@ import type {
   OptionsListEmbeddableInput,
 } from '@kbn/controls-plugin/common';
 
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty, isEqual, pick } from 'lodash';
 import type { FilterItemObj } from './types';
 
 export const getPanelsInOrderFromControlsInput = (controlInput: ControlGroupInput) => {
@@ -126,28 +126,21 @@ export const reorderControlsWithDefaultControls = (args: ReorderControlsArgs) =>
   return [...resultDefaultControls, ...resultNonPersitantControls];
 };
 
+/*
+ * getFilterControlsComparator provides a comparator that can be used with `isEqualWith` to compare
+ * 2 instances of FilterItemObj
+ *
+ * */
 export const getFilterControlsComparator =
   (...fieldsToCompare: Array<keyof FilterItemObj>) =>
   (value1: FilterItemObj[], value2: FilterItemObj[]) => {
     if (value1.length !== value2.length) return false;
     const valmod1 = value1.map((v) => {
-      return fieldsToCompare.reduce((prev, current) => {
-        const result = {
-          ...prev,
-          [current]: v[current],
-        };
-        return result;
-      }, {} as FilterItemObj);
+      return pick(v, fieldsToCompare);
     });
 
     const valmod2 = value2.map((v) => {
-      return fieldsToCompare.reduce((prev, current) => {
-        const result = {
-          ...prev,
-          [current]: v[current],
-        };
-        return result;
-      }, {} as FilterItemObj);
+      return pick(v, fieldsToCompare);
     });
 
     return isEqual(valmod1, valmod2);
