@@ -9,17 +9,17 @@ import { useCallback } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
 import { InfraClientSetupDeps } from '../types';
 import {
+  type HostsLensFormulas,
+  type HostsLensMetricChartFormulas,
+  type HostsLensLineChartFormulas,
+  type LineChartOptions,
+  type MetricChartOptions,
   LensAttributesBuilder,
-  HostsLensFormulas,
-  HostsLensMetricChartFormulas,
-  HostsLensLineChartFormulas,
-  LineChartOptions,
-  MetricChartOptions,
   LensAttributes,
   hostLensFormulas,
   visualizationTypes,
@@ -121,8 +121,7 @@ export const useLensAttributes = ({
   const getExtraActions = useCallback(
     ({ timeRange, filters, query }: { timeRange: TimeRange; filters: Filter[]; query?: Query }) => {
       const openInLens = getOpenInLensAction(openInLensAction({ timeRange, filters, query }));
-      const result: Action[] = [openInLens];
-      return result;
+      return [openInLens];
     },
     [openInLensAction]
   );
@@ -134,7 +133,7 @@ export const useLensAttributes = ({
   return { formula, attributes: attributes.current, getExtraActions, error };
 };
 
-const getOpenInLensAction = (callback: () => void): Action => {
+const getOpenInLensAction = (onExecute: () => void): Action => {
   return {
     id: 'openInLens',
 
@@ -151,7 +150,7 @@ const getOpenInLensAction = (callback: () => void): Action => {
       return true;
     },
     async execute(_context: ActionExecutionContext): Promise<void> {
-      callback();
+      onExecute();
     },
     order: 100,
   };
