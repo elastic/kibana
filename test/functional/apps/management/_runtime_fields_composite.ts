@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('create composite runtime field', function describeIndexTests() {
       // Starting with '@' to sort toward start of field list
-      const fieldName = '@composite_test';
+      const fieldName = '@composite.test';
 
       it('should create runtime field', async function () {
         await PageObjects.settings.navigateTo();
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await log.debug('add runtime field');
         await PageObjects.settings.addCompositeRuntimeField(
           fieldName,
-          "emit('a','hello world')",
+          "emit('a.a','hello world')",
           false,
           1
         );
