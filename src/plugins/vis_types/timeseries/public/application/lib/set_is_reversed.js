@@ -14,14 +14,14 @@ const isDarkTheme = () => getUISettings().get('theme:darkMode');
  * Returns true if the color that is passed has low luminosity
  */
 const isColorDark = (c) => {
-  return color(c).luminance() < 0.45;
+  return chroma(c).luminance() < 0.45;
 };
 
 /**
  * Checks to see if the `currentTheme` is dark in luminosity.
  * Defaults to checking `theme:darkMode`.
  */
-export const isThemeDark = (currentTheme) => {
+const isThemeDark = (currentTheme) => {
   let themeIsDark = currentTheme || isDarkTheme();
 
   // If passing a string, check the luminosity
