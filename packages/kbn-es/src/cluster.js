@@ -312,6 +312,7 @@ exports.Cluster = class Cluster {
    */
   _exec(installPath, opts = {}) {
     const {
+      isDocker = false,
       skipNativeRealmSetup = false,
       reportTime = () => {},
       startTime,
@@ -384,16 +385,39 @@ exports.Cluster = class Cluster {
 
     this._log.info('ES_JAVA_OPTS: %s', esJavaOpts);
 
-    this._process = execa(ES_BIN, args, {
-      cwd: installPath,
-      env: {
-        ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
-        ...process.env,
-        JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
-        ES_JAVA_OPTS: esJavaOpts,
-      },
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
+    this._process = isDocker
+      ? execa(
+          'docker',
+          [
+            'run',
+            // '--name',
+            // 'es-node01',
+            '--env',
+            `"ES_JAVA_OPTS=${esJavaOpts}"`,
+            '--net',
+            'elastic',
+            '-p',
+            '9200:9200',
+            '-p',
+            '9300:9300',
+            '-t',
+            'docker.elastic.co/elasticsearch/elasticsearch:8.8.1',
+          ],
+          {
+            stdio: ['ignore', 'pipe', 'pipe'],
+            encoding: 'utf16',
+          }
+        )
+      : execa(ES_BIN, args, {
+          cwd: installPath,
+          env: {
+            ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
+            ...process.env,
+            JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
+            ES_JAVA_OPTS: esJavaOpts,
+          },
+          stdio: ['ignore', 'pipe', 'pipe'],
+        });
 
     this._setupPromise = Promise.all([
       // parse log output to find http port

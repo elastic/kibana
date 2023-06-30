@@ -7,6 +7,7 @@
  */
 
 export interface EsClusterExecOptions {
+  isDocker?: boolean;
   skipNativeRealmSetup?: boolean;
   reportTime?: (...args: any[]) => void;
   startTime?: number;

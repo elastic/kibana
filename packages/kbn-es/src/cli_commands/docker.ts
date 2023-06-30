@@ -12,6 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { Cluster } from '../cluster';
+// docker run --name es-node01 --net elastic -p 9200:9200 -p 9300:9300 -t docker.elastic.co/elasticsearch/elasticsearch:8.8.1
 
 export const docker = {
   description: 'Pull and run an Elasticsearch Docker image',
@@ -49,7 +50,13 @@ export const docker = {
       default: defaults,
     });
 
-    // const cluster = new Cluster({ ssl: options.ssl });
+    // TODO: check docker installed
+    // TODO: pull docker image if needed (allow version or full image url)
+    // TODO: setup docker params (port? network? others? allow passing all docker opts through?)
+    // TODO: start existing container
+    // TODO: enrollment token + env params
+    const cluster = new Cluster({ ssl: false });
+    await cluster.run('', { isDocker: true });
 
     // reportTime(installStartTime, 'pulled', {
     //   success: true,
