@@ -587,10 +587,10 @@ export class TaskManagerRunner implements TaskRunner {
   ): Result<SuccessfulRunResult, FailedTaskResult> => {
     const { state, error } = failureResult;
     const { schedule, attempts } = this.instance.task;
-    const { max_attempts: maxSkipAttempts, delay } = this.requeueInvalidTasksConfig;
+    const { max_attempts: maxSkipAttempts, enabled, delay } = this.requeueInvalidTasksConfig;
     let skipAttempts = this.instance.task.numSkippedRuns ?? 0;
 
-    if (isSkipError(error)) {
+    if (isSkipError(error) && enabled) {
       skipAttempts = skipAttempts + 1;
       const { taskType, id } = this.instance.task;
       this.logger.warn(
@@ -631,7 +631,7 @@ export class TaskManagerRunner implements TaskRunner {
       }
     }
 
-    if (skipAttempts >= maxSkipAttempts) {
+    if (skipAttempts >= maxSkipAttempts && enabled) {
       return asErr({ status: TaskStatus.DeadLetter });
     }
 
