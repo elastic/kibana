@@ -62,6 +62,9 @@ export const createEndpointArtifactClientMock = (
     listArtifacts: jest.fn((...args) => endpointArtifactClientMocked.listArtifacts(...args)),
     getArtifact: jest.fn((...args) => endpointArtifactClientMocked.getArtifact(...args)),
     deleteArtifact: jest.fn((...args) => endpointArtifactClientMocked.deleteArtifact(...args)),
+    bulkDeleteArtifacts: jest.fn(async (...args) =>
+      endpointArtifactClientMocked.bulkDeleteArtifacts(...args)
+    ),
     _esClient: esClient,
   };
 };
