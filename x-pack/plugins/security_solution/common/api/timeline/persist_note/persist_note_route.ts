@@ -7,16 +7,15 @@
 
 import * as runtimeTypes from 'io-ts';
 import { unionWithNullType } from '../../../utility_types';
+import { BareNoteSchema } from '../model/api';
 
-export * from './api';
-
-export const pinnedEventIds = unionWithNullType(runtimeTypes.array(runtimeTypes.string));
-export const persistPinnedEventSchema = runtimeTypes.intersection([
+export const persistNoteSchema = runtimeTypes.intersection([
   runtimeTypes.type({
-    eventId: runtimeTypes.string,
+    note: BareNoteSchema,
   }),
   runtimeTypes.partial({
-    pinnedEventId: unionWithNullType(runtimeTypes.string),
-    timelineId: unionWithNullType(runtimeTypes.string),
+    overrideOwner: unionWithNullType(runtimeTypes.boolean),
+    noteId: unionWithNullType(runtimeTypes.string),
+    version: unionWithNullType(runtimeTypes.string),
   }),
 ]);

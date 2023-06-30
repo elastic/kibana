@@ -8,18 +8,18 @@
 import * as runtimeTypes from 'io-ts';
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 
-import { stringEnum, unionWithNullType } from '../../utility_types';
+import { stringEnum, unionWithNullType } from '../../../utility_types';
 
-import type { Maybe } from '../../search_strategy';
-import { Direction } from '../../search_strategy';
-import type { PinnedEvent } from './pinned_events/api';
-import { PinnedEventRuntimeType } from './pinned_events/api';
+import type { Maybe } from '../../../search_strategy';
+import { Direction } from '../../../search_strategy';
+import type { PinnedEvent } from '../pinned_events/pinned_events_route';
+import { PinnedEventRuntimeType } from '../pinned_events/pinned_events_route';
 import {
   SavedObjectResolveAliasPurpose,
   SavedObjectResolveAliasTargetId,
   SavedObjectResolveOutcome,
-} from '../detection_engine/model/rule_schema';
-import { errorSchema, success, success_count as successCount } from '../detection_engine';
+} from '../../detection_engine/model/rule_schema';
+import { errorSchema, success, success_count as successCount } from '../../detection_engine';
 
 export const BareNoteSchema = runtimeTypes.intersection([
   runtimeTypes.type({
@@ -674,17 +674,6 @@ export interface ResponseTimeline {
   timeline: TimelineResult;
 }
 
-export interface CreateTimelinesResponse {
-  data: {
-    persistTimeline: ResponseTimeline;
-  };
-}
-
-export interface PatchTimelinesResponse {
-  data: {
-    persistTimeline: ResponseTimeline;
-  };
-}
 export interface SortTimeline {
   sortField: SortFieldTimeline;
   sortOrder: Direction;

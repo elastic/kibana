@@ -7,11 +7,13 @@
 
 import * as rt from 'io-ts';
 
-import { SavedTimelineRuntimeType } from '../api';
+import { BareNoteSchema, SavedTimelineRuntimeType } from '../model/api';
 import { unionWithNullType } from '../../../utility_types';
 
-import { eventNotes, globalNotes } from '../notes';
-import { pinnedEventIds } from '../pinned_events';
+import { pinnedEventIds } from '../pinned_events/pinned_events_route';
+
+export const eventNotes = unionWithNullType(rt.array(BareNoteSchema));
+export const globalNotes = unionWithNullType(rt.array(BareNoteSchema));
 
 export const ImportTimelinesSchemaRt = rt.intersection([
   SavedTimelineRuntimeType,

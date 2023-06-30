@@ -7,7 +7,12 @@
 
 import * as rt from 'io-ts';
 
-import { SavedTimelineRuntimeType, TimelineStatusLiteralRt, TimelineTypeLiteralRt } from '../api';
+import type { ResponseTimeline } from '../model/api';
+import {
+  SavedTimelineRuntimeType,
+  TimelineStatusLiteralRt,
+  TimelineTypeLiteralRt,
+} from '../model/api';
 import { unionWithNullType } from '../../../utility_types';
 
 export const createTimelineSchema = rt.intersection([
@@ -23,3 +28,9 @@ export const createTimelineSchema = rt.intersection([
     version: unionWithNullType(rt.string),
   }),
 ]);
+
+export interface CreateTimelinesResponse {
+  data: {
+    persistTimeline: ResponseTimeline;
+  };
+}

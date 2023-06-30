@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
+import * as runtimeTypes from 'io-ts';
+import { unionWithNullType } from '../../../utility_types';
 
-import { TimelineTypeLiteralRt } from '../api';
-
-export const cleanDraftTimelineSchema = rt.type({
-  timelineType: TimelineTypeLiteralRt,
+export const deleteNoteSchema = runtimeTypes.partial({
+  noteId: unionWithNullType(runtimeTypes.string),
 });

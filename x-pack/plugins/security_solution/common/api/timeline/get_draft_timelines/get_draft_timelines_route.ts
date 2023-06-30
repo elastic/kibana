@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-import { TimelineTypeLiteralRt } from '../api';
+import { TimelineTypeLiteralRt } from '../model/api';
 
 export const getDraftTimelineSchema = rt.type({
   timelineType: TimelineTypeLiteralRt,
