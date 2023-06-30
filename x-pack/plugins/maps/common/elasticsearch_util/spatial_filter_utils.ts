@@ -229,7 +229,11 @@ function extractGeometryFromFilter(geoFieldName: string, filter: GeoFilter): Geo
     return circleFeature.geometry;
   }
 
-  if (filter.geo_shape && filter.geo_shape[geoFieldName] && (filter.geo_shape[geoFieldName] as estypes.QueryDslGeoShapeFieldQuery).shape) {
+  if (
+    filter.geo_shape &&
+    filter.geo_shape[geoFieldName] &&
+    (filter.geo_shape[geoFieldName] as estypes.QueryDslGeoShapeFieldQuery).shape
+  ) {
     return (filter.geo_shape[geoFieldName] as estypes.QueryDslGeoShapeFieldQuery).shape;
   }
 }
