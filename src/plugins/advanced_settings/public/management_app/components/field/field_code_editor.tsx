@@ -81,7 +81,7 @@ export const FieldCodeEditor = ({
   );
 
   return (
-    <CodeEditor // TODO updated to provide theme via src/plugins/advanced_settings/public/management_app/advanced_settings.tsx
+    <CodeEditor
       {...a11yProps}
       languageId={type === 'json' ? XJsonLang.ID : MarkdownLang}
       value={value}
