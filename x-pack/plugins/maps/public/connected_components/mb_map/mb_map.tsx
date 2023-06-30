@@ -7,6 +7,7 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
+import { supported as maplibreglSupported } from '@mapbox/mapbox-gl-supported';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
@@ -296,7 +297,7 @@ export class MbMap extends Component<Props, State> {
     const usageCollector = getUsageCollection();
     if (!usageCollector) return;
 
-    const webglSupport = maplibregl.supported();
+    const webglSupport = maplibreglSupported();
 
     usageCollector.reportUiCounter(
       APP_ID,
@@ -305,7 +306,7 @@ export class MbMap extends Component<Props, State> {
     );
 
     // Report low system performance or no hardware GPU
-    if (webglSupport && !maplibregl.supported({ failIfMajorPerformanceCaveat: true })) {
+    if (webglSupport && !maplibreglSupported({ failIfMajorPerformanceCaveat: true })) {
       usageCollector.reportUiCounter(APP_ID, METRIC_TYPE.LOADED, 'gl_majorPerformanceCaveat');
     }
   }
