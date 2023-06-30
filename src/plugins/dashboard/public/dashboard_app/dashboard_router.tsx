@@ -28,13 +28,14 @@ import {
 } from '../dashboard_constants';
 import { DashboardApp } from './dashboard_app';
 import { pluginServices } from '../services/plugin_services';
-import { DashboardNoMatch } from './listing_page/dashboard_no_match';
+import { RedirectToProps } from '../dashboard_container/types';
 import { createDashboardEditUrl } from '../dashboard_constants';
+import { DashboardNoMatch } from './listing_page/dashboard_no_match';
 import { DashboardStart, DashboardStartDependencies } from '../plugin';
 import { DashboardMountContext } from './hooks/dashboard_mount_context';
+import { DashboardEmbedSettings, DashboardMountContextProps } from './types';
 import { DashboardListingPage } from './listing_page/dashboard_listing_page';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from './_dashboard_app_strings';
-import { DashboardEmbedSettings, DashboardMountContextProps, RedirectToProps } from './types';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',

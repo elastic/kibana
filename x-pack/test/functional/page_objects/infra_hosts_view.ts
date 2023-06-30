@@ -29,11 +29,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async clickSelectedHostsButton() {
-      return testSubjects.click('infraUseHostsTableButton');
+      return testSubjects.click('hostsViewTableSelectHostsFilterButton');
     },
 
     async clickSelectedHostsAddFilterButton() {
-      return testSubjects.click('infraHostsTableAddFilterButton');
+      return testSubjects.click('hostsViewTableAddFilterButton');
     },
 
     async clickCloseFlyoutButton() {
@@ -128,7 +128,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     async selectedHostsButtonExist() {
-      return testSubjects.exists('infraUseHostsTableButton');
+      return testSubjects.exists('hostsViewTableSelectHostsFilterButton');
     },
 
     async getMetricsTrendContainer() {
