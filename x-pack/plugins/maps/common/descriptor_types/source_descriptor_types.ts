@@ -91,8 +91,10 @@ export type ESGeoGridSourceDescriptor = AbstractESAggSourceDescriptor & {
 
 export type ESGeoLineSourceDescriptor = AbstractESAggSourceDescriptor & {
   geoField: string;
-  splitField: string;
-  sortField: string;
+  groupByTimeseries: boolean;
+  lineSimplificationSize: number;
+  splitField?: string;
+  sortField?: string;
 };
 
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
