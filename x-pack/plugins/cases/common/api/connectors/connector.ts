@@ -102,6 +102,7 @@ const ActionConnectorResultRt = rt.intersection([
     name: rt.string,
     isDeprecated: rt.boolean,
     isPreconfigured: rt.boolean,
+    isSystemAction: rt.boolean,
     referencedByCount: rt.number,
   }),
   rt.exact(rt.partial({ config: rt.record(rt.string, rt.unknown), isMissingSecrets: rt.boolean })),

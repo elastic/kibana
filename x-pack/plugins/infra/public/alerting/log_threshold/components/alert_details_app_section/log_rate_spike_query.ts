@@ -5,18 +5,40 @@
  * 2.0.
  */
 
+import { TopAlert } from '@kbn/observability-plugin/public';
+import { ALERT_CONTEXT } from '@kbn/rule-data-utils';
+import { get } from 'lodash';
 import { RuleParams, CountCriteria } from '../../../../../common/alerting/logs/log_threshold';
 import { buildFiltersFromCriteria } from '../../../../../common/alerting/logs/log_threshold/query_helpers';
 
 export const getESQueryForLogSpike = (
   params: Pick<RuleParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
-  timestampField: string
+  timestampField: string,
+  alert: TopAlert<Record<string, any>>,
+  groupBy?: string[] | undefined
 ): object => {
-  const { mustFilters, mustNotFilters } = buildFiltersFromCriteria(params, timestampField);
+  const { mustFilters, mustNotFilters, mustFiltersFields } = buildFiltersFromCriteria(
+    params,
+    timestampField
+  );
+
+  const groupByFilters = groupBy
+    ? groupBy
+        .filter((groupByField) => !mustFiltersFields.includes(groupByField))
+        .map((groupByField) => {
+          const groupByValue = get(
+            alert.fields[ALERT_CONTEXT],
+            ['groupByKeys', ...groupByField.split('.')],
+            null
+          );
+          return groupByValue ? { term: { [groupByField]: { value: groupByValue } } } : null;
+        })
+        .filter((groupByFilter) => groupByFilter)
+    : [];
 
   const query = {
     bool: {
-      filter: mustFilters,
+      filter: [...mustFilters, ...groupByFilters],
       ...(mustNotFilters.length > 0 && { must_not: mustNotFilters }),
     },
   };

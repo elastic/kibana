@@ -12,11 +12,11 @@ import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
+import type { ConfigurationAttributes } from '../../../common/types/domain';
 import type {
   ActionConnector,
   Case,
   ExternalServiceResponse,
-  ConfigurationAttributes,
   CommentRequestAlertType,
   CommentAttributes,
 } from '../../../common/api';
@@ -35,7 +35,6 @@ import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter } from '../utils';
-import type { ICaseResponse } from '../typedoc_interfaces';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 
 /**
@@ -304,7 +303,7 @@ export const push = async (
 };
 
 const getProfiles = async (
-  caseInfo: ICaseResponse,
+  caseInfo: Case,
   securityStartPlugin: SecurityPluginStart
 ): Promise<Map<string, UserProfile> | undefined> => {
   const uids = new Set([

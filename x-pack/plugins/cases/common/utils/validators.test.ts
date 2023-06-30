@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import { MAX_ASSIGNEES_PER_CASE, MAX_CATEGORY_LENGTH } from '../constants';
-import {
-  isInvalidTag,
-  areTotalAssigneesInvalid,
-  isCategoryFieldInvalidString,
-  isCategoryFieldTooLong,
-} from './validators';
+import { MAX_ASSIGNEES_PER_CASE } from '../constants';
+import { isInvalidTag, areTotalAssigneesInvalid } from './validators';
 
 describe('validators', () => {
   describe('isInvalidTag', () => {
@@ -53,44 +48,6 @@ describe('validators', () => {
 
     it(`returns true if assignees are greater than ${MAX_ASSIGNEES_PER_CASE}`, () => {
       expect(areTotalAssigneesInvalid(generateAssignees(MAX_ASSIGNEES_PER_CASE + 1))).toBe(true);
-    });
-  });
-
-  describe('isCategoryFieldInvalidString', () => {
-    it('validates undefined categories correctly', () => {
-      expect(isCategoryFieldInvalidString()).toBe(false);
-    });
-
-    it('validates null categories correctly', () => {
-      expect(isCategoryFieldInvalidString(null)).toBe(false);
-    });
-
-    it('returns false if the category is a non-empty string', () => {
-      expect(isCategoryFieldInvalidString('foobar')).toBe(false);
-    });
-
-    it('returns true if the category is an empty string', () => {
-      expect(isCategoryFieldInvalidString('')).toBe(true);
-    });
-  });
-
-  describe('isCategoryFieldTooLong', () => {
-    it('validates undefined categories correctly', () => {
-      expect(isCategoryFieldTooLong()).toBe(false);
-    });
-
-    it('validates null categories correctly', () => {
-      expect(isCategoryFieldTooLong(null)).toBe(false);
-    });
-
-    it(`returns false if the category is smaller than ${MAX_CATEGORY_LENGTH}`, () => {
-      expect(isCategoryFieldTooLong('foobar')).toBe(false);
-    });
-
-    it(`returns true if the category is longer than ${MAX_CATEGORY_LENGTH}`, () => {
-      expect(isCategoryFieldTooLong('A very long category with more than fifty characters!')).toBe(
-        true
-      );
     });
   });
 });

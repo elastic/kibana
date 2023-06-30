@@ -381,7 +381,7 @@ Minimal required parameters for the `POST` route: empty object.
 {}
 ```
 
-The `GET` route don't accept any parameters and use the default parameters instead:
+The `GET` route doesn't accept any parameters and uses the default parameters instead:
 
 - interval: `last_day`
 - granularity: `hour`
@@ -737,7 +737,7 @@ Minimal required parameters for the `POST` route: empty object.
 {}
 ```
 
-The `GET` route don't accept any parameters and use the default parameters instead:
+The `GET` route doesn't accept any parameters and uses the default parameters instead:
 
 - interval: `last_day`
 - granularity: `hour`
