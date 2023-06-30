@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { registerApiKeyRoutes } from './routes/api_key_routes';
+import { registerIndicesRoutes } from './routes/indices_routes';
 
 import type { ServerlessSearchConfig } from './config';
 import type {
@@ -58,6 +59,7 @@ export class ServerlessSearchPlugin
       const dependencies = { logger: this.logger, router, security: this.security };
 
       registerApiKeyRoutes(dependencies);
+      registerIndicesRoutes(dependencies);
     });
 
     pluginsSetup.ml.setFeaturesEnabled({ ad: false, dfa: false, nlp: true });
