@@ -987,8 +987,12 @@ export class DataViewsService {
     }
     const dupe = await findByName(this.savedObjectsClient, dataView.getName());
 
-    if (dupe && !override) {
-      throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
+    if (dupe) {
+      if (override) {
+        await this.delete(dupe.id);
+      } else {
+        throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
+      }
     }
 
     const body = dataView.getAsSavedObjectBody();
