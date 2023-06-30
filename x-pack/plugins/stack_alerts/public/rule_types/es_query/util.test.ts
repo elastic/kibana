@@ -7,7 +7,7 @@
 
 import { convertFieldSpecToFieldOption, convertRawRuntimeFieldtoFieldOption } from './util';
 
-describe('convertFieldSpecToFieldOption', () => {
+describe('Es Query utils', () => {
   test('should correctly convert FieldSpec to FieldOption', () => {
     expect(
       convertFieldSpecToFieldOption([
@@ -147,9 +147,7 @@ describe('convertFieldSpecToFieldOption', () => {
       },
     ]);
   });
-});
 
-describe('convertRawRuntimeFieldtoFieldOption', () => {
   test('should correctly convert raw runtime field to FieldOption', () => {
     expect(
       convertRawRuntimeFieldtoFieldOption({
