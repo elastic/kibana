@@ -11,7 +11,7 @@
         "label": "ColorPicker",
         "description": [],
         "signature": [
-          "({ label, disableHelpTooltip, disabled, setConfig, defaultColor, overwriteColor, showAlpha, }: { overwriteColor?: string | null | undefined; defaultColor?: string | null | undefined; setConfig: (config: { color?: string | undefined; }) => void; label?: string | undefined; disableHelpTooltip?: boolean | undefined; disabled?: boolean | undefined; showAlpha?: boolean | undefined; }) => JSX.Element"
+          "({ overwriteColor, defaultColor, setConfig, label, disableHelpTooltip, disabledMessage, showAlpha, }: { overwriteColor?: string | null | undefined; defaultColor?: string | null | undefined; setConfig: (config: { color?: string | undefined; }) => void; label?: string | undefined; disableHelpTooltip?: boolean | undefined; disabledMessage?: string | undefined; showAlpha?: boolean | undefined; }) => JSX.Element"
         ],
         "path": "src/plugins/visualization_ui_components/public/components/color_picker.tsx",
         "deprecated": false,
@@ -22,7 +22,7 @@
             "id": "def-public.ColorPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  label,\n  disableHelpTooltip,\n  disabled,\n  setConfig,\n  defaultColor,\n  overwriteColor,\n  showAlpha,\n}",
+            "label": "{\n  overwriteColor,\n  defaultColor,\n  setConfig,\n  label,\n  disableHelpTooltip,\n  disabledMessage,\n  showAlpha,\n}",
             "description": [],
             "path": "src/plugins/visualization_ui_components/public/components/color_picker.tsx",
             "deprecated": false,
@@ -130,13 +130,13 @@
               },
               {
                 "parentPluginId": "visualizationUiComponents",
-                "id": "def-public.ColorPicker.$1.disabled",
-                "type": "CompoundType",
+                "id": "def-public.ColorPicker.$1.disabledMessage",
+                "type": "string",
                 "tags": [],
-                "label": "disabled",
+                "label": "disabledMessage",
                 "description": [],
                 "signature": [
-                  "boolean | undefined"
+                  "string | undefined"
                 ],
                 "path": "src/plugins/visualization_ui_components/public/components/color_picker.tsx",
                 "deprecated": false,
