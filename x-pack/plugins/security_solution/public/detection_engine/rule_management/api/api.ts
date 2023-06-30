@@ -16,6 +16,7 @@ import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
+import { convertRulesFilterToKQL } from '../../../../common/utils/kql';
 import type {
   UpgradeSpecificRulesRequest,
   PerformRuleUpgradeResponseBody,
@@ -77,7 +78,6 @@ import type {
   RulesSnoozeSettingsMap,
   UpdateRulesProps,
 } from '../logic/types';
-import { convertRulesFilterToKQL } from '../logic/utils';
 
 /**
  * Create provided Rule
@@ -171,14 +171,14 @@ export const fetchRules = async ({
   },
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
-  const filterString = convertRulesFilterToKQL(filterOptions);
+  const kql = convertRulesFilterToKQL(filterOptions);
 
   const query = {
     page: pagination.page,
     per_page: pagination.perPage,
     sort_field: sortingOptions.field,
     sort_order: sortingOptions.order,
-    ...(filterString !== '' ? { filter: filterString } : {}),
+    ...(kql !== '' ? { filter: kql } : {}),
   };
 
   return KibanaServices.get().http.fetch<FetchRulesResponse>(DETECTION_ENGINE_RULES_URL_FIND, {

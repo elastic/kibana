@@ -38,7 +38,7 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
           ruleAssetsClient,
           ruleObjectsClient,
         });
-        const { currentRules, installableRules, upgradeableRules } =
+        const { currentRules, installableRules, upgradeableRules, totalAvailableRules } =
           getVersionBuckets(ruleVersionsMap);
 
         const body: GetPrebuiltRulesStatusResponseBody = {
@@ -46,6 +46,7 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
             num_prebuilt_rules_installed: currentRules.length,
             num_prebuilt_rules_to_install: installableRules.length,
             num_prebuilt_rules_to_upgrade: upgradeableRules.length,
+            num_prebuilt_rules_total_in_package: totalAvailableRules.length,
           },
         };
 

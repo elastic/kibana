@@ -11,6 +11,7 @@ export * from './bulk_crud/bulk_delete_rules/bulk_delete_rules_route';
 export * from './bulk_crud/bulk_patch_rules/bulk_patch_rules_route';
 export * from './bulk_crud/bulk_update_rules/bulk_update_rules_route';
 export * from './bulk_crud/response_schema';
+export * from './coverage_overview/coverage_overview_route';
 export * from './crud/create_rule/request_schema_validation';
 export * from './crud/patch_rule/request_schema_validation';
 export * from './crud/patch_rule/patch_rule_route';

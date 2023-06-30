@@ -38,6 +38,7 @@ const connectors = [
     config: {},
     isPreconfigured: false,
     isDeprecated: false,
+    isSystemAction: false,
     referencedByCount: 1,
   },
   {
@@ -47,6 +48,7 @@ const connectors = [
     config: {},
     isPreconfigured: true,
     isDeprecated: false,
+    isSystemAction: false,
     referencedByCount: 1,
   },
 ];

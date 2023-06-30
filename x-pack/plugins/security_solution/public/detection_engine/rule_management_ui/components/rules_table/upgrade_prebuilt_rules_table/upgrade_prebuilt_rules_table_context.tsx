@@ -7,6 +7,7 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { affectedJobIds } from '../../../../../detections/components/callouts/ml_job_compatibility_callout/affected_job_ids';
@@ -54,6 +55,11 @@ export interface UpgradePrebuiltRulesTableState {
    */
   isRefetching: boolean;
   /**
+   * Is true when installing security_detection_rules
+   * package in background
+   */
+  isUpgradingSecurityPackages: boolean;
+  /**
    * List of rule IDs that are currently being upgraded
    */
   loadingRules: RuleSignatureId[];
@@ -99,6 +105,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     filter: '',
     tags: [],
   });
+
+  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
   const {
     data: { rules, stats: { tags } } = {
@@ -211,11 +219,10 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         isFetched,
         isLoading: isLoading && loadingJobs,
         isRefetching,
+        isUpgradingSecurityPackages,
         selectedRules,
         loadingRules,
         lastUpdated: dataUpdatedAt,
-        legacyJobsInstalled,
-        isUpgradeModalVisible,
       },
       actions,
     };
@@ -228,11 +235,10 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     isLoading,
     loadingJobs,
     isRefetching,
+    isUpgradingSecurityPackages,
     selectedRules,
     loadingRules,
     dataUpdatedAt,
-    legacyJobsInstalled,
-    isUpgradeModalVisible,
     actions,
   ]);
 
