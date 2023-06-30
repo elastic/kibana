@@ -77,38 +77,30 @@ Status code: 200
     "updatedAt": 1681398305034,
     "attributes": {
       "name": "Ad-hoc",
-      "isDefault": true,
-      "isStatic": false,
-      "metric": {
-        "type": "cpu"
+      "options": {
+        "aggregation": "avg",
+        "metrics": [
+          {
+            "aggregation": "avg",
+            "field": "system.cpu.total.norm.pct",
+            "color": "color0"
+          },
+        ],
+        "source": "default",
+        "groupBy": [
+          "host.name"
+        ]
       },
-      "sort": {
-        "by": "name",
-        "direction": "desc"
+      "chartOptions": {
+        "type": "line",
+        "yAxisMode": "fromZero",
+        "stack": false
       },
-      "groupBy": [],
-      "nodeType": "host",
-      "view": "map",
-      "customOptions": [],
-      "customMetrics": [],
-      "boundsOverride": {
-        "max": 1,
-        "min": 0
-      },
-      "autoBounds": true,
-      "accountId": "",
-      "region": "",
-      "autoReload": false,
-      "filterQuery": {
-        "expression": "",
-        "kind": "kuery"
-      },
-      "legend": {
-        "palette": "cool",
-        "reverseColors": false,
-        "steps": 10
-      },
-      "timelineOpen": false
+      "currentTimerange": {
+        "from": "now-1h",
+        "to": "now",
+        "interval": ">=10s"
+      }
     }
   }
 }
@@ -155,16 +147,6 @@ Creates a new metrics explorer view.
             "field": "system.cpu.total.norm.pct",
             "color": "color0"
           },
-          {
-            "aggregation": "avg",
-            "field": "kubernetes.pod.cpu.usage.node.pct",
-            "color": "color1"
-          },
-          {
-            "aggregation": "avg",
-            "field": "docker.cpu.total.pct",
-            "color": "color2"
-          }
         ],
         "source": "default",
         "groupBy": [
@@ -181,8 +163,6 @@ Creates a new metrics explorer view.
         "to": "now",
         "interval": ">=10s"
       },
-      "isDefault": false,
-      "isStatic": false
     }
   }
   ```
@@ -209,16 +189,6 @@ Status code: 201
             "field": "system.cpu.total.norm.pct",
             "color": "color0"
           },
-          {
-            "aggregation": "avg",
-            "field": "kubernetes.pod.cpu.usage.node.pct",
-            "color": "color1"
-          },
-          {
-            "aggregation": "avg",
-            "field": "docker.cpu.total.pct",
-            "color": "color2"
-          }
         ],
         "source": "default",
         "groupBy": [
@@ -234,9 +204,7 @@ Status code: 201
         "from": "now-1h",
         "to": "now",
         "interval": ">=10s"
-      },
-      "isDefault": false,
-      "isStatic": false
+      }
     }
   }
 }
@@ -282,16 +250,6 @@ Any attempt to update the static view with id `0` will return a `400 The metrics
             "field": "system.cpu.total.norm.pct",
             "color": "color0"
           },
-          {
-            "aggregation": "avg",
-            "field": "kubernetes.pod.cpu.usage.node.pct",
-            "color": "color1"
-          },
-          {
-            "aggregation": "avg",
-            "field": "docker.cpu.total.pct",
-            "color": "color2"
-          }
         ],
         "source": "default",
         "groupBy": [
@@ -307,9 +265,7 @@ Any attempt to update the static view with id `0` will return a `400 The metrics
         "from": "now-1h",
         "to": "now",
         "interval": ">=10s"
-      },
-      "isDefault": false,
-      "isStatic": false
+      }
     }
   }
   ```
@@ -336,16 +292,6 @@ Status code: 200
             "field": "system.cpu.total.norm.pct",
             "color": "color0"
           },
-          {
-            "aggregation": "avg",
-            "field": "kubernetes.pod.cpu.usage.node.pct",
-            "color": "color1"
-          },
-          {
-            "aggregation": "avg",
-            "field": "docker.cpu.total.pct",
-            "color": "color2"
-          }
         ],
         "source": "default",
         "groupBy": [
@@ -361,9 +307,7 @@ Status code: 200
         "from": "now-1h",
         "to": "now",
         "interval": ">=10s"
-      },
-      "isDefault": false,
-      "isStatic": false
+      }
     }
   }
 }
