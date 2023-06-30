@@ -22,10 +22,10 @@ import {
   getNewDashboardTitle,
   dashboardUnsavedListingStrings,
 } from './_dashboard_listing_strings';
-import { DashboardListingProps } from './dashboard_listing';
 import { pluginServices } from '../services/plugin_services';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_session_storage/dashboard_session_storage_service';
+import { DashboardListingProps } from './types';
 
 export interface DashboardListingEmptyPromptProps {
   createItem: () => void;
