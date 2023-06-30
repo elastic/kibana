@@ -800,7 +800,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   // Returns geo_shape indexed_shape context for spatial quering by pre-indexed shapes
-  async _getPreIndexedShape(properties: GeoJsonProperties): Promise<estypes.QueryDslFieldLookup | null> {
+  async _getPreIndexedShape(
+    properties: GeoJsonProperties
+  ): Promise<estypes.QueryDslFieldLookup | null> {
     if (properties === null) {
       return null;
     }

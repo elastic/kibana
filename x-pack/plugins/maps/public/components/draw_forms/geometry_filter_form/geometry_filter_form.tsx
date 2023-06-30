@@ -35,8 +35,8 @@ const RELATION_OPTIONS = [
   {
     value: 'within',
     text: getEsSpatialRelationLabel('within'),
-  }
-]
+  },
+];
 
 interface Props {
   buttonLabel: string;

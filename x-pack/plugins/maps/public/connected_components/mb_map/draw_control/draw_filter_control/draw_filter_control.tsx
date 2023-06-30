@@ -75,9 +75,7 @@ export class DrawFilterControl extends Component<Props, {}> {
             : geometry,
         geoFieldNames: this.props.geoFieldNames,
         geometryLabel: this.props.drawState.geometryLabel ? this.props.drawState.geometryLabel : '',
-        relation: this.props.drawState.relation
-          ? this.props.drawState.relation
-          : 'intersects',
+        relation: this.props.drawState.relation ? this.props.drawState.relation : 'intersects',
       });
     }
 

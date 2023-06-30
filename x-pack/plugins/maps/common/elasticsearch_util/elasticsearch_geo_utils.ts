@@ -209,7 +209,12 @@ export function geoShapeToGeometry(
   }
 }
 
-export function makeESBbox({ maxLat, maxLon, minLat, minLon }: MapExtent): estypes.TopLeftBottomRightGeoBounds {
+export function makeESBbox({
+  maxLat,
+  maxLon,
+  minLat,
+  minLon,
+}: MapExtent): estypes.TopLeftBottomRightGeoBounds {
   const bottom = clampToLatBounds(minLat);
   const top = clampToLatBounds(maxLat);
   let esBbox;
