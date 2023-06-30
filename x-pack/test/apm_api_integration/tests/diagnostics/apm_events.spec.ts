@@ -98,7 +98,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      describe.only('transactions', async () => {
+      describe('transactions', async () => {
         let body: APIReturnType<'GET /internal/apm/diagnostics'>;
 
         const expectedDocCount = 450;
