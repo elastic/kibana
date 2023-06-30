@@ -28,6 +28,7 @@ export const DashboardLinkComponent = () => {
 
   return (
     <EuiButtonEmpty
+      id={'test1' + embeddable.id}
       isLoading={isLoading}
       iconType="dashboardApp"
       {...(dashboardLinkId === parentDashboardId

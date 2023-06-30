@@ -8,6 +8,7 @@
 
 import { LinkPanels } from '../types';
 
+/** TODO: This is copied from the control group; maybe make it generic and extract it so we aren't duplicating this code */
 export const getNextPanelOrder = (panels?: LinkPanels) => {
   let nextOrder = 0;
   if (Object.keys(panels ?? {}).length > 0) {

@@ -7,17 +7,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import {
   ACTION_ADD_PANEL,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
 } from '@kbn/embeddable-plugin/public';
+import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
+import { NavigationContainerInput } from '../../types';
 import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_container';
 import { coreServices, untilPluginStartServicesReady } from '../../services/kibana_services';
-import { NavigationContainerInput } from '../../types';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
@@ -71,26 +71,22 @@ export class NavigationEmbeddableFactoryDefinition
     );
   }
 
-  public async getExplicitInput(initialInput: NavigationContainerInput) {
-    console.log('here');
-    return { ...getDefaultNavigationContainerInput(), ...initialInput };
-    // const { configureImage } = await import('../image_editor');
-    // const start = this.deps.start();
-    // const { files, overlays, theme, application, externalUrl, getUser } = start;
-    // const user = await getUser();
-    // const imageConfig = await configureImage(
-    //   {
-    //     files,
-    //     overlays,
-    //     theme,
-    //     user,
-    //     currentAppId$: application.currentAppId$,
-    //     validateUrl: createValidateUrl(externalUrl),
-    //     getImageDownloadHref: this.getImageDownloadHref,
-    //   },
-    //   initialInput ? initialInput.imageConfig : undefined
-    // );
-    // return { imageConfig };
+  public async getExplicitInput(
+    initialInput?: NavigationContainerInput,
+    parent?: DashboardContainer
+  ) {
+    if (!parent) return {};
+
+    const { openCreateNewFlyout: createNavigationContainer } = await import(
+      '../editor/open_create_new_flyout'
+    );
+
+    const input = await createNavigationContainer(
+      { ...getDefaultNavigationContainerInput(), ...initialInput },
+      parent.getState().componentState.lastSavedId
+    );
+
+    return input;
   }
 
   public getDisplayName() {

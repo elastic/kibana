@@ -19,23 +19,25 @@ import {
   EuiFieldSearch,
   EuiSelectableOption,
 } from '@elastic/eui';
-import { DashboardItem } from '../../dashboard_link/types';
-import { useNavigationEmbeddable } from '../embeddable/navigation_container';
-import { NavEmbeddableStrings } from './navigation_embeddable_strings';
-import { fetchDashboardList } from '../../dashboard_link/lib/fetch_dashboards';
+import { fetchDashboardList } from '../lib/fetch_dashboards';
+import { DashboardItem } from '../types';
+import { NavEmbeddableStrings } from '../../navigation_container/components/navigation_embeddable_strings';
 
 interface Props {
   currentDashboardId?: string;
-  // initialSelection?: DashboardItem;
-  // onDashboardSelected: (selectedDashboard: DashboardItem | undefined) => void;
+  setSelectedDashboard: (selectedDashboard?: DashboardItem) => void;
 }
 
-export const NavigationEmbeddableDashboardList = ({ currentDashboardId, ...other }: Props) => {
+export const DashboardLinkEditorDashboardList = ({
+  currentDashboardId,
+  setSelectedDashboard,
+  ...other
+}: Props) => {
   const [searchString, setSearchString] = useState<string>('');
   const [dashboardListOptions, setDashboardListOptions] = useState<EuiSelectableOption[]>([]);
 
   const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
-    return await fetchDashboardList(searchString);
+    return await fetchDashboardList(searchString, undefined, currentDashboardId);
   }, [searchString]);
 
   useEffect(() => {
@@ -67,7 +69,7 @@ export const NavigationEmbeddableDashboardList = ({ currentDashboardId, ...other
         options={dashboardListOptions}
         isLoading={loadingDashboardList}
         onChange={(newOptions, _, selected) => {
-          // onDashboardSelected(selected.checked ? (selected.data as DashboardItem) : undefined);
+          setSelectedDashboard(selected.checked ? (selected.data as DashboardItem) : undefined);
           setDashboardListOptions(newOptions);
         }}
         listProps={{ onFocusBadge: false, bordered: true, isVirtualized: true }}

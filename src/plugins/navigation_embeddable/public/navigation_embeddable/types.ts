@@ -17,11 +17,6 @@ import {
   PanelState,
 } from '@kbn/embeddable-plugin/public';
 
-// export interface ExternalLink {
-//   url: string;
-//   label?: string;
-// }
-
 export interface LinkInput extends EmbeddableInput {
   label?: string;
 }

@@ -7,7 +7,6 @@
  */
 
 import { isEmpty } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
@@ -24,10 +23,11 @@ import {
   EuiRadioGroupOption,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { useNavigationEmbeddable } from '../embeddable/navigation_container';
-import { NavEmbeddableStrings } from './navigation_embeddable_strings';
-import { NavigationEmbeddableDashboardList } from './navigation_embeddable_dashboard_list';
+import { NavigationContainerInput } from '../../types';
 import { DashboardItem } from '../../dashboard_link/types';
+import { NavEmbeddableStrings } from './navigation_embeddable_strings';
+import { navigationContainerInputBuilder } from '../editor/navigation_container_input_builder';
+import { DashboardLinkEditorDashboardList } from '../../dashboard_link/components/dashboard_link_editor_dashboard_list';
 
 // TODO: As part of https://github.com/elastic/kibana/issues/154381, replace this regex URL check with more robust url validation
 const isValidUrl =
@@ -35,9 +35,17 @@ const isValidUrl =
 
 type LinkType = 'dashboardLink' | 'externalLink';
 
-export const NavigationEmbeddableEditor = ({ onClose }: { onClose: () => void }) => {
-  const navEmbeddable = useNavigationEmbeddable();
-
+export const NavigationEmbeddableEditor = ({
+  initialInput,
+  onSave,
+  onClose,
+  currentDashboardId,
+}: {
+  initialInput: Partial<NavigationContainerInput>;
+  onSave: (input: Partial<NavigationContainerInput>) => void;
+  onClose: () => void;
+  currentDashboardId?: string;
+}) => {
   const [linkLabel, setLinkLabel] = useState<string>('');
   const [selectedLinkType, setSelectedLinkType] = useState<LinkType>('dashboardLink');
   const [isDashboardEditorSelected, setIsDashboardEditorSelected] = useState<boolean>(true);
@@ -103,9 +111,9 @@ export const NavigationEmbeddableEditor = ({ onClose }: { onClose: () => void })
           </EuiFormRow>
           <EuiFormRow label={NavEmbeddableStrings.editor.getLinkDestinationLabel()}>
             {isDashboardEditorSelected ? (
-              <NavigationEmbeddableDashboardList
-                initialSelection={savedDashboardSelection.current}
-                onDashboardSelected={setSelectedDashboard}
+              <DashboardLinkEditorDashboardList
+                currentDashboardId={currentDashboardId}
+                setSelectedDashboard={setSelectedDashboard}
               />
             ) : (
               <EuiFieldText
@@ -144,7 +152,7 @@ export const NavigationEmbeddableEditor = ({ onClose }: { onClose: () => void })
          */}
         </EuiForm>
       </EuiFlyoutBody>
-      <EuiFlyoutFooter className="navEmbeddable-editorFooter">
+      <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
@@ -162,22 +170,23 @@ export const NavigationEmbeddableEditor = ({ onClose }: { onClose: () => void })
                 isDashboardEditorSelected ? !selectedDashboard : !validUrl || isEmpty(selectedUrl)
               }
               onClick={() => {
-                onClose();
-
                 if (isDashboardEditorSelected && selectedDashboard) {
-                  navEmbeddable.addDashboardLink({
-                    id: uuidv4(),
+                  const { addDashboardLink } = navigationContainerInputBuilder;
+                  addDashboardLink(initialInput, {
                     label: linkLabel,
                     dashboardId: selectedDashboard.id,
                   });
+                  onSave(initialInput);
                 } else if (validUrl && selectedUrl) {
-                  navEmbeddable.addExternalLink({
-                    id: uuidv4(),
+                  const { addExternalLink } = navigationContainerInputBuilder;
+                  addExternalLink(initialInput, {
                     label: linkLabel,
                     url: selectedUrl,
                   });
+                  onSave(initialInput);
                 }
-                setLinkLabel('');
+                onClose();
+                // setLinkLabel('');
               }}
             >
               Save

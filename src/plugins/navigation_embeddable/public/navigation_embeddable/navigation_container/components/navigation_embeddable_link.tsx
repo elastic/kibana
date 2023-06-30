@@ -18,6 +18,7 @@ export interface NavigationEmbeddableLinkProps {
   embeddableType: string;
 }
 
+/** TODO: This is copied from the control group; maybe make it generic and extract it so we aren't duplicating this code */
 export const useChildEmbeddable = ({
   untilEmbeddableLoaded,
   embeddableId,
@@ -70,10 +71,8 @@ export const NavigationEmbeddableLink = ({
         <div ref={embeddableRoot}>{isErrorEmbeddable(embeddable) && <>ERROR LOADING LINK</>}</div>
       )}
       {!embeddable && (
-        <div id={`controlFrame--${embeddableId}`}>
-          <div className="controlFrame--controlLoading">
-            <EuiLoadingChart />
-          </div>
+        <div className="controlFrame--controlLoading">
+          <EuiLoadingChart />
         </div>
       )}
     </>

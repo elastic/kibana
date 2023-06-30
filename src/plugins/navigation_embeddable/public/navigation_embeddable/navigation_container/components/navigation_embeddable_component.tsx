@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 
-import { EuiPanel, EuiButtonEmpty } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 
-import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { NavigationEmbeddableLink } from './navigation_embeddable_link';
 import { useNavigationEmbeddable } from '../embeddable/navigation_container';
 
@@ -18,26 +17,22 @@ import { useNavigationEmbeddable } from '../embeddable/navigation_container';
 
 export const NavigationEmbeddableComponent = () => {
   const navEmbeddable = useNavigationEmbeddable();
-  const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   const panels = navEmbeddable.select((state) => state.explicitInput.panels);
 
   return (
     <EuiPanel className="eui-yScroll">
-      <div ref={embeddableRoot}>
-        {Object.keys(panels).map((panelId) => {
-          return (
+      {Object.keys(panels).map((panelId, index) => {
+        const embeddableId = panels[panelId].explicitInput.id;
+        return (
+          <span id={`navigationLink--${embeddableId}`} key={`${embeddableId}`}>
             <NavigationEmbeddableLink
-              embeddableId={panels[panelId].explicitInput.id}
+              embeddableId={embeddableId}
               embeddableType={panels[panelId].type}
             />
-          );
-        })}
-      </div>
-
-      <EuiButtonEmpty onClick={() => navEmbeddable.openAddLinkFlyout()} iconType="plusInCircle">
-        {NavEmbeddableStrings.component.getAddButtonLabel()}
-      </EuiButtonEmpty>
+          </span>
+        );
+      })}
     </EuiPanel>
   );
 };

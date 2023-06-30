@@ -99,7 +99,10 @@ export interface EmbeddableFactory<
    *
    * Can be used to edit an embeddable by re-requesting explicit input. Initial input can be provided to allow the editor to show the current state.
    */
-  getExplicitInput(initialInput?: Partial<TEmbeddableInput>): Promise<Partial<TEmbeddableInput>>;
+  getExplicitInput(
+    initialInput?: Partial<TEmbeddableInput>,
+    parent?: IContainer
+  ): Promise<Partial<TEmbeddableInput>>;
 
   /**
    * Creates a new embeddable instance based off the saved object id.

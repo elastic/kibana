@@ -7,13 +7,12 @@
  */
 
 import ReactDOM from 'react-dom';
-import { isEmpty } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import { distinctUntilChanged, skip, Subscription } from 'rxjs';
 
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Container, ContainerOutput } from '@kbn/embeddable-plugin/public';
-import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
@@ -25,11 +24,10 @@ import {
 } from '../../types';
 import { linksService } from '../../services/links_service';
 import { ExternalLinkInput } from '../../external_link/types';
+import { coreServices } from '../../services/kibana_services';
+import { DashboardLinkInput } from '../../dashboard_link/types';
 import { getNextPanelOrder } from '../navigation_container_helpers';
-import { DashboardItem, DashboardLinkInput } from '../../dashboard_link/types';
 import { navigationEmbeddableReducers } from '../navigation_container_reducers';
-import { coreServices, dashboardServices } from '../../services/kibana_services';
-import { NavigationEmbeddableEditor } from '../components/navigation_embeddable_editor';
 import { NavigationEmbeddableComponent } from '../components/navigation_embeddable_component';
 import { EXTERNAL_LINK_EMBEDDABLE_TYPE } from '../../external_link/embeddable/external_link_embeddable_factory';
 import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
@@ -163,70 +161,6 @@ export class NavigationContainer extends Container<
     }
   }
 
-  private async fetchCurrentDashboard(): Promise<DashboardItem> {
-    const {
-      componentState: { currentDashboardId },
-    } = this.getState();
-
-    if (!currentDashboardId) {
-      throw new Error('failure'); // TODO: better error handling
-    }
-
-    const findDashboardsService = await dashboardServices.findDashboardsService();
-    const response = (await findDashboardsService.findByIds([currentDashboardId]))[0];
-    if (response.status === 'error') {
-      throw new Error('failure'); // TODO: better error handling
-    }
-    return response;
-  }
-
-  public async fetchDashboardList(
-    search: string = '',
-    size: number = 10
-  ): Promise<DashboardItem[]> {
-    const findDashboardsService = await dashboardServices.findDashboardsService();
-    const responses = await findDashboardsService.search({
-      search,
-      size,
-      options: { onlyTitle: true },
-    });
-
-    let currentDashboard: DashboardItem | undefined;
-    let dashboardList: DashboardItem[] = responses.hits;
-
-    /** When the parent dashboard has been saved (i.e. it has an ID) and there is no search string ... */
-    const {
-      componentState: { currentDashboardId },
-    } = this.getState();
-    if (currentDashboardId && isEmpty(search)) {
-      /** ...force the current dashboard (if it is present in the original search results) to the top of the list */
-      dashboardList = dashboardList.sort((dashboard) => {
-        const isCurrentDashboard = dashboard.id === currentDashboardId;
-        if (isCurrentDashboard) {
-          currentDashboard = dashboard;
-        }
-        return isCurrentDashboard ? -1 : 1;
-      });
-
-      /**
-       * If the current dashboard wasn't returned in the original search, perform another search to find it and
-       * force it to the front of the list
-       */
-      if (!currentDashboard) {
-        currentDashboard = await this.fetchCurrentDashboard();
-        dashboardList.pop(); // the result should still be of `size,` so remove the dashboard at the end of the list
-        dashboardList.unshift(currentDashboard); // in order to force the current dashboard to the start of the list
-      }
-    }
-
-    /** Then, only return the parts of the dashboard object that we need */
-    const simplifiedDashboardList = dashboardList.map((hit) => {
-      return { id: hit.id, attributes: hit.attributes };
-    });
-
-    return simplifiedDashboardList;
-  }
-
   private closeEditorFlyout() {
     if (this.editorFlyout) {
       this.editorFlyout.close();
@@ -234,34 +168,37 @@ export class NavigationContainer extends Container<
     }
   }
 
-  public openAddLinkFlyout(onSave?: (id: string) => void) {
-    const onCancel = (changes?: NavigationLinkEditorChanges) => {
-      this.closeEditorFlyout();
-    };
+  // public openAddLinkFlyout(onSave?: (id: string) => void) {
+  //   const onCancel = (changes?: NavigationLinkEditorChanges) => {
+  //     this.closeEditorFlyout();
+  //   };
 
-    const onSaveFlyout = async (changes: NavigationLinkEditorChanges) => {
-      // this.closeAllFlyouts();
-      if (!changes.type) {
-        return;
-      }
-    };
+  //   const onSaveFlyout = async (changes: NavigationLinkEditorChanges) => {
+  //     // this.closeAllFlyouts();
+  //     if (!changes.type) {
+  //       return;
+  //     }
+  //   };
 
-    this.editorFlyout = coreServices.overlays.openFlyout(
-      toMountPoint(
-        <NavigationEmbeddableContext.Provider value={this}>
-          <NavigationEmbeddableEditor onClose={() => this.closeEditorFlyout()} />
-        </NavigationEmbeddableContext.Provider>,
-        { theme$: coreServices.theme.theme$ }
-      ),
-      {
-        outsideClickCloses: false,
-        onClose: () => {
-          this.closeEditorFlyout();
-          onCancel();
-        },
-      }
-    );
-  }
+  //   this.editorFlyout = coreServices.overlays.openFlyout(
+  //     toMountPoint(
+  //       <NavigationEmbeddableContext.Provider value={this}>
+  //         <NavigationEmbeddableEditor
+  //           onClose={() => this.closeEditorFlyout()}
+  //           onSave={onSaveFlyout}
+  //         />
+  //       </NavigationEmbeddableContext.Provider>,
+  //       { theme$: coreServices.theme.theme$ }
+  //     ),
+  //     {
+  //       outsideClickCloses: false,
+  //       onClose: () => {
+  //         this.closeEditorFlyout();
+  //         onCancel();
+  //       },
+  //     }
+  //   );
+  // }
 
   public async reload() {}
 
