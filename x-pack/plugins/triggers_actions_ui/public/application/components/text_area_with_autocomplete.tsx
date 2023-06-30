@@ -14,7 +14,6 @@ import {
   EuiSelectable,
   EuiSelectableOption,
   EuiPortal,
-  EuiOutsideClickDetector,
   EuiHighlight,
 } from '@elastic/eui';
 import './add_message_variables.scss';
