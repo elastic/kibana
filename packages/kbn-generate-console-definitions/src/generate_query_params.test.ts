@@ -8,6 +8,7 @@
 
 import { SpecificationTypes } from './types';
 import { generateQueryParams } from './generate_query_params';
+import { UrlParamValue } from './types/autocomplete_definition_types';
 
 describe('generateQueryParams', () => {
   const mockRequestType: SpecificationTypes.Request = {
@@ -322,6 +323,53 @@ describe('generateQueryParams', () => {
       expect(urlParams).toEqual({
         unionProperty: '__flag__',
       });
+    });
+
+    it('if one item is an unknown type, converts it to an empty string', () => {
+      const unionProperty = getMockProperty({
+        propertyName: 'unionProperty',
+        type: {
+          kind: 'union_of',
+          items: [
+            {
+              kind: 'literal_value',
+              value: 'test',
+            },
+            {
+              kind: 'instance_of',
+              type: {
+                name: 'UnknownType',
+                namespace: 'test.namespace',
+              },
+            },
+          ],
+        },
+      });
+
+      const requestType = { ...mockRequestType, query: [unionProperty] };
+      const urlParams = generateQueryParams(requestType, mockSchema);
+      // check that no `undefined` values are added
+      const value = urlParams.unionProperty as UrlParamValue[];
+      expect(value.length).toEqual(1);
+    });
+  });
+
+  it('converts an unknown type to an empty string', () => {
+    const unknownTypeProperty = getMockProperty({
+      propertyName: 'unknownTypeProperty',
+      type: {
+        kind: 'instance_of',
+        type: {
+          name: 'UnknownType',
+          namespace: 'test.namespace',
+        },
+      },
+    });
+
+    const requestType = { ...mockRequestType, query: [unknownTypeProperty] };
+    const urlParams = generateQueryParams(requestType, mockSchema);
+    expect(urlParams).toEqual({
+      unknownTypeProperty: '',
     });
   });
 });

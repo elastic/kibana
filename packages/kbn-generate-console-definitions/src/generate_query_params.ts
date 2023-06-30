@@ -108,6 +108,7 @@ const convertValueOf = (
     return convertLiteralValue(valueOf);
   }
   // for query params we can ignore 'dictionary_of' and 'user_defined_value'
+  return '';
 };
 
 const convertInstanceOf = (
@@ -147,6 +148,7 @@ const convertInstanceOf = (
       }
     }
   }
+  return '';
 };
 
 const convertArrayOf = (
