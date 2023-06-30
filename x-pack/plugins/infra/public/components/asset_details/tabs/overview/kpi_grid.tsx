@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
 import { KPIChartProps, Tile } from './tile';
 import { TOOLTIP } from './translations';
+import { KPIProps } from './overview';
 
 const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
   {
@@ -53,7 +54,11 @@ const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
   },
 ];
 
-export const KPIGrid = ({ nodeName }: { nodeName: string }) => {
+export interface KPIGridProps extends KPIProps {
+  nodeName: string;
+}
+
+export const KPIGrid = ({ nodeName, dataView, dateRange }: KPIGridProps) => {
   return (
     <>
       <EuiSpacer size="s" />
@@ -65,7 +70,7 @@ export const KPIGrid = ({ nodeName }: { nodeName: string }) => {
       >
         {KPI_CHARTS.map(({ ...chartProp }) => (
           <EuiFlexItem key={chartProp.type}>
-            <Tile {...chartProp} nodeName={nodeName} />
+            <Tile {...chartProp} nodeName={nodeName} dataView={dataView} dateRange={dateRange} />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

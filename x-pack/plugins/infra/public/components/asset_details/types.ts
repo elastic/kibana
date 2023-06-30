@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { LogViewReference } from '../../../common/log_views';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
 import type { InfraAssetMetricType, SnapshotCustomMetricInput } from '../../../common/http_api';
+import type { StringDateRange } from '../../pages/metrics/hosts/hooks/use_unified_search_url_state';
 
 export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
 type HostMetrics = Record<InfraAssetMetricType, number | null>;
@@ -39,6 +41,10 @@ export enum FlyoutTabIds {
 export type TabIds = `${FlyoutTabIds}`;
 
 export interface TabState {
+  overview?: {
+    dateRange: StringDateRange;
+    dataView?: DataView;
+  };
   metadata?: {
     query?: string;
     showActionsColumn?: boolean;

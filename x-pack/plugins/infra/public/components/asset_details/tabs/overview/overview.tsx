@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { StringDateRange } from '../../../../pages/metrics/hosts/hooks/use_unified_search_url_state';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { findInventoryModel } from '../../../../../common/inventory_models';
 import type { MetricsTimeInput } from '../../../../pages/metrics/metric_detail/hooks/use_metrics_time';
@@ -24,7 +26,11 @@ export interface MetadataSearchUrlState {
   setMetadataSearchUrlState: (metadataSearch: { metadataSearch?: string }) => void;
 }
 
-export interface MetadataProps {
+export interface KPIProps {
+  dateRange: StringDateRange;
+  dataView?: DataView;
+}
+export interface OverviewProps extends KPIProps {
   currentTimeRange: MetricsTimeInput;
   nodeName: string;
   nodeType: InventoryItemType;
@@ -36,7 +42,9 @@ export const Overview = ({
   currentTimeRange,
   nodeType,
   onTabsStateChange,
-}: MetadataProps) => {
+  dateRange,
+  dataView,
+}: OverviewProps) => {
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useSourceContext();
   const {
@@ -78,7 +86,7 @@ export const Overview = ({
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
-        <KPIGrid nodeName={nodeName} />
+        <KPIGrid nodeName={nodeName} dateRange={dateRange} dataView={dataView} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <MetadataSummary

@@ -93,6 +93,10 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
         },
       },
     },
+    lens: {
+      navigateToPrefilledEditor: () => {},
+      stateHelperApi: () => new Promise(() => {}),
+    },
   };
 
   return (
