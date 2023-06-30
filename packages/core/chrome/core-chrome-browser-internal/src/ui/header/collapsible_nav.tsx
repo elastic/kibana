@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -138,6 +138,7 @@ export function CollapsibleNav({
   const { undefined: unknowns = [], ...allCategorizedLinks } = groupedNavLinks;
   const categoryDictionary = getAllCategories(allCategorizedLinks);
   const orderedCategories = getOrderedCategories(allCategorizedLinks, categoryDictionary);
+  const [selectedCategory, setSelectedCategory] = useState({ category: '', isCategoryOpen: false });
   const readyForEUI = (link: ChromeNavLink, needsIcon: boolean = false) => {
     return createEuiListItem({
       link,
@@ -311,8 +312,20 @@ export function CollapsibleNav({
                 )
               }
               isCollapsible={true}
+              forceState={
+                selectedCategory.category === ''
+                  ? undefined
+                  : selectedCategory.category === category.id
+                  ? selectedCategory.isCategoryOpen
+                    ? 'open'
+                    : 'closed'
+                  : 'closed'
+              }
               initialIsOpen={getIsCategoryOpen(category.id, storage)}
-              onToggle={(isCategoryOpen) => setIsCategoryOpen(category.id, isCategoryOpen, storage)}
+              onToggle={(isCategoryOpen) => {
+                setSelectedCategory({ category: category.id, isCategoryOpen });
+                setIsCategoryOpen(category.id, isCategoryOpen, storage);
+              }}
               data-test-subj={`collapsibleNavGroup-${category.id}`}
             >
               <EuiListGroup
