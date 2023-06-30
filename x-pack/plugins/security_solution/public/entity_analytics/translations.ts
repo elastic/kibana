@@ -106,4 +106,3 @@ export const PREVIEW_ERROR_TRY_AGAIN = i18n.translate(
     defaultMessage: 'Try again',
   }
 );
-_;
