@@ -33,13 +33,13 @@ describe('useStorage', () => {
   });
 
   it('should toggle active products in storage', () => {
-    expect(getStartedStorage.toggleActiveProductsInStorage(ProductId.analytics)).toEqual([
-      ProductId.analytics,
+    expect(getStartedStorage.toggleActiveProductsInStorage(ProductId.security)).toEqual([
+      ProductId.security,
     ]);
-    expect(mockStorage.set).toHaveBeenCalledWith('ACTIVE_PRODUCTS', [ProductId.analytics]);
+    expect(mockStorage.set).toHaveBeenCalledWith('ACTIVE_PRODUCTS', [ProductId.security]);
 
-    mockStorage.set('ACTIVE_PRODUCTS', [ProductId.analytics]);
-    expect(getStartedStorage.toggleActiveProductsInStorage(ProductId.analytics)).toEqual([]);
+    mockStorage.set('ACTIVE_PRODUCTS', [ProductId.security]);
+    expect(getStartedStorage.toggleActiveProductsInStorage(ProductId.security)).toEqual([]);
     expect(mockStorage.set).toHaveBeenCalledWith('ACTIVE_PRODUCTS', []);
   });
 

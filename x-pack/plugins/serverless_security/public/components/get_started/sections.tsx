@@ -19,7 +19,7 @@ import respond from './images/respond.svg';
 import protect from './images/protect.svg';
 
 export const ActiveConditions = {
-  analyticsToggled: [ProductId.analytics],
+  analyticsToggled: [ProductId.security],
   cloudToggled: [ProductId.cloud],
   endpointToggled: [ProductId.endpoint],
 };
