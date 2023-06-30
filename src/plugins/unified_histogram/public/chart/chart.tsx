@@ -194,7 +194,7 @@ export function Chart({
     histogramCss,
     breakdownFieldSelectorGroupCss,
     breakdownFieldSelectorItemCss,
-    suggestionsdSelectorItemCss,
+    suggestionsSelectorItemCss,
     chartToolButtonCss,
   } = useChartStyles(chartVisible);
 
@@ -275,7 +275,7 @@ export function Chart({
     [isFlyoutVisible]
   );
 
-  const canEditVisualizationOnTheFly = isPlainRecord;
+  const canEditVisualizationOnTheFly = isPlainRecord && chartVisible;
 
   return (
     <EuiFlexGroup
@@ -288,6 +288,7 @@ export function Chart({
       <EuiFlexItem grow={false} css={resultCountCss}>
         <EuiFlexGroup
           justifyContent="spaceBetween"
+          alignItems="center"
           gutterSize="none"
           responsive={false}
           css={resultCountInnerCss}
@@ -318,7 +319,7 @@ export function Chart({
                   </EuiFlexItem>
                 )}
                 {chartVisible && currentSuggestion && allSuggestions && allSuggestions?.length > 1 && (
-                  <EuiFlexItem css={suggestionsdSelectorItemCss}>
+                  <EuiFlexItem css={suggestionsSelectorItemCss}>
                     <SuggestionSelector
                       suggestions={allSuggestions}
                       activeSuggestion={currentSuggestion}

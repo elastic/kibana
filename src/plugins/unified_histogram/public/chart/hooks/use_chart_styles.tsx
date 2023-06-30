@@ -56,7 +56,7 @@ export const useChartStyles = (chartVisible: boolean) => {
     align-items: flex-end;
     padding-left: ${euiTheme.size.s};
   `;
-  const suggestionsdSelectorItemCss = css`
+  const suggestionsSelectorItemCss = css`
     min-width: 0;
     align-items: flex-start;
     padding-left: ${euiTheme.size.s};
@@ -75,7 +75,7 @@ export const useChartStyles = (chartVisible: boolean) => {
     histogramCss,
     breakdownFieldSelectorGroupCss,
     breakdownFieldSelectorItemCss,
-    suggestionsdSelectorItemCss,
+    suggestionsSelectorItemCss,
     chartToolButtonCss,
   };
 };
