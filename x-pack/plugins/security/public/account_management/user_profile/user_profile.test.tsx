@@ -343,7 +343,7 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      const overrideMsg = testWrapper.find('EuiText[data-test-subj="themeOverrideMessage"]');
+      const overrideMsg = testWrapper.find('EuiIconTip[data-test-subj="themeOverrideTooltip"]');
       expect(overrideMsg).toHaveLength(1);
 
       const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
@@ -380,7 +380,7 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      const overrideMsg = testWrapper.find('EuiText[data-test-subj="themeOverrideMessage"]');
+      const overrideMsg = testWrapper.find('EuiIconTip[data-test-subj="themeOverrideTooltip"]');
       expect(overrideMsg).toHaveLength(1);
 
       const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');

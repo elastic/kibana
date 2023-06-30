@@ -209,14 +209,18 @@ function UserSettingsEditor({
     >
       <FormRow
         name="data.userSettings.darkMode"
-        helpText={renderHelpText(isThemeOverridden)}
         label={
-          <FormLabel for="data.userSettings.darkMode">
-            <FormattedMessage
-              id="xpack.security.accountManagement.userProfile.userSettings.theme"
-              defaultMessage="Mode"
-            />
-          </FormLabel>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <FormLabel for="data.userSettings.darkMode">
+                <FormattedMessage
+                  id="xpack.security.accountManagement.userProfile.userSettings.theme"
+                  defaultMessage="Mode"
+                />
+              </FormLabel>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{renderHelpText(isThemeOverridden)}</EuiFlexItem>
+          </EuiFlexGroup>
         }
         fullWidth
       >
@@ -925,12 +929,23 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
 function renderHelpText(isOverridden: boolean) {
   if (isOverridden) {
     return (
-      <EuiText size="xs" data-test-subj="themeOverrideMessage">
-        <FormattedMessage
-          id="xpack.security.accountManagement.userProfile.overriddenMessage"
-          defaultMessage="This setting is overridden by the Kibana server and can not be changed."
-        />
-      </EuiText>
+      <EuiIconTip
+        data-test-subj="themeOverrideTooltip"
+        aria-label={i18n.translate(
+          'xpack.security.accountManagement.userProfile.themeModeLockedLabel',
+          {
+            defaultMessage: 'Theme mode locked',
+          }
+        )}
+        size="s"
+        type="lock"
+        content={
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.overriddenMessage"
+            defaultMessage="This setting is overridden by the Kibana server and can not be changed."
+          />
+        }
+      />
     );
   }
 }
