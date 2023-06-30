@@ -15,20 +15,29 @@ import { Cluster } from '../cluster';
 // docker run --name es-node01 --net elastic -p 9200:9200 -p 9300:9300 -t docker.elastic.co/elasticsearch/elasticsearch:8.8.1
 
 export const docker = {
-  description: 'Pull and run an Elasticsearch Docker image',
-  // TODO: update to correct params
-  usage: 'es docker <path> [<args>]',
+  description: 'Run an Elasticsearch Docker image',
+  usage: 'es docker [<args>]',
   help: (defaults: Record<string, any> = {}) => {
-    const { version } = defaults;
+    const { version, password = 'changeme' } = defaults;
 
+    // TODO: show default docker params
+    // TODO: expand examples
     return dedent`
     Options:
 
-      --version     Version of ES to pull [default: ${version}]
+      --version           Version of ES to run [default: ${version}]
+      --image             Image of ES to run [default: docker.elastic.co/elasticsearch/elasticsearch:${version}]
+      --password          Sets password for elastic user [default: ${password}]
+      --password.[user]   Sets password for native realm user [default: ${password}]
+      -E                  Additional key=value settings to pass to Elasticsearch
+      -D                  Additional key=value settings to pass to Docker
+      --ssl               Sets up SSL on Elasticsearch
+      --skip-ready-check  Disable the ready check
+      --ready-timeout     Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
 
     Example:
 
-      es docker --version 8.8.1
+      es docker --version ${version}
     `;
   },
   run: async (defaults = {}) => {
@@ -51,10 +60,8 @@ export const docker = {
     });
 
     // TODO: check docker installed
-    // TODO: pull docker image if needed (allow version or full image url)
-    // TODO: setup docker params (port? network? others? allow passing all docker opts through?)
-    // TODO: start existing container
-    // TODO: enrollment token + env params
+    // TODO: allow docker run (pull + start) or start (existing container)
+    // TODO: enrollment token + env params?
     const cluster = new Cluster({ ssl: false });
     await cluster.run('', { isDocker: true });
 
