@@ -3809,7 +3809,12 @@
         "in": "query",
         "required": true,
         "schema": {
-          "type": "string"
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minItems": 1,
+            "maxItems": 100
+          }
         },
         "example": "d4e7abb0-b462-11ec-9a8d-698504725a43"
       },
