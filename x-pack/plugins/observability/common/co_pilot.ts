@@ -385,7 +385,7 @@ The current active alerts in the system are represented in the following table w
 ${rows}
 
 Assign a ranking position to the each alert within the group of total alerts, base the ranking only on the following priority rules:
-- If an alert Start column value is more than 2 days ago, they have the lower positions in the ranking
+- If an the alert has been active for more than 2 days, remove them from the ranking
 - Else, if an alert column "Case ids" is empty or "unnasigned", they have the higher positions in the ranking
 - Else, if an alert has values in the column "Case ids" they have the intermediate positions in the ranking
 - In case of tie between alerts in the position in ranking, alerts with be ordered from higher to lower alert Duration in the ranking
