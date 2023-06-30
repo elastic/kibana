@@ -108,8 +108,6 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
       a === b ? 0 : a ? -1 : 1
   );
 
-  console.log({ promotedVisTypes });
-
   const factories = unwrappedEmbeddableFactories.filter(
     ({ isEditable, factory: { type, canCreateNew, isContainerType } }) =>
       isEditable && !isContainerType && canCreateNew() && type !== 'visualization'
