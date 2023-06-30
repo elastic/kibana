@@ -6,20 +6,4 @@
  */
 export * from './defaults';
 export * from './errors';
-export {
-  type InventoryColorPalette,
-  type InventoryFiltersState,
-  type InventoryLegendOptions,
-  type InventoryMapBounds,
-  type InventoryOptionsState,
-  type InventorySortOption,
-  type InventoryView,
-  type InventoryViewAttributes,
-  type SingleInventoryViewItem,
-  inventoryFiltersStateRT,
-  inventoryOptionsStateRT,
-  inventoryViewRT,
-  inventoryViewAttributesRT,
-  inventoryViewBasicAttributesRT,
-  singleInventoryViewRT,
-} from './types';
+export * from './types';
