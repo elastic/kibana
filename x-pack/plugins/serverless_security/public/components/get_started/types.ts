@@ -7,6 +7,7 @@
 
 import { EuiIconProps } from '@elastic/eui';
 import React from 'react';
+import { ProductLine } from '../../../common/config';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type GetStartedComponentProps = {};
@@ -46,7 +47,7 @@ export interface Step {
 export type CardId = GetSetUpCardId | GetMoreFromElasticSecurityCardId;
 
 export interface Card {
-  productTypeRequired?: ProductId[];
+  productTypeRequired?: ProductLine[];
   description?: string | React.ReactNode;
   icon?: EuiIconProps;
   id: CardId;
@@ -57,12 +58,6 @@ export interface Card {
 }
 
 export type ActiveCards = Record<SectionId, Record<CardId, ActiveCard>>;
-
-export enum ProductId {
-  security = 'security',
-  cloud = 'cloud',
-  endpoint = 'endpoint',
-}
 
 export enum SectionId {
   getSetUp = 'getSetUp',
@@ -92,14 +87,14 @@ export interface ActiveCard {
   stepsLeft: number;
 }
 export interface TogglePanelReducer {
-  activeProducts: Set<ProductId>;
+  activeProducts: Set<ProductLine>;
   finishedSteps: Record<CardId, Set<StepId>>;
   activeCards: Record<SectionId, Record<CardId, ActiveCard>> | null;
 }
 
 export interface ToggleProductAction {
   type: GetStartedPageActions.ToggleProduct;
-  payload: { section: ProductId };
+  payload: { section: ProductLine };
 }
 
 export interface AddFinishedStepAction {
@@ -108,7 +103,7 @@ export interface AddFinishedStepAction {
 }
 
 export interface Switch {
-  id: ProductId;
+  id: ProductLine;
   label: string;
 }
 

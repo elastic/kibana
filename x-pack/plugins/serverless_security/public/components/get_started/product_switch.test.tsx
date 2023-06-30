@@ -9,7 +9,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { ProductSwitch } from './product_switch';
 import { EuiThemeComputed } from '@elastic/eui';
-import { ProductId } from './types';
+import { ProductLine } from '../../../common/config';
 
 describe('ProductSwitch', () => {
   const onProductSwitchChangedMock = jest.fn();
@@ -54,7 +54,7 @@ describe('ProductSwitch', () => {
   });
 
   it('should have checked switches for activeProducts', () => {
-    const activeProducts = new Set([ProductId.security, ProductId.endpoint]);
+    const activeProducts = new Set([ProductLine.security, ProductLine.endpoint]);
     const { getByTestId } = render(
       <ProductSwitch
         onProductSwitchChanged={onProductSwitchChangedMock}

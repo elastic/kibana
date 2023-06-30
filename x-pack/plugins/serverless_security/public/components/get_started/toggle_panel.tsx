@@ -13,12 +13,12 @@ import { css } from '@emotion/react';
 import * as i18n from './translations';
 import { useSetUpCardSections } from './use_setup_cards';
 
-import { ActiveCards, CardId, IntroductionSteps, ProductId, SectionId } from './types';
+import { ActiveCards, CardId, IntroductionSteps, ProductLine, SectionId } from './types';
 
 const TogglePanelComponent: React.FC<{
   finishedSteps: Record<CardId, Set<IntroductionSteps>>;
   activeCards: ActiveCards | null;
-  activeProducts: Set<ProductId>;
+  activeProducts: Set<ProductLine>;
   onStepClicked: ({
     stepId,
     cardId,

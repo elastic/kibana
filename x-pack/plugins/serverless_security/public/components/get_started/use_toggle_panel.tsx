@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo, useReducer } from 'react';
-import { SecurityProductTypes } from '../../../common/config';
+import { ProductLine, SecurityProductTypes } from '../../../common/config';
 import { getStartedStorage } from '../../lib/get_started/storage';
 import {
   getActiveCardsInitialStates,
@@ -14,7 +14,7 @@ import {
   getFinishedStepsInitialStates,
   reducer,
 } from './reducer';
-import { CardId, GetStartedPageActions, ProductId, SectionId, StepId, Switch } from './types';
+import { CardId, GetStartedPageActions, SectionId, StepId, Switch } from './types';
 
 export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProductTypes }) => {
   const {
@@ -35,8 +35,8 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
     });
     return activeProductsFromStorage.size > 0
       ? activeProductsFromStorage
-      : new Set(productTypes.map(({ product_line: productLine }) => ProductId[productLine])) ??
-          new Set([ProductId.security, ProductId.endpoint, ProductId.cloud]);
+      : new Set(productTypes.map(({ product_line: productLine }) => ProductLine[productLine])) ??
+          new Set([ProductLine.security, ProductLine.endpoint, ProductLine.cloud]);
   }, [getActiveProductsFromStorage, productTypes]);
 
   const activeCardsInitialStates = useMemo(

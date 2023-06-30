@@ -8,7 +8,6 @@ import React from 'react';
 
 import {
   Section,
-  ProductId,
   SectionId,
   GetMoreFromElasticSecurityCardId,
   GetSetUpCardId,
@@ -17,11 +16,12 @@ import {
 import * as i18n from './translations';
 import respond from './images/respond.svg';
 import protect from './images/protect.svg';
+import { ProductLine } from '../../../common/config';
 
 export const ActiveConditions = {
-  analyticsToggled: [ProductId.security],
-  cloudToggled: [ProductId.cloud],
-  endpointToggled: [ProductId.endpoint],
+  analyticsToggled: [ProductLine.security],
+  cloudToggled: [ProductLine.cloud],
+  endpointToggled: [ProductLine.endpoint],
 };
 
 export const introductionSteps = [

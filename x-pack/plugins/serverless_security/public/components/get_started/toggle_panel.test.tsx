@@ -8,15 +8,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TogglePanel } from './toggle_panel';
 import { useSetUpCardSections } from './use_setup_cards';
-import {
-  ActiveCards,
-  CardId,
-  GetSetUpCardId,
-  IntroductionSteps,
-  ProductId,
-  SectionId,
-  StepId,
-} from './types';
+import { ActiveCards, CardId, GetSetUpCardId, IntroductionSteps, SectionId, StepId } from './types';
+import { ProductLine } from '../../../common/config';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -41,7 +34,7 @@ jest.mock('./use_setup_cards', () => ({
 const finishedSteps = {
   [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
 } as unknown as Record<CardId, Set<StepId>>;
-const activeProducts = new Set([ProductId.security, ProductId.cloud]);
+const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
 
 const activeCards = {
   [SectionId.getSetUp]: {

@@ -7,12 +7,11 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useTogglePanel } from './use_toggle_panel';
 import { getStartedStorage } from '../../lib/get_started/storage';
-import { SecurityProductTypes } from '../../../common/config';
+import { ProductLine, SecurityProductTypes } from '../../../common/config';
 import {
   GetMoreFromElasticSecurityCardId,
   GetSetUpCardId,
   IntroductionSteps,
-  ProductId,
   SectionId,
 } from './types';
 
@@ -31,9 +30,9 @@ describe('useTogglePanel', () => {
       [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
     });
     (getStartedStorage.getActiveProductsFromStorage as jest.Mock).mockReturnValue([
-      ProductId.security,
-      ProductId.cloud,
-      ProductId.endpoint,
+      ProductLine.security,
+      ProductLine.cloud,
+      ProductLine.endpoint,
     ]);
   });
 
@@ -45,7 +44,7 @@ describe('useTogglePanel', () => {
 
     const { state } = result.current;
 
-    expect(state.activeProducts).toEqual(new Set([ProductId.security, ProductId.endpoint]));
+    expect(state.activeProducts).toEqual(new Set([ProductLine.security, ProductLine.endpoint]));
     expect(state.finishedSteps).toEqual({});
 
     expect(state.activeCards).toEqual(
@@ -99,7 +98,7 @@ describe('useTogglePanel', () => {
     const { state } = result.current;
 
     expect(state.activeProducts).toEqual(
-      new Set([ProductId.security, ProductId.cloud, ProductId.endpoint])
+      new Set([ProductLine.security, ProductLine.cloud, ProductLine.endpoint])
     );
     expect(state.finishedSteps).toEqual({
       [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
@@ -152,13 +151,13 @@ describe('useTogglePanel', () => {
 
   test('should initialize state with correct initial values - when only security product active', () => {
     (getStartedStorage.getActiveProductsFromStorage as jest.Mock).mockReturnValue([
-      ProductId.security,
+      ProductLine.security,
     ]);
     const { result } = renderHook(() => useTogglePanel({ productTypes }));
 
     const { state } = result.current;
 
-    expect(state.activeProducts).toEqual(new Set([ProductId.security]));
+    expect(state.activeProducts).toEqual(new Set([ProductLine.security]));
     expect(state.finishedSteps).toEqual({
       [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
     });
@@ -229,12 +228,12 @@ describe('useTogglePanel', () => {
     const { onProductSwitchChanged } = result.current;
 
     act(() => {
-      onProductSwitchChanged({ id: ProductId.security, label: 'Analytics' });
+      onProductSwitchChanged({ id: ProductLine.security, label: 'Analytics' });
     });
 
     expect(getStartedStorage.toggleActiveProductsInStorage).toHaveBeenCalledTimes(1);
     expect(getStartedStorage.toggleActiveProductsInStorage).toHaveBeenCalledWith(
-      ProductId.security
+      ProductLine.security
     );
   });
 });

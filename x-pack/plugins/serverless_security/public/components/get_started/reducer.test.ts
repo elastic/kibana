@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ProductLine } from '../../../common/config';
 import {
   reducer,
   getFinishedStepsInitialStates,
@@ -17,7 +18,6 @@ import {
   GetSetUpCardId,
   GetStartedPageActions,
   IntroductionSteps,
-  ProductId,
   SectionId,
   StepId,
   ToggleProductAction,
@@ -28,25 +28,25 @@ import {
 describe('reducer', () => {
   it('should toggle section correctly', () => {
     const initialState = {
-      activeProducts: new Set([ProductId.security]),
+      activeProducts: new Set([ProductLine.security]),
       finishedSteps: {} as Record<CardId, Set<StepId>>,
       activeCards: {} as ActiveCards | null,
     };
 
     const action: ToggleProductAction = {
       type: GetStartedPageActions.ToggleProduct,
-      payload: { section: ProductId.security },
+      payload: { section: ProductLine.security },
     };
 
     const nextState = reducer(initialState, action);
 
-    expect(nextState.activeProducts.has(ProductId.security)).toBe(false);
+    expect(nextState.activeProducts.has(ProductLine.security)).toBe(false);
     expect(nextState.activeCards).toBeNull();
   });
 
   it('should add a finished step correctly', () => {
     const initialState = {
-      activeProducts: new Set([ProductId.security]),
+      activeProducts: new Set([ProductLine.security]),
       finishedSteps: {} as Record<CardId, Set<StepId>>,
       activeCards: {
         getSetUp: {
@@ -103,17 +103,17 @@ describe('getFinishedStepsInitialStates', () => {
 
 describe('getActiveSectionsInitialStates', () => {
   it('should return the initial states of active sections correctly', () => {
-    const activeProducts = [ProductId.security];
+    const activeProducts = [ProductLine.security];
 
     const initialStates = getActiveSectionsInitialStates({ activeProducts });
 
-    expect(initialStates.has(ProductId.security)).toBe(true);
+    expect(initialStates.has(ProductLine.security)).toBe(true);
   });
 });
 
 describe('getActiveCardsInitialStates', () => {
   it('should return the initial states of active cards correctly', () => {
-    const activeProducts = new Set([ProductId.security]);
+    const activeProducts = new Set([ProductLine.security]);
     const finishedSteps = {
       [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
     } as unknown as Record<CardId, Set<StepId>>;

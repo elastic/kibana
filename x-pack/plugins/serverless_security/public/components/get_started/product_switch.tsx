@@ -8,27 +8,28 @@
 import { EuiPanel, EuiSwitch, EuiText, EuiThemeComputed, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
+import { ProductLine } from '../../../common/config';
 import * as i18n from './translations';
-import { ProductId, Switch } from './types';
+import { Switch } from './types';
 
 const switches: Switch[] = [
   {
-    id: ProductId.security,
+    id: ProductLine.security,
     label: i18n.ANALYTICS_SWITCH_LABEL,
   },
   {
-    id: ProductId.cloud,
+    id: ProductLine.cloud,
     label: i18n.CLOUD_SWITCH_LABEL,
   },
   {
-    id: ProductId.endpoint,
+    id: ProductLine.endpoint,
     label: i18n.ENDPOINT_SWITCH_LABEL,
   },
 ];
 
 const ProductSwitchComponent: React.FC<{
   onProductSwitchChanged: (item: Switch) => void;
-  activeProducts: Set<ProductId>;
+  activeProducts: Set<ProductLine>;
   euiTheme: EuiThemeComputed;
 }> = ({ onProductSwitchChanged, activeProducts, euiTheme }) => {
   const switchNodes = useMemo(
