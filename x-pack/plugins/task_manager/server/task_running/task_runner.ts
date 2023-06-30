@@ -381,7 +381,9 @@ export class TaskManagerRunner implements TaskRunner {
       if (numSkippedRuns < maxAttempts) {
         error = createSkipError(err);
       } else {
-        this.logger.warn(`Task Manager has reached the max skip attempts`);
+        this.logger.warn(
+          `Task Manager has reached the max skip attempts for task ${taskType}/${id}`
+        );
         error = createRetryableError(err, true);
       }
     }
@@ -407,7 +409,9 @@ export class TaskManagerRunner implements TaskRunner {
           if (numSkippedRuns < maxAttempts) {
             error = createSkipError(err);
           } else {
-            this.logger.warn(`Task Manager has reached the max skip attempts`);
+            this.logger.warn(
+              `Task Manager has reached the max skip attempts for task ${taskType}/${id}`
+            );
           }
         }
       }

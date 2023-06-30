@@ -456,7 +456,7 @@ describe('Task Runner Factory', () => {
       taskInstance: mockedTaskInstance,
     });
 
-    await taskRunner.cleanup!();
+    await taskRunner.cleanup();
 
     expect(taskRunnerFactoryInitializerParams.savedObjectsRepository.delete).toHaveBeenCalledWith(
       'action_task_params',
@@ -487,7 +487,7 @@ describe('Task Runner Factory', () => {
       taskInstance: mockedTaskInstance,
     });
 
-    await taskRunner.cancel!();
+    await taskRunner.cancel();
     expect(mockedActionExecutor.logCancellation.mock.calls[0][0].actionId).toBe('2');
 
     expect(mockedActionExecutor.logCancellation.mock.calls.length).toBe(1);
@@ -506,7 +506,7 @@ describe('Task Runner Factory', () => {
       new Error('Fail')
     );
 
-    await taskRunner.cleanup!();
+    await taskRunner.cleanup();
 
     expect(taskRunnerFactoryInitializerParams.savedObjectsRepository.delete).toHaveBeenCalledWith(
       'action_task_params',
@@ -1041,7 +1041,7 @@ describe('Task Runner Factory', () => {
       references: [],
     });
 
-    await taskRunner.cancel!();
+    await taskRunner.cancel();
 
     expect(inMemoryMetrics.increment).toHaveBeenCalledTimes(1);
     expect(inMemoryMetrics.increment.mock.calls[0][0]).toBe(IN_MEMORY_METRICS.ACTION_TIMEOUTS);
@@ -1072,7 +1072,7 @@ describe('Task Runner Factory', () => {
     });
     mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
-    const result = await taskRunner.beforeRun!();
+    const result = await taskRunner.beforeRun();
 
     expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
     expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
@@ -1114,7 +1114,7 @@ describe('Task Runner Factory', () => {
     });
     mockedActionExecutor.getActionInfoInternal.mockRejectedValueOnce(error);
 
-    const result = await taskRunner.beforeRun!();
+    const result = await taskRunner.beforeRun();
 
     expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
     expect(mockedActionExecutor.getActionInfoInternal).toHaveBeenCalledTimes(1);
