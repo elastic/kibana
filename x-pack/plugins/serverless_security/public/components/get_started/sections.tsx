@@ -18,12 +18,6 @@ import respond from './images/respond.svg';
 import protect from './images/protect.svg';
 import { ProductLine } from '../../../common/config';
 
-export const ActiveConditions = {
-  analyticsToggled: [ProductLine.security],
-  cloudToggled: [ProductLine.cloud],
-  endpointToggled: [ProductLine.endpoint],
-};
-
 export const introductionSteps = [
   {
     id: IntroductionSteps.watchOverviewVideo,
@@ -86,10 +80,7 @@ export const sections: Section[] = [
         icon: { type: protect, size: 'xl' },
         title: i18n.PROTECT_YOUR_ENVIRONMENT_TITLE,
         id: GetSetUpCardId.protectYourEnvironmentInRealtime,
-        productTypeRequired: [
-          ...ActiveConditions.cloudToggled,
-          ...ActiveConditions.endpointToggled,
-        ],
+        productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
       },
     ],
   },

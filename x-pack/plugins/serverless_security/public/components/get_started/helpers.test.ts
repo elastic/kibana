@@ -74,7 +74,7 @@ describe('getCardStepsLeft', () => {
 
 describe('isCardActive', () => {
   it('should return true if the card is active based on the active products', () => {
-    const card = { productTypeRequired: [ProductLine.security, ProductLine.cloud] } as Card;
+    const card = { productLineRequired: [ProductLine.security, ProductLine.cloud] } as Card;
     const activeProducts = new Set([ProductLine.security]);
 
     const isActive = isCardActive(card, activeProducts);
@@ -92,7 +92,7 @@ describe('isCardActive', () => {
   });
 
   it('should return false if the card is not active based on the active products', () => {
-    const card = { productTypeRequired: [ProductLine.security, ProductLine.cloud] } as Card;
+    const card = { productLineRequired: [ProductLine.security, ProductLine.cloud] } as Card;
     const activeProducts = new Set([ProductLine.endpoint]);
 
     const isActive = isCardActive(card, activeProducts);
