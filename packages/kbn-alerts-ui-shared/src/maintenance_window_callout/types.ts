@@ -69,7 +69,9 @@ export interface RRuleRecord {
 }
 
 export interface KibanaServices {
-  application: { capabilities: { maintenanceWindow: Record<string, boolean> } };
+  application: {
+    capabilities: Record<string, any>;
+  };
   http: Pick<CoreStart['http'], 'fetch'>;
   notifications: Pick<CoreStart['notifications'], 'toasts'>;
 }
