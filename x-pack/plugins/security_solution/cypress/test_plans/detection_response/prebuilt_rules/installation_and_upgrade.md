@@ -2,26 +2,84 @@
 
 This is a test plan for the workflows of installing and upgrading prebuilt rules.
 
-Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic. It does not cover any past functionality that was removed or any functionality to be implemented in the future. The plan is about to change in the future Milestones.
+Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic. It does not cover any past functionality that was removed or functionality to be implemented in the future. The plan is about to change in the future Milestones.
 
 ## Useful information
 
-### Related tickets
+### Tickets
 
 - [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic
 - [Ensure full test coverage for existing workflows of installing and upgrading prebuilt rules](https://github.com/elastic/kibana/issues/148176)
 - [Write test plan and add test coverage for the new workflows of installing and upgrading prebuilt rules](https://github.com/elastic/kibana/issues/148192)
 - [Document the new UI for installing and upgrading prebuilt detection rules](https://github.com/elastic/security-docs/issues/3496)
 
+### Terminology
+
+- **EPR**: [Elastic Package Registry](https://github.com/elastic/package-registry), service that hosts our **Package**.
+
+- **Package**: `security_detection_engine` Fleet package that we use to distribute prebuilt detection rules in the form of `security-rule` assets (saved objects).
+
+- **Real package**: actual latest stable package distributed and pulled from EPR via Fleet.
+
+- **Mock rules**: `security-rule` assets that are indexed into the `.kibana_security_solution` index directly in the test setup, either by using the ES client _in integration tests_ or by an API request _in Cypress tests_.
+
+- **Air-gapped environment**: an environment where Kibana doesn't have access to the internet. In general, EPR is not available in such environments, except the cases when the user runs a custom EPR inside the environment.
+
 ### Assumptions
 
 - Below scenarios only apply to prebuilt detection rules.
-- Most of our users are on the 7.17.x version, that’s why the 8.x version is specified on scenarios, because this TestPlan is considering a minimum version of 8.x.
+- Most of our users are on the 7.17.x version, that’s why the 8.x version is specified on scenarios, because this test plan is considering a minimum version of 8.x.
 - Users should be able to install and upgrade prebuilt rules on the `Basic` license and higher.
-- EPR (Elastic Package Registry) is available for fetching the `security_detection_engine` package unless explicitly indicated otherwise.
-- Only the latest stable `security_detection_engine` package is checked for update/installation and pre-release packages are ignored.
+- EPR is available for fetching the package unless explicitly indicated otherwise.
+- Only the latest **stable** package is checked for installation/upgrade and pre-release packages are ignored.
+
+### Non-functional requirements
+
+- Notifications, rule installation and rule upgrade workflows should work:
+  - regardless of the package type: with historical rule versions or without;
+  - regardless of the package registry availability: i.e., they should also work in air-gapped environments.
+- Rule installation and upgrade workflows should work with packages containing up to 15000 historical rule versions. This is the max number of versions of all rules in the package. This limit is enforced by Fleet.
+- Kibana should not crash with Out Of Memory exception during package installation.
+- For test purposes, it should be possible to use detection rules package versions lower than the latest.
 
 ## Scenarios
+
+### Prebuilt rules package installation
+
+#### **Scenario: Package is installed via Fleet**
+
+**Coverage**: 0 tests - covered by other scenarios. This scenario will be covered by the **Users install the latest prebuilt rules** scenario, which will include 1 e2e test which installs the rules from the real package.
+
+```Gherkin
+Given user doesn't have the package installed
+When they navigate to the Rule Management page
+Then the package is installed in the background from EPR
+```
+
+#### **Scenario: Package is installed via bundled Fleet package in Kibana**
+
+**Coverage**: 1 integration test.
+
+```Gherkin
+Given user doesn't have the package installed
+And the user is in an air-gapped environment
+When they navigate to the Rule Management page
+Then the package is installed in the background from packages bundled into Kibana
+```
+
+#### **Scenario: Large package can be installed on a small Kibana instance**
+
+**Coverage**: 1 integration test.
+
+```Gherkin
+Given user doesn't have the package installed
+And the package has the largest amount of historical rule versions installed (15000)
+And the Kibana instance has a memory heap size of X Mb (see note below)
+When they navigate to the Rule Management page
+Then the package is installed without Kibana crashing with an Out Of Memory error
+```
+
+**Note**: The amount of memory is undefined as of now because, during implementation, we will try to find a memory heap threshold below which Kibana starts to crash constantly when you install the package with 15k rules. The plan is to then increase it to the point where it stops crashing, and use it as our value for this test.
 
 ### Notifications
 
