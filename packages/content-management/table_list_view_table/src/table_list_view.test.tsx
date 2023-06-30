@@ -1240,10 +1240,23 @@ describe('TableList', () => {
     }
   );
 
-  it('refreshes the list when the bouncer changes', async () => {
+  it('refreshes the list when "refreshListBouncer" changes', async () => {
     let testBed: TestBed;
 
-    const findItems = jest.fn().mockResolvedValue({ total: 0, hits: [] });
+    const originalHits: UserContentCommonSchema[] = [
+      {
+        id: `item`,
+        type: 'dashboard',
+        updatedAt: 'original timestamp',
+        attributes: {
+          title: `Original title`,
+        },
+        references: [],
+      },
+    ];
+    const findItems = jest
+      .fn()
+      .mockResolvedValue({ total: originalHits.length, hits: originalHits });
 
     await act(async () => {
       testBed = setup({ findItems });
@@ -1258,7 +1271,7 @@ describe('TableList', () => {
       {
         id: `item`,
         type: 'dashboard',
-        updatedAt: 'some date',
+        updatedAt: 'updated timestamp',
         attributes: {
           title: `Updated title`,
         },

@@ -6,4 +6,14 @@
  * Side Public License, v 1.
  */
 
-export const API_BASE_PATH = '/api/index_pattern_field_editor';
+import { container, ContainerMetricsDocument } from './container';
+import { host, HostMetricsDocument } from './host';
+import { pod, PodMetricsDocument } from './pod';
+
+export type InfraDocument = HostMetricsDocument | PodMetricsDocument | ContainerMetricsDocument;
+
+export const infra = {
+  host,
+  pod,
+  container,
+};

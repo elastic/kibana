@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  elasticsearchServiceMock,
+} from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
@@ -88,6 +92,8 @@ export const buildManifestManagerContextMock = (
     artifactClient: createEndpointArtifactClientMock(),
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
     experimentalFeatures: parseExperimentalConfigValue([]).features,
+    packagerTaskPackagePolicyUpdateBatchSize: 10,
+    esClient: elasticsearchServiceMock.createElasticsearchClient(),
   };
 };
 
@@ -127,7 +133,7 @@ export const getManifestManagerMock = (
           context.exceptionListClient.findExceptionListItem = jest
             .fn()
             .mockRejectedValue(new Error('unexpected thing happened'));
-          return super.buildExceptionListArtifacts();
+          return super.buildExceptionListArtifacts([]);
         case ManifestManagerMockType.NormalFlow:
           return getMockArtifactsWithDiff();
       }

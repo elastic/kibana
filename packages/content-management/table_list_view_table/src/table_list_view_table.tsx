@@ -375,7 +375,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   } = state;
 
   const hasQuery = searchQuery.text !== '';
-  const hasNoItems = !isFetchingItems && items.length === 0 && !hasQuery;
+  const hasNoItems = hasInitialFetchReturned && items.length === 0 && !hasQuery;
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
 
@@ -416,10 +416,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
       });
     }
   }, [searchQueryParser, searchQuery.text, findItems, onFetchSuccess]);
-
-  useEffect(() => {
-    fetchItems();
-  }, [fetchItems, refreshListBouncer]);
 
   const updateQuery = useCallback(
     (query: Query) => {
@@ -861,7 +857,17 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   // ------------
   // Effects
   // ------------
-  useDebounce(fetchItems, 300, [fetchItems]);
+  useDebounce(
+    () => {
+      // Do not call fetchItems on dependency changes when initial fetch does not load any items
+      // to avoid flashing between empty table and no items view
+      if (!hasNoItems) {
+        fetchItems();
+      }
+    },
+    300,
+    [fetchItems, refreshListBouncer]
+  );
 
   useEffect(() => {
     if (!urlStateEnabled) {
