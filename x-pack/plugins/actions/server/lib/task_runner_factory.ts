@@ -113,10 +113,14 @@ export class TaskRunnerFactory {
             spaceIdToNamespace
           );
 
+          const { spaceId } = actionTaskExecutorParams;
           const request = getFakeRequest(taskParams.attributes.apiKey);
+          const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
+
           const actionInfo = await actionExecutor.getActionInfoInternal(
             taskParams.attributes.actionId,
-            request
+            request,
+            namespace.namespace
           );
           actionData = {
             data: { taskParams, actionInfo },

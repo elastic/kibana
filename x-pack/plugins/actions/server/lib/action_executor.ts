@@ -128,7 +128,7 @@ export class ActionExecutor {
         if (actionInfoFromTaskRunner) {
           actionInfo = actionInfoFromTaskRunner;
         } else {
-          actionInfo = await this.getActionInfoInternal(actionId, request);
+          actionInfo = await this.getActionInfoInternal(actionId, request, namespace.namespace);
         }
 
         const { actionTypeId, name, config, secrets } = actionInfo;
@@ -351,7 +351,7 @@ export class ActionExecutor {
     const spaceId = spaces && spaces.getSpaceId(request);
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
     if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
-      this.actionInfo = await this.getActionInfoInternal(actionId, request);
+      this.actionInfo = await this.getActionInfoInternal(actionId, request, namespace.namespace);
     }
     const task = taskInfo
       ? {
@@ -392,12 +392,10 @@ export class ActionExecutor {
 
   public async getActionInfoInternal(
     actionId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    namespace: string | undefined
   ): Promise<ActionInfo> {
-    const { spaces, encryptedSavedObjectsClient, preconfiguredActions } =
-      this.actionExecutorContext!;
-    const spaceId = spaces && spaces.getSpaceId(request);
-    const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
+    const { encryptedSavedObjectsClient, preconfiguredActions } = this.actionExecutorContext!;
 
     // check to see if it's a pre-configured action first
     const pcAction = preconfiguredActions.find(
@@ -425,7 +423,7 @@ export class ActionExecutor {
       'action',
       actionId,
       {
-        namespace: namespace.namespace === 'default' ? undefined : namespace.namespace,
+        namespace: namespace === 'default' ? undefined : namespace,
       }
     );
 
