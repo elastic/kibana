@@ -24,7 +24,7 @@ export interface ApmEvent {
   kuery: string;
   index: string[];
   docCount: number;
-  intervals?: Record<string, number>;
+  intervals?: Record<string, { metricDocCount: number; eventDocCount: number }>;
 }
 
 export async function getApmEvents({
@@ -165,20 +165,33 @@ async function getEventWithMetricsetInterval({
           size: 1000,
           field: METRICSET_INTERVAL,
         },
+        aggs: {
+          metric_doc_count: {
+            value_count: {
+              field: '_index',
+            },
+          },
+        },
       },
     },
   });
 
-  const defaultIntervals = { '1m': 0, '10m': 0, '60m': 0 };
+  const defaultIntervals = {
+    '1m': { metricDocCount: 0, eventDocCount: 0 },
+    '10m': { metricDocCount: 0, eventDocCount: 0 },
+    '60m': { metricDocCount: 0, eventDocCount: 0 },
+  };
   const foundIntervals = res.aggregations?.metricset_intervals.buckets.reduce<
-    Record<string, number>
+    Record<string, { metricDocCount: number; eventDocCount: number }>
   >((acc, item) => {
-    acc[item.key] = item.doc_count;
+    acc[item.key] = {
+      metricDocCount: item.metric_doc_count.value,
+      eventDocCount: item.doc_count,
+    };
     return acc;
   }, {});
 
   const intervals = merge(defaultIntervals, foundIntervals);
-
   return {
     legacy,
     name,
