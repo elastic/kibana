@@ -92,6 +92,7 @@ export const useConnectorSetup = ({
       actionTypes?.find((at) => at.id === GEN_AI_CONNECTOR_ID) ?? {
         enabledInConfig: true,
         enabledInLicense: true,
+        isSystemActionType: false,
         minimumLicenseRequired: 'platinum',
         supportedFeatureIds: ['general'],
         id: '.gen-ai',

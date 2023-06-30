@@ -1315,7 +1315,6 @@ describe('getAll()', () => {
         isPreconfigured: false,
         isSystemAction: false,
         isDeprecated: false,
-        isSystemAction: true,
         referencedByCount: 2,
       },
       {
@@ -1335,7 +1334,6 @@ describe('getAll()', () => {
         isPreconfigured: true,
         isSystemAction: false,
         isDeprecated: false,
-        isSystemAction: false,
         referencedByCount: 2,
       },
     ]);
@@ -1566,7 +1564,6 @@ describe('getBulk()', () => {
         isPreconfigured: true,
         isSystemAction: false,
         isDeprecated: false,
-        isSystemAction: false,
         name: 'test',
         config: { foo: 'bar' },
       },
@@ -1590,7 +1587,6 @@ describe('getBulk()', () => {
         isPreconfigured: false,
         isSystemAction: false,
         isDeprecated: false,
-        isSystemAction: false,
       },
     ]);
   });
