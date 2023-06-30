@@ -129,6 +129,7 @@ export class ReportingCore {
       this.context
     );
     this.exportTypesRegistry.register(this.csvSearchsourceExport);
+
     this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.pdfExport);
 
@@ -159,6 +160,8 @@ export class ReportingCore {
     this.csvSearchsourceExport.setup(setupDeps);
     this.pdfExport.setup(setupDeps);
 
+    this.pdfExport.setup(setupDeps);
+
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
       [executeTask.TYPE]: executeTask.getTaskDefinition(),
@@ -172,6 +175,7 @@ export class ReportingCore {
   public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
+    this.pdfExport.start({ ...startDeps, reporting: this.getContract() });
 
     const reportingStart = this.getContract();
     this.csvSearchsourceExport.start({ ...startDeps, reporting: reportingStart });

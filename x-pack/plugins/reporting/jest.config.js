@@ -21,6 +21,6 @@ module.exports = {
     '<rootDir>x-pack/plugins/reporting/server/routes/management/integration_tests/jobs.test.ts',
   ],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/reporting/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/plugins/reporting/{common, public, server}/**/*.{js,ts,tsx}',
   ],
 };

@@ -6,21 +6,21 @@
  */
 
 import {
+  IBasePath,
+  Headers,
+  Logger,
   CoreKibanaRequest,
   CoreSetup,
   FakeRawRequest,
-  Headers,
   HttpServiceSetup,
-  IBasePath,
-  IClusterClient,
   KibanaRequest,
-  Logger,
   PluginInitializerContext,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { ReportingConfigType } from '../../config';
@@ -39,6 +39,7 @@ export interface BaseExportTypeStartDeps {
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
+  screenshotting: ScreenshottingStart;
   reporting: ReportingStart;
 }
 
