@@ -19,12 +19,16 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import type { RequestError } from '../../hooks';
 import { useStartServices } from '../../hooks';
-
-import { useGetUninstallTokens } from '../../hooks/use_request/uninstall_tokens';
 
 import { Error } from '../error';
 import { Loading } from '../loading';
+
+import {
+  useGetUninstallToken,
+  useGetUninstallTokens,
+} from '../../hooks/use_request/uninstall_tokens';
 
 import { UninstallCommandsPerPlatform } from './uninstall_commands_per_platform';
 import type { UninstallCommandTarget } from './types';
@@ -82,35 +86,47 @@ const UninstallEndpointDescription = () => (
   </>
 );
 
-const UninstallCommands = ({ policyId }: { policyId: string }) => {
-  const { data, error, isLoading } = useGetUninstallTokens({ policyId });
-
-  if (isLoading) {
-    return <Loading size="l" />;
-  }
-
-  const token: string | null = data?.items?.[0]?.token ?? null;
-
-  if (error || !token) {
-    return (
-      <Error
-        title={
-          <FormattedMessage
-            id="xpack.fleet.agentUninstallCommandFlyout.errorFetchingToken"
-            defaultMessage="Unable to fetch uninstall token"
-          />
-        }
-        error={
-          error ??
-          i18n.translate('xpack.fleet.agentUninstallCommandFlyout.unknownError', {
-            defaultMessage: 'Unknown error',
-          })
-        }
+const ErrorFetchingUninstallToken = ({ error }: { error: RequestError | null }) => (
+  <Error
+    title={
+      <FormattedMessage
+        id="xpack.fleet.agentUninstallCommandFlyout.errorFetchingToken"
+        defaultMessage="Unable to fetch uninstall token"
       />
-    );
-  }
+    }
+    error={
+      error ??
+      i18n.translate('xpack.fleet.agentUninstallCommandFlyout.unknownError', {
+        defaultMessage: 'Unknown error',
+      })
+    }
+  />
+);
 
-  return <UninstallCommandsPerPlatform token={token} />;
+const UninstallCommandsByTokenId = ({ uninstallTokenId }: { uninstallTokenId: string }) => {
+  const { isLoading, error, data } = useGetUninstallToken(uninstallTokenId);
+  const token = data?.item.token;
+
+  return isLoading ? (
+    <Loading size="l" />
+  ) : error || !token ? (
+    <ErrorFetchingUninstallToken error={error} />
+  ) : (
+    <UninstallCommandsPerPlatform token={token} />
+  );
+};
+
+const UninstallCommandsByPolicyId = ({ policyId }: { policyId: string }) => {
+  const { isLoading, error, data } = useGetUninstallTokens({ policyId });
+  const tokenId = data?.items?.[0]?.id;
+
+  return isLoading ? (
+    <Loading size="l" />
+  ) : error || !tokenId ? (
+    <ErrorFetchingUninstallToken error={error} />
+  ) : (
+    <UninstallCommandsByTokenId uninstallTokenId={tokenId} />
+  );
 };
 
 export interface UninstallCommandFlyoutProps {
@@ -144,7 +160,7 @@ export const UninstallCommandFlyout: React.FunctionComponent<UninstallCommandFly
 
         <EuiSpacer size="l" />
 
-        <UninstallCommands policyId={policyId} />
+        <UninstallCommandsByPolicyId policyId={policyId} />
 
         <EuiSpacer size="l" />
 
