@@ -211,7 +211,7 @@ export const TestPipeline: React.FC = () => {
               {(EuiResizablePanel, EuiResizableButton) => (
                 <>
                   <EuiResizablePanel grow hasBorder initialSize={50} paddingSize="xs">
-                    <CodeEditor // TODO theme is provided in context by x-pack/plugins/enterprise_search/public/applications/index.tsx
+                    <CodeEditor
                       languageId="json"
                       options={{
                         automaticLayout: true,

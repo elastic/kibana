@@ -35,7 +35,7 @@ export const SecurityPrivilegesForm: React.FC<SecurityPrivilegesFormProps> = ({
           <p>{error}</p>
         </EuiText>
       )}
-      <CodeEditorField // TODO theme provided in context by x-pack/plugins/serverless_search/public/application/index.tsx
+      <CodeEditorField
         allowFullScreen
         fullWidth
         height="600px"
