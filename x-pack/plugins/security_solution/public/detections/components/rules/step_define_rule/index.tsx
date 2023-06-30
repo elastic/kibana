@@ -655,6 +655,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [indexPattern]
   );
 
+  const ruleTypeProps = useMemo(
+    () => ({
+      describedByIds: ['detectionEngineStepDefineRuleType'],
+      isUpdateView,
+      hasValidLicense: hasMlLicense(mlCapabilities),
+      isMlAdmin: hasMlAdminPermissions(mlCapabilities),
+    }),
+    [isUpdateView, mlCapabilities]
+  );
+
   return (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
@@ -670,16 +680,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               }}
             />
           </StyledVisibleContainer>
-          <UseField
-            path="ruleType"
-            component={SelectRuleType}
-            componentProps={{
-              describedByIds: ['detectionEngineStepDefineRuleType'],
-              isUpdateView,
-              hasValidLicense: hasMlLicense(mlCapabilities),
-              isMlAdmin: hasMlAdminPermissions(mlCapabilities),
-            }}
-          />
+          <UseField path="ruleType" component={SelectRuleType} componentProps={ruleTypeProps} />
           <RuleTypeEuiFormRow $isVisible={!isMlRule(ruleType)} fullWidth>
             <>
               <EuiSpacer size="s" />

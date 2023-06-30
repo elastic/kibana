@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, memo } from 'react';
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic/eui';
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -29,7 +29,7 @@ interface SelectRuleTypeProps {
   isUpdateView: boolean;
 }
 
-export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
+export const SelectRuleTypeComponent: React.FC<SelectRuleTypeProps> = ({
   describedByIds = [],
   field,
   isUpdateView,
@@ -190,3 +190,6 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
     </EuiFormRow>
   );
 };
+
+export const SelectRuleType = memo(SelectRuleTypeComponent);
+SelectRuleType.displayName = 'SelectRuleType';
