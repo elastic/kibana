@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, memo, useCallback } from 'react';
+import { useStore } from 'react-redux';
 import { EuiForm } from '@elastic/eui';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -52,6 +53,7 @@ export function LayerPanels(
     activeVisualization: Visualization;
   }
 ) {
+  const lensStore = useStore();
   const { activeVisualization, datasourceMap, indexPatternService, onUpdateStateCb } = props;
   const { activeDatasourceId, visualization, datasourceStates, query } = useLensSelector(
     (state) => state.lens
@@ -316,20 +318,11 @@ export function LayerPanels(
                 const datasourceId = datasourcePublicAPI?.datasourceId;
                 dispatchLens(removeDimension({ ...dimensionProps, datasourceId }));
                 if (datasourceId && onUpdateStateCb) {
-                  const nextVisState = activeVisualization.removeDimension({
-                    layerId,
-                    columnId: dimensionProps.columnId,
-                    prevState: visualization.state,
-                    frame: props.framePublicAPI,
-                  });
-                  const activeDatasource = datasourceMap[datasourceId];
-                  const nextDsState = activeDatasource?.removeColumn({
-                    layerId: dimensionProps.layerId,
-                    columnId: dimensionProps.columnId,
-                    prevState: datasourceStates[datasourceId].state,
-                    indexPatterns: props.framePublicAPI.dataViews.indexPatterns,
-                  });
-                  onUpdateStateCb(nextDsState, nextVisState);
+                  const newState = lensStore.getState().lens;
+                  onUpdateStateCb(
+                    newState.datasourceStates[datasourceId].state,
+                    newState.visualization.state
+                  );
                 }
               }}
               toggleFullscreen={toggleFullscreen}
