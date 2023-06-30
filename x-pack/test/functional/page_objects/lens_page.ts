@@ -651,7 +651,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Removes the dimension matching a specific test subject
      */
-    async removeDimension(dimensionTestSubj: string, index?: number) {
+    async removeDimension(dimensionTestSubj: string) {
       await testSubjects.moveMouseTo(`${dimensionTestSubj} > indexPattern-dimension-remove`);
       await testSubjects.click(`${dimensionTestSubj} > indexPattern-dimension-remove`);
     },
@@ -1130,7 +1130,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCell(rowIndex = 0, colIndex = 0) {
       return await find.byCssSelector(
-        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"][data-gridcell-visible-row-index="${rowIndex}"]`
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"][data-gridcell-row-index="${rowIndex}"]`
       );
     },
 
