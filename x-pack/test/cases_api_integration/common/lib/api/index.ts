@@ -27,15 +27,12 @@ import {
   INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '@kbn/cases-plugin/common/constants';
 import {
-  Configuration,
   Case,
   CaseStatuses,
   Cases,
   CasesFindResponse,
   CasesPatchRequest,
-  ConfigurationPatchRequest,
   CasesStatusResponse,
-  Configurations,
   AlertResponse,
   ConnectorMappingsAttributes,
   CasesByAlertId,
@@ -49,6 +46,8 @@ import { ActionResult } from '@kbn/actions-plugin/server/types';
 import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
 import type { ConfigurationPersistedAttributes } from '@kbn/cases-plugin/server/common/types/configure';
+import { Configurations, Configuration } from '@kbn/cases-plugin/common/types/domain';
+import { ConfigurationPatchRequest } from '@kbn/cases-plugin/common/types/api';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
