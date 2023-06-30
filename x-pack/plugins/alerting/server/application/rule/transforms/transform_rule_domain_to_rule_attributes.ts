@@ -15,7 +15,7 @@ interface TransformRuleToEsParams {
   meta?: RuleAttributes['meta'];
 }
 
-export const transformRuleToEsRule = (
+export const transformRuleDomainToRuleAttributes = (
   rule: Omit<RuleDomain, 'actions' | 'params'>,
   params: TransformRuleToEsParams
 ): RuleAttributes => {
@@ -35,8 +35,8 @@ export const transformRuleToEsRule = (
     scheduledTaskId: rule.scheduledTaskId,
     createdBy: rule.createdBy,
     updatedBy: rule.updatedBy,
-    createdAt: rule.createdAt,
-    updatedAt: rule.updatedAt,
+    createdAt: rule.createdAt.toISOString(),
+    updatedAt: rule.updatedAt.toISOString(),
     apiKey: rule.apiKey,
     apiKeyOwner: rule.apiKeyOwner,
     apiKeyCreatedByUser: rule.apiKeyCreatedByUser,
@@ -44,12 +44,20 @@ export const transformRuleToEsRule = (
     notifyWhen: rule.notifyWhen,
     muteAll: rule.muteAll,
     mutedInstanceIds: rule.mutedInstanceIds,
-    executionStatus: rule.executionStatus,
+    executionStatus: {
+      status: rule.executionStatus.status,
+      lastExecutionDate: rule.executionStatus.lastExecutionDate.toISOString(),
+      ...(rule.executionStatus.lastDuration
+        ? { lastDuration: rule.executionStatus.lastDuration }
+        : {}),
+      ...(rule.executionStatus.error ? { error: rule.executionStatus.error } : {}),
+      ...(rule.executionStatus.warning ? { warning: rule.executionStatus.warning } : {}),
+    },
     monitoring: rule.monitoring,
     snoozeSchedule: rule.snoozeSchedule,
-    isSnoozedUntil: rule.isSnoozedUntil,
+    isSnoozedUntil: rule.isSnoozedUntil?.toISOString(),
     lastRun: rule.lastRun,
-    nextRun: rule.nextRun,
+    nextRun: rule.nextRun?.toISOString(),
     revision: rule.revision,
     running: rule.running,
     ...(meta ? { meta } : {}),

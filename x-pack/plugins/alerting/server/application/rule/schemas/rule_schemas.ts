@@ -12,6 +12,7 @@ import {
   ruleExecutionStatusErrorReason,
   ruleExecutionStatusWarningReason,
 } from '../constants';
+import { dateSchema } from './date_schema';
 import { notifyWhenSchema } from './notify_when_schema';
 import { actionDomainSchema, actionSchema } from './action_schemas';
 
@@ -31,7 +32,7 @@ export const ruleExecutionStatusSchema = schema.object({
     schema.literal(ruleExecutionStatusValues.PENDING),
     schema.literal(ruleExecutionStatusValues.UNKNOWN),
   ]),
-  lastExecutionDate: schema.string(),
+  lastExecutionDate: dateSchema,
   lastDuration: schema.maybe(schema.number()),
   error: schema.maybe(
     schema.object({
@@ -184,8 +185,8 @@ export const ruleDomainSchema = schema.object({
   scheduledTaskId: schema.maybe(schema.string()),
   createdBy: schema.nullable(schema.string()),
   updatedBy: schema.nullable(schema.string()),
-  createdAt: schema.string(),
-  updatedAt: schema.string(),
+  createdAt: dateSchema,
+  updatedAt: dateSchema,
   apiKey: schema.nullable(schema.string()),
   apiKeyOwner: schema.nullable(schema.string()),
   apiKeyCreatedByUser: schema.maybe(schema.nullable(schema.boolean())),
@@ -197,9 +198,9 @@ export const ruleDomainSchema = schema.object({
   monitoring: schema.maybe(monitoringSchema),
   snoozeSchedule: schema.maybe(schema.arrayOf(snoozeScheduleSchema)),
   activeSnoozes: schema.maybe(schema.arrayOf(schema.string())),
-  isSnoozedUntil: schema.maybe(schema.nullable(schema.string())),
+  isSnoozedUntil: schema.maybe(schema.nullable(dateSchema)),
   lastRun: schema.maybe(schema.nullable(ruleLastRunSchema)),
-  nextRun: schema.maybe(schema.nullable(schema.string())),
+  nextRun: schema.maybe(schema.nullable(dateSchema)),
   revision: schema.number(),
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
@@ -222,8 +223,8 @@ export const ruleSchema = schema.object({
   scheduledTaskId: schema.maybe(schema.string()),
   createdBy: schema.nullable(schema.string()),
   updatedBy: schema.nullable(schema.string()),
-  createdAt: schema.string(),
-  updatedAt: schema.string(),
+  createdAt: dateSchema,
+  updatedAt: dateSchema,
   apiKeyOwner: schema.nullable(schema.string()),
   apiKeyCreatedByUser: schema.maybe(schema.nullable(schema.boolean())),
   throttle: schema.maybe(schema.nullable(schema.string())),
@@ -234,9 +235,9 @@ export const ruleSchema = schema.object({
   monitoring: schema.maybe(monitoringSchema),
   snoozeSchedule: schema.maybe(schema.arrayOf(snoozeScheduleSchema)),
   activeSnoozes: schema.maybe(schema.arrayOf(schema.string())),
-  isSnoozedUntil: schema.maybe(schema.nullable(schema.string())),
+  isSnoozedUntil: schema.maybe(schema.nullable(dateSchema)),
   lastRun: schema.maybe(schema.nullable(ruleLastRunSchema)),
-  nextRun: schema.maybe(schema.nullable(schema.string())),
+  nextRun: schema.maybe(schema.nullable(dateSchema)),
   revision: schema.number(),
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),

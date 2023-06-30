@@ -50,8 +50,8 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   params: rule.params,
   created_by: rule.createdBy,
   updated_by: rule.updatedBy,
-  created_at: rule.createdAt,
-  updated_at: rule.updatedAt,
+  created_at: rule.createdAt.toISOString(),
+  updated_at: rule.updatedAt.toISOString(),
   api_key_owner: rule.apiKeyOwner,
   ...(rule.apiKeyCreatedByUser !== undefined
     ? { api_key_created_by_user: rule.apiKeyCreatedByUser }
@@ -60,15 +60,17 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   mute_all: rule.muteAll,
   muted_alert_ids: rule.mutedInstanceIds,
   scheduled_task_id: rule.scheduledTaskId,
-  ...(rule.isSnoozedUntil != null ? { is_snoozed_until: rule.isSnoozedUntil } : {}),
+  ...(rule.isSnoozedUntil !== undefined
+    ? { is_snoozed_until: rule.isSnoozedUntil?.toISOString() || null }
+    : {}),
   execution_status: {
     status: rule.executionStatus.status,
     ...(rule.executionStatus.error ? { error: rule.executionStatus.error } : {}),
     ...(rule.executionStatus.warning ? { warning: rule.executionStatus.warning } : {}),
-    last_execution_date: rule.executionStatus.lastExecutionDate,
+    last_execution_date: rule.executionStatus.lastExecutionDate?.toISOString(),
     last_duration: rule.executionStatus.lastDuration,
   },
   ...(rule.lastRun ? { last_run: transformRuleLastRun(rule.lastRun) } : {}),
-  ...(rule.nextRun ? { next_run: rule.nextRun } : {}),
+  ...(rule.nextRun ? { next_run: rule.nextRun.toISOString() } : {}),
   revision: rule.revision,
 });

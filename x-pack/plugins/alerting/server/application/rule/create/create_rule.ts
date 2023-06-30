@@ -10,12 +10,10 @@ import { TypeOf } from '@kbn/config-schema';
 import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { parseDuration } from '../../../../common/parse_duration';
-import { RawRule } from '../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../authorization';
 import { validateRuleTypeParams, getRuleNotifyWhenType, getDefaultMonitoring } from '../../../lib';
 import { getRuleExecutionStatusPending } from '../../../lib/rule_execution_status';
 import {
-  createRuleSavedObject,
   extractReferences,
   validateActions,
   addGeneratedActionValues,
@@ -24,14 +22,16 @@ import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../../../rules_clie
 import { ruleAuditEvent, RuleAuditAction } from '../../../rules_client/common/audit_events';
 import { RulesClientContext } from '../../../rules_client/types';
 import { Rule, RuleDomain, RuleParams } from '../types';
+import { SanitizedRule } from '../../../types';
 import {
-  transformEsRuleToRule,
-  transformRuleToEsRule,
-  transformDomainRuleToRule,
+  transformRuleAttributesToRuleDomain,
+  transformRuleDomainToRuleAttributes,
+  transformRuleDomainToRule,
 } from '../transforms';
 import { ruleDomainSchema } from '../schemas';
 import { RuleAttributes } from '../../../data/rule/types';
 import { createRuleDataSchema } from './schemas';
+import { createRuleSavedObject } from '../../../rules_client/lib';
 
 export type CreateRuleData = TypeOf<typeof createRuleDataSchema>;
 
@@ -48,7 +48,8 @@ export interface CreateRuleParams {
 export async function createRule<Params extends RuleParams = never>(
   context: RulesClientContext,
   createParams: CreateRuleParams
-): Promise<Rule<Params>> {
+  // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
+): Promise<SanitizedRule<Params>> {
   const { data: initialData, options, allowMissingConnectorSecrets } = createParams;
 
   const data = { ...initialData, actions: addGeneratedActionValues(initialData.actions) };
@@ -140,23 +141,21 @@ export async function createRule<Params extends RuleParams = never>(
   const throttle = data.throttle ?? null;
 
   // Convert domain rule object to ES rule attributes
-  const esRule = transformRuleToEsRule(
+  const ruleAttributes = transformRuleDomainToRuleAttributes(
     {
       ...data,
       ...apiKeyAsAlertAttributes(createdAPIKey, username, isAuthTypeApiKey),
       id,
       createdBy: username,
       updatedBy: username,
-      createdAt: new Date(createTime).toISOString(),
-      updatedAt: new Date(createTime).toISOString(),
+      createdAt: new Date(createTime),
+      updatedAt: new Date(createTime),
       snoozeSchedule: [],
       muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
       throttle,
-      executionStatus: getRuleExecutionStatusPending(
-        lastRunTimestamp.toISOString()
-      ) as Rule['executionStatus'],
+      executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
       monitoring: getDefaultMonitoring(lastRunTimestamp.toISOString()) as Rule['monitoring'],
       revision: 0,
       running: false,
@@ -168,24 +167,22 @@ export async function createRule<Params extends RuleParams = never>(
     }
   );
 
-  // Save the rule with the es attributes, returns a RawRule, this should be RulesAttribute
-  // but I'm holding off changing it to that for now since we need to change a lot of
-  // references to RawRule
-  const createdRuleSavedObject: SavedObject<RawRule> = await withSpan(
+  const createdRuleSavedObject: SavedObject<RuleAttributes> = await withSpan(
     { name: 'createRuleSavedObject', type: 'rules' },
     () =>
       createRuleSavedObject(context, {
         intervalInMs,
-        rawRule: esRule as RawRule,
+        rawRule: ruleAttributes,
         references,
         ruleId: id,
         options,
+        returnRuleAttributes: true,
       })
   );
 
   // Convert ES RuleAttributes back to domain rule object
-  const rule: RuleDomain<Params> = transformEsRuleToRule<Params>(
-    createdRuleSavedObject.attributes as RuleAttributes,
+  const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
+    createdRuleSavedObject.attributes,
     {
       id: createdRuleSavedObject.id,
       logger: context.logger,
@@ -196,11 +193,15 @@ export async function createRule<Params extends RuleParams = never>(
 
   // Try to validate created rule, but don't throw.
   try {
-    ruleDomainSchema.validate(rule);
+    ruleDomainSchema.validate(ruleDomain);
   } catch (e) {
     context.logger.warn(`Error validating rule domain object for id: ${id}, ${e}`);
   }
 
   // Convert domain rule to rule (Remove certain properties)
-  return transformDomainRuleToRule<Params>(rule);
+  const rule = transformRuleDomainToRule<Params>(ruleDomain, { isPublic: true });
+
+  // TODO (http-versioning): Remove this cast, this enables us to move forward
+  // without fixing all of other solution types
+  return rule as SanitizedRule<Params>;
 }

@@ -49,10 +49,12 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           });
 
           try {
-            const createdRule: Rule<RuleParams> = await rulesClient.create<RuleParams>({
+            // TODO (http-versioning): Remove this cast, this enables us to move forward
+            // without fixing all of other solution types
+            const createdRule: Rule<RuleParams> = (await rulesClient.create<RuleParams>({
               data: transformCreateBodyV1(createRuleData),
               options: { id: params?.id },
-            });
+            })) as Rule<RuleParams>;
 
             // Assert versioned response type
             const response: CreateRuleResponseV1<RuleParamsV1> = {

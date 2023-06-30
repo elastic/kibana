@@ -10,7 +10,7 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import { RuleAttributes } from '../types';
+import { RuleAttributes } from './types';
 
 export interface UpdateRuleSavedObjectParams {
   savedObjectClient: SavedObjectsClientContract;

@@ -38,13 +38,20 @@ export type RuleExecutionStatusWarningReason =
 export type RuleParams = TypeOf<typeof ruleParamsSchema>;
 export type RRule = TypeOf<typeof rRuleSchema>;
 export type SnoozeSchedule = TypeOf<typeof snoozeScheduleSchema>;
-export type RuleExecutionStatus = TypeOf<typeof ruleExecutionStatusSchema>;
 export type RuleLastRun = TypeOf<typeof ruleLastRunSchema>;
 export type Monitoring = TypeOf<typeof monitoringSchema>;
 export type Action = TypeOf<typeof actionSchema>;
-
 type RuleSchemaType = TypeOf<typeof ruleSchema>;
 type RuleDomainSchemaType = TypeOf<typeof ruleDomainSchema>;
+
+type RuleExecutionStatusWithDateString = TypeOf<typeof ruleExecutionStatusSchema>;
+export interface RuleExecutionStatus {
+  status: RuleExecutionStatusWithDateString['status'];
+  lastExecutionDate: Date;
+  lastDuration?: RuleExecutionStatusWithDateString['lastDuration'];
+  error?: RuleExecutionStatusWithDateString['error'];
+  warning?: RuleExecutionStatusWithDateString['warning'];
+}
 
 export interface Rule<Params extends RuleParams = never> {
   id: RuleSchemaType['id'];
@@ -60,21 +67,21 @@ export interface Rule<Params extends RuleParams = never> {
   scheduledTaskId?: RuleSchemaType['scheduledTaskId'];
   createdBy: RuleSchemaType['createdBy'];
   updatedBy: RuleSchemaType['updatedBy'];
-  createdAt: RuleSchemaType['createdAt'];
-  updatedAt: RuleSchemaType['updatedAt'];
+  createdAt: Date;
+  updatedAt: Date;
   apiKeyOwner: RuleSchemaType['apiKeyOwner'];
   apiKeyCreatedByUser?: RuleSchemaType['apiKeyCreatedByUser'];
   throttle?: RuleSchemaType['throttle'];
   muteAll: RuleSchemaType['muteAll'];
   notifyWhen?: RuleSchemaType['notifyWhen'];
   mutedInstanceIds: RuleSchemaType['mutedInstanceIds'];
-  executionStatus: RuleSchemaType['executionStatus'];
+  executionStatus: RuleExecutionStatus;
   monitoring?: RuleSchemaType['monitoring'];
   snoozeSchedule?: RuleSchemaType['snoozeSchedule'];
   activeSnoozes?: RuleSchemaType['activeSnoozes'];
-  isSnoozedUntil?: RuleSchemaType['isSnoozedUntil'];
+  isSnoozedUntil?: Date | null;
   lastRun?: RuleSchemaType['lastRun'];
-  nextRun?: RuleSchemaType['nextRun'];
+  nextRun?: Date | null;
   revision: RuleSchemaType['revision'];
   running?: RuleSchemaType['running'];
   viewInAppRelativeUrl?: RuleSchemaType['viewInAppRelativeUrl'];
@@ -94,8 +101,8 @@ export interface RuleDomain<Params extends RuleParams = never> {
   scheduledTaskId?: RuleDomainSchemaType['scheduledTaskId'];
   createdBy: RuleDomainSchemaType['createdBy'];
   updatedBy: RuleDomainSchemaType['updatedBy'];
-  createdAt: RuleDomainSchemaType['createdAt'];
-  updatedAt: RuleDomainSchemaType['updatedAt'];
+  createdAt: Date;
+  updatedAt: Date;
   apiKey: RuleDomainSchemaType['apiKey'];
   apiKeyOwner: RuleDomainSchemaType['apiKeyOwner'];
   apiKeyCreatedByUser?: RuleDomainSchemaType['apiKeyCreatedByUser'];
@@ -103,13 +110,13 @@ export interface RuleDomain<Params extends RuleParams = never> {
   muteAll: RuleDomainSchemaType['muteAll'];
   notifyWhen?: RuleDomainSchemaType['notifyWhen'];
   mutedInstanceIds: RuleDomainSchemaType['mutedInstanceIds'];
-  executionStatus: RuleDomainSchemaType['executionStatus'];
+  executionStatus: RuleExecutionStatus;
   monitoring?: RuleDomainSchemaType['monitoring'];
   snoozeSchedule?: RuleDomainSchemaType['snoozeSchedule'];
   activeSnoozes?: RuleDomainSchemaType['activeSnoozes'];
-  isSnoozedUntil?: RuleDomainSchemaType['isSnoozedUntil'];
+  isSnoozedUntil?: Date | null;
   lastRun?: RuleDomainSchemaType['lastRun'];
-  nextRun?: RuleDomainSchemaType['nextRun'];
+  nextRun?: Date | null;
   revision: RuleDomainSchemaType['revision'];
   running?: RuleDomainSchemaType['running'];
   viewInAppRelativeUrl?: RuleDomainSchemaType['viewInAppRelativeUrl'];

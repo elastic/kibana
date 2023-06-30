@@ -10,8 +10,7 @@ import {
   SavedObjectsCreateOptions,
   SavedObject,
 } from '@kbn/core/server';
-
-import { RuleAttributes } from '../types';
+import { RuleAttributes } from './types';
 
 export interface CreateRuleSavedObjectParams {
   savedObjectClient: SavedObjectsClientContract;

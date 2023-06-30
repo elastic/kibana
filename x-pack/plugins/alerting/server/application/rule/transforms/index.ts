@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { transformEsRuleToRule } from './transform_es_rule_to_domain_rule';
-export { transformRuleToEsRule } from './transform_domain_rule_to_es_rule';
-export { transformDomainRuleToRule } from './transform_domain_rule_to_rule';
+export { transformRuleAttributesToRuleDomain } from './transform_rule_attributes_to_rule_domain';
+export { transformRuleDomainToRuleAttributes } from './transform_rule_domain_to_rule_attributes';
+export { transformRuleDomainToRule } from './transform_rule_domain_to_rule';

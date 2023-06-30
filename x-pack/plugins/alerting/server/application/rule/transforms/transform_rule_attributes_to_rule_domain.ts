@@ -50,7 +50,7 @@ const transformEsExecutionStatus = (
   }
   return {
     status,
-    lastExecutionDate: new Date(parsedDateMillis).toISOString(),
+    lastExecutionDate: new Date(parsedDateMillis),
     ...(lastDuration != null ? { lastDuration } : {}),
     ...(error ? { error } : {}),
     ...(warning ? { warning } : {}),
@@ -114,12 +114,11 @@ interface TransformEsToRuleParams {
   logger: Logger;
   ruleType: UntypedNormalizedRuleType;
   references?: SavedObjectReference[];
-  excludeFromPublicApi?: boolean;
   includeSnoozeData?: boolean;
   omitGeneratedValues?: boolean;
 }
 
-export const transformEsRuleToRule = <Params extends RuleParams = never>(
+export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = never>(
   esRule: RuleAttributes,
   transformParams: TransformEsToRuleParams
 ): RuleDomain<Params> => {
@@ -184,8 +183,8 @@ export const transformEsRuleToRule = <Params extends RuleParams = never>(
     ...(scheduledTaskId ? { scheduledTaskId } : {}),
     createdBy: esRule.createdBy,
     updatedBy: esRule.updatedBy,
-    createdAt: esRule.createdAt,
-    updatedAt: esRule.updatedAt,
+    createdAt: new Date(esRule.createdAt),
+    updatedAt: new Date(esRule.updatedAt),
     apiKey: esRule.apiKey,
     apiKeyOwner: esRule.apiKeyOwner,
     apiKeyCreatedByUser: esRule.apiKeyCreatedByUser,
@@ -196,7 +195,14 @@ export const transformEsRuleToRule = <Params extends RuleParams = never>(
     executionStatus: transformEsExecutionStatus(logger, id, executionStatus),
     ...(monitoring ? { monitoring: transformEsMonitoring(logger, id, monitoring) } : {}),
     snoozeSchedule: snoozeScheduleDates ?? [],
-    ...(includeSnoozeData ? { activeSnoozes, isSnoozedUntil } : {}),
+    ...(includeSnoozeData
+      ? {
+          activeSnoozes,
+          ...(isSnoozedUntil !== undefined
+            ? { isSnoozedUntil: isSnoozedUntil ? new Date(isSnoozedUntil) : null }
+            : {}),
+        }
+      : {}),
     ...(lastRun
       ? {
           lastRun: {
@@ -207,7 +213,7 @@ export const transformEsRuleToRule = <Params extends RuleParams = never>(
           },
         }
       : {}),
-    nextRun: esRule.nextRun,
+    ...(esRule.nextRun ? { nextRun: new Date(esRule.nextRun) } : {}),
     revision: esRule.revision,
     running: esRule.running,
   };
