@@ -6,7 +6,10 @@
  */
 
 import * as rt from 'io-ts';
+import { metricsExplorerViewRT } from '../../../metrics_explorer_views';
 
 export const getMetricsExplorerViewRequestParamsRT = rt.type({
   metricsExplorerViewId: rt.string,
 });
+
+export type GetMetricsExplorerViewResposePayload = rt.TypeOf<typeof metricsExplorerViewRT>;

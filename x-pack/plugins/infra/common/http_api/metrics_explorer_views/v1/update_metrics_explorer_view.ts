@@ -6,7 +6,10 @@
  */
 
 import * as rt from 'io-ts';
-import { metricsExplorerViewAttributesRT } from '../../../metrics_explorer_views';
+import {
+  metricsExplorerViewAttributesRT,
+  metricsExplorerViewRT,
+} from '../../../metrics_explorer_views';
 
 export const updateMetricsExplorerViewAttributesRequestPayloadRT = rt.intersection([
   metricsExplorerViewAttributesRT,
@@ -20,3 +23,5 @@ export type UpdateMetricsExplorerViewAttributesRequestPayload = rt.TypeOf<
 export const updateMetricsExplorerViewRequestPayloadRT = rt.type({
   attributes: updateMetricsExplorerViewAttributesRequestPayloadRT,
 });
+
+export type UpdateMetricsExplorerViewResponsePayload = rt.TypeOf<typeof metricsExplorerViewRT>;

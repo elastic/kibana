@@ -5,9 +5,38 @@
  * 2.0.
  */
 
+import { nonEmptyStringRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { metricsExplorerViewRT } from '../../../metrics_explorer_views';
+
+export const findMetricsExplorerViewAttributesResponseRT = rt.exact(
+  rt.intersection([
+    rt.type({
+      name: nonEmptyStringRt,
+    }),
+    rt.partial({
+      isDefault: rt.boolean,
+      isStatic: rt.boolean,
+    }),
+  ])
+);
+
+const findMetricsExplorerViewResponseRT = rt.exact(
+  rt.intersection([
+    rt.type({
+      id: rt.string,
+      attributes: findMetricsExplorerViewAttributesResponseRT,
+    }),
+    rt.partial({
+      updatedAt: rt.number,
+      version: rt.string,
+    }),
+  ])
+);
 
 export const findMetricsExplorerViewResponsePayloadRT = rt.type({
-  data: rt.array(metricsExplorerViewRT),
+  data: rt.array(findMetricsExplorerViewResponseRT),
 });
+
+export type FindMetricsExplorerViewResponsePayload = rt.TypeOf<
+  typeof findMetricsExplorerViewResponsePayloadRT
+>;
