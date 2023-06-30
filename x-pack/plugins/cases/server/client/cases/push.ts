@@ -36,6 +36,7 @@ import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter } from '../utils';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import type { ExternalServiceTransitionsResponse } from '../../services/sync/types';
 
 /**
  * Returns true if the case should be closed based on the configuration settings.
@@ -141,6 +142,22 @@ export const push = async (
     const alerts = await getAlerts(alertsInfo, clientArgs);
     const profiles = await getProfiles(theCase, securityStartPlugin);
 
+    let transitions: ExternalServiceTransitionsResponse | undefined;
+
+    if (theCase.external_service?.external_id != null) {
+      const transitionsResp = await actionsClient.execute({
+        actionId: connector?.id ?? '',
+        params: {
+          subAction: 'getTransitions',
+          subActionParams: { externalId: theCase.external_service.external_id },
+        },
+        source: asSavedObjectExecutionSource({ id: caseId, type: CASE_SAVED_OBJECT }),
+      });
+
+      transitions = transitionsResp.data as ExternalServiceTransitionsResponse;
+      console.log('transitions', JSON.stringify(transitions, null, 2));
+    }
+
     const externalServiceIncident = await createIncident({
       theCase,
       userActions,
@@ -150,6 +167,7 @@ export const push = async (
       userProfiles: profiles,
       spaceId,
       publicBaseUrl,
+      transitions,
     });
 
     const pushRes = await actionsClient.execute({
@@ -165,6 +183,55 @@ export const push = async (
       throw Boom.failedDependency(
         pushRes.serviceMessage ?? pushRes.message ?? 'Error pushing to service'
       );
+    }
+
+    const externalServiceResponse = pushRes.data as ExternalServiceResponse;
+
+    // check if this is the first time we're pushing the case, if so then we may need to transition the status
+    // TODO: this is a hack and seems jira specific since you can't just include the status in the original incident API
+    if (externalServiceIncident.incident.externalId == null) {
+      const transitionsResp = await actionsClient.execute({
+        actionId: connector?.id ?? '',
+        params: {
+          subAction: 'getTransitions',
+          subActionParams: { externalId: externalServiceResponse.id },
+        },
+        source: asSavedObjectExecutionSource({ id: caseId, type: CASE_SAVED_OBJECT }),
+      });
+
+      const transitionsAfterFirstPush = transitionsResp.data as ExternalServiceTransitionsResponse;
+      console.log(
+        'when external id is null: transitions',
+        JSON.stringify(transitionsAfterFirstPush, null, 2)
+      );
+
+      // TODO: this is hack, we should just hit the transitions api directly
+      const incidentWithTransition = await createIncident({
+        theCase,
+        userActions,
+        connector: connector as ActionConnector,
+        alerts,
+        casesConnectors,
+        userProfiles: profiles,
+        spaceId,
+        publicBaseUrl,
+        transitions: transitionsAfterFirstPush,
+      });
+
+      const pushResWithTransition = await actionsClient.execute({
+        actionId: connector?.id ?? '',
+        params: {
+          subAction: 'pushToService',
+          subActionParams: incidentWithTransition,
+        },
+        source: asSavedObjectExecutionSource({ id: caseId, type: CASE_SAVED_OBJECT }),
+      });
+
+      if (pushResWithTransition.status === 'error') {
+        throw Boom.failedDependency(
+          pushRes.serviceMessage ?? pushRes.message ?? 'Error pushing to service'
+        );
+      }
     }
 
     /* End of push to external service */
@@ -195,7 +262,6 @@ export const push = async (
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email, profile_uid } = user;
     const pushedDate = new Date().toISOString();
-    const externalServiceResponse = pushRes.data as ExternalServiceResponse;
 
     const externalService = {
       pushed_at: pushedDate,

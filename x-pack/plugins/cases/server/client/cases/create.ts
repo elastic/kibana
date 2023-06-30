@@ -76,6 +76,8 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
 
     validateCategory(query.category);
 
+    // TODO: validate externalSync - only 10 cases case have it enabled
+
     const savedObjectID = SavedObjectsUtils.generateId();
 
     await auth.ensureAuthorized({
@@ -123,6 +125,10 @@ export const create = async (data: CasePostRequest, clientArgs: CasesClientArgs)
         severity: query.severity ?? CaseSeverity.LOW,
         assignees: query.assignees ?? [],
         category: query.category ?? null,
+        settings: {
+          ...query.settings,
+          externalSync: query.settings.externalSync ?? false,
+        },
       },
       owner: newCase.attributes.owner,
     });

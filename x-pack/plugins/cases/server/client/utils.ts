@@ -149,7 +149,7 @@ export const getAlertIds = (comment: CommentRequest): string[] => {
   return [];
 };
 
-const addStatusFilter = (status: CaseStatuses): KueryNode => {
+export const addStatusFilter = (status: CaseStatuses): KueryNode => {
   return nodeBuilder.is(
     `${CASE_SAVED_OBJECT}.attributes.status`,
     `${STATUS_EXTERNAL_TO_ESMODEL[status]}`

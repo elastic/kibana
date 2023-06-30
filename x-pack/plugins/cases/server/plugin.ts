@@ -43,6 +43,8 @@ import {
   createCaseSavedObjectType,
   createCaseUserActionSavedObjectType,
   casesTelemetrySavedObjectType,
+  casesSyncApiKeySavedObjectType,
+  casesSyncSavedObjectType,
 } from './saved_object_types';
 
 import type { CasesClient } from './client';
@@ -60,6 +62,8 @@ import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
 import { registerInternalAttachments } from './internal_attachments';
 import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
+import { createSyncingTask } from './sync';
+import { Syncer } from './services/sync/task_service';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
@@ -94,6 +98,7 @@ export class CasePlugin {
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
+  private syncer: Syncer;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -103,6 +108,7 @@ export class CasePlugin {
     this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
     this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
     this.userProfileService = new UserProfileService(this.logger);
+    this.syncer = new Syncer();
   }
 
   public setup(core: CoreSetup, plugins: PluginsSetup): CasesSetup {
@@ -140,6 +146,8 @@ export class CasePlugin {
       })
     );
     core.savedObjects.registerType(casesTelemetrySavedObjectType);
+    core.savedObjects.registerType(casesSyncSavedObjectType);
+    core.savedObjects.registerType(casesSyncApiKeySavedObjectType);
 
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(
       APP_ID,
@@ -148,14 +156,22 @@ export class CasePlugin {
       })
     );
 
-    if (plugins.taskManager && plugins.usageCollection) {
-      createCasesTelemetry({
-        core,
+    if (plugins.taskManager) {
+      createSyncingTask({
+        syncer: this.syncer,
         taskManager: plugins.taskManager,
-        usageCollection: plugins.usageCollection,
         logger: this.logger,
-        kibanaVersion: this.kibanaVersion,
       });
+
+      if (plugins.usageCollection) {
+        createCasesTelemetry({
+          core,
+          taskManager: plugins.taskManager,
+          usageCollection: plugins.usageCollection,
+          logger: this.logger,
+          kibanaVersion: this.kibanaVersion,
+        });
+      }
     }
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
@@ -163,7 +179,7 @@ export class CasePlugin {
 
     registerRoutes({
       router,
-      routes: [...getExternalRoutes(), ...getInternalRoutes(this.userProfileService)],
+      routes: [...getExternalRoutes(), ...getInternalRoutes(this.userProfileService, this.syncer)],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
       telemetryUsageCounter,
@@ -231,6 +247,16 @@ export class CasePlugin {
         savedObjectsService: core.savedObjects,
       });
     };
+
+    this.syncer.initialize({
+      actionsPluginStart: plugins.actions,
+      logger: this.logger,
+      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+      casesClientFactory: this.clientFactory,
+      taskManagerStart: plugins.taskManager,
+      security: plugins.security,
+      core,
+    });
 
     return {
       getCasesClientWithRequest,

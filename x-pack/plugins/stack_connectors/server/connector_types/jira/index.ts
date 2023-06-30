@@ -37,6 +37,7 @@ import {
   ExecutorSubActionGetIssuesParams,
   ExecutorSubActionGetIssueParams,
   ExecutorSubActionGetIncidentParams,
+  ExecutorSubActionGetTransitionsParams,
 } from './types';
 import * as i18n from './translations';
 
@@ -50,6 +51,7 @@ const supportedSubActions: string[] = [
   'fieldsByIssueType',
   'issues',
   'issue',
+  'getTransitions',
 ];
 
 export const ConnectorTypeId = '.jira';
@@ -130,6 +132,18 @@ async function executor(
       data = res;
     }
   }
+
+  if (subAction === 'getTransitions') {
+    const getIncidentParams = subActionParams as ExecutorSubActionGetTransitionsParams;
+    const res = await api.getTransitions({
+      externalService,
+      params: getIncidentParams,
+    });
+    if (res != null) {
+      data = res;
+    }
+  }
+
   if (subAction === 'pushToService') {
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
 

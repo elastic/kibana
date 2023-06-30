@@ -17,6 +17,7 @@ import {
   PushToServiceResponse,
   GetIssueHandlerArgs,
   GetCommonFieldsHandlerArgs,
+  GetTransitionsHandlerArgs,
 } from './types';
 
 const handshakeHandler = async ({ externalService, params }: HandshakeApiHandlerArgs) => {};
@@ -54,6 +55,12 @@ const getIssuesHandler = async ({ externalService, params }: GetIssuesHandlerArg
 const getIssueHandler = async ({ externalService, params }: GetIssueHandlerArgs) => {
   const { id } = params;
   const res = await externalService.getIssue(id);
+  return res;
+};
+
+const getTransitionsHandler = async ({ externalService, params }: GetTransitionsHandlerArgs) => {
+  const { externalId } = params;
+  const res = await externalService.getTransitions(externalId);
   return res;
 };
 
@@ -109,4 +116,5 @@ export const api: ExternalServiceApi = {
   fieldsByIssueType: getFieldsByIssueTypeHandler,
   issues: getIssuesHandler,
   issue: getIssueHandler,
+  getTransitions: getTransitionsHandler,
 };

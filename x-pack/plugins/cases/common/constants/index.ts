@@ -24,6 +24,8 @@ export const CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT = 'cases-connector-mappings' a
 export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions' as const;
 export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments' as const;
 export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure' as const;
+export const CASE_SYNC_SAVED_OBJECT = 'cases-sync' as const;
+export const CASE_SYNC_API_KEY_SAVED_OBJECT = 'cases-sync-api-key' as const;
 
 /**
  * If more values are added here please also add them here: x-pack/test/cases_api_integration/common/plugins
@@ -83,6 +85,7 @@ export const INTERNAL_CASE_USERS_URL = `${CASES_INTERNAL_URL}/{case_id}/_users` 
 export const INTERNAL_DELETE_FILE_ATTACHMENTS_URL =
   `${CASES_INTERNAL_URL}/{case_id}/attachments/files/_bulk_delete` as const;
 export const INTERNAL_GET_CASE_CATEGORIES_URL = `${CASES_INTERNAL_URL}/categories` as const;
+export const INTERNAL_START_SYNC = `${CASES_INTERNAL_URL}/_start_sync` as const;
 
 /**
  * Action routes

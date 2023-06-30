@@ -14,6 +14,7 @@ const ActionTypeRt = rt.union([
 ]);
 
 const CaseFieldRt = rt.union([
+  rt.literal('status'),
   rt.literal('title'),
   rt.literal('description'),
   rt.literal('comments'),
@@ -26,11 +27,18 @@ export type ActionType = rt.TypeOf<typeof ActionTypeRt>;
 export type CaseField = rt.TypeOf<typeof CaseFieldRt>;
 export type ThirdPartyField = rt.TypeOf<typeof ThirdPartyFieldRt>;
 
-const ConnectorMappingRt = rt.strict({
-  action_type: ActionTypeRt,
-  source: CaseFieldRt,
-  target: ThirdPartyFieldRt,
-});
+const ConnectorMappingRt = rt.intersection([
+  rt.strict({
+    action_type: ActionTypeRt,
+    source: CaseFieldRt,
+    target: ThirdPartyFieldRt,
+  }),
+  rt.exact(
+    rt.partial({
+      translate: rt.boolean,
+    })
+  ),
+]);
 
 export const ConnectorMappingsRt = rt.array(ConnectorMappingRt);
 

@@ -32,6 +32,8 @@ import { getAlertIds } from '../utils';
 import type { CasesConnectorsMap } from '../../connectors';
 import { getCaseViewPath } from '../../common/utils';
 import * as i18n from './translations';
+import type { ExternalServiceTransitionsResponse } from '../../services/sync/types';
+import { getJiraToCaseMapping } from '../../services/sync/jira_mapping';
 
 interface CreateIncidentArgs {
   theCase: Case;
@@ -42,6 +44,7 @@ interface CreateIncidentArgs {
   spaceId: string;
   userProfiles?: Map<string, UserProfile>;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
+  transitions?: ExternalServiceTransitionsResponse;
 }
 
 export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undefined => {
@@ -172,6 +175,7 @@ export const createIncident = async ({
   userProfiles,
   spaceId,
   publicBaseUrl,
+  transitions,
 }: CreateIncidentArgs): Promise<ExternalServiceIncident> => {
   const latestPushInfo = getLatestPushInfo(connector.id, userActions);
   const externalId = latestPushInfo?.pushedInfo?.external_id ?? null;
@@ -197,8 +201,9 @@ export const createIncident = async ({
   });
 
   const mappedIncident = mapCaseFieldsToExternalSystemFields(
-    { title: theCase.title, description: descriptionWithKibanaInformation },
-    connectorMappings
+    { title: theCase.title, description: descriptionWithKibanaInformation, status: theCase.status },
+    connectorMappings,
+    transitions
   );
 
   const incident = {
@@ -211,7 +216,8 @@ export const createIncident = async ({
 
 export const mapCaseFieldsToExternalSystemFields = (
   caseFields: Record<Exclude<CaseField, 'comments' | 'tags'>, unknown>,
-  mapping: ConnectorMappings
+  mapping: ConnectorMappings,
+  transitions?: ExternalServiceTransitionsResponse
 ): Record<ThirdPartyField, unknown> => {
   const mappedCaseFields: Record<ThirdPartyField, unknown> = {};
 
@@ -223,7 +229,27 @@ export const mapCaseFieldsToExternalSystemFields = (
     );
 
     if (mapDefinition) {
-      mappedCaseFields[mapDefinition.target] = caseFields[caseFieldKey];
+      if (mapDefinition.translate) {
+        if (transitions != null) {
+          // TODO: this is a hack need to make this more generic and not jira specific
+          const jiraMapping = getJiraToCaseMapping();
+
+          const caseValue = caseFields[caseFieldKey] as string;
+          const translationEntry = jiraMapping.caseToExternal.get(caseFieldKey);
+
+          if (!translationEntry) {
+            throw new Error(`Failed to find translation for ${caseFieldKey}`);
+          }
+
+          const transition = transitions.byName.get(
+            translationEntry.translateToExternal?.get(caseValue) ?? ''
+          );
+
+          mappedCaseFields[mapDefinition.target] = transition?.id ?? null;
+        }
+      } else {
+        mappedCaseFields[mapDefinition.target] = caseFields[caseFieldKey];
+      }
     }
   }
 
@@ -290,20 +316,23 @@ export const addKibanaInformationToDescription = (
     )
   );
 
-  const descriptionWithKibanaInformation = `${theCase.description}\n\n${addedBy}.`;
+  return theCase.description;
 
-  if (!publicBaseUrl) {
-    return descriptionWithKibanaInformation;
-  }
+  // TODO: temporary removing this because we'll have to filter this part of the message out for syncing
+  // const descriptionWithKibanaInformation = `${theCase.description}\n\n${addedBy}.`;
 
-  const caseUrl = getCaseViewPath({
-    publicBaseUrl,
-    spaceId,
-    caseId: theCase.id,
-    owner: theCase.owner,
-  });
+  // if (!publicBaseUrl) {
+  //   return descriptionWithKibanaInformation;
+  // }
 
-  return `${descriptionWithKibanaInformation}\n${i18n.VIEW_IN_KIBANA}.\n${i18n.CASE_URL(caseUrl)}`;
+  // const caseUrl = getCaseViewPath({
+  //   publicBaseUrl,
+  //   spaceId,
+  //   caseId: theCase.id,
+  //   owner: theCase.owner,
+  // });
+
+  // return `${descriptionWithKibanaInformation}\n${i18n.VIEW_IN_KIBANA}.\n${i18n.CASE_URL(caseUrl)}`;
 };
 
 const addKibanaInformationToComments = (

@@ -37,9 +37,16 @@ export const RelatedCaseInfoRt = rt.strict({
 
 export const CasesByAlertIdRt = rt.array(RelatedCaseInfoRt);
 
-export const SettingsRt = rt.strict({
-  syncAlerts: rt.boolean,
-});
+export const SettingsRt = rt.intersection([
+  rt.strict({
+    syncAlerts: rt.boolean,
+  }),
+  rt.exact(
+    rt.partial({
+      externalSync: rt.boolean,
+    })
+  ),
+]);
 
 export enum CaseSeverity {
   LOW = 'low',

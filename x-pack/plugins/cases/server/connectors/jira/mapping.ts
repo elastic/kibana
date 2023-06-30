@@ -10,6 +10,12 @@ import type { GetMapping } from './types';
 export const getMapping: GetMapping = () => {
   return [
     {
+      source: 'status',
+      target: 'statusTransitionId',
+      action_type: 'overwrite',
+      translate: true,
+    },
+    {
       source: 'title',
       target: 'summary',
       action_type: 'overwrite',
