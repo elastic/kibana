@@ -39,8 +39,10 @@ export default function ({ getService }: FtrProviderContext) {
     previousDetectors: Array<{ advancedJobIdentifier: string }>;
     previousInfluencers: string[];
   }) => {
-    it(`${testSuite} job wizard converts to advanced job and retains previous settings`, async () => {
-      await ml.testExecution.logTestStep(' converts to advanced job creation');
+    const previousJobWizard = `${testSuite} job wizard`;
+
+    it(`${testSuite} converts to advanced job and retains previous settings`, async () => {
+      await ml.testExecution.logTestStep(`${previousJobWizard} converts to advanced job creation`);
       await ml.jobWizardCommon.assertCreateJobButtonExists();
       await ml.jobWizardCommon.convertToAdvancedJobWizard();
 
@@ -63,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       await ml.testExecution.logTestStep(
-        'advanced job creation retains detectors from population job wizard'
+        `advanced job creation retains detectors from ${previousJobWizard}`
       );
       for (const [index, detector] of previousDetectors.entries()) {
         await ml.jobWizardAdvanced.assertDetectorEntryExists(index, detector.advancedJobIdentifier);
@@ -123,7 +125,9 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.assertBucketSpanInputExists();
       await ml.jobWizardCommon.assertBucketSpanValue(bucketSpan);
 
-      await ml.testExecution.logTestStep('advanced job creation retains influencers');
+      await ml.testExecution.logTestStep(
+        `advanced job creation retains influencers from ${previousJobWizard}`
+      );
       await ml.jobWizardCommon.assertInfluencerInputExists();
       await ml.jobWizardCommon.assertInfluencerSelection(previousInfluencers);
       for (const influencer of testData.pickFieldsConfig.influencers) {
@@ -141,16 +145,20 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('advanced job creation displays the job details step');
       await ml.jobWizardCommon.advanceToJobDetailsSection();
 
-      await ml.testExecution.logTestStep('advanced job creation retains the job id');
+      await ml.testExecution.logTestStep(
+        `advanced job creation retains the job id from ${previousJobWizard}`
+      );
       await ml.jobWizardCommon.assertJobIdInputExists();
       await ml.jobWizardCommon.assertJobIdValue(testData.jobId);
 
-      await ml.testExecution.logTestStep('advanced job creation retains the job description');
+      await ml.testExecution.logTestStep(
+        `advanced job creation retains the job description from ${previousJobWizard}`
+      );
       await ml.jobWizardCommon.assertJobDescriptionInputExists();
       await ml.jobWizardCommon.assertJobDescriptionValue(testData.jobDescription);
 
       await ml.testExecution.logTestStep(
-        'population job creation retains job groups and inputs new groups'
+        `advanced job creation retains job groups and inputs new groups from ${previousJobWizard}`
       );
       await ml.jobWizardCommon.assertJobGroupInputExists();
       for (const jobGroup of testData.jobGroups) {
@@ -166,19 +174,21 @@ export default function ({ getService }: FtrProviderContext) {
       );
       await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
 
-      await ml.testExecution.logTestStep('advanced job creation retains calendar and custom url');
+      await ml.testExecution.logTestStep(
+        `advanced job creation retains calendar and custom url from ${previousJobWizard}`
+      );
       await ml.jobWizardCommon.assertCalendarsSelection([calendarId]);
       await ml.jobWizardCommon.assertCustomUrlLabel(0, { label: 'check-kibana-dashboard' });
 
       await ml.testExecution.logTestStep('advanced job creation displays the validation step');
       await ml.jobWizardCommon.advanceToValidationSection();
 
-      await ml.testExecution.logTestStep('population job creation displays the summary step');
+      await ml.testExecution.logTestStep('advanced job creation displays the summary step');
       await ml.jobWizardCommon.advanceToSummarySection();
     });
 
     it('advanced job creation runs the job and displays it correctly in the job list', async () => {
-      await ml.testExecution.logTestStep('advanced job creation the job and finishes processing');
+      await ml.testExecution.logTestStep('advanced job creates the job and finishes processing');
       await ml.jobWizardCommon.assertCreateJobButtonExists();
       await ml.jobWizardAdvanced.createJob();
       await ml.jobManagement.assertStartDatafeedModalExists();
