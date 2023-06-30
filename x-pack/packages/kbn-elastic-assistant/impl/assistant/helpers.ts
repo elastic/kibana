@@ -23,21 +23,3 @@ export const getMessageFromRawResponse = (rawResponse: string): Message => {
     };
   }
 };
-
-interface TitleAndIcon {
-  title: string | JSX.Element;
-  titleIcon: string;
-}
-
-export const getTitleAndIcon = ({
-  title: possibleTitle,
-  titleIcon: possibleIcon,
-  defaultTitle,
-}: {
-  title?: string | JSX.Element;
-  titleIcon?: string;
-  defaultTitle: TitleAndIcon;
-}): TitleAndIcon => ({
-  title: possibleTitle ? possibleTitle : defaultTitle.title,
-  titleIcon: possibleIcon ? possibleIcon : defaultTitle.titleIcon,
-});
