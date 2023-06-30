@@ -77,6 +77,5 @@ export const usePackageIconType = ({
     CACHED_ICONS.set(cacheKey, 'package');
     setIconType('package');
   }, [paramIcons, cacheKey, toPackageImage, iconList, packageName, iconType, tryApi, version]);
-
   return iconType;
 };
