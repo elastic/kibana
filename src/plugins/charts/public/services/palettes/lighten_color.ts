@@ -19,5 +19,5 @@ export function lightenColor(baseColor: string, step: number, totalSteps: number
   const [h, s, l] = chroma(baseColor).hsl();
   const lightnessSpace = Math.min(MAX_LIGHTNESS - l, MAX_LIGHTNESS_SPACE);
   const currentLevelTargetLightness = l + lightnessSpace * ((step - 1) / (totalSteps - 1));
-  return chroma.hsl(h, s, currentLevelTargetLightness).hex();
+  return chroma.hsl(h, s, currentLevelTargetLightness / 100).hex();
 }
