@@ -2032,7 +2032,9 @@ describe('TaskManagerRunner', () => {
         expect(logger.warn).toHaveBeenCalledWith(
           'Task (bar/foo) has a validation error in its indirect params: [foo]: expected value of type [string] but got [undefined]'
         );
-        expect(logger.warn).toHaveBeenCalledWith('Task Manager has reached the max skip attempts');
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Task Manager has reached the max skip attempts for task bar/foo'
+        );
         expect(result).toEqual(asOk({ state: {}, hasError: true }));
       });
     });

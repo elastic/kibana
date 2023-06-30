@@ -502,7 +502,7 @@ function validateAction(
       actionId,
       status: 'error',
       message: err.message,
-      retry: (taskInfo?.numSkippedRuns || 0) > 0,
+      retry: !!taskInfo,
     });
   }
 }
