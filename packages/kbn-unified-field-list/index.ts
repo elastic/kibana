@@ -81,6 +81,7 @@ export {
 export {
   useQuerySubscriber,
   hasQuerySubscriberData,
+  getSearchMode,
   type QuerySubscriberResult,
   type QuerySubscriberParams,
 } from './src/hooks/use_query_subscriber';

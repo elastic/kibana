@@ -186,6 +186,7 @@ async function mountComponent(
   services?: DiscoverServices
 ): Promise<ReactWrapper<DiscoverSidebarResponsiveProps>> {
   let comp: ReactWrapper<DiscoverSidebarResponsiveProps>;
+  const appState = getAppStateContainer(appStateParams);
   const mockedServices = services ?? createMockServices();
   mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () =>
     props.selectedDataView
@@ -195,11 +196,12 @@ async function mountComponent(
   mockedServices.data.dataViews.get = jest.fn().mockImplementation(async (id) => {
     return [props.selectedDataView].find((d) => d!.id === id);
   });
+  mockedServices.data.query.getState = jest.fn().mockImplementation(() => appState.getState());
 
   await act(async () => {
     comp = await mountWithIntl(
       <KibanaContextProvider services={mockedServices}>
-        <DiscoverAppStateProvider value={getAppStateContainer(appStateParams)}>
+        <DiscoverAppStateProvider value={appState}>
           <DiscoverSidebarResponsive {...props} />
         </DiscoverAppStateProvider>
       </KibanaContextProvider>
@@ -506,32 +508,44 @@ describe('discover responsive sidebar', function () {
         result: getDataTableRecords(stubLogstashDataView),
         textBasedQueryColumns: [
           { id: '1', name: 'extension', meta: { type: 'text' } },
-          { id: '1', name: 'bytes', meta: { type: 'number' } },
-          { id: '1', name: '@timestamp', meta: { type: 'date' } },
+          { id: '2', name: 'bytes', meta: { type: 'number' } },
+          { id: '3', name: '@timestamp', meta: { type: 'date' } },
         ],
       }) as DataDocuments$,
     };
-    const compInViewerMode = await mountComponent(propsWithTextBasedMode, {
+    const compInTextBasedMode = await mountComponent(propsWithTextBasedMode, {
       query: { sql: 'SELECT * FROM `index`' },
     });
-    expect(findTestSubject(compInViewerMode, 'indexPattern-add-field_btn').length).toBe(0);
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await compInTextBasedMode.update();
+    });
+
+    expect(findTestSubject(compInTextBasedMode, 'indexPattern-add-field_btn').length).toBe(0);
 
     const popularFieldsCount = findTestSubject(
-      compInViewerMode,
+      compInTextBasedMode,
       'fieldListGroupedPopularFields-count'
     );
     const selectedFieldsCount = findTestSubject(
-      compInViewerMode,
+      compInTextBasedMode,
       'fieldListGroupedSelectedFields-count'
     );
     const availableFieldsCount = findTestSubject(
-      compInViewerMode,
+      compInTextBasedMode,
       'fieldListGroupedAvailableFields-count'
     );
-    const emptyFieldsCount = findTestSubject(compInViewerMode, 'fieldListGroupedEmptyFields-count');
-    const metaFieldsCount = findTestSubject(compInViewerMode, 'fieldListGroupedMetaFields-count');
+    const emptyFieldsCount = findTestSubject(
+      compInTextBasedMode,
+      'fieldListGroupedEmptyFields-count'
+    );
+    const metaFieldsCount = findTestSubject(
+      compInTextBasedMode,
+      'fieldListGroupedMetaFields-count'
+    );
     const unmappedFieldsCount = findTestSubject(
-      compInViewerMode,
+      compInTextBasedMode,
       'fieldListGroupedUnmappedFields-count'
     );
 
@@ -544,7 +558,7 @@ describe('discover responsive sidebar', function () {
 
     expect(mockCalcFieldCounts.mock.calls.length).toBe(0);
 
-    expect(findTestSubject(compInViewerMode, 'fieldListGrouped__ariaDescription').text()).toBe(
+    expect(findTestSubject(compInTextBasedMode, 'fieldListGrouped__ariaDescription').text()).toBe(
       '2 selected fields. 3 available fields.'
     );
   });

@@ -130,7 +130,7 @@ export const hasQuerySubscriberData = (
  * Determines current search mode
  * @param query
  */
-function getSearchMode(query?: Query | AggregateQuery): SearchMode | undefined {
+export function getSearchMode(query?: Query | AggregateQuery): SearchMode | undefined {
   if (!query) {
     return undefined;
   }
