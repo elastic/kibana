@@ -9,6 +9,7 @@ import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
 import { SyntheticsServerSetup } from '../../types';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import {
@@ -401,13 +402,7 @@ export class SyntheticsPrivateLocation {
   }
 
   async getAgentPolicies() {
-    const agentPolicies = await this.server.fleet.agentPolicyService.list(
-      this.server.savedObjectsClient!,
-      {
-        page: 1,
-        perPage: 10000,
-      }
-    );
+    const agentPolicies = await getAgentPoliciesAsInternalUser(this.server);
 
     return agentPolicies.items;
   }
