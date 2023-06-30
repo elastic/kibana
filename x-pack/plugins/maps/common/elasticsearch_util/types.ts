@@ -19,20 +19,9 @@ export interface ESGeometry {
   coordinates: Coordinates;
 }
 
-export interface ESBBox {
-  top_left: number[];
-  bottom_right: number[];
-}
-
-// Index signature explicitly states that anything stored in an object using a string conforms to the structure
-// problem is that Elasticsearch signature also allows for other string keys to conform to other structures, like 'ignore_unmapped'
-// Use intersection type to exclude certain properties from the index signature
-// https://basarat.gitbook.io/typescript/type-system/index-signatures#excluding-certain-properties-from-the-index-signature
-type GeoShapeQuery = { ignore_unmapped: boolean } & { [geoFieldName: string]: estypes.QueryDslGeoShapeFieldQuery };
-
 export type GeoFilter = Filter & {
   geo_bounding_box?: {
-    [geoFieldName: string]: ESBBox;
+    [geoFieldName: string]: estypes.TopLeftBottomRightGeoBounds;
   };
   geo_distance?: {
     distance: string;
