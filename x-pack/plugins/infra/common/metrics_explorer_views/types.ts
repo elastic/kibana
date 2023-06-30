@@ -61,12 +61,12 @@ const metricsExplorerOptionsMetricRT = rt.intersection([
   }),
 ]);
 
-const metricExplorerOptionsRequiredRT = rt.type({
+export const metricExplorerOptionsRequiredRT = rt.type({
   aggregation: metricsExplorerAggregationRT,
   metrics: rt.array(metricsExplorerOptionsMetricRT),
 });
 
-const metricExplorerOptionsOptionalRT = rt.partial({
+export const metricExplorerOptionsOptionalRT = rt.partial({
   limit: rt.number,
   groupBy: rt.union([rt.string, rt.array(rt.string)]),
   filterQuery: rt.string,
@@ -134,4 +134,3 @@ export type MetricsExplorerViewState = rt.TypeOf<typeof metricExplorerViewStateR
 export type MetricsExplorerTimeOptions = rt.TypeOf<typeof metricsExplorerTimeOptionsRT>;
 export type MetricsExplorerViewAttributes = rt.TypeOf<typeof metricsExplorerViewAttributesRT>;
 export type MetricsExplorerView = rt.TypeOf<typeof metricsExplorerViewRT>;
-export type SingleMetricsExplorerView = rt.TypeOf<typeof singleMetricsExplorerViewRT>;

@@ -14,10 +14,7 @@ import {
 } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import {
-  type MetricsExplorerChartOptions,
-  type MetricsExplorerOptions,
-  MetricsExplorerChartType,
-  MetricsExplorerYAxisMode,
+  metricsExplorerViewAttributesRT,
   staticMetricsExplorerViewAttributes,
   staticMetricsExplorerViewId,
 } from '../../../common/metrics_explorer_views';
@@ -159,31 +156,14 @@ export class MetricsExplorerViewsClient implements IMetricsExplorerViewsClient {
       savedObject
     );
 
-    const { chartOptions, options } = metricsExplorerViewSavedObject.attributes;
-
-    const mappedChartOptions: MetricsExplorerChartOptions = {
-      ...chartOptions,
-      type: chartOptions.type as MetricsExplorerChartType,
-      yAxisMode: chartOptions.yAxisMode as MetricsExplorerYAxisMode,
-    };
-
-    const mappedOptions: MetricsExplorerOptions = {
-      ...options,
-      aggregation: options.aggregation as MetricsExplorerOptions['aggregation'],
-      metrics: options.metrics.map((metric) => ({
-        ...options,
-        aggregation: metric.aggregation as MetricsExplorerOptions['aggregation'],
-      })),
-    };
-
     return {
       id: metricsExplorerViewSavedObject.id,
       version: metricsExplorerViewSavedObject.version,
       updatedAt: metricsExplorerViewSavedObject.updated_at,
       attributes: {
-        ...metricsExplorerViewSavedObject.attributes,
-        chartOptions: mappedChartOptions,
-        options: mappedOptions,
+        ...decodeOrThrow(metricsExplorerViewAttributesRT)(
+          metricsExplorerViewSavedObject.attributes
+        ),
         isDefault: metricsExplorerViewSavedObject.id === defaultViewId,
         isStatic: false,
       },
