@@ -707,8 +707,7 @@ describe('AlertsTableState', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/160091
-  describe.skip('field browser', () => {
+  describe('field browser', () => {
     const browserFields: BrowserFields = {
       kibana: {
         fields: {
@@ -731,6 +730,11 @@ describe('AlertsTableState', () => {
     beforeEach(() => {
       hookUseFetchBrowserFieldCapabilities.mockClear();
       hookUseFetchBrowserFieldCapabilities.mockImplementation(() => [true, browserFields]);
+      useBulkGetCasesMock.mockReturnValue({ data: new Map(), isFetching: false });
+      useBulkGetMaintenanceWindowsMock.mockReturnValue({
+        data: new Map(),
+        isFetching: false,
+      });
     });
 
     it('should show field browser', () => {

@@ -1,0 +1,12 @@
+name: ids
+description: >
+  The cases that you want to removed.
+  All non-ASCII characters must be URL encoded.
+in: query
+required: true
+schema:
+  type: string
+example: d4e7abb0-b462-11ec-9a8d-698504725a43  
+
+
+  
