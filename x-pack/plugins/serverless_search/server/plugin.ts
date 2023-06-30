@@ -8,6 +8,7 @@
 import { IRouter, Logger, PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { registerApiKeyRoutes } from './routes/api_key_routes';
+import { registerIndicesRoutes } from './routes/indices_routes';
 
 import { ServerlessSearchConfig } from './config';
 import { ServerlessSearchPluginSetup, ServerlessSearchPluginStart } from './types';
@@ -41,6 +42,7 @@ export class ServerlessSearchPlugin
       const dependencies = { logger: this.logger, router, security: this.security };
 
       registerApiKeyRoutes(dependencies);
+      registerIndicesRoutes(dependencies);
     });
     return {};
   }
