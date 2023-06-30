@@ -11,7 +11,7 @@ import { orderBy } from 'lodash';
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { getApmIndexPatterns } from './get_indices';
 import { getIndexTemplate } from './get_index_template';
-import { getApmIndexTemplateNames } from '../get_apm_index_template_names';
+import { getApmIndexTemplateNames } from '../helpers/get_apm_index_template_names';
 
 export async function getIndexTemplatesByIndexPattern({
   esClient,
@@ -27,11 +27,16 @@ export async function getIndexTemplatesByIndexPattern({
     apmIndices.transaction,
   ]);
 
-  return Promise.all(
-    indexPatterns.map(async (indexPattern) =>
-      getSimulatedIndexTemplateForIndexPattern({ indexPattern, esClient })
-    )
-  );
+  try {
+    return await Promise.all(
+      indexPatterns.map(async (indexPattern) =>
+        getSimulatedIndexTemplateForIndexPattern({ indexPattern, esClient })
+      )
+    );
+  } catch (e) {
+    console.error(e);
+    return [];
+  }
 }
 
 async function getSimulatedIndexTemplateForIndexPattern({
