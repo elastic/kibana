@@ -77,7 +77,7 @@ export class ImportCompleteView extends Component<Props, {}> {
           </EuiFlexItem>
         </EuiFlexGroup>
         <div style={{ height: '200px' }}>
-          <CodeEditor // TODO need to provide theme in context above. Need CodeOwners help.
+          <CodeEditor
             languageId="json"
             value={jsonAsString}
             options={{

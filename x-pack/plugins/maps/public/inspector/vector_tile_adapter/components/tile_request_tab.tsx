@@ -90,7 +90,7 @@ export function TileRequestTab(props: Props) {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
-          <CodeEditor // TODO Unable to find context being provided. Need help from CodeOwners
+          <CodeEditor
             languageId={XJsonLang.ID}
             value={consoleRequest}
             options={{
