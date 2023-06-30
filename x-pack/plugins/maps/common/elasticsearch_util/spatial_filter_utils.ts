@@ -10,13 +10,24 @@ import { i18n } from '@kbn/i18n';
 import { Feature, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
 // @ts-expect-error
 import turfCircle from '@turf/circle';
-import { FilterMeta, FILTERS } from '@kbn/es-query';
+import { Filter, FilterMeta, FILTERS } from '@kbn/es-query';
 import { MapExtent } from '../descriptor_types';
 import { getEsSpatialRelationLabel } from '../i18n_getters';
-import { GeoFilter } from './types';
 import { makeESBbox } from './elasticsearch_geo_utils';
 
 const SPATIAL_FILTER_TYPE = FILTERS.SPATIAL_FILTER;
+
+type GeoFilter = Filter & {
+  geo_bounding_box?: estypes.QueryDslGeoBoundingBoxQuery;
+  geo_distance?: estypes.QueryDslGeoDistanceQuery;
+  geo_grid?: {
+    [geoFieldName: string]: {
+      geohex?: string;
+      geotile?: string;
+    };
+  };
+  geo_shape?: estypes.QueryDslGeoShapeQuery;
+};
 
 // wrapper around boiler plate code for creating bool.should clause with nested bool.must clauses
 // ensuring geoField exists prior to running geoField query

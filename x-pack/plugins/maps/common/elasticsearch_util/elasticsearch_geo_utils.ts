@@ -19,7 +19,16 @@ import {
   LAT_INDEX,
 } from '../constants';
 import { MapExtent } from '../descriptor_types';
-import { Coordinates, ESGeometry } from './types';
+
+type Coordinates = Position | Position[] | Position[][] | Position[][][];
+
+// Elasticsearch stores more then just standarized GeoJSON.
+// 1) geometry.type as lower case string
+// 2) circle and envelope types
+interface ESGeometry {
+  type: string;
+  coordinates: Coordinates;
+}
 
 function ensureGeoField(type: string) {
   const expectedTypes = [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE];
