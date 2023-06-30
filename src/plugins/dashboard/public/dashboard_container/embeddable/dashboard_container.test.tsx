@@ -291,13 +291,12 @@ describe('getInheritedInput', () => {
       to: 'now',
       from: 'now-24h',
     };
-    const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput & { timeRange: TimeRange }>(
-      CONTACT_CARD_EMBEDDABLE,
-      {
-        firstName: 'Kibana',
-        timeRange: embeddableTimeRange
-      }
-    );
+    const embeddable = await container.addNewEmbeddable<
+      ContactCardEmbeddableInput & { timeRange: TimeRange }
+    >(CONTACT_CARD_EMBEDDABLE, {
+      firstName: 'Kibana',
+      timeRange: embeddableTimeRange,
+    });
 
     const embeddableInput = container.getChild<ContactCardEmbeddable>(embeddable.id).getInput();
     expect(embeddableInput.timeRange).toEqual(embeddableTimeRange);
