@@ -299,6 +299,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
               form.updateFieldValues({ name: formData.title });
               await form.getFields().name.validate();
             }
+            // Ensures timestamp field is validated against current set of options
+            form.validateFields(['timestampField']);
             form.setFieldValue('isAdHoc', adhoc || false);
             form.submit();
           }}
