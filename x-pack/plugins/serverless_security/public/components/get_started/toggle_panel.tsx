@@ -13,7 +13,8 @@ import { css } from '@emotion/react';
 import * as i18n from './translations';
 import { useSetUpCardSections } from './use_setup_cards';
 
-import { ActiveCards, CardId, IntroductionSteps, ProductLine, SectionId } from './types';
+import { ActiveCards, CardId, IntroductionSteps, SectionId } from './types';
+import { ProductLine } from '../../../common/config';
 
 const TogglePanelComponent: React.FC<{
   finishedSteps: Record<CardId, Set<IntroductionSteps>>;
