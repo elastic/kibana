@@ -95,6 +95,12 @@ export class ActionTypeRegistry {
   }
 
   /**
+   * Returns true if the action type is a system action type
+   */
+  public isSystemActionType = (actionTypeId: string): boolean =>
+    Boolean(this.actionTypes.get(actionTypeId)?.isSystemActionType);
+
+  /**
    * Registers an action type to the action type registry
    */
   public register<
@@ -103,18 +109,6 @@ export class ActionTypeRegistry {
     Params extends ActionTypeParams = ActionTypeParams,
     ExecutorResultData = void
   >(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>) {
-    // TODO: Remove when system action are supported
-    if (actionType.isSystemActionType) {
-      throw new Error(
-        i18n.translate(
-          'xpack.actions.actionTypeRegistry.register.systemActionsNotSupportedErrorMessage',
-          {
-            defaultMessage: 'System actions are not supported',
-          }
-        )
-      );
-    }
-
     if (this.has(actionType.id)) {
       throw new Error(
         i18n.translate(

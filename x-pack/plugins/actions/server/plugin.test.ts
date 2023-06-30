@@ -448,8 +448,7 @@ describe('Actions Plugin', () => {
         });
       });
 
-      // TODO: Unskip when registering system actions is allowed
-      describe.skip('System actions', () => {
+      describe('System actions', () => {
         it('should handle system actions', async () => {
           setup(getConfig());
           // coreMock.createSetup doesn't support Plugin generics
