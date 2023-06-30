@@ -158,7 +158,7 @@ export class CpuUsageRule extends BaseRule {
 
     if (stat.unexpectedLimits) {
       return {
-        text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.limitsChanged', {
+        text: i18n.translate('xpack.monitoring.alerts.cpuUsage.ui.unexpectedLimits', {
           defaultMessage: `Kibana is configured for non-containerized workloads but node #start_link{nodeName}#end_link has resource limits configured. Node reports usage of {cpuUsage}%. Last checked at #absolute`,
           values: {
             nodeName: stat.nodeName,
