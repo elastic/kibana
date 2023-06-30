@@ -27,5 +27,6 @@ describe('extractTitleAndCount', () => {
     expect(extractTitleAndCount('Test dashboard (3.0)')).toEqual(['Test dashboard (3.0)', 1]);
     expect(extractTitleAndCount('Test dashboard (8.4)')).toEqual(['Test dashboard (8.4)', 1]);
     expect(extractTitleAndCount('Test dashboard (foo3.0)')).toEqual(['Test dashboard (foo3.0)', 1]);
+    expect(extractTitleAndCount('Test dashboard (bar7)')).toEqual(['Test dashboard (bar7)', 1]);
   });
 });
