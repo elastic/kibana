@@ -132,6 +132,7 @@ describe('create()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     taskManager.schedule.mockResolvedValue({
@@ -740,6 +741,7 @@ describe('create()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
       {
         id: '2',
@@ -756,6 +758,7 @@ describe('create()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -912,6 +915,7 @@ describe('create()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
       {
         id: '2',
@@ -928,6 +932,7 @@ describe('create()', () => {
         name: 'another email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
       {
         id: 'preconfigured',
@@ -944,6 +949,7 @@ describe('create()', () => {
         name: 'preconfigured email connector',
         isPreconfigured: true,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     actionsClient.isPreconfigured.mockReset();
@@ -2658,6 +2664,7 @@ describe('create()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -3163,6 +3170,7 @@ describe('create()', () => {
         name: 'Slack connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
