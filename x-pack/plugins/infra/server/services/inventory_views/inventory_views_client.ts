@@ -14,6 +14,7 @@ import {
 } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import {
+  inventoryViewAttributesRT,
   staticInventoryViewAttributes,
   staticInventoryViewId,
 } from '../../../common/inventory_views';
@@ -142,12 +143,7 @@ export class InventoryViewsClient implements IInventoryViewsClient {
       version: inventoryViewSavedObject.version,
       updatedAt: inventoryViewSavedObject.updated_at,
       attributes: {
-        ...inventoryViewSavedObject.attributes,
-        customMetrics: inventoryViewSavedObject.attributes
-          .customMetrics as InventoryView['attributes']['customMetrics'],
-        groupBy: inventoryViewSavedObject.attributes
-          .groupBy as InventoryView['attributes']['groupBy'],
-        metric: inventoryViewSavedObject.attributes.metric as InventoryView['attributes']['metric'],
+        ...decodeOrThrow(inventoryViewAttributesRT)(inventoryViewSavedObject.attributes),
         isDefault: inventoryViewSavedObject.id === defaultViewId,
         isStatic: false,
       },
