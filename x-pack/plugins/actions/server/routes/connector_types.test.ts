@@ -42,6 +42,7 @@ describe('connectorTypesRoute', () => {
         enabledInLicense: true,
         minimumLicenseRequired: 'gold' as LicenseType,
         supportedFeatureIds: ['alerting'],
+        isSystemActionType: false,
       },
     ];
 
@@ -57,6 +58,7 @@ describe('connectorTypesRoute', () => {
             "enabled_in_config": true,
             "enabled_in_license": true,
             "id": "1",
+            "is_system_action_type": false,
             "minimum_license_required": "gold",
             "name": "name",
             "supported_feature_ids": Array [
@@ -101,6 +103,7 @@ describe('connectorTypesRoute', () => {
         enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'gold' as LicenseType,
+        isSystemActionType: false,
       },
     ];
 
@@ -124,6 +127,7 @@ describe('connectorTypesRoute', () => {
             "enabled_in_config": true,
             "enabled_in_license": true,
             "id": "1",
+            "is_system_action_type": false,
             "minimum_license_required": "gold",
             "name": "name",
             "supported_feature_ids": Array [
@@ -175,6 +179,7 @@ describe('connectorTypesRoute', () => {
         enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'gold' as LicenseType,
+        isSystemActionType: false,
       },
     ];
 
@@ -217,6 +222,7 @@ describe('connectorTypesRoute', () => {
         enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'gold' as LicenseType,
+        isSystemActionType: false,
       },
     ];
 
