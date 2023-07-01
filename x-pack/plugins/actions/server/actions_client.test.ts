@@ -763,7 +763,7 @@ describe('create()', () => {
     actionTypeRegistry.register({
       id: '.cases',
       name: 'Cases',
-      minimumLicenseRequired: 'basic',
+      minimumLicenseRequired: 'platinum',
       supportedFeatureIds: ['alerting'],
       validate: {
         config: { schema: schema.object({}) },
@@ -786,6 +786,47 @@ describe('create()', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"System action creation is forbidden. Action type: .cases."`
     );
+  });
+
+  it('throws when creating a system connector where the action type is not registered by a system connector exists in the in-memory list', async () => {
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      inMemoryConnectors: [
+        {
+          actionTypeId: '.cases',
+          config: {},
+          id: 'system-connector-.cases',
+          name: 'System action: .cases',
+          secrets: {},
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ],
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    await expect(
+      actionsClient.create({
+        action: {
+          name: 'my name',
+          actionTypeId: '.cases',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Action type \\".cases\\" is not registered."`);
   });
 });
 
@@ -843,6 +884,40 @@ describe('get()', () => {
       });
 
       await actionsClient.get({ id: 'testPreconfigured' });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+    });
+
+    test('ensures user is authorised to get a system action', async () => {
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        executionEnqueuer,
+        ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          {
+            actionTypeId: '.cases',
+            config: {},
+            id: 'system-connector-.cases',
+            name: 'System action: .cases',
+            secrets: {},
+            isPreconfigured: false,
+            isDeprecated: false,
+            isSystemAction: true,
+          },
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+      });
+
+      await actionsClient.get({ id: 'system-connector-.cases' });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
     });
@@ -910,6 +985,48 @@ describe('get()', () => {
 
       await expect(actionsClient.get({ id: 'testPreconfigured' })).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to get a "my-action-type" action]`
+      );
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
+    });
+
+    test('throws when user is not authorised to get a system action', async () => {
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        executionEnqueuer,
+        ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          {
+            actionTypeId: '.cases',
+            config: {},
+            id: 'system-connector-.cases',
+            name: 'System action: .cases',
+            secrets: {},
+            isPreconfigured: false,
+            isDeprecated: false,
+            isSystemAction: true,
+          },
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+      });
+
+      authorization.ensureAuthorized.mockRejectedValue(
+        new Error(`Unauthorized to get a "system-connector-.cases" action`)
+      );
+
+      await expect(
+        actionsClient.get({ id: 'system-connector-.cases' })
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to get a "system-connector-.cases" action]`
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith('get');
@@ -1058,7 +1175,7 @@ describe('get()', () => {
         {
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
-          name: 'system-connector-.cases',
+          name: 'System action: .cases',
           config: {},
           secrets: {},
           isDeprecated: false,
@@ -1079,7 +1196,7 @@ describe('get()', () => {
       isPreconfigured: false,
       isDeprecated: false,
       isSystemAction: true,
-      name: 'system-connector-.cases',
+      name: 'System action: .cases',
     });
 
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
@@ -1292,7 +1409,7 @@ describe('getAll()', () => {
         {
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
-          name: 'system-connector-.cases',
+          name: 'System action: .cases',
           config: {},
           secrets: {},
           isDeprecated: false,
@@ -1311,9 +1428,9 @@ describe('getAll()', () => {
       {
         id: 'system-connector-.cases',
         actionTypeId: '.cases',
-        name: 'system-connector-.cases',
+        name: 'System action: .cases',
         isPreconfigured: false,
-        isSystemAction: false,
+        isSystemAction: true,
         isDeprecated: false,
         referencedByCount: 2,
       },
@@ -1537,7 +1654,7 @@ describe('getBulk()', () => {
         {
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
-          name: 'system-connector-.cases',
+          name: 'System action: .cases',
           config: {},
           secrets: {},
           isDeprecated: false,
@@ -1570,7 +1687,7 @@ describe('getBulk()', () => {
       {
         id: 'system-connector-.cases',
         actionTypeId: '.cases',
-        name: 'system-connector-.cases',
+        name: 'System action: .cases',
         config: {},
         secrets: {},
         isDeprecated: false,
@@ -1962,43 +2079,6 @@ describe('delete()', () => {
     `);
   });
 
-  it('throws when trying to delete a system connector', async () => {
-    actionsClient = new ActionsClient({
-      logger,
-      actionTypeRegistry,
-      unsecuredSavedObjectsClient,
-      scopedClusterClient,
-      kibanaIndices,
-      inMemoryConnectors: [
-        {
-          id: 'system-connector-.cases',
-          actionTypeId: '.cases',
-          name: 'system-connector-.cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
-          isSystemAction: true,
-        },
-      ],
-      actionExecutor,
-      executionEnqueuer,
-      ephemeralExecutionEnqueuer,
-      bulkExecutionEnqueuer,
-      request,
-      authorization: authorization as unknown as ActionsAuthorization,
-      connectorTokenClient: connectorTokenClientMock.create(),
-      getEventLogClient,
-    });
-
-    await expect(
-      actionsClient.delete({ id: 'system-connector-.cases' })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"System action system-connector-.cases is not allowed to delete."`
-    );
-  });
-
   it('throws when trying to delete a preconfigured connector', async () => {
     actionsClient = new ActionsClient({
       logger,
@@ -2036,6 +2116,43 @@ describe('delete()', () => {
       actionsClient.delete({ id: 'testPreconfigured' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Preconfigured action testPreconfigured is not allowed to delete."`
+    );
+  });
+
+  it('throws when trying to delete a system connector', async () => {
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      inMemoryConnectors: [
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    await expect(
+      actionsClient.delete({ id: 'system-connector-.cases' })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"System action system-connector-.cases is not allowed to delete."`
     );
   });
 });
@@ -2515,50 +2632,6 @@ describe('update()', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
   });
 
-  it('throws when trying to update a system connector', async () => {
-    actionsClient = new ActionsClient({
-      logger,
-      actionTypeRegistry,
-      unsecuredSavedObjectsClient,
-      scopedClusterClient,
-      kibanaIndices,
-      inMemoryConnectors: [
-        {
-          id: 'system-connector-.cases',
-          actionTypeId: '.cases',
-          name: 'system-connector-.cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
-          isSystemAction: true,
-        },
-      ],
-      actionExecutor,
-      executionEnqueuer,
-      ephemeralExecutionEnqueuer,
-      bulkExecutionEnqueuer,
-      request,
-      authorization: authorization as unknown as ActionsAuthorization,
-      connectorTokenClient: connectorTokenClientMock.create(),
-      getEventLogClient,
-    });
-
-    await expect(
-      actionsClient.update({
-        id: 'system-connector-.cases',
-        action: {
-          name: 'my name',
-          config: {},
-          secrets: {},
-        },
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"System action system-connector-.cases is not allowed to update."`
-    );
-  });
-
   it('throws when trying to update a preconfigured connector', async () => {
     actionsClient = new ActionsClient({
       logger,
@@ -2603,6 +2676,50 @@ describe('update()', () => {
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Preconfigured action testPreconfigured is not allowed to update."`
+    );
+  });
+
+  it('throws when trying to update a system connector', async () => {
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      inMemoryConnectors: [
+        {
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          config: {},
+          secrets: {},
+          isDeprecated: false,
+          isMissingSecrets: false,
+          isPreconfigured: false,
+          isSystemAction: true,
+        },
+      ],
+      actionExecutor,
+      executionEnqueuer,
+      ephemeralExecutionEnqueuer,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+    });
+
+    await expect(
+      actionsClient.update({
+        id: 'system-connector-.cases',
+        action: {
+          name: 'my name',
+          config: {},
+          secrets: {},
+        },
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"System action system-connector-.cases is not allowed to update."`
     );
   });
 });
@@ -3019,7 +3136,7 @@ describe('isPreconfigured()', () => {
         {
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
-          name: 'system-connector-.cases',
+          name: 'System action: .cases',
           config: {},
           secrets: {},
           isDeprecated: false,
@@ -3070,7 +3187,7 @@ describe('isPreconfigured()', () => {
         {
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
-          name: 'system-connector-.cases',
+          name: 'System action: .cases',
           config: {},
           secrets: {},
           isDeprecated: false,
@@ -3123,7 +3240,7 @@ describe('isSystemAction()', () => {
         {
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
-          name: 'system-connector-.cases',
+          name: 'System action: .cases',
           config: {},
           secrets: {},
           isDeprecated: false,
@@ -3143,7 +3260,7 @@ describe('isSystemAction()', () => {
     expect(actionsClient.isSystemAction('system-connector-.cases')).toEqual(true);
   });
 
-  test('should return false if connector id is not in list of preconfigured connectors', () => {
+  test('should return false if connector id is not a system action', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
@@ -3174,7 +3291,7 @@ describe('isSystemAction()', () => {
         {
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
-          name: 'system-connector-.cases',
+          name: 'System action: .cases',
           config: {},
           secrets: {},
           isDeprecated: false,

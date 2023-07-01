@@ -86,7 +86,7 @@ function executeMigrationWithErrorHandling(
   };
 }
 
-export function isPreconfiguredAction(
+export function isInMemoryAction(
   doc: SavedObjectUnsanitizedDoc<ActionTaskParams>,
   inMemoryConnectors: InMemoryConnector[]
 ): boolean {
@@ -111,7 +111,7 @@ function useSavedObjectReferences(
   const newReferences: SavedObjectReference[] = [];
   const relatedSavedObjectRefs: RelatedSavedObjects = [];
 
-  if (!isPreconfiguredAction(doc, inMemoryConnectors)) {
+  if (!isInMemoryAction(doc, inMemoryConnectors)) {
     newReferences.push({
       id: actionId,
       name: 'actionRef',

@@ -363,7 +363,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       },
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(
-          (inMemoryConnector) => inMemoryConnector.id === connectorId
+          (inMemoryConnector) =>
+            inMemoryConnector.isPreconfigured && inMemoryConnector.id === connectorId
         );
       },
       getSubActionConnectorClass: () => SubActionConnector,

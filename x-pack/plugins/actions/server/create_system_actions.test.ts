@@ -36,7 +36,7 @@ describe('createSystemConnectors', () => {
       {
         id: 'system-connector-system-action-type-2',
         actionTypeId: 'system-action-type-2',
-        name: 'system-connector-system-action-type-2',
+        name: 'System action: system-action-type-2',
         secrets: {},
         config: {},
         isDeprecated: false,

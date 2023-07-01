@@ -186,7 +186,7 @@ export class ActionExecutor {
           relatedSavedObjects,
           name,
           actionExecutionId,
-          isPreconfigured: this.actionInfo.isPreconfigured,
+          isInMemory: this.actionInfo.isInMemory,
           ...(source ? { source } : {}),
         });
 
@@ -385,7 +385,7 @@ export class ActionExecutor {
       ],
       relatedSavedObjects,
       actionExecutionId,
-      isPreconfigured: this.actionInfo.isPreconfigured,
+      isInMemory: this.actionInfo.isInMemory,
       ...(source ? { source } : {}),
     });
 
@@ -399,7 +399,7 @@ interface ActionInfo {
   config: unknown;
   secrets: unknown;
   actionId: string;
-  isPreconfigured?: boolean;
+  isInMemory?: boolean;
 }
 
 async function getActionInfoInternal(
@@ -409,18 +409,19 @@ async function getActionInfoInternal(
   actionId: string,
   namespace: string | undefined
 ): Promise<ActionInfo> {
-  // check to see if it's a pre-configured action first
-  const pcAction = inMemoryConnectors.find(
+  // check to see if it's in memory action first
+  const inMemoryAction = inMemoryConnectors.find(
     (inMemoryConnector) => inMemoryConnector.id === actionId
   );
-  if (pcAction) {
+
+  if (inMemoryAction) {
     return {
-      actionTypeId: pcAction.actionTypeId,
-      name: pcAction.name,
-      config: pcAction.config,
-      secrets: pcAction.secrets,
+      actionTypeId: inMemoryAction.actionTypeId,
+      name: inMemoryAction.name,
+      config: inMemoryAction.config,
+      secrets: inMemoryAction.secrets,
       actionId,
-      isPreconfigured: true,
+      isInMemory: true,
     };
   }
 

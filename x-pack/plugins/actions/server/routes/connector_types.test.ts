@@ -79,6 +79,7 @@ describe('connectorTypesRoute', () => {
           enabled_in_license: true,
           supported_feature_ids: ['alerting'],
           minimum_license_required: 'gold',
+          is_system_action_type: false,
         },
       ],
     });
@@ -155,6 +156,7 @@ describe('connectorTypesRoute', () => {
           enabled_in_license: true,
           supported_feature_ids: ['alerting'],
           minimum_license_required: 'gold',
+          is_system_action_type: false,
         },
       ],
     });

@@ -6,10 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import {
-  getActionTaskParamsMigrations,
-  isPreconfiguredAction,
-} from './action_task_params_migrations';
+import { getActionTaskParamsMigrations, isInMemoryAction } from './action_task_params_migrations';
 import { ActionTaskParams } from '../types';
 import { SavedObjectReference, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -39,7 +36,7 @@ describe('successful migrations', () => {
   });
 
   describe('7.16.0', () => {
-    test('adds actionId to references array if actionId is not preconfigured', () => {
+    test('adds actionId to references array if actionId is not in-memory', () => {
       const migration716 = SavedObjectsUtils.getMigrationFunction(
         getActionTaskParamsMigrations(encryptedSavedObjectsSetup, inMemoryConnectors)['7.16.0']
       );
@@ -57,7 +54,7 @@ describe('successful migrations', () => {
       });
     });
 
-    test('does not add actionId to references array if actionId is preconfigured', () => {
+    test('does not add actionId to references array if actionId is in-memory', () => {
       const migration716 = SavedObjectsUtils.getMigrationFunction(
         getActionTaskParamsMigrations(encryptedSavedObjectsSetup, inMemoryConnectors)['7.16.0']
       );
@@ -134,7 +131,7 @@ describe('successful migrations', () => {
       });
     });
 
-    test('only adds relatedSavedObjects to references array if action is preconfigured', () => {
+    test('only adds relatedSavedObjects to references array if action is in-memory', () => {
       const migration716 = SavedObjectsUtils.getMigrationFunction(
         getActionTaskParamsMigrations(encryptedSavedObjectsSetup, inMemoryConnectors)['7.16.0']
       );
@@ -391,15 +388,15 @@ describe('handles errors during migrations', () => {
   });
 });
 
-describe('isPreconfiguredAction()', () => {
-  test('returns true if actionId is preconfigured action', () => {
-    expect(
-      isPreconfiguredAction(getMockData({ actionId: 'my-slack1' }), inMemoryConnectors)
-    ).toEqual(true);
+describe('isInMemoryAction()', () => {
+  test('returns true if actionId is in-memory action', () => {
+    expect(isInMemoryAction(getMockData({ actionId: 'my-slack1' }), inMemoryConnectors)).toEqual(
+      true
+    );
   });
 
-  test('returns false if actionId is not preconfigured action', () => {
-    expect(isPreconfiguredAction(getMockData(), inMemoryConnectors)).toEqual(false);
+  test('returns false if actionId is not in-memory action', () => {
+    expect(isInMemoryAction(getMockData(), inMemoryConnectors)).toEqual(false);
   });
 });
 

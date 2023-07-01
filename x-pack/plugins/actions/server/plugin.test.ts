@@ -458,7 +458,7 @@ describe('Actions Plugin', () => {
           pluginSetup.registerType({
             id: '.cases',
             name: 'Cases',
-            minimumLicenseRequired: 'basic',
+            minimumLicenseRequired: 'platinum',
             supportedFeatureIds: ['alerting'],
             validate: {
               config: { schema: schema.object({}) },
@@ -487,7 +487,7 @@ describe('Actions Plugin', () => {
             {
               id: 'system-connector-.cases',
               actionTypeId: '.cases',
-              name: 'system-connector-.cases',
+              name: 'System action: .cases',
               config: {},
               secrets: {},
               isDeprecated: false,

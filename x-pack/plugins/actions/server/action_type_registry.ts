@@ -78,7 +78,7 @@ export class ActionTypeRegistry {
   }
 
   /**
-   * Returns true if action type is enabled or it is a preconfigured action type.
+   * Returns true if action type is enabled or it is an in memory action type.
    */
   public isActionExecutable(
     actionId: string,
@@ -109,18 +109,6 @@ export class ActionTypeRegistry {
     Params extends ActionTypeParams = ActionTypeParams,
     ExecutorResultData = void
   >(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>) {
-    // TODO: Remove when system action are supported
-    if (actionType.isSystemAction) {
-      throw new Error(
-        i18n.translate(
-          'xpack.actions.actionTypeRegistry.register.systemActionsNotSupportedErrorMessage',
-          {
-            defaultMessage: 'System actions are not supported',
-          }
-        )
-      );
-    }
-
     if (this.has(actionType.id)) {
       throw new Error(
         i18n.translate(

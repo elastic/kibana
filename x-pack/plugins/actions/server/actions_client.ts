@@ -194,7 +194,13 @@ export class ActionsClient {
     action: { actionTypeId, name, config, secrets },
     options,
   }: CreateOptions): Promise<ActionResult> {
-    if (this.actionTypeRegistry.isSystemActionType(actionTypeId)) {
+    const id = options?.id || SavedObjectsUtils.generateId();
+    const foundInMemoryConnector = this.inMemoryConnectors.find((connector) => connector.id === id);
+
+    if (
+      this.actionTypeRegistry.isSystemActionType(actionTypeId) ||
+      foundInMemoryConnector?.isSystemAction
+    ) {
       throw Boom.badRequest(
         i18n.translate('xpack.actions.serverSideErrors.systemActionCreationForbidden', {
           defaultMessage: 'System action creation is forbidden. Action type: {actionTypeId}.',
@@ -205,13 +211,7 @@ export class ActionsClient {
       );
     }
 
-    const id = options?.id || SavedObjectsUtils.generateId();
-
-    if (
-      this.inMemoryConnectors.some(
-        (inMemoryConnector) => inMemoryConnector.isPreconfigured && inMemoryConnector.id === id
-      )
-    ) {
+    if (foundInMemoryConnector?.isPreconfigured) {
       throw Boom.badRequest(
         i18n.translate('xpack.actions.serverSideErrors.predefinedIdConnectorAlreadyExists', {
           defaultMessage: 'This {id} already exist in preconfigured action.',
@@ -287,9 +287,11 @@ export class ActionsClient {
     try {
       await this.authorization.ensureAuthorized('update');
 
-      const inMemoryConnector = this.inMemoryConnectors.find((connector) => connector.id === id);
+      const foundInMemoryConnector = this.inMemoryConnectors.find(
+        (connector) => connector.id === id
+      );
 
-      if (inMemoryConnector?.isSystemAction) {
+      if (foundInMemoryConnector?.isSystemAction) {
         throw Boom.badRequest(
           i18n.translate('xpack.actions.serverSideErrors.systemActionCreationForbidden', {
             defaultMessage: 'System action {id} is not allowed to update.',
@@ -300,7 +302,7 @@ export class ActionsClient {
         );
       }
 
-      if (inMemoryConnector?.isPreconfigured) {
+      if (foundInMemoryConnector?.isPreconfigured) {
         throw new PreconfiguredActionDisabledModificationError(
           i18n.translate('xpack.actions.serverSideErrors.predefinedActionUpdateDisabled', {
             defaultMessage: 'Preconfigured action {id} is not allowed to update.',
@@ -405,9 +407,9 @@ export class ActionsClient {
       throw error;
     }
 
-    const inMemoryConnector = this.inMemoryConnectors.find((connector) => connector.id === id);
+    const foundInMemoryConnector = this.inMemoryConnectors.find((connector) => connector.id === id);
 
-    if (inMemoryConnector !== undefined) {
+    if (foundInMemoryConnector !== undefined) {
       this.auditLogger?.log(
         connectorAuditEvent({
           action: ConnectorAuditAction.GET,
@@ -417,11 +419,11 @@ export class ActionsClient {
 
       return {
         id,
-        actionTypeId: inMemoryConnector.actionTypeId,
-        name: inMemoryConnector.name,
-        isPreconfigured: inMemoryConnector.isPreconfigured,
-        isSystemAction: inMemoryConnector.isSystemAction,
-        isDeprecated: isConnectorDeprecated(inMemoryConnector),
+        actionTypeId: foundInMemoryConnector.actionTypeId,
+        name: foundInMemoryConnector.name,
+        isPreconfigured: foundInMemoryConnector.isPreconfigured,
+        isSystemAction: foundInMemoryConnector.isSystemAction,
+        isDeprecated: isConnectorDeprecated(foundInMemoryConnector),
       };
     }
 
@@ -447,7 +449,7 @@ export class ActionsClient {
   }
 
   /**
-   * Get all actions with preconfigured list
+   * Get all actions with in-memory connectors
    */
   public async getAll(): Promise<FindActionResult[]> {
     try {
@@ -495,7 +497,7 @@ export class ActionsClient {
   }
 
   /**
-   * Get bulk actions with preconfigured list
+   * Get bulk actions with in-memory list
    */
   public async getBulk(ids: string[]): Promise<ActionResult[]> {
     try {
@@ -526,7 +528,7 @@ export class ActionsClient {
     }
 
     // Fetch action objects in bulk
-    // Excluding preconfigured actions to avoid an not found error, which is already added
+    // Excluding in-memory actions to avoid an not found error, which is already added
     const actionSavedObjectsIds = [
       ...new Set(
         ids.filter(
@@ -659,9 +661,11 @@ export class ActionsClient {
     try {
       await this.authorization.ensureAuthorized('delete');
 
-      const inMemoryConnector = this.inMemoryConnectors.find((connector) => connector.id === id);
+      const foundInMemoryConnector = this.inMemoryConnectors.find(
+        (connector) => connector.id === id
+      );
 
-      if (inMemoryConnector?.isSystemAction) {
+      if (foundInMemoryConnector?.isSystemAction) {
         throw Boom.badRequest(
           i18n.translate('xpack.actions.serverSideErrors.systemActionCreationForbidden', {
             defaultMessage: 'System action {id} is not allowed to delete.',
@@ -672,7 +676,7 @@ export class ActionsClient {
         );
       }
 
-      if (inMemoryConnector?.isPreconfigured) {
+      if (foundInMemoryConnector?.isPreconfigured) {
         throw new PreconfiguredActionDisabledModificationError(
           i18n.translate('xpack.actions.serverSideErrors.predefinedActionDeleteDisabled', {
             defaultMessage: 'Preconfigured action {id} is not allowed to delete.',

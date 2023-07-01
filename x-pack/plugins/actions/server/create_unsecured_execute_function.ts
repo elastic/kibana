@@ -59,7 +59,7 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
       throw new Error(
         `${notInMemoryConnectors.join(
           ','
-        )} are not preconfigured connectors and can't be scheduled for unsecured actions execution`
+        )} are not in-memory connectors and can't be scheduled for unsecured actions execution`
       );
     }
 
