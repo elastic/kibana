@@ -16,6 +16,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
+import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
@@ -33,170 +34,177 @@ import type { PackResponseData } from './types';
 type PackSavedObjectLimited = Omit<PackSavedObject, 'saved_object_id' | 'references'>;
 
 export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'public',
       path: '/api/osquery/packs',
-      validate: {
-        body: schema.object(
-          {
-            name: schema.string(),
-            description: schema.maybe(schema.string()),
-            enabled: schema.maybe(schema.boolean()),
-            policy_ids: schema.maybe(schema.arrayOf(schema.string())),
-            shards: schema.recordOf(schema.string(), schema.number()),
-            queries: schema.recordOf(
-              schema.string(),
-              schema.object({
-                query: schema.string(),
-                interval: schema.maybe(schema.number()),
-                snapshot: schema.maybe(schema.boolean()),
-                removed: schema.maybe(schema.boolean()),
-                platform: schema.maybe(schema.string()),
-                version: schema.maybe(schema.string()),
-                ecs_mapping: schema.maybe(
-                  schema.recordOf(
-                    schema.string(),
-                    schema.object({
-                      field: schema.maybe(schema.string()),
-                      value: schema.maybe(
-                        schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
-                      ),
-                    })
-                  )
+      options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: {
+            body: schema.object(
+              {
+                name: schema.string(),
+                description: schema.maybe(schema.string()),
+                enabled: schema.maybe(schema.boolean()),
+                policy_ids: schema.maybe(schema.arrayOf(schema.string())),
+                shards: schema.recordOf(schema.string(), schema.number()),
+                queries: schema.recordOf(
+                  schema.string(),
+                  schema.object({
+                    query: schema.string(),
+                    interval: schema.maybe(schema.number()),
+                    snapshot: schema.maybe(schema.boolean()),
+                    removed: schema.maybe(schema.boolean()),
+                    platform: schema.maybe(schema.string()),
+                    version: schema.maybe(schema.string()),
+                    ecs_mapping: schema.maybe(
+                      schema.recordOf(
+                        schema.string(),
+                        schema.object({
+                          field: schema.maybe(schema.string()),
+                          value: schema.maybe(
+                            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+                          ),
+                        })
+                      )
+                    ),
+                  })
                 ),
-              })
+              },
+              { unknowns: 'allow' }
             ),
           },
-          { unknowns: 'allow' }
-        ),
+        },
       },
-      options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
-    },
-    async (context, request, response) => {
-      const coreContext = await context.core;
-      const esClient = coreContext.elasticsearch.client.asCurrentUser;
-      const savedObjectsClient = coreContext.savedObjects.client;
-      const internalSavedObjectsClient = await getInternalSavedObjectsClient(
-        osqueryContext.getStartServices
-      );
-      const agentPolicyService = osqueryContext.service.getAgentPolicyService();
-
-      const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-      const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
-
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { name, description, queries, enabled, policy_ids, shards } = request.body;
-      const conflictingEntries = await savedObjectsClient.find({
-        type: packSavedObjectType,
-        filter: `${packSavedObjectType}.attributes.name: "${name}"`,
-      });
-
-      if (
-        conflictingEntries.saved_objects.length &&
-        some(conflictingEntries.saved_objects, ['attributes.name', name])
-      ) {
-        return response.conflict({ body: `Pack with name "${name}" already exists.` });
-      }
-
-      const { items: packagePolicies } = (await packagePolicyService?.list(
-        internalSavedObjectsClient,
-        {
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-          perPage: 1000,
-          page: 1,
-        }
-      )) ?? { items: [] };
-
-      const policiesList = getInitialPolicies(packagePolicies, policy_ids, shards);
-
-      const agentPolicies = await agentPolicyService?.getByIds(
-        internalSavedObjectsClient,
-        policiesList
-      );
-
-      const policyShards = findMatchingShards(agentPolicies, shards);
-
-      const agentPoliciesIdMap = mapKeys(agentPolicies, 'id');
-
-      const references = policiesList.map((id) => ({
-        id,
-        name: agentPoliciesIdMap[id]?.name,
-        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-      }));
-
-      const packSO = await savedObjectsClient.create<PackSavedObjectLimited>(
-        packSavedObjectType,
-        {
-          name,
-          description,
-          queries: convertPackQueriesToSO(queries),
-          enabled,
-          created_at: moment().toISOString(),
-          created_by: currentUser,
-          updated_at: moment().toISOString(),
-          updated_by: currentUser,
-          shards: convertShardsToArray(shards),
-        },
-        {
-          references,
-          refresh: 'wait_for',
-        }
-      );
-
-      if (enabled && policiesList.length) {
-        await Promise.all(
-          policiesList.map((agentPolicyId) => {
-            const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
-            if (packagePolicy) {
-              return packagePolicyService?.update(
-                internalSavedObjectsClient,
-                esClient,
-                packagePolicy.id,
-                produce<PackagePolicy>(packagePolicy, (draft) => {
-                  unset(draft, 'id');
-                  if (!has(draft, 'inputs[0].streams')) {
-                    set(draft, 'inputs[0].streams', []);
-                  }
-
-                  set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
-                    shard: policyShards[packagePolicy.policy_id]
-                      ? policyShards[packagePolicy.policy_id]
-                      : 100,
-                    queries: convertSOQueriesToPackConfig(queries),
-                  });
-
-                  return draft;
-                })
-              );
-            }
-          })
+      async (context, request, response) => {
+        const coreContext = await context.core;
+        const esClient = coreContext.elasticsearch.client.asCurrentUser;
+        const savedObjectsClient = coreContext.savedObjects.client;
+        const internalSavedObjectsClient = await getInternalSavedObjectsClient(
+          osqueryContext.getStartServices
         );
+        const agentPolicyService = osqueryContext.service.getAgentPolicyService();
+
+        const packagePolicyService = osqueryContext.service.getPackagePolicyService();
+        const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
+
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { name, description, queries, enabled, policy_ids, shards } = request.body;
+        const conflictingEntries = await savedObjectsClient.find({
+          type: packSavedObjectType,
+          filter: `${packSavedObjectType}.attributes.name: "${name}"`,
+        });
+
+        if (
+          conflictingEntries.saved_objects.length &&
+          some(conflictingEntries.saved_objects, ['attributes.name', name])
+        ) {
+          return response.conflict({ body: `Pack with name "${name}" already exists.` });
+        }
+
+        const { items: packagePolicies } = (await packagePolicyService?.list(
+          internalSavedObjectsClient,
+          {
+            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+            perPage: 1000,
+            page: 1,
+          }
+        )) ?? { items: [] };
+
+        const policiesList = getInitialPolicies(packagePolicies, policy_ids, shards);
+
+        const agentPolicies = await agentPolicyService?.getByIds(
+          internalSavedObjectsClient,
+          policiesList
+        );
+
+        const policyShards = findMatchingShards(agentPolicies, shards);
+
+        const agentPoliciesIdMap = mapKeys(agentPolicies, 'id');
+
+        const references = policiesList.map((id) => ({
+          id,
+          name: agentPoliciesIdMap[id]?.name,
+          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        }));
+
+        const packSO = await savedObjectsClient.create<PackSavedObjectLimited>(
+          packSavedObjectType,
+          {
+            name,
+            description,
+            queries: convertPackQueriesToSO(queries),
+            enabled,
+            created_at: moment().toISOString(),
+            created_by: currentUser,
+            updated_at: moment().toISOString(),
+            updated_by: currentUser,
+            shards: convertShardsToArray(shards),
+          },
+          {
+            references,
+            refresh: 'wait_for',
+          }
+        );
+
+        if (enabled && policiesList.length) {
+          await Promise.all(
+            policiesList.map((agentPolicyId) => {
+              const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
+              if (packagePolicy) {
+                return packagePolicyService?.update(
+                  internalSavedObjectsClient,
+                  esClient,
+                  packagePolicy.id,
+                  produce<PackagePolicy>(packagePolicy, (draft) => {
+                    unset(draft, 'id');
+                    if (!has(draft, 'inputs[0].streams')) {
+                      set(draft, 'inputs[0].streams', []);
+                    }
+
+                    set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
+                      shard: policyShards[packagePolicy.policy_id]
+                        ? policyShards[packagePolicy.policy_id]
+                        : 100,
+                      queries: convertSOQueriesToPackConfig(queries),
+                    });
+
+                    return draft;
+                  })
+                );
+              }
+            })
+          );
+        }
+
+        set(packSO, 'attributes.queries', queries);
+
+        const { attributes } = packSO;
+
+        const data: PackResponseData = {
+          name: attributes.name,
+          description: attributes.description,
+          queries: attributes.queries,
+          version: attributes.version,
+          enabled: attributes.enabled,
+          created_at: attributes.created_at,
+          created_by: attributes.created_by,
+          updated_at: attributes.updated_at,
+          updated_by: attributes.updated_by,
+          policy_ids: attributes.policy_ids,
+          shards: attributes.shards,
+          saved_object_id: packSO.id,
+        };
+
+        return response.ok({
+          body: {
+            data,
+          },
+        });
       }
-
-      set(packSO, 'attributes.queries', queries);
-
-      const { attributes } = packSO;
-
-      const data: PackResponseData = {
-        name: attributes.name,
-        description: attributes.description,
-        queries: attributes.queries,
-        version: attributes.version,
-        enabled: attributes.enabled,
-        created_at: attributes.created_at,
-        created_by: attributes.created_by,
-        updated_at: attributes.updated_at,
-        updated_by: attributes.updated_by,
-        policy_ids: attributes.policy_ids,
-        shards: attributes.shards,
-        saved_object_id: packSO.id,
-      };
-
-      return response.ok({
-        body: {
-          data,
-        },
-      });
-    }
-  );
+    );
 };
