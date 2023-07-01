@@ -5616,6 +5616,8 @@
         "signature": [
           "PreConfiguredActionConnector",
           " | ",
+          "SystemAction",
+          " | ",
           "UserConfiguredActionConnector",
           "<Config, Secrets>"
         ],

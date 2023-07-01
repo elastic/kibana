@@ -5500,6 +5500,10 @@
                 "path": "x-pack/plugins/fleet/server/routes/uninstall_token/handlers.test.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/uninstall_token/handlers.test.ts"
+              },
+              {
                 "plugin": "remoteClusters",
                 "path": "x-pack/plugins/remote_clusters/server/routes/api/get_route.test.ts"
               },
@@ -5814,6 +5818,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/routes/fleet_proxies/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/uninstall_token/index.ts"
               },
               {
                 "plugin": "fleet",
