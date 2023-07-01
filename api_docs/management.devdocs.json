@@ -804,6 +804,40 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "management",
+          "id": "def-public.ManagementStart.setupCardsNavigation",
+          "type": "Function",
+          "tags": [],
+          "label": "setupCardsNavigation",
+          "description": [],
+          "signature": [
+            "({ enabled, hideLinksTo }: ",
+            "NavigationCardsSubject",
+            ") => void"
+          ],
+          "path": "src/plugins/management/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "management",
+              "id": "def-public.ManagementStart.setupCardsNavigation.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "{ enabled, hideLinksTo }",
+              "description": [],
+              "signature": [
+                "NavigationCardsSubject"
+              ],
+              "path": "src/plugins/management/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
