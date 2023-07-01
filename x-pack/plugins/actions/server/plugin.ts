@@ -397,12 +397,14 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     });
 
     /**
-     * It maybe possible for the task manager to start before
+     * Warning: this call mutates the inMemory collection
+     *
+     * Warning: it maybe possible for the task manager to start before
      * the system actions are being set.
+     *
      * Issue: https://github.com/elastic/kibana/issues/160797
      */
-    const systemConnectors = createSystemConnectors(this.actionTypeRegistry?.list() ?? []);
-    this.inMemoryConnectors = [...this.inMemoryConnectors, ...systemConnectors];
+    this.setSystemActions();
 
     const getActionsClientWithRequest = async (
       request: KibanaRequest,
@@ -598,13 +600,20 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     };
   }
 
+  private getInMemoryConnectors = () => this.inMemoryConnectors;
+
+  private setSystemActions = () => {
+    const systemConnectors = createSystemConnectors(this.actionTypeRegistry?.list() ?? []);
+    this.inMemoryConnectors = [...this.inMemoryConnectors, ...systemConnectors];
+  };
+
   private createRouteHandlerContext = (
     core: CoreSetup<ActionsPluginsStart>
   ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
       actionTypeRegistry,
       isESOCanEncrypt,
-      inMemoryConnectors,
+      getInMemoryConnectors,
       actionExecutor,
       instantiateAuthorization,
       security,
@@ -615,7 +624,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     return async function actionsRouteHandlerContext(context, request) {
       const [{ savedObjects }, { taskManager, encryptedSavedObjects, eventLog }] =
         await core.getStartServices();
+
       const coreContext = await context.core;
+      const inMemoryConnectors = getInMemoryConnectors();
 
       return {
         getActionsClient: () => {
