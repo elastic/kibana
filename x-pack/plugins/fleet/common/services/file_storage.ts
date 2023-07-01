@@ -65,7 +65,10 @@ export const getFileDataIndexName = (
  * getIntegrationNameFromFileDataIndexName('.fleet-fileds-fromhost-data-agent');
  * // return 'agent'
  *
- * getIntegrationNameFromFileDataIndexName('.fleet-fileds-fromhost-data-agent-00001');
+ * getIntegrationNameFromFileDataIndexName('.ds-.fleet-fileds-fromhost-data-agent');
+ * // return 'agent'
+ *
+ * getIntegrationNameFromFileDataIndexName('.ds-.fleet-fileds-fromhost-data-agent-2023.06.30-00001');
  * // return 'agent'
  */
 export const getIntegrationNameFromFileDataIndexName = (indexName: string): string => {
@@ -82,7 +85,7 @@ export const getIntegrationNameFromIndexName = (
     throw new Error(`Unable to parse index name. No '*' in index pattern: ${indexPattern}`);
   }
 
-  const indexPieces = indexName.split('-');
+  const indexPieces = indexName.replace(/^\.ds-/, '').split('-');
 
   if (indexPieces[integrationNameIndexPosition]) {
     return indexPieces[integrationNameIndexPosition];
