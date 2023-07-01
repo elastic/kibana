@@ -32,32 +32,6 @@ export const MISSING_CONNECTOR_CALLOUT_DESCRIPTION = i18n.translate(
   }
 );
 
-// Settings
-export const SETTINGS_TITLE = i18n.translate('xpack.elasticAssistant.assistant.settingsTitle', {
-  defaultMessage: 'Conversation settings',
-});
-
-export const SETTINGS_CONNECTOR_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.connectorTitle',
-  {
-    defaultMessage: 'Connector',
-  }
-);
-
-export const SETTINGS_PROMPT_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.promptTitle',
-  {
-    defaultMessage: 'System Prompt',
-  }
-);
-
-export const SETTINGS_PROMPT_HELP_TEXT_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.promptHelpTextTitle',
-  {
-    defaultMessage: 'Context provided before every conversation',
-  }
-);
-
 export const SHOW_ANONYMIZED = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.showAnonymizedToggleLabel',
   {

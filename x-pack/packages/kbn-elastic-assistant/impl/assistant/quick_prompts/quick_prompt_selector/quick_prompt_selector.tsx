@@ -169,6 +169,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
     return (
       <EuiComboBox
         aria-label={i18n.QUICK_PROMPT_SELECTOR}
+        compressed
         placeholder={i18n.QUICK_PROMPT_SELECTOR}
         customOptionText={`${i18n.CUSTOM_OPTION_TEXT} {searchValue}`}
         singleSelection={true}
@@ -177,6 +178,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
         onChange={onChange}
         onCreateOption={onCreateOption}
         renderOption={renderOption}
+        fullWidth
       />
     );
   }

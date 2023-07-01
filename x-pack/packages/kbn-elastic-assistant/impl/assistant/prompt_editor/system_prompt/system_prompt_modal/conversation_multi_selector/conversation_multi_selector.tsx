@@ -63,6 +63,8 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
     return (
       <EuiComboBox
         aria-label={i18n.SYSTEM_PROMPT_DEFAULT_CONVERSATIONS}
+        compressed
+        fullWidth
         options={options}
         selectedOptions={selectedOptions}
         onChange={onChange}

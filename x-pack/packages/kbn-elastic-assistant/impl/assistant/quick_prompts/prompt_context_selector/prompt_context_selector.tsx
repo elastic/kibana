@@ -85,6 +85,8 @@ export const PromptContextSelector: React.FC<Props> = React.memo(
     return (
       <EuiComboBox
         aria-label={i18n.PROMPT_CONTEXT_SELECTOR}
+        compressed
+        fullWidth
         placeholder={i18n.PROMPT_CONTEXT_SELECTOR_PLACEHOLDER}
         options={options}
         selectedOptions={selectedOptions}

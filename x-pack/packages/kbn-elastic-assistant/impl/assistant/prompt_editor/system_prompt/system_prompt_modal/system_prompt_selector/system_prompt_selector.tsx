@@ -28,6 +28,7 @@ interface Props {
   onSystemPromptDeleted: (systemPromptTitle: string) => void;
   onSystemPromptSelectionChange: (systemPrompt?: Prompt | string) => void;
   systemPrompts: Prompt[];
+  autoFocus?: boolean;
   selectedSystemPrompt?: Prompt;
 }
 
@@ -41,6 +42,7 @@ export type SystemPromptSelectorOption = EuiComboBoxOptionOption<{
  */
 export const SystemPromptSelector: React.FC<Props> = React.memo(
   ({
+    autoFocus = false,
     systemPrompts,
     onSystemPromptDeleted,
     onSystemPromptSelectionChange,
@@ -200,8 +202,10 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
 
     return (
       <EuiComboBox
-        className={SYSTEM_PROMPT_SELECTOR_CLASSNAME}
         aria-label={i18n.SYSTEM_PROMPT_SELECTOR}
+        className={SYSTEM_PROMPT_SELECTOR_CLASSNAME}
+        compressed
+        fullWidth
         placeholder={i18n.SYSTEM_PROMPT_SELECTOR}
         customOptionText={`${i18n.CUSTOM_OPTION_TEXT} {searchValue}`}
         singleSelection={{ asPlainText: true }}
@@ -210,7 +214,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
         onChange={onChange}
         onCreateOption={onCreateOption}
         renderOption={renderOption}
-        autoFocus
+        autoFocus={autoFocus}
       />
     );
   }

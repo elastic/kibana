@@ -6,12 +6,12 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
@@ -23,7 +23,6 @@ import type { BatchUpdateListItem } from '../../../data_anonymization_editor/con
 import { updateDefaults } from '../../../data_anonymization_editor/helpers';
 import { AllowedStat } from '../../../data_anonymization_editor/stats/allowed_stat';
 import { AnonymizedStat } from '../../../data_anonymization_editor/stats/anonymized_stat';
-import { CANCEL, SAVE } from '../anonymization_settings_modal/translations';
 import * as i18n from './translations';
 
 const StatFlexItem = styled(EuiFlexItem)`
@@ -32,16 +31,17 @@ const StatFlexItem = styled(EuiFlexItem)`
 
 interface Props {
   closeModal?: () => void;
+  pageSize?: number;
 }
 
-const AnonymizationSettingsComponent: React.FC<Props> = ({ closeModal }) => {
+const AnonymizationSettingsComponent: React.FC<Props> = ({ closeModal, pageSize }) => {
   const {
     baseAllow,
     baseAllowReplacement,
     defaultAllow,
     defaultAllowReplacement,
-    setDefaultAllow,
-    setDefaultAllowReplacement,
+    // setDefaultAllow,
+    // setDefaultAllowReplacement,
   } = useAssistantContext();
 
   // Local state for default allow and default allow replacement to allow for intermediate changes
@@ -67,17 +67,17 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({ closeModal }) => {
     setLocalDefaultAllowReplacement(baseAllowReplacement);
   }, [baseAllow, baseAllowReplacement]);
 
-  const onSave = useCallback(() => {
-    setDefaultAllow(localDefaultAllow);
-    setDefaultAllowReplacement(localDefaultAllowReplacement);
-    closeModal?.();
-  }, [
-    closeModal,
-    localDefaultAllow,
-    localDefaultAllowReplacement,
-    setDefaultAllow,
-    setDefaultAllowReplacement,
-  ]);
+  // const onSave = useCallback(() => {
+  //   setDefaultAllow(localDefaultAllow);
+  //   setDefaultAllowReplacement(localDefaultAllowReplacement);
+  //   closeModal?.();
+  // }, [
+  //   closeModal,
+  //   localDefaultAllow,
+  //   localDefaultAllowReplacement,
+  //   setDefaultAllow,
+  //   setDefaultAllowReplacement,
+  // ]);
 
   const anonymized: number = useMemo(() => {
     const allowSet = new Set(localDefaultAllow);
@@ -90,19 +90,13 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({ closeModal }) => {
 
   return (
     <>
-      <EuiCallOut
-        data-test-subj="anonymizationSettingsCallout"
-        iconType="eyeClosed"
-        size="s"
-        title={i18n.CALLOUT_TITLE}
-      >
-        <p>{i18n.CALLOUT_PARAGRAPH1}</p>
-        <EuiButton data-test-subj="reset" onClick={onReset} size="s">
-          {i18n.RESET}
-        </EuiButton>
-      </EuiCallOut>
+      <EuiTitle size={'s'}>
+        <h2>{i18n.SETTINGS_TITLE}</h2>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      <EuiText size={'xs'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>
 
-      <EuiSpacer size="m" />
+      <EuiHorizontalRule margin={'s'} />
 
       <EuiFlexGroup alignItems="center" data-test-subj="summary" gutterSize="none">
         <StatFlexItem grow={false}>
@@ -120,24 +114,10 @@ const AnonymizationSettingsComponent: React.FC<Props> = ({ closeModal }) => {
         allow={localDefaultAllow}
         allowReplacement={localDefaultAllowReplacement}
         onListUpdated={onListUpdated}
+        onReset={onReset}
         rawData={null}
+        pageSize={pageSize}
       />
-
-      <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="flexEnd">
-        {closeModal != null && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="cancel" onClick={closeModal}>
-              {CANCEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-
-        <EuiFlexItem grow={false}>
-          <EuiButton fill data-test-subj="save" onClick={onSave} size="s">
-            {SAVE}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
     </>
   );
 };
