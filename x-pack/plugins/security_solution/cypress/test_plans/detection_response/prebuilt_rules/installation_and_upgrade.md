@@ -315,82 +315,85 @@ Then user should see a CTA to install prebuilt rules
 And user should see the number of rules available to install (Y)
 ```
 
-### Rule installation workflow
+### Rule installation workflow: base cases
 
-#### **Scenario: User without any installed prebuilt rules can install `<amount>` prebuilt rules**
+#### **Scenario: User can install prebuilt rules one by one**
 
-**Coverage**: ?.
+**Coverage**: 1 e2e test with mock rules.
 
 ```Gherkin
-Given a user that doesn’t have prebuilt rules installed
-When user navigates to Add Rules page
-Then available prebuilt rules are displayed on Elastic Rules table
-And user can install <amount> prebuilt Rules
-And successfully installed message is displayed after installation
-And installed rules are removed from Elastic Rules table
-And rules to install counter is decreased accordingly
+Given no prebuilt rules are installed in Kibana
+And there are X prebuilt rules available to install
+When user opens the Add Rules page
+Then prebuilt rules available for installation should be displayed in the table
+When user installs one individual rule
+Then success message should be displayed after installation
+And the installed rule should be removed from the table
+When user navigates back to the Rule Management page
+Then user should see a CTA to install prebuilt rules
+And user should see the number of rules available to install decreased by 1
+```
+
+#### **Scenario: User can install multiple prebuilt rules selected on the page**
+
+**Coverage**: 1 e2e test with mock rules.
+
+```Gherkin
+Given no prebuilt rules are installed in Kibana
+And there are X prebuilt rules available to install
+When user opens the Add Rules page
+Then prebuilt rules available for installation should be displayed in the table
+When user selects <Y> rules
+Then user should see a CTA to install <Y> number of rules
+When user clicks the CTA
+Then success message should be displayed after installation
+And all the installed rules should be removed from the table
+When user navigates back to the Rule Management page
+Then user should see a CTA to install prebuilt rules
+And user should see the number of rules available to install decreased by <Y> number of installed rules
 
 Examples:
-  | amount     |
-  | all        |
-  | selected   |
-  | individual |
+  | Y                               |
+  | a few rules on the page, e.g. 2 |
+  | all rules on the page, e.g. 12  |
 ```
 
-### Rule upgrade workflow
+#### **Scenario: User can install all available prebuilt rules at once**
 
-#### **Scenario: Users can update prebuilt rules**
-
-**Coverage**: ?.
+**Coverage**: 1 e2e test with mock rules.
 
 ```Gherkin
-Given user already has 8.x prebuilt rules installed in Kibana
-And there are new updates available for those prebuilt rules
-And user is on Rule Management page
-When user navigates to the Rules Update tab
-Then user should see all the prebuilt rules that have updates available
-And user can update outdated prebuilt rules
-And successfully updated message is displayed
-And Rules Upgrade tab counter is decreased according to the number of updated rules
+Given no prebuilt rules are installed in Kibana
+And there are X prebuilt rules available to install
+When user opens the Add Rules page
+Then prebuilt rules available for installation should be displayed in the table
+When user installs all rules
+Then success message should be displayed after installation
+And all the rules should be removed from the table
+And user should see a message indicating that all available rules have been installed
+And user should see a CTA that leads to the Rule Management page
+When user clicks on the CTA
+Then user should be navigated back to Rule Management page
+And user should NOT see a CTA to install prebuilt rules
+And user should NOT see a number of rules available to install
 ```
 
-### Package installation / rule installation / rule upgrade failure
+#### **Scenario: Empty screen is shown when all prebuilt rules are installed**
 
-#### **Scenario: Error message is displayed when any prebuilt rules operation fails**
-
-**Coverage**: ?.
+**Coverage**: 1 e2e test with mock rules.
 
 ```Gherkin
-Given user is <action> prebuilt rules
-When the installation or update process fails
-Then user should see an error message
-And prebuilt rules are not installed/updated
-And the callout message for pending installs/updates is still displayed on Rule Management page
-And the number of available rules to install and upgrade in the badges does not change
-
-Examples:
-  | action                |
-  | installing all        |
-  | installing selected   |
-  | installing individual |
-  | updating all          |
-  | updating selected     |
-  | updating individual   |
+Given all the available prebuilt rules are installed in Kibana
+When user opens the Add Rules page
+Then user should see a message indicating that all available rules have been installed
+And user should see a CTA that leads to the Rule Management page
 ```
 
-#### **Scenario: No callout messages are displayed when rule package installation fails and no rules are avialble for install/update**
+### Rule installation workflow: filtering, sorting, pagination
 
-**Coverage**: ?.
+TODO: add scenarios
 
-```Gherkin
-Given user navigates to Rule Management page
-And user is running a fresh instance
-And rule package installation fails
-Then no callouts message should be displayed
-And the number of available rules to install and upgrade in the badges does not change
-```
-
-### Add Rules page
+### Rule installation workflow: misc cases
 
 #### **Scenario: User opening the Add Rules page sees a loading skeleton until the package installation is completed**
 
@@ -402,167 +405,176 @@ When user opens the Add Rules page
 Then user should see a loading skeleton until the package installation is completed
 ```
 
-#### **Scenario: Empty screen is shown when all prebuilt rules are installed**
+#### **Scenario: User can navigate from the Add Rules page to the Rule Management page via breadcrumbs**
+
+**Coverage**: ?.
+
+```Gherkin
+Given user is on the Add Rules page
+When user navigates to the Rule Management page via breadcrumbs
+Then the Rule Management page should be displayed
+```
+
+### Rule upgrade workflow: base cases
+
+#### **Scenario: User can upgrade prebuilt rules one by one**
 
 **Coverage**: 1 e2e test with mock rules.
 
 ```Gherkin
-Given user has all the available prebuilt rules installed in Kibana
-When user opens the Add Rules page
-Then user should see a message indicating that all available rules have been installed
-And user should see a CTA that leads to the Rule Management page
-When user clicks on the CTA
-Then user should be navigated back to Rule Management page
+Given X prebuilt rules are installed in Kibana
+And for Y of the installed rules there are new versions available
+And user is on the Rule Management page
+When user opens the Rule Updates table
+Then Y rules available for upgrade should be displayed in the table
+When user upgrades one individual rule
+Then success message should be displayed after upgrade
+And the upgraded rule should be removed from the table
+And user should see the number of rules available to upgrade decreased by 1
 ```
 
-#### **Scenario: New workflow elements are displayed on Rule Management page**
+#### **Scenario: User can upgrade multiple prebuilt rules selected on the page**
 
-**Coverage**: ?.
-
-```Gherkin
-Given a user that doesn’t have `security_detection_engine` package installed
-When user is on Rule Management page
-Then "+Add Elastic rules" menu with available Rules counter is displayed
-And Rule Updates tab is displayed
-And "+Add Elastic rules" button is displayed on empty Rules Table
-```
-
-#### **Scenario: Rules settings persist on Add Elastic Rules table**
-
-**Coverage**: ?.
+**Coverage**: 1 e2e test with mock rules.
 
 ```Gherkin
-Given a user has Rules listed on Add Elastic Rules page
-When <case>
-Then the available rules state should persist for all the rules
+Given X prebuilt rules are installed in Kibana
+And for Y of the installed rules there are new versions available
+And user is on the Rule Management page
+When user opens the Rule Updates table
+Then Y rules available for upgrade should be displayed in the table
+When user selects <Z> rules
+Then user should see a CTA to upgrade <Z> number of rules
+When user clicks the CTA
+Then success message should be displayed after upgrade
+And all the <Z> upgraded rules should be removed from the table
+And user should see the number of rules available to upgrade decreased by <Z> number of upgraded rules
 
 Examples:
-  | case                              |
-  | user reloads the page             |
-  | after switching table pagination  |
-  | after filtering and clear filters |
+  | Z                               |
+  | a few rules on the page, e.g. 2 |
+  | all rules on the page, e.g. 12  |
 ```
 
-#### **Scenario: User can navigate back to Rules Management page**
+#### **Scenario: User can upgrade all available prebuilt rules at once**
+
+**Coverage**: 1 e2e test with mock rules.
+
+```Gherkin
+Given X prebuilt rules are installed in Kibana
+And for Y of the installed rules there are new versions available
+And user is on the Rule Management page
+When user opens the Rule Updates table
+Then Y rules available for upgrade should be displayed in the table
+When user upgrades all rules
+Then success message should be displayed after upgrade
+And user should NOT see a CTA to upgrade prebuilt rules
+And user should NOT see a number of rules available to upgrade
+And user should NOT see the Rule Updates table
+```
+
+### Rule upgrade workflow: filtering, sorting, pagination
+
+TODO: add scenarios
+
+### Rule upgrade workflow: misc cases
+
+#### **Scenario: User opening the Rule Updates table sees a loading skeleton until the package installation is completed**
 
 **Coverage**: ?.
 
 ```Gherkin
-Given a user is on Add Rules Page
-When user navigates back to Rules Management page
-Then Rule Management page is properly displayed
-```
-
-#### **Scenario: User can filter prebuilt rules by rule name or by tag**
-
-**Coverage**: ?.
-
-```Gherkin
-Given a user is on Add Rules Page
-When user filters by <filter>
-Then Add Rules Table is properly updated
-
-Examples:
-  | filter                  |
-  | rule name on search bar |
-  | Tag filter              |
-```
-
-### Rule Updates table
-
-#### **Scenario: Empty screen is shown when all installed prebuilt rules are up to date**
-
-**Coverage**: ?.
-
-```Gherkin
-Given user has some prebuilt rules installed in Kibana
-And all of them are up to date (have the latest versions)
+Given prebuilt rules package is not installed
 When user opens the Rule Management page
-And selects the Rule Updates tab
-Then user should see a message indicating that all installed rules are up to date
+And user opens the Rule Updates table
+Then user should see a loading skeleton until the package installation is completed
 ```
 
-#### **Scenario: Rules settings persist on Rule Updates table**
+### Error handling
+
+#### **Scenario: Error is handled when the package installation fails**
 
 **Coverage**: ?.
 
 ```Gherkin
-Given a user has Rules listed on Rule Updates table
-When <case>
-Then the rules with available updates state should persist
+Given the package is not installed
+And no prebuilt rules are installed in Kibana
+When user opens the Rule Management page
+And the package installation fails
+Then user should NOT see a CTA to install prebuilt rules
+And user should NOT see a number of rules available to install
+And user should NOT see a CTA to upgrade prebuilt rules
+And user should NOT see a number of rules available to upgrade
+And user should NOT see the Rule Updates table
+```
+
+#### **Scenario: Error is handled when any operation on prebuilt rules fails**
+
+**Coverage**: ?.
+
+```Gherkin
+Given user is <operation> prebuilt rules
+When the operation fails
+Then user should see an error message
+And prebuilt rules should not be installed/upgraded
+And the CTAs to install/upgrade prebuilt rules should remain on the Rule Management page
+And the numbers of available rules to install/upgrade should not change
 
 Examples:
-  | case                              |
-  | user reloads the page             |
-  | after switching table pagination  |
-  | after filtering and clear filters |
-```
-
-#### **Scenario: User can navigate back to Rules Management tab**
-
-**Coverage**: ?.
-
-```Gherkin
-Given a user is on Rule Updates tab
-When user navigates back to Rules Management page
-Then Rule Management page is properly displayed
-```
-
-#### **Scenario: User can filter prebuilt rules by rule name or by tag**
-
-**Coverage**: ?.
-
-```Gherkin
-Given a user is on Rule Updates tab
-When user filters by <filter>
-Then Rule Updates tab is properly updated
-
-Examples:
-  | filter                  |
-  | rule name on search bar |
-  | Tag filter              |
+  | operation             |
+  | installing all        |
+  | installing selected   |
+  | installing individual |
+  | upgrading all         |
+  | upgrading selected    |
+  | upgrading individual  |
 ```
 
 ### Authorization / RBAC
 
-#### **Scenario: User with read privileges on security solution cannot install prebuilt rules**
+#### **Scenario: User with read privileges on Security Solution cannot install prebuilt rules**
 
-**Coverage**: ?.
+**Coverage**: 1 e2e test with mock rules + 3 integration tests with mock rules for the status and installation endpoints.
 
 ```Gherkin
-Given a user with Security: read privileges on Security solution
-When user navigates to Add Rules page
-Then user can see available prebuilt rules to install
-And user cannot Install those prebuilt rules
+Given user with "Security: read" privileges on Security Solution
+And no prebuilt rules are installed in Kibana
+And there are prebuilt rules available to install
+When user opens the Add Rules page
+Then user should see prebuilt rules available to install
+But user should not be able to install them
 ```
 
-#### **Scenario: User with read privileges on security solution cannot update prebuilt rules**
+#### **Scenario: User with read privileges on Security Solution cannot upgrade prebuilt rules**
 
-**Coverage**: ?.
+**Coverage**: 1 e2e test with mock rules + 3 integration tests with mock rules for the status and upgrade endpoints.
 
 ```Gherkin
-Given a user with Security: read privileges on Security solution
-When user navigates to Rule Updates Tab on Rule Management page
-Then user can see new updates for installed prebuilt rules
-And user cannot Update those prebuilt rules
+Given user with "Security: read" privileges on Security Solution
+And X prebuilt rules are installed in Kibana
+And for Y of the installed rules there are new versions available
+When user opens the Rule Management page
+And user opens the Rule Updates table
+Then user should see prebuilt rules available to upgrade
+But user should not be able to upgrade them
 ```
 
 ### Kibana upgrade
 
-#### **Scenario: User can operate with prebuilt rules when user upgrades from version `<version>` to 8.9 version**
+#### **Scenario: User can use prebuilt rules after upgrading Kibana from version A to B**
 
-**Coverage**: ?.
+**Coverage**: not covered, manual testing required.
 
 ```Gherkin
-Given a user that is upgrading from version <version> to version 8.9
-And the <version> instance contains already installed prebuilt rules
+Given user is upgrading Kibana from version <A> to version <B>
+And the <A> instance contains already installed prebuilt rules
 When the upgrade is complete
-Then user can install new prebuilt rules
-And remove installed prebuilt rules
-And update prebuilt rules from <version> to 8.9
+Then user should be able to install new prebuilt rules
+And delete installed prebuilt rules
+And upgrade installed prebuilt rules that have newer versions in <B>
 
 Examples:
-  | version |
-  | 8.7     |
-  | 7.17.x  |
+  | A      | B     |
+  | 8.7    | 8.9.0 |
+  | 7.17.x | 8.9.0 |
 ```
