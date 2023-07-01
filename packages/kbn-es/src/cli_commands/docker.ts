@@ -15,6 +15,9 @@ import { Cluster } from '../cluster';
 import { parseTimeoutToMs } from '../utils';
 import { Command } from './types';
 
+const DEFAULT_DOCKER_CMD = 'run -p 9200:9200 -p 9300:9300 -t';
+const DEFAULT_DOCKER_REGISTRY = 'docker.elastic.co/elasticsearch/elasticsearch';
+
 export const docker: Command = {
   description: 'Run an Elasticsearch Docker image',
   usage: 'es docker [<args>]',
@@ -37,8 +40,8 @@ export const docker: Command = {
       --image             Image of ES to run [default: docker.elastic.co/elasticsearch/elasticsearch:${version}]
       --password          Sets password for elastic user [default: ${password}]
       --password.[user]   Sets password for native realm user [default: ${password}]
-      -E                  Additional key=value settings to pass to Elasticsearch
-      -D                  Single quoted params to pass to Docker
+      -E                  Additional key=value settings to pass to Elasticsearch [default: ${DEFAULT_DOCKER_CMD}${version}]
+      -D                  Single quoted command to pass to Docker
       --ssl               Sets up SSL on Elasticsearch
       --skip-ready-check  Disable the ready check
       --ready-timeout     Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
@@ -60,12 +63,12 @@ export const docker: Command = {
     const options = getopts(argv, {
       alias: {
         esArgs: 'E',
-        dockerArgs: 'D',
+        dockerCmd: 'D',
         skipReadyCheck: 'skip-ready-check',
         readyTimeout: 'ready-timeout',
       },
 
-      string: ['version', 'ready-timeout'], // TODO: Dockerargs?
+      string: ['version', 'ready-timeout', 'D'], // TODO: Dockerargs?
       boolean: ['skip-ready-check'],
 
       default: defaults,
@@ -77,12 +80,20 @@ export const docker: Command = {
       ...options,
     });
 
+    const _dockerCmd: string[] = (
+      !!options.dockerCmd ? options.dockerCmd : DEFAULT_DOCKER_CMD
+    ).split(' ');
+    _dockerCmd[_dockerCmd.length - 1] = _dockerCmd.at(-1) + options.version;
+
+    // console.log(_dockerCmd);
+
     const cluster = new Cluster({ ssl: options.ssl });
     await cluster.run('docker', {
       reportTime,
       startTime: runStartTime,
       ...options,
       readyTimeout: parseTimeoutToMs(options.readyTimeout),
+      dockerCmd: _dockerCmd,
     });
   },
 };

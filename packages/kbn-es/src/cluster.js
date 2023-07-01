@@ -312,6 +312,7 @@ exports.Cluster = class Cluster {
    */
   _exec(installPath, opts = {}) {
     const {
+      dockerCmd,
       skipNativeRealmSetup = false,
       reportTime = () => {},
       startTime,
@@ -388,23 +389,24 @@ exports.Cluster = class Cluster {
 
     this._process = isDocker
       ? execa(
-          'docker',
-          [
-            'run',
-            // '--name',
-            // 'es-node01',
-            '--env',
-            `"ES_JAVA_OPTS=${esJavaOpts}"`,
-            '--net',
-            'elastic',
-            '-p',
-            '9200:9200',
-            '-p',
-            '9300:9300',
-            '-itd',
-            '--rm',
-            'docker.elastic.co/elasticsearch/elasticsearch:8.8.1',
-          ],
+          installPath,
+          dockerCmd,
+          // [
+          //   'run',
+          //   // '--name',
+          //   // 'es-node01',
+          //   '--env',
+          //   `"ES_JAVA_OPTS=${esJavaOpts}"`,
+          //   '--net',
+          //   'elastic',
+          //   '-p',
+          //   '9200:9200',
+          //   '-p',
+          //   '9300:9300',
+          //   '-itd',
+          //   '--rm',
+          //   'docker.elastic.co/elasticsearch/elasticsearch:8.8.1',
+          // ],
           {
             stdio: ['ignore', 'pipe', 'pipe'],
           }

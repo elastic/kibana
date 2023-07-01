@@ -12,7 +12,7 @@ export interface EsClusterExecOptions {
   startTime?: number;
   esArgs?: string[];
   esJavaOpts?: string;
-  dockerArgs?: string[];
+  dockerCmd?: string[];
   password?: string;
   skipReadyCheck?: boolean;
   readyTimeout?: number;
