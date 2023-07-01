@@ -256,6 +256,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
                 editAction(paramsProperty, '', index);
               }
             }}
+            onClick={() => setListOpen(false)}
           />
         </EuiOutsideClickDetector>
         {matches.length > 0 && isListOpen && (
