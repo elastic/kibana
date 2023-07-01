@@ -9,5 +9,6 @@
 export default function ({ loadTestFile }: any) {
   describe('MetricsUI Endpoints', () => {
     loadTestFile(require.resolve('./metric_threshold_rule'));
+    loadTestFile(require.resolve('./threshold_rule'));
   });
 }
