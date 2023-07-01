@@ -143,7 +143,6 @@ export const EditorMenu = ({ createNewVisType, createNewEmbeddable }: Props) => 
     } else {
       ungroupedFactories.push(factory);
     }
-    console.log({ grouping });
   });
 
   const getVisTypeMenuItem = (visType: BaseVisType): EuiContextMenuPanelItemDescriptor => {
