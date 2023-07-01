@@ -195,6 +195,20 @@ export class ActionsClient {
     options,
   }: CreateOptions): Promise<ActionResult> {
     const id = options?.id || SavedObjectsUtils.generateId();
+
+    try {
+      await this.authorization.ensureAuthorized('create', actionTypeId);
+    } catch (error) {
+      this.auditLogger?.log(
+        connectorAuditEvent({
+          action: ConnectorAuditAction.CREATE,
+          savedObject: { type: 'action', id },
+          error,
+        })
+      );
+      throw error;
+    }
+
     const foundInMemoryConnector = this.inMemoryConnectors.find((connector) => connector.id === id);
 
     if (
@@ -220,19 +234,6 @@ export class ActionsClient {
           },
         })
       );
-    }
-
-    try {
-      await this.authorization.ensureAuthorized('create', actionTypeId);
-    } catch (error) {
-      this.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.CREATE,
-          savedObject: { type: 'action', id },
-          error,
-        })
-      );
-      throw error;
     }
 
     const actionType = this.actionTypeRegistry.get(actionTypeId);

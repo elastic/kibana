@@ -106,7 +106,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         });
     });
 
-    it(`shouldn't update action from preconfigured list`, async () => {
+    it(`shouldn't update a preconfigured connector`, async () => {
       await supertest
         .put(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/custom-system-abc-connector`)
         .set('kbn-xsrf', 'foo')
@@ -123,6 +123,30 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           statusCode: 400,
           error: 'Bad Request',
           message: `Preconfigured action custom-system-abc-connector is not allowed to update.`,
+        });
+    });
+
+    it(`shouldn't update a system connector`, async () => {
+      await supertest
+        .put(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/actions/connector/system-connector-test-system-action`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'My action updated',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'System action system-connector-test-system-action is not allowed to update.',
         });
     });
 
@@ -270,7 +294,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           });
       });
 
-      it(`shouldn't update action from preconfigured list`, async () => {
+      it(`shouldn't update a preconfigured connector`, async () => {
         await supertest
           .put(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/custom-system-abc-connector`)
           .set('kbn-xsrf', 'foo')
@@ -287,6 +311,30 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
             statusCode: 400,
             error: 'Bad Request',
             message: `Preconfigured action custom-system-abc-connector is not allowed to update.`,
+          });
+      });
+
+      it(`shouldn't update a system connector`, async () => {
+        await supertest
+          .put(
+            `${getUrlPrefix(
+              Spaces.space1.id
+            )}/api/actions/action/system-connector-test-system-action`
+          )
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'My action updated',
+            config: {
+              unencrypted: `This value shouldn't get encrypted`,
+            },
+            secrets: {
+              encrypted: 'This value should be encrypted',
+            },
+          })
+          .expect(400, {
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'System action system-connector-test-system-action is not allowed to update.',
           });
       });
 
