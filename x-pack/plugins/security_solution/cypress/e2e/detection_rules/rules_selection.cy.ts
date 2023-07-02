@@ -16,10 +16,9 @@ import {
   waitForPrebuiltDetectionRulesToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
 import {
-  createNewRuleAsset,
   excessivelyInstallAllPrebuiltRules,
   getAvailablePrebuiltRulesCount,
-  preventPrebuiltRulesPackageInstallation,
+  createAndInstallMockedPrebuiltRules,
 } from '../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
@@ -35,13 +34,11 @@ const RULE_2 = createRuleAssetSavedObject({
 });
 
 describe('Rules selection', () => {
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
     login();
-    preventPrebuiltRulesPackageInstallation();
-    /* Create two mock rules */
-    createNewRuleAsset({ rule: RULE_1 });
-    createNewRuleAsset({ rule: RULE_2 });
+    /* Create and install two mock rules */
+    createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2] });
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
   });
 

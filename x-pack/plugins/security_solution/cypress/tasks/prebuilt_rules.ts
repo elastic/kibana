@@ -15,7 +15,7 @@ import {
 } from '../screens/alerts_detection_rules';
 import type { SAMPLE_PREBUILT_RULE } from './api_calls/prebuilt_rules';
 
-export const addElasticRulessButtonClick = () => {
+export const addElasticRulesButtonClick = () => {
   cy.get(ADD_ELASTIC_RULES_BTN).click();
   cy.location('pathname').should('include', RULES_ADD_PATH);
 };

@@ -9,9 +9,9 @@ import { createRuleAssetSavedObject } from '../../helpers/rules';
 import { ADD_ELASTIC_RULES_BTN, RULES_UPDATES_TAB } from '../../screens/alerts_detection_rules';
 import { deleteFirstRule, waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import {
-  excessivelyInstallAllPrebuiltRules,
+  installAllPrebuiltRulesRequest,
   createNewRuleAsset,
-  preventPrebuiltRulesPackageInstallation,
+  createAndInstallMockedPrebuiltRules,
 } from '../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
@@ -23,14 +23,12 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     /* Make sure persisted rules table state is cleared */
     resetRulesTableState();
     deleteAlertsAndRules();
-    /* Prevent security_detection_engine from being installed; install assets manually */
-    preventPrebuiltRulesPackageInstallation();
-    createNewRuleAsset({
-      rule: createRuleAssetSavedObject({
-        name: 'Test rule 1',
-        rule_id: 'rule_1',
-      }),
+
+    const RULE_1 = createRuleAssetSavedObject({
+      name: 'Test rule 1',
+      rule_id: 'rule_1',
     });
+    createAndInstallMockedPrebuiltRules({ rules: [RULE_1], installToKibana: false });
   });
 
   describe('Rules installation notification when no rules have been installed', () => {
@@ -46,7 +44,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
   describe('No notifications', () => {
     it('should display no install or update notifications when latest rules are installed', () => {
       /* Install current available rules */
-      excessivelyInstallAllPrebuiltRules();
+      installAllPrebuiltRulesRequest();
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
       waitForRulesTableToBeLoaded();
 
@@ -59,23 +57,20 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
 
   describe('Rule installation notification when at least one rule already installed', () => {
     beforeEach(() => {
-      excessivelyInstallAllPrebuiltRules();
+      installAllPrebuiltRulesRequest();
       /* Create new rule assets with a different rule_id as the one that was */
       /* installed before in order to trigger the installation notification */
-      createNewRuleAsset({
-        rule: createRuleAssetSavedObject({
-          name: 'Test rule 2',
-          rule_id: 'rule_2',
-        }),
+      const RULE_2 = createRuleAssetSavedObject({
+        name: 'Test rule 2',
+        rule_id: 'rule_2',
       });
-      createNewRuleAsset({
-        rule: createRuleAssetSavedObject({
-          name: 'Test rule 3',
-          rule_id: 'rule_3',
-        }),
+      const RULE_3 = createRuleAssetSavedObject({
+        name: 'Test rule 3',
+        rule_id: 'rule_3',
       });
+
+      createAndInstallMockedPrebuiltRules({ rules: [RULE_2, RULE_3], installToKibana: false });
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-      reload();
       waitForRulesTableToBeLoaded();
     });
 
@@ -91,7 +86,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     it('should notify user a rule is again available for installation if it is deleted', () => {
       /* Install available rules, assert that the notification is gone */
       /* then delete one rule and assert that the notification is back */
-      excessivelyInstallAllPrebuiltRules();
+      installAllPrebuiltRulesRequest();
       reload();
       deleteFirstRule();
       cy.get(ADD_ELASTIC_RULES_BTN).should('be.visible');
@@ -101,7 +96,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
 
   describe('Rule update notification', () => {
     beforeEach(() => {
-      excessivelyInstallAllPrebuiltRules();
+      installAllPrebuiltRulesRequest();
       /* Create new rule asset with the same rule_id as the one that was installed  */
       /* but with a higher version, in order to trigger the update notification     */
       createNewRuleAsset({

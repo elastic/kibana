@@ -30,10 +30,8 @@ import {
   waitForRuleToUpdate,
 } from '../../tasks/alerts_detection_rules';
 import {
-  createNewRuleAsset,
-  excessivelyInstallAllPrebuiltRules,
+  createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
-  preventPrebuiltRulesPackageInstallation,
 } from '../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana, deleteAlertsAndRules, deletePrebuiltRulesAssets } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
@@ -55,13 +53,8 @@ describe('Prebuilt rules', () => {
     login();
     deleteAlertsAndRules();
     deletePrebuiltRulesAssets();
-    preventPrebuiltRulesPackageInstallation();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    /* Create mock prebuilt rules */
-    for (const rule of rules) {
-      createNewRuleAsset({ rule });
-    }
-    excessivelyInstallAllPrebuiltRules();
+    createAndInstallMockedPrebuiltRules({ rules });
     cy.reload();
     waitForPrebuiltDetectionRulesToBeLoaded();
   });

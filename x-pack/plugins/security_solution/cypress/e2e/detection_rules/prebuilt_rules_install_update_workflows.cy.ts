@@ -20,17 +20,15 @@ import {
 } from '../../screens/alerts_detection_rules';
 import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import {
-  createNewRuleAsset,
   getRuleAssets,
-  installAllPrebuiltRulesRequest,
-  preventPrebuiltRulesPackageInstallation,
+  createAndInstallMockedPrebuiltRules,
 } from '../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/common';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
 import {
-  addElasticRulessButtonClick,
+  addElasticRulesButtonClick,
   assertRuleUpgradeAvailableAndUpgradeAll,
   ruleUpdatesTabClick,
 } from '../../tasks/prebuilt_rules';
@@ -82,7 +80,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           );
 
           const numberOfRulesToInstall = new Set(ruleIds).size;
-          addElasticRulessButtonClick();
+          addElasticRulesButtonClick();
 
           cy.get(INSTALL_ALL_RULES_BUTTON).click();
           cy.get(TOASTER)
@@ -103,16 +101,12 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       rule_id: 'rule_2',
     });
     beforeEach(() => {
-      preventPrebuiltRulesPackageInstallation();
-
-      /* Create two mock rules */
-      createNewRuleAsset({ rule: RULE_1 });
-      createNewRuleAsset({ rule: RULE_2 });
+      createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2], installToKibana: false });
       waitForRulesTableToBeLoaded();
     });
 
     it('should install selected rules when user clicks on Install selected rules', () => {
-      addElasticRulessButtonClick();
+      addElasticRulesButtonClick();
       cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
       cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
       cy.get(TOASTER).should('be.visible').should('have.text', `2 rules installed successfully.`);
@@ -127,7 +121,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       cy.intercept('POST', '/internal/detection_engine/prebuilt_rules/installation/_perform', {
         statusCode: 500,
       }).as('installPrebuiltRules');
-      addElasticRulessButtonClick();
+      addElasticRulesButtonClick();
       cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
       cy.get(INSTALL_SELECTED_RULES_BUTTON).click();
       cy.wait('@installPrebuiltRules');
@@ -148,12 +142,10 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       version: 2,
     });
     beforeEach(() => {
-      preventPrebuiltRulesPackageInstallation();
       /* Create a new rule and install it */
-      createNewRuleAsset({ rule: OUTDATED_RULE });
-      installAllPrebuiltRulesRequest();
+      createAndInstallMockedPrebuiltRules({ rules: [OUTDATED_RULE] });
       /* Create a second version of the rule, making it available for update */
-      createNewRuleAsset({ rule: UPDATED_RULE });
+      createAndInstallMockedPrebuiltRules({ rules: [UPDATED_RULE], installToKibana: false });
       waitForRulesTableToBeLoaded();
       reload();
     });
