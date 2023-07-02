@@ -37,6 +37,7 @@ describe('loadActionTypes', () => {
         enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'basic',
+        isSystemActionType: false,
       },
     ];
 
@@ -72,6 +73,7 @@ describe('loadActionTypes', () => {
         enabledInLicense: true,
         supportedFeatureIds: ['alerting'],
         minimumLicenseRequired: 'basic',
+        isSystemActionType: false,
       },
     ];
 
