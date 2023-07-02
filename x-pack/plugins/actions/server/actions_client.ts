@@ -294,7 +294,7 @@ export class ActionsClient {
 
       if (foundInMemoryConnector?.isSystemAction) {
         throw Boom.badRequest(
-          i18n.translate('xpack.actions.serverSideErrors.systemActionCreationForbidden', {
+          i18n.translate('xpack.actions.serverSideErrors.systemActionUpdateForbidden', {
             defaultMessage: 'System action {id} is not allowed to update.',
             values: {
               id,
@@ -668,7 +668,7 @@ export class ActionsClient {
 
       if (foundInMemoryConnector?.isSystemAction) {
         throw Boom.badRequest(
-          i18n.translate('xpack.actions.serverSideErrors.systemActionCreationForbidden', {
+          i18n.translate('xpack.actions.serverSideErrors.systemActionDeletionForbidden', {
             defaultMessage: 'System action {id} is not allowed to delete.',
             values: {
               id,
