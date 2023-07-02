@@ -4296,70 +4296,6 @@
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.ts"
               },
               {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/live_query/get_live_query_details_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/live_query/get_live_query_results_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/live_query/find_live_query_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/saved_query/find_saved_query_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/saved_query/read_saved_query_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/status/create_status_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_agent_policies.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_agent_policy.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_agent_status_for_agent_policy.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_package_policies.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_agents.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_agent_details.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/find_pack_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/privileges_check/privileges_check_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/asset/get_assets_status_route.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/find_rules/route.ts"
               },
@@ -5500,6 +5436,10 @@
                 "path": "x-pack/plugins/fleet/server/routes/uninstall_token/handlers.test.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/uninstall_token/handlers.test.ts"
+              },
+              {
                 "plugin": "remoteClusters",
                 "path": "x-pack/plugins/remote_clusters/server/routes/api/get_route.test.ts"
               },
@@ -5814,6 +5754,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/routes/fleet_proxies/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/routes/uninstall_token/index.ts"
               },
               {
                 "plugin": "fleet",
@@ -7048,22 +6992,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring/api/detection_engine_health/setup/setup_health_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/live_query/create_live_query_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/saved_query/create_saved_query_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/create_pack_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/asset/update_assets_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -8888,14 +8816,6 @@
                 "path": "x-pack/plugins/lists/server/routes/update_list_route.ts"
               },
               {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/saved_query/update_saved_query_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/update_pack_route.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/bulk_update_rules/route.ts"
               },
@@ -9974,14 +9894,6 @@
               {
                 "plugin": "lists",
                 "path": "x-pack/plugins/lists/server/routes/delete_list_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/saved_query/delete_saved_query_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/delete_pack_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14131,6 +14043,70 @@
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/csp_rule_template/get_csp_rule_template.ts"
               },
               {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/live_query/get_live_query_details_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/live_query/get_live_query_results_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/live_query/find_live_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/saved_query/find_saved_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/saved_query/read_saved_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/status/create_status_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_agent_policies.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_agent_policy.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_agent_status_for_agent_policy.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_package_policies.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_agents.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/fleet_wrapper/get_agent_details.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/pack/find_pack_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/privileges_check/privileges_check_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/asset/get_assets_status_route.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/metadata/index.ts"
               },
@@ -14529,6 +14505,14 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/workpad/update.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/saved_query/update_saved_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/pack/update_pack_route.ts"
               },
               {
                 "plugin": "transform",
@@ -15011,6 +14995,22 @@
                 "path": "x-pack/plugins/canvas/server/routes/workpad/import.ts"
               },
               {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/live_query/create_live_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/saved_query/create_saved_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/pack/create_pack_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/asset/update_assets_route.ts"
+              },
+              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/server/autocomplete/value_suggestions_route.ts"
               },
@@ -15377,6 +15377,14 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/workpad/delete.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/saved_query/delete_saved_query_route.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/pack/delete_pack_route.ts"
               },
               {
                 "plugin": "maps",
