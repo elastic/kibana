@@ -37,6 +37,9 @@ export * from '../services/artifacts/mocks';
 // export all mocks from fleet files client
 export * from '../services/files/mocks';
 
+// export all mocks from fleet actions client
+export * from '../services/actions/mocks';
+
 export interface MockedFleetAppContext extends FleetAppContext {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
   data: ReturnType<typeof dataPluginMock.createStartContract>;
@@ -183,10 +186,8 @@ export function createMessageSigningServiceMock(): MessageSigningServiceInterfac
 
 export function createUninstallTokenServiceMock(): UninstallTokenServiceInterface {
   return {
-    getTokenForPolicyId: jest.fn(),
-    getTokensForPolicyIds: jest.fn(),
-    getAllTokens: jest.fn(),
-    findTokensForPartialPolicyId: jest.fn(),
+    getToken: jest.fn(),
+    getTokenMetadata: jest.fn(),
     getHashedTokenForPolicyId: jest.fn(),
     getHashedTokensForPolicyIds: jest.fn(),
     getAllHashedTokens: jest.fn(),

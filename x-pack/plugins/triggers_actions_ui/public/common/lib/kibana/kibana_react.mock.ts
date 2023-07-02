@@ -12,6 +12,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { TriggersAndActionsUiServices } from '../../../application/app';
 import {
@@ -23,6 +24,7 @@ import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();
+  const licensingPluginMock = licensingMock.createStart();
   return {
     ...core,
     actions: { validateEmailAddresses: jest.fn() },
@@ -67,6 +69,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       style: { cursor: 'pointer' },
     } as unknown as HTMLElement,
     theme$: themeServiceMock.createTheme$(),
+    licensing: licensingPluginMock,
   } as TriggersAndActionsUiServices;
 };
 

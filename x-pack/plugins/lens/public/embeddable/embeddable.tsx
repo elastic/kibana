@@ -102,6 +102,7 @@ import {
 } from '../types';
 
 import type {
+  AllowedChartOverrides,
   AllowedPartitionOverrides,
   AllowedSettingsOverrides,
   AllowedGaugeOverrides,
@@ -176,6 +177,7 @@ export type LensByValueInput = {
    * the current behaviour by passing the "ignore" string to the override prop (i.e. onBrushEnd: "ignore" to stop brushing)
    */
   overrides?:
+    | AllowedChartOverrides
     | AllowedSettingsOverrides
     | AllowedXYOverrides
     | AllowedPartitionOverrides
@@ -585,6 +587,8 @@ export class Embeddable
     );
   }
 
+  private fullAttributes: LensSavedObjectAttributes | undefined;
+
   public getUserMessages: UserMessagesGetter = (locationId, filters) => {
     return filterAndSortUserMessages(
       [...this._userMessages, ...Object.values(this.additionalUserMessages)],
@@ -710,6 +714,10 @@ export class Embeddable
     return this.lensInspector.adapters;
   }
 
+  public getFullAttributes() {
+    return this.fullAttributes;
+  }
+
   async initializeSavedVis(input: LensEmbeddableInput) {
     const unwrapResult: LensUnwrapResult | false = await this.deps.attributeService
       .unwrapAttributes(input)
@@ -722,7 +730,7 @@ export class Embeddable
     }
 
     const { metaInfo, attributes } = unwrapResult;
-
+    this.fullAttributes = attributes;
     this.savedVis = {
       ...attributes,
       type: this.type,
