@@ -19,6 +19,7 @@ const transformCreateBodyActions = (actions: CreateRuleActionV1[]): CreateRuleDa
       group: action.group,
       id: action.id,
       params: action.params,
+      actionTypeId: action.actionTypeId,
       ...(action.uuid ? { uuid: action.uuid } : {}),
       ...(frequency
         ? {

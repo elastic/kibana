@@ -7,14 +7,11 @@
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 
-const validateDate = (string: unknown) => {
-  if (typeof string !== 'string') {
-    return `test string is not a string: ${string}`;
-  }
+const validateDate = (string: Date) => {
   if (moment(string).isValid()) {
     return;
   }
   return `string is not a valid date: ${string}`;
 };
 
-export const dateSchema = schema.object({}, { unknowns: 'allow', validate: validateDate });
+export const dateSchema = schema.any({ validate: validateDate });

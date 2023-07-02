@@ -24,6 +24,7 @@ export const createRuleDataSchema = schema.object({
     schema.object({
       group: schema.string(),
       id: schema.string(),
+      actionTypeId: schema.maybe(schema.string()),
       params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
       frequency: schema.maybe(
         schema.object({
