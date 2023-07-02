@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import {
   EuiCollapsibleNavGroup,
   EuiIcon,
@@ -46,9 +46,12 @@ const navigationNodeToEuiItem = (
     );
   };
 
+  const isSelected = item.children && item.children.length > 0 ? false : item.isActive;
+
   return {
     id,
     name: item.title,
+    isSelected,
     onClick:
       href !== undefined
         ? (event: React.MouseEvent) => {
@@ -71,16 +74,13 @@ const navigationNodeToEuiItem = (
 interface Props {
   navNode: ChromeProjectNavigationNodeEnhanced;
   items?: ChromeProjectNavigationNodeEnhanced[];
-  defaultIsCollapsed?: boolean;
 }
 
-export const NavigationSectionUI: FC<Props> = ({
-  navNode,
-  items = [],
-  defaultIsCollapsed = true,
-}) => {
-  const { id, title, icon } = navNode;
+export const NavigationSectionUI: FC<Props> = ({ navNode, items = [] }) => {
+  const { id, title, icon, isActive } = navNode;
   const { navigateToUrl, basePath } = useServices();
+  const [isCollapsed, setIsCollapsed] = useState(!isActive);
+  const initialTime = useRef(Date.now());
 
   // If the item has no link and no cildren, we don't want to render it
   const itemHasLinkOrChildren = (item: ChromeProjectNavigationNodeEnhanced) => {
@@ -107,6 +107,15 @@ export const NavigationSectionUI: FC<Props> = ({
 
   const groupHasLink = Boolean(navNode.deepLink) || Boolean(navNode.href);
 
+  useEffect(() => {
+    // We only want to set the collapsed state during the "mounting" phase (500ms).
+    // After that, even if the URL does not match the group and the group is open we don't
+    // want to collapse it automatically.
+    if (Date.now() - initialTime.current < 500) {
+      setIsCollapsed(!isActive);
+    }
+  }, [isActive]);
+
   if (!groupHasLink && !filteredItems.some(itemHasLinkOrChildren)) {
     return null;
   }
@@ -117,7 +126,9 @@ export const NavigationSectionUI: FC<Props> = ({
       title={title}
       iconType={icon}
       isCollapsible={true}
-      initialIsOpen={!defaultIsCollapsed}
+      initialIsOpen={isActive}
+      onToggle={(isOpen) => setIsCollapsed(!isOpen)}
+      forceState={isCollapsed ? 'closed' : 'open'}
       data-test-subj={`nav-bucket-${id}`}
     >
       <EuiText color="default">

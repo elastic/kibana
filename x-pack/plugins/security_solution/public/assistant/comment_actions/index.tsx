@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonIcon, EuiCopy, EuiToolTip } from '@elastic/eui';
+
+import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { Message } from '@kbn/elastic-assistant';
 import React, { useCallback } from 'react';
@@ -61,45 +62,51 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
         {
           comment: message.content,
           type: CommentType.user,
-          owner: i18n.ELASTIC_SECURITY_ASSISTANT,
+          owner: i18n.ELASTIC_AI_ASSISTANT,
         },
       ],
     });
   }, [message.content, selectCaseModal]);
 
   return (
-    <>
-      <EuiToolTip position="top" content={i18n.ADD_NOTE_TO_TIMELINE}>
-        <EuiButtonIcon
-          aria-label={i18n.ADD_MESSAGE_CONTENT_AS_TIMELINE_NOTE}
-          color="primary"
-          iconType="editorComment"
-          onClick={onAddNoteToTimeline}
-        />
-      </EuiToolTip>
+    <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <EuiToolTip position="top" content={i18n.ADD_NOTE_TO_TIMELINE}>
+          <EuiButtonIcon
+            aria-label={i18n.ADD_MESSAGE_CONTENT_AS_TIMELINE_NOTE}
+            color="primary"
+            iconType="editorComment"
+            onClick={onAddNoteToTimeline}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
 
-      <EuiToolTip position="top" content={i18n.ADD_TO_CASE_EXISTING_CASE}>
-        <EuiButtonIcon
-          aria-label={i18n.ADD_TO_CASE_EXISTING_CASE}
-          color="primary"
-          iconType="addDataApp"
-          onClick={onAddToExistingCase}
-        />
-      </EuiToolTip>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip position="top" content={i18n.ADD_TO_CASE_EXISTING_CASE}>
+          <EuiButtonIcon
+            aria-label={i18n.ADD_TO_CASE_EXISTING_CASE}
+            color="primary"
+            iconType="addDataApp"
+            onClick={onAddToExistingCase}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
 
-      <EuiToolTip position="top" content={i18n.COPY_TO_CLIPBOARD}>
-        <EuiCopy textToCopy={message.content}>
-          {(copy) => (
-            <EuiButtonIcon
-              aria-label={i18n.COPY_TO_CLIPBOARD}
-              color="primary"
-              iconType="copyClipboard"
-              onClick={copy}
-            />
-          )}
-        </EuiCopy>
-      </EuiToolTip>
-    </>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip position="top" content={i18n.COPY_TO_CLIPBOARD}>
+          <EuiCopy textToCopy={message.content}>
+            {(copy) => (
+              <EuiButtonIcon
+                aria-label={i18n.COPY_TO_CLIPBOARD}
+                color="primary"
+                iconType="copyClipboard"
+                onClick={copy}
+              />
+            )}
+          </EuiCopy>
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

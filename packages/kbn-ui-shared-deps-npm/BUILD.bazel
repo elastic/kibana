@@ -59,6 +59,7 @@ RUNTIME_DEPS = [
   "@npm//styled-components",
   "@npm//tslib",
   "@npm//uuid",
+  "@npm//io-ts",
 ]
 
 webpack_cli(

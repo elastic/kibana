@@ -6,14 +6,20 @@
  */
 
 import { EXPAND_ALERT_BTN } from '../../screens/alerts';
+import { DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE } from '../../screens/expandable_flyout/alert_details_right_panel';
 import {
   CREATE_CASE_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_DESCRIPTION_INPUT,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_NAME_INPUT,
   KIBANA_NAVBAR_ALERTS_PAGE,
   KIBANA_NAVBAR_CASES_PAGE,
   NEW_CASE_CREATE_BUTTON,
   NEW_CASE_DESCRIPTION_INPUT,
   NEW_CASE_NAME_INPUT,
+  VIEW_CASE_TOASTER_LINK,
 } from '../../screens/expandable_flyout/common';
+import { openTakeActionButtonAndSelectItem } from './alert_details_right_panel';
 
 /**
  * Navigates to the alerts page by clicking on the Kibana sidenav entry
@@ -46,4 +52,17 @@ export const createNewCaseFromCases = () => {
   cy.get(NEW_CASE_DESCRIPTION_INPUT).should('be.visible').click();
   cy.get(NEW_CASE_DESCRIPTION_INPUT).type('case description');
   cy.get(NEW_CASE_CREATE_BUTTON).should('be.visible').click();
+};
+
+/**
+ * create a new case from the expanded expandable flyout
+ */
+export const createNewCaseFromExpandableFlyout = () => {
+  openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE);
+  cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_NAME_INPUT).type('case');
+  cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_DESCRIPTION_INPUT).type('case description');
+  cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON).click();
+
+  // NOTE: wait for case link (case created)
+  cy.get(VIEW_CASE_TOASTER_LINK).should('be.visible');
 };

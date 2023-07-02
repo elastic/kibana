@@ -15,6 +15,8 @@ import {
   EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTextAlign,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -27,8 +29,34 @@ import {
   SNOOZE_FAILED_MESSAGE,
   SNOOZE_SUCCESS_MESSAGE,
   UNSNOOZE_SUCCESS_MESSAGE,
+  UNITS_TRANSLATION,
 } from './translations';
 import { RulesListNotifyBadgeProps } from './types';
+
+function getTimeRemaining(endtime: Date): string {
+  const duration = moment.duration(moment(endtime).diff(moment()));
+  const timeValues = {
+    years: UNITS_TRANSLATION.getYearsTranslation(duration.years()),
+    months: UNITS_TRANSLATION.getMonthsTranslation(duration.months()),
+    weeks: UNITS_TRANSLATION.getWeeksTranslation(duration.weeks()),
+    days: UNITS_TRANSLATION.getDaysTranslation(duration.days()),
+    hours: UNITS_TRANSLATION.getHoursTranslation(duration.hours()),
+    minutes: UNITS_TRANSLATION.getMinutesTranslation(duration.minutes()),
+    seconds: UNITS_TRANSLATION.getSecondsTranslation(duration.seconds()),
+  };
+  const timeComponents = Object.entries(timeValues)
+    .filter(([unit, value]) => value !== '' && value !== `0 ${unit}`)
+    .map(([unit, value]) => `${value}`)
+    .join(', ');
+  const lastComponentIndex = timeComponents.lastIndexOf(', ');
+  const formattedTime =
+    lastComponentIndex === -1
+      ? timeComponents
+      : timeComponents.slice(0, lastComponentIndex) +
+        ' and' +
+        timeComponents.slice(lastComponentIndex + 1);
+  return formattedTime;
+}
 
 export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = ({
   snoozeSettings,
@@ -56,6 +84,11 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   const nextScheduledSnooze = useMemo(
     () => (snoozeSettings ? getNextRuleSnoozeSchedule(snoozeSettings) : null),
     [snoozeSettings]
+  );
+
+  const snoozeTimeLeft = useMemo(
+    () => (isSnoozedUntil ? getTimeRemaining(isSnoozedUntil) : undefined),
+    [isSnoozedUntil]
   );
 
   const {
@@ -93,15 +126,39 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         }
       );
     }
-    if (isSnoozed) {
-      return i18n.translate(
-        'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.snoozedTooltip',
-        {
-          defaultMessage: 'Notifications snoozing for {snoozeTime}',
-          values: {
-            snoozeTime: moment(isSnoozedUntil).fromNow(true),
-          },
-        }
+    if (isSnoozed && snoozeTimeLeft) {
+      return (
+        <EuiToolTip
+          title={i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.timeRemaining',
+            {
+              defaultMessage: 'Time remaining',
+            }
+          )}
+          content={
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                <span>{snoozeTimeLeft}</span>
+              </EuiFlexItem>
+              <EuiSpacer />
+              <EuiFlexItem grow={false}>
+                <span>{isSnoozedUntil?.toString()}</span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          <EuiTextAlign>
+            {i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.snoozedTooltip',
+              {
+                defaultMessage: 'Notifications snoozing for {snoozeTime}',
+                values: {
+                  snoozeTime: moment(isSnoozedUntil).fromNow(true),
+                },
+              }
+            )}
+          </EuiTextAlign>
+        </EuiToolTip>
       );
     }
     if (showTooltipInline) {
@@ -117,9 +174,10 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     isSnoozedIndefinitely,
     isScheduled,
     isSnoozed,
-    isSnoozedUntil,
-    nextScheduledSnooze,
     showTooltipInline,
+    nextScheduledSnooze,
+    snoozeTimeLeft,
+    isSnoozedUntil,
   ]);
 
   const snoozedButton = useMemo(() => {
@@ -222,10 +280,25 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         ? disabled
         : isPopoverOpen || showTooltipInline
         ? undefined
-        : snoozeTooltipText;
-
-    return <EuiToolTip content={tooltipContent}>{button}</EuiToolTip>;
-  }, [disabled, isPopoverOpen, button, snoozeTooltipText, showTooltipInline]);
+        : snoozeTimeLeft;
+    return (
+      <EuiToolTip
+        title={
+          tooltipContent
+            ? i18n.translate(
+                'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.timeRemaining',
+                {
+                  defaultMessage: 'Time remaining',
+                }
+              )
+            : undefined
+        }
+        content={tooltipContent}
+      >
+        {button}
+      </EuiToolTip>
+    );
+  }, [disabled, isPopoverOpen, button, showTooltipInline, snoozeTimeLeft]);
 
   const onApplySnooze = useCallback(
     async (schedule: SnoozeSchedule) => {

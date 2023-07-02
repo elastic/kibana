@@ -9,6 +9,7 @@
 import { Subject, Observable, firstValueFrom, of } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
 import type { Logger } from '@kbn/logging';
+import { stripVersionQualifier } from '@kbn/std';
 import type { ServiceStatus } from '@kbn/core-status-common';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
@@ -106,9 +107,7 @@ export class SavedObjectsService
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
-    this.kibanaVersion = SavedObjectsService.stripVersionQualifier(
-      this.coreContext.env.packageInfo.version
-    );
+    this.kibanaVersion = stripVersionQualifier(this.coreContext.env.packageInfo.version);
   }
 
   public async setup(setupDeps: SavedObjectsSetupDeps): Promise<InternalSavedObjectsServiceSetup> {
@@ -383,13 +382,5 @@ export class SavedObjectsService
       waitForMigrationCompletion,
       nodeRoles: nodeInfo.roles,
     });
-  }
-
-  /**
-   * Coerce a semver-like string (x.y.z-SNAPSHOT) or prerelease version (x.y.z-alpha)
-   * to regular semver (x.y.z).
-   */
-  private static stripVersionQualifier(version: string) {
-    return version.split('-')[0];
   }
 }

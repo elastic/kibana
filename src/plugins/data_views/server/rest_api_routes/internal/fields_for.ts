@@ -89,6 +89,9 @@ const FieldDescriptorSchema = schema.object({
     ])
   ),
   timeSeriesDimension: schema.maybe(schema.boolean()),
+  conflictDescriptions: schema.maybe(
+    schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
+  ),
 });
 
 const validate: FullValidationConfig<any, any, any> = {
@@ -185,5 +188,8 @@ export const registerFieldForWildcard = (
   router.versioned.post({ path, access }).addVersion({ version, validate }, handler);
   router.versioned
     .get({ path, access })
-    .addVersion({ version, validate: { request: { query: querySchema } } }, handler);
+    .addVersion(
+      { version, validate: { request: { query: querySchema }, response: validate.response } },
+      handler
+    );
 };

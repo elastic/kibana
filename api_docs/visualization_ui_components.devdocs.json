@@ -11,7 +11,7 @@
         "label": "ColorPicker",
         "description": [],
         "signature": [
-          "({ label, disableHelpTooltip, disabled, setConfig, defaultColor, overwriteColor, showAlpha, }: { overwriteColor?: string | null | undefined; defaultColor?: string | null | undefined; setConfig: (config: { color?: string | undefined; }) => void; label?: string | undefined; disableHelpTooltip?: boolean | undefined; disabled?: boolean | undefined; showAlpha?: boolean | undefined; }) => JSX.Element"
+          "({ overwriteColor, defaultColor, setConfig, label, disableHelpTooltip, disabledMessage, showAlpha, }: { overwriteColor?: string | null | undefined; defaultColor?: string | null | undefined; setConfig: (config: { color?: string | undefined; }) => void; label?: string | undefined; disableHelpTooltip?: boolean | undefined; disabledMessage?: string | undefined; showAlpha?: boolean | undefined; }) => JSX.Element"
         ],
         "path": "src/plugins/visualization_ui_components/public/components/color_picker.tsx",
         "deprecated": false,
@@ -22,7 +22,7 @@
             "id": "def-public.ColorPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  label,\n  disableHelpTooltip,\n  disabled,\n  setConfig,\n  defaultColor,\n  overwriteColor,\n  showAlpha,\n}",
+            "label": "{\n  overwriteColor,\n  defaultColor,\n  setConfig,\n  label,\n  disableHelpTooltip,\n  disabledMessage,\n  showAlpha,\n}",
             "description": [],
             "path": "src/plugins/visualization_ui_components/public/components/color_picker.tsx",
             "deprecated": false,
@@ -130,13 +130,13 @@
               },
               {
                 "parentPluginId": "visualizationUiComponents",
-                "id": "def-public.ColorPicker.$1.disabled",
-                "type": "CompoundType",
+                "id": "def-public.ColorPicker.$1.disabledMessage",
+                "type": "string",
                 "tags": [],
-                "label": "disabled",
+                "label": "disabledMessage",
                 "description": [],
                 "signature": [
-                  "boolean | undefined"
+                  "string | undefined"
                 ],
                 "path": "src/plugins/visualization_ui_components/public/components/color_picker.tsx",
                 "deprecated": false,
@@ -205,17 +205,9 @@
         "label": "DimensionButton",
         "description": [],
         "signature": [
-          "({\n  groupLabel,\n  children,\n  onClick,\n  onRemoveClick,\n  accessorConfig,\n  label,\n  message,\n  ...otherProps // from Drag&Drop integration\n}: { className?: string | undefined; groupLabel: string; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; onClick: (id: string) => void; onRemoveClick: (id: string) => void; accessorConfig: ",
-          {
-            "pluginId": "visualizationUiComponents",
-            "scope": "public",
-            "docId": "kibVisualizationUiComponentsPluginApi",
-            "section": "def-public.AccessorConfig",
-            "text": "AccessorConfig"
-          },
-          "; label: string; message?: ",
-          "Message",
-          " | undefined; }) => JSX.Element"
+          "({\n  groupLabel,\n  children,\n  onClick,\n  onRemoveClick,\n  accessorConfig,\n  label,\n  message,\n  ...otherProps // from Drag&Drop integration\n}: ",
+          "DimensionButtonProps",
+          ") => JSX.Element"
         ],
         "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/dimension_button.tsx",
         "deprecated": false,
@@ -228,160 +220,13 @@
             "tags": [],
             "label": "{\n  groupLabel,\n  children,\n  onClick,\n  onRemoveClick,\n  accessorConfig,\n  label,\n  message,\n  ...otherProps // from Drag&Drop integration\n}",
             "description": [],
+            "signature": [
+              "DimensionButtonProps"
+            ],
             "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/dimension_button.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "visualizationUiComponents",
-                "id": "def-public.DimensionButton.$1.className",
-                "type": "string",
-                "tags": [],
-                "label": "className",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/dimension_button.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "visualizationUiComponents",
-                "id": "def-public.DimensionButton.$1.groupLabel",
-                "type": "string",
-                "tags": [],
-                "label": "groupLabel",
-                "description": [],
-                "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/dimension_button.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "visualizationUiComponents",
-                "id": "def-public.DimensionButton.$1.children",
-                "type": "Object",
-                "tags": [],
-                "label": "children",
-                "description": [],
-                "signature": [
-                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
-                ],
-                "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/dimension_button.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "visualizationUiComponents",
-                "id": "def-public.DimensionButton.$1.onClick",
-                "type": "Function",
-                "tags": [],
-                "label": "onClick",
-                "description": [],
-                "signature": [
-                  "(id: string) => void"
-                ],
-                "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/dimension_button.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "visualizationUiComponents",
-                    "id": "def-public.DimensionButton.$1.onClick.$1",
-                    "type": "string",
-                    "tags": [],
-                    "label": "id",
-                    "description": [],
-                    "signature": [
-                      "string"
-                    ],
-                    "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/dimension_button.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "isRequired": true
-                  }
-                ],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "visualizationUiComponents",
-                "id": "def-public.DimensionButton.$1.onRemoveClick",
-                "type": "Function",
-                "tags": [],
-                "label": "onRemoveClick",
-                "description": [],
-                "signature": [
-                  "(id: string) => void"
-                ],
-                "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/dimension_button.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "visualizationUiComponents",
-                    "id": "def-public.DimensionButton.$1.onRemoveClick.$1",
-                    "type": "string",
-                    "tags": [],
-                    "label": "id",
-                    "description": [],
-                    "signature": [
-                      "string"
-                    ],
-                    "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/dimension_button.tsx",
-                    "deprecated": false,
-                    "trackAdoption": false,
-                    "isRequired": true
-                  }
-                ],
-                "returnComment": []
-              },
-              {
-                "parentPluginId": "visualizationUiComponents",
-                "id": "def-public.DimensionButton.$1.accessorConfig",
-                "type": "Object",
-                "tags": [],
-                "label": "accessorConfig",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "visualizationUiComponents",
-                    "scope": "public",
-                    "docId": "kibVisualizationUiComponentsPluginApi",
-                    "section": "def-public.AccessorConfig",
-                    "text": "AccessorConfig"
-                  }
-                ],
-                "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/dimension_button.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "visualizationUiComponents",
-                "id": "def-public.DimensionButton.$1.label",
-                "type": "string",
-                "tags": [],
-                "label": "label",
-                "description": [],
-                "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/dimension_button.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "visualizationUiComponents",
-                "id": "def-public.DimensionButton.$1.message",
-                "type": "Object",
-                "tags": [],
-                "label": "message",
-                "description": [],
-                "signature": [
-                  "Message",
-                  " | undefined"
-                ],
-                "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/dimension_button.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1248,7 +1093,7 @@
                 "signature": [
                   "{ value: Icon; label: string; icon?: ",
                   "IconType",
-                  " | Icon | undefined; shouldRotate?: boolean | undefined; canFill?: boolean | undefined; }[]"
+                  " | Icon | undefined; shouldRotate?: boolean | undefined; }[]"
                 ],
                 "path": "src/plugins/visualization_ui_components/public/components/icon_select.tsx",
                 "deprecated": false,
@@ -1363,7 +1208,7 @@
                 "signature": [
                   "{ value: Icon; label: string; icon?: ",
                   "IconType",
-                  " | Icon | undefined; shouldRotate?: boolean | undefined; canFill?: boolean | undefined; }[]"
+                  " | Icon | undefined; shouldRotate?: boolean | undefined; }[]"
                 ],
                 "path": "src/plugins/visualization_ui_components/public/components/icon_select.tsx",
                 "deprecated": false,
@@ -2687,6 +2532,21 @@
       },
       {
         "parentPluginId": "visualizationUiComponents",
+        "id": "def-public.emptyTitleText",
+        "type": "Any",
+        "tags": [],
+        "label": "emptyTitleText",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "src/plugins/visualization_ui_components/public/components/dimension_buttons/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizationUiComponents",
         "id": "def-public.FieldOption",
         "type": "Type",
         "tags": [],
@@ -2782,7 +2642,7 @@
         "signature": [
           "{ value: T; label: string; icon?: ",
           "IconType",
-          " | T | undefined; shouldRotate?: boolean | undefined; canFill?: boolean | undefined; }[]"
+          " | T | undefined; shouldRotate?: boolean | undefined; }[]"
         ],
         "path": "src/plugins/visualization_ui_components/public/components/icon_select.tsx",
         "deprecated": false,

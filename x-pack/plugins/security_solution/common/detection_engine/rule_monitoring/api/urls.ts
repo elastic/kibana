@@ -28,6 +28,13 @@ export const GET_SPACE_HEALTH_URL = `${INTERNAL_URL}/health/_space` as const;
  */
 export const GET_RULE_HEALTH_URL = `${INTERNAL_URL}/health/_rule` as const;
 
+/**
+ * Similar to the "setup" command of beats, this endpoint installs resources
+ * (dashboards, data views, etc) related to rule monitoring and Detection Engine health,
+ * and can do any other setup work.
+ */
+export const SETUP_HEALTH_URL = `${INTERNAL_URL}/health/_setup` as const;
+
 // -------------------------------------------------------------------------------------------------
 // Rule execution logs API
 

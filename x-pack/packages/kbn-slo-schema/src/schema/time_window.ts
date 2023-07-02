@@ -20,6 +20,10 @@ const calendarAlignedTimeWindowSchema = t.type({
   type: calendarAlignedTimeWindowTypeSchema,
 });
 
+const timeWindowTypeSchema = t.union([
+  rollingTimeWindowTypeSchema,
+  calendarAlignedTimeWindowTypeSchema,
+]);
 const timeWindowSchema = t.union([rollingTimeWindowSchema, calendarAlignedTimeWindowSchema]);
 
 export {
@@ -28,4 +32,5 @@ export {
   calendarAlignedTimeWindowSchema,
   calendarAlignedTimeWindowTypeSchema,
   timeWindowSchema,
+  timeWindowTypeSchema,
 };

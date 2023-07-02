@@ -80,10 +80,10 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'dashboard',
             namespaces: ['default'],
             migrationVersion: {
-              dashboard: '8.7.0',
+              dashboard: '8.9.0',
             },
             coreMigrationVersion: '8.8.0',
-            typeMigrationVersion: '8.7.0',
+            typeMigrationVersion: '8.9.0',
             updated_at: resp.body.updated_at,
             created_at: resp.body.created_at,
             version: resp.body.version,

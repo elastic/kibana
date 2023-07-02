@@ -35,7 +35,7 @@ import { IndexPattern } from '../../../../../types';
 import { cloneDeep } from 'lodash';
 import { IncludeExcludeRow } from './include_exclude_options';
 
-jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
+jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
     topValues: {
       buckets: [
@@ -50,7 +50,7 @@ jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   }),
 }));
 
-jest.mock('@kbn/unified-field-list-plugin/public/hooks/use_existing_fields', () => ({
+jest.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => ({
   useExistingFieldsReader: jest.fn(() => {
     return {
       hasFieldData: (dataViewId: string, fieldName: string) => {
@@ -672,6 +672,20 @@ describe('terms', () => {
           name: 'test',
           displayName: 'test',
           type: 'string',
+        })
+      ).toEqual(undefined);
+    });
+
+    it('should not return an operation if type is not supported', () => {
+      expect(
+        termsOperation.getPossibleOperationForField({
+          aggregatable: true,
+          searchable: true,
+          name: 'test',
+          displayName: 'test',
+          type: 'number',
+          aggregationRestrictions: {},
+          timeSeriesMetric: 'counter',
         })
       ).toEqual(undefined);
     });
@@ -2982,6 +2996,49 @@ describe('terms', () => {
         })
       ).toEqual(true);
     });
+
+    it('should reject if the passed field is a timeSeries counter field', () => {
+      const indexPattern = createMockedIndexPattern({}, [
+        {
+          name: 'bytes_counter',
+          displayName: 'bytes_counter',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+          timeSeriesMetric: 'counter',
+        },
+      ]);
+      const field = indexPattern.getFieldByName('bytes_counter')!;
+
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn('source'),
+          field,
+          indexPattern,
+        })
+      ).toEqual(false);
+    });
+
+    it('should reject if the passed columns has a timeSeries counter field', () => {
+      const indexPattern = createMockedIndexPattern({}, [
+        {
+          name: 'bytes_counter',
+          displayName: 'bytes_counter',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+          timeSeriesMetric: 'counter',
+        },
+      ]);
+
+      expect(
+        termsOperation.canAddNewField?.({
+          targetColumn: createMultiTermsColumn('source'),
+          sourceColumn: createMultiTermsColumn(['bytes_counter']),
+          indexPattern,
+        })
+      ).toEqual(false);
+    });
   });
 
   describe('getParamsForMultipleFields', () => {
@@ -3100,6 +3157,28 @@ describe('terms', () => {
         secondaryFields: expect.arrayContaining(['dest']),
         parentFormat: { id: 'multi_terms' },
       });
+    });
+
+    it('should not append timeSeries counter field to multiterms', () => {
+      const indexPattern = createMockedIndexPattern({}, [
+        {
+          name: 'bytes_counter',
+          displayName: 'bytes_counter',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+          timeSeriesMetric: 'counter',
+        },
+      ]);
+      const field = indexPattern.getFieldByName('bytes_counter')!;
+
+      expect(
+        termsOperation.getParamsForMultipleFields?.({
+          targetColumn: createMultiTermsColumn('source'),
+          field,
+          indexPattern,
+        })
+      ).toEqual({ secondaryFields: [], parentFormat: { id: 'terms' } });
     });
   });
 

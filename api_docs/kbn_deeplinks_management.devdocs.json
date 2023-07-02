@@ -62,7 +62,7 @@
         "label": "LinkId",
         "description": [],
         "signature": [
-          "\"cases\" | \"tags\" | \"transform\" | \"watcher\" | \"settings\" | \"dataViews\" | \"spaces\" | \"reporting\" | \"rollup_jobs\" | \"snapshot_restore\" | \"api_keys\" | \"cross_cluster_replication\" | \"index_lifecycle_management\" | \"index_management\" | \"ingest_pipelines\" | \"jobsListLink\" | \"objects\" | \"pipelines\" | \"remote_clusters\" | \"triggersActions\" | \"triggersActionsConnectors\""
+          "\"transform\" | \"watcher\" | \"cases\" | \"tags\" | \"settings\" | \"dataViews\" | \"spaces\" | \"reporting\" | \"rollup_jobs\" | \"snapshot_restore\" | \"api_keys\" | \"cross_cluster_replication\" | \"index_lifecycle_management\" | \"index_management\" | \"ingest_pipelines\" | \"jobsListLink\" | \"objects\" | \"pipelines\" | \"remote_clusters\" | \"triggersActions\" | \"triggersActionsConnectors\""
         ],
         "path": "packages/deeplinks/management/deep_links.ts",
         "deprecated": false,

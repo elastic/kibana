@@ -215,7 +215,7 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.enableInfrastructureHostsView', {
       defaultMessage: 'Infrastructure Hosts view',
     }),
-    value: false,
+    value: true,
     description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
       defaultMessage: '{betaLabel} Enable the Hosts view in the Infrastructure app.',
       values: {
