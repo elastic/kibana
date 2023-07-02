@@ -201,13 +201,15 @@ export class UptimeEsClient {
   async getIndices() {
     // if isLegacyAlert appends synthetics-* if it's not already there
     let indices = '';
+    let syntheticsIndexRemoved = false;
     if (this.heartbeatIndices) {
       indices = this.heartbeatIndices;
     } else {
       const settings = await savedObjectsAdapter.getUptimeDynamicSettings(this.savedObjectsClient);
       indices = settings?.heartbeatIndices || '';
+      syntheticsIndexRemoved = settings.syntheticsIndexRemoved ?? false;
     }
-    if (this.isLegacyAlert && !indices.includes('synthetics-')) {
+    if (this.isLegacyAlert && !indices.includes('synthetics-') && syntheticsIndexRemoved) {
       indices = indices + ',synthetics-*';
     }
     return indices;
