@@ -215,11 +215,11 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           )
           .expect(200, {
             id: 'system-connector-test-system-action',
-            connector_type_id: 'test-system-action',
+            actionTypeId: 'test-system-action',
             name: 'System action: test-system-action',
-            is_preconfigured: false,
-            is_system_action: true,
-            is_deprecated: false,
+            isPreconfigured: false,
+            isSystemAction: true,
+            isDeprecated: false,
           });
       });
     });
