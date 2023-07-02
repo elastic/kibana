@@ -9,7 +9,6 @@ import type { GetBenchmarkResponse } from '@kbn/cloud-security-posture-plugin/co
 import type { SuperTest, Test } from 'supertest';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-// import { createPackagePolicy } from './status';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

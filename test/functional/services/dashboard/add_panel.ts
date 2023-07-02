@@ -131,7 +131,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async isAddPanelOpen() {
     this.log.debug('DashboardAddPanel.isAddPanelOpen');
-    return await this.testSubjects.exists('dashboardAddPanel');
+    return await this.testSubjects.exists('dashboardAddPanel', { timeout: 500 });
   }
 
   async ensureAddPanelIsShowing() {
@@ -149,7 +149,7 @@ export class DashboardAddPanelService extends FtrService {
   }
 
   async closeAddPanel() {
-    await this.flyout.ensureClosed('dashboardAddPanel');
+    await this.flyout.ensureAllClosed();
   }
 
   async filterEmbeddableNames(name: string) {

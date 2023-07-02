@@ -39,7 +39,6 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_ASSIGNEES_PER_CASE,
-  MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 
 import { arraysDifference, getCaseToUpdate } from '../utils';
@@ -70,24 +69,6 @@ function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
   if (requestsUpdatingOwner.length > 0) {
     const ids = requestsUpdatingOwner.map(({ updateReq }) => updateReq.id);
     throw Boom.badRequest(`Updating the owner of a case  is not allowed ids: [${ids.join(', ')}]`);
-  }
-}
-
-/**
- * Throws an error if any of the requests updates a title and the length is over MAX_TITLE_LENGTH.
- */
-function throwIfTitleIsInvalid(requests: UpdateRequestWithOriginalCase[]) {
-  const requestsInvalidTitle = requests.filter(
-    ({ updateReq }) => updateReq.title !== undefined && updateReq.title.length > MAX_TITLE_LENGTH
-  );
-
-  if (requestsInvalidTitle.length > 0) {
-    const ids = requestsInvalidTitle.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(
-      `The length of the title is too long. The maximum length is ${MAX_TITLE_LENGTH}, ids: [${ids.join(
-        ', '
-      )}]`
-    );
   }
 }
 
@@ -385,7 +366,6 @@ export const update = async (
     const hasPlatinumLicense = await licensingService.isAtLeastPlatinum();
 
     throwIfUpdateOwner(casesToUpdate);
-    throwIfTitleIsInvalid(casesToUpdate);
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
     throwIfTotalAssigneesAreInvalid(casesToUpdate);
 

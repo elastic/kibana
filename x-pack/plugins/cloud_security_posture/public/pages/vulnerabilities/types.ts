@@ -52,22 +52,22 @@ export interface VulnerabilityRecord {
     version: string;
   };
   cloud: {
-    image: {
+    image?: {
       id: string;
     };
-    provider: string;
-    instance: {
+    provider?: string;
+    instance?: {
       id: string;
     };
-    machine: {
+    machine?: {
       type: string;
     };
     region: string;
-    availability_zone: string;
-    service: {
+    availability_zone?: string;
+    service?: {
       name: string;
     };
-    account: {
+    account?: {
       id: string;
     };
   };

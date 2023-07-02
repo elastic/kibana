@@ -13,6 +13,13 @@ import type {
   RulesClientApi,
 } from '@kbn/alerting-plugin/server/types';
 
+import type {
+  SecuritySolutionPluginCoreSetupDependencies,
+  SecuritySolutionPluginCoreStartDependencies,
+  SecuritySolutionPluginSetupDependencies,
+  SecuritySolutionPluginStartDependencies,
+} from '../../../../plugin_contract';
+
 import type { IDetectionEngineHealthClient } from './detection_engine_health/detection_engine_health_client_interface';
 import type { IRuleExecutionLogForRoutes } from './rule_execution_log/client_for_routes/client_interface';
 import type {
@@ -21,7 +28,15 @@ import type {
 } from './rule_execution_log/client_for_executors/client_interface';
 
 export interface IRuleMonitoringService {
-  registerEventLogProvider(): void;
+  setup(
+    core: SecuritySolutionPluginCoreSetupDependencies,
+    plugins: SecuritySolutionPluginSetupDependencies
+  ): void;
+
+  start(
+    core: SecuritySolutionPluginCoreStartDependencies,
+    plugins: SecuritySolutionPluginStartDependencies
+  ): void;
 
   createDetectionEngineHealthClient(
     params: DetectionEngineHealthClientParams
@@ -37,7 +52,6 @@ export interface IRuleMonitoringService {
 }
 
 export interface DetectionEngineHealthClientParams {
-  savedObjectsClient: SavedObjectsClientContract;
   rulesClient: RulesClientApi;
   eventLogClient: IEventLogClient;
   currentSpaceId: string;

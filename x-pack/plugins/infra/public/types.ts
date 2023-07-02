@@ -39,6 +39,7 @@ import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { UnwrapPromise } from '../common/utility_types';
 import type {
   SourceProviderProps,
@@ -84,6 +85,7 @@ export interface InfraClientSetupDeps {
   share: SharePluginSetup;
   lens: LensPublicStart;
   fieldFormats: FieldFormatsSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export interface InfraClientStartDeps {
@@ -93,6 +95,7 @@ export interface InfraClientStartDeps {
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
   embeddable?: EmbeddableStart;
+  kibanaVersion?: string;
   lens: LensPublicStart;
   ml: MlPluginStart;
   observability: ObservabilityPublicStart;
@@ -107,6 +110,7 @@ export interface InfraClientStartDeps {
   usageCollection: UsageCollectionStart;
   telemetry: ITelemetryClient;
   fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;

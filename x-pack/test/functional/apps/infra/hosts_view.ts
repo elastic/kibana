@@ -178,6 +178,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.common.navigateToApp('infraOps');
 
       await pageObjects.infraHome.clickDismissKubernetesTourButton();
+      await pageObjects.infraHostsView.getBetaBadgeExists();
       await pageObjects.infraHostsView.clickTryHostViewBadge();
 
       const pageUrl = await browser.getCurrentUrl();
@@ -206,6 +207,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('Should show hosts landing page with callout when the hosts view is disabled', async () => {
+          await pageObjects.infraHostsView.getBetaBadgeExists();
           const landingPageDisabled =
             await pageObjects.infraHostsView.getHostsLandingPageDisabled();
           const learnMoreDocsUrl = await pageObjects.infraHostsView.getHostsLandingPageDocsLink();
@@ -243,7 +245,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('#Single host Flyout', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/159368
+    // FLAKY: https://github.com/elastic/kibana/issues/159369
+    describe.skip('#Single host Flyout', () => {
       before(async () => {
         await setHostViewEnabled(true);
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
@@ -264,24 +268,51 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('should render metadata tab, add and remove filter', async () => {
-        const metadataTab = await pageObjects.infraHostsView.getMetadataTabName();
-        expect(metadataTab).to.contain('Metadata');
+      describe('Metadata Tab', () => {
+        it('should render metadata tab, add and remove filter', async () => {
+          const metadataTab = await pageObjects.infraHostsView.getMetadataTabName();
+          expect(metadataTab).to.contain('Metadata');
 
-        await pageObjects.infraHostsView.clickAddMetadataFilter();
-        await pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.infraHostsView.clickAddMetadataFilter();
+          await pageObjects.header.waitUntilLoadingHasFinished();
 
-        // Add Filter
-        const addedFilter = await pageObjects.infraHostsView.getAppliedFilter();
-        expect(addedFilter).to.contain('host.architecture: arm64');
-        const removeFilterExists = await pageObjects.infraHostsView.getRemoveFilterExist();
-        expect(removeFilterExists).to.be(true);
+          // Add Filter
+          const addedFilter = await pageObjects.infraHostsView.getAppliedFilter();
+          expect(addedFilter).to.contain('host.architecture: arm64');
+          const removeFilterExists = await pageObjects.infraHostsView.getRemoveFilterExist();
+          expect(removeFilterExists).to.be(true);
 
-        // Remove filter
-        await pageObjects.infraHostsView.clickRemoveMetadataFilter();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        const removeFilterShouldNotExist = await pageObjects.infraHostsView.getRemoveFilterExist();
-        expect(removeFilterShouldNotExist).to.be(false);
+          // Remove filter
+          await pageObjects.infraHostsView.clickRemoveMetadataFilter();
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          const removeFilterShouldNotExist =
+            await pageObjects.infraHostsView.getRemoveFilterExist();
+          expect(removeFilterShouldNotExist).to.be(false);
+        });
+      });
+
+      describe('Processes Tab', () => {
+        it('should render processes tab and with Total Value summary', async () => {
+          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+          const processesTotalValue =
+            await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
+          const processValue = await processesTotalValue.getVisibleText();
+          expect(processValue).to.eql('313');
+        });
+
+        it('should expand processes table row', async () => {
+          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+          await pageObjects.infraHostsView.getProcessesTable();
+          await pageObjects.infraHostsView.getProcessesTableBody();
+          await pageObjects.infraHostsView.clickProcessesTableExpandButton();
+        });
+      });
+
+      describe('Logs Tab', () => {
+        it('should render logs tab', async () => {
+          await pageObjects.infraHostsView.clickLogsFlyoutTab();
+          await testSubjects.existOrFail('infraAssetDetailsLogsTabContent');
+        });
       });
 
       it('should navigate to Uptime after click', async () => {
@@ -317,19 +348,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await returnTo(HOSTS_VIEW_PATH);
       });
 
-      it('should render processes tab and with Total Value summary', async () => {
-        await pageObjects.infraHostsView.clickProcessesFlyoutTab();
-        const processesTotalValue =
-          await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
-        const processValue = await processesTotalValue.getVisibleText();
-        expect(processValue).to.eql('313');
-      });
+      describe('Processes Tab', () => {
+        it('should render processes tab and with Total Value summary', async () => {
+          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+          const processesTotalValue =
+            await pageObjects.infraHostsView.getProcessesTabContentTotalValue();
+          const processValue = await processesTotalValue.getVisibleText();
+          expect(processValue).to.eql('313');
+        });
 
-      it('should expand processes table row', async () => {
-        await pageObjects.infraHostsView.clickProcessesFlyoutTab();
-        await pageObjects.infraHostsView.getProcessesTable();
-        await pageObjects.infraHostsView.getProcessesTableBody();
-        await pageObjects.infraHostsView.clickProcessesTableExpandButton();
+        it('should expand processes table row', async () => {
+          await pageObjects.infraHostsView.clickProcessesFlyoutTab();
+          await pageObjects.infraHostsView.getProcessesTable();
+          await pageObjects.infraHostsView.getProcessesTableBody();
+          await pageObjects.infraHostsView.clickProcessesTableExpandButton();
+        });
       });
     });
 
@@ -356,6 +389,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(documentTitle).to.contain('Hosts - Infrastructure - Observability - Elastic');
       });
 
+      it('should render the title beta badge', async () => {
+        await pageObjects.infraHostsView.getBetaBadgeExists();
+      });
+
       describe('Hosts table', async () => {
         let hostRows: WebElementWrapper[] = [];
 
@@ -373,6 +410,34 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               .getHostsRowData(row)
               .then((hostRowData) => expect(hostRowData).to.eql(tableEntries[position]));
           });
+        });
+
+        it('should select and filter hosts inside the table', async () => {
+          const selectHostsButtonExistsOnLoad =
+            await pageObjects.infraHostsView.selectedHostsButtonExist();
+          expect(selectHostsButtonExistsOnLoad).to.be(false);
+
+          await pageObjects.infraHostsView.clickHostCheckbox('demo-stack-client-01', '-');
+          await pageObjects.infraHostsView.clickHostCheckbox('demo-stack-apache-01', '-');
+
+          const selectHostsButtonExistsOnSelection =
+            await pageObjects.infraHostsView.selectedHostsButtonExist();
+          expect(selectHostsButtonExistsOnSelection).to.be(true);
+
+          await pageObjects.infraHostsView.clickSelectedHostsButton();
+          await pageObjects.infraHostsView.clickSelectedHostsAddFilterButton();
+
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          const hostRowsAfterFilter = await pageObjects.infraHostsView.getHostsTableData();
+          expect(hostRowsAfterFilter.length).to.equal(2);
+
+          const deleteFilterButton = await find.byCssSelector(
+            `[title="Delete host.name: demo-stack-client-01 OR host.name: demo-stack-apache-01"]`
+          );
+          await deleteFilterButton.click();
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          const hostRowsAfterRemovingFilter = await pageObjects.infraHostsView.getHostsTableData();
+          expect(hostRowsAfterRemovingFilter.length).to.equal(6);
         });
       });
 
@@ -440,6 +505,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         it('should load the Logs tab section when clicking on it', async () => {
           await testSubjects.existOrFail('hostsView-logs');
+        });
+
+        it('should load the Logs tab with the right columns', async () => {
+          await retry.try(async () => {
+            const columnLabels = await pageObjects.infraHostsView.getLogsTableColumnHeaders();
+
+            expect(columnLabels).to.eql(['Timestamp', 'host.name', 'Message']);
+          });
         });
       });
 

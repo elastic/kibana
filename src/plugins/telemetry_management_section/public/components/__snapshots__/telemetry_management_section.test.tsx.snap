@@ -261,6 +261,7 @@ exports[`TelemetryManagementSectionComponent renders null because allowChangingO
       "currentKibanaVersion": "mock_kibana_version",
       "defaultConfig": Object {
         "allowChangingOptInStatus": false,
+        "appendServerlessChannelsSuffix": false,
         "banner": true,
         "labels": Object {},
         "optIn": true,

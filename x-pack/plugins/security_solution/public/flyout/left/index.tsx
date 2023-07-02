@@ -20,6 +20,7 @@ import { useLeftPanelContext } from './context';
 export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation';
 export const LeftPanelKey: LeftPanelProps['key'] = 'document-details-left';
 
+export const LeftPanelVisualizeTabPath: LeftPanelProps['path'] = ['visualize'];
 export const LeftPanelInsightsTabPath: LeftPanelProps['path'] = ['insights'];
 export const LeftPanelInvestigationTabPath: LeftPanelProps['path'] = ['investigation'];
 

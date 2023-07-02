@@ -7,7 +7,7 @@
 
 import { EuiCommentProps } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { omit } from 'lodash/fp';
+import { omit, uniq } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
@@ -45,6 +45,10 @@ type ShowAssistantOverlay = ({
 interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
+  baseAllow: string[];
+  baseAllowReplacement: string[];
+  defaultAllow: string[];
+  defaultAllowReplacement: string[];
   basePromptContexts?: PromptContextTemplate[];
   baseQuickPrompts?: QuickPrompt[];
   baseSystemPrompts?: Prompt[];
@@ -52,14 +56,18 @@ interface AssistantProviderProps {
   getComments: ({
     currentConversation,
     lastCommentRef,
+    showAnonymizedValues,
   }: {
     currentConversation: Conversation;
     lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
+    showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
   getInitialConversations: () => Record<string, Conversation>;
   nameSpace?: string;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
+  setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
+  setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   title?: string;
 }
 
@@ -68,6 +76,10 @@ interface UseAssistantContext {
   augmentMessageCodeBlocks: (currentConversation: Conversation) => CodeBlockDetails[][];
   allQuickPrompts: QuickPrompt[];
   allSystemPrompts: Prompt[];
+  baseAllow: string[];
+  baseAllowReplacement: string[];
+  defaultAllow: string[];
+  defaultAllowReplacement: string[];
   basePromptContexts: PromptContextTemplate[];
   baseQuickPrompts: QuickPrompt[];
   baseSystemPrompts: Prompt[];
@@ -76,9 +88,12 @@ interface UseAssistantContext {
   getComments: ({
     currentConversation,
     lastCommentRef,
+    showAnonymizedValues,
   }: {
     currentConversation: Conversation;
     lastCommentRef: React.MutableRefObject<HTMLDivElement | null>;
+
+    showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
   http: HttpSetup;
   promptContexts: Record<string, PromptContext>;
@@ -87,6 +102,8 @@ interface UseAssistantContext {
   setAllQuickPrompts: React.Dispatch<React.SetStateAction<QuickPrompt[] | undefined>>;
   setAllSystemPrompts: React.Dispatch<React.SetStateAction<Prompt[] | undefined>>;
   setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
+  setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
+  setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
   title: string;
@@ -98,6 +115,10 @@ const AssistantContext = React.createContext<UseAssistantContext | undefined>(un
 export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   actionTypeRegistry,
   augmentMessageCodeBlocks,
+  baseAllow,
+  baseAllowReplacement,
+  defaultAllow,
+  defaultAllowReplacement,
   basePromptContexts = [],
   baseQuickPrompts = [],
   baseSystemPrompts = BASE_SYSTEM_PROMPTS,
@@ -107,6 +128,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   getInitialConversations,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   setConversations,
+  setDefaultAllow,
+  setDefaultAllowReplacement,
   title = DEFAULT_ASSISTANT_TITLE,
 }) => {
   /**
@@ -202,11 +225,15 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       augmentMessageCodeBlocks,
       allQuickPrompts: localStorageQuickPrompts ?? [],
       allSystemPrompts: localStorageSystemPrompts ?? [],
+      baseAllow: uniq(baseAllow),
+      baseAllowReplacement: uniq(baseAllowReplacement),
       basePromptContexts,
       baseQuickPrompts,
       baseSystemPrompts,
       conversationIds,
       conversations,
+      defaultAllow: uniq(defaultAllow),
+      defaultAllowReplacement: uniq(defaultAllowReplacement),
       getComments,
       http,
       promptContexts,
@@ -215,6 +242,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       setAllQuickPrompts: setLocalStorageQuickPrompts,
       setAllSystemPrompts: setLocalStorageSystemPrompts,
       setConversations: onConversationsUpdated,
+      setDefaultAllow,
+      setDefaultAllowReplacement,
       setShowAssistantOverlay,
       showAssistantOverlay,
       title,
@@ -223,19 +252,25 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     [
       actionTypeRegistry,
       augmentMessageCodeBlocks,
+      baseAllow,
+      baseAllowReplacement,
       basePromptContexts,
       baseQuickPrompts,
       baseSystemPrompts,
       conversationIds,
       conversations,
+      defaultAllow,
+      defaultAllowReplacement,
       getComments,
       http,
       localStorageQuickPrompts,
       localStorageSystemPrompts,
-      promptContexts,
       nameSpace,
-      registerPromptContext,
       onConversationsUpdated,
+      promptContexts,
+      registerPromptContext,
+      setDefaultAllow,
+      setDefaultAllowReplacement,
       setLocalStorageQuickPrompts,
       setLocalStorageSystemPrompts,
       showAssistantOverlay,

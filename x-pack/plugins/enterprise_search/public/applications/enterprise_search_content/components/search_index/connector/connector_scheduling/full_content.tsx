@@ -17,6 +17,8 @@ import {
   EuiPanel,
   EuiAccordion,
   EuiTitle,
+  EuiButtonIcon,
+  EuiSwitchProps,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -25,11 +27,13 @@ import { SyncJobType } from '../../../../../../../common/types/connectors';
 
 import { ConnectorViewIndex, CrawlerViewIndex } from '../../../../types';
 
+import { PlatinumLicensePopover } from '../../../shared/platinum_license_popover/platinum_license_popover';
 import { ConnectorSchedulingLogic } from '../connector_scheduling_logic';
 
 import { ConnectorCronEditor } from './connector_cron_editor';
 
 export interface ConnectorContentSchedulingProps {
+  hasPlatinumLicense?: boolean;
   index: CrawlerViewIndex | ConnectorViewIndex;
   type: SyncJobType;
 }
@@ -81,9 +85,26 @@ const getDescriptionText = (type: ConnectorContentSchedulingProps['type']) => {
   }
 };
 
+const EnableSwitch: React.FC<{
+  checked: boolean;
+  disabled: boolean;
+  onChange: EuiSwitchProps['onChange'];
+}> = ({ disabled, checked, onChange }) => (
+  <EuiSwitch
+    disabled={disabled}
+    checked={checked}
+    label={i18n.translate(
+      'xpack.enterpriseSearch.content.indices.connectorScheduling.switch.label',
+      { defaultMessage: 'Enabled' }
+    )}
+    onChange={onChange}
+  />
+);
+
 export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProps> = ({
   type,
   index,
+  hasPlatinumLicense = false,
 }) => {
   const { setHasChanges, updateScheduling } = useActions(ConnectorSchedulingLogic);
   const schedulingInput = index.connector.scheduling;
@@ -91,6 +112,14 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
   const [isAccordionOpen, setIsAccordionOpen] = useState<'open' | 'closed'>(
     scheduling[type].enabled ? 'open' : 'closed'
   );
+  const [isPlatinumPopoverOpen, setIsPlatinumPopoverOpen] = useState(false);
+
+  const isGated = !hasPlatinumLicense && type === SyncJobType.ACCESS_CONTROL;
+  const isDocumentLevelSecurityDisabled =
+    !index.connector.configuration.use_document_level_security?.value;
+
+  const isEnableSwitchDisabled =
+    type === SyncJobType.ACCESS_CONTROL && (!hasPlatinumLicense || isDocumentLevelSecurityDisabled);
 
   return (
     <>
@@ -117,30 +146,76 @@ export const ConnectorContentScheduling: React.FC<ConnectorContentSchedulingProp
             setIsAccordionOpen(isOpen ? 'open' : 'closed');
           }}
           extraAction={
-            <EuiSwitch
-              checked={scheduling[type].enabled}
-              label={i18n.translate(
-                'xpack.enterpriseSearch.content.indices.connectorScheduling.switch.label',
-                { defaultMessage: 'Enabled' }
-              )}
-              onChange={(e) => {
-                if (e.target.checked) {
-                  setIsAccordionOpen('open');
-                }
-                setScheduling({
-                  ...scheduling,
-                  ...{
-                    [type]: { enabled: e.target.checked, interval: scheduling[type].interval },
-                  },
-                });
-                setHasChanges(type);
-              }}
-            />
+            isGated ? (
+              <EuiFlexGroup responsive={false} gutterSize="s">
+                <EuiFlexItem>
+                  <PlatinumLicensePopover
+                    isPopoverOpen={isPlatinumPopoverOpen}
+                    closePopover={() => setIsPlatinumPopoverOpen(!isPlatinumPopoverOpen)}
+                    button={
+                      <EuiButtonIcon
+                        aria-label={i18n.translate(
+                          'xpack.enterpriseSearch.content.newIndex.selectConnector.openPopoverLabel',
+                          {
+                            defaultMessage: 'Open licensing popover',
+                          }
+                        )}
+                        iconType="questionInCircle"
+                        onClick={() => setIsPlatinumPopoverOpen(!isPlatinumPopoverOpen)}
+                      />
+                    }
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EnableSwitch
+                    disabled={isEnableSwitchDisabled}
+                    checked={scheduling[type].enabled}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setIsAccordionOpen('open');
+                      }
+                      setScheduling({
+                        ...scheduling,
+                        ...{
+                          [type]: {
+                            enabled: e.target.checked,
+                            interval: scheduling[type].interval,
+                          },
+                        },
+                      });
+                      setHasChanges(type);
+                    }}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EnableSwitch
+                disabled={isEnableSwitchDisabled}
+                checked={scheduling[type].enabled}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setIsAccordionOpen('open');
+                  }
+                  setScheduling({
+                    ...scheduling,
+                    ...{
+                      [type]: {
+                        enabled: e.target.checked,
+                        interval: scheduling[type].interval,
+                      },
+                    },
+                  });
+                  setHasChanges(type);
+                }}
+              />
+            )
           }
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
               <ConnectorCronEditor
+                disabled={isGated}
+                frequencyBlockList={type === SyncJobType.ACCESS_CONTROL ? [] : undefined}
                 scheduling={scheduling[type]}
                 type={type}
                 onReset={() => {

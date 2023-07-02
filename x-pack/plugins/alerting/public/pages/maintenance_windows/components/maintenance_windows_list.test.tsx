@@ -7,6 +7,7 @@
 
 import React from 'react';
 import moment from 'moment';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { MaintenanceWindowsList } from './maintenance_windows_list';
 import { MaintenanceWindowFindResponse } from '../types';
@@ -125,7 +126,7 @@ describe('MaintenanceWindowsList', () => {
     expect(result.getAllByTestId('table-actions-icon-button')).toHaveLength(items.length);
   });
 
-  test('it does NOT renders action column in readonly', () => {
+  test('it does NOT render action column in readonly', () => {
     const result = appMockRenderer.render(
       <MaintenanceWindowsList
         refreshData={() => {}}
@@ -139,5 +140,19 @@ describe('MaintenanceWindowsList', () => {
 
     // check if action menu is there
     expect(result.queryByTestId('table-actions-icon-button')).not.toBeInTheDocument();
+  });
+
+  test('it calls refreshData when user presses refresh button', async () => {
+    const refreshData = jest.fn();
+    const result = appMockRenderer.render(
+      <MaintenanceWindowsList
+        refreshData={refreshData}
+        loading={false}
+        items={items}
+        readOnly={false}
+      />
+    );
+    fireEvent.click(result.getByTestId('refresh-button'));
+    await waitFor(() => expect(refreshData).toBeCalled());
   });
 });
