@@ -115,12 +115,12 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           referenced_by_count: 0,
         },
         {
-          connector_type_id: 'test-system-action',
-          id: 'system-connector-test-system-action',
+          connector_type_id: 'test.system-action',
+          id: 'system-connector-test.system-action',
           is_deprecated: false,
           is_preconfigured: false,
           is_system_action: true,
-          name: 'System action: test-system-action',
+          name: 'System action: test.system-action',
           referenced_by_count: 0,
         },
         {
@@ -236,12 +236,12 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
           referenced_by_count: 0,
         },
         {
-          connector_type_id: 'test-system-action',
-          id: 'system-connector-test-system-action',
+          connector_type_id: 'test.system-action',
+          id: 'system-connector-test.system-action',
           is_deprecated: false,
           is_preconfigured: false,
           is_system_action: true,
-          name: 'System action: test-system-action',
+          name: 'System action: test.system-action',
           referenced_by_count: 0,
         },
         {
@@ -371,12 +371,12 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
             referencedByCount: 0,
           },
           {
-            actionTypeId: 'test-system-action',
-            id: 'system-connector-test-system-action',
+            actionTypeId: 'test.system-action',
+            id: 'system-connector-test.system-action',
             isDeprecated: false,
             isPreconfigured: false,
             isSystemAction: true,
-            name: 'System action: test-system-action',
+            name: 'System action: test.system-action',
             referencedByCount: 0,
           },
           {

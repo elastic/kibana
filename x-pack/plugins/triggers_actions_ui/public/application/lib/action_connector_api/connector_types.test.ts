@@ -24,6 +24,7 @@ describe('loadActionTypes', () => {
         enabled_in_license: true,
         supported_feature_ids: ['alerting'],
         minimum_license_required: 'basic',
+        is_system_action_type: false,
       },
     ];
     http.get.mockResolvedValueOnce(apiResponseValue);
@@ -60,6 +61,7 @@ describe('loadActionTypes', () => {
         enabled_in_license: true,
         supported_feature_ids: ['alerting'],
         minimum_license_required: 'basic',
+        is_system_action_type: false,
       },
     ];
     http.get.mockResolvedValueOnce(apiResponseValue);

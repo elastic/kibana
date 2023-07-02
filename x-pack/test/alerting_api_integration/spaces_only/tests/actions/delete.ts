@@ -94,13 +94,13 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
         .delete(
           `${getUrlPrefix(
             Spaces.space1.id
-          )}/api/actions/connector/system-connector-test-system-action`
+          )}/api/actions/connector/system-connector-test.system-action`
         )
         .set('kbn-xsrf', 'foo')
         .expect(400, {
           statusCode: 400,
           error: 'Bad Request',
-          message: 'System action system-connector-test-system-action is not allowed to delete.',
+          message: 'System action system-connector-test.system-action is not allowed to delete.',
         });
     });
 
@@ -181,13 +181,13 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
           .delete(
             `${getUrlPrefix(
               Spaces.space1.id
-            )}/api/actions/action/system-connector-test-system-action`
+            )}/api/actions/action/system-connector-test.system-action`
           )
           .set('kbn-xsrf', 'foo')
           .expect(400, {
             statusCode: 400,
             error: 'Bad Request',
-            message: 'System action system-connector-test-system-action is not allowed to delete.',
+            message: 'System action system-connector-test.system-action is not allowed to delete.',
           });
       });
     });

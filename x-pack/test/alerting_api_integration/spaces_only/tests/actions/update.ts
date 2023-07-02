@@ -131,7 +131,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .put(
           `${getUrlPrefix(
             Spaces.space1.id
-          )}/api/actions/connector/system-connector-test-system-action`
+          )}/api/actions/connector/system-connector-test.system-action`
         )
         .set('kbn-xsrf', 'foo')
         .send({
@@ -146,7 +146,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .expect(400, {
           statusCode: 400,
           error: 'Bad Request',
-          message: 'System action system-connector-test-system-action is not allowed to update.',
+          message: 'System action system-connector-test.system-action is not allowed to update.',
         });
     });
 
@@ -319,7 +319,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           .put(
             `${getUrlPrefix(
               Spaces.space1.id
-            )}/api/actions/action/system-connector-test-system-action`
+            )}/api/actions/action/system-connector-test.system-action`
           )
           .set('kbn-xsrf', 'foo')
           .send({
@@ -334,7 +334,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
           .expect(400, {
             statusCode: 400,
             error: 'Bad Request',
-            message: 'System action system-connector-test-system-action is not allowed to update.',
+            message: 'System action system-connector-test.system-action is not allowed to update.',
           });
       });
 

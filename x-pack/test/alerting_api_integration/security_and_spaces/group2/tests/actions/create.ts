@@ -365,7 +365,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My system action',
-              connector_type_id: 'test-system-action',
+              connector_type_id: 'test.system-action',
               config: {},
               secrets: {},
             });
@@ -379,7 +379,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 403,
                 error: 'Forbidden',
-                message: 'Unauthorized to create a "test-system-action" action',
+                message: 'Unauthorized to create a "test.system-action" action',
               });
               break;
             case 'superuser at space1':
@@ -388,7 +388,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: 'System action creation is forbidden. Action type: test-system-action.',
+                message: 'System action creation is forbidden. Action type: test.system-action.',
               });
               break;
             default:

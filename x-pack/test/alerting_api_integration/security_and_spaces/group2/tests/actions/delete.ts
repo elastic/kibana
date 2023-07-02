@@ -181,7 +181,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
         it(`shouldn't delete system action`, async () => {
           const response = await supertestWithoutAuth
             .delete(
-              `${getUrlPrefix(space.id)}/api/actions/connector/system-connector-test-system-action`
+              `${getUrlPrefix(space.id)}/api/actions/connector/system-connector-test.system-action`
             )
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo');
@@ -205,7 +205,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'System action system-connector-test-system-action is not allowed to delete.',
+                  'System action system-connector-test.system-action is not allowed to delete.',
               });
               break;
             default:

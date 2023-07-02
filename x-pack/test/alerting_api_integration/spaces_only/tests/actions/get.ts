@@ -95,12 +95,12 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         .get(
           `${getUrlPrefix(
             Spaces.space1.id
-          )}/api/actions/connector/system-connector-test-system-action`
+          )}/api/actions/connector/system-connector-test.system-action`
         )
         .expect(200, {
-          id: 'system-connector-test-system-action',
-          connector_type_id: 'test-system-action',
-          name: 'System action: test-system-action',
+          id: 'system-connector-test.system-action',
+          connector_type_id: 'test.system-action',
+          name: 'System action: test.system-action',
           is_preconfigured: false,
           is_system_action: true,
           is_deprecated: false,
@@ -211,12 +211,12 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           .get(
             `${getUrlPrefix(
               Spaces.space1.id
-            )}/api/actions/action/system-connector-test-system-action`
+            )}/api/actions/action/system-connector-test.system-action`
           )
           .expect(200, {
-            id: 'system-connector-test-system-action',
-            actionTypeId: 'test-system-action',
-            name: 'System action: test-system-action',
+            id: 'system-connector-test.system-action',
+            actionTypeId: 'test.system-action',
+            name: 'System action: test.system-action',
             isPreconfigured: false,
             isSystemAction: true,
             isDeprecated: false,

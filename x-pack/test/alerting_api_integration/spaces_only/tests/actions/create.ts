@@ -103,14 +103,14 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           name: 'My system action',
-          connector_type_id: 'test-system-action',
+          connector_type_id: 'test.system-action',
           config: {},
           secrets: {},
         })
         .expect(400, {
           statusCode: 400,
           error: 'Bad Request',
-          message: 'System action creation is forbidden. Action type: test-system-action.',
+          message: 'System action creation is forbidden. Action type: test.system-action.',
         });
     });
 

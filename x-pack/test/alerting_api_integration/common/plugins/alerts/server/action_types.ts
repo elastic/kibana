@@ -403,7 +403,7 @@ function getExcludedActionType() {
 
 function getSystemActionType() {
   const result: ActionType<{}, {}, {}> = {
-    id: 'test-system-action',
+    id: 'test.system-action',
     name: 'Test system action',
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['alerting'],

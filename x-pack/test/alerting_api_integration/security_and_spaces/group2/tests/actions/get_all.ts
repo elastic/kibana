@@ -126,12 +126,12 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   referenced_by_count: 0,
                 },
                 {
-                  connector_type_id: 'test-system-action',
-                  id: 'system-connector-test-system-action',
+                  connector_type_id: 'test.system-action',
+                  id: 'system-connector-test.system-action',
                   is_deprecated: false,
                   is_preconfigured: false,
                   is_system_action: true,
-                  name: 'System action: test-system-action',
+                  name: 'System action: test.system-action',
                   referenced_by_count: 0,
                 },
                 {
@@ -295,12 +295,12 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   referenced_by_count: 0,
                 },
                 {
-                  connector_type_id: 'test-system-action',
-                  id: 'system-connector-test-system-action',
+                  connector_type_id: 'test.system-action',
+                  id: 'system-connector-test.system-action',
                   is_deprecated: false,
                   is_preconfigured: false,
                   is_system_action: true,
-                  name: 'System action: test-system-action',
+                  name: 'System action: test.system-action',
                   referenced_by_count: 0,
                 },
                 {
@@ -427,12 +427,12 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   referenced_by_count: 0,
                 },
                 {
-                  connector_type_id: 'test-system-action',
-                  id: 'system-connector-test-system-action',
+                  connector_type_id: 'test.system-action',
+                  id: 'system-connector-test.system-action',
                   is_deprecated: false,
                   is_preconfigured: false,
                   is_system_action: true,
-                  name: 'System action: test-system-action',
+                  name: 'System action: test.system-action',
                   referenced_by_count: 0,
                 },
                 {

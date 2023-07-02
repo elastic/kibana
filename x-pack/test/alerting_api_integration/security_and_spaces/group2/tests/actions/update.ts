@@ -391,7 +391,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         it(`shouldn't update a system action`, async () => {
           const response = await supertestWithoutAuth
             .put(
-              `${getUrlPrefix(space.id)}/api/actions/connector/system-connector-test-system-action`
+              `${getUrlPrefix(space.id)}/api/actions/connector/system-connector-test.system-action`
             )
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
@@ -424,7 +424,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'System action system-connector-test-system-action is not allowed to update.',
+                  'System action system-connector-test.system-action is not allowed to update.',
               });
               break;
             default:

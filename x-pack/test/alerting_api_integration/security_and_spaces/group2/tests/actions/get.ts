@@ -164,7 +164,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         it('should handle get system action request appropriately', async () => {
           const response = await supertestWithoutAuth
             .get(
-              `${getUrlPrefix(space.id)}/api/actions/connector/system-connector-test-system-action`
+              `${getUrlPrefix(space.id)}/api/actions/connector/system-connector-test.system-action`
             )
             .auth(user.username, user.password);
 
@@ -185,9 +185,9 @@ export default function getActionTests({ getService }: FtrProviderContext) {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
-                id: 'system-connector-test-system-action',
-                connector_type_id: 'test-system-action',
-                name: 'System action: test-system-action',
+                id: 'system-connector-test.system-action',
+                connector_type_id: 'test.system-action',
+                name: 'System action: test.system-action',
                 is_preconfigured: false,
                 is_system_action: true,
                 is_deprecated: false,
