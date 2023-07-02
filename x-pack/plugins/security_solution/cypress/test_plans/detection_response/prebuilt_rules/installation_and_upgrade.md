@@ -52,7 +52,7 @@ Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule 
 
 #### **Scenario: Package is installed via Fleet**
 
-**Coverage**: 0 tests - covered by other scenarios. This scenario will be covered by the **Users install the latest prebuilt rules** scenario, which will include 1 e2e test which installs the rules from the real package.
+**Automation**: 0 tests - covered by other scenarios. This scenario will be covered by the **Users install the latest prebuilt rules** scenario, which will include 1 e2e test which installs the rules from the real package.
 
 TODO: Where are scenarios for the real package?
 
@@ -64,7 +64,7 @@ Then the package gets installed in the background from EPR
 
 #### **Scenario: Package is installed via bundled Fleet package in Kibana**
 
-**Coverage**: 1 integration test.
+**Automation**: 1 integration test.
 
 ```Gherkin
 Given the package is not installed
@@ -75,7 +75,7 @@ Then the package gets installed in the background from packages bundled into Kib
 
 #### **Scenario: Large package can be installed on a small Kibana instance**
 
-**Coverage**: 1 integration test.
+**Automation**: 1 integration test.
 
 ```Gherkin
 Given the package is not installed
@@ -95,7 +95,7 @@ There's a legacy prebuilt rules API and a new one. Both should be tested against
 
 #### **Scenario: API can install all prebuilt rules**
 
-**Coverage**: 8 integration tests with mock rules: 4 examples below * 2 (we split checking API response and installed rules into two different tests).
+**Automation**: 8 integration tests with mock rules: 4 examples below * 2 (we split checking API response and installed rules into two different tests).
 
 ```Gherkin
 Given the package <package_type> is installed
@@ -122,7 +122,7 @@ Notes:
 
 #### **Scenario: API can install prebuilt rules that are not yet installed**
 
-**Coverage**: 4 integration tests with mock rules.
+**Automation**: 4 integration tests with mock rules.
 
 ```Gherkin
 Given the package <package_type> is installed
@@ -153,7 +153,7 @@ Notes:
 
 #### **Scenario: API can upgrade prebuilt rules that are outdated**
 
-**Coverage**: 4 integration tests with mock rules.
+**Automation**: 4 integration tests with mock rules.
 
 ```Gherkin
 Given the package <package_type> is installed
@@ -191,7 +191,7 @@ Notes:
 
 #### **Scenario: API does not install or upgrade prebuilt rules if they are up to date**
 
-**Coverage**: 4 integration tests with mock rules.
+**Automation**: 4 integration tests with mock rules.
 
 ```Gherkin
 Given the package <package_type> is installed
@@ -227,7 +227,7 @@ Notes:
 
 #### **Scenario: User is notified when no prebuilt rules are installed**
 
-**Coverage**: 1 e2e test with mock rules + 1 integration test.
+**Automation**: 1 e2e test with mock rules + 1 integration test.
 
 ```Gherkin
 Given no prebuilt rules are installed in Kibana
@@ -242,7 +242,7 @@ And user should NOT see the Rule Updates table
 
 #### **Scenario: User is NOT notified when all prebuilt rules are installed and up to date**
 
-**Coverage**: 1 e2e test with mock rules + 1 integration test.
+**Automation**: 1 e2e test with mock rules + 1 integration test.
 
 ```Gherkin
 Given all the latest prebuilt rules are installed in Kibana
@@ -256,7 +256,7 @@ And user should NOT see the Rule Updates table
 
 #### **Scenario: User is notified when some prebuilt rules can be installed**
 
-**Coverage**: 1 e2e test with mock rules + 1 integration test.
+**Automation**: 1 e2e test with mock rules + 1 integration test.
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
@@ -272,7 +272,7 @@ And user should NOT see the Rule Updates table
 
 #### **Scenario: User is notified when some prebuilt rules can be upgraded**
 
-**Coverage**: 1 e2e test with mock rules + 1 integration test.
+**Automation**: 1 e2e test with mock rules + 1 integration test.
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
@@ -288,7 +288,7 @@ And user should see the Rule Updates table
 
 #### **Scenario: User is notified when both rules to install and upgrade are available**
 
-**Coverage**: 1 e2e test with mock rules + 1 integration test.
+**Automation**: 1 e2e test with mock rules + 1 integration test.
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
@@ -304,7 +304,7 @@ And user should see the Rule Updates table
 
 #### **Scenario: User is notified after a prebuilt rule gets deleted**
 
-**Coverage**: 1 e2e test with mock rules + 1 integration test.
+**Automation**: 1 e2e test with mock rules + 1 integration test.
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
@@ -319,7 +319,7 @@ And user should see the number of rules available to install (Y)
 
 #### **Scenario: User can install prebuilt rules one by one**
 
-**Coverage**: 1 e2e test with mock rules.
+**Automation**: 1 e2e test with mock rules.
 
 ```Gherkin
 Given no prebuilt rules are installed in Kibana
@@ -336,7 +336,7 @@ And user should see the number of rules available to install decreased by 1
 
 #### **Scenario: User can install multiple prebuilt rules selected on the page**
 
-**Coverage**: 1 e2e test with mock rules.
+**Automation**: 1 e2e test with mock rules.
 
 ```Gherkin
 Given no prebuilt rules are installed in Kibana
@@ -360,7 +360,7 @@ Examples:
 
 #### **Scenario: User can install all available prebuilt rules at once**
 
-**Coverage**: 1 e2e test with mock rules.
+**Automation**: 1 e2e test with mock rules.
 
 ```Gherkin
 Given no prebuilt rules are installed in Kibana
@@ -380,7 +380,7 @@ And user should NOT see a number of rules available to install
 
 #### **Scenario: Empty screen is shown when all prebuilt rules are installed**
 
-**Coverage**: 1 e2e test with mock rules.
+**Automation**: 1 e2e test with mock rules.
 
 ```Gherkin
 Given all the available prebuilt rules are installed in Kibana
@@ -397,7 +397,7 @@ TODO: add scenarios
 
 #### **Scenario: User opening the Add Rules page sees a loading skeleton until the package installation is completed**
 
-**Coverage**: ?.
+**Automation**: ?.
 
 ```Gherkin
 Given prebuilt rules package is not installed
@@ -407,7 +407,7 @@ Then user should see a loading skeleton until the package installation is comple
 
 #### **Scenario: User can navigate from the Add Rules page to the Rule Management page via breadcrumbs**
 
-**Coverage**: ?.
+**Automation**: ?.
 
 ```Gherkin
 Given user is on the Add Rules page
@@ -419,7 +419,7 @@ Then the Rule Management page should be displayed
 
 #### **Scenario: User can upgrade prebuilt rules one by one**
 
-**Coverage**: 1 e2e test with mock rules.
+**Automation**: 1 e2e test with mock rules.
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
@@ -435,7 +435,7 @@ And user should see the number of rules available to upgrade decreased by 1
 
 #### **Scenario: User can upgrade multiple prebuilt rules selected on the page**
 
-**Coverage**: 1 e2e test with mock rules.
+**Automation**: 1 e2e test with mock rules.
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
@@ -458,7 +458,7 @@ Examples:
 
 #### **Scenario: User can upgrade all available prebuilt rules at once**
 
-**Coverage**: 1 e2e test with mock rules.
+**Automation**: 1 e2e test with mock rules.
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
@@ -481,7 +481,7 @@ TODO: add scenarios
 
 #### **Scenario: User opening the Rule Updates table sees a loading skeleton until the package installation is completed**
 
-**Coverage**: ?.
+**Automation**: ?.
 
 ```Gherkin
 Given prebuilt rules package is not installed
@@ -494,7 +494,7 @@ Then user should see a loading skeleton until the package installation is comple
 
 #### **Scenario: Error is handled when the package installation fails**
 
-**Coverage**: ?.
+**Automation**: ?.
 
 ```Gherkin
 Given the package is not installed
@@ -510,7 +510,7 @@ And user should NOT see the Rule Updates table
 
 #### **Scenario: Error is handled when any operation on prebuilt rules fails**
 
-**Coverage**: ?.
+**Automation**: ?.
 
 ```Gherkin
 Given user is <operation> prebuilt rules
@@ -534,7 +534,7 @@ Examples:
 
 #### **Scenario: User with read privileges on Security Solution cannot install prebuilt rules**
 
-**Coverage**: 1 e2e test with mock rules + 3 integration tests with mock rules for the status and installation endpoints.
+**Automation**: 1 e2e test with mock rules + 3 integration tests with mock rules for the status and installation endpoints.
 
 ```Gherkin
 Given user with "Security: read" privileges on Security Solution
@@ -547,7 +547,7 @@ But user should not be able to install them
 
 #### **Scenario: User with read privileges on Security Solution cannot upgrade prebuilt rules**
 
-**Coverage**: 1 e2e test with mock rules + 3 integration tests with mock rules for the status and upgrade endpoints.
+**Automation**: 1 e2e test with mock rules + 3 integration tests with mock rules for the status and upgrade endpoints.
 
 ```Gherkin
 Given user with "Security: read" privileges on Security Solution
@@ -563,7 +563,7 @@ But user should not be able to upgrade them
 
 #### **Scenario: User can use prebuilt rules after upgrading Kibana from version A to B**
 
-**Coverage**: not covered, manual testing required.
+**Automation**: not automated, manual testing required.
 
 ```Gherkin
 Given user is upgrading Kibana from version <A> to version <B>
