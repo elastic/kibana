@@ -10,7 +10,6 @@ import { ADD_ELASTIC_RULES_BTN, RULES_UPDATES_TAB } from '../../screens/alerts_d
 import { deleteFirstRule, waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 import {
   installAllPrebuiltRulesRequest,
-  createNewRuleAsset,
   createAndInstallMockedPrebuiltRules,
 } from '../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState, deleteAlertsAndRules, reload } from '../../tasks/common';
@@ -99,13 +98,12 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       installAllPrebuiltRulesRequest();
       /* Create new rule asset with the same rule_id as the one that was installed  */
       /* but with a higher version, in order to trigger the update notification     */
-      createNewRuleAsset({
-        rule: createRuleAssetSavedObject({
-          name: 'Test rule 1.1 (updated)',
-          rule_id: 'rule_1',
-          version: 2,
-        }),
+      const UPDATED_RULE = createRuleAssetSavedObject({
+        name: 'Test rule 1.1 (updated)',
+        rule_id: 'rule_1',
+        version: 2,
       });
+      createAndInstallMockedPrebuiltRules({ rules: [UPDATED_RULE], installToKibana: false });
       visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
       waitForRulesTableToBeLoaded();
       reload();
