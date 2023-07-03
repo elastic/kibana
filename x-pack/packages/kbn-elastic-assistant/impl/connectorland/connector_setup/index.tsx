@@ -61,8 +61,8 @@ export const useConnectorSetup = ({
   onSetupComplete,
   refetchConnectors,
 }: ConnectorSetupProps): {
-  connectorDialog: EuiCommentProps[];
-  connectorPrompt: React.ReactElement;
+  comments: EuiCommentProps[];
+  prompt: React.ReactElement;
 } => {
   const { appendMessage, setApiConfig, setConversation } = useConversation();
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -157,7 +157,7 @@ export const useConnectorSetup = ({
     ]
   );
 
-  const connectorDialog = useMemo(
+  const comments = useMemo(
     () =>
       conversation.messages.slice(0, currentMessageIndex + 1).map((message, index) => {
         const isUser = message.role === 'user';
@@ -188,9 +188,9 @@ export const useConnectorSetup = ({
   );
 
   return {
-    connectorDialog,
-    connectorPrompt: (
-      <div data-test-subj="connectorPrompt">
+    comments,
+    prompt: (
+      <div data-test-subj="prompt">
         {(showAddConnectorButton || isConnectorConfigured) && (
           <ConnectorButtonWrapper>
             <ConnectorButton

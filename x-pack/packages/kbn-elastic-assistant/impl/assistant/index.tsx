@@ -120,7 +120,7 @@ const AssistantComponent: React.FC<Props> = ({
   const isWelcomeSetup = (connectors?.length ?? 0) === 0;
   const isDisabled = isWelcomeSetup || !isAssistantEnabled;
 
-  const { connectorDialog, connectorPrompt } = useConnectorSetup({
+  const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
     actionTypeRegistry,
     http,
     refetchConnectors,
@@ -347,7 +347,7 @@ const AssistantComponent: React.FC<Props> = ({
     [messageCodeBlocks]
   );
 
-  const standardDialog = useMemo(
+  const chatbotComments = useMemo(
     () => (
       <>
         <EuiCommentList
@@ -388,12 +388,12 @@ const AssistantComponent: React.FC<Props> = ({
     ]
   );
 
-  const dialog = useMemo(() => {
+  const comments = useMemo(() => {
     if (isDisabled) {
       return (
         <>
           <EuiCommentList
-            comments={connectorDialog}
+            comments={connectorComments}
             css={css`
               margin-right: 20px;
             `}
@@ -403,8 +403,8 @@ const AssistantComponent: React.FC<Props> = ({
       );
     }
 
-    return standardDialog;
-  }, [connectorDialog, isDisabled, standardDialog]);
+    return chatbotComments;
+  }, [connectorComments, isDisabled, chatbotComments]);
 
   return (
     <>
@@ -512,7 +512,7 @@ const AssistantComponent: React.FC<Props> = ({
           </>
         )}
       </EuiModalHeader>
-      <EuiModalBody>{dialog}</EuiModalBody>
+      <EuiModalBody>{comments}</EuiModalBody>
       <EuiModalFooter
         css={css`
           align-items: flex-start;
