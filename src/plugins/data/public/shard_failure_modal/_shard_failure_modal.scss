@@ -9,3 +9,21 @@
   // could be much higher than the available screenspace
   max-width: 686px;
 }
+
+.shardFailureModal__descTitle {
+  width: 15% !important;
+}
+
+.shardFailureModal__descValue {
+  width: 85% !important;
+}
+
+@include euiBreakpoint('xs','s') {
+  .shardFailureModal__descTitle {
+    width: 100% !important;
+  }
+
+  .shardFailureModal__descValue {
+    width: 100% !important;
+  }
+}
