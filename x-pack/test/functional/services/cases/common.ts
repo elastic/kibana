@@ -20,6 +20,7 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
   const common = getPageObject('common');
   const toasts = getService('toasts');
   const retry = getService('retry');
+  const comboBox = getService('comboBox');
 
   return {
     /**
@@ -121,5 +122,15 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
 
       await header.waitUntilLoadingHasFinished();
     },
+
+    async addMultipleTags(tags: string[]) {
+      await testSubjects.click('tag-list-edit-button'); 
+
+      for (const [index, tag] of tags.entries()) {
+        await comboBox.setCustom('comboBoxInput', `${tag}-${index}`);
+      }
+
+      await header.waitUntilLoadingHasFinished();
+    }
   };
 }
