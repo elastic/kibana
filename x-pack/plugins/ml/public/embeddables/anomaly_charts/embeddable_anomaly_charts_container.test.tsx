@@ -152,6 +152,7 @@ describe('EmbeddableAnomalyChartsContainer', () => {
         onRenderComplete={onRenderComplete}
         onError={onError}
       />,
+      // @ts-expect-error upgrade to jest 28
       defaultOptions
     );
 
@@ -163,7 +164,7 @@ describe('EmbeddableAnomalyChartsContainer', () => {
   });
 
   test('should render an error in case it could not fetch the ML charts data', async () => {
-    (useAnomalyChartsInputResolver as jest.Mock).mockReturnValueOnce({
+    (useAnomalyChartsInputResolver as jest.Mock).mockReturnValue({
       chartsData: undefined,
       isLoading: false,
       error: 'No anomalies',
@@ -182,6 +183,7 @@ describe('EmbeddableAnomalyChartsContainer', () => {
         onRenderComplete={onRenderComplete}
         onError={onError}
       />,
+      // @ts-expect-error upgrade to jest 28
       defaultOptions
     );
     const errorMessage = await findByText('Unable to load the ML anomaly explorer data');

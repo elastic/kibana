@@ -124,7 +124,7 @@ describe('DatePicker', () => {
   });
 
   it('enables auto-refresh when refreshPaused is false', async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     const { wrapper } = mountDatePicker({
       rangeFrom: 'now-15m',
       rangeTo: 'now',
@@ -139,7 +139,7 @@ describe('DatePicker', () => {
   });
 
   it('disables auto-refresh when refreshPaused is true', async () => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
     mountDatePicker({
       rangeFrom: 'now-15m',
       rangeTo: 'now',

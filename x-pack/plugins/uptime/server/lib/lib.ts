@@ -93,7 +93,7 @@ export function createUptimeESClient({
             esError,
             esRequestParams: esParams,
             esRequestStatus,
-            esResponse: res.body,
+            esResponse: res?.body,
             kibanaRequest: request!,
             operationName: operationName ?? '',
             startTime: startTimeNow,

@@ -10,6 +10,7 @@ import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elasti
 import { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { throttle } from 'lodash';
+import useObservable from 'react-use/lib/useObservable';
 import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
 import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
 import type {
@@ -78,6 +79,8 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
       'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
     });
   }, []);
+
+  const input = useObservable(embeddableInput);
 
   useEffect(() => {
     onInputChange({
@@ -190,6 +193,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
               timefilter={timefilter}
               onSelectEntity={addEntityFieldFilter}
               showSelectedInterval={false}
+              timeRange={input?.timeRange}
             />
           )}
         </div>

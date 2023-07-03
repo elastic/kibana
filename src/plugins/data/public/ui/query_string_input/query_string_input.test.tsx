@@ -28,7 +28,7 @@ import { dataPluginMock } from '../../mocks';
 import { stubIndexPattern } from '../../stubs';
 import { KibanaContextProvider, withKibana } from 'src/plugins/kibana_react/public';
 
-jest.useFakeTimers();
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 const startMock = coreMock.createStart();
 

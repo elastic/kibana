@@ -57,6 +57,27 @@ export default function createActionTests({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should handle create action request appropriately when empty strings are submitted', async () => {
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'My action',
+          connector_type_id: 'test.index-record',
+          config: {
+            unencrypted: ' ',
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: `[request body.config.unencrypted]: value '' is not valid`,
+        });
+    });
+
     describe('legacy', () => {
       it('should handle create action request appropriately', async () => {
         const response = await supertest

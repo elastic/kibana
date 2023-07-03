@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment';
-import { Page } from 'puppeteer';
 import * as Rx from 'rxjs';
 import { ReportingCore } from '..';
 import { chromium, HeadlessChromiumDriver, HeadlessChromiumDriverFactory } from '../browsers';
@@ -127,7 +126,7 @@ export const createMockBrowserDriverFactory = async (
 
   const binaryPath = '/usr/local/share/common/secure/super_awesome_binary';
   const mockBrowserDriverFactory = chromium.createDriverFactory(core, binaryPath, logger);
-  const mockPage = { setViewport: () => {} } as unknown as Page;
+  const mockPage = { setViewport: () => {} } as unknown;
   const mockBrowserDriver = new HeadlessChromiumDriver(core, mockPage, {
     inspect: true,
     networkPolicy: captureConfig.networkPolicy,

@@ -12,7 +12,6 @@ export type ContextContainerMock = jest.Mocked<IContextContainer>;
 
 const createContextMock = (mockContext: any = {}) => {
   const contextMock: ContextContainerMock = {
-    // @ts-expect-error since ContextContainerMock cannot infer ContextName and fallsback to never
     registerContext: jest.fn(),
     createHandler: jest.fn(),
   };

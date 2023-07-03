@@ -89,9 +89,19 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
  */
 `;
 
+const VENN_DIAGRAM_HEADER = `
+/*
+  * This file is forked from the venn.js project (https://github.com/benfred/venn.js/),
+  * and may include modifications made by Elasticsearch B.V.
+  * Elasticsearch B.V. licenses this file to you under the MIT License.
+  * See \`x-pack/plugins/graph/public/components/venn_diagram/vennjs/LICENSE\` for more information.
+  */
+`;
+
 /** Packages which should not be included within production code. */
 const DEV_PACKAGES = [
   'kbn-babel-code-parser',
+  'kbn-babel-register',
   'kbn-dev-utils',
   'kbn-cli-dev-mode',
   'kbn-docs-utils',
@@ -160,50 +170,49 @@ const DEV_PATTERNS = [
 const RESTRICTED_IMPORTS = [
   {
     name: 'lodash',
-    importNames: ['set', 'setWith'],
-    message: 'Please use @elastic/safer-lodash-set instead',
+    importNames: ['set', 'setWith', 'template'],
+    message:
+      'lodash.set/setWith: Please use @elastic/safer-lodash-set instead.\n' +
+      'lodash.template: Function is unsafe, and not compatible with our content security policy.',
   },
   {
     name: 'lodash.set',
-    message: 'Please use @elastic/safer-lodash-set instead',
+    message: 'Please use @elastic/safer-lodash-set/set instead',
   },
   {
     name: 'lodash.setwith',
-    message: 'Please use @elastic/safer-lodash-set instead',
+    message: 'Please use @elastic/safer-lodash-set/setWith instead',
   },
   {
     name: 'lodash/set',
-    message: 'Please use @elastic/safer-lodash-set instead',
+    message: 'Please use @elastic/safer-lodash-set/set instead',
   },
   {
     name: 'lodash/setWith',
-    message: 'Please use @elastic/safer-lodash-set instead',
+    message: 'Please use @elastic/safer-lodash-set/setWith instead',
   },
   {
     name: 'lodash/fp',
-    importNames: ['set', 'setWith', 'assoc', 'assocPath'],
-    message: 'Please use @elastic/safer-lodash-set instead',
+    importNames: ['set', 'setWith', 'assoc', 'assocPath', 'template'],
+    message:
+      'lodash.set/setWith/assoc/assocPath: Please use @elastic/safer-lodash-set/fp instead\n' +
+      'lodash.template: Function is unsafe, and not compatible with our content security policy.',
   },
   {
     name: 'lodash/fp/set',
-    message: 'Please use @elastic/safer-lodash-set instead',
+    message: 'Please use @elastic/safer-lodash-set/fp/set instead',
   },
   {
     name: 'lodash/fp/setWith',
-    message: 'Please use @elastic/safer-lodash-set instead',
+    message: 'Please use @elastic/safer-lodash-set/fp/setWith instead',
   },
   {
     name: 'lodash/fp/assoc',
-    message: 'Please use @elastic/safer-lodash-set instead',
+    message: 'Please use @elastic/safer-lodash-set/fp/assoc instead',
   },
   {
     name: 'lodash/fp/assocPath',
-    message: 'Please use @elastic/safer-lodash-set instead',
-  },
-  {
-    name: 'lodash',
-    importNames: ['template'],
-    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
+    message: 'Please use @elastic/safer-lodash-set/fp/assocPath instead',
   },
   {
     name: 'lodash.template',
@@ -211,11 +220,6 @@ const RESTRICTED_IMPORTS = [
   },
   {
     name: 'lodash/template',
-    message: 'lodash.template is unsafe, and not compatible with our content security policy.',
-  },
-  {
-    name: 'lodash/fp',
-    importNames: ['template'],
     message: 'lodash.template is unsafe, and not compatible with our content security policy.',
   },
   {
@@ -304,6 +308,7 @@ module.exports = {
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -336,6 +341,7 @@ module.exports = {
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -375,6 +381,7 @@ module.exports = {
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -404,11 +411,13 @@ module.exports = {
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
       },
     },
+
     {
       files: ['packages/elastic-safer-lodash-set/test/*.{js,mjs,ts,tsx}'],
       rules: {
@@ -429,6 +438,7 @@ module.exports = {
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              VENN_DIAGRAM_HEADER,
             ],
           },
         ],
@@ -454,6 +464,37 @@ module.exports = {
               OLD_DUAL_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
+              VENN_DIAGRAM_HEADER,
+            ],
+          },
+        ],
+      },
+    },
+
+    /**
+     * venn.js fork requires special license headers
+     */
+    {
+      files: ['x-pack/plugins/graph/public/components/venn_diagram/vennjs/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: VENN_DIAGRAM_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [
+              APACHE_2_0_LICENSE_HEADER,
+              DUAL_LICENSE_HEADER,
+              ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
+              SAFER_LODASH_SET_HEADER,
+              SAFER_LODASH_SET_LODASH_HEADER,
+              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
             ],
           },
         ],
@@ -740,47 +781,59 @@ module.exports = {
     {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
-        'no-restricted-imports': [
-          2,
-          {
-            paths: RESTRICTED_IMPORTS,
-          },
-        ],
+        'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
         'no-restricted-modules': [
-          2,
+          'error',
           {
-            paths: [
-              {
-                name: 'lodash.set',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash.setwith',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash.template',
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-              {
-                name: 'lodash/set',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/setWith',
-                message: 'Please use @elastic/safer-lodash-set instead',
-              },
-              {
-                name: 'lodash/template',
-                message:
-                  'lodash.template is unsafe, and not compatible with our content security policy.',
-              },
-            ],
+            name: 'lodash.set',
+            message: 'Please use @elastic/safer-lodash-set instead',
+          },
+          {
+            name: 'lodash.setwith',
+            message: 'Please use @elastic/safer-lodash-set instead',
+          },
+          {
+            name: 'lodash.template',
+            message:
+              'lodash.template is unsafe, and not compatible with our content security policy.',
+          },
+          {
+            name: 'lodash/set',
+            message: 'Please use @elastic/safer-lodash-set/set instead',
+          },
+          {
+            name: 'lodash/setWith',
+            message: 'Please use @elastic/safer-lodash-set/setWith instead',
+          },
+          {
+            name: 'lodash/fp/set',
+            message: 'Please use @elastic/safer-lodash-set/fp/set instead',
+          },
+          {
+            name: 'lodash/fp/setWith',
+            message: 'Please use @elastic/safer-lodash-set/fp/setWith instead',
+          },
+          {
+            name: 'lodash/fp/assoc',
+            message: 'Please use @elastic/safer-lodash-set/fp/assoc instead',
+          },
+          {
+            name: 'lodash/fp/assocPath',
+            message: 'Please use @elastic/safer-lodash-set/fp/assocPath instead',
+          },
+          {
+            name: 'lodash/fp/template',
+            message:
+              'lodash.template is unsafe, and not compatible with our content security policy.',
+          },
+          {
+            name: 'lodash/template',
+            message:
+              'lodash.template is unsafe, and not compatible with our content security policy.',
           },
         ],
         'no-restricted-properties': [
-          2,
+          'error',
           {
             object: 'lodash',
             property: 'set',
@@ -790,18 +843,6 @@ module.exports = {
             object: '_',
             property: 'set',
             message: 'Please use @elastic/safer-lodash-set instead',
-          },
-          {
-            object: 'lodash',
-            property: 'template',
-            message:
-              'lodash.template is unsafe, and not compatible with our content security policy.',
-          },
-          {
-            object: '_',
-            property: 'template',
-            message:
-              'lodash.template is unsafe, and not compatible with our content security policy.',
           },
           {
             object: 'lodash',
@@ -832,6 +873,18 @@ module.exports = {
             object: '_',
             property: 'assocPath',
             message: 'Please use @elastic/safer-lodash-set instead',
+          },
+          {
+            object: 'lodash',
+            property: 'template',
+            message:
+              'lodash.template is unsafe, and not compatible with our content security policy.',
+          },
+          {
+            object: '_',
+            property: 'template',
+            message:
+              'lodash.template is unsafe, and not compatible with our content security policy.',
           },
         ],
       },
@@ -840,19 +893,15 @@ module.exports = {
       files: ['**/common/**/*.{js,mjs,ts,tsx}', '**/public/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'no-restricted-imports': [
-          2,
+          'error',
+          ...RESTRICTED_IMPORTS,
           {
-            paths: [
-              ...RESTRICTED_IMPORTS,
-              {
-                name: 'semver',
-                message: 'Please use "semver/*/{function}" instead',
-              },
-              {
-                name: '@kbn/rule-data-utils',
-                message: `Import directly from @kbn/rule-data-utils/* submodules in public/common code`,
-              },
-            ],
+            name: 'semver',
+            message: 'Please use "semver/*/{function}" instead',
+          },
+          {
+            name: '@kbn/rule-data-utils',
+            message: `Import directly from @kbn/rule-data-utils/* submodules in public/common code`,
           },
         ],
       },

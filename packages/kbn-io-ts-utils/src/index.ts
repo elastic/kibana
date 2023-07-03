@@ -7,6 +7,7 @@
  */
 
 export { deepExactRt } from './deep_exact_rt';
+export { indexPatternRt } from './index_pattern_rt';
 export { jsonRt } from './json_rt';
 export { mergeRt } from './merge_rt';
 export { strictKeysRt } from './strict_keys_rt';

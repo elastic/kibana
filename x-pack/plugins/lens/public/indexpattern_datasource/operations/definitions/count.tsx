@@ -11,7 +11,7 @@ import { buildExpressionFunction } from '../../../../../../../src/plugins/expres
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField } from '../../types';
-import { getInvalidFieldMessage, getFilter } from './helpers';
+import { getInvalidFieldMessage, getFilter, isColumnFormatted } from './helpers';
 import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
@@ -84,9 +84,8 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       params:
         previousColumn?.dataType === 'number' &&
-        previousColumn.params &&
-        'format' in previousColumn.params &&
-        previousColumn.params.format
+        isColumnFormatted(previousColumn) &&
+        previousColumn.params
           ? { format: previousColumn.params.format }
           : undefined,
     };

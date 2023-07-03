@@ -9,11 +9,12 @@
 import { EventEmitter } from 'events';
 import { waitUntilWatchIsReady } from './watch';
 
-describe('#waitUntilWatchIsReady', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/135099
+describe.skip('#waitUntilWatchIsReady', () => {
   let buildOutputStream: EventEmitter;
   let completionHintPromise: Promise<string>;
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     buildOutputStream = new EventEmitter();
     completionHintPromise = waitUntilWatchIsReady(buildOutputStream, {

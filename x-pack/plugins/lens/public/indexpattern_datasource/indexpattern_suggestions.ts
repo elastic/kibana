@@ -16,7 +16,7 @@ import {
   getMetricOperationTypes,
   getOperationTypesForField,
   operationDefinitionMap,
-  IndexPatternColumn,
+  BaseIndexPatternColumn,
   OperationType,
   getExistingColumnGroups,
   isReferenced,
@@ -62,11 +62,11 @@ function buildSuggestion({
   // two match up.
   const layers = mapValues(updatedState.layers, (layer) => ({
     ...layer,
-    columns: pick(layer.columns, layer.columnOrder) as Record<string, IndexPatternColumn>,
+    columns: pick(layer.columns, layer.columnOrder) as Record<string, BaseIndexPatternColumn>,
   }));
 
   const columnOrder = layers[layerId].columnOrder;
-  const columnMap = layers[layerId].columns as Record<string, IndexPatternColumn>;
+  const columnMap = layers[layerId].columns as Record<string, BaseIndexPatternColumn>;
   const isMultiRow = Object.values(columnMap).some((column) => column.isBucketed);
 
   return {
@@ -221,7 +221,7 @@ function getExistingLayerSuggestionsForField(
         indexPattern,
         field,
         columnId: generateId(),
-        op: metricOperation.type,
+        op: metricOperation.type as OperationType,
         visualizationGroups: [],
       });
       if (layerWithNewMetric) {
@@ -243,7 +243,7 @@ function getExistingLayerSuggestionsForField(
           indexPattern,
           field,
           columnId: metrics[0],
-          op: metricOperation.type,
+          op: metricOperation.type as OperationType,
           visualizationGroups: [],
         });
         if (layerWithReplacedMetric) {
@@ -336,7 +336,7 @@ function createNewLayerWithMetricAggregation(
   return insertNewColumn({
     op: 'date_histogram',
     layer: insertNewColumn({
-      op: metricOperation.type,
+      op: metricOperation.type as OperationType,
       layer: { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] },
       columnId: generateId(),
       field,

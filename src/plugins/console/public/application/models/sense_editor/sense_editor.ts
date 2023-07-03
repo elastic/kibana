@@ -492,7 +492,9 @@ export class SenseEditor {
     return result.join('\n');
   };
 
-  updateActionsBar = () => this.coreEditor.legacyUpdateUI(this.currentReqRange);
+  updateActionsBar = () => {
+    return this.coreEditor.legacyUpdateUI(this.currentReqRange);
+  };
 
   getCoreEditor() {
     return this.coreEditor;

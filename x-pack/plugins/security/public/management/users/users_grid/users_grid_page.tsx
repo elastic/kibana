@@ -111,7 +111,6 @@ export class UsersGridPage extends Component<Props, State> {
           defaultMessage: 'User Name',
         }),
         sortable: true,
-        truncateText: true,
         render: (username: string) => (
           <EuiLink
             data-test-subj="userRowUserName"

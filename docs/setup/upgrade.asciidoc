@@ -134,3 +134,5 @@ add the setting manually
 include::upgrade/upgrade-standard.asciidoc[]
 
 include::upgrade/upgrade-migrations.asciidoc[]
+
+include::upgrade/logging-configuration-migration.asciidoc[]

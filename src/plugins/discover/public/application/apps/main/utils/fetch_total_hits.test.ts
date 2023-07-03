@@ -22,7 +22,7 @@ function getDataSubjects() {
 }
 
 describe('test fetchTotalHits', () => {
-  test('changes of fetchStatus are correct when starting with FetchStatus.UNINITIALIZED', async (done) => {
+  test('changes of fetchStatus are correct when starting with FetchStatus.UNINITIALIZED', (done) => {
     const subjects = getDataSubjects();
     const { totalHits$ } = subjects;
 
@@ -49,7 +49,7 @@ describe('test fetchTotalHits', () => {
       },
     });
   });
-  test('change of fetchStatus on fetch error', async (done) => {
+  test('change of fetchStatus on fetch error', (done) => {
     const subjects = getDataSubjects();
     const { totalHits$ } = subjects;
     const deps = {

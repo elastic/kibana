@@ -25,7 +25,7 @@ export function fetchEffectFactory<T, R, S, F>(
   success: (response: R) => Action<S>,
   fail: (error: IHttpFetchError) => Action<F>
 ) {
-  return function* (action: Action<T>) {
+  return function* (action: Action<T>): Generator {
     try {
       const response = yield call(fetch, action.payload);
       if (response instanceof Error) {
@@ -34,7 +34,7 @@ export function fetchEffectFactory<T, R, S, F>(
 
         yield put(fail(response as IHttpFetchError));
       } else {
-        yield put(success(response));
+        yield put(success(response as R));
       }
     } catch (error) {
       // eslint-disable-next-line no-console

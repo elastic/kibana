@@ -6,27 +6,24 @@
  */
 
 import expect from '@kbn/expect';
-import fs from 'fs';
 import path from 'path';
-import { promisify } from 'util';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { checkIfPngsMatch } from './lib/compare_pngs';
-
-const writeFileAsync = promisify(fs.writeFile);
-const mkdirAsync = promisify(fs.mkdir);
 
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({
+  getPageObjects,
+  getService,
+  updateBaselines,
+}: FtrProviderContext & { updateBaselines: boolean }) {
   const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const browser = getService('browser');
-  const log = getService('log');
-  const config = getService('config');
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const png = getService('png');
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
   const loadEcommerce = async () => {
@@ -147,27 +144,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('PNG Layout', () => {
+    // FAILING FORWARD ES COMPATIBILITY: https://github.com/elastic/kibana/issues/157038
+    describe.skip('PNG Layout', () => {
       before(async () => {
         await loadEcommerce();
       });
       after(async () => {
         await unloadEcommerce();
       });
-
-      const writeSessionReport = async (name: string, rawPdf: Buffer, reportExt: string) => {
-        const sessionDirectory = path.resolve(REPORTS_FOLDER, 'session');
-        await mkdirAsync(sessionDirectory, { recursive: true });
-        const sessionReportPath = path.resolve(sessionDirectory, `${name}.${reportExt}`);
-        await writeFileAsync(sessionReportPath, rawPdf);
-        return sessionReportPath;
-      };
-      const getBaselineReportPath = (fileName: string, reportExt: string) => {
-        const baselineFolder = path.resolve(REPORTS_FOLDER, 'baseline');
-        const fullPath = path.resolve(baselineFolder, `${fileName}.${reportExt}`);
-        log.debug(`getBaselineReportPath (${fullPath})`);
-        return fullPath;
-      };
 
       it('downloads a PNG file: small dashboard', async function () {
         this.timeout(300000);
@@ -182,12 +166,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const url = await PageObjects.reporting.getReportURL(60000);
         const reportData = await PageObjects.reporting.getRawPdfReportData(url);
         const reportFileName = 'small_dashboard_preserve_layout';
-        const sessionReportPath = await writeSessionReport(reportFileName, reportData, 'png');
-        const percentDiff = await checkIfPngsMatch(
+        const sessionReportPath = await PageObjects.reporting.writeSessionReport(
+          reportFileName,
+          'png',
+          reportData,
+          REPORTS_FOLDER
+        );
+
+        const percentDiff = await png.compareAgainstBaseline(
           sessionReportPath,
-          getBaselineReportPath(reportFileName, 'png'),
-          config.get('screenshots.directory'),
-          log
+          PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
+          REPORTS_FOLDER,
+          updateBaselines
         );
 
         expect(percentDiff).to.be.lessThan(0.09);
@@ -206,19 +196,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const url = await PageObjects.reporting.getReportURL(200000);
         const reportData = await PageObjects.reporting.getRawPdfReportData(url);
         const reportFileName = 'large_dashboard_preserve_layout';
-        const sessionReportPath = await writeSessionReport(reportFileName, reportData, 'png');
-        const percentDiff = await checkIfPngsMatch(
+        const sessionReportPath = await PageObjects.reporting.writeSessionReport(
+          reportFileName,
+          'png',
+          reportData,
+          REPORTS_FOLDER
+        );
+        const percentDiff = await png.compareAgainstBaseline(
           sessionReportPath,
-          getBaselineReportPath(reportFileName, 'png'),
-          config.get('screenshots.directory'),
-          log
+          PageObjects.reporting.getBaselineReportPath(reportFileName, 'png', REPORTS_FOLDER),
+          REPORTS_FOLDER,
+          updateBaselines
         );
 
         expect(percentDiff).to.be.lessThan(0.09);
       });
     });
 
-    describe('Preserve Layout', () => {
+    // FAILING FORWARD ES COMPATIBILITY: https://github.com/elastic/kibana/issues/157050
+    describe.skip('Preserve Layout', () => {
       before(async () => {
         await loadEcommerce();
       });

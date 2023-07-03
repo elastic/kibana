@@ -42,6 +42,11 @@ export interface ReferenceBasedIndexPatternColumn
   references: string[];
 }
 
+export type GenericIndexPatternColumn =
+  | BaseIndexPatternColumn
+  | FieldBasedIndexPatternColumn
+  | ReferenceBasedIndexPatternColumn;
+
 // Used to store the temporary invalid state
 export interface IncompleteColumn {
   operationType?: OperationType;

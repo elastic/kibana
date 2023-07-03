@@ -37,9 +37,10 @@ export async function agentPolicyUpdateEventHandler(
   // `soClient` from ingest `appContextService` is used to create policy change actions
   // to ensure encrypted SOs are handled correctly
   const internalSoClient = appContextService.getInternalUserSOClient(fakeRequest);
+  const internalEsClient = appContextService.getInternalUserESClient();
 
   if (action === 'created') {
-    await generateEnrollmentAPIKey(soClient, esClient, {
+    await generateEnrollmentAPIKey(soClient, internalEsClient, {
       name: 'Default',
       agentPolicyId,
     });
@@ -51,7 +52,7 @@ export async function agentPolicyUpdateEventHandler(
   }
 
   if (action === 'deleted') {
-    await unenrollForAgentPolicyId(soClient, esClient, agentPolicyId);
-    await deleteEnrollmentApiKeyForAgentPolicyId(esClient, agentPolicyId);
+    await unenrollForAgentPolicyId(soClient, internalEsClient, agentPolicyId);
+    await deleteEnrollmentApiKeyForAgentPolicyId(internalEsClient, agentPolicyId);
   }
 }

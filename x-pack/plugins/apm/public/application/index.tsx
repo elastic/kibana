@@ -7,7 +7,6 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import 'react-vis/dist/style.css';
 import type { ObservabilityRuleTypeRegistry } from '../../../observability/public';
 import { ConfigSchema } from '../';
 import {

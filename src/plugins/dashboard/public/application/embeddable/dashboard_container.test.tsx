@@ -68,7 +68,7 @@ beforeEach(() => {
   options.application = applicationServiceMock.createStartContract();
 });
 
-test('DashboardContainer initializes embeddables', async (done) => {
+test('DashboardContainer initializes embeddables', (done) => {
   const initialInput = getSampleDashboardInput({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
@@ -118,7 +118,7 @@ test('DashboardContainer.addNewEmbeddable', async () => {
   expect(embeddableInContainer.id).toBe(embeddable.id);
 });
 
-test('DashboardContainer.replacePanel', async (done) => {
+test('DashboardContainer.replacePanel', (done) => {
   const ID = '123';
   const initialInput = getSampleDashboardInput({
     panels: {

@@ -16,7 +16,7 @@ describe('Newsfeed plugin', () => {
   let plugin: NewsfeedPublicPlugin;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

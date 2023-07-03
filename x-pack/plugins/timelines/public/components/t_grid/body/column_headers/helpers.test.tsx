@@ -6,7 +6,8 @@
  */
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import { mount } from 'enzyme';
-import { omit, set } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
+import { omit } from 'lodash/fp';
 import React from 'react';
 
 import { defaultHeaders } from './default_headers';

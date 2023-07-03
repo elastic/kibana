@@ -71,7 +71,7 @@ export const AgentBulkActions: React.FunctionComponent<{
   // Bulk actions menu states
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const closeMenu = () => setIsMenuOpen(false);
-  const openMenu = () => setIsMenuOpen(true);
+  const toggleMenu = () => setIsMenuOpen((currentState) => !currentState);
 
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
@@ -231,7 +231,7 @@ export const AgentBulkActions: React.FunctionComponent<{
                     iconType="arrowDown"
                     iconSide="right"
                     flush="left"
-                    onClick={openMenu}
+                    onClick={toggleMenu}
                   >
                     <FormattedMessage
                       id="xpack.fleet.agentBulkActions.agentsSelected"

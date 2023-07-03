@@ -20,6 +20,7 @@ import { esFilters } from '../../../../data/public';
 
 import { getEnableExternalUrls, getData } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
+import { normalizeDate, normalizeString, normalizeObject } from './utils';
 
 scheme('elastic', euiPaletteColorBlind());
 
@@ -336,8 +337,10 @@ export class VegaBaseView {
    * @param {string} [index] as defined in Kibana, or default if missing
    */
   async addFilterHandler(query, index) {
-    const indexId = await this.findIndex(index);
-    const filter = esFilters.buildQueryFilter(query, indexId);
+    const normalizedQuery = normalizeObject(query);
+    const normalizedIndex = normalizeString(index);
+    const indexId = await this.findIndex(normalizedIndex);
+    const filter = esFilters.buildQueryFilter(normalizedQuery, indexId);
 
     this._fireEvent({ name: 'applyFilter', data: { filters: [filter] } });
   }
@@ -347,8 +350,10 @@ export class VegaBaseView {
    * @param {string} [index] as defined in Kibana, or default if missing
    */
   async removeFilterHandler(query, index) {
-    const indexId = await this.findIndex(index);
-    const filterToRemove = esFilters.buildQueryFilter(query, indexId);
+    const normalizedQuery = normalizeObject(query);
+    const normalizedIndex = normalizeString(index);
+    const indexId = await this.findIndex(normalizedIndex);
+    const filterToRemove = esFilters.buildQueryFilter(normalizedQuery, indexId);
 
     const currentFilters = this._filterManager.getFilters();
     const existingFilter = currentFilters.find((filter) =>
@@ -374,7 +379,9 @@ export class VegaBaseView {
    * @param {number|string|Date} end
    */
   setTimeFilterHandler(start, end) {
-    const { from, to, mode } = VegaBaseView._parseTimeRange(start, end);
+    const normalizedStart = normalizeDate(start);
+    const normalizedEnd = normalizeDate(end);
+    const { from, to, mode } = VegaBaseView._parseTimeRange(normalizedStart, normalizedEnd);
 
     this._fireEvent({
       name: 'applyFilter',

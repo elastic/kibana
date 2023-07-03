@@ -238,11 +238,16 @@ function RelatedErrors({
   const theme = useTheme();
   const { query } = useApmParams('/services/{serviceName}/transactions/view');
 
+  let kuery = `${TRACE_ID} : "${item.doc.trace.id}"`;
+  if (item.doc.transaction?.id) {
+    kuery += ` and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`;
+  }
+
   const href = apmRouter.link(`/services/{serviceName}/errors`, {
     path: { serviceName: item.doc.service.name },
     query: {
       ...query,
-      kuery: `${TRACE_ID} : "${item.doc.trace.id}" and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`,
+      kuery,
     },
   });
 

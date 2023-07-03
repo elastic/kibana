@@ -16,7 +16,7 @@ import moment from 'moment';
 import { SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { of, Subject, throwError } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-jest.useFakeTimers();
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 describe('checkSearchSessionsByPage', () => {
   const mockClient = {} as any;

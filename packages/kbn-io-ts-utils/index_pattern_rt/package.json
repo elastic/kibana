@@ -1,0 +1,4 @@
+{
+  "main": "../target_node/index_pattern_rt",
+  "types": "../target_types/index_pattern_rt"
+}

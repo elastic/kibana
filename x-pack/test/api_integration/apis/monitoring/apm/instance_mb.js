@@ -12,7 +12,10 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('instance detail mb', () => {
+  describe('instance detail mb', function () {
+    // Archive contains non-cgroup data which collides with the in-cgroup services present by default on cloud deployments
+    this.tags(['skipCloud']);
+
     const archive = 'x-pack/test/functional/es_archives/monitoring/apm_mb';
     const timeRange = {
       min: '2018-08-31T12:59:49.104Z',

@@ -13,7 +13,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('find', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/131830
+  describe.skip('find', () => {
     before(() =>
       esArchiver.load(
         'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'

@@ -146,16 +146,18 @@ describe('getSortedObjectsForExport()', () => {
           attributes = {},
           sort = [],
           type = 'index-pattern',
+          idPrefix = '',
         }: {
           attributes?: Record<string, unknown>;
           sort?: string[];
           type?: string;
+          idPrefix?: string;
         } = {}
       ) {
         const hits = [];
         for (let i = 1; i <= hitCount; i++) {
           hits.push({
-            id: `${i}`,
+            id: `${idPrefix}${i}`,
             type,
             attributes,
             sort,
@@ -247,7 +249,7 @@ describe('getSortedObjectsForExport()', () => {
 
       describe('>1k hits', () => {
         const firstMockHits = generateHits(1000, { sort: ['a', 'b'] });
-        const secondMockHits = generateHits(500);
+        const secondMockHits = generateHits(500, { idPrefix: 'second-hit-' });
 
         test('requests multiple pages', async () => {
           savedObjectsClient.find.mockResolvedValueOnce({

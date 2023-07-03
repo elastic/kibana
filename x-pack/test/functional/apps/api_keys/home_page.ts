@@ -15,6 +15,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const browser = getService('browser');
+  const retry = getService('retry');
+
+  async function ensureApiKeysExist(apiKeysNames: string[]) {
+    await retry.try(async () => {
+      for (const apiKeyName of apiKeysNames) {
+        log.debug(`Checking if API key ("${apiKeyName}") exists.`);
+        await pageObjects.apiKeys.ensureApiKeyExists(apiKeyName);
+        log.debug(`API key ("${apiKeyName}") exists.`);
+      }
+    });
+  }
 
   describe('Home page', function () {
     before(async () => {
@@ -101,6 +112,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.apiKeys.clickOnPromptCreateApiKey();
         await pageObjects.apiKeys.setApiKeyName('api key 1');
         await pageObjects.apiKeys.submitOnCreateApiKey();
+        await ensureApiKeysExist(['api key 1']);
       });
 
       it('one by one', async () => {
@@ -114,6 +126,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.apiKeys.clickOnTableCreateApiKey();
         await pageObjects.apiKeys.setApiKeyName('api key 2');
         await pageObjects.apiKeys.submitOnCreateApiKey();
+
+        // Make sure all API keys we want to delete are created and rendered.
+        await ensureApiKeysExist(['api key 1', 'api key 2']);
 
         await pageObjects.apiKeys.bulkDeleteApiKeys();
         expect(await pageObjects.apiKeys.getApiKeysFirstPromptTitle()).to.be(

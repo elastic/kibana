@@ -9,5 +9,5 @@ Creates a `ScopedHistory` for a subpath of this `ScopedHistory`<!-- -->. Useful 
 <b>Signature:</b>
 
 ```typescript
-createSubHistory: <SubHistoryLocationState = unknown>(basePath: string) => ScopedHistory<SubHistoryLocationState>;
+createSubHistory: (basePath: string) => ScopedHistory<HistoryLocationState>;
 ```

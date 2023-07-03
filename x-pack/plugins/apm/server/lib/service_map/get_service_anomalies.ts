@@ -116,6 +116,7 @@ export async function getServiceAnomalies({
     const relevantBuckets = uniqBy(
       sortBy(
         // make sure we only return data for jobs that are available in this space
+        // @ts-ignore 4.3.5 upgrade
         typedAnomalyResponse.aggregations?.services.buckets.filter((bucket) =>
           jobIds.includes(bucket.key.jobId as string)
         ) ?? [],

@@ -8,20 +8,24 @@
 
 export interface EsErrorCause {
   type: string;
-  reason: string;
+  reason?: string;
 }
 
-export const isWriteBlockException = ({ type, reason }: EsErrorCause): boolean => {
+export const isWriteBlockException = (errorCause?: EsErrorCause): boolean => {
   return (
-    type === 'cluster_block_exception' &&
-    reason.match(/index \[.+] blocked by: \[FORBIDDEN\/8\/.+ \(api\)\]/) !== null
+    errorCause?.type === 'cluster_block_exception' &&
+    errorCause?.reason?.match(/index \[.+] blocked by: \[FORBIDDEN\/8\/.+ \(api\)\]/) !== null
   );
 };
 
-export const isIncompatibleMappingException = ({ type }: EsErrorCause): boolean => {
-  return type === 'strict_dynamic_mapping_exception' || type === 'mapper_parsing_exception';
+export const isIncompatibleMappingException = (errorCause?: EsErrorCause): boolean => {
+  return (
+    errorCause?.type === 'strict_dynamic_mapping_exception' ||
+    errorCause?.type === 'mapper_parsing_exception' ||
+    errorCause?.type === 'document_parsing_exception'
+  );
 };
 
-export const isIndexNotFoundException = ({ type }: EsErrorCause): boolean => {
-  return type === 'index_not_found_exception';
+export const isIndexNotFoundException = (errorCause?: EsErrorCause): boolean => {
+  return errorCause?.type === 'index_not_found_exception';
 };

@@ -301,7 +301,9 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         return;
       }
 
-      const packagePolicyPath = getPath('policy_details', { policyId: packagePolicy.policy_id });
+      const integrationPoliciesPath = getPath('integration_details_policies', {
+        pkgkey: params.pkgkey,
+      });
 
       if (routeState?.onSaveNavigateTo && policy) {
         const [appId, options] = routeState.onSaveNavigateTo;
@@ -310,7 +312,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           const pathWithQueryString = appendOnSaveQueryParamsToPath({
             // In cases where we created a new agent policy inline, we need to override the initial `path`
             // value and navigate to the newly-created agent policy instead
-            path: wasNewAgentPolicyCreated ? packagePolicyPath : options.path,
+            path: wasNewAgentPolicyCreated ? integrationPoliciesPath : options.path,
             policy,
             mappingOptions: routeState.onSaveQueryParams,
             paramsToApply,
@@ -320,17 +322,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           handleNavigateTo(routeState.onSaveNavigateTo);
         }
       } else {
-        history.push(packagePolicyPath);
+        history.push(integrationPoliciesPath);
       }
     },
-    [
-      packagePolicy.policy_id,
-      getPath,
-      handleNavigateTo,
-      history,
-      routeState,
-      wasNewAgentPolicyCreated,
-    ]
+    [getPath, params.pkgkey, routeState, wasNewAgentPolicyCreated, handleNavigateTo, history]
   );
 
   const onSubmit = useCallback(async () => {

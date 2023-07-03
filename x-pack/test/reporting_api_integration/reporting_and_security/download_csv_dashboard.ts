@@ -493,5 +493,102 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
     });
+
+    describe('_id field is a big integer, passes through the value without mutation', () => {
+      let resText: string;
+      before(async () => {
+        await kibanaServer.uiSettings.update({
+          'csv:quoteValues': false,
+          'dateFormat:tz': 'UTC',
+          defaultIndex: 'logstash-*',
+        });
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/big_int_id_field');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/reporting/big_int_id_field'
+        );
+        const {
+          status: resStatus,
+          type: resType,
+          text,
+        } = (await generateAPI.getCSVFromSearchSource(
+          getMockJobParams({
+            browserTimezone: 'UTC',
+            version: '8.6.0',
+            searchSource: {
+              query: { query: '', language: 'kuery' },
+              fields: [{ field: '*', include_unmapped: 'true' }],
+              index: '0b3ad420-a7d9-11ed-b7bc-4b80fc2e7c64',
+              sort: [{ timestamp: 'desc' }],
+              filter: [
+                {
+                  meta: {
+                    index: '0b3ad420-a7d9-11ed-b7bc-4b80fc2e7c64',
+                    params: {},
+                    field: 'timestamp',
+                  },
+                  query: {
+                    range: {
+                      timestamp: {
+                        format: 'strict_date_optional_time',
+                        gte: '2007-10-25T21:18:23.905Z',
+                        lte: '2022-10-30T00:00:00.000Z',
+                      },
+                    },
+                  },
+                },
+              ],
+              parent: {
+                query: { query: '', language: 'kuery' },
+                filter: [],
+                parent: {
+                  filter: [
+                    {
+                      meta: {
+                        index: '0b3ad420-a7d9-11ed-b7bc-4b80fc2e7c64',
+                        params: {},
+                        field: 'timestamp',
+                      },
+                      query: {
+                        range: {
+                          timestamp: {
+                            format: 'strict_date_optional_time',
+                            gte: '2007-10-25T21:18:23.905Z',
+                            lte: '2022-10-30T00:00:00.000Z',
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            columns: [],
+            title: 'testsearch',
+          })
+        )) as supertest.Response;
+
+        expect(resStatus).to.eql(200);
+        expect(resType).to.eql('text/csv');
+
+        resText = text;
+      });
+
+      after(async () => {
+        await Promise.all([
+          esArchiver.unload('x-pack/test/functional/es_archives/reporting/big_int_id_field'),
+          kibanaServer.importExport.unload(
+            'x-pack/test/functional/fixtures/kbn_archiver/reporting/big_int_id_field'
+          ),
+        ]);
+      });
+
+      itIfEs7('(ES 7)', async () => {
+        expectSnapshot(resText).toMatch();
+      });
+
+      itIfEs8('(ES 8)', async () => {
+        expectSnapshot(resText).toMatch();
+      });
+    });
   });
 }

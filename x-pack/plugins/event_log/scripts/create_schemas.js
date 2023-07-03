@@ -115,7 +115,8 @@ function writeEventLogConfigSchema(elSchema, ecsVersion) {
 }
 
 const StringTypes = new Set(['string', 'keyword', 'text', 'ip']);
-const NumberTypes = new Set(['long', 'integer', 'float']);
+const NumberTypes = new Set(['integer', 'float']);
+const StringOrNumberTypes = new Set(['long']);
 
 function augmentMappings(mappings, multiValuedProperties) {
   for (const prop of multiValuedProperties) {
@@ -142,6 +143,11 @@ function generateSchemaLines(lineWriter, prop, mappings) {
 
   if (NumberTypes.has(mappings.type)) {
     lineWriter.addLine(`${propKey}: ecsNumber(),`);
+    return;
+  }
+
+  if (StringOrNumberTypes.has(mappings.type)) {
+    lineWriter.addLine(`${propKey}: ecsStringOrNumber(),`);
     return;
   }
 
@@ -308,6 +314,10 @@ function ecsString() {
 
 function ecsNumber() {
   return schema.maybe(schema.number());
+}
+
+function ecsStringOrNumber() {
+  return schema.maybe(schema.oneOf([schema.string(), schema.number()]));
 }
 
 function ecsDate() {

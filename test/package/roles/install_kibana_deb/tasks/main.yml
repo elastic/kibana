@@ -26,6 +26,12 @@
     dest: /etc/kibana/kibana.yml
   register: config
 
+- name: copy node.options
+  become: yes
+  template:
+    src: templates/node.options
+    dest: /etc/kibana/node.options
+
 - name: start kibana
   become: yes
   systemd:

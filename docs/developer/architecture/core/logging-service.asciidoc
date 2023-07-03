@@ -274,7 +274,7 @@ will be `/var/logs/kibana-1.log`, `/var/logs/kibana-2.log`, and so on. The defau
 
 - `max`
 
-The maximum number of files to keep. Once this number is reached, oldest files will be deleted. The default value is `7`
+The maximum number of files to keep. Once this number is reached, oldest files will be deleted. The default value is `7` and the maximum is `100`.
 
 ==== Rewrite Appender
 

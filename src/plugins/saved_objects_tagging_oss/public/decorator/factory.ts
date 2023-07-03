@@ -13,11 +13,12 @@ import { decorateObject } from './decorate_object';
 
 export const decoratorId = 'tag';
 
-export const tagDecoratorFactory: SavedObjectDecoratorFactory<InternalTagDecoratedSavedObject> =
-  () => {
-    return {
-      getId: () => decoratorId,
-      decorateConfig,
-      decorateObject,
-    };
+export const tagDecoratorFactory: SavedObjectDecoratorFactory<
+  InternalTagDecoratedSavedObject
+> = () => {
+  return {
+    getId: () => decoratorId,
+    decorateConfig,
+    decorateObject,
   };
+};

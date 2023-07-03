@@ -19,7 +19,7 @@ describe('useField() hook', () => {
   let fieldHook: FieldHook;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

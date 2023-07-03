@@ -60,8 +60,9 @@ export default class JestJUnitReporter extends BaseReporter {
     );
 
     const msToIso = (ms: number | null | undefined) =>
-      ms ? new Date(ms).toISOString().slice(0, -5) : undefined;
-    const msToSec = (ms: number | null | undefined) => (ms ? (ms / 1000).toFixed(3) : undefined);
+      typeof ms === 'number' ? new Date(ms).toISOString().slice(0, -5) : undefined;
+    const msToSec = (ms: number | null | undefined) =>
+      typeof ms === 'number' ? (ms / 1000).toFixed(3) : undefined;
 
     root.att({
       name: 'jest',

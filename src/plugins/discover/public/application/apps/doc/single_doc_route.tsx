@@ -64,13 +64,13 @@ export function SingleDocRoute(props: SingleDocRouteProps) {
         title={
           <FormattedMessage
             id="discover.singleDocRoute.errorTitle"
-            defaultMessage="An error occured"
+            defaultMessage="An error occurred"
           />
         }
         body={
           <FormattedMessage
             id="discover.singleDocRoute.errorMessage"
-            defaultMessage="No matching index pattern for id {indexPatternId}"
+            defaultMessage="No matching data view for id {indexPatternId}"
             values={{ indexPatternId }}
           />
         }

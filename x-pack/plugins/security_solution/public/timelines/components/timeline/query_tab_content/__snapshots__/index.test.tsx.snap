@@ -306,6 +306,7 @@ In other use cases the message field can be used to concatenate different values
   }
   kqlMode="search"
   kqlQueryExpression=" "
+  kqlQueryLanguage="kuery"
   onEventClosed={[MockFunction]}
   renderCellValue={[Function]}
   rowRenderers={

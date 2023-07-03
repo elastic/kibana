@@ -86,7 +86,7 @@ describe('filter manager utilities', () => {
       expect(result).toEqual({ key: 'test', value: 'example' });
     });
 
-    test('should throw an error if no functions match', async (done) => {
+    test('should throw an error if no functions match', (done) => {
       const filter = buildEmptyFilter(true);
 
       mapping.throws(filter);

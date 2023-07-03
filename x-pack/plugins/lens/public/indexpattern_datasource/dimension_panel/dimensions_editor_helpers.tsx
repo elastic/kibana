@@ -16,7 +16,7 @@ import './dimension_editor.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText, EuiTabs, EuiTab, EuiCallOut } from '@elastic/eui';
-import { IndexPatternColumn, operationDefinitionMap } from '../operations';
+import { GenericIndexPatternColumn, operationDefinitionMap } from '../operations';
 import { useDebouncedValue } from '../../shared_components';
 
 export const formulaOperationName = 'formula';
@@ -200,7 +200,7 @@ export const DimensionEditorTabs = ({
 };
 
 export function getErrorMessage(
-  selectedColumn: IndexPatternColumn | undefined,
+  selectedColumn: GenericIndexPatternColumn | undefined,
   incompleteOperation: boolean,
   input: 'none' | 'field' | 'fullReference' | 'managedReference' | undefined,
   fieldInvalid: boolean

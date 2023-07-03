@@ -46,7 +46,9 @@ function useServicesFetcher() {
 
   const {
     query: { rangeFrom, rangeTo, environment, kuery },
-  } = useApmParams('/services/{serviceName}', '/services');
+  } =
+    // @ts-ignore 4.3.5 upgrade - Type instantiation is excessively deep and possibly infinite.
+    useApmParams('/services/{serviceName}', '/services');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

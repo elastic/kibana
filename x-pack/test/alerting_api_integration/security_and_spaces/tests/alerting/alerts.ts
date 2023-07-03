@@ -21,14 +21,12 @@ import {
   TaskManagerUtils,
   getEventLog,
 } from '../../../common/lib';
-import { IValidatedEvent } from '../../../../../plugins/event_log/server';
+import { IValidatedEvent, nanosToMillis } from '../../../../../plugins/event_log/server';
 import {
   TaskRunning,
   TaskRunningStage,
 } from '../../../../../plugins/task_manager/server/task_running';
 import { ConcreteTaskInstance } from '../../../../../plugins/task_manager/server';
-
-const NANOS_IN_MILLIS = 1000 * 1000;
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
@@ -1285,13 +1283,11 @@ instanceStateValue: true
     const eventEnd = Date.parse(event?.event?.end || 'undefined');
     const dateNow = Date.now();
 
-    expect(typeof duration).to.be('number');
+    expect(typeof duration).to.be('string');
     expect(eventStart).to.be.ok();
     expect(eventEnd).to.be.ok();
 
-    const durationDiff = Math.abs(
-      Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
-    );
+    const durationDiff = Math.abs(nanosToMillis(duration!) - (eventEnd - eventStart));
 
     // account for rounding errors
     expect(durationDiff < 1).to.equal(true);

@@ -12,7 +12,7 @@ import type {
   FieldBasedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
 } from './operations/definitions/column_types';
-import { operationDefinitionMap, IndexPatternColumn } from './operations';
+import { operationDefinitionMap, GenericIndexPatternColumn } from './operations';
 
 import { getInvalidFieldMessage } from './operations/definitions/helpers';
 import { isQueryValid } from './operations/definitions/filters';
@@ -52,7 +52,7 @@ export function isColumnInvalid(
   columnId: string,
   indexPattern: IndexPattern
 ) {
-  const column: IndexPatternColumn | undefined = layer.columns[columnId];
+  const column: GenericIndexPatternColumn | undefined = layer.columns[columnId];
   if (!column || !indexPattern) return;
 
   const operationDefinition = column.operationType && operationDefinitionMap[column.operationType];
@@ -62,12 +62,9 @@ export function isColumnInvalid(
     'references' in column &&
     Boolean(getReferencesErrors(layer, column, indexPattern).filter(Boolean).length);
 
-  const operationErrorMessages = operationDefinition.getErrorMessage?.(
-    layer,
-    columnId,
-    indexPattern,
-    operationDefinitionMap
-  );
+  const operationErrorMessages =
+    operationDefinition &&
+    operationDefinition.getErrorMessage?.(layer, columnId, indexPattern, operationDefinitionMap);
 
   const filterHasError = column.filter ? !isQueryValid(column.filter, indexPattern) : false;
 
@@ -95,7 +92,10 @@ function getReferencesErrors(
   });
 }
 
-export function fieldIsInvalid(column: IndexPatternColumn | undefined, indexPattern: IndexPattern) {
+export function fieldIsInvalid(
+  column: GenericIndexPatternColumn | undefined,
+  indexPattern: IndexPattern
+) {
   if (!column || !hasField(column)) {
     return false;
   }

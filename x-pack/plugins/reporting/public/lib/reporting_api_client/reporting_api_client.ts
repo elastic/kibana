@@ -67,11 +67,15 @@ interface IReportingAPI {
 }
 
 export class ReportingAPIClient implements IReportingAPI {
+  private http: HttpSetup;
+
   constructor(
-    private http: HttpSetup,
+    http: HttpSetup,
     private uiSettings: IUiSettingsClient,
     private kibanaVersion: string
-  ) {}
+  ) {
+    this.http = http;
+  }
 
   public getReportURL(jobId: string) {
     const apiBaseUrl = this.http.basePath.prepend(API_LIST_URL);

@@ -24,6 +24,7 @@ filegroup(
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
   "deep_exact_rt/package.json",
+  "index_pattern_rt/package.json",
   "iso_to_epoch_rt/package.json",
   "json_rt/package.json",
   "merge_rt/package.json",

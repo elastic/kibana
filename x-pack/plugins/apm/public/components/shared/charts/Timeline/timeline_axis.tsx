@@ -7,13 +7,12 @@
 
 import { inRange } from 'lodash';
 import React, { ReactNode } from 'react';
-import { XAxis, XYPlot } from 'react-vis';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
 import { Mark } from './';
-import { LastTickValue } from './LastTickValue';
 import { Marker } from './Marker';
-import { PlotValues } from './plotUtils';
+import { PlotValues } from './plot_utils';
+import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
 
 // Remove any tick that is too close to topTraceDuration
 const getXAxisTickValues = (
@@ -47,10 +46,20 @@ export function TimelineAxis({
   topTraceDuration,
 }: TimelineAxisProps) {
   const theme = useTheme();
-  const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
+  const { margins, tickValues, width, xMax, xScale } = plotValues;
   const tickFormatter = getDurationFormatter(xMax);
-  const xAxisTickValues = getXAxisTickValues(tickValues, topTraceDuration);
-  const topTraceDurationFormatted = tickFormatter(topTraceDuration).formatted;
+
+  const tickPositionsAndLabels = getXAxisTickValues(
+    tickValues,
+    topTraceDuration
+  ).reduce<Array<{ position: number; label: string }>>((ticks, tick) => {
+    const position = xScale(tick);
+    return isFiniteNumber(position)
+      ? [...ticks, { position, label: tickFormatter(tick).formatted }]
+      : ticks;
+  }, []);
+  const topTraceDurationPosition =
+    topTraceDuration > 0 ? xScale(topTraceDuration) : NaN;
 
   return (
     <div
@@ -63,41 +72,41 @@ export function TimelineAxis({
         width: '100%',
       }}
     >
-      <XYPlot
-        dontCheckIfEmpty
+      <svg
+        style={{ position: 'absolute', top: 0, left: 0 }}
         width={width}
         height={margins.top}
-        margin={{
-          top: margins.top,
-          left: margins.left,
-          right: margins.right,
-        }}
-        xDomain={xDomain}
       >
-        <XAxis
-          hideLine
-          orientation="top"
-          tickSize={0}
-          tickValues={xAxisTickValues}
-          tickFormat={(time?: number) => tickFormatter(time).formatted}
-          tickPadding={20}
-          style={{
-            text: { fill: theme.eui.euiColorDarkShade },
-          }}
-        />
+        <g transform={`translate(0 ${margins.top - 20})`}>
+          {tickPositionsAndLabels.map(({ position, label }) => (
+            <text
+              key={`tick-${position}`}
+              x={position}
+              y={0}
+              textAnchor="middle"
+              fill={theme.eui.euiColorDarkShade}
+              fontSize={11}
+            >
+              {label}
+            </text>
+          ))}
+          {Number.isFinite(topTraceDurationPosition) && (
+            <text
+              key="topTrace"
+              x={topTraceDurationPosition}
+              y={0}
+              fill={theme.eui.euiTextColor}
+              textAnchor="middle"
+            >
+              {tickFormatter(topTraceDuration).formatted}
+            </text>
+          )}
+        </g>
+      </svg>
 
-        {topTraceDuration > 0 && (
-          <LastTickValue
-            x={xScale(topTraceDuration) ?? 0}
-            value={topTraceDurationFormatted}
-            marginTop={28}
-          />
-        )}
-
-        {marks.map((mark) => (
-          <Marker key={mark.id} mark={mark} x={xScale(mark.offset) ?? 0} />
-        ))}
-      </XYPlot>
+      {marks.map((mark) => (
+        <Marker key={mark.id} mark={mark} x={xScale(mark.offset) ?? 0} />
+      ))}
     </div>
   );
 }

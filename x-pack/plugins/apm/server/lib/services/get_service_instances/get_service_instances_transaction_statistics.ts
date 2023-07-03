@@ -176,6 +176,7 @@ export async function getServiceInstancesTransactionStatistics<
           const { timeseries } = serviceNodeBucket;
           return {
             serviceNodeName,
+            // @ts-ignore 4.3.5 upgrade - Expression produces a union type that is too complex to represent.
             errorRate: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
               y: dateBucket.failures.doc_count / dateBucket.doc_count,

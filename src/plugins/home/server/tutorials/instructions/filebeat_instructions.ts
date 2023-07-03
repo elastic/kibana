@@ -348,7 +348,8 @@ export function filebeatEnableInstructions(moduleName: string) {
       }),
       commands: ['./filebeat modules enable ' + moduleName],
       textPost: i18n.translate('home.tutorials.common.filebeatEnableInstructions.osxTextPost', {
-        defaultMessage: 'Modify the settings in the `modules.d/{moduleName}.yml` file.',
+        defaultMessage:
+          'Modify the settings in the `modules.d/{moduleName}.yml` file. You must enable at least one fileset.',
         values: { moduleName },
       }),
     },
@@ -360,7 +361,7 @@ export function filebeatEnableInstructions(moduleName: string) {
       commands: ['sudo filebeat modules enable ' + moduleName],
       textPost: i18n.translate('home.tutorials.common.filebeatEnableInstructions.debTextPost', {
         defaultMessage:
-          'Modify the settings in the `/etc/filebeat/modules.d/{moduleName}.yml` file.',
+          'Modify the settings in the `/etc/filebeat/modules.d/{moduleName}.yml` file. You must enable at least one fileset.',
         values: { moduleName },
       }),
     },
@@ -372,7 +373,7 @@ export function filebeatEnableInstructions(moduleName: string) {
       commands: ['sudo filebeat modules enable ' + moduleName],
       textPost: i18n.translate('home.tutorials.common.filebeatEnableInstructions.rpmTextPost', {
         defaultMessage:
-          'Modify the settings in the `/etc/filebeat/modules.d/{moduleName}.yml` file.',
+          'Modify the settings in the `/etc/filebeat/modules.d/{moduleName}.yml` file. You must enable at least one fileset.',
         values: { moduleName },
       }),
     },
@@ -387,7 +388,8 @@ export function filebeatEnableInstructions(moduleName: string) {
       }),
       commands: ['filebeat.exe modules enable ' + moduleName],
       textPost: i18n.translate('home.tutorials.common.filebeatEnableInstructions.windowsTextPost', {
-        defaultMessage: 'Modify the settings in the `modules.d/{moduleName}.yml` file.',
+        defaultMessage:
+          'Modify the settings in the `modules.d/{moduleName}.yml` file. You must enable at least one fileset.',
         values: { moduleName },
       }),
     },

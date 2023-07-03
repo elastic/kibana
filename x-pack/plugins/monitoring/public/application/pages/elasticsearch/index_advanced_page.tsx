@@ -29,6 +29,7 @@ export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = ({ clust
   const { index }: { index: string } = useParams();
   const { zoomInfo, onBrush } = useCharts();
   const clusterUuid = globalState.cluster_uuid;
+  const ccs = globalState.ccs;
   const [data, setData] = useState({} as any);
   const [alerts, setAlerts] = useState<AlertsByName>({});
 
@@ -60,6 +61,7 @@ export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = ({ clust
       const response = await services.http?.fetch(url, {
         method: 'POST',
         body: JSON.stringify({
+          ccs,
           timeRange: {
             min: bounds.min.toISOString(),
             max: bounds.max.toISOString(),
@@ -84,7 +86,7 @@ export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = ({ clust
       });
       setAlerts(alertsResponse);
     }
-  }, [clusterUuid, services.data?.query.timefilter.timefilter, services.http, index]);
+  }, [services.data?.query.timefilter.timefilter, services.http, clusterUuid, index, ccs]);
 
   return (
     <ItemTemplate

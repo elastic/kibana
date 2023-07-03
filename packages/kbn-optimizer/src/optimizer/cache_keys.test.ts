@@ -8,7 +8,7 @@
 
 import Path from 'path';
 
-import jestDiff from 'jest-diff';
+import { diff as jestDiff } from 'jest-diff';
 import { REPO_ROOT } from '@kbn/utils';
 import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 

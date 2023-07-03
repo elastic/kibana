@@ -18,9 +18,9 @@ export const getTimeRange = async (
   const endTrace = startTrace('get_time_range', 'read');
   logger.debug('getting timeRange');
 
-  const timeRange = await browser.evaluate(
+  const timeRange = await browser.evaluate<string[], string | null>(
     {
-      fn: (durationAttribute) => {
+      fn: (durationAttribute: string) => {
         const durationElement = document.querySelector(`[${durationAttribute}]`);
 
         if (!durationElement) {

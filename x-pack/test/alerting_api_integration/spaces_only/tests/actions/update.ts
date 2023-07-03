@@ -160,6 +160,26 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
       expect(new Date(noopFeature.last_used).getTime()).to.be.greaterThan(updateStart.getTime());
     });
 
+    it('should handle update action request appropriately when empty strings are submitted', async () => {
+      await supertest
+        .put(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/custom-system-abc-connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: ' ',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: `[request body.name]: value '' is not valid`,
+        });
+    });
+
     describe('legacy', () => {
       it('should handle update action request appropriately', async () => {
         const { body: createdAction } = await supertest

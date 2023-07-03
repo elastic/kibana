@@ -39,7 +39,7 @@ const onFormHook = (_form: FormHook<any>) => {
 
 describe('useForm() hook', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

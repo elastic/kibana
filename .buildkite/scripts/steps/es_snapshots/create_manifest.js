@@ -83,7 +83,7 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
       cd "${destination}"
       gsutil -m cp -r *.* gs://${BASE_BUCKET_DAILY}/${DESTINATION}
       cp manifest.json manifest-latest.json
-      gsutil cp manifest-latest.json gs://${BASE_BUCKET_DAILY}/${VERSION}
+      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest-latest.json gs://${BASE_BUCKET_DAILY}/${VERSION}
 
       buildkite-agent meta-data set ES_SNAPSHOT_MANIFEST 'https://storage.googleapis.com/${BASE_BUCKET_DAILY}/${DESTINATION}/manifest.json'
       buildkite-agent meta-data set ES_SNAPSHOT_VERSION '${VERSION}'

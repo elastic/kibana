@@ -108,7 +108,7 @@ describe('field_manager', () => {
     ).toEqual(['field1', 'field2', 'field3']);
 
     act(() => {
-      getInstance().find(FieldPicker).dive().find(EuiSelectable).prop('onChange')([
+      getInstance().find(FieldPicker).dive().find(EuiSelectable).prop('onChange')!([
         { checked: 'on', label: 'field3' },
       ]);
     });

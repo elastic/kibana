@@ -10,7 +10,6 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
   roots: ['<rootDir>/src/plugins/vis_types/table'],
-  testRunner: 'jasmine2',
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/vis_types/table',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [

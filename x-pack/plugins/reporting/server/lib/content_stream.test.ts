@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { createMockLevelLogger } from '../test_helpers';
 import { ContentStream } from './content_stream';

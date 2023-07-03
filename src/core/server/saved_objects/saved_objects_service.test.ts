@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { setImmediate } from 'timers/promises';
 import { join } from 'path';
 import loadJsonFile from 'load-json-file';
 
@@ -18,6 +19,7 @@ import {
   deleteIndexTemplatesMock,
 } from './saved_objects_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { RawPackageInfo } from '@kbn/config';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/dev-utils';
@@ -243,6 +245,21 @@ describe('SavedObjectsService', () => {
         expect(getTypeRegistry()).toBe(typeRegistryInstanceMock);
       });
     });
+
+    describe('status$', () => {
+      it('return correct value when migration is skipped', async () => {
+        const coreContext = createCoreContext({ skipMigration: true });
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        await soService.start(createStartDeps(false));
+
+        const serviceStatus = await setup.status$.pipe(take(2)).toPromise();
+        expect(serviceStatus.level.toString()).toEqual('available');
+        expect(serviceStatus.summary).toEqual(
+          'SavedObjects service has completed migrations and is available'
+        );
+      });
+    });
   });
 
   describe('#start()', () => {
@@ -304,8 +321,7 @@ describe('SavedObjectsService', () => {
       expect(KibanaMigratorMock).toHaveBeenCalledWith(expect.objectContaining({ kibanaVersion }));
     });
 
-    it('waits for all es nodes to be compatible before running migrations', async (done) => {
-      expect.assertions(2);
+    it('waits for all es nodes to be compatible before running migrations', async () => {
       const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);
       const setupDeps = createSetupDeps();
@@ -331,7 +347,7 @@ describe('SavedObjectsService', () => {
       });
       setImmediate(() => {
         expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
-        done();
+        expect.assertions(2);
       });
     });
 

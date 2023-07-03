@@ -389,7 +389,7 @@ describe('CurationLogic', () => {
     });
 
     describe('updateCuration', () => {
-      beforeAll(() => jest.useFakeTimers());
+      beforeAll(() => jest.useFakeTimers({ legacyFakeTimers: true }));
       afterAll(() => jest.useRealTimers());
 
       it('should make a PUT API call with queries and promoted/hidden IDs to update', async () => {

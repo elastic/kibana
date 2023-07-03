@@ -95,8 +95,6 @@ export const registerAlertsIndexPrivilegeDeprecations = ({
               defaultMessage: `In order to view detection alerts in 8.0+, users will need read privileges to new detection alerts index aliases \
 ({alertsIndexPrefix}-<KIBANA_SPACE>) and backing indices ({internalAlertsIndexPrefix}-<KIBANA_SPACE>-*), \
 analogous to existing detection alerts indices ({signalsIndexPrefix}-<KIBANA_SPACE>). \
-In addition, any enabled Detection rules will be automatically disabled during the upgrade and must be manually re-enabled after \
-upgrading. Rules that are automatically disabled will also automatically be tagged to assist in manually re-enabling them post-upgrade. \
 Alerts created after upgrading will use a different schema.`,
             }
           ),
@@ -105,6 +103,29 @@ Alerts created after upgrading will use a different schema.`,
           documentationUrl: `https://www.elastic.co/guide/en/security/8.0/upgrade-intro.html#upgrade-reqs`,
           correctiveActions: {
             manualSteps: buildManualSteps(roleNamesWhichReadSignals),
+          },
+        },
+        {
+          title: i18n.translate('xpack.securitySolution.deprecations.disabledRules.title', {
+            defaultMessage: 'Detection rules will be disabled after upgrading',
+          }),
+          message: i18n.translate('xpack.securitySolution.deprecations.disabledRules.message', {
+            defaultMessage: `Any enabled Detection rules will be automatically disabled during the upgrade and must be manually re-enabled after \
+upgrading. Rules that are automatically disabled will also automatically be tagged to assist in manually re-enabling them post-upgrade.`,
+          }),
+          level: 'warning',
+          deprecationType: 'feature',
+          documentationUrl: `https://www.elastic.co/guide/en/security/8.0/upgrade-intro.html#upgrade-reqs`,
+          correctiveActions: {
+            manualSteps: [
+              i18n.translate(
+                'xpack.securitySolution.deprecations.disabledRules.correctiveActions',
+                {
+                  defaultMessage: `After upgrading, re-enable rules that were automatically disabled. Automatically disabled rules can be found \
+by filtering for the tag 'auto_disabled_8.0' in the Rules table.`,
+                }
+              ),
+            ],
           },
         },
       ];

@@ -135,6 +135,54 @@ describe('Telemetry Collection Manager', () => {
               collectionStrategy.clusterDetailsGetter.mock.calls[0][0].soClient
             ).toBeInstanceOf(TelemetrySavedObjectsClient);
           });
+
+          test('caches the promise calling `getStats` for concurrent requests', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([
+              { clusterUuid: 'clusterUuid' },
+            ]);
+            collectionStrategy.statsGetter.mockResolvedValue([basicStats]);
+            await Promise.all([setupApi.getStats(config), setupApi.getStats(config)]);
+            expect(collectionStrategy.statsGetter).toHaveBeenCalledTimes(1);
+          });
+
+          it('calls getStats with passed refreshCache config', async () => {
+            const getStatsCollectionConfig: jest.SpyInstance<
+              TelemetryCollectionManagerPlugin['getStatsCollectionConfig']
+              // @ts-expect-error spying on private method.
+            > = jest.spyOn(telemetryCollectionManager, 'getStatsCollectionConfig');
+            await setupApi.getStats(config);
+            await setupApi.getStats({ ...config, refreshCache: false });
+            await setupApi.getStats({ ...config, refreshCache: true });
+
+            expect(getStatsCollectionConfig).toBeCalledTimes(3);
+            expect(getStatsCollectionConfig).toHaveBeenNthCalledWith(1, config, usageCollection);
+            expect(getStatsCollectionConfig).toHaveNthReturnedWith(
+              1,
+              expect.objectContaining({ refreshCache: false })
+            );
+
+            expect(getStatsCollectionConfig).toHaveBeenNthCalledWith(
+              2,
+              expect.objectContaining({ refreshCache: false }),
+              usageCollection
+            );
+            expect(getStatsCollectionConfig).toHaveNthReturnedWith(
+              2,
+              expect.objectContaining({ refreshCache: false })
+            );
+
+            expect(getStatsCollectionConfig).toHaveBeenNthCalledWith(
+              3,
+              expect.objectContaining({ refreshCache: true }),
+              usageCollection
+            );
+            expect(getStatsCollectionConfig).toHaveNthReturnedWith(
+              3,
+              expect.objectContaining({ refreshCache: true })
+            );
+
+            getStatsCollectionConfig.mockRestore();
+          });
         });
 
         describe('getOptInStats', () => {
@@ -229,6 +277,15 @@ describe('Telemetry Collection Manager', () => {
                 },
               },
             ]);
+          });
+
+          test('it caches the promise calling `getStats` for concurrent requests', async () => {
+            collectionStrategy.clusterDetailsGetter.mockResolvedValue([
+              { clusterUuid: 'clusterUuid' },
+            ]);
+            collectionStrategy.statsGetter.mockResolvedValue([basicStats]);
+            await Promise.all([setupApi.getStats(config), setupApi.getStats(config)]);
+            expect(collectionStrategy.statsGetter).toHaveBeenCalledTimes(1);
           });
         });
 

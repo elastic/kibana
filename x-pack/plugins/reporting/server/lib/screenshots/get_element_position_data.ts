@@ -19,11 +19,16 @@ export const getElementPositionAndAttributes = async (
 ): Promise<ElementsPositionAndAttribute[] | null> => {
   const endTrace = startTrace('get_element_position_data', 'read');
   const { screenshot: screenshotSelector } = layout.selectors; // data-shared-items-container
+  const screenshotAttributes = { title: 'data-title', description: 'data-description' };
+
   let elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
   try {
-    elementsPositionAndAttributes = await browser.evaluate(
+    elementsPositionAndAttributes = await browser.evaluate<
+      [typeof screenshotSelector, typeof screenshotAttributes],
+      ElementsPositionAndAttribute[] | null
+    >(
       {
-        fn: (selector, attributes) => {
+        fn: (selector: string, attributes: typeof screenshotAttributes) => {
           const elements = Array.from(document.querySelectorAll<Element>(selector));
           const results: ElementsPositionAndAttribute[] = [];
 
@@ -42,16 +47,19 @@ export const getElementPositionAndAttributes = async (
                   y: window.scrollY,
                 },
               },
-              attributes: Object.keys(attributes).reduce((result: AttributesMap, key) => {
-                const attribute = attributes[key];
-                result[key] = element.getAttribute(attribute);
-                return result;
-              }, {} as AttributesMap),
+              attributes: Object.keys(attributes).reduce<AttributesMap>(
+                (result: AttributesMap, key) => {
+                  const attribute = attributes[key as keyof typeof attributes];
+                  result[key] = element.getAttribute(attribute);
+                  return result;
+                },
+                {}
+              ),
             });
           }
           return results;
         },
-        args: [screenshotSelector, { title: 'data-title', description: 'data-description' }],
+        args: [screenshotSelector, screenshotAttributes],
       },
       { context: CONTEXT_ELEMENTATTRIBUTES },
       logger

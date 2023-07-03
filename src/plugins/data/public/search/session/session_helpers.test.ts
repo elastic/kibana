@@ -57,7 +57,7 @@ beforeEach(() => {
 
 describe('waitUntilNextSessionCompletes$', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
   afterEach(() => {
     jest.useRealTimers();

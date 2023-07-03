@@ -97,6 +97,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
+  'typings/*',
 ];
 
 /**

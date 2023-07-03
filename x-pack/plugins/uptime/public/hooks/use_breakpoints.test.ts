@@ -14,7 +14,7 @@ describe('use_breakpoints', () => {
     const width = global.innerWidth;
 
     beforeEach(() => {
-      jest.useFakeTimers();
+      jest.useFakeTimers({ legacyFakeTimers: true });
     });
 
     afterEach(() => {

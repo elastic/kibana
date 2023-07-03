@@ -346,5 +346,6 @@ export const createEventFiltersPageMiddleware = (
   };
 };
 
-export const eventFiltersPageMiddlewareFactory: ImmutableMiddlewareFactory<EventFiltersListPageState> =
-  (coreStart) => createEventFiltersPageMiddleware(new EventFiltersHttpService(coreStart.http));
+export const eventFiltersPageMiddlewareFactory: ImmutableMiddlewareFactory<
+  EventFiltersListPageState
+> = (coreStart) => createEventFiltersPageMiddleware(new EventFiltersHttpService(coreStart.http));

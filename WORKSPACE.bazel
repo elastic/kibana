@@ -27,14 +27,13 @@ check_rules_nodejs_version(minimum_version_string = "3.8.0")
 # we can update that rule.
 node_repositories(
   node_repositories = {
-    "16.14.2-darwin_amd64": ("node-v16.14.2-darwin-x64.tar.gz", "node-v16.14.2-darwin-x64", "d3076ca7fcc7269c8ff9b03fe7d1c277d913a7e84a46a14eff4af7791ff9d055"),
-    "16.14.2-darwin_arm64": ("node-v16.14.2-darwin-arm64.tar.gz", "node-v16.14.2-darwin-arm64", "a66d9217d2003bd416d3dd06dfd2c7a044c4c9ff2e43a27865790bd0d59c682d"),
-    "16.14.2-linux_arm64": ("node-v16.14.2-linux-arm64.tar.xz", "node-v16.14.2-linux-arm64", "f7c5a573c06a520d6c2318f6ae204141b8420386553a692fc359f8ae3d88df96"),
-    "16.14.2-linux_s390x": ("node-v16.14.2-linux-s390x.tar.xz", "node-v16.14.2-linux-s390x", "3197925919ca357e17a31132dc6ef4e5afae819fa09905cfe9f7ff7924a00bf5"),
-    "16.14.2-linux_amd64": ("node-v16.14.2-linux-x64.tar.xz", "node-v16.14.2-linux-x64", "e40c6f81bfd078976d85296b5e657be19e06862497741ad82902d0704b34bb1b"),
-    "16.14.2-windows_amd64": ("node-v16.14.2-win-x64.zip", "node-v16.14.2-win-x64", "4731da4fbb2015d414e871fa9118cabb643bdb6dbdc8a69a3ed563266ac93229"),
+    "16.19.1-darwin_amd64": ("node-v16.19.1-darwin-x64.tar.gz", "node-v16.19.1-darwin-x64", "d7f683b2a8f78db8a28235a175e130c760f0d3cd335404e02f223e3a9adc30c7"),
+    "16.19.1-darwin_arm64": ("node-v16.19.1-darwin-arm64.tar.gz", "node-v16.19.1-darwin-arm64", "168f787f457bf645f3fc41e7419b62071db7d42519ce461b1d7ebfc0acbdbfb1"),
+    "16.19.1-linux_arm64": ("node-v16.19.1-linux-arm64.tar.xz", "node-v16.19.1-linux-arm64", "042b3ae7e994a77bfdb0e366d0389c1b7602bb744830da15f9325f404f979ce2"),
+    "16.19.1-linux_amd64": ("node-v16.19.1-linux-x64.tar.xz", "node-v16.19.1-linux-x64", "fa796a23837dc5c22914b1349b6117df4d497e2001a4cd7b28b0767e22f3bb51"),
+    "16.19.1-windows_amd64": ("node-v16.19.1-win-x64.zip", "node-v16.19.1-win-x64", "77e0198497fee24552d6a6f1737eed595b619af1b749ee0bee4b938026e55f73"),
   },
-  node_version = "16.14.2",
+  node_version = "16.19.1",
   node_urls = [
     "https://nodejs.org/dist/v{version}/{filename}",
   ],

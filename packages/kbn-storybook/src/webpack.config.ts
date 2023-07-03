@@ -32,9 +32,11 @@ function isHtmlPlugin(plugin: any): plugin is { options: { template: string } } 
   return !!(typeof plugin.options?.template === 'string');
 }
 
-function isBabelLoaderRule(rule: webpack.RuleSetRule): rule is webpack.RuleSetRule & {
+interface BabelLoaderRule extends webpack.RuleSetRule {
   use: webpack.RuleSetLoader[];
-} {
+}
+
+function isBabelLoaderRule(rule: webpack.RuleSetRule): rule is BabelLoaderRule {
   return !!(
     rule.use &&
     Array.isArray(rule.use) &&
@@ -73,6 +75,10 @@ export default function ({ config: storybookConfig }: { config: Configuration })
     },
     externals,
     module: {
+      // no parse rules for a few known large packages which have no require() statements
+      // or which have require() statements that should be ignored because the file is
+      // already bundled with all its necessary dependencies
+      noParse: [/[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/],
       rules: [
         {
           test: /\.(html|md|txt|tmpl)$/,
@@ -89,8 +95,8 @@ export default function ({ config: storybookConfig }: { config: Configuration })
             {
               loader: 'postcss-loader',
               options: {
-                config: {
-                  path: require.resolve('@kbn/optimizer/postcss.config.js'),
+                postcssOptions: {
+                  config: require.resolve('@kbn/optimizer/postcss.config.js'),
                 },
               },
             },
@@ -119,6 +125,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
       mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/core_app/images'),
+        vega: resolve(REPO_ROOT, 'node_modules/vega/build-es5/vega.js'),
       },
       symlinks: false,
     },

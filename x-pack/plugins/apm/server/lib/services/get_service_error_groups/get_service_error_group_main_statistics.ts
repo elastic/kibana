@@ -82,6 +82,7 @@ export async function getServiceErrorGroupMainStatistics({
     }
   );
 
+  // @ts-ignore 4.3.5 upgrade - Expression produces a union type that is too complex to represent. ts(2590)
   const errorGroups =
     response.aggregations?.error_groups.buckets.map((bucket) => ({
       group_id: bucket.key as string,

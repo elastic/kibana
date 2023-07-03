@@ -383,7 +383,7 @@ export class SearchInterceptor {
 
   private showTimeoutErrorMemoized = memoize(
     this.showTimeoutErrorToast,
-    (_: SearchTimeoutError, sessionId: string) => {
+    (_: SearchTimeoutError, sessionId?: string) => {
       return sessionId;
     }
   );
@@ -400,12 +400,7 @@ export class SearchInterceptor {
     );
   };
 
-  private showRestoreWarning = memoize(
-    this.showRestoreWarningToast,
-    (_: SearchTimeoutError, sessionId: string) => {
-      return sessionId;
-    }
-  );
+  private showRestoreWarning = memoize(this.showRestoreWarningToast);
 
   /**
    * Show one error notification per session.

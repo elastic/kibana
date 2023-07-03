@@ -150,6 +150,8 @@ export function runFtrCli() {
           --grep <pattern>   pattern used to select which tests to run
           --invert           invert grep to exclude tests
           --es-version       the elasticsearch version, formatted as "x.y.z"
+          --include=file     a test file to be included, pass multiple times for multiple files
+          --exclude=file     a test file to be excluded, pass multiple times for multiple files
           --include-tag=tag  a tag to be included, pass multiple times for multiple tags. Only
                                suites which have one of the passed include-tag tags will be executed.
                                When combined with the --exclude-tag flag both conditions must be met
@@ -157,8 +159,6 @@ export function runFtrCli() {
           --exclude-tag=tag  a tag to be excluded, pass multiple times for multiple tags. Any suite
                                which has any of the exclude-tags will be excluded. When combined with
                                the --include-tag flag both conditions must be met for a suite to run.
-          --include-tag=tag  a tag to be included, pass multiple times for multiple tags
-          --exclude-tag=tag  a tag to be excluded, pass multiple times for multiple tags
           --test-stats       print the number of tests (included and excluded) to STDERR
           --updateBaselines  replace baseline screenshots with whatever is generated from the test
           --updateSnapshots  replace inline and file snapshots with whatever is generated from the test

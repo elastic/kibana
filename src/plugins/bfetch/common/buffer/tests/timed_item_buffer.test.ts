@@ -9,7 +9,7 @@
 import { TimedItemBuffer } from '../timed_item_buffer';
 import { runItemBufferTests } from './run_item_buffer_tests';
 
-jest.useFakeTimers();
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 beforeEach(() => {
   jest.clearAllTimers();

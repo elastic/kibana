@@ -18,7 +18,7 @@ describe('<WatchList />', () => {
   let testBed: WatchListTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

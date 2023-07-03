@@ -27,7 +27,7 @@ describe('Reindex deprecation flyout', () => {
   let testBed: ElasticsearchTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

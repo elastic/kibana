@@ -46,7 +46,7 @@ const SHAREABLE_HIDDEN_OBJ_TYPE = 'type-c';
 const mockCurrentTime = new Date('2021-05-01T10:20:30Z');
 
 beforeAll(() => {
-  jest.useFakeTimers('modern');
+  jest.useFakeTimers();
   jest.setSystemTime(mockCurrentTime);
 });
 

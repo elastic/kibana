@@ -38,6 +38,7 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
+    "//packages/kbn-babel-register",
     "//packages/kbn-dev-utils",
     "//packages/kbn-i18n",
     "//packages/kbn-std",
@@ -76,12 +77,14 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
+  "//packages/kbn-babel-register",
   "//packages/kbn-dev-utils",
   "//packages/kbn-i18n",
   "//packages/kbn-utils",
   "@npm//@elastic/elasticsearch",
   "@npm//@jest/console",
   "@npm//@jest/reporters",
+  "@npm//@jest/types",
   "@npm//axios",
   "@npm//elastic-apm-node",
   "@npm//del",
@@ -99,7 +102,7 @@ TYPES_DEPS = [
   "@npm//@types/he",
   "@npm//@types/history",
   "@npm//@types/jest",
-  "@npm//@types/joi",
+  "@npm//joi",
   "@npm//@types/lodash",
   "@npm//@types/mustache",
   "@npm//@types/node",

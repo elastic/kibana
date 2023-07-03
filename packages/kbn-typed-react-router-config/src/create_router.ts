@@ -23,7 +23,7 @@ function toReactRouterPath(path: string) {
   return path.replace(/(?:{([^\/]+)})/g, ':$1');
 }
 
-export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<TRoutes> {
+export function createRouter<TRoute extends Route>(routes: TRoute[]): Router<TRoute[]> {
   const routesByReactRouterConfig = new Map<ReactRouterConfig, Route>();
   const reactRouterConfigsByRoute = new Map<Route, ReactRouterConfig>();
 
@@ -181,10 +181,8 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
     );
   };
 
-  return {
-    link: (path, ...args) => {
-      return link(path, ...args);
-    },
+  const router = {
+    link,
     getParams: (...args: any[]) => {
       const matches = matchRoutes(...args);
       return matches.length
@@ -197,11 +195,13 @@ export function createRouter<TRoutes extends Route[]>(routes: TRoutes): Router<T
     matchRoutes: (...args: any[]) => {
       return matchRoutes(...args) as any;
     },
-    getRoutePath: (route) => {
+    getRoutePath: (route: Route) => {
       return reactRouterConfigsByRoute.get(route)!.path as string;
     },
     getRoutesToMatch: (path: string) => {
-      return getRoutesToMatch(path) as unknown as FlattenRoutesOf<TRoutes>;
+      return getRoutesToMatch(path) as unknown as FlattenRoutesOf<typeof routes>;
     },
   };
+
+  return router;
 }

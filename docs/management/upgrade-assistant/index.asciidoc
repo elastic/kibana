@@ -10,7 +10,7 @@ The assistant identifies deprecated settings in your configuration,
 enables you to see if you are using deprecated features,
 and guides you through the process of resolving issues.
 
-IMPORTANT: To upgrade to 8.0 or later, **you must first upgrade to {prev-major-last}**.
+IMPORTANT: To upgrade to 8.0 or later, **you must first upgrade to 7.17**.
 
 If you have indices that were created prior to 7.0,
 you can use the assistant to reindex them so they can be accessed from 8.0. 

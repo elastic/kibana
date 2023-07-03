@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { MatcherHintOptions } from 'jest-matcher-utils';
+
 /**
  * Typescript won't allow global namespace stuff unless you're in a module.
  * This wouldn't otherwise be a module. The code runs as soon as it's imported.
@@ -14,7 +16,7 @@
 export {};
 
 declare global {
-  /* eslint-disable @typescript-eslint/no-namespace */
+  /* eslint-disable @typescript-eslint/no-namespace,@typescript-eslint/no-explicit-any */
   namespace jest {
     interface Matchers<R, T> {
       toYieldEqualTo(expectedYield: T extends AsyncIterable<infer E> ? E : never): Promise<R>;
@@ -36,7 +38,7 @@ expect.extend({
   ): Promise<{ pass: boolean; message: () => string }> {
     // Used in printing out the pass or fail message
     const matcherName = 'toYieldEqualTo';
-    const options: jest.MatcherHintOptions = {
+    const options: MatcherHintOptions = {
       comment: 'deep equality with any yielded value',
       isNot: this.isNot,
       promise: this.promise,
@@ -82,7 +84,7 @@ expect.extend({
                   next,
                   'Expected',
                   'Received',
-                  this.expand
+                  this.expand as any
                 )}`
             )
             .join(`\n\n`)}`;
@@ -102,7 +104,7 @@ expect.extend({
   ): Promise<{ pass: boolean; message: () => string }> {
     // Used in printing out the pass or fail message
     const matcherName = 'toYieldObjectEqualTo';
-    const options: jest.MatcherHintOptions = {
+    const options: MatcherHintOptions = {
       comment: 'subset equality with any yielded value',
       isNot: this.isNot,
       promise: this.promise,
@@ -146,7 +148,7 @@ expect.extend({
                   next,
                   'Expected',
                   'Received',
-                  this.expand
+                  this.expand as any
                 )}`
             )
             .join(`\n\n`)}`;

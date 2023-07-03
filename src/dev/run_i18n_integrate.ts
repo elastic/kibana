@@ -68,33 +68,38 @@ run(
 
     const srcPaths = Array().concat(path || ['./src', './packages', './x-pack']);
 
-    const list = new Listr([
-      {
-        title: 'Merging .i18nrc.json files',
-        task: () => new Listr(mergeConfigs(includeConfig), { exitOnError: true }),
-      },
-      {
-        title: 'Extracting Default Messages',
-        task: ({ config }) =>
-          new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
-      },
-      {
-        title: 'Integrating Locale File',
-        task: async ({ messages, config }) => {
-          await integrateLocaleFiles(messages, {
-            sourceFileName: source,
-            targetFileName: target,
-            dryRun,
-            ignoreIncompatible,
-            ignoreUnused,
-            ignoreMissing,
-            ignoreMalformed,
-            config,
-            log,
-          });
+    const list = new Listr(
+      [
+        {
+          title: 'Merging .i18nrc.json files',
+          task: () => new Listr(mergeConfigs(includeConfig), { exitOnError: true }),
         },
-      },
-    ]);
+        {
+          title: 'Extracting Default Messages',
+          task: ({ config }) =>
+            new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
+        },
+        {
+          title: 'Integrating Locale File',
+          task: async ({ messages, config }) => {
+            await integrateLocaleFiles(messages, {
+              sourceFileName: source,
+              targetFileName: target,
+              dryRun,
+              ignoreIncompatible,
+              ignoreUnused,
+              ignoreMissing,
+              ignoreMalformed,
+              config,
+              log,
+            });
+          },
+        },
+      ],
+      {
+        renderer: process.env.CI ? 'verbose' : 'default',
+      }
+    );
 
     try {
       const reporter = new ErrorReporter();

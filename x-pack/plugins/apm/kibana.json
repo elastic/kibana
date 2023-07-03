@@ -22,14 +22,14 @@
     "actions",
     "alerting",
     "cloud",
+    "fleet",
     "home",
     "maps",
     "ml",
     "security",
     "spaces",
     "taskManager",
-    "usageCollection",
-    "fleet"
+    "usageCollection"
   ],
   "server": true,
   "ui": true,

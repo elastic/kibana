@@ -9,5 +9,5 @@ Add a block prompt requesting user confirmation when navigating away from the cu
 <b>Signature:</b>
 
 ```typescript
-block: (prompt?: string | boolean | History.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
+block: (prompt?: string | boolean | TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
 ```

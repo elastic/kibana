@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Action } from 'redux-actions';
+import type { Action } from 'redux-actions';
 import { call, put, takeLatest } from 'redux-saga/effects';
 import {
   getNetworkEvents,
@@ -14,27 +14,34 @@ import {
   FetchNetworkEventsParams,
 } from '../actions/network_events';
 import { fetchNetworkEvents } from '../api/network_events';
+import type { SyntheticsNetworkEventsApiResponse } from '../../../common/runtime_types';
 
 export function* fetchNetworkEventsEffect() {
-  yield takeLatest(getNetworkEvents, function* (action: Action<FetchNetworkEventsParams>) {
-    try {
-      const response = yield call(fetchNetworkEvents, action.payload);
+  yield takeLatest(
+    getNetworkEvents,
+    function* (action: Action<FetchNetworkEventsParams>): Generator {
+      try {
+        const response = (yield call(
+          fetchNetworkEvents,
+          action.payload
+        )) as SyntheticsNetworkEventsApiResponse;
 
-      yield put(
-        getNetworkEventsSuccess({
-          checkGroup: action.payload.checkGroup,
-          stepIndex: action.payload.stepIndex,
-          ...response,
-        })
-      );
-    } catch (e) {
-      yield put(
-        getNetworkEventsFail({
-          checkGroup: action.payload.checkGroup,
-          stepIndex: action.payload.stepIndex,
-          error: e,
-        })
-      );
+        yield put(
+          getNetworkEventsSuccess({
+            checkGroup: action.payload.checkGroup,
+            stepIndex: action.payload.stepIndex,
+            ...response,
+          })
+        );
+      } catch (e) {
+        yield put(
+          getNetworkEventsFail({
+            checkGroup: action.payload.checkGroup,
+            stepIndex: action.payload.stepIndex,
+            error: e,
+          })
+        );
+      }
     }
-  });
+  );
 }

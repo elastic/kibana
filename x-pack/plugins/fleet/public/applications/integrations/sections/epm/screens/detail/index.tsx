@@ -614,13 +614,14 @@ export function Detail() {
 
 type EuiButtonPropsFull = Parameters<typeof EuiButton>[0];
 
-const EuiButtonWithTooltip: React.FC<EuiButtonPropsFull & { tooltip?: Partial<EuiToolTipProps> }> =
-  ({ tooltip: tooltipProps, ...buttonProps }) => {
-    return tooltipProps ? (
-      <EuiToolTip {...tooltipProps}>
-        <EuiButton {...buttonProps} />
-      </EuiToolTip>
-    ) : (
+const EuiButtonWithTooltip: React.FC<
+  EuiButtonPropsFull & { tooltip?: Partial<EuiToolTipProps> }
+> = ({ tooltip: tooltipProps, ...buttonProps }) => {
+  return tooltipProps ? (
+    <EuiToolTip {...tooltipProps}>
       <EuiButton {...buttonProps} />
-    );
-  };
+    </EuiToolTip>
+  ) : (
+    <EuiButton {...buttonProps} />
+  );
+};

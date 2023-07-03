@@ -31,7 +31,7 @@ interface StatusLogMeta extends LogMeta {
   kibana: { status: ServiceStatus };
 }
 
-interface SetupDeps {
+export interface SetupDeps {
   elasticsearch: Pick<InternalElasticsearchServiceSetup, 'status$'>;
   environment: InternalEnvironmentServiceSetup;
   pluginDependencies: ReadonlyMap<PluginName, PluginName[]>;

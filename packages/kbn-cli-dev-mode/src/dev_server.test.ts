@@ -15,7 +15,7 @@ import { extendedEnvSerializer } from './test_helpers';
 import { DevServer, Options } from './dev_server';
 import { TestLog } from './log';
 
-jest.useFakeTimers('modern');
+jest.useFakeTimers();
 
 class MockProc extends EventEmitter {
   public readonly signalsSent: string[] = [];

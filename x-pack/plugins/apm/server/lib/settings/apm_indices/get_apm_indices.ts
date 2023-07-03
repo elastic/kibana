@@ -52,7 +52,7 @@ export async function getApmIndices({
 }: {
   config: APMConfig;
   savedObjectsClient: ISavedObjectsClient;
-}) {
+}): Promise<ApmIndicesConfig> {
   try {
     const apmIndicesSavedObject = await getApmIndicesSavedObject(
       savedObjectsClient

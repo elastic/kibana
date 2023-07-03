@@ -16,7 +16,7 @@ describe('startTrackingEventLoopDelaysUsage', () => {
   const stopMonitoringEventLoop$ = new Subject<void>();
   const instanceUuid = 'mock_uuid';
 
-  beforeAll(() => jest.useFakeTimers('modern'));
+  beforeAll(() => jest.useFakeTimers());
   beforeEach(() => jest.clearAllMocks());
   afterEach(() => stopMonitoringEventLoop$.next());
 

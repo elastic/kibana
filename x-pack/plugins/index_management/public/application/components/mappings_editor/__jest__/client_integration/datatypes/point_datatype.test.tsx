@@ -28,7 +28,7 @@ describe('Mappings editor: point datatype', () => {
   let testBed: MappingsEditorTestBed;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
   afterAll(() => {

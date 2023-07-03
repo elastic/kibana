@@ -5,7 +5,7 @@
 <titleabbrev>ServiceNow SecOps</titleabbrev>
 ++++
 
-The {sn} SecOps connector uses the https://developer.servicenow.com/dev.do#!/reference/api/sandiego/rest/c_ImportSetAPI[Import Set API] to create {sn} security incidents.
+The {sn-sir} connector uses the https://developer.servicenow.com/dev.do#!/reference/api/sandiego/rest/c_ImportSetAPI[Import Set API] to create {sn} security incidents. You can use the connector for rule actions and cases.
 
 [float]
 [[servicenow-sir-connector-prerequisites]]
