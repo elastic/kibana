@@ -70,13 +70,6 @@ export type ConnectorConfiguration = Record<
   use_text_extraction_service?: ConnectorConfigProperties; // This only exists for SharePoint Online
 };
 
-export interface ConnectorSyncConfigProperties {
-  label: string;
-  value: string | number | boolean | null;
-}
-
-export type ConnectorSyncConfiguration = Record<string, ConnectorSyncConfigProperties | null>;
-
 export interface ConnectorScheduling {
   enabled: boolean;
   interval: string; // interval has crontab syntax
@@ -249,7 +242,7 @@ export interface ConnectorSyncJob {
   canceled_at: string | null;
   completed_at: string | null;
   connector: {
-    configuration: ConnectorSyncConfiguration;
+    configuration: ConnectorConfiguration;
     filtering: FilteringRules | FilteringRules[] | null;
     id: string;
     index_name: string;

@@ -781,6 +781,49 @@ describe('TableListView', () => {
     });
   });
 
+  describe('initialFilter', () => {
+    const setupInitialFilter = registerTestBed<string, TableListViewTableProps>(
+      WithServices<TableListViewTableProps>(TableListViewTable, {
+        getTagList: () => [
+          { id: 'id-tag-foo', name: 'foo', type: 'tag', description: '', color: '' },
+        ],
+      }),
+      {
+        defaultProps: { ...requiredProps },
+        memoryRouter: { wrapComponent: true },
+      }
+    );
+
+    test('should filter by tag passed as in initialFilter prop', async () => {
+      let testBed: TestBed;
+
+      const initialFilter = 'tag:(tag-1)';
+      const findItems = jest.fn().mockResolvedValue({ total: 0, hits: [] });
+
+      await act(async () => {
+        testBed = await setupInitialFilter({
+          findItems,
+          initialFilter,
+          urlStateEnabled: false,
+        });
+      });
+
+      const { component, find } = testBed!;
+      component.update();
+
+      const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
+
+      const getLastCallArgsFromFindItems = () =>
+        findItems.mock.calls[findItems.mock.calls.length - 1];
+
+      // The search bar should be updated
+      const expected = initialFilter;
+      const [searchTerm] = getLastCallArgsFromFindItems();
+      expect(getSearchBoxValue()).toBe(expected);
+      expect(searchTerm).toBe(expected);
+    });
+  });
+
   describe('url state', () => {
     let router: Router | undefined;
 
@@ -1265,7 +1308,7 @@ describe('TableList', () => {
   it('reports the page data test subject', async () => {
     const setPageDataTestSubject = jest.fn();
 
-    act(() => {
+    await act(async () => {
       setup({ setPageDataTestSubject });
     });
 
