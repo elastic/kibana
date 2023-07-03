@@ -144,12 +144,11 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
     },
   });
 
-  return dynamicTemplates.length
-    ? {
-        properties,
-        dynamic_templates: dynamicTemplates,
-      }
-    : { properties };
+  const indexTemplateMappings: IndexTemplateMappings = { properties };
+  if (dynamicTemplates.length > 0) {
+    indexTemplateMappings.dynamic_templates = dynamicTemplates;
+  }
+  return indexTemplateMappings;
 }
 
 /**
