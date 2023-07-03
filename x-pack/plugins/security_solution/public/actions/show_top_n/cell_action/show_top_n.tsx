@@ -16,11 +16,12 @@ import { isDataViewFieldSubtypeNested } from '@kbn/es-query';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
 import { APP_NAME, DEFAULT_DARK_MODE } from '../../../../common/constants';
 import type { SecurityAppStore } from '../../../common/store';
-import { fieldHasCellActions, isLensSupportedType } from '../../utils';
+import { fieldHasCellActions } from '../../utils';
 import { TopNAction } from '../show_top_n_component';
 import type { StartServices } from '../../../types';
 import type { SecurityCellAction } from '../../types';
 import { SecurityCellActionType } from '../../constants';
+import { isLensSupportedType } from '../../../common/utils/lens';
 
 const SHOW_TOP = (fieldName: string) =>
   i18n.translate('xpack.securitySolution.actions.showTopTooltip', {

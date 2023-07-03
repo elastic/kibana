@@ -7,7 +7,6 @@
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
 import type { Serializable } from '@kbn/utility-types';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { APP_UI_ID } from '../../common/constants';
 
 // All cell actions are disabled for these fields in Security
@@ -36,13 +35,3 @@ export const isCountField = (
 ) => {
   return fieldType === 'number' && sourceParamType === 'value_count';
 };
-
-const SUPPORTED_LENS_TYPES = new Set([
-  KBN_FIELD_TYPES.STRING,
-  KBN_FIELD_TYPES.BOOLEAN,
-  KBN_FIELD_TYPES.NUMBER,
-  KBN_FIELD_TYPES.IP,
-]);
-
-export const isLensSupportedType = (fieldType: string | undefined) =>
-  fieldType ? SUPPORTED_LENS_TYPES.has(fieldType as KBN_FIELD_TYPES) : false;
