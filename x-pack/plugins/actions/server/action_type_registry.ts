@@ -97,8 +97,16 @@ export class ActionTypeRegistry {
   /**
    * Returns true if the action type is a system action type
    */
-  public isSystemActionType = (actionTypeId: string): boolean =>
-    Boolean(this.actionTypes.get(actionTypeId)?.isSystemActionType);
+  public isSystemActionType(actionTypeId: string): boolean {
+    return Boolean(this.actionTypes.get(actionTypeId)?.isSystemActionType);
+  }
+
+  /**
+   * Returns the kibana privileges of an action type
+   */
+  public getRequiredKibanaPrivileges(actionTypeId: string): string[] {
+    return this.actionTypes.get(actionTypeId)?.requiredKibanaPrivileges ?? [];
+  }
 
   /**
    * Registers an action type to the action type registry

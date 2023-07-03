@@ -718,6 +718,18 @@ export class ActionsClient {
     return await this.unsecuredSavedObjectsClient.delete('action', id);
   }
 
+  private getRequiredKibanaPrivileges(actionId: string) {
+    const inMemoryConnector = this.inMemoryConnectors.find(
+      (connector) => connector.id === actionId
+    );
+
+    const additionalPrivileges = inMemoryConnector?.isSystemAction
+      ? this.actionTypeRegistry.getRequiredKibanaPrivileges(inMemoryConnector.actionTypeId)
+      : [];
+
+    return additionalPrivileges;
+  }
+
   public async execute({
     actionId,
     params,
@@ -730,7 +742,8 @@ export class ActionsClient {
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
-      await this.authorization.ensureAuthorized({ operation: 'execute' });
+      const additionalPrivileges = this.getRequiredKibanaPrivileges(actionId);
+      await this.authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
     } else {
       trackLegacyRBACExemption('execute', this.usageCounter);
     }
@@ -751,6 +764,10 @@ export class ActionsClient {
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
+      /**
+       * For scheduled executions the additional authorization check
+       * will be performed inside the ActionExecutor at execution time
+       */
       await this.authorization.ensureAuthorized({ operation: 'execute' });
     } else {
       trackLegacyRBACExemption('enqueueExecution', this.usageCounter);
@@ -770,6 +787,10 @@ export class ActionsClient {
       sources
     );
     if (authCounts[AuthorizationMode.RBAC] > 0) {
+      /**
+       * For scheduled executions the additional authorization check
+       * will be performed inside the ActionExecutor at execution time
+       */
       await this.authorization.ensureAuthorized({ operation: 'execute' });
     }
     if (authCounts[AuthorizationMode.Legacy] > 0) {

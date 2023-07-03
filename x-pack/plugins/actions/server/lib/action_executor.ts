@@ -34,6 +34,7 @@ import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
+import type { ActionsAuthorization } from '../authorization/actions_authorization';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -47,6 +48,7 @@ export interface ActionExecutorContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
   inMemoryConnectors: InMemoryConnector[];
+  getActionsAuthorizationWithRequest: (request: KibanaRequest) => ActionsAuthorization;
 }
 
 export interface TaskInfo {
@@ -103,6 +105,7 @@ export class ActionExecutor {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
     }
+
     return withSpan(
       {
         name: `execute_action`,
@@ -120,11 +123,13 @@ export class ActionExecutor {
           eventLogger,
           inMemoryConnectors,
           security,
+          getActionsAuthorizationWithRequest,
         } = this.actionExecutorContext!;
 
         const services = getServices(request);
         const spaceId = spaces && spaces.getSpaceId(request);
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
+        const authorization = getActionsAuthorizationWithRequest(request);
 
         const actionInfo = await getActionInfoInternal(
           this.isESOCanEncrypt,
@@ -153,7 +158,18 @@ export class ActionExecutor {
         if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId, { notifyUsage: true })) {
           actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
         }
+
         const actionType = actionTypeRegistry.get(actionTypeId);
+
+        /**
+         * Perform additional authorization checks for system actions.
+         * It will thrown an error in case of failure.
+         *
+         */
+        if (actionType.isSystemActionType) {
+          const additionalPrivileges = actionType.requiredKibanaPrivileges ?? [];
+          authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
+        }
 
         const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
         logger.debug(`executing action ${actionLabel}`);
