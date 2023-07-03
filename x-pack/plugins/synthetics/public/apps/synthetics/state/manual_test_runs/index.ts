@@ -10,12 +10,14 @@ import { createReducer, PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
 import { IHttpFetchError } from '@kbn/core-http-browser';
 
+import { ActionPayload } from '../utils/actions';
 import { TestNowResponse } from '../../../../../common/types';
 import {
   clearTestNowMonitorAction,
   hideTestNowFlyoutAction,
   manualTestMonitorAction,
   manualTestRunUpdateAction,
+  TestNowPayload,
   toggleTestNowFlyoutAction,
 } from './actions';
 import {
@@ -57,10 +59,7 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(
       String(manualTestMonitorAction.get),
-      (
-        state: WritableDraft<ManualTestRunsState>,
-        action: PayloadAction<{ configId: string; name: string }>
-      ) => {
+      (state: WritableDraft<ManualTestRunsState>, action: PayloadAction<TestNowPayload>) => {
         state = Object.values(state).reduce((acc, curr) => {
           acc[curr.configId] = {
             ...curr,
@@ -98,7 +97,10 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
     )
     .addCase(
       String(manualTestMonitorAction.fail),
-      (state: WritableDraft<ManualTestRunsState>, action: PayloadAction<TestNowResponse>) => {
+      (
+        state: WritableDraft<ManualTestRunsState>,
+        action: ActionPayload<TestNowResponse, TestNowPayload>
+      ) => {
         const fetchError = action.payload as unknown as IHttpFetchError;
         if (fetchError?.request?.url) {
           const { name, message } = fetchError;
@@ -117,7 +119,7 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
             };
           }
         }
-        const configId = action.payload.configId ?? action.payload.getPayload.configId;
+        const configId = action.payload.configId ?? action.payload.getPayload?.configId;
         if (configId) {
           state[configId] = {
             ...state[configId],
