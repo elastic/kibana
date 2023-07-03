@@ -368,7 +368,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('opens edit flyout for discover url');
           await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
 
-          await ml.testExecution.logTestStep('add discover custom url for the analytics job');
+          await ml.testExecution.logTestStep('adds discover custom url for the analytics job');
           await ml.dataFrameAnalyticsEdit.addDiscoverCustomUrl(
             testData.jobId,
             testDiscoverCustomUrl
@@ -379,7 +379,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('opens edit flyout for dashboard url');
           await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
 
-          await ml.testExecution.logTestStep('add dashboard custom url for the analytics job');
+          await ml.testExecution.logTestStep('adds dashboard custom url for the analytics job');
           await ml.dataFrameAnalyticsEdit.addDashboardCustomUrl(
             testData.jobId,
             testDashboardCustomUrl,

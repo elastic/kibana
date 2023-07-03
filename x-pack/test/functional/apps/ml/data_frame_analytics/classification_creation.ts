@@ -387,7 +387,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('opens edit flyout for dashboard url');
           await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
 
-          await ml.testExecution.logTestStep('add dashboard custom url for the analytics job');
+          await ml.testExecution.logTestStep('adds dashboard custom url for the analytics job');
           await ml.dataFrameAnalyticsEdit.addDashboardCustomUrl(
             testData.jobId,
             testDashboardCustomUrl,
@@ -402,7 +402,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('opens edit flyout for other url');
           await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
 
-          await ml.testExecution.logTestStep('add other type custom url for the analytics job');
+          await ml.testExecution.logTestStep('adds other type custom url for the analytics job');
           await ml.dataFrameAnalyticsEdit.addOtherTypeCustomUrl(testData.jobId, testOtherCustomUrl);
         });
 
