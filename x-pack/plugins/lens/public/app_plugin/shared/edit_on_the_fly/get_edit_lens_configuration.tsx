@@ -10,6 +10,7 @@ import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { PreloadedState } from '@reduxjs/toolkit';
+import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import {
@@ -114,6 +115,9 @@ export function getEditLensConfiguration(
         })}
         size="s"
         className="lnsEditConfigurationFlyout"
+        css={css`
+          background: none;
+        `}
         hideCloseButton
       >
         <Provider store={lensStore}>
