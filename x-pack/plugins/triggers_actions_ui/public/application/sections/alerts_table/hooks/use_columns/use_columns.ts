@@ -166,15 +166,10 @@ export const useColumns = ({
 
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(() => {
     let cols = storageAlertsTable.current.columns;
-
-    if (cols && cols.length === 0) {
-      cols = defaultColumns;
-    }
     // before restoring from storage, enrich the column data
     if (initialBrowserFields && defaultColumns) {
       cols = populateColumns(cols, initialBrowserFields, defaultColumns);
     }
-
     return cols;
   });
 
