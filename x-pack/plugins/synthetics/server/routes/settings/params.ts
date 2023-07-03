@@ -12,19 +12,16 @@ import { syntheticsParamType } from '../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { SyntheticsParams, SyntheticsParamsReadonly } from '../../../common/runtime_types';
 
-export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
+type SyntheticsParamsResponse =
+  | IKibanaResponse<SyntheticsParams[]>
+  | IKibanaResponse<SyntheticsParamsReadonly[]>;
+export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
+  SyntheticsParamsResponse
+> = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.PARAMS,
   validate: {},
-  handler: async ({
-    savedObjectsClient,
-    request,
-    response,
-    server,
-    spaceId,
-  }): Promise<
-    IKibanaResponse<SyntheticsParams[]> | IKibanaResponse<SyntheticsParamsReadonly[]>
-  > => {
+  handler: async ({ savedObjectsClient, request, response, server, spaceId }) => {
     try {
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
