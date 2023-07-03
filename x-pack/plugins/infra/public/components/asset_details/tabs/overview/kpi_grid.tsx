@@ -6,12 +6,11 @@
  */
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
-import { KPIChartProps, Tile } from './tile';
+import { type KPIChartProps, Tile } from './tile';
 import { TOOLTIP } from './translations';
-import { KPIProps } from './overview';
+import type { KPIProps } from './overview';
 
 const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
   {

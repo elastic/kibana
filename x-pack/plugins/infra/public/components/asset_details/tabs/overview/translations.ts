@@ -8,10 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const TOOLTIP = {
-  hostCount: i18n.translate('xpack.infra.assetDetailsEmbeddable.metrics.tooltip.hostCount', {
-    defaultMessage: 'Number of hosts returned by your search criteria.',
-  }),
-
   cpuUsage: i18n.translate('xpack.infra.assetDetailsEmbeddable.metrics.tooltip.cpuUsage', {
     defaultMessage:
       'Percentage of CPU time spent in states other than Idle and IOWait, normalized by the number of CPU cores. This includes both time spent on user space and kernel space.',

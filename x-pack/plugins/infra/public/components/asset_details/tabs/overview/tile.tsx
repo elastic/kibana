@@ -18,14 +18,12 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-// import { useMetricsDataViewContext } from '../../../../pages/metrics/hosts/hooks/use_data_view';
 import { useLensAttributes } from '../../../../hooks/use_lens_attributes';
-// import { useUnifiedSearchContext } from '../../../../pages/metrics/hosts/hooks/use_unified_search';
 import type { HostsLensMetricChartFormulas } from '../../../../common/visualizations';
 import { LensWrapper } from '../../../../pages/metrics/hosts/components/chart/lens_wrapper';
 import { buildCombinedHostsFilter } from '../../../../pages/metrics/hosts/utils';
 import { TooltipContent } from '../../../../pages/metrics/hosts/components/metric_explanation/tooltip_content';
-import { KPIGridProps } from './kpi_grid';
+import type { KPIGridProps } from './kpi_grid';
 
 export interface KPIChartProps {
   title: string;

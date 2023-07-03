@@ -7,9 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { StringDateRange } from '../../../../pages/metrics/hosts/hooks/use_unified_search_url_state';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';

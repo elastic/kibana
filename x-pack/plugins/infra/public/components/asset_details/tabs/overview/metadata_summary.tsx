@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiDescriptionListTitle } from '@elastic/eui';
 import {
   EuiButtonEmpty,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiDescriptionList,
