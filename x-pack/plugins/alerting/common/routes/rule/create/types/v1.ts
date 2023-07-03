@@ -17,7 +17,20 @@ export type CreateRuleAction = TypeOf<typeof actionSchemaV1>;
 export type CreateRuleActionFrequency = TypeOf<typeof actionFrequencySchemaV1>;
 
 export type CreateRuleRequestParams = TypeOf<typeof createParamsSchemaV1>;
-export type CreateRuleRequestBody = TypeOf<typeof createBodySchemaV1>;
+type CreateBodySchema = TypeOf<typeof createBodySchemaV1>;
+
+export interface CreateRuleRequestBody<Params extends RuleParamsV1 = never> {
+  name: CreateBodySchema['name'];
+  rule_type_id: CreateBodySchema['rule_type_id'];
+  enabled: CreateBodySchema['enabled'];
+  consumer: CreateBodySchema['consumer'];
+  tags: CreateBodySchema['tags'];
+  throttle?: CreateBodySchema['throttle'];
+  params: Params;
+  schedule: CreateBodySchema['schedule'];
+  actions: CreateBodySchema['actions'];
+  notify_when?: CreateBodySchema['notify_when'];
+}
 
 export interface CreateRuleResponse<Params extends RuleParamsV1 = never> {
   body: RuleResponseV1<Params>;

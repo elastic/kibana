@@ -32,35 +32,41 @@ export const transformRuleDomainToRuleAttributes = (
     schedule: rule.schedule,
     actions: actionsWithRefs,
     params: paramsWithRefs,
-    scheduledTaskId: rule.scheduledTaskId,
+    ...(Object.keys(mappedParams).length ? { mapped_params: mappedParams } : {}),
+    ...(rule.scheduledTaskId !== undefined ? { scheduledTaskId: rule.scheduledTaskId } : {}),
     createdBy: rule.createdBy,
     updatedBy: rule.updatedBy,
     createdAt: rule.createdAt.toISOString(),
     updatedAt: rule.updatedAt.toISOString(),
     apiKey: rule.apiKey,
     apiKeyOwner: rule.apiKeyOwner,
-    apiKeyCreatedByUser: rule.apiKeyCreatedByUser,
-    throttle: rule.throttle,
-    notifyWhen: rule.notifyWhen,
+    ...(rule.apiKeyCreatedByUser !== undefined
+      ? { apiKeyCreatedByUser: rule.apiKeyCreatedByUser }
+      : {}),
+    ...(rule.throttle !== undefined ? { throttle: rule.throttle } : {}),
+    ...(rule.notifyWhen !== undefined ? { notifyWhen: rule.notifyWhen } : {}),
     muteAll: rule.muteAll,
     mutedInstanceIds: rule.mutedInstanceIds,
+    ...(meta ? { meta } : {}),
     executionStatus: {
       status: rule.executionStatus.status,
       lastExecutionDate: rule.executionStatus.lastExecutionDate.toISOString(),
       ...(rule.executionStatus.lastDuration
         ? { lastDuration: rule.executionStatus.lastDuration }
         : {}),
-      ...(rule.executionStatus.error ? { error: rule.executionStatus.error } : {}),
-      ...(rule.executionStatus.warning ? { warning: rule.executionStatus.warning } : {}),
+      ...(rule.executionStatus.error !== undefined ? { error: rule.executionStatus.error } : {}),
+      ...(rule.executionStatus.warning !== undefined
+        ? { warning: rule.executionStatus.warning }
+        : {}),
     },
-    monitoring: rule.monitoring,
-    snoozeSchedule: rule.snoozeSchedule,
-    isSnoozedUntil: rule.isSnoozedUntil?.toISOString(),
-    lastRun: rule.lastRun,
-    nextRun: rule.nextRun?.toISOString(),
+    ...(rule.monitoring ? { monitoring: rule.monitoring } : {}),
+    ...(rule.snoozeSchedule ? { snoozeSchedule: rule.snoozeSchedule } : {}),
+    ...(rule.isSnoozedUntil !== undefined
+      ? { isSnoozedUntil: rule.isSnoozedUntil?.toISOString() || null }
+      : {}),
+    ...(rule.lastRun !== undefined ? { lastRun: rule.lastRun } : {}),
+    ...(rule.nextRun !== undefined ? { nextRun: rule.nextRun?.toISOString() || null } : {}),
     revision: rule.revision,
-    running: rule.running,
-    ...(meta ? { meta } : {}),
-    ...(Object.keys(mappedParams).length ? { mapped_params: mappedParams } : {}),
+    ...(rule.running !== undefined ? { running: rule.running } : {}),
   };
 };

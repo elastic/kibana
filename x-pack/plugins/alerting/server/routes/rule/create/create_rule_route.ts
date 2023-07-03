@@ -20,7 +20,7 @@ import type {
 } from '../../../../common/routes/rule/create';
 import { createBodySchemaV1, createParamsSchemaV1 } from '../../../../common/routes/rule/create';
 import type { RuleParamsV1 } from '../../../../common/routes/rule/rule_response';
-import { Rule, RuleParams } from '../../../application/rule/types';
+import { Rule } from '../../../application/rule/types';
 import { transformCreateBodyV1 } from './transforms';
 import { transformRuleToRuleResponseV1 } from '../transforms';
 
@@ -39,7 +39,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           const rulesClient = (await context.alerting).getRulesClient();
 
           // Assert versioned inputs
-          const createRuleData: CreateRuleRequestBodyV1 = req.body;
+          const createRuleData: CreateRuleRequestBodyV1<RuleParamsV1> = req.body;
           const params: CreateRuleRequestParamsV1 = req.params;
 
           countUsageOfPredefinedIds({
@@ -51,10 +51,10 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           try {
             // TODO (http-versioning): Remove this cast, this enables us to move forward
             // without fixing all of other solution types
-            const createdRule: Rule<RuleParams> = (await rulesClient.create<RuleParams>({
-              data: transformCreateBodyV1(createRuleData),
+            const createdRule: Rule<RuleParamsV1> = (await rulesClient.create<RuleParamsV1>({
+              data: transformCreateBodyV1<RuleParamsV1>(createRuleData),
               options: { id: params?.id },
-            })) as Rule<RuleParams>;
+            })) as Rule<RuleParamsV1>;
 
             // Assert versioned response type
             const response: CreateRuleResponseV1<RuleParamsV1> = {

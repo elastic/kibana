@@ -57,10 +57,10 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
     ? { api_key_created_by_user: rule.apiKeyCreatedByUser }
     : {}),
   ...(rule.throttle !== undefined ? { throttle: rule.throttle } : {}),
-  notify_when: rule.notifyWhen,
+  ...(rule.notifyWhen !== undefined ? { notify_when: rule.notifyWhen } : {}),
   mute_all: rule.muteAll,
   muted_alert_ids: rule.mutedInstanceIds,
-  scheduled_task_id: rule.scheduledTaskId,
+  ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
   ...(rule.isSnoozedUntil !== undefined
     ? { is_snoozed_until: rule.isSnoozedUntil?.toISOString() || null }
     : {}),
@@ -69,10 +69,14 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
     ...(rule.executionStatus.error ? { error: rule.executionStatus.error } : {}),
     ...(rule.executionStatus.warning ? { warning: rule.executionStatus.warning } : {}),
     last_execution_date: rule.executionStatus.lastExecutionDate?.toISOString(),
-    last_duration: rule.executionStatus.lastDuration,
+    ...(rule.executionStatus.lastDuration !== undefined
+      ? { last_duration: rule.executionStatus.lastDuration }
+      : {}),
   },
-  ...(rule.lastRun ? { last_run: transformRuleLastRun(rule.lastRun) } : {}),
-  ...(rule.nextRun ? { next_run: rule.nextRun.toISOString() } : {}),
+  ...(rule.lastRun !== undefined
+    ? { last_run: rule.lastRun ? transformRuleLastRun(rule.lastRun) : null }
+    : {}),
+  ...(rule.nextRun !== undefined ? { next_run: rule.nextRun?.toISOString() || null } : {}),
   revision: rule.revision,
   ...(rule.running !== undefined ? { running: rule.running } : {}),
 });

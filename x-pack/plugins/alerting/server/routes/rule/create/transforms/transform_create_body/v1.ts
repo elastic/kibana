@@ -10,6 +10,7 @@ import type {
   CreateRuleRequestBodyV1,
 } from '../../../../../../common/routes/rule/create';
 import type { CreateRuleData } from '../../../../../application/rule/create';
+import type { RuleParams } from '../../../../../application/rule/types';
 
 const transformCreateBodyActions = (actions: CreateRuleActionV1[]): CreateRuleData['actions'] => {
   if (!actions) return [];
@@ -35,7 +36,9 @@ const transformCreateBodyActions = (actions: CreateRuleActionV1[]): CreateRuleDa
   });
 };
 
-export const transformCreateBody = (createBody: CreateRuleRequestBodyV1): CreateRuleData => {
+export const transformCreateBody = <Params extends RuleParams = never>(
+  createBody: CreateRuleRequestBodyV1<Params>
+): CreateRuleData<Params> => {
   return {
     name: createBody.name,
     alertTypeId: createBody.rule_type_id,

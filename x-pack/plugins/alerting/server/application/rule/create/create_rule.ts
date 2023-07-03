@@ -6,7 +6,6 @@
  */
 import Semver from 'semver';
 import Boom from '@hapi/boom';
-import { TypeOf } from '@kbn/config-schema';
 import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { parseDuration } from '../../../../common/parse_duration';
@@ -30,24 +29,23 @@ import {
 } from '../transforms';
 import { ruleDomainSchema } from '../schemas';
 import { RuleAttributes } from '../../../data/rule/types';
+import type { CreateRuleData } from './types';
 import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../rules_client/lib';
-
-export type CreateRuleData = TypeOf<typeof createRuleDataSchema>;
 
 export interface CreateRuleOptions {
   id?: string;
 }
 
-export interface CreateRuleParams {
-  data: CreateRuleData;
+export interface CreateRuleParams<Params extends RuleParams = never> {
+  data: CreateRuleData<Params>;
   options?: CreateRuleOptions;
   allowMissingConnectorSecrets?: boolean;
 }
 
 export async function createRule<Params extends RuleParams = never>(
   context: RulesClientContext,
-  createParams: CreateRuleParams
+  createParams: CreateRuleParams<Params>
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 ): Promise<SanitizedRule<Params>> {
   const { data: initialData, options, allowMissingConnectorSecrets } = createParams;
