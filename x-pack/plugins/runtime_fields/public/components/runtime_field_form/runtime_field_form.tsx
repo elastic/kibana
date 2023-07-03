@@ -286,7 +286,7 @@ const RuntimeFieldFormComp = ({
               }
               fullWidth
             >
-              <CodeEditor // TODO theme provided in context by x-pack/plugins/runtime_fields/public/load_editor.tsx
+              <CodeEditor
                 languageId={PainlessLang.ID}
                 suggestionProvider={suggestionProvider}
                 width="100%"

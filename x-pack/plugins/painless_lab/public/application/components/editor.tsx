@@ -20,7 +20,7 @@ export function Editor({ code, onChange, context }: Props) {
   const suggestionProvider = PainlessLang.getSuggestionProvider(context);
 
   return (
-    <CodeEditor // TODO theme provided in context by x-pack/plugins/painless_lab/public/application/index.tsx
+    <CodeEditor
       languageId={PainlessLang.ID}
       // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
       width="99%"

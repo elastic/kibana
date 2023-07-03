@@ -50,7 +50,7 @@ export const ParametersTab: FunctionComponent = () => {
           </EuiText>
         }
       >
-        <CodeEditor // TODO theme provided in context by x-pack/plugins/painless_lab/public/application/index.tsx
+        <CodeEditor
           languageId="json"
           height={600}
           value={payload.parameters}
