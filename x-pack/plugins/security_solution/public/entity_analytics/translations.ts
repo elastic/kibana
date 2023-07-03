@@ -79,7 +79,7 @@ export const PREVIEW = i18n.translate('xpack.securitySolution.riskScore.riskScor
 });
 
 export const PREVIEW_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.preview',
+  'xpack.securitySolution.riskScore.riskScorePreview.preview_description',
   {
     defaultMessage:
       'The entities shown in the preview are the riskiest found in the 1000 sampled during your chosen timeframe. They may not be the riskiest entities across all of your data.',
