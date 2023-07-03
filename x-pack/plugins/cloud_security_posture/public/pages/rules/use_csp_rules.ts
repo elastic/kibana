@@ -10,6 +10,7 @@ import { useKibana } from '../../common/hooks/use_kibana';
 
 import {
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+  FIND_CSP_RULE_TEMPLATE_API_CURRENT_VERSION,
   FIND_CSP_RULE_TEMPLATE_ROUTE_PATH,
 } from '../../../common/constants';
 
@@ -27,7 +28,7 @@ export const useFindCspRuleTemplates = (
     () => {
       return http.get<GetCspRuleTemplateResponse>(FIND_CSP_RULE_TEMPLATE_ROUTE_PATH, {
         query: { packagePolicyId, page, perPage },
-        version: '1',
+        version: FIND_CSP_RULE_TEMPLATE_API_CURRENT_VERSION,
       });
     }
   );
