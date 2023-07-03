@@ -316,9 +316,13 @@ const setupGettingStarted = (configId: string, routeContext: RouteContext) => {
 
     if (gettingStarted) {
       // ignore await, since we don't want to block the response
-      triggerTestNow(configId, routeContext).then(() => {
-        server.logger.debug(`Successfully triggered test for monitor: ${configId}`);
-      });
+      triggerTestNow(configId, routeContext)
+        .then(() => {
+          server.logger.debug(`Successfully triggered test for monitor: ${configId}`);
+        })
+        .catch((e) => {
+          server.logger.error(`Error triggering test for monitor: ${configId}: ${e}`);
+        });
     }
   } catch (e) {
     server.logger.info(`Error triggering test for getting started monitor: ${configId}`);

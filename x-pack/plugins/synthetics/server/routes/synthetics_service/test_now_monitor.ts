@@ -40,7 +40,10 @@ export const triggerTestNow = async (
   const monitorWithSecrets =
     await encryptedClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
       syntheticsMonitorType,
-      monitorId
+      monitorId,
+      {
+        namespace: spaceId,
+      }
     );
   const normalizedMonitor = normalizeSecrets(monitorWithSecrets);
 
