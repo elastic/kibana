@@ -57,7 +57,10 @@ describe('Files service utils', () => {
     });
 
     it('should error if index does not match a known pattern', () => {
-      expect(() => parseFileStorageIndex('foo')).toThrow();
+      expect(() => parseFileStorageIndex('foo')).toThrow(
+        'Unable to parse index [foo]. Does not match a known index pattern: [.fleet-fileds-fromhost-meta-* | ' +
+          '.fleet-fileds-fromhost-data-* | .fleet-fileds-tohost-meta-* | .fleet-fileds-tohost-data-*]'
+      );
     });
   });
 });
