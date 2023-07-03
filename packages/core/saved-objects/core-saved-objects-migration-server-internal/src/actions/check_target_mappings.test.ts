@@ -20,8 +20,6 @@ jest.mock('../core/build_active_mappings');
 
 const getUpdatedHashesMock = getUpdatedHashes as jest.MockedFn<typeof getUpdatedHashes>;
 
-const indexTypes = ['type1', 'type2'];
-
 const properties: SavedObjectsMappingProperties = {
   type1: { type: 'long' },
   type2: { type: 'long' },
