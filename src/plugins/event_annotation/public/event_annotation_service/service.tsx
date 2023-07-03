@@ -16,11 +16,7 @@ import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { defaultAnnotationLabel } from '../../common/manual_event_annotation';
 import { EventAnnotationGroupContent } from '../../common/types';
-import {
-  EventAnnotationConfig,
-  EventAnnotationGroupConfig,
-  EVENT_ANNOTATION_GROUP_TYPE,
-} from '../../common';
+import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
 import { EventAnnotationServiceType } from './types';
 import {
   defaultAnnotationColor,
