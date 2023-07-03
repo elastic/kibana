@@ -61,6 +61,7 @@ describe('Routing versioned requests', () => {
   });
 
   afterEach(async () => {
+    captureErrorMock.mockReset();
     await server.stop();
   });
 
@@ -169,6 +170,7 @@ describe('Routing versioned requests', () => {
         message: expect.stringMatching(/expected value of type/),
       })
     );
+    expect(captureErrorMock).not.toHaveBeenCalled();
   });
 
   it('returns the version in response headers', async () => {
@@ -212,6 +214,7 @@ describe('Routing versioned requests', () => {
         message: expect.stringMatching(/Failed output validation/),
       })
     );
+    expect(captureErrorMock).not.toHaveBeenCalled();
   });
 
   it('does not run response validation in prod', async () => {
@@ -297,6 +300,7 @@ describe('Routing versioned requests', () => {
     ).resolves.toEqual(
       expect.objectContaining({ message: expect.stringMatching(/No handlers registered/) })
     );
+    expect(captureErrorMock).not.toHaveBeenCalled();
   });
 
   it('resolves the newest handler on serverless', async () => {
