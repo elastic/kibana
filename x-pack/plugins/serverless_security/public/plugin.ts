@@ -49,11 +49,12 @@ export class ServerlessSecurityPlugin
     startDeps: ServerlessSecurityPluginStartDependencies
   ): ServerlessSecurityPluginStart {
     const { securitySolution, serverless } = startDeps;
+    const { productTypes } = this.config;
 
     const services = createServices(core, startDeps);
 
     securitySolution.setIsSidebarEnabled(false);
-    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services));
+    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
 
     serverless.setProjectHome('/app/security');
     serverless.setSideNavComponent(getSecuritySideNavComponent(services));

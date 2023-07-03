@@ -10,11 +10,15 @@ import React from 'react';
 import { KibanaServicesProvider, type Services } from '../../common/services';
 import type { GetStartedComponent } from './types';
 import { GetStarted } from './lazy';
+import { SecurityProductTypes } from '../../../common/config';
 
-export const getSecurityGetStartedComponent = (services: Services): GetStartedComponent => {
+export const getSecurityGetStartedComponent = (
+  services: Services,
+  productTypes: SecurityProductTypes
+): GetStartedComponent => {
   return () => (
     <KibanaServicesProvider services={services}>
-      <GetStarted />
+      <GetStarted productTypes={productTypes} />
     </KibanaServicesProvider>
   );
 };
