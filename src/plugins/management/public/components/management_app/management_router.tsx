@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { ManagementAppWrapper } from '../management_app_wrapper';
 import { ManagementLandingPage } from '../landing';
 import { ManagementSection } from '../../utils';
@@ -23,6 +24,7 @@ interface ManagementRouterProps {
   sections: ManagementSection[];
   landingPageRedirect: string | undefined;
   navigateToUrl: ApplicationStart['navigateToUrl'];
+  basePath: HttpStart['basePath'];
 }
 
 export const ManagementRouter = memo(
@@ -34,13 +36,12 @@ export const ManagementRouter = memo(
     theme$,
     landingPageRedirect,
     navigateToUrl,
+    basePath,
   }: ManagementRouterProps) => {
-    // If the consumer has specified a landing page redirect, redirect to that page from one level
-    // below the management root. This is to allow the consumer to specify a landing page that is
-    // not from the management root.
-    React.useEffect(() => {
+    // Redirect the user to the configured landing page if there is one
+    useEffect(() => {
       if (landingPageRedirect) {
-        navigateToUrl(`..${landingPageRedirect}`);
+        navigateToUrl(basePath.prepend(landingPageRedirect));
       }
     }, [landingPageRedirect, navigateToUrl]);
 

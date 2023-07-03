@@ -136,6 +136,7 @@ export const ManagementApp = ({
                 sections={sections}
                 landingPageRedirect={landingPageRedirect}
                 navigateToUrl={dependencies.coreStart.application.navigateToUrl}
+                basePath={dependencies.coreStart.http.basePath}
               />
             </KibanaPageTemplate>
           </KibanaThemeProvider>
