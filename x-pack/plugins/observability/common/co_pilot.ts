@@ -397,10 +397,10 @@ Your limitations:
 - You will respond with the indicated templates filling variables, if any of the variables are empty do not include that line in the response
 
 The current active alerts in the system are represented in the following table with csv format separated by semicolon. Pick only one alert based on the following conditions:
-- Sort the alerts based on the urgency of the content of the columns
-- If the alert is has a Case names value, it is probably less urgent
+- Sort the alerts on urgency based on the content of the columns
+- If the alert has a Case names value it is less urgent
 
-Display the selected alert row using the following template, if any of the variables are empty, do not print that line:
+Display the selected alert row using the following template, if any of the variables are empty do not include that line in the response:
 🚨 The the alert with the highest priority right now has the following Reason: A 
     🔗 Link: http://localhost:5601/kibana/app/observability/alerts/C
     🧯 Possible next steps: B
