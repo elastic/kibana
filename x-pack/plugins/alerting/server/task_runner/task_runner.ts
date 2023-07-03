@@ -91,7 +91,7 @@ interface TaskRunnerConstructorParams<
   Params extends RuleTypeParams,
   ExtractedParams extends RuleTypeParams,
   RuleState extends RuleTypeState,
-  State extends AlertInstanceState,
+  AlertState extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
@@ -101,7 +101,7 @@ interface TaskRunnerConstructorParams<
     Params,
     ExtractedParams,
     RuleState,
-    State,
+    AlertState,
     Context,
     ActionGroupIds,
     RecoveryActionGroupId,
@@ -116,7 +116,7 @@ export class TaskRunner<
   Params extends RuleTypeParams,
   ExtractedParams extends RuleTypeParams,
   RuleState extends RuleTypeState,
-  State extends AlertInstanceState,
+  AlertState extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
@@ -130,7 +130,7 @@ export class TaskRunner<
     Params,
     ExtractedParams,
     RuleState,
-    State,
+    AlertState,
     Context,
     ActionGroupIds,
     RecoveryActionGroupId,
@@ -161,7 +161,7 @@ export class TaskRunner<
     Params,
     ExtractedParams,
     RuleState,
-    State,
+    AlertState,
     Context,
     ActionGroupIds,
     RecoveryActionGroupId,
@@ -335,7 +335,7 @@ export class TaskRunner<
     // of the LegacyAlertsClient and into the AlertsClient.
     let alertsClient: IAlertsClient<
       AlertData,
-      State,
+      AlertState,
       Context,
       ActionGroupIds,
       RecoveryActionGroupId
@@ -345,7 +345,7 @@ export class TaskRunner<
       const client =
         (await this.context.alertsService?.createAlertsClient<
           AlertData,
-          State,
+          AlertState,
           Context,
           ActionGroupIds,
           RecoveryActionGroupId
@@ -357,7 +357,7 @@ export class TaskRunner<
 
       alertsClient = client
         ? client
-        : new LegacyAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+        : new LegacyAlertsClient<AlertState, Context, ActionGroupIds, RecoveryActionGroupId>(
             alertsClientParams
           );
     } catch (err) {
@@ -365,9 +365,12 @@ export class TaskRunner<
         `Error initializing AlertsClient for context ${this.ruleType.alerts?.context}. Using legacy alerts client instead. - ${err.message}`
       );
 
-      alertsClient = new LegacyAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId>(
-        alertsClientParams
-      );
+      alertsClient = new LegacyAlertsClient<
+        AlertState,
+        Context,
+        ActionGroupIds,
+        RecoveryActionGroupId
+      >(alertsClientParams);
     }
 
     await alertsClient.initializeExecution({
@@ -786,8 +789,11 @@ export class TaskRunner<
       const { error, data } = this.ruleData;
 
       if (error) {
+        this.ruleData = { error };
         return { error };
       }
+      this.ruleData = { data };
+
       return { data: data.rawRule };
     });
   }

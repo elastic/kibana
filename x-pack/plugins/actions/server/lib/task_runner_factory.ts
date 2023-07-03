@@ -136,11 +136,11 @@ export class TaskRunnerFactory {
           await this.beforeRun();
         }
         if (actionData.error) {
-          throwRetryableError(actionData.error, true);
+          return throwRetryableError(actionData.error, true);
         }
 
         const { spaceId } = actionTaskExecutorParams;
-        const { taskParams, actionInfo } = actionData.data!;
+        const { taskParams, actionInfo } = actionData.data;
         const {
           attributes: {
             actionId,

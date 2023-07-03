@@ -64,7 +64,7 @@ export function validateRule<Params extends RuleTypeParams>(
     alertingEventLogger,
   } = params;
 
-  const { enabled, apiKey } = rawRule as RawRule;
+  const { enabled, apiKey } = rawRule;
 
   if (!enabled) {
     throw new ErrorWithReason(
