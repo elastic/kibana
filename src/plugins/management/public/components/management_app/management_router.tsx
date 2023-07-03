@@ -43,7 +43,7 @@ export const ManagementRouter = memo(
       if (landingPageRedirect) {
         navigateToUrl(basePath.prepend(landingPageRedirect));
       }
-    }, [landingPageRedirect, navigateToUrl]);
+    }, [landingPageRedirect, navigateToUrl, basePath]);
 
     return (
       <Router history={history}>
