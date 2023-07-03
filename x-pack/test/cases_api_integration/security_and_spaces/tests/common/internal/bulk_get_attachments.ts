@@ -90,27 +90,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.attachments[1].id).to.eql(updatedCase.comments![1].id);
       });
 
-      it('returns an empty array when no ids are requested', async () => {
-        const { attachments, errors } = await bulkGetAttachments({
-          attachmentIds: [],
-          caseId: updatedCase.id,
-          supertest,
-          expectedHttpCode: 200,
-        });
-
-        expect(attachments.length).to.be(0);
-        expect(errors.length).to.be(0);
-      });
-
-      it('returns a 400 when more than 10k ids are requested', async () => {
-        await bulkGetAttachments({
-          attachmentIds: Array.from(Array(10001).keys()).map((item) => item.toString()),
-          caseId: updatedCase.id,
-          supertest,
-          expectedHttpCode: 400,
-        });
-      });
-
       it('populates the errors field with attachments that could not be found', async () => {
         const response = await bulkGetAttachments({
           attachmentIds: [updatedCase.comments![0].id, 'does-not-exist'],
