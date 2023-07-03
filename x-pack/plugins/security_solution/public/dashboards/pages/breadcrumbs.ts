@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GetTrailingBreadcrumbs } from '../common/components/navigation/breadcrumbs/types';
+import type { GetTrailingBreadcrumbs } from '../../common/components/navigation/breadcrumbs/types';
 
 /**
  * This module should only export this function.
@@ -13,13 +13,10 @@ import type { GetTrailingBreadcrumbs } from '../common/components/navigation/bre
  * We should be careful to not import unnecessary modules in this file to avoid increasing the main app bundle size.
  */
 export const getTrailingBreadcrumbs: GetTrailingBreadcrumbs = (params, getSecuritySolutionUrl) => {
-  const breadcrumbs = [];
-
-  if (params.state?.ruleName) {
-    breadcrumbs.push({
-      text: params.state.ruleName,
-    });
+  const breadcrumbName = params?.state?.dashboardName;
+  if (breadcrumbName) {
+    return [{ text: breadcrumbName }];
   }
 
-  return breadcrumbs;
+  return [];
 };

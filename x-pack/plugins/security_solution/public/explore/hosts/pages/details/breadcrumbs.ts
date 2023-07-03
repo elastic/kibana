@@ -8,16 +8,13 @@
 import { get } from 'lodash/fp';
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
-import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';
 import { getHostDetailsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
 
 import * as i18n from '../translations';
 import type { HostRouteSpyState } from '../../../../common/utils/route/types';
 import { SecurityPageName } from '../../../../app/types';
-import type { GetSecuritySolutionUrl } from '../../../../common/components/link_to';
-
-export const type = hostsModel.HostsType.details;
+import type { GetTrailingBreadcrumbs } from '../../../../common/components/navigation/breadcrumbs/types';
 
 const TabNameMappedToI18nKey: Record<HostsTableType, string> = {
   [HostsTableType.hosts]: i18n.NAVIGATION_ALL_HOSTS_TITLE,
@@ -29,10 +26,15 @@ const TabNameMappedToI18nKey: Record<HostsTableType, string> = {
   [HostsTableType.sessions]: i18n.NAVIGATION_SESSIONS_TITLE,
 };
 
-export const getTrailingBreadcrumbs = (
-  params: HostRouteSpyState,
-  getSecuritySolutionUrl: GetSecuritySolutionUrl
-): ChromeBreadcrumb[] => {
+/**
+ * This module should only export this function.
+ * All the `getTrailingBreadcrumbs` functions in Security are loaded into the main bundle.
+ * We should be careful to not import unnecessary modules in this file to avoid increasing the main app bundle size.
+ */
+export const getTrailingBreadcrumbs: GetTrailingBreadcrumbs<HostRouteSpyState> = (
+  params,
+  getSecuritySolutionUrl
+) => {
   let breadcrumb: ChromeBreadcrumb[] = [];
 
   if (params.detailName != null) {

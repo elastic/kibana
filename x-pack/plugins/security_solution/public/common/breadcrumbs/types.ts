@@ -4,4 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { useBreadcrumbsNav } from './use_breadcrumbs_nav';
+
+import type { ChromeBreadcrumb } from '@kbn/core/public';
+
+export interface BreadcrumbsNav {
+  trailing: ChromeBreadcrumb[];
+  leading: ChromeBreadcrumb[];
+}

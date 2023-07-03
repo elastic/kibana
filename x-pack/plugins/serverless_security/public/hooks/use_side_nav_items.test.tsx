@@ -7,17 +7,14 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useSideNavItems, useSideNavSelectedId } from './use_side_nav_items';
-import { BehaviorSubject } from 'rxjs';
-import type { NavigationLink } from '@kbn/security-solution-plugin/public/common/links/types';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
-import { KibanaServicesProvider, servicesMocks } from '../services.mock';
+import {
+  KibanaServicesProvider,
+  servicesMocks,
+  mockProjectNavLinks,
+} from '../common/services.mock';
 
 jest.mock('./use_link_props');
-
-const mockNavLinks = jest.fn((): NavigationLink[] => []);
-servicesMocks.securitySolution.getNavLinks$.mockImplementation(
-  () => new BehaviorSubject(mockNavLinks())
-);
 
 const mockUseLocation = jest.fn(() => ({ pathname: '/' }));
 jest.mock('react-router-dom', () => ({
@@ -36,11 +33,11 @@ describe('useSideNavItems', () => {
     const items = result.current;
 
     expect(items).toEqual([]);
-    expect(servicesMocks.securitySolution.getNavLinks$).toHaveBeenCalledTimes(1);
+    expect(servicesMocks.getProjectNavLinks$).toHaveBeenCalledTimes(1);
   });
 
   it('should return main items', async () => {
-    mockNavLinks.mockReturnValueOnce([
+    mockProjectNavLinks.mockReturnValueOnce([
       { id: SecurityPageName.alerts, title: 'Alerts' },
       { id: SecurityPageName.case, title: 'Cases' },
     ]);
@@ -66,7 +63,7 @@ describe('useSideNavItems', () => {
   });
 
   it('should return secondary items', async () => {
-    mockNavLinks.mockReturnValueOnce([
+    mockProjectNavLinks.mockReturnValueOnce([
       {
         id: SecurityPageName.dashboards,
         title: 'Dashboards',
@@ -96,7 +93,7 @@ describe('useSideNavItems', () => {
   });
 
   it('should return get started link', async () => {
-    mockNavLinks.mockReturnValueOnce([
+    mockProjectNavLinks.mockReturnValueOnce([
       {
         id: SecurityPageName.landing,
         title: 'Get Started',
