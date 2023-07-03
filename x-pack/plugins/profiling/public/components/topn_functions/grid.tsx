@@ -101,7 +101,7 @@ export const Grid = forwardRef(
     const columns: EuiDataGridColumn[] = [
       {
         id: TopNFunctionSortField.Rank,
-        initialWidth: 90,
+        initialWidth: isDifferentialView ? 50 : 90,
         displayAsText: i18n.translate('xpack.profiling.functionsView.rankColumnLabel', {
           defaultMessage: 'Rank',
         }),
@@ -114,14 +114,14 @@ export const Grid = forwardRef(
       },
       {
         id: TopNFunctionSortField.Samples,
-        initialWidth: 200,
+        initialWidth: isDifferentialView ? 100 : 200,
         displayAsText: i18n.translate('xpack.profiling.functionsView.samplesColumnLabel', {
           defaultMessage: 'Samples (estd.)',
         }),
       },
       {
         id: TopNFunctionSortField.SelfCPU,
-        initialWidth: 200,
+        initialWidth: isDifferentialView ? 100 : 200,
         display: (
           <CPULabelWithHint
             type="self"
@@ -133,7 +133,7 @@ export const Grid = forwardRef(
       },
       {
         id: TopNFunctionSortField.TotalCPU,
-        initialWidth: 200,
+        initialWidth: isDifferentialView ? 100 : 200,
         display: (
           <CPULabelWithHint
             type="total"
@@ -148,6 +148,7 @@ export const Grid = forwardRef(
     const leadingControlColumns: EuiDataGridControlColumn[] = [];
     if (showDiffColumn) {
       columns.push({
+        initialWidth: 60,
         id: TopNFunctionSortField.Diff,
         displayAsText: i18n.translate('xpack.profiling.functionsView.diffColumnLabel', {
           defaultMessage: 'Diff',
@@ -159,14 +160,14 @@ export const Grid = forwardRef(
       columns.push(
         {
           id: TopNFunctionSortField.AnnualizedCo2,
-          initialWidth: 200,
+          initialWidth: isDifferentialView ? 100 : 200,
           displayAsText: i18n.translate('xpack.profiling.functionsView.annualizedCo2', {
             defaultMessage: 'Annualized CO2',
           }),
         },
         {
           id: TopNFunctionSortField.AnnualizedDollarCost,
-          initialWidth: 200,
+          initialWidth: isDifferentialView ? 100 : 200,
           displayAsText: i18n.translate('xpack.profiling.functionsView.annualizedDollarCost', {
             defaultMessage: `Annualized dollar cost`,
           }),
