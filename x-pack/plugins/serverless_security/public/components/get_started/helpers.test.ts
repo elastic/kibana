@@ -13,18 +13,18 @@ import {
   updateCard,
 } from './helpers';
 import {
-  ActiveCard,
+  ActiveCards,
   Card,
   CardId,
   GetMoreFromElasticSecurityCardId,
   GetSetUpCardId,
   IntroductionSteps,
-  ProductId,
   Section,
   SectionId,
   StepId,
 } from './types';
 import * as sectionsConfigs from './sections';
+import { ProductLine } from '../../../common/config';
 const mockSections = jest.spyOn(sectionsConfigs, 'getSections');
 describe('getCardTimeInMinutes', () => {
   it('should calculate the total time in minutes for a card correctly', () => {
@@ -74,8 +74,8 @@ describe('getCardStepsLeft', () => {
 
 describe('isCardActive', () => {
   it('should return true if the card is active based on the active products', () => {
-    const card = { productTypeRequired: [ProductId.analytics, ProductId.cloud] } as Card;
-    const activeProducts = new Set([ProductId.analytics]);
+    const card = { productLineRequired: [ProductLine.security, ProductLine.cloud] } as Card;
+    const activeProducts = new Set([ProductLine.security]);
 
     const isActive = isCardActive(card, activeProducts);
 
@@ -84,7 +84,7 @@ describe('isCardActive', () => {
 
   it('should return true if the card has no product type requirement', () => {
     const card = {} as Card;
-    const activeProducts = new Set([ProductId.analytics]);
+    const activeProducts = new Set([ProductLine.security]);
 
     const isActive = isCardActive(card, activeProducts);
 
@@ -92,8 +92,8 @@ describe('isCardActive', () => {
   });
 
   it('should return false if the card is not active based on the active products', () => {
-    const card = { productTypeRequired: [ProductId.analytics, ProductId.cloud] } as Card;
-    const activeProducts = new Set([ProductId.endpoint]);
+    const card = { productLineRequired: [ProductLine.security, ProductLine.cloud] } as Card;
+    const activeProducts = new Set([ProductLine.endpoint]);
 
     const isActive = isCardActive(card, activeProducts);
 
@@ -140,7 +140,7 @@ describe('setupCards', () => {
   };
   it('should set up active cards based on active products', () => {
     const finishedSteps = {} as unknown as Record<CardId, Set<StepId>>;
-    const activeProducts = new Set([ProductId.cloud]);
+    const activeProducts = new Set([ProductLine.cloud]);
 
     const activeCards = setupCards(finishedSteps, activeProducts);
 
@@ -148,8 +148,8 @@ describe('setupCards', () => {
       ...analyticProductActiveCards,
       [SectionId.getSetUp]: {
         ...analyticProductActiveCards[SectionId.getSetUp],
-        [GetSetUpCardId.protectYourEnvironmentInRuntime]: {
-          id: GetSetUpCardId.protectYourEnvironmentInRuntime,
+        [GetSetUpCardId.protectYourEnvironmentInRealtime]: {
+          id: GetSetUpCardId.protectYourEnvironmentInRealtime,
           timeInMins: 0,
           stepsLeft: 0,
         },
@@ -159,7 +159,7 @@ describe('setupCards', () => {
 
   it('should skip inactive cards based on finished steps and active products', () => {
     const finishedSteps = {} as Record<CardId, Set<StepId>>;
-    const activeProducts = new Set([ProductId.analytics]);
+    const activeProducts = new Set([ProductLine.security]);
 
     const activeCards = setupCards(finishedSteps, activeProducts);
 
@@ -171,7 +171,7 @@ describe('setupCards', () => {
       [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
     } as unknown as Record<CardId, Set<StepId>>;
 
-    const activeProducts: Set<ProductId> = new Set();
+    const activeProducts: Set<ProductLine> = new Set();
 
     const activeCards = setupCards(finishedSteps, activeProducts);
 
@@ -188,7 +188,7 @@ describe('setupCards', () => {
     const finishedSteps = {
       [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
     } as unknown as Record<CardId, Set<StepId>>;
-    const activeProducts = new Set([ProductId.analytics]);
+    const activeProducts = new Set([ProductLine.security]);
 
     const activeCards = setupCards(finishedSteps, activeProducts);
 
@@ -202,7 +202,7 @@ describe('updateCard', () => {
   const finishedSteps = {
     [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
   } as unknown as Record<CardId, Set<StepId>>;
-  const activeProducts = new Set([ProductId.analytics, ProductId.cloud]);
+  const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
 
   const activeCards = {
     [SectionId.getSetUp]: {
@@ -221,8 +221,8 @@ describe('updateCard', () => {
         timeInMins: 0,
         stepsLeft: 0,
       },
-      [GetSetUpCardId.protectYourEnvironmentInRuntime]: {
-        id: GetSetUpCardId.protectYourEnvironmentInRuntime,
+      [GetSetUpCardId.protectYourEnvironmentInRealtime]: {
+        id: GetSetUpCardId.protectYourEnvironmentInRealtime,
         timeInMins: 0,
         stepsLeft: 0,
       },
@@ -244,7 +244,7 @@ describe('updateCard', () => {
         timeInMins: 0,
       },
     },
-  } as Record<SectionId, Record<CardId, ActiveCard>>;
+  } as ActiveCards;
 
   it('should update the active card based on finished steps and active products', () => {
     const sectionId = SectionId.getSetUp;
@@ -273,7 +273,7 @@ describe('updateCard', () => {
 
   it('should return null if the card is inactive based on active products', () => {
     const sectionId = SectionId.getSetUp;
-    const cardId = GetSetUpCardId.protectYourEnvironmentInRuntime;
+    const cardId = GetSetUpCardId.protectYourEnvironmentInRealtime;
 
     const updatedCards = updateCard({
       finishedSteps,
