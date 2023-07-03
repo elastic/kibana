@@ -20,7 +20,7 @@ export function PatternInput({ value, onChange }) {
       fullWidth
       data-test-subj="patternInput"
     >
-      <CodeEditor // TODO theme provided in context by x-pack/plugins/grokdebugger/public/render_app.js
+      <CodeEditor
         languageId={GrokLang}
         value={value}
         height={200}

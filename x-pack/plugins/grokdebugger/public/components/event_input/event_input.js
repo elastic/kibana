@@ -20,7 +20,7 @@ export function EventInput({ value, onChange }) {
       fullWidth
       data-test-subj="eventInput"
     >
-      <CodeEditor // TODO theme provided in context by x-pack/plugins/grokdebugger/public/render_app.js
+      <CodeEditor
         languageId="plaintext"
         value={value}
         height={200}

@@ -38,13 +38,7 @@ export const TextEditor: FunctionComponent<Props> = ({ field, editorProps }) => 
         paddingSize="s"
         hasShadow={false}
       >
-        <CodeEditor
-          /* TODO theme provided in context by x-pack/plugins/ingest_pipelines/public/application/index.tsx */ value={
-            value
-          }
-          onChange={setValue}
-          {...(editorProps as any)}
-        />
+        <CodeEditor value={value} onChange={setValue} {...(editorProps as any)} />
       </EuiPanel>
     </EuiFormRow>
   );

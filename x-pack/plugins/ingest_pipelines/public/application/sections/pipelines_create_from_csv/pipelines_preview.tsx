@@ -89,7 +89,7 @@ export const PipelinesPreview: FC<Props> = ({
           data-test-subj="pipelineMappingsJSONEditor"
         >
           <Fragment>
-            <CodeEditorField // TODO updated x-pack/plugins/ingest_pipelines/public/application/index.tsx to provide theme in context
+            <CodeEditorField
               aria-label={''}
               languageId={XJsonLang.ID}
               value={processorsJson}
