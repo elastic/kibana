@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import React from 'react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
@@ -33,6 +33,7 @@ export const unifiedHistogramServicesMock = {
         suggestions: jest.fn(() => allSuggestionsMock),
       };
     }),
+    EditLensConfigPanelApi: jest.fn().mockResolvedValue(<span>Lens Config Panel Component</span>),
   },
   storage: {
     get: jest.fn(),
