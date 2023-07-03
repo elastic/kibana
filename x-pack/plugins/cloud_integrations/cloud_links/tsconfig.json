@@ -17,6 +17,8 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/guided-onboarding-plugin",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-doc-links-browser",
   ],
   "exclude": [
     "target/**/*",
