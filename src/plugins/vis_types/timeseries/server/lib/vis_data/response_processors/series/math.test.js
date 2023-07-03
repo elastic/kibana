@@ -95,7 +95,7 @@ describe('math(resp, panel, series)', () => {
     expect(results[0]).toEqual({
       id: 'test╰┄►example-01',
       label: 'example-01',
-      color: 'rgb(255, 0, 0)',
+      color: '#ff0000',
       stack: false,
       seriesId: 'test',
       lines: { show: true, fill: 0, lineWidth: 1, steps: false },
@@ -153,7 +153,7 @@ describe('math(resp, panel, series)', () => {
     expect(results[0]).toEqual({
       id: 'test╰┄►example-01',
       label: 'example-01',
-      color: 'rgb(255, 0, 0)',
+      color: '#ff0000',
       stack: false,
       seriesId: 'test',
       lines: { show: true, fill: 0, lineWidth: 1, steps: false },
@@ -180,7 +180,7 @@ describe('math(resp, panel, series)', () => {
     expect(results[0]).toEqual({
       id: 'test╰┄►example-01',
       label: 'example-01',
-      color: 'rgb(255, 0, 0)',
+      color: '#ff0000',
       stack: false,
       seriesId: 'test',
       lines: { show: true, fill: 0, lineWidth: 1, steps: false },

@@ -81,6 +81,6 @@ describe('Color Palette', () => {
   });
 
   it('should create new colors and convert them correctly', () => {
-    expect(createColorPalette(num3)[72]).toEqual('#404ABF');
+    expect(createColorPalette(num3)[72]).toEqual('#404abf');
   });
 });

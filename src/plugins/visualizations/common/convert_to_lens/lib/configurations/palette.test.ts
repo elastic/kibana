@@ -34,7 +34,7 @@ describe('getPalette', () => {
       name: 'custom',
       params: {
         colorStops: [
-          { color: '#FFFFFF', stop: 0 },
+          { color: '#ffffff', stop: 0 },
           { color: '#979797', stop: 0.3333333333333333 },
           { color: '#000000', stop: 0.6666666666666666 },
         ],
@@ -47,7 +47,7 @@ describe('getPalette', () => {
         rangeType: 'number',
         reverse: false,
         stops: [
-          { color: '#FFFFFF', stop: 0.3333333333333333 },
+          { color: '#ffffff', stop: 0.3333333333333333 },
           { color: '#979797', stop: 0.6666666666666666 },
           { color: '#000000', stop: 1 },
         ],
@@ -61,7 +61,7 @@ describe('getPalette', () => {
       name: 'custom',
       params: {
         colorStops: [
-          { color: '#FFFFFF', stop: 0 },
+          { color: '#ffffff', stop: 0 },
           { color: '#979797', stop: 33.33333333333333 },
           { color: '#000000', stop: 66.66666666666666 },
         ],
@@ -74,7 +74,7 @@ describe('getPalette', () => {
         rangeType: 'percent',
         reverse: false,
         stops: [
-          { color: '#FFFFFF', stop: 33.33333333333333 },
+          { color: '#ffffff', stop: 33.33333333333333 },
           { color: '#979797', stop: 66.66666666666666 },
           { color: '#000000', stop: 100 },
         ],
@@ -88,7 +88,7 @@ describe('getPalette', () => {
       name: 'custom',
       params: {
         colorStops: [
-          { color: '#FFFFFF', stop: 0 },
+          { color: '#ffffff', stop: 0 },
           { color: '#979797', stop: 100 },
           { color: '#000000', stop: 200 },
         ],
@@ -101,7 +101,7 @@ describe('getPalette', () => {
         rangeType: 'number',
         reverse: false,
         stops: [
-          { color: '#FFFFFF', stop: 100 },
+          { color: '#ffffff', stop: 100 },
           { color: '#979797', stop: 200 },
           { color: '#000000', stop: 300 },
         ],

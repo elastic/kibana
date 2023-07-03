@@ -6,7 +6,7 @@
  */
 
 import { ReactText } from 'react';
-import Color from 'color';
+import chroma from 'chroma-js';
 import { get, first, last, min, max } from 'lodash';
 import { createFormatter } from '../../../../../common/formatters';
 import {
@@ -76,8 +76,7 @@ export const getChartColor = (seriesOverrides: SeriesOverrides | undefined, seri
   if (!rawColor) {
     return null;
   }
-  const color = new Color(rawColor);
-  return color.hex().toString();
+  return chroma(rawColor).hex();
 };
 
 /**

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import Color from 'color';
+import chroma from 'chroma-js';
 import { get, isPlainObject } from 'lodash';
 import { overwrite } from '.';
 
@@ -51,7 +51,11 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
     meta = get(resp, `aggregations.${series.id}.meta`);
   }
 
-  const color = new Color(series.color);
+  // FIXME: the series.color could be undefined even if it is typed as required. This happen due to
+  // a partially implemented Mock of Series and Panel in the process_bucket.test.ts
+  // The fallback follows the preexisting fallback used from the `color` library
+  // https://github.com/Qix-/color/blob/e188999dee229c902102ec37e398ff4d868616e5/index.js#L38-L41
+  const color = chroma.valid(series.color) ? chroma(series.color).hex() : '#000000';
   const metric = getLastMetric(series);
   const buckets = get(resp, `aggregations.${series.id}.buckets`);
 
@@ -71,7 +75,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
         bucket.id = `${series.id}${SERIES_SEPARATOR}${bucket.key}`;
         bucket.splitByLabel = splitByLabel;
         bucket.label = formatKey(bucket.key, series);
-        bucket.color = color.string();
+        bucket.color = color;
         bucket.meta = meta;
         bucket.termsSplitKey = bucket.key;
         return bucket;
@@ -109,7 +113,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
       id: series.id,
       splitByLabel,
       label: series.label || splitByLabel,
-      color: color.string(),
+      color,
       ...mergeObj,
       meta: meta!,
     },
