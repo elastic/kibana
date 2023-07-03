@@ -31,22 +31,26 @@ interface Props {
   errors?: string[];
 }
 
-const filterSuggestions = (
-  actionVariablesList: ActionVariable[] | undefined,
-  propertyPath: string
-) => {
+const filterSuggestions = ({
+  actionVariablesList,
+  propertyPath,
+}: {
+  actionVariablesList?: ActionVariable[];
+  propertyPath: string;
+}) => {
   if (!actionVariablesList) return [];
-  const suggections = actionVariablesList.map(({ name }) => name);
-  const firstLineSuggestions = suggections.reduce((acc: string[], suggection: string) => {
-    const splittedWords = suggection.split('.');
-    if (splittedWords.length > 1 && !acc.includes(splittedWords[0])) {
-      return [...acc, splittedWords[0]];
+  const initialSuggestions = actionVariablesList.map(({ name }) => name);
+  const allSuggestions: string[] = [];
+  initialSuggestions.forEach((suggestion: string) => {
+    const splittedWords = suggestion.split('.');
+    for (let i = 0; i < splittedWords.length; i++) {
+      const currentSuggestion = splittedWords.slice(0, i + 1).join('.');
+      if (!allSuggestions.includes(currentSuggestion)) {
+        allSuggestions.push(currentSuggestion);
+      }
     }
-    return acc;
-  }, [] as string[]);
-
-  const allSuggestions = suggections.concat(firstLineSuggestions).sort();
-  return allSuggestions.filter((suggestion) => suggestion.startsWith(propertyPath));
+  });
+  return allSuggestions.sort().filter((suggestion) => suggestion.startsWith(propertyPath));
 };
 
 export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
@@ -135,7 +139,10 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
       .slice(currentWordStartIndex === -1 ? 0 : currentWordStartIndex, selectionStart)
       .trim();
     if (currentWord.startsWith('{{')) {
-      const filteredMatches = filterSuggestions(messageVariables, currentWord.slice(2));
+      const filteredMatches = filterSuggestions({
+        actionVariablesList: messageVariables,
+        propertyPath: currentWord.slice(2),
+      });
       setSearchWord(currentWord.slice(2));
       setMatches(filteredMatches);
       setListOpen((prevVal) => {
