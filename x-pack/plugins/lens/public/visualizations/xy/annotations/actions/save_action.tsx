@@ -133,6 +133,28 @@ const saveAnnotationGroupToLibrary = async (
   return { id: savedId, config: groupConfig };
 };
 
+const shouldStopBecauseDuplicateTitle = async (
+  newTitle: string,
+  existingTitle: string,
+  newCopyOnSave: ModalOnSaveProps['newCopyOnSave'],
+  onTitleDuplicate: ModalOnSaveProps['onTitleDuplicate'],
+  isTitleDuplicateConfirmed: ModalOnSaveProps['isTitleDuplicateConfirmed'],
+  eventAnnotationService: EventAnnotationServiceType
+) => {
+  if (isTitleDuplicateConfirmed || (newTitle === existingTitle && !newCopyOnSave)) {
+    return false;
+  }
+
+  const duplicateExists = await eventAnnotationService.groupExistsWithTitle(newTitle);
+
+  if (duplicateExists) {
+    onTitleDuplicate();
+    return true;
+  } else {
+    return false;
+  }
+};
+
 /** @internal exported for testing only */
 export const onSave = async ({
   state,
@@ -140,7 +162,15 @@ export const onSave = async ({
   setState,
   eventAnnotationService,
   toasts,
-  modalOnSaveProps: { newTitle, newDescription, newTags, closeModal, newCopyOnSave },
+  modalOnSaveProps: {
+    newTitle,
+    newDescription,
+    newTags,
+    closeModal,
+    newCopyOnSave,
+    onTitleDuplicate,
+    isTitleDuplicateConfirmed,
+  },
   dataViews,
   goToAnnotationLibrary,
 }: {
@@ -153,6 +183,17 @@ export const onSave = async ({
   dataViews: DataViewsContract;
   goToAnnotationLibrary: () => Promise<void>;
 }) => {
+  const shouldStop = await shouldStopBecauseDuplicateTitle(
+    newTitle,
+    isByReferenceAnnotationsLayer(layer) ? layer.__lastSaved.title : '',
+    newCopyOnSave,
+    onTitleDuplicate,
+    isTitleDuplicateConfirmed,
+    eventAnnotationService
+  );
+
+  if (shouldStop) return;
+
   let savedInfo: Awaited<ReturnType<typeof saveAnnotationGroupToLibrary>>;
   try {
     savedInfo = await saveAnnotationGroupToLibrary(
@@ -205,27 +246,25 @@ export const onSave = async ({
     text: ((element) =>
       render(
         <I18nProvider>
-          <p>
-            <FormattedMessage
-              id="xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastBody"
-              defaultMessage="View or manage in the {link}."
-              values={{
-                link: (
-                  <EuiLink
-                    data-test-subj="lnsAnnotationLibraryLink"
-                    onClick={() => goToAnnotationLibrary()}
-                  >
-                    {i18n.translate(
-                      'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.annotationLibrary',
-                      {
-                        defaultMessage: 'annotation library',
-                      }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
+          <FormattedMessage
+            id="xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastBody"
+            defaultMessage="View or manage in the {link}."
+            values={{
+              link: (
+                <EuiLink
+                  data-test-subj="lnsAnnotationLibraryLink"
+                  onClick={() => goToAnnotationLibrary()}
+                >
+                  {i18n.translate(
+                    'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.annotationLibrary',
+                    {
+                      defaultMessage: 'annotation library',
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
         </I18nProvider>,
         element
       )) as MountPoint,
@@ -258,7 +297,7 @@ export const getSaveLayerAction = ({
   const displayName = i18n.translate(
     'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary',
     {
-      defaultMessage: 'Save annotation group',
+      defaultMessage: 'Save to library',
     }
   );
 
