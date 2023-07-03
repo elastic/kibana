@@ -134,7 +134,7 @@ export class EndpointAppContextService {
           featureUsageService,
           endpointMetadataService,
           cloud,
-          esClient,
+          esClient
         )
       );
 

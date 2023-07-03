@@ -21,6 +21,7 @@ import type {
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import type { LicenseService } from '../../common/license';
 import type { ManifestManager } from '../endpoint/services';
@@ -37,7 +38,6 @@ import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage'
 import type { AnyPolicyCreateConfig } from './types';
 import { ENDPOINT_INTEGRATION_CONFIG_KEY } from './constants';
 import { createEventFilters } from './handlers/create_event_filters';
-import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -49,9 +49,9 @@ const shouldUpdateMetaValues = (
   endpointPackagePolicy: PolicyConfig,
   currentLicenseType: string,
   currentCloudInfo: boolean,
-  currentClusterName: string, 
+  currentClusterName: string,
   currentClusterUUID: string,
-  currentLicenseUID: string,
+  currentLicenseUID: string
 ) => {
   return (
     endpointPackagePolicy.meta.license !== currentLicenseType ||
@@ -140,7 +140,7 @@ export const getPackagePolicyCreateCallback = (
       licenseService,
       endpointIntegrationConfig,
       cloud,
-      esClientInfo,
+      esClientInfo
     );
 
     return {
@@ -175,7 +175,7 @@ export const getPackagePolicyUpdateCallback = (
   featureUsageService: FeatureUsageService,
   endpointMetadataService: EndpointMetadataService,
   cloud: CloudSetup,
-  esClient: ElasticsearchClient,
+  esClient: ElasticsearchClient
 ): PutPackagePolicyUpdateCallback => {
   return async (newPackagePolicy: NewPackagePolicy): Promise<UpdatePackagePolicy> => {
     if (!isEndpointPackagePolicy(newPackagePolicy)) {

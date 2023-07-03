@@ -6,6 +6,7 @@
  */
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   policyFactory as policyConfigFactory,
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
@@ -20,7 +21,6 @@ import {
   ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
 } from '../constants';
 import { disableProtections } from '../../../common/endpoint/models/policy_config_helpers';
-import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 
 /**
  * Create the default endpoint policy based on the current license and configuration type
@@ -29,7 +29,7 @@ export const createDefaultPolicy = (
   licenseService: LicenseService,
   config: AnyPolicyCreateConfig | undefined,
   cloud: CloudSetup,
-  esClientInfo: InfoResponse,
+  esClientInfo: InfoResponse
 ): PolicyConfig => {
   const factoryPolicy = policyConfigFactory();
 
