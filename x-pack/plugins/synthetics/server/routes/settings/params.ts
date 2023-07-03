@@ -7,7 +7,6 @@
 
 import { IKibanaResponse } from '@kbn/core/server';
 import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsParamType } from '../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -22,29 +21,25 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
     request,
     response,
     server,
+    spaceId,
   }): Promise<
     IKibanaResponse<SyntheticsParams[]> | IKibanaResponse<SyntheticsParamsReadonly[]>
   > => {
     try {
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
-      const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
-        id: DEFAULT_SPACE_ID,
-      };
-
       const canSave =
         (await server.coreStart?.capabilities.resolveCapabilities(request)).uptime.save ?? false;
 
       if (canSave) {
         const finder =
-          await encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<
-            SyntheticsParams,
-            unknown
-          >({
-            type: syntheticsParamType,
-            perPage: 1000,
-            namespaces: [spaceId],
-          });
+          await encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParams>(
+            {
+              type: syntheticsParamType,
+              perPage: 1000,
+              namespaces: [spaceId],
+            }
+          );
 
         const hits: Array<SavedObjectsFindResult<SyntheticsParams>> = [];
         for await (const result of finder.find()) {
@@ -52,35 +47,26 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
         }
 
         return response.ok({
-          body: hits.map(({ id, attributes: { key, value, description, tags }, namespaces }) => ({
+          body: hits.map(({ id, attributes }) => ({
+            ...attributes,
             id,
-            key,
-            value,
-            description,
-            namespaces,
-            tags,
           })),
         });
       } else {
-        const data = await savedObjectsClient.find<SyntheticsParamsReadonly, unknown>({
+        const data = await savedObjectsClient.find<SyntheticsParamsReadonly>({
           type: syntheticsParamType,
           perPage: 10000,
         });
         return response.ok({
-          body: data.saved_objects.map(
-            ({ id, attributes: { key, description, tags }, namespaces }) => ({
-              id,
-              key,
-              description,
-              namespaces,
-              tags,
-            })
-          ),
+          body: data.saved_objects.map(({ id, attributes, namespaces }) => ({
+            ...attributes,
+            namespaces,
+            id,
+          })),
         });
       }
     } catch (error) {
       if (error.output?.statusCode === 404) {
-        const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
         return response.notFound({ body: { message: `Kibana space '${spaceId}' does not exist` } });
       }
 
