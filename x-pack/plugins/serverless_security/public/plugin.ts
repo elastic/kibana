@@ -45,12 +45,14 @@ export class ServerlessSecurityPlugin
     core: CoreStart,
     startDeps: ServerlessSecurityPluginStartDependencies
   ): ServerlessSecurityPluginStart {
-    const { securitySolution, serverless } = startDeps;
+    const { securitySolution, serverless, management } = startDeps;
 
     securitySolution.setIsSidebarEnabled(false);
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(core, startDeps));
     serverless.setProjectHome('/app/security');
     serverless.setSideNavComponent(getSecuritySideNavComponent(core, startDeps));
+
+    management.setLandingPageRedirect('/app/security/manage');
 
     return {};
   }
