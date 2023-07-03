@@ -5,37 +5,29 @@
  * 2.0.
  */
 
-/* eslint-disable react-hooks/exhaustive-deps */
-
-import React, { useState } from 'react';
+import React from 'react';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import { useActor } from '@xstate/react';
 import { DatasetSelector } from '../components/dataset_selector';
 import { DatasetsProvider, useDatasetsContext } from '../hooks/use_datasets';
 import { InternalStateProvider } from '../hooks/use_data_view';
 import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
 import { IDatasetsClient } from '../services/datasets';
-import {
-  AllDatasetSelection,
-  DatasetSelection,
-  DatasetSelectionChange,
-} from '../utils/dataset_selection';
+import { DatasetSelectionChange } from '../utils/dataset_selection';
+import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
 
 interface CustomDatasetSelectorProps {
-  stateContainer: DiscoverStateContainer;
+  logExplorerProfileStateService: LogExplorerProfileStateService;
 }
 
-export const CustomDatasetSelector = withProviders(({ stateContainer }) => {
-  /**
-   * TOREMOVE: This is a temporary workaround to control the datasetSelection value
-   * until we handle the restore/initialization of the dataview with https://github.com/elastic/kibana/issues/160425,
-   * where this value will be used to control the DatasetSelector selection with a top level state machine.
-   */
-  const [datasetSelection, setDatasetSelection] = useState<DatasetSelection>(() =>
-    AllDatasetSelection.create()
-  );
+export const CustomDatasetSelector = withProviders(({ logExplorerProfileStateService }) => {
+  const [logStreamPageState, logStreamPageSend] = useActor(logExplorerProfileStateService);
 
-  // Restore All dataset selection on refresh until restore from url is not available
-  React.useEffect(() => handleStreamSelection(datasetSelection), []);
+  const { datasetSelection } = logStreamPageState.context;
+
+  const handleStreamSelection: DatasetSelectionChange = (data) => {
+    logStreamPageSend({ type: 'UPDATE_DATASET_SELECTION', data });
+  };
 
   const {
     error: integrationsError,
@@ -58,17 +50,6 @@ export const CustomDatasetSelector = withProviders(({ stateContainer }) => {
     searchDatasets,
     sortDatasets,
   } = useDatasetsContext();
-
-  /**
-   * TODO: this action will be abstracted into a method of a class adapter in a follow-up PR
-   * since we'll need to handle more actions from the stateContainer
-   */
-  const handleStreamSelection: DatasetSelectionChange = (nextDatasetSelection) => {
-    setDatasetSelection(nextDatasetSelection);
-    return stateContainer.actions.onCreateDefaultAdHocDataView(
-      nextDatasetSelection.toDataviewSpec()
-    );
-  };
 
   return (
     <DatasetSelector
@@ -99,10 +80,12 @@ export default CustomDatasetSelector;
 
 export type CustomDatasetSelectorBuilderProps = CustomDatasetSelectorProps & {
   datasetsClient: IDatasetsClient;
+  stateContainer: DiscoverStateContainer;
 };
 
 function withProviders(Component: React.FunctionComponent<CustomDatasetSelectorProps>) {
   return function ComponentWithProviders({
+    logExplorerProfileStateService,
     stateContainer,
     datasetsClient,
   }: CustomDatasetSelectorBuilderProps) {
@@ -110,7 +93,7 @@ function withProviders(Component: React.FunctionComponent<CustomDatasetSelectorP
       <InternalStateProvider value={stateContainer.internalState}>
         <IntegrationsProvider datasetsClient={datasetsClient}>
           <DatasetsProvider datasetsClient={datasetsClient}>
-            <Component stateContainer={stateContainer} />
+            <Component logExplorerProfileStateService={logExplorerProfileStateService} />
           </DatasetsProvider>
         </IntegrationsProvider>
       </InternalStateProvider>

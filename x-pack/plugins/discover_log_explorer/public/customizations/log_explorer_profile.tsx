@@ -8,21 +8,35 @@
 import { CoreStart } from '@kbn/core/public';
 import { CustomizationCallback } from '@kbn/discover-plugin/public';
 import React from 'react';
+import { interpret } from 'xstate';
+import { createLogExplorerProfileStateMachine } from '../state_machines/log_explorer_profile';
+import { DiscoverLogExplorerStartDeps } from '../types';
+import { AllDatasetSelection } from '../utils/dataset_selection';
 import { dynamic } from '../utils/dynamic';
 
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
 
 interface CreateLogExplorerProfileCustomizationsDeps {
   core: CoreStart;
+  plugins: DiscoverLogExplorerStartDeps;
 }
 
 export const createLogExplorerProfileCustomizations =
-  ({ core }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
+  ({ core, plugins }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
     const { DatasetsService } = await import('../services/datasets');
     const datasetsService = new DatasetsService().start({
       http: core.http,
     });
+
+    const logExplorerProfileStateService = interpret(
+      createLogExplorerProfileStateMachine(
+        { datasetSelection: AllDatasetSelection.create() },
+        { dataViews: plugins.dataViews, stateContainer }
+      )
+    );
+    logExplorerProfileStateService.start();
+    await waitForState(logExplorerProfileStateService, 'initialized');
 
     /**
      * Replace the DataViewPicker with a custom `DatasetSelector` to pick integrations streams
@@ -32,6 +46,7 @@ export const createLogExplorerProfileCustomizations =
       CustomDataViewPicker: () => (
         <LazyCustomDatasetSelector
           datasetsClient={datasetsService.client}
+          logExplorerProfileStateService={logExplorerProfileStateService}
           stateContainer={stateContainer}
         />
       ),
@@ -49,3 +64,16 @@ export const createLogExplorerProfileCustomizations =
       },
     });
   };
+
+async function waitForState(machineService, targetState) {
+  return new Promise((resolve) => {
+    const listener = (state) => {
+      if (state.matches(targetState)) {
+        resolve(state);
+        machineService.off(listener); // Unsubscribe the listener once the target state is matched
+      }
+    };
+
+    machineService.onTransition(listener);
+  });
+}
