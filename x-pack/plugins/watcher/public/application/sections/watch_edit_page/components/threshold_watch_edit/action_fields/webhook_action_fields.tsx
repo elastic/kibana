@@ -243,7 +243,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
         fullWidth
         errors={errors}
       >
-        <CodeEditor // TODO theme provided in context by x-pack/plugins/watcher/public/application/index.tsx
+        <CodeEditor
           languageId="json"
           value={body || ''}
           data-test-subj="webhookBodyEditor"

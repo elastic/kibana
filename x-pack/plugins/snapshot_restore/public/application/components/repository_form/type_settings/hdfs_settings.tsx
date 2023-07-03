@@ -347,7 +347,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             />
           }
         >
-          <CodeEditor // TODO theme needs to be provided in x-pack/plugins/snapshot_restore/public/application/app_context.tsx
+          <CodeEditor
             languageId="json"
             value={additionalConf}
             data-test-subj="codeEditor"

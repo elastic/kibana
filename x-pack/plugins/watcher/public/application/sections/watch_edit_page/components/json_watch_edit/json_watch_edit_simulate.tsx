@@ -367,7 +367,7 @@ export const JsonWatchEditSimulate = ({
             fullWidth
             errors={executeWatchErrors}
           >
-            <CodeEditor // TODO theme provided in context by x-pack/plugins/watcher/public/application/index.tsx
+            <CodeEditor
               languageId="json"
               value={xJson}
               data-test-subj="jsonEditor"
