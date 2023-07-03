@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RRule } from 'rrule';
+import { Frequency } from '@kbn/rrule';
 import { MaintenanceWindowSOAttributes } from '../../../common';
 
 export const getMockMaintenanceWindow = (
@@ -18,7 +18,7 @@ export const getMockMaintenanceWindow = (
     rRule: {
       tzid: 'UTC',
       dtstart: '2023-02-26T00:00:00.000Z',
-      freq: RRule.WEEKLY,
+      freq: Frequency.WEEKLY,
       count: 2,
     },
     events: [
