@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Frequency } from 'rrule';
+import { Frequency } from '@kbn/rrule';
 import moment from 'moment';
 import { RuleSnoozeSchedule } from '../types';
 

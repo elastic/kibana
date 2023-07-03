@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { RRule } from 'rrule';
+import { Frequency } from '@kbn/rrule';
 import { archive } from './archive';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
@@ -153,7 +153,7 @@ describe('MaintenanceWindowClient - archive', () => {
       rRule: {
         tzid: 'CET',
         dtstart: '2023-03-26T00:00:00.000Z',
-        freq: RRule.WEEKLY,
+        freq: Frequency.WEEKLY,
         count: 5,
       },
       events: modifiedEvents,
