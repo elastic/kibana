@@ -14,7 +14,7 @@ export interface DashboardDuplicateTitleCheckProps {
   title: string;
   copyOnSave: boolean;
   lastSavedTitle: string;
-  onTitleDuplicate: () => void;
+  onTitleDuplicate?: () => void;
   isTitleDuplicateConfirmed: boolean;
 }
 
