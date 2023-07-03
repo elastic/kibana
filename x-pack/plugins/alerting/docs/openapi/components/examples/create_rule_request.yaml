@@ -8,13 +8,13 @@ value:
       group: threshold met
       params:
         level: info
-        message: "alert '{{alertName}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+        message: "rule '{{rule.name}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
   consumer: alerts
   name: my rule
   params:
     aggType: avg
     termSize: 6
-    thresholdComparator: ">"
+    thresholdComparator: '>'
     timeWindowSize: 5
     timeWindowUnit: m
     groupBy: top
@@ -22,7 +22,7 @@ value:
       - 1000
     index:
       - .test-index
-    timeField: "@timestamp"
+    timeField: '@timestamp'
     aggField: sheet.version
     termField: name.keyword
   rule_type_id: .index-threshold

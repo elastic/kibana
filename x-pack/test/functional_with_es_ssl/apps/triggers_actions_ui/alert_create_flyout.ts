@@ -144,7 +144,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('throttleInput', '10');
       const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
       expect(await messageTextArea.getAttribute('value')).to.eql(
-        `alert '{{alertName}}' is active for group '{{context.group}}':
+        `rule '{{rule.name}}' is active for group '{{context.group}}':
 
 - Value: {{context.value}}
 - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}

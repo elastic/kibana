@@ -164,7 +164,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               source: ES_TEST_INDEX_SOURCE,
               reference: ES_TEST_INDEX_REFERENCE,
               params: {
-                name: '{{{alertName}}}',
+                name: '{{{rule.name}}}',
                 message: '{{{context.message}}}',
               },
             },

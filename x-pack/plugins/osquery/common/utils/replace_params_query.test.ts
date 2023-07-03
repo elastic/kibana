@@ -46,7 +46,7 @@ describe('replaceParamsQuery', () => {
     expect(result).toBe(expectedQuery);
     expect(skipped).toBe(false);
   });
-  it('should return skipped true if {{params}} field not found', () => {
+  it('should return skipped true if {{rule.params}} field not found', () => {
     const query =
       'SELECT * FROM processes WHERE version = {{kibana.version}} {{not.existing}} {{agent.name}}';
     const { result, skipped } = replaceParamsQuery(query, {

@@ -1038,9 +1038,9 @@ Example of the index document for Index Threshold alert:
 
 ```
 {
-    "alert_id": "{{alertId}}",
-    "alert_name": "{{alertName}}",
-    "alert_instance_id": "{{alertInstanceId}}",
+    "rule_id": "{{rule.id}}",
+    "rule_name": "{{rule.name}}",
+    "alert_id": "{{alert.id}}",
     "context_title": "{{context.title}}",
     "context_value": "{{context.value}}",
     "context_message": "{{context.message}}"
