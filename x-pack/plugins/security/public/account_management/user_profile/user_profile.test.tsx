@@ -257,11 +257,19 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      const darkModeButtonGroup = testWrapper.find('fieldset[data-test-subj="darkModeButton"]');
-      expect(darkModeButtonGroup.getDOMNode()).not.toBeDisabled();
+      const overrideMsg = testWrapper.find('EuiText[data-test-subj="themeOverrideMessage"]');
+      expect(overrideMsg).toHaveLength(0);
 
-      const defaultButton = darkModeButtonGroup.find('label[title="Space default"]');
-      expect(defaultButton.hasClass('euiButtonGroupButton-isSelected')).toBe(true);
+      const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
+      expect(themeMenu).toHaveLength(1);
+
+      const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
+      expect(themeOptions).toHaveLength(3);
+      themeOptions.forEach((option) => {
+        expect(option.getDOMNode().classList.contains('euiKeyPadMenuItem-isDisabled')).toEqual(
+          false
+        );
+      });
     });
 
     it('should not display if the User is a cloud user', () => {
@@ -335,11 +343,19 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      const darkModeButtonGroup = testWrapper.find('fieldset[data-test-subj="darkModeButton"]');
-      expect(darkModeButtonGroup.getDOMNode()).toBeDisabled();
+      const overrideMsg = testWrapper.find('EuiIconTip[data-test-subj="themeOverrideTooltip"]');
+      expect(overrideMsg).toHaveLength(1);
 
-      const darkModeButton = darkModeButtonGroup.find('button[title="Dark"]');
-      expect(darkModeButton.hasClass('euiButtonGroupButton-isSelected')).toBe(true);
+      const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
+      expect(themeMenu).toHaveLength(1);
+
+      const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
+      expect(themeOptions).toHaveLength(3);
+      themeOptions.forEach((option) => {
+        expect(option.getDOMNode().classList.contains('euiKeyPadMenuItem-isDisabled')).toEqual(
+          true
+        );
+      });
     });
 
     it('should be disabled if the theme has been set to `darkMode: false` in the config', () => {
@@ -364,11 +380,19 @@ describe('useUserProfileForm', () => {
         </Providers>
       );
 
-      const darkModeButtonGroup = testWrapper.find('fieldset[data-test-subj="darkModeButton"]');
-      expect(darkModeButtonGroup.getDOMNode()).toBeDisabled();
+      const overrideMsg = testWrapper.find('EuiIconTip[data-test-subj="themeOverrideTooltip"]');
+      expect(overrideMsg).toHaveLength(1);
 
-      const lightModeButton = darkModeButtonGroup.find('button[title="Light"]');
-      expect(lightModeButton.hasClass('euiButtonGroupButton-isSelected')).toBe(true);
+      const themeMenu = testWrapper.find('EuiKeyPadMenu[data-test-subj="themeMenu"]');
+      expect(themeMenu).toHaveLength(1);
+
+      const themeOptions = themeMenu.find('EuiKeyPadMenuItem');
+      expect(themeOptions).toHaveLength(3);
+      themeOptions.forEach((option) => {
+        expect(option.getDOMNode().classList.contains('euiKeyPadMenuItem-isDisabled')).toEqual(
+          true
+        );
+      });
     });
   });
 });
