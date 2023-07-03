@@ -367,31 +367,35 @@ export default function ({ getService }: FtrProviderContext) {
         it('adds discover custom url to the analytics job', async () => {
           await ml.testExecution.logTestStep('opens edit flyout for discover url');
           await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
-          await ml.dataFrameAnalyticsEdit.openEditCustomUrlsForJobTab(testData.jobId);
 
           await ml.testExecution.logTestStep('add discover custom url for the analytics job');
-          await ml.dataFrameAnalyticsEdit.addDiscoverCustomUrl(testDiscoverCustomUrl);
+          await ml.dataFrameAnalyticsEdit.addDiscoverCustomUrl(
+            testData.jobId,
+            testDiscoverCustomUrl
+          );
         });
 
         it('adds dashboard custom url to the analytics job', async () => {
           await ml.testExecution.logTestStep('opens edit flyout for dashboard url');
           await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
-          await ml.dataFrameAnalyticsEdit.openEditCustomUrlsForJobTab(testData.jobId);
 
           await ml.testExecution.logTestStep('add dashboard custom url for the analytics job');
-          await ml.dataFrameAnalyticsEdit.addDashboardCustomUrl(testDashboardCustomUrl, {
-            index: 1,
-            url: `dashboards#/view/${testDashboardId}?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'SaleType:\"$SaleType$\"'))`,
-          });
+          await ml.dataFrameAnalyticsEdit.addDashboardCustomUrl(
+            testData.jobId,
+            testDashboardCustomUrl,
+            {
+              index: 1,
+              url: `dashboards#/view/${testDashboardId}?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'SaleType:\"$SaleType$\"'))`,
+            }
+          );
         });
 
         it('adds other custom url type to the analytics job', async () => {
           await ml.testExecution.logTestStep('opens edit flyout for other url');
           await ml.dataFrameAnalyticsTable.openEditFlyout(testData.jobId);
-          await ml.dataFrameAnalyticsEdit.openEditCustomUrlsForJobTab(testData.jobId);
 
           await ml.testExecution.logTestStep('add other type custom url for the analytics job');
-          await ml.dataFrameAnalyticsEdit.addOtherTypeCustomUrl(testOtherCustomUrl);
+          await ml.dataFrameAnalyticsEdit.addOtherTypeCustomUrl(testData.jobId, testOtherCustomUrl);
         });
 
         it('edits the analytics job and displays it correctly in the job list', async () => {

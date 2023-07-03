@@ -139,9 +139,12 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
     },
 
     async addDashboardCustomUrl(
+      jobId: string,
       customUrl: DashboardUrlConfig,
       expectedResult: { index: number; url: string }
     ) {
+      await this.openEditCustomUrlsForJobTab(jobId);
+
       await retry.tryForTime(30 * 1000, async () => {
         await this.fillInDashboardUrlForm(customUrl);
       });
@@ -149,7 +152,9 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
       await this.updateAnalyticsJob();
     },
 
-    async addDiscoverCustomUrl(customUrl: DiscoverUrlConfig) {
+    async addDiscoverCustomUrl(jobId: string, customUrl: DiscoverUrlConfig) {
+      await this.openEditCustomUrlsForJobTab(jobId);
+
       await retry.tryForTime(30 * 1000, async () => {
         const existingCustomUrlCount = await this.getExistingCustomUrlCount();
 
@@ -160,7 +165,9 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
       await this.updateAnalyticsJob();
     },
 
-    async addOtherTypeCustomUrl(customUrl: OtherUrlConfig) {
+    async addOtherTypeCustomUrl(jobId: string, customUrl: OtherUrlConfig) {
+      await this.openEditCustomUrlsForJobTab(jobId);
+
       await retry.tryForTime(30 * 1000, async () => {
         const existingCustomUrlCount = await this.getExistingCustomUrlCount();
 
