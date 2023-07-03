@@ -124,13 +124,13 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async addMultipleTags(tags: string[]) {
-      await testSubjects.click('tag-list-edit-button'); 
+      await testSubjects.click('tag-list-edit-button');
 
       for (const [index, tag] of tags.entries()) {
         await comboBox.setCustom('comboBoxInput', `${tag}-${index}`);
       }
 
       await header.waitUntilLoadingHasFinished();
-    }
+    },
   };
 }

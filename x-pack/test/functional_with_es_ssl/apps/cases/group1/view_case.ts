@@ -74,7 +74,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('shows error message when title is more than 160 characters', async () => {
-        const longTitle =  Array(161).fill('x').toString();
+        const longTitle = Array(161).fill('x').toString();
 
         // const newTitle = `test-${uuidv4()}`;
 
@@ -83,7 +83,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('editable-title-submit-btn');
 
         const error = await find.byCssSelector('.euiFormErrorText');
-        expect(await error.getVisibleText()).equal('The length of the title is too long. The maximum length is 160.');
+        expect(await error.getVisibleText()).equal(
+          'The length of the title is too long. The maximum length is 160.'
+        );
 
         await testSubjects.click('editable-title-cancel-btn');
       });
@@ -134,7 +136,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('edit-category-submit');
 
         const error = await find.byCssSelector('.euiFormErrorText');
-        expect(await error.getVisibleText()).equal('The length of the category is too long. The maximum length is 50.');
+        expect(await error.getVisibleText()).equal(
+          'The length of the category is too long. The maximum length is 50.'
+        );
 
         await testSubjects.click('edit-category-cancel');
       });
@@ -154,7 +158,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows error when tag is more than 256 characters', async () => {
         const longTag = Array(257).fill('a').toString();
-      
+
         await testSubjects.click('tag-list-edit-button');
         await comboBox.clearInputField('comboBoxInput');
 
@@ -164,11 +168,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await browser.pressKeys(browser.keys.ENTER);
 
         const error = await find.byCssSelector('.euiFormErrorText');
-        expect(await error.getVisibleText()).equal('The length of the tag is too long. The maximum length is 256.');
+        expect(await error.getVisibleText()).equal(
+          'The length of the tag is too long. The maximum length is 256.'
+        );
 
         await testSubjects.click('edit-tags-cancel');
       });
-      
+
       it('deletes a tag from a case', async () => {
         await testSubjects.click('tag-list-edit-button');
         // find the tag button and click the close button
@@ -182,12 +188,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('shows error when more than 200 tags are added to the case', async () => {
         const tags = Array(200).fill('foo');
-      
+
         await cases.common.addMultipleTags(tags);
         await testSubjects.click('edit-tags-submit');
 
         const error = await find.byCssSelector('.euiFormErrorText');
-        expect(await error.getVisibleText()).equal('The length of tags array is too long. Array must be of length <= 200.');
+        expect(await error.getVisibleText()).equal(
+          'The length of tags array is too long. Array must be of length <= 200.'
+        );
 
         await testSubjects.click('edit-tags-cancel');
       });
