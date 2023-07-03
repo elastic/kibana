@@ -50,6 +50,34 @@ export const getMockPackageInfoVulnMgmtAWS = () => {
   } as PackageInfo;
 };
 
+export const getMockPackageInfoCspmAWS = () => {
+  return {
+    name: 'cspm',
+    policy_templates: [
+      {
+        title: '',
+        description: '',
+        name: 'cspm',
+        inputs: [
+          {
+            type: CLOUDBEAT_AWS,
+            title: '',
+            description: '',
+            vars: [
+              {
+                type: 'text',
+                name: 'cloud_formation_template',
+                default: 's3_url',
+                show_user: false,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  } as PackageInfo;
+};
+
 const getPolicyMock = (
   type: PostureInput,
   posture: string,
@@ -58,6 +86,16 @@ const getPolicyMock = (
   const mockPackagePolicy = createNewPackagePolicyMock();
 
   const awsVarsMock = {
+    access_key_id: { type: 'text' },
+    secret_access_key: { type: 'text' },
+    session_token: { type: 'text' },
+    shared_credential_file: { type: 'text' },
+    credential_profile_name: { type: 'text' },
+    role_arn: { type: 'text' },
+    'aws.credentials.type': { value: 'cloud_formation', type: 'text' },
+  };
+
+  const eksVarsMock = {
     access_key_id: { type: 'text' },
     secret_access_key: { type: 'text' },
     session_token: { type: 'text' },
@@ -95,7 +133,7 @@ const getPolicyMock = (
         type: CLOUDBEAT_EKS,
         policy_template: 'kspm',
         enabled: type === CLOUDBEAT_EKS,
-        streams: [{ enabled: type === CLOUDBEAT_EKS, data_stream: dataStream, vars: awsVarsMock }],
+        streams: [{ enabled: type === CLOUDBEAT_EKS, data_stream: dataStream, vars: eksVarsMock }],
       },
       {
         type: CLOUDBEAT_AWS,

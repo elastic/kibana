@@ -3695,7 +3695,7 @@ describe('xy_visualization', () => {
               Object {
                 "data-test-subj": "lnsXY_annotationLayer_saveToLibrary",
                 "description": "Saves annotation group as separate saved object",
-                "displayName": "Save annotation group",
+                "displayName": "Save to library",
                 "execute": [Function],
                 "icon": "save",
                 "isCompatible": true,
@@ -3954,6 +3954,54 @@ describe('xy_visualization', () => {
           annotationGroups
         )
       ).not.toThrowError();
+    });
+  });
+
+  describe('#getCustomRemoveLayerText', () => {
+    it('should NOT return custom text for the remove layer button if not by-reference', () => {
+      expect(xyVisualization.getCustomRemoveLayerText!('first', exampleState())).toBeUndefined();
+    });
+
+    it('should return custom text for the remove layer button if by-reference', () => {
+      const layerId = 'layer-id';
+
+      const commonProps = {
+        layerId,
+        layerType: 'annotations' as const,
+        indexPatternId: 'some-index-pattern',
+        ignoreGlobalFilters: false,
+        annotations: [
+          {
+            id: 'some-annotation-id',
+            type: 'manual',
+            key: {
+              type: 'point_in_time',
+              timestamp: 'timestamp',
+            },
+          } as PointInTimeEventAnnotationConfig,
+        ],
+      };
+
+      const layer: XYByReferenceAnnotationLayerConfig = {
+        ...commonProps,
+        annotationGroupId: 'some-group-id',
+        __lastSaved: {
+          ...commonProps,
+          title: 'My saved object title',
+          description: 'some description',
+          tags: [],
+        },
+      };
+      expect(
+        xyVisualization.getCustomRemoveLayerText!(layerId, {
+          ...exampleState(),
+          layers: [layer],
+        })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "title": "Delete \\"My saved object title\\"",
+        }
+      `);
     });
   });
 });

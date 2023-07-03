@@ -320,6 +320,14 @@ export const getXyVisualization = ({
     return actions;
   },
 
+  getCustomRemoveLayerText(layerId, state) {
+    const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
+    const layer = state.layers[layerIndex];
+    if (layer && isByReferenceAnnotationsLayer(layer)) {
+      return { title: `Delete "${layer.__lastSaved.title}"` };
+    }
+  },
+
   hasLayerSettings({ state, layerId: currentLayerId }) {
     const layer = state.layers?.find(({ layerId }) => layerId === currentLayerId);
     return { data: Boolean(layer && isAnnotationsLayer(layer)), appearance: false };
