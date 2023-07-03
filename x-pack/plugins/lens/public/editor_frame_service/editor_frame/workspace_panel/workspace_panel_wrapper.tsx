@@ -16,6 +16,7 @@ import {
   FramePublicAPI,
   UserMessagesGetter,
   VisualizationMap,
+  Visualization,
 } from '../../../types';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { NativeRenderer } from '../../../native_renderer';
@@ -49,6 +50,52 @@ export interface WorkspacePanelWrapperProps {
   getUserMessages: UserMessagesGetter;
 }
 
+export function VisualizationToolbar(props: {
+  activeVisualization: Visualization | null;
+  framePublicAPI: FramePublicAPI;
+  onUpdateStateCb?: (datasourceState: unknown, visualizationState: unknown) => void;
+}) {
+  const dispatchLens = useLensDispatch();
+  const { activeDatasourceId, visualization, datasourceStates } = useLensSelector(
+    (state) => state.lens
+  );
+  const setVisualizationState = useCallback(
+    (newState: unknown) => {
+      if (!props.activeVisualization) {
+        return;
+      }
+      dispatchLens(
+        updateVisualizationState({
+          visualizationId: props.activeVisualization.id,
+          newState,
+        })
+      );
+      if (activeDatasourceId && props.onUpdateStateCb) {
+        const dsState = datasourceStates[activeDatasourceId].state;
+        props.onUpdateStateCb?.(dsState, newState);
+      }
+    },
+    [activeDatasourceId, datasourceStates, dispatchLens, props]
+  );
+
+  return (
+    <>
+      {props.activeVisualization && props.activeVisualization.renderToolbar && (
+        <EuiFlexItem grow={false}>
+          <NativeRenderer
+            render={props.activeVisualization.renderToolbar}
+            nativeProps={{
+              frame: props.framePublicAPI,
+              state: visualization.state,
+              setState: setVisualizationState,
+            }}
+          />
+        </EuiFlexItem>
+      )}
+    </>
+  );
+}
+
 export function WorkspacePanelWrapper({
   children,
   framePublicAPI,
@@ -65,21 +112,6 @@ export function WorkspacePanelWrapper({
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
 
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
-  const setVisualizationState = useCallback(
-    (newState: unknown) => {
-      if (!activeVisualization) {
-        return;
-      }
-      dispatchLens(
-        updateVisualizationState({
-          visualizationId: activeVisualization.id,
-          newState,
-        })
-      );
-    },
-    [dispatchLens, activeVisualization]
-  );
-
   const userMessages = getUserMessages('toolbar');
 
   return (
@@ -116,19 +148,10 @@ export function WorkspacePanelWrapper({
                       framePublicAPI={framePublicAPI}
                     />
                   </EuiFlexItem>
-
-                  {activeVisualization && activeVisualization.renderToolbar && (
-                    <EuiFlexItem grow={false}>
-                      <NativeRenderer
-                        render={activeVisualization.renderToolbar}
-                        nativeProps={{
-                          frame: framePublicAPI,
-                          state: visualizationState,
-                          setState: setVisualizationState,
-                        }}
-                      />
-                    </EuiFlexItem>
-                  )}
+                  <VisualizationToolbar
+                    activeVisualization={activeVisualization}
+                    framePublicAPI={framePublicAPI}
+                  />
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}

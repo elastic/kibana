@@ -27,7 +27,11 @@ export const UpgradePrebuiltRulesTableButtons = () => {
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
       {shouldDisplayUpgradeSelectedRulesButton ? (
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={upgradeSelectedRules} disabled={isRequestInProgress}>
+          <EuiButton
+            onClick={upgradeSelectedRules}
+            disabled={isRequestInProgress}
+            data-test-subj="upgradeSelectedRulesButton"
+          >
             <>
               {i18n.UPDATE_SELECTED_RULES(numberOfSelectedRules)}
               {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
@@ -41,6 +45,7 @@ export const UpgradePrebuiltRulesTableButtons = () => {
           iconType="plusInCircle"
           onClick={upgradeAllRules}
           disabled={!isRulesAvailableForUpgrade || isRequestInProgress}
+          data-test-subj="upgradeAllRulesButton"
         >
           {i18n.UPDATE_ALL}
           {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
