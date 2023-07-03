@@ -99,11 +99,7 @@ describe('#getAll', () => {
     mockCallWithRequestRepository.find.mockResolvedValue({
       saved_objects: savedObjects,
     } as any);
-    const mockConfig = createMockConfig({
-      enabled: true,
-      maxSpaces: 1234,
-      allowFeatureVisibility: true,
-    });
+    const mockConfig = createMockConfig();
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
     const actualSpaces = await client.getAll();
