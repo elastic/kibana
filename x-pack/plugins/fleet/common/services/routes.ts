@@ -286,6 +286,8 @@ export const enrollmentAPIKeyRouteService = {
 
 export const uninstallTokensRouteService = {
   getListPath: () => UNINSTALL_TOKEN_ROUTES.LIST_PATTERN,
+  getInfoPath: (uninstallTokenId: string) =>
+    UNINSTALL_TOKEN_ROUTES.INFO_PATTERN.replace('{uninstallTokenId}', uninstallTokenId),
 };
 
 export const setupRouteService = {

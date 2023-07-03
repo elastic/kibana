@@ -215,6 +215,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud_integrations.gain_sight.org_id (any)',
         'xpack.cloud.id (string)',
         'xpack.cloud.organization_url (string)',
+        'xpack.cloud.billing_url (string)',
         'xpack.cloud.profile_url (string)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',

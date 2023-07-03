@@ -473,6 +473,10 @@ describe('Task Runner', () => {
         // new alert doc
         {
           '@timestamp': DATE_1970,
+          event: {
+            action: 'open',
+            kind: 'signal',
+          },
           kibana: {
             alert: {
               action_group: 'default',
@@ -503,12 +507,18 @@ describe('Task Runner', () => {
               },
               start: DATE_1970,
               status: 'active',
+              time_range: {
+                gte: DATE_1970,
+              },
               uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+              workflow_status: 'open',
             },
             space_ids: ['default'],
+            version: '8.8.0',
           },
           numericField: 27,
           textField: 'foo',
+          tags: ['rule-', '-tags'],
         },
       ],
     });

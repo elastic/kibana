@@ -198,7 +198,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
-              <h2 id="flyoutTitle">
+              <h2 id="flyoutTitle" data-test-subj="mlJobSelectorFlyoutTitle">
                 <FormattedMessage
                   id="xpack.aiops.categorizeFlyout.title"
                   defaultMessage="Pattern analysis of {name}"
@@ -216,7 +216,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj={'mlJobSelectorFlyoutBody'}>
+      <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody">
         {loading === true ? <LoadingCategorization onClose={onClose} /> : null}
 
         <InformationText

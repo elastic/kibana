@@ -8,7 +8,6 @@ import React from 'react';
 
 import {
   Section,
-  ProductId,
   SectionId,
   GetMoreFromElasticSecurityCardId,
   GetSetUpCardId,
@@ -17,12 +16,7 @@ import {
 import * as i18n from './translations';
 import respond from './images/respond.svg';
 import protect from './images/protect.svg';
-
-export const ActiveConditions = {
-  analyticsToggled: [ProductId.analytics],
-  cloudToggled: [ProductId.cloud],
-  endpointToggled: [ProductId.endpoint],
-};
+import { ProductLine } from '../../../common/config';
 
 export const introductionSteps = [
   {
@@ -85,11 +79,8 @@ export const sections: Section[] = [
       {
         icon: { type: protect, size: 'xl' },
         title: i18n.PROTECT_YOUR_ENVIRONMENT_TITLE,
-        id: GetSetUpCardId.protectYourEnvironmentInRuntime,
-        productTypeRequired: [
-          ...ActiveConditions.cloudToggled,
-          ...ActiveConditions.endpointToggled,
-        ],
+        id: GetSetUpCardId.protectYourEnvironmentInRealtime,
+        productLineRequired: [ProductLine.cloud, ProductLine.endpoint],
       },
     ],
   },

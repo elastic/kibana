@@ -781,6 +781,49 @@ describe('TableListView', () => {
     });
   });
 
+  describe('initialFilter', () => {
+    const setupInitialFilter = registerTestBed<string, TableListViewTableProps>(
+      WithServices<TableListViewTableProps>(TableListViewTable, {
+        getTagList: () => [
+          { id: 'id-tag-foo', name: 'foo', type: 'tag', description: '', color: '' },
+        ],
+      }),
+      {
+        defaultProps: { ...requiredProps },
+        memoryRouter: { wrapComponent: true },
+      }
+    );
+
+    test('should filter by tag passed as in initialFilter prop', async () => {
+      let testBed: TestBed;
+
+      const initialFilter = 'tag:(tag-1)';
+      const findItems = jest.fn().mockResolvedValue({ total: 0, hits: [] });
+
+      await act(async () => {
+        testBed = await setupInitialFilter({
+          findItems,
+          initialFilter,
+          urlStateEnabled: false,
+        });
+      });
+
+      const { component, find } = testBed!;
+      component.update();
+
+      const getSearchBoxValue = () => find('tableListSearchBox').props().defaultValue;
+
+      const getLastCallArgsFromFindItems = () =>
+        findItems.mock.calls[findItems.mock.calls.length - 1];
+
+      // The search bar should be updated
+      const expected = initialFilter;
+      const [searchTerm] = getLastCallArgsFromFindItems();
+      expect(getSearchBoxValue()).toBe(expected);
+      expect(searchTerm).toBe(expected);
+    });
+  });
+
   describe('url state', () => {
     let router: Router | undefined;
 
@@ -1197,10 +1240,23 @@ describe('TableList', () => {
     }
   );
 
-  it('refreshes the list when the bouncer changes', async () => {
+  it('refreshes the list when "refreshListBouncer" changes', async () => {
     let testBed: TestBed;
 
-    const findItems = jest.fn().mockResolvedValue({ total: 0, hits: [] });
+    const originalHits: UserContentCommonSchema[] = [
+      {
+        id: `item`,
+        type: 'dashboard',
+        updatedAt: 'original timestamp',
+        attributes: {
+          title: `Original title`,
+        },
+        references: [],
+      },
+    ];
+    const findItems = jest
+      .fn()
+      .mockResolvedValue({ total: originalHits.length, hits: originalHits });
 
     await act(async () => {
       testBed = setup({ findItems });
@@ -1215,7 +1271,7 @@ describe('TableList', () => {
       {
         id: `item`,
         type: 'dashboard',
-        updatedAt: 'some date',
+        updatedAt: 'updated timestamp',
         attributes: {
           title: `Updated title`,
         },
@@ -1252,7 +1308,7 @@ describe('TableList', () => {
   it('reports the page data test subject', async () => {
     const setPageDataTestSubject = jest.fn();
 
-    act(() => {
+    await act(async () => {
       setup({ setPageDataTestSubject });
     });
 
