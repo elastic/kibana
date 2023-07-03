@@ -371,8 +371,6 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('add discover custom url for the analytics job');
           await ml.dataFrameAnalyticsEdit.addDiscoverCustomUrl(testDiscoverCustomUrl);
-
-          await ml.dataFrameAnalyticsEdit.updateAnalyticsJob();
         });
 
         it('adds dashboard custom url to the analytics job', async () => {
@@ -385,8 +383,6 @@ export default function ({ getService }: FtrProviderContext) {
             index: 1,
             url: `dashboards#/view/${testDashboardId}?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'SaleType:\"$SaleType$\"'))`,
           });
-
-          await ml.dataFrameAnalyticsEdit.updateAnalyticsJob();
         });
 
         it('adds other custom url type to the analytics job', async () => {
@@ -396,8 +392,6 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('add other type custom url for the analytics job');
           await ml.dataFrameAnalyticsEdit.addOtherTypeCustomUrl(testOtherCustomUrl);
-
-          await ml.dataFrameAnalyticsEdit.updateAnalyticsJob();
         });
 
         it('edits the analytics job and displays it correctly in the job list', async () => {

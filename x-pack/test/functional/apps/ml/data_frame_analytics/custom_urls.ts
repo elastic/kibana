@@ -103,7 +103,6 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.dataFrameAnalyticsTable.openEditFlyout(dfaJobId);
         await ml.dataFrameAnalyticsEdit.openEditCustomUrlsForJobTab(dfaJobId);
         await ml.dataFrameAnalyticsEdit.addDiscoverCustomUrl(testDiscoverCustomUrl);
-        await ml.dataFrameAnalyticsEdit.updateAnalyticsJob();
       });
 
       it('adds a custom URL to Dashboard in the edit job flyout', async () => {
@@ -113,14 +112,12 @@ export default function ({ getService }: FtrProviderContext) {
           index: 1,
           url: `dashboards#/view/${testDashboardId}?_g=(filters:!(),time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:'airline:\"$airline$\"'))`,
         });
-        await ml.dataFrameAnalyticsEdit.updateAnalyticsJob();
       });
 
       it('adds a custom URL to an external page in the edit job flyout', async () => {
         await ml.dataFrameAnalyticsTable.openEditFlyout(dfaJobId);
         await ml.dataFrameAnalyticsEdit.openEditCustomUrlsForJobTab(dfaJobId);
         await ml.dataFrameAnalyticsEdit.addOtherTypeCustomUrl(testOtherCustomUrl);
-        await ml.dataFrameAnalyticsEdit.updateAnalyticsJob();
       });
 
       it('tests other type custom URL', async () => {

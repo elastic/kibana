@@ -146,6 +146,7 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
         await this.fillInDashboardUrlForm(customUrl);
       });
       await this.saveCustomUrl(customUrl.label, expectedResult.index, expectedResult.url);
+      await this.updateAnalyticsJob();
     },
 
     async addDiscoverCustomUrl(customUrl: DiscoverUrlConfig) {
@@ -155,6 +156,8 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
         await this.fillInDiscoverUrlForm(customUrl);
         await this.saveCustomUrl(customUrl.label, existingCustomUrlCount);
       });
+
+      await this.updateAnalyticsJob();
     },
 
     async addOtherTypeCustomUrl(customUrl: OtherUrlConfig) {
@@ -164,6 +167,8 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
         await this.fillInOtherUrlForm(customUrl);
         await this.saveCustomUrl(customUrl.label, existingCustomUrlCount);
       });
+
+      await this.updateAnalyticsJob();
     },
 
     async testOtherTypeCustomUrlAction(indexInList: number, expectedUrl: string) {
@@ -203,7 +208,7 @@ export function MachineLearningDataFrameAnalyticsEditProvider(
     async closeEditJobFlyout() {
       if (await testSubjects.exists('mlAnalyticsEditFlyoutCancelButton')) {
         await testSubjects.click('mlAnalyticsEditFlyoutCancelButton');
-        await testSubjects.missingOrFail('mlAnalyticsEditFlyout');
+        await this.assertAnalyticsEditFlyoutMissing();
       }
     },
 
