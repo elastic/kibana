@@ -20,13 +20,16 @@ import {
   UNITS,
   frequencyToFieldsMap,
   frequencyToBaselineFieldsMap,
+  EVERY_MINUTE_OPTIONS,
 } from './constants';
 import { CronDaily } from './cron_daily';
 import { CronHourly } from './cron_hourly';
+import { CronMinutely } from './cron_minutely';
 import { CronMonthly } from './cron_monthly';
 import { CronWeekly } from './cron_weekly';
 import { CronYearly } from './cron_yearly';
 import { cronExpressionToParts, cronPartsToExpression } from './services';
+import { convertFromEveryXMinute, convertToEveryXMinute } from './services/cron';
 import { Frequency, Field, FieldToValueMap } from './types';
 
 const excludeBlockListedFrequencies = (
@@ -41,10 +44,12 @@ const excludeBlockListedFrequencies = (
 };
 
 interface Props {
-  frequencyBlockList?: string[];
+  autoFocus?: boolean;
+  cronExpression: string;
+  disabled?: boolean;
   fieldToPreferredValueMap: FieldToValueMap;
   frequency: Frequency;
-  cronExpression: string;
+  frequencyBlockList?: string[];
   onChange: ({
     cronExpression,
     fieldToPreferredValueMap,
@@ -54,8 +59,6 @@ interface Props {
     fieldToPreferredValueMap: FieldToValueMap;
     frequency: Frequency;
   }) => void;
-  autoFocus?: boolean;
-  disabled?: boolean;
 }
 
 type State = FieldToValueMap;
@@ -77,14 +80,20 @@ export class CronEditor extends Component<Props, State> {
   }
 
   onChangeFrequency = (frequency: Frequency) => {
-    const { onChange, fieldToPreferredValueMap } = this.props;
+    const { onChange, fieldToPreferredValueMap, frequency: oldFrequency } = this.props;
 
     // Update fields which aren't editable with acceptable baseline values.
     const editableFields = Object.keys(frequencyToFieldsMap[frequency]) as Field[];
     const inheritedFields = editableFields.reduce<FieldToValueMap>(
       (fieldBaselines, field) => {
         if (fieldToPreferredValueMap[field] != null) {
-          fieldBaselines[field] = fieldToPreferredValueMap[field];
+          if (oldFrequency === 'MINUTE') {
+            fieldBaselines[field] = convertFromEveryXMinute(fieldToPreferredValueMap[field]);
+          } else if (frequency === 'MINUTE') {
+            fieldBaselines[field] = convertToEveryXMinute(fieldToPreferredValueMap[field]);
+          } else {
+            fieldBaselines[field] = fieldToPreferredValueMap[field];
+          }
         }
         return fieldBaselines;
       },
@@ -143,7 +152,14 @@ export class CronEditor extends Component<Props, State> {
 
     switch (frequency) {
       case 'MINUTE':
-        return;
+        return (
+          <CronMinutely
+            disabled={disabled}
+            minute={minute}
+            minuteOptions={EVERY_MINUTE_OPTIONS}
+            onChange={this.onChangeFields}
+          />
+        );
 
       case 'HOUR':
         return (
