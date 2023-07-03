@@ -6,32 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-
-interface Detector {
-  identifier: string;
-  function: string;
-  field?: string;
-  byField?: string;
-  overField?: string;
-  partitionField?: string;
-  excludeFrequent?: string;
-  description?: string;
-}
-
-interface DatafeedConfig {
-  queryDelay?: string;
-  frequency?: string;
-  scrollSize?: string;
-}
-
-interface PickFieldsConfig {
-  detectors: Detector[];
-  influencers: string[];
-  bucketSpan: string;
-  memoryLimit: string;
-  categorizationField?: string;
-  summaryCountField?: string;
-}
+import type { PickFieldsConfig, DatafeedConfig, Detector } from './types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
