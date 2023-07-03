@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
+import { filterSuggestions } from '../lib/filter_suggestions_for_autocomplete';
 
 interface Props {
   messageVariables?: ActionVariable[];
@@ -30,28 +31,6 @@ interface Props {
   label: string;
   errors?: string[];
 }
-
-const filterSuggestions = ({
-  actionVariablesList,
-  propertyPath,
-}: {
-  actionVariablesList?: ActionVariable[];
-  propertyPath: string;
-}) => {
-  if (!actionVariablesList) return [];
-  const initialSuggestions = actionVariablesList.map(({ name }) => name);
-  const allSuggestions: string[] = [];
-  initialSuggestions.forEach((suggestion: string) => {
-    const splittedWords = suggestion.split('.');
-    for (let i = 0; i < splittedWords.length; i++) {
-      const currentSuggestion = splittedWords.slice(0, i + 1).join('.');
-      if (!allSuggestions.includes(currentSuggestion)) {
-        allSuggestions.push(currentSuggestion);
-      }
-    }
-  });
-  return allSuggestions.sort().filter((suggestion) => suggestion.startsWith(propertyPath));
-};
 
 export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   editAction,
@@ -140,7 +119,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
       .trim();
     if (currentWord.startsWith('{{')) {
       const filteredMatches = filterSuggestions({
-        actionVariablesList: messageVariables,
+        actionVariablesList: messageVariables?.map(({ name }) => name),
         propertyPath: currentWord.slice(2),
       });
       setSearchWord(currentWord.slice(2));
