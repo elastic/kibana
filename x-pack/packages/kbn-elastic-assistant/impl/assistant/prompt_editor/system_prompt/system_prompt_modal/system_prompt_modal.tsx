@@ -69,29 +69,29 @@ export const SystemPromptModal: React.FC<Props> = React.memo(
     const [selectedConversations, setSelectedConversations] = useState<Conversation[]>([]);
 
     const onConversationSelectionChange = useCallback(
-      (newConversations: Conversation[]) => {
-        let conversationsToBeProcessed = newConversations;
-        if (newConversations.length === 0) {
-          // then selected prompt if associated with a
-          // conversation must be removed.
-          conversationsToBeProcessed = Object.values(conversations).map((convo) => ({
-            ...convo,
-            apiConfig: {
-              defaultSystemPrompt:
-                convo.apiConfig.defaultSystemPrompt === selectedSystemPrompt?.id
-                  ? undefined
-                  : convo.apiConfig.defaultSystemPrompt,
-            },
-          }));
-        } else {
-          conversationsToBeProcessed = newConversations.map((convo) => ({
-            ...convo,
-            apiConfig: {
-              defaultSystemPrompt: selectedSystemPrompt?.id,
-            },
-          }));
-        }
-        setSelectedConversations(conversationsToBeProcessed);
+      (currentPromptConversations: Conversation[]) => {
+        // currentPromptConversations is the list of all conversation for which the selected
+        // prompt is applicable. So we need to remove any conversation for which prompt
+        // was already existing but does not exists as of now.
+
+        const currentPromptConversationIds = currentPromptConversations.map((convo) => convo.id);
+
+        const allConversations = Object.values(conversations).map((convo) => ({
+          ...convo,
+          apiConfig: {
+            defaultSystemPrompt: currentPromptConversationIds.includes(convo.id)
+              ? selectedSystemPrompt?.id
+              : convo.apiConfig.defaultSystemPrompt === selectedSystemPrompt?.id
+              ? // remove the the default System Prompt if it is assigned to a conversation
+                // but that conversation is not in the currentPromptConversationList
+                // This means conversation was removed in the current transaction
+                undefined
+              : //  leave it as it is .. if that conversation was neither added nor removed.
+                convo.apiConfig.defaultSystemPrompt,
+          },
+        }));
+
+        setSelectedConversations(allConversations);
       },
       [selectedSystemPrompt, conversations]
     );

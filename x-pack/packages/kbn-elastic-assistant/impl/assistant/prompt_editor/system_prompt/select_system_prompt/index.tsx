@@ -56,6 +56,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
 }) => {
   const { allSystemPrompts, setAllSystemPrompts, conversations, setConversations } =
     useAssistantContext();
+
   const { setApiConfig } = useConversation();
 
   const [isOpenLocal, setIsOpenLocal] = useState<boolean>(isOpen);

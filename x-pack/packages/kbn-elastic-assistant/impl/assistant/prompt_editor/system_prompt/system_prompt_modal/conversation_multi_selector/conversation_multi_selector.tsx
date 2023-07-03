@@ -13,7 +13,7 @@ import { Conversation } from '../../../../../..';
 import * as i18n from '../translations';
 
 interface Props {
-  onConversationSelectionChange: (conversations: Conversation[]) => void;
+  onConversationSelectionChange: (currentPromptConversations: Conversation[]) => void;
   conversations: Conversation[];
   selectedConversations?: Conversation[];
 }

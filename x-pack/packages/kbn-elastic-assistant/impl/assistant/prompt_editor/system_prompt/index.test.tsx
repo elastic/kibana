@@ -16,6 +16,7 @@ import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations'
 import { Prompt } from '../../types';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { TEST_IDS } from '../../constants';
+import { useAssistantContext } from '../../../assistant_context';
 
 const BASE_CONVERSATION: Conversation = {
   ...BASE_CONVERSATIONS[DEFAULT_CONVERSATION_TITLE],
@@ -39,10 +40,9 @@ const mockUseAssistantContext = {
 
 jest.mock('../../../assistant_context', () => {
   const original = jest.requireActual('../../../assistant_context');
-
   return {
     ...original,
-    useAssistantContext: () => mockUseAssistantContext,
+    useAssistantContext: jest.fn().mockImplementation(() => mockUseAssistantContext),
   };
 });
 
@@ -301,6 +301,82 @@ describe('SystemPrompt', () => {
       expect(mockUseAssistantContext.setAllSystemPrompts).toHaveBeenCalledTimes(1);
       expect(mockUseAssistantContext.setConversations).toHaveBeenCalledTimes(1);
       expect(mockUseAssistantContext.setConversations).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          [DEFAULT_CONVERSATION_TITLE]: expect.objectContaining({
+            id: DEFAULT_CONVERSATION_TITLE,
+            apiConfig: expect.objectContaining({
+              defaultSystemPrompt: undefined,
+            }),
+          }),
+        })
+      );
+    });
+    it('should save new prompt correctly when prompt is removed from a conversation and linked to another conversation in a single transaction', async () => {
+      const secondMockConversation: Conversation = {
+        id: 'second',
+        apiConfig: {},
+        messages: [],
+      };
+      const localMockConversations: Record<string, Conversation> = {
+        [DEFAULT_CONVERSATION_TITLE]: BASE_CONVERSATION,
+        [secondMockConversation.id]: secondMockConversation,
+      };
+
+      const localMockUseAssistantContext = {
+        conversations: localMockConversations,
+        setConversations: jest.fn(),
+        setAllSystemPrompts: jest.fn(),
+        allSystemPrompts: mockSystemPrompts,
+      };
+
+      (useAssistantContext as jest.Mock).mockReturnValue(localMockUseAssistantContext);
+
+      render(
+        <TestProviders>
+          <SystemPrompt conversation={BASE_CONVERSATION} />
+        </TestProviders>
+      );
+      userEvent.click(screen.getByTestId('edit'));
+      userEvent.click(screen.getByTestId(TEST_IDS.ADD_SYSTEM_PROMPT));
+
+      expect(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeVisible();
+
+      userEvent.type(
+        within(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_SELECTOR)).getByTestId('comboBoxInput'),
+        `${mockSystemPrompt.name}[Enter]`
+      );
+
+      expect(
+        within(screen.getByTestId(TEST_IDS.CONVERSATIONS_MULTISELECTOR)).getByText(
+          DEFAULT_CONVERSATION_TITLE
+        )
+      ).toBeVisible();
+
+      // removed selected conversation
+      userEvent.click(
+        within(screen.getByTestId(TEST_IDS.CONVERSATIONS_MULTISELECTOR)).getByTestId(
+          'comboBoxClearButton'
+        )
+      );
+
+      // add `second` conversation
+      userEvent.type(
+        within(screen.getByTestId(TEST_IDS.CONVERSATIONS_MULTISELECTOR)).getByTestId(
+          'comboBoxInput'
+        ),
+        'second[Enter]'
+      );
+
+      userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeFalsy();
+      });
+
+      expect(localMockUseAssistantContext.setAllSystemPrompts).toHaveBeenCalledTimes(1);
+      expect(localMockUseAssistantContext.setConversations).toHaveBeenCalledTimes(1);
+      expect(localMockUseAssistantContext.setConversations).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
           [DEFAULT_CONVERSATION_TITLE]: expect.objectContaining({
