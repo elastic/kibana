@@ -5,21 +5,15 @@
  * 2.0.
  */
 import React from 'react';
-import type { Query, AggregateQuery } from '@kbn/es-query';
-import { isOfQueryType } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import { EuiErrorBoundary } from '@elastic/eui';
 
 const Bee = React.lazy(() => import('./bee'));
 
 const ELK_BEE_REGEX = /^What\'s (an|(\d+)) elk bees?\?$/;
 
-function Bees({ query }: { query?: Query | AggregateQuery }) {
-  if (
-    !query ||
-    !isOfQueryType(query) ||
-    typeof query !== 'object' ||
-    typeof query.query !== 'string'
-  ) {
+function Bees({ query }: { query?: Query }) {
+  if (!query || typeof query !== 'object' || typeof query.query !== 'string') {
     return null;
   }
   const match = ELK_BEE_REGEX.exec(query.query);
@@ -40,7 +34,7 @@ function Bees({ query }: { query?: Query | AggregateQuery }) {
   );
 }
 
-export function Easteregg(props: { query?: Query | AggregateQuery }) {
+export function Easteregg(props: { query?: Query }) {
   return (
     // Do not break Lens for an easteregg
     <EuiErrorBoundary style={{ display: 'none' }}>

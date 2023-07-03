@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { Filter, Query } from '@kbn/es-query';
 import { SavedObjectReference } from '@kbn/core/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { ContentClient } from '@kbn/content-management-plugin/public';
@@ -32,7 +32,7 @@ export interface Document {
   state: {
     datasourceStates: Record<string, unknown>;
     visualization: unknown;
-    query: Query | AggregateQuery;
+    query: Query;
     globalPalette?: {
       activePaletteId: string;
       state?: unknown;

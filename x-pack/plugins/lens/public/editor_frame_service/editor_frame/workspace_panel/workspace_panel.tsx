@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useEffect, useMemo, useContext, useCallback, useRef } from 'react';
-import { Query } from '@kbn/es-query';
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -688,7 +687,7 @@ export const VisualizationWrapper = ({
     useReportingState(errors);
   const searchContext: ExecutionContextSearch = useMemo(
     () => ({
-      query: context.query as Query,
+      query: context.query,
       timeRange: {
         from: context.dateRange.fromDate,
         to: context.dateRange.toDate,

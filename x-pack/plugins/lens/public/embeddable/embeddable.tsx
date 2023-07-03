@@ -1152,7 +1152,7 @@ export class Embeddable
               mode: 'absolute' as 'absolute',
             }
           : input.timeRange,
-      query: [this.savedVis.state.query as Query],
+      query: [this.savedVis.state.query],
       filters: this.deps.injectFilterReferences(
         this.savedVis.state.filters,
         this.savedVis.references

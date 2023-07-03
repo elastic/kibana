@@ -7,7 +7,6 @@
 
 import {
   Query,
-  AggregateQuery,
   Filter,
   DataViewBase,
   buildCustomFilter,
@@ -204,7 +203,7 @@ type QueryLanguage = 'lucene' | 'kuery';
  * extra filter pill.
  */
 export function combineQueryAndFilters(
-  query: Query | Query[] | AggregateQuery | undefined,
+  query: Query | Query[] | undefined,
   filters: Filter[],
   meta: LayerMetaInfo,
   dataViews: DataViewBase[] | undefined,

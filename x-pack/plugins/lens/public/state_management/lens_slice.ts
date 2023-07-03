@@ -11,6 +11,7 @@ import { mapValues, uniq } from 'lodash';
 import { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
+import { Query } from '@kbn/es-query';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
@@ -91,19 +92,20 @@ export const getPreloadedState = ({
       datasourceStates,
     };
   }
+  const query = !initialContext
+    ? data.query.queryString.getDefaultQuery()
+    : 'searchQuery' in initialContext && initialContext.searchQuery
+    ? initialContext.searchQuery
+    : 'query' in initialContext
+    ? initialContext.query
+    : data.query.queryString.getQuery();
 
   const state = {
     ...initialState,
     isLoading: true,
     // Do not use app-specific filters from previous app,
     // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
-    query: !initialContext
-      ? data.query.queryString.getDefaultQuery()
-      : 'searchQuery' in initialContext && initialContext.searchQuery
-      ? initialContext.searchQuery
-      : 'query' in initialContext
-      ? initialContext.query
-      : data.query.queryString.getQuery(),
+    queru: query as Query,
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
       : 'searchFilters' in initialContext && initialContext.searchFilters
