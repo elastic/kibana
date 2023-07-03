@@ -112,6 +112,7 @@ export async function fileIdsWithoutChunksByIndex(
           },
           _source: ['bid'],
         },
+        ignore_unavailable: true,
       },
       { signal: abortController.signal }
     )
