@@ -157,9 +157,9 @@ export const ACTIVATE_AND_CREATE_RULES_TITLE = i18n.translate(
 );
 
 export const PROTECT_YOUR_ENVIRONMENT_TITLE = i18n.translate(
-  'xpack.serverlessSecurity.getStarted.togglePanel.protectYourEnvironmentInRuntime.title',
+  'xpack.serverlessSecurity.getStarted.togglePanel.protectYourEnvironmentInRealtime.title',
   {
-    defaultMessage: 'Protect your environment in runtime',
+    defaultMessage: 'Protect your environment in realtime',
   }
 );
 
