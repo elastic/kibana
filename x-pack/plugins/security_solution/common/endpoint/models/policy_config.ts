@@ -11,10 +11,13 @@ import { ProtectionModes } from '../types';
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
  */
-export const policyFactory = (license = '', cloud = false): PolicyConfig => {
+export const policyFactory = (license = '', license_uid = '', cluster_uuid = '', cluster_name = '', cloud = false): PolicyConfig => {
   return {
     meta: {
       license,
+      license_uid,
+      cluster_uuid,
+      cluster_name,
       cloud,
     },
     windows: {

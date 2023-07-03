@@ -934,6 +934,9 @@ export interface PolicyConfig {
   meta: {
     license: string;
     cloud: boolean;
+    license_uid: string;
+    cluster_uuid: string;
+    cluster_name: string;
   };
   windows: {
     advanced?: {

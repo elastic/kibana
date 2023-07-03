@@ -523,6 +523,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         this.endpointContext
       ),
       createFleetActionsClient,
+      esClient: core.elasticsearch.client.asInternalUser,
     });
 
     this.telemetryReceiver.start(
