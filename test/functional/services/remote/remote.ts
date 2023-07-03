@@ -37,6 +37,8 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
       if (err instanceof NoSuchSessionError) {
         // https://developer.mozilla.org/en-US/docs/Web/WebDriver/Errors/InvalidSessionID
         log.error('WebDriver session is no longer valid');
+      } else {
+        log.error(err);
       }
     }
   };

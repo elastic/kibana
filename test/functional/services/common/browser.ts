@@ -634,7 +634,9 @@ class BrowserService extends FtrService {
   }
 
   public async getClipboardValue(): Promise<string> {
-    return this.driver.executeAsyncScript('navigator.clipboard.readText().then(arguments[0])');
+    return await this.driver.executeAsyncScript(
+      'navigator.clipboard.readText().then(arguments[0])'
+    );
   }
 
   /**
@@ -643,7 +645,7 @@ class BrowserService extends FtrService {
    */
   public async hasOpenWindow(): Promise<boolean> {
     if (this.driver == null) {
-      return Promise.resolve(false);
+      return false;
     } else {
       try {
         const windowHandles = await this.driver.getAllWindowHandles();
