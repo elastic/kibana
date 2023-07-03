@@ -59,7 +59,17 @@ jest.mock('../../use_conversation', () => {
 });
 
 describe('SystemPrompt', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    jest.mock('../../../assistant_context', () => {
+      const original = jest.requireActual('../../../assistant_context');
+      return {
+        ...original,
+        useAssistantContext: jest.fn().mockImplementation(() => mockUseAssistantContext),
+      };
+    });
+  });
 
   describe('when conversation is undefined', () => {
     const conversation = undefined;
@@ -315,7 +325,9 @@ describe('SystemPrompt', () => {
     it('should save new prompt correctly when prompt is removed from a conversation and linked to another conversation in a single transaction', async () => {
       const secondMockConversation: Conversation = {
         id: 'second',
-        apiConfig: {},
+        apiConfig: {
+          defaultSystemPrompt: undefined,
+        },
         messages: [],
       };
       const localMockConversations: Record<string, Conversation> = {
@@ -328,9 +340,12 @@ describe('SystemPrompt', () => {
         setConversations: jest.fn(),
         setAllSystemPrompts: jest.fn(),
         allSystemPrompts: mockSystemPrompts,
+        hero: 'abc',
       };
 
-      (useAssistantContext as jest.Mock).mockReturnValue(localMockUseAssistantContext);
+      (useAssistantContext as jest.Mock).mockImplementation(() => ({
+        ...localMockUseAssistantContext,
+      }));
 
       render(
         <TestProviders>
@@ -376,17 +391,20 @@ describe('SystemPrompt', () => {
 
       expect(localMockUseAssistantContext.setAllSystemPrompts).toHaveBeenCalledTimes(1);
       expect(localMockUseAssistantContext.setConversations).toHaveBeenCalledTimes(1);
-      expect(localMockUseAssistantContext.setConversations).toHaveBeenNthCalledWith(
-        1,
-        expect.objectContaining({
-          [DEFAULT_CONVERSATION_TITLE]: expect.objectContaining({
-            id: DEFAULT_CONVERSATION_TITLE,
-            apiConfig: expect.objectContaining({
-              defaultSystemPrompt: undefined,
-            }),
+      expect(localMockUseAssistantContext.setConversations).toHaveBeenNthCalledWith(1, {
+        [DEFAULT_CONVERSATION_TITLE]: expect.objectContaining({
+          id: DEFAULT_CONVERSATION_TITLE,
+          apiConfig: expect.objectContaining({
+            defaultSystemPrompt: undefined,
           }),
-        })
-      );
+        }),
+        [secondMockConversation.id]: {
+          ...secondMockConversation,
+          apiConfig: {
+            defaultSystemPrompt: mockSystemPrompt.id,
+          },
+        },
+      });
     });
   });
 
