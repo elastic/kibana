@@ -245,7 +245,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('#Single host Flyout', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/159368
+    // FLAKY: https://github.com/elastic/kibana/issues/159369
+    describe.skip('#Single host Flyout', () => {
       before(async () => {
         await setHostViewEnabled(true);
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
@@ -408,6 +410,34 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               .getHostsRowData(row)
               .then((hostRowData) => expect(hostRowData).to.eql(tableEntries[position]));
           });
+        });
+
+        it('should select and filter hosts inside the table', async () => {
+          const selectHostsButtonExistsOnLoad =
+            await pageObjects.infraHostsView.selectedHostsButtonExist();
+          expect(selectHostsButtonExistsOnLoad).to.be(false);
+
+          await pageObjects.infraHostsView.clickHostCheckbox('demo-stack-client-01', '-');
+          await pageObjects.infraHostsView.clickHostCheckbox('demo-stack-apache-01', '-');
+
+          const selectHostsButtonExistsOnSelection =
+            await pageObjects.infraHostsView.selectedHostsButtonExist();
+          expect(selectHostsButtonExistsOnSelection).to.be(true);
+
+          await pageObjects.infraHostsView.clickSelectedHostsButton();
+          await pageObjects.infraHostsView.clickSelectedHostsAddFilterButton();
+
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          const hostRowsAfterFilter = await pageObjects.infraHostsView.getHostsTableData();
+          expect(hostRowsAfterFilter.length).to.equal(2);
+
+          const deleteFilterButton = await find.byCssSelector(
+            `[title="Delete host.name: demo-stack-client-01 OR host.name: demo-stack-apache-01"]`
+          );
+          await deleteFilterButton.click();
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          const hostRowsAfterRemovingFilter = await pageObjects.infraHostsView.getHostsTableData();
+          expect(hostRowsAfterRemovingFilter.length).to.equal(6);
         });
       });
 

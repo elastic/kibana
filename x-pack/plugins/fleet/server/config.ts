@@ -41,6 +41,7 @@ export const config: PluginConfigDescriptor = {
     },
     internal: {
       fleetServerStandalone: true,
+      disableProxies: true,
     },
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
@@ -167,6 +168,9 @@ export const config: PluginConfigDescriptor = {
     internal: schema.maybe(
       schema.object({
         disableILMPolicies: schema.boolean({
+          defaultValue: false,
+        }),
+        disableProxies: schema.boolean({
           defaultValue: false,
         }),
         fleetServerStandalone: schema.boolean({

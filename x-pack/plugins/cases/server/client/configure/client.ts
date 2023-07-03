@@ -14,24 +14,22 @@ import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type {
-  Configurations,
+  Configuration,
   ConfigurationAttributes,
+  Configurations,
+} from '../../../common/types/domain';
+import type {
   ConfigurationPatchRequest,
   ConfigurationRequest,
-  Configuration,
-  ConnectorMappings,
   GetConfigurationFindRequest,
-  ConnectorMappingResponse,
-} from '../../../common/api';
+} from '../../../common/types/api';
 import {
-  ConfigurationsRt,
   ConfigurationPatchRequestRt,
-  GetConfigurationFindRequestRt,
-  ConfigurationRt,
-  FindActionConnectorResponseRt,
-  decodeWithExcessOrThrow,
   ConfigurationRequestRt,
-} from '../../../common/api';
+  GetConfigurationFindRequestRt,
+} from '../../../common/types/api';
+import type { ConnectorMappings, ConnectorMappingResponse } from '../../../common/api';
+import { FindActionConnectorResponseRt, decodeWithExcessOrThrow } from '../../../common/api';
 import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
 import type { CasesClientInternal } from '../client_internal';
@@ -43,12 +41,8 @@ import { combineAuthorizedAndOwnerFilter } from '../utils';
 import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
-import type {
-  ICasesConfigurePatch,
-  ICasesConfigureRequest,
-  ICasesConfigureResponse,
-} from '../typedoc_interfaces';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
 
 /**
  * Defines the internal helper functions.
@@ -68,7 +62,7 @@ export interface ConfigureSubClient {
   /**
    * Retrieves the external connector configuration for a particular case owner.
    */
-  get(params: GetConfigurationFindRequest): Promise<ICasesConfigureResponse | {}>;
+  get(params: GetConfigurationFindRequest): Promise<Configurations>;
   /**
    * Retrieves the valid external connectors supported by the cases plugin.
    */
@@ -82,13 +76,13 @@ export interface ConfigureSubClient {
    */
   update(
     configurationId: string,
-    configurations: ICasesConfigurePatch
-  ): Promise<ICasesConfigureResponse>;
+    configurations: ConfigurationPatchRequest
+  ): Promise<Configuration>;
 
   /**
    * Creates a configuration if one does not already exist. If one exists it is deleted and a new one is created.
    */
-  create(configuration: ICasesConfigureRequest): Promise<ICasesConfigureResponse>;
+  create(configuration: ConfigurationRequest): Promise<Configuration>;
 }
 
 /**
