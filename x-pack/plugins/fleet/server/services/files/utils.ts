@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  getFileDataIndexName,
-  getFileMetadataIndexName,
-  getIntegrationNameFromIndexName,
-} from '../../../common/services';
+import { getFileDataIndexName, getFileMetadataIndexName } from '../../../common/services';
 
 import {
   FILE_STORAGE_DATA_INDEX_PATTERN,
@@ -27,7 +23,7 @@ interface ParsedFileStorageIndex {
 
 /**
  * Given a document index (from either a file's metadata doc or a file's chunk doc), utility will
- * parse it and return back the Index (alias) for it and the name of the integration that owns it
+ * parse it and return information about that index
  * @param index
  */
 export const parseFileStorageIndex = (index: string): ParsedFileStorageIndex => {
@@ -52,10 +48,19 @@ export const parseFileStorageIndex = (index: string): ParsedFileStorageIndex => 
     if (index.includes(indexPrefix)) {
       const isDeliveryToHost = index.includes('-tohost-');
       const isDataIndex = index.includes('host-data-');
+      const integrationPosition = indexPattern.split('-').indexOf('*');
+      const integration = index
+        .replace(/^\.ds-/, '')
+        .split('-')
+        .at(integrationPosition);
+
+      if (!integration) {
+        throw new Error(`Index name ${index} does not seem to be a File storage index`);
+      }
 
       response.direction = isDeliveryToHost ? 'to-host' : 'from-host';
       response.type = isDataIndex ? 'data' : 'meta';
-      response.integration = getIntegrationNameFromIndexName(index, indexPattern);
+      response.integration = integration;
       response.index = isDataIndex
         ? getFileDataIndexName(response.integration, isDeliveryToHost)
         : getFileMetadataIndexName(response.integration, isDeliveryToHost);

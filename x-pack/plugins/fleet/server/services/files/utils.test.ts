@@ -15,28 +15,48 @@ describe('Files service utils', () => {
       [
         'tohost meta',
         '.ds-.fleet-fileds-tohost-meta-endpoint-2023.07.03-000001',
-        { index: getFileMetadataIndexName('endpoint', true), integration: 'endpoint' },
+        {
+          index: getFileMetadataIndexName('endpoint', true),
+          integration: 'endpoint',
+          direction: 'to-host',
+          type: 'meta',
+        },
       ],
       [
         'tohost data',
         '.ds-.fleet-fileds-tohost-data-agent-2023.07.03-000001',
-        { index: getFileDataIndexName('agent', true), integration: 'agent' },
+        {
+          index: getFileDataIndexName('agent', true),
+          integration: 'agent',
+          direction: 'to-host',
+          type: 'data',
+        },
       ],
       [
         'fromhost meta',
         '.ds-.fleet-fileds-fromhost-meta-agent-2023.07.03-000001',
-        { index: getFileMetadataIndexName('agent'), integration: 'agent' },
+        {
+          index: getFileMetadataIndexName('agent'),
+          integration: 'agent',
+          direction: 'from-host',
+          type: 'meta',
+        },
       ],
       [
         'fromhost data',
         '.ds-.fleet-fileds-fromhost-data-endpoint-2023.07.03-000001',
-        { index: getFileDataIndexName('endpoint'), integration: 'endpoint' },
+        {
+          index: getFileDataIndexName('endpoint'),
+          integration: 'endpoint',
+          direction: 'from-host',
+          type: 'data',
+        },
       ],
     ])('should parse index %s', (_, index, result) => {
       expect(parseFileStorageIndex(index)).toEqual(result);
     });
 
-    it('should error if index does not match a knonwn pattern', () => {
+    it('should error if index does not match a known pattern', () => {
       expect(() => parseFileStorageIndex('foo')).toThrow();
     });
   });
