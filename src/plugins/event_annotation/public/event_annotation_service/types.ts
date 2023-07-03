@@ -13,6 +13,7 @@ import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common'
 
 export interface EventAnnotationServiceType {
   loadAnnotationGroup: (savedObjectId: string) => Promise<EventAnnotationGroupConfig>;
+  groupExistsWithTitle: (title: string) => Promise<boolean>;
   findAnnotationGroupContent: (
     searchTerm: string,
     pageSize: number,
