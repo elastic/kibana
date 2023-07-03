@@ -49,10 +49,13 @@ export const DiscoverTopNav = ({
   const savedSearch = useSavedSearchInitial();
   const [dataViewList, setDataViewList] = useState([dataView]);
   const isDataViewMissing = !dataViewList.includes(dataView);
-  
+
   useEffect(() => {
     if (isDataViewMissing) {
-      setDataViewList(currentDataViewList => [dataView, ...currentDataViewList.filter(dw => dw.id !== dataView.id)]);
+      setDataViewList((currentDataViewList) => [
+        dataView,
+        ...currentDataViewList.filter((dw) => dw.id !== dataView.id),
+      ]);
     }
   }, [dataView, isDataViewMissing, setDataViewList]);
   const showDatePicker = useMemo(() => {
