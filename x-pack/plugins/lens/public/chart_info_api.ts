@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Filter, Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getActiveDatasourceIdFromDoc } from './utils';
@@ -21,7 +21,7 @@ export interface ChartInfo {
   layers: ChartLayerDescriptor[];
   visualizationType: string;
   filters: Filter[];
-  query: Query;
+  query: Query | AggregateQuery;
 }
 
 export interface ChartLayerDescriptor {

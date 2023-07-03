@@ -6,6 +6,7 @@
  */
 
 import { createSelector } from '@reduxjs/toolkit';
+import { Query } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { SavedObjectReference } from '@kbn/core/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
@@ -56,7 +57,7 @@ export const selectExecutionContext = createSelector(
 );
 
 export const selectExecutionContextSearch = createSelector(selectExecutionContext, (res) => ({
-  query: res.query,
+  query: res.query as Query,
   timeRange: {
     from: res.dateRange.fromDate,
     to: res.dateRange.toDate,

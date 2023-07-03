@@ -595,7 +595,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
     CoreStart,
     'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'application' | 'docLinks'
   >;
-  query: Query;
+  query: Query | AggregateQuery;
   dateRange: DateRange;
   filters: Filter[];
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
@@ -956,7 +956,7 @@ export interface FramePublicAPI {
 }
 
 export interface FrameDatasourceAPI extends FramePublicAPI {
-  query: Query;
+  query: Query | AggregateQuery;
   filters: Filter[];
 }
 

@@ -11,7 +11,7 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { EuiText, EuiButton, EuiPopoverFooter } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Filter, Query } from '@kbn/es-query';
+import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import { DataViewField, type DataView } from '@kbn/data-views-plugin/common';
 import {
   AddFieldFilterHandler,
@@ -51,7 +51,7 @@ interface FieldItemBaseProps {
 export interface FieldItemIndexPatternFieldProps extends FieldItemBaseProps {
   field: IndexPatternField;
   indexPattern: IndexPattern;
-  query: Query;
+  query: Query | AggregateQuery;
   dateRange: DatasourceDataPanelProps['dateRange'];
   filters: Filter[];
   editField?: (name: string) => void;
