@@ -72,6 +72,7 @@ describe('client', () => {
         config: {},
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
         referencedByCount: 1,
       },
       {
@@ -81,6 +82,8 @@ describe('client', () => {
         config: {},
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
+
         referencedByCount: 1,
       },
       {
@@ -90,6 +93,7 @@ describe('client', () => {
         config: {},
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
         referencedByCount: 1,
       },
     ];
@@ -110,6 +114,7 @@ describe('client', () => {
           config: {},
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
         },
         {
@@ -118,6 +123,7 @@ describe('client', () => {
           name: '2',
           config: {},
           isPreconfigured: false,
+          isSystemAction: false,
           isDeprecated: false,
           referencedByCount: 1,
         },
@@ -135,6 +141,7 @@ describe('client', () => {
           config: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
         },
       ]);
@@ -147,6 +154,7 @@ describe('client', () => {
           config: {},
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
         },
         {
@@ -156,6 +164,7 @@ describe('client', () => {
           config: {},
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
         },
         {
@@ -164,6 +173,7 @@ describe('client', () => {
           name: 'sn-preconfigured',
           config: {},
           isPreconfigured: true,
+          isSystemAction: false,
           isDeprecated: false,
           referencedByCount: 1,
         },
@@ -181,6 +191,7 @@ describe('client', () => {
           config: {},
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
         },
       ]);
@@ -193,6 +204,7 @@ describe('client', () => {
           config: {},
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
         },
         {
@@ -202,6 +214,7 @@ describe('client', () => {
           config: {},
           isPreconfigured: false,
           isDeprecated: false,
+          isSystemAction: false,
           referencedByCount: 1,
         },
       ]);

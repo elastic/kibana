@@ -102,6 +102,7 @@ import {
 } from '../types';
 
 import type {
+  AllowedChartOverrides,
   AllowedPartitionOverrides,
   AllowedSettingsOverrides,
   AllowedGaugeOverrides,
@@ -176,6 +177,7 @@ export type LensByValueInput = {
    * the current behaviour by passing the "ignore" string to the override prop (i.e. onBrushEnd: "ignore" to stop brushing)
    */
   overrides?:
+    | AllowedChartOverrides
     | AllowedSettingsOverrides
     | AllowedXYOverrides
     | AllowedPartitionOverrides
