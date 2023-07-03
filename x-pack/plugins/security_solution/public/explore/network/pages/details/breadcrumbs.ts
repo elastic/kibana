@@ -10,15 +10,13 @@ import { get } from 'lodash/fp';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { decodeIpv6 } from '../../../../common/lib/helpers';
 import { getNetworkDetailsUrl } from '../../../../common/components/link_to/redirect_to_network';
-import { networkModel } from '../../store';
 import * as i18n from '../translations';
 import { NetworkDetailsRouteType } from './types';
 import type { NetworkRouteSpyState } from '../../../../common/utils/route/types';
 import { SecurityPageName } from '../../../../app/types';
-import type { GetSecuritySolutionUrl } from '../../../../common/components/link_to';
 import { NetworkRouteType } from '../navigation/types';
+import type { GetTrailingBreadcrumbs } from '../../../../common/components/navigation/breadcrumbs/types';
 
-export const type = networkModel.NetworkType.details;
 const TabNameMappedToI18nKey: Record<NetworkDetailsRouteType | NetworkRouteType, string> = {
   [NetworkDetailsRouteType.events]: i18n.NAVIGATION_EVENTS_TITLE,
   [NetworkDetailsRouteType.anomalies]: i18n.NAVIGATION_ANOMALIES_TITLE,
@@ -28,11 +26,15 @@ const TabNameMappedToI18nKey: Record<NetworkDetailsRouteType | NetworkRouteType,
   [NetworkDetailsRouteType.tls]: i18n.NAVIGATION_TLS_TITLE,
   [NetworkRouteType.dns]: i18n.NAVIGATION_DNS_TITLE,
 };
-
-export const getTrailingBreadcrumbs = (
-  params: NetworkRouteSpyState,
-  getSecuritySolutionUrl: GetSecuritySolutionUrl
-): ChromeBreadcrumb[] => {
+/**
+ * This module should only export this function.
+ * All the `getTrailingBreadcrumbs` functions in Security are loaded into the main bundle.
+ * We should be careful to not import unnecessary modules in this file to avoid increasing the main app bundle size.
+ */
+export const getTrailingBreadcrumbs: GetTrailingBreadcrumbs<NetworkRouteSpyState> = (
+  params,
+  getSecuritySolutionUrl
+) => {
   let breadcrumb: ChromeBreadcrumb[] = [];
 
   if (params.detailName != null) {

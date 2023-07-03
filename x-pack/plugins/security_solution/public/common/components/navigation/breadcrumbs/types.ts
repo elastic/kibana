@@ -6,13 +6,10 @@
  */
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
-import type { RouteSpyState } from '../../common/utils/route/types';
+import type { RouteSpyState } from '../../../utils/route/types';
+import type { GetSecuritySolutionUrl } from '../../link_to';
 
-export const getTrailingBreadcrumbs = (params: RouteSpyState): ChromeBreadcrumb[] => {
-  const breadcrumbName = params?.state?.dashboardName;
-  if (breadcrumbName) {
-    return [{ text: breadcrumbName }];
-  }
-
-  return [];
-};
+export type GetTrailingBreadcrumbs<T extends RouteSpyState = RouteSpyState> = (
+  spyState: T,
+  getSecuritySolutionUrl: GetSecuritySolutionUrl
+) => ChromeBreadcrumb[];
