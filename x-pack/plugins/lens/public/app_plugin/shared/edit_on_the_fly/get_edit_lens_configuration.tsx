@@ -113,6 +113,7 @@ export function getEditLensConfiguration(
           defaultMessage: 'Edit configuration',
         })}
         size="s"
+        className="lnsEditConfigurationFlyout"
         hideCloseButton
       >
         <Provider store={lensStore}>
