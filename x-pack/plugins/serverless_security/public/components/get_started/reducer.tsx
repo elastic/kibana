@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { ProductLine } from '../../../common/config';
 import { setupCards, updateCard } from './helpers';
 import {
   CardId,
   GetStartedPageActions,
-  ProductId,
   StepId,
   ToggleProductAction,
   TogglePanelReducer,
@@ -80,13 +80,13 @@ export const getFinishedStepsInitialStates = ({
 export const getActiveSectionsInitialStates = ({
   activeProducts,
 }: {
-  activeProducts: ProductId[];
+  activeProducts: ProductLine[];
 }) => new Set(activeProducts);
 
 export const getActiveCardsInitialStates = ({
   activeProducts,
   finishedSteps,
 }: {
-  activeProducts: Set<ProductId>;
+  activeProducts: Set<ProductLine>;
   finishedSteps: Record<CardId, Set<StepId>>;
 }) => setupCards(finishedSteps, activeProducts);

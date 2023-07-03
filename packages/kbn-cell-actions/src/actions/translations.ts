@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { SUPPORTED_KBN_TYPES } from './constants';
+import { i18n } from '@kbn/i18n';
 
-export const isTypeSupportedByCellActions = (kbnFieldType: KBN_FIELD_TYPES) =>
-  SUPPORTED_KBN_TYPES.includes(kbnFieldType);
+export const ACTION_INCOMPATIBLE_VALUE_WARNING = i18n.translate(
+  'cellActions.actions.incompatibility.warningMessage',
+  {
+    defaultMessage: 'The action can not be executed because the value and type are incompatible',
+  }
+);

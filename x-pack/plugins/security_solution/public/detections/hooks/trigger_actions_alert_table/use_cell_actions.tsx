@@ -72,7 +72,7 @@ export const getUseCellActionsHook = (tableId: TableId) => {
         const browserField: Partial<BrowserField> | undefined = browserFieldsByName[column.id];
         return {
           name: column.id,
-          type: browserField?.type ?? 'keyword',
+          type: browserField?.type ?? '', // When type is an empty string all cell actions are incompatible
           esTypes: browserField?.esTypes ?? [],
           aggregatable: browserField?.aggregatable ?? false,
           searchable: browserField?.searchable ?? false,
