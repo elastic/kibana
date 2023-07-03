@@ -78,6 +78,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
 
         editAction(paramsProperty, newInputText, index);
         setMatches([]);
+        textAreaRef.current.focus();
       }
     },
     [editAction, index, paramsProperty]
