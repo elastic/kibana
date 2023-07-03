@@ -7,12 +7,13 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getPageObject, getService }: FtrProviderContext) {
+export default function ({ getPageObject }: FtrProviderContext) {
   const PageObject = getPageObject('common');
 
   describe('Management', function () {
     it('redirects from common management url to security specific page', async () => {
-      await PageObject.navigateToUrl('management', {
+      const SUB_URL = '';
+      await PageObject.navigateToUrl('management', SUB_URL, {
         ensureCurrentUrl: false,
         shouldLoginIfPrompted: false,
         shouldUseHashForSubUrl: false,
