@@ -97,7 +97,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
     ruleName,
     timestamp,
   }) => {
-    const { isAssistantHidden } = useAssistantAvailability();
+    const { hasAssistantPrivilege } = useAssistantAvailability();
     const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
     const { onClick } = useGetSecuritySolutionLinkProps()({
       deepLinkId: SecurityPageName.alerts,
@@ -153,7 +153,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
             )}
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
-                {isAssistantHidden && promptContextId != null && (
+                {hasAssistantPrivilege && promptContextId != null && (
                   <EuiFlexItem grow={false}>
                     <NewChatById
                       conversationId={

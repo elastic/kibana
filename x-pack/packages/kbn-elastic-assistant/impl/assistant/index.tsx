@@ -130,7 +130,7 @@ const AssistantComponent: React.FC<Props> = ({
     conversation: !isAssistantEnabled
       ? {
           ...welcomeConversation,
-          messages: enterpriseMessaging,
+          messages: [...welcomeConversation.messages, ...enterpriseMessaging],
         }
       : welcomeConversation,
     isConnectorConfigured: !!connectors?.length,

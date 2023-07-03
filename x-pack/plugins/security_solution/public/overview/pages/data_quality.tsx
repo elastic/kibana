@@ -129,7 +129,7 @@ const renderOption = (
 );
 
 const DataQualityComponent: React.FC = () => {
-  const { isAssistantHidden } = useAssistantAvailability();
+  const { hasAssistantPrivilege } = useAssistantAvailability();
   const httpFetch = KibanaServices.get().http.fetch;
   const { baseTheme, theme } = useThemes();
   const toasts = useToasts();
@@ -237,7 +237,7 @@ const DataQualityComponent: React.FC = () => {
             getGroupByFieldsOnClick={getGroupByFieldsOnClick}
             httpFetch={httpFetch}
             ilmPhases={ilmPhases}
-            isAssistantEnabled={isAssistantHidden}
+            isAssistantEnabled={hasAssistantPrivilege}
             lastChecked={lastChecked}
             openCreateCaseFlyout={openCreateCaseFlyout}
             patterns={alertsAndSelectedPatterns}

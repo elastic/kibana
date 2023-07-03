@@ -56,8 +56,8 @@ export const useAssistant = ({
   dataFormattedForFieldBrowser,
   isAlert,
 }: UseAssistantParams): UseAssistantResult => {
-  const { isAssistantHidden } = useAssistantAvailability();
-  const useAssistantHook = isAssistantHidden ? useAssistantOverlay : useAssistantNoop;
+  const { hasAssistantPrivilege } = useAssistantAvailability();
+  const useAssistantHook = hasAssistantPrivilege ? useAssistantOverlay : useAssistantNoop;
   const getPromptContext = useCallback(
     async () => getPromptContextFromEventDetailsItem(dataFormattedForFieldBrowser ?? []),
     [dataFormattedForFieldBrowser]
@@ -77,7 +77,7 @@ export const useAssistant = ({
   );
 
   return {
-    showAssistant: isAssistantHidden && promptContextId !== null,
+    showAssistant: hasAssistantPrivilege && promptContextId !== null,
     promptContextId: promptContextId || '',
   };
 };

@@ -176,7 +176,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     timelineType,
     showTimeline,
   }) => {
-    const { isAssistantHidden, isAssistantEnabled } = useAssistantAvailability();
+    const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -245,7 +245,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
         >
           {isGraphOrNotesTabs && getTab(activeTimelineTab)}
         </HideShowContainer>
-        {isAssistantHidden && (
+        {hasAssistantPrivilege && (
           <HideShowContainer
             $isVisible={activeTimelineTab === TimelineTabs.securityAssistant}
             isOverflowYScroll={activeTimelineTab === TimelineTabs.securityAssistant}
@@ -302,7 +302,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   sessionViewConfig,
   timelineDescription,
 }) => {
-  const { isAssistantHidden } = useAssistantAvailability();
+  const { hasAssistantPrivilege } = useAssistantAvailability();
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
   const getShowTimeline = useMemo(() => getShowTimelineSelector(), []);
@@ -457,7 +457,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               </div>
             )}
           </StyledEuiTab>
-          {isAssistantHidden && (
+          {hasAssistantPrivilege && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.securityAssistant}`}
               onClick={setSecurityAssistantAsActiveTab}

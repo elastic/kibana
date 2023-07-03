@@ -42,7 +42,7 @@ interface SecuritySolutionPageWrapperProps {
 const SecuritySolutionPageWrapperComponent: React.FC<
   SecuritySolutionPageWrapperProps & CommonProps
 > = ({ children, className, style, noPadding, noTimeline, ...otherProps }) => {
-  const { isAssistantEnabled, isAssistantHidden } = useAssistantAvailability();
+  const { isAssistantEnabled, hasAssistantPrivilege } = useAssistantAvailability();
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   useEffect(() => {
     setGlobalFullScreen(false); // exit full screen mode on page load
@@ -59,7 +59,7 @@ const SecuritySolutionPageWrapperComponent: React.FC<
     <Wrapper className={classes} style={style} {...otherProps}>
       {children}
       <AppGlobalStyle />
-      {!isAssistantHidden && <AssistantOverlay isAssistantEnabled={isAssistantEnabled} />}
+      {hasAssistantPrivilege && <AssistantOverlay isAssistantEnabled={isAssistantEnabled} />}
     </Wrapper>
   );
 };

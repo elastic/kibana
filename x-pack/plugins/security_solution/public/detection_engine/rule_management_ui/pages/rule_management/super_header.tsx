@@ -15,7 +15,7 @@ import { useRulesTableContext } from '../../components/rules_table/rules_table/r
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 
 export const SuperHeader: React.FC<{ children: React.ReactNode }> = React.memo(({ children }) => {
-  const { isAssistantHidden } = useAssistantAvailability();
+  const { hasAssistantPrivilege } = useAssistantAvailability();
   const memoizedChildren = useMemo(() => children, [children]);
   // Rules state
   const {
@@ -37,7 +37,7 @@ export const SuperHeader: React.FC<{ children: React.ReactNode }> = React.memo((
       title={
         <>
           {i18n.PAGE_TITLE}{' '}
-          {isAssistantHidden && selectedRules.length > 0 && (
+          {hasAssistantPrivilege && selectedRules.length > 0 && (
             <NewChat
               category="detection-rules"
               conversationId={i18n.DETECTION_RULES_CONVERSATION_ID}
