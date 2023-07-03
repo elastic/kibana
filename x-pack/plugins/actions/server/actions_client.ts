@@ -260,6 +260,7 @@ export class ActionsClient {
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
     };
   }
@@ -357,6 +358,7 @@ export class ActionsClient {
       name: result.attributes.name as string,
       config: result.attributes.config as Record<string, unknown>,
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
     };
   }
@@ -394,6 +396,7 @@ export class ActionsClient {
         actionTypeId: preconfiguredActionsList.actionTypeId,
         name: preconfiguredActionsList.name,
         isPreconfigured: true,
+        isSystemAction: false,
         isDeprecated: isConnectorDeprecated(preconfiguredActionsList),
       };
     }
@@ -414,6 +417,7 @@ export class ActionsClient {
       name: result.attributes.name,
       config: result.attributes.config,
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
     };
   }
@@ -460,6 +464,7 @@ export class ActionsClient {
         name: preconfiguredAction.name,
         isPreconfigured: true,
         isDeprecated: isConnectorDeprecated(preconfiguredAction),
+        isSystemAction: false,
       })),
     ].sort((a, b) => a.name.localeCompare(b.name));
     return await injectExtraFindData(this.kibanaIndices, this.scopedClusterClient, mergedResult);
@@ -893,6 +898,7 @@ function actionFromSavedObject(
     ...savedObject.attributes,
     isPreconfigured: false,
     isDeprecated,
+    isSystemAction: false,
   };
 }
 

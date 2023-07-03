@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlyout } from '@elastic/eui';
+import { EuiFlyoutBody } from '@elastic/eui';
 import { mountWithProvider } from '../../../mocks';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -22,7 +22,7 @@ import type { TypedLensByValueInput } from '../../../embeddable/embeddable_compo
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
 import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
 import {
-  LensEditConfifurationFlyout,
+  LensEditConfigurationFlyout,
   type EditConfigPanelProps,
 } from './lens_configuration_flyout';
 
@@ -42,8 +42,7 @@ afterEach(() => {
   container = undefined;
 });
 
-describe('LensEditConfifurationFlyout', () => {
-  // const frame = createMockFramePublicAPI();
+describe('LensEditConfigurationFlyout', () => {
   const mockStartDependencies =
     createMockStartDependencies() as unknown as LensPluginStartDependencies;
   const data = mockDataPlugin();
@@ -61,7 +60,7 @@ describe('LensEditConfifurationFlyout', () => {
     query?: Query | AggregateQuery
   ) {
     return mountWithProvider(
-      <LensEditConfifurationFlyout {...props} />,
+      <LensEditConfigurationFlyout {...props} />,
       {
         preloadedState: {
           datasourceStates: {
@@ -134,7 +133,7 @@ describe('LensEditConfifurationFlyout', () => {
       setIsFlyoutVisible: setIsFlyoutVisibleSpy,
     };
     const { instance } = await prepareAndMountComponent(newProps);
-    expect(instance.find(EuiFlyout).exists()).toBe(true);
+    expect(instance.find(EuiFlyoutBody).exists()).toBe(true);
     instance.find('[data-test-subj="collapseFlyoutButton"]').at(1).simulate('click');
     expect(setIsFlyoutVisibleSpy).toHaveBeenCalled();
   });

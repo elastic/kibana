@@ -10,6 +10,7 @@ import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { PreloadedState } from '@reduxjs/toolkit';
+import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import {
@@ -22,7 +23,7 @@ import { getPreloadedState } from '../../../state_management/lens_slice';
 
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import {
-  LensEditConfifurationFlyout,
+  LensEditConfigurationFlyout,
   type EditConfigPanelProps,
 } from './lens_configuration_flyout';
 import type { LensAppServices } from '../../types';
@@ -103,6 +104,10 @@ export function getEditLensConfiguration(
             })}
             size="s"
             hideCloseButton
+            css={css`
+             background: none;
+            `}
+            hideCloseButton
           >
             {children}
           </EuiFlyout>
@@ -129,6 +134,7 @@ export function getEditLensConfiguration(
       <Provider store={lensStore}>
         <LensEditConfifurationFlyout {...configPanelProps} />
       </Provider>
+
     );
   };
 }

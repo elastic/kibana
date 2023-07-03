@@ -55,6 +55,10 @@ export function useChartConfigPanel({
   );
 
   useEffect(() => {
+    const dataHasChanged =
+      Boolean(lensTablesAdapter) &&
+      !isEqual(previousAdapters.current, lensTablesAdapter) &&
+      query !== previousQuery?.current;
     async function fetchLensConfigComponent() {
       const Component = await services.lens.EditLensConfigPanelApi();
       const panel = (
@@ -74,10 +78,6 @@ export function useChartConfigPanel({
         previousQuery.current = query;
       }
     }
-    const dataHasChanged =
-      Boolean(lensTablesAdapter) &&
-      !isEqual(previousAdapters.current, lensTablesAdapter) &&
-      query !== previousQuery?.current;
     const suggestionHasChanged = currentSuggestion?.title !== previousSuggestion?.current?.title;
     // rerender the component if the data has changed or the suggestion
     // as I can have different suggestions for the same data

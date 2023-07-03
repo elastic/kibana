@@ -8,14 +8,15 @@
 import React, { useMemo } from 'react';
 import {
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
   useEuiTheme,
   EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -46,7 +47,7 @@ export interface EditConfigPanelProps {
   adaptersTables?: Record<string, Datatable>;
 }
 
-export function LensEditConfifurationFlyout({
+export function LensEditConfigurationFlyout({
   attributes,
   dataView,
   coreStart,
@@ -125,48 +126,48 @@ export function LensEditConfifurationFlyout({
     onUpdateStateCb: updateAll,
   };
   return (
-    <EuiFlyoutBody
-      className="lnsEditFlyoutBody"
-      css={css`
-        .euiFlyoutBody__overflowContent {
-          padding: ${euiTheme.size.s};
-        }
-      `}
-    >
-      <EuiFlexGroup gutterSize="s">
-        {setIsFlyoutVisible && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="menuRight"
-              iconSize="m"
-              size="xs"
-              onClick={closeFlyout}
-              data-test-subj="collapseFlyoutButton"
-              aria-controls="lens-config-close-button"
-              aria-expanded="true"
-              aria-label={i18n.translate('xpack.lens.config.closeFlyoutAriaLabel', {
-                defaultMessage: 'Close flyout',
+    <>
+      <EuiFlyoutBody
+        className="lnsEditFlyoutBody"
+        css={css`
+          .euiFlyoutBody__overflowContent {
+            padding: ${euiTheme.size.s};
+          }
+        `}
+      >
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <EuiCallOut
+              size="s"
+              title={i18n.translate('xpack.lens.config.configFlyoutCallout', {
+                defaultMessage: 'SQL currently offers limited configuration options',
               })}
+              iconType="iInCircle"
             />
+            <EuiSpacer size="m" />
+            <VisualizationToolbar
+              activeVisualization={activeVisualization}
+              framePublicAPI={framePublicAPI}
+              onUpdateStateCb={updateAll}
+            />
+            <EuiSpacer size="m" />
+            <ConfigPanelWrapper {...layerPanelsProps} />
           </EuiFlexItem>
-        )}
-        <EuiFlexItem>
-          <EuiCallOut
-            title={i18n.translate('xpack.lens.config.configFlyoutCallout', {
-              defaultMessage: 'SQL currently offers limited configuration options',
-            })}
-            iconType="iInCircle"
-          />
-          <EuiSpacer size="m" />
-          <VisualizationToolbar
-            activeVisualization={activeVisualization}
-            framePublicAPI={framePublicAPI}
-            onUpdateStateCb={updateAll}
-          />
-          <EuiSpacer size="m" />
-          <ConfigPanelWrapper {...layerPanelsProps} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlyoutBody>
+        </EuiFlexGroup>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiButtonEmpty
+          onClick={closeFlyout}
+          data-test-subj="collapseFlyoutButton"
+          aria-controls="lens-config-close-button"
+          aria-expanded="true"
+          aria-label={i18n.translate('xpack.lens.config.closeFlyoutAriaLabel', {
+            defaultMessage: 'Close flyout',
+          })}
+        >
+          <FormattedMessage id="xpack.lens.config.closeFlyoutLabel" defaultMessage="Close" />
+        </EuiButtonEmpty>
+      </EuiFlyoutFooter>
+    </>
   );
 }
