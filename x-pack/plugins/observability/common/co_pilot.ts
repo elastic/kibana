@@ -211,19 +211,17 @@ export const coPilotPrompts = {
 
           The request it occurred for is called ${transactionName}.
 
-          ${
-            logStacktrace
+          ${logStacktrace
               ? `The log stacktrace:
           ${logStacktrace}`
               : ''
-          }
+            }
 
-          ${
-            exceptionStacktrace
+          ${exceptionStacktrace
               ? `The exception stacktrace:
           ${exceptionStacktrace}`
               : ''
-          }
+            }
           `,
           role: 'user',
         },
@@ -389,43 +387,39 @@ export const coPilotPrompts = {
         })
         .join('\n');
 
-      const content = `Use a temperature of 0.3. For this response, do not use previous context given by me.
+      const content = `You are the Elastic Observability alert assistant, helping SREs prioritize which alerts in observability should be investigated.
+You are use a deep observability knowledge.
 
-Only respond with the info requested on the sentences that start with the word Display, do not show original Display sentence.
+Your limitations:
+- You only provide information that is accurate
+- Use a temperature of 0.3
+- Do not use info from previous prompts
+- Do not print 
+- Only respond with the info requested on the sentences that start with the word Display, do not show original Display sentence.  
+- You will respond with the indicated templates filling variables, if any of the variables are empty do not include that line in the response
 
 The current active alerts in the system are represented in the following table with csv format separated by semicolon. Pick only one alert based on the following conditions:
-- If column "case names" does not have a value those alerts go first
-- Then sort the rest based on the urgency of the content of rest of the columns
+- Sort the alerts based on the urgency of the content of the columns
+- If the alert has a Case assigned, it is probably less urgent
 
 Display the selected alert row using the following template, if any of the variables are empty, do not print that line:
-"
-🥇 The the alert with the highest priority right now has the following Reason: A
+"🚨 The the alert with the highest priority right now has the following Reason: A 
+        🔗 Link: http://localhost:5601/kibana/app/observability/alerts/C
         🧯 Possible next steps: B
-        🔗 Alert id: C
         ︖ The reason this issue is has the highest priority is: D
         📂 Assigned to Case ids: E
-        👀 Case status: F
-        🚨 Case severity: G
-        🗓️ Last update of the Case: H
         📝 Case general summary: I
-"
+        📝 Related alerts: J"
 A being the alert Reason column value
-B being a way to start a remediation of the alert for an SRE
-C being the Alert uuid value
+B being a way to start a remediation of the alert for an SRE in Elastic Observability
+C being the Alert uuid value, concatenated after the string "http://localhost:5601/kibana/app/observability/alerts/"
 D being the reasoning why this alert was chosen and what makes it urgent
-E being the Case ids values
-F being the Case status column value
-G being the Case severity column values
-H being the Case updatedAt column values
+E being the summary in text of Case ids values, Case status column value, Case severity column value and Case updatedAt column values
 I being a summary you generate about the properties of the Case
+J being a summary of other alerts that are related through the same Case ids
 
 ${header}
 ${rows}
-
-At the end of the response, display the following template substituting X and Y using info from the above table:
-"🔍 There are X total active alerts in the system, and Y of them are not yet assigned to a case and show be reviewed as soon as possible"
-- X being the total current active alerts in the table
-- Y being how many alerts have "undefined" value in column "Case ids"
 `;
 
       console.log('content:', content);
