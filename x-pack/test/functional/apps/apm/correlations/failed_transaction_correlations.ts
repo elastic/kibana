@@ -22,7 +22,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     correlationsTab: 'Failed transaction correlations',
     serviceName: 'opbeans-go',
     transactionsTab: 'Transactions',
-    alertsTab: 'Alerts',
     transaction: 'GET /api/stats',
   };
 
