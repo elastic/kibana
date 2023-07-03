@@ -5,98 +5,46 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useReducer } from 'react';
+import React from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiShadow, useEuiTheme } from '@elastic/eui';
 
 import { css } from '@emotion/react';
 
-import { Switch, GetStartedPageActions, StepId, CardId, SectionId } from './types';
 import * as i18n from './translations';
-import { ProductSwitch } from './product_switch';
 import { useSetUpCardSections } from './use_setup_cards';
-import { getStartedStorage } from '../../lib/get_started/storage';
-import {
-  getActiveCardsInitialStates,
-  getActiveSectionsInitialStates,
-  getFinishedStepsInitialStates,
-  reducer,
-} from './reducer';
 
-const TogglePanelComponent = () => {
+import { ActiveCards, CardId, IntroductionSteps, SectionId } from './types';
+import { ProductLine } from '../../../common/config';
+
+const TogglePanelComponent: React.FC<{
+  finishedSteps: Record<CardId, Set<IntroductionSteps>>;
+  activeCards: ActiveCards | null;
+  activeProducts: Set<ProductLine>;
+  onStepClicked: ({
+    stepId,
+    cardId,
+    sectionId,
+  }: {
+    stepId: IntroductionSteps;
+    cardId: CardId;
+    sectionId: SectionId;
+  }) => void;
+}> = ({ finishedSteps, activeCards, activeProducts, onStepClicked }) => {
   const { euiTheme } = useEuiTheme();
 
   const shadow = useEuiShadow('s');
-  const {
-    getAllFinishedStepsFromStorage,
-    getActiveProductsFromStorage,
-    toggleActiveProductsInStorage,
-    addFinishedStepToStorage,
-  } = getStartedStorage;
-  const finishedStepsInitialStates = useMemo(
-    () => getFinishedStepsInitialStates({ finishedSteps: getAllFinishedStepsFromStorage() }),
-    [getAllFinishedStepsFromStorage]
-  );
 
-  const activeSectionsInitialStates = useMemo(
-    () => getActiveSectionsInitialStates({ activeProducts: getActiveProductsFromStorage() }),
-    [getActiveProductsFromStorage]
-  );
-
-  const activeCardsInitialStates = useMemo(
-    () =>
-      getActiveCardsInitialStates({
-        activeProducts: activeSectionsInitialStates,
-        finishedSteps: finishedStepsInitialStates,
-      }),
-    [activeSectionsInitialStates, finishedStepsInitialStates]
-  );
-
-  const [state, dispatch] = useReducer(reducer, {
-    activeProducts: activeSectionsInitialStates,
-    finishedSteps: finishedStepsInitialStates,
-    activeCards: activeCardsInitialStates,
-  });
   const { setUpSections } = useSetUpCardSections({ euiTheme, shadow });
-  const onStepClicked = useCallback(
-    ({ stepId, cardId, sectionId }: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => {
-      dispatch({
-        type: GetStartedPageActions.AddFinishedStep,
-        payload: { stepId, cardId, sectionId },
-      });
-      addFinishedStepToStorage(cardId, stepId);
-    },
-    [addFinishedStepToStorage]
-  );
   const sectionNodes = setUpSections({
     onStepClicked,
-    finishedSteps: state.finishedSteps,
-    activeCards: state.activeCards,
+    finishedSteps,
+    activeCards,
   });
-  const onProductSwitchChanged = useCallback(
-    (section: Switch) => {
-      dispatch({ type: GetStartedPageActions.ToggleProduct, payload: { section: section.id } });
-      toggleActiveProductsInStorage(section.id);
-    },
-    [toggleActiveProductsInStorage]
-  );
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column">
-      <EuiFlexItem grow={false}>
-        <ProductSwitch
-          onProductSwitchChanged={onProductSwitchChanged}
-          activeProducts={state.activeProducts}
-          euiTheme={euiTheme}
-          shadow={shadow}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        css={css`
-          padding: ${euiTheme.size.xs} ${euiTheme.base * 2.25}px;
-        `}
-        grow={1}
-      >
-        {state.activeProducts.size > 0 ? (
+      <EuiFlexItem grow={1}>
+        {activeProducts.size > 0 ? (
           sectionNodes
         ) : (
           <EuiEmptyPrompt
