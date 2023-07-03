@@ -169,6 +169,8 @@ export const useColumns = ({
     // before restoring from storage, enrich the column data
     if (initialBrowserFields && defaultColumns) {
       cols = populateColumns(cols, initialBrowserFields, defaultColumns);
+    } else if (cols && cols.length === 0) {
+      cols = defaultColumns;
     }
     return cols;
   });
