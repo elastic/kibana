@@ -541,6 +541,6 @@ function createUrlGeneratorState({
     viewMode: appState.viewMode,
     hideAggregatedPreview: appState.hideAggregatedPreview,
     breakdownField: appState.breakdownField,
-    dataViewSpec: !dataView?.isPersisted() ? dataView?.toSpec() : undefined,
+    dataViewSpec: !dataView?.isPersisted() ? dataView?.toSpec(false) : undefined,
   };
 }
