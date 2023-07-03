@@ -34,22 +34,27 @@ export async function getFilesByStatus(
   abortController: AbortController,
   status: FileStatus = 'READY'
 ): Promise<SearchHit[]> {
-  const result = await esClient.search(
-    {
-      index: FILE_STORAGE_METADATA_INDEX_PATTERN,
-      body: {
-        size: ES_SEARCH_LIMIT,
-        query: {
-          term: {
-            'file.Status': status,
+  const result = await esClient
+    .search(
+      {
+        index: FILE_STORAGE_METADATA_INDEX_PATTERN,
+        body: {
+          size: ES_SEARCH_LIMIT,
+          query: {
+            term: {
+              'file.Status': status,
+            },
           },
+          _source: false,
         },
-        _source: false,
+        ignore_unavailable: true,
       },
-      ignore_unavailable: true,
-    },
-    { signal: abortController.signal }
-  );
+      { signal: abortController.signal }
+    )
+    .catch((err) => {
+      Error.captureStackTrace(err);
+      throw err;
+    });
 
   return result.hits.hits;
 }
@@ -84,32 +89,37 @@ export async function fileIdsWithoutChunksByIndex(
     return acc;
   }, {} as FileIdsByIndex);
 
-  const chunks = await esClient.search<{ bid: string }>(
-    {
-      index: FILE_STORAGE_DATA_INDEX_PATTERN,
-      body: {
-        size: ES_SEARCH_LIMIT,
-        query: {
-          bool: {
-            must: [
-              {
-                terms: {
-                  bid: Array.from(allFileIds),
+  const chunks = await esClient
+    .search<{ bid: string }>(
+      {
+        index: FILE_STORAGE_DATA_INDEX_PATTERN,
+        body: {
+          size: ES_SEARCH_LIMIT,
+          query: {
+            bool: {
+              must: [
+                {
+                  terms: {
+                    bid: Array.from(allFileIds),
+                  },
                 },
-              },
-              {
-                term: {
-                  last: true,
+                {
+                  term: {
+                    last: true,
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
+          _source: ['bid'],
         },
-        _source: ['bid'],
       },
-    },
-    { signal: abortController.signal }
-  );
+      { signal: abortController.signal }
+    )
+    .catch((err) => {
+      Error.captureStackTrace(err);
+      throw err;
+    });
 
   chunks.hits.hits.forEach((hit) => {
     const fileId = hit._source?.bid;
@@ -140,22 +150,27 @@ export function updateFilesStatus(
 ): Promise<UpdateByQueryResponse[]> {
   return Promise.all(
     Object.entries(fileIdsByIndex).map(([index, fileIds]) => {
-      return esClient.updateByQuery(
-        {
-          index,
-          refresh: true,
-          query: {
-            ids: {
-              values: Array.from(fileIds),
+      return esClient
+        .updateByQuery(
+          {
+            index,
+            refresh: true,
+            query: {
+              ids: {
+                values: Array.from(fileIds),
+              },
+            },
+            script: {
+              source: `ctx._source.file.Status = '${status}'`,
+              lang: 'painless',
             },
           },
-          script: {
-            source: `ctx._source.file.Status = '${status}'`,
-            lang: 'painless',
-          },
-        },
-        { signal: abortController.signal }
-      );
+          { signal: abortController.signal }
+        )
+        .catch((err) => {
+          Error.captureStackTrace(err);
+          throw err;
+        });
     })
   );
 }
