@@ -211,17 +211,19 @@ export const coPilotPrompts = {
 
           The request it occurred for is called ${transactionName}.
 
-          ${logStacktrace
+          ${
+            logStacktrace
               ? `The log stacktrace:
           ${logStacktrace}`
               : ''
-            }
+          }
 
-          ${exceptionStacktrace
+          ${
+            exceptionStacktrace
               ? `The exception stacktrace:
           ${exceptionStacktrace}`
               : ''
-            }
+          }
           `,
           role: 'user',
         },
@@ -363,14 +365,15 @@ export const coPilotPrompts = {
     }),
     messages: ({ alertCaseData }) => {
       const header =
-        'Alert uuid;Start time;Reason;Case ids;Case status;Case updatedAt;Case severity;Case totalComments;Case tags;Case categories;Case assignees';
+        'alert uuid;start time;reason;case names;case status;case updatedAt;case severity;case totalComments;case tags;case categories;case assignees';
       const add = (accumulator: number, a: number) => {
         return accumulator + a;
       };
       const rows = alertCaseData
-        .map(({ id, reason, start, caseIds, cases }) => {
+        .map(({ id, reason, start, cases }) => {
           let casesRow: string = '';
           if (cases) {
+            const casesName = cases.map((item: any) => item.name).join(',');
             const casesStatus = cases.map((item: any) => item.status).join(',');
             const casesUpdatedAt = cases.map((item: any) => item.updatedAt).join(',');
             const casesSeverity = cases.map((item: any) => item.severity).join(',');
@@ -378,25 +381,25 @@ export const coPilotPrompts = {
             const casesTags = cases.map((item: any) => item.tags).join(',');
             const casesCategories = cases.map((item: any) => item.category).join(',');
             const casesAssignees = cases.map((item: any) => item.assignees).reduce(add, 0);
-            casesRow = `${casesStatus};${casesUpdatedAt};${casesSeverity};${casesTotalComments};${casesTags};${casesCategories};${casesAssignees}`;
+            casesRow = `${casesName};${casesStatus};${casesUpdatedAt};${casesSeverity};${casesTotalComments};${casesTags};${casesCategories};${casesAssignees}`;
           } else {
             casesRow = ';;;;;;';
           }
-          return `${id};${start};${reason};${caseIds};${casesRow}`;
+          return `${id};${start};${reason};${casesRow}`;
         })
         .join('\n');
 
       const content = `Use a temperature of 0.3. For this response, do not use previous context given by me.
 
-Only respond with the info requested on the sentences that start with the word Display, do not show original Display sentence.  
-  
-The current active alerts in the system are represented in the following table with csv format separated by semicolon. Order the table by:
-- If column "Case ids" is the value "undefined" those alerts go first
-- Then order by ascending Start time
+Only respond with the info requested on the sentences that start with the word Display, do not show original Display sentence.
 
-Display only the first row usign the following template, if any of the variables are empty, do not print that line:  
-"  
-🥇 The the alert with the highest priority right now has the following Reason: A  
+The current active alerts in the system are represented in the following table with csv format separated by semicolon. Pick only one alert based on the following conditions:
+- If column "case names" does not have a value those alerts go first
+- Then sort the rest based on the urgency of the content of rest of the columns
+
+Display the selected alert row using the following template, if any of the variables are empty, do not print that line:
+"
+🥇 The the alert with the highest priority right now has the following Reason: A
         🧯 Possible next steps: B
         🔗 Alert id: C
         ︖ The reason this issue is has the highest priority is: D
@@ -404,15 +407,15 @@ Display only the first row usign the following template, if any of the variables
         👀 Case status: F
         🚨 Case severity: G
         🗓️ Last update of the Case: H
-        📝 Case general summary: I    
-"  
-A being the alert Reason column value  
-B being a way to start a remediation of the alert for an SRE  
-C being the Alert uuid value  
-D being the reasoning why this alert was chosen
-E being the Case ids values  
-F being the Case status column value  
-G being the Case severity column values  
+        📝 Case general summary: I
+"
+A being the alert Reason column value
+B being a way to start a remediation of the alert for an SRE
+C being the Alert uuid value
+D being the reasoning why this alert was chosen and what makes it urgent
+E being the Case ids values
+F being the Case status column value
+G being the Case severity column values
 H being the Case updatedAt column values
 I being a summary you generate about the properties of the Case
 
