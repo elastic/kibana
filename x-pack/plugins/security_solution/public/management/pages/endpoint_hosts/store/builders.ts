@@ -19,11 +19,9 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     loading: false,
     error: undefined,
     endpointDetails: {
-      hostDetails: {
-        details: undefined,
-        detailsLoading: false,
-        detailsError: undefined,
-      },
+      hostInfo: undefined,
+      hostInfoError: undefined,
+      isHostInfoLoading: false,
     },
     policyResponse: undefined,
     policyResponseLoading: false,
