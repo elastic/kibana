@@ -236,7 +236,7 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 
 |{kib-repo}blob/{branch}/src/plugins/management/README.md[management]
 |This plugins contains the "Stack Management" page framework. It offers navigation and an API
-to link individual managment section into it. This plugin does not contain any individual
+to link individual management section into it. This plugin does not contain any individual
 management section itself.
 
 

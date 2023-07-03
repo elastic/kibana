@@ -212,11 +212,12 @@ const getResponseActionListTableColumns = ({
       },
     },
     {
+      field: 'status',
       name: TABLE_COLUMN_NAMES.status,
       width: !showHostNames ? '15%' : '10%',
-      render: (action: ActionListApiResponse['data'][number]) => {
-        const _status = action.errors?.length ? 'failed' : action.status;
+      render: (_status: ActionListApiResponse['data'][number]['status']) => {
         const status = getActionStatus(_status);
+
         return (
           <EuiToolTip content={status} anchorClassName="eui-textTruncate">
             <StatusBadge

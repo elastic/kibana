@@ -253,6 +253,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           ...this.actionsConfig.preconfigured[preconfiguredId],
           id: preconfiguredId,
           isPreconfigured: true,
+          isSystemAction: false,
         };
         this.preconfiguredActions.push({
           ...rawPreconfiguredConnector,
