@@ -267,3 +267,29 @@ export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean 
 
   return false;
 };
+
+export const isKueryValid = (
+  kuery: string,
+  allowedTypes: string[],
+  indexMapping: IndexMapping
+): boolean => {
+  if (kuery && indexMapping) {
+    const astFilter = esKuery.fromKueryExpression(kuery);
+    const validationObject = validateFilterKueryNode({
+      astFilter,
+      types: allowedTypes,
+      indexMapping,
+      storeValue: true,
+    });
+
+    if (validationObject.some((obj) => obj.error != null)) {
+      throw new Error(
+        validationObject
+          .filter((obj) => obj.error != null)
+          .map((obj) => obj.error)
+          .join('\n')
+      );
+    }
+  }
+  return true;
+};

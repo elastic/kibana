@@ -20,7 +20,7 @@ import { HTTPAuthorizationHeader } from '../../../common/http_authorization_head
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService } from '../../services';
 import { getAgentsByKuery } from '../../services/agents';
-import { AGENTS_PREFIX } from '../../constants';
+import { AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -50,6 +50,7 @@ import type {
 } from '../../../common/types';
 import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
+import { isKueryValid } from '../utils/filter_utils';
 
 export async function populateAssignedAgentsCount(
   esClient: ElasticsearchClient,
@@ -78,6 +79,18 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { full: withPackagePolicies = false, noAgentCount = false, ...restOfQuery } = request.query;
+  const { kuery } = request.query;
+
+  try {
+    isKueryValid(kuery, [AGENTS_PREFIX], AGENT_MAPPINGS);
+  } catch (e) {
+    if (e.name === 'KQLSyntaxError') {
+      throw new Error(`KQLSyntaxError: ${e.message}`);
+    } else {
+      throw e;
+    }
+  }
+
   try {
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
       withPackagePolicies,

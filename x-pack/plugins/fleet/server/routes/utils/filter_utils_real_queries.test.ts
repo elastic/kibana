@@ -11,347 +11,16 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   AGENTS_PREFIX,
+  AGENT_POLICY_MAPPINGS,
+  PACKAGE_POLICIES_MAPPINGS,
+  AGENT_MAPPINGS,
+  ENROLLMENT_API_KEY_MAPPINGS,
 } from '../../constants';
 
 import { normalizeKuery } from '../../services/saved_object';
 
-import { validateFilterKueryNode } from './filter_utils';
+import { validateFilterKueryNode, isKueryValid } from './filter_utils';
 const FLEET_ENROLLMENT_API_PREFIX = 'fleet-enrollment-api-keys';
-
-const agentPoliciesMappings = {
-  properties: {
-    name: { type: 'keyword' },
-    schema_version: { type: 'version' },
-    description: { type: 'text' },
-    namespace: { type: 'keyword' },
-    is_managed: { type: 'boolean' },
-    is_default: { type: 'boolean' },
-    is_default_fleet_server: { type: 'boolean' },
-    status: { type: 'keyword' },
-    unenroll_timeout: { type: 'integer' },
-    inactivity_timeout: { type: 'integer' },
-    updated_at: { type: 'date' },
-    updated_by: { type: 'keyword' },
-    revision: { type: 'integer' },
-    monitoring_enabled: { type: 'keyword', index: false },
-    is_preconfigured: { type: 'keyword' },
-    data_output_id: { type: 'keyword' },
-    monitoring_output_id: { type: 'keyword' },
-    download_source_id: { type: 'keyword' },
-    fleet_server_host_id: { type: 'keyword' },
-    agent_features: {
-      properties: {
-        name: { type: 'keyword' },
-        enabled: { type: 'boolean' },
-      },
-    },
-    is_protected: { type: 'boolean' },
-    overrides: { type: 'flattened', index: false },
-  },
-} as const;
-
-const packagePoliciesMappings = {
-  properties: {
-    name: { type: 'keyword' },
-    description: { type: 'text' },
-    namespace: { type: 'keyword' },
-    enabled: { type: 'boolean' },
-    is_managed: { type: 'boolean' },
-    policy_id: { type: 'keyword' },
-    package: {
-      properties: {
-        name: { type: 'keyword' },
-        title: { type: 'keyword' },
-        version: { type: 'keyword' },
-      },
-    },
-    elasticsearch: {
-      dynamic: false,
-      properties: {},
-    },
-    vars: { type: 'flattened' },
-    inputs: {
-      dynamic: false,
-      properties: {},
-    },
-    secret_references: { properties: { id: { type: 'keyword' } } },
-    revision: { type: 'integer' },
-    updated_at: { type: 'date' },
-    updated_by: { type: 'keyword' },
-    created_at: { type: 'date' },
-    created_by: { type: 'keyword' },
-  },
-} as const;
-
-const agentMappings = {
-  properties: {
-    access_api_key_id: {
-      type: 'keyword',
-    },
-    action_seq_no: {
-      type: 'integer',
-      index: false,
-    },
-    active: {
-      type: 'boolean',
-    },
-    agent: {
-      properties: {
-        id: {
-          type: 'keyword',
-        },
-        version: {
-          type: 'keyword',
-        },
-      },
-    },
-    default_api_key: {
-      type: 'keyword',
-    },
-    default_api_key_id: {
-      type: 'keyword',
-    },
-    default_api_key_history: {
-      type: 'object',
-      enabled: false,
-    },
-    enrolled_at: {
-      type: 'date',
-    },
-    last_checkin: {
-      type: 'date',
-    },
-    last_checkin_status: {
-      type: 'keyword',
-    },
-    last_checkin_message: {
-      type: 'text',
-      fields: {
-        keyword: {
-          type: 'keyword',
-          ignore_above: 1024,
-        },
-      },
-    },
-    components: {
-      type: 'object',
-      enabled: false,
-    },
-    last_updated: {
-      type: 'date',
-    },
-    local_metadata: {
-      properties: {
-        elastic: {
-          properties: {
-            agent: {
-              properties: {
-                build: {
-                  properties: {
-                    original: {
-                      type: 'text',
-                      fields: {
-                        keyword: {
-                          type: 'keyword',
-                          ignore_above: 256,
-                        },
-                      },
-                    },
-                  },
-                },
-                id: {
-                  type: 'keyword',
-                },
-                log_level: {
-                  type: 'keyword',
-                },
-                snapshot: {
-                  type: 'boolean',
-                },
-                upgradeable: {
-                  type: 'boolean',
-                },
-                version: {
-                  type: 'text',
-                  fields: {
-                    keyword: {
-                      type: 'keyword',
-                      ignore_above: 16,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        host: {
-          properties: {
-            architecture: {
-              type: 'keyword',
-            },
-            hostname: {
-              type: 'text',
-              fields: {
-                keyword: {
-                  type: 'keyword',
-                  ignore_above: 256,
-                },
-              },
-            },
-            id: {
-              type: 'keyword',
-            },
-            ip: {
-              type: 'text',
-              fields: {
-                keyword: {
-                  type: 'keyword',
-                  ignore_above: 64,
-                },
-              },
-            },
-            mac: {
-              type: 'text',
-              fields: {
-                keyword: {
-                  type: 'keyword',
-                  ignore_above: 17,
-                },
-              },
-            },
-            name: {
-              type: 'text',
-              fields: {
-                keyword: {
-                  type: 'keyword',
-                  ignore_above: 256,
-                },
-              },
-            },
-          },
-        },
-        os: {
-          properties: {
-            family: {
-              type: 'keyword',
-            },
-            full: {
-              type: 'text',
-              fields: {
-                keyword: {
-                  type: 'keyword',
-                  ignore_above: 128,
-                },
-              },
-            },
-            kernel: {
-              type: 'text',
-              fields: {
-                keyword: {
-                  type: 'keyword',
-                  ignore_above: 128,
-                },
-              },
-            },
-            name: {
-              type: 'text',
-              fields: {
-                keyword: {
-                  type: 'keyword',
-                  ignore_above: 256,
-                },
-              },
-            },
-            platform: {
-              type: 'keyword',
-            },
-            version: {
-              type: 'text',
-              fields: {
-                keyword: {
-                  type: 'keyword',
-                  ignore_above: 32,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    packages: {
-      type: 'keyword',
-    },
-    policy_coordinator_idx: {
-      type: 'integer',
-    },
-    policy_id: {
-      type: 'keyword',
-    },
-    policy_revision_idx: {
-      type: 'integer',
-    },
-    shared_id: {
-      type: 'keyword',
-    },
-    enrollment_id: {
-      type: 'keyword',
-    },
-    type: {
-      type: 'keyword',
-    },
-    unenrolled_at: {
-      type: 'date',
-    },
-    unenrollment_started_at: {
-      type: 'date',
-    },
-    updated_at: {
-      type: 'date',
-    },
-    upgrade_started_at: {
-      type: 'date',
-    },
-    upgraded_at: {
-      type: 'date',
-    },
-    user_provided_metadata: {
-      type: 'object',
-      enabled: false,
-    },
-    tags: {
-      type: 'keyword',
-    },
-  },
-} as const;
-
-const enrollmentApiKeyMappings = {
-  properties: {
-    active: {
-      type: 'boolean',
-    },
-    api_key: {
-      type: 'keyword',
-    },
-    api_key_id: {
-      type: 'keyword',
-    },
-    created_at: {
-      type: 'date',
-    },
-    expire_at: {
-      type: 'date',
-    },
-    name: {
-      type: 'keyword',
-    },
-    policy_id: {
-      type: 'keyword',
-    },
-    updated_at: {
-      type: 'date',
-    },
-  },
-} as const;
 
 describe('ValidateFilterKueryNode validates real kueries through KueryNode', () => {
   describe('Agent policies', () => {
@@ -362,7 +31,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       const validationObject = validateFilterKueryNode({
         astFilter,
         types: [AGENT_POLICY_SAVED_OBJECT_TYPE],
-        indexMapping: agentPoliciesMappings,
+        indexMapping: AGENT_POLICY_MAPPINGS,
         storeValue: true,
       });
       expect(validationObject).toEqual([
@@ -383,7 +52,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       const validationObject = validateFilterKueryNode({
         astFilter,
         types: [AGENT_POLICY_SAVED_OBJECT_TYPE],
-        indexMapping: agentPoliciesMappings,
+        indexMapping: AGENT_POLICY_MAPPINGS,
         storeValue: true,
       });
       expect(validationObject).toEqual([
@@ -403,7 +72,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
           `${AGENT_POLICY_SAVED_OBJECT_TYPE}.download_source_id:some_id or (not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.download_source_id:*)`
         ),
         types: [AGENT_POLICY_SAVED_OBJECT_TYPE],
-        indexMapping: agentPoliciesMappings,
+        indexMapping: AGENT_POLICY_MAPPINGS,
         storeValue: true,
       });
 
@@ -432,7 +101,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       const validationObject = validateFilterKueryNode({
         astFilter,
         types: [AGENT_POLICY_SAVED_OBJECT_TYPE],
-        indexMapping: agentPoliciesMappings,
+        indexMapping: AGENT_POLICY_MAPPINGS,
         storeValue: true,
       });
 
@@ -468,7 +137,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       const validationObject = validateFilterKueryNode({
         astFilter,
         types: [AGENT_POLICY_SAVED_OBJECT_TYPE],
-        indexMapping: agentPoliciesMappings,
+        indexMapping: AGENT_POLICY_MAPPINGS,
         storeValue: true,
       });
       expect(validationObject).toEqual([
@@ -503,7 +172,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       const validationObject = validateFilterKueryNode({
         astFilter,
         types: [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
-        indexMapping: packagePoliciesMappings,
+        indexMapping: PACKAGE_POLICIES_MAPPINGS,
         storeValue: true,
       });
       expect(validationObject).toEqual([
@@ -524,7 +193,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       const validationObject = validateFilterKueryNode({
         astFilter,
         types: [AGENTS_PREFIX],
-        indexMapping: agentMappings,
+        indexMapping: AGENT_MAPPINGS,
         storeValue: true,
       });
       expect(validationObject).toEqual([
@@ -548,7 +217,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       const validationObject = validateFilterKueryNode({
         astFilter,
         types: [AGENTS_PREFIX],
-        indexMapping: agentMappings,
+        indexMapping: AGENT_MAPPINGS,
         storeValue: true,
       });
       expect(validationObject).toEqual([
@@ -576,7 +245,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       const validationObject = validateFilterKueryNode({
         astFilter,
         types: [AGENTS_PREFIX],
-        indexMapping: agentMappings,
+        indexMapping: AGENT_MAPPINGS,
         storeValue: true,
       });
       expect(validationObject).toEqual([
@@ -611,7 +280,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       const validationObject = validateFilterKueryNode({
         astFilter,
         types: [AGENTS_PREFIX],
-        indexMapping: agentMappings,
+        indexMapping: AGENT_MAPPINGS,
         storeValue: true,
       });
       expect(validationObject).toEqual([
@@ -646,7 +315,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       const validationObject = validateFilterKueryNode({
         astFilter,
         types: [AGENTS_PREFIX],
-        indexMapping: agentMappings,
+        indexMapping: AGENT_MAPPINGS,
         storeValue: true,
       });
       expect(validationObject).toEqual([
@@ -674,53 +343,50 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       ]);
     });
 
-    // TODO: fix
-    // this kuery should work (getAgentStatus)
     it('Test 6 - returns error if kuery is passed without a reference to the index', async () => {
       const astFilter = esKuery.fromKueryExpression(
-        `status:online or (status:updating or status:unenrolling or status:enrolling)`
+        `${AGENTS_PREFIX}.status:online or (${AGENTS_PREFIX}.status:updating or ${AGENTS_PREFIX}.status:unenrolling or ${AGENTS_PREFIX}.status:enrolling)`
       );
       const validationObject = validateFilterKueryNode({
         astFilter,
         types: [AGENTS_PREFIX],
-        indexMapping: agentMappings,
+        indexMapping: AGENT_MAPPINGS,
         storeValue: true,
       });
       expect(validationObject).toEqual([
         {
           astPath: 'arguments.0',
-          error: "This key 'status' need to be wrapped by a saved object type like fleet-agents",
-          isSavedObjectAttr: false,
-          key: 'status',
-          type: null,
+          error: null,
+          isSavedObjectAttr: true,
+          key: 'fleet-agents.status',
+          type: 'fleet-agents',
         },
         {
           astPath: 'arguments.1.arguments.0',
-          error: "This key 'status' need to be wrapped by a saved object type like fleet-agents",
-          isSavedObjectAttr: false,
-          key: 'status',
-          type: null,
+          error: null,
+          isSavedObjectAttr: true,
+          key: 'fleet-agents.status',
+          type: 'fleet-agents',
         },
         {
           astPath: 'arguments.1.arguments.1',
-          error: "This key 'status' need to be wrapped by a saved object type like fleet-agents",
-          isSavedObjectAttr: false,
-          key: 'status',
-          type: null,
+          error: null,
+          isSavedObjectAttr: true,
+          key: 'fleet-agents.status',
+          type: 'fleet-agents',
         },
         {
           astPath: 'arguments.1.arguments.2',
-          error: "This key 'status' need to be wrapped by a saved object type like fleet-agents",
-          isSavedObjectAttr: false,
-          key: 'status',
-          type: null,
+          error: null,
+          isSavedObjectAttr: true,
+          key: 'fleet-agents.status',
+          type: 'fleet-agents',
         },
       ]);
     });
   });
 
   describe('Enrollment Api keys', () => {
-    // should also tests kuerys from the search bar
     it('Test 1', async () => {
       const astFilter = esKuery.fromKueryExpression(
         `${FLEET_ENROLLMENT_API_PREFIX}.policy_id: policyId1`
@@ -728,7 +394,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
       const validationObject = validateFilterKueryNode({
         astFilter,
         types: [FLEET_ENROLLMENT_API_PREFIX],
-        indexMapping: enrollmentApiKeyMappings,
+        indexMapping: ENROLLMENT_API_KEY_MAPPINGS,
         storeValue: true,
       });
       expect(validationObject).toEqual([
@@ -740,6 +406,73 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
           type: 'fleet-enrollment-api-keys',
         },
       ]);
+    });
+  });
+});
+
+describe('isKueryValid validates real kueries', () => {
+  describe('Agent policies', () => {
+    it('Test 1 - search by data_output_id', async () => {
+      const isValid = isKueryValid(
+        `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id`,
+        [AGENT_POLICY_SAVED_OBJECT_TYPE],
+        AGENT_POLICY_MAPPINGS
+      );
+      expect(isValid).toEqual(true);
+    });
+  });
+
+  describe('Agents', () => {
+    it('Test 1 - search policy id', async () => {
+      const isValid = isKueryValid(
+        `${AGENTS_PREFIX}.policy_id: "policy_id"`,
+        [AGENTS_PREFIX],
+        AGENT_MAPPINGS
+      );
+      expect(isValid).toEqual(true);
+    });
+
+    it('Test 2 - invalid kuery', async () => {
+      expect(() =>
+        isKueryValid(
+          `status:online or (status:updating or status:unenrolling or status:enrolling)`,
+          [AGENTS_PREFIX],
+          AGENT_MAPPINGS
+        )
+      ).toThrowError();
+    });
+
+    it('Test 3 - valid kuery', async () => {
+      expect(
+        isKueryValid(
+          `${AGENTS_PREFIX}.status:online or (${AGENTS_PREFIX}.status:updating or ${AGENTS_PREFIX}.status:unenrolling or ${AGENTS_PREFIX}.status:enrolling)`,
+          [AGENTS_PREFIX],
+          AGENT_MAPPINGS
+        )
+      ).toEqual(true);
+    });
+  });
+
+  describe('Package policies', () => {
+    it('Test 1 - search by package name', async () => {
+      const isValid = isKueryValid(
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:packageName`,
+        [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+        PACKAGE_POLICIES_MAPPINGS
+      );
+      expect(isValid).toEqual(true);
+    });
+
+    it('Test 2 - invalid search by package name', async () => {
+      expect(() =>
+        isKueryValid(
+          `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:packageName`,
+          [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
+          PACKAGE_POLICIES_MAPPINGS
+        )
+      ).toThrowError(
+        `This key 'ingest-package-policies.package.name' does NOT match the filter proposition SavedObjectType.attributes.key`
+      );
     });
   });
 });

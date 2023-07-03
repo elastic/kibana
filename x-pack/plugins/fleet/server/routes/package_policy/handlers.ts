@@ -47,8 +47,14 @@ import type {
 import { installationStatuses } from '../../../common/constants';
 import { defaultFleetErrorHandler, PackagePolicyNotFoundError } from '../../errors';
 import { getInstallations, getPackageInfo } from '../../services/epm/packages';
-import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
+import {
+  PACKAGES_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICIES_MAPPINGS,
+} from '../../constants';
 import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
+import { isKueryValid } from '../utils/filter_utils';
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
@@ -62,6 +68,18 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const limitedToPackages = fleetContext.limitedToPackages;
+
+  const { kuery } = request.query;
+
+  try {
+    isKueryValid(kuery, [PACKAGE_POLICY_SAVED_OBJECT_TYPE], PACKAGE_POLICIES_MAPPINGS);
+  } catch (e) {
+    if (e.name === 'KQLSyntaxError') {
+      throw new Error(`KQLSyntaxError: ${e.message}`);
+    } else {
+      throw e;
+    }
+  }
 
   try {
     const { items, total, page, perPage } = await packagePolicyService.list(
