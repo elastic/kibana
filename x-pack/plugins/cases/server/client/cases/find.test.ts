@@ -8,7 +8,12 @@ import { v1 as uuidv1 } from 'uuid';
 
 import type { Case } from '../../../common/api';
 
-import { MAX_CATEGORY_FILTER_LENGTH } from '../../../common/constants';
+import {
+  MAX_ASSIGNEES_FILTER_LENGTH,
+  MAX_CATEGORY_FILTER_LENGTH,
+  MAX_REPORTERS_FILTER_LENGTH,
+  MAX_TAGS_FILTER_LENGTH,
+} from '../../../common/constants';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs, createCasesClientMockFindRequest } from '../mocks';
@@ -112,6 +117,36 @@ describe('find', () => {
 
       await expect(find(findRequest, clientArgs)).rejects.toThrow(
         `Error: Too many categories provided. The maximum allowed is ${MAX_CATEGORY_FILTER_LENGTH}`
+      );
+    });
+
+    it(`throws an error when the tags array has ${MAX_TAGS_FILTER_LENGTH} items`, async () => {
+      const tags = Array(MAX_TAGS_FILTER_LENGTH + 1).fill('foobar');
+
+      const findRequest = createCasesClientMockFindRequest({ tags });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrowError(
+        `Error: The length of the field tags is too long. Array must be of length <= ${MAX_TAGS_FILTER_LENGTH}`
+      );
+    });
+
+    it(`throws an error when the assignees array has ${MAX_ASSIGNEES_FILTER_LENGTH} items`, async () => {
+      const assignees = Array(MAX_ASSIGNEES_FILTER_LENGTH + 1).fill('foobar');
+
+      const findRequest = createCasesClientMockFindRequest({ assignees });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrowError(
+        `Error: The length of the field assignees is too long. Array must be of length <= ${MAX_ASSIGNEES_FILTER_LENGTH}`
+      );
+    });
+
+    it(`throws an error when the reporters array has ${MAX_REPORTERS_FILTER_LENGTH} items`, async () => {
+      const reporters = Array(MAX_REPORTERS_FILTER_LENGTH + 1).fill('foobar');
+
+      const findRequest = createCasesClientMockFindRequest({ reporters });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrowError(
+        `Error: The length of the field reporters is too long. Array must be of length <= ${MAX_REPORTERS_FILTER_LENGTH}.`
       );
     });
   });

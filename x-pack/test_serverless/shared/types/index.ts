@@ -6,7 +6,8 @@
  */
 
 export interface CreateTestConfigOptions {
-  serverlessProject: 'es' | 'oblt' | 'security' | undefined;
+  serverlessProject: 'es' | 'oblt' | 'security';
   testFiles: string[];
   junit: { reportName: string };
+  suiteTags?: { include?: string[]; exclude?: string[] };
 }

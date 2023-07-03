@@ -56,6 +56,7 @@ describe('useGetEndpointActionList hook', () => {
 
     expect(apiMocks.responseProvider.actionList).toHaveBeenCalledWith({
       path: BASE_ENDPOINT_ACTION_ROUTE,
+      version: '2023-10-31',
       query: {
         agentIds: ['123', '456'],
         commands: ['isolate', 'unisolate'],
