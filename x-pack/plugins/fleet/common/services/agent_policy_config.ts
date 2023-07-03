@@ -9,15 +9,13 @@ import type { ILicense } from '@kbn/licensing-plugin/common/types';
 
 import type { AgentPolicy } from '../types';
 
-import { hasAtLeast } from './license';
-
 import { agentPolicyWithoutPaidFeatures } from './generate_new_agent_policy';
 
 function isAgentTamperingPolicyValidForLicense(
   policy: Partial<AgentPolicy>,
   license: ILicense | null
 ) {
-  if (hasAtLeast(license, 'platinum')) {
+  if (license.hasAtLeast('platinum')) {
     // platinum allows agent tamper protection
     return true;
   }
@@ -47,7 +45,7 @@ export const unsetAgentPolicyAccordingToLicenseLevel = (
   policy: Partial<AgentPolicy>,
   license: ILicense | null
 ): Partial<AgentPolicy> => {
-  if (hasAtLeast(license, 'platinum')) {
+  if (license.hasAtLeast('platinum')) {
     return policy;
   }
 

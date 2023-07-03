@@ -58,7 +58,3 @@ export class LicenseService {
     );
   }
 }
-
-export const hasAtLeast = (license: ILicense | null, level: LicenseType): boolean => {
-  return !!license && license.isAvailable && license.isActive && license.hasAtLeast(level);
-};
