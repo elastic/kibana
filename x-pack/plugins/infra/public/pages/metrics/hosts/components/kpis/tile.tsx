@@ -85,13 +85,14 @@ export const Tile = ({
 
   const filters = useMemo(() => {
     return [
+      ...searchCriteria.filters,
       buildCombinedHostsFilter({
         field: 'host.name',
         values: hostNodes.map((p) => p.name),
         dataView,
       }),
     ];
-  }, [hostNodes, dataView]);
+  }, [searchCriteria.filters, hostNodes, dataView]);
 
   const handleBrushEnd = useCallback(
     ({ range }: BrushTriggerEvent['data']) => {
@@ -122,9 +123,10 @@ export const Tile = ({
     () =>
       getExtraActions({
         timeRange: afterLoadedState.dateRange,
+        query: searchCriteria.query,
         filters,
       }),
-    [afterLoadedState.dateRange, filters, getExtraActions]
+    [afterLoadedState.dateRange, filters, getExtraActions, searchCriteria.query]
   );
 
   return (
@@ -168,6 +170,7 @@ export const Tile = ({
               lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
               dateRange={afterLoadedState.dateRange}
               filters={afterLoadedState.filters}
+              query={afterLoadedState.query}
               onBrushEnd={handleBrushEnd}
               loading={loading}
             />
