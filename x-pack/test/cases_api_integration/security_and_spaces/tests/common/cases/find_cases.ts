@@ -8,7 +8,13 @@
 import { v1 as uuidv1 } from 'uuid';
 
 import expect from '@kbn/expect';
-import { CASES_URL, MAX_CATEGORY_FILTER_LENGTH } from '@kbn/cases-plugin/common/constants';
+import {
+  CASES_URL,
+  MAX_ASSIGNEES_FILTER_LENGTH,
+  MAX_CATEGORY_FILTER_LENGTH,
+  MAX_REPORTERS_FILTER_LENGTH,
+  MAX_TAGS_FILTER_LENGTH,
+} from '@kbn/cases-plugin/common/constants';
 import { Case, CaseSeverity, CaseStatuses, CommentType } from '@kbn/cases-plugin/common/api';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -307,20 +313,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('unhappy path - 400s when bad query supplied', async () => {
-        await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
-      });
-
-      for (const field of ['owner', 'tags', 'severity', 'status']) {
-        it(`should return a 400 when attempting to query a keyword field [${field}] when using a wildcard query`, async () => {
-          await findCases({
-            supertest,
-            query: { searchFields: [field], search: 'some search string*' },
-            expectedHttpCode: 400,
-          });
-        });
-      }
-
       it('sorts by severity', async () => {
         const case4 = await createCase(supertest, {
           ...postCaseReq,
@@ -349,10 +341,37 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('unhappy path - 400s when more than the maximum category fields are supplied', async () => {
-        const category = Array(MAX_CATEGORY_FILTER_LENGTH + 1).fill('foobar');
+      describe('errors', () => {
+        it('unhappy path - 400s when bad query supplied', async () => {
+          await findCases({ supertest, query: { perPage: true }, expectedHttpCode: 400 });
+        });
 
-        await findCases({ supertest, query: { category }, expectedHttpCode: 400 });
+        for (const field of ['owner', 'tags', 'severity', 'status']) {
+          it(`should return a 400 when attempting to query a keyword field [${field}] when using a wildcard query`, async () => {
+            await findCases({
+              supertest,
+              query: { searchFields: [field], search: 'some search string*' },
+              expectedHttpCode: 400,
+            });
+          });
+        }
+
+        for (const scenario of [
+          { fieldName: 'category', sizeLimit: MAX_CATEGORY_FILTER_LENGTH },
+          { fieldName: 'tags', sizeLimit: MAX_TAGS_FILTER_LENGTH },
+          { fieldName: 'assignees', sizeLimit: MAX_ASSIGNEES_FILTER_LENGTH },
+          { fieldName: 'reporters', sizeLimit: MAX_REPORTERS_FILTER_LENGTH },
+        ]) {
+          it(`unhappy path - 400s when the field ${scenario.fieldName} exceeds the size limit`, async () => {
+            const value = Array(scenario.sizeLimit + 1).fill('foobar');
+
+            await findCases({
+              supertest,
+              query: { [scenario.fieldName]: value },
+              expectedHttpCode: 400,
+            });
+          });
+        }
       });
 
       describe('search and searchField', () => {

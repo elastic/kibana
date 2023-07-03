@@ -21,7 +21,7 @@ export function AiopsProvider(context: FtrProviderContext) {
   const explainLogRateSpikesAnalysisGroupsTable =
     ExplainLogRateSpikesAnalysisGroupsTableProvider(context);
   const explainLogRateSpikesDataGenerator = ExplainLogRateSpikesDataGeneratorProvider(context);
-  const logPatternAnalysisPageProvider = LogPatternAnalysisPageProvider(context);
+  const logPatternAnalysisPage = LogPatternAnalysisPageProvider(context);
 
   const tableService = MlTableServiceProvider(context);
 
@@ -33,6 +33,6 @@ export function AiopsProvider(context: FtrProviderContext) {
     explainLogRateSpikesAnalysisTable,
     explainLogRateSpikesAnalysisGroupsTable,
     explainLogRateSpikesDataGenerator,
-    logPatternAnalysisPageProvider,
+    logPatternAnalysisPage,
   };
 }
