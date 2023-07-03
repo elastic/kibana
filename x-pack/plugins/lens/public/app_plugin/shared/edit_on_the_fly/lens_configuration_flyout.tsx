@@ -13,7 +13,6 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
   useEuiTheme,
   EuiCallOut,
 } from '@elastic/eui';
