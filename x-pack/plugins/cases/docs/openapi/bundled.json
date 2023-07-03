@@ -12,24 +12,16 @@
       "url": "https://www.elastic.co/licensing/elastic-license"
     }
   },
-  "servers": [
-    {
-      "url": "http://localhost:5601",
-      "description": "local"
-    }
-  ],
-  "security": [
-    {
-      "basicAuth": []
-    },
-    {
-      "apiKeyAuth": []
-    }
-  ],
   "tags": [
     {
       "name": "cases",
       "description": "Case APIs enable you to open and track issues."
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://localhost:5601",
+      "description": "local"
     }
   ],
   "paths": {
@@ -5213,6 +5205,8 @@
           "cases": {
             "type": "array",
             "description": "An array containing one or more case objects.",
+            "maxItems": 100,
+            "minItems": 1,
             "items": {
               "type": "object",
               "required": [
@@ -7161,5 +7155,13 @@
         ]
       }
     }
-  }
+  },
+  "security": [
+    {
+      "basicAuth": []
+    },
+    {
+      "apiKeyAuth": []
+    }
+  ]
 }

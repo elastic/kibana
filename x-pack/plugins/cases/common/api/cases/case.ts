@@ -24,6 +24,7 @@ import {
   MAX_ASSIGNEES_FILTER_LENGTH,
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
+  MAX_CASES_TO_UPDATE,
 } from '../../constants';
 
 export const AttachmentTotalsRt = rt.strict({
@@ -420,7 +421,10 @@ export const CasePatchRequestRt = rt.intersection([
   rt.strict({ id: rt.string, version: rt.string }),
 ]);
 
-export const CasesPatchRequestRt = rt.strict({ cases: rt.array(CasePatchRequestRt) });
+export const CasesPatchRequestRt = rt.strict({
+  cases: limitedArraySchema(CasePatchRequestRt, 1, MAX_CASES_TO_UPDATE, 'cases'),
+});
+
 export const CasesRt = rt.array(CaseRt);
 
 export const CasePushRequestParamsRt = rt.strict({
