@@ -122,6 +122,16 @@ export const usePivotConfig = (
       const config: PivotGroupByConfig = groupByOptionsData[label];
       let aggName: AggName = config.aggName;
 
+      const aggNameConflictMessages = getAggNameConflictToastMessages(
+        aggName,
+        aggList,
+        groupByList
+      );
+      if (aggNameConflictMessages.length > 0) {
+        aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
+        return;
+      }
+
       const { newAggName, toastMsg: aggRenamedInfoMsg } = getRenamedAggNameAndMsgDueToConflict(
         aggName,
         aggList,
@@ -133,16 +143,6 @@ export const usePivotConfig = (
         aggName = newAggName;
         config.aggName = aggName;
         toastNotifications.addInfo({ text: aggRenamedInfoMsg });
-      } else {
-        const aggNameConflictMessages = getAggNameConflictToastMessages(
-          aggName,
-          aggList,
-          groupByList
-        );
-        if (aggNameConflictMessages.length > 0) {
-          aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
-          return;
-        }
       }
 
       groupByList[aggName] = config;
@@ -236,23 +236,21 @@ export const usePivotConfig = (
         aggList,
         groupByList
       );
+      const aggNameConflictMessages = getAggNameConflictToastMessages(
+        aggName,
+        aggList,
+        groupByList
+      );
+      if (aggNameConflictMessages.length > 0) {
+        aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
+        return;
+      }
 
       if (newAggName && aggRenamedInfoMsg) {
         toastNotifications.addInfo({ text: aggRenamedInfoMsg });
         aggName = newAggName;
         config.aggName = aggName;
-      } else {
-        const aggNameConflictMessages = getAggNameConflictToastMessages(
-          aggName,
-          aggList,
-          groupByList
-        );
-        if (aggNameConflictMessages.length > 0) {
-          aggNameConflictMessages.forEach((m) => toastNotifications.addDanger(m));
-          return;
-        }
       }
-
       aggList[aggName] = config;
       setAggList({ ...aggList });
     },

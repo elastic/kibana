@@ -91,7 +91,11 @@ export function getAggNameConflictToastMessages(
   let aggNameCheck: string;
   aggNameSplit.forEach((aggNamePart: string) => {
     aggNameCheck = aggNameCheck === undefined ? aggNamePart : `${aggNameCheck}.${aggNamePart}`;
-    if (aggList[aggNameCheck] !== undefined || groupByList[aggNameCheck] !== undefined) {
+
+    if (
+      (aggList[aggNameCheck] !== undefined || groupByList[aggNameCheck] !== undefined) &&
+      groupByList[aggNameCheck].agg !== PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM
+    ) {
       conflicts.push(
         i18n.translate('xpack.transform.stepDefineForm.nestedConflictErrorMessage', {
           defaultMessage: `Couldn't add configuration '{aggName}' because of a nesting conflict with '{aggNameCheck}'.`,
