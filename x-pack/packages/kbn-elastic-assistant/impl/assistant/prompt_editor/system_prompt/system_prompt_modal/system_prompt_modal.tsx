@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -75,11 +75,13 @@ export const SystemPromptModal: React.FC<Props> = React.memo(
       []
     );
 
-    const updatedConversationWithPrompts = useMemo(() => {
-      // currentPromptConversations is the list of all conversation for which the selected
-      // prompt is applicable. So we need to remove any conversation for which prompt
-      // was already existing but does not exists as of now.
-
+    /*
+     * updatedConversationWithPrompts calculates the present of prompt for
+     * each conversation. Based on the values of selected conversation, it goes
+     * through each conversation adds/removed the selected prompt on each conversation.
+     *
+     * */
+    const getUpdatedConversationWithPrompts = useCallback(() => {
       const currentPromptConversationIds = selectedConversations.map((convo) => convo.id);
 
       const allConversations = Object.values(conversations).map((convo) => ({
@@ -155,8 +157,9 @@ export const SystemPromptModal: React.FC<Props> = React.memo(
     }, []);
 
     const handleSave = useCallback(() => {
-      onSystemPromptsChange(updatedSystemPrompts, updatedConversationWithPrompts);
-    }, [onSystemPromptsChange, updatedSystemPrompts, updatedConversationWithPrompts]);
+      const updatedConversations = getUpdatedConversationWithPrompts();
+      onSystemPromptsChange(updatedSystemPrompts, updatedConversations);
+    }, [onSystemPromptsChange, updatedSystemPrompts, getUpdatedConversationWithPrompts]);
 
     // useEffects
     // Update system prompts on any field change since editing is in place
