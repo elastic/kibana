@@ -7,7 +7,6 @@
 
 import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import pMap from 'p-map';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { GetCspRuleTemplateRequest, GetCspRuleTemplateResponse } from '../../../common/types';
 import { CspRuleTemplate } from '../../../common/schemas';
