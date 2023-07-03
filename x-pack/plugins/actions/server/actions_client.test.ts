@@ -385,6 +385,7 @@ describe('create()', () => {
     expect(result).toEqual({
       id: '1',
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
@@ -532,6 +533,7 @@ describe('create()', () => {
     expect(result).toEqual({
       id: '1',
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: false,
       name: 'my name',
       actionTypeId: 'my-action-type',
@@ -722,6 +724,7 @@ describe('create()', () => {
           },
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -799,6 +802,7 @@ describe('get()', () => {
             },
             isPreconfigured: true,
             isDeprecated: false,
+            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -860,6 +864,7 @@ describe('get()', () => {
             },
             isPreconfigured: true,
             isDeprecated: false,
+            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -950,6 +955,7 @@ describe('get()', () => {
     expect(result).toEqual({
       id: '1',
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: false,
     });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
@@ -983,6 +989,7 @@ describe('get()', () => {
           },
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -999,6 +1006,7 @@ describe('get()', () => {
       actionTypeId: '.slack',
       isPreconfigured: true,
       isDeprecated: false,
+      isSystemAction: false,
       name: 'test',
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
@@ -1057,6 +1065,7 @@ describe('getAll()', () => {
             secrets: {},
             isPreconfigured: true,
             isDeprecated: false,
+            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -1200,6 +1209,7 @@ describe('getAll()', () => {
           secrets: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -1214,6 +1224,7 @@ describe('getAll()', () => {
       {
         id: '1',
         isPreconfigured: false,
+        isSystemAction: false,
         isDeprecated: false,
         name: 'test',
         config: {
@@ -1226,6 +1237,7 @@ describe('getAll()', () => {
         id: 'testPreconfigured',
         actionTypeId: '.slack',
         isPreconfigured: true,
+        isSystemAction: false,
         isDeprecated: false,
         name: 'test',
         referencedByCount: 2,
@@ -1283,6 +1295,7 @@ describe('getBulk()', () => {
             secrets: {},
             isPreconfigured: true,
             isDeprecated: false,
+            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
@@ -1420,6 +1433,7 @@ describe('getBulk()', () => {
           secrets: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -1438,6 +1452,7 @@ describe('getBulk()', () => {
         },
         id: 'testPreconfigured',
         isPreconfigured: true,
+        isSystemAction: false,
         isDeprecated: false,
         name: 'test',
         secrets: {},
@@ -1450,6 +1465,7 @@ describe('getBulk()', () => {
         id: '1',
         isMissingSecrets: false,
         isPreconfigured: false,
+        isSystemAction: false,
         isDeprecated: false,
         name: 'test',
       },
@@ -1479,6 +1495,7 @@ describe('getOAuthAccessToken()', () => {
           actionTypeId: '.slack',
           secrets: {},
           isPreconfigured: true,
+          isSystemAction: false,
           isDeprecated: false,
           name: 'test',
           config: {
@@ -1982,6 +1999,7 @@ describe('update()', () => {
     expect(result).toEqual({
       id: 'my-action',
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: false,
@@ -2060,6 +2078,7 @@ describe('update()', () => {
     expect(result).toEqual({
       id: 'my-action',
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: true,
@@ -2217,6 +2236,7 @@ describe('update()', () => {
     expect(result).toEqual({
       id: 'my-action',
       isPreconfigured: false,
+      isSystemAction: false,
       isDeprecated: false,
       actionTypeId: 'my-action-type',
       isMissingSecrets: true,
@@ -2703,6 +2723,7 @@ describe('isPreconfigured()', () => {
           },
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
@@ -2742,6 +2763,7 @@ describe('isPreconfigured()', () => {
           },
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',

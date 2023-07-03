@@ -74,6 +74,8 @@ export const CoverageOverviewFilter = t.partial({
 });
 
 export type CoverageOverviewRequestBody = t.TypeOf<typeof CoverageOverviewRequestBody>;
-export const CoverageOverviewRequestBody = t.partial({
-  filter: CoverageOverviewFilter,
-});
+export const CoverageOverviewRequestBody = t.exact(
+  t.partial({
+    filter: CoverageOverviewFilter,
+  })
+);

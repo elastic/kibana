@@ -17,7 +17,7 @@ pageLoadAssetSize:
   cloudExperiments: 59358
   cloudFullStory: 18493
   cloudGainsight: 18710
-  cloudLinks: 17629
+  cloudLinks: 55984
   cloudSecurityPosture: 19109
   console: 46091
   contentManagement: 16254
@@ -36,6 +36,7 @@ pageLoadAssetSize:
   devTools: 38637
   discover: 99999
   discoverEnhanced: 42730
+  discoverLogExplorer: 39045
   embeddable: 87309
   embeddableEnhanced: 22107
   enterpriseSearch: 50858
