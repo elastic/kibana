@@ -11,7 +11,13 @@ import React, { MouseEvent } from 'react';
 import { EuiToolTip, EuiButton, EuiHeaderLink, EuiBetaBadge } from '@elastic/eui';
 import { TopNavMenuData } from './top_nav_menu_data';
 
-export function TopNavMenuItem(props: TopNavMenuData) {
+export function TopNavMenuItem(itemProps: TopNavMenuData) {
+  const { render, ...props } = itemProps;
+
+  if (render) {
+    return render({ props });
+  }
+
   function isDisabled(): boolean {
     const val = isFunction(props.disableButton) ? props.disableButton() : props.disableButton;
     return val!;

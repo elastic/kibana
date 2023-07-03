@@ -51,6 +51,8 @@ import type {
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { CloudCollaborationPluginStart } from '@kbn/cloud-collaboration-plugin/public';
 
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
@@ -88,6 +90,8 @@ export interface DashboardSetupDependencies {
 }
 
 export interface DashboardStartDependencies {
+  cloud?: CloudStart;
+  cloudCollaboration?: CloudCollaborationPluginStart;
   data: DataPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
   embeddable: EmbeddableStart;

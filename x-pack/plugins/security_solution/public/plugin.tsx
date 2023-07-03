@@ -172,6 +172,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         getStartedComponent$: this.getStartedComponent$,
         upselling: this.upsellingService,
         telemetry: this.telemetry.start(),
+        cloudCollaboration: startPluginsDeps.cloudCollaboration,
       };
       return services;
     };

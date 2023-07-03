@@ -28,6 +28,8 @@
       "unifiedSearch"
     ],
     "optionalPlugins": [
+      "cloud",
+      "cloudCollaboration",
       "home",
       "spaces",
       "savedObjectsTaggingOss",
@@ -35,6 +37,10 @@
       "usageCollection",
       "taskManager"
     ],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "presentationUtil"]
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+      "presentationUtil",
+    ]
   }
 }

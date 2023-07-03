@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type { ChromeStart } from '@kbn/core-chrome-browser';
 
-export interface DashboardChromeService {
-  docTitle: CoreStart['chrome']['docTitle'];
-  setBadge: CoreStart['chrome']['setBadge'];
-  getIsVisible$: CoreStart['chrome']['getIsVisible$'];
-  recentlyAccessed: CoreStart['chrome']['recentlyAccessed'];
-  setBreadcrumbs: CoreStart['chrome']['setBreadcrumbs'];
-  setHelpExtension: CoreStart['chrome']['setHelpExtension'];
-  setIsVisible: CoreStart['chrome']['setIsVisible'];
-}
+export type DashboardChromeService = Pick<
+  ChromeStart,
+  | 'docTitle'
+  | 'setBadge'
+  | 'getIsVisible$'
+  | 'recentlyAccessed'
+  | 'setBreadcrumbs'
+  | 'setHelpExtension'
+  | 'setIsVisible'
+>;

@@ -82,6 +82,14 @@ export function DashboardApp({
     settings: { uiSettings },
     data: { search },
     customBranding,
+    cloud: {
+      clearBreadcrumbPresence,
+      CollaborationContextProvider,
+      isCollaborationAvailable,
+      setBreadcrumbPresence,
+      setPageTitle,
+      clearPageTitle,
+    },
   } = pluginServices.getServices();
   const showPlainSpinner = useObservable(customBranding.hasCustomBranding$, false);
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
@@ -184,13 +192,34 @@ export function DashboardApp({
     return () => stopWatchingAppStateInUrl();
   }, [dashboardAPI, kbnUrlStateStorage, savedDashboardId]);
 
+  useEffect(() => {
+    if (!showNoDataPage && isCollaborationAvailable && savedDashboardId) {
+      setBreadcrumbPresence('dashboard', savedDashboardId);
+      setPageTitle(dashboardAPI?.getTitle() || null);
+    }
+
+    return () => {
+      clearBreadcrumbPresence();
+      clearPageTitle();
+    };
+  }, [
+    isCollaborationAvailable,
+    setBreadcrumbPresence,
+    clearBreadcrumbPresence,
+    dashboardAPI,
+    savedDashboardId,
+    showNoDataPage,
+    setPageTitle,
+    clearPageTitle,
+  ]);
+
   return (
     <div className="dshAppWrapper">
       {showNoDataPage && (
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
       {!showNoDataPage && (
-        <>
+        <CollaborationContextProvider>
           {dashboardAPI && (
             <DashboardAPIContext.Provider value={dashboardAPI}>
               <DashboardTopNav redirectTo={redirectTo} embedSettings={embedSettings} />
@@ -206,7 +235,7 @@ export function DashboardApp({
             showPlainSpinner={showPlainSpinner}
             getCreationOptions={getCreationOptions}
           />
-        </>
+        </CollaborationContextProvider>
       )}
     </div>
   );

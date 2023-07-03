@@ -68,6 +68,8 @@
     "@kbn/field-types",
     "@kbn/content-management-utils",
     "@kbn/core-saved-objects-server",
+    "@kbn/cloud-collaboration-plugin",
+    "@kbn/cloud-collaboration-threads",
     "@kbn/maps-vector-tile-utils",
     "@kbn/core-http-common",
     "@kbn/content-management-table-list-view-table",

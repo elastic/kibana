@@ -467,6 +467,10 @@ for inventory and topology purposes.
 |This plugin exists as a workaround for using cloudChat plugin in plugins which can't have a direct dependency on security plugin.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_collaboration/README.md[cloudCollaboration]
+|A Kibana plugin
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_data_migration/README.md[cloudDataMigration]
 |Static migration page where self-managed users can see text/copy about migrating to Elastic Cloud
 

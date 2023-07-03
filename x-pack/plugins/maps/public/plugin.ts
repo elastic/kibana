@@ -46,6 +46,7 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 
+import { CloudCollaborationPluginStart } from '@kbn/cloud-collaboration-plugin/public';
 import {
   createRegionMapFn,
   GEOHASH_GRID,
@@ -121,6 +122,7 @@ export interface MapsPluginStartDependencies {
   contentManagement: ContentManagementPublicStart;
   screenshotMode?: ScreenshotModePluginSetup;
   usageCollection?: UsageCollectionSetup;
+  cloudCollaboration?: CloudCollaborationPluginStart;
 }
 
 /**

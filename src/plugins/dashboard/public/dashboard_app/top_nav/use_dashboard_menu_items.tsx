@@ -6,12 +6,15 @@
  * Side Public License, v 1.
  */
 
+import React, { useRef } from 'react';
 import { batch } from 'react-redux';
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
+import { ThreadButton } from '@kbn/cloud-collaboration-threads';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { UI_SETTINGS } from '../../../common';
 import { useDashboardAPI } from '../dashboard_app';
 import { topNavStrings } from '../_dashboard_app_strings';
@@ -31,6 +34,7 @@ export const useDashboardMenuItems = ({
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
 }) => {
+  const stateStorage = useRef(createKbnUrlStateStorage());
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
   /**
@@ -40,6 +44,7 @@ export const useDashboardMenuItems = ({
     share,
     settings: { uiSettings },
     dashboardCapabilities: { showWriteControls },
+    cloud: { isCollaborationAvailable, CollaborationContextProvider },
   } = pluginServices.getServices();
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
 
@@ -163,6 +168,24 @@ export const useDashboardMenuItems = ({
         },
       } as TopNavMenuData,
 
+      threads: {
+        ...topNavStrings.threads,
+        id: 'threads',
+        run: () => {},
+        render: () => {
+          return lastSavedId ? (
+            <CollaborationContextProvider>
+              <ThreadButton
+                application="dashboard"
+                savedObjectId={lastSavedId}
+                savedObjectName={dashboardTitle}
+                kbnStateStorage={stateStorage.current}
+              />
+            </CollaborationContextProvider>
+          ) : null;
+        },
+      } as TopNavMenuData,
+
       quickSave: {
         ...topNavStrings.quickSave,
         id: 'quick-save',
@@ -230,6 +253,8 @@ export const useDashboardMenuItems = ({
     showShare,
     dashboard,
     clone,
+    CollaborationContextProvider,
+    dashboardTitle,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
@@ -253,6 +278,7 @@ export const useDashboardMenuItems = ({
     const shareMenuItem = share ? [menuItems.share] : [];
     const cloneMenuItem = showWriteControls ? [menuItems.clone] : [];
     const editMenuItem = showWriteControls ? [menuItems.edit] : [];
+    const threadsMenuItem = isCollaborationAvailable && lastSavedId ? [menuItems.threads] : [];
     return [
       ...labsMenuItem,
       menuItems.fullScreen,
@@ -260,8 +286,17 @@ export const useDashboardMenuItems = ({
       ...cloneMenuItem,
       resetChangesMenuItem,
       ...editMenuItem,
+      ...threadsMenuItem,
     ];
-  }, [menuItems, share, showWriteControls, resetChangesMenuItem, isLabsEnabled]);
+  }, [
+    menuItems,
+    share,
+    showWriteControls,
+    resetChangesMenuItem,
+    isLabsEnabled,
+    lastSavedId,
+    isCollaborationAvailable,
+  ]);
 
   const editModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];

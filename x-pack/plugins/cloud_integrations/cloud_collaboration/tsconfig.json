@@ -1,0 +1,27 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/cloud-plugin",
+    "@kbn/core-http-browser",
+    "@kbn/config-schema",
+    "@kbn/security-plugin",
+    "@kbn/cloud-collaboration-presence",
+    "@kbn/cloud-collaboration-notifications",
+    "@kbn/kibana-react-plugin",
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}
