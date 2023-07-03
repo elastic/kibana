@@ -295,10 +295,11 @@ export const MAX_LENGTH_ERROR = (field: string, length: number) =>
     defaultMessage: 'The length of the {field} is too long. The maximum length is {length}.',
   });
 
-export const MAX_TAGS_ERROR = (length: number) => i18n.translate('xpack.cases.createCase.maxTagsError', {
-  values: { length },
-  defaultMessage: 'The length of tags array is too long. Array must be of length <= {length}.'
-});
+export const MAX_TAGS_ERROR = (length: number) =>
+  i18n.translate('xpack.cases.createCase.maxTagsError', {
+    values: { length },
+    defaultMessage: 'The length of tags array is too long. Array must be of length <= {length}.',
+  });
 
 export const LINK_APPROPRIATE_LICENSE = i18n.translate('xpack.cases.common.appropriateLicense', {
   defaultMessage: 'appropriate license',

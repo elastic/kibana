@@ -57,7 +57,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
 
   const onClickEditIcon = useCallback(() => setEditMode(true), []);
   const onClickSubmit = useCallback((): void => {
-    if(!newTitle.trim().length) {
+    if (!newTitle.trim().length) {
       setErrors([i18n.REQUIRED_FIELD]);
       return;
     }
@@ -74,13 +74,10 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
     setErrors([]);
   }, [newTitle, onSubmit, title]);
 
-  const handleOnChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      setNewTitle(e.target.value);
-      setErrors([]);
-    },
-    []
-  );
+  const handleOnChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setNewTitle(e.target.value);
+    setErrors([]);
+  }, []);
 
   const hasErrors = errors.length > 0;
 

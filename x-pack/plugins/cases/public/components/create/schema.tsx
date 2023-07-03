@@ -9,7 +9,12 @@ import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form
 import { FIELD_TYPES, VALIDATION_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { CasePostRequest, ConnectorTypeFields } from '../../../common/api';
-import { MAX_TITLE_LENGTH, MAX_DESCRIPTION_LENGTH, MAX_LENGTH_PER_TAG, MAX_TAGS_PER_CASE } from '../../../common/constants';
+import {
+  MAX_TITLE_LENGTH,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_LENGTH_PER_TAG,
+  MAX_TAGS_PER_CASE,
+} from '../../../common/constants';
 import * as i18n from './translations';
 
 import { OptionalFieldLabel } from './optional_field_label';
@@ -41,8 +46,11 @@ export const schemaTags = {
       isBlocking: false,
     },
     {
-      validator: ({value}: { value: string | string []}) => {
-        if((!Array.isArray(value) && isTagCharactersInLimit(value)) || (Array.isArray(value) && value.length > 0 && value.find(isTagCharactersInLimit))) {
+      validator: ({ value }: { value: string | string[] }) => {
+        if (
+          (!Array.isArray(value) && isTagCharactersInLimit(value)) ||
+          (Array.isArray(value) && value.length > 0 && value.find(isTagCharactersInLimit))
+        ) {
           return {
             message: i18n.MAX_LENGTH_ERROR('tag', MAX_LENGTH_PER_TAG),
           };
@@ -52,11 +60,11 @@ export const schemaTags = {
       isBlocking: false,
     },
     {
-      validator: ({value}: { value: string []}) => {
-        if(Array.isArray(value) && value.length > MAX_TAGS_PER_CASE) {
+      validator: ({ value }: { value: string[] }) => {
+        if (Array.isArray(value) && value.length > MAX_TAGS_PER_CASE) {
           return {
             message: i18n.MAX_TAGS_ERROR(MAX_TAGS_PER_CASE),
-          }
+          };
         }
       },
     },
@@ -93,7 +101,7 @@ export const schema: FormSchema<FormProps> = {
         validator: emptyField(i18n.DESCRIPTION_REQUIRED),
       },
       {
-        validator:  maxLengthField({
+        validator: maxLengthField({
           length: MAX_DESCRIPTION_LENGTH,
           message: i18n.MAX_LENGTH_ERROR('description', MAX_DESCRIPTION_LENGTH),
         }),

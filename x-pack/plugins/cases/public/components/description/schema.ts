@@ -23,7 +23,7 @@ export const schema: FormSchema<Content> = {
         validator: emptyField(i18n.REQUIRED_FIELD),
       },
       {
-        validator:  maxLengthField({
+        validator: maxLengthField({
           length: MAX_DESCRIPTION_LENGTH,
           message: i18n.MAX_LENGTH_ERROR('description', MAX_DESCRIPTION_LENGTH),
         }),
