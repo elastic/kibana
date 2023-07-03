@@ -85,13 +85,14 @@ export const Tile = ({
 
   const filters = useMemo(() => {
     return [
+      ...searchCriteria.filters,
       buildCombinedHostsFilter({
         field: 'host.name',
         values: hostNodes.map((p) => p.name),
         dataView,
       }),
     ];
-  }, [hostNodes, dataView]);
+  }, [searchCriteria.filters, hostNodes, dataView]);
 
   const handleBrushEnd = useCallback(
     ({ range }: BrushTriggerEvent['data']) => {

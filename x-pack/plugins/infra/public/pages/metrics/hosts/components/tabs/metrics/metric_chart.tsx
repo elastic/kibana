@@ -65,13 +65,14 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
 
   const filters = useMemo(() => {
     return [
+      ...searchCriteria.filters,
       buildCombinedHostsFilter({
         field: 'host.name',
         values: currentPage.map((p) => p.name),
         dataView,
       }),
     ];
-  }, [currentPage, dataView]);
+  }, [currentPage, dataView, searchCriteria.filters]);
 
   const extraActions: Action[] = useMemo(
     () =>
