@@ -6,7 +6,7 @@
  */
 
 import type { CaseAssignees } from '../api';
-import { MAX_ASSIGNEES_PER_CASE, MAX_CATEGORY_LENGTH } from '../constants';
+import { MAX_ASSIGNEES_PER_CASE } from '../constants';
 
 export const isInvalidTag = (value: string) => value.trim() === '';
 
@@ -17,9 +17,3 @@ export const areTotalAssigneesInvalid = (assignees?: CaseAssignees): boolean => 
 
   return assignees.length > MAX_ASSIGNEES_PER_CASE;
 };
-
-export const isCategoryFieldInvalidString = (category?: string | null): boolean =>
-  category?.trim().length === 0;
-
-export const isCategoryFieldTooLong = (category?: string | null): boolean =>
-  category != null && category.length > MAX_CATEGORY_LENGTH;

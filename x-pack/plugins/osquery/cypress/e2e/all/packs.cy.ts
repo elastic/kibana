@@ -7,6 +7,8 @@
 
 import { recurse } from 'cypress-recurse';
 import { find } from 'lodash';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '../../../common/constants';
 import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
@@ -46,6 +48,7 @@ import {
   loadPack,
   cleanupAgentPolicy,
 } from '../../tasks/api_fixtures';
+import { request } from '../../tasks/common';
 
 describe('ALL - Packs', () => {
   let savedQueryId: string;
@@ -225,12 +228,17 @@ describe('ALL - Packs', () => {
             query: 'select * from uptime;',
           },
         };
-        cy.request('/internal/osquery/fleet_wrapper/package_policies').then((response) => {
+        request<{ items: PackagePolicy[] }>({
+          url: '/internal/osquery/fleet_wrapper/package_policies',
+          headers: {
+            'Elastic-Api-Version': API_VERSIONS.internal.v1,
+          },
+        }).then((response) => {
           const item = response.body.items.find(
-            (policy: { policy_id: string }) => policy.policy_id === 'fleet-server-policy'
+            (policy: PackagePolicy) => policy.policy_id === 'fleet-server-policy'
           );
 
-          expect(item.inputs[0].config.osquery.value.packs[packName].queries).to.deep.equal(
+          expect(item?.inputs[0].config?.osquery.value.packs[packName].queries).to.deep.equal(
             queries
           );
         });
@@ -829,10 +837,15 @@ describe('ALL - Packs', () => {
         addIntegration(agentPolicy);
         cy.contains('Add Elastic Agent later').click();
         cy.contains('osquery_manager-');
-        cy.request('/internal/osquery/fleet_wrapper/package_policies').then((response) => {
+        request<{ items: PackagePolicy[] }>({
+          url: '/internal/osquery/fleet_wrapper/package_policies',
+          headers: {
+            'Elastic-Api-Version': API_VERSIONS.internal.v1,
+          },
+        }).then((response) => {
           const item = find(response.body.items, ['policy_id', agentPolicyId]);
 
-          expect(item.inputs[0].config.osquery.value.packs[globalPack]).to.deep.equal({
+          expect(item?.inputs[0].config?.osquery.value.packs[globalPack]).to.deep.equal({
             shard: 100,
             queries: {},
           });
@@ -879,12 +892,17 @@ describe('ALL - Packs', () => {
         cy.contains(`Successfully created "${shardPack}" pack`);
         closeToastIfVisible();
 
-        cy.request('/internal/osquery/fleet_wrapper/package_policies').then((response) => {
+        request<{ items: PackagePolicy[] }>({
+          url: '/internal/osquery/fleet_wrapper/package_policies',
+          headers: {
+            'Elastic-Api-Version': API_VERSIONS.internal.v1,
+          },
+        }).then((response) => {
           const shardPolicy = response.body.items.find(
-            (policy: { policy_id: string }) => policy.policy_id === 'fleet-server-policy'
+            (policy: PackagePolicy) => policy.policy_id === 'fleet-server-policy'
           );
 
-          expect(shardPolicy.inputs[0].config.osquery.value.packs[shardPack]).to.deep.equal({
+          expect(shardPolicy?.inputs[0].config?.osquery.value.packs[shardPack]).to.deep.equal({
             shard: 15,
             queries: {},
           });
