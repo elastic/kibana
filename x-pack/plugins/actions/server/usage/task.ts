@@ -24,10 +24,10 @@ export function initializeActionsTelemetry(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  inMemoryConnectors: InMemoryConnector[],
+  getInMemoryConnectors: () => InMemoryConnector[],
   eventLogIndex: string
 ) {
-  registerActionsTelemetryTask(logger, taskManager, core, inMemoryConnectors, eventLogIndex);
+  registerActionsTelemetryTask(logger, taskManager, core, getInMemoryConnectors, eventLogIndex);
 }
 
 export function scheduleActionsTelemetry(logger: Logger, taskManager: TaskManagerStartContract) {
@@ -38,14 +38,14 @@ function registerActionsTelemetryTask(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
   core: CoreSetup,
-  inMemoryConnectors: InMemoryConnector[],
+  getInMemoryConnectors: () => InMemoryConnector[],
   eventLogIndex: string
 ) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
       title: 'Actions usage fetch task',
       timeout: '5m',
-      createTaskRunner: telemetryTaskRunner(logger, core, inMemoryConnectors, eventLogIndex),
+      createTaskRunner: telemetryTaskRunner(logger, core, getInMemoryConnectors, eventLogIndex),
     },
   });
 }
@@ -67,9 +67,17 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 export function telemetryTaskRunner(
   logger: Logger,
   core: CoreSetup,
-  inMemoryConnectors: InMemoryConnector[],
+  getInMemoryConnectors: () => InMemoryConnector[],
   eventLogIndex: string
 ) {
+  /**
+   * Filter out system actions from the
+   * inMemoryConnectors list.
+   */
+  const inMemoryConnectors = getInMemoryConnectors().filter(
+    (inMemoryConnector) => inMemoryConnector.isPreconfigured
+  );
+
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
     const getEsClient = () =>

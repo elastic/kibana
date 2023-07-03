@@ -80,7 +80,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
         type: so.type,
         id: so.id,
         type_id: so.typeId,
-        // set space_agnostic to true for preconfigured connectors
+        // set space_agnostic to true for in-memory connectors
         ...(so.type === 'action' && isInMemory ? { space_agnostic: isInMemory } : {}),
         ...(namespace ? { namespace } : {}),
       })),

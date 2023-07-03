@@ -64,7 +64,9 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
     }
 
     const connectors: InMemoryConnector[] = connectorIds
-      .map((connectorId) => inMemoryConnectors.find((pConnector) => pConnector.id === connectorId))
+      .map((connectorId) =>
+        inMemoryConnectors.find((inMemoryConnector) => inMemoryConnector.id === connectorId)
+      )
       .filter(Boolean) as InMemoryConnector[];
 
     connectors.forEach((connector) => {

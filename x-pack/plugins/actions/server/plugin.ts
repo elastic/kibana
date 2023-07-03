@@ -308,7 +308,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         this.telemetryLogger,
         plugins.taskManager,
         core,
-        this.inMemoryConnectors,
+        this.getInMemoryConnectors,
         eventLogIndex
       );
     }

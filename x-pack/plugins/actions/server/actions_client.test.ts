@@ -788,7 +788,7 @@ describe('create()', () => {
     );
   });
 
-  it('throws when creating a system connector where the action type is not registered by a system connector exists in the in-memory list', async () => {
+  it('throws when creating a system connector where the action type is not registered but a system connector exists in the in-memory list', async () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,

@@ -346,7 +346,7 @@ describe('execute()', () => {
       id: '123',
       type: 'action',
       attributes: {
-        actionTypeId: 'mock-action',
+        actionTypeId: '.cases',
       },
       references: [],
     });
@@ -530,7 +530,7 @@ describe('execute()', () => {
       id: '123',
       type: 'action',
       attributes: {
-        actionTypeId: 'mock-action',
+        actionTypeId: '.cases',
       },
       references: [],
     });
@@ -762,7 +762,7 @@ describe('execute()', () => {
       id: '123',
       type: 'action',
       attributes: {
-        actionTypeId: 'mock-action',
+        actionTypeId: '.cases',
       },
       references: [],
     });
@@ -1174,7 +1174,7 @@ describe('bulkExecute()', () => {
           id: '123',
           type: 'action',
           attributes: {
-            actionTypeId: 'mock-action',
+            actionTypeId: '.cases',
           },
           references: [],
         },
@@ -1389,7 +1389,7 @@ describe('bulkExecute()', () => {
           id: '123',
           type: 'action',
           attributes: {
-            actionTypeId: 'mock-action',
+            actionTypeId: '.cases',
           },
           references: [],
         },
@@ -1606,6 +1606,65 @@ describe('bulkExecute()', () => {
           type: 'action',
           attributes: {
             actionTypeId: 'mock-action',
+          },
+          references: [],
+        },
+      ],
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '234',
+          type: 'action_task_params',
+          attributes: {
+            actionId: '123',
+          },
+          references: [],
+        },
+      ],
+    });
+
+    await executeFn(savedObjectsClient, [
+      {
+        id: '123',
+        params: { baz: false },
+        spaceId: 'default',
+        executionId: '123abc',
+        apiKey: null,
+        source: asHttpRequestExecutionSource(request),
+      },
+    ]);
+
+    expect(mockedActionTypeRegistry.ensureActionTypeEnabled).not.toHaveBeenCalled();
+  });
+
+  test('should skip ensure action type if action type is system action and license is valid', async () => {
+    const mockedActionTypeRegistry = actionTypeRegistryMock.create();
+    const executeFn = createBulkExecutionEnqueuerFunction({
+      taskManager: mockTaskManager,
+      isESOCanEncrypt: true,
+      actionTypeRegistry: mockedActionTypeRegistry,
+      inMemoryConnectors: [
+        {
+          actionTypeId: '.cases',
+          config: {},
+          id: 'system-connector-.cases',
+          name: 'System action: .cases',
+          secrets: {},
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: true,
+        },
+      ],
+    });
+    mockedActionTypeRegistry.isActionExecutable.mockImplementation(() => true);
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '123',
+          type: 'action',
+          attributes: {
+            actionTypeId: '.cases',
           },
           references: [],
         },

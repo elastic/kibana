@@ -295,9 +295,10 @@ async function getAction(
   inMemoryConnectors: InMemoryConnector[],
   actionId: string
 ): Promise<{ action: InMemoryConnector | RawAction; isInMemory: boolean }> {
-  const pcAction = inMemoryConnectors.find((action) => action.id === actionId);
-  if (pcAction) {
-    return { action: pcAction, isInMemory: true };
+  const inMemoryAction = inMemoryConnectors.find((action) => action.id === actionId);
+
+  if (inMemoryAction) {
+    return { action: inMemoryAction, isInMemory: true };
   }
 
   const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>('action', actionId);
