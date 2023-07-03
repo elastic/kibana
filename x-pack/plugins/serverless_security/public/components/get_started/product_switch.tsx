@@ -8,30 +8,30 @@
 import { EuiPanel, EuiSwitch, EuiText, EuiThemeComputed, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
+import { ProductLine } from '../../../common/config';
 import * as i18n from './translations';
-import { ProductId, Switch } from './types';
+import { Switch } from './types';
 
 const switches: Switch[] = [
   {
-    id: ProductId.analytics,
+    id: ProductLine.security,
     label: i18n.ANALYTICS_SWITCH_LABEL,
   },
   {
-    id: ProductId.cloud,
+    id: ProductLine.cloud,
     label: i18n.CLOUD_SWITCH_LABEL,
   },
   {
-    id: ProductId.endpoint,
+    id: ProductLine.endpoint,
     label: i18n.ENDPOINT_SWITCH_LABEL,
   },
 ];
 
 const ProductSwitchComponent: React.FC<{
   onProductSwitchChanged: (item: Switch) => void;
-  activeProducts: Set<ProductId>;
-  shadow?: string;
+  activeProducts: Set<ProductLine>;
   euiTheme: EuiThemeComputed;
-}> = ({ onProductSwitchChanged, activeProducts, euiTheme, shadow = '' }) => {
+}> = ({ onProductSwitchChanged, activeProducts, euiTheme }) => {
   const switchNodes = useMemo(
     () =>
       switches.map((item) => (
@@ -58,8 +58,7 @@ const ProductSwitchComponent: React.FC<{
       paddingSize="none"
       hasShadow={false}
       css={css`
-        padding: ${euiTheme.base * 1.25}px ${euiTheme.base * 2.25}px;
-        ${shadow};
+        padding: ${euiTheme.base * 1.25}px 0;
       `}
       borderRadius="none"
     >
