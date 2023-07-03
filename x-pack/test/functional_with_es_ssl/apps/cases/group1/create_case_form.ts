@@ -66,10 +66,10 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       expect(await button.getVisibleText()).equal('Add connector');
     });
 
-    it('displays errors correctly while creating a cse', async () => {
-      const caseTitle = Array(81).fill('x').toString();
-      const longTag = Array(149).fill('a').toString();
-      const longCategory = Array(26).fill('x').toString();
+    it('displays errors correctly while creating a case', async () => {
+      const caseTitle = Array(161).fill('x').toString();
+      const longTag = Array(256).fill('a').toString();
+      const longCategory = Array(51).fill('x').toString();
 
       await cases.create.openCreateCasePage();
       await cases.create.createCase({

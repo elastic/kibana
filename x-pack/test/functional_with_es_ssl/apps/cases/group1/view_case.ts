@@ -76,8 +76,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('shows error message when title is more than 160 characters', async () => {
         const longTitle = Array(161).fill('x').toString();
 
-        // const newTitle = `test-${uuidv4()}`;
-
         await testSubjects.click('editable-title-edit-icon');
         await testSubjects.setValue('editable-title-input-field', longTitle);
         await testSubjects.click('editable-title-submit-btn');
