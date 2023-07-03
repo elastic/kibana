@@ -36,10 +36,14 @@ const RULE_2 = createRuleAssetSavedObject({
 describe('Rules selection', () => {
   before(() => {
     cleanKibana();
+  });
+
+  beforeEach(() => {
     login();
     /* Create and install two mock rules */
     createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2] });
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    waitForPrebuiltDetectionRulesToBeLoaded();
   });
 
   it('should correctly update the selection label when rules are individually selected and unselected', () => {
