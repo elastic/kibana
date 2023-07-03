@@ -67,35 +67,37 @@ export const EventAnnotationGroupSavedObjectFinder = ({
       direction="column"
       justifyContent="center"
     >
-      <EuiEmptyPrompt
-        titleSize="xs"
-        title={
-          <h2>
-            <FormattedMessage
-              id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyPromptTitle"
-              defaultMessage="Start by adding an annotation layer"
-            />
-          </h2>
-        }
-        body={
-          <EuiText size="s">
-            <p>
+      <EuiFlexItem>
+        <EuiEmptyPrompt
+          titleSize="xs"
+          title={
+            <h2>
               <FormattedMessage
-                id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyPromptDescription"
-                defaultMessage="There are currently no annotations available to select from the library. Create a new layer to add annotations."
+                id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyPromptTitle"
+                defaultMessage="Start by adding an annotation layer"
               />
-            </p>
-          </EuiText>
-        }
-        actions={
-          <EuiButton onClick={() => onCreateNew()} size="s">
-            <FormattedMessage
-              id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyCTA"
-              defaultMessage="Create annotation layer"
-            />
-          </EuiButton>
-        }
-      />
+            </h2>
+          }
+          body={
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyPromptDescription"
+                  defaultMessage="There are currently no annotations available to select from the library. Create a new layer to add annotations."
+                />
+              </p>
+            </EuiText>
+          }
+          actions={
+            <EuiButton onClick={() => onCreateNew()} size="s">
+              <FormattedMessage
+                id="eventAnnotation.eventAnnotationGroup.savedObjectFinder.emptyCTA"
+                defaultMessage="Create annotation layer"
+              />
+            </EuiButton>
+          }
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
     <SavedObjectFinder

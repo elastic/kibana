@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { SecuritySideNavigation } from './side_navigation';
 import { useSideNavItems, useSideNavSelectedId } from '../../hooks/use_side_nav_items';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
-import { KibanaServicesProvider } from '../../services.mock';
+import { KibanaServicesProvider } from '../../common/services.mock';
 
 jest.mock('../../hooks/use_side_nav_items');
 const mockUseSideNavItems = useSideNavItems as jest.Mock;
