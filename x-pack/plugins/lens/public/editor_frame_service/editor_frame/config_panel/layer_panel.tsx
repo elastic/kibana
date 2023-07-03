@@ -549,7 +549,7 @@ export function LayerPanel(
                   {group.accessors.length ? (
                     <ReorderProvider
                       id={group.groupId}
-                      className={'lnsLayerPanel__group'}
+                      className="lnsLayerPanel__group"
                       dataTestSubj="lnsDragDrop"
                     >
                       {group.accessors.map((accessorConfig, accessorIndex) => {
@@ -655,6 +655,7 @@ export function LayerPanel(
                         background-color: ${euiThemeVars.euiColorLightShade} !important;
                         border-color: transparent !important;
                         box-shadow: none !important;
+                        padding: 0 ${euiThemeVars.euiSizeS};
                       `}
                     >
                       <DimensionTrigger
