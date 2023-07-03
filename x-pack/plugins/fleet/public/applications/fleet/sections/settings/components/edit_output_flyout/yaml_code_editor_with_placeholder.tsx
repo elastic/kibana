@@ -75,7 +75,7 @@ export const YamlCodeEditorWithPlaceholder: React.FunctionComponent<
 
   return (
     <CodeEditorContainer>
-      <CodeEditor // TODO theme provided in context by x-pack/plugins/fleet/public/applications/fleet/app.tsx
+      <CodeEditor
         languageId="yaml"
         width="100%"
         height="116px"

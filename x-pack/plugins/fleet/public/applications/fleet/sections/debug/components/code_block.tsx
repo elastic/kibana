@@ -14,7 +14,7 @@ import { CodeEditor } from '@kbn/kibana-react-plugin/public';
  */
 export const CodeBlock: React.FunctionComponent<{ value: string }> = ({ value }) => {
   return (
-    <CodeEditor // TODO theme provided in context by x-pack/plugins/fleet/public/applications/fleet/app.tsx
+    <CodeEditor
       isCopyable
       languageId=""
       height="600px"
