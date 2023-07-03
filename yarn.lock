@@ -4630,7 +4630,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/management-cards-navigation@link:packages/kbn-management/cards_navigation":
+  version "0.0.0"
+  uid ""
+
 "@kbn/management-plugin@link:src/plugins/management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/management-storybook-config@link:packages/kbn-management/storybook/config":
   version "0.0.0"
   uid ""
 
@@ -4943,6 +4951,10 @@
   uid ""
 
 "@kbn/routing-example-plugin@link:examples/routing_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/rrule@link:packages/kbn-rrule":
   version "0.0.0"
   uid ""
 
@@ -5703,6 +5715,10 @@
   uid ""
 
 "@kbn/ux-plugin@link:x-pack/plugins/ux":
+  version "0.0.0"
+  uid ""
+
+"@kbn/v8-profiler-examples-plugin@link:examples/v8_profiler_examples":
   version "0.0.0"
   uid ""
 
@@ -18021,9 +18037,9 @@ inquirer@^8.2.3:
     wrap-ansi "^7.0.0"
 
 install-artifact-from-github@^1.3.0:
-  version "1.3.2"
-  resolved "https://registry.yarnpkg.com/install-artifact-from-github/-/install-artifact-from-github-1.3.2.tgz#1a16d9508e40330523a3017ae0d4713ccc64de82"
-  integrity sha512-yCFcLvqk0yQdxx0uJz4t9Z3adDMLAYrcGYv546uRXCSvxE+GqNYhhz/KmrGcUKGI/gVLR9n/e/zM9jX/+ASMJQ==
+  version "1.3.3"
+  resolved "https://registry.yarnpkg.com/install-artifact-from-github/-/install-artifact-from-github-1.3.3.tgz#57d89bacfa0f47d7307fe41b6247cda9f9a8079c"
+  integrity sha512-x79SL0d8WOi1ZjXSTUqqs0GPQZ92YArJAN9O46wgU9wdH2U9ecyyhB9YGDbPe2OLV4ptmt6AZYRQZ2GydQZosQ==
 
 internal-slot@^1.0.3:
   version "1.0.3"
@@ -20691,7 +20707,7 @@ lru-queue@0.1:
   dependencies:
     es5-ext "~0.10.2"
 
-luxon@^1.21.3, luxon@^1.25.0:
+luxon@^1.25.0:
   version "1.28.1"
   resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.28.1.tgz#528cdf3624a54506d710290a2341aa8e6e6c61b0"
   integrity sha512-gYHAa180mKrNIUJCbwpmD0aTu9kV0dREDrwNnuyFAsO1Wt0EVYSZelPnJlbj9HplzXX/YWXHFTL45kvZ53M0pw==
@@ -25661,15 +25677,6 @@ robust-predicates@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/robust-predicates/-/robust-predicates-3.0.1.tgz#ecde075044f7f30118682bd9fb3f123109577f9a"
   integrity sha512-ndEIpszUHiG4HtDsQLeIuMvRsDnn8c8rYStabochtUeCvfuvNptb5TUbVD68LRAILPX7p9nqQGh4xJgn3EHS/g==
-
-rrule@2.6.4:
-  version "2.6.4"
-  resolved "https://registry.yarnpkg.com/rrule/-/rrule-2.6.4.tgz#7f4f31fda12bc7249bb176c891109a9bc448e035"
-  integrity sha512-sLdnh4lmjUqq8liFiOUXD5kWp/FcnbDLPwq5YAc/RrN6120XOPb86Ae5zxF7ttBVq8O3LxjjORMEit1baluahA==
-  dependencies:
-    tslib "^1.10.0"
-  optionalDependencies:
-    luxon "^1.21.3"
 
 rst-selector-parser@^2.2.3:
   version "2.2.3"

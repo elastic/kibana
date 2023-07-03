@@ -827,7 +827,7 @@ export function XYChart({
           singleTable,
         }}
       >
-        <Chart ref={chartRef}>
+        <Chart ref={chartRef} {...getOverridesFor(overrides, 'chart')}>
           <Tooltip<Record<string, string | number>, XYChartSeriesIdentifier>
             boundary={document.getElementById('app-fixed-viewport') ?? undefined}
             headerFormatter={
