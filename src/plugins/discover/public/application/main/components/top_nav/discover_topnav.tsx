@@ -48,11 +48,13 @@ export const DiscoverTopNav = ({
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
   const savedSearch = useSavedSearchInitial();
   const [dataViewList, setDataViewList] = useState([dataView]);
+  const isDataViewMissing = !dataViewList.includes(dataView);
+  
   useEffect(() => {
-    if (!dataViewList.includes(dataView)) {
-      setDataViewList([dataView, ...dataViewList]);
+    if (isDataViewMissing) {
+      setDataViewList(currentDataViewList => [dataView, ...currentDataViewList.filter(dw => dw.id !== dataView.id)]);
     }
-  }, [dataView, dataViewList, setDataViewList]);
+  }, [dataView, isDataViewMissing, setDataViewList]);
   const showDatePicker = useMemo(() => {
     // always show the timepicker for text based languages
     return (
