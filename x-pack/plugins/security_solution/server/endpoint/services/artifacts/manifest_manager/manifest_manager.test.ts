@@ -42,6 +42,7 @@ import { ManifestManager } from './manifest_manager';
 import type { EndpointArtifactClientInterface } from '../artifact_client';
 import { InvalidInternalManifestError } from '../errors';
 import { EndpointError } from '../../../../../common/endpoint/errors';
+import type { Artifact } from '@kbn/fleet-plugin/server';
 
 const getArtifactObject = (artifact: InternalArtifactSchema) =>
   JSON.parse(Buffer.from(artifact.body!, 'base64').toString());
@@ -195,8 +196,8 @@ describe('ManifestManager', () => {
 
       (
         manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
-      ).getArtifact.mockImplementation(async (id) => {
-        return ARTIFACTS_BY_ID[id];
+      ).listArtifacts.mockImplementation(async () => {
+        return { items: ARTIFACTS as Artifact[], total: 100, page: 1, perPage: 100 };
       });
 
       const manifest = await manifestManager.getLastComputedManifest();
@@ -254,9 +255,19 @@ describe('ManifestManager', () => {
 
       (
         manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>
-      ).getArtifact.mockImplementation(async (id) => {
+      ).listArtifacts.mockImplementation(async (id) => {
         // report the MACOS Exceptions artifact as not found
-        return id === ARTIFACT_ID_EXCEPTIONS_MACOS ? undefined : ARTIFACTS_BY_ID[id];
+        return {
+          items: [
+            ARTIFACT_TRUSTED_APPS_MACOS,
+            ARTIFACT_EXCEPTIONS_WINDOWS,
+            ARTIFACT_TRUSTED_APPS_WINDOWS,
+            ARTIFACTS_BY_ID[ARTIFACT_ID_EXCEPTIONS_LINUX],
+          ] as Artifact[],
+          total: 100,
+          page: 1,
+          perPage: 100,
+        };
       });
 
       const manifest = await manifestManager.getLastComputedManifest();
