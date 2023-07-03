@@ -9,7 +9,7 @@ import { EuiSpacer, EuiThemeComputed } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
-import { ActiveCard, CardId, SectionId, StepId } from './types';
+import { ActiveCards, CardId, SectionId, StepId } from './types';
 
 import { CardItem } from './card_item';
 import { getSections } from './sections';
@@ -30,7 +30,7 @@ export const useSetUpCardSections = ({
     }: {
       onStepClicked: (params: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => void;
       finishedSteps: Record<CardId, Set<StepId>>;
-      activeCards: Record<SectionId, Record<CardId, ActiveCard>> | null;
+      activeCards: ActiveCards | null;
       sectionId: SectionId;
     }) => {
       const section = activeCards?.[sectionId];
@@ -63,7 +63,7 @@ export const useSetUpCardSections = ({
     }: {
       onStepClicked: (params: { stepId: StepId; cardId: CardId; sectionId: SectionId }) => void;
       finishedSteps: Record<CardId, Set<StepId>>;
-      activeCards: Record<SectionId, Record<CardId, ActiveCard>> | null;
+      activeCards: ActiveCards | null;
     }) =>
       getSections().reduce<React.ReactNode[]>((acc, currentSection) => {
         const cardNodes = setUpCards({

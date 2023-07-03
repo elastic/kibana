@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Configuration, ConfigurationRequest } from '../../../common/api';
+import type { ConfigurationRequest } from '../../../common/types/api';
+import type { Configuration } from '../../../common/types/domain';
 import { ConnectorTypes } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import type { CaseConfigure, CaseConnectorMapping } from './types';
