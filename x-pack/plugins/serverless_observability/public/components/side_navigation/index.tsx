@@ -148,27 +148,6 @@ const navigationTree: NavigationTreeDefinition = {
             {
               link: 'fleet',
             },
-            {
-              id: 'users_and_roles',
-              href: 'https://cloud.elastic.co/',
-              title: i18n.translate('xpack.serverlessObservability.nav.users_and_roles', {
-                defaultMessage: 'Users and roles',
-              }),
-            },
-            {
-              id: 'performance',
-              href: 'https://cloud.elastic.co/',
-              title: i18n.translate('xpack.serverlessObservability.nav.performance', {
-                defaultMessage: 'Performance',
-              }),
-            },
-            {
-              id: 'billing_and_subscription',
-              href: 'https://cloud.elastic.co/',
-              title: i18n.translate('xpack.serverlessObservability.nav.users', {
-                defaultMessage: 'Billing and subscription',
-              }),
-            },
           ],
         },
       ],
