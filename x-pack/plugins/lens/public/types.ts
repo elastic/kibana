@@ -10,7 +10,7 @@ import type { CoreStart, SavedObjectReference, ResolvedSimpleSavedObject } from 
 import type { PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject } from 'react';
-import type { Filter, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, TimeRange } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
   IInterpreterRenderHandlers,
@@ -1409,7 +1409,7 @@ export type LensTopNavMenuEntryGenerator = (props: {
   visualizationId: string;
   datasourceStates: Record<string, { state: unknown }>;
   visualizationState: unknown;
-  query: Query;
+  query: Query | AggregateQuery;
   filters: Filter[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   currentDoc: Document | undefined;

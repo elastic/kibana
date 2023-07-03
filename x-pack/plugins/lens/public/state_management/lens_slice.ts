@@ -8,7 +8,6 @@
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
-import { Query } from '@kbn/es-query';
 import { History } from 'history';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
@@ -104,7 +103,7 @@ export const getPreloadedState = ({
       ? initialContext.searchQuery
       : 'query' in initialContext
       ? initialContext.query
-      : (data.query.queryString.getQuery() as Query),
+      : data.query.queryString.getQuery(),
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
       : 'searchFilters' in initialContext && initialContext.searchFilters
