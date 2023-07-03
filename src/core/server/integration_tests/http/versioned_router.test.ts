@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { captureErrorMock } from './versioned_router.test.mocks';
+
 import Supertest from 'supertest';
 import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 import { schema } from '@kbn/config-schema';
@@ -339,5 +341,22 @@ describe('Routing versioned requests', () => {
         .expect(200)
         .then(({ body }) => body.v)
     ).resolves.toEqual('oldest');
+  });
+
+  it('captures the error if handler throws', async () => {
+    const error = new Error(`some error`);
+
+    router.versioned
+      .get({ path: '/my-path', access: 'internal' })
+      .addVersion({ validate: false, version: '1' }, async (ctx, req, res) => {
+        throw error;
+      });
+
+    await server.start();
+
+    await supertest.get('/my-path').set('Elastic-Api-Version', '1').expect(500);
+
+    expect(captureErrorMock).toHaveBeenCalledTimes(1);
+    expect(captureErrorMock).toHaveBeenCalledWith(error);
   });
 });
