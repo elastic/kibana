@@ -19,6 +19,7 @@ const createActionTypeRegistryMock = () => {
     isActionExecutable: jest.fn(),
     isSystemActionType: jest.fn(),
     getUtils: jest.fn(),
+    getRequiredKibanaPrivileges: jest.fn(),
   };
   return mocked;
 };

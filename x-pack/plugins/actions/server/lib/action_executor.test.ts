@@ -14,7 +14,7 @@ import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
 import { ActionType } from '../types';
-import { actionsMock } from '../mocks';
+import { actionsAuthorizationMock, actionsMock } from '../mocks';
 import {
   asHttpRequestExecutionSource,
   asSavedObjectExecutionSource,
@@ -43,6 +43,10 @@ const loggerMock: ReturnType<typeof loggingSystemMock.createLogger> =
   loggingSystemMock.createLogger();
 const securityMockStart = securityMock.createStart();
 
+const getActionsAuthorizationWithRequest = jest
+  .fn()
+  .mockReturnValue(actionsAuthorizationMock.create());
+
 actionExecutor.initialize({
   logger: loggerMock,
   spaces: spacesMock,
@@ -51,6 +55,7 @@ actionExecutor.initialize({
   actionTypeRegistry,
   encryptedSavedObjectsClient,
   eventLogger,
+  getActionsAuthorizationWithRequest,
   inMemoryConnectors: [
     {
       id: 'preconfigured',
@@ -1141,6 +1146,7 @@ test('throws an error when passing isESOCanEncrypt with value of false', async (
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
     inMemoryConnectors: [],
+    getActionsAuthorizationWithRequest,
   });
   await expect(
     customActionExecutor.execute(executeParams)
@@ -1158,6 +1164,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
     actionTypeRegistry,
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
+    getActionsAuthorizationWithRequest,
     inMemoryConnectors: [
       {
         id: 'preconfigured',
@@ -1308,6 +1315,7 @@ test('should not throw error if action is system action and isESOCanEncrypt is f
     actionTypeRegistry,
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
+    getActionsAuthorizationWithRequest,
     inMemoryConnectors: [
       {
         actionTypeId: '.cases',

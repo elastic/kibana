@@ -42,7 +42,7 @@ describe('ensureAuthorized', () => {
       request,
     });
 
-    await actionsAuthorization.ensureAuthorized('create', 'myType');
+    await actionsAuthorization.ensureAuthorized({ operation: 'create', actionTypeId: 'myType' });
   });
 
   test('is a no-op when the security license is disabled', async () => {
@@ -53,7 +53,7 @@ describe('ensureAuthorized', () => {
       authorization,
     });
 
-    await actionsAuthorization.ensureAuthorized('create', 'myType');
+    await actionsAuthorization.ensureAuthorized({ operation: 'create', actionTypeId: 'myType' });
   });
 
   test('ensures the user has privileges to use the operation on the Actions Saved Object type', async () => {
@@ -78,11 +78,11 @@ describe('ensureAuthorized', () => {
       ],
     });
 
-    await actionsAuthorization.ensureAuthorized('create', 'myType');
+    await actionsAuthorization.ensureAuthorized({ operation: 'create', actionTypeId: 'myType' });
 
     expect(authorization.actions.savedObject.get).toHaveBeenCalledWith('action', 'create');
     expect(checkPrivileges).toHaveBeenCalledWith({
-      kibana: mockAuthorizationAction('action', 'create'),
+      kibana: [mockAuthorizationAction('action', 'create')],
     });
   });
 
@@ -108,7 +108,7 @@ describe('ensureAuthorized', () => {
       ],
     });
 
-    await actionsAuthorization.ensureAuthorized('execute', 'myType');
+    await actionsAuthorization.ensureAuthorized({ operation: 'execute', actionTypeId: 'myType' });
 
     expect(authorization.actions.savedObject.get).toHaveBeenCalledWith(
       ACTION_SAVED_OBJECT_TYPE,
@@ -153,7 +153,7 @@ describe('ensureAuthorized', () => {
     });
 
     await expect(
-      actionsAuthorization.ensureAuthorized('create', 'myType')
+      actionsAuthorization.ensureAuthorized({ operation: 'create', actionTypeId: 'myType' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unauthorized to create a \\"myType\\" action"`);
   });
 
@@ -174,7 +174,7 @@ describe('ensureAuthorized', () => {
       username: 'some-user',
     } as unknown as AuthenticatedUser);
 
-    await actionsAuthorization.ensureAuthorized('execute', 'myType');
+    await actionsAuthorization.ensureAuthorized({ operation: 'execute', actionTypeId: 'myType' });
 
     expect(authorization.actions.savedObject.get).not.toHaveBeenCalled();
     expect(checkPrivileges).not.toHaveBeenCalled();

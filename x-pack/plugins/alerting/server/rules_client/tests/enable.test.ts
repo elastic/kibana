@@ -148,7 +148,7 @@ describe('enable()', () => {
         operation: 'enable',
         ruleTypeId: 'myType',
       });
-      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
     });
 
     test('throws when user is not authorised to enable this type of alert', async () => {

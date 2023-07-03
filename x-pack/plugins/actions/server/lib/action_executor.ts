@@ -159,17 +159,17 @@ export class ActionExecutor {
           actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
         }
 
-        const actionType = actionTypeRegistry.get(actionTypeId);
-
         /**
          * Perform additional authorization checks for system actions.
          * It will thrown an error in case of failure.
          *
          */
-        if (actionType.isSystemActionType) {
-          const additionalPrivileges = actionType.requiredKibanaPrivileges ?? [];
+        if (actionTypeRegistry.isSystemActionType(actionTypeId)) {
+          const additionalPrivileges = actionTypeRegistry.getRequiredKibanaPrivileges(actionTypeId);
           authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
         }
+
+        const actionType = actionTypeRegistry.get(actionTypeId);
 
         const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
         logger.debug(`executing action ${actionLabel}`);
