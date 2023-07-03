@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import { EuiDataGridRefProps, EuiDataGridSorting, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useRef } from 'react';
+import { GridOnScrollProps } from 'react-window';
+import { TopNFunctionSortField } from '../../../../common/functions';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import {
@@ -22,23 +24,23 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 
 export function DifferentialTopNFunctionsView() {
+  const baseGridRef = useRef<EuiDataGridRefProps>(null);
+  const comparisonGridRef = useRef<EuiDataGridRefProps>(null);
+  const { query } = useProfilingParams('/functions/differential');
   const {
-    path,
-    query,
-    query: {
-      rangeFrom,
-      rangeTo,
-      kuery,
-      sortDirection,
-      sortField,
-      comparisonKuery,
-      normalizationMode,
-      comparisonRangeFrom,
-      comparisonRangeTo,
-      baseline = 1,
-      comparison = 1,
-    },
-  } = useProfilingParams('/functions/differential');
+    rangeFrom,
+    rangeTo,
+    kuery,
+    sortDirection,
+    sortField,
+    comparisonKuery,
+    normalizationMode,
+    comparisonRangeFrom,
+    comparisonRangeTo,
+    baseline = 1,
+    comparison = 1,
+    pageIndex = 0,
+  } = query;
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
   const comparisonTimeRange = useTimeRange({
@@ -140,6 +142,38 @@ export function DifferentialTopNFunctionsView() {
     });
   }
 
+  function handleBaseGridScroll(scroll: GridOnScrollProps) {
+    if (comparisonGridRef?.current?.scrollTo) {
+      comparisonGridRef.current.scrollTo({
+        scrollTop: scroll.scrollTop,
+      });
+    }
+  }
+
+  function handleComparisonGridScroll(scroll: GridOnScrollProps) {
+    if (baseGridRef?.current?.scrollTo) {
+      baseGridRef.current.scrollTo({ scrollTop: scroll.scrollTop });
+    }
+  }
+
+  function handlePageChange(nextPage: number) {
+    profilingRouter.push('/functions/differential', {
+      path: {},
+      query: { ...query, pageIndex: nextPage },
+    });
+  }
+
+  function handleSortChange(sorting: EuiDataGridSorting['columns'][0]) {
+    profilingRouter.push('/functions/differential', {
+      path: {},
+      query: {
+        ...query,
+        sortField: sorting.id as TopNFunctionSortField,
+        sortDirection: sorting.direction,
+      },
+    });
+  }
+
   return (
     <>
       <EuiFlexGroup direction="column">
@@ -158,11 +192,18 @@ export function DifferentialTopNFunctionsView() {
             <EuiFlexItem>
               <AsyncComponent {...state} size="xl" alignTop>
                 <Grid
+                  ref={baseGridRef}
                   topNFunctions={state.data}
                   totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
                   isDifferentialView={true}
                   onFrameClick={handleOnFrameClick}
                   baselineScaleFactor={isNormalizedByTime ? baselineTime : baseline}
+                  onScroll={handleBaseGridScroll}
+                  pageIndex={pageIndex}
+                  onChangePage={handlePageChange}
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onChangeSort={handleSortChange}
                 />
                 {/* <TopNFunctionsTable
                   topNFunctions={state.data}
@@ -189,6 +230,7 @@ export function DifferentialTopNFunctionsView() {
               <EuiFlexItem>
                 <AsyncComponent {...comparisonState} size="xl" alignTop>
                   <Grid
+                    ref={comparisonGridRef}
                     topNFunctions={comparisonState.data}
                     comparisonTopNFunctions={state.data}
                     totalSeconds={
@@ -198,6 +240,13 @@ export function DifferentialTopNFunctionsView() {
                     baselineScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
                     comparisonScaleFactor={isNormalizedByTime ? baselineTime : baseline}
                     onFrameClick={handleOnFrameClick}
+                    onScroll={handleComparisonGridScroll}
+                    showDiffColumn
+                    pageIndex={pageIndex}
+                    onChangePage={handlePageChange}
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    onChangeSort={handleSortChange}
                   />
                   {/* <TopNFunctionsTable
                     sortDirection={sortDirection}

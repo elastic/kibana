@@ -34,14 +34,14 @@ interface Row {
   rank: number;
   frame: StackFrameMetadata;
   samples: number;
-  exclusiveCPU: number;
-  inclusiveCPU: number;
+  selfCPU: number;
+  totalCPU: number;
   impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
   diff?: {
     rank: number;
     samples: number;
-    exclusiveCPU: number;
-    inclusiveCPU: number;
+    selfCPU: number;
+    totalCPU: number;
   };
 }
 
@@ -206,15 +206,15 @@ export function TopNFunctionsTable({
         scaleFactor: baselineScaleFactor,
       });
 
-      const inclusiveCPU = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
-      const exclusiveCPU = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
+      const totalCPU = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
+      const selfCPU = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
       const totalSamples = topN.CountExclusive;
 
       const impactEstimates =
         totalSeconds > 0
           ? calculateImpactEstimates({
-              countExclusive: exclusiveCPU,
-              countInclusive: inclusiveCPU,
+              countExclusive: selfCPU,
+              countInclusive: totalCPU,
               totalSamples,
               totalSeconds,
             })
@@ -230,12 +230,10 @@ export function TopNFunctionsTable({
           return {
             rank: topN.Rank - comparisonRow.Rank,
             samples: topNCountExclusiveScaled - comparisonCountExclusiveScaled,
-            exclusiveCPU:
-              exclusiveCPU -
-              (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
-            inclusiveCPU:
-              inclusiveCPU -
-              (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
+            selfCPU:
+              selfCPU - (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
+            totalCPU:
+              totalCPU - (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
           };
         }
       }
@@ -244,8 +242,8 @@ export function TopNFunctionsTable({
         rank: topN.Rank,
         frame: topN.Frame,
         samples: topNCountExclusiveScaled,
-        exclusiveCPU,
-        inclusiveCPU,
+        selfCPU,
+        totalCPU,
         impactEstimates,
         diff: calculateDiff(),
       };
@@ -299,7 +297,7 @@ export function TopNFunctionsTable({
       align: 'right',
     },
     {
-      field: TopNFunctionSortField.ExclusiveCPU,
+      field: TopNFunctionSortField.SelfCPU,
       name: (
         <CPULabelWithHint
           type="self"
@@ -308,13 +306,13 @@ export function TopNFunctionsTable({
           iconSize="s"
         />
       ),
-      render: (_, { exclusiveCPU, diff }) => {
-        return <CPUStat cpu={exclusiveCPU} diffCPU={diff?.exclusiveCPU} />;
+      render: (_, { selfCPU, diff }) => {
+        return <CPUStat cpu={selfCPU} diffCPU={diff?.selfCPU} />;
       },
       align: 'right',
     },
     {
-      field: TopNFunctionSortField.InclusiveCPU,
+      field: TopNFunctionSortField.TotalCPU,
       name: (
         <CPULabelWithHint
           type="total"
@@ -323,8 +321,8 @@ export function TopNFunctionsTable({
           iconSize="s"
         />
       ),
-      render: (_, { inclusiveCPU, diff }) => {
-        return <CPUStat cpu={inclusiveCPU} diffCPU={diff?.inclusiveCPU} />;
+      render: (_, { totalCPU, diff }) => {
+        return <CPUStat cpu={totalCPU} diffCPU={diff?.totalCPU} />;
       },
       align: 'right',
     },
@@ -454,8 +452,8 @@ export function TopNFunctionsTable({
           }}
           frame={{
             addressOrLine: selectedRow.frame.AddressOrLine,
-            countExclusive: selectedRow.exclusiveCPU,
-            countInclusive: selectedRow.inclusiveCPU,
+            countExclusive: selectedRow.selfCPU,
+            countInclusive: selectedRow.totalCPU,
             exeFileName: selectedRow.frame.ExeFileName,
             fileID: selectedRow.frame.FileID,
             frameType: selectedRow.frame.FrameType,

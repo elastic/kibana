@@ -26,14 +26,14 @@ export interface IFunctionRow {
   rank: number;
   frame: StackFrameMetadata;
   samples: number;
-  exclusiveCPU: number;
-  inclusiveCPU: number;
+  selfCPU: number;
+  totalCPU: number;
   impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
   diff?: {
     rank: number;
     samples: number;
-    exclusiveCPU: number;
-    inclusiveCPU: number;
+    selfCPU: number;
+    totalCPU: number;
   };
 }
 
@@ -66,15 +66,15 @@ export function getFunctionsRows({
       scaleFactor: baselineScaleFactor,
     });
 
-    const inclusiveCPU = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
-    const exclusiveCPU = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
+    const totalCPU = (topN.CountInclusive / topNFunctions.TotalCount) * 100;
+    const selfCPU = (topN.CountExclusive / topNFunctions.TotalCount) * 100;
     const totalSamples = topN.CountExclusive;
 
     const impactEstimates =
       totalSeconds > 0
         ? calculateImpactEstimates({
-            countExclusive: exclusiveCPU,
-            countInclusive: inclusiveCPU,
+            countExclusive: selfCPU,
+            countInclusive: totalCPU,
             totalSamples,
             totalSeconds,
           })
@@ -90,12 +90,10 @@ export function getFunctionsRows({
         return {
           rank: topN.Rank - comparisonRow.Rank,
           samples: topNCountExclusiveScaled - comparisonCountExclusiveScaled,
-          exclusiveCPU:
-            exclusiveCPU -
-            (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
-          inclusiveCPU:
-            inclusiveCPU -
-            (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
+          selfCPU:
+            selfCPU - (comparisonRow.CountExclusive / comparisonTopNFunctions.TotalCount) * 100,
+          totalCPU:
+            totalCPU - (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
         };
       }
     }
@@ -104,8 +102,8 @@ export function getFunctionsRows({
       rank: topN.Rank,
       frame: topN.Frame,
       samples: topNCountExclusiveScaled,
-      exclusiveCPU,
-      inclusiveCPU,
+      selfCPU,
+      totalCPU,
       impactEstimates,
       diff: calculateDiff(),
     };

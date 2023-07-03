@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiText, useEuiTheme } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiDataGridCellValueElementProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  useEuiBackgroundColor,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { TopNFunctionSortField } from '../../../common/functions';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { StackFrameSummary } from '../stack_frame_summary';
@@ -21,6 +30,7 @@ interface Props {
   totalCount: number;
   isEstimatedA: boolean;
   onFrameClick?: (functionName: string) => void;
+  setCellProps: EuiDataGridCellValueElementProps['setCellProps'];
 }
 
 export function FunctionRow({
@@ -29,44 +39,17 @@ export function FunctionRow({
   totalCount,
   isEstimatedA,
   onFrameClick,
+  setCellProps,
 }: Props) {
   const theme = useEuiTheme();
-  if (columnId === 'rank') {
-    return <div>{functionRow.rank}</div>;
+  const successColor = useEuiBackgroundColor('success');
+  const dangerColor = useEuiBackgroundColor('danger');
+
+  function getColor(value: number) {
+    return value > 0 ? 'success' : 'danger';
   }
 
-  if (columnId === 'function') {
-    return <StackFrameSummary frame={functionRow.frame} onFrameClick={onFrameClick} />;
-  }
-
-  if (columnId === 'samples') {
-    return (
-      <SampleStat
-        samples={functionRow.samples}
-        diffSamples={functionRow.diff?.samples}
-        totalSamples={totalCount}
-        isSampled={isEstimatedA}
-      />
-    );
-  }
-
-  if (columnId === 'selfCPU') {
-    return <CPUStat cpu={functionRow.exclusiveCPU} diffCPU={functionRow.diff?.exclusiveCPU} />;
-  }
-
-  if (columnId === 'totalCPU') {
-    return <CPUStat cpu={functionRow.inclusiveCPU} diffCPU={functionRow.diff?.inclusiveCPU} />;
-  }
-
-  if (columnId === 'annualizedCo2' && functionRow.impactEstimates?.annualizedCo2) {
-    return <div>{asWeight(functionRow.impactEstimates.annualizedCo2)}</div>;
-  }
-
-  if (columnId === 'annualizedDollarCost' && functionRow.impactEstimates?.annualizedDollarCost) {
-    return <div>{asCost(functionRow.impactEstimates.annualizedDollarCost)}</div>;
-  }
-
-  if (columnId === 'diff') {
+  if (columnId === TopNFunctionSortField.Diff) {
     if (!functionRow.diff) {
       return (
         <EuiText size="xs" color={theme.euiTheme.colors.primaryText}>
@@ -81,16 +64,61 @@ export function FunctionRow({
       return null;
     }
 
+    const color = getColor(functionRow.diff.rank);
+    setCellProps({ style: { backgroundColor: color === 'success' ? successColor : dangerColor } });
+
     return (
-      <EuiBadge
-        color={functionRow.diff.rank > 0 ? 'success' : 'danger'}
-        iconType={functionRow.diff.rank > 0 ? 'sortDown' : 'sortUp'}
-        iconSide="right"
-        style={{ minWidth: '100%', textAlign: 'right' }}
-      >
-        {functionRow.diff.rank}
-      </EuiBadge>
+      <EuiFlexGroup direction="row" gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">{functionRow.diff.rank}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={functionRow.diff.rank > 0 ? 'sortDown' : 'sortUp'} color={color} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
+
+  if (columnId === TopNFunctionSortField.Rank) {
+    return <div>{functionRow.rank}</div>;
+  }
+
+  if (columnId === TopNFunctionSortField.Frame) {
+    return <StackFrameSummary frame={functionRow.frame} onFrameClick={onFrameClick} />;
+  }
+
+  if (columnId === TopNFunctionSortField.Samples) {
+    return (
+      <SampleStat
+        samples={functionRow.samples}
+        diffSamples={functionRow.diff?.samples}
+        totalSamples={totalCount}
+        isSampled={isEstimatedA}
+      />
+    );
+  }
+
+  if (columnId === TopNFunctionSortField.SelfCPU) {
+    return <CPUStat cpu={functionRow.selfCPU} diffCPU={functionRow.diff?.selfCPU} />;
+  }
+
+  if (columnId === TopNFunctionSortField.TotalCPU) {
+    return <CPUStat cpu={functionRow.totalCPU} diffCPU={functionRow.diff?.totalCPU} />;
+  }
+
+  if (
+    columnId === TopNFunctionSortField.AnnualizedCo2 &&
+    functionRow.impactEstimates?.annualizedCo2
+  ) {
+    return <div>{asWeight(functionRow.impactEstimates.annualizedCo2)}</div>;
+  }
+
+  if (
+    columnId === TopNFunctionSortField.AnnualizedDollarCost &&
+    functionRow.impactEstimates?.annualizedDollarCost
+  ) {
+    return <div>{asCost(functionRow.impactEstimates.annualizedDollarCost)}</div>;
+  }
+
   return null;
 }
