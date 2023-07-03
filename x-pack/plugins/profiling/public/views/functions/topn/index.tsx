@@ -46,6 +46,13 @@ export function TopNFunctionsView() {
 
   const profilingRouter = useProfilingRouter();
 
+  function handleOnFrameClick(functionName: string) {
+    profilingRouter.push('/flamegraphs/flamegraph', {
+      path: {},
+      query: { ...query, searchText: functionName },
+    });
+  }
+
   return (
     <>
       <EuiFlexGroup direction="column">
@@ -69,6 +76,7 @@ export function TopNFunctionsView() {
                   }}
                   totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
                   isDifferentialView={false}
+                  onFrameClick={handleOnFrameClick}
                 />
               </AsyncComponent>
             </EuiFlexItem>
