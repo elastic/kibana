@@ -111,12 +111,18 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('errors', () => {
-      it('400s when requesting more than 1000 cases', async () => {
-        const ids = Array(1001).fill('test');
-
+      it('400s when requesting more than 100 cases', async () => {
         await bulkGetCases({
           supertest,
-          ids,
+          ids: Array(101).fill('foobar'),
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when requesting zero cases', async () => {
+        await bulkGetCases({
+          supertest,
+          ids: [],
           expectedHttpCode: 400,
         });
       });

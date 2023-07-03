@@ -6,39 +6,36 @@
  */
 
 import { MAX_BULK_GET_CASES } from '../../../common/constants';
-import { createCasesClientMockArgs } from '../mocks';
+import { createCasesClientMockArgs, createCasesClientMock } from '../mocks';
 import { bulkGet } from './bulk_get';
 
 describe('bulkGet', () => {
   describe('errors', () => {
+    const casesClient = createCasesClientMock();
     const clientArgs = createCasesClientMockArgs();
 
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
-    it(`throws when trying to fetch more than ${MAX_BULK_GET_CASES} cases`, async () => {
+    it(`throws when trying to fetch more than ${MAX_BULK_GET_CASES} attachments`, async () => {
       await expect(
-        bulkGet({ ids: Array(MAX_BULK_GET_CASES + 1).fill('foobar') }, clientArgs)
+        bulkGet(
+          { attachmentIDs: Array(MAX_BULK_GET_CASES + 1).fill('foobar'), caseID: '123' },
+          clientArgs,
+          casesClient
+        )
       ).rejects.toThrow(
         'Error: The length of the field ids is too long. Array must be of length <= 100.'
       );
     });
 
-    it('throws when trying to fetch zero cases', async () => {
-      await expect(bulkGet({ ids: [] }, clientArgs)).rejects.toThrow(
+    it('throws when trying to fetch zero attachments', async () => {
+      await expect(
+        bulkGet({ attachmentIDs: [], caseID: '123' }, clientArgs, casesClient)
+      ).rejects.toThrow(
         'Error: The length of the field ids is too short. Array must be of length >= 1.'
       );
-    });
-
-    it('throws with excess fields', async () => {
-      await expect(
-        bulkGet(
-          // @ts-expect-error: excess attribute
-          { ids: ['1'], foo: 'bar' },
-          clientArgs
-        )
-      ).rejects.toThrow('invalid keys "foo"');
     });
   });
 });

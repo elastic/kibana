@@ -455,5 +455,25 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       }
     });
+
+    describe('errors', () => {
+      it('400s when requesting more than 100 attachments', async () => {
+        await bulkGetAttachments({
+          attachmentIds: Array(101).fill('foobar'),
+          caseId: 'id',
+          expectedHttpCode: 400,
+          supertest,
+        });
+      });
+
+      it('400s when requesting zero attachments', async () => {
+        await bulkGetAttachments({
+          attachmentIds: [],
+          caseId: 'id',
+          expectedHttpCode: 400,
+          supertest,
+        });
+      });
+    });
   });
 };
