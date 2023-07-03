@@ -20,7 +20,7 @@ export const subscribeBreadcrumbs = (
   });
 };
 
-const emptyLastBreadcrumbUrl = (breadcrumbs: ChromeBreadcrumb[]) => {
+export const emptyLastBreadcrumbUrl = (breadcrumbs: ChromeBreadcrumb[]) => {
   const lastBreadcrumb = breadcrumbs[breadcrumbs.length - 1];
   if (lastBreadcrumb) {
     return [...breadcrumbs.slice(0, -1), { ...lastBreadcrumb, href: '', onClick: undefined }];

@@ -12,8 +12,8 @@ import type { Services } from '../services';
 import type { ProjectNavigationLink } from './links/types';
 
 // We need to hide breadcrumbs for some pages (tabs) because they appear duplicated.
-// They are incorrectly processed as trailing breadcrumbs in SecuritySolution, because of `SpyRoute` architecture limitations.
-// They are are navLinks tree with a SecurityPageName, so they should be treated as leading breadcrumbs in ESS as well.
+// These breadcrumbs are incorrectly processed as trailing breadcrumbs in SecuritySolution, because of `SpyRoute` architecture limitations.
+// They are navLinks tree with a SecurityPageName, so they should be treated as leading breadcrumbs in ESS as well.
 // TODO: Improve the breadcrumbs logic in `use_breadcrumbs_nav` to avoid this workaround.
 const HIDDEN_BREADCRUMBS = new Set<SecurityPageName>([
   SecurityPageName.networkDns,
