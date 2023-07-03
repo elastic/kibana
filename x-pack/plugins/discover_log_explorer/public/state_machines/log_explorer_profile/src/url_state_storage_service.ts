@@ -47,5 +47,5 @@ export const updateUrlState =
   async (context) => {
     const { dataView } = context;
 
-    return stateContainer.appState.replaceUrlState({ index: dataView.id }, false);
+    return stateContainer.appState.update({ index: dataView.id });
   };

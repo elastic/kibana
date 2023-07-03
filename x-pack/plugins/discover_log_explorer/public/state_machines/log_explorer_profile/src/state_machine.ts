@@ -103,7 +103,9 @@ export const createLogExplorerProfileStateMachine = (
       initializeFromUrl: initializeFromUrl({ stateContainer }),
       createDataView: async (context, event) => {
         const dataView = await dataViews.create(context.datasetSelection.toDataviewSpec());
-        stateContainer.internalState.transitions.appendAdHocDataViews(dataView);
+
+        stateContainer.actions.setDataView(dataView);
+        // stateContainer.internalState.transitions.appendAdHocDataViews(dataView);
         return dataView;
       },
       updateUrlState: updateUrlState({ stateContainer }),
