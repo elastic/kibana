@@ -30,8 +30,8 @@ export const UserActionFindRequestRt = rt.exact(
   rt.partial({
     types: rt.array(FindTypeFieldRt),
     sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
-    page: NumberFromString,
-    perPage: NumberFromString,
+    page: rt.union([rt.number, NumberFromString]),
+    perPage: rt.union([rt.number, NumberFromString]),
   })
 );
 

@@ -16,6 +16,7 @@ import {
   CasesFindResponseRt,
 } from '../../../common/api';
 
+import { validateFindCasesPagination } from './validators';
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
 import { constructQueryOptions, constructSearch } from '../utils';
@@ -54,6 +55,8 @@ export const find = async (
 
   try {
     const queryParams = decodeWithExcessOrThrow(CasesFindRequestRt)(params);
+
+    validateFindCasesPagination(queryParams);
 
     throwIfCategoryParamTooLong(queryParams.category);
 

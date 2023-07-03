@@ -10,6 +10,7 @@ import type { Case } from '../../../common/api';
 
 import {
   MAX_ASSIGNEES_FILTER_LENGTH,
+  MAX_CASES_PER_PAGE,
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
@@ -81,7 +82,7 @@ describe('find', () => {
     });
   });
 
-  describe('searchFields errors', () => {
+  describe('errors', () => {
     const clientArgs = createCasesClientMockArgs();
 
     beforeEach(() => {
@@ -147,6 +148,25 @@ describe('find', () => {
 
       await expect(find(findRequest, clientArgs)).rejects.toThrowError(
         `Error: The length of the field reporters is too long. Array must be of length <= ${MAX_REPORTERS_FILTER_LENGTH}.`
+      );
+    });
+
+    it('Invalid total items results in error', async () => {
+      const findRequest = createCasesClientMockFindRequest({ page: 209, perPage: 100 });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrowError(
+        `Error: The number of documents is too high. Paginating through more than 10,000 documents is not possible.`
+      );
+    });
+
+    it('Invalid perPage items results in error', async () => {
+      const findRequest = createCasesClientMockFindRequest({
+        page: 1,
+        perPage: MAX_CASES_PER_PAGE + 1,
+      });
+
+      await expect(find(findRequest, clientArgs)).rejects.toThrowError(
+        `Error: The provided perPage value was too high. The maximum allowed perPage value is ${MAX_CASES_PER_PAGE}.`
       );
     });
   });

@@ -284,11 +284,11 @@ export const CasesFindRequestRt = rt.exact(
     /**
      * The page of objects to return
      */
-    page: NumberFromString,
+    page: rt.union([rt.number, NumberFromString]),
     /**
      * The number of objects to include in each page
      */
-    perPage: NumberFromString,
+    perPage: rt.union([rt.number, NumberFromString]),
     /**
      * An Elasticsearch simple_query_string
      */

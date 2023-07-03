@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { MAX_DOCS_PER_PAGE, MAX_COMMENTS_PER_PAGE } from '../../../common/constants';
+import { MAX_COMMENTS_PER_PAGE } from '../../../common/constants';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
@@ -14,6 +14,7 @@ import {
 import type { CommentRequest, FindCommentsQueryParams } from '../../../common/api';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import { validatePagination } from '../../common/validators';
 
 export const validateRegisteredAttachments = ({
   query,
@@ -44,22 +45,9 @@ export const validateRegisteredAttachments = ({
 };
 
 export const validateFindCommentsPagination = (params?: FindCommentsQueryParams) => {
-  if (params?.page == null && params?.perPage == null) {
-    return;
-  }
-
-  const pageAsNumber = params.page ?? 0;
-  const perPageAsNumber = params.perPage ?? 0;
-
-  if (perPageAsNumber > MAX_COMMENTS_PER_PAGE) {
-    throw Boom.badRequest(
-      `The provided perPage value was too high. The maximum allowed perPage value is ${MAX_COMMENTS_PER_PAGE}.`
-    );
-  }
-
-  if (Math.max(pageAsNumber, pageAsNumber * perPageAsNumber) > MAX_DOCS_PER_PAGE) {
-    throw Boom.badRequest(
-      'The number of documents is too high. Paginating through more than 10,000 documents is not possible.'
-    );
-  }
+  validatePagination({
+    page: params?.page,
+    perPage: params?.perPage,
+    maxPerPage: MAX_COMMENTS_PER_PAGE,
+  });
 };
