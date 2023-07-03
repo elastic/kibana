@@ -493,7 +493,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 legendPosition={legendPosition}
               />
             )}
-            <Chart size="100%">
+            <Chart size="100%" {...getOverridesFor(overrides, 'chart')}>
               <ChartSplit
                 splitColumnAccessor={splitChartColumnAccessor}
                 splitRowAccessor={splitChartRowAccessor}
