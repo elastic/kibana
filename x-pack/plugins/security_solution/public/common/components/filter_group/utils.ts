@@ -133,15 +133,15 @@ export const reorderControlsWithDefaultControls = (args: ReorderControlsArgs) =>
  * */
 export const getFilterControlsComparator =
   (...fieldsToCompare: Array<keyof FilterItemObj>) =>
-  (value1: FilterItemObj[], value2: FilterItemObj[]) => {
-    if (value1.length !== value2.length) return false;
-    const valmod1 = value1.map((v) => {
+  (filterItemObject1: FilterItemObj[], filterItemObject2: FilterItemObj[]) => {
+    if (filterItemObject1.length !== filterItemObject2.length) return false;
+    const filterItemObjectWithSelectedKeys1 = filterItemObject1.map((v) => {
       return pick(v, fieldsToCompare);
     });
 
-    const valmod2 = value2.map((v) => {
+    const filterItemObjectWithSelectedKeys2 = filterItemObject2.map((v) => {
       return pick(v, fieldsToCompare);
     });
 
-    return isEqual(valmod1, valmod2);
+    return isEqual(filterItemObjectWithSelectedKeys1, filterItemObjectWithSelectedKeys2);
   };
