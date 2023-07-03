@@ -146,6 +146,7 @@ export function Histogram({
   const chartCss = css`
     position: relative;
     flex-grow: 1;
+    margin-block: ${euiTheme.size.xs};
 
     & > div {
       height: 100%;
