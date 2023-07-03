@@ -67,7 +67,6 @@ export { policyHasFleetServer, policyHasAPMIntegration } from './agent_policies_
 
 export {
   generateNewAgentPolicyWithDefaults,
-  agentPolicyWithSupportedFeatures,
   agentPolicyWithoutPaidFeatures,
 } from './generate_new_agent_policy';
 
