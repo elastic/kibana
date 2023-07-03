@@ -94,7 +94,7 @@ export function getAggNameConflictToastMessages(
 
     if (
       (aggList[aggNameCheck] !== undefined || groupByList[aggNameCheck] !== undefined) &&
-      groupByList[aggNameCheck].agg !== PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM
+      groupByList[aggNameCheck]?.agg !== PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM
     ) {
       conflicts.push(
         i18n.translate('xpack.transform.stepDefineForm.nestedConflictErrorMessage', {
