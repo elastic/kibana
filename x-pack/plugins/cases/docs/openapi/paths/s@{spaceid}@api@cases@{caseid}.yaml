@@ -8,15 +8,9 @@ get:
   tags:
     - cases
   parameters:
-    - $ref: ../components/parameters/case_id.yaml
+    - $ref: '../components/parameters/case_id.yaml'
     - $ref: '../components/parameters/space_id.yaml'
-    - in: query
-      name: includeComments
-      description: Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.
-      deprecated: true
-      schema:
-        type: boolean
-        default: true
+    - $ref: '../components/parameters/includeComments.yaml'
   responses:
     '200':
       description: Indicates a successful call.

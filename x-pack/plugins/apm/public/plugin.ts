@@ -11,6 +11,7 @@ import { map } from 'rxjs/operators';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import {
   AppMountParameters,
+  AppNavLinkStatus,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
@@ -327,6 +328,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
+      navLinkStatus: AppNavLinkStatus.visible,
       deepLinks: [
         {
           id: 'service-groups-list',
@@ -337,13 +339,26 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           id: 'services',
           title: servicesTitle,
           path: '/services',
+          navLinkStatus: config.serverless.enabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.default,
         },
-        { id: 'traces', title: tracesTitle, path: '/traces' },
+        {
+          id: 'traces',
+          title: tracesTitle,
+          path: '/traces',
+          navLinkStatus: config.serverless.enabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.default,
+        },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
         {
           id: 'dependencies',
           title: dependenciesTitle,
           path: '/dependencies/inventory',
+          navLinkStatus: config.serverless.enabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.default,
         },
         { id: 'settings', title: apmSettingsTitle, path: '/settings' },
         {

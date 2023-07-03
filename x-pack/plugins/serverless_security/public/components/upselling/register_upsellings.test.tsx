@@ -8,7 +8,7 @@
 import { UpsellingService } from '@kbn/security-solution-plugin/public';
 import { ALL_APP_FEATURE_KEYS } from '@kbn/security-solution-plugin/common';
 import { registerUpsellings, upsellingPages, upsellingSections } from './register_upsellings';
-import type { SecurityProductTypes } from '../../../common/config';
+import { ProductLine, SecurityProductTypes } from '../../../common/config';
 
 const mockGetProductAppFeatures = jest.fn();
 jest.mock('../../../common/pli/pli_features', () => ({
@@ -16,9 +16,9 @@ jest.mock('../../../common/pli/pli_features', () => ({
 }));
 
 const allProductTypes: SecurityProductTypes = [
-  { product_line: 'security', product_tier: 'complete' },
-  { product_line: 'endpoint', product_tier: 'complete' },
-  { product_line: 'cloud', product_tier: 'complete' },
+  { product_line: ProductLine.security, product_tier: 'complete' },
+  { product_line: ProductLine.endpoint, product_tier: 'complete' },
+  { product_line: ProductLine.cloud, product_tier: 'complete' },
 ];
 
 describe('registerUpsellings', () => {
