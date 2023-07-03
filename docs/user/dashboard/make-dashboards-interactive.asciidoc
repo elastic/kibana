@@ -15,7 +15,7 @@ src="https://play.vidyard.com/embed/v4.js"></script>
 <img
 style="width: 100%; margin: auto; display: block;"
 class="vidyard-player-embed"
-src="https://videos.elastic.co/watch/jqP5A4jNhbdtSyvBhrBgTw"
+src="https://play.vidyard.com/jqP5A4jNhbdtSyvBhrBgTw.jpg"
 data-uuid="jqP5A4jNhbdtSyvBhrBgTw"
 data-v="4"
 data-type="inline"
