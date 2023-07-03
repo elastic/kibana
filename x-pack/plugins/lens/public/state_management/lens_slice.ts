@@ -102,6 +102,8 @@ export const getPreloadedState = ({
       ? data.query.queryString.getDefaultQuery()
       : 'searchQuery' in initialContext && initialContext.searchQuery
       ? initialContext.searchQuery
+      : 'query' in initialContext
+      ? initialContext.query
       : (data.query.queryString.getQuery() as Query),
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
