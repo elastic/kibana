@@ -87,8 +87,9 @@ export function LayerPanel(
       datasourceId?: string;
       visualizationId?: string;
     }) => void;
-    indexPatternService: IndexPatternServiceAPI;
-    getUserMessages: UserMessagesGetter;
+    indexPatternService?: IndexPatternServiceAPI;
+    getUserMessages?: UserMessagesGetter;
+    displayLayerSettings: boolean;
   }
 ) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
@@ -418,17 +419,20 @@ export function LayerPanel(
                   activeVisualization={activeVisualization}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <LayerActions
-                  actions={compatibleActions}
-                  layerIndex={layerIndex}
-                  mountingPoint={layerActionsFlyoutRef.current}
-                />
-                <div ref={layerActionsFlyoutRef} />
-              </EuiFlexItem>
+              {props.displayLayerSettings && (
+                <EuiFlexItem grow={false}>
+                  <LayerActions
+                    actions={compatibleActions}
+                    layerIndex={layerIndex}
+                    mountingPoint={layerActionsFlyoutRef.current}
+                  />
+                  <div ref={layerActionsFlyoutRef} />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
-            {(layerDatasource || activeVisualization.renderLayerPanel) && <EuiSpacer size="s" />}
-            {layerDatasource && (
+            {props.indexPatternService &&
+              (layerDatasource || activeVisualization.renderLayerPanel) && <EuiSpacer size="s" />}
+            {layerDatasource && props.indexPatternService && (
               <NativeRenderer
                 render={layerDatasource.renderLayerPanel}
                 nativeProps={{
@@ -544,9 +548,10 @@ export function LayerPanel(
                       {group.accessors.map((accessorConfig, accessorIndex) => {
                         const { columnId } = accessorConfig;
 
-                        const messages = props.getUserMessages('dimensionButton', {
-                          dimensionId: columnId,
-                        });
+                        const messages =
+                          props?.getUserMessages?.('dimensionButton', {
+                            dimensionId: columnId,
+                          }) ?? [];
 
                         return (
                           <DraggableDimensionButton
