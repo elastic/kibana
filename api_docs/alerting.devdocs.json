@@ -7146,239 +7146,6 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.RRuleRecord",
-        "type": "Interface",
-        "tags": [],
-        "label": "RRuleRecord",
-        "description": [],
-        "path": "x-pack/plugins/alerting/common/rrule_type.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RRuleRecord.dtstart",
-            "type": "string",
-            "tags": [],
-            "label": "dtstart",
-            "description": [],
-            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RRuleRecord.tzid",
-            "type": "string",
-            "tags": [],
-            "label": "tzid",
-            "description": [],
-            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RRuleRecord.freq",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "freq",
-            "description": [],
-            "signature": [
-              "0 | 2 | 6 | 5 | 4 | 3 | 1 | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RRuleRecord.until",
-            "type": "string",
-            "tags": [],
-            "label": "until",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RRuleRecord.count",
-            "type": "number",
-            "tags": [],
-            "label": "count",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RRuleRecord.interval",
-            "type": "number",
-            "tags": [],
-            "label": "interval",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RRuleRecord.wkst",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "wkst",
-            "description": [],
-            "signature": [
-              "WeekdayStr",
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RRuleRecord.byweekday",
-            "type": "Array",
-            "tags": [],
-            "label": "byweekday",
-            "description": [],
-            "signature": [
-              "(string | number)[] | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RRuleRecord.bymonth",
-            "type": "Array",
-            "tags": [],
-            "label": "bymonth",
-            "description": [],
-            "signature": [
-              "number[] | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RRuleRecord.bysetpos",
-            "type": "Array",
-            "tags": [],
-            "label": "bysetpos",
-            "description": [],
-            "signature": [
-              "number[] | undefined"
-            ],
-            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RRuleRecord.bymonthday",
-            "type": "Array",
-            "tags": [],
-            "label": "bymonthday",
-            "description": [],
-            "signature": [
-              "number[]"
-            ],
-            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RRuleRecord.byyearday",
-            "type": "Array",
-            "tags": [],
-            "label": "byyearday",
-            "description": [],
-            "signature": [
-              "number[]"
-            ],
-            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RRuleRecord.byweekno",
-            "type": "Array",
-            "tags": [],
-            "label": "byweekno",
-            "description": [],
-            "signature": [
-              "number[]"
-            ],
-            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RRuleRecord.byhour",
-            "type": "Array",
-            "tags": [],
-            "label": "byhour",
-            "description": [],
-            "signature": [
-              "number[]"
-            ],
-            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RRuleRecord.byminute",
-            "type": "Array",
-            "tags": [],
-            "label": "byminute",
-            "description": [],
-            "signature": [
-              "number[]"
-            ],
-            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.RRuleRecord.bysecond",
-            "type": "Array",
-            "tags": [],
-            "label": "bysecond",
-            "description": [],
-            "signature": [
-              "number[]"
-            ],
-            "path": "x-pack/plugins/alerting/common/rrule_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
         "id": "def-common.Rule",
         "type": "Interface",
         "tags": [],
@@ -10241,6 +10008,31 @@
             "text": "RRuleRecord"
           },
           ", \"dtstart\" | \"tzid\">"
+        ],
+        "path": "x-pack/plugins/alerting/common/rrule_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.RRuleRecord",
+        "type": "Type",
+        "tags": [],
+        "label": "RRuleRecord",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "Options",
+          ", \"wkst\" | \"byweekday\" | \"dtstart\" | \"until\"> & { dtstart: string; byweekday?: (string | number)[] | undefined; wkst?: ",
+          {
+            "pluginId": "@kbn/rrule",
+            "scope": "common",
+            "docId": "kibKbnRrulePluginApi",
+            "section": "def-common.WeekdayStr",
+            "text": "WeekdayStr"
+          },
+          " | undefined; until?: string | undefined; }"
         ],
         "path": "x-pack/plugins/alerting/common/rrule_type.ts",
         "deprecated": false,
