@@ -262,10 +262,8 @@ export default function ({ getService }: FtrProviderContext) {
         } as DatafeedConfig,
       };
 
-      it('multi-metric job creation loads the population wizard for the source data', async () => {
-        await ml.testExecution.logTestStep(
-          'multi-metric job creation loads the job management page'
-        );
+      it('multi-metric job creation loads the multi-metric job wizard for the source data', async () => {
+        await ml.testExecution.logTestStep('job creation loads the job management page');
         await ml.navigation.navigateToMl();
         await ml.navigation.navigateToJobManagement();
 
@@ -275,11 +273,11 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('job creation loads the job type selection page');
         await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('ft_ecommerce');
 
-        await ml.testExecution.logTestStep('job creation loads the population job wizard page');
+        await ml.testExecution.logTestStep('job creation loads the multi-metric job wizard page');
         await ml.jobTypeSelection.selectMultiMetricJob();
       });
 
-      it('multi-metric job creation navigates through the population wizard and sets all needed fields', async () => {
+      it('multi-metric job creation navigates through the multi-metric job wizard and sets all needed fields', async () => {
         await ml.testExecution.logTestStep('job creation displays the time range step');
         await ml.jobWizardCommon.assertTimeRangeSectionExists();
 
