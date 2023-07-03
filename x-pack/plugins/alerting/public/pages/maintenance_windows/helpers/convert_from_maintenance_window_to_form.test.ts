@@ -7,8 +7,7 @@
 
 import moment from 'moment';
 
-import { Frequency } from '../constants';
-import { RRuleFrequency } from '../types';
+import { Frequency } from '@kbn/rrule';
 import { convertFromMaintenanceWindowToForm } from './convert_from_maintenance_window_to_form';
 
 describe('convertFromMaintenanceWindowToForm', () => {
@@ -25,7 +24,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       rRule: {
         dtstart: startDate.toISOString(),
         tzid: 'UTC',
-        freq: RRuleFrequency.YEARLY,
+        freq: Frequency.YEARLY,
         count: 1,
       },
     });
@@ -46,7 +45,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       rRule: {
         dtstart: startDate.toISOString(),
         tzid: 'UTC',
-        freq: RRuleFrequency.DAILY,
+        freq: Frequency.DAILY,
         interval: 1,
         byweekday: ['WE'],
       },
@@ -76,7 +75,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       rRule: {
         dtstart: startDate.toISOString(),
         tzid: 'UTC',
-        freq: RRuleFrequency.DAILY,
+        freq: Frequency.DAILY,
         interval: 1,
         byweekday: ['WE'],
         until,
@@ -106,7 +105,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       rRule: {
         dtstart: startDate.toISOString(),
         tzid: 'UTC',
-        freq: RRuleFrequency.DAILY,
+        freq: Frequency.DAILY,
         interval: 1,
         byweekday: ['WE'],
         count: 3,
@@ -136,7 +135,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       rRule: {
         dtstart: startDate.toISOString(),
         tzid: 'UTC',
-        freq: RRuleFrequency.WEEKLY,
+        freq: Frequency.WEEKLY,
         interval: 1,
         byweekday: ['WE'],
       },
@@ -164,7 +163,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       rRule: {
         dtstart: startDate.toISOString(),
         tzid: 'UTC',
-        freq: RRuleFrequency.MONTHLY,
+        freq: Frequency.MONTHLY,
         interval: 1,
         byweekday: ['+4WE'],
       },
@@ -192,7 +191,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       rRule: {
         dtstart: startDate.toISOString(),
         tzid: 'UTC',
-        freq: RRuleFrequency.YEARLY,
+        freq: Frequency.YEARLY,
         interval: 1,
         bymonth: [3],
         bymonthday: [22],
@@ -220,7 +219,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       rRule: {
         dtstart: startDate.toISOString(),
         tzid: 'UTC',
-        freq: RRuleFrequency.DAILY,
+        freq: Frequency.DAILY,
         interval: 1,
       },
     });
@@ -247,7 +246,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       rRule: {
         dtstart: startDate.toISOString(),
         tzid: 'UTC',
-        freq: RRuleFrequency.WEEKLY,
+        freq: Frequency.WEEKLY,
         interval: 1,
         byweekday: ['WE', 'TH'],
       },
@@ -276,7 +275,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       rRule: {
         dtstart: startDate.toISOString(),
         tzid: 'UTC',
-        freq: RRuleFrequency.MONTHLY,
+        freq: Frequency.MONTHLY,
         interval: 1,
         bymonthday: [22],
       },
@@ -305,7 +304,7 @@ describe('convertFromMaintenanceWindowToForm', () => {
       rRule: {
         dtstart: startDate.toISOString(),
         tzid: 'UTC',
-        freq: RRuleFrequency.YEARLY,
+        freq: Frequency.YEARLY,
         interval: 3,
         bymonth: [3],
         bymonthday: [22],

@@ -120,6 +120,9 @@ export interface EventAnnotationGroupSearchQuery {
   searchFields?: string[];
 }
 
-export type EventAnnotationGroupSearchIn = SearchIn<EventAnnotationGroupContentType, {}>;
+export type EventAnnotationGroupSearchIn = SearchIn<
+  EventAnnotationGroupContentType,
+  EventAnnotationGroupSearchQuery
+>;
 
 export type EventAnnotationGroupSearchOut = SearchResult<EventAnnotationGroupSavedObject>;
