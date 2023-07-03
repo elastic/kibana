@@ -54,7 +54,7 @@ interface Props {
  */
 export const SystemPromptModal: React.FC<Props> = React.memo(
   ({ systemPrompts, onClose, onSystemPromptsChange }) => {
-    const { conversations, ...rest } = useAssistantContext();
+    const { conversations } = useAssistantContext();
     // Local state for quick prompts (returned to parent on save via onSystemPromptsChange())
     const [updatedSystemPrompts, setUpdatedSystemPrompts] = useState<Prompt[]>(systemPrompts);
 
