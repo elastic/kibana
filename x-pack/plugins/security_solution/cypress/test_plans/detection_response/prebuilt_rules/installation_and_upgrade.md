@@ -52,9 +52,7 @@ Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule 
 
 #### **Scenario: Package is installed via Fleet**
 
-**Automation**: 0 tests - covered by other scenarios. This scenario will be covered by the **Users install the latest prebuilt rules** scenario, which will include 1 e2e test which installs the rules from the real package.
-
-TODO: Where are scenarios for the real package?
+**Automation**: 2 e2e tests that install the real package.
 
 ```Gherkin
 Given the package is not installed
@@ -80,14 +78,12 @@ Then the package gets installed in the background from packages bundled into Kib
 ```Gherkin
 Given the package is not installed
 And the package contains the largest amount of historical rule versions (15000)
-And the Kibana instance has a memory heap size of X Mb (see note below)
+And the Kibana instance has a memory heap size of 700 Mb (see note below)
 When user opens the Rule Management page
 Then the package is installed without Kibana crashing with an Out Of Memory error
 ```
 
-TODO: Update the `heap size of X Mb` to a concrete value and update the note below.
-
-**Note**: The amount of memory is undefined as of now because, during implementation, we will try to find a memory heap threshold below which Kibana starts to crash constantly when you install the package with 15k rules. The plan is to then increase it to the point where it stops crashing, and use it as our value for this test.
+**Note**: 600 Mb seems to always crash Kibana with an OOM error. 700 Mb runs with no issues in the Flaky test runner with 100 iterations: https://buildkite.com/elastic/kibana-flaky-test-suite-runner/builds/2215.
 
 ### Rule installation and upgrade via the Prebuilt rules API
 
@@ -223,11 +219,41 @@ Notes:
   - upgrade: `POST /internal/detection_engine/prebuilt_rules/upgrade/_perform`
   - status: `GET /internal/detection_engine/prebuilt_rules/status`
 
+### Scenarios for the real package
+
+#### **Scenario: User can install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new pckage**
+
+**Automation**: 1 integration test with real packages.
+
+```Gherkin
+Given there are two package versions: N-1 and N
+And the package of N-1 version is installed
+When user calls the status endpoint
+Then it should return a 200 response with some number of rules to install and 0 rules to upgrade
+When user calls the installation/_review endpoint
+Then it should return a 200 response matching the response of the status endpoint
+When user calls the installation/_perform_ endpoint
+Then it should return a 200 response matching the response of the status endpoint
+And rules returned in this response should exist as alert saved objects
+When user installs the package of N version
+Then it should be installed successfully
+When user calls the status endpoint
+Then it should return a 200 response with some number of new rules to install and some number of rules to upgrade
+When user calls the installation/_review endpoint
+Then it should return a 200 response matching the response of the status endpoint
+When user calls the installation/_perform_ endpoint
+Then rules returned in this response should exist as alert saved objects
+When user calls the upgrade/_review endpoint
+Then it should return a 200 response matching the response of the status endpoint
+When user calls the upgrade/_perform_ endpoint
+Then rules returned in this response should exist as alert saved objects
+```
+
 ### Rule installation and upgrade notifications on the Rule Management page
 
-#### **Scenario: User is notified when no prebuilt rules are installed**
+#### **Scenario: User is notified when no prebuilt rules are installed and there are rules available to install**
 
-**Automation**: 1 e2e test with mock rules + 1 integration test.
+**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
 
 ```Gherkin
 Given no prebuilt rules are installed in Kibana
@@ -240,9 +266,24 @@ And user should NOT see a number of rules available to upgrade
 And user should NOT see the Rule Updates table
 ```
 
+#### **Scenario: User is NOT notified when no prebuilt rules are installed and there are no prebuilt rules assets**
+
+**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
+
+```Gherkin
+Given no prebuilt rules are installed in Kibana
+And no prebuilt rule assets exist
+When user opens the Rule Management page
+Then user should NOT see a CTA to install prebuilt rules
+And user should NOT see a number of rules available to install
+And user should NOT see a CTA to upgrade prebuilt rules
+And user should NOT see a number of rules available to upgrade
+And user should NOT see the Rule Updates table
+```
+
 #### **Scenario: User is NOT notified when all prebuilt rules are installed and up to date**
 
-**Automation**: 1 e2e test with mock rules + 1 integration test.
+**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
 
 ```Gherkin
 Given all the latest prebuilt rules are installed in Kibana
@@ -256,7 +297,7 @@ And user should NOT see the Rule Updates table
 
 #### **Scenario: User is notified when some prebuilt rules can be installed**
 
-**Automation**: 1 e2e test with mock rules + 1 integration test.
+**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
@@ -272,7 +313,7 @@ And user should NOT see the Rule Updates table
 
 #### **Scenario: User is notified when some prebuilt rules can be upgraded**
 
-**Automation**: 1 e2e test with mock rules + 1 integration test.
+**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
@@ -288,7 +329,7 @@ And user should see the Rule Updates table
 
 #### **Scenario: User is notified when both rules to install and upgrade are available**
 
-**Automation**: 1 e2e test with mock rules + 1 integration test.
+**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
@@ -304,7 +345,7 @@ And user should see the Rule Updates table
 
 #### **Scenario: User is notified after a prebuilt rule gets deleted**
 
-**Automation**: 1 e2e test with mock rules + 1 integration test.
+**Automation**: 1 e2e test with mock rules + 1 integration test with mock rules for the /status endpoint.
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
@@ -319,7 +360,7 @@ And user should see the number of rules available to install (Y)
 
 #### **Scenario: User can install prebuilt rules one by one**
 
-**Automation**: 1 e2e test with mock rules.
+**Automation**: 1 e2e test with mock rules + integration tests with mock rules that would test /status and /installation/* endpoints in integration.
 
 ```Gherkin
 Given no prebuilt rules are installed in Kibana
@@ -336,7 +377,7 @@ And user should see the number of rules available to install decreased by 1
 
 #### **Scenario: User can install multiple prebuilt rules selected on the page**
 
-**Automation**: 1 e2e test with mock rules.
+**Automation**: 1 e2e test with mock rules + integration tests with mock rules that would test /status and /installation/* endpoints in integration.
 
 ```Gherkin
 Given no prebuilt rules are installed in Kibana
@@ -360,7 +401,7 @@ Examples:
 
 #### **Scenario: User can install all available prebuilt rules at once**
 
-**Automation**: 1 e2e test with mock rules.
+**Automation**: 1 e2e test with mock rules + integration tests with mock rules that would test /status and /installation/* endpoints in integration.
 
 ```Gherkin
 Given no prebuilt rules are installed in Kibana
@@ -380,7 +421,7 @@ And user should NOT see a number of rules available to install
 
 #### **Scenario: Empty screen is shown when all prebuilt rules are installed**
 
-**Automation**: 1 e2e test with mock rules.
+**Automation**: 1 e2e test with mock rules + 1 integration test.
 
 ```Gherkin
 Given all the available prebuilt rules are installed in Kibana
@@ -397,7 +438,7 @@ TODO: add scenarios
 
 #### **Scenario: User opening the Add Rules page sees a loading skeleton until the package installation is completed**
 
-**Automation**: ?.
+**Automation**: unit tests.
 
 ```Gherkin
 Given prebuilt rules package is not installed
@@ -407,7 +448,7 @@ Then user should see a loading skeleton until the package installation is comple
 
 #### **Scenario: User can navigate from the Add Rules page to the Rule Management page via breadcrumbs**
 
-**Automation**: ?.
+**Automation**: 1 e2e test.
 
 ```Gherkin
 Given user is on the Add Rules page
@@ -419,7 +460,7 @@ Then the Rule Management page should be displayed
 
 #### **Scenario: User can upgrade prebuilt rules one by one**
 
-**Automation**: 1 e2e test with mock rules.
+**Automation**: 1 e2e test with mock rules + integration tests with mock rules that would test /status and /upgrade/* endpoints in integration.
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
@@ -435,7 +476,7 @@ And user should see the number of rules available to upgrade decreased by 1
 
 #### **Scenario: User can upgrade multiple prebuilt rules selected on the page**
 
-**Automation**: 1 e2e test with mock rules.
+**Automation**: 1 e2e test with mock rules + integration tests with mock rules that would test /status and /upgrade/* endpoints in integration.
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
@@ -458,7 +499,7 @@ Examples:
 
 #### **Scenario: User can upgrade all available prebuilt rules at once**
 
-**Automation**: 1 e2e test with mock rules.
+**Automation**: 1 e2e test with mock rules + integration tests with mock rules that would test /status and /upgrade/* endpoints in integration.
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
@@ -479,46 +520,26 @@ TODO: add scenarios
 
 ### Rule upgrade workflow: misc cases
 
-#### **Scenario: User opening the Rule Updates table sees a loading skeleton until the package installation is completed**
+#### **Scenario: User don't see the Rule Updates tab until the package installation is completed**
 
-**Automation**: ?.
+**Automation**: unit tests.
 
 ```Gherkin
 Given prebuilt rules package is not installed
 When user opens the Rule Management page
-And user opens the Rule Updates table
-Then user should see a loading skeleton until the package installation is completed
+Then user should NOT see the Rule Updates tab until the package installation is completed and there are rules available for upgrade
 ```
 
 ### Error handling
 
-#### **Scenario: Error is handled when the package installation fails**
-
-**Automation**: ?.
-
-```Gherkin
-Given the package is not installed
-And no prebuilt rules are installed in Kibana
-When user opens the Rule Management page
-And the package installation fails
-Then user should NOT see a CTA to install prebuilt rules
-And user should NOT see a number of rules available to install
-And user should NOT see a CTA to upgrade prebuilt rules
-And user should NOT see a number of rules available to upgrade
-And user should NOT see the Rule Updates table
-```
-
 #### **Scenario: Error is handled when any operation on prebuilt rules fails**
 
-**Automation**: ?.
+**Automation**: unit tests.
 
 ```Gherkin
-Given user is <operation> prebuilt rules
-When the operation fails
+When user is <operation> prebuilt rules
+And this operation fails
 Then user should see an error message
-And prebuilt rules should not be installed/upgraded
-And the CTAs to install/upgrade prebuilt rules should remain on the Rule Management page
-And the numbers of available rules to install/upgrade should not change
 
 Examples:
   | operation             |
