@@ -106,6 +106,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
         'home.disableWelcomeScreen (boolean)',
+        'management.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
         'map.emsFileApiUrl (string)',
         'map.emsFontLibraryUrl (string)',
         'map.emsLandingPageUrl (string)',
