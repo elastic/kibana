@@ -54,6 +54,47 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-public.PackageIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "PackageIcon",
+        "description": [],
+        "signature": [
+          "({ packageName, integrationName, version, icons, tryApi, ...euiIconProps }: React.PropsWithChildren<",
+          "UsePackageIconType",
+          " & Omit<",
+          "EuiIconProps",
+          ", \"type\">>) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/fleet/public/components/package_icon.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.PackageIcon.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ packageName, integrationName, version, icons, tryApi, ...euiIconProps }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "UsePackageIconType",
+              " & Omit<",
+              "EuiIconProps",
+              ", \"type\">>"
+            ],
+            "path": "x-pack/plugins/fleet/public/components/package_icon.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-public.PackagePolicyEditorDatastreamMappings",
         "type": "Function",
         "tags": [],
@@ -5375,6 +5416,38 @@
                 "description": [],
                 "signature": [
                   "string"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.ArtifactsClientInterface.bulkDeleteArtifacts",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkDeleteArtifacts",
+            "description": [],
+            "signature": [
+              "(ids: string[]) => Promise<Error[]>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.ArtifactsClientInterface.bulkDeleteArtifacts.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[]"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
                 "deprecated": false,

@@ -471,7 +471,9 @@ packages/kbn-logging-mocks @elastic/kibana-core
 x-pack/plugins/logstash @elastic/logstash
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
+packages/kbn-management/cards_navigation @elastic/platform-deployment-management
 src/plugins/management @elastic/platform-deployment-management
+packages/kbn-management/storybook/config @elastic/platform-deployment-management
 test/plugin_functional/plugins/management_test_plugin @elastic/kibana-app-services
 packages/kbn-mapbox-gl @elastic/kibana-gis
 x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
@@ -550,6 +552,7 @@ examples/response_stream @elastic/ml-ui
 packages/kbn-rison @elastic/kibana-operations
 x-pack/plugins/rollup @elastic/platform-deployment-management
 examples/routing_example @elastic/kibana-core
+packages/kbn-rrule @elastic/response-ops
 packages/kbn-rule-data-utils @elastic/security-detections-response @elastic/actionable-observability @elastic/response-ops
 x-pack/plugins/rule_registry @elastic/response-ops @elastic/actionable-observability
 x-pack/plugins/runtime_fields @elastic/platform-deployment-management
@@ -740,6 +743,7 @@ packages/kbn-utility-types @elastic/kibana-core
 packages/kbn-utility-types-jest @elastic/kibana-operations
 packages/kbn-utils @elastic/kibana-operations
 x-pack/plugins/ux @elastic/uptime
+examples/v8_profiler_examples @elastic/response-ops
 packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 src/plugins/vis_default_editor @elastic/kibana-visualizations
 src/plugins/vis_types/gauge @elastic/kibana-visualizations
@@ -962,6 +966,9 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 #CC# /x-pack/plugins/global_search/ @elastic/kibana-core
 #CC# /src/plugins/newsfeed @elastic/kibana-core
 #CC# /x-pack/plugins/global_search_providers/ @elastic/kibana-core
+
+# AppEx Platform Services Security
+x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
 
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core

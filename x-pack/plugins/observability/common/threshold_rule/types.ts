@@ -8,9 +8,9 @@
 import * as rt from 'io-ts';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { values } from 'lodash';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { Color } from './color_palette';
 import { metricsExplorerMetricRT } from './metrics_explorer';
-
 import { TimeUnitChar } from '../utils/formatters/duration';
 import { SNAPSHOT_CUSTOM_AGGREGATIONS } from './constants';
 
@@ -201,13 +201,14 @@ export interface MetricAnomalyParams {
 
 // Types for the executor
 
-export interface MetricThresholdParams {
+export interface ThresholdParams {
   criteria: MetricExpressionParams[];
   filterQuery?: string;
   filterQueryText?: string;
   sourceId?: string;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
+  searchConfiguration: SerializedSearchSourceFields;
 }
 
 interface BaseMetricExpressionParams {

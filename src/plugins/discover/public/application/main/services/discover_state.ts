@@ -16,7 +16,6 @@ import {
 import {
   DataPublicPluginStart,
   noSearchSessionStorageCapabilityMessage,
-  QueryState,
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
 import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
@@ -38,7 +37,6 @@ import {
   DiscoverAppState,
   DiscoverAppStateContainer,
   getDiscoverAppStateContainer,
-  GLOBAL_STATE_URL_KEY,
 } from './discover_app_state_container';
 import {
   DiscoverInternalStateContainer,
@@ -51,6 +49,7 @@ import {
   DiscoverSavedSearchContainer,
 } from './discover_saved_search_container';
 import { updateFiltersReferences } from '../utils/update_filter_references';
+import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 interface DiscoverStateContainerParams {
   /**
    * Browser history
@@ -192,6 +191,7 @@ export function getDiscoverStateContainer({
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
+
   /**
    * state storage for state in the URL
    */
@@ -208,11 +208,18 @@ export function getDiscoverStateContainer({
     history,
     session: services.data.search.session,
   });
+
+  /**
+   * Global State Container, synced with the _g part URL
+   */
+  const globalStateContainer = getDiscoverGlobalStateContainer(stateStorage);
+
   /**
    * Saved Search State Container, the persisted saved object of Discover
    */
   const savedSearchContainer = getSavedSearchContainer({
     services,
+    globalStateContainer,
   });
 
   /**
@@ -223,6 +230,7 @@ export function getDiscoverStateContainer({
     savedSearch: savedSearchContainer.getState(),
     services,
   });
+
   /**
    * Internal State Container, state that's not persisted and not part of the URL
    */
@@ -230,13 +238,12 @@ export function getDiscoverStateContainer({
 
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
-      const state = stateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY);
+      const state = globalStateContainer.get();
       if (state?.refreshInterval && !state.refreshInterval.pause) {
-        await stateStorage.set(
-          GLOBAL_STATE_URL_KEY,
-          { ...state, refreshInterval: { ...state?.refreshInterval, pause: true } },
-          { replace: true }
-        );
+        await globalStateContainer.set({
+          ...state,
+          refreshInterval: { ...state?.refreshInterval, pause: true },
+        });
       }
     }
   };
@@ -351,8 +358,8 @@ export function getDiscoverStateContainer({
     const unsubscribeData = dataStateContainer.subscribe();
 
     // updates saved search when query or filters change, triggers data fetching
-    const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(async () => {
-      await savedSearchContainer.update({
+    const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(() => {
+      savedSearchContainer.update({
         nextDataView: internalStateContainer.getState().dataView,
         nextState: appStateContainer.getState(),
         useFilterAndQueryServices: true,
@@ -424,7 +431,7 @@ export function getDiscoverStateContainer({
   const undoSavedSearchChanges = async () => {
     addLog('undoSavedSearchChanges');
     const nextSavedSearch = savedSearchContainer.getInitial$().getValue();
-    await savedSearchContainer.set(nextSavedSearch);
+    savedSearchContainer.set(nextSavedSearch);
     restoreStateFromSavedSearch({
       savedSearch: nextSavedSearch,
       timefilter: services.timefilter,
@@ -469,7 +476,7 @@ export function createSearchSessionRestorationDataProvider(deps: {
   data: DataPublicPluginStart;
   getSavedSearch: () => SavedSearch;
 }): SearchSessionInfoProvider {
-  const getSavedSearchId = () => deps.getSavedSearch().id;
+  const getSavedSearch = () => deps.getSavedSearch();
   return {
     getName: async () => {
       const savedSearch = deps.getSavedSearch();
@@ -485,12 +492,12 @@ export function createSearchSessionRestorationDataProvider(deps: {
         id: DISCOVER_APP_LOCATOR,
         initialState: createUrlGeneratorState({
           ...deps,
-          getSavedSearchId,
+          getSavedSearch,
           shouldRestoreSearchSession: false,
         }),
         restoreState: createUrlGeneratorState({
           ...deps,
-          getSavedSearchId,
+          getSavedSearch,
           shouldRestoreSearchSession: true,
         }),
       };
@@ -501,20 +508,21 @@ export function createSearchSessionRestorationDataProvider(deps: {
 function createUrlGeneratorState({
   appStateContainer,
   data,
-  getSavedSearchId,
+  getSavedSearch,
   shouldRestoreSearchSession,
 }: {
   appStateContainer: StateContainer<DiscoverAppState>;
   data: DataPublicPluginStart;
-  getSavedSearchId: () => string | undefined;
+  getSavedSearch: () => SavedSearch;
   shouldRestoreSearchSession: boolean;
 }): DiscoverAppLocatorParams {
   const appState = appStateContainer.get();
+  const dataView = getSavedSearch().searchSource.getField('index');
   return {
     filters: data.query.filterManager.getFilters(),
     dataViewId: appState.index,
     query: appState.query,
-    savedSearchId: getSavedSearchId(),
+    savedSearchId: getSavedSearch().id,
     timeRange: shouldRestoreSearchSession
       ? data.query.timefilter.timefilter.getAbsoluteTime()
       : data.query.timefilter.timefilter.getTime(),
@@ -533,5 +541,6 @@ function createUrlGeneratorState({
     viewMode: appState.viewMode,
     hideAggregatedPreview: appState.hideAggregatedPreview,
     breakdownField: appState.breakdownField,
+    dataViewSpec: !dataView?.isPersisted() ? dataView?.toSpec(false) : undefined,
   };
 }
