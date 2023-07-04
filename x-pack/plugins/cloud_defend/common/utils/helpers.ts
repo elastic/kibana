@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { Truthy } from 'lodash';
 import { INTEGRATION_PACKAGE_NAME } from '../constants';
 
@@ -33,3 +34,7 @@ export function assert(condition: any, msg?: string): asserts condition {
 
 export const isCloudDefendPackage = (packageName?: string) =>
   packageName === INTEGRATION_PACKAGE_NAME;
+
+export function getInputFromPolicy(policy: NewPackagePolicy, inputId: string) {
+  return policy.inputs.find((input) => input.type === inputId);
+}

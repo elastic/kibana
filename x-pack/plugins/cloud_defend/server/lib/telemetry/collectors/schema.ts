@@ -77,8 +77,6 @@ export const cloudDefendUsageSchema: MakeSchemaFrom<CloudDefendUsage> = {
       file_doc_count: { type: 'long' },
       process_doc_count: { type: 'long' },
       alert_doc_count: { type: 'long' },
-      policy_id: { type: 'keyword' },
-      policy_name: { type: 'keyword' },
       policy_version: { type: 'keyword' },
       kubernetes_version: { type: 'keyword' },
       agents_count: { type: 'short' },

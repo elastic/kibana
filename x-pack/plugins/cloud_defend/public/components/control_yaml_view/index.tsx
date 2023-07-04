@@ -13,12 +13,12 @@ import { INPUT_CONTROL } from '../../../common/constants';
 import { useStyles } from './styles';
 import { useConfigModel } from './hooks/use_config_model';
 import {
-  getInputFromPolicy,
   validateStringValuesForCondition,
   getSelectorsAndResponsesFromYaml,
   validateMaxSelectorsAndResponses,
   validateBlockRestrictions,
 } from '../../common/utils';
+import { getInputFromPolicy } from '../../../common/utils/helpers';
 import * as i18n from './translations';
 import { ViewDeps, SelectorConditionsMap, SelectorCondition } from '../../types';
 

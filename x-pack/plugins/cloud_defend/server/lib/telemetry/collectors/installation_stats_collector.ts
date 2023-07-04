@@ -15,7 +15,8 @@ import {
 import { agentPolicyService } from '@kbn/fleet-plugin/server/services';
 import type { CloudDefendInstallationStats } from './types';
 import type { CloudDefendPluginStart, CloudDefendPluginStartDeps } from '../../../types';
-import { INTEGRATION_PACKAGE_NAME } from '../../../../common/constants';
+import { INTEGRATION_PACKAGE_NAME, INPUT_CONTROL } from '../../../../common/constants';
+import { getInputFromPolicy } from '../../../../common/utils/helpers';
 
 export const getInstallationStats = async (
   esClient: ElasticsearchClient,
@@ -43,9 +44,11 @@ export const getInstallationStats = async (
           agentPolicies?.find((agentPolicy) => agentPolicy?.id === packagePolicy.policy_id)
             ?.agents ?? 0;
 
+        const input = getInputFromPolicy(packagePolicy, INPUT_CONTROL);
+
         return {
           package_policy_id: packagePolicy.id,
-          policy_yaml: packagePolicy.vars?.configuration?.value as string,
+          policy_yaml: input?.vars?.configuration?.value,
           package_version: packagePolicy.package?.version as string,
           created_at: packagePolicy.created_at,
           agent_policy_id: packagePolicy.policy_id,
@@ -67,6 +70,7 @@ export const getInstallationStats = async (
     esClient,
     withAgentCount: true,
   });
+
   if (!packagePolicies) return [];
 
   const installationStats: CloudDefendInstallationStats[] = await getInstalledPackagePolicies(

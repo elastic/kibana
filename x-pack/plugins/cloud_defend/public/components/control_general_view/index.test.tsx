@@ -16,7 +16,7 @@ import {
   MOCK_YAML_TOO_MANY_FILE_SELECTORS_RESPONSES,
 } from '../../test/mocks';
 import { ControlGeneralView } from '.';
-import { getInputFromPolicy } from '../../common/utils';
+import { getInputFromPolicy } from '../../../common/utils/helpers';
 import { INPUT_CONTROL } from '../../../common/constants';
 
 describe('<ControlGeneralView />', () => {

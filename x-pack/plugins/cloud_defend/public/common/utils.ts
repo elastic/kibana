@@ -6,7 +6,6 @@
  */
 import yaml from 'js-yaml';
 import { uniq } from 'lodash';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { errorBlockActionRequiresTargetFilePath } from '../components/control_general_view/translations';
 import {
@@ -25,10 +24,6 @@ import {
   MAX_SELECTORS_AND_RESPONSES_PER_TYPE,
   FIM_OPERATIONS,
 } from './constants';
-
-export function getInputFromPolicy(policy: NewPackagePolicy, inputId: string) {
-  return policy.inputs.find((input) => input.type === inputId);
-}
 
 export function getSelectorTypeIcon(type: SelectorType) {
   switch (type) {

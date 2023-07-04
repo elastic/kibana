@@ -11,7 +11,7 @@ import type {
   CustomRequestHandlerContext,
   Logger,
   SavedObjectsClientContract,
-  ElasticsearchClient,
+  IScopedClusterClient,
 } from '@kbn/core/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
@@ -27,6 +27,8 @@ import type {
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
 
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CloudDefendPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -36,6 +38,7 @@ export interface CloudDefendPluginSetupDeps {
   data: DataPluginSetup;
   security: SecurityPluginSetup;
   cloud: CloudSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 export interface CloudDefendPluginStartDeps {
   data: DataPluginStart;
@@ -47,7 +50,7 @@ export interface CloudDefendPluginStartDeps {
 export interface CloudDefendApiRequestHandlerContext {
   user: ReturnType<SecurityPluginStart['authc']['getCurrentUser']>;
   logger: Logger;
-  esClient: ElasticsearchClient;
+  esClient: IScopedClusterClient;
   soClient: SavedObjectsClientContract;
   agentPolicyService: AgentPolicyServiceInterface;
   agentService: AgentService;

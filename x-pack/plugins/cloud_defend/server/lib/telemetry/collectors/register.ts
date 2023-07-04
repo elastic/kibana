@@ -22,17 +22,20 @@ export function registerCloudDefendUsageCollector(
 ): void {
   // usageCollection is an optional dependency, so make sure to return if it is not registered
   if (!usageCollection) {
+    logger.debug('Usage collection disabled');
     return;
   }
 
   // Create usage collector
   const cloudDefendUsageCollector = usageCollection.makeUsageCollector<CloudDefendUsage>({
-    type: 'cloud_security_posture',
+    type: 'cloud_defend',
     isReady: async () => {
       await coreServices;
       return true;
     },
     fetch: async (collectorFetchContext: CollectorFetchContext) => {
+      logger.debug('Starting cloud_defend usage collection');
+
       const [indicesStats, accountsStats, podsStats, installationStats] = await Promise.all([
         getIndicesStats(
           collectorFetchContext.esClient,
@@ -48,7 +51,11 @@ export function registerCloudDefendUsageCollector(
           coreServices,
           logger
         ),
-      ]);
+      ]).catch((err) => {
+        logger.error(err);
+
+        return err;
+      });
 
       return {
         indices: indicesStats,

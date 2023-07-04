@@ -23,10 +23,10 @@ import type {
 import moment from 'moment';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
-  ALERTS_INDEX_PATTERN,
-  FILE_INDEX_PATTERN,
+  ALERTS_INDEX_PATTERN_DEFAULT_NS,
+  FILE_INDEX_PATTERN_DEFAULT_NS,
   INTEGRATION_PACKAGE_NAME,
-  PROCESS_INDEX_PATTERN,
+  PROCESS_INDEX_PATTERN_DEFAULT_NS,
   STATUS_ROUTE_PATH,
 } from '../../../common/constants';
 import type { CloudDefendApiRequestHandlerContext, CloudDefendRouter } from '../../types';
@@ -84,14 +84,25 @@ const getHealthyAgents = async (
 const calculateCloudDefendStatusCode = (
   indicesStatus: {
     alerts: IndexStatus;
+    process: IndexStatus;
+    file: IndexStatus;
   },
   installedCloudDefendPackagePolicies: number,
   healthyAgents: number,
   timeSinceInstallationInMinutes: number
 ): CloudDefendStatusCode => {
-  // We check privileges only for the relevant indices for our pages to appear
-  if (indicesStatus.alerts === 'unprivileged') return 'unprivileged';
-  if (indicesStatus.alerts === 'not-empty') return 'indexed';
+  if (
+    indicesStatus.alerts === 'unprivileged' ||
+    indicesStatus.file === 'unprivileged' ||
+    indicesStatus.process === 'unprivileged'
+  )
+    return 'unprivileged';
+  if (
+    indicesStatus.alerts === 'not-empty' ||
+    indicesStatus.file === 'not-empty' ||
+    indicesStatus.process === 'not-empty'
+  )
+    return 'indexed';
   if (installedCloudDefendPackagePolicies === 0) return 'not-installed';
   if (healthyAgents === 0) return 'not-deployed';
   if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
@@ -130,9 +141,9 @@ export const getCloudDefendStatus = async ({
     installedPackagePolicies,
     installedPolicyTemplates,
   ] = await Promise.all([
-    checkIndexStatus(esClient, ALERTS_INDEX_PATTERN, logger),
-    checkIndexStatus(esClient, FILE_INDEX_PATTERN, logger),
-    checkIndexStatus(esClient, PROCESS_INDEX_PATTERN, logger),
+    checkIndexStatus(esClient, ALERTS_INDEX_PATTERN_DEFAULT_NS, logger),
+    checkIndexStatus(esClient, FILE_INDEX_PATTERN_DEFAULT_NS, logger),
+    checkIndexStatus(esClient, PROCESS_INDEX_PATTERN_DEFAULT_NS, logger),
     packageService.asInternalUser.getInstallation(INTEGRATION_PACKAGE_NAME),
     packageService.asInternalUser.fetchFindLatestPackage(INTEGRATION_PACKAGE_NAME),
     getCloudDefendPackagePolicies(soClient, packagePolicyService, INTEGRATION_PACKAGE_NAME, {
@@ -155,15 +166,15 @@ export const getCloudDefendStatus = async ({
   const MIN_DATE = 0;
   const indicesDetails = [
     {
-      index: ALERTS_INDEX_PATTERN,
+      index: ALERTS_INDEX_PATTERN_DEFAULT_NS,
       status: alertsIndexStatus,
     },
     {
-      index: FILE_INDEX_PATTERN,
+      index: FILE_INDEX_PATTERN_DEFAULT_NS,
       status: fileIndexStatus,
     },
     {
-      index: PROCESS_INDEX_PATTERN,
+      index: PROCESS_INDEX_PATTERN_DEFAULT_NS,
       status: processIndexStatus,
     },
   ];
@@ -171,6 +182,8 @@ export const getCloudDefendStatus = async ({
   const status = calculateCloudDefendStatusCode(
     {
       alerts: alertsIndexStatus,
+      file: fileIndexStatus,
+      process: processIndexStatus,
     },
     installedPackagePoliciesTotal,
     healthyAgents,
@@ -212,7 +225,10 @@ export const defineGetCloudDefendStatusRoute = (router: CloudDefendRouter) =>
     .addVersion({ version: '1', validate: {} }, async (context, request, response) => {
       const cloudDefendContext = await context.cloudDefend;
       try {
-        const status = await getCloudDefendStatus(cloudDefendContext);
+        const status = await getCloudDefendStatus({
+          ...cloudDefendContext,
+          esClient: cloudDefendContext.esClient.asCurrentUser,
+        });
         return response.ok({
           body: status,
         });

@@ -46,8 +46,6 @@ export interface CloudDefendPodsStats {
 export interface CloudDefendAccountsStats {
   account_id: string;
   total_doc_count: number;
-  policy_id: string;
-  policy_name: string;
   policy_version: string;
   kubernetes_version: string | null;
   file_doc_count: number;

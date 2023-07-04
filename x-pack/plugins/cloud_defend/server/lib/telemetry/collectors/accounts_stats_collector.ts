@@ -17,14 +17,6 @@ interface Value {
   value: number;
 }
 
-interface PolicyName {
-  metrics: { 'cloud_defend.package_policy_name': string };
-}
-
-interface PolicyId {
-  metrics: { 'cloud_defend.package_policy_id': string };
-}
-
 interface PolicyVersion {
   metrics: { 'cloud_defend.policy_version': string };
 }
@@ -44,8 +36,6 @@ interface AccountEntity {
   process_doc_count: AggregationsMultiBucketBase;
   file_doc_count: AggregationsMultiBucketBase;
   alert_doc_count: AggregationsMultiBucketBase;
-  policy_name: { top: PolicyName[] };
-  policy_id: { top: PolicyId[] };
   policy_version: { top: PolicyVersion[] };
   kubernetes_version: { top: KubernetesVersion[] };
   agents_count: Value;
@@ -81,17 +71,6 @@ const getAccountsStatsQuery = (): SearchRequest => ({
             field: 'agent.id',
           },
         },
-        policy_id: {
-          top_metrics: {
-            metrics: {
-              field: 'cloud_defend.package_policy_id',
-            },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
-          },
-        },
         package_version: {
           top_metrics: {
             metrics: {
@@ -103,17 +82,17 @@ const getAccountsStatsQuery = (): SearchRequest => ({
             },
           },
         },
-        /*        kubernetes_version: {
+        kubernetes_version: {
           top_metrics: {
             metrics: {
-              field: 'cloudbeat.kubernetes.version',
+              field: 'orchestrator.version',
             },
             size: 1,
             sort: {
               '@timestamp': 'desc',
             },
           },
-        },*/
+        },
         file_doc_count: {
           filter: {
             bool: {
@@ -199,7 +178,6 @@ const getCloudDefendAccountsStats = (
     file_doc_count: account.file_doc_count.doc_count,
     process_doc_count: account.process_doc_count.doc_count,
     alert_doc_count: account.alert_doc_count.doc_count,
-    policy_id: account.policy_id.top[0].metrics['cloud_defend.package_policy_id'],
     policy_version: account.policy_version.top[0].metrics['cloud_defend.policy_version'],
     kubernetes_version: account.kubernetes_version.top[0].metrics['orchestrator.version'],
     agents_count: account.agents_count.value,
