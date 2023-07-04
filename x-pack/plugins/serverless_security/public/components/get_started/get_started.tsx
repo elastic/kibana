@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiTitle, useEuiTheme, useEuiShadow } from '@elastic/eui';
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
@@ -17,13 +17,40 @@ import {
   GET_STARTED_PAGE_SUBTITLE,
   GET_STARTED_PAGE_TITLE,
 } from './translations';
+import { SecurityProductTypes } from '../../../common/config';
+import { ProductSwitch } from './product_switch';
+import { useTogglePanel } from './use_toggle_panel';
 
-export const GetStartedComponent: React.FC = () => {
+const CONTENT_WIDTH = 1150;
+
+export const GetStartedComponent: React.FC<{ productTypes: SecurityProductTypes }> = ({
+  productTypes,
+}) => {
   const { euiTheme } = useEuiTheme();
-
+  const shadow = useEuiShadow('s');
+  const {
+    onProductSwitchChanged,
+    onStepClicked,
+    state: { activeProducts, activeCards, finishedSteps },
+  } = useTogglePanel({ productTypes });
   return (
-    <KibanaPageTemplate restrictWidth={false} contentBorder={false}>
+    <KibanaPageTemplate
+      restrictWidth={false}
+      contentBorder={false}
+      grow={true}
+      /* this is the only page without padding in Security Solution,
+       **  ignoring main page wrapper padding using absolute positioning
+       */
+      css={css`
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        position: absolute;
+      `}
+    >
       <KibanaPageTemplate.Header
+        restrictWidth={CONTENT_WIDTH}
         css={css`
           padding: 0 ${euiTheme.base * 2.25}px;
         `}
@@ -47,12 +74,38 @@ export const GetStartedComponent: React.FC = () => {
         <WelcomePanel />
       </KibanaPageTemplate.Header>
       <KibanaPageTemplate.Section
+        bottomBorder={false}
+        grow={true}
+        restrictWidth={CONTENT_WIDTH}
+        paddingSize="none"
+        css={css`
+          ${shadow};
+          z-index: 1;
+          flex-grow: 0;
+          padding: 0 ${euiTheme.base * 2.25}px;
+        `}
+      >
+        <ProductSwitch
+          onProductSwitchChanged={onProductSwitchChanged}
+          activeProducts={activeProducts}
+          euiTheme={euiTheme}
+        />
+      </KibanaPageTemplate.Section>
+      <KibanaPageTemplate.Section
         bottomBorder="extended"
         grow={true}
-        restrictWidth={false}
+        restrictWidth={CONTENT_WIDTH}
         paddingSize="none"
+        css={css`
+          padding: 0 ${euiTheme.base * 2.25}px;
+        `}
       >
-        <TogglePanel />
+        <TogglePanel
+          finishedSteps={finishedSteps}
+          activeCards={activeCards}
+          activeProducts={activeProducts}
+          onStepClicked={onStepClicked}
+        />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
@@ -60,3 +113,6 @@ export const GetStartedComponent: React.FC = () => {
 
 GetStartedComponent.displayName = 'GetStartedComponent';
 export const GetStarted = React.memo(GetStartedComponent);
+
+// eslint-disable-next-line import/no-default-export
+export default GetStarted;

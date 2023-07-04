@@ -6,22 +6,15 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import {
-  usePartitionFooterNavItems,
-  useSideNavItems,
-  useSideNavSelectedId,
-} from './use_side_nav_items';
-import { BehaviorSubject } from 'rxjs';
-import type { NavigationLink } from '@kbn/security-solution-plugin/public/common/links/types';
+import { useSideNavItems, useSideNavSelectedId } from './use_side_nav_items';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
-import { KibanaServicesProvider, servicesMocks } from '../services.mock';
+import {
+  KibanaServicesProvider,
+  servicesMocks,
+  mockProjectNavLinks,
+} from '../common/services.mock';
 
 jest.mock('./use_link_props');
-
-const mockNavLinks = jest.fn((): NavigationLink[] => []);
-servicesMocks.securitySolution.getNavLinks$.mockImplementation(
-  () => new BehaviorSubject(mockNavLinks())
-);
 
 const mockUseLocation = jest.fn(() => ({ pathname: '/' }));
 jest.mock('react-router-dom', () => ({
@@ -40,11 +33,11 @@ describe('useSideNavItems', () => {
     const items = result.current;
 
     expect(items).toEqual([]);
-    expect(servicesMocks.securitySolution.getNavLinks$).toHaveBeenCalledTimes(1);
+    expect(servicesMocks.getProjectNavLinks$).toHaveBeenCalledTimes(1);
   });
 
   it('should return main items', async () => {
-    mockNavLinks.mockReturnValueOnce([
+    mockProjectNavLinks.mockReturnValueOnce([
       { id: SecurityPageName.alerts, title: 'Alerts' },
       { id: SecurityPageName.case, title: 'Cases' },
     ]);
@@ -55,12 +48,14 @@ describe('useSideNavItems', () => {
       {
         id: SecurityPageName.alerts,
         label: 'Alerts',
+        position: 'top',
         href: expect.any(String),
         onClick: expect.any(Function),
       },
       {
         id: SecurityPageName.case,
         label: 'Cases',
+        position: 'top',
         href: expect.any(String),
         onClick: expect.any(Function),
       },
@@ -68,7 +63,7 @@ describe('useSideNavItems', () => {
   });
 
   it('should return secondary items', async () => {
-    mockNavLinks.mockReturnValueOnce([
+    mockProjectNavLinks.mockReturnValueOnce([
       {
         id: SecurityPageName.dashboards,
         title: 'Dashboards',
@@ -82,6 +77,7 @@ describe('useSideNavItems', () => {
       {
         id: SecurityPageName.dashboards,
         label: 'Dashboards',
+        position: 'top',
         href: expect.any(String),
         onClick: expect.any(Function),
         items: [
@@ -97,10 +93,11 @@ describe('useSideNavItems', () => {
   });
 
   it('should return get started link', async () => {
-    mockNavLinks.mockReturnValueOnce([
+    mockProjectNavLinks.mockReturnValueOnce([
       {
         id: SecurityPageName.landing,
         title: 'Get Started',
+        sideNavIcon: 'launch',
       },
     ]);
     const { result } = renderHook(useSideNavItems, { wrapper: KibanaServicesProvider });
@@ -110,109 +107,14 @@ describe('useSideNavItems', () => {
     expect(items).toEqual([
       {
         id: SecurityPageName.landing,
-        label: 'GET STARTED',
+        label: 'Get Started',
+        position: 'bottom',
         href: expect.any(String),
         onClick: expect.any(Function),
-        labelSize: 'xs',
         iconType: 'launch',
         appendSeparator: true,
       },
     ]);
-  });
-});
-
-describe('usePartitionFooterNavItems', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('should partition main items only', async () => {
-    const mainInputItems = [
-      {
-        id: SecurityPageName.dashboards,
-        label: 'Dashboards',
-        href: '',
-        onClick: jest.fn(),
-      },
-      {
-        id: SecurityPageName.alerts,
-        label: 'Alerts',
-        href: '',
-        onClick: jest.fn(),
-      },
-    ];
-    const { result } = renderHook(usePartitionFooterNavItems, {
-      initialProps: mainInputItems,
-    });
-
-    const [items, footerItems] = result.current;
-
-    expect(items).toEqual(mainInputItems);
-    expect(footerItems).toEqual([]);
-  });
-
-  it('should partition footer items only', async () => {
-    const footerInputItems = [
-      {
-        id: SecurityPageName.landing,
-        label: 'GET STARTED',
-        href: '',
-        onClick: jest.fn(),
-      },
-      {
-        id: SecurityPageName.administration,
-        label: 'Manage',
-        href: '',
-        onClick: jest.fn(),
-      },
-    ];
-    const { result } = renderHook(usePartitionFooterNavItems, {
-      initialProps: footerInputItems,
-    });
-
-    const [items, footerItems] = result.current;
-
-    expect(items).toEqual([]);
-    expect(footerItems).toEqual(footerInputItems);
-  });
-
-  it('should partition main and footer items', async () => {
-    const mainInputItems = [
-      {
-        id: SecurityPageName.dashboards,
-        label: 'Dashboards',
-        href: '',
-        onClick: jest.fn(),
-      },
-      {
-        id: SecurityPageName.alerts,
-        label: 'Alerts',
-        href: '',
-        onClick: jest.fn(),
-      },
-    ];
-    const footerInputItems = [
-      {
-        id: SecurityPageName.landing,
-        label: 'GET STARTED',
-        href: '',
-        onClick: jest.fn(),
-      },
-      {
-        id: SecurityPageName.administration,
-        label: 'Manage',
-        href: '',
-        onClick: jest.fn(),
-      },
-    ];
-    const { result } = renderHook(usePartitionFooterNavItems, {
-      initialProps: [...mainInputItems, ...footerInputItems],
-    });
-
-    const [items, footerItems] = result.current;
-
-    expect(items).toEqual(mainInputItems);
-    expect(footerItems).toEqual(footerInputItems);
   });
 });
 

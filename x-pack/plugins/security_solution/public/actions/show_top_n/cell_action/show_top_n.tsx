@@ -8,7 +8,7 @@ import React from 'react';
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import type { History } from 'history';
 import { Provider } from 'react-redux';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { createCellActionFactory, type CellActionTemplate } from '@kbn/cell-actions';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -29,7 +29,7 @@ const SHOW_TOP = (fieldName: string) =>
   });
 
 const ICON = 'visBarVertical';
-const UNSUPPORTED_FIELD_TYPES = [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.TEXT];
+const UNSUPPORTED_ES_FIELD_TYPES = [ES_FIELD_TYPES.DATE, ES_FIELD_TYPES.TEXT];
 
 export const createShowTopNCellActionFactory = createCellActionFactory(
   ({
@@ -52,7 +52,7 @@ export const createShowTopNCellActionFactory = createCellActionFactory(
         data.length === 1 &&
         fieldHasCellActions(field.name) &&
         (field.esTypes ?? []).every(
-          (esType) => !UNSUPPORTED_FIELD_TYPES.includes(esType as ES_FIELD_TYPES)
+          (esType) => !UNSUPPORTED_ES_FIELD_TYPES.includes(esType as ES_FIELD_TYPES)
         ) &&
         !!field.aggregatable
       );
