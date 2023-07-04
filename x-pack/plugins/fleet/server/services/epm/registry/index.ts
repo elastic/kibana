@@ -114,7 +114,7 @@ async function _fetchFindLatestPackage(
     }
 
     try {
-      const res = await fetchUrl(url.toString(), 1);
+      const res = await fetchUrl(url.toString(), { retries: 1, withCache: true });
       const searchResults: RegistryPackage[] = JSON.parse(res);
 
       const latestPackageFromRegistry = searchResults[0] ?? null;
@@ -179,7 +179,9 @@ export async function fetchInfo(
   const registryUrl = getRegistryUrl();
   try {
     // Trailing slash avoids 301 redirect / extra hop
-    const res = await fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}/`).then(JSON.parse);
+    const res = await fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}/`, {
+      withCache: true,
+    }).then(JSON.parse);
 
     return res;
   } catch (err) {

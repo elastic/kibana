@@ -6,6 +6,8 @@
  */
 import { merge } from 'lodash';
 
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+
 import { isPackageLimited } from '../../../common/services';
 import type {
   PackagePolicy,
@@ -14,7 +16,7 @@ import type {
   PackageInfo,
 } from '../../types';
 import { DEFAULT_OUTPUT } from '../../constants';
-import { pkgToPkgKey } from '../epm/registry';
+import { getPackageInfo } from '../epm/packages';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
@@ -103,7 +105,7 @@ export const storedPackagePolicyToAgentInputs = (
 
 export const storedPackagePoliciesToAgentInputs = async (
   packagePolicies: PackagePolicy[],
-  packageInfoCache: Map<string, PackageInfo>,
+  soClient: SavedObjectsClientContract,
   outputId: string = DEFAULT_OUTPUT.name
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
@@ -114,7 +116,11 @@ export const storedPackagePoliciesToAgentInputs = async (
     }
 
     const packageInfo = packagePolicy.package
-      ? packageInfoCache.get(pkgToPkgKey(packagePolicy.package))
+      ? await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: packagePolicy.package.name,
+          pkgVersion: packagePolicy.package.version,
+        })
       : undefined;
 
     fullInputs.push(...storedPackagePolicyToAgentInputs(packagePolicy, packageInfo, outputId));

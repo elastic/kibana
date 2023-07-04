@@ -7,6 +7,7 @@
 
 import fetch, { FetchError } from 'node-fetch';
 import type { RequestInit, Response } from 'node-fetch';
+import { fetchBuilder, MemoryCache } from 'node-fetch-cache';
 import pRetry from 'p-retry';
 
 import { streamToString } from '../streams';
@@ -17,9 +18,17 @@ import { getProxyAgent, getRegistryProxyUrl } from './proxy';
 
 type FailedAttemptErrors = pRetry.FailedAttemptError | FetchError | Error;
 
+const fetchWithCache = fetchBuilder.withCache(
+  new MemoryCache({
+    ttl: 1000 * 60 * 10, // Time to live. How long (in ms) responses remain cached before being automatically ejected. If undefined, responses are never automatically ejected from the cache.
+  })
+);
+
 // not sure what to call this function, but we're not exporting it
-async function registryFetch(url: string) {
-  const response = await fetch(url, getFetchOptions(url));
+async function registryFetch(url: string, withCache?: boolean) {
+  const response = withCache
+    ? await fetchWithCache(url, getFetchOptions(url))
+    : await fetch(url, getFetchOptions(url));
   if (response.ok) {
     return response;
   } else {
@@ -34,13 +43,18 @@ async function registryFetch(url: string) {
   }
 }
 
-export async function getResponse(url: string, retries: number = 5): Promise<Response> {
+export interface RequestOptions {
+  retries?: number;
+  withCache: boolean;
+}
+
+export async function getResponse(url: string, options?: RequestOptions): Promise<Response> {
   try {
     // we only want to retry certain failures like network issues
     // the rest should only try the one time then fail as they do now
-    const response = await pRetry(() => registryFetch(url), {
+    const response = await pRetry(() => registryFetch(url, options?.withCache), {
       factor: 2,
-      retries,
+      retries: options?.retries ?? 5,
       onFailedAttempt: (error) => {
         // we only want to retry certain types of errors, like `ECONNREFUSED` and other operational errors
         // and let the others through without retrying
@@ -69,14 +83,14 @@ export async function getResponse(url: string, retries: number = 5): Promise<Res
 
 export async function getResponseStream(
   url: string,
-  retries?: number
+  options?: RequestOptions
 ): Promise<NodeJS.ReadableStream> {
-  const res = await getResponse(url, retries);
+  const res = await getResponse(url, options);
   return res.body;
 }
 
-export async function fetchUrl(url: string, retries?: number): Promise<string> {
-  return getResponseStream(url, retries).then(streamToString);
+export async function fetchUrl(url: string, options?: RequestOptions): Promise<string> {
+  return getResponseStream(url, options).then(streamToString);
 }
 
 // node-fetch throws a FetchError for those types of errors and
