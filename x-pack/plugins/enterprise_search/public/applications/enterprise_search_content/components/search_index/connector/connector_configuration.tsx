@@ -111,7 +111,7 @@ export const ConnectorConfiguration: React.FC = () => {
                       <EuiText size="s">
                         <FormattedMessage
                           id="xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.description.secondParagraph"
-                          defaultMessage="The connectors repository contains several {link}. Use our framework for accelerated development against custom data sources."
+                          defaultMessage="The connectors repository contains several {link}. Use our framework to accelerate developing connectors for custom data sources."
                           values={{
                             link: (
                               <EuiLink
@@ -167,7 +167,7 @@ service_type: "${index.connector.service_type || 'changeme'}"
                           'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.connectorDeployedText',
                           {
                             defaultMessage:
-                              'Once you’ve configured the connector, deploy the connector to your self managed infrastructure.',
+                              'Once configured, deploy the connector on your infrastructure.',
                           }
                         )}
                       </EuiText>
@@ -180,7 +180,7 @@ service_type: "${index.connector.service_type || 'changeme'}"
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.deployConnector.title',
                     {
-                      defaultMessage: 'Deploy a connector',
+                      defaultMessage: 'Deploy connector',
                     }
                   ),
                   titleSize: 'xs',
@@ -325,7 +325,7 @@ service_type: "${index.connector.service_type || 'changeme'}"
                         'xpack.enterpriseSearch.content.indices.configurationConnector.support.description',
                         {
                           defaultMessage:
-                            'Your connector will have to be deployed to your own infrastructure.',
+                            'You need to deploy this connector on your own infrastructure.',
                         }
                       )}
                     </EuiText>
@@ -345,7 +345,7 @@ service_type: "${index.connector.service_type || 'changeme'}"
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.indices.configurationConnector.support.manageKeys.label',
                         {
-                          defaultMessage: 'Manage keys',
+                          defaultMessage: 'Manage API keys',
                         }
                       )}
                     </EuiLinkTo>
