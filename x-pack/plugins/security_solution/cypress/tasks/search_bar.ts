@@ -74,4 +74,4 @@ export const fillLocalSearchBar = (query: string) => {
 
 export const submitLocalSearch = () => {
   cy.get(LOCAL_SEACH_BAR_SUBMMIT_BUTTON).click();
-}
+};
