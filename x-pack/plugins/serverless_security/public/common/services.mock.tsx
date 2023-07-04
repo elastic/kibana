@@ -12,6 +12,7 @@ import { serverlessMock } from '@kbn/serverless/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { securitySolutionMock } from '@kbn/security-solution-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
+import { managementMock } from '@kbn/management-plugin/public/mocks';
 import type { ProjectNavigationLink } from './navigation/links';
 import type { Services } from './services';
 
@@ -23,6 +24,7 @@ export const servicesMocks: Services = {
   security: securityMock.createStart(),
   securitySolution: securitySolutionMock.createStart(),
   getProjectNavLinks$: jest.fn(() => new BehaviorSubject(mockProjectNavLinks())),
+  management: managementMock.createStart(),
 };
 
 export const KibanaServicesProvider = React.memo(({ children }) => (
