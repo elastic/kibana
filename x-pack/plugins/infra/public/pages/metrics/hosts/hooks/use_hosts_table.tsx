@@ -31,7 +31,7 @@ import { useUnifiedSearchContext } from './use_unified_search';
 import { useMetricsDataViewContext } from './use_data_view';
 import { ColumnHeader } from '../components/table/column_header';
 import { TOOLTIP, TABLE_COLUMN_LABEL } from '../translations';
-import { buildCombinedHostsFilter } from '../utils';
+import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
 
 /**
  * Columns and items types

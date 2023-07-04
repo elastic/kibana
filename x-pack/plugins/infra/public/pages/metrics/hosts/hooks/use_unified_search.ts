@@ -22,7 +22,7 @@ import {
   type HostsState,
   type StringDateRangeTimestamp,
 } from './use_unified_search_url_state';
-import { retrieveFieldsFromFilter } from '../utils';
+import { retrieveFieldsFromFilter } from '../../../../utils/filters/build';
 
 const buildQuerySubmittedPayload = (
   hostState: HostsState & { parsedDateRange: StringDateRangeTimestamp }

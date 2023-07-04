@@ -10,10 +10,10 @@ import { Action } from '@kbn/ui-actions-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
-import { useIntersectedOnce } from '../../../../../hooks/use_intersection_once';
-import { LensAttributes } from '../../../../../common/visualizations';
+import { useIntersectedOnce } from '../../../hooks/use_intersection_once';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { ChartLoader } from './chart_loader';
+import type { LensAttributes } from '../types';
 
 export interface LensWrapperProps {
   id: string;

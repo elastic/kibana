@@ -15,7 +15,7 @@ import { HostsState } from './use_unified_search_url_state';
 import { useHostsViewContext } from './use_hosts_view';
 import { AlertStatus } from '../types';
 import { ALERT_STATUS_QUERY } from '../constants';
-import { buildCombinedHostsFilter } from '../utils';
+import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
 
 export interface AlertsEsQuery {
   bool: BoolQuery;
