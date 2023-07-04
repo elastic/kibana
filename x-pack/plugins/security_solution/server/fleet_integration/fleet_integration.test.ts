@@ -66,7 +66,9 @@ describe('ingest_integration tests ', () => {
   const exceptionListClient: ExceptionListClient = getExceptionListClientMock();
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
-  const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum', uid: '' } });
+  const Platinum = licenseMock.createLicense({
+    license: { type: 'platinum', mode: 'platinum', uid: '' },
+  });
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold', uid: '' } });
   const generator = new EndpointDocGenerator();
   const cloudService = cloudMock.createSetup();
@@ -100,14 +102,18 @@ describe('ingest_integration tests ', () => {
       cloud = cloudService.isCloudEnabled,
       licenseUuid = '',
       clusterUuid = '',
-      clusterName = '',
+      clusterName = ''
     ) => ({
       type: 'endpoint',
       enabled: true,
       streams: [],
       config: {
         integration_config: {},
-        policy: { value: disableProtections(policyFactory(license, cloud, licenseUuid, clusterUuid, clusterName)) },
+        policy: {
+          value: disableProtections(
+            policyFactory(license, cloud, licenseUuid, clusterUuid, clusterName)
+          ),
+        },
         artifact_manifest: { value: manifest },
       },
     });
