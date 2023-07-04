@@ -8,8 +8,11 @@
 import { useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
-import { SolutionSideNavItem, SolutionSideNavItemPosition } from '@kbn/security-solution-side-nav';
-import { useKibana } from '../services';
+import {
+  SolutionSideNavItemPosition,
+  type SolutionSideNavItem,
+} from '@kbn/security-solution-side-nav';
+import { useKibana } from '../common/services';
 import { type GetLinkProps, useGetLinkProps } from './use_link_props';
 import { useNavLinks } from './use_nav_links';
 
