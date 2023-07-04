@@ -17,6 +17,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
+    "@kbn/management-plugin",
     "@kbn/security-plugin",
     "@kbn/security-solution-plugin",
     "@kbn/serverless",
