@@ -10,6 +10,8 @@ import { jsonValueRt } from '../../runtime_types';
 import { NumberFromString } from '../../saved_object';
 
 import { UserRt } from '../../user';
+import { limitedStringSchema } from '../../../schema';
+import { MAX_COMMENT_LENGTH } from '../../../constants';
 
 export * from './files';
 
@@ -192,7 +194,31 @@ const BasicCommentRequestRt = rt.union([
   PersistableStateAttachmentRt,
 ]);
 
-export const CommentRequestRt = rt.union([BasicCommentRequestRt, ExternalReferenceSORt]);
+export const CommentRequestRt = rt.union([
+  rt.strict({
+    comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
+    type: rt.literal(CommentType.user),
+    owner: rt.string,
+  }),
+  AlertCommentRequestRt,
+  rt.strict({
+    type: rt.literal(CommentType.actions),
+    comment: limitedStringSchema({ fieldName: 'comment', min: 1, max: MAX_COMMENT_LENGTH }),
+    actions: rt.strict({
+      targets: rt.array(
+        rt.strict({
+          hostname: rt.string,
+          endpointId: rt.string,
+        })
+      ),
+      type: rt.string,
+    }),
+    owner: rt.string,
+  }),
+  ExternalReferenceNoSORt,
+  ExternalReferenceSORt,
+  PersistableStateAttachmentRt,
+]);
 
 export const CommentRequestWithoutRefsRt = rt.union([
   BasicCommentRequestRt,
