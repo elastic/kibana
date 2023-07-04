@@ -7,20 +7,18 @@
 
 import React from 'react';
 
-import { CoreStart } from '@kbn/core/public';
-
+import { KibanaServicesProvider, type Services } from '../../common/services';
 import type { GetStartedComponent } from './types';
-import { GetStarted } from './get_started';
-import { KibanaServicesProvider } from '../../services';
-import { ServerlessSecurityPluginStartDependencies } from '../../types';
+import { GetStarted } from './lazy';
+import { SecurityProductTypes } from '../../../common/config';
 
 export const getSecurityGetStartedComponent = (
-  core: CoreStart,
-  pluginsStart: ServerlessSecurityPluginStartDependencies
+  services: Services,
+  productTypes: SecurityProductTypes
 ): GetStartedComponent => {
   return () => (
-    <KibanaServicesProvider core={core} pluginsStart={pluginsStart}>
-      <GetStarted />
+    <KibanaServicesProvider services={services}>
+      <GetStarted productTypes={productTypes} />
     </KibanaServicesProvider>
   );
 };
