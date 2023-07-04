@@ -9,7 +9,6 @@
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { initWebDriver, BrowserConfig } from './webdriver';
-
 import { Browsers } from './browsers';
 
 export async function RemoteProvider({ getService }: FtrProviderContext) {
@@ -33,12 +32,13 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
     // Since WebDriver session may be deleted, we fail silently. Use only in after hooks.
     try {
       await command();
-    } catch (err) {
-      if (err instanceof NoSuchSessionError) {
+    } catch (error) {
+      if (error instanceof NoSuchSessionError) {
+        // Avoid duplicating NoSuchSessionError error output on each hook
         // https://developer.mozilla.org/en-US/docs/Web/WebDriver/Errors/InvalidSessionID
         log.error('WebDriver session is no longer valid');
       } else {
-        log.error(err);
+        throw error;
       }
     }
   };
