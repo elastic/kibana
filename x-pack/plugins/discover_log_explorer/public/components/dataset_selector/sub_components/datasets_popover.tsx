@@ -9,6 +9,7 @@ import React from 'react';
 import {
   EuiButton,
   EuiHorizontalRule,
+  EuiIcon,
   EuiPanel,
   EuiPopover,
   EuiPopoverProps,
@@ -17,7 +18,7 @@ import {
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
-import { Dataset } from '../../../../common/datasets/models/dataset';
+import { DatasetSelection } from '../../../utils/dataset_selection';
 import { DATA_VIEW_POPOVER_CONTENT_WIDTH, POPOVER_ID, selectDatasetLabel } from '../constants';
 import { getPopoverButtonStyles } from '../utils';
 
@@ -25,16 +26,17 @@ const panelStyle = { width: DATA_VIEW_POPOVER_CONTENT_WIDTH };
 interface DatasetsPopoverProps extends Omit<EuiPopoverProps, 'button'> {
   children: React.ReactNode;
   onClick: () => void;
-  selected?: Dataset;
+  selection: DatasetSelection['selection'];
 }
 
 export const DatasetsPopover = ({
   children,
   onClick,
-  selected,
+  selection,
   ...props
 }: DatasetsPopoverProps) => {
-  const { title, parentIntegration } = selected ?? {};
+  const { iconType, parentIntegration } = selection.dataset;
+  const title = selection.dataset.getFullTitle();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const buttonStyles = getPopoverButtonStyles({ fullWidth: isMobile });
@@ -52,14 +54,16 @@ export const DatasetsPopover = ({
           onClick={onClick}
           fullWidth={isMobile}
         >
-          {hasIntegration && (
+          {iconType ? (
+            <EuiIcon type={iconType} />
+          ) : hasIntegration ? (
             <PackageIcon
               packageName={parentIntegration.name}
               version={parentIntegration.version}
               size="m"
               tryApi
             />
-          )}
+          ) : null}
           <span className="eui-textTruncate">{title}</span>
         </EuiButton>
       }
