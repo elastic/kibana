@@ -16,7 +16,27 @@ import {
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
+import {
+  DETECTION_ENTITY_DASHBOARD,
+  RISKY_HOSTS_DOC_LINK,
+  RISKY_USERS_DOC_LINK,
+} from '../../../common/constants';
 import * as i18n from '../translations';
+
+const docsLinks = [
+  {
+    link: DETECTION_ENTITY_DASHBOARD,
+    label: i18n.EA_DOCS_DASHBOARD,
+  },
+  {
+    link: RISKY_HOSTS_DOC_LINK,
+    label: i18n.EA_DOCS_RISK_HOSTS,
+  },
+  {
+    link: RISKY_USERS_DOC_LINK,
+    label: i18n.EA_DOCS_RISK_USERS,
+  },
+];
 
 export const RiskScoreEnableSection = () => {
   const [checked, setChecked] = useState(false);
@@ -63,15 +83,14 @@ export const RiskScoreEnableSection = () => {
         </EuiTitle>
         <EuiSpacer />
         <ul>
-          <li>
-            <EuiLink
-              href="https://www.elastic.co/guide/en/security/current/detection-entity-dashboard.html"
-              target="_blank"
-              external
-            >
-              {i18n.EA_DOCS}
-            </EuiLink>
-          </li>
+          {docsLinks.map(({ link, label }) => (
+            <li key={link}>
+              <EuiLink href={link} target="_blank" external>
+                {label}
+              </EuiLink>
+              <EuiSpacer size="s" />
+            </li>
+          ))}
         </ul>
       </>
     </>

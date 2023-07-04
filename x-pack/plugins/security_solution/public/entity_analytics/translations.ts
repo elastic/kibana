@@ -70,9 +70,26 @@ export const USEFUL_LINKS = i18n.translate(
   }
 );
 
-export const EA_DOCS = i18n.translate('xpack.securitySolution.riskScore.riskScorePreview.eaDocs', {
-  defaultMessage: 'Entity Analytics documentation',
-});
+export const EA_DOCS_DASHBOARD = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.eaDocsDashboard',
+  {
+    defaultMessage: 'Entity Analytics documentation',
+  }
+);
+
+export const EA_DOCS_RISK_HOSTS = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.eaDocsHosts',
+  {
+    defaultMessage: 'Host risk score',
+  }
+);
+
+export const EA_DOCS_RISK_USERS = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.eaDocsUsers',
+  {
+    defaultMessage: 'User risk score',
+  }
+);
 
 export const PREVIEW = i18n.translate('xpack.securitySolution.riskScore.riskScorePreview.preview', {
   defaultMessage: 'Preview',
