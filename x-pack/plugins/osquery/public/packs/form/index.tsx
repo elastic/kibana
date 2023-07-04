@@ -42,7 +42,7 @@ type PackFormData = Omit<PackItem, 'id' | 'queries'> & { queries: PackQueryFormD
 
 const euiAccordionCss = ({ theme }) => ({
   '.euiAccordion__button': {
-    color: theme.colors.primary,
+    color: theme.colors ? theme.colors.primary : theme.eui.euiColorPrimary,
   },
 });
 

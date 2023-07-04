@@ -24,7 +24,7 @@ const euiCodeBlockCss = {
 
 const euiAccordionCss = ({ theme }) => ({
   '.euiAccordion__button': {
-    color: theme.colors.primary,
+    color: theme.colors ? theme.colors.primary : theme.eui.euiColorPrimary,
   },
   '.euiAccordion__childWrapper': {
     '-webkit-transition': 'none',
