@@ -1762,8 +1762,8 @@ describe('Task Runner', () => {
     expect(logger.error).toBeCalledTimes(1);
   });
 
-  test('recovers gracefully when the Alert Task Runner throws an exception when loading rule to prepare for run', async () => {
-    // used in loadRule() which is called in prepareToRun()
+  test('recovers gracefully when the Rule Task Runner throws an exception when loading rule to prepare for run', async () => {
+    // used in beforeRun() which is called to load rule data
     rulesClient.getAlertFromRaw.mockImplementation(() => {
       throw new Error(GENERIC_ERROR_MESSAGE);
     });

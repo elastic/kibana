@@ -652,9 +652,16 @@ export class TaskRunner<
 
     this.alertingEventLogger.start(this.runDate);
 
+    if (!this.ruleData) {
+      throw new ErrorWithReason(
+        RuleExecutionStatusErrorReasons.Unknown,
+        new Error(`ruleData is not available`)
+      );
+    }
+
     return validateRule({
       alertingEventLogger: this.alertingEventLogger,
-      ruleData: this.ruleData!,
+      ruleData: this.ruleData,
       paramValidator: this.ruleType.validate.params,
       ruleId,
       spaceId,
@@ -823,6 +830,7 @@ export class TaskRunner<
       if (!this.ruleData) {
         await this.beforeRun();
       }
+
       const preparedResult = this.prepareToRun();
 
       this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring);
