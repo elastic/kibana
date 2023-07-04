@@ -12,6 +12,7 @@ import {
   MAX_ASSIGNEES_FILTER_LENGTH,
   MAX_CASES_PER_PAGE,
   MAX_CATEGORY_FILTER_LENGTH,
+  MAX_DOCS_PER_PAGE,
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
 } from '../../../common/constants';
@@ -155,7 +156,7 @@ describe('find', () => {
       const findRequest = createCasesClientMockFindRequest({ page: 209, perPage: 100 });
 
       await expect(find(findRequest, clientArgs)).rejects.toThrowError(
-        `Error: The number of documents is too high. Paginating through more than 10,000 documents is not possible.`
+        `Error: The number of documents is too high. Paginating through more than ${MAX_DOCS_PER_PAGE} documents is not possible.`
       );
     });
 
@@ -166,7 +167,7 @@ describe('find', () => {
       });
 
       await expect(find(findRequest, clientArgs)).rejects.toThrowError(
-        `Error: The provided perPage value was too high. The maximum allowed perPage value is ${MAX_CASES_PER_PAGE}.`
+        `Error: The provided perPage value is too high. The maximum allowed perPage value is ${MAX_CASES_PER_PAGE}.`
       );
     });
   });

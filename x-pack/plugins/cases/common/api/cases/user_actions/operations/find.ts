@@ -6,9 +6,10 @@
  */
 
 import * as rt from 'io-ts';
+import { MAX_USER_ACTIONS_PER_PAGE } from '../../../../constants';
 import { UserActionsRt } from '../response';
 import { ActionTypes } from '../common';
-import { NumberFromString } from '../../../saved_object';
+import { paginationSchema } from '../../../../schema';
 
 const AdditionalFilterTypes = {
   action: 'action',
@@ -27,12 +28,13 @@ const FindTypeFieldRt = rt.keyof(FindTypes);
 export type FindTypeField = rt.TypeOf<typeof FindTypeFieldRt>;
 
 export const UserActionFindRequestRt = rt.exact(
-  rt.partial({
-    types: rt.array(FindTypeFieldRt),
-    sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
-    page: rt.union([rt.number, NumberFromString]),
-    perPage: rt.union([rt.number, NumberFromString]),
-  })
+  rt.intersection([
+    rt.partial({
+      types: rt.array(FindTypeFieldRt),
+      sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+    }),
+    paginationSchema({ maxPerPage: MAX_USER_ACTIONS_PER_PAGE }),
+  ])
 );
 
 export type UserActionFindRequest = rt.TypeOf<typeof UserActionFindRequestRt>;

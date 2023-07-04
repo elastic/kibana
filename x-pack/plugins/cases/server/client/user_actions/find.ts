@@ -19,7 +19,6 @@ import { createCaseError } from '../../common/error';
 import { asArray } from '../../common/utils';
 import type { CasesClient } from '../client';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
-import { validateFindUserActionsPagination } from './validators';
 
 export const find = async (
   { caseId, params }: UserActionFind,
@@ -37,8 +36,6 @@ export const find = async (
     const types = asArray(params.types);
 
     const queryParams = decodeWithExcessOrThrow(UserActionFindRequestRt)({ ...params, types });
-
-    validateFindUserActionsPagination(queryParams);
 
     const [authorizationFilterRes] = await Promise.all([
       authorization.getAuthorizationFilter(Operations.findUserActions),

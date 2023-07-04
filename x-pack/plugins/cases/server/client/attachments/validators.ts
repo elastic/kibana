@@ -6,15 +6,13 @@
  */
 
 import Boom from '@hapi/boom';
-import { MAX_COMMENTS_PER_PAGE } from '../../../common/constants';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
 } from '../../../common/utils/attachments';
-import type { CommentRequest, FindCommentsQueryParams } from '../../../common/api';
+import type { CommentRequest } from '../../../common/api';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import { validatePagination } from '../../common/validators';
 
 export const validateRegisteredAttachments = ({
   query,
@@ -42,12 +40,4 @@ export const validateRegisteredAttachments = ({
       `Attachment type ${query.persistableStateAttachmentTypeId} is not registered.`
     );
   }
-};
-
-export const validateFindCommentsPagination = (params?: FindCommentsQueryParams) => {
-  validatePagination({
-    page: params?.page,
-    perPage: params?.perPage,
-    maxPerPage: MAX_COMMENTS_PER_PAGE,
-  });
 };

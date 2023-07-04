@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_USER_ACTIONS_PER_PAGE } from '../../../common/constants';
+import { MAX_DOCS_PER_PAGE, MAX_USER_ACTIONS_PER_PAGE } from '../../../common/constants';
 import { createMockClient } from '../metrics/test_utils/client';
 import { createCasesClientMockArgs } from '../mocks';
 import { find } from './find';
@@ -26,11 +26,11 @@ describe('findUserActions', () => {
       ).rejects.toThrow('invalid keys "foo"');
     });
 
-    it('throws when trying to fetch more than 10,000 items', async () => {
+    it(`throws when trying to fetch more than ${MAX_DOCS_PER_PAGE} items`, async () => {
       await expect(
         find({ caseId: 'test-case', params: { page: 209, perPage: 100 } }, client, clientArgs)
       ).rejects.toThrow(
-        'Error: The number of documents is too high. Paginating through more than 10,000 documents is not possible.'
+        `Error: The number of documents is too high. Paginating through more than ${MAX_DOCS_PER_PAGE} documents is not possible.`
       );
     });
 
@@ -48,7 +48,7 @@ describe('findUserActions', () => {
           clientArgs
         )
       ).rejects.toThrow(
-        `Error: The provided perPage value was too high. The maximum allowed perPage value is ${MAX_USER_ACTIONS_PER_PAGE}.`
+        `Error: The provided perPage value is too high. The maximum allowed perPage value is ${MAX_USER_ACTIONS_PER_PAGE}.`
       );
     });
   });
