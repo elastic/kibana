@@ -112,7 +112,7 @@ describe('SLOs Page', () => {
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
-        sloHistoricalSummaryResponse: {},
+        data: {},
       });
     });
     it('navigates to the SLOs Welcome Page', async () => {
@@ -135,7 +135,7 @@ describe('SLOs Page', () => {
       useFetchSloListMock.mockReturnValue({ isLoading: false, sloList: emptySloList });
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
-        sloHistoricalSummaryResponse: {},
+        data: {},
       });
 
       await act(async () => {
@@ -152,7 +152,7 @@ describe('SLOs Page', () => {
 
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
-        sloHistoricalSummaryResponse: historicalSummaryData,
+        data: historicalSummaryData,
       });
 
       await act(async () => {
@@ -167,7 +167,7 @@ describe('SLOs Page', () => {
 
       useFetchHistoricalSummaryMock.mockReturnValue({
         isLoading: false,
-        sloHistoricalSummaryResponse: historicalSummaryData,
+        data: historicalSummaryData,
       });
 
       await act(async () => {
@@ -183,7 +183,7 @@ describe('SLOs Page', () => {
 
         useFetchHistoricalSummaryMock.mockReturnValue({
           isLoading: false,
-          sloHistoricalSummaryResponse: historicalSummaryData,
+          data: historicalSummaryData,
         });
 
         await act(async () => {
@@ -201,7 +201,7 @@ describe('SLOs Page', () => {
 
         useFetchHistoricalSummaryMock.mockReturnValue({
           isLoading: false,
-          sloHistoricalSummaryResponse: historicalSummaryData,
+          data: historicalSummaryData,
         });
 
         await act(async () => {
@@ -228,7 +228,7 @@ describe('SLOs Page', () => {
 
         useFetchHistoricalSummaryMock.mockReturnValue({
           isLoading: false,
-          sloHistoricalSummaryResponse: historicalSummaryData,
+          data: historicalSummaryData,
         });
 
         await act(async () => {
@@ -253,7 +253,7 @@ describe('SLOs Page', () => {
 
         useFetchHistoricalSummaryMock.mockReturnValue({
           isLoading: false,
-          sloHistoricalSummaryResponse: historicalSummaryData,
+          data: historicalSummaryData,
         });
 
         await act(async () => {
@@ -278,7 +278,7 @@ describe('SLOs Page', () => {
 
         useFetchHistoricalSummaryMock.mockReturnValue({
           isLoading: false,
-          sloHistoricalSummaryResponse: historicalSummaryData,
+          data: historicalSummaryData,
         });
 
         await act(async () => {
@@ -308,7 +308,7 @@ describe('SLOs Page', () => {
 
         useFetchHistoricalSummaryMock.mockReturnValue({
           isLoading: false,
-          sloHistoricalSummaryResponse: historicalSummaryData,
+          data: historicalSummaryData,
         });
 
         await act(async () => {

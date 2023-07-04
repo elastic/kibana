@@ -37,14 +37,14 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
   const { data: activeAlerts } = useFetchActiveAlerts({
     sloIds: [slo.id],
   });
-  const { isLoading: historicalSummaryLoading, sloHistoricalSummaryResponse = {} } =
+  const { isLoading: historicalSummaryLoading, data: historicalSummaryBySlo = {} } =
     useFetchHistoricalSummary({ sloIds: [slo.id], shouldRefetch: isAutoRefreshing });
 
   const errorBudgetBurnDownData = formatHistoricalData(
-    sloHistoricalSummaryResponse[slo.id],
+    historicalSummaryBySlo[slo.id],
     'error_budget_remaining'
   );
-  const historicalSliData = formatHistoricalData(sloHistoricalSummaryResponse[slo.id], 'sli_value');
+  const historicalSliData = formatHistoricalData(historicalSummaryBySlo[slo.id], 'sli_value');
 
   const tabs: EuiTabbedContentTab[] = [
     {

@@ -105,7 +105,7 @@ describe('SLO Details Page', () => {
     useCapabilitiesMock.mockReturnValue({ hasWriteCapabilities: true, hasReadCapabilities: true });
     useFetchHistoricalSummaryMock.mockReturnValue({
       isLoading: false,
-      sloHistoricalSummaryResponse: historicalSummaryData,
+      data: historicalSummaryData,
     });
     useFetchActiveAlertsMock.mockReturnValue({ isLoading: false, data: {} });
     useCloneSloMock.mockReturnValue({ mutate: mockClone });
@@ -155,7 +155,7 @@ describe('SLO Details Page', () => {
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     useFetchHistoricalSummaryMock.mockReturnValue({
       isLoading: true,
-      sloHistoricalSummaryResponse: {},
+      data: {},
     });
 
     render(<SloDetailsPage />);

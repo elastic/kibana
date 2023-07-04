@@ -27,7 +27,7 @@ export function SloListItems({ sloList, loading, error }: Props) {
 
   const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIds });
   const { data: rulesBySlo } = useFetchRulesForSlo({ sloIds });
-  const { isLoading: historicalSummaryLoading, sloHistoricalSummaryResponse } =
+  const { isLoading: historicalSummaryLoading, data: historicalSummaryBySlo } =
     useFetchHistoricalSummary({ sloIds });
 
   const { mutate: deleteSlo } = useDeleteSlo();
@@ -50,7 +50,7 @@ export function SloListItems({ sloList, loading, error }: Props) {
           <SloListItem
             activeAlerts={activeAlertsBySlo[slo.id]}
             rules={rulesBySlo?.[slo.id]}
-            historicalSummary={sloHistoricalSummaryResponse?.[slo.id]}
+            historicalSummary={historicalSummaryBySlo?.[slo.id]}
             historicalSummaryLoading={historicalSummaryLoading}
             slo={slo}
             onConfirmDelete={handleDelete}

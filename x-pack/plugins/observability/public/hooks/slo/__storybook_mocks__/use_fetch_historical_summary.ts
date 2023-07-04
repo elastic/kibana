@@ -24,6 +24,6 @@ export const useFetchHistoricalSummary = ({
     isRefetching: false,
     isSuccess: false,
     isError: false,
-    sloHistoricalSummaryResponse: data,
+    data,
   };
 };
