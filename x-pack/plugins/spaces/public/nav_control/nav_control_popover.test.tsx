@@ -214,13 +214,13 @@ describe('NavControlPopover', () => {
       wrapper.find(EuiHeaderSectionItemButton).simulate('click');
     });
     wrapper.update();
-    expect(wrapper.find(EuiPopover).props().isOpen).toEqual(true);
+    expect(wrapper.find(EuiPopover).first().props().isOpen).toEqual(true);
 
     await act(async () => {
-      wrapper.find(EuiPopover).props().closePopover();
+      wrapper.find(EuiPopover).first().props().closePopover();
     });
     wrapper.update();
 
-    expect(wrapper.find(EuiPopover).props().isOpen).toEqual(false);
+    expect(wrapper.find(EuiPopover).first().props().isOpen).toEqual(false);
   });
 });
