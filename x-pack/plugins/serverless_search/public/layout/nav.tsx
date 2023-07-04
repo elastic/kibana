@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import {
   DefaultNavigation,
   NavigationKibanaProvider,
-  NavigationTreeDefinition,
+  type NavigationTreeDefinition,
   getPresets,
 } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
 const navigationTree: NavigationTreeDefinition = {
   body: [
@@ -25,6 +25,7 @@ const navigationTree: NavigationTreeDefinition = {
       title: 'Elasticsearch',
       icon: 'logoElasticsearch',
       defaultIsCollapsed: false,
+      breadcrumbStatus: 'hidden',
       children: [
         {
           id: 'search_getting_started',
@@ -98,6 +99,10 @@ const navigationTree: NavigationTreeDefinition = {
           ],
         },
       ],
+    },
+    {
+      type: 'navGroup',
+      ...getPresets('ml'),
     },
   ],
 };

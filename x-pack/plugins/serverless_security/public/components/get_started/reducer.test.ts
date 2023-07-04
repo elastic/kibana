@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ProductLine } from '../../../common/config';
 import {
   reducer,
   getFinishedStepsInitialStates,
@@ -12,12 +13,11 @@ import {
   getActiveCardsInitialStates,
 } from './reducer';
 import {
-  ActiveCard,
+  ActiveCards,
   CardId,
   GetSetUpCardId,
   GetStartedPageActions,
   IntroductionSteps,
-  ProductId,
   SectionId,
   StepId,
   ToggleProductAction,
@@ -28,25 +28,25 @@ import {
 describe('reducer', () => {
   it('should toggle section correctly', () => {
     const initialState = {
-      activeProducts: new Set([ProductId.analytics]),
+      activeProducts: new Set([ProductLine.security]),
       finishedSteps: {} as Record<CardId, Set<StepId>>,
-      activeCards: {} as Record<SectionId, Record<CardId, ActiveCard>> | null,
+      activeCards: {} as ActiveCards | null,
     };
 
     const action: ToggleProductAction = {
       type: GetStartedPageActions.ToggleProduct,
-      payload: { section: ProductId.analytics },
+      payload: { section: ProductLine.security },
     };
 
     const nextState = reducer(initialState, action);
 
-    expect(nextState.activeProducts.has(ProductId.analytics)).toBe(false);
+    expect(nextState.activeProducts.has(ProductLine.security)).toBe(false);
     expect(nextState.activeCards).toBeNull();
   });
 
   it('should add a finished step correctly', () => {
     const initialState = {
-      activeProducts: new Set([ProductId.analytics]),
+      activeProducts: new Set([ProductLine.security]),
       finishedSteps: {} as Record<CardId, Set<StepId>>,
       activeCards: {
         getSetUp: {
@@ -56,7 +56,7 @@ describe('reducer', () => {
             timeInMins: 3,
           },
         },
-      } as unknown as Record<SectionId, Record<CardId, ActiveCard>> | null,
+      } as unknown as ActiveCards | null,
     };
 
     const action: AddFinishedStepAction = {
@@ -103,17 +103,17 @@ describe('getFinishedStepsInitialStates', () => {
 
 describe('getActiveSectionsInitialStates', () => {
   it('should return the initial states of active sections correctly', () => {
-    const activeProducts = [ProductId.analytics];
+    const activeProducts = [ProductLine.security];
 
     const initialStates = getActiveSectionsInitialStates({ activeProducts });
 
-    expect(initialStates.has(ProductId.analytics)).toBe(true);
+    expect(initialStates.has(ProductLine.security)).toBe(true);
   });
 });
 
 describe('getActiveCardsInitialStates', () => {
   it('should return the initial states of active cards correctly', () => {
-    const activeProducts = new Set([ProductId.analytics]);
+    const activeProducts = new Set([ProductLine.security]);
     const finishedSteps = {
       [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
     } as unknown as Record<CardId, Set<StepId>>;
