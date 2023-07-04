@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import type { PackItem } from './types';
 
@@ -19,7 +20,7 @@ export const usePack = ({ packId, skip = false }: UsePack) => {
 
   return useQuery<{ data: PackItem }, unknown, PackItem>(
     ['pack', { packId }],
-    () => http.get(`/api/osquery/packs/${packId}`),
+    () => http.get(`/api/osquery/packs/${packId}`, { version: API_VERSIONS.public.v1 }),
     {
       select: (response) => response?.data,
       keepPreviousData: true,
