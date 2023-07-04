@@ -723,11 +723,12 @@ Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/security_solution_ess/README.md[securitySolutionEss]
-|This plugin contains the ESS/on-prem deployments (non-serverless) customizations for Security Solution.
+|This plugin contains the ESS/on-prem deployments (non-serverless) specific logic for Security Solution.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/security_solution_serverless/README.mdx[securitySolutionServerless]
-|This plugin contains configuration and code used to create a Serverless Security project.  It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
+|This plugin contains configuration and code used to create a Serverless Security project.
+It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/serverless/README.mdx[serverless]
