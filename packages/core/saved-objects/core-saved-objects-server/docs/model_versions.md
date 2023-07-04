@@ -558,8 +558,7 @@ let modelVersion2: SavedObjectsModelVersion = {
     {
       type: 'data_backfill',
       transform: (document) => {
-        document.attributes.dolly = 'default_value';
-        return { document };
+        return { attributes: { dolly: 'default_value' } };
       },
     },
     // define the mappings for the new field
@@ -616,8 +615,7 @@ const myType: SavedObjectsType = {
         {
           type: 'data_backfill',
           transform: (document) => {
-            document.attributes.dolly = 'default_value';
-            return { document };
+            return { attributes: { dolly: 'default_value' } };
           },
         },
         {
