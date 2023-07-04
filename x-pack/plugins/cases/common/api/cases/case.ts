@@ -454,7 +454,12 @@ export const CasePatchRequestRt = rt.intersection([
 ]);
 
 export const CasesPatchRequestRt = rt.strict({
-  cases: limitedArraySchema(CasePatchRequestRt, 1, MAX_CASES_TO_UPDATE, 'cases'),
+  cases: limitedArraySchema({
+    codec: CasePatchRequestRt,
+    min: 1,
+    max: MAX_CASES_TO_UPDATE,
+    fieldName: 'cases',
+  }),
 });
 
 export const CasesRt = rt.array(CaseRt);
