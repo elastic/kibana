@@ -549,8 +549,6 @@ Now a slightly different scenario where we'd like to populate the newly introduc
 In that case, we'd need to add an additional `data_backfill` change to populate the new field's value
 (in addition to the `mappings_addition` one):
 
-// TODO: change!
-
 ```ts
 let modelVersion2: SavedObjectsModelVersion = {
   changes: [
