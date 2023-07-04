@@ -45,10 +45,6 @@ export function FunctionRow({
   const successColor = useEuiBackgroundColor('success');
   const dangerColor = useEuiBackgroundColor('danger');
 
-  function getColor(value: number) {
-    return value > 0 ? 'success' : 'danger';
-  }
-
   if (columnId === TopNFunctionSortField.Diff) {
     if (!functionRow.diff) {
       return (
@@ -64,7 +60,7 @@ export function FunctionRow({
       return null;
     }
 
-    const color = getColor(functionRow.diff.rank);
+    const color = functionRow.diff.rank > 0 ? 'success' : 'danger';
     setCellProps({ style: { backgroundColor: color === 'success' ? successColor : dangerColor } });
 
     return (
