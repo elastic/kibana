@@ -15,7 +15,7 @@ import { CasesPage } from '../pages/cases/cases';
 import { LandingPage } from '../pages/landing/landing';
 import { OverviewPage } from '../pages/overview/overview';
 import { RulesPage } from '../pages/rules/rules';
-import { RuleDetailsPage } from '../pages/rule_details';
+import { RuleDetailsPage } from '../pages/rule_details/rule_details';
 import { SlosPage } from '../pages/slos/slos';
 import { SlosWelcomePage } from '../pages/slos_welcome/slos_welcome';
 import { SloDetailsPage } from '../pages/slo_details/slo_details';

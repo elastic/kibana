@@ -12,7 +12,7 @@ import * as i18n from './translations';
 
 export const AddPrebuiltRulesHeaderButtons = () => {
   const {
-    state: { rules, selectedRules, loadingRules },
+    state: { rules, selectedRules, loadingRules, isRefetching, isUpgradingSecurityPackages },
     actions: { installAllRules, installSelectedRules },
   } = useAddPrebuiltRulesTableContext();
 
@@ -21,12 +21,17 @@ export const AddPrebuiltRulesHeaderButtons = () => {
   const shouldDisplayInstallSelectedRulesButton = numberOfSelectedRules > 0;
 
   const isRuleInstalling = loadingRules.length > 0;
+  const isRequestInProgress = isRuleInstalling || isRefetching || isUpgradingSecurityPackages;
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
       {shouldDisplayInstallSelectedRulesButton ? (
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={installSelectedRules} disabled={isRuleInstalling}>
+          <EuiButton
+            onClick={installSelectedRules}
+            disabled={isRequestInProgress}
+            data-test-subj="installSelectedRulesButton"
+          >
             {i18n.INSTALL_SELECTED_RULES(numberOfSelectedRules)}
             {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : undefined}
           </EuiButton>
@@ -38,7 +43,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
           iconType="plusInCircle"
           data-test-subj="installAllRulesButton"
           onClick={installAllRules}
-          disabled={!isRulesAvailableForInstall || isRuleInstalling}
+          disabled={!isRulesAvailableForInstall || isRequestInProgress}
         >
           {i18n.INSTALL_ALL}
           {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : undefined}
