@@ -11,7 +11,6 @@ import React from 'react';
 import { interpret } from 'xstate';
 import { createLogExplorerProfileStateMachine } from '../state_machines/log_explorer_profile';
 import { DiscoverLogExplorerStartDeps } from '../types';
-import { AllDatasetSelection } from '../utils/dataset_selection';
 import { dynamic } from '../utils/dynamic';
 
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
