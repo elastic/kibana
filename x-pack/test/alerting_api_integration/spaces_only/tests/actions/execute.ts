@@ -340,6 +340,7 @@ export default function ({ getService }: FtrProviderContext) {
     errorMessage?: string;
     startMessage?: string;
     source?: string;
+    spaceAgnostic?: boolean;
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
@@ -352,6 +353,7 @@ export default function ({ getService }: FtrProviderContext) {
       startMessage,
       errorMessage,
       source,
+      spaceAgnostic,
     } = params;
 
     const events: IValidatedEvent[] = await retry.try(async () => {
@@ -398,6 +400,7 @@ export default function ({ getService }: FtrProviderContext) {
         id: actionId,
         namespace: 'space1',
         type_id: actionTypeId,
+        ...(spaceAgnostic ? { space_agnostic: true } : {}),
       },
     ]);
     expect(startExecuteEvent?.kibana?.saved_objects).to.eql(executeEvent?.kibana?.saved_objects);
