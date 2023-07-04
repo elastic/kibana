@@ -8,7 +8,7 @@ import type { ChromeNavLink } from '@kbn/core/public';
 import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
 import { subscribeNavigationTree } from './navigation_tree';
 import { BehaviorSubject } from 'rxjs';
-import { servicesMocks, mockProjectNavLinks } from '../common/services.mock';
+import { mockServices, mockProjectNavLinks } from '../common/__mocks__/services.mock';
 import type { ProjectNavigationLink } from './links';
 
 const mockChromeNavLinks = jest.fn((): ChromeNavLink[] => []);
@@ -20,12 +20,12 @@ const mockChromeNavLinksHas = jest.fn((id: string): boolean =>
   mockChromeNavLinks().some((link) => link.id === id)
 );
 
-const mockServices = {
-  ...servicesMocks,
+const testServices = {
+  ...mockServices,
   chrome: {
-    ...servicesMocks.chrome,
+    ...mockServices.chrome,
     navLinks: {
-      ...servicesMocks.chrome.navLinks,
+      ...mockServices.chrome.navLinks,
       get: mockChromeNavLinksGet,
       has: mockChromeNavLinksHas,
       getNavLinks$: mockChromeGetNavLinks,
@@ -65,10 +65,10 @@ describe('subscribeNavigationTree', () => {
   it('should call serverless setNavigation', async () => {
     mockProjectNavLinks.mockReturnValueOnce([link1]);
 
-    subscribeNavigationTree(mockServices);
+    subscribeNavigationTree(testServices);
     await waitForDebounce();
 
-    expect(mockServices.serverless.setNavigation).toHaveBeenCalledWith({
+    expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
         {
           id: 'root',
@@ -97,10 +97,10 @@ describe('subscribeNavigationTree', () => {
     mockChromeNavLinks.mockReturnValue([chromeNavLinkExpected]);
     mockProjectNavLinks.mockReturnValueOnce([externalLink]);
 
-    subscribeNavigationTree(mockServices);
+    subscribeNavigationTree(testServices);
     await waitForDebounce();
 
-    expect(mockServices.serverless.setNavigation).toHaveBeenCalledWith({
+    expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
         {
           id: 'root',
@@ -123,10 +123,10 @@ describe('subscribeNavigationTree', () => {
   it('should call serverless setNavigation with nested children', async () => {
     mockProjectNavLinks.mockReturnValueOnce([{ ...link1, links: [link2] }]);
 
-    subscribeNavigationTree(mockServices);
+    subscribeNavigationTree(testServices);
     await waitForDebounce();
 
-    expect(mockServices.serverless.setNavigation).toHaveBeenCalledWith({
+    expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
         {
           id: 'root',
@@ -157,20 +157,20 @@ describe('subscribeNavigationTree', () => {
   it('should not call serverless setNavigation when projectNavLinks is empty', async () => {
     mockProjectNavLinks.mockReturnValueOnce([]);
 
-    subscribeNavigationTree(mockServices);
+    subscribeNavigationTree(testServices);
     await waitForDebounce();
 
-    expect(mockServices.serverless.setNavigation).not.toHaveBeenCalled();
+    expect(testServices.serverless.setNavigation).not.toHaveBeenCalled();
   });
 
   it('should not call serverless setNavigation when chrome navLinks is empty', async () => {
     mockChromeNavLinks.mockReturnValue([]);
     mockProjectNavLinks.mockReturnValueOnce([link1]);
 
-    subscribeNavigationTree(mockServices);
+    subscribeNavigationTree(testServices);
     await waitForDebounce();
 
-    expect(mockServices.serverless.setNavigation).not.toHaveBeenCalled();
+    expect(testServices.serverless.setNavigation).not.toHaveBeenCalled();
   });
 
   it('should debounce updates', async () => {
@@ -184,18 +184,18 @@ describe('subscribeNavigationTree', () => {
     mockChromeNavLinks.mockReturnValue([chromeNavLink1, chromeNavLink2, chromeNavLinkExpected]);
     mockProjectNavLinks.mockReturnValueOnce([linkExpected]);
 
-    subscribeNavigationTree(mockServices);
+    subscribeNavigationTree(testServices);
 
     chromeGetNavLinks$.next([chromeNavLink1]);
     chromeGetNavLinks$.next([chromeNavLink2]);
     chromeGetNavLinks$.next([chromeNavLinkExpected]);
 
-    expect(mockServices.serverless.setNavigation).not.toHaveBeenCalled();
+    expect(testServices.serverless.setNavigation).not.toHaveBeenCalled();
 
     await waitForDebounce();
 
-    expect(mockServices.serverless.setNavigation).toHaveBeenCalledTimes(1);
-    expect(mockServices.serverless.setNavigation).toHaveBeenCalledWith({
+    expect(testServices.serverless.setNavigation).toHaveBeenCalledTimes(1);
+    expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
         {
           id: 'root',
@@ -219,10 +219,10 @@ describe('subscribeNavigationTree', () => {
     mockChromeNavLinks.mockReturnValue([chromeNavLink2]);
     mockProjectNavLinks.mockReturnValueOnce([link1, link2]);
 
-    subscribeNavigationTree(mockServices);
+    subscribeNavigationTree(testServices);
     await waitForDebounce();
 
-    expect(mockServices.serverless.setNavigation).toHaveBeenCalledWith({
+    expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
         {
           id: 'root',
@@ -253,10 +253,10 @@ describe('subscribeNavigationTree', () => {
       link2,
     ]);
 
-    subscribeNavigationTree(mockServices);
+    subscribeNavigationTree(testServices);
     await waitForDebounce();
 
-    expect(mockServices.serverless.setNavigation).toHaveBeenCalledWith({
+    expect(testServices.serverless.setNavigation).toHaveBeenCalledWith({
       navigationTree: [
         {
           id: 'root',

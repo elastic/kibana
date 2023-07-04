@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../',
-  projects: ['<rootDir>/x-pack/plugins/security_solution_serverless/public/jest.config.js'],
-};
+import { mockServices } from './services.mock';
+
+export const useKibana = jest.fn(() => ({ services: mockServices }));

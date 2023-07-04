@@ -8,13 +8,10 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { useSideNavItems, useSideNavSelectedId } from './use_side_nav_items';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
-import {
-  KibanaServicesProvider,
-  servicesMocks,
-  mockProjectNavLinks,
-} from '../../common/services.mock';
+import { mockServices, mockProjectNavLinks } from '../../common/__mocks__/services.mock';
 
 jest.mock('../../common/hooks/use_link_props');
+jest.mock('../../common/services');
 
 const mockUseLocation = jest.fn(() => ({ pathname: '/' }));
 jest.mock('react-router-dom', () => ({
@@ -28,12 +25,11 @@ describe('useSideNavItems', () => {
   });
 
   it('should return empty items', async () => {
-    const { result } = renderHook(useSideNavItems, { wrapper: KibanaServicesProvider });
-
+    const { result } = renderHook(useSideNavItems);
     const items = result.current;
 
     expect(items).toEqual([]);
-    expect(servicesMocks.getProjectNavLinks$).toHaveBeenCalledTimes(1);
+    expect(mockServices.getProjectNavLinks$).toHaveBeenCalledTimes(1);
   });
 
   it('should return main items', async () => {
@@ -41,7 +37,7 @@ describe('useSideNavItems', () => {
       { id: SecurityPageName.alerts, title: 'Alerts' },
       { id: SecurityPageName.case, title: 'Cases' },
     ]);
-    const { result } = renderHook(useSideNavItems, { wrapper: KibanaServicesProvider });
+    const { result } = renderHook(useSideNavItems);
 
     const items = result.current;
     expect(items).toEqual([
@@ -70,7 +66,7 @@ describe('useSideNavItems', () => {
         links: [{ id: SecurityPageName.detectionAndResponse, title: 'Detection & Response' }],
       },
     ]);
-    const { result } = renderHook(useSideNavItems, { wrapper: KibanaServicesProvider });
+    const { result } = renderHook(useSideNavItems);
 
     const items = result.current;
     expect(items).toEqual([
@@ -100,7 +96,7 @@ describe('useSideNavItems', () => {
         sideNavIcon: 'launch',
       },
     ]);
-    const { result } = renderHook(useSideNavItems, { wrapper: KibanaServicesProvider });
+    const { result } = renderHook(useSideNavItems);
 
     const items = result.current;
 
@@ -139,10 +135,7 @@ describe('useSideNavSelectedId', () => {
       },
     ];
 
-    const { result } = renderHook(useSideNavSelectedId, {
-      wrapper: KibanaServicesProvider,
-      initialProps: items,
-    });
+    const { result } = renderHook(useSideNavSelectedId, { initialProps: items });
 
     const selectedId = result.current;
     expect(selectedId).toEqual('');
@@ -165,10 +158,7 @@ describe('useSideNavSelectedId', () => {
       },
     ];
 
-    const { result } = renderHook(useSideNavSelectedId, {
-      wrapper: KibanaServicesProvider,
-      initialProps: items,
-    });
+    const { result } = renderHook(useSideNavSelectedId, { initialProps: items });
 
     const selectedId = result.current;
     expect(selectedId).toEqual(SecurityPageName.alerts);
@@ -193,10 +183,7 @@ describe('useSideNavSelectedId', () => {
       },
     ];
 
-    const { result } = renderHook(useSideNavSelectedId, {
-      wrapper: KibanaServicesProvider,
-      initialProps: items,
-    });
+    const { result } = renderHook(useSideNavSelectedId, { initialProps: items });
 
     const selectedId = result.current;
     expect(selectedId).toEqual(SecurityPageName.dashboards);

@@ -10,9 +10,10 @@ import { render } from '@testing-library/react';
 import { SecuritySideNavigation } from './side_navigation';
 import { useSideNavItems, useSideNavSelectedId } from './use_side_nav_items';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
-import { KibanaServicesProvider } from '../../common/services.mock';
+import { ServicesWrapper } from '../../common/__mocks__/services.mock';
 
 jest.mock('./use_side_nav_items');
+
 const mockUseSideNavItems = useSideNavItems as jest.Mock;
 const mockUseSideNavSelectedId = useSideNavSelectedId as jest.Mock;
 
@@ -54,22 +55,22 @@ describe('SecuritySideNavigation', () => {
 
   it('should render loading when not items received', () => {
     mockUseSideNavItems.mockReturnValueOnce([]);
-    const component = render(<SecuritySideNavigation />, { wrapper: KibanaServicesProvider });
+    const component = render(<SecuritySideNavigation />, { wrapper: ServicesWrapper });
     expect(component.queryByTestId('sideNavLoader')).toBeInTheDocument();
   });
 
   it('should not render loading when items received', () => {
-    const component = render(<SecuritySideNavigation />, { wrapper: KibanaServicesProvider });
+    const component = render(<SecuritySideNavigation />, { wrapper: ServicesWrapper });
     expect(component.queryByTestId('sideNavLoader')).not.toBeInTheDocument();
   });
 
   it('should render the SideNav when items received', () => {
-    const component = render(<SecuritySideNavigation />, { wrapper: KibanaServicesProvider });
+    const component = render(<SecuritySideNavigation />, { wrapper: ServicesWrapper });
     expect(component.queryByTestId('solutionSideNav')).toBeInTheDocument();
   });
 
   it('should pass item props to the SolutionSideNav component', () => {
-    render(<SecuritySideNavigation />, { wrapper: KibanaServicesProvider });
+    render(<SecuritySideNavigation />, { wrapper: ServicesWrapper });
 
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -79,7 +80,7 @@ describe('SecuritySideNavigation', () => {
   });
 
   it('should selectedId the SolutionSideNav component', () => {
-    render(<SecuritySideNavigation />, { wrapper: KibanaServicesProvider });
+    render(<SecuritySideNavigation />, { wrapper: ServicesWrapper });
 
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({

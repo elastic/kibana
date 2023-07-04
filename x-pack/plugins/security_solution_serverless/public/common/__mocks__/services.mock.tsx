@@ -13,12 +13,12 @@ import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { securitySolutionMock } from '@kbn/security-solution-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
-import type { ProjectNavigationLink } from '../navigation/links';
-import type { Services } from './services';
+import type { ProjectNavigationLink } from '../../navigation/links';
+import type { Services } from '../services';
 
 export const mockProjectNavLinks = jest.fn((): ProjectNavigationLink[] => []);
 
-export const servicesMocks: Services = {
+export const mockServices: Services = {
   ...coreMock.createStart(),
   serverless: serverlessMock.createStart(),
   security: securityMock.createStart(),
@@ -27,8 +27,10 @@ export const servicesMocks: Services = {
   management: managementPluginMock.createStartContract(),
 };
 
-export const KibanaServicesProvider: React.FC = ({ children }) => (
-  <I18nProvider>
-    <KibanaContextProvider services={servicesMocks}>{children}</KibanaContextProvider>
-  </I18nProvider>
-);
+export const ServicesWrapper = React.memo(function ServicesWrapper({ children }) {
+  return (
+    <I18nProvider>
+      <KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>
+    </I18nProvider>
+  );
+});
