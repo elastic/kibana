@@ -14,7 +14,7 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { useLocation } from 'react-router-dom';
