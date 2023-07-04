@@ -2432,6 +2432,7 @@ paths:
       security: []
       parameters:
         - $ref: '#/components/parameters/format'
+    parameters: []
     post:
       summary: Create package policy
       tags:

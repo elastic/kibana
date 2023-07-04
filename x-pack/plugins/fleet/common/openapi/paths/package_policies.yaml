@@ -28,6 +28,7 @@ get:
   security: []
   parameters:
     - $ref: ../components/parameters/format.yaml
+parameters: []
 post:
   summary: Create package policy
   tags:
