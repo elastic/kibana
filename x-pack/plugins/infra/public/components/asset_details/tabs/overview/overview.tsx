@@ -45,7 +45,6 @@ export const Overview = ({
   nodeName,
   currentTimeRange,
   nodeType,
-  onTabsStateChange,
   dateRange,
   dataView,
 }: OverviewProps) => {
@@ -97,11 +96,7 @@ export const Overview = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <MetadataSummary
-          metadata={metadata}
-          metadataLoading={metadataLoading}
-          onShowAllClick={onTabsStateChange}
-        />
+        <MetadataSummary metadata={metadata} metadataLoading={metadataLoading} />
       </EuiFlexItem>
       <EuiFlexItem grow={false} />
     </EuiFlexGroup>

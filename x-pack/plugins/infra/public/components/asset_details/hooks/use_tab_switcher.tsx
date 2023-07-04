@@ -8,9 +8,14 @@
 import { useState } from 'react';
 import createContainer from 'constate';
 import { useLazyRef } from '../../../hooks/use_lazy_ref';
-import type { TabIds } from '../types';
+import type { TabIds, TabsStateChangeFn } from '../types';
 
-export function useTabSwitcher({ initialActiveTabId }: { initialActiveTabId?: TabIds }) {
+interface TabSwitcherParams {
+  initialActiveTabId?: TabIds;
+  onTabsStateChange?: TabsStateChangeFn;
+}
+
+export function useTabSwitcher({ initialActiveTabId, onTabsStateChange }: TabSwitcherParams) {
   const [activeTabId, setActiveTabId] = useState<TabIds | undefined>(initialActiveTabId);
 
   // This set keeps track of which tabs content have been rendered the first time.
@@ -20,6 +25,10 @@ export function useTabSwitcher({ initialActiveTabId }: { initialActiveTabId?: Ta
   const showTab = (tabId: TabIds) => {
     renderedTabsSet.current.add(tabId); // On a tab click, mark the tab content as allowed to be rendered
     setActiveTabId(tabId);
+
+    if (onTabsStateChange) {
+      onTabsStateChange({ activeTabId: tabId });
+    }
   };
 
   return {

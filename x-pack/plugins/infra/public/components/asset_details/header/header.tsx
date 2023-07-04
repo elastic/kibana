@@ -30,7 +30,7 @@ import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 
 type Props = Pick<
   AssetDetailsProps,
-  'currentTimeRange' | 'overrides' | 'node' | 'nodeType' | 'links' | 'tabs' | 'onTabsStateChange'
+  'currentTimeRange' | 'overrides' | 'node' | 'nodeType' | 'links' | 'tabs'
 > & {
   compact: boolean;
 };
@@ -45,16 +45,11 @@ export const Header = ({
   compact,
   currentTimeRange,
   overrides,
-  onTabsStateChange,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { showTab, activeTabId } = useTabSwitcherContext();
 
   const onTabClick = (tabId: TabIds) => {
-    if (onTabsStateChange) {
-      onTabsStateChange({ activeTabId: tabId });
-    }
-
     showTab(tabId);
   };
 

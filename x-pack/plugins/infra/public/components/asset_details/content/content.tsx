@@ -8,7 +8,7 @@
 import React from 'react';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import { Anomalies, Metadata, Processes, Osquery, Metrics, Logs, Overview } from '../tabs';
-import { FlyoutTabIds, type TabState, type AssetDetailsProps, TabIds } from '../types';
+import { FlyoutTabIds, type TabState, type AssetDetailsProps } from '../types';
 
 type Props = Pick<
   AssetDetailsProps,
@@ -19,10 +19,10 @@ export const Content = ({
   overrides,
   currentTimeRange,
   node,
-  nodeType = 'host',
   onTabsStateChange,
+  nodeType = 'host',
 }: Props) => {
-  const onChange = (state: TabState & { activeTabId?: TabIds }) => {
+  const onChange = (state: TabState) => {
     if (!onTabsStateChange) {
       return;
     }
@@ -40,7 +40,6 @@ export const Content = ({
           currentTimeRange={currentTimeRange}
           nodeName={node.name}
           nodeType={nodeType}
-          onTabsStateChange={(tabId: TabIds) => onChange({ activeTabId: tabId })}
           dataView={overrides?.overview?.dataView}
           dateRange={overrides?.overview?.dateRange}
         />

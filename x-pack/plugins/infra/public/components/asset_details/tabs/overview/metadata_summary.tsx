@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { InfraMetadata } from '../../../../../common/http_api';
 import { NOT_AVAILABLE_LABEL } from '../../translations';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
-import { FlyoutTabIds, type TabIds } from '../../types';
+import { FlyoutTabIds } from '../../types';
 import { ExpandableContent } from '../../components/expandable_content';
 
 const columnTitles = {
@@ -53,20 +53,12 @@ const metadataData = (metadataInfo: InfraMetadata['info']) => [
 interface MetadataSummaryProps {
   metadata: InfraMetadata | null;
   metadataLoading: boolean;
-  onShowAllClick?: (tabId: TabIds) => void;
 }
 
-export const MetadataSummary = ({
-  metadata,
-  metadataLoading,
-  onShowAllClick,
-}: MetadataSummaryProps) => {
+export const MetadataSummary = ({ metadata, metadataLoading }: MetadataSummaryProps) => {
   const { showTab } = useTabSwitcherContext();
 
   const onClick = () => {
-    if (onShowAllClick) {
-      onShowAllClick(FlyoutTabIds.METADATA);
-    }
     showTab(FlyoutTabIds.METADATA);
   };
 
