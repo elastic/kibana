@@ -6,24 +6,28 @@
  */
 
 import React, { useState } from 'react';
-import type { OnTimeChangeProps } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiAccordion,
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
-  EuiSuperDatePicker,
   EuiTitle,
   EuiCallOut,
   EuiButton,
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
+import type { BoolQuery, Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { RiskScoreEntity } from '../../../common/risk_engine/types';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
 import * as i18n from '../translations';
 import type { RiskScore } from '../../../server/lib/risk_engine/types';
 import { useRiskScorePreview } from '../api/hooks/use_preview_risk_scores';
+import { useKibana } from '../../common/lib/kibana';
+import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 
 interface IRiskScorePreviewPanel {
   showMessage: string;
@@ -73,20 +77,38 @@ const RiskScorePreviewPanel = ({
 };
 
 export const RiskScorePreviewSection = () => {
-  const [start, setStart] = useState('now-24h');
-  const [end, setEnd] = useState('now');
+  const [query, setQuery] = useState<{
+    dateRange: { from: string; to: string };
+    query: Query;
+  }>({
+    dateRange: { from: 'now-24h', to: 'now' },
+    query: { query: '', language: 'kuery' },
+  });
+
+  const {
+    unifiedSearch: {
+      ui: { SearchBar },
+    },
+  } = useKibana().services;
+
+  let riskScorePreviewFilter: { bool: BoolQuery } = {
+    bool: { must: [], filter: [], should: [], must_not: [] },
+  };
+  try {
+    riskScorePreviewFilter = buildEsQuery(undefined, query.query, []);
+  } catch (e) {
+    // Default to keeping default filter
+  }
 
   const { data, isLoading, refetch, isError } = useRiskScorePreview({
+    filter: riskScorePreviewFilter,
     range: {
-      start,
-      end,
+      start: query.dateRange.from,
+      end: query.dateRange.to,
     },
   });
 
-  const onTimeChangeCallback = (props: OnTimeChangeProps) => {
-    setStart(props.start);
-    setEnd(props.end);
-  };
+  const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
 
   const hosts = getRiskiestScores(data?.scores, 'host.name');
   const users = getRiskiestScores(data?.scores, 'user.name');
@@ -120,14 +142,28 @@ export const RiskScorePreviewSection = () => {
       <EuiText>{i18n.PREVIEW_DESCRIPTION}</EuiText>
       <EuiSpacer />
       <EuiFormRow fullWidth>
-        <EuiSuperDatePicker
-          start={start}
-          end={end}
-          onTimeChange={onTimeChangeCallback}
-          onRefresh={() => refetch()}
-          isLoading={isLoading}
-          width="full"
-        />
+        {indexPattern && (
+          <SearchBar
+            appName="siem"
+            isLoading={isLoading}
+            indexPatterns={[indexPattern] as DataView[]}
+            query={query.query}
+            dateRangeFrom={query.dateRange.from}
+            dateRangeTo={query.dateRange.to}
+            onQuerySubmit={(payload) =>
+              setQuery({
+                query: payload.query ?? { query: '', language: 'kuery' },
+                dateRange: {
+                  from: payload.dateRange.from,
+                  to: payload.dateRange.to,
+                },
+              })
+            }
+            showFilterBar={false}
+            showDatePicker={true}
+            displayStyle={'inPage'}
+          />
+        )}
       </EuiFormRow>
 
       <EuiSpacer />
