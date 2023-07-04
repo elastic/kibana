@@ -30,6 +30,7 @@ import { RiskSummary } from './risk_summary';
 import { EnrichmentSummary } from './enrichment_summary';
 import type { HostRisk, UserRisk } from '../../../../explore/containers/risk_score';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { useHasSecurityCapability } from '../../../../helper_hooks';
 
 const UppercaseEuiTitle = styled(EuiTitle)`
   text-transform: uppercase;
@@ -151,6 +152,12 @@ const ThreatSummaryViewComponent: React.FC<{
     (eventDetail) => eventDetail?.field === 'user.risk.calculated_level'
   )?.values?.[0] as RiskSeverity | undefined;
 
+  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
+
+  if (!hasEntityAnalyticsCapability && enrichments.length === 0) {
+    return null;
+  }
+
   return (
     <>
       <EuiHorizontalRule />
@@ -161,21 +168,25 @@ const ThreatSummaryViewComponent: React.FC<{
       <EuiSpacer size="m" />
 
       <EuiFlexGroup direction="column" gutterSize="m" style={{ flexGrow: 0 }}>
-        <EuiFlexItem grow={false}>
-          <RiskSummary
-            riskEntity={RiskScoreEntity.host}
-            risk={hostRisk}
-            originalRisk={originalHostRisk}
-          />
-        </EuiFlexItem>
+        {hasEntityAnalyticsCapability && (
+          <>
+            <EuiFlexItem grow={false}>
+              <RiskSummary
+                riskEntity={RiskScoreEntity.host}
+                risk={hostRisk}
+                originalRisk={originalHostRisk}
+              />
+            </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <RiskSummary
-            riskEntity={RiskScoreEntity.user}
-            risk={userRisk}
-            originalRisk={originalUserRisk}
-          />
-        </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <RiskSummary
+                riskEntity={RiskScoreEntity.user}
+                risk={userRisk}
+                originalRisk={originalUserRisk}
+              />
+            </EuiFlexItem>
+          </>
+        )}
 
         <EnrichmentSummary
           browserFields={browserFields}

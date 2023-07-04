@@ -111,7 +111,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     inspect,
     refetch,
     isDeprecated,
-    isLicenseValid,
+    isAuthorized,
     isModuleEnabled,
   } = useRiskScore({
     filterQuery,
@@ -140,7 +140,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
 
   const refreshPage = useRefetchQueries();
 
-  if (!isLicenseValid) {
+  if (!isAuthorized) {
     return null;
   }
 

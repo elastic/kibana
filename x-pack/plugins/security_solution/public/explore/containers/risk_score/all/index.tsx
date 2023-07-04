@@ -40,7 +40,7 @@ export interface RiskScoreState<T extends RiskScoreEntity.host | RiskScoreEntity
   refetch: inputsModel.Refetch;
   totalCount: number;
   isModuleEnabled: boolean;
-  isLicenseValid: boolean;
+  isAuthorized: boolean;
   isDeprecated: boolean;
   loading: boolean;
 }
@@ -98,7 +98,7 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
   const {
     isDeprecated,
     isEnabled,
-    isLicenseValid,
+    isAuthorized,
     isLoading: isDeprecatedLoading,
     refetch: refetchDeprecated,
   } = useRiskScoreFeatureStatus(riskEntity, defaultIndex);
@@ -136,20 +136,12 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
       inspect,
       refetch: refetchAll,
       totalCount: response.totalCount,
-      isLicenseValid,
+      isAuthorized,
       isDeprecated,
       isModuleEnabled: isEnabled,
       isInspected: false,
     }),
-    [
-      inspect,
-      isDeprecated,
-      isEnabled,
-      isLicenseValid,
-      refetchAll,
-      response.data,
-      response.totalCount,
-    ]
+    [inspect, isDeprecated, isEnabled, isAuthorized, refetchAll, response.data, response.totalCount]
   );
 
   const requestTimerange = useMemo(
@@ -205,21 +197,13 @@ export const useRiskScore = <T extends RiskScoreEntity.host | RiskScoreEntity.us
       !skip &&
       !isDeprecatedLoading &&
       riskScoreRequest != null &&
-      isLicenseValid &&
+      isAuthorized &&
       isEnabled &&
       !isDeprecated
     ) {
       search(riskScoreRequest);
     }
-  }, [
-    isEnabled,
-    isDeprecated,
-    isLicenseValid,
-    isDeprecatedLoading,
-    riskScoreRequest,
-    search,
-    skip,
-  ]);
+  }, [isEnabled, isDeprecated, isAuthorized, isDeprecatedLoading, riskScoreRequest, search, skip]);
 
   return { ...riskScoreResponse, loading: loading || isDeprecatedLoading };
 };
