@@ -6,11 +6,24 @@
  */
 
 import React, { RefCallback } from 'react';
-import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+  EuiIcon,
+} from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
-import { Integration } from '../../../common/datasets';
-import { DATA_VIEW_POPOVER_CONTENT_WIDTH } from './constants';
+import { Dataset, Integration } from '../../../common/datasets';
+import {
+  DATA_VIEW_POPOVER_CONTENT_WIDTH,
+  uncategorizedLabel,
+  UNMANAGED_STREAMS_PANEL_ID,
+} from './constants';
 import { DatasetSelectionHandler } from './types';
+import { LoadDatasets } from '../../hooks/use_datasets';
+import { dynamic } from '../../utils/dynamic';
+import type { IntegrationsListStatusProps } from './sub_components/integrations_list_status';
+
+const IntegrationsListStatus = dynamic(() => import('./sub_components/integrations_list_status'));
 
 export const getPopoverButtonStyles = ({ fullWidth }: { fullWidth?: boolean }) => ({
   maxWidth: fullWidth ? undefined : DATA_VIEW_POPOVER_CONTENT_WIDTH,
@@ -66,4 +79,29 @@ export const buildIntegrationsTree = ({
     },
     { items: [], panels: [] }
   );
+};
+
+export const createAllLogDatasetsItem = ({ onClick }: { onClick(): void }) => {
+  const allLogDataset = Dataset.createAllLogsDataset();
+  return {
+    name: allLogDataset.title,
+    icon: allLogDataset.iconType && <EuiIcon type={allLogDataset.iconType} />,
+    onClick,
+  };
+};
+
+export const createUnmanagedDatasetsItem = ({ onClick }: { onClick: LoadDatasets }) => {
+  return {
+    name: uncategorizedLabel,
+    icon: <EuiIcon type="documents" />,
+    onClick,
+    panel: UNMANAGED_STREAMS_PANEL_ID,
+  };
+};
+
+export const createIntegrationStatusItem = (props: IntegrationsListStatusProps) => {
+  return {
+    disabled: true,
+    name: <IntegrationsListStatus {...props} />,
+  };
 };
