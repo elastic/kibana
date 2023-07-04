@@ -309,7 +309,12 @@ export const FindCommentsQueryParamsRt = rt.exact(
 export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
 
 export const BulkGetAttachmentsRequestRt = rt.strict({
-  ids: limitedArraySchema(rt.string, 1, MAX_BULK_GET_ATTACHMENTS, 'ids'),
+  ids: limitedArraySchema({
+    codec: rt.string,
+    min: 1,
+    max: MAX_BULK_GET_ATTACHMENTS,
+    fieldName: 'ids',
+  }),
 });
 
 export const BulkGetAttachmentsResponseRt = rt.strict({

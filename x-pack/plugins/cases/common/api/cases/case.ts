@@ -510,7 +510,7 @@ export const GetCategoriesResponseRt = rt.array(rt.string);
 export const GetReportersResponseRt = rt.array(UserRt);
 
 export const CasesBulkGetRequestRt = rt.strict({
-  ids: limitedArraySchema(rt.string, 1, MAX_BULK_GET_CASES, 'ids'),
+  ids: limitedArraySchema({ codec: rt.string, min: 1, max: MAX_BULK_GET_CASES, fieldName: 'ids' }),
 });
 
 export const CasesBulkGetResponseRt = rt.strict({
