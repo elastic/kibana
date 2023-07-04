@@ -36,8 +36,8 @@ export const createDefaultPolicy = (
   // Add license and cloud information after policy creation
   factoryPolicy.meta.license = licenseService.getLicenseType();
   factoryPolicy.meta.cloud = cloud?.isCloudEnabled;
-  factoryPolicy.meta.cluster_name = esClientInfo.cluster_name;
-  factoryPolicy.meta.cluster_uuid = esClientInfo.cluster_uuid;
+  factoryPolicy.meta.cluster_name = esClientInfo?.cluster_name ? esClientInfo.cluster_name : factoryPolicy.meta.cluster_name;
+  factoryPolicy.meta.cluster_uuid = esClientInfo?.cluster_uuid ? esClientInfo.cluster_uuid : factoryPolicy.meta.cluster_uuid;
   factoryPolicy.meta.license_uid = licenseService.getLicenseUID();
 
   const defaultPolicyPerType =
