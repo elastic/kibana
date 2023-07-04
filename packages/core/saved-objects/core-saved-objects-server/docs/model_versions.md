@@ -1,5 +1,19 @@
 # savedObjects: Model Version API
 
+## Table of contents
+
+- [Introduction](#introduction)
+- [What are model versions trying to solve?](#what-are-model-versions-trying-to-solve)
+- [Defining model versions](#defining-model-versions)
+- [Structure of a model version](#structure-of-a-model-version)
+  - [changes](#changes)
+  - [schemas](#schemas)
+- [Examples](#use-case-examples) 
+  - [Adding a non-indexed field without default value](#adding-a-non-indexed-field-without-default-value) 
+  - [Adding an indexed field without default value](#adding-an-indexed-field-without-default-value)
+  - [Adding an indexed field with a default value](#adding-an-indexed-field-with-a-default-value)
+  - [Removing an existing field](#removing-an-existing-field)
+
 ## Introduction
 
 The modelVersion API is a new way to define transformations (*"migrations"*) for your savedObject types, and will 
