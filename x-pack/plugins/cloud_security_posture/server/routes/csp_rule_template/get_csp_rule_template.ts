@@ -61,12 +61,8 @@ const findCspRuleTemplateHandler = async (
     filter: getBenchmarkTypeFilter(benchmarkId),
   });
 
-  const cspRulesTemplates = await pMap(
-    cspRulesTemplatesSo.saved_objects,
-    async (cspRuleTemplate) => {
-      return { ...cspRuleTemplate.attributes };
-    },
-    { concurrency: 50 }
+  const cspRulesTemplates = cspRulesTemplatesSo.saved_objects.map(
+    (cspRuleTemplate) => cspRuleTemplate.attributes
   );
 
   return {
