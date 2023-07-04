@@ -14,6 +14,7 @@ import {
   AlertInstanceMock,
 } from '@kbn/alerting-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { getRuleType } from './rule_type';
 import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
@@ -583,7 +584,9 @@ describe('ruleType', () => {
       const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce(dataViewMock);
+      (ruleServices.dataViews.create as jest.Mock).mockImplementationOnce((spec: DataViewSpec) =>
+        createStubDataView({ spec })
+      );
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
         if (name === 'index') {
           return dataViewMock;
@@ -618,7 +621,9 @@ describe('ruleType', () => {
       const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce(dataViewMock);
+      (ruleServices.dataViews.create as jest.Mock).mockImplementationOnce((spec: DataViewSpec) =>
+        createStubDataView({ spec })
+      );
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
         if (name === 'index') {
           return dataViewMock;
