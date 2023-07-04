@@ -18,6 +18,7 @@
     "@kbn/security-solution-plugin",
     "@kbn/i18n",
     "@kbn/cloud-experiments-plugin",
-    "@kbn/kibana-react-plugin"
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n-react"
   ]
 }
