@@ -67,7 +67,7 @@ describe('V2 algorithm - using model versions - stack version bump scenario', ()
               {
                 type: 'data_backfill',
                 backfillFn: (document) => {
-                  return { field3: 'test_switch-backfilled' };
+                  return { attributes: { field3: 'test_switch-backfilled' } };
                 },
               },
             ],
@@ -120,7 +120,7 @@ describe('V2 algorithm - using model versions - stack version bump scenario', ()
               {
                 type: 'data_backfill',
                 backfillFn: (document) => {
-                  return { field3: 'test_mv-backfilled' };
+                  return { attributes: { field3: 'test_mv-backfilled' } };
                 },
               },
             ],

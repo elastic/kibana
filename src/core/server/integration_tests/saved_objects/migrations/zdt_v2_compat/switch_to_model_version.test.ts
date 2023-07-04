@@ -76,7 +76,9 @@ describe('ZDT with v2 compat - type switching from migration to model version', 
             type: 'data_backfill',
             backfillFn: (doc) => {
               return {
-                newField2: `new2 ${doc.id}`,
+                attributes: {
+                  newField2: `new2 ${doc.id}`,
+                },
               };
             },
           },

@@ -43,7 +43,7 @@ describe('Higher version doc conversion', () => {
           {
             type: 'data_backfill',
             backfillFn: (document) => {
-              return { newField: 'someValue' };
+              return { attributes: { newField: 'someValue' } };
             },
           },
         ],

@@ -136,6 +136,7 @@ export type {
   SavedObjectModelBidirectionalTransformation,
   SavedObjectModelTransformationResult,
   SavedObjectModelDataBackfillFn,
+  SavedObjectModelDataBackfillResult,
   SavedObjectModelUnsafeTransformFn,
   SavedObjectsModelVersionSchemaDefinitions,
   SavedObjectModelVersionForwardCompatibilityFn,

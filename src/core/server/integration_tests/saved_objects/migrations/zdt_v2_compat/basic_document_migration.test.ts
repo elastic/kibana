@@ -85,7 +85,9 @@ describe('ZDT with v2 compat - basic document migration', () => {
             type: 'data_backfill',
             backfillFn: (doc) => {
               return {
-                someAddedField: `${doc.attributes.keyword}-mig`,
+                attributes: {
+                  someAddedField: `${doc.attributes.keyword}-mig`,
+                },
               };
             },
           },

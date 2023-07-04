@@ -68,7 +68,7 @@ describe('V2 algorithm - using model versions - upgrade without stack version in
               {
                 type: 'data_backfill',
                 backfillFn: (document) => {
-                  return { field3: 'test_mv-backfilled' };
+                  return { attributes: { field3: 'test_mv-backfilled' } };
                 },
               },
             ],

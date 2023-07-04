@@ -28,6 +28,7 @@ export type {
   SavedObjectModelBidirectionalTransformation,
   SavedObjectModelTransformationResult,
   SavedObjectModelDataBackfillFn,
+  SavedObjectModelDataBackfillResult,
   SavedObjectModelUnsafeTransformFn,
 } from './transformations';
 

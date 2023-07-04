@@ -92,7 +92,7 @@ export interface SavedObjectsModelMappingsDeprecationChange {
  * let change: SavedObjectsModelDataBackfillChange = {
  *   type: 'data_backfill',
  *   transform: (document) => {
- *     return { someAddedField: 'defaultValue' };
+ *     return { attributes: { someAddedField: 'defaultValue' } };
  *   },
  * };
  * ```

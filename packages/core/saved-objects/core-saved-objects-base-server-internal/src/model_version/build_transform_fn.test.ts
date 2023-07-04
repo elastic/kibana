@@ -71,7 +71,7 @@ describe('buildModelVersionTransformFn', () => {
         {
           type: 'data_backfill',
           backfillFn: (doc) => {
-            return { newProp: 'newValue' };
+            return { attributes: { newProp: 'newValue' } };
           },
         },
       ];
@@ -93,7 +93,7 @@ describe('buildModelVersionTransformFn', () => {
         {
           type: 'data_backfill',
           backfillFn: (doc) => {
-            return { rootProp: { nestedNewProp: 'nestedNewValue' } };
+            return { attributes: { rootProp: { nestedNewProp: 'nestedNewValue' } } };
           },
         },
       ];
@@ -294,7 +294,7 @@ describe('buildModelVersionTransformFn', () => {
         {
           type: 'data_backfill',
           backfillFn: (doc) => {
-            return { newField: 'newValue' };
+            return { attributes: { newField: 'newValue' } };
           },
         },
         {

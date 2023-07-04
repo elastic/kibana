@@ -40,7 +40,7 @@ export interface SavedObjectsModelVersion {
    *     {
    *       type: 'data_backfill',
    *       backfillFn: (doc) => {
-   *         return { someNewField: 'some default value' };
+   *         return { attributes: { someNewField: 'some default value' } };
    *       },
    *     },
    *   ],

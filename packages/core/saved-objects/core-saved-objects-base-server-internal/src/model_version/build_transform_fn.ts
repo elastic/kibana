@@ -52,8 +52,8 @@ export const dataBackfillChangeToTransformFn = (
   change: SavedObjectsModelDataBackfillChange
 ): SavedObjectModelTransformationFn => {
   return (document, context) => {
-    const backfillAttributes = change.backfillFn(document, context);
-    const mergedAttributes = lodashMerge({}, document.attributes, backfillAttributes);
+    const result = change.backfillFn(document, context);
+    const mergedAttributes = lodashMerge({}, document.attributes, result.attributes ?? {});
     return { document: { ...document, attributes: mergedAttributes } };
   };
 };
