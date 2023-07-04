@@ -895,7 +895,7 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async setGroupByFilterQuery(query: string, nth: number = 0) {
     const filterQueryInput = await this.find.byXPath(
-      `(//input[@data-test-subj='filterItemsQueryBar'])[${nth + 1}]`
+      `(//textarea[@data-test-subj='filterItemsQueryBar'])[${nth + 1}]`
     );
     await filterQueryInput.type(query);
   }
