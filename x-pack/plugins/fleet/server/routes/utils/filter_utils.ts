@@ -11,6 +11,8 @@ import * as esKuery from '@kbn/es-query';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
+import { KQLSyntaxError } from '../../errors';
+
 type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
@@ -268,7 +270,7 @@ export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean 
   return false;
 };
 
-export const isKueryValid = (
+export const validateKuery = (
   kuery: string,
   allowedTypes: string[],
   indexMapping: IndexMapping
@@ -283,11 +285,11 @@ export const isKueryValid = (
     });
 
     if (validationObject.some((obj) => obj.error != null)) {
-      throw new Error(
-        validationObject
+      throw new KQLSyntaxError(
+        `KQLSyntaxError: ${validationObject
           .filter((obj) => obj.error != null)
           .map((obj) => obj.error)
-          .join('\n')
+          .join('\n')}`
       );
     }
   }

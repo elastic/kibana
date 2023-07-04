@@ -15,12 +15,10 @@ import {
   PACKAGE_POLICIES_MAPPINGS,
   AGENT_MAPPINGS,
   ENROLLMENT_API_KEY_MAPPINGS,
+  FLEET_ENROLLMENT_API_PREFIX,
 } from '../../constants';
 
-import { normalizeKuery } from '../../services/saved_object';
-
-import { validateFilterKueryNode, isKueryValid } from './filter_utils';
-const FLEET_ENROLLMENT_API_PREFIX = 'fleet-enrollment-api-keys';
+import { validateFilterKueryNode, validateKuery } from './filter_utils';
 
 describe('ValidateFilterKueryNode validates real kueries through KueryNode', () => {
   describe('Agent policies', () => {
@@ -164,10 +162,7 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
   describe('Package policies kuerys', () => {
     it('Test 1', async () => {
       const astFilter = esKuery.fromKueryExpression(
-        normalizeKuery(
-          PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-          `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:packageName`
-        )
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:packageName`
       );
       const validationObject = validateFilterKueryNode({
         astFilter,
@@ -208,11 +203,9 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
     });
 
     it('Test 2 - search by multiple ids', async () => {
-      const normalizedKuery = normalizeKuery(
-        `${AGENTS_PREFIX}`,
+      const astFilter = esKuery.fromKueryExpression(
         `${AGENTS_PREFIX}.attributes.agent.id : (id_1 or id_2)`
       );
-      const astFilter = esKuery.fromKueryExpression(normalizedKuery);
 
       const validationObject = validateFilterKueryNode({
         astFilter,
@@ -410,10 +403,10 @@ describe('ValidateFilterKueryNode validates real kueries through KueryNode', () 
   });
 });
 
-describe('isKueryValid validates real kueries', () => {
+describe('validateKuery validates real kueries', () => {
   describe('Agent policies', () => {
     it('Test 1 - search by data_output_id', async () => {
-      const isValid = isKueryValid(
+      const isValid = validateKuery(
         `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id: test_id`,
         [AGENT_POLICY_SAVED_OBJECT_TYPE],
         AGENT_POLICY_MAPPINGS
@@ -424,7 +417,7 @@ describe('isKueryValid validates real kueries', () => {
 
   describe('Agents', () => {
     it('Test 1 - search policy id', async () => {
-      const isValid = isKueryValid(
+      const isValid = validateKuery(
         `${AGENTS_PREFIX}.policy_id: "policy_id"`,
         [AGENTS_PREFIX],
         AGENT_MAPPINGS
@@ -434,7 +427,7 @@ describe('isKueryValid validates real kueries', () => {
 
     it('Test 2 - invalid kuery', async () => {
       expect(() =>
-        isKueryValid(
+        validateKuery(
           `status:online or (status:updating or status:unenrolling or status:enrolling)`,
           [AGENTS_PREFIX],
           AGENT_MAPPINGS
@@ -444,7 +437,7 @@ describe('isKueryValid validates real kueries', () => {
 
     it('Test 3 - valid kuery', async () => {
       expect(
-        isKueryValid(
+        validateKuery(
           `${AGENTS_PREFIX}.status:online or (${AGENTS_PREFIX}.status:updating or ${AGENTS_PREFIX}.status:unenrolling or ${AGENTS_PREFIX}.status:enrolling)`,
           [AGENTS_PREFIX],
           AGENT_MAPPINGS
@@ -455,7 +448,7 @@ describe('isKueryValid validates real kueries', () => {
 
   describe('Package policies', () => {
     it('Test 1 - search by package name', async () => {
-      const isValid = isKueryValid(
+      const isValid = validateKuery(
         `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:packageName`,
         [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
         PACKAGE_POLICIES_MAPPINGS
@@ -465,13 +458,13 @@ describe('isKueryValid validates real kueries', () => {
 
     it('Test 2 - invalid search by package name', async () => {
       expect(() =>
-        isKueryValid(
+        validateKuery(
           `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:packageName`,
           [PACKAGE_POLICY_SAVED_OBJECT_TYPE],
           PACKAGE_POLICIES_MAPPINGS
         )
       ).toThrowError(
-        `This key 'ingest-package-policies.package.name' does NOT match the filter proposition SavedObjectType.attributes.key`
+        `KQLSyntaxError: This key 'ingest-package-policies.package.name' does NOT match the filter proposition SavedObjectType.attributes.key`
       );
     });
   });

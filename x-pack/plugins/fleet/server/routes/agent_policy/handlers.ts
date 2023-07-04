@@ -20,7 +20,11 @@ import { HTTPAuthorizationHeader } from '../../../common/http_authorization_head
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService } from '../../services';
 import { getAgentsByKuery } from '../../services/agents';
-import { AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants';
+import {
+  AGENTS_PREFIX,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_MAPPINGS,
+} from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -48,9 +52,11 @@ import type {
   GetFullAgentManifestResponse,
   BulkGetAgentPoliciesResponse,
 } from '../../../common/types';
-import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
+import { defaultFleetErrorHandler, AgentPolicyNotFoundError, KQLSyntaxError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
-import { isKueryValid } from '../utils/filter_utils';
+import { validateKuery } from '../utils/filter_utils';
+
+import { normalizeKuery } from '../../services/saved_object';
 
 export async function populateAssignedAgentsCount(
   esClient: ElasticsearchClient,
@@ -78,23 +84,24 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const { full: withPackagePolicies = false, noAgentCount = false, ...restOfQuery } = request.query;
-  const { kuery } = request.query;
-
+  const {
+    full: withPackagePolicies = false,
+    noAgentCount = false,
+    kuery,
+    ...restOfQuery
+  } = request.query;
+  let newKuery = kuery;
   try {
-    isKueryValid(kuery, [AGENTS_PREFIX], AGENT_MAPPINGS);
-  } catch (e) {
-    if (e.name === 'KQLSyntaxError') {
-      throw new Error(`KQLSyntaxError: ${e.message}`);
-    } else {
-      throw e;
+    // validate kuery parameters
+    if (kuery && kuery !== '') {
+      newKuery = normalizeKuery(AGENT_POLICY_SAVED_OBJECT_TYPE, kuery);
+      validateKuery(newKuery, [AGENT_POLICY_SAVED_OBJECT_TYPE], AGENT_POLICY_MAPPINGS);
     }
-  }
 
-  try {
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
       withPackagePolicies,
       esClient,
+      kuery: newKuery,
       ...restOfQuery,
       withAgentCount: !noAgentCount,
     });
@@ -107,7 +114,15 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
+    if (error instanceof KQLSyntaxError) {
+      return response.badRequest({
+        body: {
+          message: error.message,
+        },
+      });
+    } else {
+      return defaultFleetErrorHandler({ error, response });
+    }
   }
 };
 

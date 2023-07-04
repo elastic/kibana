@@ -45,7 +45,7 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
 import { installationStatuses } from '../../../common/constants';
-import { defaultFleetErrorHandler, PackagePolicyNotFoundError } from '../../errors';
+import { defaultFleetErrorHandler, PackagePolicyNotFoundError, KQLSyntaxError } from '../../errors';
 import { getInstallations, getPackageInfo } from '../../services/epm/packages';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -54,9 +54,11 @@ import {
   PACKAGE_POLICIES_MAPPINGS,
 } from '../../constants';
 import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
-import { isKueryValid } from '../utils/filter_utils';
 
 import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
+
+import { validateKuery } from '../utils/filter_utils';
+import { normalizeKuery } from '../../services/saved_object';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -69,23 +71,19 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
   const soClient = fleetContext.internalSoClient;
   const limitedToPackages = fleetContext.limitedToPackages;
 
-  const { kuery } = request.query;
-
+  const { kuery, ...restOfQuery } = request.query;
+  let newKuery = kuery;
   try {
-    isKueryValid(kuery, [PACKAGE_POLICY_SAVED_OBJECT_TYPE], PACKAGE_POLICIES_MAPPINGS);
-  } catch (e) {
-    if (e.name === 'KQLSyntaxError') {
-      throw new Error(`KQLSyntaxError: ${e.message}`);
-    } else {
-      throw e;
+    // normalize kuery and validate it
+    if (kuery && kuery !== '') {
+      newKuery = normalizeKuery(PACKAGE_POLICY_SAVED_OBJECT_TYPE, kuery);
+      validateKuery(newKuery, [PACKAGE_POLICY_SAVED_OBJECT_TYPE], PACKAGE_POLICIES_MAPPINGS);
     }
-  }
 
-  try {
-    const { items, total, page, perPage } = await packagePolicyService.list(
-      soClient,
-      request.query
-    );
+    const { items, total, page, perPage } = await packagePolicyService.list(soClient, {
+      kuery: newKuery,
+      ...restOfQuery,
+    });
 
     checkAllowedPackages(items, limitedToPackages, 'package.name');
 
@@ -103,7 +101,15 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
       },
     });
   } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
+    if (error instanceof KQLSyntaxError) {
+      return response.badRequest({
+        body: {
+          message: error.message,
+        },
+      });
+    } else {
+      return defaultFleetErrorHandler({ error, response });
+    }
   }
 };
 

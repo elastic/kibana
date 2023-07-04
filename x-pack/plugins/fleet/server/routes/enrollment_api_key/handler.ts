@@ -22,7 +22,12 @@ import type {
 } from '../../../common/types';
 import * as APIKeyService from '../../services/api_keys';
 import { agentPolicyService } from '../../services/agent_policy';
-import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
+import { defaultFleetErrorHandler, AgentPolicyNotFoundError, KQLSyntaxError } from '../../errors';
+
+import { ENROLLMENT_API_KEY_MAPPINGS, FLEET_ENROLLMENT_API_PREFIX } from '../../constants';
+
+import { validateKuery } from '../utils/filter_utils';
+import { normalizeKuery } from '../../services/saved_object';
 
 export const getEnrollmentApiKeysHandler: RequestHandler<
   undefined,
@@ -30,12 +35,20 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
 > = async (context, request, response) => {
   // Use kibana_system and depend on authz checks on HTTP layer to prevent abuse
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
+  const { kuery } = request.query;
+  let newKuery = kuery;
 
   try {
+    // normalize kuery and validate it
+    if (kuery && kuery !== '') {
+      newKuery = normalizeKuery(FLEET_ENROLLMENT_API_PREFIX, kuery);
+      validateKuery(newKuery, [FLEET_ENROLLMENT_API_PREFIX], ENROLLMENT_API_KEY_MAPPINGS);
+    }
+
     const { items, total, page, perPage } = await APIKeyService.listEnrollmentApiKeys(esClient, {
       page: request.query.page,
       perPage: request.query.perPage,
-      kuery: request.query.kuery,
+      kuery: newKuery,
     });
     const body: GetEnrollmentAPIKeysResponse = {
       list: items, // deprecated
@@ -93,7 +106,13 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    if (error.isBoom && error.output.statusCode === 404) {
+    if (error instanceof KQLSyntaxError) {
+      return response.badRequest({
+        body: {
+          message: error.message,
+        },
+      });
+    } else if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
         body: { message: `EnrollmentAPIKey ${request.params.keyId} not found` },
       });
