@@ -118,13 +118,14 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
               id: tool.id,
               title: tool.title as string,
               path: `#/${tool.id}`,
+              navLinkStatus: AppNavLinkStatus.visible,
             };
             if (!devtoolsDeeplinkIds.some((id) => id === deepLink.id)) {
               throw new Error('Deeplink must be registered in package.');
             }
             return deepLink;
           });
-        return { deepLinks };
+        return { deepLinks, navLinkStatus: AppNavLinkStatus.visible };
       });
     }
   }
