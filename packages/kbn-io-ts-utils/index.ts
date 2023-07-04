@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { IndexPatternType } from './src/index_pattern_rt';
+export type { IndexPattern } from './src/index_pattern_rt';
 export type { NonEmptyString, NonEmptyStringBrand } from './src/non_empty_string_rt';
 
 export { deepExactRt } from './src/deep_exact_rt';

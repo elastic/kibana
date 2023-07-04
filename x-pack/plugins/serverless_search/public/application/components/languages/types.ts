@@ -21,6 +21,7 @@ export enum Languages {
 export interface LanguageDefinitionSnippetArguments {
   url: string;
   apiKey: string;
+  indexName?: string;
 }
 
 type CodeSnippet = string | ((args: LanguageDefinitionSnippetArguments) => string);
@@ -33,6 +34,7 @@ export interface LanguageDefinition {
   iconType: string;
   id: Languages;
   ingestData: CodeSnippet;
+  ingestDataIndex: CodeSnippet;
   installClient: string;
   languageStyling?: string;
   name: string;

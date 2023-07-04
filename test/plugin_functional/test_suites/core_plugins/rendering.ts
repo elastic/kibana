@@ -189,6 +189,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.migrationToFleetAvailable (any)',
         'xpack.apm.featureFlags.sourcemapApiAvailable (any)',
         'xpack.apm.featureFlags.storageExplorerAvailable (any)',
+        'xpack.apm.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
+        'xpack.observability_onboarding.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
         'xpack.cases.files.allowedMimeTypes (array)',
         'xpack.cases.files.maxSize (number)',
         'xpack.cases.markdownPlugins.lens (boolean)',
@@ -213,6 +215,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud_integrations.gain_sight.org_id (any)',
         'xpack.cloud.id (string)',
         'xpack.cloud.organization_url (string)',
+        'xpack.cloud.billing_url (string)',
         'xpack.cloud.profile_url (string)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
@@ -255,6 +258,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.showNavLinks (boolean)',
         'xpack.security.ui (any)',
         'xpack.spaces.maxSpaces (number)',
+        'xpack.spaces.allowFeatureVisibility (any)',
         'xpack.securitySolution.enableExperimental (array)',
         'xpack.securitySolution.prebuiltRulesPackageVersion (string)',
         'xpack.snapshot_restore.slm_ui.enabled (boolean)',

@@ -6,6 +6,7 @@
  */
 import { getProductAppFeatures } from './pli_features';
 import * as pliConfig from './pli_config';
+import { ProductLine } from '../config';
 
 describe('getProductAppFeatures', () => {
   it('should return the essentials PLIs features', () => {
@@ -18,7 +19,7 @@ describe('getProductAppFeatures', () => {
     };
 
     const appFeatureKeys = getProductAppFeatures([
-      { product_line: 'security', product_tier: 'essentials' },
+      { product_line: ProductLine.security, product_tier: 'essentials' },
     ]);
 
     expect(appFeatureKeys).toEqual(['foo']);
@@ -34,7 +35,7 @@ describe('getProductAppFeatures', () => {
     };
 
     const appFeatureKeys = getProductAppFeatures([
-      { product_line: 'security', product_tier: 'complete' },
+      { product_line: ProductLine.security, product_tier: 'complete' },
     ]);
 
     expect(appFeatureKeys).toEqual(['foo', 'baz']);
@@ -58,9 +59,9 @@ describe('getProductAppFeatures', () => {
     };
 
     const appFeatureKeys = getProductAppFeatures([
-      { product_line: 'security', product_tier: 'essentials' },
-      { product_line: 'endpoint', product_tier: 'complete' },
-      { product_line: 'cloud', product_tier: 'essentials' },
+      { product_line: ProductLine.security, product_tier: 'essentials' },
+      { product_line: ProductLine.endpoint, product_tier: 'complete' },
+      { product_line: ProductLine.cloud, product_tier: 'essentials' },
     ]);
 
     expect(appFeatureKeys).toEqual(['foo', 'bar', 'repeated', 'qux', 'quux', 'corge', 'garply']);
