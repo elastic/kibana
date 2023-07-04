@@ -387,40 +387,27 @@ exports.Cluster = class Cluster {
 
     this._log.info('ES_JAVA_OPTS: %s', esJavaOpts);
 
-    this._process = isDocker
-      ? execa(
-          installPath,
-          dockerCmd,
-          // [
-          //   'run',
-          //   // '--name',
-          //   // 'es-node01',
-          //   '--env',
-          //   `"ES_JAVA_OPTS=${esJavaOpts}"`,
-          //   '--net',
-          //   'elastic',
-          //   '-p',
-          //   '9200:9200',
-          //   '-p',
-          //   '9300:9300',
-          //   '-itd',
-          //   '--rm',
-          //   'docker.elastic.co/elasticsearch/elasticsearch:8.8.1',
-          // ],
-          {
-            stdio: ['ignore', 'pipe', 'pipe'],
-          }
-        )
-      : execa(ES_BIN, args, {
-          cwd: installPath,
-          env: {
-            ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
-            ...process.env,
-            JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
-            ES_JAVA_OPTS: esJavaOpts,
-          },
-          stdio: ['ignore', 'pipe', 'pipe'],
-        });
+    if (isDocker) {
+      this._process = execa(installPath, dockerCmd, {
+        stdio: ['ignore', 'inherit', 'inherit'],
+      });
+
+      // TODO: handle detached with inherit does not properly detach
+      // TODO: better way to do this? attach to docker process?
+      this._process.stdout = process.stdout;
+      this._process.stderr = process.stderr;
+    } else {
+      this._process = execa(ES_BIN, args, {
+        cwd: installPath,
+        env: {
+          ...(installPath ? { ES_TMPDIR: path.resolve(installPath, 'ES_TMPDIR') } : {}),
+          ...process.env,
+          JAVA_HOME: '', // By default, we want to always unset JAVA_HOME so that the bundled JDK will be used
+          ES_JAVA_OPTS: esJavaOpts,
+        },
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+    }
 
     this._setupPromise = Promise.all([
       // parse log output to find http port

@@ -10,13 +10,16 @@ import dedent from 'dedent';
 import getopts from 'getopts';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 
 import { Cluster } from '../cluster';
 import { parseTimeoutToMs } from '../utils';
 import { Command } from './types';
 
-const DEFAULT_DOCKER_CMD = 'run -p 9200:9200 -p 9300:9300 -t';
+const DEFAULT_DOCKER_BASE_CMD = 'run -p 9200:9200 -p 9300:9300 -t --rm';
 const DEFAULT_DOCKER_REGISTRY = 'docker.elastic.co/elasticsearch/elasticsearch';
+const DEFAULT_DOCKER_IMG = `${DEFAULT_DOCKER_REGISTRY}:${pkg.version}-SNAPSHOT`;
+const DEFAULT_DOCKER_CMD = `${DEFAULT_DOCKER_BASE_CMD} ${DEFAULT_DOCKER_IMG}`;
 
 export const docker: Command = {
   description: 'Run an Elasticsearch Docker image',
@@ -37,11 +40,11 @@ export const docker: Command = {
     Options:
 
       --version           Version of ES to run [default: ${version}]
-      --image             Image of ES to run [default: docker.elastic.co/elasticsearch/elasticsearch:${version}]
+      --image             Image of ES to run [default: ${DEFAULT_DOCKER_IMG}]
       --password          Sets password for elastic user [default: ${password}]
       --password.[user]   Sets password for native realm user [default: ${password}]
-      -E                  Additional key=value settings to pass to Elasticsearch [default: ${DEFAULT_DOCKER_CMD}${version}]
-      -D                  Single quoted command to pass to Docker
+      -E                  Additional key=value settings to pass to Elasticsearch 
+      -D                  Single quoted command to pass to Docker [default: ${DEFAULT_DOCKER_CMD}]
       --ssl               Sets up SSL on Elasticsearch
       --skip-ready-check  Disable the ready check
       --ready-timeout     Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
@@ -83,9 +86,6 @@ export const docker: Command = {
     const _dockerCmd: string[] = (
       !!options.dockerCmd ? options.dockerCmd : DEFAULT_DOCKER_CMD
     ).split(' ');
-    _dockerCmd[_dockerCmd.length - 1] = _dockerCmd.at(-1) + options.version;
-
-    // console.log(_dockerCmd);
 
     const cluster = new Cluster({ ssl: options.ssl });
     await cluster.run('docker', {
