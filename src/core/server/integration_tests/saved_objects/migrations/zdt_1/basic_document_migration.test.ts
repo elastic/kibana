@@ -84,15 +84,9 @@ describe('ZDT upgrades - basic document migration', () => {
         changes: [
           {
             type: 'data_backfill',
-            transform: (doc) => {
+            backfillFn: (doc) => {
               return {
-                document: {
-                  ...doc,
-                  attributes: {
-                    ...doc.attributes,
-                    someAddedField: `${doc.attributes.keyword}-mig`,
-                  },
-                },
+                someAddedField: `${doc.attributes.keyword}-mig`,
               };
             },
           },
@@ -114,15 +108,9 @@ describe('ZDT upgrades - basic document migration', () => {
         changes: [
           {
             type: 'data_backfill',
-            transform: (doc) => {
+            backfillFn: (doc) => {
               return {
-                document: {
-                  ...doc,
-                  attributes: {
-                    ...doc.attributes,
-                    text2: `${doc.attributes.text2} - mig2`,
-                  },
-                },
+                text2: `${doc.attributes.text2} - mig2`,
               };
             },
           },
@@ -132,15 +120,9 @@ describe('ZDT upgrades - basic document migration', () => {
         changes: [
           {
             type: 'data_backfill',
-            transform: (doc) => {
+            backfillFn: (doc) => {
               return {
-                document: {
-                  ...doc,
-                  attributes: {
-                    ...doc.attributes,
-                    text2: `${doc.attributes.text2} - mig3`,
-                  },
-                },
+                text2: `${doc.attributes.text2} - mig3`,
               };
             },
           },
