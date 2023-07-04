@@ -15,7 +15,6 @@ import { ShardsPolicyField } from './shards_policy_field';
 import { ShardsPercentageField } from './shards_percentage_field';
 import { overflowCss } from '../../utils';
 
-// TODO check this one
 const buttonWrapperCss = ({ index }: { index: number }) => ({
   marginTop: index === 0 && '16px',
 });

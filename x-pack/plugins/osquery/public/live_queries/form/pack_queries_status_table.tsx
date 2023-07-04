@@ -34,7 +34,7 @@ import { PackViewInDiscoverAction } from '../../discover/pack_view_in_discover';
 import { AddToCaseWrapper } from '../../cases/add_to_cases';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 
-const TruncateTooltipText = css`
+const truncateTooltipTextCss = css`
   width: 100%;
 
   > span {
@@ -168,11 +168,11 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
   const renderIDColumn = useCallback(
     (id: string) => (
-      <TruncateTooltipText>
+      <div css={truncateTooltipTextCss}>
         <EuiToolTip content={id} display="block">
           <>{id}</>
         </EuiToolTip>
-      </TruncateTooltipText>
+      </div>
     ),
     []
   );
@@ -407,15 +407,21 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           agentIds={agentIds}
         />
       )}
+      {/* eslint-disable @typescript-eslint/ban-ts-comment */}
       <EuiBasicTable
         css={euiBasicTableCss}
         items={data ?? EMPTY_ARRAY}
+        // @ts-ignore
         itemId={getItemId}
+        // @ts-ignore
         columns={columns}
+        // @ts-ignore
         sorting={sorting}
+        // @ts-ignore
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         isExpandable
       />
+      {/* eslint-enable @typescript-eslint/ban-ts-comment */}
       {queryDetailsFlyoutOpen ? (
         <QueryDetailsFlyout onClose={handleQueryFlyoutClose} action={queryDetailsFlyoutOpen} />
       ) : null}

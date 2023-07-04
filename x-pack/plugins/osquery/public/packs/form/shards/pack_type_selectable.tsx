@@ -12,7 +12,9 @@ import { noop } from 'lodash';
 
 const euiCardCss = ({ theme, selectable }) => ({
   padding: '16px 92px 16px 16px !important',
-  border: `${selectable?.isSelected && `1px solid ${theme.colors.success}`}`,
+  border:
+    selectable?.isSelected &&
+    `1px solid ${theme.colors ? theme.collors.success : theme.eui.euiColorSuccess}`,
 
   '.euiTitle': {
     fontSize: '1rem',
@@ -25,7 +27,7 @@ const euiCardCss = ({ theme, selectable }) => ({
   '.euiText': {
     marginTop: 0,
     marginLeft: '25px',
-    color: theme.colors.subduedText,
+    color: theme.colors ? theme.colors.subduedText : theme.eui.euiTextSubduedColor,
   },
 
   '> button[role="switch"]': {

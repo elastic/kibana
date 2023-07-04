@@ -14,7 +14,9 @@ const euiCardCss = ({ theme, selectable }) => ({
   padding: 0,
   display: 'flex',
   flexDirection: 'row',
-  border: `${selectable?.isSelected && `1px solid ${theme.colors.success}`}`,
+  border:
+    selectable?.isSelected &&
+    `1px solid ${theme.colors ? theme.collors.success : theme.eui.euiColorSuccess}`,
   '.euiCard__content': {
     padding: '16px 92px 16px 16px !important',
   },
@@ -23,7 +25,7 @@ const euiCardCss = ({ theme, selectable }) => ({
   },
   '.euiText': {
     marginTop: 0,
-    color: theme.colors.subduedText,
+    color: theme.colors ? theme.colors.subduedText : theme.eui.euiTextSubduedColor,
   },
 
   '> button[role="switch"]': {
