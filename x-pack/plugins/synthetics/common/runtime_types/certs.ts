@@ -34,6 +34,7 @@ export const CertType = t.intersection([
   t.type({
     monitors: t.array(CertMonitorType),
     sha256: t.string,
+    configId: t.string,
   }),
   t.partial({
     not_after: t.string,

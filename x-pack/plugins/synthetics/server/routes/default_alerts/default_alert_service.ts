@@ -64,7 +64,7 @@ export class DefaultAlertService {
     return this.createDefaultAlertIfNotExist(
       SYNTHETICS_TLS_RULE,
       `Synthetics internal TLS alert`,
-      '10m'
+      '1m'
     );
   }
 
@@ -119,7 +119,7 @@ export class DefaultAlertService {
     );
   }
   updateTlsRule() {
-    return this.updateDefaultAlert(SYNTHETICS_TLS_RULE, `Synthetics internal TLS alert`, '10m');
+    return this.updateDefaultAlert(SYNTHETICS_TLS_RULE, `Synthetics internal TLS alert`, '1m');
   }
 
   async updateDefaultAlert(ruleType: DefaultRuleType, name: string, interval: string) {

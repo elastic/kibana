@@ -131,6 +131,7 @@ export const getCertsRequestBody = ({
         },
       },
       _source: [
+        'config_id',
         'monitor.id',
         'monitor.name',
         'monitor.type',
@@ -201,6 +202,7 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
       not_before: notBefore,
       common_name: commonName,
       monitorName: ping?.monitor?.name,
+      configId: ping.config_id!,
       monitorUrl: ping?.url?.full,
       monitorType: ping?.monitor?.type,
       locationName: ping?.observer?.geo?.name,

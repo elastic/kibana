@@ -11,6 +11,7 @@ import {
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
+import { SUMMARY_FILTER } from '../../../common/constants/client_defaults';
 import { formatFilterString } from '../common';
 import { SyntheticsServerSetup } from '../../types';
 import { getSyntheticsCerts } from '../../queries/get_certs';
@@ -21,7 +22,7 @@ import {
   getAllMonitors,
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import { CertResult, EncryptedSyntheticsMonitor } from '../../../common/runtime_types';
+import { CertResult, EncryptedSyntheticsMonitor, Ping } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
@@ -132,9 +133,12 @@ export class TLSRuleExecutor {
       monitorIds: enabledMonitorQueryIds,
     });
 
+    const latestPings = await this.getLatestPingsForMonitors(certs);
+
     const foundCerts = total > 0;
 
     return {
+      latestPings,
       foundCerts,
       certs,
       total,
@@ -143,5 +147,60 @@ export class TLSRuleExecutor {
       absoluteExpirationThreshold,
       absoluteAgeThreshold,
     };
+  }
+  async getLatestPingsForMonitors(certs: CertResult['certs']) {
+    if (certs.length === 0) {
+      return [];
+    }
+    const configIds = certs.map((cert) => cert.configId);
+    const certIds = certs.map((cert) => cert.sha256);
+    const { body } = await this.esClient.search({
+      body: {
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  config_id: configIds,
+                },
+              },
+              SUMMARY_FILTER,
+            ],
+            must_not: {
+              bool: {
+                filter: [
+                  {
+                    terms: {
+                      'tls.server.hash.sha256': certIds,
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+        collapse: {
+          field: 'config_id',
+        },
+        _source: [
+          '@timestamp',
+          'monitor.id',
+          'monitor.name',
+          'url.full',
+          'monitor.type',
+          'config_id',
+          'tls.server.hash.sha256',
+        ],
+        sort: [
+          {
+            '@timestamp': {
+              order: 'desc',
+            },
+          },
+        ],
+      },
+    });
+
+    return body.hits.hits.map((hit) => hit._source as Ping);
   }
 }
