@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { InlineLogViewSplashPage } from '../../../components/logging/inline_log_view_splash_page';
 import { LogAnalysisSetupFlyoutStateProvider } from '../../../components/logging/log_analysis_setup/setup_flyout';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
@@ -13,7 +14,6 @@ import { LogEntryCategoriesModuleProvider } from '../../../containers/logs/log_a
 import { LogEntryRateModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_rate';
 import { LogEntryFlyoutProvider } from '../../../containers/logs/log_flyout';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
-import { useLogViewContext } from '../../../hooks/use_log_view';
 import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
 
 export const LogEntryRatePageProviders: React.FunctionComponent = ({ children }) => {

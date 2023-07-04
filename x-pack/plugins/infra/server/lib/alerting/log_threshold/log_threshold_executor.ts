@@ -201,12 +201,12 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
       return alert;
     };
 
-    const [, , { logViews }] = await libs.getStartServices();
+    const [, { logsShared }] = await libs.getStartServices();
 
     try {
       const validatedParams = decodeOrThrow(ruleParamsRT)(params);
 
-      const { indices, timestampField, runtimeMappings } = await logViews
+      const { indices, timestampField, runtimeMappings } = await logsShared.logViews
         .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser)
         .getResolvedLogView(validatedParams.logView);
 
