@@ -44,6 +44,7 @@ export async function executeAction({ embeddable, startDependencies, overlays, t
   const rootEmbeddable = embeddable.getRoot();
   const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
   const ConfigPanel = await embeddable.openConfingPanel(startDependencies);
+  console.log('boom', ConfigPanel);
   if (ConfigPanel) {
     const handle = overlays.openFlyout(
       toMountPoint(
