@@ -7,14 +7,13 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { getBaseMappings } from './build_active_mappings';
 
-export const buildPickupMappingsQuery = ({
-  rootFields,
-  updatedFields,
-}: {
-  rootFields: string[];
-  updatedFields: string[];
-}): QueryDslQueryContainer | undefined => {
+export const buildPickupMappingsQuery = (
+  updatedFields: string[]
+): QueryDslQueryContainer | undefined => {
+  const rootFields = Object.keys(getBaseMappings().properties);
+
   if (updatedFields.some((field) => rootFields.includes(field))) {
     // we are updating some root fields, update ALL documents (no filter query)
     return undefined;

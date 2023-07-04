@@ -40,7 +40,6 @@ import {
   setMetaDocMigrationStarted,
 } from './utils';
 import { buildPickupMappingsQuery } from '../core/build_pickup_mappings_query';
-import { getBaseMappings } from '../core';
 
 export type ActionMap = ReturnType<typeof nextActionMap>;
 
@@ -74,10 +73,7 @@ export const nextActionMap = (context: MigratorContext) => {
         index: state.currentIndex,
         mappings: { properties: state.additiveMappingChanges },
         batchSize: context.batchSize,
-        query: buildPickupMappingsQuery({
-          rootFields: Object.keys(getBaseMappings().properties),
-          updatedFields: Object.keys(state.additiveMappingChanges),
-        }),
+        query: buildPickupMappingsQuery(Object.keys(state.additiveMappingChanges)),
       }),
     UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: (state: UpdateIndexMappingsWaitForTaskState) =>
       Actions.waitForPickupUpdatedMappingsTask({

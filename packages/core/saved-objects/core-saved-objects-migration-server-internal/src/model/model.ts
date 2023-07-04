@@ -1443,9 +1443,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else if (isTypeof(left, 'compared_mappings_changed')) {
         const rootFields = Object.keys(getBaseMappings().properties);
         const updatedRootFields = left.updatedHashes.filter((field) => rootFields.includes(field));
-        const updatedTypesQuery = Option.fromNullable(
-          buildPickupMappingsQuery({ rootFields, updatedFields: left.updatedHashes })
-        );
+        const updatedTypesQuery = Option.fromNullable(buildPickupMappingsQuery(left.updatedHashes));
 
         if (updatedRootFields.length) {
           // compatible migration: some core fields have been updated
