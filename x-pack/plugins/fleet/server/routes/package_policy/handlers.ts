@@ -37,8 +37,6 @@ import type {
   BulkGetPackagePoliciesRequestSchema,
 } from '../../types';
 import type {
-  BulkGetPackagePoliciesResponse,
-  CreatePackagePolicyResponse,
   PostDeletePackagePoliciesResponse,
   NewPackagePolicy,
   UpgradePackagePolicyDryRunResponse,
@@ -112,7 +110,7 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
 
 export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
   undefined,
-  undefined,
+  TypeOf<typeof BulkGetPackagePoliciesRequestSchema.query>,
   TypeOf<typeof BulkGetPackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
@@ -124,13 +122,15 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
     const items = await packagePolicyService.getByIDs(soClient, ids, {
       ignoreMissing,
     });
+    const responseItems = items ?? [];
 
-    const body: BulkGetPackagePoliciesResponse = { items: items ?? [] };
-
-    checkAllowedPackages(body.items, limitedToPackages, 'package.name');
+    checkAllowedPackages(responseItems, limitedToPackages, 'package.name');
 
     return response.ok({
-      body,
+      body:
+        responseItems.length > 0 && request.query.format === inputsFormat.Simplified
+          ? responseItems.map((item) => packagePolicyToSimplifiedPackagePolicy(item))
+          : responseItems,
     });
   } catch (error) {
     if (error instanceof PackagePolicyNotFoundError) {
@@ -160,17 +160,12 @@ export const getOnePackagePolicyHandler: FleetRequestHandler<
     if (packagePolicy) {
       checkAllowedPackages([packagePolicy], limitedToPackages, 'package.name');
 
-      if (request.query.format === inputsFormat.Simplified) {
-        return response.ok({
-          body: {
-            item: packagePolicyToSimplifiedPackagePolicy(packagePolicy),
-          },
-        });
-      }
-
       return response.ok({
         body: {
-          item: packagePolicy,
+          item:
+            request.query.format === inputsFormat.Simplified
+              ? packagePolicyToSimplifiedPackagePolicy(packagePolicy)
+              : packagePolicy,
         },
       });
     } else {
@@ -242,7 +237,7 @@ function isSimplifiedCreatePackagePolicyRequest(
 
 export const createPackagePolicyHandler: FleetRequestHandler<
   undefined,
-  undefined,
+  TypeOf<typeof CreatePackagePolicyRequestSchema.query>,
   TypeOf<typeof CreatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
@@ -297,10 +292,13 @@ export const createPackagePolicyHandler: FleetRequestHandler<
       request
     );
 
-    const body: CreatePackagePolicyResponse = { item: packagePolicy };
-
     return response.ok({
-      body,
+      body: {
+        item:
+          request.query.format === inputsFormat.Simplified
+            ? packagePolicyToSimplifiedPackagePolicy(packagePolicy)
+            : packagePolicy,
+      },
     });
   } catch (error) {
     if (error.statusCode) {
@@ -315,7 +313,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
 
 export const updatePackagePolicyHandler: FleetRequestHandler<
   TypeOf<typeof UpdatePackagePolicyRequestSchema.params>,
-  unknown,
+  TypeOf<typeof UpdatePackagePolicyRequestSchema.query>,
   TypeOf<typeof UpdatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
@@ -402,7 +400,10 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       packagePolicy.package?.version
     );
     return response.ok({
-      body: { item: updatedPackagePolicy },
+      body:
+        request.query.format === inputsFormat.Simplified
+          ? packagePolicyToSimplifiedPackagePolicy(updatedPackagePolicy)
+          : updatedPackagePolicy,
     });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });

@@ -52,6 +52,10 @@ export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs'> {
   inputs?: SimplifiedInputs;
 }
 
+export interface FormattedCreatePackagePolicyResponse {
+  item: FormattedPackagePolicy;
+}
+
 export function packagePolicyToSimplifiedPackagePolicy(packagePolicy: PackagePolicy) {
   const formattedPackagePolicy = packagePolicy as unknown as FormattedPackagePolicy;
   formattedPackagePolicy.inputs = formatInputs(packagePolicy.inputs);

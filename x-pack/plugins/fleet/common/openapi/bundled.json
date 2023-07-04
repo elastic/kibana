@@ -3952,6 +3952,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/format"
           }
         ]
       }
@@ -4014,7 +4017,11 @@
         },
         "operationId": "bulk-get-package-policies",
         "security": [],
-        "parameters": []
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/format"
+          }
+        ]
       }
     },
     "/package_policies/delete": {
@@ -4307,6 +4314,9 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/format"
           }
         ]
       },

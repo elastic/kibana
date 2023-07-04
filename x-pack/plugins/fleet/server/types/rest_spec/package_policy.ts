@@ -28,6 +28,11 @@ export const GetPackagePoliciesRequestSchema = {
 
 export const BulkGetPackagePoliciesRequestSchema = {
   body: BulkRequestBodySchema,
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
+  }),
 };
 
 export const GetOnePackagePolicyRequestSchema = {
@@ -46,6 +51,11 @@ export const CreatePackagePolicyRequestSchema = {
     CreatePackagePolicyRequestBodySchema,
     SimplifiedCreatePackagePolicyRequestBodySchema,
   ]),
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
+  }),
 };
 
 export const UpdatePackagePolicyRequestSchema = {
@@ -54,6 +64,11 @@ export const UpdatePackagePolicyRequestSchema = {
     UpdatePackagePolicyRequestBodySchema,
     SimplifiedCreatePackagePolicyRequestBodySchema,
   ]),
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
+  }),
 };
 
 export const DeletePackagePoliciesRequestSchema = {

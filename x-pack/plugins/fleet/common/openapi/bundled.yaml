@@ -2463,6 +2463,7 @@ paths:
               $ref: '#/components/schemas/package_policy_request'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/format'
   /package_policies/_bulk_get:
     post:
       summary: Bulk get package policies
@@ -2501,7 +2502,8 @@ paths:
           $ref: '#/components/responses/error'
       operationId: bulk-get-package-policies
       security: []
-      parameters: []
+      parameters:
+        - $ref: '#/components/parameters/format'
   /package_policies/delete:
     post:
       summary: Delete package policy
@@ -2683,6 +2685,7 @@ paths:
           $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/format'
     delete:
       summary: Delete package policy by ID
       tags:
