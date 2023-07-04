@@ -7,7 +7,7 @@
 
 import { APP_UI_ID, type SecurityPageName } from '@kbn/security-solution-plugin/common';
 import { useMemo, useCallback, type MouseEventHandler, type MouseEvent } from 'react';
-import { useKibana, type Services } from '../services';
+import { useKibana, type Services } from '../common/services';
 
 interface LinkProps {
   onClick: MouseEventHandler;

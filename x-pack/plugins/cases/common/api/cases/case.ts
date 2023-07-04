@@ -13,12 +13,18 @@ import { CommentRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt } from '../connectors/connector';
 import { CaseAssigneesRt } from './assignee';
-import { limitedArraySchema, NonEmptyString } from '../../schema';
+import { limitedArraySchema, limitedStringSchema, NonEmptyString } from '../../schema';
 import {
   MAX_DELETE_IDS_LENGTH,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_TITLE_LENGTH,
+  MAX_LENGTH_PER_TAG,
+  MAX_CATEGORY_LENGTH,
+  MAX_TAGS_PER_CASE,
   MAX_ASSIGNEES_FILTER_LENGTH,
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
+  MAX_BULK_GET_CASES,
 } from '../../constants';
 
 export const AttachmentTotalsRt = rt.strict({
@@ -139,15 +145,24 @@ export const CasePostRequestRt = rt.intersection([
     /**
      * Description of the case
      */
-    description: rt.string,
+    description: limitedStringSchema({
+      fieldName: 'description',
+      min: 1,
+      max: MAX_DESCRIPTION_LENGTH,
+    }),
     /**
      * Identifiers for the case.
      */
-    tags: rt.array(rt.string),
+    tags: limitedArraySchema({
+      codec: limitedStringSchema({ fieldName: 'tag', min: 1, max: MAX_LENGTH_PER_TAG }),
+      fieldName: 'tags',
+      min: 0,
+      max: MAX_TAGS_PER_CASE,
+    }),
     /**
      * Title of the case
      */
-    title: rt.string,
+    title: limitedStringSchema({ fieldName: 'title', min: 1, max: MAX_TITLE_LENGTH }),
     /**
      * The external configuration for the case
      */
@@ -176,7 +191,10 @@ export const CasePostRequestRt = rt.intersection([
       /**
        * The category of the case.
        */
-      category: rt.union([rt.string, rt.null]),
+      category: rt.union([
+        limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
+        rt.null,
+      ]),
     })
   ),
 ]);
@@ -214,7 +232,15 @@ export const CasesFindRequestRt = rt.exact(
     /**
      * Tags to filter by
      */
-    tags: rt.union([limitedArraySchema(rt.string, 0, MAX_TAGS_FILTER_LENGTH, 'tags'), rt.string]),
+    tags: rt.union([
+      limitedArraySchema({
+        codec: rt.string,
+        fieldName: 'tags',
+        min: 0,
+        max: MAX_TAGS_FILTER_LENGTH,
+      }),
+      rt.string,
+    ]),
     /**
      * The status of the case (open, closed, in-progress)
      */
@@ -227,14 +253,24 @@ export const CasesFindRequestRt = rt.exact(
      * The uids of the user profiles to filter by
      */
     assignees: rt.union([
-      limitedArraySchema(rt.string, 0, MAX_ASSIGNEES_FILTER_LENGTH, 'assignees'),
+      limitedArraySchema({
+        codec: rt.string,
+        fieldName: 'assignees',
+        min: 0,
+        max: MAX_ASSIGNEES_FILTER_LENGTH,
+      }),
       rt.string,
     ]),
     /**
      * The reporters to filter by
      */
     reporters: rt.union([
-      limitedArraySchema(rt.string, 0, MAX_REPORTERS_FILTER_LENGTH, 'reporters'),
+      limitedArraySchema({
+        codec: rt.string,
+        fieldName: 'reporters',
+        min: 0,
+        max: MAX_REPORTERS_FILTER_LENGTH,
+      }),
       rt.string,
     ]),
     /**
@@ -296,12 +332,12 @@ export const CasesFindRequestRt = rt.exact(
   })
 );
 
-export const CasesDeleteRequestRt = limitedArraySchema(
-  NonEmptyString,
-  1,
-  MAX_DELETE_IDS_LENGTH,
-  'ids'
-);
+export const CasesDeleteRequestRt = limitedArraySchema({
+  codec: NonEmptyString,
+  min: 1,
+  max: MAX_DELETE_IDS_LENGTH,
+  fieldName: 'ids',
+});
 
 export const CasesByAlertIDRequestRt = rt.exact(
   rt.partial({
@@ -355,7 +391,62 @@ export const CasesFindResponseRt = rt.intersection([
 ]);
 
 export const CasePatchRequestRt = rt.intersection([
-  rt.exact(rt.partial(CaseBasicRt.type.props)),
+  rt.exact(
+    rt.partial({
+      /**
+       * The description of the case
+       */
+      description: limitedStringSchema({
+        fieldName: 'description',
+        min: 1,
+        max: MAX_DESCRIPTION_LENGTH,
+      }),
+      /**
+       * The current status of the case (open, closed, in-progress)
+       */
+      status: CaseStatusRt,
+      /**
+       * The identifying strings for filter a case
+       */
+      tags: limitedArraySchema({
+        codec: limitedStringSchema({ fieldName: 'tag', min: 1, max: MAX_LENGTH_PER_TAG }),
+        min: 0,
+        max: MAX_TAGS_PER_CASE,
+        fieldName: 'tags',
+      }),
+      /**
+       * The title of a case
+       */
+      title: limitedStringSchema({ fieldName: 'title', min: 1, max: MAX_TITLE_LENGTH }),
+      /**
+       * The external system that the case can be synced with
+       */
+      connector: CaseConnectorRt,
+      /**
+       * The alert sync settings
+       */
+      settings: SettingsRt,
+      /**
+       * The plugin owner of the case
+       */
+      owner: rt.string,
+      /**
+       * The severity of the case
+       */
+      severity: CaseSeverityRt,
+      /**
+       * The users assigned to this case
+       */
+      assignees: CaseAssigneesRt,
+      /**
+       * The category of the case.
+       */
+      category: rt.union([
+        limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
+        rt.null,
+      ]),
+    })
+  ),
   /**
    * The saved object ID and version
    */
@@ -419,7 +510,7 @@ export const GetCategoriesResponseRt = rt.array(rt.string);
 export const GetReportersResponseRt = rt.array(UserRt);
 
 export const CasesBulkGetRequestRt = rt.strict({
-  ids: rt.array(rt.string),
+  ids: limitedArraySchema({ codec: rt.string, min: 1, max: MAX_BULK_GET_CASES, fieldName: 'ids' }),
 });
 
 export const CasesBulkGetResponseRt = rt.strict({

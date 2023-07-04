@@ -11,9 +11,9 @@ import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { decode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
-import type { Immutable, EndpointPendingActions } from '../../../../../common/endpoint/types';
+import type { EndpointPendingActions, Immutable } from '../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../common/endpoint/types';
-import type { EndpointState, EndpointIndexUIQueryParams } from '../types';
+import type { EndpointIndexUIQueryParams, EndpointState } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
 import {
   MANAGEMENT_DEFAULT_PAGE,
@@ -43,26 +43,23 @@ export const listLoading = (state: Immutable<EndpointState>): boolean => state.l
 
 export const listError = (state: Immutable<EndpointState>) => state.error;
 
-export const detailsData = (state: Immutable<EndpointState>) =>
-  state.endpointDetails.hostDetails.details;
-
-export const fullDetailsHostInfo = (state: Immutable<EndpointState>) =>
-  state.endpointDetails.hostInfo;
-
-export const detailsLoading = (state: Immutable<EndpointState>): boolean =>
-  state.endpointDetails.hostDetails.detailsLoading;
-
-export const detailsError = (
+export const fullDetailsHostInfo = (
   state: Immutable<EndpointState>
-): EndpointState['endpointDetails']['hostDetails']['detailsError'] =>
-  state.endpointDetails.hostDetails.detailsError;
+): EndpointState['endpointDetails']['hostInfo'] => state.endpointDetails.hostInfo;
+
+export const isHostInfoLoading = (
+  state: Immutable<EndpointState>
+): EndpointState['endpointDetails']['isHostInfoLoading'] => state.endpointDetails.isHostInfoLoading;
+
+export const hostInfoError = (
+  state: Immutable<EndpointState>
+): EndpointState['endpointDetails']['hostInfoError'] => state.endpointDetails.hostInfoError;
 
 export const policyItems = (state: Immutable<EndpointState>) => state.policyItems;
 
 export const policyItemsLoading = (state: Immutable<EndpointState>) => state.policyItemsLoading;
 
 export const selectedPolicyId = (state: Immutable<EndpointState>) => state.selectedPolicyId;
-
 export const endpointPackageInfo = (state: Immutable<EndpointState>) => state.endpointPackageInfo;
 export const getIsEndpointPackageInfoUninitialized: (state: Immutable<EndpointState>) => boolean =
   createSelector(endpointPackageInfo, (packageInfo) => isUninitialisedResourceState(packageInfo));
@@ -258,8 +255,8 @@ export const getIsOnEndpointDetailsActivityLog: (state: Immutable<EndpointState>
     return searchParams.show === EndpointDetailsTabsTypes.activityLog;
   });
 
-export const getIsEndpointHostIsolated = createSelector(detailsData, (details) => {
-  return (details && isEndpointHostIsolated(details)) || false;
+export const getIsEndpointHostIsolated = createSelector(fullDetailsHostInfo, (details) => {
+  return (details && isEndpointHostIsolated(details.metadata)) || false;
 });
 
 export const getEndpointPendingActionsState = (
