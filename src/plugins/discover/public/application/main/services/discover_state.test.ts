@@ -13,6 +13,8 @@ import {
 } from './discover_state';
 import { createBrowserHistory, History } from 'history';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
   savedSearchAdHoc,
@@ -38,12 +40,9 @@ async function getState(url: string = '/', savedSearch?: SavedSearch) {
   const nextHistory = createBrowserHistory();
   nextHistory.push(url);
 
-  discoverServiceMock.dataViews.create = jest.fn().mockReturnValue({
-    ...dataViewMock,
-    isPersisted: () => false,
-    id: 'ad-hoc-id',
-    title: 'test',
-  });
+  discoverServiceMock.dataViews.create = jest
+    .fn()
+    .mockImplementationOnce((spec: DataViewSpec) => createStubDataView({ spec }));
 
   const nextState = getDiscoverStateContainer({
     services: discoverServiceMock,
