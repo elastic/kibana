@@ -9,7 +9,7 @@ import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EuiBasicTable, EuiText } from '@elastic/eui';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 
 import type { UninstallTokenMetadata } from '../../../../../../common/types/models/uninstall_token';
 
@@ -45,7 +45,14 @@ export const UninstallTokenListPage = () => {
         items={tokens}
         columns={[
           { field: 'policy_id', name: 'Policy ID' },
-          { field: 'created_at', name: 'Created at', dataType: 'date' },
+          {
+            field: 'created_at',
+            name: 'Created at',
+            render: (createdAt: string) =>
+              createdAt ? (
+                <FormattedDate year="numeric" month="short" day="2-digit" value={createdAt} />
+              ) : null,
+          },
           {
             field: 'id',
             name: 'Token',
