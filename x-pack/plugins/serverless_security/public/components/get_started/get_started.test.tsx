@@ -7,6 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { GetStartedComponent } from './get_started';
+import { SecurityProductTypes } from '../../../common/config';
 
 jest.mock('./toggle_panel');
 jest.mock('./welcome_panel');
@@ -20,9 +21,15 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+const productTypes = [
+  { product_line: 'security', product_tier: 'essentials' },
+  { product_line: 'endpoint', product_tier: 'complete' },
+  { product_line: 'cloud', product_tier: 'complete' },
+] as SecurityProductTypes;
+
 describe('GetStartedComponent', () => {
   it('should render page title, subtitle, and description', () => {
-    const { getByText } = render(<GetStartedComponent />);
+    const { getByText } = render(<GetStartedComponent productTypes={productTypes} />);
 
     const pageTitle = getByText('Welcome');
     const subtitle = getByText('Let’s get started');
@@ -35,8 +42,16 @@ describe('GetStartedComponent', () => {
     expect(description).toBeInTheDocument();
   });
 
+  it('should render Product Switch', () => {
+    const { getByTestId } = render(<GetStartedComponent productTypes={productTypes} />);
+
+    const productSwitch = getByTestId('product-switch');
+
+    expect(productSwitch).toBeInTheDocument();
+  });
+
   it('should render WelcomePanel and TogglePanel', () => {
-    const { getByTestId } = render(<GetStartedComponent />);
+    const { getByTestId } = render(<GetStartedComponent productTypes={productTypes} />);
 
     const welcomePanel = getByTestId('welcome-panel');
     const togglePanel = getByTestId('toggle-panel');

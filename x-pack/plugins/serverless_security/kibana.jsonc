@@ -13,10 +13,12 @@
       "security"
     ],
     "requiredPlugins": [
-      "serverless",
+      "kibanaReact",
+      "management",
+      "ml",
       "security",
       "securitySolution",
-      "kibanaReact"
+      "serverless"
     ],
     "optionalPlugins": [
       "essSecurity"

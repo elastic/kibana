@@ -2615,8 +2615,7 @@ describe('migrations v2 model', () => {
         it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if core fields have been updated', () => {
           const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
             type: 'compared_mappings_changed' as const,
-            updatedRootFields: ['namespaces'],
-            updatedTypes: ['dashboard', 'lens'],
+            updatedHashes: ['dashboard', 'lens', 'namespaces'],
           });
           const newState = model(
             checkTargetMappingsState,
@@ -2631,8 +2630,7 @@ describe('migrations v2 model', () => {
         it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if only SO types have changed', () => {
           const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.left({
             type: 'compared_mappings_changed' as const,
-            updatedRootFields: [],
-            updatedTypes: ['dashboard', 'lens'],
+            updatedHashes: ['dashboard', 'lens'],
           });
           const newState = model(
             checkTargetMappingsState,
