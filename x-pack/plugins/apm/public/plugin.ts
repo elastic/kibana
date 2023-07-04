@@ -357,15 +357,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
             : AppNavLinkStatus.default,
         },
         { id: 'settings', title: apmSettingsTitle, path: '/settings' },
-        ...(featureFlags.storageExplorerAvailable
-          ? [
-              {
-                id: 'storage-explorer',
-                title: apmStorageExplorerTitle,
-                path: '/storage-explorer',
-              },
-            ]
-          : []),
+        {
+          id: 'storage-explorer',
+          title: apmStorageExplorerTitle,
+          path: '/storage-explorer',
+          searchable: featureFlags.storageExplorerAvailable,
+        },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {
