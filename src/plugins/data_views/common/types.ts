@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObject } from '@kbn/core/server';
 import type { ErrorToastOptions, ToastInputFields } from '@kbn/core-notifications-browser';
@@ -288,7 +289,7 @@ export interface PersistenceAPI {
   create: (
     attributes: DataViewAttributes,
     // SavedObjectsCreateOptions
-    options: { id?: string; initialNamespaces?: string[] }
+    options: { id?: string; initialNamespaces?: string[]; overwrite?: boolean }
   ) => Promise<SavedObject>;
   /**
    * Delete a saved object by id
@@ -429,7 +430,7 @@ export type FieldSpec = DataViewFieldBase & {
   /**
    * set if field is a TSDB metric field
    */
-  timeSeriesMetric?: 'histogram' | 'summary' | 'gauge' | 'counter';
+  timeSeriesMetric?: estypes.MappingTimeSeriesMetricType;
 
   // not persisted
 

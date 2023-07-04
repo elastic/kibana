@@ -71,6 +71,7 @@ dataStart.search.search = jest.fn(({ params }: IKibanaSearchRequest) => {
 }) as ISearchGeneric;
 
 const appDependencies: AppDependencies = {
+  analytics: coreStart.analytics,
   application: coreStart.application,
   charts: chartPluginMock.createStartContract(),
   chrome: coreStart.chrome,
