@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { CriteriaWithPagination } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { EuiBasicTable, EuiText } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,15 +15,21 @@ import type { UninstallTokenMetadata } from '../../../../../../common/types/mode
 
 import { useGetUninstallTokens } from '../../../../../hooks/use_request/uninstall_tokens';
 
-import { useBreadcrumbs } from '../../../hooks';
+import { useBreadcrumbs, usePagination } from '../../../hooks';
 import { DefaultLayout } from '../../../layouts';
 
 export const UninstallTokenListPage = () => {
   useBreadcrumbs('uninstall_tokens');
 
-  const { isLoading, data } = useGetUninstallTokens();
+  const { pagination, setPagination, pageSizeOptions } = usePagination();
+
+  const { isLoading, data } = useGetUninstallTokens({
+    perPage: pagination.pageSize,
+    page: pagination.currentPage,
+  });
 
   const tokens = data?.items ?? [];
+  const total = data?.total ?? 0;
 
   return (
     <DefaultLayout section="uninstall_tokens">
@@ -45,6 +53,19 @@ export const UninstallTokenListPage = () => {
           },
         ]}
         loading={isLoading}
+        pagination={{
+          pageIndex: pagination.currentPage - 1,
+          pageSize: pagination.pageSize,
+          totalItemCount: total,
+          pageSizeOptions,
+        }}
+        onChange={({ page }: CriteriaWithPagination<UninstallTokenMetadata>) => {
+          setPagination((prevPagination) => ({
+            ...prevPagination,
+            currentPage: page.index + 1,
+            pageSize: page.size,
+          }));
+        }}
         noItemsMessage={
           isLoading ? (
             <FormattedMessage
@@ -59,6 +80,8 @@ export const UninstallTokenListPage = () => {
           )
         }
       />
+
+      <EuiSpacer size="xl" />
     </DefaultLayout>
   );
 };
