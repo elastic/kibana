@@ -363,12 +363,12 @@ export const coPilotPrompts = {
     }),
     messages: ({ alertCaseData }) => {
       const header =
-        'alert uuid;start time;reason;case names;case status;case updatedAt;case severity;case totalComments;case tags;case categories;case assignees';
+        'alert uuid;start time;reason;rule name;rule category;case names;case status;case updatedAt;case severity;case totalComments;case tags;case categories;case assignees';
       const add = (accumulator: number, a: number) => {
         return accumulator + a;
       };
       const rows = alertCaseData
-        .map(({ id, reason, start, cases }) => {
+        .map(({ id, reason, start, ruleName, ruleCategory, cases }) => {
           let casesRow: string = '';
           if (cases) {
             const casesName = cases.map((item: any) => item.name).join(',');
@@ -383,7 +383,7 @@ export const coPilotPrompts = {
           } else {
             casesRow = ';;;;;;';
           }
-          return `${id};${start};${reason};${casesRow}`;
+          return `${id};${start};${reason};${ruleName};${ruleCategory};${casesRow}`;
         })
         .join('\n');
 
@@ -401,7 +401,7 @@ The current active alerts in the system are represented in the following table w
 - If the alert has a Case names value it is less urgent
 
 Display the selected alert row using the following template, if any of the variables are empty do not include that line in the response:
-🚨 The the alert with the highest priority right now has the following Reason: A 
+🚨 The the alert with the highest priority right now has the following Reason: A
     🔗 Link: http://localhost:5601/kibana/app/observability/alerts/C
     🧯 Possible next steps: B
     ︖ The reason this alert has the highest priority is: D

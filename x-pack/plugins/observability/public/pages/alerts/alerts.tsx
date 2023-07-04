@@ -52,6 +52,8 @@ const mapCopilotParams = (alerts: any[], cases: any) => {
         id: alert['kibana.alert.uuid'].join(','),
         reason: alert['kibana.alert.reason'].join(','),
         start: alert['kibana.alert.start'].join(','),
+        ruleName: alert['kibana.alert.rule.name'].join(','),
+        ruleCategory: alert['kibana.alert.rule.category'].join(','),
         caseIds,
         cases: undefined,
       };
