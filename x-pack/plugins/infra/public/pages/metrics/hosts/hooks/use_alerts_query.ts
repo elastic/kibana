@@ -57,7 +57,8 @@ export const [AlertsQueryProvider, useAlertsQuery] = AlertsQueryContainer;
 /**
  * Helpers
  */
-const createAlertsEsQuery = ({
+// TODO move to shared
+export const createAlertsEsQuery = ({
   dateRange,
   hostNodes,
   status,
