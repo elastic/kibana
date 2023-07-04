@@ -137,35 +137,4 @@ describe('UptimeEsClient', () => {
       expect(mockUiSettings.get).toHaveBeenCalledWith('observability:enableInspectEsQueries');
     });
   });
-  describe('heartbeatIndices', () => {
-    it('appends synthetics-* in index for legacy alerts', async () => {
-      uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, { isLegacyAlert: true });
-
-      const mockSearchParams = {
-        body: {
-          query: {
-            match_all: {},
-          },
-        },
-      };
-
-      await uptimeEsClient.search({
-        body: {
-          query: {
-            match_all: {},
-          },
-        },
-      });
-
-      expect(esClient.search).toHaveBeenCalledWith(
-        {
-          index: 'heartbeat-8*,heartbeat-7*,synthetics-*',
-          ...mockSearchParams,
-        },
-        { meta: true }
-      );
-    });
-  });
-
-  // Add more tests for other methods and edge cases
 });

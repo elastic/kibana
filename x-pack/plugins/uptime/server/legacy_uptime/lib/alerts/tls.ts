@@ -155,6 +155,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     spaceId,
     startedAt,
     state,
+    rule,
   }) {
     const { share, basePath } = _server;
     const alertsLocator: LocatorPublic<AlertsLocatorParams> | undefined =
