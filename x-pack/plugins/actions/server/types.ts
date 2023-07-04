@@ -152,7 +152,7 @@ export interface ActionType<
    * It only works with system actions and only when executing an action.
    * For all other scenarios they will be ignored
    */
-  requiredKibanaPrivileges?: string[];
+  kibanaPrivileges?: string[];
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }

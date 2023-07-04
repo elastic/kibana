@@ -718,13 +718,15 @@ export class ActionsClient {
     return await this.unsecuredSavedObjectsClient.delete('action', id);
   }
 
-  private getRequiredKibanaPrivileges(actionId: string) {
+  private getSystemActionRequiredKibanaPrivileges(actionId: string) {
     const inMemoryConnector = this.inMemoryConnectors.find(
       (connector) => connector.id === actionId
     );
 
     const additionalPrivileges = inMemoryConnector?.isSystemAction
-      ? this.actionTypeRegistry.getRequiredKibanaPrivileges(inMemoryConnector.actionTypeId)
+      ? this.actionTypeRegistry.getSystemActionRequiredKibanaPrivileges(
+          inMemoryConnector.actionTypeId
+        )
       : [];
 
     return additionalPrivileges;
@@ -742,7 +744,7 @@ export class ActionsClient {
       (await getAuthorizationModeBySource(this.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
-      const additionalPrivileges = this.getRequiredKibanaPrivileges(actionId);
+      const additionalPrivileges = this.getSystemActionRequiredKibanaPrivileges(actionId);
       await this.authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
     } else {
       trackLegacyRBACExemption('execute', this.usageCounter);

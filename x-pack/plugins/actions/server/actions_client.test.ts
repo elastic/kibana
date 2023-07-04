@@ -2787,6 +2787,134 @@ describe('execute()', () => {
       });
 
       expect(trackLegacyRBACExemption as jest.Mock).toBeCalledWith('execute', mockUsageCounter);
+      expect(authorization.ensureAuthorized).not.toHaveBeenCalled();
+    });
+
+    test('ensures that system actions privileges are being authorized correctly', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+
+      actionsClient = new ActionsClient({
+        inMemoryConnectors: [
+          {
+            id: 'system-connector-.cases',
+            actionTypeId: '.cases',
+            name: 'System action: .cases',
+            config: {},
+            secrets: {},
+            isDeprecated: false,
+            isMissingSecrets: false,
+            isPreconfigured: false,
+            isSystemAction: true,
+          },
+        ],
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        executionEnqueuer,
+        ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        auditLogger,
+        usageCounter: mockUsageCounter,
+        connectorTokenClient,
+        getEventLogClient,
+      });
+
+      actionTypeRegistry.register({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        kibanaPrivileges: ['cases/create'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      await actionsClient.execute({
+        actionId: 'system-connector-.cases',
+        params: {},
+      });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+        additionalPrivileges: ['cases/create'],
+      });
+    });
+
+    test('does not authorize kibana privileges for non system actions', async () => {
+      (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
+        return AuthorizationMode.RBAC;
+      });
+
+      actionsClient = new ActionsClient({
+        inMemoryConnectors: [
+          {
+            id: 'testPreconfigured',
+            actionTypeId: 'my-action-type',
+            secrets: {
+              test: 'test1',
+            },
+            isPreconfigured: true,
+            isDeprecated: false,
+            isSystemAction: false,
+            name: 'test',
+            config: {
+              foo: 'bar',
+            },
+          },
+        ],
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        executionEnqueuer,
+        ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        auditLogger,
+        usageCounter: mockUsageCounter,
+        connectorTokenClient,
+        getEventLogClient,
+      });
+
+      actionTypeRegistry.register({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        kibanaPrivileges: ['cases/create'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      await actionsClient.execute({
+        actionId: 'testPreconfigured',
+        params: {},
+      });
+
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        operation: 'execute',
+        additionalPrivileges: [],
+      });
     });
   });
 

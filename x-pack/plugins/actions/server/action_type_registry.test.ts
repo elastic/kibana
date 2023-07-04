@@ -689,4 +689,69 @@ describe('actionTypeRegistry', () => {
       expect(result).toBe(false);
     });
   });
+
+  describe('getSystemActionRequiredKibanaPrivileges()', () => {
+    it('should get the kibana privileges correctly for system actions', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      registry.register({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        kibanaPrivileges: ['cases/create'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      const result = registry.getSystemActionRequiredKibanaPrivileges('.cases');
+      expect(result).toEqual(['cases/create']);
+    });
+
+    it('should return an empty array if the system action does not define any kibana privileges', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      registry.register({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        isSystemActionType: true,
+        executor,
+      });
+
+      const result = registry.getSystemActionRequiredKibanaPrivileges('.cases');
+      expect(result).toEqual([]);
+    });
+
+    it('should return an empty array if the action type is not a system action', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      registry.register({
+        id: 'foo',
+        name: 'Foo',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        validate: {
+          config: { schema: schema.object({}) },
+          secrets: { schema: schema.object({}) },
+          params: { schema: schema.object({}) },
+        },
+        executor,
+      });
+
+      const result = registry.getSystemActionRequiredKibanaPrivileges('foo');
+      expect(result).toEqual([]);
+    });
+  });
 });

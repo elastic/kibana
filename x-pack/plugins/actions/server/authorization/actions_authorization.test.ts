@@ -18,6 +18,7 @@ import { AuthorizationMode } from './get_authorization_mode_by_source';
 const request = {} as KibanaRequest;
 
 const mockAuthorizationAction = (type: string, operation: string) => `${type}/${operation}`;
+
 function mockSecurity() {
   const security = securityMock.createSetup();
   const authorization = security.authz;
@@ -178,5 +179,53 @@ describe('ensureAuthorized', () => {
 
     expect(authorization.actions.savedObject.get).not.toHaveBeenCalled();
     expect(checkPrivileges).not.toHaveBeenCalled();
+  });
+
+  test('checks additional privileges correctly', async () => {
+    const { authorization } = mockSecurity();
+    const checkPrivileges: jest.MockedFunction<
+      ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+    > = jest.fn();
+
+    authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    const actionsAuthorization = new ActionsAuthorization({
+      request,
+      authorization,
+    });
+
+    checkPrivileges.mockResolvedValueOnce({
+      username: 'some-user',
+      hasAllRequested: true,
+      privileges: [
+        {
+          privilege: mockAuthorizationAction('myType', 'execute'),
+          authorized: true,
+        },
+      ],
+    });
+
+    await actionsAuthorization.ensureAuthorized({
+      operation: 'execute',
+      actionTypeId: 'myType',
+      additionalPrivileges: ['cases/create'],
+    });
+
+    expect(authorization.actions.savedObject.get).toHaveBeenCalledWith(
+      ACTION_SAVED_OBJECT_TYPE,
+      'get'
+    );
+
+    expect(authorization.actions.savedObject.get).toHaveBeenCalledWith(
+      ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      'create'
+    );
+
+    expect(checkPrivileges).toHaveBeenCalledWith({
+      kibana: [
+        mockAuthorizationAction(ACTION_SAVED_OBJECT_TYPE, 'get'),
+        mockAuthorizationAction(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
+        'cases/create',
+      ],
+    });
   });
 });

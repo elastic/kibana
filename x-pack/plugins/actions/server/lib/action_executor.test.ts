@@ -43,9 +43,8 @@ const loggerMock: ReturnType<typeof loggingSystemMock.createLogger> =
   loggingSystemMock.createLogger();
 const securityMockStart = securityMock.createStart();
 
-const getActionsAuthorizationWithRequest = jest
-  .fn()
-  .mockReturnValue(actionsAuthorizationMock.create());
+const authorizationMock = actionsAuthorizationMock.create();
+const getActionsAuthorizationWithRequest = jest.fn();
 
 actionExecutor.initialize({
   logger: loggerMock,
@@ -100,6 +99,8 @@ beforeEach(() => {
     roles: ['superuser'],
     username: 'coolguy',
   }));
+
+  getActionsAuthorizationWithRequest.mockReturnValue(authorizationMock);
 });
 
 test('successfully executes', async () => {
@@ -683,6 +684,7 @@ test('successfully executes with system connector', async () => {
     name: 'Cases',
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['alerting'],
+    isSystemActionType: true,
     validate: {
       config: { schema: schema.any() },
       secrets: { schema: schema.any() },
@@ -802,6 +804,56 @@ test('successfully executes with system connector', async () => {
       ],
     ]
   `);
+});
+
+test('successfully authorize system actions', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: '.cases',
+    name: 'Cases',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    kibanaPrivileges: ['cases/create'],
+    isSystemActionType: true,
+    validate: {
+      config: { schema: schema.any() },
+      secrets: { schema: schema.any() },
+      params: { schema: schema.any() },
+    },
+    executor: jest.fn(),
+  };
+
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  actionTypeRegistry.isSystemActionType.mockReturnValueOnce(true);
+  actionTypeRegistry.getSystemActionRequiredKibanaPrivileges.mockReturnValueOnce(['cases/create']);
+
+  await actionExecutor.execute({ ...executeParams, actionId: 'system-connector-.cases' });
+
+  expect(authorizationMock.ensureAuthorized).toBeCalledWith({
+    operation: 'execute',
+    additionalPrivileges: ['cases/create'],
+  });
+});
+
+test('does not authorize non system actions', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      config: { schema: schema.object({ bar: schema.string() }) },
+      secrets: { schema: schema.object({ apiKey: schema.string() }) },
+      params: { schema: schema.object({ foo: schema.boolean() }) },
+    },
+    executor: jest.fn(),
+  };
+
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+  actionTypeRegistry.isSystemActionType.mockReturnValueOnce(false);
+
+  await actionExecutor.execute({ ...executeParams, actionId: 'preconfigured' });
+
+  expect(authorizationMock.ensureAuthorized).not.toBeCalled();
 });
 
 test('successfully executes as a task', async () => {
@@ -1097,6 +1149,7 @@ test('should not throws an error if actionType is system action', async () => {
     name: 'Cases',
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['alerting'],
+    isSystemActionType: true,
     validate: {
       config: { schema: schema.any() },
       secrets: { schema: schema.any() },
@@ -1335,6 +1388,7 @@ test('should not throw error if action is system action and isESOCanEncrypt is f
     name: 'Cases',
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['alerting'],
+    isSystemActionType: true,
     validate: {
       config: { schema: schema.any() },
       secrets: { schema: schema.any() },
