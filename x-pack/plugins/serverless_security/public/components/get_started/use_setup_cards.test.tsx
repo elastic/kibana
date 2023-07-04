@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { EuiThemeComputed } from '@elastic/eui';
 import { useSetUpCardSections } from './use_setup_cards';
 import {
-  ActiveCard,
+  ActiveCards,
   CardId,
   GetMoreFromElasticSecurityCardId,
   GetSetUpCardId,
@@ -44,7 +44,7 @@ describe('useSetUpCardSections', () => {
           id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
         },
       },
-    } as Record<SectionId, Record<CardId, ActiveCard>>;
+    } as ActiveCards;
 
     const sections = result.current.setUpSections({
       activeCards,

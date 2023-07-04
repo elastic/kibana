@@ -12,11 +12,14 @@ import type {
 
 export const setSignalStatus = ({
   signalIds,
+  query,
   status,
 }: {
-  signalIds: SignalIds;
+  signalIds?: SignalIds;
+  query?: object;
   status: Status;
 }) => ({
   signal_ids: signalIds,
+  query,
   status,
 });
