@@ -17,10 +17,6 @@ interface Value {
   value: number;
 }
 
-interface PolicyVersion {
-  metrics: { 'cloud_defend.policy_version': string };
-}
-
 interface KubernetesVersion {
   metrics: { 'orchestrator.version': string };
 }
@@ -36,7 +32,6 @@ interface AccountEntity {
   process_doc_count: AggregationsMultiBucketBase;
   file_doc_count: AggregationsMultiBucketBase;
   alert_doc_count: AggregationsMultiBucketBase;
-  policy_version: { top: PolicyVersion[] };
   kubernetes_version: { top: KubernetesVersion[] };
   agents_count: Value;
   nodes_count: Value;
@@ -63,23 +58,12 @@ const getAccountsStatsQuery = (): SearchRequest => ({
       aggs: {
         nodes_count: {
           cardinality: {
-            field: 'cloud.instance.id',
+            field: 'cloud.instance.name',
           },
         },
         agents_count: {
           cardinality: {
             field: 'agent.id',
-          },
-        },
-        package_version: {
-          top_metrics: {
-            metrics: {
-              field: 'cloud_defend.package_version',
-            },
-            size: 1,
-            sort: {
-              '@timestamp': 'desc',
-            },
           },
         },
         kubernetes_version: {
@@ -155,7 +139,7 @@ const getAccountsStatsQuery = (): SearchRequest => ({
         },
         pods_count: {
           cardinality: {
-            field: 'orchestrator.resource.id',
+            field: 'orchestrator.resource.name',
           },
         },
       },
@@ -178,8 +162,7 @@ const getCloudDefendAccountsStats = (
     file_doc_count: account.file_doc_count.doc_count,
     process_doc_count: account.process_doc_count.doc_count,
     alert_doc_count: account.alert_doc_count.doc_count,
-    policy_version: account.policy_version.top[0].metrics['cloud_defend.policy_version'],
-    kubernetes_version: account.kubernetes_version.top[0].metrics['orchestrator.version'],
+    kubernetes_version: account.kubernetes_version?.top?.[0]?.metrics['orchestrator.version'],
     agents_count: account.agents_count.value,
     nodes_count: account.nodes_count.value,
     pods_count: account.pods_count.value,

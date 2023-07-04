@@ -46,7 +46,6 @@ export interface CloudDefendPodsStats {
 export interface CloudDefendAccountsStats {
   account_id: string;
   total_doc_count: number;
-  policy_version: string;
   kubernetes_version: string | null;
   file_doc_count: number;
   process_doc_count: number;
@@ -59,6 +58,7 @@ export interface CloudDefendAccountsStats {
 export interface CloudDefendInstallationStats {
   package_policy_id: string;
   policy_yaml: string;
+  policy_json: string;
   package_version: string;
   agent_policy_id: string;
   created_at: string;

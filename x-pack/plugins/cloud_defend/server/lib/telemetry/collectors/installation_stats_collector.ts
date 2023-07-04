@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import yaml from 'js-yaml';
 import type { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
@@ -45,10 +46,22 @@ export const getInstallationStats = async (
             ?.agents ?? 0;
 
         const input = getInputFromPolicy(packagePolicy, INPUT_CONTROL);
+        const policyYaml = input?.vars?.configuration?.value;
+        let policyJson: any = {};
+
+        try {
+          policyJson = JSON.stringify(yaml.load(policyYaml));
+        } catch (err) {
+          logger.error(
+            'could not convert cloud_defend yaml to json for installation stats usage collection',
+            err
+          );
+        }
 
         return {
           package_policy_id: packagePolicy.id,
-          policy_yaml: input?.vars?.configuration?.value,
+          policy_yaml: policyYaml,
+          policy_json: policyJson,
           package_version: packagePolicy.package?.version as string,
           created_at: packagePolicy.created_at,
           agent_policy_id: packagePolicy.policy_id,

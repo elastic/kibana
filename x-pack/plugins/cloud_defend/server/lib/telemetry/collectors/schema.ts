@@ -77,7 +77,6 @@ export const cloudDefendUsageSchema: MakeSchemaFrom<CloudDefendUsage> = {
       file_doc_count: { type: 'long' },
       process_doc_count: { type: 'long' },
       alert_doc_count: { type: 'long' },
-      policy_version: { type: 'keyword' },
       kubernetes_version: { type: 'keyword' },
       agents_count: { type: 'short' },
       nodes_count: { type: 'short' },
@@ -89,6 +88,7 @@ export const cloudDefendUsageSchema: MakeSchemaFrom<CloudDefendUsage> = {
     items: {
       package_policy_id: { type: 'keyword' },
       policy_yaml: { type: 'keyword' },
+      policy_json: { type: 'keyword' }, // in DBT BQ land, this will be stored as a JSON type so we can run analytic queries on cloud_defend policy behavior
       package_version: { type: 'keyword' },
       agent_policy_id: { type: 'keyword' },
       created_at: { type: 'date' },

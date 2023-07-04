@@ -17,16 +17,22 @@ interface PodsStats {
 }
 
 export interface AccountEntity {
-  key: string; // account_id
+  key: string; // orchestrator.cluster.id
   doc_count: number;
   pods: {
     buckets: Pod[];
   };
 }
 
+interface ContainerImageName {
+  key: string;
+}
+
 interface Pod {
-  key: string; // orchestrator.resource.id
-  container_image_name: string;
+  key: string; // orchestrator.resource.name
+  container_image_name: {
+    buckets: ContainerImageName[];
+  };
   doc_count: number;
   file_doc_count: number;
   process_doc_count: number;
@@ -50,9 +56,9 @@ const getPodsStatsQuery = (index: string): SearchRequest => ({
       aggs: {
         // all cloud-defend logs are from the viewpoint of an orchestrator.resource.type = "pod"
         // so no need to filter by orchestrator.resource.type.
-        pod: {
+        pods: {
           terms: {
-            field: 'orchestrator.resource.id',
+            field: 'orchestrator.resource.name',
             order: {
               _count: 'desc',
             },
@@ -60,8 +66,9 @@ const getPodsStatsQuery = (index: string): SearchRequest => ({
           },
           aggs: {
             container_image_name: {
-              avg: {
+              terms: {
                 field: 'container.image.name',
+                size: 1,
               },
             },
             file_doc_count: {
@@ -139,20 +146,20 @@ const getCloudDefendPodsStats = (
   logger: Logger
 ): CloudDefendPodsStats[] => {
   const accounts = aggregatedPodsStats.accounts.buckets;
-
   const podsStats = accounts.map((account) => {
     const accountId = account.key;
     return account.pods.buckets.map((pod) => {
       return {
         account_id: accountId,
-        container_image_name: pod.container_image_name,
+        pod_name: pod.key,
+        container_image_name: pod.container_image_name?.buckets?.[0]?.key,
         file_doc_count: pod.file_doc_count,
         process_doc_count: pod.process_doc_count,
         alert_doc_count: pod.alert_doc_count,
       };
     });
   });
-  logger.info('CSPM telemetry: resources stats was sent');
+  logger.info('Cloud defend telemetry: pods stats was sent');
 
   return podsStats.flat(2);
 };
@@ -180,7 +187,7 @@ export const getPodsStats = async (
 
     return [];
   } catch (e) {
-    logger.error(`Failed to get resources stats ${e}`);
+    logger.error(`Failed to get pods stats ${e}`);
     return [];
   }
 };
