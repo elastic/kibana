@@ -233,14 +233,14 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
             value={inputTargetValue || ''}
             data-test-subj={`${paramsProperty}TextArea`}
             onChange={onChangeWithMessageVariable}
-            onFocus={() => setListOpen(true)}
+            onFocus={useCallback(() => setListOpen(true), [])}
             onKeyDown={textareaOnKeyPress}
-            onBlur={() => {
+            onBlur={useCallback(() => {
               if (!inputTargetValue && !isListOpen) {
                 editAction(paramsProperty, '', index);
               }
-            }}
-            onClick={() => setListOpen(false)}
+            }, [editAction, index, inputTargetValue, isListOpen, paramsProperty])}
+            onClick={useCallback(() => setListOpen(false), [])}
           />
         </EuiOutsideClickDetector>
         {matches.length > 0 && isListOpen && (
