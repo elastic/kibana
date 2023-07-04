@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { HttpStart } from '@kbn/core/public';
 
@@ -70,6 +70,8 @@ export class UserProfileAPIClient {
   public readonly dataUpdates$: Observable<UserProfileData> =
     this.internalDataUpdates$.asObservable();
 
+  public readonly userProfile$ = new BehaviorSubject<UserProfileData | null>(null);
+
   constructor(private readonly http: HttpStart) {}
 
   /**
@@ -80,9 +82,14 @@ export class UserProfileAPIClient {
    * optional "dataPath" parameter can be used to return personal data for this user.
    */
   public getCurrent<D extends UserProfileData>(params?: UserProfileGetCurrentParams) {
-    return this.http.get<GetUserProfileResponse<D>>('/internal/security/user_profile', {
-      query: { dataPath: params?.dataPath },
-    });
+    return this.http
+      .get<GetUserProfileResponse<D>>('/internal/security/user_profile', {
+        query: { dataPath: params?.dataPath },
+      })
+      .then((response) => {
+        this.userProfile$.next(response.data ?? {});
+        return response;
+      });
   }
 
   /**
@@ -130,6 +137,7 @@ export class UserProfileAPIClient {
       .post('/internal/security/user_profile/_data', { body: JSON.stringify(data) })
       .then(() => {
         this.internalDataUpdates$.next(data);
+        this.userProfile$.next(data);
       });
   }
 }

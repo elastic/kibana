@@ -65,7 +65,10 @@ export interface UserProfileUserInfo {
 /**
  * Placeholder for data stored in user profile.
  */
-export type UserProfileData = Record<string, unknown>;
+export interface UserProfileData {
+  avatar?: UserProfileAvatarData;
+  userSettings?: UserSettingsData;
+}
 
 /**
  * Type of the user profile labels structure (currently
@@ -90,11 +93,13 @@ export interface UserProfileAvatarData {
   imageUrl?: string | null;
 }
 
+export type DarkModeValue = '' | 'dark' | 'light';
+
 /**
  * User settings stored in the data object of the User Profile
  */
 export interface UserSettingsData {
-  darkMode?: string;
+  darkMode?: DarkModeValue;
 }
 
 /**
