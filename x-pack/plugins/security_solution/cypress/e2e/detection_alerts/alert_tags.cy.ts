@@ -52,8 +52,6 @@ describe('Alert tagging', () => {
     clickAlertTag('Duplicate');
     updateAlertTags();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
-    // refreshIndex('.alerts-security.alerts-default*');
-    // waitForAlertsToPopulate();
     selectNumberOfAlerts(1);
     openAlertTaggingBulkActionMenu();
     cy.get(SELECTED_ALERT_TAG).contains('Duplicate');
@@ -61,8 +59,6 @@ describe('Alert tagging', () => {
     clickAlertTag('Duplicate');
     updateAlertTags();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
-    // refreshIndex('.alerts-security.alerts-default*');
-    // waitForAlertsToPopulate();
     selectNumberOfAlerts(1);
     openAlertTaggingBulkActionMenu();
     cy.get(UNSELECTED_ALERT_TAG).first().contains('Duplicate');
@@ -75,8 +71,6 @@ describe('Alert tagging', () => {
     clickAlertTag('Duplicate');
     updateAlertTags();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
-    // refreshIndex('.alerts-security.alerts-default*');
-    // waitForAlertsToPopulate();
     // Then add tags to both alerts
     selectNumberOfAlerts(2);
     openAlertTaggingBulkActionMenu();
@@ -84,8 +78,6 @@ describe('Alert tagging', () => {
     clickAlertTag('Duplicate');
     updateAlertTags();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
-    // refreshIndex('.alerts-security.alerts-default*');
-    // waitForAlertsToPopulate();
     selectNumberOfAlerts(2);
     openAlertTaggingBulkActionMenu();
     cy.get(SELECTED_ALERT_TAG).contains('Duplicate');
@@ -108,8 +100,6 @@ describe('Alert tagging', () => {
     clickAlertTag('Duplicate'); // Clicking twice will return to unselected state
     updateAlertTags();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
-    // refreshIndex('.alerts-security.alerts-default*');
-    // waitForAlertsToPopulate();
     selectNumberOfAlerts(2);
     openAlertTaggingBulkActionMenu();
     cy.get(UNSELECTED_ALERT_TAG).first().contains('Duplicate');
