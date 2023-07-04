@@ -46,10 +46,27 @@ async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string
   return null;
 }
 
+export async function getFullAgentPolicies(
+  soClient: SavedObjectsClientContract,
+  ids: string[]
+): Promise<Array<FullAgentPolicy | null>> {
+  const fullAgentPolicies = [];
+
+  // Using a common cache for bulk update of agent policies
+  const packageInfoCache = new Map<string, PackageInfo>();
+
+  for (const id of ids) {
+    const fullAgentPolicy = await getFullAgentPolicy(soClient, id, undefined, packageInfoCache);
+    fullAgentPolicies.push(fullAgentPolicy);
+  }
+  return fullAgentPolicies;
+}
+
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options?: { standalone: boolean }
+  options?: { standalone: boolean },
+  packageCache?: Map<string, PackageInfo>
 ): Promise<FullAgentPolicy | null> {
   const standalone = options?.standalone ?? false;
 
@@ -63,7 +80,7 @@ export async function getFullAgentPolicy(
 
   // Build up an in-memory object for looking up Package Info, so we don't have
   // call `getPackageInfo` for every single policy, which incurs performance costs
-  const packageInfoCache = new Map<string, PackageInfo>();
+  const packageInfoCache = packageCache ?? new Map<string, PackageInfo>();
   for (const policy of agentPolicy.package_policies as PackagePolicy[]) {
     if (!policy.package || packageInfoCache.has(pkgToPkgKey(policy.package))) {
       continue;

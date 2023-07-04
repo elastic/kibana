@@ -87,7 +87,7 @@ import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
-import { getFullAgentPolicy } from './agent_policies';
+import { getFullAgentPolicy, getFullAgentPolicies } from './agent_policies';
 import { validateOutputForPolicy } from './agent_policies';
 import { auditLoggingService } from './audit_logging';
 import { licenseService } from './license';
@@ -823,14 +823,7 @@ class AgentPolicyService {
 
     const policies = await agentPolicyService.getByIDs(soClient, agentPolicyIds);
     const policiesMap = keyBy(policies, 'id');
-    const fullPolicies = await Promise.all(
-      agentPolicyIds.map((agentPolicyId) =>
-        // There are some potential performance concerns around using `getFullAgentPolicy` in this context, e.g.
-        // re-fetching outputs, settings, and upgrade download source URI data for each policy. This could potentially
-        // be a bottleneck in environments with several thousand agent policies being deployed here.
-        agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId)
-      )
-    );
+    const fullPolicies = await agentPolicyService.getFullAgentPolicies(soClient, agentPolicyIds);
 
     const fleetServerPolicies = fullPolicies.reduce((acc, fullPolicy) => {
       if (!fullPolicy || !fullPolicy.revision) {
@@ -1021,6 +1014,13 @@ class AgentPolicyService {
     options?: { standalone: boolean }
   ): Promise<FullAgentPolicy | null> {
     return getFullAgentPolicy(soClient, id, options);
+  }
+
+  public async getFullAgentPolicies(
+    soClient: SavedObjectsClientContract,
+    ids: string[]
+  ): Promise<FullAgentPolicy | null> {
+    return getFullAgentPolicies(soClient, ids);
   }
 
   /**

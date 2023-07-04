@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { getFullAgentPolicy } from './full_agent_policy';
+export { getFullAgentPolicy, getFullAgentPolicies } from './full_agent_policy';
 export {
   storedPackagePolicyToAgentInputs,
   storedPackagePoliciesToAgentInputs,
