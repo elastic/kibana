@@ -20,8 +20,6 @@ interface MlJobEditorProps {
   width?: string;
   mode?: typeof ML_EDITOR_MODE[keyof typeof ML_EDITOR_MODE];
   readOnly?: boolean;
-  syntaxChecking?: boolean;
-  theme?: string;
   onChange?: EuiCodeEditorProps['onChange'];
   'data-test-subj'?: string;
   schema?: object;
@@ -32,8 +30,6 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
   width = '100%',
   mode = ML_EDITOR_MODE.JSON,
   readOnly = false,
-  syntaxChecking = true,
-  theme = 'textmate',
   onChange = () => {},
   'data-test-subj': dataTestSubj,
   schema,
@@ -48,12 +44,9 @@ export const MLJobEditor: FC<MlJobEditorProps> = ({
   }
 
   return (
-    <CodeEditor // TODO theme provided in context by x-pack/plugins/ml/public/application/app.tsx
+    <CodeEditor
       languageId={mode}
-      options={{
-        readOnly,
-        theme,
-      }}
+      options={{ readOnly }}
       value={value}
       width={width}
       height={height}
