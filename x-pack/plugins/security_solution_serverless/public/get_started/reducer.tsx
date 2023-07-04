@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ProductLine } from '../../common/config';
+import type { ProductLine } from '../../common/product';
 import { setupCards, updateCard } from './helpers';
 import {
   type CardId,

@@ -14,7 +14,7 @@ import * as i18n from './translations';
 import { useSetUpCardSections } from './use_setup_cards';
 
 import type { ActiveCards, CardId, IntroductionSteps, SectionId } from './types';
-import type { ProductLine } from '../../common/config';
+import type { ProductLine } from '../../common/product';
 
 const TogglePanelComponent: React.FC<{
   finishedSteps: Record<CardId, Set<IntroductionSteps>>;

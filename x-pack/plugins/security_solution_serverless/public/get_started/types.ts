@@ -7,12 +7,7 @@
 
 import type { EuiIconProps } from '@elastic/eui';
 import type React from 'react';
-import type { ProductLine } from '../../common/config';
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type GetStartedComponentProps = {};
-
-export type GetStartedComponent = (props?: GetStartedComponentProps) => JSX.Element;
+import type { ProductLine } from '../../common/product';
 
 export interface HeaderSection {
   description?: string;

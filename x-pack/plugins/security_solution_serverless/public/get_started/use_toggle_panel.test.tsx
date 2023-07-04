@@ -7,7 +7,8 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useTogglePanel } from './use_toggle_panel';
 import { getStartedStorage } from './storage';
-import { ProductLine, type SecurityProductTypes } from '../../common/config';
+import { ProductLine } from '../../common/product';
+import type { SecurityProductTypes } from '../../common/config';
 import {
   GetMoreFromElasticSecurityCardId,
   GetSetUpCardId,
@@ -15,7 +16,7 @@ import {
   SectionId,
 } from './types';
 
-jest.mock('../../lib/get_started/storage');
+jest.mock('./storage');
 
 describe('useTogglePanel', () => {
   const productTypes = [

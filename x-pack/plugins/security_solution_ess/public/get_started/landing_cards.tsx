@@ -22,7 +22,7 @@ import * as i18n from './translations';
 import endpointSvg from './images/endpoint1.svg';
 import cloudSvg from './images/cloud1.svg';
 import siemSvg from './images/siem1.svg';
-import { useKibana } from '../services';
+import { useKibana } from '../common/services';
 
 const imgUrls = {
   cloud: cloudSvg,

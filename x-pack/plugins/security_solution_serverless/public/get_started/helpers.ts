@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ProductLine } from '../../common/config';
+import type { ProductLine } from '../../common/product';
 import { getSections } from './sections';
 import type { ActiveCard, ActiveCards, Card, CardId, SectionId, StepId } from './types';
 

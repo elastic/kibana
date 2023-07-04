@@ -10,15 +10,13 @@ import { TogglePanel } from './toggle_panel';
 import { useSetUpCardSections } from './use_setup_cards';
 import type { ActiveCards, CardId, StepId } from './types';
 import { GetSetUpCardId, IntroductionSteps, SectionId } from './types';
-import { ProductLine } from '../../common/config';
+import { ProductLine } from '../../common/product';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   useEuiTheme: jest.fn(() => ({ euiTheme: { base: 16, size: { xs: '4px' } } })),
   useEuiShadow: jest.fn(),
 }));
-
-jest.mock('../../lib/get_started/storage');
 
 jest.mock('./use_setup_cards', () => ({
   useSetUpCardSections: jest.fn(),

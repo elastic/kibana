@@ -14,7 +14,7 @@ import {
   mockProjectNavLinks,
 } from '../../common/services.mock';
 
-jest.mock('./use_link_props');
+jest.mock('../../common/hooks/use_link_props');
 
 const mockUseLocation = jest.fn(() => ({ pathname: '/' }));
 jest.mock('react-router-dom', () => ({

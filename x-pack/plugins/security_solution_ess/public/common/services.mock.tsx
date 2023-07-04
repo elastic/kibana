@@ -8,21 +8,12 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { serverlessMock } from '@kbn/serverless/public/mocks';
-import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { securitySolutionMock } from '@kbn/security-solution-plugin/public/mocks';
-import { BehaviorSubject } from 'rxjs';
-import type { ProjectNavigationLink } from '../navigation/links';
 import type { Services } from './services';
-
-export const mockProjectNavLinks = jest.fn((): ProjectNavigationLink[] => []);
 
 export const servicesMocks: Services = {
   ...coreMock.createStart(),
-  serverless: serverlessMock.createStart(),
-  security: securityMock.createStart(),
   securitySolution: securitySolutionMock.createStart(),
-  getProjectNavLinks$: jest.fn(() => new BehaviorSubject(mockProjectNavLinks())),
 };
 
 export const KibanaServicesProvider = React.memo(function KibanaServicesProvider({ children }) {

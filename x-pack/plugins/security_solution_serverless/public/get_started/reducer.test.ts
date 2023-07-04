@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProductLine } from '../../common/config';
+import { ProductLine } from '../../common/product';
 import {
   reducer,
   getFinishedStepsInitialStates,

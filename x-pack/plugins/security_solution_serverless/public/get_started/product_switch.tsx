@@ -8,7 +8,7 @@
 import { EuiPanel, EuiSwitch, EuiText, EuiTitle, type EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
-import { ProductLine } from '../../common/config';
+import { ProductLine } from '../../common/product';
 import * as i18n from './translations';
 import type { Switch } from './types';
 

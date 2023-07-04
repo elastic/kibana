@@ -15,7 +15,7 @@ import {
 import * as i18n from './translations';
 import respond from './images/respond.svg';
 import protect from './images/protect.svg';
-import { ProductLine } from '../../common/config';
+import { ProductLine } from '../../common/product';
 
 export const introductionSteps = [
   {

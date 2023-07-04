@@ -11,16 +11,21 @@ import {
   KibanaContextProvider,
   useKibana as useKibanaReact,
 } from '@kbn/kibana-react-plugin/public';
-import type { SecuritySolutionEssPluginStartDeps } from './types';
+import type { SecuritySolutionEssPluginStartDeps } from '../types';
 
 export type Services = CoreStart & SecuritySolutionEssPluginStartDeps;
 
 export const KibanaServicesProvider: React.FC<{
-  core: CoreStart;
-  pluginsStart: SecuritySolutionEssPluginStartDeps;
-}> = ({ core, pluginsStart, children }) => {
-  const services: Services = { ...core, ...pluginsStart };
+  services: Services;
+}> = ({ services, children }) => {
   return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
 };
 
 export const useKibana = () => useKibanaReact<Services>();
+
+export const createServices = (
+  core: CoreStart,
+  pluginsStart: SecuritySolutionEssPluginStartDeps
+): Services => {
+  return { ...core, ...pluginsStart };
+};

@@ -6,10 +6,9 @@
  */
 import type { ChromeNavLink } from '@kbn/core/public';
 import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
-import { servicesMocks } from '../common/services.mock';
 import { subscribeNavigationTree } from './navigation_tree';
 import { BehaviorSubject } from 'rxjs';
-import { mockProjectNavLinks } from '../common/services.mock';
+import { servicesMocks, mockProjectNavLinks } from '../common/services.mock';
 import type { ProjectNavigationLink } from './links';
 
 const mockChromeNavLinks = jest.fn((): ChromeNavLink[] => []);

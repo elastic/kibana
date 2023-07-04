@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-
-export enum ProductLine {
-  security = 'security',
-  cloud = 'cloud',
-  endpoint = 'endpoint',
-}
+import { schema, type TypeOf } from '@kbn/config-schema';
+import { ProductLine, ProductTier } from './product';
 
 export const productLine = schema.oneOf([
   schema.literal(ProductLine.security),
@@ -21,7 +16,10 @@ export const productLine = schema.oneOf([
 
 export type SecurityProductLine = TypeOf<typeof productLine>;
 
-export const productTier = schema.oneOf([schema.literal('essentials'), schema.literal('complete')]);
+export const productTier = schema.oneOf([
+  schema.literal(ProductTier.essentials),
+  schema.literal(ProductTier.complete),
+]);
 export type SecurityProductTier = TypeOf<typeof productTier>;
 
 export const productType = schema.object({

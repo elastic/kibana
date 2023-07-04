@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { subscribeBreadcrumbs } from './breadcrumbs';
+import { createServices } from './common/services';
 import { getSecurityGetStartedComponent } from './get_started';
 import type {
   SecuritySolutionEssPluginSetup,
@@ -36,9 +37,10 @@ export class SecuritySolutionEssPlugin
     startDeps: SecuritySolutionEssPluginStartDeps
   ): SecuritySolutionEssPluginStart {
     const { securitySolution } = startDeps;
+    const services = createServices(core, startDeps);
 
-    subscribeBreadcrumbs(securitySolution, core);
-    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(core, startDeps));
+    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services));
+    subscribeBreadcrumbs(services);
 
     return {};
   }

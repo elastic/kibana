@@ -7,9 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-import { APP_PATH } from '@kbn/security-solution-plugin/common';
 import { getSecurityGetStartedComponent } from './get_started';
-import { getSecuritySideNavComponent } from './navigation/side_navigation';
 import type {
   SecuritySolutionServerlessPluginSetup,
   SecuritySolutionServerlessPluginStart,
@@ -19,8 +17,7 @@ import type {
 } from './types';
 import { registerUpsellings } from './upselling';
 import { createServices } from './common/services';
-import { subscribeNavigationTree } from './navigation/navigation_tree';
-import { subscribeBreadcrumbs } from './navigation/breadcrumbs';
+import { setServerlessNavigation } from './navigation';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -49,19 +46,14 @@ export class SecuritySolutionServerlessPlugin
     core: CoreStart,
     startDeps: SecuritySolutionServerlessPluginStartDeps
   ): SecuritySolutionServerlessPluginStart {
-    const { securitySolution, serverless } = startDeps;
+    const { securitySolution } = startDeps;
     const { productTypes } = this.config;
 
     const services = createServices(core, startDeps);
 
-    securitySolution.setIsSidebarEnabled(false);
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
 
-    serverless.setProjectHome(APP_PATH);
-    serverless.setSideNavComponent(getSecuritySideNavComponent(services));
-
-    subscribeNavigationTree(services);
-    subscribeBreadcrumbs(services);
+    setServerlessNavigation(services);
 
     return {};
   }

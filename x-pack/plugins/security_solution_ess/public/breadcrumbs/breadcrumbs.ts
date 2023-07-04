@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { PluginStart as SecuritySolutionPluginStart } from '@kbn/security-solution-plugin/public';
-import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
+import type { Services } from '../common/services';
 
-export const subscribeBreadcrumbs = (
-  securitySolution: SecuritySolutionPluginStart,
-  core: CoreStart
-) => {
+export const subscribeBreadcrumbs = (services: Services) => {
+  const { chrome, securitySolution } = services;
   securitySolution.getBreadcrumbsNav$().subscribe((breadcrumbsNav) => {
     const breadcrumbs = [...breadcrumbsNav.leading, ...breadcrumbsNav.trailing];
     if (breadcrumbs.length > 0) {
-      core.chrome.setBreadcrumbs(emptyLastBreadcrumbUrl(breadcrumbs));
+      chrome.setBreadcrumbs(emptyLastBreadcrumbUrl(breadcrumbs));
     }
   });
 };

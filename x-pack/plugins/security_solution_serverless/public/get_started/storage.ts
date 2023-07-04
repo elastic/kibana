@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ProductLine } from '../../common/config';
+import type { ProductLine } from '../../common/product';
 import type { CardId, StepId } from './types';
 import { storage } from '../common/lib/storage';
 

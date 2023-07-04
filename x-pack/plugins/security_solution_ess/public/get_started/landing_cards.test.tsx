@@ -12,7 +12,7 @@ import { ADD_DATA_PATH } from '@kbn/security-solution-plugin/common';
 import { useVariation } from '../common/hooks/use_variation';
 
 jest.mock('../common/hooks/use_variation');
-jest.mock('../services');
+jest.mock('../common/services');
 
 describe('LandingCards component', () => {
   beforeEach(() => {

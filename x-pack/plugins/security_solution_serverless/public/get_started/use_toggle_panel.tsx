@@ -6,7 +6,8 @@
  */
 
 import { useCallback, useMemo, useReducer } from 'react';
-import { ProductLine, type SecurityProductTypes } from '../../common/config';
+import { ProductLine } from '../../common/product';
+import type { SecurityProductTypes } from '../../common/config';
 import { getStartedStorage } from './storage';
 import {
   getActiveCardsInitialStates,

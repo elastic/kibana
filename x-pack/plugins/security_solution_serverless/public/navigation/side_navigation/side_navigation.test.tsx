@@ -12,7 +12,7 @@ import { useSideNavItems, useSideNavSelectedId } from './use_side_nav_items';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import { KibanaServicesProvider } from '../../common/services.mock';
 
-jest.mock('../../hooks/use_side_nav_items');
+jest.mock('./use_side_nav_items');
 const mockUseSideNavItems = useSideNavItems as jest.Mock;
 const mockUseSideNavSelectedId = useSideNavSelectedId as jest.Mock;
 

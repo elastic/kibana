@@ -8,14 +8,13 @@
 import React from 'react';
 
 import { KibanaServicesProvider, type Services } from '../common/services';
-import type { GetStartedComponent } from './types';
 import { GetStarted } from './lazy';
 import type { SecurityProductTypes } from '../../common/config';
 
 export const getSecurityGetStartedComponent = (
   services: Services,
   productTypes: SecurityProductTypes
-): GetStartedComponent =>
+): React.ComponentType =>
   function GetStartedComponent() {
     return (
       <KibanaServicesProvider services={services}>

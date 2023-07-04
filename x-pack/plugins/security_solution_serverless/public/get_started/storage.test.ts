@@ -9,9 +9,9 @@ import { getStartedStorage } from './storage';
 import { GetSetUpCardId, IntroductionSteps, type StepId } from './types';
 import { storage } from '../common/lib/storage';
 import type { MockStorage } from '../common/lib/__mocks__/storage';
-import { ProductLine } from '../../common/config';
+import { ProductLine } from '../../common/product';
 
-jest.mock('./storage');
+jest.mock('../common/lib/storage');
 
 describe('useStorage', () => {
   const mockStorage = storage as unknown as MockStorage;

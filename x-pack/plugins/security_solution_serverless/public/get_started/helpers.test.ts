@@ -20,7 +20,7 @@ import {
   SectionId,
 } from './types';
 import * as sectionsConfigs from './sections';
-import { ProductLine } from '../../common/config';
+import { ProductLine } from '../../common/product';
 const mockSections = jest.spyOn(sectionsConfigs, 'getSections');
 describe('getCardTimeInMinutes', () => {
   it('should calculate the total time in minutes for a card correctly', () => {
