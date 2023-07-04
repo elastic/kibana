@@ -39,6 +39,7 @@ export interface Field {
   null_value?: string;
   dimension?: boolean;
   default_field?: boolean;
+  runtime?: boolean | string;
 
   // Fields specific of the aggregate_metric_double type
   metrics?: string[];
