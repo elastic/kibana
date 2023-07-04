@@ -5427,6 +5427,38 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-server.ArtifactsClientInterface.bulkDeleteArtifacts",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkDeleteArtifacts",
+            "description": [],
+            "signature": [
+              "(ids: string[]) => Promise<Error[]>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.ArtifactsClientInterface.bulkDeleteArtifacts.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-server.ArtifactsClientInterface.listArtifacts",
             "type": "Function",
             "tags": [],
