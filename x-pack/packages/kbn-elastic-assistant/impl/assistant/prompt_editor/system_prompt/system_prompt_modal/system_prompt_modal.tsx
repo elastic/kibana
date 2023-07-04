@@ -87,6 +87,7 @@ export const SystemPromptModal: React.FC<Props> = React.memo(
       const allConversations = Object.values(conversations).map((convo) => ({
         ...convo,
         apiConfig: {
+          ...convo.apiConfig,
           defaultSystemPrompt: currentPromptConversationIds.includes(convo.id)
             ? selectedSystemPrompt?.id
             : convo.apiConfig.defaultSystemPrompt === selectedSystemPrompt?.id

@@ -154,7 +154,7 @@ describe('SystemPrompt', () => {
             promptType: 'system',
           },
         ]);
-        expect(screen.queryByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeFalsy();
+        expect(screen.queryByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).not.toBeInTheDocument();
       });
     });
 
@@ -208,7 +208,7 @@ describe('SystemPrompt', () => {
             isNewConversationDefault: true,
           },
         ]);
-        expect(screen.queryByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeFalsy();
+        expect(screen.queryByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).not.toBeInTheDocument();
       });
     });
 
@@ -257,7 +257,7 @@ describe('SystemPrompt', () => {
       userEvent.click(screen.getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.SAVE));
 
       await waitFor(() => {
-        expect(screen.queryByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).toBeFalsy();
+        expect(screen.queryByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.ID)).not.toBeInTheDocument();
       });
 
       expect(mockUseAssistantContext.setAllSystemPrompts).toHaveBeenCalledTimes(1);
