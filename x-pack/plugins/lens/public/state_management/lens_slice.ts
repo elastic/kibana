@@ -93,16 +93,20 @@ export const getPreloadedState = ({
     };
   }
 
+  const query = !initialContext
+    ? data.query.queryString.getDefaultQuery()
+    : 'searchQuery' in initialContext && initialContext.searchQuery
+    ? initialContext.searchQuery
+    : 'query' in initialContext && initialContext.query
+    ? initialContext.query
+    : data.query.queryString.getQuery();
+
   const state = {
     ...initialState,
     isLoading: true,
     // Do not use app-specific filters from previous app,
     // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
-    query: !initialContext
-      ? data.query.queryString.getDefaultQuery()
-      : 'searchQuery' in initialContext && initialContext.searchQuery
-      ? initialContext.searchQuery
-      : (data.query.queryString.getQuery() as Query),
+    query: query as Query,
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
       : 'searchFilters' in initialContext && initialContext.searchFilters
