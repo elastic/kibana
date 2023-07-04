@@ -44,9 +44,10 @@ export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         }
 
         return response.ok({
-          body: hits.map(({ id, attributes }) => ({
+          body: hits.map(({ id, attributes, namespaces }) => ({
             ...attributes,
             id,
+            namespaces,
           })),
         });
       } else {
