@@ -2430,17 +2430,8 @@ paths:
           $ref: '#/components/responses/error'
       operationId: get-package-policies
       security: []
-      parameters: []
-    parameters:
-      - name: format
-        in: query
-        description: Simplified or legacy format for package inputs
-        required: false
-        schema:
-          type: string
-          enum:
-            - simplified
-            - legacy
+      parameters:
+        - $ref: '#/components/parameters/format'
     post:
       summary: Create package policy
       tags:
@@ -2636,6 +2627,12 @@ paths:
         '400':
           $ref: '#/components/responses/error'
   /package_policies/{packagePolicyId}:
+    parameters:
+      - schema:
+          type: string
+        name: packagePolicyId
+        in: path
+        required: true
     get:
       summary: Get package policy by ID
       tags:
@@ -2655,12 +2652,8 @@ paths:
         '400':
           $ref: '#/components/responses/error'
       operationId: get-package-policy
-    parameters:
-      - schema:
-          type: string
-        name: packagePolicyId
-        in: path
-        required: true
+      parameters:
+        - $ref: '#/components/parameters/format'
     put:
       summary: Update package policy by ID
       tags:
@@ -3458,6 +3451,16 @@ components:
       required: false
       schema:
         type: boolean
+    format:
+      name: format
+      in: query
+      description: Simplified or legacy format for package inputs
+      required: false
+      schema:
+        type: string
+        enum:
+          - simplified
+          - legacy
   responses:
     error:
       description: Generic Error

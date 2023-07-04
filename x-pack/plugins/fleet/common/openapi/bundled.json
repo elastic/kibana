@@ -3901,23 +3901,12 @@
         },
         "operationId": "get-package-policies",
         "security": [],
-        "parameters": []
-      },
-      "parameters": [
-        {
-          "name": "format",
-          "in": "query",
-          "description": "Simplified or legacy format for package inputs",
-          "required": false,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "simplified",
-              "legacy"
-            ]
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/format"
           }
-        }
-      ],
+        ]
+      },
       "post": {
         "summary": "Create package policy",
         "tags": [
@@ -4228,6 +4217,16 @@
       }
     },
     "/package_policies/{packagePolicyId}": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "packagePolicyId",
+          "in": "path",
+          "required": true
+        }
+      ],
       "get": {
         "summary": "Get package policy by ID",
         "tags": [
@@ -4256,18 +4255,13 @@
             "$ref": "#/components/responses/error"
           }
         },
-        "operationId": "get-package-policy"
+        "operationId": "get-package-policy",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/format"
+          }
+        ]
       },
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "packagePolicyId",
-          "in": "path",
-          "required": true
-        }
-      ],
       "put": {
         "summary": "Update package policy by ID",
         "tags": [
@@ -5528,6 +5522,19 @@
         "required": false,
         "schema": {
           "type": "boolean"
+        }
+      },
+      "format": {
+        "name": "format",
+        "in": "query",
+        "description": "Simplified or legacy format for package inputs",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "simplified",
+            "legacy"
+          ]
         }
       }
     },

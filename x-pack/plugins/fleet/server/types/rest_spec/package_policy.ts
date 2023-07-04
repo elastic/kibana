@@ -15,10 +15,10 @@ import {
 
 import { inputsFormat } from '../../../common/constants';
 
-import { ListWithKuerySchema, BulkRequestBodySchema } from './common';
+import { BulkRequestBodySchema } from './common';
 
 export const GetPackagePoliciesRequestSchema = {
-  query: ListWithKuerySchema.extends({
+  query: schema.object({
     format: schema.maybe(
       schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
     ),
@@ -33,6 +33,11 @@ export const BulkGetPackagePoliciesRequestSchema = {
 export const GetOnePackagePolicyRequestSchema = {
   params: schema.object({
     packagePolicyId: schema.string(),
+  }),
+  query: schema.object({
+    format: schema.maybe(
+      schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
+    ),
   }),
 };
 

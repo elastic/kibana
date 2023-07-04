@@ -144,7 +144,8 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
 };
 
 export const getOnePackagePolicyHandler: FleetRequestHandler<
-  TypeOf<typeof GetOnePackagePolicyRequestSchema.params>
+  TypeOf<typeof GetOnePackagePolicyRequestSchema.params>,
+  TypeOf<typeof GetOnePackagePolicyRequestSchema.query>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
@@ -158,6 +159,14 @@ export const getOnePackagePolicyHandler: FleetRequestHandler<
 
     if (packagePolicy) {
       checkAllowedPackages([packagePolicy], limitedToPackages, 'package.name');
+
+      if (request.query.format === inputsFormat.Simplified) {
+        return response.ok({
+          body: {
+            item: packagePolicyToSimplifiedPackagePolicy(packagePolicy),
+          },
+        });
+      }
 
       return response.ok({
         body: {
