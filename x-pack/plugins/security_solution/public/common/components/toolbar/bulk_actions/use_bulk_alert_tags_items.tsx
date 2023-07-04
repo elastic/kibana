@@ -16,6 +16,13 @@ export interface UseBulkAlertTagsItemsProps {
   refetch?: () => void;
 }
 
+export interface UseBulkAlertTagsPanel {
+  id: number;
+  title: JSX.Element;
+  'data-test-subj': string;
+  renderContent: (props: RenderContentPanelProps) => JSX.Element;
+}
+
 export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) => {
   const setAlertTags = useSetAlertTags();
   const handleOnAlertTagsSubmit = useCallback(
@@ -50,7 +57,7 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
     []
   );
 
-  const alertTagsPanels = [
+  const alertTagsPanels: UseBulkAlertTagsPanel[] = [
     {
       id: 1,
       title: TitleContent,
