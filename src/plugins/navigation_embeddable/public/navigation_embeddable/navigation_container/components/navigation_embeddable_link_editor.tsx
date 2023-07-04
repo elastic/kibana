@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isEmpty } from 'lodash';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import {
   EuiForm,
@@ -26,15 +25,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { NavigationContainerInput } from '../../types';
-import { DashboardItem } from '../../dashboard_link/types';
+import { ILinkFactory, LinkInput, NavigationContainerInput } from '../../types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
-import { navigationContainerInputBuilder } from '../editor/navigation_container_input_builder';
-import { DashboardLinkEditorDestinationPicker } from '../../dashboard_link/components/dashboard_link_editor_destination_picker';
-
-// TODO: As part of https://github.com/elastic/kibana/issues/154381, replace this regex URL check with more robust url validation
-const isValidUrl =
-  /^https?:\/\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
+import { addLink } from '../editor/navigation_container_input_builder';
+import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
+import { EXTERNAL_LINK_EMBEDDABLE_TYPE } from '../../external_link/embeddable/external_link_embeddable_factory';
+import { linksService } from '../../services/links_service';
 
 type LinkType = 'dashboardLink' | 'externalLink';
 
@@ -50,16 +46,21 @@ export const NavigationEmbeddableLinkEditor = ({
   currentDashboardId?: string;
 }) => {
   const [linkLabel, setLinkLabel] = useState<string>('');
+  const [linkFactory, setLinkFactory] = useState<ILinkFactory | undefined>();
+
   const [selectedLinkType, setSelectedLinkType] = useState<LinkType>('dashboardLink');
-  const [isDashboardEditorSelected, setIsDashboardEditorSelected] = useState<boolean>(true);
+  const [linkInput, setLinkInput] = useState<LinkInput>();
 
-  /** external URL link state */
-  const [validUrl, setValidUrl] = useState<boolean>(true);
-  const [selectedUrl, setSelectedUrl] = useState<string>();
+  const [placeholder, setPlaceholder] = useState<string | undefined>();
 
-  /** dashboard link state */
-  const [selectedDashboard, setSelectedDashboard] = useState<DashboardItem | undefined>();
-  const savedDashboardSelection = useRef<DashboardItem | undefined>(undefined);
+  useEffect(() => {
+    const factory = linksService.getLinkFactory(
+      selectedLinkType === 'dashboardLink'
+        ? DASHBOARD_LINK_EMBEDDABLE_TYPE
+        : EXTERNAL_LINK_EMBEDDABLE_TYPE
+    );
+    setLinkFactory(factory);
+  }, [selectedLinkType]);
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
     return [
@@ -88,18 +89,9 @@ export const NavigationEmbeddableLinkEditor = ({
     ];
   }, []);
 
-  useEffect(() => {
-    /**
-     * A boolean check is faster than comparing strings so, since this is such a common check in this component,
-     * storing this value as a boolean is (in theory) marginally more efficient
-     */
-    setIsDashboardEditorSelected(selectedLinkType === 'dashboardLink');
-  }, [selectedLinkType]);
-
   return (
     <div className={'navEmbeddableEditor'}>
       <EuiFlyoutHeader hasBorder>
-        {/* <EuiButtonEmpty iconType={'arrowLeft'} color="text" onClick={onClose}> */}
         <EuiButtonEmpty
           css={css`
             height: auto;
@@ -113,7 +105,6 @@ export const NavigationEmbeddableLinkEditor = ({
             <h2>Add link</h2>
           </EuiTitle>
         </EuiButtonEmpty>
-        {/* </EuiButtonEmpty> */}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm component="form">
@@ -123,46 +114,32 @@ export const NavigationEmbeddableLinkEditor = ({
               idSelected={selectedLinkType}
               onChange={(id) => {
                 setSelectedLinkType(id as LinkType);
-                if (selectedDashboard) {
-                  savedDashboardSelection.current = selectedDashboard;
-                }
               }}
             />
           </EuiFormRow>
           <EuiFormRow label={NavEmbeddableStrings.editor.getLinkDestinationLabel()}>
-            {isDashboardEditorSelected ? (
-              <DashboardLinkEditorDestinationPicker
+            {linkFactory?.linkEditorDestinationComponent ? (
+              <linkFactory.linkEditorDestinationComponent
                 currentDashboardId={currentDashboardId}
-                setSelectedDashboard={setSelectedDashboard}
+                // initialInput={{ dashboardId: selectedDashboard }}
+                setPlaceholder={setPlaceholder}
+                onChange={(partialInput) => setLinkInput(partialInput)}
               />
             ) : (
-              <EuiFieldText
-                placeholder={NavEmbeddableStrings.editor.external.getPlaceholder()}
-                isInvalid={!validUrl}
-                onChange={(e) => {
-                  const url = e.target.value;
-                  const isValid = isValidUrl.test(url);
-                  if (isValid) {
-                    setSelectedUrl(url);
-                  }
-                  setValidUrl(isValid);
-                }}
-              />
+              <></>
             )}
           </EuiFormRow>
+
           <EuiFormRow label={NavEmbeddableStrings.editor.getLinkTextLabel()}>
             <EuiFieldText
-              placeholder={
-                isDashboardEditorSelected && selectedDashboard
-                  ? selectedDashboard.attributes.title
-                  : NavEmbeddableStrings.editor.getLinkTextPlaceholder()
-              }
+              placeholder={placeholder || NavEmbeddableStrings.editor.getLinkTextPlaceholder()}
               value={linkLabel}
               onChange={(e) => {
                 setLinkLabel(e.target.value);
               }}
             />
           </EuiFormRow>
+
           {/* TODO: As part of https://github.com/elastic/kibana/issues/154381, we should pull in the custom settings for each link type.
             Refer to `x-pack/examples/ui_actions_enhanced_examples/public/drilldowns/dashboard_to_discover_drilldown/collect_config_container.tsx`
             for the dashboard drilldown settings, for example. 
@@ -186,25 +163,13 @@ export const NavigationEmbeddableLinkEditor = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              disabled={
-                isDashboardEditorSelected ? !selectedDashboard : !validUrl || isEmpty(selectedUrl)
-              }
+              // disabled={
+              //   isDashboardEditorSelected ? !selectedDashboard : !validUrl || isEmpty(selectedUrl)
+              // }
               onClick={() => {
-                if (isDashboardEditorSelected && selectedDashboard) {
-                  const { addDashboardLink } = navigationContainerInputBuilder;
-                  addDashboardLink(initialInput, {
-                    label: linkLabel,
-                    dashboardId: selectedDashboard.id,
-                  });
-                  onSave(initialInput);
-                } else if (validUrl && selectedUrl) {
-                  const { addExternalLink } = navigationContainerInputBuilder;
-                  addExternalLink(initialInput, {
-                    label: linkLabel,
-                    url: selectedUrl,
-                  });
-                  onSave(initialInput);
-                }
+                console.log('linkInput', linkInput);
+                addLink(initialInput, linkInput);
+                onSave(initialInput);
                 onClose();
               }}
             >

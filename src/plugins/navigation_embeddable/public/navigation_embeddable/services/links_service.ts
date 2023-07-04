@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableFactory, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
-import { LinkEmbeddable, LinkFactory, LinkInput } from '../types';
+import { LinkFactory } from '../types';
 
 export interface LinkTypeRegistry {
   [key: string]: LinkFactory;
@@ -19,14 +18,8 @@ export const linksService = {
   registerLinkType: (factory: LinkFactory) => {
     linkFactoriesMap[factory.type] = factory;
   },
-  getLinkFactory: <
-    I extends LinkInput = LinkInput,
-    O extends EmbeddableOutput = EmbeddableOutput,
-    E extends LinkEmbeddable<I, O> = LinkEmbeddable<I, O>
-  >(
-    type: string
-  ) => {
-    return linkFactoriesMap[type] as EmbeddableFactory<I, O, E>;
+  getLinkFactory: (type: string) => {
+    return linkFactoriesMap[type];
   },
   getLinkTypes: () => Object.keys(linkFactoriesMap),
 };

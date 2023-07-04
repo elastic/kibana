@@ -11,12 +11,17 @@ import { EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
 import { DashboardLinkInput } from '../types';
+import { ILinkFactory } from '../../types';
 import { NavigationContainer } from '../../navigation_container/embeddable/navigation_container';
 import { DashboardLinkEditorDestinationPicker } from '../components/dashboard_link_editor_destination_picker';
 
 export const DASHBOARD_LINK_EMBEDDABLE_TYPE = 'navEmbeddable_dashboardLink';
 
-export class DashboardLinkFactory implements EmbeddableFactoryDefinition {
+export class DashboardLinkFactory
+  implements EmbeddableFactoryDefinition, ILinkFactory<DashboardLinkInput>
+{
+  constructor() {}
+
   public type = DASHBOARD_LINK_EMBEDDABLE_TYPE;
 
   public async isEditable() {
@@ -25,6 +30,10 @@ export class DashboardLinkFactory implements EmbeddableFactoryDefinition {
 
   public canCreateNew() {
     return false;
+  }
+
+  public getTest() {
+    return;
   }
 
   public linkEditorDestinationComponent = DashboardLinkEditorDestinationPicker;

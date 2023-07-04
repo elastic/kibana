@@ -10,12 +10,20 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { DashboardLinkInput } from '../../dashboard_link/types';
 import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
-import { LinkPanelState, NavigationContainerInput } from '../../types';
+import { LinkInput, LinkPanelState, NavigationContainerInput } from '../../types';
 import { getNextPanelOrder } from '../navigation_container_helpers';
 import { ExternalLinkInput } from '../../external_link/types';
 import { EXTERNAL_LINK_EMBEDDABLE_TYPE } from '../../external_link/embeddable/external_link_embeddable_factory';
 
 export type ControlGroupInputBuilder = typeof navigationContainerInputBuilder;
+
+export const addLink = (initialInput: Partial<NavigationContainerInput>, linkProps: LinkInput) => {
+  if ((linkProps as DashboardLinkInput).dashboardId) {
+    navigationContainerInputBuilder.addDashboardLink(initialInput, linkProps as DashboardLinkInput);
+  } else {
+    navigationContainerInputBuilder.addExternalLink(initialInput, linkProps as ExternalLinkInput);
+  }
+};
 
 export const navigationContainerInputBuilder = {
   addDashboardLink: (

@@ -9,12 +9,17 @@
 import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+
+import { ILinkFactory } from '../../types';
 import { ExternalLinkInput } from '../types';
 import { NavigationContainer } from '../../navigation_container/embeddable/navigation_container';
+import { ExternalLinkEditorDestinationPicker } from '../components/external_link_editor_destination_picker';
 
 export const EXTERNAL_LINK_EMBEDDABLE_TYPE = 'navEmbeddable_externalLink';
 
-export class ExternalLinkFactory implements EmbeddableFactoryDefinition {
+export class ExternalLinkFactory
+  implements EmbeddableFactoryDefinition, ILinkFactory<ExternalLinkInput>
+{
   public type = EXTERNAL_LINK_EMBEDDABLE_TYPE;
 
   public async isEditable() {
@@ -24,6 +29,8 @@ export class ExternalLinkFactory implements EmbeddableFactoryDefinition {
   public canCreateNew() {
     return false;
   }
+
+  public linkEditorDestinationComponent = ExternalLinkEditorDestinationPicker;
 
   public async create(initialInput: ExternalLinkInput, parent: NavigationContainer) {
     const { ExternalLinkEmbeddable } = await import('./external_link_embeddable');

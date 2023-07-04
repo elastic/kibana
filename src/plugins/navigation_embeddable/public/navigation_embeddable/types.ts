@@ -8,15 +8,16 @@
 
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 import {
+  PanelState,
+  IEmbeddable,
   ContainerInput,
   ContainerOutput,
-  EmbeddableFactory,
   EmbeddableInput,
   EmbeddableOutput,
-  IEmbeddable,
-  PanelState,
+  EmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 
+// export type LinkDestination = DashboardLinkDestination | ExternalLinkDestination;
 export interface LinkInput extends EmbeddableInput {
   label?: string;
 }
@@ -26,7 +27,23 @@ export type LinkEmbeddable<
   O extends EmbeddableOutput = EmbeddableOutput
 > = IEmbeddable<I, O>;
 
-export type LinkFactory = EmbeddableFactory<LinkInput, EmbeddableOutput, LinkEmbeddable>;
+export type LinkFactory<I extends LinkInput = LinkInput> = EmbeddableFactory<
+  I,
+  EmbeddableOutput,
+  LinkEmbeddable<I>
+>;
+
+export interface ILinkFactory<I extends LinkInput = LinkInput>
+  extends Pick<EmbeddableFactory, 'type'> {
+  linkEditorDestinationComponent?: (props: LinkEditorDestinationProps<I>) => JSX.Element;
+}
+
+export interface LinkEditorDestinationProps<I extends LinkInput = LinkInput> {
+  initialInput?: Partial<I>;
+  onChange: (partial: Partial<I>) => void;
+  setPlaceholder: (placeholder: string | undefined) => void;
+  currentDashboardId?: string;
+}
 
 export interface LinkPanelState<TEmbeddableInput extends LinkInput = LinkInput>
   extends PanelState<TEmbeddableInput> {

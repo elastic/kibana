@@ -19,20 +19,20 @@ import {
   EuiFieldSearch,
   EuiSelectableOption,
 } from '@elastic/eui';
+
+import { LinkEditorDestinationProps } from '../../types';
 import { fetchDashboardList } from '../lib/fetch_dashboards';
-import { DashboardItem } from '../types';
+import { DashboardItem, DashboardLinkInput } from '../types';
 import { NavEmbeddableStrings } from '../../navigation_container/components/navigation_embeddable_strings';
 
-interface Props {
-  currentDashboardId?: string;
-  setSelectedDashboard: (selectedDashboard?: DashboardItem) => void;
-}
-
 export const DashboardLinkEditorDestinationPicker = ({
+  initialInput,
+  onChange,
+  setPlaceholder,
   currentDashboardId,
-  setSelectedDashboard,
   ...other
-}: Props) => {
+}: LinkEditorDestinationProps<DashboardLinkInput>) => {
+  console.log('HERE!!');
   const [searchString, setSearchString] = useState<string>('');
   const [dashboardListOptions, setDashboardListOptions] = useState<EuiSelectableOption[]>([]);
 
@@ -69,7 +69,13 @@ export const DashboardLinkEditorDestinationPicker = ({
         options={dashboardListOptions}
         isLoading={loadingDashboardList}
         onChange={(newOptions, _, selected) => {
-          setSelectedDashboard(selected.checked ? (selected.data as DashboardItem) : undefined);
+          // setSelectedDashboard(selected.checked ? (selected.data as DashboardItem) : undefined);
+          if (selected.checked) {
+            onChange({ ...initialInput, dashboardId: (selected.data as DashboardItem).id });
+            setPlaceholder((selected.data as DashboardItem).attributes.title);
+          } else {
+            setPlaceholder(undefined);
+          }
           setDashboardListOptions(newOptions);
         }}
         listProps={{ onFocusBadge: false, bordered: true, isVirtualized: true }}

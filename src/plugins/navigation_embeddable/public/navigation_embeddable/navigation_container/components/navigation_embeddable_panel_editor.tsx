@@ -24,7 +24,7 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import { NavigationContainerInput } from '../../types';
+import { LinkInput, NavigationContainerInput } from '../../types';
 import { NavigationEmbeddableLinkEditor } from './navigation_embeddable_link_editor';
 
 import './navigation_embeddable.scss';
@@ -42,6 +42,7 @@ export const NavigationEmbeddablePanelEditor = ({
 }) => {
   const [showLinkEditorFlyout, setShowLinkEditorFlyout] = useState(false);
   const [panels, setPanels] = useState(initialInput.panels);
+  const [newLinks, setNewLinks] = useState<LinkInput[]>([]);
 
   return (
     <>

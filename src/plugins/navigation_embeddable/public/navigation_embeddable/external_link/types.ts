@@ -14,6 +14,8 @@ export interface ExternalLinkInput extends LinkInput {
   url: string;
 }
 
+// export type ExternalinkDestination = ExternalLinkInput;
+
 export interface ExternalLinkComponentState {
   deleteme?: boolean;
 }
