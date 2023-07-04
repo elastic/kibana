@@ -22,24 +22,48 @@ export type MissingVersion = typeof MissingVersion;
 /**
  * Three versions of a value to pass to a diff algorithm.
  */
-export interface ThreeVersionsOf<TValue> {
+export interface ThreeVersionsOf<TValueBaseAndCurrent, TValueTarget> {
   /**
    * Corresponds to the stock version of the currently installed prebuilt rule.
    * This field is optional because the base version is not always available in the package.
    */
-  base_version: TValue | MissingVersion;
+  base_version: TValueBaseAndCurrent | MissingVersion;
 
   /**
    * Corresponds exactly to the currently installed prebuilt rule:
    *   - to the customized version (if it's customized)
    *   - to the stock version (if it's not customized)
    */
-  current_version: TValue;
+  current_version: TValueBaseAndCurrent;
 
   /**
    * Corresponds to the "new" stock version that the user is trying to upgrade to.
    */
-  target_version: TValue;
+  target_version: TValueTarget;
+}
+
+/**
+ * Three versions of a value to pass to a diff algorithm.
+ */
+export interface RuleTypeChangeThreeVersions<BaseAndCurrentValue, TargetValue> {
+  /**
+   * Corresponds to the stock version of the currently installed prebuilt rule.
+   * This field is optional because the base version is not always available in the package.
+   */
+  base_version: BaseAndCurrentValue | MissingVersion;
+
+  /**
+   * Corresponds exactly to the currently installed prebuilt rule:
+   *   - to the customized version (if it's customized)
+   *   - to the stock version (if it's not customized)
+   */
+  current_version: BaseAndCurrentValue;
+
+  /**
+   * Corresponds to the "new" stock version that the user is trying to upgrade to.
+   * when the rule type is changed, the target version is the new rule type
+   */
+  target_version: TargetValue;
 }
 
 /**
@@ -66,7 +90,7 @@ export interface ThreeVersionsOf<TValue> {
  * 6. base=A, current=B, target=C => merged=C, conflict=true
  *    Customized rule, the value has changed, conflict between B and C couldn't be resolved automatically.
  */
-export interface ThreeWayDiff<TValue> extends ThreeVersionsOf<TValue> {
+export interface ThreeWayDiff<TValue> extends ThreeVersionsOf<TValue, TValue> {
   /**
    * The result of an automatic three-way merge of three values:
    *   - base version
@@ -122,5 +146,5 @@ export interface ThreeWayDiff<TValue> extends ThreeVersionsOf<TValue> {
  * Given the three versions of a value, calculates a three-way diff for it.
  */
 export type ThreeWayDiffAlgorithm<TValue> = (
-  versions: ThreeVersionsOf<TValue>
+  versions: ThreeVersionsOf<TValue, TValue>
 ) => ThreeWayDiff<TValue>;
