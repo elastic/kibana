@@ -24,7 +24,6 @@ import {
   UNSELECTED_ALERT_TAG,
 } from '../../screens/alerts';
 import { esArchiverLoad, esArchiverResetKibana, esArchiverUnload } from '../../tasks/es_archiver';
-import { refreshIndex } from '../../tasks/api_calls/elasticsearch';
 
 describe('Alert tagging', () => {
   before(() => {
@@ -90,7 +89,6 @@ describe('Alert tagging', () => {
     clickAlertTag('Duplicate');
     updateAlertTags();
     cy.get(ALERTS_TABLE_ROW_LOADER).should('not.exist');
-    refreshIndex('.alerts-security.alerts-default*');
     waitForAlertsToPopulate();
     // Then remove tags from both alerts
     selectNumberOfAlerts(2);
