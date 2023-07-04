@@ -74,7 +74,7 @@ export interface KPIGridProps extends KPIProps {
   dateRange: StringDateRange;
 }
 
-export const KPIGrid = ({ nodeName, dataView, dateRange }: KPIGridProps) => {
+export const KPIGrid = React.memo(({ nodeName, dataView, dateRange }: KPIGridProps) => {
   return (
     <>
       <EuiSpacer size="s" />
@@ -92,4 +92,4 @@ export const KPIGrid = ({ nodeName, dataView, dateRange }: KPIGridProps) => {
       </EuiFlexGroup>
     </>
   );
-};
+});
