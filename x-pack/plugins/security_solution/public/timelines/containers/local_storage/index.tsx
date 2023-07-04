@@ -100,7 +100,7 @@ export const migrateAlertTableStateToTriggerActionsState = (
           sort: legacyDataTableState[tableKey].sort.map((sortCandidate) => ({
             [sortCandidate.columnId]: { order: sortCandidate.sortDirection },
           })),
-          visibleColumns: legacyDataTableState[tableKey].columns,
+          visibleColumns: legacyDataTableState[tableKey].columns.map((c) => c.id),
         },
       };
     });
@@ -110,6 +110,7 @@ export const migrateAlertTableStateToTriggerActionsState = (
       storage.set(key, stateObj[key]);
     })
   );
+  return Object.assign(legacyDataTableState, triggersActionsState);
 };
 
 /**
@@ -154,7 +155,7 @@ export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdL
     }
   }
 
-  migrateAlertTableStateToTriggerActionsState(storage, allDataTables);
+  allDataTables = migrateAlertTableStateToTriggerActionsState(storage, allDataTables);
 
   return tableIds.reduce((acc, tableId) => {
     const tableModel = allDataTables[tableId];

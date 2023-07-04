@@ -219,7 +219,6 @@ const AlertsTableStateWithQueryProvider = ({
 
   const {
     columns,
-    onColumnsChange,
     browserFields,
     isBrowserFieldDataLoading,
     onToggleColumn,
@@ -394,7 +393,6 @@ const AlertsTableStateWithQueryProvider = ({
       browserFields,
       onToggleColumn,
       onResetColumns,
-      onColumnsChange,
       onChangeVisibleColumns,
       onColumnResize,
       query,
@@ -423,7 +421,6 @@ const AlertsTableStateWithQueryProvider = ({
       browserFields,
       onToggleColumn,
       onResetColumns,
-      onColumnsChange,
       onChangeVisibleColumns,
       onColumnResize,
       query,

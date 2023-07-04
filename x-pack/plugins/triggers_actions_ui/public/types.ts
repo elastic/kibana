@@ -546,7 +546,6 @@ export type AlertsTableProps = {
   browserFields: any;
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
-  onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onChangeVisibleColumns: (newColumns: string[]) => void;
   onColumnResize?: EuiDataGridOnColumnResizeHandler;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
