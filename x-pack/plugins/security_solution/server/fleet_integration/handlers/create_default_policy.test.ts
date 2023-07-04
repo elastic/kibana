@@ -13,21 +13,23 @@ import { createDefaultPolicy } from './create_default_policy';
 import { ProtectionModes } from '../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../common/endpoint/types';
 import { policyFactory } from '../../../common/endpoint/models/policy_config';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type {
   AnyPolicyCreateConfig,
   PolicyCreateCloudConfig,
   PolicyCreateEndpointConfig,
 } from '../types';
 
-describe('Create Default Policy tests ', () => {
+describe('Create Default Policy tests ', async () => {
   const cloud = cloudMock.createSetup();
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
+  const esClientInfo = await elasticsearchServiceMock.createClusterClient().asInternalUser.info();
 
   const createDefaultPolicyCallback = (config: AnyPolicyCreateConfig | undefined): PolicyConfig => {
-    return createDefaultPolicy(licenseService, config, cloud);
+    return createDefaultPolicy(licenseService, config, cloud, esClientInfo);
   };
 
   beforeEach(() => {

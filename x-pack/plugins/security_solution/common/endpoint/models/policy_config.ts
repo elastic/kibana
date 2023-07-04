@@ -13,17 +13,17 @@ import { ProtectionModes } from '../types';
  */
 export const policyFactory = (
   license = '',
-  license_uid = '',
-  cluster_uuid = '',
-  cluster_name = '',
-  cloud = false
+  cloud = false,
+  licenseUid = '',
+  clusterUuid = '',
+  clusterName = ''
 ): PolicyConfig => {
   return {
     meta: {
       license,
-      license_uid,
-      cluster_uuid,
-      cluster_name,
+      license_uid: licenseUid,
+      cluster_uuid: clusterUuid,
+      cluster_name: clusterName,
       cloud,
     },
     windows: {

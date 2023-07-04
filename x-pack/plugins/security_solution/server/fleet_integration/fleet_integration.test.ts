@@ -367,7 +367,8 @@ describe('ingest_integration tests ', () => {
         licenseService,
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
-        cloudService
+        cloudService,
+        esClient
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -384,7 +385,8 @@ describe('ingest_integration tests ', () => {
         licenseService,
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
-        cloudService
+        cloudService,
+        esClient
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -415,7 +417,8 @@ describe('ingest_integration tests ', () => {
         licenseService,
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
-        cloudService
+        cloudService,
+        esClient
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
@@ -447,7 +450,8 @@ describe('ingest_integration tests ', () => {
         licenseService,
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
-        cloudService
+        cloudService,
+        esClient
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       // values should be updated
@@ -473,7 +477,8 @@ describe('ingest_integration tests ', () => {
         licenseService,
         endpointAppContextMock.featureUsageService,
         endpointAppContextMock.endpointMetadataService,
-        cloudService
+        cloudService,
+        esClient
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
       // values should be updated
