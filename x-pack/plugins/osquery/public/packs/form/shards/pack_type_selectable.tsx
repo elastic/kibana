@@ -10,6 +10,29 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 
+const euiCardCss = ({ theme, selectable }) => ({
+  padding: '16px 92px 16px 16px !important',
+  border: `${selectable?.isSelected && `1px solid ${theme.colors.success}`}`,
+
+  '.euiTitle': {
+    fontSize: '1rem',
+  },
+
+  '.euiSpacer': {
+    display: 'none',
+  },
+
+  '.euiText': {
+    marginTop: 0,
+    marginLeft: '25px',
+    color: theme.colors.subduedText,
+  },
+
+  '> button[role="switch"]': {
+    display: 'none',
+  },
+});
+
 interface PackTypeSelectableProps {
   packType: string;
   setPackType: (type: 'global' | 'policy') => void;
@@ -104,26 +127,3 @@ const PackTypeSelectableComponent = ({
 };
 
 export const PackTypeSelectable = React.memo(PackTypeSelectableComponent);
-
-const euiCardCss = ({ theme, selectable }) => ({
-  padding: '16px 92px 16px 16px !important',
-  border: `${selectable?.isSelected && `1px solid ${theme.colors.success}`}`,
-
-  '.euiTitle': {
-    fontSize: '1rem',
-  },
-
-  '.euiSpacer': {
-    display: 'none',
-  },
-
-  '.euiText': {
-    marginTop: 0,
-    marginLeft: '25px',
-    color: theme.colors.subduedText,
-  },
-
-  '> button[role="switch"]': {
-    display: 'none',
-  },
-});
