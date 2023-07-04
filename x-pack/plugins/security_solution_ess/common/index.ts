@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'essSecurity';
-export const PLUGIN_NAME = 'essSecurity';
+export const PLUGIN_ID = 'securitySolutionEss';
+export const PLUGIN_NAME = 'securitySolutionEss';

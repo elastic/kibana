@@ -9,24 +9,24 @@ import { Plugin, CoreSetup } from '@kbn/core/server';
 import { DEFAULT_APP_FEATURES } from './constants';
 
 import {
-  EssSecurityPluginSetup,
-  EssSecurityPluginStart,
-  EssSecurityPluginSetupDependencies,
-  EssSecurityPluginStartDependencies,
+  SecuritySolutionEssPluginSetup,
+  SecuritySolutionEssPluginStart,
+  SecuritySolutionEssPluginSetupDeps,
+  SecuritySolutionEssPluginStartDeps,
 } from './types';
 
-export class EssSecurityPlugin
+export class SecuritySolutionEssPlugin
   implements
     Plugin<
-      EssSecurityPluginSetup,
-      EssSecurityPluginStart,
-      EssSecurityPluginSetupDependencies,
-      EssSecurityPluginStartDependencies
+      SecuritySolutionEssPluginSetup,
+      SecuritySolutionEssPluginStart,
+      SecuritySolutionEssPluginSetupDeps,
+      SecuritySolutionEssPluginStartDeps
     >
 {
   constructor() {}
 
-  public setup(_coreSetup: CoreSetup, pluginsSetup: EssSecurityPluginSetupDependencies) {
+  public setup(_coreSetup: CoreSetup, pluginsSetup: SecuritySolutionEssPluginSetupDeps) {
     pluginsSetup.securitySolution.setAppFeatures(DEFAULT_APP_FEATURES);
     return {};
   }

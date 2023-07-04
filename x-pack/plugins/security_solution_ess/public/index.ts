@@ -6,12 +6,12 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
-import { EssSecurityPlugin } from './plugin';
+import { SecuritySolutionEssPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
 export function plugin(_initializerContext: PluginInitializerContext) {
-  return new EssSecurityPlugin();
+  return new SecuritySolutionEssPlugin();
 }
 
-export type { EssSecurityPluginSetup, EssSecurityPluginStart } from './types';
+export type { SecuritySolutionEssPluginSetup, SecuritySolutionEssPluginStart } from './types';

@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/serverless-security",
+  "name": "@kbn/security-solution-serverless",
   "version": "1.0.0",
   "license": "Elastic License 2.0",
   "private": true,

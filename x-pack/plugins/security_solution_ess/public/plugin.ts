@@ -9,34 +9,34 @@ import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { subscribeBreadcrumbs } from './breadcrumbs';
 import { getSecurityGetStartedComponent } from './get_started';
 import {
-  EssSecurityPluginSetup,
-  EssSecurityPluginStart,
-  EssSecurityPluginSetupDependencies,
-  EssSecurityPluginStartDependencies,
+  SecuritySolutionEssPluginSetup,
+  SecuritySolutionEssPluginStart,
+  SecuritySolutionEssPluginSetupDeps,
+  SecuritySolutionEssPluginStartDeps,
 } from './types';
 
-export class EssSecurityPlugin
+export class SecuritySolutionEssPlugin
   implements
     Plugin<
-      EssSecurityPluginSetup,
-      EssSecurityPluginStart,
-      EssSecurityPluginSetupDependencies,
-      EssSecurityPluginStartDependencies
+      SecuritySolutionEssPluginSetup,
+      SecuritySolutionEssPluginStart,
+      SecuritySolutionEssPluginSetupDeps,
+      SecuritySolutionEssPluginStartDeps
     >
 {
   constructor() {}
 
   public setup(
     _core: CoreSetup,
-    _setupDeps: EssSecurityPluginSetupDependencies
-  ): EssSecurityPluginSetup {
+    _setupDeps: SecuritySolutionEssPluginSetupDeps
+  ): SecuritySolutionEssPluginSetup {
     return {};
   }
 
   public start(
     core: CoreStart,
-    startDeps: EssSecurityPluginStartDependencies
-  ): EssSecurityPluginStart {
+    startDeps: SecuritySolutionEssPluginStartDeps
+  ): SecuritySolutionEssPluginStart {
     const { securitySolution } = startDeps;
 
     subscribeBreadcrumbs(securitySolution, core);

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'serverlessSecurity';
-export const PLUGIN_NAME = 'serverlessSecurity';
+export const PLUGIN_ID = 'securitySolutionServerless';
+export const PLUGIN_NAME = 'securitySolutionServerless';

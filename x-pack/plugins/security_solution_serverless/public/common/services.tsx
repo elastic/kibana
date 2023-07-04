@@ -12,13 +12,13 @@ import {
   useKibana as useKibanaReact,
 } from '@kbn/kibana-react-plugin/public';
 
-import type { ServerlessSecurityPluginStartDependencies } from '../types';
+import type { SecuritySolutionServerlessPluginStartDeps } from '../types';
 import { getProjectNavLinks$, type ProjectNavLinks } from './navigation/links';
 
 interface InternalServices {
   getProjectNavLinks$: () => ProjectNavLinks;
 }
-export type Services = CoreStart & ServerlessSecurityPluginStartDependencies & InternalServices;
+export type Services = CoreStart & SecuritySolutionServerlessPluginStartDeps & InternalServices;
 
 export const KibanaServicesProvider: React.FC<{
   services: Services;
@@ -30,7 +30,7 @@ export const useKibana = () => useKibanaReact<Services>();
 
 export const createServices = (
   core: CoreStart,
-  pluginsStart: ServerlessSecurityPluginStartDependencies
+  pluginsStart: SecuritySolutionServerlessPluginStartDeps
 ): Services => {
   const { securitySolution } = pluginsStart;
   const projectNavLinks$ = getProjectNavLinks$(securitySolution.getNavLinks$());

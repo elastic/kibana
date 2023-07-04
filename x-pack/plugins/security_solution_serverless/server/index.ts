@@ -7,14 +7,17 @@
 
 import { PluginInitializerContext } from '@kbn/core/server';
 
-import { ServerlessSecurityPlugin } from './plugin';
+import { SecuritySolutionServerlessPlugin } from './plugin';
 export { config } from './config';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new ServerlessSecurityPlugin(initializerContext);
+  return new SecuritySolutionServerlessPlugin(initializerContext);
 }
 
-export type { ServerlessSecurityPluginSetup, ServerlessSecurityPluginStart } from './types';
+export type {
+  SecuritySolutionServerlessPluginSetup,
+  SecuritySolutionServerlessPluginStart,
+} from './types';

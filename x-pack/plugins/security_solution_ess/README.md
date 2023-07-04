@@ -1,3 +1,3 @@
-# essSecurity
+# securitySolutionEss
 
-This plugin contains the ESS/on-prem deployments (non-serverless) customizations for Security Solution.
+This plugin contains the ESS/on-prem deployments (non-serverless) specific logic for Security Solution.

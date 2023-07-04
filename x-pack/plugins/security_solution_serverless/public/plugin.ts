@@ -7,13 +7,14 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
+import { APP_PATH } from '@kbn/security-solution-plugin/common';
 import { getSecurityGetStartedComponent } from './components/get_started';
 import { getSecuritySideNavComponent } from './components/side_navigation';
 import {
-  ServerlessSecurityPluginSetup,
-  ServerlessSecurityPluginStart,
-  ServerlessSecurityPluginSetupDependencies,
-  ServerlessSecurityPluginStartDependencies,
+  SecuritySolutionServerlessPluginSetup,
+  SecuritySolutionServerlessPluginStart,
+  SecuritySolutionServerlessPluginSetupDeps,
+  SecuritySolutionServerlessPluginStartDeps,
   ServerlessSecurityPublicConfig,
 } from './types';
 import { registerUpsellings } from './components/upselling';
@@ -21,13 +22,13 @@ import { createServices } from './common/services';
 import { subscribeNavigationTree } from './common/navigation/navigation_tree';
 import { subscribeBreadcrumbs } from './common/navigation/breadcrumbs';
 
-export class ServerlessSecurityPlugin
+export class SecuritySolutionServerlessPlugin
   implements
     Plugin<
-      ServerlessSecurityPluginSetup,
-      ServerlessSecurityPluginStart,
-      ServerlessSecurityPluginSetupDependencies,
-      ServerlessSecurityPluginStartDependencies
+      SecuritySolutionServerlessPluginSetup,
+      SecuritySolutionServerlessPluginStart,
+      SecuritySolutionServerlessPluginSetupDeps,
+      SecuritySolutionServerlessPluginStartDeps
     >
 {
   private config: ServerlessSecurityPublicConfig;
@@ -38,16 +39,16 @@ export class ServerlessSecurityPlugin
 
   public setup(
     _core: CoreSetup,
-    setupDeps: ServerlessSecurityPluginSetupDependencies
-  ): ServerlessSecurityPluginSetup {
+    setupDeps: SecuritySolutionServerlessPluginSetupDeps
+  ): SecuritySolutionServerlessPluginSetup {
     registerUpsellings(setupDeps.securitySolution.upselling, this.config.productTypes);
     return {};
   }
 
   public start(
     core: CoreStart,
-    startDeps: ServerlessSecurityPluginStartDependencies
-  ): ServerlessSecurityPluginStart {
+    startDeps: SecuritySolutionServerlessPluginStartDeps
+  ): SecuritySolutionServerlessPluginStart {
     const { securitySolution, serverless } = startDeps;
     const { productTypes } = this.config;
 
@@ -56,7 +57,7 @@ export class ServerlessSecurityPlugin
     securitySolution.setIsSidebarEnabled(false);
     securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
 
-    serverless.setProjectHome('/app/security');
+    serverless.setProjectHome(APP_PATH);
     serverless.setSideNavComponent(getSecuritySideNavComponent(services));
 
     subscribeNavigationTree(services);

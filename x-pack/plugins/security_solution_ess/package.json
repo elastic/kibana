@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/ess-security",
+  "name": "@kbn/security-solution-ess",
   "version": "1.0.0",
   "license": "Elastic License 2.0",
   "private": true,

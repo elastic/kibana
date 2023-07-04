@@ -1,16 +1,15 @@
 {
   "type": "plugin",
-  "id": "@kbn/serverless-security",
+  "id": "@kbn/security-solution-serverless",
   "owner": "@elastic/security-solution",
   "description": "Serverless customizations for security.",
   "plugin": {
-    "id": "serverlessSecurity",
+    "id": "securitySolutionServerless",
     "server": true,
     "browser": true,
     "configPath": [
       "xpack",
-      "serverless",
-      "security"
+      "securitySolutionServerless",
     ],
     "requiredPlugins": [
       "kibanaReact",
@@ -20,7 +19,7 @@
       "serverless"
     ],
     "optionalPlugins": [
-      "essSecurity"
+      "securitySolutionEss"
     ],
     "requiredBundles": ["kibanaUtils"]
   }

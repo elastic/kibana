@@ -1,13 +1,13 @@
 {
   "type": "plugin",
-  "id": "@kbn/ess-security",
+  "id": "@kbn/security-solution-ess",
   "owner": "@elastic/security-solution",
   "description": "ESS customizations for Security Solution.",
   "plugin": {
-    "id": "essSecurity",
+    "id": "securitySolutionEss",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "ess", "security"],
+    "configPath": ["xpack", "securitySolutionEss"],
     "requiredPlugins": [
       "securitySolution"
     ],

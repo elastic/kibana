@@ -8,11 +8,11 @@ import React from 'react';
 
 import { CoreStart } from '@kbn/core/public';
 import { KibanaServicesProvider } from '../services';
-import { EssSecurityPluginStartDependencies } from '../types';
+import { SecuritySolutionEssPluginStartDeps } from '../types';
 import { GetStarted } from './lazy';
 
 export const getSecurityGetStartedComponent =
-  (core: CoreStart, pluginsStart: EssSecurityPluginStartDependencies): React.ComponentType =>
+  (core: CoreStart, pluginsStart: SecuritySolutionEssPluginStartDeps): React.ComponentType =>
   () =>
     (
       <KibanaServicesProvider core={core} pluginsStart={pluginsStart}>

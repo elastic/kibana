@@ -10,19 +10,19 @@ import type { ServerlessSecurityConfig } from './config';
 import { getProductAppFeatures } from '../common/pli/pli_features';
 
 import type {
-  ServerlessSecurityPluginSetup,
-  ServerlessSecurityPluginStart,
-  ServerlessSecurityPluginSetupDependencies,
-  ServerlessSecurityPluginStartDependencies,
+  SecuritySolutionServerlessPluginSetup,
+  SecuritySolutionServerlessPluginStart,
+  SecuritySolutionServerlessPluginSetupDeps,
+  SecuritySolutionServerlessPluginStartDeps,
 } from './types';
 
-export class ServerlessSecurityPlugin
+export class SecuritySolutionServerlessPlugin
   implements
     Plugin<
-      ServerlessSecurityPluginSetup,
-      ServerlessSecurityPluginStart,
-      ServerlessSecurityPluginSetupDependencies,
-      ServerlessSecurityPluginStartDependencies
+      SecuritySolutionServerlessPluginSetup,
+      SecuritySolutionServerlessPluginStart,
+      SecuritySolutionServerlessPluginSetupDeps,
+      SecuritySolutionServerlessPluginStartDeps
     >
 {
   private config: ServerlessSecurityConfig;
@@ -31,11 +31,11 @@ export class ServerlessSecurityPlugin
     this.config = this.initializerContext.config.get<ServerlessSecurityConfig>();
   }
 
-  public setup(_coreSetup: CoreSetup, pluginsSetup: ServerlessSecurityPluginSetupDependencies) {
-    // essSecurity plugin should always be disabled when serverlessSecurity is enabled.
+  public setup(_coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
+    // securitySolutionEss plugin should always be disabled when securitySolutionServerless is enabled.
     // This check is an additional layer of security to prevent double registrations when
     // `plugins.forceEnableAllPlugins` flag is enabled).
-    const shouldRegister = pluginsSetup.essSecurity == null;
+    const shouldRegister = pluginsSetup.securitySolutionEss == null;
 
     if (shouldRegister) {
       pluginsSetup.securitySolution.setAppFeatures(getProductAppFeatures(this.config.productTypes));

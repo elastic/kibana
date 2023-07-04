@@ -12,16 +12,16 @@ import type {
 import { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface EssSecurityPluginSetup {}
+export interface SecuritySolutionEssPluginSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface EssSecurityPluginStart {}
+export interface SecuritySolutionEssPluginStart {}
 
-export interface EssSecurityPluginSetupDependencies {
+export interface SecuritySolutionEssPluginSetupDeps {
   securitySolution: SecuritySolutionPluginSetup;
 }
 
-export interface EssSecurityPluginStartDependencies {
+export interface SecuritySolutionEssPluginStartDeps {
   securitySolution: SecuritySolutionPluginStart;
   cloudExperiments?: CloudExperimentsPluginStart;
 }

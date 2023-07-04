@@ -14,18 +14,18 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 import type { SecurityProductTypes } from '../common/config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ServerlessSecurityPluginSetup {}
+export interface SecuritySolutionServerlessPluginSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ServerlessSecurityPluginStart {}
+export interface SecuritySolutionServerlessPluginStart {}
 
-export interface ServerlessSecurityPluginSetupDependencies {
+export interface SecuritySolutionServerlessPluginSetupDeps {
   security: SecurityPluginSetup;
   securitySolution: SecuritySolutionPluginSetup;
   serverless: ServerlessPluginSetup;
 }
 
-export interface ServerlessSecurityPluginStartDependencies {
+export interface SecuritySolutionServerlessPluginStartDeps {
   security: SecurityPluginStart;
   securitySolution: SecuritySolutionPluginStart;
   serverless: ServerlessPluginStart;
