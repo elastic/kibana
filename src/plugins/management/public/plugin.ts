@@ -26,6 +26,7 @@ import { ManagementSetup, ManagementStart, NavigationCardsSubject } from './type
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
 import { ManagementAppLocatorDefinition } from '../common/locator';
+import { ConfigSchema } from './';
 import {
   ManagementSectionsService,
   getSectionsServiceStartPrivate,
@@ -53,15 +54,21 @@ export class ManagementPlugin
   private readonly managementSections = new ManagementSectionsService();
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
+    const config = this.initializerContext.config.get();
+
     const deepLinks: AppDeepLink[] = Object.values(this.managementSections.definedSections).map(
       (section: ManagementSection) => ({
         id: section.id,
         title: section.title,
+        navLinkStatus: AppNavLinkStatus.visible,
         deepLinks: section.getAppsEnabled().map((mgmtApp) => ({
           id: mgmtApp.id,
           title: mgmtApp.title,
           path: mgmtApp.basePath,
           keywords: mgmtApp.keywords,
+          navLinkStatus: config.serverless.enabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.default,
         })),
       })
     );
@@ -77,7 +84,7 @@ export class ManagementPlugin
     hideLinksTo: [],
   });
 
-  constructor(private initializerContext: PluginInitializerContext) {}
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
     core: CoreSetup<ManagementStartDependencies>,
