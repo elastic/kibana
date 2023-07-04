@@ -43,30 +43,6 @@ export interface ThreeVersionsOf<TValueBaseAndCurrent, TValueTarget> {
 }
 
 /**
- * Three versions of a value to pass to a diff algorithm.
- */
-export interface RuleTypeChangeThreeVersions<BaseAndCurrentValue, TargetValue> {
-  /**
-   * Corresponds to the stock version of the currently installed prebuilt rule.
-   * This field is optional because the base version is not always available in the package.
-   */
-  base_version: BaseAndCurrentValue | MissingVersion;
-
-  /**
-   * Corresponds exactly to the currently installed prebuilt rule:
-   *   - to the customized version (if it's customized)
-   *   - to the stock version (if it's not customized)
-   */
-  current_version: BaseAndCurrentValue;
-
-  /**
-   * Corresponds to the "new" stock version that the user is trying to upgrade to.
-   * when the rule type is changed, the target version is the new rule type
-   */
-  target_version: TargetValue;
-}
-
-/**
  * Represents a result of an abstract three-way diff/merge operation on a value
  * (could be a whole rule JSON or a given rule field).
  *

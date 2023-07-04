@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { invariant } from '../../../../../../../common/utils/invariant';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 import type {
   DiffableCommonFields,
@@ -52,25 +52,46 @@ export const calculateRuleFieldsDiff = (
   const { base_version, current_version, target_version } = ruleVersions;
   const hasBaseVersion = base_version !== MissingVersion;
 
-  switch (current_version.type) {
+  switch (target_version.type) {
     case 'query': {
-      if (hasBaseVersion) {
-        invariant(base_version.type === 'query', BASE_TYPE_ERROR);
+      // if (ruleVersions.target_version.rule_id === 'd76b02ef-fc95-4001-9297-01cb7412232f') { // Python
+      if (ruleVersions.target_version.rule_id === 'a00681e3-9ed6-447c-ab2c-be648821c622') {
+        // First seen AWS
+        debugger;
       }
 
-      return {
-        ...commonFieldsDiff,
-        ...calculateCustomQueryFieldsDiff<typeof base_version, typeof target_version>({
-          base_version,
-          current_version,
-          target_version,
-        }),
-      };
+      switch (current_version.type) {
+        case 'query': {
+          if (hasBaseVersion) {
+            invariant(base_version.type === 'query', BASE_TYPE_ERROR);
+          }
+          return {
+            ...commonFieldsDiff,
+            ...calculateCustomQueryFieldsDiff<DiffableCustomQueryFields, DiffableCustomQueryFields>(
+              {
+                base_version,
+                current_version,
+                target_version,
+              }
+            ),
+          };
+        }
+        case 'saved_query': {
+          if (hasBaseVersion) {
+            invariant(base_version.type === 'saved_query', BASE_TYPE_ERROR);
+          }
+          return {
+            ...commonFieldsDiff,
+            ...calculateSavedQueryFieldsDiff<DiffableSavedQueryFields, DiffableCustomQueryFields>({
+              base_version,
+              current_version,
+              target_version,
+            }),
+          };
+        }
+      }
     }
     case 'saved_query': {
-      if (hasBaseVersion) {
-        invariant(base_version.type === 'saved_query', BASE_TYPE_ERROR);
-      }
       return {
         ...commonFieldsDiff,
         ...calculateSavedQueryFieldsDiff<typeof base_version, typeof target_version>({
@@ -81,9 +102,6 @@ export const calculateRuleFieldsDiff = (
       };
     }
     case 'eql': {
-      if (hasBaseVersion) {
-        invariant(base_version.type === 'eql', BASE_TYPE_ERROR);
-      }
       return {
         ...commonFieldsDiff,
         ...calculateEqlFieldsDiff<typeof base_version, typeof target_version>({
@@ -94,9 +112,6 @@ export const calculateRuleFieldsDiff = (
       };
     }
     case 'threat_match': {
-      if (hasBaseVersion) {
-        invariant(base_version.type === 'threat_match', BASE_TYPE_ERROR);
-      }
       return {
         ...commonFieldsDiff,
         ...calculateThreatMatchFieldsDiff<typeof base_version, typeof target_version>({
@@ -107,9 +122,6 @@ export const calculateRuleFieldsDiff = (
       };
     }
     case 'threshold': {
-      if (hasBaseVersion) {
-        invariant(base_version.type === 'threshold', BASE_TYPE_ERROR);
-      }
       return {
         ...commonFieldsDiff,
         ...calculateThresholdFieldsDiff<typeof base_version, typeof target_version>({
@@ -120,9 +132,6 @@ export const calculateRuleFieldsDiff = (
       };
     }
     case 'machine_learning': {
-      if (hasBaseVersion) {
-        invariant(base_version.type === 'machine_learning', BASE_TYPE_ERROR);
-      }
       return {
         ...commonFieldsDiff,
         ...calculateMachineLearningFieldsDiff<typeof base_version, typeof target_version>({
@@ -133,8 +142,9 @@ export const calculateRuleFieldsDiff = (
       };
     }
     case 'new_terms': {
-      if (hasBaseVersion) {
-        invariant(base_version.type === 'new_terms', BASE_TYPE_ERROR);
+      if (ruleVersions.target_version.rule_id === 'a00681e3-9ed6-447c-ab2c-be648821c622') {
+        // First seen AWS
+        debugger;
       }
       return {
         ...commonFieldsDiff,
@@ -146,7 +156,7 @@ export const calculateRuleFieldsDiff = (
       };
     }
     default: {
-      return assertUnreachable(current_version, 'Unhandled rule type');
+      return assertUnreachable(target_version, 'Unhandled rule type');
     }
   }
 };
@@ -191,6 +201,11 @@ const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> 
 const calculateCustomQueryFieldsDiff = <TValueBaseAndCurrent, TValueTarget>(
   ruleVersions: ThreeVersionsOf<TValueBaseAndCurrent, TValueTarget>
 ): CustomQueryFieldsDiff => {
+  // if (ruleVersions.target_version.rule_id === 'd76b02ef-fc95-4001-9297-01cb7412232f') { // Python
+  if (ruleVersions.target_version.rule_id === 'a00681e3-9ed6-447c-ab2c-be648821c622') {
+    // First seen AWS
+    debugger;
+  }
   return calculateFieldsDiffFor(ruleVersions, customQueryFieldsDiffAlgorithms);
 };
 
