@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { IToasts } from '@kbn/core/public';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { TextAreaWithAutocomplete } from './text_area_with_autocomplete';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -49,12 +49,13 @@ describe('Autocomplete component tests', () => {
     jest.clearAllMocks();
   });
 
-  it('Render modal text area with autocomplete', async () => {
+  it('render modal text area with autocomplete', async () => {
     renderWithProviders(
       <TextAreaWithAutocomplete
         messageVariables={defaultMessageVariables}
         paramsProperty="message"
         index={0}
+        inputTargetValue="default message"
         isDisabled={false}
         editAction={() => {}}
         label="Message"
@@ -62,6 +63,121 @@ describe('Autocomplete component tests', () => {
       />
     );
 
-    expect(await screen.findByText('')).toBeInTheDocument();
+    expect(await screen.findByText('default message')).toBeVisible();
+    expect(await screen.findByText('Message')).toBeVisible();
+  });
+
+  it('open selectable component if write {{ in text area', async () => {
+    renderWithProviders(
+      <TextAreaWithAutocomplete
+        messageVariables={defaultMessageVariables}
+        paramsProperty="message"
+        index={0}
+        inputTargetValue="default message"
+        isDisabled={false}
+        editAction={() => {}}
+        label="Message"
+        errors={[]}
+      />
+    );
+
+    expect(screen.queryByTestId('euiSelectableList')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByTestId('messageTextArea'), {
+      target: { value: '{{' },
+    });
+    expect(screen.getByTestId('euiSelectableList')).toBeVisible();
+  });
+
+  it('type a word in textarea after click on it', async () => {
+    const editAction = jest.fn(() => {});
+    renderWithProviders(
+      <TextAreaWithAutocomplete
+        messageVariables={defaultMessageVariables}
+        paramsProperty="message"
+        index={0}
+        inputTargetValue=""
+        isDisabled={false}
+        editAction={editAction}
+        label="Message"
+        errors={[]}
+      />
+    );
+
+    fireEvent.change(screen.getByTestId('messageTextArea'), {
+      target: { value: '{{' },
+    });
+    expect(screen.getByText('alert.actionGroup')).toBeVisible();
+    fireEvent.click(screen.getByTestId('alert.actionGroup-selectableOption'));
+    expect(editAction).toBeCalledWith('message', '{{alert.actionGroup}}', 0);
+  });
+
+  it('selectable component disappeared if click on textarea', async () => {
+    const editAction = jest.fn(() => {});
+    renderWithProviders(
+      <TextAreaWithAutocomplete
+        messageVariables={defaultMessageVariables}
+        paramsProperty="message"
+        index={0}
+        inputTargetValue=""
+        isDisabled={false}
+        editAction={editAction}
+        label="Message"
+        errors={[]}
+      />
+    );
+
+    fireEvent.change(screen.getByTestId('messageTextArea'), {
+      target: { value: '{{aler' },
+    });
+    expect(screen.getByTestId('euiSelectableList')).toBeVisible();
+    fireEvent.click(screen.getByTestId('messageTextArea'));
+    expect(screen.queryByTestId('euiSelectableList')).not.toBeInTheDocument();
+  });
+
+  it('do not have "context.tags" in selectable list', async () => {
+    const editAction = jest.fn(() => {});
+    renderWithProviders(
+      <TextAreaWithAutocomplete
+        messageVariables={defaultMessageVariables}
+        paramsProperty="message"
+        index={0}
+        inputTargetValue=""
+        isDisabled={false}
+        editAction={editAction}
+        label="Message"
+        errors={[]}
+      />
+    );
+
+    fireEvent.change(screen.getByTestId('messageTextArea'), {
+      target: { value: '{{alert' },
+    });
+    expect(screen.getByTestId('euiSelectableList')).toBeVisible();
+    screen.getByTestId('alert.actionGroup-selectableOption');
+    expect(screen.queryByText('context.tags')).not.toBeInTheDocument();
+  });
+
+  it.skip('can go down to selectable component if press keydown', async () => {
+    renderWithProviders(
+      <TextAreaWithAutocomplete
+        messageVariables={defaultMessageVariables}
+        paramsProperty="message"
+        index={0}
+        inputTargetValue="default message"
+        isDisabled={false}
+        editAction={() => {}}
+        label="Message"
+        errors={[]}
+      />
+    );
+
+    screen.getByTestId('messageTextArea').focus();
+
+    fireEvent.change(screen.getByTestId('messageTextArea'), {
+      target: { value: '{{' },
+    });
+    fireEvent.keyDown(screen.getByTestId('messageTextArea'), { code: 'ArrowDown' });
+    // await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(await screen.findByTestId('alert-selectableOption')).toHaveFocus();
   });
 });

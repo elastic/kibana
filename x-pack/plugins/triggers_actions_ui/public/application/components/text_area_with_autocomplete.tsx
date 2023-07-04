@@ -188,7 +188,6 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   );
 
   const clickOutSideTextArea = useCallback((event) => {
-    // TODO we need to use a class name directly (.euiSelectable), that's just the idea how to do it
     const box = document
       .querySelector('.euiSelectableMsgAutoComplete')
       ?.getBoundingClientRect() || {
@@ -234,9 +233,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
             value={inputTargetValue || ''}
             data-test-subj={`${paramsProperty}TextArea`}
             onChange={onChangeWithMessageVariable}
-            onFocus={(e: React.FocusEvent<HTMLTextAreaElement>) => {
-              setListOpen(true);
-            }}
+            onFocus={() => setListOpen(true)}
             onKeyDown={textareaOnKeyPress}
             onBlur={() => {
               if (!inputTargetValue && !isListOpen) {
