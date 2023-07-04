@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Services } from '../common/services';
+import type { Services } from '../common/services';
 
 export const subscribeBreadcrumbs = (services: Services) => {
   const { securitySolution, serverless } = services;
