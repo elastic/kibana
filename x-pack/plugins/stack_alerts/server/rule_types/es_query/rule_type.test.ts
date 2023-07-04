@@ -14,6 +14,7 @@ import {
   AlertInstanceMock,
 } from '@kbn/alerting-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { getRuleType } from './rule_type';
 import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
 import { ActionContext } from './action_context';
@@ -512,32 +513,31 @@ describe('ruleType', () => {
   });
 
   describe('search source query', () => {
-    const dataViewMock = {
-      id: 'test-id',
-      title: 'test-title',
-      timeFieldName: 'time-field',
-      fields: [
-        {
-          name: 'message',
-          type: 'string',
-          displayName: 'message',
-          scripted: false,
-          filterable: false,
-          aggregatable: false,
+    const dataViewMock = createStubDataView({
+      spec: {
+        id: 'test-id',
+        title: 'test-title',
+        timeFieldName: 'time-field',
+        fields: {
+          message: {
+            name: 'message',
+            type: 'string',
+            scripted: false,
+            searchable: false,
+            aggregatable: false,
+            readFromDocValues: false,
+          },
+          timestamp: {
+            name: 'timestamp',
+            type: 'date',
+            scripted: false,
+            searchable: true,
+            aggregatable: false,
+            readFromDocValues: false,
+          },
         },
-        {
-          name: 'timestamp',
-          type: 'date',
-          displayName: 'timestamp',
-          scripted: false,
-          filterable: false,
-          aggregatable: false,
-        },
-      ],
-      toSpec: () => {
-        return { id: 'test-id', title: 'test-title', timeFieldName: 'time-field' };
       },
-    };
+    });
     const defaultParams: OnlySearchSourceRuleParams = {
       size: 100,
       timeWindowSize: 5,
@@ -583,9 +583,7 @@ describe('ruleType', () => {
       const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
-        toSpec: () => dataViewMock.toSpec(),
-      });
+      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce(dataViewMock);
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
         if (name === 'index') {
           return dataViewMock;
@@ -620,9 +618,7 @@ describe('ruleType', () => {
       const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
-        toSpec: () => dataViewMock.toSpec(),
-      });
+      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce(dataViewMock);
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
         if (name === 'index') {
           return dataViewMock;
