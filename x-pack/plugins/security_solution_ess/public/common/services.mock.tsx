@@ -16,10 +16,8 @@ export const servicesMocks: Services = {
   securitySolution: securitySolutionMock.createStart(),
 };
 
-export const KibanaServicesProvider = React.memo(function KibanaServicesProvider({ children }) {
-  return (
-    <I18nProvider>
-      <KibanaContextProvider services={servicesMocks}>{children}</KibanaContextProvider>
-    </I18nProvider>
-  );
-});
+export const KibanaServicesProvider: React.FC = ({ children }) => (
+  <I18nProvider>
+    <KibanaContextProvider services={servicesMocks}>{children}</KibanaContextProvider>
+  </I18nProvider>
+);

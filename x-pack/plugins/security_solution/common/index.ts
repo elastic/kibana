@@ -14,6 +14,7 @@ export {
   CASES_FEATURE_ID,
   SERVER_APP_ID,
   APP_PATH,
+  MANAGE_PATH,
   ADD_DATA_PATH,
   SecurityPageName,
 } from './constants';
