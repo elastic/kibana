@@ -8,7 +8,7 @@
 
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
-import { compressToBase64 } from 'lz-string';
+import { decompressFromBase64 } from 'lz-string';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -75,7 +75,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('permalink', function () {
         it('should allow for copying the snapshot URL', async function () {
-          const data = {
+          const actualUrl = await PageObjects.share.getSharedUrl();
+          expect(actualUrl).to.contain(`?l=${DISCOVER_APP_LOCATOR}`);
+          const urlSearchParams = new URLSearchParams(actualUrl);
+          expect(JSON.parse(decompressFromBase64(urlSearchParams.get('lz')!)!)).to.eql({
             query: {
               language: 'kuery',
               query: '',
@@ -94,12 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               value: 60000,
               pause: true,
             },
-          };
-          const actualUrl = await PageObjects.share.getSharedUrl();
-          expect(actualUrl).to.contain(`?l=${DISCOVER_APP_LOCATOR}`);
-          expect(actualUrl).to.contain(
-            `&lz=${encodeURIComponent(compressToBase64(JSON.stringify(data)))}`
-          );
+          });
         });
 
         it('should allow for copying the snapshot URL as a short URL', async function () {
