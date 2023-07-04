@@ -90,11 +90,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               'processor.event: "metric" AND metricset.name: "transaction" AND transaction.duration.summary :* ',
             docCount: 21,
           },
-          { kuery: 'processor.event: "metric" AND metricset.name: "span_breakdown"', docCount: 15 },
           {
             kuery: 'processor.event: "metric" AND metricset.name: "service_summary"',
             docCount: 21,
           },
+          { kuery: 'processor.event: "metric" AND metricset.name: "span_breakdown"', docCount: 15 },
           { kuery: 'processor.event: "transaction"', docCount: 450 },
         ]);
       });
