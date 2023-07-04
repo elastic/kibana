@@ -387,6 +387,16 @@ export const createBaseline = async () => {
     types: baselineTypes,
   });
 
+  // remove the testing index (current and next minor)
+  await client.indices.delete({
+    index: [
+      defaultKibanaIndex,
+      `${defaultKibanaIndex}_${currentVersion}_001`,
+      `${defaultKibanaIndex}_${nextMinor}_001`,
+    ],
+    ignore_unavailable: true,
+  });
+
   await runMigrations();
 
   await savedObjectsRepository.bulkCreate(baselineDocuments, {
