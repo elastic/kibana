@@ -135,6 +135,12 @@ export const packConfigFilesValidator = (
 
 const CommonUseField = getUseField({ component: Field });
 
+const euiAccordionCss = ({ theme }) => ({
+  '.euiAccordion__button': {
+    color: theme.colors.primary,
+  },
+});
+
 /**
  * Exports Osquery-specific package policy instructions
  * for use in the Fleet app create / edit package policy
@@ -389,9 +395,3 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
 });
 
 OsqueryManagedPolicyCreateImportExtension.displayName = 'OsqueryManagedPolicyCreateImportExtension';
-
-const euiAccordionCss = ({ theme }) => ({
-  '.euiAccordion__button': {
-    color: theme.colors.primary,
-  },
-});

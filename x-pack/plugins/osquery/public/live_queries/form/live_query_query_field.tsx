@@ -22,6 +22,15 @@ const euiCodeBlockCss = {
   minHeight: '100px',
 };
 
+const euiAccordionCss = ({ theme }) => ({
+  '.euiAccordion__button': {
+    color: theme.colors.primary,
+  },
+  '.euiAccordion__childWrapper': {
+    '-webkit-transition': 'none',
+  },
+});
+
 export interface LiveQueryQueryFieldProps {
   handleSubmitForm?: () => void;
   disabled?: boolean;
@@ -157,12 +166,3 @@ export const LiveQueryQueryField = React.memo(LiveQueryQueryFieldComponent);
 
 // eslint-disable-next-line import/no-default-export
 export { LiveQueryQueryField as default };
-
-const euiAccordionCss = ({ theme }) => ({
-  '.euiAccordion__button': {
-    color: theme.colors.primary,
-  },
-  '.euiAccordion__childWrapper': {
-    '-webkit-transition': 'none',
-  },
-});

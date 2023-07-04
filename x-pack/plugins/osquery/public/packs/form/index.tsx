@@ -40,6 +40,12 @@ import { overflowCss } from '../utils';
 
 type PackFormData = Omit<PackItem, 'id' | 'queries'> & { queries: PackQueryFormData[] };
 
+const euiAccordionCss = ({ theme }) => ({
+  '.euiAccordion__button': {
+    color: theme.colors.primary,
+  },
+});
+
 interface PackFormProps {
   defaultValue?: PackItem;
   editMode?: boolean;
@@ -339,9 +345,3 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 };
 
 export const PackForm = React.memo(PackFormComponent, deepEqual);
-
-const euiAccordionCss = ({ theme }) => ({
-  '.euiAccordion__button': {
-    color: theme.colors.primary,
-  },
-});
