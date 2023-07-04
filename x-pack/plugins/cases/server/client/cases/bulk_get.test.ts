@@ -21,7 +21,7 @@ describe('bulkGet', () => {
       await expect(
         bulkGet({ ids: Array(MAX_BULK_GET_CASES + 1).fill('foobar') }, clientArgs)
       ).rejects.toThrow(
-        'Error: The length of the field ids is too long. Array must be of length <= 100.'
+        `Error: The length of the field ids is too long. Array must be of length <= ${MAX_BULK_GET_CASES}.`
       );
     });
 

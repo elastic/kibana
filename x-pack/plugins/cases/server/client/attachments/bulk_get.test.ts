@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_BULK_GET_CASES } from '../../../common/constants';
+import { MAX_BULK_GET_ATTACHMENTS } from '../../../common/constants';
 import { createCasesClientMockArgs, createCasesClientMock } from '../mocks';
 import { bulkGet } from './bulk_get';
 
@@ -18,15 +18,15 @@ describe('bulkGet', () => {
       jest.clearAllMocks();
     });
 
-    it(`throws when trying to fetch more than ${MAX_BULK_GET_CASES} attachments`, async () => {
+    it(`throws when trying to fetch more than ${MAX_BULK_GET_ATTACHMENTS} attachments`, async () => {
       await expect(
         bulkGet(
-          { attachmentIDs: Array(MAX_BULK_GET_CASES + 1).fill('foobar'), caseID: '123' },
+          { attachmentIDs: Array(MAX_BULK_GET_ATTACHMENTS + 1).fill('foobar'), caseID: '123' },
           clientArgs,
           casesClient
         )
       ).rejects.toThrow(
-        'Error: The length of the field ids is too long. Array must be of length <= 100.'
+        `Error: The length of the field ids is too long. Array must be of length <= ${MAX_BULK_GET_ATTACHMENTS}.`
       );
     });
 
