@@ -22,6 +22,9 @@ import type {
  *   - 'data_removal' ({@link SavedObjectsModelDataRemovalChange})
  *   - 'unsafe_transform' ({@link SavedObjectsModelUnsafeTransformChange})
  *
+ * @remark Please refer to the model version documentation for more details on all change types
+ *         and examples of using them for concrete migration usages.
+ *
  * @public
  */
 export type SavedObjectsModelChange =
@@ -85,17 +88,19 @@ export interface SavedObjectsModelMappingsDeprecationChange {
 }
 
 /**
- * A {@link SavedObjectsModelChange | model change} used to backfill fields introduced in the same model version.
+ * A {@link SavedObjectsModelChange | model change} backfilling fields introduced in the same model version.
  *
  * @example
  * ```ts
  * let change: SavedObjectsModelDataBackfillChange = {
  *   type: 'data_backfill',
- *   transform: (document) => {
+ *   backfillFn: (document, ctx) => {
  *     return { attributes: { someAddedField: 'defaultValue' } };
  *   },
  * };
  * ```
+ * @remark Combining the document's attributes with the ones returned from the function
+ *         will be done using a deep merge policy.
  *
  * @remark This type of model change should only be used to backfill newly introduced fields.
  *         Even if no check is performed to ensure that, using such transformations to mutate
@@ -113,9 +118,9 @@ export interface SavedObjectsModelDataBackfillChange<
 }
 
 /**
- * A {@link SavedObjectsModelChange | model change} used to TODO.
+ * A {@link SavedObjectsModelChange | model change} removing data from all documents of the type.
  *
- * @example TODO: change
+ * @example
  * ```ts
  * let change: SavedObjectsModelDataRemovalChange = {
  *   type: 'data_removal',
@@ -123,31 +128,36 @@ export interface SavedObjectsModelDataBackfillChange<
  * };
  * ```
  *
- * @remark TODO
+ * @remark Due to backward compatibility, field utilization must be stopped in a prior release
+ *         before actual data removal (in case of rollback). Please refer to the modelVersion documentation
+ *         for more information and examples.
  */
 export interface SavedObjectsModelDataRemovalChange {
   type: 'data_removal';
   /**
-   * The list of removed attribute's paths.
+   * The list of attribute paths to remove.
    */
   removedAttributePaths: string[];
 }
 
 /**
- * A {@link SavedObjectsModelChange | model change} used to TODO.
+ * A {@link SavedObjectsModelChange | model change} executing an arbitrary transformation function.
  *
- * @example TODO: change
+ * @example
  * ```ts
- * let change: SavedObjectsModelDataBackfillChange = {
- *   type: 'data_backfill',
- *   transform: (document) => {
+ * let change: SavedObjectsModelUnsafeTransformChange = {
+ *   type: 'unsafe_transform',
+ *   transformFn: (document) => {
  *     document.attributes.someAddedField = 'defaultValue';
  *     return { document };
  *   },
  * };
  * ```
  *
- * @remark TODO
+ * @remark Such transformations are potentially (well, likely) unsafe, given the migration system will have
+ *         no knowledge of which kind of operations will effectively be executed against the documents.
+ *         Those should only be used when there's no other way to cover one's migration needs.
+ *         Please reach out to the Core team if you think you need to use this, as you theoretically shouldn't.
  */
 export interface SavedObjectsModelUnsafeTransformChange<
   PreviousAttributes = any,
@@ -155,7 +165,7 @@ export interface SavedObjectsModelUnsafeTransformChange<
 > {
   type: 'unsafe_transform';
   /**
-   * The backfill function to run.
+   * The transform function to execute.
    */
   transformFn: SavedObjectModelUnsafeTransformFn<PreviousAttributes, NewAttributes>;
 }
