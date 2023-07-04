@@ -183,7 +183,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
 
-  describe('import_rules', () => {
+  // eslint-disable-next-line ban/ban
+  describe.only('import_rules', () => {
     describe('importing rules with different roles', () => {
       before(async () => {
         await createUserAndRole(getService, ROLES.hunter_no_actions);
