@@ -8,7 +8,7 @@ import React, { useEffect, useRef, CSSProperties } from 'react';
 import { Chart, Metric, type MetricWNumber, type MetricWTrend } from '@elastic/charts';
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
-import { ChartLoader } from './chart_loader';
+import { ChartLoader } from '../../../../../common/visualizations/lens/chart_loader';
 
 export interface Props extends Pick<MetricWTrend, 'title' | 'color' | 'extra' | 'subtitle'> {
   id: string;

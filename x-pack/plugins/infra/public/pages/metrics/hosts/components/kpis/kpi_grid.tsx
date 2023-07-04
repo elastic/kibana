@@ -9,11 +9,11 @@ import React, { CSSProperties } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
+import { HostMetricsDocsLink } from '../../../../../common/visualizations/metric_explanation/host_metrics_docs_link';
 import { KPIChartProps, Tile } from './tile';
 import { HostCountProvider } from '../../hooks/use_host_count';
 import { TOOLTIP } from '../../translations';
 import { HostsTile } from './hosts_tile';
-import { HostMetricsDocsLink } from '../metric_explanation/host_metrics_docs_link';
 import { KPI_CHART_MIN_HEIGHT } from '../../constants';
 
 const lensStyle: CSSProperties = {
