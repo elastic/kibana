@@ -124,7 +124,7 @@ export interface SavedObjectsModelDataBackfillChange<
  * ```ts
  * let change: SavedObjectsModelDataRemovalChange = {
  *   type: 'data_removal',
- *   attributePaths: ['someRootAttributes', 'some.nested.attribute'],
+ *   removedAttributePaths: ['someRootAttributes', 'some.nested.attribute'],
  * };
  * ```
  *
