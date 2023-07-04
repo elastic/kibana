@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { sumBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -127,7 +128,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             kuery.includes('metricset.name: "transaction"')
           );
 
+          const intervalDocCount = sumBy(
+            Object.values(transactionMetrics?.intervals ?? {}),
+            ({ metricDocCount }) => metricDocCount
+          );
+          expect(transactionMetrics?.docCount).to.be(intervalDocCount);
           expect(transactionMetrics?.docCount).to.be(21);
+
           expect(transactionMetrics?.intervals).to.eql({
             '1m': { metricDocCount: 15, eventDocCount: expectedDocCount },
             '10m': { metricDocCount: 4, eventDocCount: expectedDocCount },
@@ -139,7 +146,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const serviceTransactionMetrics = body.apmEvents.find(({ kuery }) =>
             kuery.includes('metricset.name: "service_transaction"')
           );
+
+          const intervalDocCount = sumBy(
+            Object.values(serviceTransactionMetrics?.intervals ?? {}),
+            ({ metricDocCount }) => metricDocCount
+          );
+
+          expect(serviceTransactionMetrics?.docCount).to.be(intervalDocCount);
           expect(serviceTransactionMetrics?.docCount).to.be(21);
+
           expect(serviceTransactionMetrics?.kuery).to.be(
             'processor.event: "metric" AND metricset.name: "service_transaction" AND transaction.duration.summary :* '
           );

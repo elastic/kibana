@@ -17,7 +17,7 @@ import React, { useState, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { orderBy } from 'lodash';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { asInteger } from '../../../../common/utils/formatters';
+import { asBigNumber, asInteger } from '../../../../common/utils/formatters';
 import { APM_STATIC_DATA_VIEW_ID } from '../../../../common/data_view_constants';
 import type { ApmEvent } from '../../../../server/routes/diagnostics/bundle/get_apm_events';
 import { useDiagnosticsContext } from './context/use_diagnostics';
@@ -188,20 +188,4 @@ function IntervalDocCount({
       </div>
     </EuiToolTip>
   );
-}
-
-function asBigNumber(value: number): string {
-  if (value < 1e3) {
-    return value.toString();
-  }
-
-  if (value < 1e6) {
-    return `${asInteger(value / 1e3)}k`;
-  }
-
-  if (value < 1e9) {
-    return `${asInteger(value / 1e6)}m`;
-  }
-
-  return `${asInteger(value / 1e9)}b`;
 }

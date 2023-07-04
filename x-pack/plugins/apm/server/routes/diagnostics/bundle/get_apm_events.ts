@@ -13,6 +13,7 @@ import {
   METRICSET_NAME,
   METRICSET_INTERVAL,
   TRANSACTION_DURATION_SUMMARY,
+  INDEX,
 } from '../../../../common/es_fields/apm';
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { getTypedSearch, TypedSearch } from '../create_typed_es_client';
@@ -93,19 +94,19 @@ export async function getApmEvents({
     }),
     getEventWithMetricsetInterval({
       ...commonProps,
-      name: 'Metric: Span breakdown',
-      index: getApmIndexPatterns([apmIndices.metric]),
-      kuery: mergeKueries(
-        `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "span_breakdown"`,
-        kuery
-      ),
-    }),
-    getEventWithMetricsetInterval({
-      ...commonProps,
       name: 'Metric: Service summary',
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "service_summary"`,
+        kuery
+      ),
+    }),
+    getEvent({
+      ...commonProps,
+      name: 'Metric: Span breakdown',
+      index: getApmIndexPatterns([apmIndices.metric]),
+      kuery: mergeKueries(
+        `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "span_breakdown"`,
         kuery
       ),
     }),
@@ -168,7 +169,7 @@ async function getEventWithMetricsetInterval({
         aggs: {
           metric_doc_count: {
             value_count: {
-              field: '_index',
+              field: INDEX,
             },
           },
         },
