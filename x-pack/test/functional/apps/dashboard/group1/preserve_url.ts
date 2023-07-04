@@ -78,5 +78,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const activeTitleOtherSpace = await globalNav.getLastBreadcrumb();
       expect(activeTitleOtherSpace).to.be('A Dashboard in another space');
     });
+
+    it('keeps same url if nav to home toggle is off', async function () {
+      // default space
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.loadSavedDashboard('A Dashboard');
+
+      await PageObjects.spaceSelector.openSpacesNav();
+      // click twice to toggle back to default
+      await PageObjects.spaceSelector.clickNavToggleButton();
+      await PageObjects.spaceSelector.clickSpaceAvatar('another-space');
+      await PageObjects.spaceSelector.expectDashboard('another-space');
+
+      // other space
+      await appsMenu.clickLink('Dashboard', { category: 'kibana' });
+      await PageObjects.dashboard.loadSavedDashboard('A Dashboard in another space');
+
+      await PageObjects.spaceSelector.openSpacesNav();
+      await PageObjects.spaceSelector.clickSpaceAvatar('default');
+      await PageObjects.spaceSelector.expectDashboard('default');
+    });
   });
 }

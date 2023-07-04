@@ -33,6 +33,10 @@ export class SpaceSelectorPageObject extends FtrService {
     return await this.expectRoute(spaceId, `/app/home#/`);
   }
 
+  async expectDashboard(spaceId: string) {
+    return await this.expectRoute(spaceId, `/app/dashboards#/`);
+  }
+
   async expectRoute(spaceId: string, route: string) {
     return await this.retry.try(async () => {
       this.log.debug(`expectRoute(${spaceId}, ${route})`);
@@ -207,6 +211,10 @@ export class SpaceSelectorPageObject extends FtrService {
       await this.common.sleep(1000);
       expect(await this.find.existsByCssSelector('#headerSpacesMenuContent')).to.be(false);
     });
+  }
+
+  public clickNavToggleButton() {
+    return this.testSubjects.click('spaceNavToHomeToggle');
   }
 
   async clickSpaceAvatar(spaceId: string) {
