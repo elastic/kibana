@@ -7,12 +7,13 @@
 
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { PluginSetupContract, PluginStartContract } from '@kbn/features-plugin/server';
-import {
+import type {
   PluginSetup as SecuritySolutionPluginSetup,
   PluginStart as SecuritySolutionPluginStart,
 } from '@kbn/security-solution-plugin/server';
 
 import type { EssSecurityPluginSetup } from '@kbn/ess-security/server';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ServerlessSecurityPluginSetup {}
@@ -24,6 +25,7 @@ export interface ServerlessSecurityPluginSetupDependencies {
   securitySolution: SecuritySolutionPluginSetup;
   features: PluginSetupContract;
   essSecurity: EssSecurityPluginSetup;
+  ml: MlPluginSetup;
 }
 
 export interface ServerlessSecurityPluginStartDependencies {

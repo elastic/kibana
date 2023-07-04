@@ -6,14 +6,10 @@
  */
 
 import { getStartedStorage } from './storage';
-import {
-  GetSetUpCardId,
-  IntroductionSteps,
-  ProductId,
-  StepId,
-} from '../../components/get_started/types';
+import { GetSetUpCardId, IntroductionSteps, StepId } from '../../components/get_started/types';
 import { storage } from '../storage';
 import { MockStorage } from '../__mocks__/storage';
+import { ProductLine } from '../../../common/config';
 
 jest.mock('../storage');
 
@@ -33,13 +29,13 @@ describe('useStorage', () => {
   });
 
   it('should toggle active products in storage', () => {
-    expect(getStartedStorage.toggleActiveProductsInStorage(ProductId.analytics)).toEqual([
-      ProductId.analytics,
+    expect(getStartedStorage.toggleActiveProductsInStorage(ProductLine.security)).toEqual([
+      ProductLine.security,
     ]);
-    expect(mockStorage.set).toHaveBeenCalledWith('ACTIVE_PRODUCTS', [ProductId.analytics]);
+    expect(mockStorage.set).toHaveBeenCalledWith('ACTIVE_PRODUCTS', [ProductLine.security]);
 
-    mockStorage.set('ACTIVE_PRODUCTS', [ProductId.analytics]);
-    expect(getStartedStorage.toggleActiveProductsInStorage(ProductId.analytics)).toEqual([]);
+    mockStorage.set('ACTIVE_PRODUCTS', [ProductLine.security]);
+    expect(getStartedStorage.toggleActiveProductsInStorage(ProductLine.security)).toEqual([]);
     expect(mockStorage.set).toHaveBeenCalledWith('ACTIVE_PRODUCTS', []);
   });
 
