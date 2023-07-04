@@ -8,8 +8,11 @@
 import { IToasts } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { actions, createMachine } from 'xstate';
+import { isDatasetSelection } from '../../../utils/dataset_selection';
+import { DEFAULT_CONTEXT } from './defaults';
 import type {
   LogExplorerProfileContext,
   LogExplorerProfileEvent,
@@ -75,14 +78,14 @@ export const createPureLogExplorerProfileStateMachine = (
       actions: {
         notifyRestoreFailed: actions.pure(() => undefined),
         storeDatasetSelection: actions.assign((_context, event) =>
-          'data' in event
+          'data' in event && isDatasetSelection(event.data)
             ? {
                 datasetSelection: event.data,
               }
             : {}
         ),
         storeDataView: actions.assign((_context, event) =>
-          'data' in event
+          'data' in event && event.data instanceof DataView
             ? {
                 dataView: event.data,
               }
@@ -93,15 +96,18 @@ export const createPureLogExplorerProfileStateMachine = (
   );
 
 export interface LogExplorerProfileStateMachineDependencies {
+  initialContext?: LogExplorerProfileContext;
   dataViews: DataViewsPublicPluginStart;
   stateContainer: DiscoverStateContainer;
   toasts: IToasts;
 }
 
-export const createLogExplorerProfileStateMachine = (
-  initialContext: LogExplorerProfileContext,
-  { dataViews, stateContainer, toasts }: LogExplorerProfileStateMachineDependencies
-) =>
+export const createLogExplorerProfileStateMachine = ({
+  initialContext = DEFAULT_CONTEXT,
+  dataViews,
+  stateContainer,
+  toasts,
+}: LogExplorerProfileStateMachineDependencies) =>
   createPureLogExplorerProfileStateMachine(initialContext).withConfig({
     actions: {
       notifyRestoreFailed: () => {

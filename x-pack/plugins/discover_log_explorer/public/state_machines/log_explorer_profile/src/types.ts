@@ -5,33 +5,40 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { DoneInvokeEvent, Interpreter } from 'xstate';
-import { DatasetEncodingError, DatasetSelection } from '../../../utils/dataset_selection';
+import type { DatasetEncodingError, DatasetSelection } from '../../../utils/dataset_selection';
 
-export type LogExplorerProfileState = LogExplorerProfileContextWithTargetPosition &
-  LogExplorerProfileContextWithLatestPosition &
-  LogExplorerProfileContextWithVisiblePositions;
+export interface WithDatasetSelection {
+  datasetSelection: DatasetSelection;
+}
+
+export interface WithDataView {
+  dataView: DataView;
+}
+
+export type DefaultLogExplorerProfileState = WithDatasetSelection;
 
 export type LogExplorerProfileTypestate =
   | {
       value: 'uninitialized';
-      context: LogExplorerProfileState;
+      context: WithDatasetSelection;
     }
   | {
       value: 'initializingFromUrl';
-      context: LogExplorerProfileState;
+      context: WithDatasetSelection;
     }
   | {
       value: 'creatingDataView';
-      context: LogExplorerProfileState;
+      context: WithDatasetSelection & WithDataView;
     }
   | {
       value: 'syncingUrlState';
-      context: LogExplorerProfileState;
+      context: WithDatasetSelection & WithDataView;
     }
   | {
       value: 'initialized';
-      context: LogExplorerProfileState;
+      context: WithDatasetSelection & WithDataView;
     };
 
 export type LogExplorerProfileContext = LogExplorerProfileTypestate['context'];
@@ -42,11 +49,12 @@ export type LogExplorerProfileEvent =
       data: DatasetSelection;
     }
   | DoneInvokeEvent<DatasetSelection>
+  | DoneInvokeEvent<DataView>
   | DoneInvokeEvent<DatasetEncodingError>
   | DoneInvokeEvent<Error>;
 
 export type LogExplorerProfileStateService = Interpreter<
-  LogExplorerProfileState,
+  LogExplorerProfileContext,
   any,
   LogExplorerProfileEvent,
   LogExplorerProfileTypestate

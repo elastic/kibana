@@ -30,10 +30,11 @@ export const createLogExplorerProfileCustomizations =
     });
 
     const logExplorerProfileStateService = interpret(
-      createLogExplorerProfileStateMachine(
-        { datasetSelection: AllDatasetSelection.create() },
-        { dataViews: plugins.dataViews, stateContainer, toasts: core.notifications.toasts }
-      )
+      createLogExplorerProfileStateMachine({
+        dataViews: plugins.dataViews,
+        stateContainer,
+        toasts: core.notifications.toasts,
+      })
     );
     logExplorerProfileStateService.start();
     await waitForState(logExplorerProfileStateService, 'initialized');

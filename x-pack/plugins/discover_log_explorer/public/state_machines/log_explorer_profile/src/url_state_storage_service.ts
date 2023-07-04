@@ -6,6 +6,7 @@
  */
 import { InvokeCreator } from 'xstate';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import { MESSAGE_FIELD, TIMESTAMP_FIELD } from '../../../../common/constants';
 import {
   AllDatasetSelection,
   decodeDatasetSelectionId,
@@ -24,11 +25,12 @@ export const initializeFromUrl =
     LogExplorerProfileContext,
     LogExplorerProfileEvent
   > =>
-  async (_context, _event) => {
+  async (context) => {
     const { index } = stateContainer.appState.getState();
 
+    // If the index parameter doesn't exists, use initialContext value or fallback to AllDatasetSelection
     if (!index) {
-      return AllDatasetSelection.create();
+      return context.datasetSelection ?? AllDatasetSelection.create();
     }
 
     const rawDatasetSelection = decodeDatasetSelectionId(index);
@@ -49,6 +51,6 @@ export const updateUrlState =
 
     return stateContainer.appState.update({
       index: dataView.id,
-      columns: ['@timestamp', 'message'],
+      columns: [TIMESTAMP_FIELD, MESSAGE_FIELD],
     });
   };

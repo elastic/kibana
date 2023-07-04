@@ -6,3 +6,6 @@
  */
 
 export const LOG_EXPLORER_PROFILE_ID = 'log-explorer';
+
+export const TIMESTAMP_FIELD = '@timestamp';
+export const MESSAGE_FIELD = 'message';
