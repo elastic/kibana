@@ -27,21 +27,15 @@ interface Props {
   children?: React.ReactNode;
 }
 
-export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }) => {
-  // console.log({ pageCss });
-
-  console.log('test1');
-
-  return (
-    <Fragment>
-      <EuiPage css={pageCss} restrictWidth={restrictWidth || 1200}>
-        <EuiPageBody>
-          <div css={contentCss}>
-            <EuiSpacer size="m" />
-            {children}
-          </div>
-        </EuiPageBody>
-      </EuiPage>
-    </Fragment>
-  );
-};
+export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }) => (
+  <Fragment>
+    <EuiPage css={pageCss} restrictWidth={restrictWidth || 1200}>
+      <EuiPageBody>
+        <div css={contentCss}>
+          <EuiSpacer size="m" />
+          {children}
+        </div>
+      </EuiPageBody>
+    </EuiPage>
+  </Fragment>
+);

@@ -7,11 +7,10 @@
 
 import { isEmpty } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
-import { EuiCodeBlock, EuiFormRow, EuiAccordion, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiCodeBlock, EuiFormRow, EuiAccordion, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/css';
 import type { LiveQueryFormFields } from '.';
 import { OsqueryEditor } from '../../editor';
 import { useKibana } from '../../common/lib/kibana';
@@ -108,16 +107,6 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
         : [],
     [handleSubmitForm]
   );
-  const { euiTheme } = useEuiTheme();
-
-  const euiAccordionCss = css`
-    .euiAccordion__button {
-      color: ${euiTheme.colors.primary};
-    }
-    .euiAccordion__childWrapper {
-      -webkit-transition: none;
-    }
-  `;
 
   return (
     <>
@@ -168,3 +157,12 @@ export const LiveQueryQueryField = React.memo(LiveQueryQueryFieldComponent);
 
 // eslint-disable-next-line import/no-default-export
 export { LiveQueryQueryField as default };
+
+const euiAccordionCss = ({ theme }) => ({
+  '.euiAccordion__button': {
+    color: theme.colors.primary,
+  },
+  '.euiAccordion__childWrapper': {
+    '-webkit-transition': 'none',
+  },
+});

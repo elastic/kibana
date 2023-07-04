@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, useEuiTheme } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { useController } from 'react-hook-form';
 
 interface QueryPackSelectableProps {
@@ -55,48 +54,6 @@ export const QueryPackSelectable = ({
     }),
     [queryType, handleChange]
   );
-  const { euiTheme } = useEuiTheme();
-
-  const euiCardCss = useMemo(
-    () => css`
-      padding: 0;
-      display: flex;
-      flex-direction: row;
-      border: ${queryCardSelectable && `1px solid ${euiTheme.colors.success}`};
-      .euiCard__content {
-        padding: 16px 92px 16px 16px !important;
-      }
-      .euiTitle {
-        font-size: 1rem;
-      }
-      .euiText {
-        margin-top: 0;
-        color: ${euiTheme.colors.subduedText};
-      }
-
-      > button[role='switch'] {
-        min-inline-size: 80px;
-        height: 100% !important;
-        width: 80px;
-        border-radius: 0 5px 5px 0;
-
-        > span {
-          > svg {
-            width: 18px;
-            height: 18px;
-            display: inline-block !important;
-          }
-
-          // hide the label
-          > :not(svg) {
-            display: none;
-          }
-        }
-      }
-    `,
-    [euiTheme.colors.subduedText, euiTheme.colors.success, queryCardSelectable]
-  );
-  console.log({ euiCardCss1: euiCardCss });
 
   return (
     <EuiFlexItem>
@@ -145,3 +102,40 @@ export const QueryPackSelectable = ({
     </EuiFlexItem>
   );
 };
+
+const euiCardCss = ({ theme, selectable }) => ({
+  padding: 0,
+  display: 'flex',
+  flexDirection: 'row',
+  border: `${selectable?.isSelected && `1px solid ${theme.colors.success}`}`,
+  '.euiCard__content': {
+    padding: '16px 92px 16px 16px !important',
+  },
+  '.euiTitle': {
+    fontSize: '1rem',
+  },
+  '.euiText': {
+    marginTop: 0,
+    color: theme.colors.subduedText,
+  },
+
+  '> button[role="switch"]': {
+    minInlineSize: '80px',
+    height: '100% !important',
+    width: '80px',
+    borderRadius: '0 5px 5px 0',
+
+    '> span': {
+      '> svg': {
+        width: '18px',
+        height: '18px',
+        display: 'inline-block !important',
+      },
+
+      // hide the label
+      '> :not(svg)': {
+        display: 'none',
+      },
+    },
+  },
+});

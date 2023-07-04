@@ -438,15 +438,18 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
         gutterSize="none"
       >
         <EuiFlexItem grow={false}>
-          <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__label--expand">
+          <span css={fieldSpanCss} className="euiSuggestItem__label euiSuggestItem__label--expand">
             {option.value.suggestion_label}
-          </StyledFieldSpan>
+          </span>
         </EuiFlexItem>
-        <DescriptionWrapper grow={false}>
-          <StyledFieldSpan className="euiSuggestItem__description euiSuggestItem__description">
+        <EuiFlexItem css={descriptionWrapperCss} grow={false}>
+          <span
+            css={fieldSpanCss}
+            className="euiSuggestItem__description euiSuggestItem__description"
+          >
             {option.value.description}
-          </StyledFieldSpan>
-        </DescriptionWrapper>
+          </span>
+        </EuiFlexItem>
       </EuiFlexGroup>
     ),
     []

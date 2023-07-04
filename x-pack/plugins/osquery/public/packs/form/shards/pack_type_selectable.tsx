@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import {
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiRadio,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRadio } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
-import { css } from '@emotion/react';
 
 interface PackTypeSelectableProps {
   packType: string;
@@ -53,31 +45,6 @@ const PackTypeSelectableComponent = ({
     }),
     [packType, handleChange]
   );
-  const { euiTheme } = useEuiTheme();
-
-  // TODO some parent does add background color?
-  const euiCardCss = css`
-    padding: 16px 92px 16px 16px !important;
-    border: ${policyCardSelectable && `1px solid ${euiTheme.colors.success}`};
-
-    .euiTitle {
-      font-size: 1rem;
-    }
-
-    .euiSpacer {
-      display: none;
-    }
-
-    .euiText {
-      margin-top: 0;
-      margin-left: 25px;
-      color: ${euiTheme.colors.subduedText};
-    }
-
-    > button[role='switch'] {
-      display: none;
-    }
-  `;
 
   return (
     <EuiFlexItem>
@@ -137,3 +104,26 @@ const PackTypeSelectableComponent = ({
 };
 
 export const PackTypeSelectable = React.memo(PackTypeSelectableComponent);
+
+const euiCardCss = ({ theme, selectable }) => ({
+  padding: '16px 92px 16px 16px !important',
+  border: `${selectable?.isSelected && `1px solid ${theme.colors.success}`}`,
+
+  '.euiTitle': {
+    fontSize: '1rem',
+  },
+
+  '.euiSpacer': {
+    display: 'none',
+  },
+
+  '.euiText': {
+    marginTop: 0,
+    marginLeft: '25px',
+    color: theme.colors.subduedText,
+  },
+
+  '> button[role="switch"]': {
+    display: 'none',
+  },
+});

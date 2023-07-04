@@ -14,7 +14,6 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiLink,
-  useEuiTheme,
   EuiAccordion,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -29,7 +28,6 @@ import type {
   PackagePolicyEditExtensionComponentProps,
 } from '@kbn/fleet-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { css } from '@emotion/react';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { useKibana } from '../common/lib/kibana';
 import { NavigationButtons } from './navigation_buttons';
@@ -337,16 +335,6 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
   }, []);
 
   const { permissionDenied } = useFetchStatus();
-  const { euiTheme } = useEuiTheme();
-
-  const euiAccordionCss = useMemo(
-    () => css`
-      .euiAccordion__button {
-        color: ${euiTheme.colors.primary};
-      }
-    `,
-    [euiTheme.colors.primary]
-  );
 
   return (
     <>
@@ -401,3 +389,9 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
 });
 
 OsqueryManagedPolicyCreateImportExtension.displayName = 'OsqueryManagedPolicyCreateImportExtension';
+
+const euiAccordionCss = ({ theme }) => ({
+  '.euiAccordion__button': {
+    color: theme.colors.primary,
+  },
+});

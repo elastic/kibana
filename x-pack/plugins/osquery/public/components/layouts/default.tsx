@@ -24,9 +24,8 @@ export const navCss = ({ theme }: { theme: EuiThemeComputed }) => ({
   background: theme.colors.emptyShade,
   borderBottom: theme.border.thin,
   padding: `${theme.size.base} ${theme.size.l} ${theme.size.base} ${theme.size.l}`,
-  // TODO check this one
-  // .euiTabs {
-  //   paddingLeft: 3px,
-  //   marginLeft: -3px,
-  // }
+  '.euiTabs': {
+    paddingLeft: '3px',
+    marginLeft: '-3px',
+  },
 });

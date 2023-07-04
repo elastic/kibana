@@ -6,7 +6,8 @@
  */
 
 import { EuiErrorBoundary, useEuiTheme } from '@elastic/eui';
-import React from 'react';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
+import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -16,18 +17,30 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from './shared_imports';
+import { useUiSetting$, KibanaThemeProvider } from './shared_imports';
 import type { AppPluginStartDependencies } from './types';
 import { OsqueryApp } from './components/app';
-import { PLUGIN_NAME } from '../common';
+import { DEFAULT_DARK_MODE, PLUGIN_NAME } from '../common';
 import { KibanaContextProvider } from './common/lib/kibana';
 import { queryClient } from './query_client';
 
 const OsqueryAppContext = () => {
   const { euiTheme } = useEuiTheme();
+  const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+  const theme = useMemo(
+    () => ({
+      eui: darkMode ? euiDarkVars : euiLightVars,
+      darkMode,
+    }),
+    [darkMode]
+  );
+
+  // spread theme.eui (old theme) because some external plugins eg. addToCases depend on it
+  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+  const combinedTheme = { eui: theme.eui, ...euiTheme };
 
   return (
-    <ThemeProvider theme={euiTheme}>
+    <ThemeProvider theme={combinedTheme}>
       <OsqueryApp />
     </ThemeProvider>
   );

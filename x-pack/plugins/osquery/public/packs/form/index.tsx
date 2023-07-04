@@ -16,14 +16,12 @@ import {
   EuiBottomBar,
   EuiHorizontalRule,
   EuiAccordion,
-  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 
-import { css } from '@emotion/css';
 import { PackShardsField } from './shards/pack_shards_field';
 import { useRouterNavigate } from '../../common/lib/kibana';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
@@ -232,14 +230,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     return options.filter(({ key }) => !currentValues.includes(key));
   }, [shards, policyIds, options]);
 
-  const { euiTheme } = useEuiTheme();
-
-  const styledEuiAccordionCss = css`
-    .euiAccordion__button {
-      color: ${euiTheme.colors.primary};
-    }
-  `;
-
   return (
     <>
       <FormProvider {...hooksForm}>
@@ -274,7 +264,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
             <EuiFlexGroup>
               <EuiFlexItem css={overflowCss}>
                 <EuiAccordion
-                  css={styledEuiAccordionCss}
+                  css={euiAccordionCss}
                   id="shardsToggle"
                   forceState={shardsToggleState}
                   onToggle={handleToggle}
@@ -349,3 +339,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 };
 
 export const PackForm = React.memo(PackFormComponent, deepEqual);
+
+const euiAccordionCss = ({ theme }) => ({
+  '.euiAccordion__button': {
+    color: theme.colors.primary,
+  },
+});
