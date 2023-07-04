@@ -704,15 +704,15 @@ Say that Kibana version `X` was still using this field, and that we stopped util
 
 We can't remove the data in version `X+1`, as we need to be able to rollback to the prior version at **any time**. 
 If we were to delete the data of this `removed` field during the upgrade to version `X+1`, and if then, for any reason,
-we'll need to rollback to version `X`,  it would cause a data loss, as version `X` was still using this field, but it is
-no longer present in our document. It would put the rollback at risk.
+we'd need to rollback to version `X`,  it would cause a data loss, as version `X` was still using this field, but it would
+no longer present in our document after the rollback.
 
-Which is why we need to perform field removal as a 2-step operation:
+Which is why we need to perform any field removal as a 2-step operation:
 - release `X`: Kibana still utilize the field
 - release `X+1`: Kibana no longer utilize the field, but the data is still present in the documents
 - release `X+2`: The data is effectively deleted from the documents.
 
-That way, any one-version rollback (`X+2` to `X+1` **or** `X+1` to `X` is safe in term of data integrity)
+That way, any prior-version rollback (`X+2` to `X+1` **or** `X+1` to `X` is safe in term of data integrity)
 
 The main question then, is what's the best way of having our application layer simply ignore this `removed` field during version `X+1`,
 as we don't want this field (now non-utilized) to be returned from the persistence layer, as it could "pollute" the higher-layers
@@ -720,7 +720,7 @@ where the field is effectively no longer used or even known.
 
 This can easily be done by introducing a new version and using the `forwardCompatibility` schema to "shallow" the field.
 
-The added model version would look like:
+The `X+1` model version would look like:
 
 ```ts
 // the new model version ignoring the `removed` field
