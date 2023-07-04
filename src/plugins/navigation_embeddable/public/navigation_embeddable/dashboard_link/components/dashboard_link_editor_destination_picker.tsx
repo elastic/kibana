@@ -28,7 +28,7 @@ interface Props {
   setSelectedDashboard: (selectedDashboard?: DashboardItem) => void;
 }
 
-export const DashboardLinkEditorDashboardList = ({
+export const DashboardLinkEditorDestinationPicker = ({
   currentDashboardId,
   setSelectedDashboard,
   ...other

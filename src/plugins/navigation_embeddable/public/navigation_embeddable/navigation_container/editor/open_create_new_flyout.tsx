@@ -7,16 +7,13 @@
  */
 
 import React from 'react';
-import { Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { coreServices } from '../../services/kibana_services';
-import { NavigationEmbeddableEditor } from '../components/navigation_embeddable_editor';
 import { NavigationContainerInput } from '../../types';
-import { DashboardLinkInput } from '../../dashboard_link/types';
-import { ExternalLinkInput } from '../../external_link/types';
+import { coreServices } from '../../services/kibana_services';
+import { NavigationEmbeddablePanelEditor } from '../components/navigation_embeddable_panel_editor';
 
 /**
  * @throws in case user cancels
@@ -38,7 +35,7 @@ export async function openCreateNewFlyout(
 
     const editorFlyout = coreServices.overlays.openFlyout(
       toMountPoint(
-        <NavigationEmbeddableEditor
+        <NavigationEmbeddablePanelEditor
           initialInput={{ id: uuidv4(), ...initialInput }}
           onClose={() => editorFlyout.close()}
           onSave={onSave}

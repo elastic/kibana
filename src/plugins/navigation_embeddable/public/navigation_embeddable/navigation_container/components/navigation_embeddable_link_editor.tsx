@@ -22,12 +22,15 @@ import {
   EuiFlyoutFooter,
   EuiRadioGroupOption,
   EuiButtonEmpty,
+  EuiFlyoutHeader,
+  EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { NavigationContainerInput } from '../../types';
 import { DashboardItem } from '../../dashboard_link/types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { navigationContainerInputBuilder } from '../editor/navigation_container_input_builder';
-import { DashboardLinkEditorDashboardList } from '../../dashboard_link/components/dashboard_link_editor_dashboard_list';
+import { DashboardLinkEditorDestinationPicker } from '../../dashboard_link/components/dashboard_link_editor_destination_picker';
 
 // TODO: As part of https://github.com/elastic/kibana/issues/154381, replace this regex URL check with more robust url validation
 const isValidUrl =
@@ -35,7 +38,7 @@ const isValidUrl =
 
 type LinkType = 'dashboardLink' | 'externalLink';
 
-export const NavigationEmbeddableEditor = ({
+export const NavigationEmbeddableLinkEditor = ({
   initialInput,
   onSave,
   onClose,
@@ -94,7 +97,24 @@ export const NavigationEmbeddableEditor = ({
   }, [selectedLinkType]);
 
   return (
-    <>
+    <div className={'navEmbeddableEditor'}>
+      <EuiFlyoutHeader hasBorder>
+        {/* <EuiButtonEmpty iconType={'arrowLeft'} color="text" onClick={onClose}> */}
+        <EuiButtonEmpty
+          css={css`
+            height: auto;
+          `}
+          flush="left"
+          iconType={'arrowLeft'}
+          color="text"
+          onClick={onClose}
+        >
+          <EuiTitle size="m">
+            <h2>Add link</h2>
+          </EuiTitle>
+        </EuiButtonEmpty>
+        {/* </EuiButtonEmpty> */}
+      </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm component="form">
           <EuiFormRow label={NavEmbeddableStrings.editor.getLinkTypePickerLabel()}>
@@ -111,7 +131,7 @@ export const NavigationEmbeddableEditor = ({
           </EuiFormRow>
           <EuiFormRow label={NavEmbeddableStrings.editor.getLinkDestinationLabel()}>
             {isDashboardEditorSelected ? (
-              <DashboardLinkEditorDashboardList
+              <DashboardLinkEditorDestinationPicker
                 currentDashboardId={currentDashboardId}
                 setSelectedDashboard={setSelectedDashboard}
               />
@@ -188,11 +208,11 @@ export const NavigationEmbeddableEditor = ({
                 onClose();
               }}
             >
-              Save
+              Add link
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </>
+    </div>
   );
 };
