@@ -100,7 +100,7 @@ export const startTransformIfNotStarted = async (
       } catch (startErr) {
         const startError = transformError(startErr);
         logger.error(
-          `Failed restarting transform ${transformId}. Transform State: Transform State: ${fetchedTransformStats.state}. Error: ${startError.message}`
+          `Failed to restart transform ${transformId}. Transform State: Transform State: ${fetchedTransformStats.state}. Error: ${startError.message}`
         );
       }
     }
