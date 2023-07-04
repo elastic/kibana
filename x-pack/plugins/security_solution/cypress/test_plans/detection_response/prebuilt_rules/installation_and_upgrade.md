@@ -32,7 +32,6 @@ Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule 
 ### Assumptions
 
 - Below scenarios only apply to prebuilt detection rules.
-- Most of our users are on the 7.17.x version, that’s why the 8.x version is specified on scenarios, because this test plan is considering a minimum version of 8.x.
 - Users should be able to install and upgrade prebuilt rules on the `Basic` license and higher.
 - EPR is available for fetching the package unless explicitly indicated otherwise.
 - Only the latest **stable** package is checked for installation/upgrade and pre-release packages are ignored.
@@ -520,7 +519,7 @@ TODO: add scenarios
 
 ### Rule upgrade workflow: misc cases
 
-#### **Scenario: User don't see the Rule Updates tab until the package installation is completed**
+#### **Scenario: User doesn't see the Rule Updates tab until the package installation is completed**
 
 **Automation**: unit tests.
 
