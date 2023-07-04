@@ -136,6 +136,9 @@ export const FilterGroupContextMenu = () => {
       closePopover={toggleContextMenu}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      panelProps={{
+        'data-test-subj': TEST_IDS.CONTEXT_MENU.MENU,
+      }}
     >
       <EuiContextMenuPanel items={contextMenuItems} />
     </EuiPopover>

@@ -66,7 +66,6 @@ import { FIELD_INPUT } from '../screens/exceptions';
 import {
   CONTROL_FRAME_TITLE,
   DETECTION_PAGE_FILTERS_LOADING,
-  DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU,
   DETECTION_PAGE_FILTER_GROUP_LOADING,
   DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON,
   DETECTION_PAGE_FILTER_GROUP_WRAPPER,
@@ -80,6 +79,7 @@ import { ALERTS_URL } from '../urls/navigation';
 import { FIELDS_BROWSER_BTN } from '../screens/rule_details';
 import type { FilterItemObj } from '../../public/common/components/filter_group/types';
 import { visit } from './login';
+import { openFilterGroupContextMenu } from './common/filter_group';
 
 export const addExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
@@ -407,7 +407,7 @@ export const waitForPageFilters = () => {
 };
 
 export const resetFilters = () => {
-  cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).trigger('click');
+  openFilterGroupContextMenu();
   cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).trigger('click');
   waitForPageFilters();
   cy.log('Resetting filters complete');

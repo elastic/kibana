@@ -29,7 +29,6 @@ import { formatPageFilterSearchParam } from '../../../../common/utils/format_pag
 import {
   closePageFilterPopover,
   markAcknowledgedFirstAlert,
-  openFirstAlert,
   openPageFilterPopover,
   resetFilters,
   selectCountTable,
@@ -235,31 +234,30 @@ describe(`Detections : Page Filters`, () => {
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
   });
 
-  it(`Alert list is updated when the alerts are updated`, () => {
-    // mark status of one alert to be acknowledged
-    selectCountTable();
-    cy.get(ALERTS_COUNT)
-      .invoke('text')
-      .then((noOfAlerts) => {
-        const originalAlertCount = noOfAlerts.split(' ')[0];
-        markAcknowledgedFirstAlert();
-        waitForAlerts();
-        cy.get(OPTION_LIST_VALUES(0)).click();
-        cy.get(OPTION_SELECTABLE(0, 'acknowledged')).should('be.visible').trigger('click');
-        cy.get(ALERTS_COUNT)
-          .invoke('text')
-          .should((newAlertCount) => {
-            expect(newAlertCount.split(' ')[0]).eq(String(parseInt(originalAlertCount, 10) - 1));
-          });
-      });
+  context('with data modificiation', () => {
+    after(() => {
+      cleanKibana();
+      createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
+    });
 
-    // cleanup
-    // revert the changes so that data does not change for further tests.
-    // It would make sure that tests can run in any order.
-    cy.get(OPTION_SELECTABLE(0, 'open')).trigger('click');
-    togglePageFilterPopover(0);
-    openFirstAlert();
-    waitForAlerts();
+    it(`Alert list is updated when the alerts are updated`, () => {
+      // mark status of one alert to be acknowledged
+      selectCountTable();
+      cy.get(ALERTS_COUNT)
+        .invoke('text')
+        .then((noOfAlerts) => {
+          const originalAlertCount = noOfAlerts.split(' ')[0];
+          markAcknowledgedFirstAlert();
+          waitForAlerts();
+          cy.get(OPTION_LIST_VALUES(0)).click();
+          cy.get(OPTION_SELECTABLE(0, 'acknowledged')).should('be.visible').trigger('click');
+          cy.get(ALERTS_COUNT)
+            .invoke('text')
+            .should((newAlertCount) => {
+              expect(newAlertCount.split(' ')[0]).eq(String(parseInt(originalAlertCount, 10) - 1));
+            });
+        });
+    });
   });
 
   it(`URL is updated when filters are updated`, () => {

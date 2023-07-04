@@ -50,7 +50,11 @@ export const DETECTION_PAGE_FILTERS_LOADING = '.securityPageWrapper .controlFram
 
 export const DETECTION_PAGE_FILTER_GROUP_LOADING = '[data-test-subj="filter-group__loading"]';
 
-export const DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU = '[data-test-subj="filter-group__context"]';
+export const DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU_BTN =
+  '[data-test-subj="filter-group__context"]';
+
+export const DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU =
+  '[data-test-subj="filter-group__context-menu"]';
 
 export const DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON =
   '[data-test-subj="filter-group__context--reset"]';
