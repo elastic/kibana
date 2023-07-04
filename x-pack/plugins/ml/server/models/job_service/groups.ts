@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UpdateGroupsRequest } from '../../../common/types/job_service';
+import type { UpdateGroupsRequest } from '../../../common/types/job_service';
 import { CalendarManager } from '../calendar';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import type { Group } from '../../../common/types/groups';
