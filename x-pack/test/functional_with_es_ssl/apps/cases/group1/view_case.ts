@@ -192,7 +192,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const error = await find.byCssSelector('.euiFormErrorText');
         expect(await error.getVisibleText()).equal(
-          'The length of tags array is too long. Array must be of length <= 200.'
+          'Too many tags. The maximum number of allowed tags is 200'
         );
 
         await testSubjects.click('edit-tags-cancel');

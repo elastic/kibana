@@ -298,7 +298,7 @@ export const MAX_LENGTH_ERROR = (field: string, length: number) =>
 export const MAX_TAGS_ERROR = (length: number) =>
   i18n.translate('xpack.cases.createCase.maxTagsError', {
     values: { length },
-    defaultMessage: 'The length of tags array is too long. Array must be of length <= {length}.',
+    defaultMessage: 'Too many tags. The maximum number of allowed tags is 200',
   });
 
 export const LINK_APPROPRIATE_LICENSE = i18n.translate('xpack.cases.common.appropriateLicense', {

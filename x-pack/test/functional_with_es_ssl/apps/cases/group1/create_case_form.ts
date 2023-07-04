@@ -93,7 +93,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         'The length of the tag is too long. The maximum length is 256.'
       );
 
-      const category = await testSubjects.find('caseCategory');
+      const category = await testSubjects.find('case-create-form-category');
       expect(await category.getVisibleText()).contain(
         'The length of the category is too long. The maximum length is 50.'
       );
