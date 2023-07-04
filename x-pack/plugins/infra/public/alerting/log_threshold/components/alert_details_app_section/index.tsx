@@ -44,7 +44,7 @@ const AlertDetailsAppSection = ({
   alert,
   setAlertSummaryFields,
 }: AlertDetailsAppSectionProps) => {
-  const { observability, logViews } = useKibanaContextForPlugin().services;
+  const { observability, logsShared } = useKibanaContextForPlugin().services;
   const theme = useTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
@@ -66,7 +66,7 @@ const AlertDetailsAppSection = ({
 
   const { derivedDataView } = useLogView({
     initialLogViewReference: rule.params.logView,
-    logViews: logViews.client,
+    logViews: logsShared.logViews.client,
   });
 
   const { hasAtLeast } = useLicense();

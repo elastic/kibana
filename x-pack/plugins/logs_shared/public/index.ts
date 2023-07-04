@@ -22,7 +22,7 @@ export function plugin() {
 }
 
 // Containers & Hook
-export { LogViewProvider, useLogViewContext } from './hooks/use_log_view';
+export { LogViewProvider, useLogViewContext, useLogView } from './hooks/use_log_view';
 export { LogStreamProvider, useLogStreamContext } from './containers/logs/log_stream';
 export {
   LogPositionStateProvider,
