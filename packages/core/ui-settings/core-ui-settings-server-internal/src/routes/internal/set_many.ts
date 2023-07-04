@@ -10,9 +10,9 @@ import { schema, ValidationError } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { InternalUiSettingsRouter } from '../internal_types';
-import { CannotOverrideError } from '../ui_settings_errors';
-import { InternalUiSettingsRequestHandlerContext } from '../internal_types';
+import type { InternalUiSettingsRouter } from '../../internal_types';
+import { CannotOverrideError } from '../../ui_settings_errors';
+import { InternalUiSettingsRequestHandlerContext } from '../../internal_types';
 
 const validate = {
   body: schema.object({
@@ -20,7 +20,7 @@ const validate = {
   }),
 };
 
-export function registerSetManyRoute(router: InternalUiSettingsRouter) {
+export function registerInternalSetManyRoute(router: InternalUiSettingsRouter) {
   const setManyFromRequest = async (
     uiSettingsClient: IUiSettingsClient,
     context: InternalUiSettingsRequestHandlerContext,
@@ -52,13 +52,17 @@ export function registerSetManyRoute(router: InternalUiSettingsRouter) {
       throw error;
     }
   };
-  router.post({ path: '/api/kibana/settings', validate }, async (context, request, response) => {
-    const uiSettingsClient = (await context.core).uiSettings.client;
-    return await setManyFromRequest(uiSettingsClient, context, request, response);
-  });
 
   router.post(
-    { path: '/api/kibana/global_settings', validate },
+    { path: '/internal/kibana/settings', validate, options: { access: 'internal' } },
+    async (context, request, response) => {
+      const uiSettingsClient = (await context.core).uiSettings.client;
+      return await setManyFromRequest(uiSettingsClient, context, request, response);
+    }
+  );
+
+  router.post(
+    { path: '/internal/kibana/global_settings', validate, options: { access: 'internal' } },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
       return await setManyFromRequest(uiSettingsClient, context, request, response);

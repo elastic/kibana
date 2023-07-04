@@ -25,7 +25,7 @@ import type {
 } from './types';
 import type { InternalUiSettingsRequestHandlerContext } from './internal_types';
 import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
-import { registerRoutes } from './routes';
+import { registerRoutes, registerInternalRoutes } from './routes';
 import { getCoreSettings } from './settings';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
 
@@ -83,13 +83,12 @@ export class UiSettingsService
     savedObjects.registerType(uiSettingsType);
     savedObjects.registerType(uiSettingsGlobalType);
 
-    if (config.hasOwnProperty('publicApiEnabled')) {
-      registerRoutes(
-        http.createRouter<InternalUiSettingsRequestHandlerContext>(''),
-        config.publicApiEnabled
-      );
-    } else {
-      registerRoutes(http.createRouter<InternalUiSettingsRequestHandlerContext>(''));
+    const router = http.createRouter<InternalUiSettingsRequestHandlerContext>('');
+    registerInternalRoutes(router);
+
+    // Register public routes by default unless the publicApiEnabled config setting is set to false
+    if (!config.hasOwnProperty('publicApiEnabled') || config.publicApiEnabled === true) {
+      registerRoutes(router);
     }
 
     return {

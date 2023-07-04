@@ -6,31 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
-
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import type { InternalUiSettingsRouter } from '../internal_types';
-import { CannotOverrideError } from '../ui_settings_errors';
-import { InternalUiSettingsRequestHandlerContext } from '../internal_types';
+import { InternalUiSettingsRequestHandlerContext } from '../../internal_types';
+import type { InternalUiSettingsRouter } from '../../internal_types';
 
-const validate = {
-  params: schema.object({
-    key: schema.string(),
-  }),
-};
-
-export function registerDeleteRoute(router: InternalUiSettingsRouter) {
-  const deleteFromRequest = async (
+export function registerInternalGetRoute(router: InternalUiSettingsRouter) {
+  const getFromRequest = async (
     uiSettingsClient: IUiSettingsClient,
     context: InternalUiSettingsRequestHandlerContext,
-    request: KibanaRequest<Readonly<{} & { key: string }>, unknown, unknown, 'delete'>,
+    request: KibanaRequest<unknown, unknown, unknown, 'get'>,
     response: KibanaResponseFactory
   ) => {
     try {
-      await uiSettingsClient.remove(request.params.key);
-
       return response.ok({
         body: {
           settings: await uiSettingsClient.getUserProvided(),
@@ -44,25 +33,21 @@ export function registerDeleteRoute(router: InternalUiSettingsRouter) {
         });
       }
 
-      if (error instanceof CannotOverrideError) {
-        return response.badRequest({ body: error });
-      }
-
       throw error;
     }
   };
-  router.delete(
-    { path: '/api/kibana/settings/{key}', validate },
+  router.get(
+    { path: '/internal/kibana/settings', validate: false, options: { access: 'internal' } },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.client;
-      return await deleteFromRequest(uiSettingsClient, context, request, response);
+      return await getFromRequest(uiSettingsClient, context, request, response);
     }
   );
-  router.delete(
-    { path: '/api/kibana/global_settings/{key}', validate },
+  router.get(
+    { path: '/internal/kibana/global_settings', validate: false, options: { access: 'internal' } },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
-      return await deleteFromRequest(uiSettingsClient, context, request, response);
+      return await getFromRequest(uiSettingsClient, context, request, response);
     }
   );
 }

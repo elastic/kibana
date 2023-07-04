@@ -12,7 +12,7 @@ import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { InternalUiSettingsRequestHandlerContext } from '../internal_types';
 import type { InternalUiSettingsRouter } from '../internal_types';
 
-export function registerGetRoute(router: InternalUiSettingsRouter, publicApiEnabled: boolean) {
+export function registerGetRoute(router: InternalUiSettingsRouter) {
   const getFromRequest = async (
     uiSettingsClient: IUiSettingsClient,
     context: InternalUiSettingsRequestHandlerContext,
@@ -36,33 +36,15 @@ export function registerGetRoute(router: InternalUiSettingsRouter, publicApiEnab
       throw error;
     }
   };
-  if (publicApiEnabled) {
-    router.get(
-      { path: '/api/kibana/settings', validate: false },
-      async (context, request, response) => {
-        const uiSettingsClient = (await context.core).uiSettings.client;
-        return await getFromRequest(uiSettingsClient, context, request, response);
-      }
-    );
-  }
-  if (publicApiEnabled) {
-    router.get(
-      { path: '/api/kibana/global_settings', validate: false },
-      async (context, request, response) => {
-        const uiSettingsClient = (await context.core).uiSettings.globalClient;
-        return await getFromRequest(uiSettingsClient, context, request, response);
-      }
-    );
-  }
   router.get(
-    { path: '/internal/kibana/settings', validate: false, options: { access: 'internal' } },
+    { path: '/api/kibana/settings', validate: false },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.client;
       return await getFromRequest(uiSettingsClient, context, request, response);
     }
   );
   router.get(
-    { path: '/internal/kibana/global_settings', validate: false, options: { access: 'internal' } },
+    { path: '/api/kibana/global_settings', validate: false },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
       return await getFromRequest(uiSettingsClient, context, request, response);

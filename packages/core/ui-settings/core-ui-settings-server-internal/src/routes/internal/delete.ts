@@ -6,31 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { schema, ValidationError } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { InternalUiSettingsRouter } from '../internal_types';
-import { CannotOverrideError } from '../ui_settings_errors';
-import { InternalUiSettingsRequestHandlerContext } from '../internal_types';
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { InternalUiSettingsRouter } from '../../internal_types';
+import { CannotOverrideError } from '../../ui_settings_errors';
+import { InternalUiSettingsRequestHandlerContext } from '../../internal_types';
 
 const validate = {
-  body: schema.object({
-    changes: schema.object({}, { unknowns: 'allow' }),
+  params: schema.object({
+    key: schema.string(),
   }),
 };
 
-export function registerSetManyRoute(router: InternalUiSettingsRouter) {
-  const setManyFromRequest = async (
+export function registerInternalDeleteRoute(router: InternalUiSettingsRouter) {
+  const deleteFromRequest = async (
     uiSettingsClient: IUiSettingsClient,
     context: InternalUiSettingsRequestHandlerContext,
-    request: KibanaRequest<unknown, unknown, Readonly<{} & { changes?: any & {} }>, 'post'>,
+    request: KibanaRequest<Readonly<{} & { key: string }>, unknown, unknown, 'delete'>,
     response: KibanaResponseFactory
   ) => {
     try {
-      const { changes } = request.body;
-
-      await uiSettingsClient.setMany(changes);
+      await uiSettingsClient.remove(request.params.key);
 
       return response.ok({
         body: {
@@ -45,23 +44,25 @@ export function registerSetManyRoute(router: InternalUiSettingsRouter) {
         });
       }
 
-      if (error instanceof CannotOverrideError || error instanceof ValidationError) {
+      if (error instanceof CannotOverrideError) {
         return response.badRequest({ body: error });
       }
 
       throw error;
     }
   };
-  router.post({ path: '/api/kibana/settings', validate }, async (context, request, response) => {
-    const uiSettingsClient = (await context.core).uiSettings.client;
-    return await setManyFromRequest(uiSettingsClient, context, request, response);
-  });
-
-  router.post(
-    { path: '/api/kibana/global_settings', validate },
+  router.delete(
+    { path: '/internal/kibana/settings/{key}', validate, options: { access: 'internal' } },
+    async (context, request, response) => {
+      const uiSettingsClient = (await context.core).uiSettings.client;
+      return await deleteFromRequest(uiSettingsClient, context, request, response);
+    }
+  );
+  router.delete(
+    { path: '/internal/kibana/global_settings/{key}', validate, options: { access: 'internal' } },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
-      return await setManyFromRequest(uiSettingsClient, context, request, response);
+      return await deleteFromRequest(uiSettingsClient, context, request, response);
     }
   );
 }

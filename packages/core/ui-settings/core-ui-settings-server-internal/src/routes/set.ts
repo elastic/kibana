@@ -25,7 +25,7 @@ const validate = {
   }),
 };
 
-export function registerSetRoute(router: InternalUiSettingsRouter, publicApiEnabled: boolean) {
+export function registerSetRoute(router: InternalUiSettingsRouter) {
   const setFromRequest = async (
     uiSettingsClient: IUiSettingsClient,
     context: InternalUiSettingsRequestHandlerContext,
@@ -63,33 +63,15 @@ export function registerSetRoute(router: InternalUiSettingsRouter, publicApiEnab
       throw error;
     }
   };
-  if (publicApiEnabled) {
-    router.post(
-      { path: '/api/kibana/settings/{key}', validate },
-      async (context, request, response) => {
-        const uiSettingsClient = (await context.core).uiSettings.client;
-        return await setFromRequest(uiSettingsClient, context, request, response);
-      }
-    );
-  }
-  if (publicApiEnabled) {
-    router.post(
-      { path: '/api/kibana/global_settings/{key}', validate },
-      async (context, request, response) => {
-        const uiSettingsClient = (await context.core).uiSettings.globalClient;
-        return await setFromRequest(uiSettingsClient, context, request, response);
-      }
-    );
-  }
   router.post(
-    { path: '/internal/kibana/settings/{key}', validate, options: { access: 'internal' } },
+    { path: '/api/kibana/settings/{key}', validate },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.client;
       return await setFromRequest(uiSettingsClient, context, request, response);
     }
   );
   router.post(
-    { path: '/internal/kibana/global_settings/{key}', validate, options: { access: 'internal' } },
+    { path: '/api/kibana/global_settings/{key}', validate },
     async (context, request, response) => {
       const uiSettingsClient = (await context.core).uiSettings.globalClient;
       return await setFromRequest(uiSettingsClient, context, request, response);
