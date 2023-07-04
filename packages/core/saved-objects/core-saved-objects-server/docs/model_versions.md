@@ -203,7 +203,7 @@ let change: SavedObjectsModelMappingsDeprecationChange = {
 
 #### - data_backfill
 
-Used to populate fields (indexed or not) added in the same version
+Used to populate fields (indexed or not) added in the same version.
 
 *Usage example:*
 
@@ -211,14 +211,51 @@ Used to populate fields (indexed or not) added in the same version
 let change: SavedObjectsModelDataBackfillChange = {
   type: 'data_backfill',
   transform: (document) => {
-    document.attributes.someAddedField = 'defaultValue';
-    return { document };
+    return { attributes: { someAddedField: 'defaultValue' } };
   },
 };
 ```
 
 **note:** *Even if no check is performed to ensure it, this type of model change should only be used to 
            backfill newly introduced fields.*
+
+#### - data_removal
+
+Used to remove data (unset fields) from all documents of the type. 
+
+*Usage example:*
+
+```ts
+let change: SavedObjectsModelDataRemovalChange = {
+  type: 'data_removal',
+  attributePaths: ['someRootAttributes', 'some.nested.attribute'],
+};
+```
+
+**note:** *Due to backward compatibility, field utilization must be stopped in a prior release
+           before actual data removal (in case of rollback). Please refer to the field removal migration example
+           below in this document*
+
+#### - unsafe_transform
+
+Used to execute an arbitrary transformation function.
+
+*Usage example:*
+
+```ts
+let change: SavedObjectsModelUnsafeTransformChange = {
+  type: 'unsafe_transform',
+  transformFn: (document) => {
+    document.attributes.someAddedField = 'defaultValue';
+    return { document };
+  },
+};
+```
+
+**note:** *Using such transformations is potentially unsafe, given the migration system will have
+           no knowledge of which kind of operations will effectively be executed against the documents.
+           Those should only be used when there's no other way to cover one's migration needs.*
+           **Please reach out to the Core team if you think you need to use this, as you theoretically shouldn't.**
 
 ### schemas
 
