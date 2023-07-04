@@ -49,7 +49,7 @@ export const Tile = ({
   dataView,
 }: KPIChartProps & KPIGridProps) => {
   const getSubtitle = () =>
-    i18n.translate('xpack.infra.hostsViewPage.metricTrend.subtitle.average', {
+    i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.metricTrend.subtitle.average', {
       defaultMessage: 'Average',
     });
 
@@ -109,7 +109,7 @@ export const Tile = ({
           <EuiFlexItem grow={false}>
             <EuiText size="s" textAlign="center">
               <EuiI18n
-                token="'xpack.infra.hostsViewPage.errorOnLoadingLensDependencies'"
+                token="'xpack.infra.assetDetailsEmbeddable.overview.errorOnLoadingLensDependencies'"
                 default="There was an error trying to load Lens Plugin."
               />
             </EuiText>

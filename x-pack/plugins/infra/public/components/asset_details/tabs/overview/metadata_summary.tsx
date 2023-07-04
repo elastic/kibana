@@ -21,9 +21,9 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { InfraMetadata } from '../../../../../common/http_api';
 import { NOT_AVAILABLE_LABEL } from '../../translations';
-import { ExpandableContent } from '../metadata/table';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { FlyoutTabIds, type TabIds } from '../../types';
+import { ExpandableContent } from '../../components/expandable_content';
 
 const columnTitles = {
   hostIp: i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.metadataHostIpHeading', {
@@ -32,7 +32,7 @@ const columnTitles = {
   hostOsVersion: i18n.translate(
     'xpack.infra.assetDetailsEmbeddable.overview.metadataHostOsVersionHeading',
     {
-      defaultMessage: 'Host os version',
+      defaultMessage: 'Host OS version',
     }
   ),
 };
@@ -72,7 +72,7 @@ export const MetadataSummary = ({
 
   return (
     <>
-      <EuiFlexGroup gutterSize="m" responsive={false} wrap={true} justifyContent="spaceBetween">
+      <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
         <EuiFlexGroup alignItems="flexStart">
           {metadataData(metadata?.info).map((metadataValue) => (
             <EuiFlexItem key={metadataValue.field}>
@@ -99,7 +99,7 @@ export const MetadataSummary = ({
           <EuiButtonEmpty
             data-test-subj="infraMetadataSummaryShowAllMetadataButton"
             onClick={onClick}
-            size="s"
+            size="xs"
             flush="both"
             iconSide="right"
             iconType="sortRight"

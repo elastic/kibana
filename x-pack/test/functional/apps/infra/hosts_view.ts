@@ -245,8 +245,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/159368
-    // FLAKY: https://github.com/elastic/kibana/issues/159369
     describe('#Single host Flyout', () => {
       before(async () => {
         await setHostViewEnabled(true);

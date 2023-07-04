@@ -42,7 +42,7 @@ export const Content = ({
           nodeType={nodeType}
           onTabsStateChange={(tabId: TabIds) => onChange({ activeTabId: tabId })}
           dataView={overrides?.overview?.dataView}
-          dateRange={overrides?.overview?.dateRange!}
+          dateRange={overrides?.overview?.dateRange}
         />
       </TabPanel>
       <TabPanel activeWhen={FlyoutTabIds.LOGS}>

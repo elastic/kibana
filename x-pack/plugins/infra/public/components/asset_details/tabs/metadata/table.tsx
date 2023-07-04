@@ -7,20 +7,16 @@
 
 import {
   EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
   EuiInMemoryTable,
   EuiSearchBarProps,
   type HorizontalAlignment,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import useToggle from 'react-use/lib/useToggle';
 import { debounce } from 'lodash';
 import { Query } from '@elastic/eui';
 import { AddMetadataFilterButton } from './add_metadata_filter_button';
+import { ExpandableContent } from '../../components/expandable_content';
 
 interface Row {
   name: string;
@@ -162,56 +158,5 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
         )
       }
     />
-  );
-};
-
-interface ExpandableContentProps {
-  values: string | string[] | undefined;
-}
-export const ExpandableContent = (props: ExpandableContentProps) => {
-  const { values } = props;
-  const [isExpanded, toggle] = useToggle(false);
-
-  const list = Array.isArray(values) ? values : [values];
-  const [first, ...others] = list;
-  const hasOthers = others.length > 0;
-  const shouldShowMore = hasOthers && !isExpanded;
-
-  return (
-    <EuiFlexGroup
-      gutterSize={'xs'}
-      responsive={false}
-      alignItems={'baseline'}
-      wrap={true}
-      direction="column"
-    >
-      <div>
-        {first}
-        {shouldShowMore && (
-          <>
-            {' ... '}
-            <EuiLink data-test-subj="infraExpandableContentCountMoreLink" onClick={toggle}>
-              <FormattedMessage
-                id="xpack.infra.nodeDetails.tabs.metadata.seeMore"
-                defaultMessage="+{count} more"
-                values={{
-                  count: others.length,
-                }}
-              />
-            </EuiLink>
-          </>
-        )}
-      </div>
-      {isExpanded && others.map((item, index) => <EuiFlexItem key={index}>{item}</EuiFlexItem>)}
-      {hasOthers && isExpanded && (
-        <EuiFlexItem>
-          <EuiLink data-test-subj="infraExpandableContentShowLessLink" onClick={toggle}>
-            {i18n.translate('xpack.infra.nodeDetails.tabs.metadata.seeLess', {
-              defaultMessage: 'Show less',
-            })}
-          </EuiLink>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
   );
 };

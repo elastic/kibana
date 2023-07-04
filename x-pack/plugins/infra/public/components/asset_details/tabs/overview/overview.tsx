@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { StringDateRange } from '../../../../pages/metrics/hosts/hooks/use_unified_search_url_state';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { findInventoryModel } from '../../../../../common/inventory_models';
 import type { MetricsTimeInput } from '../../../../pages/metrics/metric_detail/hooks/use_metrics_time';
@@ -18,7 +17,7 @@ import { useMetadata } from '../../hooks/use_metadata';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { MetadataSummary } from './metadata_summary';
 import { KPIGrid } from './kpi_grid';
-import type { TabIds } from '../../types';
+import type { StringDateRange, TabIds } from '../../types';
 
 export interface MetadataSearchUrlState {
   metadataSearchUrlState: string;
@@ -26,7 +25,7 @@ export interface MetadataSearchUrlState {
 }
 
 export interface KPIProps {
-  dateRange: StringDateRange;
+  dateRange?: StringDateRange;
   dataView?: DataView;
 }
 export interface OverviewProps extends KPIProps {
@@ -35,6 +34,12 @@ export interface OverviewProps extends KPIProps {
   nodeType: InventoryItemType;
   onTabsStateChange?: (tabId: TabIds) => void;
 }
+
+const DEFAULT_DATE_RANGE = {
+  from: 'now-15m',
+  to: 'now',
+  mode: 'absolute' as const,
+};
 
 export const Overview = ({
   nodeName,
@@ -55,7 +60,7 @@ export const Overview = ({
   if (fetchMetadataError) {
     return (
       <EuiCallOut
-        title={i18n.translate('xpack.infra.metadataEmbeddable.errorTitle', {
+        title={i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.errorTitle', {
           defaultMessage: 'Sorry, there was an error',
         })}
         color="danger"
@@ -63,7 +68,7 @@ export const Overview = ({
         data-test-subj="infraMetadataErrorCallout"
       >
         <FormattedMessage
-          id="xpack.infra.metadataEmbeddable.errorMessage"
+          id="xpack.infra.assetDetailsEmbeddable.overview.errorMessage"
           defaultMessage="There was an error loading your data. Try to {reload} and open the host details again."
           values={{
             reload: (
@@ -71,7 +76,7 @@ export const Overview = ({
                 data-test-subj="infraMetadataReloadPageLink"
                 onClick={() => window.location.reload()}
               >
-                {i18n.translate('xpack.infra.metadataEmbeddable.errorAction', {
+                {i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.errorAction', {
                   defaultMessage: 'reload the page',
                 })}
               </EuiLink>
@@ -85,7 +90,11 @@ export const Overview = ({
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
-        <KPIGrid nodeName={nodeName} dateRange={dateRange} dataView={dataView} />
+        <KPIGrid
+          nodeName={nodeName}
+          dateRange={dateRange ?? DEFAULT_DATE_RANGE}
+          dataView={dataView}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <MetadataSummary
