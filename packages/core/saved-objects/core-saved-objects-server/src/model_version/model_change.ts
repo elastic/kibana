@@ -7,7 +7,10 @@
  */
 
 import type { SavedObjectsMappingProperties } from '../mapping_definition';
-import type { SavedObjectModelDataBackfillFn } from './transformations';
+import type {
+  SavedObjectModelDataBackfillFn,
+  SavedObjectModelUnsafeTransformFn,
+} from './transformations';
 
 /**
  * Represents a change of model associated with a given {@link SavedObjectsModelVersion}.
@@ -16,13 +19,17 @@ import type { SavedObjectModelDataBackfillFn } from './transformations';
  *   - 'mappings_addition' ({@link SavedObjectsModelMappingsAdditionChange}
  *   - 'mappings_deprecation' ({@link SavedObjectsModelMappingsDeprecationChange}
  *   - 'data_backfill' ({@link SavedObjectsModelDataBackfillChange}
+ *   - 'data_removal' ({@link SavedObjectsModelDataRemovalChange})
+ *   - 'unsafe_transform' ({@link SavedObjectsModelUnsafeTransformChange})
  *
  * @public
  */
 export type SavedObjectsModelChange =
   | SavedObjectsModelMappingsAdditionChange
   | SavedObjectsModelMappingsDeprecationChange
-  | SavedObjectsModelDataBackfillChange;
+  | SavedObjectsModelDataBackfillChange
+  | SavedObjectsModelDataRemovalChange
+  | SavedObjectsModelUnsafeTransformChange;
 
 /**
  * A {@link SavedObjectsModelChange | model change} adding new mappings.
@@ -85,8 +92,7 @@ export interface SavedObjectsModelMappingsDeprecationChange {
  * let change: SavedObjectsModelDataBackfillChange = {
  *   type: 'data_backfill',
  *   transform: (document) => {
- *     document.attributes.someAddedField = 'defaultValue';
- *     return { document };
+ *     return { someAddedField: 'defaultValue' };
  *   },
  * };
  * ```
@@ -103,5 +109,53 @@ export interface SavedObjectsModelDataBackfillChange<
   /**
    * The backfill function to run.
    */
-  transform: SavedObjectModelDataBackfillFn<PreviousAttributes, NewAttributes>;
+  backfillFn: SavedObjectModelDataBackfillFn<PreviousAttributes, NewAttributes>;
+}
+
+/**
+ * A {@link SavedObjectsModelChange | model change} used to TODO.
+ *
+ * @example TODO: change
+ * ```ts
+ * let change: SavedObjectsModelDataRemovalChange = {
+ *   type: 'data_removal',
+ *   attributePaths: ['someRootAttributes', 'some.nested.attribute'],
+ * };
+ * ```
+ *
+ * @remark TODO
+ */
+export interface SavedObjectsModelDataRemovalChange {
+  type: 'data_removal';
+  /**
+   * The list of removed attribute's paths.
+   */
+  removedAttributePaths: string[];
+}
+
+/**
+ * A {@link SavedObjectsModelChange | model change} used to TODO.
+ *
+ * @example TODO: change
+ * ```ts
+ * let change: SavedObjectsModelDataBackfillChange = {
+ *   type: 'data_backfill',
+ *   transform: (document) => {
+ *     document.attributes.someAddedField = 'defaultValue';
+ *     return { document };
+ *   },
+ * };
+ * ```
+ *
+ * @remark TODO
+ */
+export interface SavedObjectsModelUnsafeTransformChange<
+  PreviousAttributes = any,
+  NewAttributes = any
+> {
+  type: 'unsafe_transform';
+  /**
+   * The backfill function to run.
+   */
+  transformFn: SavedObjectModelUnsafeTransformFn<PreviousAttributes, NewAttributes>;
 }
