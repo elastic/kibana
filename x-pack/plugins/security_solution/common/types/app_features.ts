@@ -7,7 +7,11 @@
 
 export enum AppFeatureSecurityKey {
   /**
-   * Enables Advanced Insights (Entity Risk, GenAI)
+   * Enables Security Gen AI Assistant.
+   */
+  genAIAssistant = 'gen_AI_assistant',
+  /**
+   * Enables Advanced Insights (Entity Risk).
    */
   advancedInsights = 'advanced_insights',
   /**

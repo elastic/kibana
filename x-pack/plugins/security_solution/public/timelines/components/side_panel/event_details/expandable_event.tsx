@@ -40,6 +40,7 @@ import {
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useGetAlertDetailsFlyoutLink } from './use_get_alert_details_flyout_link';
+import { useIsAssistantEnabled } from '../../../../assistant/helpers';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -96,7 +97,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
     ruleName,
     timestamp,
   }) => {
-    const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
+    const isAssistantEnabled = useIsAssistantEnabled();
     const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
     const { onClick } = useGetSecuritySolutionLinkProps()({
       deepLinkId: SecurityPageName.alerts,

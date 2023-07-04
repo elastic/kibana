@@ -38,7 +38,6 @@ import { useLocalStorage } from '../../common/components/local_storage';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { DEFAULT_BYTES_FORMAT, DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import {
   KibanaServices,
   useGetUserCasesPermissions,
@@ -49,6 +48,7 @@ import {
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as i18n from './translations';
+import { useIsAssistantEnabled } from '../../assistant/helpers';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';
 
@@ -129,7 +129,7 @@ const renderOption = (
 );
 
 const DataQualityComponent: React.FC = () => {
-  const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
+  const isAssistantEnabled = useIsAssistantEnabled();
   const httpFetch = KibanaServices.get().http.fetch;
   const { baseTheme, theme } = useThemes();
   const toasts = useToasts();

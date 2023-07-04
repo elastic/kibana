@@ -148,13 +148,16 @@ export const getSecurityAppFeaturesConfig = (
           ui: ['entity-analytics'],
           api: [`${APP_ID}-entity-analytics`],
         },
-        read: {
-          ui: ['entity-analytics'],
-          api: [`${APP_ID}-entity-analytics`],
+      },
+    },
+    [AppFeatureSecurityKey.genAIAssistant]: {
+      privileges: {
+        all: {
+          ui: ['assistant'],
+          api: [`${APP_ID}-assistant`],
         },
       },
     },
-
     [AppFeatureSecurityKey.endpointResponseActions]: {
       subFeatureIds: [
         SecuritySubFeatureId.processOperations,

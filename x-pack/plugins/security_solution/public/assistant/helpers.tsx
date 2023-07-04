@@ -13,6 +13,8 @@ import React from 'react';
 import type { TimelineEventsDetailsItem } from '../../common/search_strategy';
 import type { Rule } from '../detection_engine/rule_management/logic';
 import { SendToTimelineButton } from './send_to_timeline';
+import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
+import { useHasSecurityCapability } from '../helper_hooks';
 
 export const LOCAL_STORAGE_KEY = `securityAssistant`;
 
@@ -94,4 +96,10 @@ export const augmentMessageCodeBlocks = (
       ),
     }))
   );
+};
+
+export const useIsAssistantEnabled = () => {
+  const isFeatureEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
+  const hasCapability = useHasSecurityCapability('assistant');
+  return isFeatureEnabled && hasCapability;
 };

@@ -8,14 +8,16 @@
 import { NewChat } from '@kbn/elastic-assistant';
 import React, { useCallback, useMemo } from 'react';
 
-import { getPromptContextFromDetectionRules } from '../../../../assistant/helpers';
+import {
+  getPromptContextFromDetectionRules,
+  useIsAssistantEnabled,
+} from '../../../../assistant/helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRulesTableContext } from '../../components/rules_table/rules_table/rules_table_context';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 
 export const SuperHeader: React.FC<{ children: React.ReactNode }> = React.memo(({ children }) => {
-  const isAssistantEnabled = useIsExperimentalFeatureEnabled('assistantEnabled');
+  const isAssistantEnabled = useIsAssistantEnabled();
   const memoizedChildren = useMemo(() => children, [children]);
   // Rules state
   const {
