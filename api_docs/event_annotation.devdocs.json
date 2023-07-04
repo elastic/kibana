@@ -312,6 +312,38 @@
           },
           {
             "parentPluginId": "eventAnnotation",
+            "id": "def-public.EventAnnotationServiceType.groupExistsWithTitle",
+            "type": "Function",
+            "tags": [],
+            "label": "groupExistsWithTitle",
+            "description": [],
+            "signature": [
+              "(title: string) => Promise<boolean>"
+            ],
+            "path": "src/plugins/event_annotation/public/event_annotation_service/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "eventAnnotation",
+                "id": "def-public.EventAnnotationServiceType.groupExistsWithTitle.$1",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/event_annotation/public/event_annotation_service/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventAnnotation",
             "id": "def-public.EventAnnotationServiceType.findAnnotationGroupContent",
             "type": "Function",
             "tags": [],

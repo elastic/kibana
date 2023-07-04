@@ -29,7 +29,6 @@ import { CronMonthly } from './cron_monthly';
 import { CronWeekly } from './cron_weekly';
 import { CronYearly } from './cron_yearly';
 import { cronExpressionToParts, cronPartsToExpression } from './services';
-import { convertFromEveryXMinute, convertToEveryXMinute } from './services/cron';
 import { Frequency, Field, FieldToValueMap } from './types';
 
 const excludeBlockListedFrequencies = (
@@ -80,20 +79,14 @@ export class CronEditor extends Component<Props, State> {
   }
 
   onChangeFrequency = (frequency: Frequency) => {
-    const { onChange, fieldToPreferredValueMap, frequency: oldFrequency } = this.props;
+    const { onChange, fieldToPreferredValueMap } = this.props;
 
     // Update fields which aren't editable with acceptable baseline values.
     const editableFields = Object.keys(frequencyToFieldsMap[frequency]) as Field[];
     const inheritedFields = editableFields.reduce<FieldToValueMap>(
       (fieldBaselines, field) => {
         if (fieldToPreferredValueMap[field] != null) {
-          if (oldFrequency === 'MINUTE') {
-            fieldBaselines[field] = convertFromEveryXMinute(fieldToPreferredValueMap[field]);
-          } else if (frequency === 'MINUTE') {
-            fieldBaselines[field] = convertToEveryXMinute(fieldToPreferredValueMap[field]);
-          } else {
-            fieldBaselines[field] = fieldToPreferredValueMap[field];
-          }
+          fieldBaselines[field] = fieldToPreferredValueMap[field];
         }
         return fieldBaselines;
       },
