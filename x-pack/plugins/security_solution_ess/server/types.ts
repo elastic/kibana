@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   PluginSetup as SecuritySolutionPluginSetup,
   PluginStart as SecuritySolutionPluginStart,
 } from '@kbn/security-solution-plugin/server';

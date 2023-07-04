@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
 import { DEFAULT_APP_FEATURES } from './constants';
 
-import {
+import type {
   SecuritySolutionEssPluginSetup,
   SecuritySolutionEssPluginStart,
   SecuritySolutionEssPluginSetupDeps,
@@ -24,8 +24,6 @@ export class SecuritySolutionEssPlugin
       SecuritySolutionEssPluginStartDeps
     >
 {
-  constructor() {}
-
   public setup(_coreSetup: CoreSetup, pluginsSetup: SecuritySolutionEssPluginSetupDeps) {
     pluginsSetup.securitySolution.setAppFeatures(DEFAULT_APP_FEATURES);
     return {};

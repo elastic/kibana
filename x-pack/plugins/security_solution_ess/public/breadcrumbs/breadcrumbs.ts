@@ -6,7 +6,7 @@
  */
 
 import type { PluginStart as SecuritySolutionPluginStart } from '@kbn/security-solution-plugin/public';
-import { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
+import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 
 export const subscribeBreadcrumbs = (
   securitySolution: SecuritySolutionPluginStart,

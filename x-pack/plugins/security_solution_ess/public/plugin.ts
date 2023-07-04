@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { subscribeBreadcrumbs } from './breadcrumbs';
 import { getSecurityGetStartedComponent } from './get_started';
-import {
+import type {
   SecuritySolutionEssPluginSetup,
   SecuritySolutionEssPluginStart,
   SecuritySolutionEssPluginSetupDeps,
@@ -24,8 +24,6 @@ export class SecuritySolutionEssPlugin
       SecuritySolutionEssPluginStartDeps
     >
 {
-  constructor() {}
-
   public setup(
     _core: CoreSetup,
     _setupDeps: SecuritySolutionEssPluginSetupDeps

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
 import { APP_PATH } from '@kbn/security-solution-plugin/common';
-import { getSecurityGetStartedComponent } from './components/get_started';
-import { getSecuritySideNavComponent } from './components/side_navigation';
-import {
+import { getSecurityGetStartedComponent } from './get_started';
+import { getSecuritySideNavComponent } from './navigation/side_navigation';
+import type {
   SecuritySolutionServerlessPluginSetup,
   SecuritySolutionServerlessPluginStart,
   SecuritySolutionServerlessPluginSetupDeps,
   SecuritySolutionServerlessPluginStartDeps,
   ServerlessSecurityPublicConfig,
 } from './types';
-import { registerUpsellings } from './components/upselling';
+import { registerUpsellings } from './upselling';
 import { createServices } from './common/services';
-import { subscribeNavigationTree } from './common/navigation/navigation_tree';
-import { subscribeBreadcrumbs } from './common/navigation/breadcrumbs';
+import { subscribeNavigationTree } from './navigation/navigation_tree';
+import { subscribeBreadcrumbs } from './navigation/breadcrumbs';
 
 export class SecuritySolutionServerlessPlugin
   implements

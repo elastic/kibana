@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { SecuritySolutionServerlessPlugin } from './plugin';
 
 // This exports static code and TypeScript types,

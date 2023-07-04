@@ -13,7 +13,7 @@ import {
 } from '@kbn/kibana-react-plugin/public';
 
 import type { SecuritySolutionServerlessPluginStartDeps } from '../types';
-import { getProjectNavLinks$, type ProjectNavLinks } from './navigation/links';
+import { getProjectNavLinks$, type ProjectNavLinks } from '../navigation/links';
 
 interface InternalServices {
   getProjectNavLinks$: () => ProjectNavLinks;

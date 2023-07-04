@@ -6,16 +6,19 @@
  */
 import React from 'react';
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { KibanaServicesProvider } from '../services';
-import { SecuritySolutionEssPluginStartDeps } from '../types';
+import type { SecuritySolutionEssPluginStartDeps } from '../types';
 import { GetStarted } from './lazy';
 
-export const getSecurityGetStartedComponent =
-  (core: CoreStart, pluginsStart: SecuritySolutionEssPluginStartDeps): React.ComponentType =>
-  () =>
-    (
+export const getSecurityGetStartedComponent = (
+  core: CoreStart,
+  pluginsStart: SecuritySolutionEssPluginStartDeps
+) =>
+  function GetStartedComponent() {
+    return (
       <KibanaServicesProvider core={core} pluginsStart={pluginsStart}>
         <GetStarted />
       </KibanaServicesProvider>
     );
+  };

@@ -12,8 +12,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
-  EuiThemeComputed,
   useEuiTheme,
+  type EuiThemeComputed,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ADD_DATA_PATH } from '@kbn/security-solution-plugin/common';

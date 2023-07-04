@@ -11,15 +11,13 @@
     "server/**/*.ts",
     "../../../typings/**/*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/security-solution-plugin",
     "@kbn/i18n",
     "@kbn/cloud-experiments-plugin",
-    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-react-plugin"
   ]
 }
