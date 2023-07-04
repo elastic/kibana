@@ -106,11 +106,8 @@ export type SavedObjectModelDataBackfillFn<
 ) => SavedObjectModelDataBackfillResult<OutputAttributes>;
 
 /**
- * A data backfill function associated with a {@link SavedObjectsModelDataBackfillChange | data backfill} change.
+ * A data transformation function associated with a {@link SavedObjectsModelUnsafeTransformChange | unsafe transform} change.
  *
- * @remark Such transformation functions should only be used to backfill newly introduced fields.
- *         Even if no check is performed to ensure that, using such transformations to mutate
- *         existing data of the document can lead to data corruption or inconsistency.
  * @public
  */
 export type SavedObjectModelUnsafeTransformFn<
