@@ -394,6 +394,7 @@ Your limitations:
 - Use a temperature of 0.3
 - Do not use info from previous prompts
 - Only respond with the info requested on the sentences that start with the word Display, do not show original Display sentence
+- Do not include a summary
 - You will respond with the indicated templates filling variables, if any of the variables are empty do not include that line in the response
 
 The current active alerts in the system are represented in the following table with csv format separated by semicolon. Pick only one alert based on the following conditions:
@@ -415,7 +416,7 @@ C being the Alert uuid value, concatenated after the string "http://localhost:56
 D being the reasoning why this alert is the most urgent between all of the alerts
 E being the summary in text of Case names values, Case status column value, Case severity column value and Case updatedAt column values
 I being a summary you generate about the properties of the Case
-J being a summary of other alerts that belong to the same "case name" or "rule name"
+J being which alerts belong to the same case or rule as the selected alert, include their alert id
 
 ${header}
 ${rows}
