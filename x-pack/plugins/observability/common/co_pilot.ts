@@ -412,10 +412,10 @@ Display the selected alert row using the following template, if any of the varia
 A being the alert Reason column value
 B being a way to start the remediation of the alert for an SRE using Elastic Observability
 C being the Alert uuid value, concatenated after the string "http://localhost:5601/kibana/app/observability/alerts/"
-D being the reasoning why this alert was chosen and what makes it urgent
+D being the reasoning why this alert is the most urgent between all of the alerts
 E being the summary in text of Case names values, Case status column value, Case severity column value and Case updatedAt column values
 I being a summary you generate about the properties of the Case
-J being a summary of other alerts that are related through the same case names or rule names
+J being a summary of other alerts that belong to the same "case name" or "rule name"
 
 ${header}
 ${rows}
