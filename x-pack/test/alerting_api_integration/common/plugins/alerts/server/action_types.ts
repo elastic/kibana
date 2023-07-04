@@ -74,7 +74,12 @@ export function defineActionTypes(
   actions.registerType(getNoAttemptsRateLimitedActionType());
   actions.registerType(getAuthorizationActionType(core));
   actions.registerType(getExcludedActionType());
+
+  /**
+   * System actions
+   */
   actions.registerType(getSystemActionType());
+  actions.registerType(getSystemActionTypeWithKibanaPrivileges());
 
   /** Sub action framework */
 
@@ -407,6 +412,37 @@ function getSystemActionType() {
     name: 'Test system action',
     minimumLicenseRequired: 'platinum',
     supportedFeatureIds: ['alerting'],
+    validate: {
+      params: {
+        schema: schema.any(),
+      },
+      config: {
+        schema: schema.any(),
+      },
+      secrets: {
+        schema: schema.any(),
+      },
+    },
+    isSystemActionType: true,
+    async executor({ config, secrets, params, services, actionId }) {
+      return { status: 'ok', actionId };
+    },
+  };
+
+  return result;
+}
+
+function getSystemActionTypeWithKibanaPrivileges() {
+  const result: ActionType<{}, {}, {}> = {
+    id: 'test.system-action-kibana-privileges',
+    name: 'Test system action with kibana privileges',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    /**
+     * Requires all access to the case feature
+     * in Stack management
+     */
+    kibanaPrivileges: ['cases:cases/createCase'],
     validate: {
       params: {
         schema: schema.any(),
