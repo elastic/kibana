@@ -26,7 +26,7 @@ import { ManagementSetup, ManagementStart, NavigationCardsSubject } from './type
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
 import { ManagementAppLocatorDefinition } from '../common/locator';
-import { ConfigSchema } from './';
+import { ConfigSchema } from '.';
 import {
   ManagementSectionsService,
   getSectionsServiceStartPrivate,
