@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+
+import React, { useState } from 'react';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { useActor } from '@xstate/react';
 import { DatasetSelector } from '../components/dataset_selector';
