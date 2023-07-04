@@ -132,6 +132,11 @@ const updateSignalsStatusByIds = async (
     ]),
   });
 
+/**
+ * Please avoid using `updateSignalsStatusByQuery` when possible, use `updateSignalsStatusByIds` instead.
+ *
+ * This method calls `updateByQuery` with `refresh: true` which is expensive on serverless.
+ */
 const updateSignalsStatusByQuery = async (
   status: SetSignalsStatusSchemaDecoded['status'],
   query: object | undefined,
