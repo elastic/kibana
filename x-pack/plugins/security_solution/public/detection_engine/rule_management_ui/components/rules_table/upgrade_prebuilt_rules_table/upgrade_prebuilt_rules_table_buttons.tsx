@@ -12,7 +12,7 @@ import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_ta
 
 export const UpgradePrebuiltRulesTableButtons = () => {
   const {
-    state: { rules, selectedRules, loadingRules },
+    state: { rules, selectedRules, loadingRules, isRefetching, isUpgradingSecurityPackages },
     actions: { upgradeAllRules, upgradeSelectedRules },
   } = useUpgradePrebuiltRulesTableContext();
 
@@ -21,12 +21,17 @@ export const UpgradePrebuiltRulesTableButtons = () => {
   const shouldDisplayUpgradeSelectedRulesButton = numberOfSelectedRules > 0;
 
   const isRuleUpgrading = loadingRules.length > 0;
+  const isRequestInProgress = isRuleUpgrading || isRefetching || isUpgradingSecurityPackages;
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
       {shouldDisplayUpgradeSelectedRulesButton ? (
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={upgradeSelectedRules} disabled={isRuleUpgrading}>
+          <EuiButton
+            onClick={upgradeSelectedRules}
+            disabled={isRequestInProgress}
+            data-test-subj="upgradeSelectedRulesButton"
+          >
             <>
               {i18n.UPDATE_SELECTED_RULES(numberOfSelectedRules)}
               {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}
@@ -39,7 +44,8 @@ export const UpgradePrebuiltRulesTableButtons = () => {
           fill
           iconType="plusInCircle"
           onClick={upgradeAllRules}
-          disabled={!isRulesAvailableForUpgrade || isRuleUpgrading}
+          disabled={!isRulesAvailableForUpgrade || isRequestInProgress}
+          data-test-subj="upgradeAllRulesButton"
         >
           {i18n.UPDATE_ALL}
           {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : undefined}

@@ -34,7 +34,7 @@ export interface SessionViewDeps {
     // Callback used when alert flyout panel is closed
     handleOnAlertDetailsClosed: () => void
   ) => void;
-  canAccessEndpointManagement?: boolean;
+  canReadPolicyManagement?: boolean;
 }
 
 export interface EuiTabProps {

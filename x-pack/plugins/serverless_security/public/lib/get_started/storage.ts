@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { CardId, ProductId, StepId } from '../../components/get_started/types';
+import { ProductLine } from '../../../common/config';
+import { CardId, StepId } from '../../components/get_started/types';
 import { storage } from '../storage';
 
 export const ACTIVE_PRODUCTS_STORAGE_KEY = 'ACTIVE_PRODUCTS';
@@ -13,12 +14,12 @@ export const FINISHED_STEPS_STORAGE_KEY = 'FINISHED_STEPS';
 
 export const getStartedStorage = {
   getActiveProductsFromStorage: () => {
-    const activeProducts: ProductId[] = storage.get(ACTIVE_PRODUCTS_STORAGE_KEY);
+    const activeProducts: ProductLine[] = storage.get(ACTIVE_PRODUCTS_STORAGE_KEY);
     return activeProducts ?? new Array();
   },
-  toggleActiveProductsInStorage: (productId: ProductId) => {
-    const activeProducts: ProductId[] =
-      storage.get(ACTIVE_PRODUCTS_STORAGE_KEY) ?? new Array<ProductId>();
+  toggleActiveProductsInStorage: (productId: ProductLine) => {
+    const activeProducts: ProductLine[] =
+      storage.get(ACTIVE_PRODUCTS_STORAGE_KEY) ?? new Array<ProductLine>();
     const index = activeProducts.indexOf(productId);
     if (index < 0) {
       activeProducts.push(productId);

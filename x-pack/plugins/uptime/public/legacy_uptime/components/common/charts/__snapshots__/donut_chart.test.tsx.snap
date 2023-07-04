@@ -50,6 +50,14 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   "visible": true,
                 },
               },
+              "isolatedPoint": Object {
+                "fill": "white",
+                "opacity": 1,
+                "radius": 2,
+                "stroke": "__use__series__color__",
+                "strokeWidth": 1,
+                "visible": true,
+              },
               "line": Object {
                 "opacity": 1,
                 "strokeWidth": 1,
@@ -59,6 +67,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
+                "stroke": "__use__series__color__",
                 "strokeWidth": 1,
                 "visible": false,
               },
@@ -397,6 +406,14 @@ exports[`DonutChart component passes correct props without errors for valid prop
                   "visible": true,
                 },
               },
+              "isolatedPoint": Object {
+                "fill": "white",
+                "opacity": 1,
+                "radius": 2,
+                "stroke": "__use__series__color__",
+                "strokeWidth": 1,
+                "visible": true,
+              },
               "line": Object {
                 "opacity": 1,
                 "strokeWidth": 1,
@@ -406,6 +423,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "fill": "white",
                 "opacity": 1,
                 "radius": 2,
+                "stroke": "__use__series__color__",
                 "strokeWidth": 1,
                 "visible": true,
               },
@@ -788,20 +806,24 @@ exports[`DonutChart component renders a donut chart 1`] = `
       style="width:125px;height:125px"
     >
       <div
-        class="echChartBackground"
-        style="background-color:transparent"
-      />
-      <div
-        class="echChartStatus"
-        data-ech-render-complete="false"
-        data-ech-render-count="0"
-      />
-      <div
-        class="echChartResizer"
-      />
-      <div
-        class="echContainer"
-      />
+        class="echChartContent"
+      >
+        <div
+          class="echChartBackground"
+          style="background-color:transparent"
+        />
+        <div
+          class="echChartStatus"
+          data-ech-render-complete="false"
+          data-ech-render-count="0"
+        />
+        <div
+          class="echChartResizer"
+        />
+        <div
+          class="echContainer"
+        />
+      </div>
     </div>
   </div>
   <div
@@ -939,20 +961,24 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
       style="width:125px;height:125px"
     >
       <div
-        class="echChartBackground"
-        style="background-color:transparent"
-      />
-      <div
-        class="echChartStatus"
-        data-ech-render-complete="false"
-        data-ech-render-count="0"
-      />
-      <div
-        class="echChartResizer"
-      />
-      <div
-        class="echContainer"
-      />
+        class="echChartContent"
+      >
+        <div
+          class="echChartBackground"
+          style="background-color:transparent"
+        />
+        <div
+          class="echChartStatus"
+          data-ech-render-complete="false"
+          data-ech-render-count="0"
+        />
+        <div
+          class="echChartResizer"
+        />
+        <div
+          class="echContainer"
+        />
+      </div>
     </div>
     <span
       class="c0 greenCheckIcon"
