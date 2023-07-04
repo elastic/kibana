@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-/* eslint-disable react-hooks/exhaustive-deps */
-
-import React, { useState } from 'react';
-import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import React from 'react';
 import { useActor } from '@xstate/react';
 import { DatasetSelector } from '../components/dataset_selector';
 import { DatasetsProvider, useDatasetsContext } from '../hooks/use_datasets';
-import { InternalStateProvider } from '../hooks/use_data_view';
 import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
 import { IDatasetsClient } from '../services/datasets';
 import { DatasetSelectionChange } from '../utils/dataset_selection';
@@ -82,23 +78,19 @@ export default CustomDatasetSelector;
 
 export type CustomDatasetSelectorBuilderProps = CustomDatasetSelectorProps & {
   datasetsClient: IDatasetsClient;
-  stateContainer: DiscoverStateContainer;
 };
 
 function withProviders(Component: React.FunctionComponent<CustomDatasetSelectorProps>) {
   return function ComponentWithProviders({
     logExplorerProfileStateService,
-    stateContainer,
     datasetsClient,
   }: CustomDatasetSelectorBuilderProps) {
     return (
-      <InternalStateProvider value={stateContainer.internalState}>
-        <IntegrationsProvider datasetsClient={datasetsClient}>
-          <DatasetsProvider datasetsClient={datasetsClient}>
-            <Component logExplorerProfileStateService={logExplorerProfileStateService} />
-          </DatasetsProvider>
-        </IntegrationsProvider>
-      </InternalStateProvider>
+      <IntegrationsProvider datasetsClient={datasetsClient}>
+        <DatasetsProvider datasetsClient={datasetsClient}>
+          <Component logExplorerProfileStateService={logExplorerProfileStateService} />
+        </DatasetsProvider>
+      </IntegrationsProvider>
     );
   };
 }

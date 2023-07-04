@@ -47,7 +47,6 @@ export const createLogExplorerProfileCustomizations =
         <LazyCustomDatasetSelector
           datasetsClient={datasetsService.client}
           logExplorerProfileStateService={logExplorerProfileStateService}
-          stateContainer={stateContainer}
         />
       ),
     });
