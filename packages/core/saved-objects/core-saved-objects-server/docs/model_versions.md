@@ -647,3 +647,211 @@ const myType: SavedObjectsType = {
 ```
 
 **Note:**  *if the field was non-indexed, we would just not use the `mappings_addition` change or update the mappings (as done in example 1)*
+
+### Removing an existing field
+
+We are currently in model version 1, and our type has 2 indexed fields defined: `kept` and `removed`.
+
+The definition of the type at version 1 would look like:
+
+```ts
+const myType: SavedObjectsType = {
+  name: 'test',
+  namespaceType: 'single',
+  switchToModelVersionAt: '8.10.0',
+  modelVersions: {
+    // initial (and current) model version
+    1: {
+      changes: [],
+      schemas: {
+        // FC schema defining the known fields (indexed or not) for this version
+        forwardCompatibility: schema.object(
+          { kept: schema.string(), removed: schema.string() },
+          { unknowns: 'ignore' } // note the `unknown: ignore` which is how we're evicting the unknown fields
+        ),
+        // schema that will be used to validate input during `create` and `bulkCreate`
+        create:  schema.object(
+          { kept: schema.string(), removed: schema.string() },
+        )
+      },
+    },
+  },
+  mappings: {
+    properties: {
+      kept: { type: 'text' },
+      removed: { type: 'text' },
+    },
+  },
+};
+```
+
+From here, say we want to remove the `removed` field, as our application doesn't need it anymore since a recent change.
+
+The first thing to understand here is the impact toward backward compatibility:
+Say that Kibana version `X` was still using this field, and that we stopped utilizing the field in version `X+1`.
+
+We can't remove the data in version `X+1`, as we need to be able to rollback to the prior version at **any time**. 
+If we were to delete the data of this `removed` field during the upgrade to version `X+1`, and if then, for any reason,
+we'll need to rollback to version `X`,  it would cause a data loss, as version `X` was still using this field, but it is
+no longer present in our document. It would put the rollback at risk.
+
+Which is why we need to perform field removal as a 2-step operation:
+- release `X`: Kibana still utilize the field
+- release `X+1`: Kibana no longer utilize the field, but the data is still present in the documents
+- release `X+2`: The data is effectively deleted from the documents.
+
+That way, any one-version rollback (`X+2` to `X+1` **or** `X+1` to `X` is safe in term of data integrity)
+
+The main question then, is what's the best way of having our application layer simply ignore this `removed` field during version `X+1`,
+as we don't want this field (now non-utilized) to be returned from the persistence layer, as it could "pollute" the higher-layers
+where the field is effectively no longer used or even known.
+
+This can easily be done by introducing a new version and using the `forwardCompatibility` schema to "shallow" the field.
+
+The added model version would look like:
+
+```ts
+// the new model version ignoring the `removed` field
+let modelVersion2: SavedObjectsModelVersion = {
+  changes: [],
+  schemas: {
+    forwardCompatibility: schema.object(
+      { kept: schema.string() }, // `removed` is no longer defined here
+      { unknowns: 'ignore' }
+    ),
+    create:  schema.object(
+      { kept: schema.string() }, // `removed` is no longer defined here
+    )
+  },
+};
+```
+
+The full type definition after the addition of the new model version:
+
+```ts
+const myType: SavedObjectsType = {
+  name: 'test',
+  namespaceType: 'single',
+  switchToModelVersionAt: '8.10.0',
+  modelVersions: {
+    // initial (and current) model version
+    1: {
+      changes: [],
+      schemas: {
+        // FC schema defining the known fields (indexed or not) for this version
+        forwardCompatibility: schema.object(
+          { kept: schema.string(), removed: schema.string() },
+          { unknowns: 'ignore' } // note the `unknown: ignore` which is how we're evicting the unknown fields
+        ),
+        // schema that will be used to validate input during `create` and `bulkCreate`
+        create:  schema.object(
+          { kept: schema.string(), removed: schema.string() },
+        )
+      },
+    },
+    2: {
+      changes: [],
+      schemas: {
+        forwardCompatibility: schema.object(
+          { kept: schema.string() }, // `removed` is no longer defined here
+          { unknowns: 'ignore' }
+        ),
+        create:  schema.object(
+          { kept: schema.string() }, // `removed` is no longer defined here
+        )
+      },
+    }
+  },
+  mappings: {
+    properties: {
+      kept: { type: 'text' },
+      removed: { type: 'text' },
+    },
+  },
+};
+```
+
+then, in a **later** release, we can then deploy the change that will effectively remove the data from the documents:
+
+```ts
+// the new model version ignoring the `removed` field
+let modelVersion3: SavedObjectsModelVersion = {
+  changes: [ // define a data_removal change to delete the field
+    {
+      type: 'data_removal',
+      removedAttributePaths: ['removed']
+    }
+  ],
+  schemas: {
+    forwardCompatibility: schema.object(
+      { kept: schema.string() }, 
+      { unknowns: 'ignore' }
+    ),
+    create:  schema.object(
+      { kept: schema.string() }, 
+    )
+  },
+};
+```
+
+The full type definition after the data removal would look like:
+
+```ts
+const myType: SavedObjectsType = {
+  name: 'test',
+  namespaceType: 'single',
+  switchToModelVersionAt: '8.10.0',
+  modelVersions: {
+    // initial (and current) model version
+    1: {
+      changes: [],
+      schemas: {
+        // FC schema defining the known fields (indexed or not) for this version
+        forwardCompatibility: schema.object(
+          { kept: schema.string(), removed: schema.string() },
+          { unknowns: 'ignore' } // note the `unknown: ignore` which is how we're evicting the unknown fields
+        ),
+        // schema that will be used to validate input during `create` and `bulkCreate`
+        create:  schema.object(
+          { kept: schema.string(), removed: schema.string() },
+        )
+      },
+    },
+    2: {
+      changes: [],
+      schemas: {
+        forwardCompatibility: schema.object(
+          { kept: schema.string() }, // `removed` is no longer defined here
+          { unknowns: 'ignore' }
+        ),
+        create:  schema.object(
+          { kept: schema.string() }, // `removed` is no longer defined here
+        )
+      },
+    },
+    3: {
+      changes: [ // define a data_removal change to delete the field
+        {
+          type: 'data_removal',
+          removedAttributePaths: ['removed']
+        }
+      ],
+      schemas: {
+        forwardCompatibility: schema.object(
+          { kept: schema.string() },
+          { unknowns: 'ignore' }
+        ),
+        create:  schema.object(
+          { kept: schema.string() },
+        )
+      },
+    }
+  },
+  mappings: {
+    properties: {
+      kept: { type: 'text' },
+      removed: { type: 'text' },
+    },
+  },
+};
+```
