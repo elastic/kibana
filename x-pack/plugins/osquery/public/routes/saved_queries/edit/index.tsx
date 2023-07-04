@@ -19,14 +19,14 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
 
-import styled from 'styled-components';
+import { css } from '@emotion/css';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { EditSavedQueryForm } from './form';
 import { useDeleteSavedQuery, useUpdateSavedQuery, useSavedQuery } from '../../../saved_queries';
 
-const StyledEuiCallOut = styled(EuiCallOut)`
+const euiCalloutCss = css`
   margin: 10px;
 `;
 
@@ -88,12 +88,12 @@ const EditSavedQueryPageComponent = () => {
                     }}
                   />
                   {elasticPrebuiltQuery && (
-                    <StyledEuiCallOut size="s">
+                    <EuiCallOut css={euiCalloutCss} size="s">
                       <FormattedMessage
                         id="xpack.osquery.viewSavedQuery.prebuiltInfo"
                         defaultMessage="This is a prebuilt Elastic query, and it cannot be edited."
                       />
-                    </StyledEuiCallOut>
+                    </EuiCallOut>
                   )}
                 </>
               ) : (

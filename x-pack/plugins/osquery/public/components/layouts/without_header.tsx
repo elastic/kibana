@@ -6,36 +6,42 @@
  */
 
 import React, { Fragment } from 'react';
-import styled from 'styled-components';
 import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 
-export const Page = styled(EuiPage)`
-  background: ${(props) => props.theme.eui.euiColorEmptyShade};
-  width: 100%;
-  align-self: center;
-  margin-left: 0;
-  margin-right: 0;
-  flex: 1;
-`;
+export const pageCss = ({ theme }: { theme: EuiThemeComputed }) => ({
+  background: theme.colors.emptyShade,
+  width: '100%',
+  alignSelf: 'center',
+  marginLeft: 0,
+  marginRight: 0,
+  flex: 1,
+});
 
-export const ContentWrapper = styled.div`
-  height: 100%;
-`;
+export const contentCss = {
+  height: '100%',
+};
 
 interface Props {
   restrictWidth?: number;
   children?: React.ReactNode;
 }
 
-export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }) => (
-  <Fragment>
-    <Page restrictWidth={restrictWidth || 1200}>
-      <EuiPageBody>
-        <ContentWrapper>
-          <EuiSpacer size="m" />
-          {children}
-        </ContentWrapper>
-      </EuiPageBody>
-    </Page>
-  </Fragment>
-);
+export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }) => {
+  // console.log({ pageCss });
+
+  console.log('test1');
+
+  return (
+    <Fragment>
+      <EuiPage css={pageCss} restrictWidth={restrictWidth || 1200}>
+        <EuiPageBody>
+          <div css={contentCss}>
+            <EuiSpacer size="m" />
+            {children}
+          </div>
+        </EuiPageBody>
+      </EuiPage>
+    </Fragment>
+  );
+};

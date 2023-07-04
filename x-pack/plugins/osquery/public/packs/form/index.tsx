@@ -16,13 +16,14 @@ import {
   EuiBottomBar,
   EuiHorizontalRule,
   EuiAccordion,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 
-import styled from 'styled-components';
+import { css } from '@emotion/css';
 import { PackShardsField } from './shards/pack_shards_field';
 import { useRouterNavigate } from '../../common/lib/kibana';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
@@ -40,13 +41,6 @@ import { PackTypeSelectable } from './shards/pack_type_selectable';
 import { overflowCss } from '../utils';
 
 type PackFormData = Omit<PackItem, 'id' | 'queries'> & { queries: PackQueryFormData[] };
-
-const StyledEuiAccordion = styled(EuiAccordion)`
-  ${({ isDisabled }: { isDisabled?: boolean }) => isDisabled && 'display: none;'}
-  .euiAccordion__button {
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
-  }
-`;
 
 interface PackFormProps {
   defaultValue?: PackItem;
@@ -238,6 +232,14 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     return options.filter(({ key }) => !currentValues.includes(key));
   }, [shards, policyIds, options]);
 
+  const { euiTheme } = useEuiTheme();
+
+  const styledEuiAccordionCss = css`
+    .euiAccordion__button {
+      color: ${euiTheme.colors.primary};
+    }
+  `;
+
   return (
     <>
       <FormProvider {...hooksForm}>
@@ -271,7 +273,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
             <EuiFlexGroup>
               <EuiFlexItem css={overflowCss}>
-                <StyledEuiAccordion
+                <EuiAccordion
+                  css={styledEuiAccordionCss}
                   id="shardsToggle"
                   forceState={shardsToggleState}
                   onToggle={handleToggle}
@@ -279,7 +282,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                 >
                   <EuiSpacer size="xs" />
                   <PackShardsField options={availableOptions} />
-                </StyledEuiAccordion>
+                </EuiAccordion>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="m" />

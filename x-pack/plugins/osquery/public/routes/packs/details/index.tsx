@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -19,7 +20,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
 
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
@@ -29,11 +29,11 @@ import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useAgentPolicyAgentIds } from '../../../agents/use_agent_policy_agent_ids';
 import { AgentPoliciesPopover } from '../../../packs/packs_table';
 
-const Divider = styled.div`
-  width: 0;
-  height: 100%;
-  border-left: ${({ theme }) => theme.eui.euiBorderThin};
-`;
+const dividerCss = ({ theme }: { theme: EuiThemeComputed }) => ({
+  width: 0,
+  height: '100%',
+  borderLeft: theme.border.thin,
+});
 
 const PackDetailsPageComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;
@@ -112,7 +112,7 @@ const PackDetailsPageComponent = () => {
           </EuiDescriptionList>
         </EuiFlexItem>
         <EuiFlexItem grow={false} key="agents_failed_count_divider">
-          <Divider />
+          <div css={dividerCss} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} key="edit_button">
           <EuiButton

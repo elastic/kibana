@@ -5,38 +5,18 @@
  * 2.0.
  */
 
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRadio } from '@elastic/eui';
+import {
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiRadio,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { noop } from 'lodash';
-
-const StyledEuiCard = styled(EuiCard)`
-  padding: 16px 92px 16px 16px !important;
-  border: ${(props) => {
-    if (props.selectable?.isSelected) {
-      return `1px solid ${props.theme.eui.euiColorPrimary}`;
-    }
-  }};
-
-  .euiTitle {
-    font-size: 1rem;
-  }
-
-  .euiSpacer {
-    display: none;
-  }
-
-  .euiText {
-    margin-top: 0;
-    margin-left: 25px;
-    color: ${(props) => props.theme.eui.EuiTextSubduedColor};
-  }
-
-  > button[role='switch'] {
-    display: none;
-  }
-`;
+import { css } from '@emotion/react';
 
 interface PackTypeSelectableProps {
   packType: string;
@@ -73,13 +53,39 @@ const PackTypeSelectableComponent = ({
     }),
     [packType, handleChange]
   );
+  const { euiTheme } = useEuiTheme();
+
+  // TODO some parent does add background color?
+  const euiCardCss = css`
+    padding: 16px 92px 16px 16px !important;
+    border: ${policyCardSelectable && `1px solid ${euiTheme.colors.success}`};
+
+    .euiTitle {
+      font-size: 1rem;
+    }
+
+    .euiSpacer {
+      display: none;
+    }
+
+    .euiText {
+      margin-top: 0;
+      margin-left: 25px;
+      color: ${euiTheme.colors.subduedText};
+    }
+
+    > button[role='switch'] {
+      display: none;
+    }
+  `;
 
   return (
     <EuiFlexItem>
       <EuiFormRow label="Type" fullWidth>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
-            <StyledEuiCard
+            <EuiCard
+              css={euiCardCss}
               layout="horizontal"
               title={
                 <EuiRadio
@@ -102,7 +108,8 @@ const PackTypeSelectableComponent = ({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <StyledEuiCard
+            <EuiCard
+              css={euiCardCss}
               layout="horizontal"
               title={
                 <EuiRadio

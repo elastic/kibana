@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
+import { css } from '@emotion/css';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 import { AddToCaseWrapper } from '../../cases/add_to_cases';
 
@@ -17,12 +17,12 @@ interface PackResultsHeadersProps {
   agentIds?: string[];
 }
 
-const StyledResultsHeading = styled(EuiFlexItem)`
+const resultsHeadingCss = css`
   padding-right: 20px;
   border-right: 2px solid #d3dae6;
 `;
 
-const StyledIconsList = styled(EuiFlexItem)`
+const iconsListCss = css`
   align-content: center;
   justify-content: center;
   padding-left: 10px;
@@ -36,7 +36,7 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
       <>
         <EuiSpacer size={'l'} />
         <EuiFlexGroup direction="row" gutterSize="m">
-          <StyledResultsHeading grow={false}>
+          <EuiFlexItem css={resultsHeadingCss} grow={false}>
             <EuiText>
               <h2>
                 <FormattedMessage
@@ -45,8 +45,8 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
                 />
               </h2>
             </EuiText>
-          </StyledResultsHeading>
-          <StyledIconsList grow={false}>
+          </EuiFlexItem>
+          <EuiFlexItem css={iconsListCss} grow={false}>
             <span>
               {actionId && (
                 <EuiFlexGroup>
@@ -69,7 +69,7 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
                 </EuiFlexGroup>
               )}
             </span>
-          </StyledIconsList>
+          </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size={'l'} />
       </>

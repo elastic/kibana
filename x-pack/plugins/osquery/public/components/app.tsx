@@ -17,7 +17,7 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
-import { Container, Wrapper } from './layouts';
+import { containerCss, wrapperCss } from './layouts/default';
 import { OsqueryAppRoutes } from '../routes';
 import { useOsqueryIntegrationStatus } from '../common/hooks';
 import { OsqueryAppEmptyState } from './empty_state';
@@ -54,12 +54,12 @@ const OsqueryAppComponent = () => {
   }
 
   return (
-    <Container id="osquery-app">
-      <Wrapper>
+    <div css={containerCss} id="osquery-app">
+      <div css={wrapperCss}>
         <MainNavigation />
         <OsqueryAppRoutes />
-      </Wrapper>
-    </Container>
+      </div>
+    </div>
   );
 };
 

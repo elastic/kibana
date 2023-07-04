@@ -7,14 +7,14 @@
 
 import { EuiLink } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
 
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { css } from '@emotion/css';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { useAgentPolicy } from './use_agent_policy';
 
-const StyledEuiLink = styled(EuiLink)`
+const euiLinkCss = css`
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -52,9 +52,10 @@ const AgentsPolicyLinkComponent: React.FC<AgentsPolicyLinkProps> = ({ policyId }
   );
 
   return (
-    <StyledEuiLink href={href} onClick={handleClick}>
+    // TODO verify href vs onClick
+    <EuiLink href={href} onClick={handleClick} css={euiLinkCss}>
       {data?.name ?? policyId}
-    </StyledEuiLink>
+    </EuiLink>
   );
 };
 

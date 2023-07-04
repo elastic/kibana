@@ -9,11 +9,11 @@ import { EuiTabbedContent, EuiNotificationBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
-import styled from 'styled-components';
+import { css } from '@emotion/css';
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
 
-const StyledEuiTabbedContent = styled(EuiTabbedContent)`
+const euiTabbedContentCss = css`
   div.euiTabs {
     padding-left: 8px;
   }
@@ -90,7 +90,8 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   );
 
   return (
-    <StyledEuiTabbedContent
+    <EuiTabbedContent
+      css={euiTabbedContentCss}
       // TODO: extend the EuiTabbedContent component to support EuiTabs props
       // bottomBorder={false}
       tabs={tabs}

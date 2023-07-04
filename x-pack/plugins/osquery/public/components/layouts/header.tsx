@@ -8,26 +8,27 @@
 // copied from x-pack/plugins/fleet/public/applications/fleet/components/header.tsx
 
 import React, { memo } from 'react';
-import styled from 'styled-components';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
+import { css } from '@emotion/css';
 
-const Container = styled.div`
-  border-bottom: ${(props) => props.theme.eui.euiBorderThin};
-  background-color: ${(props) => props.theme.eui.euiPageBackgroundColor};
-`;
+const containerCss = ({ theme }: { theme: EuiThemeComputed }) => ({
+  borderBottom: theme.border.thin,
+  backgroundColor: theme.colors.body,
+});
 
-const Wrapper = styled.div<{ maxWidth?: number }>`
-  max-width: ${(props) => props.maxWidth || 1200}px;
-  margin-left: auto;
-  margin-right: auto;
-  padding-top: ${(props) => props.theme.eui.euiSizeXL};
-  padding-left: ${(props) => props.theme.eui.euiSizeM};
-  padding-right: ${(props) => props.theme.eui.euiSizeM};
-`;
+const wrapperCss = ({ theme, maxWidth }: { theme: EuiThemeComputed; maxWidth?: number }) => ({
+  maxWidth: `${maxWidth || 1200}px`,
+  marginLeft: 'auto',
+  marginRight: 'auto',
+  paddingTop: theme.size.xl,
+  paddingLeft: theme.size.m,
+  paddingRight: theme.size.m,
+});
 
-const Tabs = styled(EuiTabs)`
+const tabsCss = css`
   top: 1px;
   &:before {
     height: 0px;
@@ -66,8 +67,8 @@ const HeaderComponent: React.FC<HeaderProps> = ({
   tabsClassName,
   'data-test-subj': dataTestSubj,
 }) => (
-  <Container data-test-subj={dataTestSubj}>
-    <Wrapper maxWidth={maxWidth}>
+  <div css={containerCss} data-test-subj={dataTestSubj}>
+    <div css={wrapperCss} maxWidth={maxWidth}>
       <HeaderColumns
         leftColumn={leftColumn}
         rightColumn={rightColumn}
@@ -78,13 +79,13 @@ const HeaderComponent: React.FC<HeaderProps> = ({
         {tabs ? (
           <EuiFlexItem>
             <EuiSpacer size="s" />
-            <Tabs className={tabsClassName}>
+            <EuiTabs className={tabsClassName} css={tabsCss}>
               {tabs.map((props) => (
                 <EuiTab {...(props as EuiTabProps)} key={props.id}>
                   {props.name}
                 </EuiTab>
               ))}
-            </Tabs>
+            </EuiTabs>
           </EuiFlexItem>
         ) : (
           <EuiFlexItem>
@@ -92,8 +93,8 @@ const HeaderComponent: React.FC<HeaderProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </Wrapper>
-  </Container>
+    </div>
+  </div>
 );
 
 export const Header = React.memo(HeaderComponent);

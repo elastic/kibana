@@ -10,12 +10,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow, EuiComboBox, EuiTextColor, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
 
 import { useController } from 'react-hook-form';
+import { css } from '@emotion/css';
 import type { PackSavedObject } from '../../packs/types';
 
-const TextTruncate = styled.div`
+const textTruncateCss = css`
   overflow: hidden;
   text-overflow: ellipsis;
 `;
@@ -103,9 +103,9 @@ export const PacksComboBoxField = ({
           <strong>{option?.name}</strong>
         </EuiFlexItem>
         <EuiFlexItem>
-          <TextTruncate>
+          <div css={textTruncateCss}>
             <EuiTextColor color="subdued">{option?.description}</EuiTextColor>
-          </TextTruncate>
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

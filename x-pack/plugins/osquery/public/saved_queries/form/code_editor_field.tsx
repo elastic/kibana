@@ -8,14 +8,14 @@
 import { isEmpty } from 'lodash/fp';
 import { EuiCodeBlock, EuiFormRow } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 
 import { useController } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/css';
 import { OsquerySchemaLink } from '../../components/osquery_schema_link';
 import { OsqueryEditor } from '../../editor';
 
-const StyledEuiCodeBlock = styled(EuiCodeBlock)`
+const euiCodeBlockCss = css`
   min-height: 100px;
 `;
 
@@ -58,14 +58,15 @@ const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({
       fullWidth
     >
       {euiFieldProps?.isDisabled ? (
-        <StyledEuiCodeBlock
+        <EuiCodeBlock
+          css={euiCodeBlockCss}
           language="sql"
           fontSize="m"
           paddingSize="m"
           transparentBackground={!value.length}
         >
           {value}
-        </StyledEuiCodeBlock>
+        </EuiCodeBlock>
       ) : (
         <OsqueryEditor defaultValue={value} onChange={onChange} />
       )}

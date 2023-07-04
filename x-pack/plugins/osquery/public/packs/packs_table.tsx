@@ -18,17 +18,17 @@ import {
 } from '@elastic/eui';
 import moment from 'moment-timezone';
 import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
+import { css } from '@emotion/css';
 import { useKibana, useRouterNavigate } from '../common/lib/kibana';
 import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
 import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
 import type { PackSavedObject } from './types';
 
-const UpdatedBy = styled.span`
+const updatedAtCss = css`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -105,7 +105,7 @@ const PacksTableComponent = () => {
 
     return updatedAt ? (
       <EuiToolTip content={`${moment(updatedAt).fromNow()}${updatedBy}`}>
-        <UpdatedBy>{`${moment(updatedAt).fromNow()}${updatedBy}`}</UpdatedBy>
+        <span css={updatedAtCss}>{`${moment(updatedAt).fromNow()}${updatedBy}`}</span>
       </EuiToolTip>
     ) : (
       '-'

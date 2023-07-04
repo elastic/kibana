@@ -29,7 +29,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import styled from 'styled-components';
 import { AddToTimelineButton } from '../timelines/add_to_timeline_button';
 import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
@@ -48,7 +47,7 @@ import { AddToCaseWrapper } from '../cases/add_to_cases';
 
 const DataContext = createContext<ResultEdges>([]);
 
-const StyledEuiDataGrid = styled(EuiDataGrid)`
+const euiDataGridCss = css`
   :not(.euiDataGrid--fullScreen) {
     .euiDataGrid__virtualized {
       height: 100% !important;
@@ -441,7 +440,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         </EuiPanel>
       ) : (
         <DataContext.Provider value={allResultsData?.edges}>
-          <StyledEuiDataGrid
+          <EuiDataGrid
+            css={euiDataGridCss}
             data-test-subj="osqueryResultsTable"
             aria-label="Osquery results"
             columns={columns}

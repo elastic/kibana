@@ -21,8 +21,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
+import { css } from '@emotion/css';
 import { QueryDetailsFlyout } from './query_details_flyout';
 import { PackResultsHeader } from './pack_results_header';
 import { Direction } from '../../../common/search_strategy';
@@ -34,7 +34,7 @@ import { PackViewInDiscoverAction } from '../../discover/pack_view_in_discover';
 import { AddToCaseWrapper } from '../../cases/add_to_cases';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 
-const TruncateTooltipText = styled.div`
+const TruncateTooltipText = css`
   width: 100%;
 
   > span {
@@ -44,14 +44,14 @@ const TruncateTooltipText = styled.div`
   }
 `;
 
-const StyledEuiFlexItem = styled(EuiFlexItem)`
+const euiFlexItemCss = css`
   cursor: pointer;
 `;
 
 const EMPTY_ARRAY: PackQueryStatusItem[] = [];
 
-// @ts-expect-error TS2769
-const StyledEuiBasicTable = styled(EuiBasicTable)`
+// TODO fix types
+const euiBasicTableCss = css`
   .euiTableRow.euiTableRow-isExpandedRow > td > div {
     padding: 0;
     border: 1px solid #d3dae6;
@@ -183,11 +183,11 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       const content = singleLine.length > 55 ? `${singleLine.substring(0, 55)}...` : singleLine;
 
       return (
-        <StyledEuiFlexItem onClick={handleQueryFlyoutOpen(item)}>
+        <EuiFlexItem css={euiFlexItemCss} onClick={handleQueryFlyoutOpen(item)}>
           <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
             {content}
           </EuiCodeBlock>
-        </StyledEuiFlexItem>
+        </EuiFlexItem>
       );
     },
     [handleQueryFlyoutOpen]
@@ -407,8 +407,8 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           agentIds={agentIds}
         />
       )}
-
-      <StyledEuiBasicTable
+      <EuiBasicTable
+        css={euiBasicTableCss}
         items={data ?? EMPTY_ARRAY}
         itemId={getItemId}
         columns={columns}
