@@ -132,6 +132,7 @@ export function DiscoverMainRoute({ customizationCallbacks, isDev }: MainRoutePr
   const loadSavedSearch = useCallback(
     async (nextDataView?: DataView) => {
       if (!customizationService) return;
+
       const loadSavedSearchStartTime = window.performance.now();
       setLoading(true);
       if (!nextDataView && !(await checkData())) {

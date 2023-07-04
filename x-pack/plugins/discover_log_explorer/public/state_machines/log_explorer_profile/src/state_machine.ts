@@ -101,7 +101,7 @@ export const createLogExplorerProfileStateMachine = (
   createPureLogExplorerProfileStateMachine(initialContext).withConfig({
     services: {
       initializeFromUrl: initializeFromUrl({ stateContainer }),
-      createDataView: async (context, event) => {
+      createDataView: async (context) => {
         const dataView = await dataViews.create(context.datasetSelection.toDataviewSpec());
 
         stateContainer.actions.setDataView(dataView);

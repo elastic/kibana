@@ -47,5 +47,8 @@ export const updateUrlState =
   async (context) => {
     const { dataView } = context;
 
-    return stateContainer.appState.update({ index: dataView.id });
+    return stateContainer.appState.update({
+      index: dataView.id,
+      columns: ['@timestamp', 'message'],
+    });
   };
