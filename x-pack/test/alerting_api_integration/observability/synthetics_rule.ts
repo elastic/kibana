@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { API_URLS, SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { omit } from 'lodash';
