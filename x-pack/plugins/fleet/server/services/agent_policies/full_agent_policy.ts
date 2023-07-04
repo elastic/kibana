@@ -48,15 +48,13 @@ async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string
 
 export async function getFullAgentPolicies(
   soClient: SavedObjectsClientContract,
-  ids: string[]
+  ids: string[],
+  packageCache: Map<string, PackageInfo>
 ): Promise<Array<FullAgentPolicy | null>> {
   const fullAgentPolicies = [];
 
-  // Using a common cache for bulk update of agent policies
-  const packageInfoCache = new Map<string, PackageInfo>();
-
   for (const id of ids) {
-    const fullAgentPolicy = await getFullAgentPolicy(soClient, id, undefined, packageInfoCache);
+    const fullAgentPolicy = await getFullAgentPolicy(soClient, id, undefined, packageCache);
     fullAgentPolicies.push(fullAgentPolicy);
   }
   return fullAgentPolicies;

@@ -7,6 +7,8 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
+import type { PackageInfo } from '../../../common';
+
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   FLEET_AGENT_POLICIES_SCHEMA_VERSION,
@@ -34,12 +36,16 @@ export async function upgradeAgentPolicySchemaVersion(soClient: SavedObjectsClie
   const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? DEFAULT_BATCH_SIZE;
   let outdatedAgentPolicies = await getOutdatedAgentPoliciesBatch(soClient, batchSize);
   logger.debug(`Found ${outdatedAgentPolicies.total} outdated agent policies`);
+
+  // Using a common cache for bulk update of agent policies
+  const packageInfoCache = new Map<string, PackageInfo>();
+
   while (outdatedAgentPolicies.total > 0) {
     const start = Date.now();
     const outdatedAgentPolicyIds = outdatedAgentPolicies.items.map(
       (outdatedAgentPolicy) => outdatedAgentPolicy.id
     );
-    await agentPolicyService.deployPolicies(soClient, outdatedAgentPolicyIds);
+    await agentPolicyService.deployPolicies(soClient, outdatedAgentPolicyIds, packageInfoCache);
     outdatedAgentPolicies = await getOutdatedAgentPoliciesBatch(soClient, batchSize);
     logger.debug(
       `Upgraded ${outdatedAgentPolicyIds.length} agent policies in ${Date.now() - start}ms, ${

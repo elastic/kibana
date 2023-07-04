@@ -806,7 +806,11 @@ class AgentPolicyService {
     await this.deployPolicies(soClient, [agentPolicyId]);
   }
 
-  public async deployPolicies(soClient: SavedObjectsClientContract, agentPolicyIds: string[]) {
+  public async deployPolicies(
+    soClient: SavedObjectsClientContract,
+    agentPolicyIds: string[],
+    packageCache: Map<string, PackageInfo>
+  ) {
     // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
     const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
@@ -823,7 +827,11 @@ class AgentPolicyService {
 
     const policies = await agentPolicyService.getByIDs(soClient, agentPolicyIds);
     const policiesMap = keyBy(policies, 'id');
-    const fullPolicies = await agentPolicyService.getFullAgentPolicies(soClient, agentPolicyIds);
+    const fullPolicies = await agentPolicyService.getFullAgentPolicies(
+      soClient,
+      agentPolicyIds,
+      packageCache
+    );
 
     const fleetServerPolicies = fullPolicies.reduce((acc, fullPolicy) => {
       if (!fullPolicy || !fullPolicy.revision) {
@@ -1018,9 +1026,10 @@ class AgentPolicyService {
 
   public async getFullAgentPolicies(
     soClient: SavedObjectsClientContract,
-    ids: string[]
-  ): Promise<FullAgentPolicy | null> {
-    return getFullAgentPolicies(soClient, ids);
+    ids: string[],
+    packageCache: Map<string, PackageInfo>
+  ): Promise<Array<FullAgentPolicy | null>> {
+    return getFullAgentPolicies(soClient, ids, packageCache);
   }
 
   /**
