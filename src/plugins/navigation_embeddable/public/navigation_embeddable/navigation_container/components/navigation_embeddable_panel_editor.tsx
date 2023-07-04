@@ -41,6 +41,7 @@ export const NavigationEmbeddablePanelEditor = ({
   currentDashboardId?: string;
 }) => {
   const [showLinkEditorFlyout, setShowLinkEditorFlyout] = useState(false);
+  const [panels, setPanels] = useState(initialInput.panels);
 
   return (
     <>
@@ -52,21 +53,47 @@ export const NavigationEmbeddablePanelEditor = ({
       <EuiFlyoutBody>
         <EuiForm fullWidth>
           <EuiFormRow>
-            <EuiPanel hasBorder={true}>
-              <EuiFlexGroup justifyContent="spaceAround">
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">{"You haven't added any links yet."}</EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              <EuiFlexGroup justifyContent="spaceAround">
-                <EuiFlexItem grow={false}>
-                  <EuiButton onClick={() => setShowLinkEditorFlyout(true)} iconType="plusInCircle">
+            <>
+              {!panels || Object.keys(panels).length === 0 ? (
+                <EuiPanel hasBorder={true}>
+                  <EuiFlexGroup justifyContent="spaceAround">
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">{"You haven't added any links yet."}</EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="s" />
+                  <EuiFlexGroup justifyContent="spaceAround">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        onClick={() => setShowLinkEditorFlyout(true)}
+                        iconType="plusInCircle"
+                      >
+                        Add link
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
+              ) : (
+                <>
+                  {Object.keys(panels).map((panelId) => {
+                    return (
+                      <>
+                        <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+                          {panels[panelId].explicitInput.id}
+                        </EuiPanel>
+                        <EuiSpacer size="s" />
+                      </>
+                    );
+                  })}
+                  <EuiButtonEmpty
+                    iconType="plusInCircle"
+                    onClick={() => setShowLinkEditorFlyout(true)}
+                  >
                     Add link
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
+                  </EuiButtonEmpty>
+                </>
+              )}
+            </>
           </EuiFormRow>
           <EuiFormRow>
             {/* TODO: As part of https://github.com/elastic/kibana/issues/154362, connect this to the library */}
@@ -89,6 +116,7 @@ export const NavigationEmbeddablePanelEditor = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={() => {
+                onSave({ ...initialInput, panels });
                 onClose();
               }}
             >
@@ -102,7 +130,9 @@ export const NavigationEmbeddablePanelEditor = ({
         <NavigationEmbeddableLinkEditor
           initialInput={initialInput}
           onClose={() => setShowLinkEditorFlyout(false)}
-          onSave={onSave}
+          onSave={(newInput) => {
+            setPanels(newInput.panels);
+          }}
           currentDashboardId={currentDashboardId}
         />
       )}
