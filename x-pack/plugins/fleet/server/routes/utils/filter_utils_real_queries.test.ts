@@ -413,6 +413,14 @@ describe('validateKuery validates real kueries', () => {
       );
       expect(isValid).toEqual(true);
     });
+
+    it('Invalid kuery', async () => {
+      expect(() =>
+        validateKuery('test%3A', [AGENT_POLICY_SAVED_OBJECT_TYPE], AGENT_POLICY_MAPPINGS)
+      ).toThrowError(
+        `KQLSyntaxError: The key is empty and needs to be wrapped by a saved object type like ingest-agent-policies`
+      );
+    });
   });
 
   describe('Agents', () => {

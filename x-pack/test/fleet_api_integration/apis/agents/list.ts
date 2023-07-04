@@ -73,14 +73,16 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return a 400 when given an invalid "kuery" value', async () => {
-      await supertest.get(`/api/fleet/agents?kuery=.test%3A`).expect(400);
+      const { body: apiResponse } = await supertest
+        .get(`/api/fleet/agents?kuery='test%3A'`)
+        .expect(400);
+      // expect(apiResponse.error.text).to.equal('');
     });
 
-    it('should return a 200 and an empty list when given a "kuery" value with a missing saved object type', async () => {
-      const { body: apiResponse } = await supertest
+    it('should return a 500 when given a "kuery" value with a missing saved object type', async () => {
+      await supertest
         .get(`/api/fleet/agents?kuery=m`) // missing saved object type
-        .expect(200);
-      expect(apiResponse.total).to.eql(0);
+        .expect(500);
     });
 
     it('should accept a valid "kuery" value', async () => {

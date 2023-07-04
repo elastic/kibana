@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set';
-import { get, cloneDeep } from 'lodash';
+import { get } from 'lodash';
 import * as esKuery from '@kbn/es-query';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
 import { KQLSyntaxError } from '../../errors';
@@ -17,71 +15,6 @@ type KueryNode = any;
 
 const astFunctionType = ['is', 'range', 'nested'];
 const allowedTerms = ['_exists_'];
-
-export const validateConvertFilterToKueryNode = (
-  allowedTypes: string[],
-  filter: string | KueryNode,
-  indexMapping: IndexMapping
-): KueryNode | undefined => {
-  if (filter && indexMapping) {
-    let filterKueryNode =
-      typeof filter === 'string' ? esKuery.fromKueryExpression(filter) : cloneDeep(filter);
-
-    const validationFilterKuery = validateFilterKueryNode({
-      astFilter: filterKueryNode,
-      types: allowedTypes,
-      indexMapping,
-      storeValue:
-        filterKueryNode.type === 'function' && astFunctionType.includes(filterKueryNode.function),
-      hasNestedKey: filterKueryNode.type === 'function' && filterKueryNode.function === 'nested',
-    });
-
-    if (validationFilterKuery.length === 0) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        'If we have a filter options defined, we should always have validationFilterKuery defined too'
-      );
-    }
-
-    if (validationFilterKuery.some((obj) => obj.error != null)) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        validationFilterKuery
-          .filter((obj) => obj.error != null)
-          .map((obj) => obj.error)
-          .join('\n')
-      );
-    }
-
-    validationFilterKuery.forEach((item) => {
-      const path: string[] = item.astPath.length === 0 ? [] : item.astPath.split('.');
-      const existingKueryNode: KueryNode =
-        path.length === 0 ? filterKueryNode : get(filterKueryNode, path);
-      if (item.isSavedObjectAttr) {
-        const keySavedObjectAttr = existingKueryNode.arguments[0].value.split('.')[1];
-        existingKueryNode.arguments[0].value =
-          keySavedObjectAttr === 'id' ? '_id' : keySavedObjectAttr;
-        const itemType = allowedTypes.filter((t) => t === item.type);
-        if (itemType.length === 1) {
-          const kueryToAdd = esKuery.nodeTypes.function.buildNode('and', [
-            esKuery.nodeTypes.function.buildNode('is', 'type', itemType[0]),
-            existingKueryNode,
-          ]);
-          if (path.length > 0) {
-            set(filterKueryNode, path, kueryToAdd);
-          } else {
-            filterKueryNode = kueryToAdd;
-          }
-        }
-      } else {
-        existingKueryNode.arguments[0].value = existingKueryNode.arguments[0].value.replace(
-          '.attributes',
-          ''
-        );
-        set(filterKueryNode, path, existingKueryNode);
-      }
-    });
-    return filterKueryNode;
-  }
-};
 
 interface ValidateFilterKueryNode {
   astPath: string;
@@ -271,10 +204,12 @@ export const fieldDefined = (indexMappings: IndexMapping, key: string): boolean 
 };
 
 export const validateKuery = (
-  kuery: string,
+  kuery: string | undefined,
   allowedTypes: string[],
   indexMapping: IndexMapping
 ): boolean => {
+  if (!kuery) return true;
+
   if (kuery && indexMapping) {
     const astFilter = esKuery.fromKueryExpression(kuery);
     const validationObject = validateFilterKueryNode({

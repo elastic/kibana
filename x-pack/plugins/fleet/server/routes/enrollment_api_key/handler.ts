@@ -27,7 +27,6 @@ import { defaultFleetErrorHandler, AgentPolicyNotFoundError, KQLSyntaxError } fr
 import { ENROLLMENT_API_KEY_MAPPINGS, FLEET_ENROLLMENT_API_PREFIX } from '../../constants';
 
 import { validateKuery } from '../utils/filter_utils';
-import { normalizeKuery } from '../../services/saved_object';
 
 export const getEnrollmentApiKeysHandler: RequestHandler<
   undefined,
@@ -36,19 +35,14 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
   // Use kibana_system and depend on authz checks on HTTP layer to prevent abuse
   const esClient = (await context.core).elasticsearch.client.asInternalUser;
   const { kuery } = request.query;
-  let newKuery = kuery;
 
   try {
-    // normalize kuery and validate it
-    if (kuery && kuery !== '') {
-      newKuery = normalizeKuery(FLEET_ENROLLMENT_API_PREFIX, kuery);
-      validateKuery(newKuery, [FLEET_ENROLLMENT_API_PREFIX], ENROLLMENT_API_KEY_MAPPINGS);
-    }
+    validateKuery(kuery, [FLEET_ENROLLMENT_API_PREFIX], ENROLLMENT_API_KEY_MAPPINGS);
 
     const { items, total, page, perPage } = await APIKeyService.listEnrollmentApiKeys(esClient, {
       page: request.query.page,
       perPage: request.query.perPage,
-      kuery: newKuery,
+      kuery,
     });
     const body: GetEnrollmentAPIKeysResponse = {
       list: items, // deprecated

@@ -54,7 +54,6 @@ import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics'
 import { AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants';
 
 import { validateKuery } from '../utils/filter_utils';
-import { normalizeKuery } from '../../services/saved_object';
 
 export const getAgentHandler: RequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>,
@@ -185,21 +184,17 @@ export const getAgentsHandler: RequestHandler<
   const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
   const soClient = coreContext.savedObjects.client;
   const { kuery } = request.query;
-  let newKuery = kuery;
 
   try {
-    // normalize kuery and validate it
-    if (kuery && kuery !== '') {
-      newKuery = normalizeKuery(AGENTS_PREFIX, kuery);
-      validateKuery(newKuery, [AGENTS_PREFIX], AGENT_MAPPINGS);
-    }
+    // validate kuery
+    validateKuery(kuery, [AGENTS_PREFIX], AGENT_MAPPINGS);
 
     const agentRes = await AgentService.getAgentsByKuery(esClient, soClient, {
       page: request.query.page,
       perPage: request.query.perPage,
       showInactive: request.query.showInactive,
       showUpgradeable: request.query.showUpgradeable,
-      kuery: newKuery,
+      kuery,
       sortField: request.query.sortField,
       sortOrder: request.query.sortOrder,
       getStatusSummary: request.query.getStatusSummary,
@@ -242,17 +237,14 @@ export const getAgentTagsHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
   const { kuery } = request.query;
-  let newKuery = kuery;
 
   try {
-    // normalize kuery and validate it
-    if (kuery && kuery !== '') {
-      newKuery = normalizeKuery(AGENTS_PREFIX, kuery);
-      validateKuery(newKuery, [AGENTS_PREFIX], AGENT_MAPPINGS);
-    }
+    // validate kuery
+    validateKuery(kuery, [AGENTS_PREFIX], AGENT_MAPPINGS);
+
     const tags = await AgentService.getAgentTags(soClient, esClient, {
       showInactive: request.query.showInactive,
-      kuery: newKuery,
+      kuery,
     });
 
     const body: GetAgentTagsResponse = {
