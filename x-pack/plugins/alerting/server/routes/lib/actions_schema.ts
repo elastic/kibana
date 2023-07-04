@@ -68,6 +68,7 @@ export const actionsSchema = schema.arrayOf(
         ),
       })
     ),
+    version: schema.maybe(schema.number()),
   }),
   { defaultValue: [] }
 );

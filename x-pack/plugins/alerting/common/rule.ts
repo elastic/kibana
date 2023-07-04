@@ -115,6 +115,7 @@ export interface RuleAction {
   params: RuleActionParams;
   frequency?: RuleActionFrequency;
   alertsFilter?: AlertsFilter;
+  version?: number;
 }
 
 export interface AggregateOptions {

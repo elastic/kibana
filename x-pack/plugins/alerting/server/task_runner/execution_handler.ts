@@ -20,12 +20,17 @@ import {
   RawRule,
   CombinedSummarizedAlerts,
   ThrottledActions,
+  AlertHit,
 } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
 import { Executable, ExecutionHandlerOptions, RuleTaskInstance } from './types';
 import { TaskRunnerContext } from './task_runner_factory';
-import { transformActionParams, transformSummaryActionParams } from './transform_action_params';
+import {
+  transformActionParams,
+  TransformActionParamsOptions,
+  transformSummaryActionParams,
+} from './transform_action_params';
 import { Alert } from '../alert';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {
@@ -261,33 +266,39 @@ export class ExecutionHandler<
           });
         } else {
           const executableAlert = alert!;
+          const transformActionParamsOptions: TransformActionParamsOptions = {
+            actionsPlugin,
+            alertId: ruleId,
+            alertType: this.ruleType.id,
+            actionTypeId,
+            alertName: this.rule.name,
+            spaceId,
+            tags: this.rule.tags,
+            alertInstanceId: executableAlert.getId(),
+            alertUuid: executableAlert.getUuid(),
+            alertActionGroup: actionGroup,
+            alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
+            context: executableAlert.getContext(),
+            actionId: action.id,
+            state: executableAlert.getScheduledActionOptions()?.state || {},
+            kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
+            alertParams: this.rule.params,
+            actionParams: action.params,
+            flapping: executableAlert.getFlapping(),
+            ruleUrl: this.buildRuleUrl(spaceId),
+          };
+
+          if (executableAlert.isAlertAsData()) {
+            transformActionParamsOptions.kibana = executableAlert.getAlertAsData()!.kibana;
+          }
+
           const actionToRun = {
             ...action,
             params: injectActionParams({
               ruleId,
               spaceId,
               actionTypeId,
-              actionParams: transformActionParams({
-                actionsPlugin,
-                alertId: ruleId,
-                alertType: this.ruleType.id,
-                actionTypeId,
-                alertName: this.rule.name,
-                spaceId,
-                tags: this.rule.tags,
-                alertInstanceId: executableAlert.getId(),
-                alertUuid: executableAlert.getUuid(),
-                alertActionGroup: actionGroup,
-                alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
-                context: executableAlert.getContext(),
-                actionId: action.id,
-                state: executableAlert.getScheduledActionOptions()?.state || {},
-                kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
-                alertParams: this.rule.params,
-                actionParams: action.params,
-                flapping: executableAlert.getFlapping(),
-                ruleUrl: this.buildRuleUrl(spaceId),
-              }),
+              actionParams: transformActionParams(transformActionParamsOptions),
             }),
           };
 
@@ -537,6 +548,16 @@ export class ExecutionHandler<
       }
 
       for (const [alertId, alert] of alertsArray) {
+        if (summarizedAlerts) {
+          const alertAsData = summarizedAlerts.all.data.find(
+            (alertHit: AlertHit) => alertHit._id === alert.getUuid()
+          );
+
+          if (alertAsData) {
+            alert.setAlertAsData(alertAsData);
+          }
+        }
+
         if (alert.isFilteredOut(summarizedAlerts)) {
           continue;
         }
@@ -595,7 +616,7 @@ export class ExecutionHandler<
     }
 
     // we fetch summarizedAlerts to filter alerts in memory as well
-    if (!isSummaryAction(action) && !action.alertsFilter) {
+    if (!isSummaryAction(action) && action.version && !action.alertsFilter) {
       return false;
     }
 

@@ -7,6 +7,7 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import { isEmpty } from 'lodash';
+import { AADAlert } from '@kbn/alerts-as-data-utils';
 import { AlertHit, CombinedSummarizedAlerts } from '../types';
 import {
   AlertInstanceMeta,
@@ -35,7 +36,7 @@ export type PublicAlert<
   Context extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = DefaultActionGroupId
 > = Pick<
-  Alert<State, Context, ActionGroupIds>,
+  Alert<State, Context, ActionGroupIds, AADAlert>,
   | 'getContext'
   | 'getState'
   | 'getUuid'
@@ -48,13 +49,15 @@ export type PublicAlert<
 export class Alert<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
+  AlertAsData extends AADAlert = AADAlert
 > {
   private scheduledExecutionOptions?: ScheduledExecutionOptions<State, Context, ActionGroupIds>;
   private meta: AlertInstanceMeta;
   private state: State;
   private context: Context;
   private readonly id: string;
+  private alertAsData: AlertAsData | undefined;
 
   constructor(id: string, { state, meta = {} }: RawAlertInstance = {}) {
     this.id = id;
@@ -74,6 +77,18 @@ export class Alert<
 
   getUuid() {
     return this.meta.uuid!;
+  }
+
+  isAlertAsData() {
+    return this.alertAsData !== undefined;
+  }
+
+  setAlertAsData(alertAsData: AlertAsData) {
+    this.alertAsData = alertAsData;
+  }
+
+  getAlertAsData() {
+    return this.alertAsData;
   }
 
   hasScheduledActions() {
