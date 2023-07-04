@@ -234,9 +234,7 @@ describe('EditableTitle', () => {
 
     wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
     wrapper.update();
-    expect(wrapper.find('.euiFormErrorText').text()).toBe(
-      'Required field'
-    );
+    expect(wrapper.find('.euiFormErrorText').text()).toBe('Required field');
 
     expect(submitTitle).not.toHaveBeenCalled();
     expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(

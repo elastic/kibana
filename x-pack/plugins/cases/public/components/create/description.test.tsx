@@ -84,7 +84,7 @@ describe('Description', () => {
     const description = screen.getByTestId('euiMarkdownEditorTextArea');
 
     userEvent.clear(description);
-    userEvent.type(description,'  ');
+    userEvent.type(description, '  ');
 
     await waitFor(() => {
       expect(screen.getByText('A description is required.')).toBeInTheDocument();
@@ -92,7 +92,9 @@ describe('Description', () => {
   });
 
   it('shows an error when description is too long', async () => {
-    const longDescription = Array((MAX_DESCRIPTION_LENGTH / 2) + 1).fill('a').toString();
+    const longDescription = Array(MAX_DESCRIPTION_LENGTH / 2 + 1)
+      .fill('a')
+      .toString();
 
     appMockRender.render(
       <MockHookWrapperComponent>
@@ -105,7 +107,9 @@ describe('Description', () => {
     userEvent.paste(description, longDescription);
 
     await waitFor(() => {
-      expect(screen.getByText('The length of the description is too long. The maximum length is 30000.')).toBeInTheDocument();
+      expect(
+        screen.getByText('The length of the description is too long. The maximum length is 30000.')
+      ).toBeInTheDocument();
     });
   });
 });

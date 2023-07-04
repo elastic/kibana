@@ -126,7 +126,9 @@ describe('Description', () => {
   });
 
   it('shows an error when description is too long', async () => {
-    const longDescription = Array((MAX_DESCRIPTION_LENGTH / 2) + 1).fill('a').toString();
+    const longDescription = Array(MAX_DESCRIPTION_LENGTH / 2 + 1)
+      .fill('a')
+      .toString();
 
     const res = appMockRender.render(
       <Description {...defaultProps} onUpdateField={onUpdateField} />
@@ -138,7 +140,9 @@ describe('Description', () => {
     userEvent.paste(screen.getByTestId('euiMarkdownEditorTextArea'), longDescription);
 
     await waitFor(() => {
-      expect(screen.getByText('The length of the description is too long. The maximum length is 30000.')).toBeInTheDocument();
+      expect(
+        screen.getByText('The length of the description is too long. The maximum length is 30000.')
+      ).toBeInTheDocument();
     });
   });
 
