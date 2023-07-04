@@ -9,7 +9,7 @@ import React from 'react';
 import { TopNFunctionSortField } from '../../../../common/functions';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
-import { Grid } from '../../../components/topn_functions/grid';
+import { TopNFunctionsGrid } from '../../../components/topn_functions';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -73,7 +73,7 @@ export function TopNFunctionsView() {
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiFlexItem>
               <AsyncComponent {...state} size="xl" alignTop>
-                <Grid
+                <TopNFunctionsGrid
                   topNFunctions={state.data}
                   totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
                   isDifferentialView={false}
@@ -86,29 +86,6 @@ export function TopNFunctionsView() {
                 />
               </AsyncComponent>
             </EuiFlexItem>
-
-            {/* <EuiFlexItem>
-              <AsyncComponent {...state} size="xl" alignTop>
-                <TopNFunctionsTable
-                  topNFunctions={state.data}
-                  sortDirection={sortDirection}
-                  sortField={sortField}
-                  onSortChange={(nextSort) => {
-                    profilingRouter.push(routePath, {
-                      path,
-                      query: {
-                        ...query,
-                        sortField: nextSort.sortField,
-                        sortDirection: nextSort.sortDirection,
-                      },
-                    });
-                  }}
-                  totalSeconds={timeRange.inSeconds.end - timeRange.inSeconds.start}
-                  isDifferentialView={false}
-                  onFrameClick={handleOnFrameClick}
-                />
-              </AsyncComponent>
-            </EuiFlexItem> */}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
