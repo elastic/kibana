@@ -20,7 +20,7 @@ import { useAgentPolicies } from '../../agent_policies';
 //     names/descriptions from overflowing the flex items
 //  2) max-width is built from the grow property on the flex items because the value
 //     changes based on if Fleet is enabled/setup or not
-const agentPolicyNameColumnCss = ({ grow }: { grow: number }) => ({
+const agentPolicyColumnCss = ({ grow }: { grow: number }) => ({
   maxWidth: `${((grow as number) / 9) * 100}%`,
   overflow: 'hidden',
 });
@@ -66,12 +66,12 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption<string>) => (
       <EuiFlexGroup>
-        <EuiFlexItem css={agentPolicyNameColumnCss} grow={2}>
+        <EuiFlexItem css={agentPolicyColumnCss} grow={2}>
           <span className="eui-textTruncate">
             {(option.key && agentPoliciesById?.[option.key]?.name) ?? option.label}
           </span>
         </EuiFlexItem>
-        <EuiFlexItem css={agentPolicyNameColumnCss} grow={5}>
+        <EuiFlexItem css={agentPolicyColumnCss} grow={5}>
           <EuiTextColor className="eui-textTruncate" color="subdued">
             {(option.key && agentPoliciesById?.[option.key].description) ?? ''}
           </EuiTextColor>
