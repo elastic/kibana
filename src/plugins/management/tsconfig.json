@@ -22,7 +22,8 @@
     "@kbn/shared-ux-router",
     "@kbn/management-cards-navigation",
     "@kbn/shared-ux-link-redirect-app",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/config-schema"
   ],
   "exclude": [
     "target/**/*",
