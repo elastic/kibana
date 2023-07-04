@@ -26,9 +26,10 @@ import {
 } from '../_dashboard_app_strings';
 import { UI_SETTINGS } from '../../../common';
 import { useDashboardAPI } from '../dashboard_app';
+import { DashboardEmbedSettings } from '../types';
 import { pluginServices } from '../../services/plugin_services';
 import { useDashboardMenuItems } from './use_dashboard_menu_items';
-import { DashboardEmbedSettings, DashboardRedirect } from '../types';
+import { DashboardRedirect } from '../../dashboard_container/types';
 import { DashboardEditingToolbar } from './dashboard_editing_toolbar';
 import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../../dashboard_constants';
