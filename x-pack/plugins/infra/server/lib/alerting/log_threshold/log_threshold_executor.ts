@@ -881,7 +881,7 @@ const processRecoveredAlerts = async ({
     alertUuid: string
   ) => Promise<Partial<ParsedTechnicalFields & ParsedExperimentalFields> | null> | null;
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
-  isAlertDetailsPageEnabled?: booleanl;
+  isAlertDetailsPageEnabled?: boolean;
 }) => {
   const groupByKeysObjectForRecovered = getGroupByObject(
     validatedParams.groupBy,
