@@ -17,14 +17,6 @@ jest.mock('@elastic/eui', () => ({
   useEuiShadow: jest.fn(),
 }));
 
-jest.mock('../../services', () => ({
-  useKibana: jest.fn(() => ({
-    services: {
-      storage: {},
-    },
-  })),
-}));
-
 jest.mock('../../lib/get_started/storage');
 
 jest.mock('./use_setup_cards', () => ({

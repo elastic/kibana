@@ -144,20 +144,24 @@ export const CasePostRequestRt = rt.intersection([
     /**
      * Description of the case
      */
-    description: limitedStringSchema('description', 1, MAX_DESCRIPTION_LENGTH),
+    description: limitedStringSchema({
+      fieldName: 'description',
+      min: 1,
+      max: MAX_DESCRIPTION_LENGTH,
+    }),
     /**
      * Identifiers for the case.
      */
-    tags: limitedArraySchema(
-      limitedStringSchema('tag', 1, MAX_LENGTH_PER_TAG),
-      0,
-      MAX_TAGS_PER_CASE,
-      'tags'
-    ),
+    tags: limitedArraySchema({
+      codec: limitedStringSchema({ fieldName: 'tag', min: 1, max: MAX_LENGTH_PER_TAG }),
+      fieldName: 'tags',
+      min: 0,
+      max: MAX_TAGS_PER_CASE,
+    }),
     /**
      * Title of the case
      */
-    title: limitedStringSchema('title', 1, MAX_TITLE_LENGTH),
+    title: limitedStringSchema({ fieldName: 'title', min: 1, max: MAX_TITLE_LENGTH }),
     /**
      * The external configuration for the case
      */
@@ -186,7 +190,10 @@ export const CasePostRequestRt = rt.intersection([
       /**
        * The category of the case.
        */
-      category: rt.union([limitedStringSchema('category', 1, MAX_CATEGORY_LENGTH), rt.null]),
+      category: rt.union([
+        limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
+        rt.null,
+      ]),
     })
   ),
 ]);
@@ -224,7 +231,15 @@ export const CasesFindRequestRt = rt.exact(
     /**
      * Tags to filter by
      */
-    tags: rt.union([limitedArraySchema(rt.string, 0, MAX_TAGS_FILTER_LENGTH, 'tags'), rt.string]),
+    tags: rt.union([
+      limitedArraySchema({
+        codec: rt.string,
+        fieldName: 'tags',
+        min: 0,
+        max: MAX_TAGS_FILTER_LENGTH,
+      }),
+      rt.string,
+    ]),
     /**
      * The status of the case (open, closed, in-progress)
      */
@@ -237,14 +252,24 @@ export const CasesFindRequestRt = rt.exact(
      * The uids of the user profiles to filter by
      */
     assignees: rt.union([
-      limitedArraySchema(rt.string, 0, MAX_ASSIGNEES_FILTER_LENGTH, 'assignees'),
+      limitedArraySchema({
+        codec: rt.string,
+        fieldName: 'assignees',
+        min: 0,
+        max: MAX_ASSIGNEES_FILTER_LENGTH,
+      }),
       rt.string,
     ]),
     /**
      * The reporters to filter by
      */
     reporters: rt.union([
-      limitedArraySchema(rt.string, 0, MAX_REPORTERS_FILTER_LENGTH, 'reporters'),
+      limitedArraySchema({
+        codec: rt.string,
+        fieldName: 'reporters',
+        min: 0,
+        max: MAX_REPORTERS_FILTER_LENGTH,
+      }),
       rt.string,
     ]),
     /**
@@ -306,12 +331,12 @@ export const CasesFindRequestRt = rt.exact(
   })
 );
 
-export const CasesDeleteRequestRt = limitedArraySchema(
-  NonEmptyString,
-  1,
-  MAX_DELETE_IDS_LENGTH,
-  'ids'
-);
+export const CasesDeleteRequestRt = limitedArraySchema({
+  codec: NonEmptyString,
+  min: 1,
+  max: MAX_DELETE_IDS_LENGTH,
+  fieldName: 'ids',
+});
 
 export const CasesByAlertIDRequestRt = rt.exact(
   rt.partial({
@@ -370,7 +395,11 @@ export const CasePatchRequestRt = rt.intersection([
       /**
        * The description of the case
        */
-      description: limitedStringSchema('description', 1, MAX_DESCRIPTION_LENGTH),
+      description: limitedStringSchema({
+        fieldName: 'description',
+        min: 1,
+        max: MAX_DESCRIPTION_LENGTH,
+      }),
       /**
        * The current status of the case (open, closed, in-progress)
        */
@@ -378,16 +407,16 @@ export const CasePatchRequestRt = rt.intersection([
       /**
        * The identifying strings for filter a case
        */
-      tags: limitedArraySchema(
-        limitedStringSchema('tag', 1, MAX_LENGTH_PER_TAG),
-        0,
-        MAX_TAGS_PER_CASE,
-        'tags'
-      ),
+      tags: limitedArraySchema({
+        codec: limitedStringSchema({ fieldName: 'tag', min: 1, max: MAX_LENGTH_PER_TAG }),
+        min: 0,
+        max: MAX_TAGS_PER_CASE,
+        fieldName: 'tags',
+      }),
       /**
        * The title of a case
        */
-      title: limitedStringSchema('title', 1, MAX_TITLE_LENGTH),
+      title: limitedStringSchema({ fieldName: 'title', min: 1, max: MAX_TITLE_LENGTH }),
       /**
        * The external system that the case can be synced with
        */
@@ -411,7 +440,10 @@ export const CasePatchRequestRt = rt.intersection([
       /**
        * The category of the case.
        */
-      category: rt.union([limitedStringSchema('category', 1, MAX_CATEGORY_LENGTH), rt.null]),
+      category: rt.union([
+        limitedStringSchema({ fieldName: 'category', min: 1, max: MAX_CATEGORY_LENGTH }),
+        rt.null,
+      ]),
     })
   ),
   /**
