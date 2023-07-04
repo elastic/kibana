@@ -22,13 +22,17 @@ import type {
 
 describe('Create Default Policy tests ', () => {
   const cloud = cloudMock.createSetup();
-  const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum', uid: '' } });
+  const Platinum = licenseMock.createLicense({
+    license: { type: 'platinum', mode: 'platinum', uid: '' },
+  });
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold', uid: '' } });
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
 
-  const createDefaultPolicyCallback = async (config: AnyPolicyCreateConfig | undefined): Promise<PolicyConfig> => {
-    const esClientInfo =  await elasticsearchServiceMock.createClusterClient().asInternalUser.info();
+  const createDefaultPolicyCallback = async (
+    config: AnyPolicyCreateConfig | undefined
+  ): Promise<PolicyConfig> => {
+    const esClientInfo = await elasticsearchServiceMock.createClusterClient().asInternalUser.info();
     esClientInfo.cluster_name = '';
     esClientInfo.cluster_uuid = '';
     return createDefaultPolicy(licenseService, config, cloud, esClientInfo);
