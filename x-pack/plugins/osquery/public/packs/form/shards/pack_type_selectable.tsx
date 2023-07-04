@@ -14,7 +14,7 @@ const euiCardCss = ({ theme, selectable }) => ({
   padding: '16px 92px 16px 16px !important',
   border:
     selectable?.isSelected &&
-    `1px solid ${theme.colors ? theme.collors.success : theme.eui.euiColorSuccess}`,
+    `1px solid ${theme.colors ? theme.colors.success : theme.eui.euiColorSuccess}`,
 
   '.euiTitle': {
     fontSize: '1rem',

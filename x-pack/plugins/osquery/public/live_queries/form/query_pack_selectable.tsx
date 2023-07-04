@@ -16,7 +16,7 @@ const euiCardCss = ({ theme, selectable }) => ({
   flexDirection: 'row',
   border:
     selectable?.isSelected &&
-    `1px solid ${theme.colors ? theme.collors.success : theme.eui.euiColorSuccess}`,
+    `1px solid ${theme.colors ? theme.colors.success : theme.eui.euiColorSuccess}`,
   '.euiCard__content': {
     padding: '16px 92px 16px 16px !important',
   },
