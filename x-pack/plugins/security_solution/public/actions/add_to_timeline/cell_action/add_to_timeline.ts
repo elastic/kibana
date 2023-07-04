@@ -7,6 +7,14 @@
 
 import { createCellActionFactory } from '@kbn/cell-actions';
 import type { CellActionTemplate } from '@kbn/cell-actions';
+import {
+  isTypeSupportedByDefaultActions,
+  isValueSupportedByDefaultActions,
+  filterOutNullableValues,
+  valueToArray,
+} from '@kbn/cell-actions/src/actions/utils';
+import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { addProvider } from '../../../timelines/store/timeline/actions';
 import { TimelineId } from '../../../../common/types';
 import type { SecurityAppStore } from '../../../common/store';
@@ -44,15 +52,24 @@ export const createAddToTimelineCellActionFactory = createCellActionFactory(
         return (
           data.length === 1 && // TODO Add support for multiple values
           fieldHasCellActions(field.name) &&
-          isValidDataProviderField(field.name, field.type)
+          isValidDataProviderField(field.name, field.type) &&
+          isTypeSupportedByDefaultActions(field.type as KBN_FIELD_TYPES)
         );
       },
+
       execute: async ({ data, metadata }) => {
         const { name, type } = data[0]?.field;
-        const value = data[0]?.value;
+        const rawValue = data[0]?.value;
+        const value = filterOutNullableValues(valueToArray(rawValue));
 
-        const values = Array.isArray(value) ? value : [value];
-        const [firstValue, ...andValues] = values;
+        if (!isValueSupportedByDefaultActions(value)) {
+          notificationsService.toasts.addWarning({
+            title: ACTION_INCOMPATIBLE_VALUE_WARNING,
+          });
+          return;
+        }
+
+        const [firstValue, ...andValues] = value;
         const [dataProvider] =
           createDataProviders({
             contextId: TimelineId.active,
@@ -81,10 +98,7 @@ export const createAddToTimelineCellActionFactory = createCellActionFactory(
         if (dataProvider) {
           store.dispatch(addProvider({ id: TimelineId.active, providers: [dataProvider] }));
 
-          let messageValue = '';
-          if (value != null) {
-            messageValue = Array.isArray(value) ? value.join(', ') : value.toString();
-          }
+          const messageValue = value.join(', ');
           notificationsService.toasts.addSuccess({
             title: ADD_TO_TIMELINE_SUCCESS_TITLE(messageValue),
           });

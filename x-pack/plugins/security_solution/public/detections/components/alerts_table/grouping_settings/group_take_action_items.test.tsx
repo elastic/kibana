@@ -35,7 +35,6 @@ describe('useGroupTakeActionsItems', () => {
       const { result, waitForNextUpdate } = renderHook(
         () =>
           useGroupTakeActionsItems({
-            indexName: '.alerts-security.alerts-default',
             showAlertStatusActions: true,
           }),
         {
@@ -53,7 +52,6 @@ describe('useGroupTakeActionsItems', () => {
         () =>
           useGroupTakeActionsItems({
             currentStatus: [],
-            indexName: '.alerts-security.alerts-default',
             showAlertStatusActions: true,
           }),
         {
@@ -71,7 +69,6 @@ describe('useGroupTakeActionsItems', () => {
         () =>
           useGroupTakeActionsItems({
             currentStatus: ['open', 'closed'],
-            indexName: '.alerts-security.alerts-default',
             showAlertStatusActions: true,
           }),
         {
@@ -89,7 +86,6 @@ describe('useGroupTakeActionsItems', () => {
         () =>
           useGroupTakeActionsItems({
             currentStatus: ['open'],
-            indexName: '.alerts-security.alerts-default',
             showAlertStatusActions: true,
           }),
         {
@@ -110,7 +106,6 @@ describe('useGroupTakeActionsItems', () => {
         () =>
           useGroupTakeActionsItems({
             currentStatus: ['closed'],
-            indexName: '.alerts-security.alerts-default',
             showAlertStatusActions: true,
           }),
         {
@@ -131,7 +126,6 @@ describe('useGroupTakeActionsItems', () => {
         () =>
           useGroupTakeActionsItems({
             currentStatus: ['acknowledged'],
-            indexName: '.alerts-security.alerts-default',
             showAlertStatusActions: true,
           }),
         {
@@ -151,7 +145,6 @@ describe('useGroupTakeActionsItems', () => {
       const { result, waitForNextUpdate } = renderHook(
         () =>
           useGroupTakeActionsItems({
-            indexName: '.alerts-security.alerts-default',
             showAlertStatusActions: false,
           }),
         {
@@ -167,7 +160,6 @@ describe('useGroupTakeActionsItems', () => {
       const { result, waitForNextUpdate } = renderHook(
         () =>
           useGroupTakeActionsItems({
-            indexName: '.alerts-security.alerts-default',
             showAlertStatusActions: true,
           }),
         {

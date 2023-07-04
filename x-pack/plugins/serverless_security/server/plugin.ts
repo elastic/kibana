@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
-import { ServerlessSecurityConfig } from './config';
+import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
+import type { ServerlessSecurityConfig } from './config';
 import { getProductAppFeatures } from '../common/pli/pli_features';
 
-import {
+import type {
   ServerlessSecurityPluginSetup,
   ServerlessSecurityPluginStart,
   ServerlessSecurityPluginSetupDependencies,
@@ -40,6 +40,8 @@ export class ServerlessSecurityPlugin
     if (shouldRegister) {
       pluginsSetup.securitySolution.setAppFeatures(getProductAppFeatures(this.config.productTypes));
     }
+
+    pluginsSetup.ml.setFeaturesEnabled({ ad: true, dfa: true, nlp: false });
 
     return {};
   }
