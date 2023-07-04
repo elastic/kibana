@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { getPaddedAlertTimeRange } from '@kbn/observability-alert-details';
 import { get, identity } from 'lodash';
 import { CoPilotContextProvider } from '@kbn/observability-plugin/public';
+import { useLogView } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import {
   Comparator,
@@ -33,7 +34,6 @@ import { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
 import { ExplainLogRateSpikes } from './components/explain_log_rate_spike';
 import { LogThresholdCountChart, LogThresholdRatioChart } from './components/threhsold_chart';
-import { useLogView } from '../../../../hooks/use_log_view';
 import { useLicense } from '../../../../hooks/use_license';
 
 const LogsHistoryChart = React.lazy(() => import('./components/logs_history_chart'));
