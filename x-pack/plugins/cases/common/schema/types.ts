@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 import { NumberFromString } from '../api/saved_object';
 
-const PageTypeRt = rt.union([rt.number, NumberFromString, rt.undefined]);
+const PageTypeRt = rt.union([rt.number, NumberFromString]);
 type PageNumberType = rt.TypeOf<typeof PageTypeRt>;
 
 export interface PaginationType {
@@ -16,5 +16,5 @@ export interface PaginationType {
   perPage: PageNumberType;
 }
 
-export const PaginationSchemaRt = rt.partial({ page: PageTypeRt, perPage: PageTypeRt });
+export const PaginationSchemaRt = rt.exact(rt.partial({ page: PageTypeRt, perPage: PageTypeRt }));
 export type PartialPaginationType = Partial<PaginationType>;

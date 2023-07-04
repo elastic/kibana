@@ -36,7 +36,7 @@ describe('get', () => {
       await expect(
         findComment(
           // @ts-expect-error: excess attribute
-          { caseID: 'mock-id', findQueryParams: { foo: 'bar' } },
+          { caseID: 'mock-id', findQueryParams: { page: 2, perPage: 9, foo: 'bar' } },
           clientArgs
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(

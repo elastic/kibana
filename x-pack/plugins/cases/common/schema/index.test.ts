@@ -267,12 +267,10 @@ describe('schema', () => {
         PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ page: 'a', perPage: 'b' }))
       ).toMatchInlineSnapshot(`
         Array [
-          "Invalid value \\"a\\" supplied to : Pagination/page: (number | NumberFromString | undefined)/0: number",
+          "Invalid value \\"a\\" supplied to : Pagination/page: (number | NumberFromString)/0: number",
           "cannot parse to a number",
-          "Invalid value \\"a\\" supplied to : Pagination/page: (number | NumberFromString | undefined)/2: undefined",
-          "Invalid value \\"b\\" supplied to : Pagination/perPage: (number | NumberFromString | undefined)/0: number",
+          "Invalid value \\"b\\" supplied to : Pagination/perPage: (number | NumberFromString)/0: number",
           "cannot parse to a number",
-          "Invalid value \\"b\\" supplied to : Pagination/perPage: (number | NumberFromString | undefined)/2: undefined",
         ]
       `);
     });

@@ -232,8 +232,8 @@ const CasesFindRequestSearchFieldsRt = rt.keyof({
   'updated_by.profile_uid': null,
 });
 
-export const CasesFindRequestRt = rt.exact(
-  rt.intersection([
+export const CasesFindRequestRt = rt.intersection([
+  rt.exact(
     rt.partial({
       /**
        * Tags to filter by
@@ -335,10 +335,10 @@ export const CasesFindRequestRt = rt.exact(
        * The category of the case.
        */
       category: rt.union([rt.array(rt.string), rt.string]),
-    }),
-    paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE }),
-  ])
-);
+    })
+  ),
+  paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE }),
+]);
 
 export const CasesDeleteRequestRt = limitedArraySchema({
   codec: NonEmptyString,

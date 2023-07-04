@@ -126,7 +126,10 @@ export const paginationSchema = ({ maxPerPage }: { maxPerPage: number }) =>
           );
         }
 
-        return rt.success(params);
+        return rt.success({
+          ...(params.page != null && { page: pageAsNumber }),
+          ...(params.perPage != null && { perPage: perPageAsNumber }),
+        });
       }),
     rt.identity,
     undefined

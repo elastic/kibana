@@ -288,17 +288,17 @@ export const CommentsFindResponseRt = rt.strict({
 
 export const CommentsRt = rt.array(CommentRt);
 
-export const FindCommentsQueryParamsRt = rt.exact(
-  rt.intersection([
+export const FindCommentsQueryParamsRt = rt.intersection([
+  rt.exact(
     rt.partial({
       /**
        * Order to sort the response
        */
       sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
-    }),
-    paginationSchema({ maxPerPage: MAX_COMMENTS_PER_PAGE }),
-  ])
-);
+    })
+  ),
+  paginationSchema({ maxPerPage: MAX_COMMENTS_PER_PAGE }),
+]);
 
 export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
 
