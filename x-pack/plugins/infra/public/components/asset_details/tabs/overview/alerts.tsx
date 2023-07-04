@@ -13,6 +13,7 @@ import {
 import { TimeRange } from '@kbn/es-query';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 
+import styled from 'styled-components';
 import { AlertStatus } from '../../../../pages/metrics/hosts/types';
 import {
   DEFAULT_DATE_FORMAT,
@@ -32,7 +33,7 @@ import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
 export const AlertsSummaryContent = ({ nodeName }: { nodeName: string }) => {
   // TODO check status and if we need to set it
-  const [alertStatus, setAlertStatus] = useState<AlertStatus>('all');
+  const [alertStatus, _setAlertStatus] = useState<AlertStatus>('all');
   const { onSubmit, searchCriteria } = useUnifiedSearchContext();
 
   const getAlertsEsQuery = useCallback(
@@ -52,11 +53,13 @@ export const AlertsSummaryContent = ({ nodeName }: { nodeName: string }) => {
   );
 
   return (
-    <MemoAlertSummaryWidget
-      alertsQuery={alertsEsQueryByStatus}
-      dateRange={searchCriteria.dateRange}
-      onRangeSelection={onSubmit}
-    />
+    <ContainerPanel>
+      <MemoAlertSummaryWidget
+        alertsQuery={alertsEsQueryByStatus}
+        dateRange={searchCriteria.dateRange}
+        onRangeSelection={onSubmit}
+      />
+    </ContainerPanel>
   );
 };
 
@@ -98,12 +101,18 @@ const MemoAlertSummaryWidget = React.memo(
         chartProps={chartProps}
         featureIds={infraAlertFeatureIds}
         filter={alertsQuery}
-        fullSize
         timeRange={summaryTimeRange}
       />
     );
   }
 );
+
+const ContainerPanel = styled.div`
+  && .euiPanel {
+    border: none;
+    pointer-events: none;
+  }
+`;
 
 const useSummaryTimeRange = (unifiedSearchDateRange: TimeRange) => {
   const timeBuckets = useTimeBuckets();
