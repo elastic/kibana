@@ -77,8 +77,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should allow for copying the snapshot URL', async function () {
           const data = {
             query: {
-              query: '',
               language: 'kuery',
+              query: '',
             },
             sort: [['@timestamp', 'desc']],
             columns: [],
