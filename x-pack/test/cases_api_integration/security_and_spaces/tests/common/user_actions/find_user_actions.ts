@@ -15,6 +15,7 @@ import {
   ConnectorTypes,
   FindTypes,
 } from '@kbn/cases-plugin/common/api';
+import { MAX_USER_ACTIONS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -43,7 +44,6 @@ import {
 } from '../../../../common/lib/api';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { MAX_USER_ACTIONS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
