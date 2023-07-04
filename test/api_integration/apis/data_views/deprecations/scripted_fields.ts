@@ -34,6 +34,11 @@ export default function ({ getService }: FtrProviderContext) {
         ({ domainId }) => domainId === 'dataViews'
       );
 
+      // eslint-disable-next-line no-console
+      console.log('deprecations', JSON.stringify(deprecations));
+      // eslint-disable-next-line no-console
+      console.log('dataPluginDeprecations', JSON.stringify(dataPluginDeprecations));
+
       expect(dataPluginDeprecations.length).to.be(0);
     });
 
