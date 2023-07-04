@@ -18,34 +18,25 @@ import {
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 import { cleanKibana } from '../../tasks/common';
 import { ENTITY_ANALYTICS_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigation';
-import { esArchiverLoad, esArchiverUnload, esArchiverResetKibana } from '../../tasks/es_archiver';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { getNewRule } from '../../objects/rule';
 import { createRule } from '../../tasks/api_calls/rules';
-import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import {
-  SHOW_DATES_BUTTON,
-  DATE_PICKER_ABSOLUTE_TAB,
-  DATE_PICKER_ABSOLUTE_INPUT,
-  LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
-  LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON,
-  LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE,
-} from '../../screens/date_picker';
+import { updatDateRangeInLocalDatePickers } from '../../tasks/date_picker';
+import { fillLocalSearchBar, submitLocalSearch } from '../../tasks/search_bar';
 
 describe(
   'Entity analytics management page',
   { env: { ftrConfig: { enableExperimental: ['riskScoringRoutesEnabled'] } } },
   () => {
     before(() => {
-      esArchiverResetKibana();
       cleanKibana();
+      esArchiverLoad('all_users');
     });
 
     beforeEach(() => {
       login();
-      esArchiverLoad('all_users');
       visitWithoutDateRange(ALERTS_URL);
       createRule(getNewRule({ query: 'user.name:* or host.name:*', risk_score: 70 }));
-      waitForAlertsToPopulate();
       visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
     });
 
@@ -54,49 +45,35 @@ describe(
     });
 
     it('renders page as expected', () => {
-      cy.get(`${PAGE_TITLE}`).should('have.text', 'Entity Risk Score');
+      cy.get(PAGE_TITLE).should('have.text', 'Entity Risk Score');
     });
 
     describe('Risk preview', () => {
-      it('there is data for risk and host preview react on date range', () => {
+      it('risk scores reacts on change in datepicker', () => {
         const START_DATE = 'Jan 18, 2019 @ 20:33:29.186';
         const END_DATE = 'Jan 19, 2019 @ 20:33:29.186';
 
         cy.get(HOST_RISK_PREVIEW_TABLE_ROWS).should('have.length', 5);
         cy.get(USER_RISK_PREVIEW_TABLE_ROWS).should('have.length', 5);
 
-        cy.get('.euiSuperDatePicker');
-        cy.get('body').then(($container) => {
-          if ($container.find(SHOW_DATES_BUTTON).length > 0) {
-            cy.get(SHOW_DATES_BUTTON).click({ force: true });
-          } else {
-            cy.get(LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON).click({ force: true });
-          }
-        });
-
-        cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click({ force: true });
-
-        cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
-        cy.get(DATE_PICKER_ABSOLUTE_INPUT).clear();
-        cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(START_DATE);
-
-        cy.get(LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE).click();
-        cy.get(LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE).should('not.have.text', 'Updating');
-
-        cy.get(LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON).click({ force: true });
-
-        cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click({ force: true });
-
-        cy.get(DATE_PICKER_ABSOLUTE_INPUT).click();
-        cy.get(DATE_PICKER_ABSOLUTE_INPUT).clear();
-        cy.get(DATE_PICKER_ABSOLUTE_INPUT).type(END_DATE);
-        cy.get(LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE).click();
+        updatDateRangeInLocalDatePickers(START_DATE, END_DATE);
 
         cy.get(HOST_RISK_PREVIEW_TABLE).contains('No items found');
         cy.get(USER_RISK_PREVIEW_TABLE).contains('No items found');
       });
 
-      it('Show error panel if API returns error', () => {
+      it('risk scores reacts on change in search bar query', () => {
+        cy.get(HOST_RISK_PREVIEW_TABLE_ROWS).should('have.length', 5);
+        cy.get(USER_RISK_PREVIEW_TABLE_ROWS).should('have.length', 5);
+
+        fillLocalSearchBar('host.name: "test-host1"');
+        submitLocalSearch();
+
+        cy.get(HOST_RISK_PREVIEW_TABLE_ROWS).should('have.length', 1);
+        cy.get(USER_RISK_PREVIEW_TABLE_ROWS).should('have.length', 1);
+      });
+
+      it('show error panel if API returns error and then try to refetch data', () => {
         cy.intercept('POST', '/internal/risk_score/preview', {
           statusCode: 500,
         });
