@@ -12,7 +12,7 @@ import { BulkAlertTagsPanel } from './alert_bulk_tags';
 import * as i18n from './translations';
 import { useSetAlertTags } from './use_set_alert_tags';
 
-interface UseBulkAlertTagsItemsProps {
+export interface UseBulkAlertTagsItemsProps {
   refetch?: () => void;
 }
 

@@ -10,8 +10,17 @@ import { renderHook } from '@testing-library/react-hooks';
 import type { UseAlertTagsActionsProps } from './use_alert_tags_actions';
 import { useAlertTagsActions } from './use_alert_tags_actions';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
+import type { AlertTableContextMenuItem } from '../types';
+import { render } from '@testing-library/react';
+import React from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiPopover, EuiContextMenu } from '@elastic/eui';
+import { useSetAlertTags } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_tags';
+import { useUiSetting$ } from '../../../../common/lib/kibana';
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
+jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_tags');
+jest.mock('../../../../common/lib/kibana');
 
 const defaultProps: UseAlertTagsActionsProps = {
   closePopover: jest.fn(),
@@ -24,6 +33,24 @@ const defaultProps: UseAlertTagsActionsProps = {
     },
   },
   refetch: jest.fn(),
+};
+
+const renderContextMenu = (
+  items: AlertTableContextMenuItem[],
+  panels: EuiContextMenuPanelDescriptor[]
+) => {
+  const panelsToRender = [{ id: 0, items }, ...panels];
+  return render(
+    <EuiPopover
+      isOpen={true}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+      closePopover={() => {}}
+      button={<></>}
+    >
+      <EuiContextMenu size="s" initialPanelId={1} panels={panelsToRender} />
+    </EuiPopover>
+  );
 };
 
 describe('useAlertTagsActions', () => {
@@ -123,5 +150,19 @@ describe('useAlertTagsActions', () => {
         setIsLoading={[Function]}
       />
     `);
+  });
+
+  it('should render the nested panel', async () => {
+    (useSetAlertTags as jest.Mock).mockReturnValue(jest.fn());
+    (useUiSetting$ as jest.Mock).mockReturnValue([['default-test-tag-1', 'default-test-tag-2']]);
+
+    const { result } = renderHook(() => useAlertTagsActions(defaultProps), {
+      wrapper: TestProviders,
+    });
+    const alertTagsItems = result.current.alertTagsItems;
+    const alertTagsPanels = result.current.alertTagsPanels;
+    const { getByTestId } = renderContextMenu(alertTagsItems, alertTagsPanels);
+
+    expect(getByTestId('alert-tags-selectable-menu')).toBeInTheDocument();
   });
 });

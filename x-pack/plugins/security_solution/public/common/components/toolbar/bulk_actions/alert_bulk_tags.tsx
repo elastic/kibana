@@ -76,6 +76,7 @@ const BulkAlertTagsPanelComponent: React.FC<BulkAlertTagsPanelComponentProps> = 
 
   const onTagsUpdate = useCallback(async () => {
     if (tagsToAdd.size === 0 && tagsToRemove.size === 0) {
+      closePopoverMenu();
       return;
     }
     const tagsToAddArray = Array.from(tagsToAdd);
