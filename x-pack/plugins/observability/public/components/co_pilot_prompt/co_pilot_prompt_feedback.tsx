@@ -71,10 +71,6 @@ export function CoPilotPromptFeedback({
     }
   }, [coPilot, promptId, messages, response, responseTime, hasSubmittedTelemetry]);
 
-  useEffect(() => {
-    setHasSubmittedFeedback(false);
-  }, []);
-
   if (hasSubmittedFeedback) {
     return (
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">

@@ -99,7 +99,7 @@ const trackRoute = createObservabilityServerRoute({
     } = resources;
 
     if (!config.aiAssistant?.enabled) {
-      throw Boom.notImplemented;
+      throw Boom.notImplemented();
     }
 
     const info = await (
