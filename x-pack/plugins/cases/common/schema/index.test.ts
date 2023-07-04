@@ -14,8 +14,11 @@ describe('schema', () => {
     const fieldName = 'foobar';
 
     it('fails when given an empty string', () => {
-      expect(PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1, fieldName).decode([''])))
-        .toMatchInlineSnapshot(`
+      expect(
+        PathReporter.report(
+          limitedArraySchema({ codec: NonEmptyString, fieldName, min: 1, max: 1 }).decode([''])
+        )
+      ).toMatchInlineSnapshot(`
       Array [
         "string must have length >= 1",
       ]
@@ -23,8 +26,11 @@ describe('schema', () => {
     });
 
     it('fails when given an empty array', () => {
-      expect(PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1, fieldName).decode([])))
-        .toMatchInlineSnapshot(`
+      expect(
+        PathReporter.report(
+          limitedArraySchema({ codec: NonEmptyString, fieldName, min: 1, max: 1 }).decode([])
+        )
+      ).toMatchInlineSnapshot(`
       Array [
         "The length of the field foobar is too short. Array must be of length >= 1.",
       ]
@@ -33,7 +39,12 @@ describe('schema', () => {
 
     it('fails when given an array larger than the limit of one item', () => {
       expect(
-        PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1, fieldName).decode(['a', 'b']))
+        PathReporter.report(
+          limitedArraySchema({ codec: NonEmptyString, fieldName, min: 1, max: 1 }).decode([
+            'a',
+            'b',
+          ])
+        )
       ).toMatchInlineSnapshot(`
       Array [
         "The length of the field foobar is too long. Array must be of length <= 1.",
@@ -42,8 +53,11 @@ describe('schema', () => {
     });
 
     it('succeeds when given an array of 1 item with a non-empty string', () => {
-      expect(PathReporter.report(limitedArraySchema(NonEmptyString, 1, 1, fieldName).decode(['a'])))
-        .toMatchInlineSnapshot(`
+      expect(
+        PathReporter.report(
+          limitedArraySchema({ codec: NonEmptyString, fieldName, min: 1, max: 1 }).decode(['a'])
+        )
+      ).toMatchInlineSnapshot(`
       Array [
         "No errors!",
       ]
@@ -51,8 +65,11 @@ describe('schema', () => {
     });
 
     it('succeeds when given an array of 0 item with a non-empty string when the min is 0', () => {
-      expect(PathReporter.report(limitedArraySchema(NonEmptyString, 0, 2, fieldName).decode([])))
-        .toMatchInlineSnapshot(`
+      expect(
+        PathReporter.report(
+          limitedArraySchema({ codec: NonEmptyString, fieldName, min: 0, max: 2 }).decode([])
+        )
+      ).toMatchInlineSnapshot(`
       Array [
         "No errors!",
       ]
@@ -64,7 +81,7 @@ describe('schema', () => {
     const fieldName = 'foo';
 
     it('fails when given string is shorter than minimum', () => {
-      expect(PathReporter.report(limitedStringSchema(fieldName, 2, 1).decode('a')))
+      expect(PathReporter.report(limitedStringSchema({ fieldName, min: 2, max: 1 }).decode('a')))
         .toMatchInlineSnapshot(`
         Array [
           "The length of the ${fieldName} is too short. The minimum length is 2.",
@@ -73,7 +90,7 @@ describe('schema', () => {
     });
 
     it('fails when given string is empty and minimum is not 0', () => {
-      expect(PathReporter.report(limitedStringSchema(fieldName, 1, 1).decode('')))
+      expect(PathReporter.report(limitedStringSchema({ fieldName, min: 1, max: 1 }).decode('')))
         .toMatchInlineSnapshot(`
         Array [
           "The ${fieldName} field cannot be an empty string.",
@@ -82,7 +99,7 @@ describe('schema', () => {
     });
 
     it('fails when given string consists only empty characters and minimum is not 0', () => {
-      expect(PathReporter.report(limitedStringSchema(fieldName, 1, 1).decode('  ')))
+      expect(PathReporter.report(limitedStringSchema({ fieldName, min: 1, max: 1 }).decode('  ')))
         .toMatchInlineSnapshot(`
         Array [
           "The ${fieldName} field cannot be an empty string.",
@@ -91,8 +108,11 @@ describe('schema', () => {
     });
 
     it('fails when given string is larger than maximum', () => {
-      expect(PathReporter.report(limitedStringSchema(fieldName, 1, 5).decode('Hello there!!')))
-        .toMatchInlineSnapshot(`
+      expect(
+        PathReporter.report(
+          limitedStringSchema({ fieldName, min: 1, max: 5 }).decode('Hello there!!')
+        )
+      ).toMatchInlineSnapshot(`
         Array [
           "The length of the ${fieldName} is too long. The maximum length is 5.",
         ]
@@ -100,8 +120,9 @@ describe('schema', () => {
     });
 
     it('succeeds when given string within limit', () => {
-      expect(PathReporter.report(limitedStringSchema(fieldName, 1, 50).decode('Hello!!')))
-        .toMatchInlineSnapshot(`
+      expect(
+        PathReporter.report(limitedStringSchema({ fieldName, min: 1, max: 50 }).decode('Hello!!'))
+      ).toMatchInlineSnapshot(`
         Array [
           "No errors!",
         ]
@@ -109,7 +130,7 @@ describe('schema', () => {
     });
 
     it('succeeds when given string is empty and minimum is 0', () => {
-      expect(PathReporter.report(limitedStringSchema(fieldName, 0, 5).decode('')))
+      expect(PathReporter.report(limitedStringSchema({ fieldName, min: 0, max: 5 }).decode('')))
         .toMatchInlineSnapshot(`
         Array [
           "No errors!",
@@ -118,7 +139,7 @@ describe('schema', () => {
     });
 
     it('succeeds when given string consists only empty characters and minimum is 0', () => {
-      expect(PathReporter.report(limitedStringSchema(fieldName, 0, 5).decode('  ')))
+      expect(PathReporter.report(limitedStringSchema({ fieldName, min: 0, max: 5 }).decode('  ')))
         .toMatchInlineSnapshot(`
         Array [
           "No errors!",
@@ -127,8 +148,9 @@ describe('schema', () => {
     });
 
     it('succeeds when given string is same as maximum', () => {
-      expect(PathReporter.report(limitedStringSchema(fieldName, 0, 5).decode('Hello')))
-        .toMatchInlineSnapshot(`
+      expect(
+        PathReporter.report(limitedStringSchema({ fieldName, min: 0, max: 5 }).decode('Hello'))
+      ).toMatchInlineSnapshot(`
         Array [
           "No errors!",
         ]
@@ -136,8 +158,9 @@ describe('schema', () => {
     });
 
     it('succeeds when given string is larger than maximum but same as maximum after trim', () => {
-      expect(PathReporter.report(limitedStringSchema(fieldName, 0, 5).decode('Hello  ')))
-        .toMatchInlineSnapshot(`
+      expect(
+        PathReporter.report(limitedStringSchema({ fieldName, min: 0, max: 5 }).decode('Hello  '))
+      ).toMatchInlineSnapshot(`
         Array [
           "No errors!",
         ]
