@@ -5,17 +5,18 @@
  * 2.0.
  */
 
+import { isIndexNotFoundException } from '@kbn/core-saved-objects-migration-server-internal';
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '../..';
 
 export const deleteAccessControlIndex = async (client: IScopedClusterClient, index: string) => {
-  const accessControlExists = await client.asCurrentUser.indices.exists({
-    index: index.replace('search-', CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX),
-  });
-  if (accessControlExists) {
+  try {
     await client.asCurrentUser.indices.delete({
       index: index.replace('search-', CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX),
     });
+  } catch (e) {
+    // Gracefully exit if index not found. This is a valid case.
+    if (!isIndexNotFoundException(e)) throw e;
   }
 };

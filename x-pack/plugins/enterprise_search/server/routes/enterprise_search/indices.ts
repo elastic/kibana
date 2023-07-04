@@ -202,9 +202,9 @@ export function registerIndexRoutes({
         }
 
         await deleteIndexPipelines(client, indexName);
+        await deleteAccessControlIndex(client, indexName);
 
         await client.asCurrentUser.indices.delete({ index: indexName });
-        await deleteAccessControlIndex(client, indexName);
 
         return response.ok({
           body: {},
