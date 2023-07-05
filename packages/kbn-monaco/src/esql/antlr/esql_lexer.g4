@@ -195,7 +195,10 @@ WHERE_FUNCTIONS
     ;
 
 UNQUOTED_IDENTIFIER
-    : (LETTER | '_') (LETTER | DIGIT | '_' | ASTERISK)*
+    : LETTER (LETTER | DIGIT | '_' | ASTERISK)*
+    // only allow @ at beginning of identifier to keep the option to allow @ as infix operator in the future
+    // also, single `_` and `@` characters are not valid identifiers
+    | ('_' | '@') (LETTER | DIGIT | '_' | ASTERISK)+
     ;
 
 QUOTED_IDENTIFIER

@@ -141,7 +141,7 @@ export function LensEditConfigurationFlyout({
             <EuiCallOut
               size="s"
               title={i18n.translate('xpack.lens.config.configFlyoutCallout', {
-                defaultMessage: 'SQL currently offers limited configuration options',
+                defaultMessage: 'ESQL currently offers limited configuration options',
               })}
               iconType="iInCircle"
             />
