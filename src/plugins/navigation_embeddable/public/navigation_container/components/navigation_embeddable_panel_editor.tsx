@@ -63,7 +63,7 @@ export const NavigationEmbeddablePanelEditor = ({
   const { value: linkList } = useAsync(async () => {
     if (!panels || isEmpty(panels)) return [];
 
-    const links: Array<{ icon: IconType; label: string }> = await Promise.all(
+    const links: Array<{ id: string; icon: IconType; label: string }> = await Promise.all(
       Object.keys(panels).map(async (panelId) => {
         let label = panels[panelId].explicitInput.label;
         let icon = 'link';
@@ -80,7 +80,7 @@ export const NavigationEmbeddablePanelEditor = ({
           label = (panels[panelId].explicitInput as ExternalLinkInput).url;
         }
 
-        return { label, icon };
+        return { id: panelId, label, icon };
       })
     );
     return links;
@@ -122,7 +122,7 @@ export const NavigationEmbeddablePanelEditor = ({
                 <>
                   {linkList?.map((link) => {
                     return (
-                      <>
+                      <div key={link.id}>
                         <EuiPanel hasBorder hasShadow={false} paddingSize="s">
                           <EuiFlexGroup gutterSize="s">
                             <EuiFlexItem grow={false}>
@@ -132,7 +132,7 @@ export const NavigationEmbeddablePanelEditor = ({
                           </EuiFlexGroup>
                         </EuiPanel>
                         <EuiSpacer size="s" />
-                      </>
+                      </div>
                     );
                   })}
                   <EuiButtonEmpty

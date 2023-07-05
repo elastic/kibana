@@ -13,8 +13,6 @@ import { EuiPanel } from '@elastic/eui';
 import { NavigationEmbeddableLink } from './navigation_embeddable_link';
 import { useNavigationEmbeddable } from '../embeddable/navigation_container';
 
-// import './navigation_embeddable.scss';
-
 export const NavigationEmbeddableComponent = () => {
   const navEmbeddable = useNavigationEmbeddable();
 

@@ -430,28 +430,28 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   };
 
   private getActionContextMenuPanel = async () => {
-    let regularActions =
+    const regularActions =
       (await this.props.getActions?.(CONTEXT_MENU_TRIGGER, {
         embeddable: this.props.embeddable,
       })) ?? [];
 
     const { disabledActions } = this.props.embeddable.getInput();
 
-    let sortedActions = regularActions
-      .concat(Object.values(this.state.universalActions || {}) as Array<Action<object>>)
-      .sort(sortByOrderField);
-
+    let allActions = regularActions.concat(
+      Object.values(this.state.universalActions || {}) as Array<Action<object>>
+    );
     if (disabledActions) {
       const removeDisabledActions = removeById(disabledActions);
-      sortedActions = sortedActions.filter(removeDisabledActions);
+      allActions = allActions.filter(removeDisabledActions);
     }
 
     if (this.props.actionPredicate) {
-      sortedActions = sortedActions.filter(({ id }) => this.props.actionPredicate!(id));
+      allActions = allActions.filter(({ id }) => this.props.actionPredicate!(id));
     }
+    allActions.sort(sortByOrderField);
 
     const panels = await buildContextMenuForActions({
-      actions: sortedActions.map((action) => ({
+      actions: allActions.map((action) => ({
         action,
         context: { embeddable: this.props.embeddable },
         trigger: contextMenuTrigger,
@@ -461,7 +461,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     return {
       panels,
-      actions: sortedActions,
+      actions: allActions,
     };
   };
 }
