@@ -62,6 +62,8 @@ export default async () => {
       ],
     },
 
+    security: { disableTestUser: true },
+
     // overriding default timeouts from packages/kbn-test/src/functional_test_runner/lib/config/schema.ts
     // so we can easily adjust them for serverless where needed
     timeouts: {
