@@ -103,7 +103,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.sessions.management.refreshTimeout (duration)',
         'data.search.sessions.maxUpdateRetries (number)',
         'data.search.sessions.notTouchedTimeout (duration)',
-        'devTools.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
+        'dev_tools.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
         'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
         'home.disableWelcomeScreen (boolean)',
