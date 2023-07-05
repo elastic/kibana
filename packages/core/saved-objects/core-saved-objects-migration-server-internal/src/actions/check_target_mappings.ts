@@ -13,7 +13,6 @@ import { getUpdatedHashes } from '../core/build_active_mappings';
 
 /** @internal */
 export interface CheckTargetMappingsParams {
-  indexTypes: string[];
   actualMappings?: IndexMapping;
   expectedMappings: IndexMapping;
 }
@@ -29,13 +28,11 @@ export interface ActualMappingsIncomplete {
 
 export interface ComparedMappingsChanged {
   type: 'compared_mappings_changed';
-  updatedRootFields: string[];
-  updatedTypes: string[];
+  updatedHashes: string[];
 }
 
 export const checkTargetMappings =
   ({
-    indexTypes,
     actualMappings,
     expectedMappings,
   }: CheckTargetMappingsParams): TaskEither.TaskEither<
@@ -56,12 +53,9 @@ export const checkTargetMappings =
     });
 
     if (updatedHashes.length) {
-      const updatedTypes = updatedHashes.filter((field) => indexTypes.includes(field));
-      const updatedRootFields = updatedHashes.filter((field) => !indexTypes.includes(field));
       return Either.left({
         type: 'compared_mappings_changed' as const,
-        updatedRootFields,
-        updatedTypes,
+        updatedHashes,
       });
     } else {
       return Either.right({ type: 'compared_mappings_match' as const });

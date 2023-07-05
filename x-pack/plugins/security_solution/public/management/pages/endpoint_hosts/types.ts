@@ -8,15 +8,14 @@
 import type { DataViewBase } from '@kbn/es-query';
 import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
 import type {
-  HostInfo,
-  Immutable,
-  HostMetadata,
-  HostPolicyResponse,
   AppLocation,
-  PolicyData,
-  HostStatus,
-  ResponseActionApiResponse,
   EndpointPendingActions,
+  HostInfo,
+  HostPolicyResponse,
+  HostStatus,
+  Immutable,
+  PolicyData,
+  ResponseActionApiResponse,
 } from '../../../../common/endpoint/types';
 import type { ServerApiError } from '../../../common/types';
 import type { AsyncResourceState } from '../../state';
@@ -39,14 +38,8 @@ export interface EndpointState {
     // Adding `hostInfo` to store full API response in order to support the
     // refactoring effort with AgentStatus component
     hostInfo?: HostInfo;
-    hostDetails: {
-      /** details data for a specific host */
-      details?: Immutable<HostMetadata>;
-      /** details page is retrieving data */
-      detailsLoading: boolean;
-      /** api error from retrieving host details */
-      detailsError?: ServerApiError;
-    };
+    hostInfoError?: ServerApiError;
+    isHostInfoLoading: boolean;
   };
   /** Holds the Policy Response for the Host currently being displayed in the details */
   policyResponse?: HostPolicyResponse;

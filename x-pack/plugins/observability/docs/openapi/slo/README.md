@@ -7,28 +7,28 @@ A guide about the OpenApi specification can be found at [https://swagger.io/docs
 
 ## The `openapi/slo` folder
 
-* `entrypoint.yaml` is the overview file which pulls together all the paths and components.
-* [Paths](paths/README.md): this defines each endpoint.  A path can have one operation per http method.
-* [Components](components/README.md): Reusable components
+- `entrypoint.yaml` is the overview file which pulls together all the paths and components.
+- [Paths](paths/README.md): this defines each endpoint. A path can have one operation per http method.
+- [Components](components/README.md): Reusable components
 
 ## Tools
 
 It is possible to validate the docs before bundling them with the following
 command in the `x-pack/plugins/observability/docs/openapi/slo` folder:
 
-  ```bash
-    npx swagger-cli validate entrypoint.yaml
-  ```
+```bash
+  npx swagger-cli validate entrypoint.yaml
+```
 
 Then you can generate the `bundled` files by running the following commands:
 
-  ```bash
-    npx @redocly/cli bundle entrypoint.yaml --output bundled.yaml --ext yaml
-    npx @redocly/cli bundle entrypoint.yaml --output bundled.json --ext json
-  ```
+```bash
+  npx @redocly/cli bundle entrypoint.yaml --output bundled.yaml --ext yaml
+  npx @redocly/cli bundle entrypoint.yaml --output bundled.json --ext json
+```
 
 After generating the json bundle ensure that it is also valid by running the following command:
 
-  ```bash
-     npx @redocly/cli lint bundled.json
-  ```
+```bash
+   npx @redocly/cli lint bundled.json
+```

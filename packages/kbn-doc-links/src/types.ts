@@ -12,6 +12,7 @@
 export interface DocLinksMeta {
   version: string;
   elasticWebsiteUrl: string;
+  elasticGithubUrl: string;
   docsWebsiteUrl: string;
 }
 
@@ -284,6 +285,9 @@ export interface DocLinks {
   };
   readonly addData: string;
   readonly kibana: {
+    readonly askElastic: string;
+    readonly createGithubIssue: string;
+    readonly feedback: string;
     readonly guide: string;
     readonly autocompleteSuggestions: string;
     readonly secureSavedObject: string;
@@ -397,6 +401,7 @@ export interface DocLinks {
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
+    sloBurnRateRule: string;
   }>;
   readonly alerting: Readonly<{
     guide: string;
