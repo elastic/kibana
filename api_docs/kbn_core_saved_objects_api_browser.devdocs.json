@@ -3092,12 +3092,12 @@
             "path": "x-pack/plugins/graph/public/types/app_state.ts"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/common/types/synthetics_monitor.ts"
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/common/types/synthetics_monitor.ts"
           },
           {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/common/types/synthetics_monitor.ts"
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/common/types/synthetics_monitor.ts"
           },
           {
             "plugin": "graph",

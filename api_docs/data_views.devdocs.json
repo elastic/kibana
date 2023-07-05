@@ -113,10 +113,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
@@ -352,20 +348,16 @@
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/services/field_existing/field_existing_utils.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/services/field_existing/field_existing_utils.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
                 "plugin": "eventAnnotation",
@@ -378,6 +370,10 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
+              },
+              {
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
               },
               {
                 "plugin": "lens",
@@ -668,14 +664,6 @@
                 "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/filter_group/filter_group.tsx"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
-              },
-              {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
               },
@@ -694,6 +682,14 @@
               {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/public/legacy_uptime/components/overview/filter_group/filter_group.tsx"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
               },
               {
                 "plugin": "ux",
@@ -2645,7 +2641,9 @@
                 "section": "def-common.RuntimeFieldSpec",
                 "text": "RuntimeFieldSpec"
               },
-              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
+              "MappingTimeSeriesMetricType",
+              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -3012,7 +3010,8 @@
               "\nreturns type of TSDB metric or undefined"
             ],
             "signature": [
-              "\"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined"
+              "MappingTimeSeriesMetricType",
+              " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -4923,7 +4922,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4965,10 +4964,8 @@
                 "id": "def-public.DataViewsService.createAndSave.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists."
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -5032,7 +5029,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -5074,10 +5071,8 @@
                 "id": "def-public.DataViewsService.createSavedObject.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists"
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -7801,7 +7796,7 @@
                 "section": "def-common.DataViewAttributes",
                 "text": "DataViewAttributes"
               },
-              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; }) => Promise<",
+              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; overwrite?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -7872,6 +7867,20 @@
                     "description": [],
                     "signature": [
                       "string[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-public.SavedObjectsClientCommon.create.$2.overwrite",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "overwrite",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "src/plugins/data_views/common/types.ts",
                     "deprecated": false,
@@ -8146,7 +8155,9 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
+          "MappingTimeSeriesMetricType",
+          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -8417,10 +8428,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
@@ -8656,20 +8663,16 @@
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/services/field_existing/field_existing_utils.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/services/field_existing/field_existing_utils.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
                 "plugin": "eventAnnotation",
@@ -8682,6 +8685,10 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
+              },
+              {
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
               },
               {
                 "plugin": "lens",
@@ -8972,14 +8979,6 @@
                 "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/filter_group/filter_group.tsx"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
-              },
-              {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
               },
@@ -8998,6 +8997,14 @@
               {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/public/legacy_uptime/components/overview/filter_group/filter_group.tsx"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
               },
               {
                 "plugin": "ux",
@@ -12271,7 +12278,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -12313,10 +12320,8 @@
                 "id": "def-server.DataViewsService.createAndSave.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists."
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -12380,7 +12385,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -12422,10 +12427,8 @@
                 "id": "def-server.DataViewsService.createSavedObject.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists"
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -13511,7 +13514,8 @@
             "label": "timeSeriesMetric",
             "description": [],
             "signature": [
-              "\"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined"
+              "MappingTimeSeriesMetricType",
+              " | undefined"
             ],
             "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
             "deprecated": false,
@@ -13871,7 +13875,7 @@
                 "section": "def-common.DataViewAttributes",
                 "text": "DataViewAttributes"
               },
-              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; }) => Promise<",
+              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; overwrite?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -13942,6 +13946,20 @@
                     "description": [],
                     "signature": [
                       "string[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-server.SavedObjectsClientCommon.create.$2.overwrite",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "overwrite",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "src/plugins/data_views/common/types.ts",
                     "deprecated": false,
@@ -14063,7 +14081,9 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
+          "MappingTimeSeriesMetricType",
+          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -15778,10 +15798,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
@@ -16017,20 +16033,16 @@
                 "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/services/field_existing/field_existing_utils.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/services/field_existing/field_existing_utils.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
-              },
-              {
-                "plugin": "unifiedFieldList",
-                "path": "src/plugins/unified_field_list/public/hooks/use_existing_fields.ts"
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/hooks/use_existing_fields.ts"
               },
               {
                 "plugin": "eventAnnotation",
@@ -16043,6 +16055,10 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
+              },
+              {
+                "plugin": "@kbn/unified-field-list",
+                "path": "packages/kbn-unified-field-list/src/services/field_stats/load_field_stats.ts"
               },
               {
                 "plugin": "lens",
@@ -16333,14 +16349,6 @@
                 "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
               },
               {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/filter_group/filter_group.tsx"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
-              },
-              {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
               },
@@ -16359,6 +16367,14 @@
               {
                 "plugin": "upgradeAssistant",
                 "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/public/legacy_uptime/components/overview/filter_group/filter_group.tsx"
+              },
+              {
+                "plugin": "uptime",
+                "path": "x-pack/plugins/uptime/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
               },
               {
                 "plugin": "ux",
@@ -18310,7 +18326,9 @@
                 "section": "def-common.RuntimeFieldSpec",
                 "text": "RuntimeFieldSpec"
               },
-              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
+              "MappingTimeSeriesMetricType",
+              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -18677,7 +18695,8 @@
               "\nreturns type of TSDB metric or undefined"
             ],
             "signature": [
-              "\"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined"
+              "MappingTimeSeriesMetricType",
+              " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -20293,7 +20312,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -20335,10 +20354,8 @@
                 "id": "def-common.DataViewsService.createAndSave.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists."
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -20402,7 +20419,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -20444,10 +20461,8 @@
                 "id": "def-common.DataViewsService.createSavedObject.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists"
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -22190,7 +22205,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean | undefined, displayErrors?: boolean | undefined) => Promise<",
+              ", overwrite?: boolean | undefined, displayErrors?: boolean | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -22230,10 +22245,8 @@
                 "id": "def-common.DataViewsServicePublicMethods.createSavedObject.$2",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "- If true, save over existing data view"
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean | undefined"
                 ],
@@ -24583,6 +24596,10 @@
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
               },
@@ -25102,7 +25119,7 @@
                 "section": "def-common.DataViewAttributes",
                 "text": "DataViewAttributes"
               },
-              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; }) => Promise<",
+              ", options: { id?: string | undefined; initialNamespaces?: string[] | undefined; overwrite?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-common",
                 "scope": "common",
@@ -25173,6 +25190,20 @@
                     "description": [],
                     "signature": [
                       "string[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-common.SavedObjectsClientCommon.create.$2.overwrite",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "overwrite",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "src/plugins/data_views/common/types.ts",
                     "deprecated": false,
@@ -25862,7 +25893,7 @@
             "section": "def-common.DataViewSpec",
             "text": "DataViewSpec"
           },
-          ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
+          ", overwrite?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25878,7 +25909,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", override?: boolean, displayErrors?: boolean) => Promise<",
+          ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -26104,7 +26135,9 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
+          "MappingTimeSeriesMetricType",
+          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,

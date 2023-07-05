@@ -116,6 +116,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <EuiListGroup flush className="productCard-features">
             {features.map((item: string, index: number) => (
               <EuiListGroupItem
+                wrapText
                 key={index}
                 size="s"
                 label={item}

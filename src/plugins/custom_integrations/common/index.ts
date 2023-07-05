@@ -29,9 +29,7 @@ export const INTEGRATION_CATEGORY_DISPLAY: {
   config_management: { title: 'Config management', parent_id: undefined },
   connector: { title: 'Connector', parent_id: 'enterprise_search' },
   connector_client: { title: 'Connector Client', parent_id: 'enterprise_search' },
-  connector_package: { title: 'Connector Package', parent_id: 'enterprise_search' },
   containers: { title: 'Containers', parent_id: undefined },
-  content_source: { title: 'Content Source', parent_id: 'enterprise_search' },
   crawler: { title: 'Crawler', parent_id: 'enterprise_search' },
   credential_management: { title: 'Credential Management', parent_id: 'security' },
   crm: { title: 'CRM', parent_id: undefined },
@@ -81,7 +79,10 @@ export const INTEGRATION_CATEGORY_DISPLAY: {
   web_application_firewall: { title: 'Web Application Firewall', parent_id: 'security' },
   websphere: { title: 'WebSphere Application Server', parent_id: 'observability' },
   workplace_search: { title: 'Workplace Search', parent_id: 'enterprise_search' },
-
+  workplace_search_content_source: {
+    title: 'Workplace Search Content Source',
+    parent_id: 'enterprise_search',
+  },
   // Kibana added
   apm: { title: 'APM', parent_id: undefined },
 };
