@@ -49,7 +49,7 @@ describe('<UserEntityOverview />', () => {
   describe('license is valid', () => {
     it('should render ip addresses and user risk classification', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
-      mockUseRiskScore.mockReturnValue({ data: riskLevel, isLicenseValid: true });
+      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
       const { getByTestId } = render(
         <TestProviders>
@@ -64,7 +64,7 @@ describe('<UserEntityOverview />', () => {
 
     it('should render correctly if returned data is null', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: null }]);
-      mockUseRiskScore.mockReturnValue({ data: null, isLicenseValid: true });
+      mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: true });
 
       const { getByTestId } = render(
         <TestProviders>
@@ -80,7 +80,7 @@ describe('<UserEntityOverview />', () => {
   describe('license is not valid', () => {
     it('should render ip but not user risk classification', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
-      mockUseRiskScore.mockReturnValue({ data: riskLevel, isLicenseValid: false });
+      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: false });
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
           <UserEntityOverview userName={userName} />
@@ -93,7 +93,7 @@ describe('<UserEntityOverview />', () => {
 
     it('should render correctly if returned data is null', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: null }]);
-      mockUseRiskScore.mockReturnValue({ data: null, isLicenseValid: false });
+      mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: false });
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
           <UserEntityOverview userName={userName} />

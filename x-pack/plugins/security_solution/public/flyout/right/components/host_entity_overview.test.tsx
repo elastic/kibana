@@ -48,7 +48,7 @@ describe('<HostEntityContent />', () => {
   describe('license is valid', () => {
     it('should render ip addresses and host risk classification', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
-      mockUseRiskScore.mockReturnValue({ data: riskLevel, isLicenseValid: true });
+      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
       const { getByTestId } = render(
         <TestProviders>
@@ -63,7 +63,7 @@ describe('<HostEntityContent />', () => {
 
     it('should render correctly if returned data is null', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: null }]);
-      mockUseRiskScore.mockReturnValue({ data: null, isLicenseValid: true });
+      mockUseRiskScore.mockReturnValue({ data: null, isAuthorized: true });
 
       const { getByTestId } = render(
         <TestProviders>
