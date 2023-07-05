@@ -13,7 +13,6 @@ import {
   rollingTimeWindowTypeSchema,
   SLOWithSummaryResponse,
 } from '@kbn/slo-schema';
-import moment from 'moment';
 import React from 'react';
 import { useKibana } from '../../../utils/kibana_react';
 import {
@@ -31,7 +30,6 @@ export interface Props {
 
 export function Overview({ slo }: Props) {
   const { uiSettings } = useKibana().services;
-  const dateFormat = uiSettings.get('dateFormat');
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const hasNoData = slo.summary.status === 'NO_DATA';
 
