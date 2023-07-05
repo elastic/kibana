@@ -88,7 +88,7 @@ export class UserProfileAPIClient {
         query: { dataPath: params?.dataPath },
       })
       .then((response) => {
-        const data = response.data ?? {};
+        const data = response?.data ?? {};
         const updated = merge(this.userProfile$.getValue(), data);
         this.userProfile$.next(updated);
         return response;

@@ -40,6 +40,10 @@ type Hook = (props?: Props) => {
   update: (data: UserProfileData) => void;
   /** Update a single key/value user setting. */
   updateSetting: (data: UpdateSettingProps) => void;
+  /** Flag to indicate if currently updating */
+  isLoading: boolean;
+  /** The current user profile data */
+  userProfileData?: UserProfileData | null;
 };
 
 let useUpdateUserProfile: Hook | undefined;
