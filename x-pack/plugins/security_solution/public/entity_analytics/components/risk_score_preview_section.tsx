@@ -162,6 +162,7 @@ export const RiskScorePreviewSection = () => {
             showFilterBar={false}
             showDatePicker={true}
             displayStyle={'inPage'}
+            submitButtonStyle={'iconOnly'}
           />
         )}
       </EuiFormRow>
