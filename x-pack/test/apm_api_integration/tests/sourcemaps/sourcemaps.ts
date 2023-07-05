@@ -27,6 +27,16 @@ const SAMPLE_SOURCEMAP = {
   mappings: 'A,AAAB;;ABCDE;',
 };
 
+const SAMPLE_ANDROID_MAP = `# compiler: R8
+# compiler_version: 3.2.47
+# min_api: 26
+# common_typos_disable
+# {"id":"com.android.tools.r8.mapping","version":"2.0"}
+# pg_map_id: 127b14c
+# pg_map_hash: SHA-256 127b14c0be5dd1b55beee544a8d0e7c9414b432868ed8bc54ca5cc43cba12435
+a1.TableInfo$ForeignKey$$ExternalSyntheticOutline0 -> a1.e:
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}`
+
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
@@ -99,6 +109,28 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return response.body;
   }
 
+  async function uploadAndroidMap({
+                                   serviceName,
+                                   serviceVersion,
+                                   androidMap,
+                                 }: {
+    serviceName: string;
+    serviceVersion: string;
+    androidMap: string;
+  }) {
+    const response = await apmApiClient.writeUser({
+      endpoint: 'POST /api/apm/androidmaps 2023-10-31',
+      type: 'form-data',
+      params: {
+        body: {
+          service_name: serviceName,
+          service_version: serviceVersion,
+          map_file: androidMap,
+        },
+      },
+    });
+    return response.body;
+  }
   async function runSourceMapMigration() {
     await apmApiClient.writeUser({
       endpoint: 'POST /internal/apm/sourcemaps/migrate_fleet_artifacts',
@@ -127,6 +159,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     before(async () => {
       await Promise.all([deleteAllFleetSourceMaps(), deleteAllApmSourceMaps()]);
     });
+
+    async function getDecodedMapContent(
+      encodedContent?: string
+    ): Promise<SourceMap | undefined> {
+      if (encodedContent) {
+        return (await unzip(Buffer.from(encodedContent, 'base64'))).toString();
+      }
+    }
 
     async function getDecodedSourceMapContent(
       encodedContent?: string
@@ -240,6 +280,57 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('updates the content hash', async () => {
           expect(resBefore._source?.content_sha256).to.not.be(resAfter._source?.content_sha256);
         });
+      });
+    });
+
+    let androidResp: APIReturnType<'POST /api/apm/androidmaps 2023-10-31'>;
+    describe('upload android map', () => {
+      after(async () => {
+        await apmApiClient.writeUser({
+          endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-10-31',
+          params: {path: {id: androidResp.id}},
+        });
+      });
+
+      before(async () => {
+        androidResp = await uploadAndroidMap({
+          serviceName: 'uploading-test',
+          serviceVersion: '1.0.0',
+          androidMap: SAMPLE_ANDROID_MAP,
+        });
+
+        await waitForSourceMapCount(1);
+      });
+
+      it('is uploaded as a fleet artifact', async () => {
+        const res = await esClient.search({
+          index: '.fleet-artifacts',
+          size: 1,
+          query: {
+            bool: {
+              filter: [{term: {type: 'sourcemap'}}, {term: {package_name: 'apm'}}],
+            },
+          },
+        });
+
+        // @ts-expect-error
+        expect(res.hits.hits[0]._source.identifier).to.be('uploading-test-1.0.0-android');
+      });
+
+      it('is added to .apm-source-map index', async () => {
+        const res = await esClient.search<ApmSourceMap>({
+          index: '.apm-source-map',
+        });
+
+        const source = res.hits.hits[0]._source;
+        const decodedSourceMap = await getDecodedMapContent(source?.content);
+        expect(decodedSourceMap).to.eql(SAMPLE_ANDROID_MAP);
+        expect(source?.content_sha256).to.be(
+          '702e07279b0fbed47fdbf5e71528dff845b4f07a16ca79cab0c1b06eb71be966'
+        );
+        expect(source?.file.path).to.be('android');
+        expect(source?.service.name).to.be('uploading-test');
+        expect(source?.service.version).to.be('1.0.0');
       });
     });
 
