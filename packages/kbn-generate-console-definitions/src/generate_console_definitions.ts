@@ -10,6 +10,7 @@ import fs from 'fs';
 import Path, { join } from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import { generateQueryParams } from './generate_query_params';
+import { generateBodyParams } from './generate_body_params';
 import type {
   AutocompleteBodyParams,
   AutocompleteDefinition,
@@ -55,14 +56,8 @@ const generateParams = (
     return;
   }
   const urlParams = generateQueryParams(requestType as SpecificationTypes.Request, schema);
-  const bodyParams = generateBodyParams(requestType);
+  const bodyParams = generateBodyParams(requestType as SpecificationTypes.Request, schema);
   return { urlParams, bodyParams };
-};
-
-const generateBodyParams = (
-  requestType: SpecificationTypes.TypeDefinition
-): AutocompleteBodyParams => {
-  return {};
 };
 
 const addParams = (

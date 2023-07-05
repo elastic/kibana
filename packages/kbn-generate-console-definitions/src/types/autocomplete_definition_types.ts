@@ -11,7 +11,7 @@ export interface AutocompleteUrlParams {
 }
 
 export interface AutocompleteBodyParams {
-  [key: string]: number | string;
+  [key: string]: any;
 }
 
 export interface AutocompleteDefinition {
