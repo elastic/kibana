@@ -14,7 +14,7 @@ import type { ThreeVersionsOf } from '../../../../../../../common/detection_engi
 import { MissingVersion } from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
 
 export const calculateFieldsDiffFor = <TObject extends object>(
-  ruleVersions: ThreeVersionsOf<TObject>,
+  ruleVersions: ThreeVersionsOf<TObject, TObject>,
   fieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<TObject>
 ): FieldsDiff<TObject> => {
   const result = mapValues(fieldsDiffAlgorithms, (calculateFieldDiff, fieldName) => {
@@ -22,15 +22,19 @@ export const calculateFieldsDiffFor = <TObject extends object>(
     const fieldDiff = calculateFieldDiff(fieldVersions);
     return fieldDiff;
   });
-
+  // if (ruleVersions.target_version.rule_id === 'd76b02ef-fc95-4001-9297-01cb7412232f') { // Python
+  if (ruleVersions.target_version.rule_id === 'a00681e3-9ed6-447c-ab2c-be648821c622') {
+    // First seen AWS
+    debugger;
+  }
   // TODO: try to improve strict typing and get rid of this "as" operator.
   return result as FieldsDiff<TObject>;
 };
 
 const pickField = <TObject extends object>(
   fieldName: keyof TObject,
-  versions: ThreeVersionsOf<TObject>
-): ThreeVersionsOf<TObject[typeof fieldName]> => {
+  versions: ThreeVersionsOf<TObject, TObject>
+): ThreeVersionsOf<TObject[typeof fieldName], TObject[typeof fieldName]> => {
   return {
     base_version:
       versions.base_version !== MissingVersion ? versions.base_version[fieldName] : MissingVersion,

@@ -18,7 +18,7 @@ import {
 import { ThreeWayMergeOutcome } from '../../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_merge_outcome';
 
 export const simpleDiffAlgorithm = <TValue>(
-  versions: ThreeVersionsOf<TValue>
+  versions: ThreeVersionsOf<TValue, TValue>
 ): ThreeWayDiff<TValue> => {
   const {
     base_version: baseVersion,
