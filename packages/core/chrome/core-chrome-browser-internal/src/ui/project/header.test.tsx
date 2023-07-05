@@ -8,6 +8,7 @@
 
 import { EuiHeader } from '@elastic/eui';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
@@ -18,18 +19,19 @@ const mockApplication = applicationServiceMock.createInternalStartContract();
 describe('Header', () => {
   const mockProps: Omit<ProjectHeaderProps, 'children'> = {
     application: mockApplication,
-    kibanaDocLink: 'app/help/doclinks',
-    kibanaVersion: '8.9',
-    actionMenu$: Rx.of(),
     breadcrumbs$: Rx.of([]),
+    actionMenu$: Rx.of(undefined),
+    docLinks: docLinksServiceMock.createStartContract(),
     globalHelpExtensionMenuLinks$: Rx.of([]),
     headerBanner$: Rx.of(),
-    helpExtension$: Rx.of(),
+    helpExtension$: Rx.of(undefined),
     helpSupportUrl$: Rx.of('app/help'),
+    helpMenuLinks$: Rx.of([]),
     homeHref$: Rx.of('app/home'),
+    kibanaVersion: '8.9',
     loadingCount$: Rx.of(0),
-    navControlsCenter$: Rx.of([]),
     navControlsLeft$: Rx.of([]),
+    navControlsCenter$: Rx.of([]),
     navControlsRight$: Rx.of([]),
     prependBasePath: (str) => `hello/world/${str}`,
   };

@@ -17,14 +17,8 @@ import { useHostIsolationTools } from '../../timelines/components/side_panel/eve
  */
 export const PanelFooter: FC = memo(() => {
   const { closeFlyout } = useExpandableFlyoutContext();
-  const {
-    eventId,
-    indexName,
-    dataFormattedForFieldBrowser,
-    dataAsNestedObject,
-    refetchFlyoutData,
-    scopeId,
-  } = useRightPanelContext();
+  const { dataFormattedForFieldBrowser, dataAsNestedObject, refetchFlyoutData, scopeId } =
+    useRightPanelContext();
 
   const { isHostIsolationPanelOpen, showHostIsolationPanel } = useHostIsolationTools();
 
@@ -36,7 +30,6 @@ export const PanelFooter: FC = memo(() => {
     <FlyoutFooter
       detailsData={dataFormattedForFieldBrowser}
       detailsEcsData={dataAsNestedObject}
-      expandedEvent={{ eventId, indexName }}
       handleOnEventClosed={closeFlyout}
       isHostIsolationPanelOpen={isHostIsolationPanelOpen}
       isReadOnly={false}

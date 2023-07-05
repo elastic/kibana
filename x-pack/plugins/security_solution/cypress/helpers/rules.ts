@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
+import type { PrebuiltRuleAsset } from '../../server/lib/detection_engine/prebuilt_rules';
+import { getPrebuiltRuleMock } from '../../server/lib/detection_engine/prebuilt_rules/mocks';
 
 import type { ThreatArray } from '../../common/detection_engine/rule_schema';
 
@@ -77,3 +78,21 @@ export const convertHistoryStartToSize = (relativeTime: string) => {
     return relativeTime;
   }
 };
+
+/**
+ * A helper function to create a rule asset saved object (type: security-rule)
+ *
+ * @param overrideParams Params to override the default mock
+ * @returns Created rule asset saved object
+ */
+export const createRuleAssetSavedObject = (overrideParams: Partial<PrebuiltRuleAsset>) => ({
+  'security-rule': {
+    ...getPrebuiltRuleMock(),
+    ...overrideParams,
+  },
+  type: 'security-rule',
+  references: [],
+  coreMigrationVersion: '8.6.0',
+  updated_at: '2022-11-01T12:56:39.717Z',
+  created_at: '2022-11-01T12:56:39.717Z',
+});

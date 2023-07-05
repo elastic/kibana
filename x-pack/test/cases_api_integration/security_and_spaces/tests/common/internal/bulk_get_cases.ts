@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { CommentType } from '@kbn/cases-plugin/common';
+import { MAX_BULK_GET_CASES } from '@kbn/cases-plugin/common/constants';
 import { getPostCaseRequest, postCaseReq } from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -111,12 +112,18 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('errors', () => {
-      it('400s when requesting more than 1000 cases', async () => {
-        const ids = Array(1001).fill('test');
-
+      it(`400s when requesting more than ${MAX_BULK_GET_CASES} cases`, async () => {
         await bulkGetCases({
           supertest,
-          ids,
+          ids: Array(MAX_BULK_GET_CASES + 1).fill('foobar'),
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when requesting zero cases', async () => {
+        await bulkGetCases({
+          supertest,
+          ids: [],
           expectedHttpCode: 400,
         });
       });

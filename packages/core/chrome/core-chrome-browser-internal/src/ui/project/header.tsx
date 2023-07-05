@@ -23,9 +23,11 @@ import {
   ChromeBreadcrumb,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
+  ChromeHelpMenuLink,
   ChromeNavControl,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser/src';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
@@ -88,20 +90,21 @@ const headerStrings = {
 };
 
 export interface Props {
-  kibanaDocLink: string;
-  children: React.ReactNode;
-  kibanaVersion: string;
-  application: InternalApplicationStart;
-  actionMenu$: Observable<MountPoint | undefined>;
-  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   headerBanner$: Observable<ChromeUserBanner | undefined>;
+  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  actionMenu$: Observable<MountPoint | undefined>;
+  docLinks: DocLinksStart;
+  children: React.ReactNode;
+  globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
+  helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
   homeHref$: Observable<string | undefined>;
+  kibanaVersion: string;
+  application: InternalApplicationStart;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
-  navControlsCenter$: Observable<ChromeNavControl[]>;
   navControlsLeft$: Observable<ChromeNavControl[]>;
+  navControlsCenter$: Observable<ChromeNavControl[]>;
   navControlsRight$: Observable<ChromeNavControl[]>;
   prependBasePath: (url: string) => string;
 }
@@ -162,10 +165,10 @@ const Logo = (
 
 export const ProjectHeader = ({
   application,
-  kibanaDocLink,
   kibanaVersion,
   children,
   prependBasePath,
+  docLinks,
   ...observables
 }: Props) => {
   const [navId] = useState(htmlIdGenerator()());
@@ -253,7 +256,9 @@ export const ProjectHeader = ({
                   globalHelpExtensionMenuLinks$={observables.globalHelpExtensionMenuLinks$}
                   helpExtension$={observables.helpExtension$}
                   helpSupportUrl$={observables.helpSupportUrl$}
-                  kibanaDocLink={kibanaDocLink}
+                  kibanaDocLink={docLinks.links.elasticStackGetStarted}
+                  defaultContentLinks$={observables.helpMenuLinks$}
+                  docLinks={docLinks}
                   kibanaVersion={kibanaVersion}
                   navigateToUrl={application.navigateToUrl}
                 />
