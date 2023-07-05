@@ -54,6 +54,8 @@ import {
   CLUSTER_SHARD_LIMIT_EXCEEDED_REASON,
   FATAL_REASON_REQUEST_ENTITY_TOO_LARGE,
 } from '../common/constants';
+import { getBaseMappings } from '../core';
+import { buildPickupMappingsQuery } from '../core/build_pickup_mappings_query';
 
 export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
   // The action response `resW` is weakly typed, the type includes all action
@@ -1439,18 +1441,22 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           updatedTypesQuery: Option.none,
         };
       } else if (isTypeof(left, 'compared_mappings_changed')) {
-        if (left.updatedRootFields.length) {
+        const rootFields = Object.keys(getBaseMappings().properties);
+        const updatedRootFields = left.updatedHashes.filter((field) => rootFields.includes(field));
+        const updatedTypesQuery = Option.fromNullable(buildPickupMappingsQuery(left.updatedHashes));
+
+        if (updatedRootFields.length) {
           // compatible migration: some core fields have been updated
           return {
             ...stateP,
             controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
             // we must "pick-up" all documents on the index (by not providing a query)
-            updatedTypesQuery: Option.none,
+            updatedTypesQuery,
             logs: [
               ...stateP.logs,
               {
                 level: 'info',
-                message: `Kibana is performing a compatible upgrade and the mappings of some root fields have been changed. For Elasticsearch to pickup these mappings, all saved objects need to be updated. Updated root fields: ${left.updatedRootFields}.`,
+                message: `Kibana is performing a compatible upgrade and the mappings of some root fields have been changed. For Elasticsearch to pickup these mappings, all saved objects need to be updated. Updated root fields: ${updatedRootFields}.`,
               },
             ],
           };
@@ -1460,16 +1466,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             ...stateP,
             controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
             // we can "pick-up" only the SO types that have changed
-            updatedTypesQuery: Option.some({
-              bool: {
-                should: left.updatedTypes.map((type) => ({ term: { type } })),
-              },
-            }),
+            updatedTypesQuery,
             logs: [
               ...stateP.logs,
               {
                 level: 'info',
-                message: `Kibana is performing a compatible upgrade and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings: ${left.updatedTypes}.`,
+                message: `Kibana is performing a compatible upgrade and NO root fields have been udpated. Kibana will update the following SO types so that ES can pickup the updated mappings: ${left.updatedHashes}.`,
               },
             ],
           };

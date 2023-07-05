@@ -782,7 +782,13 @@
                 "text": "HomeServerPluginStart"
               },
               ">; } | undefined; ml?: { setup: ",
-              "SharedServices",
+              {
+                "pluginId": "ml",
+                "scope": "server",
+                "docId": "kibMlPluginApi",
+                "section": "def-server.MlPluginSetup",
+                "text": "MlPluginSetup"
+              },
               "; start: () => Promise<never>; } | undefined; security?: { setup: ",
               {
                 "pluginId": "security",
