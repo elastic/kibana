@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 export const ExternalLinkEmbeddableStrings = {
   getPlaceholder: () =>
-    i18n.translate('navEmbeddable.editor.external.placeholder', {
+    i18n.translate('navigationEmbeddable.externalLink.editor.placeholder', {
       defaultMessage: 'Enter external URL',
     }),
 };

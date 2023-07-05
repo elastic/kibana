@@ -42,13 +42,13 @@ export class ExternalLinkFactory
   }
 
   public getDisplayName() {
-    return i18n.translate('externalLinkEmbeddable.factory.displayName', {
+    return i18n.translate('navigationEmbeddable.externalLink.factory.displayName', {
       defaultMessage: 'URL',
     });
   }
 
   public getDescription() {
-    return i18n.translate('externalLinkEmbeddable.factory.description', {
+    return i18n.translate('navigationEmbeddable.externalLink.factory.description', {
       defaultMessage: 'Go to URL',
     });
   }

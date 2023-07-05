@@ -10,15 +10,15 @@ import { i18n } from '@kbn/i18n';
 
 export const DashboardLinkEmbeddableStrings = {
   getSearchPlaceholder: () =>
-    i18n.translate('navEmbeddable.editor.dashboard.searchPlaceholder', {
+    i18n.translate('navigationEmbeddable.dashboardLink.editor.searchPlaceholder', {
       defaultMessage: 'Search for a dashboard',
     }),
   getDashboardPickerAriaLabel: () =>
-    i18n.translate('navEmbeddable.editor.dashboard.dashboardPickerAriaLabel', {
+    i18n.translate('navigationEmbeddable.dashboardLink.editor.dashboardPickerAriaLabel', {
       defaultMessage: 'Search for a dashboard',
     }),
   getCurrentDashboardLabel: () =>
-    i18n.translate('navEmbeddable.editor.dashboard.currentDashboardLabel', {
+    i18n.translate('navigationEmbeddable.dashboardLink.editor.currentDashboardLabel', {
       defaultMessage: 'Current',
     }),
 };
