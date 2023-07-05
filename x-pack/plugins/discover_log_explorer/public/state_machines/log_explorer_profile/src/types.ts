@@ -41,6 +41,7 @@ export type LogExplorerProfileTypestate =
       context: WithDatasetSelection & WithDataView;
     };
 
+export type LogExplorerProfileState = LogExplorerProfileTypestate['value'];
 export type LogExplorerProfileContext = LogExplorerProfileTypestate['context'];
 
 export type LogExplorerProfileEvent =
@@ -52,10 +53,3 @@ export type LogExplorerProfileEvent =
   | DoneInvokeEvent<DataView>
   | DoneInvokeEvent<DatasetEncodingError>
   | DoneInvokeEvent<Error>;
-
-export type LogExplorerProfileStateService = Interpreter<
-  LogExplorerProfileContext,
-  any,
-  LogExplorerProfileEvent,
-  LogExplorerProfileTypestate
->;

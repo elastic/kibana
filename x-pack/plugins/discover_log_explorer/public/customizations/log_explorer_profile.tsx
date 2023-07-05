@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { CustomizationCallback } from '@kbn/discover-plugin/public';
 import React from 'react';
-import { interpret } from 'xstate';
-import { createLogExplorerProfileStateMachine } from '../state_machines/log_explorer_profile';
+
 import { DiscoverLogExplorerStartDeps } from '../types';
 import { dynamic } from '../utils/dynamic';
 
@@ -23,19 +22,22 @@ interface CreateLogExplorerProfileCustomizationsDeps {
 export const createLogExplorerProfileCustomizations =
   ({ core, plugins }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
-    const { DatasetsService } = await import('../services/datasets');
+    // Lazy load dependencies
+    const datasetServiceModuleLoadable = import('../services/datasets');
+    const logExplorerMachineModuleLoadable = import('../state_machines/log_explorer_profile');
+
+    const [{ DatasetsService }, { initializeLogExplorerProfileStateService, waitForState }] =
+      await Promise.all([datasetServiceModuleLoadable, logExplorerMachineModuleLoadable]);
+
     const datasetsService = new DatasetsService().start({
       http: core.http,
     });
 
-    const logExplorerProfileStateService = interpret(
-      createLogExplorerProfileStateMachine({
-        dataViews: plugins.dataViews,
-        stateContainer,
-        toasts: core.notifications.toasts,
-      })
-    );
-    logExplorerProfileStateService.start();
+    const logExplorerProfileStateService = initializeLogExplorerProfileStateService({
+      dataViews: plugins.dataViews,
+      stateContainer,
+      toasts: core.notifications.toasts,
+    });
     await waitForState(logExplorerProfileStateService, 'initialized');
 
     /**
@@ -63,16 +65,3 @@ export const createLogExplorerProfileCustomizations =
       },
     });
   };
-
-async function waitForState(machineService, targetState) {
-  return new Promise((resolve) => {
-    const listener = (state) => {
-      if (state.matches(targetState)) {
-        resolve(state);
-        machineService.off(listener); // Unsubscribe the listener once the target state is matched
-      }
-    };
-
-    machineService.onTransition(listener);
-  });
-}

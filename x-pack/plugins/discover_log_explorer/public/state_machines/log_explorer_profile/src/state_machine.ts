@@ -10,7 +10,7 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { actions, createMachine } from 'xstate';
+import { actions, createMachine, interpret, InterpreterFrom } from 'xstate';
 import { isDatasetSelection } from '../../../utils/dataset_selection';
 import { DEFAULT_CONTEXT } from './defaults';
 import type {
@@ -112,12 +112,14 @@ export const createLogExplorerProfileStateMachine = ({
     actions: {
       notifyRestoreFailed: () => {
         toasts.addWarning({
-          title: i18n.translate('discover.invalidFiltersWarnToast.title', {
-            defaultMessage: "We couldn't restore your datasets selection.",
-          }),
-          text: i18n.translate('discover.invalidFiltersWarnToast.description', {
-            defaultMessage: 'We switched to "All log datasets" as the default selection.',
-          }),
+          title: i18n.translate(
+            'xpack.discoverLogExplorer.datasetSelection.restoreFailedToastTitle',
+            { defaultMessage: "We couldn't restore your datasets selection." }
+          ),
+          text: i18n.translate(
+            'xpack.discoverLogExplorer.datasetSelection.restoreFailedToastMessage',
+            { defaultMessage: 'We switched to "All log datasets" as the default selection.' }
+          ),
         });
       },
     },
@@ -132,3 +134,17 @@ export const createLogExplorerProfileStateMachine = ({
       updateUrlState: updateUrlState({ stateContainer }),
     },
   });
+
+export const initializeLogExplorerProfileStateService = (
+  deps: LogExplorerProfileStateMachineDependencies
+) => {
+  const service = interpret(createLogExplorerProfileStateMachine(deps));
+
+  service.start();
+
+  return service;
+};
+
+export type LogExplorerProfileStateService = InterpreterFrom<
+  ReturnType<typeof createLogExplorerProfileStateMachine>
+>;

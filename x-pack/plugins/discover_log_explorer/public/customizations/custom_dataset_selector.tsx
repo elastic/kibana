@@ -6,26 +6,21 @@
  */
 
 import React from 'react';
-import { useActor } from '@xstate/react';
 import { DatasetSelector } from '../components/dataset_selector';
 import { DatasetsProvider, useDatasetsContext } from '../hooks/use_datasets';
 import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
 import { IDatasetsClient } from '../services/datasets';
-import { DatasetSelectionChange } from '../utils/dataset_selection';
 import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
+import { useLogExplorerProfile } from '../hooks/use_log_explorer_profile';
 
 interface CustomDatasetSelectorProps {
   logExplorerProfileStateService: LogExplorerProfileStateService;
 }
 
 export const CustomDatasetSelector = withProviders(({ logExplorerProfileStateService }) => {
-  const [logStreamPageState, logStreamPageSend] = useActor(logExplorerProfileStateService);
-
-  const { datasetSelection } = logStreamPageState.context;
-
-  const handleStreamSelection: DatasetSelectionChange = (data) => {
-    logStreamPageSend({ type: 'UPDATE_DATASET_SELECTION', data });
-  };
+  const { datasetSelection, handleDatasetSelectionChange } = useLogExplorerProfile(
+    logExplorerProfileStateService
+  );
 
   const {
     error: integrationsError,
@@ -64,7 +59,7 @@ export const CustomDatasetSelector = withProviders(({ logExplorerProfileStateSer
       onIntegrationsSort={sortIntegrations}
       onIntegrationsStreamsSearch={searchIntegrationsStreams}
       onIntegrationsStreamsSort={sortIntegrationsStreams}
-      onSelectionChange={handleStreamSelection}
+      onSelectionChange={handleDatasetSelectionChange}
       onStreamsEntryClick={loadDatasets}
       onUnmanagedStreamsReload={reloadDatasets}
       onUnmanagedStreamsSearch={searchDatasets}
