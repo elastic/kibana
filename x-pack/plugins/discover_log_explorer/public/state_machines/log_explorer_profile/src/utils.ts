@@ -6,11 +6,11 @@
  */
 
 import { LogExplorerProfileStateService } from './state_machine';
-import { LogExplorerProfileState } from './types';
+import { LogExplorerProfileStateValue } from './types';
 
 export const waitForState = (
   service: LogExplorerProfileStateService,
-  targetState: LogExplorerProfileState
+  targetState: LogExplorerProfileStateValue
 ) => {
   return new Promise((resolve) => {
     const { unsubscribe } = service.subscribe((state) => {

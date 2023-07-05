@@ -19,6 +19,7 @@ import type {
   LogExplorerProfileTypestate,
 } from './types';
 import { initializeFromUrl, updateUrlState } from './url_state_storage_service';
+import { createAndSetDataView } from './data_view_service';
 
 export const createPureLogExplorerProfileStateMachine = (
   initialContext: LogExplorerProfileContext
@@ -124,13 +125,8 @@ export const createLogExplorerProfileStateMachine = ({
       },
     },
     services: {
+      createDataView: createAndSetDataView({ dataViews, stateContainer }),
       initializeFromUrl: initializeFromUrl({ stateContainer }),
-      createDataView: async (context) => {
-        const dataView = await dataViews.create(context.datasetSelection.toDataviewSpec());
-
-        stateContainer.actions.setDataView(dataView);
-        return dataView;
-      },
       updateUrlState: updateUrlState({ stateContainer }),
     },
   });

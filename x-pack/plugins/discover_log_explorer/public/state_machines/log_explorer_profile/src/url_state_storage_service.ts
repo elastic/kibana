@@ -47,10 +47,13 @@ export const updateUrlState =
     LogExplorerProfileEvent
   > =>
   async (context) => {
-    const { dataView } = context;
-
-    return stateContainer.appState.update({
-      index: dataView.id,
-      columns: [TIMESTAMP_FIELD, MESSAGE_FIELD],
-    });
+    if ('dataView' in context) {
+      return stateContainer.appState.update(
+        {
+          index: context.dataView.id,
+          columns: [TIMESTAMP_FIELD, MESSAGE_FIELD],
+        },
+        true
+      );
+    }
   };

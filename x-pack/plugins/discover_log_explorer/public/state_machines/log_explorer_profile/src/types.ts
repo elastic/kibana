@@ -41,8 +41,9 @@ export type LogExplorerProfileTypestate =
       context: WithDatasetSelection & WithDataView;
     };
 
-export type LogExplorerProfileState = LogExplorerProfileTypestate['value'];
 export type LogExplorerProfileContext = LogExplorerProfileTypestate['context'];
+
+export type LogExplorerProfileStateValue = LogExplorerProfileTypestate['value'];
 
 export type LogExplorerProfileEvent =
   | {
