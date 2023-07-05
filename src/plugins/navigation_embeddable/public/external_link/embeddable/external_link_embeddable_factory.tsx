@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
-import { ILinkFactory } from '../../types';
+import { ILinkFactory } from '../../navigation_container/types';
 import { ExternalLinkInput } from '../types';
 import { NavigationContainer } from '../../navigation_container/embeddable/navigation_container';
 import { ExternalLinkEditorDestinationPicker } from '../components/external_link_editor_destination_picker';

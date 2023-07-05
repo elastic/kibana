@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { NavigationContainerInput } from '../../types';
+import { NavigationContainerInput } from '../types';
 import { coreServices } from '../../services/kibana_services';
 import { NavigationEmbeddablePanelEditor } from '../components/navigation_embeddable_panel_editor';
 

@@ -9,7 +9,7 @@
 import { EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
-import { LinkInput } from '../types';
+import { LinkInput } from '../navigation_container/types';
 
 export interface DashboardLinkInput extends LinkInput {
   dashboardId: string;

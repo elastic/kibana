@@ -8,7 +8,7 @@
 
 import { EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
-import { LinkInput } from '../types';
+import { LinkInput } from '../navigation_container/types';
 
 export interface ExternalLinkInput extends LinkInput {
   url: string;

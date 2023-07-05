@@ -21,7 +21,7 @@ import {
   LinkPanelState,
   NavigationContainerInput,
   NavigationContainerReduxState,
-} from '../../types';
+} from '../types';
 import { linksService } from '../../services/links_service';
 import { ExternalLinkInput } from '../../external_link/types';
 import { coreServices } from '../../services/kibana_services';
@@ -47,11 +47,6 @@ type NavigationReduxEmbeddableTools = ReduxEmbeddableTools<
   NavigationContainerReduxState,
   typeof navigationEmbeddableReducers
 >;
-
-interface NavigationLinkEditorChanges {
-  type: string;
-  label?: string;
-}
 
 export class NavigationContainer extends Container<
   LinkInput,
@@ -167,38 +162,6 @@ export class NavigationContainer extends Container<
       this.editorFlyout = undefined;
     }
   }
-
-  // public openAddLinkFlyout(onSave?: (id: string) => void) {
-  //   const onCancel = (changes?: NavigationLinkEditorChanges) => {
-  //     this.closeEditorFlyout();
-  //   };
-
-  //   const onSaveFlyout = async (changes: NavigationLinkEditorChanges) => {
-  //     // this.closeAllFlyouts();
-  //     if (!changes.type) {
-  //       return;
-  //     }
-  //   };
-
-  //   this.editorFlyout = coreServices.overlays.openFlyout(
-  //     toMountPoint(
-  //       <NavigationEmbeddableContext.Provider value={this}>
-  //         <NavigationEmbeddableEditor
-  //           onClose={() => this.closeEditorFlyout()}
-  //           onSave={onSaveFlyout}
-  //         />
-  //       </NavigationEmbeddableContext.Provider>,
-  //       { theme$: coreServices.theme.theme$ }
-  //     ),
-  //     {
-  //       outsideClickCloses: false,
-  //       onClose: () => {
-  //         this.closeEditorFlyout();
-  //         onCancel();
-  //       },
-  //     }
-  //   );
-  // }
 
   public async reload() {}
 

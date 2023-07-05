@@ -15,7 +15,7 @@ import {
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { NavigationContainerInput } from '../../types';
+import { NavigationContainerInput } from '../types';
 import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_container';
 import { coreServices, untilPluginStartServicesReady } from '../../services/kibana_services';
 

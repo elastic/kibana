@@ -20,7 +20,7 @@ import {
   EuiSelectableOption,
 } from '@elastic/eui';
 
-import { LinkEditorDestinationProps } from '../../types';
+import { LinkEditorDestinationProps } from '../../navigation_container/types';
 import { DashboardItem, DashboardLinkInput } from '../types';
 import { DashboardLinkEmbeddableStrings } from './dashboard_link_strings';
 import { memoizedFetchDashboards } from '../lib/dashboard_editor_tools';

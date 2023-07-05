@@ -9,13 +9,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const NavEmbeddableStrings = {
-  component: {
+  editor: {
     getAddButtonLabel: () =>
       i18n.translate('navEmbeddable.editor.addButtonLabel', {
         defaultMessage: 'Add link',
       }),
-  },
-  editor: {
     getApplyButtonLabel: () =>
       i18n.translate('navEmbeddable.editor.confirmApplyButtonLabel', {
         defaultMessage: 'Apply',
@@ -36,17 +34,5 @@ export const NavEmbeddableStrings = {
       i18n.translate('navEmbeddable.editor.linkTextPlaceholder', {
         defaultMessage: 'Enter text for link',
       }),
-    dashboard: {
-      getLinkTypeLabel: () =>
-        i18n.translate('navEmbeddable.editor.dashboard.linkTypeLabel', {
-          defaultMessage: 'Dashboard',
-        }),
-    },
-    external: {
-      getLinkTypeLabel: () =>
-        i18n.translate('navEmbeddable.editor.external.linkTypeLabel', {
-          defaultMessage: 'URL',
-        }),
-    },
   },
 };

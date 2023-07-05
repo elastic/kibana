@@ -10,19 +10,19 @@ import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 
-import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_embeddable';
-import { ILinkFactory, LinkFactory } from './navigation_embeddable/types';
-import { linksService } from './navigation_embeddable/services/links_service';
-import { NavigationEmbeddableFactoryDefinition } from './navigation_embeddable';
-import { setKibanaServices } from './navigation_embeddable/services/kibana_services';
+import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_container';
+import { ILinkFactory, LinkFactory } from './navigation_container/types';
+import { linksService } from './services/links_service';
+import { NavigationEmbeddableFactoryDefinition } from './navigation_container';
+import { setKibanaServices } from './services/kibana_services';
 import {
   ExternalLinkFactory,
   EXTERNAL_LINK_EMBEDDABLE_TYPE,
-} from './navigation_embeddable/external_link/embeddable/external_link_embeddable_factory';
+} from './external_link/embeddable/external_link_embeddable_factory';
 import {
   DashboardLinkFactory,
   DASHBOARD_LINK_EMBEDDABLE_TYPE,
-} from './navigation_embeddable/dashboard_link/embeddable/dashboard_link_embeddable_factory';
+} from './dashboard_link/embeddable/dashboard_link_embeddable_factory';
 
 export interface NavigationEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;

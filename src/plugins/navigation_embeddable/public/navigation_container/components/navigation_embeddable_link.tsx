@@ -11,7 +11,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import { useNavigationEmbeddable } from '../embeddable/navigation_container';
-import { LinkEmbeddable } from '../../types';
+import { LinkEmbeddable } from '../types';
 
 export interface NavigationEmbeddableLinkProps {
   embeddableId: string;

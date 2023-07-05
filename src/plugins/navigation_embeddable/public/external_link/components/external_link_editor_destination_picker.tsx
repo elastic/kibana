@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 
 import { ExternalLinkInput } from '../types';
-import { LinkEditorDestinationProps } from '../../types';
+import { LinkEditorDestinationProps } from '../../navigation_container/types';
 import { ExternalLinkEmbeddableStrings } from './external_link_strings';
 
 // TODO: As part of https://github.com/elastic/kibana/issues/154381, replace this regex URL check with more robust url validation

@@ -27,11 +27,11 @@ import {
 import { css } from '@emotion/react';
 import { linksService } from '../../services/links_service';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
-import { ILinkFactory } from '../../types';
+import { ILinkFactory } from '../types';
 import { EXTERNAL_LINK_EMBEDDABLE_TYPE } from '../../external_link/embeddable/external_link_embeddable_factory';
 import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
 
-type LinkType = 'dashboardLink' | 'externalLink';
+type LinkType = typeof DASHBOARD_LINK_EMBEDDABLE_TYPE | typeof EXTERNAL_LINK_EMBEDDABLE_TYPE;
 
 export const NavigationEmbeddableLinkEditor = ({
   onSave,
@@ -45,45 +45,33 @@ export const NavigationEmbeddableLinkEditor = ({
   const [linkLabel, setLinkLabel] = useState<string>('');
   const [linkFactory, setLinkFactory] = useState<ILinkFactory | undefined>();
 
-  const [selectedLinkType, setSelectedLinkType] = useState<LinkType>('dashboardLink');
+  const [selectedLinkType, setSelectedLinkType] = useState<LinkType>(
+    DASHBOARD_LINK_EMBEDDABLE_TYPE
+  );
 
   const [destination, setDestination] = useState<string | undefined>();
   const [placeholder, setPlaceholder] = useState<string | undefined>();
 
   useEffect(() => {
-    const factory = linksService.getLinkFactory(
-      selectedLinkType === 'dashboardLink'
-        ? DASHBOARD_LINK_EMBEDDABLE_TYPE
-        : EXTERNAL_LINK_EMBEDDABLE_TYPE
-    );
+    const factory = linksService.getLinkFactory(selectedLinkType);
     setLinkFactory(factory);
   }, [selectedLinkType]);
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
-    return [
-      {
+    return linksService.getLinkTypes().map((factoryType) => {
+      const factory = linksService.getLinkFactory(factoryType);
+      return {
+        id: factoryType,
         label: (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={'dashboardApp'} color="text" />
+              <EuiIcon type={factory.getIconType()} color="text" />
             </EuiFlexItem>
-            <EuiFlexItem>{NavEmbeddableStrings.editor.dashboard.getLinkTypeLabel()}</EuiFlexItem>
+            <EuiFlexItem>{factory.getDisplayName()}</EuiFlexItem>
           </EuiFlexGroup>
         ),
-        id: 'dashboardLink' as LinkType,
-      },
-      {
-        label: (
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={'link'} color="text" />
-            </EuiFlexItem>
-            <EuiFlexItem>{NavEmbeddableStrings.editor.external.getLinkTypeLabel()}</EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        id: 'externalLink' as LinkType,
-      },
-    ];
+      };
+    });
   }, []);
 
   return (

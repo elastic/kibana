@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
 
-import { NavigationEmbeddableStartDependencies } from '../../plugin';
+import { NavigationEmbeddableStartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
 export let dashboardServices: DashboardStart;

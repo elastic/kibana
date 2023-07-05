@@ -11,7 +11,7 @@ import { EmbeddableFactoryDefinition } from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
 import { DashboardLinkInput } from '../types';
-import { ILinkFactory } from '../../types';
+import { ILinkFactory } from '../../navigation_container/types';
 import { NavigationContainer } from '../../navigation_container/embeddable/navigation_container';
 import { DashboardLinkEditorDestinationPicker } from '../components/dashboard_link_editor_destination_picker';
 

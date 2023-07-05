@@ -29,7 +29,7 @@ import {
   EuiFlyoutHeader,
 } from '@elastic/eui';
 
-import { NavigationContainerInput } from '../../types';
+import { NavigationContainerInput } from '../types';
 import { ExternalLinkInput } from '../../external_link/types';
 import { DashboardLinkInput } from '../../dashboard_link/types';
 import { NavigationEmbeddableLinkEditor } from './navigation_embeddable_link_editor';
@@ -38,6 +38,7 @@ import { addLink } from '../editor/navigation_container_input_builder';
 import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
 
 import './navigation_embeddable.scss';
+import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 
 export const NavigationEmbeddablePanelEditor = ({
   onSave,
@@ -53,6 +54,13 @@ export const NavigationEmbeddablePanelEditor = ({
   const [showLinkEditorFlyout, setShowLinkEditorFlyout] = useState(false);
   const [panels, setPanels] = useState(initialInput.panels);
 
+  /**
+   * TODO: There is probably a more efficient way of storing the dashboard information "temporarily" for any new
+   * panels and only fetching the dashboard saved objects when first loading this flyout.
+   *
+   * Will need to think this through and fix as part of the editing process - not worth holding this PR, since it's
+   * blocking so much other work :)
+   */
   const { value: linkList } = useAsync(async () => {
     if (!panels || isEmpty(panels)) return [];
 
@@ -104,7 +112,7 @@ export const NavigationEmbeddablePanelEditor = ({
                         onClick={() => setShowLinkEditorFlyout(true)}
                         iconType="plusInCircle"
                       >
-                        Add link
+                        {NavEmbeddableStrings.editor.getAddButtonLabel()}
                       </EuiButton>
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -132,7 +140,7 @@ export const NavigationEmbeddablePanelEditor = ({
                     iconType="plusInCircle"
                     onClick={() => setShowLinkEditorFlyout(true)}
                   >
-                    Add link
+                    {NavEmbeddableStrings.editor.getAddButtonLabel()}
                   </EuiButtonEmpty>
                 </>
               )}

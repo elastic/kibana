@@ -10,7 +10,7 @@ import { WritableDraft } from 'immer/dist/types/types-external';
 
 import { PayloadAction } from '@reduxjs/toolkit';
 
-import { NavigationContainerReduxState } from '../types';
+import { NavigationContainerReduxState } from './types';
 
 export const navigationEmbeddableReducers = {
   setLoading: (
