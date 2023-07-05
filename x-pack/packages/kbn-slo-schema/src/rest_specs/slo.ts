@@ -39,7 +39,11 @@ const createSLOParamsSchema = t.type({
       budgetingMethod: budgetingMethodSchema,
       objective: objectiveSchema,
     }),
-    t.partial({ id: sloIdSchema, settings: optionalSettingsSchema, tags: tagsSchema }),
+    t.partial({
+      id: sloIdSchema,
+      settings: optionalSettingsSchema,
+      tags: tagsSchema,
+    }),
   ]),
 });
 

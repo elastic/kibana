@@ -7,7 +7,7 @@
 
 import { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 
 import { TransformSettings } from '../../../assets/transform_templates/slo_transform_template';
 import { SLO } from '../../../domain/models';
@@ -27,6 +27,12 @@ export abstract class TransformGenerator {
         type: 'long' as MappingRuntimeFieldType,
         script: {
           source: `emit(${slo.revision})`,
+        },
+      },
+      'slo.instanceId': {
+        type: 'keyword' as MappingRuntimeFieldType,
+        script: {
+          source: `emit('${ALL_VALUE}')`,
         },
       },
     };
@@ -58,6 +64,12 @@ export abstract class TransformGenerator {
         date_histogram: {
           field: sourceIndexTimestampField, // timestamp field defined in the source index
           fixed_interval: fixedInterval,
+        },
+      },
+      'slo.instanceId': {
+        terms: {
+          // @ts-ignore
+          field: slo.indicator.groupBy ?? 'slo.instanceId',
         },
       },
     };

@@ -49,6 +49,8 @@ export class DefaultSummaryClient implements SummaryClient {
 
       // @ts-ignore
       const { aggregations = {} } = result.responses[i];
+
+      console.log(aggregations);
       const good = aggregations?.good?.value ?? 0;
       const total = aggregations?.total?.value ?? 0;
 
@@ -114,8 +116,15 @@ function generateSearchQuery(slo: SLO, dateRange: DateRange): MsearchMultisearch
     },
     ...(occurrencesBudgetingMethodSchema.is(slo.budgetingMethod) && {
       aggs: {
-        good: { sum: { field: 'slo.numerator' } },
-        total: { sum: { field: 'slo.denominator' } },
+        groupBy: {
+          terms: {
+            field: 'groupBy',
+          },
+          aggs: {
+            good: { sum: { field: 'slo.numerator' } },
+            total: { sum: { field: 'slo.denominator' } },
+          },
+        },
       },
     }),
     ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {

@@ -6,7 +6,11 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  kqlCustomIndicatorSchema,
+  timeslicesBudgetingMethodSchema,
+} from '@kbn/slo-schema';
 
 import { InvalidTransformError } from '../../../errors';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
@@ -58,8 +62,9 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
   private buildAggregations(slo: SLO, indicator: KQLCustomIndicator) {
     const numerator = getElastichsearchQueryOrThrow(indicator.params.good);
     const denominator = getElastichsearchQueryOrThrow(indicator.params.total);
+    // const hasGroupBy = indicator.groupBy !== ALL_VALUE;
 
-    return {
+    const rollupAgg = {
       'slo.numerator': {
         filter: numerator,
       },
@@ -78,5 +83,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
         },
       }),
     };
+
+    return rollupAgg;
   }
 }

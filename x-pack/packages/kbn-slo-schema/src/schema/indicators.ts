@@ -46,6 +46,7 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
 const kqlCustomIndicatorTypeSchema = t.literal('sli.kql.custom');
 const kqlCustomIndicatorSchema = t.type({
   type: kqlCustomIndicatorTypeSchema,
+  groupBy: t.string,
   params: t.type({
     index: t.string,
     filter: t.string,
