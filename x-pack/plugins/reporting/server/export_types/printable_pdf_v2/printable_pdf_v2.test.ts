@@ -7,7 +7,7 @@
 
 jest.mock('./lib/generate_pdf');
 
-import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import * as Rx from 'rxjs';
@@ -61,6 +61,7 @@ beforeEach(async () => {
     savedObjects: mockCoreStart.savedObjects,
     uiSettings: mockCoreStart.uiSettings,
     screenshotting: {} as unknown as ScreenshottingStart,
+    esClient: elasticsearchServiceMock.createClusterClient(),
     reporting: mockReportingCore.getContract(),
   });
 });
