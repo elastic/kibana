@@ -468,6 +468,7 @@ examples/locator_examples @elastic/kibana-app-services
 examples/locator_explorer @elastic/kibana-app-services
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
+x-pack/plugins/logs_shared @elastic/infra-monitoring-ui
 x-pack/plugins/logstash @elastic/logstash
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
@@ -552,6 +553,7 @@ examples/response_stream @elastic/ml-ui
 packages/kbn-rison @elastic/kibana-operations
 x-pack/plugins/rollup @elastic/platform-deployment-management
 examples/routing_example @elastic/kibana-core
+packages/kbn-rrule @elastic/response-ops
 packages/kbn-rule-data-utils @elastic/security-detections-response @elastic/actionable-observability @elastic/response-ops
 x-pack/plugins/rule_registry @elastic/response-ops @elastic/actionable-observability
 x-pack/plugins/runtime_fields @elastic/platform-deployment-management

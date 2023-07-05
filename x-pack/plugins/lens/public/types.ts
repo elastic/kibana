@@ -1118,6 +1118,15 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     isSaveable?: boolean
   ) => LayerAction[];
 
+  /**
+   * This method is a clunky solution to the problem, but I'm banking on the confirm modal being removed
+   * with undo/redo anyways
+   */
+  getCustomRemoveLayerText?: (
+    layerId: string,
+    state: T
+  ) => { title?: string; description?: string } | undefined;
+
   /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
 

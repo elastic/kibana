@@ -17,7 +17,7 @@ pageLoadAssetSize:
   cloudExperiments: 59358
   cloudFullStory: 18493
   cloudGainsight: 18710
-  cloudLinks: 17629
+  cloudLinks: 55984
   cloudSecurityPosture: 19109
   console: 46091
   contentManagement: 16254
@@ -88,6 +88,7 @@ pageLoadAssetSize:
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
+  logsShared: 281060
   logstash: 53548
   management: 46112
   maps: 90000

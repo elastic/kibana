@@ -6,6 +6,8 @@
  */
 
 import * as rt from 'io-ts';
+import { MAX_BULK_GET_ATTACHMENTS } from '../../../constants';
+import { limitedArraySchema } from '../../../schema';
 import { jsonValueRt } from '../../runtime_types';
 import { NumberFromString } from '../../saved_object';
 
@@ -307,7 +309,12 @@ export const FindCommentsQueryParamsRt = rt.exact(
 export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
 
 export const BulkGetAttachmentsRequestRt = rt.strict({
-  ids: rt.array(rt.string),
+  ids: limitedArraySchema({
+    codec: rt.string,
+    min: 1,
+    max: MAX_BULK_GET_ATTACHMENTS,
+    fieldName: 'ids',
+  }),
 });
 
 export const BulkGetAttachmentsResponseRt = rt.strict({

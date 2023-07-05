@@ -4618,6 +4618,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/logs-shared-plugin@link:x-pack/plugins/logs_shared":
+  version "0.0.0"
+  uid ""
+
 "@kbn/logstash-plugin@link:x-pack/plugins/logstash":
   version "0.0.0"
   uid ""
@@ -4951,6 +4955,10 @@
   uid ""
 
 "@kbn/routing-example-plugin@link:examples/routing_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/rrule@link:packages/kbn-rrule":
   version "0.0.0"
   uid ""
 
@@ -20703,7 +20711,7 @@ lru-queue@0.1:
   dependencies:
     es5-ext "~0.10.2"
 
-luxon@^1.21.3, luxon@^1.25.0:
+luxon@^1.25.0:
   version "1.28.1"
   resolved "https://registry.yarnpkg.com/luxon/-/luxon-1.28.1.tgz#528cdf3624a54506d710290a2341aa8e6e6c61b0"
   integrity sha512-gYHAa180mKrNIUJCbwpmD0aTu9kV0dREDrwNnuyFAsO1Wt0EVYSZelPnJlbj9HplzXX/YWXHFTL45kvZ53M0pw==
@@ -25673,15 +25681,6 @@ robust-predicates@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/robust-predicates/-/robust-predicates-3.0.1.tgz#ecde075044f7f30118682bd9fb3f123109577f9a"
   integrity sha512-ndEIpszUHiG4HtDsQLeIuMvRsDnn8c8rYStabochtUeCvfuvNptb5TUbVD68LRAILPX7p9nqQGh4xJgn3EHS/g==
-
-rrule@2.6.4:
-  version "2.6.4"
-  resolved "https://registry.yarnpkg.com/rrule/-/rrule-2.6.4.tgz#7f4f31fda12bc7249bb176c891109a9bc448e035"
-  integrity sha512-sLdnh4lmjUqq8liFiOUXD5kWp/FcnbDLPwq5YAc/RrN6120XOPb86Ae5zxF7ttBVq8O3LxjjORMEit1baluahA==
-  dependencies:
-    tslib "^1.10.0"
-  optionalDependencies:
-    luxon "^1.21.3"
 
 rst-selector-parser@^2.2.3:
   version "2.2.3"
