@@ -64,6 +64,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await reportingApi.deleteAllReports();
     });
 
+    // PNG reporting
     xit('Displays new jobs', async () => {
       await PageObjects.common.navigateToApp('reporting');
       await testSubjects.existOrFail('reportJobListing', { timeout: 200000 });

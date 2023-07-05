@@ -244,6 +244,7 @@ export class ExecuteReportTask implements ReportingTask {
     stream: Writable
   ): Promise<TaskRunResult> {
     const exportType = this.exportTypesRegistry.get((e) => e.jobType === task.jobtype);
+
     if (!exportType) {
       throw new Error(`No export type from ${task.jobtype} found to execute report`);
     }
@@ -276,6 +277,7 @@ export class ExecuteReportTask implements ReportingTask {
     docId = `/${report._index}/_doc/${report._id}`;
 
     const resp = await store.setReportCompleted(report, doc);
+
     this.logger.info(`Saved ${report.jobtype} job ${docId}`);
     report._seq_no = resp._seq_no;
     report._primary_term = resp._primary_term;
@@ -358,7 +360,6 @@ export class ExecuteReportTask implements ReportingTask {
                 encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
               }
             );
-
             eventLog.logExecutionStart();
 
             const output = await Promise.race<TaskRunResult>([
