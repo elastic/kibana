@@ -107,6 +107,7 @@ export const sideEffectSimulatorFactory: () => SideEffectSimulator = () => {
             contentRect,
             borderBoxSize: [{ inlineSize: 0, blockSize: 0 }],
             contentBoxSize: [{ inlineSize: 0, blockSize: 0 }],
+            devicePixelContentBoxSize: [],
           },
         ];
         this.callback(entries, this);
