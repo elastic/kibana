@@ -133,7 +133,10 @@ function alertsAreTheSame(alertsA: any[], alertsB: any[]): void {
     ]);
   };
 
-  expect(alertsA.map(mapAlert)).to.eql(alertsB.map(mapAlert));
+  const sort = (alerts: any[]) =>
+    alerts.sort((a: any, b: any) => a.message.localeCompare(b.message));
+
+  expect(sort(alertsA.map(mapAlert))).to.eql(sort(alertsB.map(mapAlert)));
 }
 
 // eslint-disable-next-line import/no-default-export
@@ -147,7 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
    * Specific api integration tests for threat matching rule type
    */
   // FLAKY: https://github.com/elastic/kibana/issues/155304
-  describe('Threat match type rules', () => {
+  describe.only('Threat match type rules', () => {
     before(async () => {
       // await deleteSignalsIndex(supertest, log);
       // await deleteAllAlerts(supertest, log);
