@@ -496,7 +496,6 @@ export default function (providerContext: FtrProviderContext) {
           },
         }).expect(200);
 
-        console.log
         expect(Array.isArray(item.inputs));
     });
 
