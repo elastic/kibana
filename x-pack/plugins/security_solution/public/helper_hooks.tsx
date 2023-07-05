@@ -6,7 +6,8 @@
  */
 
 import { useCallback, useState } from 'react';
-import { useKibana } from './common/lib/kibana';
+import { SERVER_APP_ID } from '../common';
+import { useCapabilities } from './common/lib/kibana';
 
 export const useOnOpenCloseHandler = (): [boolean, () => void, () => void] => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,6 +23,6 @@ export const useOnOpenCloseHandler = (): [boolean, () => void, () => void] => {
 };
 
 export const useHasSecurityCapability = (capability: string): boolean => {
-  const { capabilities } = useKibana().services.application;
-  return !!capabilities.siem[capability];
+  const capabilities = useCapabilities(SERVER_APP_ID);
+  return !!capabilities[capability];
 };

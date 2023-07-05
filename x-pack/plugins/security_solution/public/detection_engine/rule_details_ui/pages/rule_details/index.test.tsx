@@ -108,6 +108,7 @@ jest.mock('../../../../common/lib/kibana', () => {
             `/app/${appId}${options?.path}`,
           navigateToApp: jest.fn(),
           capabilities: {
+            ...originalModule.useKibana().services.application.capabilities,
             actions: {
               delete: true,
               save: true,

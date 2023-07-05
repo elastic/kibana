@@ -11,16 +11,9 @@ import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import {
-  KibanaServices,
-  useKibana,
-  useGetUserCasesPermissions,
-} from '../../../../common/lib/kibana';
 import { mockBrowserFields, mockRuntimeMappings } from '../../../../common/containers/source/mock';
-import { coreMock } from '@kbn/core/public/mocks';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { useTimelineEventsDetails } from '../../../containers/details';
-import { allCasesPermissions } from '../../../../cases_test_utils';
 import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 
 const ecsData: Ecs = {
@@ -76,7 +69,6 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
 jest.mock('../../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
 }));
-jest.mock('../../../../common/lib/kibana');
 jest.mock(
   '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
   () => ({
@@ -132,12 +124,13 @@ jest.mock('../../../containers/details', () => {
   };
 });
 
-describe('event details panel component', () => {
-  beforeEach(() => {
-    const coreStartMock = coreMock.createStart();
-    (KibanaServices.get as jest.Mock).mockReturnValue(coreStartMock);
-    (useKibana as jest.Mock).mockReturnValue({
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...original,
+    useKibana: () => ({
       services: {
+        ...original.useKibana().services,
         uiSettings: {
           get: jest.fn().mockReturnValue([]),
         },
@@ -156,9 +149,11 @@ describe('event details panel component', () => {
           fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
         },
       },
-    });
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
-  });
+    }),
+  };
+});
+
+describe('event details panel component', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });

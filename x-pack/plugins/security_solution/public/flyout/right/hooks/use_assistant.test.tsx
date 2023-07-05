@@ -10,10 +10,10 @@ import { renderHook } from '@testing-library/react-hooks';
 import type { UseAssistantParams, UseAssistantResult } from './use_assistant';
 import { useAssistant } from './use_assistant';
 import { mockDataFormattedForFieldBrowser } from '../mocks/mock_context';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useIsAssistantEnabled } from '../../../assistant/helpers';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
 
-jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('../../../assistant/helpers');
 jest.mock('@kbn/elastic-assistant');
 
 const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
@@ -28,7 +28,7 @@ describe('useAssistant', () => {
   let hookResult: RenderHookResult<UseAssistantParams, UseAssistantResult>;
 
   it(`should return showAssistant true and a value for promptContextId`, () => {
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+    jest.mocked(useIsAssistantEnabled).mockReturnValue(true);
     jest
       .mocked(useAssistantOverlay)
       .mockReturnValue({ showAssistantOverlay: jest.fn, promptContextId: '123' });
@@ -40,7 +40,7 @@ describe('useAssistant', () => {
   });
 
   it(`should return showAssistant false if feature flag is off`, () => {
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
+    jest.mocked(useIsAssistantEnabled).mockReturnValue(false);
     jest
       .mocked(useAssistantOverlay)
       .mockReturnValue({ showAssistantOverlay: jest.fn, promptContextId: '123' });
