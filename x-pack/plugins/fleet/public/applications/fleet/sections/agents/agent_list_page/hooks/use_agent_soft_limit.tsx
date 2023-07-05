@@ -32,8 +32,6 @@ export function useAgentSoftLimit() {
     enabled: softLimit !== undefined,
   });
 
-  console.log(totalAgents > softLimit);
-
   return {
     shouldDisplayAgentSoftLimit: softLimit && totalAgents ? totalAgents > softLimit : false,
   };
