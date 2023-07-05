@@ -67,27 +67,6 @@ export const ML_MODULE_ID = 'uptime_heartbeat';
 
 export const UNNAMED_LOCATION = 'Unnamed-location';
 
-export const SHORT_TS_LOCALE = 'en-short-locale';
-
-export const SHORT_TIMESPAN_LOCALE = {
-  relativeTime: {
-    future: 'in %s',
-    past: '%s ago',
-    s: '%ds',
-    ss: '%ss',
-    m: '%dm',
-    mm: '%dm',
-    h: '%dh',
-    hh: '%dh',
-    d: '%dd',
-    dd: '%dd',
-    M: '%d Mon',
-    MM: '%d Mon',
-    y: '%d Yr',
-    yy: '%d Yr',
-  },
-};
-
 export enum CERT_STATUS {
   OK = 'OK',
   EXPIRING_SOON = 'EXPIRING_SOON',

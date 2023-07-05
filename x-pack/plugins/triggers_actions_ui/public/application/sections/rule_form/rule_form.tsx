@@ -661,6 +661,9 @@ export const RuleForm = ({
             defaultActionGroupId={defaultActionGroupId}
             hasSummary={selectedRuleType.hasGetSummarizedAlerts}
             featureId={connectorFeatureId}
+            producerId={selectedRuleType.producer}
+            hasFieldsForAAD={selectedRuleType.hasFieldsForAAD}
+            ruleTypeId={rule.ruleTypeId}
             isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
               isActionGroupDisabledForActionType(selectedRuleType, actionGroupId, actionTypeId)
             }

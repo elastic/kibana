@@ -38,10 +38,16 @@ export interface AlertSearchResponse<Hit = {}, Aggregations = {} | undefined>
   };
 }
 
-export interface UpdateAlertStatusProps {
+export interface UpdateAlertStatusByQueryProps {
   query: object;
   status: Status;
-  signal?: AbortSignal; // TODO: implement cancelling
+  signal?: AbortSignal;
+}
+
+export interface UpdateAlertStatusByIdsProps {
+  signalIds: string[];
+  status: Status;
+  signal?: AbortSignal;
 }
 
 export interface AlertsIndex {

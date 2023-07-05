@@ -175,6 +175,7 @@ describe('PUT /api/spaces/space', () => {
       id: 'a-new-space',
       name: 'my new space',
       description: 'with a description',
+      disabledFeatures: [],
     };
 
     const { routeHandler } = await setup();

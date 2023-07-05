@@ -90,6 +90,7 @@ export async function indexEndpointHostDocs({
   generator,
   withResponseActions = true,
   numResponseActions,
+  alertIds,
 }: {
   numDocs: number;
   client: Client;
@@ -102,6 +103,7 @@ export async function indexEndpointHostDocs({
   generator: EndpointDocGenerator;
   withResponseActions?: boolean;
   numResponseActions?: IndexEndpointAndFleetActionsForHostOptions['numResponseActions'];
+  alertIds?: string[];
 }): Promise<IndexedHostsResponse> {
   const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
   const timestamp = new Date().getTime();
@@ -198,14 +200,10 @@ export async function indexEndpointHostDocs({
 
       if (withResponseActions) {
         // Create some fleet endpoint actions and .logs-endpoint actions for this Host
-        const actionsResponse = await indexEndpointAndFleetActionsForHost(
-          client,
-          hostMetadata,
-          undefined,
-          {
-            numResponseActions,
-          }
-        );
+        const actionsResponse = await indexEndpointAndFleetActionsForHost(client, hostMetadata, {
+          alertIds,
+          numResponseActions,
+        });
         mergeAndAppendArrays(response, actionsResponse);
       }
     }
@@ -213,7 +211,7 @@ export async function indexEndpointHostDocs({
     await client
       .index({
         index: metadataIndex,
-        body: hostMetadata,
+        document: hostMetadata,
         op_type: 'create',
         refresh: 'wait_for',
       })
@@ -227,7 +225,7 @@ export async function indexEndpointHostDocs({
     await client
       .index({
         index: policyResponseIndex,
-        body: hostPolicyResponse,
+        document: hostPolicyResponse,
         op_type: 'create',
         refresh: 'wait_for',
       })
@@ -283,11 +281,9 @@ export const deleteIndexedEndpointHosts = async (
   };
 
   if (indexedData.hosts.length) {
-    const body = {
-      query: {
-        bool: {
-          filter: [{ terms: { 'agent.id': indexedData.hosts.map((host) => host.agent.id) } }],
-        },
+    const query = {
+      bool: {
+        filter: [{ terms: { 'agent.id': indexedData.hosts.map((host) => host.agent.id) } }],
       },
     };
 
@@ -295,7 +291,7 @@ export const deleteIndexedEndpointHosts = async (
       .deleteByQuery({
         index: indexedData.metadataIndex,
         wait_for_completion: true,
-        body,
+        query,
       })
       .catch(wrapErrorAndRejectPromise);
 
@@ -304,7 +300,7 @@ export const deleteIndexedEndpointHosts = async (
       .deleteByQuery({
         index: metadataCurrentIndexPattern,
         wait_for_completion: true,
-        body,
+        query,
       })
       .catch(wrapErrorAndRejectPromise);
   }
@@ -314,19 +310,17 @@ export const deleteIndexedEndpointHosts = async (
       .deleteByQuery({
         index: indexedData.policyResponseIndex,
         wait_for_completion: true,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  terms: {
-                    'agent.id': indexedData.policyResponses.map(
-                      (policyResponse) => policyResponse.agent.id
-                    ),
-                  },
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  'agent.id': indexedData.policyResponses.map(
+                    (policyResponse) => policyResponse.agent.id
+                  ),
                 },
-              ],
-            },
+              },
+            ],
           },
         },
       })

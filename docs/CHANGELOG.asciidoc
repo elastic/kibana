@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.8.2>>
 * <<release-notes-8.8.1>>
 * <<release-notes-8.8.0>>
 * <<release-notes-8.7.1>>
@@ -43,10 +44,83 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.8.2]]
+== {kib} 8.8.2
+
+Review the following information about the {kib} 8.8.2 release.
+
+[float]
+[[fixes-v8.8.2]]
+=== Bug Fixes
+
+APM::
+* Fixes the latency graph displaying all service transactions, rather than the selected one, on the transaction detail page {kibana-pull}159085[#159085]
+
+Dashboard::
+* Fixes styling of top nav bar {kibana-pull}159754[#159754]
+* Fixes alias redirect and update error handling {kibana-pull}159742[#159742]
+* Fixes time range regression {kibana-pull}159337[#159337]
+
+Elastic Security::
+For the Elastic Security 8.8.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Enterprise Search::
+For the Elastic Enterprise Search 8.8.2 release information, refer to {enterprise-search-ref}/changelog.html[_Elastic Enterprise Search Documentation Release notes_].
+
+Fleet::
+* Fixes usage of AsyncLocalStorage for audit log {kibana-pull}159807[#159807]
+* Fixing issue of returning output API key {kibana-pull}159179[#159179]
+
+Logs::
+* Fixes log categorization UI failure due to an infinite loop {kibana-pull}159090[#159090]
+
+Machine Learning::
+* Hiding pattern analysis button for non-time series data {kibana-pull}160051[#160051]
+* Fixes blocking forced downgrades/installation if indices can't be deleted {kibana-pull}159814[#159814]
+
+Maps::
+* Fixes layer group loading indicator always on when group has non-visible layer {kibana-pull}159517[#159517]
+* Fixes geo line source not loading unless the Maps application is open {kibana-pull}159432[#159432]
+* Fixes Maps orphan sources on layer deletion {kibana-pull}159067[#159067]
+
+Monitoring::
+* Permanently hide the telemetry notice on dismissal {kibana-pull}159893[#159893]
+
+Observability::
+* Handle buildEsQuery error (such as leading wildcard) in status change {kibana-pull}159891[#159891]
+
+Platform::
+* Fixes global search crash on missing tag {kibana-pull}159196[#159196]
+* Fixes a regression where the "saved_object_resolve" audit action was not being logged per object {kibana-pull}160014[#160014]
+
+Uptime::
+* Ensures that users can configure custom `Content-Type` headers for HTTP monitors in the Synthetics app {kibana-pull}159737[#159737]
+* Fixes an issue where alerting on Synthetics monitors was sometimes delayed {kibana-pull}159511[#159511]
+
 [[release-notes-8.8.1]]
 == {kib} 8.8.1
 
 Review the following information about the {kib} 8.8.1 release.
+
+[float]
+[[known-issues-8.8.1]]
+=== Known issues
+
+// tag::known-issue-159807[]
+[discrete]
+.Memory leak in {fleet} audit logging.
+[%collapsible]
+====
+*Details* +
+{fleet} introduced audit logging for various CRUD (create, read, update, and delete) operations in version 8.8.0.
+
+While audit logging is not enabled by default, we have identified an off-heap memory leak in the implementation of {fleet} audit logging that can result in poor {kib} performance, and in some cases {kib} instances being terminated by the OS kernel's oom-killer. This memory leak can occur even when {kib} audit logging is not explicitly enabled (regardless of whether `xpack.security.audit.enabled` is set in the `kibana.yml` settings file).
+
+*Impact* +
+The version 8.8.2 release includes in {kibana-pull}159807[a fix] for this problem. If you are using {fleet} integrations
+and {kib} audit logging in version 8.8.0 or 8.8.1, you should upgrade to 8.8.2 or above to obtain the fix.
+====
+// end::known-issue-159807[]
 
 [float]
 [[breaking-changes-8.8.1]]
@@ -138,6 +212,20 @@ This can result in a loss of saved objects during the upgrade. This can also lea
 The 8.8.1 release includes in {kibana-pull}158940[a fix] for this problem. Customers affected by a failed 8.8.0 upgrade should contact Elastic support. For more information, see the {kibana-issue}158733[related issue].
 ====
 // end::known-issue-158940[]
+
+// tag::known-issue-159807[]
+[discrete]
+.Memory leak in {fleet} audit logging.
+[%collapsible]
+====
+*Details* +
+{fleet} introduced audit logging for various CRUD (create, read, update, and delete) operations in version 8.8.0.
+While audit logging is not enabled by default, we have identified an off-heap memory leak in the implementation of {fleet} audit logging that can result in poor {kib} performance, and in some cases {kib} instances being terminated by the OS kernel's oom-killer. This memory leak can occur even when {kib} audit logging is not explicitly enabled (regardless of whether `xpack.security.audit.enabled` is set in the `kibana.yml` settings file).
+*Impact* +
+The version 8.8.2 release includes in {kibana-pull}159807[a fix] for this problem. If you are using {fleet} integrations
+and {kib} audit logging in version 8.8.0 or 8.8.1, you should upgrade to 8.8.2 or above to obtain the fix.
+====
+// end::known-issue-159807[]
 
 // tag::known-issue-155203[]
 [discrete]
