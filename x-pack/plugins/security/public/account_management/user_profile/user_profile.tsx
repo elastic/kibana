@@ -44,7 +44,11 @@ import {
   getUserAvatarColor,
   getUserAvatarInitials,
 } from '../../../common/model';
-import type { DarkModeValue, UserProfileData } from '../../../common/model/user_profile';
+import type {
+  DarkModeValue,
+  UserProfileAvatarData,
+  UserSettingsData,
+} from '../../../common/model/user_profile';
 import { useSecurityApiClients } from '../../components';
 import { Breadcrumb } from '../../components/breadcrumb';
 import {
@@ -59,6 +63,11 @@ import { ChangePasswordModal } from '../../management/users/edit_user/change_pas
 import { isUserReserved } from '../../management/users/user_utils';
 import { getUseUpdateUserProfile } from './use_update_user_profile';
 import { createImageHandler, getRandomColor, IMAGE_FILE_TYPES, VALID_HEX_COLOR } from './utils';
+
+export interface UserProfileData {
+  avatar?: UserProfileAvatarData;
+  userSettings?: UserSettingsData;
+}
 
 export interface UserProfileProps {
   user: AuthenticatedUser;

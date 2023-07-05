@@ -65,10 +65,7 @@ export interface UserProfileUserInfo {
 /**
  * Placeholder for data stored in user profile.
  */
-export interface UserProfileData {
-  avatar?: UserProfileAvatarData;
-  userSettings?: UserSettingsData;
-}
+export type UserProfileData = Record<any, any>;
 
 /**
  * Type of the user profile labels structure (currently

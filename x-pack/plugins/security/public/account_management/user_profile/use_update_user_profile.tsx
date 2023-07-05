@@ -13,7 +13,7 @@ import type { NotificationsStart, ToastInput, ToastOptions } from '@kbn/core/pub
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import type { UserProfileData } from '../../../common/model/user_profile';
+import type { UserProfileData } from './user_profile';
 import type { UserProfileAPIClient } from './user_profile_api_client';
 
 interface ThemeDarkModeUpdate {
