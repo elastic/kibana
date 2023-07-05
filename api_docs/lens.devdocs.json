@@ -3185,6 +3185,28 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.LensPublicStart.EditLensConfigPanelApi",
+            "type": "Function",
+            "tags": [
+              "experimental"
+            ],
+            "label": "EditLensConfigPanelApi",
+            "description": [
+              "\nReact component which can be used to embed a Lens Visualization Config Panel Component.\n\nThis API might undergo breaking changes even in minor versions.\n"
+            ],
+            "signature": [
+              "() => Promise<",
+              "EditLensConfigPanelComponent",
+              ">"
+            ],
+            "path": "x-pack/plugins/lens/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.LensPublicStart.navigateToPrefilledEditor",
             "type": "Function",
             "tags": [
@@ -5880,6 +5902,55 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.getCustomRemoveLayerText",
+            "type": "Function",
+            "tags": [],
+            "label": "getCustomRemoveLayerText",
+            "description": [
+              "\nThis method is a clunky solution to the problem, but I'm banking on the confirm modal being removed\nwith undo/redo anyways"
+            ],
+            "signature": [
+              "((layerId: string, state: T) => { title?: string | undefined; description?: string | undefined; } | undefined) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getCustomRemoveLayerText.$1",
+                "type": "string",
+                "tags": [],
+                "label": "layerId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.getCustomRemoveLayerText.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []

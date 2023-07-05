@@ -36,7 +36,7 @@ import {
   ServiceLocations,
   SyntheticsMonitorWithId,
   SyntheticsMonitorWithSecrets,
-  SyntheticsParamSO,
+  SyntheticsParams,
   ThrottlingOptions,
 } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
@@ -599,7 +599,7 @@ export class SyntheticsService {
     const paramsBySpace: Record<string, Record<string, string>> = Object.create(null);
 
     const finder =
-      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParamSO>({
+      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParams>({
         type: syntheticsParamType,
         perPage: 1000,
         namespaces: spaceId ? [spaceId] : undefined,
