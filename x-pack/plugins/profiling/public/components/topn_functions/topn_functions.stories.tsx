@@ -18,7 +18,7 @@ const stories: Meta<{}> = {
     (StoryComponent, { globals }) => {
       return (
         <MockProfilingDependenciesStorybook
-          routePath="/functions/topn?rangeFrom=now-15m&rangeTo=now&kuery="
+          routePath="/functions/topn?rangeFrom=now-15m&rangeTo=now&kuery=&sortField=rank&sortDirection=asc"
           mockServices={{
             fetchTopNFunctions: async () => data,
           }}

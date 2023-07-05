@@ -28,7 +28,6 @@ interface Props {
   functionRow: IFunctionRow;
   columnId: string;
   totalCount: number;
-  isEstimatedA: boolean;
   onFrameClick?: (functionName: string) => void;
   setCellProps: EuiDataGridCellValueElementProps['setCellProps'];
 }
@@ -37,7 +36,6 @@ export function FunctionRow({
   functionRow,
   columnId,
   totalCount,
-  isEstimatedA,
   onFrameClick,
   setCellProps,
 }: Props) {
@@ -89,7 +87,6 @@ export function FunctionRow({
         samples={functionRow.samples}
         diffSamples={functionRow.diff?.samples}
         totalSamples={totalCount}
-        isSampled={isEstimatedA}
       />
     );
   }

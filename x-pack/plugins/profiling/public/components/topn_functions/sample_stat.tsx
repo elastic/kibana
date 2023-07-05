@@ -13,14 +13,12 @@ export function SampleStat({
   samples,
   diffSamples,
   totalSamples,
-  isSampled,
 }: {
   samples: number;
   diffSamples?: number;
   totalSamples: number;
-  isSampled: boolean;
 }) {
-  const samplesLabel = `${isSampled ? '~ ' : ''}${samples.toLocaleString()}`;
+  const samplesLabel = samples.toLocaleString();
 
   if (diffSamples === undefined || diffSamples === 0 || totalSamples === 0) {
     return <>{samplesLabel}</>;

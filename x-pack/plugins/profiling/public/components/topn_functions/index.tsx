@@ -73,7 +73,6 @@ export const TopNFunctionsGrid = forwardRef(
       }
     }
 
-    const isEstimatedA = (topNFunctions?.SamplingRate ?? 1.0) !== 1.0;
     const totalCount = useMemo(() => {
       if (!topNFunctions || !topNFunctions.TotalCount) {
         return 0;
@@ -216,7 +215,6 @@ export const TopNFunctionsGrid = forwardRef(
           <FunctionRow
             functionRow={data}
             columnId={columnId}
-            isEstimatedA={isEstimatedA}
             totalCount={totalCount}
             onFrameClick={onFrameClick}
             setCellProps={setCellProps}
