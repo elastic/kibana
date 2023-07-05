@@ -10,7 +10,6 @@
     "@kbn/i18n",
     "@kbn/config-schema",
     "@kbn/std",
-    "@kbn/core-http-server",
     "@kbn/core-http-common",
   ],
   "exclude": [
