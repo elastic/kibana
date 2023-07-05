@@ -597,7 +597,7 @@ function getPatternFiringAlertsAsDataRuleType() {
       // set recovery payload
       for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
         alertsClient.setAlertData({
-          id: recoveredAlert.getId(),
+          id: recoveredAlert.alert.getId(),
           payload: { patternIndex: -1, instancePattern: [] },
         });
       }

@@ -19,10 +19,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import {
   ChromeBreadcrumb,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
+  ChromeHelpMenuLink,
   ChromeNavControl,
 } from '@kbn/core-chrome-browser/src';
 import type { HttpStart } from '@kbn/core-http-browser';
@@ -33,6 +35,8 @@ import { Router } from '@kbn/shared-ux-router';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable, debounceTime } from 'rxjs';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+
 import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
 import { HeaderBreadcrumbs } from '../header/header_breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
@@ -86,11 +90,12 @@ const headerStrings = {
 export interface Props {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   actionMenu$: Observable<MountPoint | undefined>;
-  kibanaDocLink: string;
+  docLinks: DocLinksStart;
   children: React.ReactNode;
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
+  helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
   homeHref$: Observable<string | undefined>;
   kibanaVersion: string;
   application: InternalApplicationStart;
@@ -157,10 +162,10 @@ const Logo = (
 
 export const ProjectHeader = ({
   application,
-  kibanaDocLink,
   kibanaVersion,
   children,
   prependBasePath,
+  docLinks,
   ...observables
 }: Props) => {
   const [navId] = useState(htmlIdGenerator()());
@@ -221,7 +226,9 @@ export const ProjectHeader = ({
           </EuiHeaderSectionItem>
 
           <EuiHeaderSectionItem>
-            <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+            <RedirectAppLinks coreStart={{ application }}>
+              <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+            </RedirectAppLinks>
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
 
@@ -236,7 +243,9 @@ export const ProjectHeader = ({
               globalHelpExtensionMenuLinks$={observables.globalHelpExtensionMenuLinks$}
               helpExtension$={observables.helpExtension$}
               helpSupportUrl$={observables.helpSupportUrl$}
-              kibanaDocLink={kibanaDocLink}
+              defaultContentLinks$={observables.helpMenuLinks$}
+              kibanaDocLink={docLinks.links.elasticStackGetStarted}
+              docLinks={docLinks}
               kibanaVersion={kibanaVersion}
               navigateToUrl={application.navigateToUrl}
             />

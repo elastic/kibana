@@ -6,7 +6,7 @@
  */
 
 import React, { Dispatch, FC } from 'react';
-import { EuiSwitch } from '@elastic/eui';
+import { EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface IntervalTimerangeSelectorProps {
@@ -24,15 +24,18 @@ export const IntervalTimerangeSelector: FC<IntervalTimerangeSelectorProps> = ({
   disabled,
 }) => {
   return (
-    <EuiSwitch
-      disabled={disabled}
-      showLabel={true}
-      label={i18n.translate('xpack.ml.customUrlsEditor.addIntervalTimeRangeSwitchLabel', {
-        defaultMessage: 'Add interval time range',
-      })}
-      checked={addIntervalTimerange}
-      onChange={(e) => setAddIntervalTimerange(e.target.checked)}
-      compressed
-    />
+    <>
+      <EuiSpacer size="xs" />
+      <EuiSwitch
+        data-test-subj="mlJobCustomUrlIntervalTimeRangeSwitch"
+        disabled={disabled}
+        showLabel={true}
+        label={i18n.translate('xpack.ml.customUrlsEditor.addIntervalTimeRangeSwitchLabel', {
+          defaultMessage: 'Add interval time range',
+        })}
+        checked={addIntervalTimerange}
+        onChange={(e) => setAddIntervalTimerange(e.target.checked)}
+      />
+    </>
   );
 };
