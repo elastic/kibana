@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { ProductLine } from '../../../common/config';
 import { getSections } from './sections';
-import { ActiveCard, Card, CardId, ProductId, SectionId, StepId } from './types';
+import { ActiveCard, ActiveCards, Card, CardId, SectionId, StepId } from './types';
 
 export const getCardTimeInMinutes = (card: Card, stepsDone: Set<StepId>) =>
   card.steps?.reduce(
@@ -18,13 +19,13 @@ export const getCardTimeInMinutes = (card: Card, stepsDone: Set<StepId>) =>
 export const getCardStepsLeft = (card: Card, stepsDone: Set<StepId>) =>
   (card.steps?.length ?? 0) - (stepsDone.size ?? 0);
 
-export const isCardActive = (card: Card, activeProducts: Set<ProductId>) =>
-  !card.productTypeRequired ||
-  card.productTypeRequired?.some((condition) => activeProducts.has(condition));
+export const isCardActive = (card: Card, activeProducts: Set<ProductLine>) =>
+  !card.productLineRequired ||
+  card.productLineRequired?.some((condition) => activeProducts.has(condition));
 
 export const setupCards = (
   finishedSteps: Record<CardId, Set<StepId>>,
-  activeProducts: Set<ProductId>
+  activeProducts: Set<ProductLine>
 ) =>
   activeProducts.size > 0
     ? getSections().reduce((acc, section) => {
@@ -46,7 +47,7 @@ export const setupCards = (
           acc[section.id] = cardsInSections;
         }
         return acc;
-      }, {} as Record<SectionId, Record<CardId, ActiveCard>>)
+      }, {} as ActiveCards)
     : null;
 
 export const updateCard = ({
@@ -57,11 +58,11 @@ export const updateCard = ({
   cardId,
 }: {
   finishedSteps: Record<CardId, Set<StepId>>;
-  activeProducts: Set<ProductId>;
-  activeCards: Record<SectionId, Record<CardId, ActiveCard>> | null;
+  activeProducts: Set<ProductLine>;
+  activeCards: ActiveCards | null;
   sectionId: SectionId;
   cardId: CardId;
-}): Record<SectionId, Record<CardId, ActiveCard>> | null => {
+}): ActiveCards | null => {
   const sections = getSections();
   const section = sections.find(({ id }) => id === sectionId);
   const cards = section?.cards;

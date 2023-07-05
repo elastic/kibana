@@ -13,11 +13,12 @@ import type { Meta, Story } from '@storybook/react';
 import { IndexPattern } from '@kbn/io-ts-utils';
 import { Dataset, Integration } from '../../../common/datasets';
 import { DatasetSelector } from './dataset_selector';
+import { DatasetSelectorProps, DatasetsSelectorSearchParams } from './types';
 import {
-  DatasetSelectionHandler,
-  DatasetSelectorProps,
-  DatasetsSelectorSearchParams,
-} from './types';
+  AllDatasetSelection,
+  DatasetSelection,
+  DatasetSelectionChange,
+} from '../../utils/dataset_selection';
 
 const meta: Meta<typeof DatasetSelector> = {
   component: DatasetSelector,
@@ -37,7 +38,9 @@ const meta: Meta<typeof DatasetSelector> = {
 export default meta;
 
 const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
-  const [selected, setSelected] = useState<Dataset>(() => mockIntegrations[0].datasets[0]);
+  const [datasetSelection, setDatasetSelection] = useState<DatasetSelection>(() =>
+    AllDatasetSelection.create()
+  );
 
   const [search, setSearch] = useState<DatasetsSelectorSearchParams>({
     sortOrder: 'asc',
@@ -51,8 +54,8 @@ const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
     }
   };
 
-  const onDatasetSelected: DatasetSelectionHandler = (dataset) => {
-    setSelected(dataset);
+  const onSelectionChange: DatasetSelectionChange = (newSelection) => {
+    setDatasetSelection(newSelection);
   };
 
   const filteredIntegrations = integrations.filter((integration) =>
@@ -72,14 +75,14 @@ const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
     <DatasetSelector
       {...args}
       datasets={sortedDatasets}
-      initialSelected={selected}
+      datasetSelection={datasetSelection}
       integrations={sortedIntegrations}
       onIntegrationsLoadMore={onIntegrationsLoadMore}
       onIntegrationsSearch={setSearch}
       onIntegrationsSort={setSearch}
       onIntegrationsStreamsSearch={setSearch}
       onIntegrationsStreamsSort={setSearch}
-      onDatasetSelected={onDatasetSelected}
+      onSelectionChange={onSelectionChange}
       onUnmanagedStreamsSearch={setSearch}
       onUnmanagedStreamsSort={setSearch}
     />
