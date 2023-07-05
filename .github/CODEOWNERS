@@ -56,6 +56,7 @@ x-pack/plugins/canvas @elastic/kibana-presentation
 x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 packages/kbn-cases-components @elastic/response-ops
 x-pack/plugins/cases @elastic/response-ops
+x-pack/packages/ml/category_validator @elastic/ml-ui
 packages/kbn-cell-actions @elastic/security-threat-hunting-explore
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
 packages/kbn-chart-icons @elastic/kibana-visualizations
