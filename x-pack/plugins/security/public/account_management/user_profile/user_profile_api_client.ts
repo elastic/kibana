@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { merge } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
@@ -87,7 +88,9 @@ export class UserProfileAPIClient {
         query: { dataPath: params?.dataPath },
       })
       .then((response) => {
-        this.userProfile$.next(response.data ?? {});
+        const data = response.data ?? {};
+        const updated = merge(this.userProfile$.getValue(), data);
+        this.userProfile$.next(updated);
         return response;
       });
   }

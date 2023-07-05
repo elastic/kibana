@@ -717,7 +717,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
   const { services } = useKibana<CoreStart>();
   const { userProfiles, users } = useSecurityApiClients();
 
-  const { overwrite } = getUseUpdateUserProfile({
+  const { update } = getUseUpdateUserProfile({
     apiClient: userProfiles,
     notifications: services.notifications,
   })();
@@ -762,7 +762,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
       // Update profile only if it's available for the current user.
       if (values.data) {
         submitActions.push(
-          overwrite(
+          update(
             values.avatarType === 'image'
               ? values.data
               : { ...values.data, avatar: { ...values.data.avatar, imageUrl: null } }

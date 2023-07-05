@@ -6,9 +6,8 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { first, lastValueFrom } from 'rxjs';
 
 import type { NotificationsStart, ToastInput, ToastOptions } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -22,24 +21,42 @@ interface ThemeDarkModeUpdate {
   value: '' | 'dark' | 'light';
 }
 
-type KeyValueUpdateProps = ThemeDarkModeUpdate;
+type UpdateSettingProps = ThemeDarkModeUpdate;
 
 interface Deps {
   apiClient: UserProfileAPIClient;
   notifications: NotificationsStart;
 }
 
-type Hook = () => {
-  /** Replace the user profile data with new data. */
-  overwrite: (data: UserProfileData) => void;
-  /** Partially update the user profile data, merging existing data. */
-  partialUpdate: (data: Partial<UserProfileData>) => void;
-  /** Update a single key/value of user profile data. */
-  keyValueUpdate: (data: KeyValueUpdateProps) => void;
-  userProfileData: UserProfileData | undefined | null;
+interface Props {
+  notificationSuccess?: {
+    title?: string;
+    pageReloadText?: string;
+  };
+}
+
+type Hook = (props?: Props) => {
+  /** Update the user profile */
+  update: (data: UserProfileData) => void;
+  /** Update a single key/value user setting. */
+  updateSetting: (data: UpdateSettingProps) => void;
 };
 
 let useUpdateUserProfile: Hook | undefined;
+
+const i18nTexts = {
+  notificationSuccess: {
+    title: i18n.translate('xpack.security.accountManagement.userProfile.submitSuccessTitle', {
+      defaultMessage: 'Profile updated',
+    }),
+    pageReloadText: i18n.translate(
+      'xpack.security.accountManagement.userProfile.requiresPageReloadToastDescription',
+      {
+        defaultMessage: 'One or more settings require you to reload the page to take effect.',
+      }
+    ),
+  },
+};
 
 export const getUseUpdateUserProfile = ({ apiClient, notifications }: Deps) => {
   if (useUpdateUserProfile) {
@@ -48,20 +65,30 @@ export const getUseUpdateUserProfile = ({ apiClient, notifications }: Deps) => {
 
   const { userProfile$ } = apiClient;
 
-  useUpdateUserProfile = () => {
+  useUpdateUserProfile = ({ notificationSuccess = {} }: Props = {}) => {
+    const {
+      title: notificationTitle = i18nTexts.notificationSuccess.title,
+      pageReloadText = i18nTexts.notificationSuccess.pageReloadText,
+    } = notificationSuccess;
+    const [isLoading, setIsLoading] = useState(false);
     const userProfileData = useObservable(userProfile$);
+    // Keep a snapshot before updating the user profile so we can compare previous and updated values
+    const userProfileSnapshot = useRef<UserProfileData | null>();
 
     const onUserProfileUpdate = useCallback(
       (updatedData: UserProfileData) => {
+        setIsLoading(false);
+
         let isRefreshRequired = false;
-        if (userProfileData?.userSettings?.darkMode !== updatedData?.userSettings?.darkMode) {
+        if (
+          userProfileSnapshot.current?.userSettings?.darkMode !==
+          updatedData?.userSettings?.darkMode
+        ) {
           isRefreshRequired = true;
         }
 
         let successToastInput: ToastInput = {
-          title: i18n.translate('xpack.security.accountManagement.userProfile.submitSuccessTitle', {
-            defaultMessage: 'Profile updated',
-          }),
+          title: notificationTitle,
         };
         let successToastOptions: ToastOptions = {};
 
@@ -75,15 +102,7 @@ export const getUseUpdateUserProfile = ({ apiClient, notifications }: Deps) => {
             text: toMountPoint(
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <p>
-                    {i18n.translate(
-                      'xpack.security.accountManagement.userProfile.requiresPageReloadToastDescription',
-                      {
-                        defaultMessage:
-                          'One or more settings require you to reload the page to take effect.',
-                      }
-                    )}
-                  </p>
+                  <p>{pageReloadText}</p>
                   <EuiButton
                     size="s"
                     onClick={() => window.location.reload()}
@@ -104,78 +123,37 @@ export const getUseUpdateUserProfile = ({ apiClient, notifications }: Deps) => {
 
         notifications.toasts.addSuccess(successToastInput, successToastOptions);
       },
-      [userProfileData]
+      [notificationTitle, pageReloadText]
     );
 
-    const getCurrentData = useCallback(async () => {
-      const currentData =
-        (await lastValueFrom(
-          userProfile$.pipe(
-            first((data) => {
-              // Wait for the initial fetched data to be returned
-              return Boolean(data);
-            })
-          )
-        )) ?? {};
-      return currentData;
-    }, []);
-
-    const overwrite = useCallback(
+    const update = useCallback(
       (udpatedData: UserProfileData) => {
+        userProfileSnapshot.current = userProfileData;
+        setIsLoading(true);
         return apiClient.update(udpatedData).then(() => onUserProfileUpdate(udpatedData));
       },
-      [onUserProfileUpdate]
+      [onUserProfileUpdate, userProfileData]
     );
 
-    const partialUpdate = useCallback(
-      async (props: Partial<UserProfileData>) => {
-        const currentData = await getCurrentData();
-
-        const userSettings = props.userSettings
-          ? {
-              ...currentData.userSettings,
-              ...props.userSettings,
-            }
-          : currentData.userSettings;
-
+    const updateSetting = useCallback(
+      async (props: UpdateSettingProps) => {
         const updatedData = {
-          ...currentData,
-          ...props,
-          userSettings,
-        };
-
-        return overwrite(updatedData);
-      },
-      [getCurrentData, overwrite]
-    );
-
-    const keyValueUpdate = useCallback(
-      async (props: KeyValueUpdateProps) => {
-        const currentData = await getCurrentData();
-
-        // For now we only support updating the dark mode theme, which lives inside the "userSettings" object.
-        const updatedData = {
-          ...currentData,
           userSettings: {
-            ...currentData.userSettings,
             [props.key]: props.value,
           },
         };
 
-        return overwrite(updatedData);
+        return update(updatedData);
       },
-      [getCurrentData, overwrite]
+      [update]
     );
 
-    return useMemo(
-      () => ({
-        overwrite,
-        partialUpdate,
-        keyValueUpdate,
-        userProfileData,
-      }),
-      [overwrite, partialUpdate, keyValueUpdate, userProfileData]
-    );
+    return {
+      update,
+      updateSetting,
+      userProfileData,
+      isLoading,
+    };
   };
 
   return useUpdateUserProfile;
