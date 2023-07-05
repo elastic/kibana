@@ -152,6 +152,32 @@ export default function (providerContext: FtrProviderContext) {
       it('should return a 404 with an invalid id', async function () {
         await supertest.get(`/api/fleet/package_policies/IS_NOT_PRESENT`).expect(404);
       });
+
+      it('should succeed and return formatted inputs when the format=simplified query param is passed', async function () {
+        const {
+          body: { item },
+        } = await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}?format=simplified`)
+          .expect(200);
+
+        expect(Array.isArray(item.inputs)).to.be(false);
+      });
+
+      it('should succeed and return arrayed inputs when the format=legacy query param is passed', async function () {
+        const {
+          body: { item },
+        } = await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}?format=legacy`)
+          .expect(200);
+
+        expect(Array.isArray(item.inputs));
+      });
+
+      it('should return 400 if an invalid format query param is passed', async function () {
+        await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}?format=foo`)
+          .expect(400);
+      });
     });
 
     describe('POST /api/fleet/package_policies/_bulk_get', async function () {
@@ -246,9 +272,10 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(items.length).eql(1);
+        expect(Array.isArray(items[0]));
       });
 
-      it('should return 404 with invvalid ids', async function () {
+      it('should return 404 with invalid ids', async function () {
         await supertest
           .post(`/api/fleet/package_policies/_bulk_get`)
           .set('kbn-xsrf', 'xxxx')
@@ -294,6 +321,40 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(items.length).eql(1);
+      });
+
+      it('should succeed and return formatted inputs when the format=simplified query param is passed', async function () {
+        const {
+          body: { items },
+        } = await supertest
+          .post(`/api/fleet/package_policies/_bulk_get?format=simplified`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ids: [packagePolicyId] })
+          .expect(200);
+
+        expect(items.length).eql(1);
+        expect(Array.isArray(items[0])).to.be(false);
+      });
+
+      it('should succeed and return arrayed inputs when the format=legacy query param is passed', async function () {
+        const {
+          body: { items },
+        } = await supertest
+          .post(`/api/fleet/package_policies/_bulk_get?format=legacy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ids: [packagePolicyId] })
+          .expect(200);
+
+        expect(items.length).eql(1);
+        expect(Array.isArray(items[0]));
+      });
+
+      it('should return 400 if an invalid format query param is passed', async function () {
+        await supertest
+          .post(`/api/fleet/package_policies/_bulk_get?format=foo`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ ids: [packagePolicyId] })
+          .expect(400);
       });
     });
 

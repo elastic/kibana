@@ -127,10 +127,12 @@ export const bulkGetPackagePoliciesHandler: FleetRequestHandler<
     checkAllowedPackages(responseItems, limitedToPackages, 'package.name');
 
     return response.ok({
-      body:
-        responseItems.length > 0 && request.query.format === inputsFormat.Simplified
-          ? responseItems.map((item) => packagePolicyToSimplifiedPackagePolicy(item))
-          : responseItems,
+      body: {
+        items:
+          responseItems.length > 0 && request.query.format === inputsFormat.Simplified
+            ? responseItems.map((item) => packagePolicyToSimplifiedPackagePolicy(item))
+            : responseItems,
+      },
     });
   } catch (error) {
     if (error instanceof PackagePolicyNotFoundError) {
@@ -400,10 +402,12 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       packagePolicy.package?.version
     );
     return response.ok({
-      body:
-        request.query.format === inputsFormat.Simplified
-          ? packagePolicyToSimplifiedPackagePolicy(updatedPackagePolicy)
-          : updatedPackagePolicy,
+      body: {
+        item:
+          request.query.format === inputsFormat.Simplified
+            ? packagePolicyToSimplifiedPackagePolicy(updatedPackagePolicy)
+            : updatedPackagePolicy,
+      },
     });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
