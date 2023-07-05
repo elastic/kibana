@@ -497,7 +497,7 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-        expect(body.item.inputs).to.eql({ single_input: { enabled: true, streams: {} } });
+      expect(body.item.inputs).to.eql({ single_input: { enabled: true, streams: {} } });
     });
 
     it('should return 200 and arrayed inputs when the format=legacy query param is passed', async function () {
@@ -526,7 +526,7 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-        expect(body.item.inputs).to.eql(inputs);
+      expect(body.item.inputs).to.eql(inputs);
     });
 
     it('should return 400 if an invalid format query param is passed', async function () {
@@ -748,18 +748,18 @@ export default function (providerContext: FtrProviderContext) {
             },
           })
           .expect(200);
-          
-          expect(body.item.inputs).to.eql({
-            'with_required_variables-test_input': {
-              "enabled": true,
-              streams: {
-                'with_required_variables.log': {
-                  "enabled": true,
-                  vars: { test_var_required: 'I am required' },
-                },
+
+        expect(body.item.inputs).to.eql({
+          'with_required_variables-test_input': {
+            enabled: true,
+            streams: {
+              'with_required_variables.log': {
+                enabled: true,
+                vars: { test_var_required: 'I am required' },
               },
             },
-          });
+          },
+        });
       });
 
       it('should return 200 and arrayed inputs when the format=legacy query param is passed', async () => {
@@ -787,7 +787,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-          expect(Array.isArray(body.item.inputs));
+        expect(Array.isArray(body.item.inputs));
       });
 
       it('should return 400 if an invalid format query param is passed', async function () {
