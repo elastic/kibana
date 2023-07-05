@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 import {
   PanelState,
   IEmbeddable,
@@ -16,8 +15,8 @@ import {
   EmbeddableOutput,
   EmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
+import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
 
-// export type LinkDestination = DashboardLinkDestination | ExternalLinkDestination;
 export interface LinkInput extends EmbeddableInput {
   label?: string;
 }
@@ -35,14 +34,12 @@ export type LinkFactory<I extends LinkInput = LinkInput> = EmbeddableFactory<
 
 export interface ILinkFactory<I extends LinkInput = LinkInput>
   extends Pick<EmbeddableFactory, 'type'> {
-  linkEditorDestinationComponent?: (props: LinkEditorDestinationProps<I>) => JSX.Element;
+  linkEditorComponent?: (props: LinkEditorProps<I>) => JSX.Element;
 }
 
-export interface LinkEditorDestinationProps<I extends LinkInput = LinkInput> {
-  /** TODO: As part of https://github.com/elastic/kibana/issues/161274, connect the initialInput so things are pre-selected when editing */
-  // initialInput?: Partial<I>; // Leaving this commented out so I don't forget the typing :)
-  setDestination: (destination: string | undefined) => void;
-  setPlaceholder: (placeholder: string | undefined) => void;
+export interface LinkEditorProps<I extends LinkInput = LinkInput> {
+  onChange: (changes: Partial<I>, valid: boolean) => void;
+  initialInput?: Partial<I>;
   currentDashboardId?: string;
 }
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   EuiForm,
@@ -14,7 +14,6 @@ import {
   EuiButton,
   EuiFormRow,
   EuiFlexItem,
-  EuiFieldText,
   EuiFlexGroup,
   EuiRadioGroup,
   EuiFlyoutBody,
@@ -28,7 +27,7 @@ import {
 import { css } from '@emotion/react';
 import { linksService } from '../../services/links_service';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
-import { ILinkFactory } from '../types';
+import { ILinkFactory, LinkInput } from '../types';
 import { EXTERNAL_LINK_EMBEDDABLE_TYPE } from '../../external_link/embeddable/external_link_embeddable_factory';
 import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
 
@@ -41,22 +40,22 @@ export const NavigationEmbeddableLinkEditor = ({
 }: {
   onClose: (closeBoth: boolean) => void;
   currentDashboardId?: string;
-  onSave: (type: string, destination: string, label?: string) => void;
+  onSave: (type: string, linkInput: Omit<LinkInput, 'id'>) => void;
 }) => {
-  const [linkLabel, setLinkLabel] = useState<string>('');
+  // const [linkLabel, setLinkLabel] = useState<string>('');
   const [linkFactory, setLinkFactory] = useState<ILinkFactory | undefined>();
-
   const [selectedLinkType, setSelectedLinkType] = useState<LinkType>(
     DASHBOARD_LINK_EMBEDDABLE_TYPE
   );
+  const [linkInput, setLinkInput] = useState<Partial<LinkInput>>({});
+  const [validLink, setValidLink] = useState<boolean>(false);
 
-  const [destination, setDestination] = useState<string | undefined>();
-  const [placeholder, setPlaceholder] = useState<string | undefined>();
+  const rootRef: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   useEffect(() => {
     const factory = linksService.getLinkFactory(selectedLinkType);
     setLinkFactory(factory);
-  }, [selectedLinkType]);
+  }, [selectedLinkType, rootRef]);
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
     return linksService.getLinkTypes().map((factoryType) => {
@@ -73,6 +72,11 @@ export const NavigationEmbeddableLinkEditor = ({
         ),
       };
     });
+  }, []);
+
+  const onChange = useCallback((changes, valid) => {
+    setLinkInput(changes);
+    setValidLink(valid);
   }, []);
 
   return (
@@ -103,36 +107,13 @@ export const NavigationEmbeddableLinkEditor = ({
               }}
             />
           </EuiFormRow>
-          <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkDestinationLabel()}>
-            {linkFactory?.linkEditorDestinationComponent ? (
-              <linkFactory.linkEditorDestinationComponent
-                setDestination={setDestination}
-                setPlaceholder={setPlaceholder}
-                currentDashboardId={currentDashboardId}
-              />
-            ) : (
-              <></>
-            )}
-          </EuiFormRow>
-          <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkTextLabel()}>
-            <EuiFieldText
-              placeholder={
-                placeholder || NavEmbeddableStrings.editor.linkEditor.getLinkTextPlaceholder()
-              }
-              value={linkLabel}
-              onChange={(e) => {
-                setLinkLabel(e.target.value);
-              }}
+
+          {linkFactory?.linkEditorComponent && (
+            <linkFactory.linkEditorComponent
+              currentDashboardId={currentDashboardId}
+              onChange={onChange}
             />
-          </EuiFormRow>
-
-          {/* TODO: As part of https://github.com/elastic/kibana/issues/154381, we should pull in the custom settings for each link type.
-            Refer to `x-pack/examples/ui_actions_enhanced_examples/public/drilldowns/dashboard_to_discover_drilldown/collect_config_container.tsx`
-            for the dashboard drilldown settings, for example. 
-
-            Open question: It probably makes sense to re-use these components so any changes made to the drilldown architecture
-            trickle down to the navigation embeddable - this would require some refactoring, though. Is this a goal for MVP?
-         */}
+          )}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -144,11 +125,11 @@ export const NavigationEmbeddableLinkEditor = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              disabled={!linkFactory || !destination}
+              disabled={!linkFactory || !validLink}
               onClick={() => {
                 // this check should always be true, since the button is disabled otherwise - this is just for type safety
-                if (linkFactory && destination) {
-                  onSave(linkFactory.type, destination, linkLabel);
+                if (linkFactory && validLink) {
+                  onSave(linkFactory.type, linkInput);
                   onClose(false);
                 }
               }}

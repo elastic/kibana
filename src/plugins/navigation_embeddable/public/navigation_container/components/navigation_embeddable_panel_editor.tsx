@@ -178,8 +178,8 @@ export const NavigationEmbeddablePanelEditor = ({
               setShowLinkEditorFlyout(false);
             }
           }}
-          onSave={(type, destination, label) => {
-            addLink(initialInput, { type, destination, label });
+          onSave={(type, linkInput) => {
+            addLink(initialInput, { type, input: linkInput });
             setPanels(initialInput.panels);
           }}
           currentDashboardId={currentDashboardId}

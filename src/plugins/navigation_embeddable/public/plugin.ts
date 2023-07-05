@@ -45,8 +45,7 @@ export class NavigationEmbeddablePlugin
   constructor() {}
 
   private transferEditorFunctions(factoryDef: ILinkFactory, factory: LinkFactory) {
-    (factory as ILinkFactory).linkEditorDestinationComponent =
-      factoryDef.linkEditorDestinationComponent ?? undefined;
+    (factory as ILinkFactory).linkEditorComponent = factoryDef.linkEditorComponent ?? undefined;
   }
 
   public setup(

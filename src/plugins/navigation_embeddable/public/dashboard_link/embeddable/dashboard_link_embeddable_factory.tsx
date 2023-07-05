@@ -13,7 +13,7 @@ import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public'
 import { DashboardLinkInput } from '../types';
 import { ILinkFactory } from '../../navigation_container/types';
 import { NavigationContainer } from '../../navigation_container/embeddable/navigation_container';
-import { DashboardLinkEditorDestinationPicker } from '../components/dashboard_link_editor_destination_picker';
+import { DashboardLinkEditor } from '../components/dashboard_link_editor';
 
 export const DASHBOARD_LINK_EMBEDDABLE_TYPE = 'navEmbeddable_dashboardLink';
 
@@ -32,7 +32,7 @@ export class DashboardLinkFactory
     return false;
   }
 
-  public linkEditorDestinationComponent = DashboardLinkEditorDestinationPicker;
+  public linkEditorComponent = DashboardLinkEditor;
 
   public async create(initialInput: DashboardLinkInput, parent: NavigationContainer) {
     const { DashboardLinkEmbeddable } = await import('./dashboard_link_embeddable');
