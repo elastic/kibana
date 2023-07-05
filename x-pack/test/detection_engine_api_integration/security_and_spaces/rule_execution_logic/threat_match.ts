@@ -150,7 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
    * Specific api integration tests for threat matching rule type
    */
   // FLAKY: https://github.com/elastic/kibana/issues/155304
-  describe.only('Threat match type rules', () => {
+  describe('Threat match type rules', () => {
     before(async () => {
       // await deleteSignalsIndex(supertest, log);
       // await deleteAllAlerts(supertest, log);
