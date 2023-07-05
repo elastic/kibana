@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
 import {
-  type DataPublicPluginStart,
   isCompleteResponse,
   ISearchSource,
   type SearchResponseWarning,
@@ -27,8 +26,7 @@ const DISABLE_SHARD_FAILURE_WARNING = true;
  */
 export const fetchDocuments = (
   searchSource: ISearchSource,
-  { abortController, inspectorAdapters, searchSessionId, services }: FetchDeps,
-  data: DataPublicPluginStart
+  { abortController, inspectorAdapters, searchSessionId, services }: FetchDeps
 ): Promise<RecordsFetchResponse> => {
   searchSource.setField('size', services.uiSettings.get(SAMPLE_SIZE_SETTING));
   searchSource.setField('trackTotalHits', false);
@@ -74,7 +72,7 @@ export const fetchDocuments = (
     const warnings: SearchResponseWarning[] = [];
 
     if (DISABLE_SHARD_FAILURE_WARNING) {
-      data.search.showWarnings(inspectorAdapters.requests!, (warning) => {
+      services.data.search.showWarnings(inspectorAdapters.requests!, (warning) => {
         if (warning.type === 'shard_failure') {
           warnings.push(warning);
           return true; // suppress the default behaviour

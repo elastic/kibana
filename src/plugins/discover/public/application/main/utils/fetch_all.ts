@@ -82,7 +82,7 @@ export function fetchAll(
     const response =
       useSql && query
         ? fetchSql(query, dataView, data, services.expressions, inspectorAdapters)
-        : fetchDocuments(searchSource, fetchDeps, data);
+        : fetchDocuments(searchSource, fetchDeps);
     const fetchType = useSql && query ? 'fetchSql' : 'fetchDocuments';
     const startTime = window.performance.now();
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects

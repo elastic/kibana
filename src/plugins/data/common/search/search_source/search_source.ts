@@ -916,6 +916,25 @@ export class SearchSource {
     };
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
+    body.query = {
+      error_query: {
+        indices: [
+          {
+            name: 'kibana_sample_data_ecommerce',
+            shard_ids: [0, 1],
+            error_type: 'exception',
+            message: 'Everythings is fine! I swear!',
+          },
+          {
+            name: 'kibana_sample_data_logs',
+            shard_ids: [0, 1],
+            error_type: 'exception',
+            message: 'Next time I return results! I swear!',
+          },
+        ],
+      },
+    };
+
     if (highlightAll && body.query) {
       body.highlight = getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
       delete searchRequest.highlightAll;
