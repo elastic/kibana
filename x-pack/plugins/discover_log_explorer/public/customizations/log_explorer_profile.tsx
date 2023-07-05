@@ -38,6 +38,12 @@ export const createLogExplorerProfileCustomizations =
       stateContainer,
       toasts: core.notifications.toasts,
     });
+
+    //
+    /**
+     * Wait for the machine to be fully initialized to set the restored selection
+     * create the DataView and set it in the stateContainer from Discover
+     */
     await waitForState(logExplorerProfileStateService, 'initialized');
 
     /**

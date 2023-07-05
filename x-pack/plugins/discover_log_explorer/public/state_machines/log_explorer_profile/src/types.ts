@@ -6,7 +6,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { DoneInvokeEvent, Interpreter } from 'xstate';
+import { DoneInvokeEvent } from 'xstate';
 import type { DatasetEncodingError, DatasetSelection } from '../../../utils/dataset_selection';
 
 export interface WithDatasetSelection {
@@ -33,7 +33,7 @@ export type LogExplorerProfileTypestate =
       context: WithDatasetSelection & WithDataView;
     }
   | {
-      value: 'syncingUrlState';
+      value: 'updatingUrlState';
       context: WithDatasetSelection & WithDataView;
     }
   | {

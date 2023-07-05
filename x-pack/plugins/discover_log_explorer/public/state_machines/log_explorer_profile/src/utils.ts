@@ -5,28 +5,19 @@
  * 2.0.
  */
 
-import { State } from 'xstate';
 import { LogExplorerProfileStateService } from './state_machine';
-import {
-  LogExplorerProfileContext,
-  LogExplorerProfileEvent,
-  LogExplorerProfileState,
-} from './types';
-
-type ListenerState = State<LogExplorerProfileContext, LogExplorerProfileEvent>;
+import { LogExplorerProfileState } from './types';
 
 export const waitForState = (
   service: LogExplorerProfileStateService,
   targetState: LogExplorerProfileState
 ) => {
   return new Promise((resolve) => {
-    const listener = (state: ListenerState) => {
+    const { unsubscribe } = service.subscribe((state) => {
       if (state.matches(targetState)) {
         resolve(state);
-        service.off(listener);
+        unsubscribe();
       }
-    };
-
-    service.onTransition(listener);
+    });
   });
 };
