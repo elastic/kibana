@@ -7,31 +7,35 @@
 
 /* eslint-disable @elastic/eui/href-or-on-click */
 
+import React, { PropsWithChildren, MouseEvent } from 'react';
 import {
-  EuiCard,
+  EuiTitle,
+  EuiLink,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiSpacer,
+  EuiCard,
   EuiIcon,
   EuiIconProps,
-  EuiLink,
-  EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent, PropsWithChildren } from 'react';
-import { useWizard } from '.';
-import { useKibanaNavigation } from '../../../../hooks/use_kibana_navigation';
 import {
   StepPanel,
   StepPanelContent,
   StepPanelFooter,
 } from '../../../shared/step_panel';
-import { BackButton } from './back_button';
+import { useWizard } from '.';
+import { useKibanaNavigation } from '../../../../hooks/use_kibana_navigation';
 
 export function SelectLogs() {
-  const { navigateToAppUrl } = useKibanaNavigation();
-  const { goBack, goToStep, setState } = useWizard();
+  const { navigateToKibanaUrl, navigateToAppUrl } = useKibanaNavigation();
+  const { goToStep, setState } = useWizard();
+
+  function onBack() {
+    navigateToKibanaUrl('/app/observabilityOnboarding');
+  }
 
   return (
     <StepPanel
@@ -42,7 +46,16 @@ export function SelectLogs() {
         }
       )}
       panelFooter={
-        <StepPanelFooter items={[<BackButton onBack={goBack} />, <></>]} />
+        <StepPanelFooter
+          items={[
+            <EuiButton color="text" onClick={onBack}>
+              {i18n.translate('xpack.observability_onboarding.steps.back', {
+                defaultMessage: 'Back',
+              })}
+            </EuiButton>,
+            <></>,
+          ]}
+        />
       }
     >
       <StepPanelContent>
