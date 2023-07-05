@@ -27,6 +27,12 @@ export interface ExpandableFlyoutProps extends EuiFlyoutProps {
   handleOnFlyoutClosed?: () => void;
 }
 
+const flyoutStyles = css`
+  overflow-y: scroll;
+`;
+
+const flyoutInnerStyles = { height: '100%' };
+
 /**
  * Expandable flyout UI React component.
  * Displays 3 sections (right, left, preview) depending on the panels in the context.
@@ -65,9 +71,10 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
     [mostRecentPreview, registeredPanels]
   );
 
-  // do not add the flyout to the dom if there aren't any panels to display
-  if (!left && !right && !preview.length) {
-    return <></>;
+  const hideFlyout = !left && !right && !preview.length;
+
+  if (hideFlyout) {
+    return null;
   }
 
   const flyoutWidth: string = leftSection && rightSection ? 'l' : 's';
@@ -77,9 +84,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
 
   return (
     <EuiFlyout
-      css={css`
-        overflow-y: scroll;
-      `}
+      css={flyoutStyles}
       {...flyoutProps}
       size={flyoutWidth}
       ownFocus={false}
@@ -89,7 +94,7 @@ export const ExpandableFlyout: React.FC<ExpandableFlyoutProps> = ({
         direction={leftSection ? 'row' : 'column'}
         wrap={false}
         gutterSize="none"
-        style={{ height: '100%' }}
+        style={flyoutInnerStyles}
       >
         {leftSection && left ? (
           <LeftSection

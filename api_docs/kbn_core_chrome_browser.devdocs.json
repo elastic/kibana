@@ -3104,19 +3104,19 @@
             "section": "def-common.AppId",
             "text": "AppId"
           },
-          " | \"serverlessElasticsearch\" | ",
-          {
-            "pluginId": "@kbn/deeplinks-observability",
-            "scope": "common",
-            "docId": "kibKbnDeeplinksObservabilityPluginApi",
-            "section": "def-common.AppId",
-            "text": "AppId"
-          },
           " | ",
           {
             "pluginId": "@kbn/deeplinks-management",
             "scope": "common",
             "docId": "kibKbnDeeplinksManagementPluginApi",
+            "section": "def-common.AppId",
+            "text": "AppId"
+          },
+          " | \"serverlessElasticsearch\" | ",
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
             "section": "def-common.AppId",
             "text": "AppId"
           }

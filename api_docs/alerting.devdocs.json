@@ -3152,7 +3152,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3168,7 +3168,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
