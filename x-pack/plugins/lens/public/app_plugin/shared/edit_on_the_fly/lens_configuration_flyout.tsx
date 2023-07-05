@@ -22,16 +22,11 @@ import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getResolvedDateRange } from '../../../utils';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import {
-  DataViewsState,
-  useLensDispatch,
-  updateStateFromSuggestion,
-} from '../../../state_management';
+import { useLensSelector, selectFramePublicAPI } from '../../../state_management';
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
 
-import type { DatasourceMap, VisualizationMap, DatasourceLayers } from '../../../types';
+import type { DatasourceMap, VisualizationMap } from '../../../types';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
 
@@ -61,60 +56,31 @@ export function LensEditConfigurationFlyout({
   closeFlyout,
   adaptersTables,
 }: EditConfigPanelProps) {
-  const currentDataViewId = dataView.id ?? '';
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
-  const dispatchLens = useLensDispatch();
   const { euiTheme } = useEuiTheme();
-  const dataViews = useMemo(() => {
-    return {
-      indexPatterns: {
-        [currentDataViewId]: dataView,
-      },
-      indexPatternRefs: [],
-    } as unknown as DataViewsState;
-  }, [currentDataViewId, dataView]);
-  dispatchLens(
-    updateStateFromSuggestion({
-      newDatasourceId: datasourceId,
-      visualizationId: activeVisualization.id,
-      visualizationState: attributes.state.visualization,
-      datasourceState,
-      dataViews,
-    })
-  );
 
-  const datasourceLayers: DatasourceLayers = useMemo(() => {
-    return {};
-  }, []);
   const activeData: Record<string, Datatable> = useMemo(() => {
     return {};
   }, []);
   const layers = activeDatasource.getLayers(datasourceState);
   layers.forEach((layer) => {
-    datasourceLayers[layer] = datasourceMap[datasourceId].getPublicAPI({
-      state: datasourceState,
-      layerId: layer,
-      indexPatterns: dataViews.indexPatterns,
-    });
     if (adaptersTables) {
       activeData[layer] = Object.values(adaptersTables)[0];
     }
   });
 
-  const dateRange = getResolvedDateRange(startDependencies.data.query.timefilter.timefilter);
-  const framePublicAPI = useMemo(() => {
-    return {
-      activeData,
-      dataViews,
-      datasourceLayers,
-      dateRange,
-    };
-  }, [activeData, dataViews, datasourceLayers, dateRange]);
+  const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
+  const { isLoading } = useLensSelector((state) => state.lens);
+  if (isLoading) return null;
+  const newApi = {
+    ...framePublicAPI,
+    activeData,
+  };
 
   const layerPanelsProps = {
-    framePublicAPI,
+    framePublicAPI: newApi,
     datasourceMap,
     visualizationMap,
     core: coreStart,
@@ -135,13 +101,15 @@ export function LensEditConfigurationFlyout({
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>
-            <EuiCallOut
-              size="s"
-              title={i18n.translate('xpack.lens.config.configFlyoutCallout', {
-                defaultMessage: 'SQL currently offers limited configuration options',
-              })}
-              iconType="iInCircle"
-            />
+            {datasourceId === 'textBased' && (
+              <EuiCallOut
+                size="s"
+                title={i18n.translate('xpack.lens.config.configFlyoutCallout', {
+                  defaultMessage: 'SQL currently offers limited configuration options',
+                })}
+                iconType="iInCircle"
+              />
+            )}
             <EuiSpacer size="m" />
             <VisualizationToolbar
               activeVisualization={activeVisualization}

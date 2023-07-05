@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
@@ -18,6 +18,7 @@ import {
   LensRootStore,
   LensAppState,
   LensState,
+  loadInitial,
 } from '../../../state_management';
 import { getPreloadedState } from '../../../state_management/lens_slice';
 
@@ -73,6 +74,10 @@ export function getEditLensConfiguration(
       loadLensService();
     }, []);
 
+    const redirectCallback = useCallback((id?: string) => {
+      // do nothing
+    }, []);
+
     if (!lensServices || !datasourceMap || !visualizationMap || !dataView.id) {
       return <LoadingSpinnerWithOverlay />;
     }
@@ -89,6 +94,15 @@ export function getEditLensConfiguration(
     const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
       lens: getPreloadedState(storeDeps) as LensAppState,
     } as unknown as PreloadedState<LensState>);
+    lensStore.dispatch(
+      loadInitial({
+        redirectCallback,
+        initialInput: {
+          attributes,
+          id: 'random-id',
+        },
+      })
+    );
 
     const getWrapper = (children: JSX.Element) => {
       if (wrapInFlyout) {

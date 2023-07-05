@@ -188,7 +188,7 @@ export const navigateAway = createAction<void>('lens/navigateAway');
 export const loadInitial = createAction<{
   initialInput?: LensEmbeddableInput;
   redirectCallback: (savedObjectId?: string) => void;
-  history: History<unknown>;
+  history?: History<unknown>;
 }>('lens/loadInitial');
 export const initEmpty = createAction(
   'initEmpty',
@@ -902,7 +902,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       payload: PayloadAction<{
         initialInput?: LensEmbeddableInput;
         redirectCallback: (savedObjectId?: string) => void;
-        history: History<unknown>;
+        history?: History<unknown>;
       }>
     ) => state,
     [initEmpty.type]: (
