@@ -169,7 +169,7 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
     const reportingStart = this.getContract();
-    
+
     this.pngExport.start({ ...startDeps, reporting: reportingStart });
     this.pdfExport.start({ ...startDeps, reporting: reportingStart });
 
