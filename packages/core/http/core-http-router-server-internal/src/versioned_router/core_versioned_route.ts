@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  ELASTIC_HTTP_VERSION_QUERY_PARAM,
+} from '@kbn/core-http-common';
 import type {
   RequestHandler,
   RequestHandlerContextBase,
@@ -28,6 +31,7 @@ import {
   isAllowedPublicVersion,
   isValidRouteVersion,
   hasVersion,
+  hasQueryVersion,
   readVersion,
   removeQueryVersion,
 } from './route_version_utils';
@@ -148,6 +152,10 @@ export class CoreVersionedRoute implements VersionedRoute {
     ) {
       if (this.enableQueryVersion) {
         removeQueryVersion(mutableCoreKibanaRequest);
+      } else if (hasQueryVersion(mutableCoreKibanaRequest)) {
+        return res.badRequest({
+          body: `Query parameter "${ELASTIC_HTTP_VERSION_QUERY_PARAM}" is not allowed. Please specify the API version using the "${ELASTIC_HTTP_VERSION_HEADER}" header.`,
+        });
       }
       try {
         const { body, params, query } = validate(

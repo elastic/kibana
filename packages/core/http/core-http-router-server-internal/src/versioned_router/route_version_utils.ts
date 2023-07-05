@@ -47,7 +47,7 @@ export function isValidRouteVersion(isPublicApi: boolean, version: string): unde
     : `Invalid version number. Received "${version}", expected a string containing _only_ a finite, whole number greater than 0.`;
 }
 
-function hasQueryVersion(request: KibanaRequest) {
+export function hasQueryVersion(request: KibanaRequest) {
   return isObject(request.query) && ELASTIC_HTTP_VERSION_QUERY_PARAM in request.query;
 }
 export function hasVersion(request: KibanaRequest, isQueryVersionEnabled?: boolean): boolean {
