@@ -39,13 +39,13 @@ import { ReportingCore } from './core';
  * Plugin Setup Contract
  */
 export interface ReportingSetup {
+  registerExportTypes: ExportTypesRegistry['register'];
   getSpaceId: ReportingCore['getSpaceId'];
   getScreenshots: ReportingCore['getScreenshots'];
   /**
    * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
    */
   usesUiCapabilities: () => boolean;
-  registerExportTypes: ExportTypesRegistry['register'];
 }
 
 /**
@@ -59,14 +59,15 @@ export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 /**
  * Internal Types
  */
-
-export type CreateJobFn<JobParamsType> = (
+// standard type for create job function of any ExportType implementation
+export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
   jobParams: JobParamsType,
   context: ReportingRequestHandlerContext,
   req: KibanaRequest
-) => JobParamsType & { isDeprecated: boolean; browserTimezone: any };
+) => Promise<Omit<JobPayloadType, 'headers' | 'spaceId'>>;
 
-export type RunTaskFn<TaskPayloadType> = (
+// standard type for run task function of any ExportType implementation
+export type RunTaskFn<TaskPayloadType = BasePayload> = (
   jobId: string,
   payload: TaskPayloadType,
   cancellationToken: CancellationToken,
