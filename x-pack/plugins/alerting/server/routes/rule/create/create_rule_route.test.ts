@@ -6,22 +6,22 @@
  */
 
 import { pick } from 'lodash';
-import { createRuleRoute } from './create_rule';
+import { createRuleRoute } from './create_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { verifyApiAccess } from '../lib/license_api_access';
-import { mockHandlerArguments } from './_mock_handler_arguments';
-import { CreateOptions } from '../rules_client';
-import { rulesClientMock } from '../rules_client.mock';
-import { RuleTypeDisabledError } from '../lib';
-import { AsApiContract } from './lib';
-import { SanitizedRule } from '../types';
+import { licenseStateMock } from '../../../lib/license_state.mock';
+import { verifyApiAccess } from '../../../lib/license_api_access';
+import { mockHandlerArguments } from '../../_mock_handler_arguments';
+import type { CreateRuleRequestBodyV1 } from '../../../../common/routes/rule/create';
+import { rulesClientMock } from '../../../rules_client.mock';
+import { RuleTypeDisabledError } from '../../../lib';
+import { AsApiContract } from '../../lib';
+import { SanitizedRule } from '../../../types';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../lib/license_api_access', () => ({
+jest.mock('../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -83,7 +83,7 @@ describe('createRuleRoute', () => {
     revision: 0,
   };
 
-  const ruleToCreate: AsApiContract<CreateOptions<{ bar: boolean }>['data']> = {
+  const ruleToCreate: CreateRuleRequestBodyV1<{ bar: boolean }> = {
     ...pick(mockedAlert, 'consumer', 'name', 'schedule', 'tags', 'params', 'throttle', 'enabled'),
     rule_type_id: mockedAlert.alertTypeId,
     notify_when: mockedAlert.notifyWhen,
@@ -156,7 +156,17 @@ describe('createRuleRoute', () => {
       ['ok']
     );
 
-    expect(await handler(context, req, res)).toEqual({ body: createResult });
+    expect(await handler(context, req, res)).toEqual({
+      body: {
+        ...createResult,
+        created_at: createResult.created_at.toISOString(),
+        updated_at: createResult.updated_at.toISOString(),
+        execution_status: {
+          ...createResult.execution_status,
+          last_execution_date: createResult.execution_status.last_execution_date.toISOString(),
+        },
+      },
+    });
 
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
@@ -166,6 +176,7 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "actionTypeId": undefined,
                 "alertsFilter": Object {
                   "query": Object {
                     "filters": Array [],
@@ -213,7 +224,15 @@ describe('createRuleRoute', () => {
     `);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: createResult,
+      body: {
+        ...createResult,
+        created_at: createResult.created_at.toISOString(),
+        updated_at: createResult.updated_at.toISOString(),
+        execution_status: {
+          ...createResult.execution_status,
+          last_execution_date: createResult.execution_status.last_execution_date.toISOString(),
+        },
+      },
     });
   });
 
@@ -253,7 +272,17 @@ describe('createRuleRoute', () => {
       ['ok']
     );
 
-    expect(await handler(context, req, res)).toEqual({ body: expectedResult });
+    expect(await handler(context, req, res)).toEqual({
+      body: {
+        ...expectedResult,
+        created_at: expectedResult.created_at.toISOString(),
+        updated_at: expectedResult.updated_at.toISOString(),
+        execution_status: {
+          ...expectedResult.execution_status,
+          last_execution_date: expectedResult.execution_status.last_execution_date.toISOString(),
+        },
+      },
+    });
 
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
@@ -263,6 +292,7 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "actionTypeId": undefined,
                 "alertsFilter": Object {
                   "query": Object {
                     "filters": Array [],
@@ -310,7 +340,15 @@ describe('createRuleRoute', () => {
     `);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: expectedResult,
+      body: {
+        ...expectedResult,
+        created_at: expectedResult.created_at.toISOString(),
+        updated_at: expectedResult.updated_at.toISOString(),
+        execution_status: {
+          ...expectedResult.execution_status,
+          last_execution_date: expectedResult.execution_status.last_execution_date.toISOString(),
+        },
+      },
     });
   });
 
@@ -351,7 +389,17 @@ describe('createRuleRoute', () => {
       ['ok']
     );
 
-    expect(await handler(context, req, res)).toEqual({ body: expectedResult });
+    expect(await handler(context, req, res)).toEqual({
+      body: {
+        ...expectedResult,
+        created_at: expectedResult.created_at.toISOString(),
+        updated_at: expectedResult.updated_at.toISOString(),
+        execution_status: {
+          ...expectedResult.execution_status,
+          last_execution_date: expectedResult.execution_status.last_execution_date.toISOString(),
+        },
+      },
+    });
 
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
@@ -361,6 +409,7 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "actionTypeId": undefined,
                 "alertsFilter": Object {
                   "query": Object {
                     "filters": Array [],
@@ -408,7 +457,15 @@ describe('createRuleRoute', () => {
     `);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: expectedResult,
+      body: {
+        ...expectedResult,
+        created_at: expectedResult.created_at.toISOString(),
+        updated_at: expectedResult.updated_at.toISOString(),
+        execution_status: {
+          ...expectedResult.execution_status,
+          last_execution_date: expectedResult.execution_status.last_execution_date.toISOString(),
+        },
+      },
     });
   });
 
@@ -449,7 +506,17 @@ describe('createRuleRoute', () => {
       ['ok']
     );
 
-    expect(await handler(context, req, res)).toEqual({ body: expectedResult });
+    expect(await handler(context, req, res)).toEqual({
+      body: {
+        ...expectedResult,
+        created_at: expectedResult.created_at.toISOString(),
+        updated_at: expectedResult.updated_at.toISOString(),
+        execution_status: {
+          ...expectedResult.execution_status,
+          last_execution_date: expectedResult.execution_status.last_execution_date.toISOString(),
+        },
+      },
+    });
 
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(2);
     expect(rulesClient.create).toHaveBeenCalledTimes(1);
@@ -459,6 +526,7 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "actionTypeId": undefined,
                 "alertsFilter": Object {
                   "query": Object {
                     "filters": Array [],
@@ -506,7 +574,15 @@ describe('createRuleRoute', () => {
     `);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: expectedResult,
+      body: {
+        ...expectedResult,
+        created_at: expectedResult.created_at.toISOString(),
+        updated_at: expectedResult.updated_at.toISOString(),
+        execution_status: {
+          ...expectedResult.execution_status,
+          last_execution_date: expectedResult.execution_status.last_execution_date.toISOString(),
+        },
+      },
     });
   });
 
