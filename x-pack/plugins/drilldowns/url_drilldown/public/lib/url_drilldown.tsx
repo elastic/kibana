@@ -121,7 +121,6 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       [context]
     );
 
-    console.log(this.deps.theme);
     return (
       <KibanaContextProvider
         services={{
