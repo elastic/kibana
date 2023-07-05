@@ -224,23 +224,29 @@ export const parseMlInferenceParametersFromPipeline = (
   }
 
   // Extract source -> target field mappings from all inference processors in pipeline
-  const fieldMappings = inferenceProcessors.map((p) => {
-    const sourceFields = Object.keys(p.field_map ?? {});
-    // We assume that there is only one source field per inference processor
-    const sourceField = sourceFields.length >= 1 ? sourceFields[0] : null;
-    return {
-      sourceField,
-      targetField: p.target_field ? stripMlInferencePrefix(p.target_field) : '',
-    }
-  }).filter((f) => f.sourceField) as FieldMapping[];
+  const fieldMappings = inferenceProcessors
+    .map((p) => {
+      const sourceFields = Object.keys(p.field_map ?? {});
+      // We assume that there is only one source field per inference processor
+      const sourceField = sourceFields.length >= 1 ? sourceFields[0] : null;
+      return {
+        sourceField,
+        targetField: p.target_field, // Prefixed target field
+      };
+    })
+    .filter((f) => f.sourceField) as FieldMapping[];
 
-  return {
-    destination_field: fieldMappings[0].targetField, // Backward compatibility - TODO: remove
-    model_id: inferenceProcessors[0].model_id,
-    pipeline_name: name,
-    source_field: fieldMappings[0].sourceField, // Backward compatibility - TODO: remove
-    field_mappings: fieldMappings,
-  };
+  return fieldMappings.length === 0
+    ? null
+    : {
+        destination_field: fieldMappings[0].targetField // Backward compatibility - TODO: remove
+          ? stripMlInferencePrefix(fieldMappings[0].targetField)
+          : '',
+        model_id: inferenceProcessors[0].model_id,
+        pipeline_name: name,
+        source_field: fieldMappings[0].sourceField, // Backward compatibility - TODO: remove
+        field_mappings: fieldMappings,
+      };
 };
 
 export const parseModelStateFromStats = (
