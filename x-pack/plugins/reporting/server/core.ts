@@ -44,6 +44,7 @@ import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
 import { CsvSearchsourceExportType } from './export_types/csv_searchsource';
+import { CsvV2ExportType } from './export_types/csv_v2';
 import { PdfExportType } from './export_types/printable_pdf_v2';
 import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
@@ -106,6 +107,7 @@ export class ReportingCore {
   private config: ReportingConfigType;
   private executing: Set<string>;
   private csvSearchsourceExport: CsvSearchsourceExportType;
+  private csvV2ExportType: CsvV2ExportType;
   private pdfExport: PdfExportType;
   private exportTypesRegistry = new ExportTypesRegistry();
 
@@ -129,6 +131,9 @@ export class ReportingCore {
       this.context
     );
     this.exportTypesRegistry.register(this.csvSearchsourceExport);
+
+    this.csvV2ExportType = new CsvV2ExportType(this.core, this.config, this.logger, this.context);
+    this.exportTypesRegistry.register(this.csvV2ExportType);
 
     this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.pdfExport);
@@ -157,11 +162,9 @@ export class ReportingCore {
   public pluginSetup(setupDeps: ReportingInternalSetup) {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
+
     this.csvSearchsourceExport.setup(setupDeps);
-    this.pdfExport.setup(setupDeps);
-
-    this.pdfExport.setup(setupDeps);
-
+    this.csvV2ExportType.setup(setupDeps);
     this.pdfExport.setup(setupDeps);
 
     const { executeTask, monitorTask } = this;
@@ -179,6 +182,7 @@ export class ReportingCore {
     this.pluginStartDeps = startDeps; // cache
     const reportingStart = this.getContract();
     this.csvSearchsourceExport.start({ ...startDeps, reporting: reportingStart });
+    this.csvV2ExportType.start({ ...startDeps, reporting: reportingStart });
     this.pdfExport.start({ ...startDeps, reporting: reportingStart });
 
     await this.assertKibanaIsAvailable();

@@ -64,7 +64,7 @@ export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload
   jobParams: JobParamsType,
   context: ReportingRequestHandlerContext,
   req: KibanaRequest
-) => JobParamsType & { isDeprecated: boolean; browserTimezone: any };
+) => Promise<Omit<JobPayloadType, 'headers' | 'spaceId'>>;
 
 // standard type for run task function of any ExportType implementation
 export type RunTaskFn<TaskPayloadType = BasePayload> = (

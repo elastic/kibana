@@ -16,6 +16,7 @@ import { CONTENT_TYPE_CSV } from '@kbn/generate-csv/src/constants';
 import { JobParamsCsvFromSavedObject, TaskPayloadCsvFromSavedObject } from '../../../common/types';
 import {
   CSV_REPORT_TYPE_V2,
+  LICENSE_TYPE_BASIC,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
@@ -50,6 +51,7 @@ export class CsvV2ExportType extends ExportType<
   jobContentExtension = 'csv' as const;
   validLicenses = [
     LICENSE_TYPE_TRIAL,
+    LICENSE_TYPE_BASIC,
     LICENSE_TYPE_CLOUD_STANDARD,
     LICENSE_TYPE_GOLD,
     LICENSE_TYPE_PLATINUM,
