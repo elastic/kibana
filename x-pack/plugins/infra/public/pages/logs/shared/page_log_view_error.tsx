@@ -11,12 +11,12 @@ import React, { useCallback } from 'react';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useSelector } from '@xstate/react';
-import { useLogViewContext } from '../../../hooks/use_log_view';
+import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import {
   FetchLogViewStatusError,
   FetchLogViewError,
   ResolveLogViewError,
-} from '../../../../common/log_views';
+} from '@kbn/logs-shared-plugin/common';
 import { LogsPageTemplate } from './page_template';
 
 export const LogViewErrorPage: React.FC<{
