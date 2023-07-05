@@ -9,7 +9,10 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { FindActionResult } from '@kbn/actions-plugin/server';
 import { savedObjectsAdapter } from '../../saved_objects';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
-import { SyntheticsMonitorStatusTranslations } from '../../../common/rules/synthetics/translations';
+import {
+  SyntheticsMonitorStatusTranslations,
+  TlsTranslations,
+} from '../../../common/rules/synthetics/translations';
 import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../../types';
 import {
   ACTION_GROUP_DEFINITIONS,
@@ -64,7 +67,7 @@ export class DefaultAlertService {
     return this.createDefaultAlertIfNotExist(
       SYNTHETICS_TLS_RULE,
       `Synthetics internal TLS alert`,
-      '10m'
+      '1m'
     );
   }
 
@@ -119,7 +122,7 @@ export class DefaultAlertService {
     );
   }
   updateTlsRule() {
-    return this.updateDefaultAlert(SYNTHETICS_TLS_RULE, `Synthetics internal TLS alert`, '10m');
+    return this.updateDefaultAlert(SYNTHETICS_TLS_RULE, `Synthetics internal TLS alert`, '1m');
   }
 
   async updateDefaultAlert(ruleType: DefaultRuleType, name: string, interval: string) {
@@ -151,21 +154,32 @@ export class DefaultAlertService {
       settings?.defaultConnectors?.includes(act.id)
     );
 
-    return populateAlertActions({
-      groupId:
-        ruleType === SYNTHETICS_STATUS_RULE
-          ? ACTION_GROUP_DEFINITIONS.MONITOR_STATUS.id
-          : ACTION_GROUP_DEFINITIONS.TLS_CERTIFICATE.id,
-      defaultActions,
-      defaultEmail: settings?.defaultEmail!,
-      translations: {
-        defaultActionMessage: SyntheticsMonitorStatusTranslations.defaultActionMessage,
-        defaultRecoveryMessage: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
-        defaultSubjectMessage: SyntheticsMonitorStatusTranslations.defaultSubjectMessage,
-        defaultRecoverySubjectMessage:
-          SyntheticsMonitorStatusTranslations.defaultRecoverySubjectMessage,
-      },
-    });
+    if (ruleType === SYNTHETICS_STATUS_RULE) {
+      return populateAlertActions({
+        defaultActions,
+        groupId: ACTION_GROUP_DEFINITIONS.MONITOR_STATUS.id,
+        defaultEmail: settings?.defaultEmail!,
+        translations: {
+          defaultActionMessage: SyntheticsMonitorStatusTranslations.defaultActionMessage,
+          defaultRecoveryMessage: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
+          defaultSubjectMessage: SyntheticsMonitorStatusTranslations.defaultSubjectMessage,
+          defaultRecoverySubjectMessage:
+            SyntheticsMonitorStatusTranslations.defaultRecoverySubjectMessage,
+        },
+      });
+    } else {
+      return populateAlertActions({
+        defaultActions,
+        groupId: ACTION_GROUP_DEFINITIONS.TLS_CERTIFICATE.id,
+        defaultEmail: settings?.defaultEmail!,
+        translations: {
+          defaultActionMessage: TlsTranslations.defaultActionMessage,
+          defaultRecoveryMessage: TlsTranslations.defaultRecoveryMessage,
+          defaultSubjectMessage: TlsTranslations.defaultSubjectMessage,
+          defaultRecoverySubjectMessage: TlsTranslations.defaultRecoverySubjectMessage,
+        },
+      });
+    }
   }
 
   async getActionConnectors() {
