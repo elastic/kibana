@@ -168,8 +168,10 @@ export class ReportingCore {
   public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
-    this.pngExport.start({ ...startDeps, reporting: this.getContract() });
-    this.pdfExport.start({ ...startDeps, reporting: this.getContract() });
+    const reportingStart = this.getContract();
+    
+    this.pngExport.start({ ...startDeps, reporting: reportingStart });
+    this.pdfExport.start({ ...startDeps, reporting: reportingStart });
 
     await this.assertKibanaIsAvailable();
 
@@ -343,20 +345,6 @@ export class ReportingCore {
       throw new Error(`"pluginSetupDeps" dependencies haven't initialized yet`);
     }
     return this.pluginSetupDeps;
-  }
-
-  public getSpaceId(request: KibanaRequest, logger = this.logger): string | undefined {
-    const spacesService = this.getPluginSetupDeps().spaces?.spacesService;
-    if (spacesService) {
-      const spaceId = spacesService?.getSpaceId(request);
-
-      if (spaceId !== DEFAULT_SPACE_ID) {
-        logger.info(`Request uses Space ID: ${spaceId}`);
-        return spaceId;
-      } else {
-        logger.debug(`Request uses default Space`);
-      }
-    }
   }
 
   public async getDataViewsService(request: KibanaRequest) {
