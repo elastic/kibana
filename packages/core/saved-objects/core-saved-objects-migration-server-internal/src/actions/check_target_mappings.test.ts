@@ -20,8 +20,6 @@ jest.mock('../core/build_active_mappings');
 
 const getUpdatedHashesMock = getUpdatedHashes as jest.MockedFn<typeof getUpdatedHashes>;
 
-const indexTypes = ['type1', 'type2'];
-
 const properties: SavedObjectsMappingProperties = {
   type1: { type: 'long' },
   type2: { type: 'long' },
@@ -48,7 +46,6 @@ describe('checkTargetMappings', () => {
   describe('when actual mappings are incomplete', () => {
     it("returns 'actual_mappings_incomplete' if actual mappings are not defined", async () => {
       const task = checkTargetMappings({
-        indexTypes,
         expectedMappings,
       });
 
@@ -58,7 +55,6 @@ describe('checkTargetMappings', () => {
 
     it("returns 'actual_mappings_incomplete' if actual mappings do not define _meta", async () => {
       const task = checkTargetMappings({
-        indexTypes,
         expectedMappings,
         actualMappings: {
           properties,
@@ -72,7 +68,6 @@ describe('checkTargetMappings', () => {
 
     it("returns 'actual_mappings_incomplete' if actual mappings do not define migrationMappingPropertyHashes", async () => {
       const task = checkTargetMappings({
-        indexTypes,
         expectedMappings,
         actualMappings: {
           properties,
@@ -87,7 +82,6 @@ describe('checkTargetMappings', () => {
 
     it("returns 'actual_mappings_incomplete' if actual mappings define a different value for 'dynamic' property", async () => {
       const task = checkTargetMappings({
-        indexTypes,
         expectedMappings,
         actualMappings: {
           properties,
@@ -105,7 +99,6 @@ describe('checkTargetMappings', () => {
     describe('and mappings do not match', () => {
       it('returns the lists of changed root fields and types', async () => {
         const task = checkTargetMappings({
-          indexTypes,
           expectedMappings,
           actualMappings: expectedMappings,
         });
@@ -115,8 +108,7 @@ describe('checkTargetMappings', () => {
         const result = await task();
         const expected: ComparedMappingsChanged = {
           type: 'compared_mappings_changed' as const,
-          updatedRootFields: ['someRootField'],
-          updatedTypes: ['type1', 'type2'],
+          updatedHashes: ['type1', 'type2', 'someRootField'],
         };
         expect(result).toEqual(Either.left(expected));
       });
@@ -125,7 +117,6 @@ describe('checkTargetMappings', () => {
     describe('and mappings match', () => {
       it('returns a compared_mappings_match response', async () => {
         const task = checkTargetMappings({
-          indexTypes,
           expectedMappings,
           actualMappings: expectedMappings,
         });

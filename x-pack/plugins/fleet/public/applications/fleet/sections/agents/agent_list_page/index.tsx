@@ -410,6 +410,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   };
 
   const isCurrentRequestIncremented = currentRequestRef?.current === 1;
+
   return (
     <>
       {isAgentActivityFlyoutOpen ? (
@@ -509,6 +510,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           }}
         />
       )}
+      {showUnhealthyCallout && (
+        <>
+          {cloud?.deploymentUrl ? (
+            <FleetServerCloudUnhealthyCallout deploymentUrl={cloud.deploymentUrl} />
+          ) : (
+            <FleetServerOnPremUnhealthyCallout onClickAddFleetServer={onClickAddFleetServer} />
+          )}
+          <EuiSpacer size="l" />
+        </>
+      )}
+      {/* TODO serverless agent soft limit */}
       {showUnhealthyCallout && (
         <>
           {cloud?.deploymentUrl ? (
