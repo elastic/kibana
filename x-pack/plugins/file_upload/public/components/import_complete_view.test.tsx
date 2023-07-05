@@ -38,6 +38,11 @@ jest.mock('../kibana_services', () => ({
       get: jest.fn(),
     };
   },
+  getTheme: () => {
+    return {
+      theme$: jest.fn(),
+    };
+  },
 }));
 
 test('Should render success', () => {

@@ -115,8 +115,8 @@ describe('<CodeEditor />', () => {
     // Verify our mount callback will be called
     expect(editorWillMount.mock.calls.length).toBe(1);
 
-    // Verify that both, default and transparent theme will be setup
-    expect((monaco.editor.defineTheme as jest.Mock).mock.calls.length).toBe(2);
+    // Verify that both, default and transparent theme will be setup and then redefined as new values come through from the theme$ observable
+    expect((monaco.editor.defineTheme as jest.Mock).mock.calls.length).toBe(4);
 
     // Verify our language features have been registered
     expect((monaco.languages.onLanguage as jest.Mock).mock.calls.length).toBe(1);
