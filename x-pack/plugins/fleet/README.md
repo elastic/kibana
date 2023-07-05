@@ -164,24 +164,30 @@ yarn jest --config x-pack/plugins/fleet/jest.config.js x-pack/plugins/fleet/comm
 
 #### API integration tests
 
-You need to have `docker` to run ingest manager api integration tests
+You need to have `docker` to run ingest manager api integration tests.
 
-1. In one terminal, run the tests from the Kibana root directory with
-
-   ```
-   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/fleet_api_integration/config.ts
-   ```
-
-1. in a second terminal, run the tests from the Kibana root directory with
+1. In one terminal, run the server from the Kibana root directory with
 
    ```
-   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/config.ts
+   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/fleet_api_integration/<configFile>
+   ```
+   where `configFile` is the relevant config file relevant from the following:
+   - config.agent.ts
+   - config.agent_policy.ts
+   - config.epm.ts
+   - config.fleet.ts
+   - config.package_policy.ts
+
+1. In a second terminal, run the tests from the Kibana root directory with
+
+   ```
+   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/<configFile>
    ```
 
-   Optionally you can filter which tests you want to run using `--grep`
+   Optionally, you can filter which tests you want to run using `--grep`
 
    ```
-   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/config.ts --grep='fleet'
+   FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/<configFile> --grep='fleet'
    ```
 
 **Note** you can also supply which docker image to use for the package registry via the `FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE` env variable. For example,
