@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export type {
-  JobParamsCSV,
-  TaskPayloadCSV,
-} from '../../../common/types/export_types/csv_searchsource';
+export { ExportType } from '@kbn/reporting-plugin/server/export_types/common';

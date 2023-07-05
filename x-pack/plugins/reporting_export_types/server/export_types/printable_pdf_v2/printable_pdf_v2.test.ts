@@ -9,26 +9,18 @@ jest.mock('./lib/generate_pdf');
 
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
-import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-import * as Rx from 'rxjs';
-import type { Writable } from 'stream';
-import { PdfExportType } from '.';
-<<<<<<< HEAD:x-pack/plugins/reporting/server/export_types/printable_pdf_v2/printable_pdf_v2.test.ts
-import type { LocatorParams } from '../../../common';
-import type { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
-import { cryptoFactory } from '../../lib';
-import { generatePdfObservable } from './lib/generate_pdf';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
-=======
+import { LocatorParams } from '@kbn/reporting-plugin/common';
+import { TaskPayloadPDFV2 } from '@kbn/reporting-plugin/common/types/export_types/printable_pdf_v2';
 import { cryptoFactory } from '@kbn/reporting-plugin/server/lib';
-import { generatePdfObservable } from './lib/generate_pdf';
 import {
   createMockConfigSchema,
   createMockReportingCore,
 } from '@kbn/reporting-plugin/server/test_helpers';
-import { LocatorParams } from '@kbn/reporting-plugin/common';
-import { TaskPayloadPDFV2 } from '@kbn/reporting-plugin/common/types/export_types/printable_pdf_v2';
->>>>>>> 258cefe7f7f (update imports):x-pack/plugins/reporting_export_types/server/export_types/printable_pdf_v2/printable_pdf_v2.test.ts
+import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+import * as Rx from 'rxjs';
+import type { Writable } from 'stream';
+import { PdfExportType } from '.';
+import { generatePdfObservable } from './lib/generate_pdf';
 
 let content: string;
 let mockPdfExportType: PdfExportType;

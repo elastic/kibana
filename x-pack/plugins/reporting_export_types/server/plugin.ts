@@ -7,19 +7,32 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
-import { ConfigSchema } from '@kbn/reporting-plugin/server/config';
+import { ConfigSchema, ReportingConfigType } from '@kbn/reporting-plugin/server/config';
+import {
+  CsvSearchsourceExportType,
+  ExportType,
+  PdfExportType,
+  PngExportType,
+} from './export_types';
 import { ExportTypesPluginSetup, ExportTypesPluginStart } from './types';
 
 export class ExportTypesPlugin
   implements Plugin<{}, {}, ExportTypesPluginSetup, ExportTypesPluginStart>
 {
-  exportTypes = [
-    // new CsvExportType(),
-    // new PdfExportType(),
-    // new PngExportType(),
-  ];
+  exportTypes: ExportType[];
 
-  constructor(initializerContext: PluginInitializerContext<typeof ConfigSchema>, logger: Logger) {
+  constructor(
+    private core: CoreSetup,
+    reportingConfig: ReportingConfigType,
+    initializerContext: PluginInitializerContext<typeof ConfigSchema>,
+    logger: Logger
+  ) {
+    this.exportTypes = [
+      new CsvSearchsourceExportType(this.core, reportingConfig, logger, initializerContext),
+      // new CsvV2ExportType(this.core, reportingConfig, logger, initializerContext),
+      new PdfExportType(this.core, reportingConfig, logger, initializerContext),
+      new PngExportType(this.core, reportingConfig, logger, initializerContext),
+    ];
     logger = initializerContext.logger.get();
   }
 

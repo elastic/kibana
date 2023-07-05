@@ -27,9 +27,6 @@ import { ReportingConfigType } from '../../config';
 import { ReportingServerInfo } from '../../core';
 import { CreateJobFn, ReportingStart, RunTaskFn } from '../../types';
 
-/**
- * @TODO move to be within @kbn-reporting-export-types
- */
 export interface ExportTypeSetupDeps {
   basePath: Pick<IBasePath, 'set'>;
   spaces?: SpacesPluginSetup;

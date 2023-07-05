@@ -8,13 +8,15 @@
 import * as Rx from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
 import { PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import { ReportingServerInfo } from '../../../core';
-import { ReportingConfigType } from '../../../config';
-import type { PdfScreenshotOptions } from '../../../types';
-import { LocatorParams, PdfMetrics, UrlOrUrlLocatorTuple } from '../../../../common/types';
-import { TaskPayloadPDFV2 } from '../../../../common/types/export_types/printable_pdf_v2';
-import { getTracker } from '../../common/pdf_tracker';
-import { getFullRedirectAppUrl } from '../../common/v2/get_full_redirect_app_url';
+import { ReportingServerInfo } from '@kbn/reporting-plugin/server/core';
+import { ReportingConfigType } from '@kbn/reporting-plugin/server/config';
+import type { PdfScreenshotOptions } from '@kbn/reporting-plugin/server/types';
+import {
+  LocatorParams,
+  PdfMetrics,
+  UrlOrUrlLocatorTuple,
+} from '@kbn/reporting-plugin/common/types';
+import { TaskPayloadPDFV2 } from '@kbn/reporting-plugin/common/types/export_types/printable_pdf_v2';
 
 interface PdfResult {
   buffer: Uint8Array | null;

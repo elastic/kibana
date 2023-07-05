@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export type { JobParamsPNGV2, TaskPayloadPNGV2 } from '../../../common/types/export_types/png_v2';
+export type {
+  JobParamsPNGV2,
+  TaskPayloadPNGV2,
+} from '@kbn/reporting-plugin/common/types/export_types/png_v2';
