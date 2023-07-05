@@ -13,5 +13,9 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/core",
+    "@kbn/ml-runtime-field-utils",
+  ]
 }
