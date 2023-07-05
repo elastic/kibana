@@ -29,7 +29,7 @@ export const AdvancedPivotEditor: FC<StepDefineFormHook['advancedPivotEditor']> 
         })}
         data-test-subj="transformAdvancedPivotEditor"
       >
-        <CodeEditor // TODO theme is provided in context by x-pack/plugins/transform/public/app/app.tsx
+        <CodeEditor
           height={250}
           languageId={'json'}
           onChange={(d: string) => {
