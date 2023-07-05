@@ -732,9 +732,9 @@ describe('DragDrop', () => {
       extraDrop.simulate('dragover', { shiftKey: true });
       extraDrop.simulate('dragover');
       expect(
-        dndDispatch.mock.calls.every(
-          (call) => call[0].payload.dropTarget.dropType === 'duplicate_compatible'
-        )
+        dndDispatch.mock.calls.every((call) => {
+          return call[0].payload.dropTarget.dropType === 'duplicate_compatible';
+        })
       ).toBe(true);
     });
     describe('keyboard navigation', () => {
@@ -825,7 +825,7 @@ describe('DragDrop', () => {
                 keyboardMode: true,
               },
               jest.fn((action) => {
-                if (action.type === 'registerDropTarget') {
+                if (action.type === 'registerDropTargets') {
                   dropTargetsByOrder = {
                     ...dropTargetsByOrder,
                     ...action.payload,

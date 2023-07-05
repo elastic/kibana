@@ -53,7 +53,6 @@ export interface ProviderProps {
  *
  * @param props
  */
-// write base reducer code here
 
 interface ResetStateAction {
   type: 'resetState';
@@ -96,7 +95,7 @@ interface DragToTargetAction {
 }
 
 interface RegisterDropTargetAction {
-  type: 'registerDropTarget';
+  type: 'registerDropTargets';
   payload: RegisteredDropTargets;
 }
 
@@ -115,11 +114,12 @@ const dragDropReducer = (state: DragContextState, action: DragDropAction) => {
     case 'endDragging':
       return {
         ...state,
+        dropTargetsByOrder: undefined,
         dragging: undefined,
         keyboardMode: false,
         activeDropTarget: undefined,
       };
-    case 'registerDropTarget':
+    case 'registerDropTargets':
       return {
         ...state,
         dropTargetsByOrder: {
@@ -130,6 +130,7 @@ const dragDropReducer = (state: DragContextState, action: DragDropAction) => {
     case 'dropToTarget':
       return {
         ...state,
+        dropTargetsByOrder: undefined,
         dragging: undefined,
         keyboardMode: false,
         activeDropTarget: undefined,
@@ -252,7 +253,6 @@ export function RootDragDropProvider({
           </p>
         </div>
       </EuiScreenReaderOnly>
-      ;
     </>
   );
 }

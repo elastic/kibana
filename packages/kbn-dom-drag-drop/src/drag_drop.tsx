@@ -6,16 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, {
-  useContext,
-  useCallback,
-  useEffect,
-  memo,
-  useMemo,
-  useLayoutEffect,
-  useState,
-  useRef,
-} from 'react';
+import React, { useContext, useCallback, useEffect, memo, useMemo, useState, useRef } from 'react';
 import type { KeyboardEvent, ReactElement } from 'react';
 import classNames from 'classnames';
 import { keys, EuiScreenReaderOnly, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
@@ -342,9 +333,7 @@ const DragInner = memo(function DragInner({
           },
         },
       });
-      if (onDragStart) {
-        onDragStart(currentTarget);
-      }
+      onDragStart?.(currentTarget);
     });
   };
 
@@ -491,24 +480,16 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
 
   useShallowCompareEffect(() => {
     if (dropTypes && dropTypes?.[0] && onDrop && dndState.keyboardMode) {
-      dropTypes.forEach((dropType, index) => {
-        dndDispatch({
-          type: 'registerDropTarget',
-          payload: {
+      dndDispatch({
+        type: 'registerDropTargets',
+        payload: dropTypes.reduce(
+          (acc, dropType, index) => ({
+            ...acc,
             [[...props.order, index].join(',')]: { ...value, onDrop, dropType },
-          },
-        });
+          }),
+          {}
+        ),
       });
-      return () => {
-        dropTypes.forEach((_, index) => {
-          dndDispatch({
-            type: 'registerDropTarget',
-            payload: {
-              [[...props.order, index].join(',')]: undefined,
-            },
-          });
-        });
-      };
     }
   }, [order, dndDispatch, dropTypes, dndState.keyboardMode]);
 
@@ -757,9 +738,11 @@ const ReorderableDrag = memo(function ReorderableDrag(
       | KeyboardEvent<HTMLButtonElement>['currentTarget']
   ) => {
     if (currentTarget) {
-      reorderDispatch({
-        type: 'registerDraggingItemHeight',
-        payload: currentTarget.offsetHeight + REORDER_OFFSET,
+      setTimeout(() => {
+        reorderDispatch({
+          type: 'registerDraggingItemHeight',
+          payload: currentTarget.offsetHeight + REORDER_OFFSET,
+        });
       });
     }
   };
@@ -876,7 +859,7 @@ const ReorderableDrop = memo(function ReorderableDrop(
   const isReordered =
     isReorderOn && reorderedItems.some((el) => el.id === value.id) && reorderedItems.length;
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (isReordered && heightRef.current?.clientHeight) {
       reorderDispatch({
         type: 'registerReorderedItemHeight',
@@ -893,13 +876,7 @@ const ReorderableDrop = memo(function ReorderableDrop(
       if (!dragging || draggingIndex === -1) {
         return;
       }
-      dndDispatch({
-        type: 'selectDropTarget',
-        payload: {
-          dropTarget: { ...value, dropType: 'reorder', onDrop },
-          dragging,
-        },
-      });
+
       const droppingIndex = currentIndex;
       if (draggingIndex === droppingIndex) {
         reorderDispatch({ type: 'reset' });
@@ -908,6 +885,13 @@ const ReorderableDrop = memo(function ReorderableDrop(
       reorderDispatch({
         type: 'setReorderedItems',
         payload: { draggingIndex, droppingIndex, items: reorderableGroup },
+      });
+      dndDispatch({
+        type: 'selectDropTarget',
+        payload: {
+          dropTarget: { ...value, dropType: 'reorder', onDrop },
+          dragging,
+        },
       });
     }
   };

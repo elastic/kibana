@@ -87,9 +87,5 @@ export type CustomMiddleware = (action: DragDropAction) => void;
 export type DragContextValue = [
   state: DragContextState,
   dispatch: React.Dispatch<DragDropAction>,
-  /**
-   * A custom callback for telemetry
-   * @param event
-   */
   customMiddleware?: CustomMiddleware
 ];
