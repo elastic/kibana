@@ -25,9 +25,7 @@ describe('addComment', () => {
   });
 
   it('should throw an error if the comment length is too long', async () => {
-    const longComment = Array(MAX_COMMENT_LENGTH + 1)
-      .fill('x')
-      .toString();
+    const longComment = 'x'.repeat(MAX_COMMENT_LENGTH + 1);
 
     await expect(
       addComment({ comment: { ...comment, comment: longComment }, caseId: 'test-case' }, clientArgs)

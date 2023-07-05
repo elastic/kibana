@@ -29,6 +29,7 @@ import {
   BulkGetAttachmentsRequestRt,
   BulkGetAttachmentsResponseRt,
 } from '.';
+import { MAX_COMMENT_LENGTH } from '../../../constants';
 
 describe('Comments', () => {
   describe('CommentAttributesBasicRt', () => {
@@ -338,6 +339,23 @@ describe('Comments', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
+      });
+    });
+
+    it.skip('throws error when comment is too long', () => {
+      const longComment = 'x'.repeat(MAX_COMMENT_LENGTH + 1);
+
+      expect(CommentRequestRt.decode({ ...defaultRequest, comment: longComment })).toMatchObject({
+        _tag: 'Left',
+        left: [{
+          context:[{
+          actual: {
+              ...defaultRequest,
+              comment: longComment,
+              message: "The length of the comment is too long. The maximum length is 30000."
+            }
+          }]
+        }]
       });
     });
   });
