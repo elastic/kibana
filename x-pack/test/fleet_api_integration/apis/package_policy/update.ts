@@ -471,9 +471,10 @@ export default function (providerContext: FtrProviderContext) {
             title: 'For File Tests',
             version: '0.1.0',
           },
-        }).expect(200);
+        })
+        .expect(200);
 
-        expect(Array.isArray(item.inputs)).to.be(false);
+      expect(Array.isArray(item.inputs)).to.be(false);
     });
 
     it('should succeed and return arrayed inputs when the format=legacy query param is passed', async function () {
@@ -494,9 +495,10 @@ export default function (providerContext: FtrProviderContext) {
             title: 'For File Tests',
             version: '0.1.0',
           },
-        }).expect(200);
+        })
+        .expect(200);
 
-        expect(Array.isArray(item.inputs));
+      expect(Array.isArray(item.inputs));
     });
 
     it('should return 400 if an invalid format query param is passed', async function () {
@@ -515,7 +517,8 @@ export default function (providerContext: FtrProviderContext) {
             title: 'For File Tests',
             version: '0.1.0',
           },
-        }).expect(400);
+        })
+        .expect(400);
     });
 
     describe('Simplified package policy', async () => {
@@ -621,10 +624,10 @@ export default function (providerContext: FtrProviderContext) {
             },
           })
           .expect(200);
-  
-          expect(Array.isArray(item.inputs)).to.be(false);
+
+        expect(Array.isArray(item.inputs)).to.be(false);
       });
-  
+
       it('should succeed and return arrayed inputs when the format=legacy query param is passed', async function () {
         const {
           body: { item },
@@ -651,10 +654,10 @@ export default function (providerContext: FtrProviderContext) {
             },
           })
           .expect(200);
-  
-          expect(Array.isArray(item.inputs));
+
+        expect(Array.isArray(item.inputs));
       });
-  
+
       it('should return 400 if an invalid format query param is passed', async function () {
         await supertest
           .put(`/api/fleet/package_policies/${packagePolicyId}?format=foo`)
