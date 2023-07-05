@@ -6,7 +6,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { LogViewReference } from '../../../common/log_views';
+import type { LogViewReference } from '@kbn/logs-shared-plugin/common';
 import type { InventoryItemType } from '../../../common/inventory_models/types';
 import type { InfraAssetMetricType, SnapshotCustomMetricInput } from '../../../common/http_api';
 

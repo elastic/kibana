@@ -7,8 +7,8 @@
 
 import useAsync from 'react-use/lib/useAsync';
 import { v4 as uuidv4 } from 'uuid';
+import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
 import { useLazyRef } from '../../../../hooks/use_lazy_ref';
-import { DEFAULT_LOG_VIEW, type LogViewReference } from '../../../../../common/log_views';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
 interface Props {
@@ -17,13 +17,11 @@ interface Props {
 }
 export const useLogViewReference = ({ id, extraFields = [] }: Props) => {
   const {
-    services: {
-      logViews: { client },
-    },
+    services: { logsShared },
   } = useKibanaContextForPlugin();
 
   const { loading, value: defaultLogView } = useAsync(
-    () => client.getLogView(DEFAULT_LOG_VIEW),
+    () => logsShared.logViews.client.getLogView(DEFAULT_LOG_VIEW),
     []
   );
 
