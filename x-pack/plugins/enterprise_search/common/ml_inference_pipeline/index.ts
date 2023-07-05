@@ -239,12 +239,12 @@ export const parseMlInferenceParametersFromPipeline = (
   return fieldMappings.length === 0
     ? null
     : {
-        destination_field: fieldMappings[0].targetField // Backward compatibility - TODO: remove
+        destination_field: fieldMappings[0].targetField // Backward compatibility - TODO: remove after multi-field selector is implemented for all inference types
           ? stripMlInferencePrefix(fieldMappings[0].targetField)
           : '',
         model_id: inferenceProcessors[0].model_id,
         pipeline_name: name,
-        source_field: fieldMappings[0].sourceField, // Backward compatibility - TODO: remove
+        source_field: fieldMappings[0].sourceField, // Backward compatibility - TODO: remove after multi-field selector is implemented for all inference types
         field_mappings: fieldMappings,
       };
 };
