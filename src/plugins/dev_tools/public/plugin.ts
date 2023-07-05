@@ -19,7 +19,7 @@ import {
 } from '@kbn/core/public';
 import { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
 import { deepLinkIds as devtoolsDeeplinkIds } from '@kbn/deeplinks-devtools';
-import { ConfigSchema } from '.';
+import { ConfigSchema } from './types';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 import { DocTitleService, BreadcrumbService } from './services';
 

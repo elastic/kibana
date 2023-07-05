@@ -93,3 +93,9 @@ export interface AppDependencies {
   sections: ManagementSection[];
   cardsNavigationConfig?: NavigationCardsSubject;
 }
+
+export interface ConfigSchema {
+  serverless: {
+    enabled: boolean;
+  };
+}

@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110892
-/* eslint-disable @kbn/eslint/no_export_all */
-
-import { PluginInitializerContext } from '@kbn/core/public';
-import { DevToolsPlugin } from './plugin';
-export * from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new DevToolsPlugin(initializerContext);
+export interface ConfigSchema {
+  serverless: {
+    enabled: boolean;
+  };
 }
