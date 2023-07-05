@@ -7,7 +7,7 @@
  */
 
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import {
   type TableListViewKibanaDependencies,
@@ -41,7 +41,6 @@ export const DashboardListingTable = ({
     overlays,
     http,
     savedObjectsTagging,
-
     coreContext: { executionContext },
   } = pluginServices.getServices();
 
@@ -63,24 +62,33 @@ export const DashboardListingTable = ({
     initialFilter,
   });
 
+  const savedObjectsTaggingFakePlugin = useMemo(
+    () =>
+      savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
+        ? ({
+            ui: savedObjectsTagging,
+          } as TableListViewKibanaDependencies['savedObjectsTagging'])
+        : undefined,
+    [savedObjectsTagging]
+  );
+
+  const core = useMemo(
+    () => ({
+      application: application as TableListViewApplicationService,
+      notifications,
+      overlays,
+      http,
+    }),
+    [application, notifications, overlays, http]
+  );
+
   return (
     <I18nProvider>
       <TableListViewKibanaProvider
-        {...{
-          core: {
-            application: application as TableListViewApplicationService,
-            notifications,
-            overlays,
-            http,
-          },
-          toMountPoint,
-          savedObjectsTagging: savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
-            ? ({
-                ui: savedObjectsTagging,
-              } as TableListViewKibanaDependencies['savedObjectsTagging'])
-            : undefined,
-          FormattedRelative,
-        }}
+        core={core}
+        toMountPoint={toMountPoint}
+        savedObjectsTagging={savedObjectsTaggingFakePlugin}
+        FormattedRelative={FormattedRelative}
       >
         <>
           <DashboardUnsavedListing

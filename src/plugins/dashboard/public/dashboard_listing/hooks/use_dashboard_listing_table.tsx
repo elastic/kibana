@@ -58,6 +58,17 @@ const toTableListViewSavedObject = (hit: DashboardItem): DashboardSavedObjectUse
   };
 };
 
+interface UseDashboardListingTableReturnType {
+  hasInitialFetchReturned: boolean;
+  pageDataTestSubject: string | undefined;
+  refreshUnsavedDashboards: () => void;
+  tableListViewTableProps: Omit<
+    TableListViewTableProps<DashboardSavedObjectUserContent>,
+    'tableCaption'
+  > & { title: string };
+  unsavedDashboardIds: string[];
+}
+
 export const useDashboardListingTable = ({
   dashboardListingId = 'dashboard',
   disableCreateDashboardButton,
@@ -76,7 +87,7 @@ export const useDashboardListingTable = ({
   initialFilter?: string;
   urlStateEnabled?: boolean;
   useSessionStorageIntegration?: boolean;
-}) => {
+}): UseDashboardListingTableReturnType => {
   const {
     dashboardSessionStorage,
     dashboardCapabilities: { showWriteControls },

@@ -14,6 +14,7 @@ import {
   TableListViewKibanaProvider,
 } from '@kbn/content-management-table-list-view-table';
 import { TableListView } from '@kbn/content-management-table-list-view';
+import { TableListView } from '@kbn/content-management-table-list-view';
 
 import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
