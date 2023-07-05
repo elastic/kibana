@@ -21,7 +21,6 @@ export const migratePackagePolicyToV8100: SavedObjectMigrationFn<PackagePolicy, 
   if (packagePolicyDoc.attributes.package?.name === 'endpoint') {
     updatedPackagePolicyDoc = SecSolMigratePackagePolicyToV8100(packagePolicyDoc, migrationContext);
   }
-  
 
   return updatedPackagePolicyDoc;
 };
