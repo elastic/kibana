@@ -140,6 +140,7 @@ const createInstance = (setupPlugins: Partial<EmbeddableSetupDependencies> = {})
       inspector: inspectorPluginMock.createStartContract(),
       savedObjectsManagement:
         savedObjectsManagementMock as unknown as SavedObjectsManagementPluginStart,
+      usageCollection: { reportUiCounter: jest.fn() },
     });
   return {
     plugin,
@@ -165,5 +166,6 @@ export const setStubKibanaServices = () => {
     uiActions: uiActionsPluginMock.createStartContract(),
     inspector: inspectorPluginMock.createStartContract(),
     savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
+    usageCollection: { reportUiCounter: jest.fn() },
   });
 };

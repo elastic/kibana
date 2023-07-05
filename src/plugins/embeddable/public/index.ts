@@ -108,6 +108,8 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
 
+export { openAddPanelFlyout } from './add_panel_flyout/open_add_panel_flyout';
+
 export type {
   EmbeddableSetup,
   EmbeddableStart,
