@@ -45,7 +45,7 @@ export function maybeAddCloudLinks({
           href: cloud.deploymentUrl,
         });
       }
-      const userMenuLinks = createUserMenuLinks(cloud);
+      const userMenuLinks = createUserMenuLinks({ cloud, security });
       security.navControlService.addUserMenuLinks(userMenuLinks);
     })
   );

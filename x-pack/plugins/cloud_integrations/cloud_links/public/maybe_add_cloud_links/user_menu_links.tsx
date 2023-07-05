@@ -5,12 +5,23 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { UserMenuLink } from '@kbn/security-plugin/public';
+import type { SecurityPluginStart, UserMenuLink } from '@kbn/security-plugin/public';
+import { ThemDarkModeToggle } from './theme_darkmode_toggle';
 
-export const createUserMenuLinks = (cloud: CloudStart): UserMenuLink[] => {
+export const createUserMenuLinks = ({
+  cloud,
+  security,
+}: {
+  cloud: CloudStart;
+  security: SecurityPluginStart;
+}): UserMenuLink[] => {
   const { profileUrl, billingUrl, organizationUrl } = cloud;
+  const {
+    hooks: { useUpdateUserProfile },
+  } = security;
 
   const userMenuLinks = [] as UserMenuLink[];
 
@@ -47,6 +58,14 @@ export const createUserMenuLinks = (cloud: CloudStart): UserMenuLink[] => {
       order: 300,
     });
   }
+
+  userMenuLinks.push({
+    content: <ThemDarkModeToggle useUpdateUserProfile={useUpdateUserProfile} />,
+    order: 400,
+    label: '',
+    iconType: '',
+    href: '',
+  });
 
   return userMenuLinks;
 };
