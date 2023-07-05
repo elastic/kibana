@@ -159,7 +159,13 @@ export const PolicyFormLayout = React.memo(() => {
         />
       )}
 
-      <PolicySettingsForm policy={policyItem} onChange={() => {}} mode="edit" />
+      <PolicySettingsForm
+        policy={policyItem.inputs[0].config.policy.value}
+        onChange={(changes) => {
+          window.console.log(changes);
+        }}
+        mode="edit"
+      />
 
       <div
         style={{

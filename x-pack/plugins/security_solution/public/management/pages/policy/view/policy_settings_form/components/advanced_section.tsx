@@ -115,7 +115,6 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
     const isPlatinumPlus = useLicense().isPlatinumPlus();
 
     const isEditMode = mode === 'edit';
-    const policySettings = policy.inputs[0].config.policy.value;
 
     const handleAdvancedSettingsButtonClick = useCallback(() => {
       setShowAdvancedPolicy((prevState) => !prevState);
@@ -123,15 +122,17 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
 
     const handleAdvancedSettingUpdate = useCallback(
       (event) => {
-        const updatedPolicy = cloneDeep(policySettings);
+        const updatedPolicy = cloneDeep(policy);
 
         setValue(
           updatedPolicy as unknown as Record<string, unknown>,
           event.target.value,
           event.target.name.split('.')
         );
+
+        onChange({ isValid: true, updatedPolicy });
       },
-      [policySettings]
+      [onChange, policy]
     );
 
     return (
@@ -186,17 +187,15 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
                   index
                 ) => {
                   if (!isPlatinumPlus && license === 'platinum') {
-                    return null;
+                    return <React.Fragment key={key} />;
                   }
 
                   const configPath = key.split('.');
-                  const value = getValue(
-                    policySettings as unknown as Record<string, unknown>,
-                    configPath
-                  );
+                  const value = getValue(policy as unknown as Record<string, unknown>, configPath);
 
                   return (
                     <EuiFormRow
+                      key={key}
                       fullWidth
                       label={
                         <EuiFlexGroup responsive={false}>

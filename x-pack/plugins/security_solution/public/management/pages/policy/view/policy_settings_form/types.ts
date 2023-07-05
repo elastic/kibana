@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { PolicyData } from '../../../../../../common/endpoint/types';
+import type { PolicyConfig } from '../../../../../../common/endpoint/types';
 
 export interface PolicyFormComponentCommonProps {
-  policy: PolicyData;
-  onChange: (options: { isValid: boolean; updatedPolicy: PolicyData }) => void;
+  policy: PolicyConfig;
+  onChange: (options: { isValid: boolean; updatedPolicy: PolicyConfig }) => void;
   mode?: 'edit' | 'view';
   'data-test-subj'?: string;
 }
