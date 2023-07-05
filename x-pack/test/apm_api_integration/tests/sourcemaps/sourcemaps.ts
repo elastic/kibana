@@ -332,6 +332,60 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(source?.service.name).to.be('uploading-test');
         expect(source?.service.version).to.be('1.0.0');
       });
+
+      describe('when uploading a new android map with the same service.name and service.version', () => {
+        let resBefore: GetResponse<ApmSourceMap>;
+        let resAfter: GetResponse<ApmSourceMap>;
+
+        before(async () => {
+          async function getSourceMapDocFromApmIndex() {
+            await esClient.indices.refresh({ index: '.apm-source-map' });
+            return await esClient.get<ApmSourceMap>({
+              index: '.apm-source-map',
+              id: 'uploading-test-1.0.0-android',
+            });
+          }
+
+          resBefore = await getSourceMapDocFromApmIndex();
+
+          await uploadAndroidMap({
+            serviceName: 'uploading-test',
+            serviceVersion: '1.0.0',
+            androidMap: "# compiler: R8\n# ANOTHER MAP",
+          });
+
+          resAfter = await getSourceMapDocFromApmIndex();
+        });
+
+        after(async () => {
+          await deleteAllApmSourceMaps();
+          await deleteAllFleetSourceMaps();
+        });
+
+        it('creates one document in the .apm-source-map index', async () => {
+          const res = await esClient.search<ApmSourceMap>({ index: '.apm-source-map', size: 0 });
+
+          // @ts-expect-error
+          expect(res.hits.total.value).to.be(1);
+        });
+
+        it('creates two documents in the .fleet-artifacts index', async () => {
+          const res = await listSourcemaps({ page: 1, perPage: 10 });
+          expect(res.total).to.be(2);
+        });
+
+        it('updates the content', async () => {
+          const contentBefore = await getDecodedMapContent(resBefore._source?.content);
+          const contentAfter = await getDecodedMapContent(resAfter._source?.content);
+
+          expect(contentBefore).to.be(SAMPLE_ANDROID_MAP);
+          expect(contentAfter).to.be('# compiler: R8\n# ANOTHER MAP');
+        });
+
+        it('updates the content hash', async () => {
+          expect(resBefore._source?.content_sha256).to.not.be(resAfter._source?.content_sha256);
+        });
+      });
     });
 
     describe('list source maps', async () => {
