@@ -37,6 +37,7 @@
     "xpack.idxMgmt": "plugins/index_management",
     "xpack.indexLifecycleMgmt": "plugins/index_lifecycle_management",
     "xpack.infra": "plugins/infra",
+    "xpack.logsShared": "plugins/logs_shared",
     "xpack.fleet": "plugins/fleet",
     "xpack.ingestPipelines": "plugins/ingest_pipelines",
     "xpack.kubernetesSecurity": "plugins/kubernetes_security",
