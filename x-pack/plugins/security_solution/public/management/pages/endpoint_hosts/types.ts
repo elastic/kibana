@@ -11,7 +11,6 @@ import type {
   AppLocation,
   EndpointPendingActions,
   HostInfo,
-  HostPolicyResponse,
   HostStatus,
   Immutable,
   PolicyData,
@@ -34,12 +33,6 @@ export interface EndpointState {
   loading: boolean;
   /** api error from retrieving host list */
   error?: ServerApiError;
-  /** Holds the Policy Response for the Host currently being displayed in the details */
-  policyResponse?: HostPolicyResponse;
-  /** policyResponse is being retrieved */
-  policyResponseLoading: boolean;
-  /** api error from retrieving the policy response */
-  policyResponseError?: ServerApiError;
   /** current location info */
   location?: Immutable<AppLocation>;
   /** policies */

@@ -121,24 +121,10 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       error: action.payload,
       policyItemsLoading: false,
     };
-  } else if (action.type === 'serverReturnedEndpointPolicyResponse') {
-    return {
-      ...state,
-      policyResponse: action.payload.policy_response,
-      policyResponseLoading: false,
-      policyResponseError: undefined,
-    };
-  } else if (action.type === 'serverFailedToReturnEndpointPolicyResponse') {
-    return {
-      ...state,
-      policyResponseError: action.payload,
-      policyResponseLoading: false,
-    };
   } else if (action.type === 'userSelectedEndpointPolicy') {
     return {
       ...state,
       selectedPolicyId: action.payload.selectedPolicyId,
-      policyResponseLoading: false,
     };
   } else if (action.type === 'serverCancelledEndpointListLoading') {
     return {
@@ -200,7 +186,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     const stateUpdates: Partial<EndpointState> = {
       location: action.payload,
       error: undefined,
-      policyResponseError: undefined,
     };
 
     // Reset `isolationRequestState` if needed
@@ -228,7 +213,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
           ...state,
           ...stateUpdates,
           detailsLoading: true,
-          policyResponseLoading: true,
         };
       } else {
         // if the previous page was not endpoint list or endpoint details, load both list and details
@@ -236,7 +220,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
           ...state,
           ...stateUpdates,
           loading: true,
-          policyResponseLoading: true,
+
           policyItemsLoading: true,
         };
       }

@@ -156,16 +156,6 @@ export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = c
 );
 
 /**
- * Returns the Policy Response overall status
- */
-export const policyResponseStatus: (state: Immutable<EndpointState>) => string = createSelector(
-  (state: Immutable<EndpointState>) => state.policyResponse,
-  (policyResponse) => {
-    return (policyResponse && policyResponse?.Endpoint?.policy?.applied?.status) || '';
-  }
-);
-
-/**
  * returns the list of known non-existing polices that may have been in the Endpoint API response.
  * @param state
  */

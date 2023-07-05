@@ -149,8 +149,6 @@ export type MetadataTransformStatsChanged = Action<'metadataTransformStatsChange
 export type EndpointAction =
   | ServerReturnedEndpointList
   | ServerFailedToReturnEndpointList
-  | ServerReturnedEndpointPolicyResponse
-  | ServerFailedToReturnEndpointPolicyResponse
   | ServerReturnedPoliciesForOnboarding
   | ServerFailedToReturnPoliciesForOnboarding
   | UserSelectedEndpointPolicy
