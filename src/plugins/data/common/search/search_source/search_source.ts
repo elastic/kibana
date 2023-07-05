@@ -916,6 +916,7 @@ export class SearchSource {
     };
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
+    // TODO: revert this tmp change
     body.query = {
       error_query: {
         indices: [
@@ -923,13 +924,13 @@ export class SearchSource {
             name: 'kibana_sample_data_ecommerce',
             shard_ids: [0, 1],
             error_type: 'exception',
-            message: 'Everythings is fine! I swear!',
+            message: 'Everythings is fine!',
           },
           {
             name: 'kibana_sample_data_logs',
             shard_ids: [0, 1],
             error_type: 'exception',
-            message: 'Next time I return results! I swear!',
+            message: 'Next time I return results!',
           },
         ],
       },
