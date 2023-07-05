@@ -390,7 +390,7 @@ describe('Routing versioned requests', () => {
         .expect(400)
         .then(({ body }) => body.message)
     ).resolves.toEqual(
-      'Query parameter "apiVersion" is not allowed. Please specify the API version using the "elastic-api-version" header.'
+      'Use of query parameter "apiVersion" is not allowed. Please specify the API version using the "elastic-api-version" header.'
     );
   });
 

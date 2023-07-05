@@ -41,13 +41,14 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
    *
    * `/api/my-app/foo?apiVersion=1`
    *
-   * This enables use cases like, for example, using a versioned Kibana endpoint
+   * This enables use cases like a versioned Kibana endpoint
    * inside an <img /> tag's href. Otherwise it should _not_ be enabled.
    *
    * @note When enabled and both query parameter and header are present, header
    *       will take precedence.
    * @note When enabled `apiVersion` is a reserved query parameter and will not
    *       be passed to the route handler or handler validation.
+   * @note `apiVersion` is a reserved query parameter, avoid using it
    * @experimental
    * @default false
    */

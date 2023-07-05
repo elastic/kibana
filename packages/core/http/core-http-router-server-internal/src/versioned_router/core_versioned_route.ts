@@ -150,12 +150,14 @@ export class CoreVersionedRoute implements VersionedRoute {
       validation?.request &&
       Boolean(validation.request.body || validation.request.params || validation.request.query)
     ) {
-      if (this.enableQueryVersion) {
-        removeQueryVersion(mutableCoreKibanaRequest);
-      } else if (hasQueryVersion(mutableCoreKibanaRequest)) {
-        return res.badRequest({
-          body: `Query parameter "${ELASTIC_HTTP_VERSION_QUERY_PARAM}" is not allowed. Please specify the API version using the "${ELASTIC_HTTP_VERSION_HEADER}" header.`,
-        });
+      if (hasQueryVersion(mutableCoreKibanaRequest)) {
+        if (this.enableQueryVersion) {
+          // We remove the query parameter as it is a reserved keyword.
+          removeQueryVersion(mutableCoreKibanaRequest);
+        } else
+          return res.badRequest({
+            body: `Use of query parameter "${ELASTIC_HTTP_VERSION_QUERY_PARAM}" is not allowed. Please specify the API version using the "${ELASTIC_HTTP_VERSION_HEADER}" header.`,
+          });
       }
       try {
         const { body, params, query } = validate(

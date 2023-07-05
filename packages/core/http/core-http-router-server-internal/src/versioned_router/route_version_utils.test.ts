@@ -119,7 +119,7 @@ describe('removeQueryVersion', () => {
       query: { apiVersion: '1', baz: 'qux' },
     });
     expect(hasVersion(req, true)).toBe(true);
-    removeQueryVersion(req);
+    removeQueryVersion(req as any);
     expect(hasVersion(req, true)).toBe(false);
     expect(req.query).toEqual({ baz: 'qux' });
     expect(req.headers).toEqual({ foo: 'bar' });

@@ -10,7 +10,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   ELASTIC_HTTP_VERSION_QUERY_PARAM,
 } from '@kbn/core-http-common';
-import { isObject, get, omit } from 'lodash';
+import { isObject, get } from 'lodash';
 import { KibanaRequest } from '@kbn/core-http-server';
 import moment from 'moment';
 import type { Mutable } from 'utility-types';
@@ -47,7 +47,12 @@ export function isValidRouteVersion(isPublicApi: boolean, version: string): unde
     : `Invalid version number. Received "${version}", expected a string containing _only_ a finite, whole number greater than 0.`;
 }
 
-export function hasQueryVersion(request: KibanaRequest) {
+type KibanaRequestWithQueryVersion = KibanaRequest<
+  unknown,
+  { [ELASTIC_HTTP_VERSION_QUERY_PARAM]: unknown }
+>;
+
+export function hasQueryVersion(request: KibanaRequest): request is KibanaRequestWithQueryVersion {
   return isObject(request.query) && ELASTIC_HTTP_VERSION_QUERY_PARAM in request.query;
 }
 export function hasVersion(request: KibanaRequest, isQueryVersionEnabled?: boolean): boolean {
@@ -57,10 +62,8 @@ export function hasVersion(request: KibanaRequest, isQueryVersionEnabled?: boole
   );
 }
 
-export function removeQueryVersion(request: Mutable<KibanaRequest>): void {
-  if (hasQueryVersion(request)) {
-    request.query = omit({ ...(request.query as {}) }, ELASTIC_HTTP_VERSION_QUERY_PARAM);
-  }
+export function removeQueryVersion(request: Mutable<KibanaRequestWithQueryVersion>): void {
+  delete request.query[ELASTIC_HTTP_VERSION_QUERY_PARAM];
 }
 
 function readQueryVersion(request: KibanaRequest): undefined | ApiVersion {
