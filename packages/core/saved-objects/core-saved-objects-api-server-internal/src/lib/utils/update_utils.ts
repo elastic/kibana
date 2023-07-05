@@ -66,8 +66,14 @@ export interface UpdateErrorMap<E = DecoratedError | Error | unknown> {
  * @param error
  * @returns error
  */
-export function errorMap(logger: Logger, errorType: string, error: DecoratedError | Error) {
-  let errorToReturn: unknown;
+export function errorMap(
+  logger: Logger,
+  errorType: string,
+  error: DecoratedError | Error,
+  type?: string,
+  id?: string
+) {
+  let errorToReturn: DecoratedError | Error;
   switch (errorType) {
     case 'bad request':
       logger.info(`Cannot perform update request`);
@@ -75,11 +81,14 @@ export function errorMap(logger: Logger, errorType: string, error: DecoratedErro
       break;
     case 'saved object not found':
       logger.info(`Saved object not found, ${error}`);
-      errorToReturn = error;
+      errorToReturn = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       break;
     case 'saved object migrateStorageDocument error':
       logger.info(`Saved object migrateStorageDocument, ${error}`);
-      errorToReturn = error;
+      errorToReturn = SavedObjectsErrorHelpers.decorateGeneralError(
+        error,
+        'Failed to migrate document to the latest version.'
+      );
     default:
       errorToReturn = new Error('unknown error', error);
   }

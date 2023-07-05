@@ -189,7 +189,7 @@ rawDocSource
         rawDocSource: response.body,
         savedObjectFromRawDoc: getSavedObjectFromSource(this.registry, type, id, response.body, {
           migrationVersionCompatibility,
-        }) as SavedObject,
+        }) as SavedObject, // unused, remove later
       };
     }
 
@@ -346,5 +346,5 @@ export interface PreflightGetDocForUpdateResult {
   checkDocFound: 'not_found' | 'found' | 'unknown';
   /** The source of the raw document, if the object already exists in the server's version (unsafe to use) */
   rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
-  savedObjectFromRawDoc?: SavedObject<T>;
+  savedObjectFromRawDoc?: SavedObject<unknown>;
 }
