@@ -388,6 +388,8 @@ exports.Cluster = class Cluster {
     this._log.info('ES_JAVA_OPTS: %s', esJavaOpts);
 
     if (isDocker) {
+      this._log.info('docker %s', dockerCmd.join(' '));
+
       this._process = execa(installPath, dockerCmd, {
         stdio: ['ignore', 'inherit', 'inherit'],
       });

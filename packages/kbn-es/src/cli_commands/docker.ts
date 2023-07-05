@@ -16,10 +16,36 @@ import { Cluster } from '../cluster';
 import { parseTimeoutToMs } from '../utils';
 import { Command } from './types';
 
+// TODO: remove
 const DEFAULT_DOCKER_BASE_CMD = 'run -p 9200:9200 -p 9300:9300 -t --rm';
+// const DEFAULT_DOCKER_BASE_CMD = 'run -p 9200:9200 -p 9300:9300 -t';
 const DEFAULT_DOCKER_REGISTRY = 'docker.elastic.co/elasticsearch/elasticsearch';
 const DEFAULT_DOCKER_IMG = `${DEFAULT_DOCKER_REGISTRY}:${pkg.version}-SNAPSHOT`;
 const DEFAULT_DOCKER_CMD = `${DEFAULT_DOCKER_BASE_CMD} ${DEFAULT_DOCKER_IMG}`;
+
+const resolveDockerImage = ({ version, image }: { version?: string; image?: string }) => {
+  if (image) {
+    return image;
+  } else if (version) {
+    return `${DEFAULT_DOCKER_REGISTRY}:${version}-SNAPSHOT`;
+  }
+
+  return DEFAULT_DOCKER_IMG;
+};
+
+const resolveDockerCmd = (options: Record<string, any>) => {
+  let cmd;
+
+  if (options.dockerCmd) {
+    cmd = options.dockerCmd;
+  } else {
+    const img = resolveDockerImage(options);
+
+    cmd = `${DEFAULT_DOCKER_BASE_CMD} ${img}`;
+  }
+
+  return cmd.split(' ');
+};
 
 export const docker: Command = {
   description: 'Run an Elasticsearch Docker image',
@@ -27,10 +53,6 @@ export const docker: Command = {
   help: (defaults: Record<string, any> = {}) => {
     const { version, password = 'changeme' } = defaults;
 
-    // docker run --name es-node01 --net elastic -p 9200:9200 -p 9300:9300 -t docker.elastic.co/elasticsearch/elasticsearch:8.8.1
-    // TODO: show default docker params
-    // TODO: expand examples
-    // TODO: allow docker run (pull + start) or start (existing container)
     // TODO: enrollment token + env params?
     // TODO: allow private registry?
     // TODO: docker-compose
@@ -40,7 +62,7 @@ export const docker: Command = {
     Options:
 
       --version           Version of ES to run [default: ${version}]
-      --image             Image of ES to run [default: ${DEFAULT_DOCKER_IMG}]
+      --image             Full path to image of ES to run [default: ${DEFAULT_DOCKER_IMG}]. Has precedence over version.
       --password          Sets password for elastic user [default: ${password}]
       --password.[user]   Sets password for native realm user [default: ${password}]
       -E                  Additional key=value settings to pass to Elasticsearch 
@@ -49,9 +71,11 @@ export const docker: Command = {
       --skip-ready-check  Disable the ready check
       --ready-timeout     Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
 
-    Example:
+    Examples:
 
       es docker --version ${version}
+      es docker --image docker.elastic.co/elasticsearch/elasticsearch:8.10.0-759b2cb2-SNAPSHOT-amd64
+      es docker -D 'start -a 4e79be040f6aca5c433f73faa60fe245791482c2a1abda9417a505ec552cb9a5' 
     `;
   },
   run: async (defaults = {}) => {
@@ -71,7 +95,7 @@ export const docker: Command = {
         readyTimeout: 'ready-timeout',
       },
 
-      string: ['version', 'ready-timeout', 'D'], // TODO: Dockerargs?
+      string: ['version', 'ready-timeout', 'D'],
       boolean: ['skip-ready-check'],
 
       default: defaults,
@@ -83,17 +107,13 @@ export const docker: Command = {
       ...options,
     });
 
-    const _dockerCmd: string[] = (
-      !!options.dockerCmd ? options.dockerCmd : DEFAULT_DOCKER_CMD
-    ).split(' ');
-
     const cluster = new Cluster({ ssl: options.ssl });
     await cluster.run('docker', {
       reportTime,
       startTime: runStartTime,
       ...options,
       readyTimeout: parseTimeoutToMs(options.readyTimeout),
-      dockerCmd: _dockerCmd,
+      dockerCmd: resolveDockerCmd(options),
     });
   },
 };
