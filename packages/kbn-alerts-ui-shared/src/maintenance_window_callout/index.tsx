@@ -14,13 +14,13 @@ import { useFetchActiveMaintenanceWindows } from './use_fetch_active_maintenance
 
 const MAINTENANCE_WINDOW_FEATURE_ID = 'maintenanceWindow';
 const MAINTENANCE_WINDOW_RUNNING = i18n.translate(
-  'xpack.alerting.maintenanceWindowCallout.maintenanceWindowActive',
+  'alertsUIShared.maintenanceWindowCallout.maintenanceWindowActive',
   {
     defaultMessage: 'Maintenance window is running',
   }
 );
 const MAINTENANCE_WINDOW_RUNNING_DESCRIPTION = i18n.translate(
-  'xpack.alerting.maintenanceWindowCallout.maintenanceWindowActiveDescription',
+  'alertsUIShared.maintenanceWindowCallout.maintenanceWindowActiveDescription',
   {
     defaultMessage: 'Rule notifications are stopped while the maintenance window is running.',
   }

@@ -30,12 +30,12 @@ export const useFetchActiveMaintenanceWindows = (
 };
 
 const INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH = `/internal/alerting/rules/maintenance_window/_active`;
-const FETCH_ERROR = i18n.translate('xpack.alerting.maintenanceWindowCallout.fetchError', {
+const FETCH_ERROR = i18n.translate('alertsUIShared.maintenanceWindowCallout.fetchError', {
   defaultMessage: 'Failed to check if maintenance windows are active',
 });
 
 const FETCH_ERROR_DESCRIPTION = i18n.translate(
-  'xpack.alerting.maintenanceWindowCallout.fetchErrorDescription',
+  'alertsUIShared.maintenanceWindowCallout.fetchErrorDescription',
   {
     defaultMessage: 'Rule notifications are stopped while the maintenance window is running.',
   }
