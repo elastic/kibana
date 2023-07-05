@@ -42,27 +42,39 @@ export function ApmIndicatorOverview({ indicator }: Props) {
         <EuiFlexGroup direction="row" alignItems="flexStart" gutterSize="s" responsive={false} wrap>
           <EuiFlexItem grow={false}>
             <EuiBadge color="hollow" href={link}>
-              service: {service}
+              {i18n.translate(
+                'xpack.observability.slo.sloDetails.overview.apmSource.serviceLabel',
+                { defaultMessage: 'service: {value}', values: { value: service } }
+              )}
             </EuiBadge>
           </EuiFlexItem>
           {environment !== '*' && (
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow" href={link}>
-                environment: {environment}
+                {i18n.translate(
+                  'xpack.observability.slo.sloDetails.overview.apmSource.environmentLabel',
+                  { defaultMessage: 'environment: {value}', values: { value: environment } }
+                )}
               </EuiBadge>
             </EuiFlexItem>
           )}
           {transactionType !== '*' && (
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow" href={link}>
-                transactionType: {transactionType}
+                {i18n.translate(
+                  'xpack.observability.slo.sloDetails.overview.apmSource.transactionTypeLabel',
+                  { defaultMessage: 'transactionType: {value}', values: { value: transactionType } }
+                )}
               </EuiBadge>
             </EuiFlexItem>
           )}
           {transactionName !== '*' && (
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow" href={link}>
-                transactionName: {transactionName}
+                {i18n.translate(
+                  'xpack.observability.slo.sloDetails.overview.apmSource.transactionNameLabel',
+                  { defaultMessage: 'transactionName: {value}', values: { value: transactionName } }
+                )}
               </EuiBadge>
             </EuiFlexItem>
           )}
