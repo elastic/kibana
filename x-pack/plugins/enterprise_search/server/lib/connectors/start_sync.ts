@@ -7,19 +7,17 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import {
-  CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX,
-  CONNECTORS_INDEX,
-  CONNECTORS_JOBS_INDEX,
-} from '../..';
+import { CONNECTORS_INDEX, CONNECTORS_JOBS_INDEX } from '../..';
 import { isConfigEntry } from '../../../common/connectors/is_category_entry';
 
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
+import {
+  CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX,
+  ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
+} from '../../../common/constants';
 
 import {
+  ConnectorConfiguration,
   ConnectorDocument,
-  ConnectorSyncConfiguration,
-  ConnectorSyncJobDocument,
   SyncJobType,
   SyncStatus,
   TriggerMethod,
@@ -38,13 +36,13 @@ export const startConnectorSync = async (
   });
   const connector = connectorResult._source;
   if (connector) {
-    const config = Object.entries(connector.configuration).reduce((prev, [key, configEntry]) => {
+    const config = Object.entries(connector.configuration).reduce((acc, [key, configEntry]) => {
       if (isConfigEntry(configEntry)) {
-        prev[key] = { label: configEntry.label, value: configEntry.value };
+        acc[key] = configEntry;
       }
-      return prev;
-    }, {} as ConnectorSyncConfiguration);
-    const configuration: ConnectorSyncConfiguration = nextSyncConfig
+      return acc;
+    }, {} as ConnectorConfiguration);
+    const configuration = nextSyncConfig
       ? {
           ...config,
           nextSyncConfig: { label: 'nextSyncConfig', value: nextSyncConfig },
@@ -73,7 +71,7 @@ export const startConnectorSync = async (
         ? `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}${indexNameWithoutSearchPrefix}`
         : index_name;
 
-    return await client.asCurrentUser.index<ConnectorSyncJobDocument>({
+    return await client.asCurrentUser.index({
       document: {
         cancelation_requested_at: null,
         canceled_at: null,

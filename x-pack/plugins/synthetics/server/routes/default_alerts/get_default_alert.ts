@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { SYNTHETICS_STATUS_RULE } from '../../../common/constants/synthetics_alerts';
+import {
+  SYNTHETICS_STATUS_RULE,
+  SYNTHETICS_TLS_RULE,
+} from '../../../common/constants/synthetics_alerts';
 import { DefaultAlertService } from './default_alert_service';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -16,6 +19,12 @@ export const getDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => ({
   validate: {},
   handler: async ({ context, server, savedObjectsClient }): Promise<any> => {
     const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
-    return await defaultAlertService.getExistingAlert(SYNTHETICS_STATUS_RULE);
+    const statusRule = defaultAlertService.getExistingAlert(SYNTHETICS_STATUS_RULE);
+    const tlsRule = defaultAlertService.getExistingAlert(SYNTHETICS_TLS_RULE);
+    const [status, tls] = await Promise.all([statusRule, tlsRule]);
+    return {
+      statusRule: status,
+      tlsRule: tls,
+    };
   },
 });

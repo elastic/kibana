@@ -233,6 +233,17 @@ describe('Chart', () => {
     expect(component.find(SuggestionSelector).exists()).toBeTruthy();
   });
 
+  it('should render the edit on the fly button when chart is visible and suggestions exist', async () => {
+    const component = await mountComponent({
+      currentSuggestion: currentSuggestionMock,
+      allSuggestions: allSuggestionsMock,
+      isPlainRecord: true,
+    });
+    expect(
+      component.find('[data-test-subj="unifiedHistogramEditFlyoutVisualization"]').exists()
+    ).toBeTruthy();
+  });
+
   it('should render the save button when chart is visible and suggestions exist', async () => {
     const component = await mountComponent({
       currentSuggestion: currentSuggestionMock,

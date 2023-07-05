@@ -40,7 +40,7 @@
       "kibanaReact",
       "cloudChat",
       "esUiShared",
-      "infra",
+      "logsShared",
       "kibanaUtils",
       "usageCollection",
       "unifiedSearch"
