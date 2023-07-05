@@ -80,7 +80,7 @@ export const inventoryViewSavedObjectAttributesRT = rt.intersection([
 export const inventoryViewSavedObjectRT = rt.intersection([
   rt.type({
     id: rt.string,
-    attributes: inventoryViewAttributesRT,
+    attributes: inventoryViewSavedObjectAttributesRT,
   }),
   rt.partial({
     version: rt.string,

@@ -36,7 +36,7 @@ const metricExplorerSavedObjectOptionsRequiredRT = rt.type({
   metrics: rt.array(metricsExplorerSavedObjectOptionsMetricRT),
 });
 
-const metricExplorersavedObjectOptionsOptionalRT = rt.partial({
+const metricExplorerSavedObjectOptionsOptionalRT = rt.partial({
   limit: rt.number,
   groupBy: rt.union([rt.string, rt.array(rt.string)]),
   filterQuery: rt.string,
@@ -46,7 +46,7 @@ const metricExplorersavedObjectOptionsOptionalRT = rt.partial({
 });
 export const metricsExplorerSavedObjectOptionsRT = rt.intersection([
   metricExplorerSavedObjectOptionsRequiredRT,
-  metricExplorersavedObjectOptionsOptionalRT,
+  metricExplorerSavedObjectOptionsOptionalRT,
 ]);
 
 const metricExplorerViewsSavedObjectStateRT = rt.type({
@@ -55,7 +55,7 @@ const metricExplorerViewsSavedObjectStateRT = rt.type({
   options: metricsExplorerSavedObjectOptionsRT,
 });
 
-const metricsExplorerViewASavedObjectttributesRT = rt.intersection([
+const metricsExplorerViewASavedObjectAtttributesRT = rt.intersection([
   metricExplorerViewsSavedObjectStateRT,
   rt.type({
     name: nonEmptyStringRt,
@@ -66,7 +66,7 @@ const metricsExplorerViewASavedObjectttributesRT = rt.intersection([
 export const metricsExplorerViewSavedObjectRT = rt.intersection([
   rt.type({
     id: rt.string,
-    attributes: metricsExplorerViewASavedObjectttributesRT,
+    attributes: metricsExplorerViewASavedObjectAtttributesRT,
   }),
   rt.partial({
     version: rt.string,
