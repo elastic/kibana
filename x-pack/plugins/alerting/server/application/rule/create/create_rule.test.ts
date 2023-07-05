@@ -6,24 +6,25 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CreateOptions } from '../methods/create';
-import { RulesClient, ConstructorOptions } from '../rules_client';
+import { CreateRuleParams } from './create_rule';
+import { RulesClient, ConstructorOptions } from '../../../rules_client';
 import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
+import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import { alertingAuthorizationMock } from '../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import { AlertingAuthorization } from '../../../authorization/alerting_authorization';
 import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
-import { RuleNotifyWhen } from '../../types';
+import { ruleNotifyWhen } from '../constants';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { getBeforeSetup, setGlobalDate } from './lib';
-import { RecoveredActionGroup } from '../../../common';
-import { getDefaultMonitoring } from '../../lib/monitoring';
-import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+import { getBeforeSetup, setGlobalDate } from '../../../rules_client/tests/lib';
+import { RecoveredActionGroup } from '../../../../common';
+import { bulkMarkApiKeysForInvalidation } from '../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { getRuleExecutionStatusPending, getDefaultMonitoring } from '../../../lib';
+
+jest.mock('../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
@@ -79,7 +80,9 @@ beforeEach(() => {
 
 setGlobalDate();
 
-function getMockData(overwrites: Record<string, unknown> = {}): CreateOptions<{
+const now = new Date().toISOString();
+
+function getMockData(overwrites: Record<string, unknown> = {}): CreateRuleParams<{
   bar: boolean;
 }>['data'] {
   return {
@@ -103,7 +106,6 @@ function getMockData(overwrites: Record<string, unknown> = {}): CreateOptions<{
         },
       },
     ],
-    running: false,
     ...overwrites,
   };
 }
@@ -153,7 +155,7 @@ describe('create()', () => {
 
   describe('authorization', () => {
     function tryToExecuteOperation(
-      options: CreateOptions<{
+      options: CreateRuleParams<{
         bar: boolean;
       }>
     ): Promise<unknown> {
@@ -166,6 +168,8 @@ describe('create()', () => {
           params: {
             bar: true,
           },
+          executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
+          running: false,
           createdAt: '2019-02-12T21:01:22.479Z',
           actions: [
             {
@@ -175,7 +179,7 @@ describe('create()', () => {
               params: {
                 foo: true,
               },
-              frequency: { summary: false, notifyWhen: RuleNotifyWhen.CHANGE, throttle: null },
+              frequency: { summary: false, notifyWhen: ruleNotifyWhen.CHANGE, throttle: null },
             },
           ],
         },
@@ -254,7 +258,11 @@ describe('create()', () => {
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',
         type: 'alert',
-        attributes: data,
+        attributes: {
+          ...data,
+          executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
+          running: false,
+        },
         references: [],
       });
       await rulesClient.create({ data });
@@ -331,7 +339,11 @@ describe('create()', () => {
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
-      attributes: createdAttributes,
+      attributes: {
+        ...createdAttributes,
+        running: false,
+        executionStatus: getRuleExecutionStatusPending(createdAttributes.createdAt),
+      },
       references: [
         {
           name: 'action_0',
@@ -345,6 +357,8 @@ describe('create()', () => {
       type: 'alert',
       attributes: {
         ...createdAttributes,
+        running: false,
+        executionStatus: getRuleExecutionStatusPending(createdAttributes.createdAt),
         scheduledTaskId: 'task-123',
       },
       references: [
@@ -379,6 +393,10 @@ describe('create()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "createdBy": "elastic",
         "enabled": true,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+          "status": "pending",
+        },
         "id": "1",
         "muteAll": false,
         "mutedInstanceIds": Array [],
@@ -425,10 +443,8 @@ describe('create()', () => {
         "createdBy": "elastic",
         "enabled": true,
         "executionStatus": Object {
-          "error": null,
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
           "status": "pending",
-          "warning": null,
         },
         "legacyId": null,
         "meta": Object {
@@ -513,7 +529,7 @@ describe('create()', () => {
                                                                         ]
                                                 `);
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(3);
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(4);
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -554,7 +570,11 @@ describe('create()', () => {
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '123',
       type: 'alert',
-      attributes: createdAttributes,
+      attributes: {
+        ...createdAttributes,
+        running: false,
+        executionStatus: getRuleExecutionStatusPending(createdAttributes.createdAt),
+      },
       references: [
         {
           name: 'action_0',
@@ -614,7 +634,11 @@ describe('create()', () => {
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '123',
       type: 'alert',
-      attributes: createdAttributes,
+      attributes: {
+        ...createdAttributes,
+        running: false,
+        executionStatus: getRuleExecutionStatusPending(createdAttributes.createdAt),
+      },
       references: [
         {
           name: 'action_0',
@@ -647,10 +671,8 @@ describe('create()', () => {
         "createdBy": "elastic",
         "enabled": true,
         "executionStatus": Object {
-          "error": null,
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
           "status": "pending",
-          "warning": null,
         },
         "legacyId": "123",
         "meta": Object {
@@ -765,6 +787,8 @@ describe('create()', () => {
       id: '1',
       type: 'alert',
       attributes: {
+        running: false,
+        executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
         alertTypeId: '123',
         schedule: { interval: '1m' },
         params: {
@@ -858,11 +882,16 @@ describe('create()', () => {
         ],
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+          "status": "pending",
+        },
         "id": "1",
         "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": "1m",
         },
@@ -960,6 +989,7 @@ describe('create()', () => {
       id: '1',
       type: 'alert',
       attributes: {
+        executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
         alertTypeId: '123',
         schedule: { interval: '1m' },
         params: {
@@ -1049,6 +1079,10 @@ describe('create()', () => {
         ],
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+          "status": "pending",
+        },
         "id": "1",
         "notifyWhen": null,
         "params": Object {
@@ -1104,10 +1138,8 @@ describe('create()', () => {
         enabled: true,
         legacyId: null,
         executionStatus: {
-          error: null,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
-          warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
@@ -1148,8 +1180,10 @@ describe('create()', () => {
         params: {
           bar: true,
         },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        running: false,
+        executionStatus: getRuleExecutionStatusPending(now),
+        createdAt: now,
+        updatedAt: now,
         notifyWhen: null,
         actions: [
           {
@@ -1186,11 +1220,16 @@ describe('create()', () => {
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+          "status": "pending",
+        },
         "id": "1",
         "notifyWhen": null,
         "params": Object {
           "bar": true,
         },
+        "running": false,
         "schedule": Object {
           "interval": 10000,
         },
@@ -1256,8 +1295,10 @@ describe('create()', () => {
           bar: true,
           parameterThatIsSavedObjectRef: 'soRef_0',
         },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
+        running: false,
+        createdAt: now,
+        updatedAt: now,
         notifyWhen: null,
         actions: [
           {
@@ -1269,7 +1310,6 @@ describe('create()', () => {
             },
           },
         ],
-        running: false,
       },
       references: [
         {
@@ -1318,10 +1358,8 @@ describe('create()', () => {
         enabled: true,
         legacyId: null,
         executionStatus: {
-          error: null,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
-          warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
@@ -1369,6 +1407,10 @@ describe('create()', () => {
         ],
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+          "status": "pending",
+        },
         "id": "1",
         "notifyWhen": null,
         "params": Object {
@@ -1440,8 +1482,9 @@ describe('create()', () => {
           bar: true,
           parameterThatIsSavedObjectRef: 'action_0',
         },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        executionStatus: getRuleExecutionStatusPending(now),
+        createdAt: now,
+        updatedAt: now,
         notifyWhen: null,
         actions: [
           {
@@ -1502,10 +1545,8 @@ describe('create()', () => {
         createdBy: 'elastic',
         enabled: true,
         executionStatus: {
-          error: null,
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
-          warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         meta: { versionApiKeyLastmodified: kibanaVersion },
@@ -1553,6 +1594,10 @@ describe('create()', () => {
         ],
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+          "status": "pending",
+        },
         "id": "1",
         "notifyWhen": null,
         "params": Object {
@@ -1582,8 +1627,10 @@ describe('create()', () => {
         params: {
           bar: true,
         },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        executionStatus: getRuleExecutionStatusPending(now),
+        running: false,
+        createdAt: now,
+        updatedAt: now,
         actions: [
           {
             group: 'default',
@@ -1617,6 +1664,7 @@ describe('create()', () => {
       params: {
         bar: true,
       },
+      executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
       createdAt: '2019-02-12T21:01:22.479Z',
       createdBy: 'elastic',
       updatedBy: 'elastic',
@@ -1688,8 +1736,6 @@ describe('create()', () => {
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
-          error: null,
-          warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         revision: 0,
@@ -1723,6 +1769,10 @@ describe('create()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "createdBy": "elastic",
         "enabled": true,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+          "status": "pending",
+        },
         "id": "1",
         "muteAll": false,
         "mutedInstanceIds": Array [],
@@ -1755,6 +1805,7 @@ describe('create()', () => {
       params: {
         bar: true,
       },
+      executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
       createdAt: '2019-02-12T21:01:22.479Z',
       createdBy: 'elastic',
       updatedBy: 'elastic',
@@ -1826,8 +1877,6 @@ describe('create()', () => {
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
-          error: null,
-          warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         revision: 0,
@@ -1861,6 +1910,10 @@ describe('create()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "createdBy": "elastic",
         "enabled": true,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+          "status": "pending",
+        },
         "id": "1",
         "muteAll": false,
         "mutedInstanceIds": Array [],
@@ -1893,6 +1946,7 @@ describe('create()', () => {
       params: {
         bar: true,
       },
+      executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
       createdAt: '2019-02-12T21:01:22.479Z',
       createdBy: 'elastic',
       updatedBy: 'elastic',
@@ -1964,8 +2018,6 @@ describe('create()', () => {
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
-          error: null,
-          warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         revision: 0,
@@ -1999,6 +2051,10 @@ describe('create()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "createdBy": "elastic",
         "enabled": true,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+          "status": "pending",
+        },
         "id": "1",
         "muteAll": false,
         "mutedInstanceIds": Array [],
@@ -2040,6 +2096,7 @@ describe('create()', () => {
         risk_score: 42,
         severity: 'low',
       },
+      executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
       createdAt: '2019-02-12T21:01:22.479Z',
       createdBy: 'elastic',
       updatedBy: 'elastic',
@@ -2117,8 +2174,6 @@ describe('create()', () => {
         executionStatus: {
           status: 'pending',
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
-          error: null,
-          warning: null,
         },
         monitoring: {
           run: {
@@ -2178,6 +2233,10 @@ describe('create()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "createdBy": "elastic",
         "enabled": true,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+          "status": "pending",
+        },
         "id": "123",
         "muteAll": false,
         "mutedInstanceIds": Array [],
@@ -2277,6 +2336,8 @@ describe('create()', () => {
         params: {
           bar: true,
         },
+        executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
+        running: false,
         actions: [
           {
             group: 'default',
@@ -2305,11 +2366,12 @@ describe('create()', () => {
     );
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
-                                                                                                                  Array [
-                                                                                                                    "alert",
-                                                                                                                    "1",
-                                                                                                                  ]
-                                                                            `);
+      Array [
+        "alert",
+        "1",
+        undefined,
+      ]
+    `);
   });
 
   test('attempts to remove saved object if scheduling failed', async () => {
@@ -2323,6 +2385,8 @@ describe('create()', () => {
         params: {
           bar: true,
         },
+        executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
+        running: false,
         actions: [
           {
             group: 'default',
@@ -2349,11 +2413,12 @@ describe('create()', () => {
     );
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.delete.mock.calls[0]).toMatchInlineSnapshot(`
-                                                                                                                  Array [
-                                                                                                                    "alert",
-                                                                                                                    "1",
-                                                                                                                  ]
-                                                                            `);
+      Array [
+        "alert",
+        "1",
+        undefined,
+      ]
+    `);
   });
 
   test('returns task manager error if cleanup fails, logs to console', async () => {
@@ -2367,6 +2432,8 @@ describe('create()', () => {
         params: {
           bar: true,
         },
+        executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
+        running: false,
         actions: [
           {
             group: 'default',
@@ -2398,7 +2465,7 @@ describe('create()', () => {
     );
   });
 
-  test('throws an error if alert type not registerd', async () => {
+  test('throws an error if alert type not registered', async () => {
     const data = getMockData();
     ruleTypeRegistry.get.mockImplementation(() => {
       throw new Error('Invalid type');
@@ -2423,6 +2490,8 @@ describe('create()', () => {
         params: {
           bar: true,
         },
+        executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
+        running: false,
         actions: [
           {
             group: 'default',
@@ -2497,8 +2566,6 @@ describe('create()', () => {
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
-          error: null,
-          warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         revision: 0,
@@ -2538,6 +2605,7 @@ describe('create()', () => {
             },
           },
         ],
+        executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
         running: false,
       },
       references: [
@@ -2604,8 +2672,6 @@ describe('create()', () => {
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
-          error: null,
-          warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         revision: 0,
@@ -2703,6 +2769,7 @@ describe('create()', () => {
       params: {
         bar: true,
       },
+      executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
       createdAt: '2019-02-12T21:01:22.479Z',
       createdBy: 'elastic',
       updatedBy: 'elastic',
@@ -3182,8 +3249,9 @@ describe('create()', () => {
         params: {
           bar: true,
         },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        executionStatus: getRuleExecutionStatusPending(now),
+        createdAt: now,
+        updatedAt: now,
         notifyWhen: null,
         actions: [
           {
@@ -3238,6 +3306,10 @@ describe('create()', () => {
         ],
         "alertTypeId": "123",
         "createdAt": 2019-02-12T21:01:22.479Z,
+        "executionStatus": Object {
+          "lastExecutionDate": 2019-02-12T21:01:22.000Z,
+          "status": "pending",
+        },
         "id": "1",
         "notifyWhen": null,
         "params": Object {
@@ -3380,6 +3452,8 @@ describe('create()', () => {
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '1m' },
+        running: false,
+        executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
         params: {
           bar: true,
         },
@@ -3459,8 +3533,6 @@ describe('create()', () => {
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
           status: 'pending',
-          error: null,
-          warning: null,
         },
         monitoring: getDefaultMonitoring('2019-02-12T21:01:22.479Z'),
         revision: 0,

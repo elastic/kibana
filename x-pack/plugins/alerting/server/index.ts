@@ -43,6 +43,7 @@ export type {
   BulkEditOptionsFilter,
   BulkEditOptionsIds,
 } from './rules_client';
+export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration, isRuleSnoozed } from './lib';
 export { getEsErrorMessage } from './lib/errors';
