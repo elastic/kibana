@@ -30,7 +30,6 @@ import { validate } from './validate';
 import {
   isAllowedPublicVersion,
   isValidRouteVersion,
-  hasVersion,
   hasQueryVersion,
   readVersion,
   removeQueryVersion,
@@ -111,7 +110,7 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   private requestHandler = async (
     ctx: RequestHandlerContextBase,
-    req: KibanaRequest,
+    originalReq: KibanaRequest,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> => {
     if (this.handlers.size <= 0) {
@@ -120,14 +119,23 @@ export class CoreVersionedRoute implements VersionedRoute {
         body: `No handlers registered for [${this.method}] [${this.path}].`,
       });
     }
-
-    if (!hasVersion(req, this.enableQueryVersion) && (this.isInternal || this.router.isDev)) {
+    const req = originalReq as Mutable<KibanaRequest>;
+    const requestVersion = readVersion(req, this.enableQueryVersion);
+    if (!requestVersion && !this.canUseDefaultVersion()) {
       return res.badRequest({
         body: `Please specify a version via ${ELASTIC_HTTP_VERSION_HEADER} header. Available versions: ${this.versionsToString()}`,
       });
     }
-
-    const version = this.getVersion(req);
+    if (hasQueryVersion(req)) {
+      if (this.enableQueryVersion) {
+        // This endpoint has opted-in to query versioning, so we remove the query parameter as it is reserved
+        removeQueryVersion(req);
+      } else
+        return res.badRequest({
+          body: `Use of query parameter "${ELASTIC_HTTP_VERSION_QUERY_PARAM}" is not allowed. Please specify the API version using the "${ELASTIC_HTTP_VERSION_HEADER}" header.`,
+        });
+    }
+    const version: ApiVersion = requestVersion ?? this.getDefaultVersion();
 
     const invalidVersionMessage = isValidRouteVersion(this.isPublic, version);
     if (invalidVersionMessage) {
@@ -142,32 +150,16 @@ export class CoreVersionedRoute implements VersionedRoute {
         }]. Available versions are: ${this.versionsToString()}`,
       });
     }
-
     const validation = handler.options.validate || undefined;
-
-    const mutableCoreKibanaRequest = req as Mutable<KibanaRequest>;
     if (
       validation?.request &&
       Boolean(validation.request.body || validation.request.params || validation.request.query)
     ) {
-      if (hasQueryVersion(mutableCoreKibanaRequest)) {
-        if (this.enableQueryVersion) {
-          // We remove the query parameter as it is a reserved keyword.
-          removeQueryVersion(mutableCoreKibanaRequest);
-        } else
-          return res.badRequest({
-            body: `Use of query parameter "${ELASTIC_HTTP_VERSION_QUERY_PARAM}" is not allowed. Please specify the API version using the "${ELASTIC_HTTP_VERSION_HEADER}" header.`,
-          });
-      }
       try {
-        const { body, params, query } = validate(
-          mutableCoreKibanaRequest,
-          validation.request,
-          handler.options.version
-        );
-        mutableCoreKibanaRequest.body = body;
-        mutableCoreKibanaRequest.params = params;
-        mutableCoreKibanaRequest.query = query;
+        const { body, params, query } = validate(req, validation.request, handler.options.version);
+        req.body = body;
+        req.params = params;
+        req.query = query;
       } catch (e) {
         return res.badRequest({
           body: e.message,
@@ -175,12 +167,12 @@ export class CoreVersionedRoute implements VersionedRoute {
       }
     } else {
       // Preserve behavior of not passing through unvalidated data
-      mutableCoreKibanaRequest.body = {};
-      mutableCoreKibanaRequest.params = {};
-      mutableCoreKibanaRequest.query = {};
+      req.body = {};
+      req.params = {};
+      req.query = {};
     }
 
-    const response = await handler.fn(ctx, mutableCoreKibanaRequest, res);
+    const response = await handler.fn(ctx, req, res);
 
     if (this.router.isDev && validation?.response?.[response.status]) {
       const responseValidation = validation.response[response.status];
@@ -206,8 +198,8 @@ export class CoreVersionedRoute implements VersionedRoute {
     );
   };
 
-  private getVersion(request: KibanaRequest): ApiVersion {
-    return readVersion(request, this.enableQueryVersion) ?? this.getDefaultVersion();
+  private canUseDefaultVersion(): boolean {
+    return !this.isInternal && !this.router.isDev;
   }
 
   private validateVersion(version: string) {

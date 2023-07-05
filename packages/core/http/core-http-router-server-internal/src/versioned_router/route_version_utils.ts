@@ -55,13 +55,6 @@ type KibanaRequestWithQueryVersion = KibanaRequest<
 export function hasQueryVersion(request: KibanaRequest): request is KibanaRequestWithQueryVersion {
   return isObject(request.query) && ELASTIC_HTTP_VERSION_QUERY_PARAM in request.query;
 }
-export function hasVersion(request: KibanaRequest, isQueryVersionEnabled?: boolean): boolean {
-  return Boolean(
-    ELASTIC_HTTP_VERSION_HEADER in request.headers ||
-      (isQueryVersionEnabled && hasQueryVersion(request))
-  );
-}
-
 export function removeQueryVersion(request: Mutable<KibanaRequestWithQueryVersion>): void {
   delete request.query[ELASTIC_HTTP_VERSION_QUERY_PARAM];
 }
