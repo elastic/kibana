@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "common/**/*",
@@ -28,6 +28,6 @@
     "@kbn/core-http-browser"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }
