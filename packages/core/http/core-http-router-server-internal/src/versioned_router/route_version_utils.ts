@@ -5,7 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import {
+  type ApiVersion,
+  ELASTIC_HTTP_VERSION_HEADER,
+  ELASTIC_HTTP_VERSION_QUERY_PARAM,
+} from '@kbn/core-http-common';
+import { isObject, get } from 'lodash';
+import { KibanaRequest } from '@kbn/core-http-server';
 import moment from 'moment';
+import type { Mutable } from 'utility-types';
 
 const PUBLIC_VERSION_REGEX = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/;
 const INTERNAL_VERSION_REGEX = /^[1-9][0-9]*$/;
@@ -37,4 +45,31 @@ export function isValidRouteVersion(isPublicApi: boolean, version: string): unde
   return INTERNAL_VERSION_REGEX.test(version) && version !== '0'
     ? undefined
     : `Invalid version number. Received "${version}", expected a string containing _only_ a finite, whole number greater than 0.`;
+}
+
+type KibanaRequestWithQueryVersion = KibanaRequest<
+  unknown,
+  { [ELASTIC_HTTP_VERSION_QUERY_PARAM]: unknown }
+>;
+
+export function hasQueryVersion(request: KibanaRequest): request is KibanaRequestWithQueryVersion {
+  return isObject(request.query) && ELASTIC_HTTP_VERSION_QUERY_PARAM in request.query;
+}
+export function removeQueryVersion(request: Mutable<KibanaRequestWithQueryVersion>): void {
+  delete request.query[ELASTIC_HTTP_VERSION_QUERY_PARAM];
+}
+
+function readQueryVersion(request: KibanaRequest): undefined | ApiVersion {
+  const version = get(request.query, ELASTIC_HTTP_VERSION_QUERY_PARAM);
+  if (typeof version === 'string') return version;
+}
+/** Reading from header takes precedence over query param */
+export function readVersion(
+  request: KibanaRequest,
+  isQueryVersionEnabled?: boolean
+): undefined | ApiVersion {
+  const versions = request.headers?.[ELASTIC_HTTP_VERSION_HEADER];
+  const headerVersion = Array.isArray(versions) ? versions[0] : versions;
+  if (headerVersion) return headerVersion;
+  if (isQueryVersionEnabled) return readQueryVersion(request);
 }
