@@ -23,7 +23,8 @@ export const calculateFieldsDiffFor = <TObject extends object>(
     return fieldDiff;
   });
   // if (ruleVersions.target_version.rule_id === 'd76b02ef-fc95-4001-9297-01cb7412232f') { // Python
-  if (ruleVersions.target_version.rule_id === 'a00681e3-9ed6-447c-ab2c-be648821c622') { // First seen AWS
+  if (ruleVersions.target_version.rule_id === 'a00681e3-9ed6-447c-ab2c-be648821c622') {
+    // First seen AWS
     debugger;
   }
   // TODO: try to improve strict typing and get rid of this "as" operator.
