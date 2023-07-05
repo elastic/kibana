@@ -6,17 +6,20 @@
  */
 
 import type { Alert } from '@kbn/alerts-as-data-utils';
+import { DeepPartial } from '@kbn/utility-types';
 import { Alert as LegacyAlert } from '../alert/alert';
 import {
   AlertInstanceContext,
   AlertInstanceState,
   RawAlertInstance,
+  RuleAlertData,
   RuleNotifyWhenType,
+  WithoutReservedActionGroups,
 } from '../types';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
-
+import type { PublicAlertFactory } from '../alert/create_alert_factory';
 export interface AlertRuleData {
   consumer: string;
   executionId: string;
@@ -38,6 +41,7 @@ export interface AlertRule {
 }
 
 export interface IAlertsClient<
+  AlertData extends RuleAlertData,
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
@@ -50,10 +54,22 @@ export interface IAlertsClient<
   getProcessedAlerts(
     type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
   ): Record<string, LegacyAlert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
-  getAlertsToSerialize(): Promise<{
+  persistAlerts(): Promise<void>;
+  getAlertsToSerialize(): {
     alertsToReturn: Record<string, RawAlertInstance>;
     recoveredAlertsToReturn: Record<string, RawAlertInstance>;
-  }>;
+  };
+  factory(): PublicAlertFactory<
+    State,
+    Context,
+    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+  >;
+  client(): PublicAlertsClient<
+    AlertData,
+    State,
+    Context,
+    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
+  > | null;
 }
 
 export interface ProcessAndLogAlertsOpts {
@@ -80,3 +96,51 @@ export interface TrackedAlerts<
   active: Record<string, LegacyAlert<State, Context>>;
   recovered: Record<string, LegacyAlert<State, Context>>;
 }
+
+export interface PublicAlertsClient<
+  AlertData extends RuleAlertData,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
+> {
+  report(alert: ReportedAlert<AlertData, State, Context, ActionGroupIds>): ReportedAlertData;
+  setAlertData(alert: UpdateableAlert<AlertData, State, Context, ActionGroupIds>): void;
+  getAlertLimitValue: () => number;
+  setAlertLimitReached: (reached: boolean) => void;
+  getRecoveredAlerts: () => Array<RecoveredAlertData<AlertData, State, Context, ActionGroupIds>>;
+}
+
+export interface ReportedAlert<
+  AlertData extends RuleAlertData,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
+> {
+  id: string; // alert instance id
+  actionGroup: ActionGroupIds;
+  state?: State;
+  context?: Context;
+  payload?: DeepPartial<AlertData>;
+}
+
+export interface RecoveredAlertData<
+  AlertData extends RuleAlertData,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
+> {
+  alert: LegacyAlert<State, Context, ActionGroupIds>;
+  hit?: AlertData;
+}
+
+export interface ReportedAlertData {
+  uuid: string;
+  start: string | null;
+}
+
+export type UpdateableAlert<
+  AlertData extends RuleAlertData,
+  State extends AlertInstanceState,
+  Context extends AlertInstanceContext,
+  ActionGroupIds extends string
+> = Pick<ReportedAlert<AlertData, State, Context, ActionGroupIds>, 'id' | 'context' | 'payload'>;

@@ -16,11 +16,12 @@ import {
 } from './mock';
 import {
   fetchQueryAlerts,
-  updateAlertStatus,
   getSignalIndex,
   getUserPrivilege,
   createSignalIndex,
   createHostIsolation,
+  updateAlertStatusByQuery,
+  updateAlertStatusByIds,
 } from './api';
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -57,41 +58,83 @@ describe('Detections Alerts API', () => {
     });
   });
 
-  describe('updateAlertStatus', () => {
+  describe('updateAlertStatusByQuery', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue({});
     });
 
     test('check parameter url, body when closing an alert', async () => {
-      await updateAlertStatus({
+      await updateAlertStatusByQuery({
         query: mockStatusAlertQuery,
         signal: abortCtrl.signal,
         status: 'closed',
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/signals/status', {
-        body: '{"conflicts":"proceed","status":"closed","bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}',
+        body: '{"conflicts":"proceed","status":"closed","query":{"bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}}',
         method: 'POST',
         signal: abortCtrl.signal,
       });
     });
 
     test('check parameter url, body when opening an alert', async () => {
-      await updateAlertStatus({
+      await updateAlertStatusByQuery({
         query: mockStatusAlertQuery,
         signal: abortCtrl.signal,
         status: 'open',
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/signals/status', {
-        body: '{"conflicts":"proceed","status":"open","bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}',
+        body: '{"conflicts":"proceed","status":"open","query":{"bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}}',
         method: 'POST',
         signal: abortCtrl.signal,
       });
     });
 
     test('happy path', async () => {
-      const alertsResp = await updateAlertStatus({
+      const alertsResp = await updateAlertStatusByQuery({
         query: mockStatusAlertQuery,
+        signal: abortCtrl.signal,
+        status: 'open',
+      });
+      expect(alertsResp).toEqual({});
+    });
+  });
+
+  describe('updateAlertStatusById', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({});
+    });
+
+    test('check parameter url, body when closing an alert', async () => {
+      await updateAlertStatusByIds({
+        signalIds: ['123'],
+        signal: abortCtrl.signal,
+        status: 'closed',
+      });
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/signals/status', {
+        body: '{"status":"closed","signal_ids":["123"]}',
+        method: 'POST',
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('check parameter url, body when opening an alert', async () => {
+      await updateAlertStatusByIds({
+        signalIds: ['123'],
+        signal: abortCtrl.signal,
+        status: 'open',
+      });
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/signals/status', {
+        body: '{"status":"open","signal_ids":["123"]}',
+        method: 'POST',
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('happy path', async () => {
+      const alertsResp = await updateAlertStatusByIds({
+        signalIds: ['123'],
         signal: abortCtrl.signal,
         status: 'open',
       });
@@ -179,8 +222,9 @@ describe('Detections Alerts API', () => {
         comment: 'commento',
         caseIds: ['88c04a90-b19c-11eb-b838-bf3c7840b969'],
       });
-      expect(postMock).toHaveBeenCalledWith('/api/endpoint/isolate', {
+      expect(postMock).toHaveBeenCalledWith('/api/endpoint/action/isolate', {
         body: '{"endpoint_ids":["fd8a122b-4c54-4c05-b295-e5f8381fc59d"],"comment":"commento","case_ids":["88c04a90-b19c-11eb-b838-bf3c7840b969"]}',
+        version: '2023-10-31',
       });
     });
 

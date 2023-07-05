@@ -8,111 +8,159 @@
 import { CoreStart } from '@kbn/core/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
-  ChromeNavigationNodeViewModel,
-  Navigation,
+  DefaultNavigation,
   NavigationKibanaProvider,
+  NavigationTreeDefinition,
 } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
-// #TODO translate titles?
-const navItems: ChromeNavigationNodeViewModel[] = [
-  {
-    id: 'services-infra',
-    items: [
-      { id: 'services', title: 'Services', href: '/app/apm/services' },
-      {
-        id: 'infra',
-        title: 'Infrastructure',
-        href: '/app/metrics/inventory',
-      },
-    ],
-  },
-  {
-    id: 'alerts-cases-slos',
-    items: [
-      {
-        id: 'alerts',
-        title: 'Alerts',
-        href: '/app/observability/alerts',
-      },
-      {
-        id: 'Cases',
-        title: 'Cases',
-        href: '/app/observability/cases',
-      },
-      {
-        id: 'slos',
-        title: 'SLOs',
-        href: '/app/observability/slos',
-      },
-    ],
-  },
-  {
-    id: 'signals',
-    title: 'Signals',
-    items: [
-      {
-        id: 'traces',
-        title: 'Traces',
-        href: '/app/apm/traces',
-      },
-      {
-        id: 'logs',
-        title: 'Logs',
-        href: '/app/logs/stream',
-      },
-    ],
-  },
-  {
-    id: 'toolbox',
-    title: 'Toolbox',
-    items: [
-      {
-        id: 'visualization',
-        title: 'Visualization',
-        href: '/app/visualize',
-      },
-      {
-        id: 'dashboards',
-        title: 'Dashboards',
-        href: '/app/dashboards',
-      },
-    ],
-  },
-  {
-    id: 'on-boarding',
-    items: [
-      {
-        id: 'get-started',
-        title: 'Get started',
-        icon: 'launch',
-        href: '/app/observabilityOnboarding',
-      },
-    ],
-  },
-];
+const navigationTree: NavigationTreeDefinition = {
+  body: [
+    { type: 'recentlyAccessed' },
+    {
+      type: 'navGroup',
+      id: 'observability_project_nav',
+      title: 'Observability',
+      icon: 'logoObservability',
+      defaultIsCollapsed: false,
+      breadcrumbStatus: 'hidden',
+      children: [
+        {
+          id: 'discover-dashboard-alerts-slos',
+          children: [
+            {
+              link: 'discover',
+            },
+            {
+              title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
+                defaultMessage: 'Dashboards',
+              }),
+              link: 'dashboards',
+            },
+            {
+              link: 'observability-overview:alerts',
+            },
+            {
+              link: 'observability-overview:slos',
+            },
+            {
+              id: 'aiops',
+              title: 'AIOps',
+              children: [
+                {
+                  title: i18n.translate('xpack.serverlessObservability.nav.ml.jobs', {
+                    defaultMessage: 'Anomaly detection',
+                  }),
+                  link: 'ml:anomalyDetection',
+                },
+                {
+                  title: i18n.translate('xpack.serverlessObservability.ml.spike.analysis', {
+                    defaultMessage: 'Spike analysis',
+                  }),
+                  link: 'ml:explainLogRateSpikes',
+                  icon: 'beaker',
+                },
+                {
+                  link: 'ml:changePointDetections',
+                  icon: 'beaker',
+                },
+                {
+                  title: i18n.translate('xpack.serverlessObservability.nav.ml.job.notifications', {
+                    defaultMessage: 'Job notifications',
+                  }),
+                  link: 'ml:notifications',
+                },
+              ],
+            },
+          ],
+        },
+
+        {
+          id: 'applications',
+          children: [
+            {
+              id: 'apm',
+              title: 'Applications',
+              children: [
+                {
+                  link: 'apm:services',
+                },
+                {
+                  link: 'apm:traces',
+                },
+                {
+                  link: 'apm:dependencies',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'cases-vis',
+          children: [
+            {
+              link: 'observability-overview:cases',
+            },
+            {
+              title: i18n.translate('xpack.serverlessObservability.nav.visualizations', {
+                defaultMessage: 'Visualizations',
+              }),
+              link: 'visualize',
+            },
+          ],
+        },
+        {
+          id: 'on-boarding',
+          children: [
+            {
+              title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
+                defaultMessage: 'Add data',
+              }),
+              link: 'observabilityOnboarding',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  footer: [
+    {
+      type: 'navGroup',
+      id: 'projest_settings_project_nav',
+      title: 'Project settings',
+      icon: 'gear',
+      defaultIsCollapsed: true,
+      breadcrumbStatus: 'hidden',
+      children: [
+        {
+          id: 'settings',
+          children: [
+            {
+              link: 'management',
+              title: i18n.translate('xpack.serverlessObservability.nav.mngt', {
+                defaultMessage: 'Management',
+              }),
+            },
+            {
+              link: 'integrations',
+            },
+            {
+              link: 'fleet',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
 
 export const getObservabilitySideNavComponent =
   (core: CoreStart, { serverless }: { serverless: ServerlessPluginStart }) =>
   () => {
-    const activeNavItemId = 'observability_project_nav.root';
-
     return (
       <NavigationKibanaProvider core={core} serverless={serverless}>
-        <Navigation
-          navigationTree={[
-            {
-              id: 'observability_project_nav',
-              items: navItems,
-              title: 'Observability',
-              icon: 'logoObservability',
-            },
-          ]}
-          activeNavItemId={activeNavItemId}
-          homeHref="/app/enterprise_search/content/setup_guide"
-          linkToCloud="projects"
-          platformConfig={{ devTools: { enabled: false } }}
-        />
+        <DefaultNavigation navigationTree={navigationTree} dataTestSubj="svlObservabilitySideNav" />
       </NavigationKibanaProvider>
     );
   };

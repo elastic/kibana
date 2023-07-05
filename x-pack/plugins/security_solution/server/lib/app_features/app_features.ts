@@ -71,7 +71,7 @@ export class AppFeatures {
       this.experimentalFeatures
     );
     const enabledSecurityAppFeaturesConfigs = this.getEnabledAppFeaturesConfigs(
-      getSecurityAppFeaturesConfig()
+      getSecurityAppFeaturesConfig(this.experimentalFeatures)
     );
     this.featuresSetup.registerKibanaFeature(
       this.securityFeatureConfigMerger.mergeAppFeatureConfigs(

@@ -33,14 +33,12 @@ const messageVariables = [
 
 describe('Gen AI Params Fields renders', () => {
   test('all params fields are rendered', () => {
-    const actionParams = {
-      subAction: SUB_ACTION.RUN,
-      subActionParams: { body: '{"message": "test"}' },
-    };
-
     const { getByTestId } = render(
       <GenerativeAiParamsFields
-        actionParams={actionParams}
+        actionParams={{
+          subAction: SUB_ACTION.RUN,
+          subActionParams: { body: '{"message": "test"}' },
+        }}
         errors={{ body: [] }}
         editAction={() => {}}
         index={0}
@@ -67,6 +65,7 @@ describe('Gen AI Params Fields renders', () => {
         id: 'test',
         actionTypeId: '.gen-ai',
         isPreconfigured: false,
+        isSystemAction: false as const,
         isDeprecated: false,
         name: 'My GenAI Connector',
         config: {
@@ -118,17 +117,16 @@ describe('Gen AI Params Fields renders', () => {
   });
 
   it('calls editAction function with the correct arguments ', () => {
-    const actionParams = {
-      subAction: SUB_ACTION.RUN,
-      subActionParams: {
-        body: '{"key": "value"}',
-      },
-    };
     const editAction = jest.fn();
     const errors = {};
     const { getByTestId } = render(
       <GenerativeAiParamsFields
-        actionParams={actionParams}
+        actionParams={{
+          subAction: SUB_ACTION.RUN,
+          subActionParams: {
+            body: '{"key": "value"}',
+          },
+        }}
         editAction={editAction}
         index={0}
         messageVariables={messageVariables}

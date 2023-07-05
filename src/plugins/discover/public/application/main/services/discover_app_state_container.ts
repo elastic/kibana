@@ -54,7 +54,7 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    * @param newState
    * @param merge if true, the given state is merged with the current state
    */
-  replaceUrlState: (newPartial: DiscoverAppState, merge?: boolean) => void;
+  replaceUrlState: (newPartial: DiscoverAppState, merge?: boolean) => Promise<void>;
   /**
    * Resets the current state to the initial state
    */
@@ -258,8 +258,6 @@ export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
    */
   sort?: string[][] | [string, string];
 }
-
-export const GLOBAL_STATE_URL_KEY = '_g';
 
 export function getInitialState(
   stateStorage: IKbnUrlStateStorage | undefined,

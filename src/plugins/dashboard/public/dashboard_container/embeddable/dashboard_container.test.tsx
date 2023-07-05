@@ -25,6 +25,7 @@ import {
   ContactCardEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { TimeRange } from '@kbn/es-query';
 import { findTestSubject, nextTick } from '@kbn/test-jest-helpers';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
@@ -256,4 +257,61 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
   // TODO: Address this.
   // const action = findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`);
   // expect(action.length).toBe(1);
+});
+
+describe('getInheritedInput', () => {
+  const dashboardTimeRange = {
+    to: 'now',
+    from: 'now-15m',
+  };
+  const dashboardTimeslice = [1688061910000, 1688062209000] as [number, number];
+
+  test('Should pass dashboard timeRange and timeslice to panel when panel does not have custom time range', async () => {
+    const container = buildMockDashboard({
+      timeRange: dashboardTimeRange,
+      timeslice: dashboardTimeslice,
+    });
+    const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
+      CONTACT_CARD_EMBEDDABLE,
+      {
+        firstName: 'Kibana',
+      }
+    );
+    expect(embeddable).toBeDefined();
+
+    const embeddableInput = container
+      .getChild<ContactCardEmbeddable>(embeddable.id)
+      .getInput() as ContactCardEmbeddableInput & {
+      timeRange: TimeRange;
+      timeslice: [number, number];
+    };
+    expect(embeddableInput.timeRange).toEqual(dashboardTimeRange);
+    expect(embeddableInput.timeslice).toEqual(dashboardTimeslice);
+  });
+
+  test('Should not pass dashboard timeRange and timeslice to panel when panel has custom time range', async () => {
+    const container = buildMockDashboard({
+      timeRange: dashboardTimeRange,
+      timeslice: dashboardTimeslice,
+    });
+    const embeddableTimeRange = {
+      to: 'now',
+      from: 'now-24h',
+    };
+    const embeddable = await container.addNewEmbeddable<
+      ContactCardEmbeddableInput & { timeRange: TimeRange }
+    >(CONTACT_CARD_EMBEDDABLE, {
+      firstName: 'Kibana',
+      timeRange: embeddableTimeRange,
+    });
+
+    const embeddableInput = container
+      .getChild<ContactCardEmbeddable>(embeddable.id)
+      .getInput() as ContactCardEmbeddableInput & {
+      timeRange: TimeRange;
+      timeslice: [number, number];
+    };
+    expect(embeddableInput.timeRange).toEqual(embeddableTimeRange);
+    expect(embeddableInput.timeslice).toBeUndefined();
+  });
 });

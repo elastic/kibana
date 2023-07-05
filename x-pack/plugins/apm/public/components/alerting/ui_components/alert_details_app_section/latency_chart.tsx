@@ -101,6 +101,9 @@ function LatencyChart({
                 documentType: preferred.source.documentType,
                 rollupInterval: preferred.source.rollupInterval,
                 bucketSizeInSeconds: preferred.bucketSizeInSeconds,
+                useDurationSummary:
+                  preferred.source.hasDurationSummaryField &&
+                  latencyAggregationType === LatencyAggregationType.avg,
               },
             },
           }

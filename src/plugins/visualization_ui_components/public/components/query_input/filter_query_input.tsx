@@ -22,6 +22,7 @@ import type { DataViewBase, Query } from '@kbn/es-query';
 import { useDebouncedValue } from '../debounced_value';
 import { QueryInput, validateQuery } from '.';
 import type { QueryInputServices } from '.';
+import './filter_query_input.scss';
 
 const filterByLabel = i18n.translate('visualizationUiComponents.filterQueryInput.label', {
   defaultMessage: 'Filter by',
@@ -101,7 +102,7 @@ export function FilterQueryInput({
             isOpen={filterPopoverOpen}
             closePopover={onClosePopup}
             anchorClassName="eui-fullWidth"
-            panelClassName="lnsIndexPatternDimensionEditor__filtersEditor"
+            panelClassName="filterQueryInput__popover"
             initialFocus={dataTestSubj ? `textarea[data-test-subj='${dataTestSubj}']` : undefined}
             button={
               <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
@@ -109,7 +110,7 @@ export function FilterQueryInput({
                   <EuiFlexItem grow={false}>{/* Empty for spacing */}</EuiFlexItem>
                   <EuiFlexItem grow={true}>
                     <EuiLink
-                      className="lnsFiltersOperation__popoverButton"
+                      className="filterQueryInput__popoverButton"
                       data-test-subj="indexPattern-filters-existingFilterTrigger"
                       onClick={() => {
                         setFilterPopoverOpen(!filterPopoverOpen);

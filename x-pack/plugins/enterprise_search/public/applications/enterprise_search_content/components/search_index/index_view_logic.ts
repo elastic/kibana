@@ -18,7 +18,16 @@ import {
 } from '../../../../../common/types/connectors';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { flashSuccessToast } from '../../../shared/flash_messages';
+import { KibanaLogic } from '../../../shared/kibana';
 
+import {
+  StartAccessControlSyncApiLogic,
+  StartAccessControlSyncArgs,
+} from '../../api/connector/start_access_control_sync_api_logic';
+import {
+  StartIncrementalSyncApiLogic,
+  StartIncrementalSyncArgs,
+} from '../../api/connector/start_incremental_sync_api_logic';
 import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector/start_sync_api_logic';
 import {
   CachedFetchIndexApiLogic,
@@ -41,6 +50,8 @@ import { CrawlerLogic } from './crawler/crawler_logic';
 import { IndexNameLogic } from './index_name_logic';
 
 type StartSyncApiActions = Actions<StartSyncArgs, {}>;
+type StartIncrementalSyncApiActions = Actions<StartIncrementalSyncArgs, {}>;
+type StartAccessControlSyncApiActions = Actions<StartAccessControlSyncArgs, {}>;
 
 export interface IndexViewActions {
   cancelSyncs(): void;
@@ -50,11 +61,15 @@ export interface IndexViewActions {
   fetchIndex: () => void;
   fetchIndexApiSuccess: CachedFetchIndexApiLogicActions['apiSuccess'];
   makeFetchIndexRequest: CachedFetchIndexApiLogicActions['makeRequest'];
+  makeStartAccessControlSyncRequest: StartAccessControlSyncApiActions['makeRequest'];
+  makeStartIncrementalSyncRequest: StartIncrementalSyncApiActions['makeRequest'];
   makeStartSyncRequest: StartSyncApiActions['makeRequest'];
   recheckIndex: () => void;
   resetFetchIndexApi: CachedFetchIndexApiLogicActions['apiReset'];
   resetRecheckIndexLoading: () => void;
+  startAccessControlSync(): void;
   startFetchIndexPoll: CachedFetchIndexApiLogicActions['startPolling'];
+  startIncrementalSync(): void;
   startSync(): void;
   stopFetchIndexPoll(): CachedFetchIndexApiLogicActions['stopPolling'];
   stopFetchIndexPoll(): void;
@@ -69,7 +84,9 @@ export interface IndexViewValues {
   fetchIndexApiStatus: Status;
   hasAdvancedFilteringFeature: boolean;
   hasBasicFilteringFeature: boolean;
+  hasDocumentLevelSecurityFeature: boolean;
   hasFilteringFeature: boolean;
+  hasIncrementalSyncFeature: boolean;
   htmlExtraction: boolean | undefined;
   index: ElasticsearchViewIndex | undefined;
   indexData: typeof CachedFetchIndexApiLogic.values.indexData;
@@ -94,6 +111,8 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     fetchIndex: true,
     recheckIndex: true,
     resetRecheckIndexLoading: true,
+    startAccessControlSync: true,
+    startIncrementalSync: true,
     startSync: true,
   },
   connect: {
@@ -111,6 +130,16 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       ],
       StartSyncApiLogic,
       ['apiSuccess as startSyncApiSuccess', 'makeRequest as makeStartSyncRequest'],
+      StartIncrementalSyncApiLogic,
+      [
+        'apiSuccess as startIncrementalSyncApiSuccess',
+        'makeRequest as makeStartIncrementalSyncRequest',
+      ],
+      StartAccessControlSyncApiLogic,
+      [
+        'apiSuccess as startAccessControlSyncApiSuccess',
+        'makeRequest as makeStartAccessControlSyncRequest',
+      ],
       CrawlerLogic,
       ['fetchCrawlerData'],
     ],
@@ -151,6 +180,28 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     recheckIndex: () => actions.fetchIndex(),
     setIndexName: ({ indexName }) => {
       actions.startFetchIndexPoll(indexName);
+    },
+    startAccessControlSync: () => {
+      if (
+        isConnectorIndex(values.fetchIndexApiData) &&
+        values.hasDocumentLevelSecurityFeature &&
+        KibanaLogic.values.productFeatures.hasDocumentLevelSecurityEnabled
+      ) {
+        actions.makeStartAccessControlSyncRequest({
+          connectorId: values.fetchIndexApiData.connector.id,
+        });
+      }
+    },
+    startIncrementalSync: () => {
+      if (
+        isConnectorIndex(values.fetchIndexApiData) &&
+        values.hasIncrementalSyncFeature &&
+        KibanaLogic.values.productFeatures.hasIncrementalSyncEnabled
+      ) {
+        actions.makeStartIncrementalSyncRequest({
+          connectorId: values.fetchIndexApiData.connector.id,
+        });
+      }
     },
     startSync: () => {
       if (isConnectorIndex(values.fetchIndexApiData)) {
@@ -211,9 +262,19 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
             connector.features[FeatureName.FILTERING_RULES]
           : false,
     ],
+    hasDocumentLevelSecurityFeature: [
+      () => [selectors.connector],
+      (connector?: Connector) =>
+        connector?.features?.[FeatureName.DOCUMENT_LEVEL_SECURITY]?.enabled || false,
+    ],
     hasFilteringFeature: [
       () => [selectors.hasAdvancedFilteringFeature, selectors.hasBasicFilteringFeature],
       (advancedFeature: boolean, basicFeature: boolean) => advancedFeature || basicFeature,
+    ],
+    hasIncrementalSyncFeature: [
+      () => [selectors.connector],
+      (connector?: Connector) =>
+        connector?.features?.[FeatureName.INCREMENTAL_SYNC]?.enabled || false,
     ],
     htmlExtraction: [
       () => [selectors.connector],

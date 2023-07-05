@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -27,7 +27,6 @@ import type {
   SubPlugins,
   StartedSubPlugins,
   StartPluginsDependencies,
-  GetStartedComponent,
 } from './types';
 import { initTelemetry, TelemetryService } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
@@ -37,7 +36,6 @@ import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/consta
 
 import { updateAppLinks, type LinksPermissions } from './common/links';
 import { registerDeepLinksUpdater } from './common/links/deep_links';
-import { navLinks$ } from './common/links/nav_links';
 import { licenseService } from './common/hooks/use_license';
 import type { SecuritySolutionUiConfigType } from './common/types';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
@@ -50,10 +48,10 @@ import { getLazyEndpointPolicyResponseExtension } from './management/pages/polic
 import { getLazyEndpointGenericErrorsListExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_generic_errors_list';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
-import { UpsellingService } from './common/lib/upsellings';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
 
 import type { SecurityAppStore } from './common/store/types';
+import { PluginContract } from './plugin_contract';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -77,21 +75,20 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
    */
   readonly prebuiltRulesPackageVersion?: string;
   private config: SecuritySolutionUiConfigType;
+  private contract: PluginContract;
   private telemetry: TelemetryService;
 
   readonly experimentalFeatures: ExperimentalFeatures;
-  private upsellingService: UpsellingService;
-  private isSidebarEnabled$: BehaviorSubject<boolean>;
-  private getStartedComponent?: GetStartedComponent;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
-    this.experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental || []);
+    this.experimentalFeatures = parseExperimentalConfigValue(
+      this.config.enableExperimental || []
+    ).features;
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
-    this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
-    this.upsellingService = new UpsellingService();
+    this.contract = new PluginContract();
     this.telemetry = new TelemetryService();
   }
   private appUpdater$ = new Subject<AppUpdater>();
@@ -156,6 +153,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
+        ...this.contract.getStartServices(),
         apm,
         savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
         storage: this.storage,
@@ -166,9 +164,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           getPluginWrapper: () => SecuritySolutionTemplateWrapper,
         },
         savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
-        isSidebarEnabled$: this.isSidebarEnabled$,
-        getStartedComponent: this.getStartedComponent,
-        upselling: this.upsellingService,
         telemetry: this.telemetry.start(),
       };
       return services;
@@ -233,19 +228,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    return {
-      resolver: async () => {
-        /**
-         * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-         * See https://webpack.js.org/api/module-methods/#magic-comments
-         */
-        const { resolverPluginSetup } = await import(
-          /* webpackChunkName: "resolver" */ './resolver'
-        );
-        return resolverPluginSetup();
-      },
-      upselling: this.upsellingService,
-    };
+    return this.contract.getSetupContract();
   }
 
   public start(core: CoreStart, plugins: StartPlugins): PluginStart {
@@ -268,18 +251,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         Component: getLazyEndpointPolicyEditExtension(core, plugins),
       });
 
-      if (this.experimentalFeatures.policyResponseInFleetEnabled) {
-        registerExtension({
-          package: 'endpoint',
-          view: 'package-policy-response',
-          Component: getLazyEndpointPolicyResponseExtension(core, plugins),
-        });
-        registerExtension({
-          package: 'endpoint',
-          view: 'package-generic-errors-list',
-          Component: getLazyEndpointGenericErrorsListExtension(core, plugins),
-        });
-      }
+      registerExtension({
+        package: 'endpoint',
+        view: 'package-policy-response',
+        Component: getLazyEndpointPolicyResponseExtension(core, plugins),
+      });
+
+      registerExtension({
+        package: 'endpoint',
+        view: 'package-generic-errors-list',
+        Component: getLazyEndpointGenericErrorsListExtension(core, plugins),
+      });
 
       registerExtension({
         package: 'endpoint',
@@ -309,19 +291,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     // Not using await to prevent blocking start execution
     this.registerAppLinks(core, plugins);
 
-    return {
-      getNavLinks$: () => navLinks$,
-      setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
-        this.isSidebarEnabled$.next(isSidebarEnabled),
-      setGetStartedPage: (getStartedComponent: GetStartedComponent) => {
-        this.getStartedComponent = getStartedComponent;
-      },
-    };
+    return this.contract.getStartContract();
   }
 
   public stop() {
     licenseService.stop();
-    return {};
+    return this.contract.getStopContract();
   }
 
   private lazyHelpersForRoutes() {
@@ -491,13 +466,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
     const { links, getFilteredLinks } = await this.lazyApplicationLinks();
     const { license$ } = plugins.licensing;
+    const upselling = this.contract.upsellingService;
 
     registerDeepLinksUpdater(this.appUpdater$);
 
     license$.subscribe(async (license) => {
       const linksPermissions: LinksPermissions = {
         experimentalFeatures: this.experimentalFeatures,
-        upselling: this.upsellingService,
+        upselling,
         capabilities: core.application.capabilities,
       };
 

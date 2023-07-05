@@ -17,7 +17,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import useResizeObserver from 'use-resize-observer';
 import { throttle } from 'lodash';
-import { ProcessEvent } from '../../../common/types/process_tree';
+import type { ProcessEvent } from '../../../common';
 import { TTYSearchBar } from '../tty_search_bar';
 import { TTYTextSizer } from '../tty_text_sizer';
 import { useStyles } from './styles';
@@ -41,7 +41,7 @@ export interface TTYPlayerDeps {
   isFullscreen: boolean;
   onJumpToEvent(event: ProcessEvent): void;
   autoSeekToEntityId?: string;
-  canAccessEndpointManagement?: boolean;
+  canReadPolicyManagement?: boolean;
 }
 
 export const TTYPlayer = ({
@@ -53,7 +53,7 @@ export const TTYPlayer = ({
   isFullscreen,
   onJumpToEvent,
   autoSeekToEntityId,
-  canAccessEndpointManagement,
+  canReadPolicyManagement,
 }: TTYPlayerDeps) => {
   const ref = useRef<HTMLDivElement>(null);
   const { ref: scrollRef, height: containerHeight = 1 } = useResizeObserver<HTMLDivElement>({});
@@ -71,10 +71,8 @@ export const TTYPlayer = ({
   const { getUrlForApp } = useKibana<CoreStart>().services.application;
   const policiesUrl = useMemo(
     () =>
-      canAccessEndpointManagement
-        ? getUrlForApp(SECURITY_APP_ID, { path: POLICIES_PAGE_PATH })
-        : '',
-    [canAccessEndpointManagement, getUrlForApp]
+      canReadPolicyManagement ? getUrlForApp(SECURITY_APP_ID, { path: POLICIES_PAGE_PATH }) : '',
+    [canReadPolicyManagement, getUrlForApp]
   );
 
   const { search, currentLine, seekToLine } = useXtermPlayer({

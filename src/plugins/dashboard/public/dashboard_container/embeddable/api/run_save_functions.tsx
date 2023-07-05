@@ -11,14 +11,14 @@ import { batch } from 'react-redux';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { DASHBOARD_SAVED_OBJECT_TYPE, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
+import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
 import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
 import { DashboardSaveModal } from './overlays/save_modal';
 import { DashboardContainer } from '../dashboard_container';
-import { showCloneModal } from './overlays/show_clone_modal';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardContainerInput } from '../../../../common';
-import { SaveDashboardReturn } from '../../../services/dashboard_saved_object/types';
+import { SaveDashboardReturn } from '../../../services/dashboard_content_management/types';
+import { extractTitleAndCount } from './lib/extract_title_and_count';
 
 export function runSaveAs(this: DashboardContainer) {
   const {
@@ -28,7 +28,7 @@ export function runSaveAs(this: DashboardContainer) {
       },
     },
     savedObjectsTagging: { hasApi: hasSavedObjectsTagging },
-    dashboardSavedObject: { checkForDuplicateDashboardTitle, saveDashboardStateToSavedObject },
+    dashboardContentManagement: { checkForDuplicateDashboardTitle, saveDashboardState },
   } = pluginServices.getServices();
 
   const {
@@ -81,7 +81,7 @@ export function runSaveAs(this: DashboardContainer) {
         ...stateFromSaveModal,
       };
       const beforeAddTime = window.performance.now();
-      const saveResult = await saveDashboardStateToSavedObject({
+      const saveResult = await saveDashboardState({
         currentState: stateToSave,
         saveOptions,
         lastSavedId,
@@ -91,7 +91,7 @@ export function runSaveAs(this: DashboardContainer) {
         eventName: SAVED_OBJECT_POST_TIME,
         duration: addDuration,
         meta: {
-          saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
+          saved_object_type: DASHBOARD_CONTENT_ID,
         },
       });
 
@@ -127,7 +127,7 @@ export function runSaveAs(this: DashboardContainer) {
  */
 export async function runQuickSave(this: DashboardContainer) {
   const {
-    dashboardSavedObject: { saveDashboardStateToSavedObject },
+    dashboardContentManagement: { saveDashboardState },
   } = pluginServices.getServices();
 
   const {
@@ -135,7 +135,7 @@ export async function runQuickSave(this: DashboardContainer) {
     componentState: { lastSavedId },
   } = this.getState();
 
-  const saveResult = await saveDashboardStateToSavedObject({
+  const saveResult = await saveDashboardState({
     lastSavedId,
     currentState,
     saveOptions: {},
@@ -147,36 +147,46 @@ export async function runQuickSave(this: DashboardContainer) {
 
 export async function runClone(this: DashboardContainer) {
   const {
-    dashboardSavedObject: { saveDashboardStateToSavedObject, checkForDuplicateDashboardTitle },
+    dashboardContentManagement: { saveDashboardState, checkForDuplicateDashboardTitle },
   } = pluginServices.getServices();
 
   const { explicitInput: currentState } = this.getState();
 
-  return new Promise<SaveDashboardReturn | undefined>((resolve) => {
-    const onClone = async (
-      newTitle: string,
-      isTitleDuplicateConfirmed: boolean,
-      onTitleDuplicate: () => void
-    ) => {
-      if (
+  return new Promise<SaveDashboardReturn | undefined>(async (resolve, reject) => {
+    try {
+      const [baseTitle, baseCount] = extractTitleAndCount(currentState.title);
+      let copyCount = baseCount;
+      let newTitle = `${baseTitle} (${copyCount})`;
+      while (
         !(await checkForDuplicateDashboardTitle({
           title: newTitle,
-          onTitleDuplicate,
           lastSavedTitle: currentState.title,
           copyOnSave: true,
-          isTitleDuplicateConfirmed,
+          isTitleDuplicateConfirmed: false,
         }))
       ) {
-        // do not clone if title is duplicate and is unconfirmed
-        return {};
+        copyCount++;
+        newTitle = `${baseTitle} (${copyCount})`;
       }
-      const saveResult = await saveDashboardStateToSavedObject({
-        saveOptions: { saveAsCopy: true },
-        currentState: { ...currentState, title: newTitle },
+      const saveResult = await saveDashboardState({
+        saveOptions: {
+          saveAsCopy: true,
+        },
+        currentState: {
+          ...currentState,
+          title: newTitle,
+        },
       });
       resolve(saveResult);
-      return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
-    };
-    showCloneModal({ onClone, title: currentState.title, onClose: () => resolve(undefined) });
+      return saveResult.id
+        ? {
+            id: saveResult.id,
+          }
+        : {
+            error: saveResult.error,
+          };
+    } catch (error) {
+      reject(error);
+    }
   });
 }

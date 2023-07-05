@@ -1,0 +1,246 @@
+{
+  "id": "@kbn/ml-date-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-date-utils",
+        "id": "def-common.formatHumanReadableDate",
+        "type": "Function",
+        "tags": [],
+        "label": "formatHumanReadableDate",
+        "description": [
+          "\nFormat a timestamp as human readable date.\n"
+        ],
+        "signature": [
+          "(ts: number) => string"
+        ],
+        "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-date-utils",
+            "id": "def-common.formatHumanReadableDate.$1",
+            "type": "number",
+            "tags": [],
+            "label": "ts",
+            "description": [
+              "- The timestamp to be formatted."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-date-utils",
+        "id": "def-common.formatHumanReadableDateTime",
+        "type": "Function",
+        "tags": [],
+        "label": "formatHumanReadableDateTime",
+        "description": [
+          "\nFormat a timestamp as human readable date including hours and minutes.\n"
+        ],
+        "signature": [
+          "(ts: number) => string"
+        ],
+        "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-date-utils",
+            "id": "def-common.formatHumanReadableDateTime.$1",
+            "type": "number",
+            "tags": [],
+            "label": "ts",
+            "description": [
+              "- The timestamp to be formatted."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-date-utils",
+        "id": "def-common.formatHumanReadableDateTimeSeconds",
+        "type": "Function",
+        "tags": [],
+        "label": "formatHumanReadableDateTimeSeconds",
+        "description": [
+          "\nFormat a timestamp as human readable date including hours, minutes and seconds.\n"
+        ],
+        "signature": [
+          "(ts: number) => string"
+        ],
+        "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-date-utils",
+            "id": "def-common.formatHumanReadableDateTimeSeconds.$1",
+            "type": "number",
+            "tags": [],
+            "label": "ts",
+            "description": [
+              "- The timestamp to be formatted."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-date-utils",
+        "id": "def-common.timeFormatter",
+        "type": "Function",
+        "tags": [],
+        "label": "timeFormatter",
+        "description": [
+          "\nFormat a timestamp into a human readable date based on the `TIME_FORMAT` spec.\n"
+        ],
+        "signature": [
+          "(value: number) => string"
+        ],
+        "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-date-utils",
+            "id": "def-common.timeFormatter.$1",
+            "type": "number",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "- The timestamp to be formatted."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-date-utils",
+        "id": "def-common.validateTimeRange",
+        "type": "Function",
+        "tags": [],
+        "label": "validateTimeRange",
+        "description": [
+          "\nValidate a time range of two string based dates.\nCopy of `src/plugins/data/public/query/timefilter/lib/validate_timerange.ts`\nfor the time being so it can be used in packages.\n"
+        ],
+        "signature": [
+          "(time: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined) => boolean"
+        ],
+        "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-date-utils",
+            "id": "def-common.validateTimeRange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "time",
+            "description": [
+              "- The time range to be validated."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ml-date-utils",
+        "id": "def-common.TIME_FORMAT",
+        "type": "string",
+        "tags": [],
+        "label": "TIME_FORMAT",
+        "description": [
+          "\nTime format spec for string parsing."
+        ],
+        "signature": [
+          "\"YYYY-MM-DD HH:mm:ss\""
+        ],
+        "path": "x-pack/packages/ml/date_utils/src/time_format.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

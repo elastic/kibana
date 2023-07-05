@@ -8,7 +8,16 @@
 // TODO(jbudz): should be removed when upgrading to TS@4.8
 // this is a skip for the errors created when typechecking with isolatedModules
 export {};
-export { APP_UI_ID, APP_ID, CASES_FEATURE_ID, SERVER_APP_ID, SecurityPageName } from './constants';
+export {
+  APP_UI_ID,
+  APP_ID,
+  CASES_FEATURE_ID,
+  SERVER_APP_ID,
+  APP_PATH,
+  MANAGE_PATH,
+  ADD_DATA_PATH,
+  SecurityPageName,
+} from './constants';
 export { ELASTIC_SECURITY_RULE_ID } from './detection_engine/constants';
 export { allowedExperimentalValues, type ExperimentalFeatures } from './experimental_features';
 export type { AppFeatureKeys } from './types/app_features';

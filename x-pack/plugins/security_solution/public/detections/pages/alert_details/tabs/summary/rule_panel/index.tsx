@@ -21,7 +21,7 @@ import {
   KIBANA_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { SearchHit } from '../../../../../../../common/search_strategy';
-import { TimelineId } from '../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../common/types/timeline';
 import { SeverityBadge } from '../../../../../components/rules/severity_badge';
 import { getEnrichedFieldInfo } from '../../../../../../common/components/event_details/helpers';
 import type { SelectedDataView } from '../../../../../../common/store/sourcerer/model';

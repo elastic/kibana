@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BehaviorSubject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import type { AppLeaveHandler, CoreStart } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -70,6 +70,7 @@ import type { NavigationLink } from './common/links';
 import type { TelemetryClientStart } from './common/lib/telemetry';
 import type { Dashboards } from './dashboards';
 import type { UpsellingService } from './common/lib/upsellings';
+import type { BreadcrumbsNav } from './common/breadcrumbs/types';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -81,6 +82,15 @@ export interface SetupPlugins {
   ml?: MlPluginSetup;
 }
 
+/**
+ * IMPORTANT - PLEASE READ: When adding new plugins to the
+ * security solution, please ensure you add that plugin
+ * name to the kibana.jsonc file located in ../kibana.jsonc
+ *
+ * Without adding the plugin name there, the plugin will not
+ * fulfill at runtime, despite the types showing up correctly
+ * in the code.
+ */
 export interface StartPlugins {
   cases: CasesUiStart;
   data: DataPublicPluginStart;
@@ -118,8 +128,15 @@ export interface StartPluginsDependencies extends StartPlugins {
   savedObjectsTaggingOss: SavedObjectTaggingOssPluginStart;
 }
 
+export interface ContractStartServices {
+  isSidebarEnabled$: Observable<boolean>;
+  getStartedComponent$: Observable<React.ComponentType | null>;
+  upselling: UpsellingService;
+}
+
 export type StartServices = CoreStart &
-  StartPlugins & {
+  StartPlugins &
+  ContractStartServices & {
     storage: Storage;
     sessionStorage: Storage;
     apm: ApmBase;
@@ -134,9 +151,6 @@ export type StartServices = CoreStart &
       getPluginWrapper: () => typeof SecuritySolutionTemplateWrapper;
     };
     savedObjectsManagement: SavedObjectsManagementPluginStart;
-    isSidebarEnabled$: BehaviorSubject<boolean>;
-    getStartedComponent: GetStartedComponent | undefined;
-    upselling: UpsellingService;
     telemetry: TelemetryClientStart;
   };
 
@@ -145,15 +159,11 @@ export interface PluginSetup {
   upselling: UpsellingService;
 }
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type GetStartedComponentProps = {};
-
-export type GetStartedComponent = (props?: GetStartedComponentProps) => JSX.Element;
-
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
   setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
-  setGetStartedPage: (getStartedComponent: GetStartedComponent) => void;
+  setGetStartedPage: (getStartedComponent: React.ComponentType) => void;
+  getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
 }
 
 export interface AppObservableLibs {

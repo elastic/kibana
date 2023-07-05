@@ -114,7 +114,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         expect(await breakdownLabel.getVisibleText()).to.eql('Top 3 values of extension.raw');
-        expect(values).to.eql(['Other', 'png', 'css', 'jpg']);
+        expect(values).to.eql(['jpg', 'css', 'png', 'Other']);
       });
     });
 
@@ -156,11 +156,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('TextBasedLangEditor-expand');
-      await testSubjects.click('unifiedHistogramEditVisualization');
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await retry.waitFor('lens visualization', async () => {
+      await retry.waitFor('lens flyout', async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
         return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'average';
       });
@@ -175,14 +175,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('TextBasedLangEditor-expand');
-      await testSubjects.click('unifiedHistogramEditVisualization');
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await retry.waitFor('lens visualization', async () => {
+      await retry.waitFor('lens flyout', async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
         return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'average';
       });
+    });
+
+    it('should save correctly chart to dashboard', async () => {
+      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue(
+        'SELECT extension, AVG("bytes") as average FROM "logstash*" GROUP BY extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('TextBasedLangEditor-expand');
+      await testSubjects.click('unifiedHistogramSaveVisualization');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.lens.saveModal('TextBasedChart', false, false, false, 'new');
+      await testSubjects.existOrFail('embeddablePanelHeading-TextBasedChart');
     });
   });
 }

@@ -81,6 +81,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   documentType: ApmDocumentType.TransactionEvent,
                   rollupInterval: RollupInterval.None,
                 }),
+            useDurationSummary: latencyAggregationType === LatencyAggregationType.avg,
           },
         },
       }),

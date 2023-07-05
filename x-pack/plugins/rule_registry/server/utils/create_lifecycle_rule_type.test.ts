@@ -132,6 +132,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           updatedBy: 'updatedBy',
         },
         services: {
+          alertsClient: null,
           alertFactory,
           savedObjectsClient: {} as any,
           scopedClusterClient: {} as any,

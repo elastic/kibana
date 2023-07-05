@@ -16,7 +16,6 @@ import { useMetadata } from '../../hooks/use_metadata';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { Table } from './table';
 import { getAllFields } from './utils';
-import type { HostNodeRow } from '../../types';
 
 export interface MetadataSearchUrlState {
   metadataSearchUrlState: string;
@@ -25,7 +24,7 @@ export interface MetadataSearchUrlState {
 
 export interface MetadataProps {
   currentTimeRange: MetricsTimeInput;
-  node: HostNodeRow;
+  nodeName: string;
   nodeType: InventoryItemType;
   showActionsColumn?: boolean;
   search?: string;
@@ -33,21 +32,20 @@ export interface MetadataProps {
 }
 
 export const Metadata = ({
-  node,
+  nodeName,
   currentTimeRange,
   nodeType,
   search,
   showActionsColumn = false,
   onSearchChange,
 }: MetadataProps) => {
-  const nodeId = node.name;
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId } = useSourceContext();
   const {
     loading: metadataLoading,
     error: fetchMetadataError,
     metadata,
-  } = useMetadata(nodeId, nodeType, inventoryModel.requiredMetrics, sourceId, currentTimeRange);
+  } = useMetadata(nodeName, nodeType, inventoryModel.requiredMetrics, sourceId, currentTimeRange);
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);
 

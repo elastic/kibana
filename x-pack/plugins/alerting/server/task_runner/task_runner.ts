@@ -72,6 +72,7 @@ import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status
 import { RunningHandler } from './running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { LegacyAlertsClient } from '../alerts_client';
+import { IAlertsClient } from '../alerts_client/types';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -301,21 +302,42 @@ export class TaskRunner<
     // writing from alerts-as-data indices and eventually
     // we will want to migrate all the processing of alerts out
     // of the LegacyAlertsClient and into the AlertsClient.
-    const alertsClient =
-      (await this.context.alertsService?.createAlertsClient<
-        AlertData,
-        State,
-        Context,
-        ActionGroupIds,
-        RecoveryActionGroupId
-      >({
-        ...alertsClientParams,
-        namespace: namespace ?? DEFAULT_NAMESPACE_STRING,
-        rule: this.getAADRuleData(rule, spaceId),
-      })) ??
-      new LegacyAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+    let alertsClient: IAlertsClient<
+      AlertData,
+      State,
+      Context,
+      ActionGroupIds,
+      RecoveryActionGroupId
+    >;
+
+    try {
+      const client =
+        (await this.context.alertsService?.createAlertsClient<
+          AlertData,
+          State,
+          Context,
+          ActionGroupIds,
+          RecoveryActionGroupId
+        >({
+          ...alertsClientParams,
+          namespace: namespace ?? DEFAULT_NAMESPACE_STRING,
+          rule: this.getAADRuleData(rule, spaceId),
+        })) ?? null;
+
+      alertsClient = client
+        ? client
+        : new LegacyAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+            alertsClientParams
+          );
+    } catch (err) {
+      this.logger.error(
+        `Error initializing AlertsClient for context ${this.ruleType.alerts?.context}. Using legacy alerts client instead. - ${err.message}`
+      );
+
+      alertsClient = new LegacyAlertsClient<State, Context, ActionGroupIds, RecoveryActionGroupId>(
         alertsClientParams
       );
+    }
 
     await alertsClient.initializeExecution({
       maxAlerts: this.maxAlerts,
@@ -405,7 +427,8 @@ export class TaskRunner<
                 searchSourceClient: wrappedSearchSourceClient.searchSourceClient,
                 uiSettingsClient: this.context.uiSettings.asScopedToClient(savedObjectsClient),
                 scopedClusterClient: wrappedScopedClusterClient.client(),
-                alertFactory: alertsClient.getExecutorServices(),
+                alertFactory: alertsClient.factory(),
+                alertsClient: alertsClient.client(),
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,
                 ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
@@ -493,6 +516,10 @@ export class TaskRunner<
       });
     });
 
+    await this.timer.runWithTimer(TaskRunnerTimerSpan.PersistAlerts, async () => {
+      await alertsClient.persistAlerts();
+    });
+
     const executionHandler = new ExecutionHandler({
       rule,
       ruleType: this.ruleType,
@@ -530,12 +557,12 @@ export class TaskRunner<
 
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
-    const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
-      await alertsClient.getAlertsToSerialize();
 
     // Only serialize alerts into task state if we're auto-recovering, otherwise
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
+      const { alertsToReturn: alerts, recoveredAlertsToReturn: recovered } =
+        alertsClient.getAlertsToSerialize();
       alertsToReturn = alerts;
       recoveredAlertsToReturn = recovered;
     }

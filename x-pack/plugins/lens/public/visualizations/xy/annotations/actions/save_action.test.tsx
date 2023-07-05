@@ -113,7 +113,7 @@ describe('annotation group save action', () => {
   describe('save routine', () => {
     const layerId = 'mylayerid';
 
-    const layer: XYByValueAnnotationLayerConfig = {
+    const byValueLayer: XYByValueAnnotationLayerConfig = {
       layerId,
       layerType: 'annotations',
       indexPatternId: 'some-index-pattern',
@@ -144,16 +144,17 @@ describe('annotation group save action', () => {
           legend: { isVisible: true, position: 'bottom' },
           layers: [{ layerId } as XYAnnotationLayerConfig],
         } as XYState,
-        layer,
+        layer: byValueLayer,
         setState: jest.fn(),
         eventAnnotationService: {
           createAnnotationGroup: jest.fn(() => Promise.resolve({ id: savedId })),
+          groupExistsWithTitle: jest.fn(() => Promise.resolve(false)),
           updateAnnotationGroup: jest.fn(),
           loadAnnotationGroup: jest.fn(),
           toExpression: jest.fn(),
           toFetchExpression: jest.fn(),
           renderEventAnnotationGroupSavedObjectFinder: jest.fn(),
-        } as EventAnnotationServiceType,
+        } as Partial<EventAnnotationServiceType> as EventAnnotationServiceType,
         toasts: toastsServiceMock.createStartContract(),
         modalOnSaveProps: {
           newTitle: 'my title',
@@ -162,9 +163,10 @@ describe('annotation group save action', () => {
           newTags: ['my-tag'],
           newCopyOnSave: false,
           isTitleDuplicateConfirmed: false,
-          onTitleDuplicate: () => {},
+          onTitleDuplicate: jest.fn(),
         },
         dataViews,
+        goToAnnotationLibrary: () => Promise.resolve(),
       };
     };
 
@@ -320,5 +322,78 @@ describe('annotation group save action', () => {
 
       expect(props.toasts.addSuccess).toHaveBeenCalledTimes(1);
     });
+
+    it.each`
+      existingGroup | newCopyOnSave | titleChanged | isTitleDuplicateConfirmed | expectPreventSave
+      ${false}      | ${false}      | ${false}     | ${false}                  | ${true}
+      ${false}      | ${false}      | ${false}     | ${true}                   | ${false}
+      ${true}       | ${false}      | ${false}     | ${false}                  | ${false}
+      ${true}       | ${true}       | ${false}     | ${false}                  | ${true}
+      ${true}       | ${true}       | ${false}     | ${true}                   | ${false}
+    `(
+      'checks duplicate title when saving group',
+      async ({
+        existingGroup,
+        newCopyOnSave,
+        titleChanged,
+        isTitleDuplicateConfirmed,
+        expectPreventSave,
+      }) => {
+        (props.eventAnnotationService.groupExistsWithTitle as jest.Mock).mockResolvedValueOnce(
+          true
+        );
+
+        const oldTitle = 'old title';
+        let layer: XYAnnotationLayerConfig = byValueLayer;
+        if (existingGroup) {
+          const byReferenceLayer: XYByReferenceAnnotationLayerConfig = {
+            ...props.layer,
+            annotationGroupId: 'my-group-id',
+            __lastSaved: {
+              ...props.layer,
+              title: oldTitle,
+              description: 'description',
+              tags: [],
+            },
+          };
+          layer = byReferenceLayer;
+        }
+
+        const newTitle = titleChanged ? 'my changed title' : oldTitle;
+
+        await onSave({
+          ...props,
+          layer,
+          modalOnSaveProps: {
+            ...props.modalOnSaveProps,
+            newTitle,
+            isTitleDuplicateConfirmed,
+            newCopyOnSave,
+          },
+        });
+
+        if (expectPreventSave) {
+          expect(props.eventAnnotationService.updateAnnotationGroup).not.toHaveBeenCalled();
+
+          expect(props.eventAnnotationService.createAnnotationGroup).not.toHaveBeenCalled();
+
+          expect(props.modalOnSaveProps.closeModal).not.toHaveBeenCalled();
+
+          expect(props.setState).not.toHaveBeenCalled();
+
+          expect(props.toasts.addSuccess).not.toHaveBeenCalled();
+
+          expect(props.modalOnSaveProps.onTitleDuplicate).toHaveBeenCalled();
+        } else {
+          expect(props.modalOnSaveProps.onTitleDuplicate).not.toHaveBeenCalled();
+
+          expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();
+
+          expect(props.setState).toHaveBeenCalled();
+
+          expect(props.toasts.addSuccess).toHaveBeenCalledTimes(1);
+        }
+      }
+    );
   });
 });

@@ -708,6 +708,74 @@ describe('UserActionBuilder', () => {
 
       expect(userAction).toBeUndefined();
     });
+
+    it('builds an add category user action correctly', () => {
+      const builder = builderFactory.getBuilder(ActionTypes.category)!;
+      const userAction = builder.build({
+        payload: { category: 'new' },
+        ...commonArgs,
+      });
+
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
+        Object {
+          "attributes": Object {
+            "action": "update",
+            "created_at": "2022-01-09T22:00:00.000Z",
+            "created_by": Object {
+              "email": "elastic@elastic.co",
+              "full_name": "Elastic User",
+              "username": "elastic",
+            },
+            "owner": "securitySolution",
+            "payload": Object {
+              "category": "new",
+            },
+            "type": "category",
+          },
+          "references": Array [
+            Object {
+              "id": "123",
+              "name": "associated-cases",
+              "type": "cases",
+            },
+          ],
+        }
+      `);
+    });
+
+    it('builds a remove category user action correctly', () => {
+      const builder = builderFactory.getBuilder(ActionTypes.category)!;
+      const userAction = builder.build({
+        payload: { category: null },
+        ...commonArgs,
+      });
+
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
+        Object {
+          "attributes": Object {
+            "action": "delete",
+            "created_at": "2022-01-09T22:00:00.000Z",
+            "created_by": Object {
+              "email": "elastic@elastic.co",
+              "full_name": "Elastic User",
+              "username": "elastic",
+            },
+            "owner": "securitySolution",
+            "payload": Object {
+              "category": null,
+            },
+            "type": "category",
+          },
+          "references": Array [
+            Object {
+              "id": "123",
+              "name": "associated-cases",
+              "type": "cases",
+            },
+          ],
+        }
+      `);
+    });
   });
 
   describe('eventDetails', () => {
@@ -1126,6 +1194,48 @@ describe('UserActionBuilder', () => {
       `);
       expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User created case id: 123 - user action id: 123"`
+      );
+    });
+
+    it('logs an add category user action correctly', () => {
+      const builder = builderFactory.getBuilder(ActionTypes.category)!;
+      const userAction = builder.build({
+        payload: { category: 'sci-fi' },
+        ...commonArgs,
+      });
+
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "update",
+          "descriptiveAction": "case_user_action_update_case_category",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
+      `);
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User updated the category for case id: 123 - user action id: 123"`
+      );
+    });
+
+    it('logs a remove category user action correctly', () => {
+      const builder = builderFactory.getBuilder(ActionTypes.category)!;
+      const userAction = builder.build({
+        payload: { category: null },
+        ...commonArgs,
+      });
+
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
+        Object {
+          "action": "delete",
+          "descriptiveAction": "case_user_action_update_case_category",
+          "getMessage": [Function],
+          "savedObjectId": "123",
+          "savedObjectType": "cases",
+        }
+      `);
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+        `"User updated the category for case id: 123 - user action id: 123"`
       );
     });
   });

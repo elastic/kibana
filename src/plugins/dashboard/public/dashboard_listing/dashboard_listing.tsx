@@ -7,31 +7,31 @@
  */
 
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
-import React, { PropsWithChildren, useCallback, useState } from 'react';
+import React, { PropsWithChildren, useCallback, useMemo, useState } from 'react';
 
 import {
-  TableListView,
-  TableListViewKibanaDependencies,
+  type TableListViewKibanaDependencies,
   TableListViewKibanaProvider,
   type UserContentCommonSchema,
-} from '@kbn/content-management-table-list';
+} from '@kbn/content-management-table-list-view-table';
+import { TableListView } from '@kbn/content-management-table-list-view';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { toMountPoint, useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import type { SavedObjectsFindOptionsReference, SimpleSavedObject } from '@kbn/core/public';
 
 import {
+  DASHBOARD_CONTENT_ID,
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
-  DASHBOARD_SAVED_OBJECT_TYPE,
 } from '../dashboard_constants';
 import {
   dashboardListingTableStrings,
   dashboardListingErrorStrings,
 } from './_dashboard_listing_strings';
-import { DashboardAttributes } from '../../common';
 import { pluginServices } from '../services/plugin_services';
 import { confirmCreateWithUnsaved } from './confirm_overlays';
+import { DashboardItem } from '../../common/content_management';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { DashboardApplicationService } from '../services/application/types';
 import { DashboardListingEmptyPrompt } from './dashboard_listing_empty_prompt';
@@ -53,15 +53,13 @@ interface DashboardSavedObjectUserContent extends UserContentCommonSchema {
   };
 }
 
-const toTableListViewSavedObject = (
-  savedObject: SimpleSavedObject<DashboardAttributes>
-): DashboardSavedObjectUserContent => {
-  const { title, description, timeRestore } = savedObject.attributes;
+const toTableListViewSavedObject = (hit: DashboardItem): DashboardSavedObjectUserContent => {
+  const { title, description, timeRestore } = hit.attributes;
   return {
     type: 'dashboard',
-    id: savedObject.id,
-    updatedAt: savedObject.updatedAt!,
-    references: savedObject.references,
+    id: hit.id,
+    updatedAt: hit.updatedAt!,
+    references: hit.references,
     attributes: {
       title,
       description,
@@ -95,7 +93,7 @@ export const DashboardListing = ({
     notifications: { toasts },
     coreContext: { executionContext },
     dashboardCapabilities: { showWriteControls },
-    dashboardSavedObject: { findDashboards, savedObjectsClient },
+    dashboardContentManagement: { findDashboards, deleteDashboards },
   } = pluginServices.getServices();
 
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
@@ -133,8 +131,9 @@ export const DashboardListing = ({
       } = {}
     ) => {
       const searchStartTime = window.performance.now();
+
       return findDashboards
-        .findSavedObjects({
+        .search({
           search: searchTerm,
           size: listingLimit,
           hasReference: references,
@@ -147,7 +146,7 @@ export const DashboardListing = ({
             eventName: SAVED_OBJECT_LOADED_TIME,
             duration: searchDuration,
             meta: {
-              saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
+              saved_object_type: DASHBOARD_CONTENT_ID,
             },
           });
           return {
@@ -164,10 +163,10 @@ export const DashboardListing = ({
       try {
         const deleteStartTime = window.performance.now();
 
-        await Promise.all(
+        await deleteDashboards(
           dashboardsToDelete.map(({ id }) => {
             dashboardSessionStorage.clearState(id);
-            return savedObjectsClient.delete(DASHBOARD_SAVED_OBJECT_TYPE, id);
+            return id;
           })
         );
 
@@ -176,7 +175,7 @@ export const DashboardListing = ({
           eventName: SAVED_OBJECT_DELETE_TIME,
           duration: deleteDuration,
           meta: {
-            saved_object_type: DASHBOARD_SAVED_OBJECT_TYPE,
+            saved_object_type: DASHBOARD_CONTENT_ID,
             total: dashboardsToDelete.length,
           },
         });
@@ -188,7 +187,7 @@ export const DashboardListing = ({
 
       setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
     },
-    [savedObjectsClient, dashboardSessionStorage, toasts]
+    [dashboardSessionStorage, deleteDashboards, toasts]
   );
 
   const editItem = useCallback(
@@ -207,6 +206,14 @@ export const DashboardListing = ({
 
   const { getEntityName, getTableListTitle, getEntityNamePlural } = dashboardListingTableStrings;
 
+  const savedObjectsTaggingFakePlugin = useMemo(() => {
+    return savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
+      ? ({
+          ui: savedObjectsTagging,
+        } as TableListViewKibanaDependencies['savedObjectsTagging'])
+      : undefined;
+  }, [savedObjectsTagging]);
+
   return (
     <I18nProvider>
       <TableListViewKibanaProvider
@@ -218,11 +225,7 @@ export const DashboardListing = ({
             http,
           },
           toMountPoint,
-          savedObjectsTagging: savedObjectsTagging.hasApi // TODO: clean up this logic once https://github.com/elastic/kibana/issues/140433 is resolved
-            ? ({
-                ui: savedObjectsTagging,
-              } as TableListViewKibanaDependencies['savedObjectsTagging'])
-            : undefined,
+          savedObjectsTagging: savedObjectsTaggingFakePlugin,
           FormattedRelative,
         }}
       >
@@ -234,7 +237,7 @@ export const DashboardListing = ({
           createItem={!showWriteControls ? undefined : createItem}
           editItem={!showWriteControls ? undefined : editItem}
           entityNamePlural={getEntityNamePlural()}
-          tableListTitle={getTableListTitle()}
+          title={getTableListTitle()}
           headingId="dashboardListingHeading"
           initialPageSize={initialPageSize}
           initialFilter={initialFilter}

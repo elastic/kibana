@@ -8,9 +8,13 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { LineAnnotationDatum, RectAnnotationDatum } from '@elastic/charts';
 import type { ErrorType } from '@kbn/ml-error-utils';
-import type { MlEntityField, MlRecordForInfluencer } from '@kbn/ml-anomaly-utils';
+import {
+  type MlEntityField,
+  type MlRecordForInfluencer,
+  ES_AGGREGATION,
+  ML_JOB_AGGREGATION,
+} from '@kbn/ml-anomaly-utils';
 import type { Datafeed, JobId, ModelSnapshot } from './anomaly_detection_jobs';
-import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 
 export interface GetStoppedPartitionResult {
   jobs: string[] | Record<string, string[]>;

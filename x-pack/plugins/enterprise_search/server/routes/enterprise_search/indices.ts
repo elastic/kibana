@@ -26,6 +26,7 @@ import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
 import { createIndex } from '../../lib/indices/create_index';
+import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices, fetchSearchIndices } from '../../lib/indices/fetch_indices';
@@ -51,6 +52,7 @@ import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
   isIndexNotFoundException,
+  isNotFoundException,
   isPipelineIsInUseException,
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';
@@ -200,6 +202,7 @@ export function registerIndexRoutes({
         }
 
         await deleteIndexPipelines(client, indexName);
+        await deleteAccessControlIndex(client, indexName);
 
         await client.asCurrentUser.indices.delete({ index: indexName });
 
@@ -338,7 +341,7 @@ export function registerIndexRoutes({
       const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
       const [defaultPipeline, customPipelines] = await Promise.all([
-        getPipeline(DEFAULT_PIPELINE_NAME, client),
+        getPipeline(DEFAULT_PIPELINE_NAME, client).catch(() => ({})),
         getCustomPipelines(indexName, client),
       ]);
       return response.ok({
@@ -948,6 +951,47 @@ export function registerIndexRoutes({
         body: pipelines,
         headers: { 'content-type': 'application/json' },
       });
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/pipelines/{pipelineName}',
+      validate: {
+        params: schema.object({
+          pipelineName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const pipelineName = decodeURIComponent(request.params.pipelineName);
+      const { client } = (await context.core).elasticsearch;
+      try {
+        const pipeline = await getPipeline(pipelineName, client);
+        return response.ok({
+          body: pipeline,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isNotFoundException(error)) {
+          // return specific message if pipeline doesn't exist
+          return createError({
+            errorCode: ErrorCode.PIPELINE_NOT_FOUND,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.indices.pipelines.pipelineNotFoundError',
+              {
+                defaultMessage: 'The pipeline {pipelineName} does not exist',
+                values: {
+                  pipelineName,
+                },
+              }
+            ),
+            response,
+            statusCode: 404,
+          });
+        }
+        throw error;
+      }
     })
   );
 

@@ -59,10 +59,11 @@ export interface EditorFramePlugins {
   uiSettings: IUiSettingsClient;
   storage: IStorageWrapper;
   timefilter: TimefilterContract;
+  nowProvider: DataPublicPluginStart['nowProvider'];
   eventAnnotationService: EventAnnotationServiceType;
 }
 
-async function collectAsyncDefinitions<T extends { id: string }>(
+async function collectAsyncDefinitions<T extends { id: string; alias?: string[] }>(
   definitions: Array<T | (() => Promise<T>)>
 ) {
   const resolvedDefinitions = await Promise.all(
@@ -71,6 +72,11 @@ async function collectAsyncDefinitions<T extends { id: string }>(
   const definitionMap: Record<string, T> = {};
   resolvedDefinitions.forEach((definition) => {
     definitionMap[definition.id] = definition;
+    if (definition.alias) {
+      for (const aliasId of definition.alias) {
+        definitionMap[aliasId] = definition;
+      }
+    }
   });
 
   return definitionMap;

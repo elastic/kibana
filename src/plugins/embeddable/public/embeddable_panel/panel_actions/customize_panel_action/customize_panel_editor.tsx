@@ -127,7 +127,9 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               size="xs"
               data-test-subj="resetCustomEmbeddablePanelTitleButton"
               onClick={() => setPanelTitle(embeddable.getOutput().defaultTitle)}
-              disabled={hideTitle || !editMode}
+              disabled={
+                hideTitle || !editMode || embeddable.getOutput().defaultTitle === panelTitle
+              }
               aria-label={i18n.translate(
                 'embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomTitleButtonAriaLabel',
                 {
@@ -173,7 +175,11 @@ export const CustomizePanelEditor = (props: CustomizePanelProps) => {
               onClick={() => {
                 setPanelDescription(embeddable.getOutput().defaultDescription);
               }}
-              disabled={hideTitle || !editMode}
+              disabled={
+                hideTitle ||
+                !editMode ||
+                embeddable.getOutput().defaultDescription === panelDescription
+              }
               aria-label={i18n.translate(
                 'embeddableApi.customizePanel.flyout.optionsMenuForm.resetCustomDescriptionButtonAriaLabel',
                 {

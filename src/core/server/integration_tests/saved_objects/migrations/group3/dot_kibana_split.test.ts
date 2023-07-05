@@ -42,7 +42,8 @@ const RELOCATE_TYPES: Record<string, string> = {
 };
 
 const PARALLEL_MIGRATORS = 6;
-export const logFilePath = Path.join(__dirname, 'dot_kibana_split.test.log');
+export const logFilePathFirstRun = Path.join(__dirname, 'dot_kibana_split_1st_run.test.log');
+export const logFilePathSecondRun = Path.join(__dirname, 'dot_kibana_split_2nd_run.test.log');
 
 describe('split .kibana index into multiple system indices', () => {
   let esServer: TestElasticsearchUtils['es'];
@@ -53,11 +54,12 @@ describe('split .kibana index into multiple system indices', () => {
   });
 
   beforeEach(async () => {
-    await clearLog(logFilePath);
+    await clearLog(logFilePathFirstRun);
+    await clearLog(logFilePathSecondRun);
   });
 
   describe('when migrating from a legacy version', () => {
-    let migratorTestKitFactory: () => Promise<KibanaMigratorTestKit>;
+    let migratorTestKitFactory: (logFilePath: string) => Promise<KibanaMigratorTestKit>;
 
     beforeAll(async () => {
       esServer = await startElasticsearch({
@@ -77,7 +79,7 @@ describe('split .kibana index into multiple system indices', () => {
         }
       );
 
-      migratorTestKitFactory = () =>
+      migratorTestKitFactory = (logFilePath: string) =>
         getKibanaMigratorTestKit({
           types: updatedTypeRegistry.getAllTypes(),
           kibanaIndex: '.kibana',
@@ -85,7 +87,7 @@ describe('split .kibana index into multiple system indices', () => {
           defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
         });
 
-      const { runMigrations, client } = await migratorTestKitFactory();
+      const { runMigrations, client } = await migratorTestKitFactory(logFilePathFirstRun);
 
       // count of types in the legacy index
       expect(await getAggregatedTypesCount(client, '.kibana_1')).toEqual({
@@ -194,7 +196,6 @@ describe('split .kibana index into multiple system indices', () => {
             "cases-connector-mappings",
             "cases-telemetry",
             "cases-user-actions",
-            "composite-slo",
             "config",
             "config-global",
             "connector_token",
@@ -263,6 +264,7 @@ describe('split .kibana index into multiple system indices', () => {
             "synthetics-privates-locations",
             "tag",
             "telemetry",
+            "threshold-explorer-view",
             "ui-metric",
             "upgrade-assistant-ml-upgrade-operation",
             "upgrade-assistant-reindex-operation",
@@ -286,7 +288,7 @@ describe('split .kibana index into multiple system indices', () => {
         }
       `);
 
-      const logs = await parseLogFile(logFilePath);
+      const logs = await parseLogFile(logFilePathFirstRun);
 
       expect(logs).toContainLogEntries(
         [
@@ -324,6 +326,8 @@ describe('split .kibana index into multiple system indices', () => {
         // .kibana_task_manager migrator is NOT involved in relocation, must not sync with other migrators
         '[.kibana_task_manager] READY_TO_REINDEX_SYNC',
         '[.kibana_task_manager] DONE_REINDEXING_SYNC',
+        // .kibana_task_manager migrator performed a REINDEX migration, it must update ALL types
+        '[.kibana_task_manager] Kibana is performing a compatible update and it will update the following SO types so that ES can pickup the updated mappings',
       ]);
 
       // new indices migrators did not exist, so they all have to reindex (create temp index + sync)
@@ -378,7 +382,7 @@ describe('split .kibana index into multiple system indices', () => {
             `[${index}] UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META.`,
             `[${index}] UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.`,
             `[${index}] CHECK_VERSION_INDEX_READY_ACTIONS -> MARK_VERSION_INDEX_READY_SYNC.`,
-            `[${index}] MARK_VERSION_INDEX_READY_SYNC -> DONE.`,
+            `[${index}] MARK_VERSION_INDEX_READY_SYNC`, // all migrators try to update all aliases, all but one will have conclicts
             `[${index}] Migration completed after`,
           ],
           { ordered: true }
@@ -388,15 +392,17 @@ describe('split .kibana index into multiple system indices', () => {
       // should NOT retransform anything (we reindexed, thus we transformed already)
       ['.kibana', '.kibana_task_manager', '.kibana_so_ui', '.kibana_so_search'].forEach((index) => {
         expect(logs).not.toContainLogEntry(`[${index}] OUTDATED_DOCUMENTS_TRANSFORM`);
+        expect(logs).not.toContainLogEntry(
+          `[${index}] Kibana is performing a compatible update and it will update the following SO types so that ES can pickup the updated mappings`
+        );
       });
     });
 
     afterEach(async () => {
       // we run the migrator again to ensure that the next time state is loaded everything still works as expected
-      const { runMigrations } = await migratorTestKitFactory();
-      await clearLog(logFilePath);
+      const { runMigrations } = await migratorTestKitFactory(logFilePathSecondRun);
       await runMigrations();
-      const logs = await parseLogFile(logFilePath);
+      const logs = await parseLogFile(logFilePathSecondRun);
       expect(logs).not.toContainLogEntries(['REINDEX', 'CREATE', 'UPDATE_TARGET_MAPPINGS']);
     });
 
@@ -406,9 +412,8 @@ describe('split .kibana index into multiple system indices', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/157510
-  // This test takes too long. Can be manually executed to verify the correct behavior.
-  describe.skip('when multiple Kibana migrators run in parallel', () => {
+  describe('when multiple Kibana migrators run in parallel', () => {
+    jest.setTimeout(1200000);
     it('correctly migrates 7.7.2_xpack_100k_obj.zip archive', async () => {
       esServer = await startElasticsearch({
         dataArchive: Path.join(__dirname, '..', 'archives', '7.7.2_xpack_100k_obj.zip'),
@@ -419,9 +424,11 @@ describe('split .kibana index into multiple system indices', () => {
       expect(breakdownBefore).toEqual({
         '.kibana': {
           'apm-telemetry': 1,
+          application_usage_transactional: 4,
           config: 1,
           dashboard: 52994,
           'index-pattern': 1,
+          'maps-telemetry': 1,
           search: 1,
           space: 1,
           'ui-metric': 5,
@@ -483,7 +490,7 @@ describe('split .kibana index into multiple system indices', () => {
           task: 5,
         },
       });
-    }, 1200000);
+    });
 
     afterEach(async () => {
       await esServer?.stop();

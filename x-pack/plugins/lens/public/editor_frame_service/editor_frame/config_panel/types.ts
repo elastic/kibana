@@ -25,9 +25,11 @@ export interface ConfigPanelWrapperProps {
   visualizationMap: VisualizationMap;
   core: DatasourceDimensionEditorProps['core'];
   dataViews: DataViewsPublicPluginStart;
-  indexPatternService: IndexPatternServiceAPI;
+  indexPatternService?: IndexPatternServiceAPI;
   uiActions: UiActionsStart;
-  getUserMessages: UserMessagesGetter;
+  getUserMessages?: UserMessagesGetter;
+  hideLayerHeader?: boolean;
+  onUpdateStateCb?: (datasourceState: unknown, visualizationState: unknown) => void;
 }
 
 export interface LayerPanelProps {

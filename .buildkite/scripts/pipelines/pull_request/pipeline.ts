@@ -60,6 +60,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     if (
       (await doAnyChangesMatch([
+        /^src\/plugins\/controls/,
         /^packages\/kbn-securitysolution-.*/,
         /^x-pack\/plugins\/lists/,
         /^x-pack\/plugins\/security_solution/,
@@ -74,7 +75,8 @@ const uploadPipeline = (pipelineContent: string | object) => {
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution.yml'));
       pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/security_solution_investigations.yml')
+        getPipeline('.buildkite/pipelines/pull_request/security_solution_investigations.yml'),
+        getPipeline('.buildkite/pipelines/pull_request/security_solution_explore.yml')
       );
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/defend_workflows.yml'));
     }
@@ -152,6 +154,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
       ])
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml'));
     }
 
     if (await doAnyChangesMatch([/^x-pack\/plugins\/ux/, /^x-pack\/plugins\/exploratory_view/])) {

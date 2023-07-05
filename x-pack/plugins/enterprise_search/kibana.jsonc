@@ -17,12 +17,13 @@
       "data",
       "discover",
       "charts",
-      "infra",
+      "logsShared",
       "cloud",
       "esUiShared",
       "guidedOnboarding",
       "lens",
       "embeddable",
+      "share"
     ],
     "optionalPlugins": [
       "customIntegrations",

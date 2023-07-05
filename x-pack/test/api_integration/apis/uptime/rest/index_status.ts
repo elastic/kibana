@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
       const data = apiResponse.body;
       expect(data).to.eql({
         indexExists: true,
-        indices: 'heartbeat-8*,heartbeat-7*,synthetics-*',
+        indices: 'heartbeat-8*,heartbeat-7*',
       });
     });
   });

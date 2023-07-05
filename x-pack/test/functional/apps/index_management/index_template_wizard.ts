@@ -12,6 +12,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'indexManagement', 'header']);
   const security = getService('security');
+  const comboBox = getService('comboBox');
+  const find = getService('find');
+  const browser = getService('browser');
 
   describe('Index template wizard', function () {
     before(async () => {
@@ -96,6 +99,74 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         // Click Create template
         await pageObjects.indexManagement.clickNextButton();
+      });
+    });
+
+    describe('Mappings step', async () => {
+      beforeEach(async () => {
+        await pageObjects.common.navigateToApp('indexManagement');
+        // Navigate to the index templates tab
+        await pageObjects.indexManagement.changeTabs('templatesTab');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Click Create Template button
+        await testSubjects.click('createTemplateButton');
+
+        // Fill out required fields
+        await testSubjects.setValue('nameField', 'test-index-template');
+        await testSubjects.setValue('indexPatternsField', 'test-index-pattern');
+
+        // Go to Mappings step
+        await pageObjects.indexManagement.clickNextButton();
+        expect(await testSubjects.getVisibleText('stepTitle')).to.be(
+          'Component templates (optional)'
+        );
+        await pageObjects.indexManagement.clickNextButton();
+        expect(await testSubjects.getVisibleText('stepTitle')).to.be('Index settings (optional)');
+        await pageObjects.indexManagement.clickNextButton();
+        expect(await testSubjects.getVisibleText('stepTitle')).to.be('Mappings (optional)');
+      });
+
+      // Test for catching the bug reported in https://github.com/elastic/kibana/issues/156202
+      it("clearing up the Numeric subtype dropdown doesn't break the page", async () => {
+        // Add a mapping field
+        await testSubjects.click('addFieldButton');
+
+        // Select Numeric type
+        await testSubjects.click('fieldType');
+        await comboBox.set('fieldType', 'Numeric');
+
+        // Clear up subtype dropdown
+        await testSubjects.click('fieldSubType');
+        const input = await find.activeElement();
+        await input.pressKeys(browser.keys.BACK_SPACE);
+
+        // Verify that elements are still visible
+        expect(await testSubjects.exists('addFieldButton')).to.be(true);
+        expect(await testSubjects.exists('fieldType')).to.be(true);
+        expect(await testSubjects.exists('fieldSubType')).to.be(true);
+        expect(await testSubjects.exists('nextButton')).to.be(true);
+      });
+
+      // Test for catching the bug reported in https://github.com/elastic/kibana/issues/156202
+      it("clearing up the Range subtype dropdown doesn't break the page", async () => {
+        // Add a mapping field
+        await testSubjects.click('addFieldButton');
+
+        // Select Range type
+        await testSubjects.click('fieldType');
+        await comboBox.set('fieldType', 'Range');
+
+        // Clear up subtype dropdown
+        await testSubjects.click('fieldSubType');
+        const input = await find.activeElement();
+        await input.pressKeys(browser.keys.BACK_SPACE);
+
+        // Verify that elements are still visible
+        expect(await testSubjects.exists('addFieldButton')).to.be(true);
+        expect(await testSubjects.exists('fieldType')).to.be(true);
+        expect(await testSubjects.exists('fieldSubType')).to.be(true);
+        expect(await testSubjects.exists('nextButton')).to.be(true);
       });
     });
   });

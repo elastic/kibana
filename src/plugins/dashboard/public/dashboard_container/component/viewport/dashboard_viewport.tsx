@@ -22,11 +22,13 @@ import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 
 export const useDebouncedWidthObserver = (wait = 250) => {
   const [width, setWidth] = useState<number>(0);
-  const onWidthCange = useMemo(() => debounce(setWidth, wait), [wait]);
+  const onWidthChange = useMemo(() => debounce(setWidth, wait), [wait]);
   const { ref } = useResizeObserver<HTMLDivElement>({
     onResize: (dimensions) => {
-      if (width === 0) setWidth(dimensions.width);
-      if (dimensions.width !== width) onWidthCange(dimensions.width);
+      if (dimensions.width) {
+        if (width === 0) setWidth(dimensions.width);
+        if (dimensions.width !== width) onWidthChange(dimensions.width);
+      }
     },
   });
   return { ref, width };

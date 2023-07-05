@@ -14,8 +14,9 @@ import {
   niceTimeFormatter,
   Position,
   Settings,
-  TooltipValue,
   BrushEndListener,
+  TooltipProps,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiPageContentBody_Deprecated as EuiPageContentBody } from '@elastic/eui';
 import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
@@ -75,9 +76,9 @@ export const ChartSectionVis = ({
     },
     [onChangeRangeTime, isLiveStreaming, stopLiveStreaming]
   );
-  const tooltipProps = {
-    headerFormatter: useCallback(
-      (data: TooltipValue) => moment(data.value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
+  const tooltipProps: TooltipProps = {
+    headerFormatter: useCallback<NonNullable<TooltipProps['headerFormatter']>>(
+      ({ value }) => moment(value).format(dateFormat || 'Y-MM-DD HH:mm:ss.SSS'),
       [dateFormat]
     ),
   };
@@ -131,8 +132,8 @@ export const ChartSectionVis = ({
                 stack={stacked}
               />
             ))}
+          <Tooltip {...tooltipProps} />
           <Settings
-            tooltip={tooltipProps}
             onBrushEnd={handleTimeChange}
             theme={getChartTheme(isDarkMode)}
             showLegend

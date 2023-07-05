@@ -26,7 +26,7 @@ import type { DocumentField } from './field_list';
 import { PreviewState } from '../types';
 import { useStateSelector } from '../../../state_utils';
 
-interface Props {
+export interface PreviewListItemProps {
   field: DocumentField;
   toggleIsPinned?: (name: string) => void;
   hasScriptError?: boolean;
@@ -36,7 +36,7 @@ interface Props {
 
 const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
 
-export const PreviewListItem: React.FC<Props> = ({
+export const PreviewListItem: React.FC<PreviewListItemProps> = ({
   field: { key, value, formattedValue, isPinned = false },
   toggleIsPinned,
   hasScriptError,

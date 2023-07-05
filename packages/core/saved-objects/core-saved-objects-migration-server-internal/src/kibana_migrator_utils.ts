@@ -30,10 +30,7 @@ export function waitGroup<T>(): WaitGroup<T> {
   return new Defer<T>();
 }
 
-export function createWaitGroupMap<T, U>(
-  keys: string[],
-  thenHook: (res: T[]) => U = (res) => res as unknown as U
-): Record<string, WaitGroup<T>> {
+export function createWaitGroupMap<T>(keys: string[]): Record<string, WaitGroup<T>> {
   if (!keys?.length) {
     return {};
   }
@@ -41,7 +38,7 @@ export function createWaitGroupMap<T, U>(
   const defers: Array<WaitGroup<T>> = keys.map(() => waitGroup<T>());
 
   // every member of the WaitGroup will wait for all members to resolve
-  const all = Promise.all(defers.map(({ promise }) => promise)).then(thenHook);
+  const all = Promise.all(defers.map(({ promise }) => promise));
 
   return keys.reduce<Record<string, WaitGroup<T>>>((acc, indexName, i) => {
     const { resolve, reject } = defers[i];

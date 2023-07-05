@@ -7,11 +7,14 @@
  */
 
 export type {
+  AppDeepLinkId,
+  AppId,
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeDocTitle,
   ChromeGlobalHelpExtensionMenuLink,
+  ChromeHelpMenuLink,
   ChromeHelpExtension,
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
@@ -29,9 +32,12 @@ export type {
   ChromeStart,
   ChromeStyle,
   ChromeUserBanner,
-  ChromeProjectNavigationLink,
   ChromeProjectNavigation,
   ChromeProjectNavigationNode,
   SideNavCompProps,
   SideNavComponent,
+  ChromeProjectBreadcrumb,
+  ChromeSetProjectBreadcrumbsParams,
+  NodeDefinition,
+  NodeDefinitionWithChildren,
 } from './src';

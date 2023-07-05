@@ -7,6 +7,7 @@
 
 import { css } from '@emotion/react';
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,63 +15,152 @@ import {
   EuiSuperSelect,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
+import { euiThemeVars } from '@kbn/ui-theme';
+import { Conversation } from '../../../../..';
 import { getOptions } from '../helpers';
 import * as i18n from '../translations';
 import type { Prompt } from '../../../types';
+import { useAssistantContext } from '../../../../assistant_context';
+import { useConversation } from '../../../use_conversation';
+import { SystemPromptModal } from '../system_prompt_modal/system_prompt_modal';
 
 export interface Props {
+  conversation: Conversation | undefined;
   selectedPrompt: Prompt | undefined;
-  setSelectedSystemPromptId: React.Dispatch<React.SetStateAction<string | null>>;
-  setShowSelectSystemPrompt: React.Dispatch<React.SetStateAction<boolean>>;
-  showSelectSystemPrompt: boolean;
-  systemPrompts: Prompt[];
+  clearSelectedSystemPrompt?: () => void;
+  fullWidth?: boolean;
+  isClearable?: boolean;
+  isEditing?: boolean;
+  isOpen?: boolean;
+  onSystemPromptModalVisibilityChange?: (isVisible: boolean) => void;
+  setIsEditing?: React.Dispatch<React.SetStateAction<boolean>>;
+  showTitles?: boolean;
 }
 
-const SelectSystemPromptComponent: React.FC<Props> = ({
-  selectedPrompt,
-  setSelectedSystemPromptId,
-  setShowSelectSystemPrompt,
-  showSelectSystemPrompt,
-  systemPrompts,
-}) => {
-  const options = useMemo(() => getOptions(systemPrompts), [systemPrompts]);
+const ADD_NEW_SYSTEM_PROMPT = 'ADD_NEW_SYSTEM_PROMPT';
 
-  const onChange = useCallback(
-    (value) => {
-      setSelectedSystemPromptId(value);
-      setShowSelectSystemPrompt(false);
+const SelectSystemPromptComponent: React.FC<Props> = ({
+  conversation,
+  selectedPrompt,
+  clearSelectedSystemPrompt,
+  fullWidth = true,
+  isClearable = false,
+  isEditing = false,
+  isOpen = false,
+  onSystemPromptModalVisibilityChange,
+  setIsEditing,
+  showTitles = false,
+}) => {
+  const { allSystemPrompts, setAllSystemPrompts } = useAssistantContext();
+  const { setApiConfig } = useConversation();
+
+  const [isOpenLocal, setIsOpenLocal] = useState<boolean>(isOpen);
+  const handleOnBlur = useCallback(() => setIsOpenLocal(false), []);
+
+  // Write the selected system prompt to the conversation config
+  const setSelectedSystemPrompt = useCallback(
+    (prompt: Prompt | undefined) => {
+      if (conversation) {
+        setApiConfig({
+          conversationId: conversation.id,
+          apiConfig: {
+            ...conversation.apiConfig,
+            defaultSystemPrompt: prompt,
+          },
+        });
+      }
     },
-    [setSelectedSystemPromptId, setShowSelectSystemPrompt]
+    [conversation, setApiConfig]
+  );
+
+  // Connector Modal State
+  const [isSystemPromptModalVisible, setIsSystemPromptModalVisible] = useState<boolean>(false);
+  const addNewSystemPrompt = useMemo(() => {
+    return {
+      value: ADD_NEW_SYSTEM_PROMPT,
+      inputDisplay: i18n.ADD_NEW_SYSTEM_PROMPT,
+      dropdownDisplay: (
+        <EuiFlexGroup gutterSize="none" key={ADD_NEW_SYSTEM_PROMPT}>
+          <EuiFlexItem grow={true}>
+            <EuiButtonEmpty iconType="plus" size="xs">
+              {i18n.ADD_NEW_SYSTEM_PROMPT}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {/* Right offset to compensate for 'selected' icon of EuiSuperSelect since native footers aren't supported*/}
+            <div style={{ width: '24px' }} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    };
+  }, []);
+
+  // Callback for modal onSave, saves to local storage on change
+  const onSystemPromptsChange = useCallback(
+    (newSystemPrompts: Prompt[]) => {
+      setAllSystemPrompts(newSystemPrompts);
+      setIsSystemPromptModalVisible(false);
+      onSystemPromptModalVisibilityChange?.(false);
+    },
+    [onSystemPromptModalVisibilityChange, setAllSystemPrompts]
+  );
+
+  // SuperSelect State/Actions
+  const options = useMemo(
+    () => getOptions({ prompts: allSystemPrompts, showTitles }),
+    [allSystemPrompts, showTitles]
+  );
+  const onChange = useCallback(
+    (selectedSystemPromptId) => {
+      if (selectedSystemPromptId === ADD_NEW_SYSTEM_PROMPT) {
+        onSystemPromptModalVisibilityChange?.(true);
+        setIsSystemPromptModalVisible(true);
+        return;
+      }
+      setSelectedSystemPrompt(allSystemPrompts.find((sp) => sp.id === selectedSystemPromptId));
+      setIsEditing?.(false);
+    },
+    [allSystemPrompts, onSystemPromptModalVisibilityChange, setIsEditing, setSelectedSystemPrompt]
   );
 
   const clearSystemPrompt = useCallback(() => {
-    setSelectedSystemPromptId(null);
-    setShowSelectSystemPrompt(false);
-  }, [setSelectedSystemPromptId, setShowSelectSystemPrompt]);
+    setSelectedSystemPrompt(undefined);
+    setIsEditing?.(false);
+    clearSelectedSystemPrompt?.();
+  }, [clearSelectedSystemPrompt, setIsEditing, setSelectedSystemPrompt]);
 
-  const onShowSelectSystemPrompt = useCallback(
-    () => setShowSelectSystemPrompt(true),
-    [setShowSelectSystemPrompt]
-  );
+  const onShowSelectSystemPrompt = useCallback(() => {
+    setIsEditing?.(true);
+    setIsOpenLocal(true);
+  }, [setIsEditing]);
 
   return (
     <EuiFlexGroup data-test-subj="selectSystemPrompt" gutterSize="none">
-      <EuiFlexItem>
-        {showSelectSystemPrompt && (
+      <EuiFlexItem
+        css={css`
+          max-width: 100%;
+        `}
+      >
+        {isEditing && (
           <EuiFormRow
             css={css`
               min-width: 100%;
             `}
           >
             <EuiSuperSelect
+              // Limits popover z-index to prevent it from getting too high and covering tooltips.
+              // If the z-index is not defined, when a popover is opened, it sets the target z-index + 2000
+              popoverProps={{ zIndex: euiThemeVars.euiZLevel8 }}
               data-test-subj="promptSuperSelect"
-              fullWidth={true}
+              fullWidth={fullWidth}
               hasDividers
               itemLayoutAlign="top"
+              isOpen={isOpenLocal && !isSystemPromptModalVisible}
               onChange={onChange}
-              options={options}
+              onBlur={handleOnBlur}
+              options={[...options, addNewSystemPrompt]}
               placeholder={i18n.SELECT_A_SYSTEM_PROMPT}
               valueOfSelected={selectedPrompt?.id}
             />
@@ -79,7 +169,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        {showSelectSystemPrompt ? (
+        {isEditing && isClearable && (
           <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT}>
             <EuiButtonIcon
               aria-label={i18n.CLEAR_SYSTEM_PROMPT}
@@ -88,7 +178,8 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
               onClick={clearSystemPrompt}
             />
           </EuiToolTip>
-        ) : (
+        )}
+        {!isEditing && (
           <EuiToolTip content={i18n.ADD_SYSTEM_PROMPT_TOOLTIP}>
             <EuiButtonIcon
               aria-label={i18n.ADD_SYSTEM_PROMPT_TOOLTIP}
@@ -99,6 +190,13 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
           </EuiToolTip>
         )}
       </EuiFlexItem>
+      {isSystemPromptModalVisible && (
+        <SystemPromptModal
+          onClose={() => setIsSystemPromptModalVisible(false)}
+          onSystemPromptsChange={onSystemPromptsChange}
+          systemPrompts={allSystemPrompts}
+        />
+      )}
     </EuiFlexGroup>
   );
 };

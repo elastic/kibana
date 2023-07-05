@@ -6,13 +6,13 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import { PersistedLogViewReference } from '../../../../../common/log_views';
+import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import {
   getLogEntryAnomaliesDatasetsRequestPayloadRT,
   getLogEntryAnomaliesDatasetsSuccessReponsePayloadRT,
   LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH,
-} from '../../../../../common/http_api/log_analysis';
+} from '../../../../../common/http_api';
 
 interface RequestArgs {
   logViewReference: PersistedLogViewReference;
@@ -38,6 +38,7 @@ export const callGetLogEntryAnomaliesDatasetsAPI = async (
         },
       })
     ),
+    version: '1',
   });
 
   return decodeOrThrow(getLogEntryAnomaliesDatasetsSuccessReponsePayloadRT)(response);

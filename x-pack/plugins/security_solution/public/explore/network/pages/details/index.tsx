@@ -58,8 +58,6 @@ import {
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
 
-export { getTrailingBreadcrumbs } from './utils';
-
 const NetworkDetailsManage = manageQuery(IpOverview);
 
 const NetworkDetailsComponent: React.FC = () => {
@@ -182,7 +180,10 @@ const NetworkDetailsComponent: React.FC = () => {
               }
               title={
                 <SecurityCellActions
-                  field={{ type: 'ip', value: ip, name: `${flowTarget}.ip` }}
+                  data={{
+                    value: ip,
+                    field: `${flowTarget}.ip`,
+                  }}
                   mode={CellActionsMode.HOVER_DOWN}
                   visibleCellActions={5}
                   triggerId={SecurityCellActionsTrigger.DEFAULT}

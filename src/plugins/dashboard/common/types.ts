@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableInput, EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import { Reference } from '@kbn/content-management-utils';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 
-import { SavedDashboardPanel } from './dashboard_saved_object/types';
-import { DashboardContainerInput, DashboardPanelState } from './dashboard_container/types';
+import { DashboardAttributes, SavedDashboardPanel } from './content_management';
+import { DashboardContainerInput, DashboardPanelMap } from './dashboard_container/types';
 
 export interface DashboardOptions {
   hidePanelTitles: boolean;
@@ -36,26 +37,15 @@ export type SharedDashboardState = Partial<
 >;
 
 /**
- * Grid type for React Grid Layout
+ * A partially parsed version of the Dashboard Attributes used for inject and extract logic for both the Dashboard Container and the Dashboard Saved Object.
  */
-export interface GridData {
-  w: number;
-  h: number;
-  x: number;
-  y: number;
-  i: string;
-}
-
-/**
- * Types below this line are copied here because so many important types are tied up in public. These types should be
- * moved from public into common.
- *
- * TODO replace this type with a type that uses the real Dashboard Input type.
- * See https://github.com/elastic/kibana/issues/147488 for more information.
- */
-export interface DashboardContainerStateWithType extends EmbeddableStateWithType {
-  panels: {
-    [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
-  };
+export type ParsedDashboardAttributesWithType = EmbeddableStateWithType & {
   controlGroupInput?: PersistableControlGroupInput;
+  panels: DashboardPanelMap;
+  type: 'dashboard';
+};
+
+export interface DashboardAttributesAndReferences {
+  attributes: DashboardAttributes;
+  references: Reference[];
 }
