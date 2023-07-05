@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { LensChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaValue, LayerValue } from '../../../types';
 
-export const memoryFree: LensChartConfig = {
-  title: 'Memory Free',
-  formula: {
-    formula: 'max(system.memory.total) - average(system.memory.actual.used.bytes)',
+export const memoryFree: LayerValue<FormulaValue> = {
+  name: 'Memory Free',
+  data: {
+    value: 'max(system.memory.total) - average(system.memory.actual.used.bytes)',
     format: {
       id: 'bytes',
       params: {
@@ -19,5 +18,4 @@ export const memoryFree: LensChartConfig = {
       },
     },
   },
-  getFilters,
 };

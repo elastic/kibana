@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import type { LensChartConfig, LensLineChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaValue, LayerValue } from '../../../types';
 
-const memoryLineChart: LensLineChartConfig = {
-  extraVisualizationState: {
-    yLeftExtent: {
-      mode: 'custom',
-      lowerBound: 0,
-      upperBound: 1,
-    },
-  },
-};
+// const lineChartConfig: LineChartConfig = {
+//   extraVisualizationState: {
+//     yLeftExtent: {
+//       mode: 'custom',
+//       lowerBound: 0,
+//       upperBound: 1,
+//     },
+//   },
+// };
 
-export const memoryUsage: LensChartConfig = {
-  title: 'Memory Usage',
-  formula: {
-    formula: 'average(system.memory.actual.used.pct)',
+export const memoryUsage: LayerValue<FormulaValue> = {
+  name: 'Memory Usage',
+  data: {
+    value: 'average(system.memory.actual.used.pct)',
     format: {
       id: 'percent',
       params: {
@@ -29,6 +28,4 @@ export const memoryUsage: LensChartConfig = {
       },
     },
   },
-  lineChartConfig: memoryLineChart,
-  getFilters,
 };

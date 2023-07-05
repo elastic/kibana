@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { LineChart } from './line_chart';
-export { MetricChart } from './metric_chart';
+export { MetricLayer } from './metric_layer';
+export { XYLayer } from './xy_layer';
 
-export { MetricLayer, XYLayer } from './layers';
+export { FormulaData } from './data/formula';

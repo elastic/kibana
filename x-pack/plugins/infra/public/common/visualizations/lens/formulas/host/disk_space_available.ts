@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { LensChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaValue, LayerValue } from '../../../types';
 
-export const diskSpaceAvailable: LensChartConfig = {
-  title: 'Disk Space Available',
-  formula: {
-    formula: 'average(system.filesystem.free)',
+export const diskSpaceAvailable: LayerValue<FormulaValue> = {
+  name: 'Disk Space Available',
+  data: {
+    value: 'average(system.filesystem.free)',
     format: {
       id: 'bytes',
       params: {
@@ -19,5 +18,4 @@ export const diskSpaceAvailable: LensChartConfig = {
       },
     },
   },
-  getFilters,
 };

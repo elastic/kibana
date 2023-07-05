@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { LensChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaValue, LayerValue } from '../../../types';
 
-export const tx: LensChartConfig = {
-  title: 'Network Outbound (TX)',
-  formula: {
-    formula:
+export const tx: LayerValue<FormulaValue> = {
+  name: 'Network Outbound (TX)',
+  data: {
+    value:
       "average(host.network.egress.bytes) * 8 / (max(metricset.period, kql='host.network.egress.bytes: *') / 1000)",
     format: {
       id: 'bits',
@@ -20,5 +19,4 @@ export const tx: LensChartConfig = {
       },
     },
   },
-  getFilters,
 };

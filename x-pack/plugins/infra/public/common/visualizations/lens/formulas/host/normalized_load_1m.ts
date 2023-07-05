@@ -5,65 +5,29 @@
  * 2.0.
  */
 
-import type { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
-import type { LensChartConfig, LensLineChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import { XYReferenceLineLayerConfig } from '@kbn/lens-plugin/public';
+import type { FormulaValue, LayerValue, StaticValue } from '../../../types';
 
 const REFERENCE_LAYER = 'referenceLayer';
 
-export const loadLineChart: LensLineChartConfig = {
-  extraLayers: {
-    [REFERENCE_LAYER]: {
-      linkToLayers: [],
-      columnOrder: ['referenceColumn'],
-      columns: {
-        referenceColumn: {
-          label: 'Reference',
-          dataType: 'number',
-          operationType: 'static_value',
-          isStaticValue: true,
-          isBucketed: false,
-          scale: 'ratio',
-          params: {
-            value: 1,
-            format: {
-              id: 'percent',
-              params: {
-                decimals: 0,
-              },
-            },
-          },
-          references: [],
-          customLabel: true,
-        } as ReferenceBasedIndexPatternColumn,
-      },
-      sampling: 1,
-      incompleteColumns: {},
+export const referenceLineConfig: XYReferenceLineLayerConfig = {
+  layerId: REFERENCE_LAYER,
+  accessors: ['referenceColumn'],
+  layerType: 'referenceLine',
+  yConfig: [
+    {
+      forAccessor: 'referenceColumn',
+      axisMode: 'left',
+      color: '#6092c0',
     },
-  },
-  extraVisualizationState: {
-    layers: [
-      {
-        layerId: REFERENCE_LAYER,
-        layerType: 'referenceLine',
-        accessors: ['referenceColumn'],
-        yConfig: [
-          {
-            forAccessor: 'referenceColumn',
-            axisMode: 'left',
-            color: '#6092c0',
-          },
-        ],
-      },
-    ],
-  },
-  extraReference: REFERENCE_LAYER,
+  ],
 };
 
-export const normalizedLoad1m: LensChartConfig = {
-  title: 'Normalized Load',
-  formula: {
-    formula: 'average(system.load.1) / max(system.load.cores)',
+export const referenceLayer: LayerValue<StaticValue> = {
+  name: 'layer',
+  data: {
+    value: 1,
+    scale: 'ratio',
     format: {
       id: 'percent',
       params: {
@@ -71,6 +35,17 @@ export const normalizedLoad1m: LensChartConfig = {
       },
     },
   },
-  getFilters,
-  lineChartConfig: loadLineChart,
+};
+
+export const normalizedLoad1m: LayerValue<FormulaValue> = {
+  name: 'Normalized Load',
+  data: {
+    value: 'average(system.load.1) / max(system.load.cores)',
+    format: {
+      id: 'percent',
+      params: {
+        decimals: 0,
+      },
+    },
+  },
 };

@@ -7,16 +7,17 @@
 
 export type {
   HostsLensFormulas,
-  LineChartOptions,
-  LensChartConfig,
-  LensLineChartConfig,
-  MetricChartOptions,
+  XYLayerOptions,
+  MetricLayerOptions,
   HostsLensMetricChartFormulas,
   HostsLensLineChartFormulas,
-  LensOptions,
+  Options as LensOptions,
   LensAttributes,
+  ValueParameters,
 } from './types';
 
 export { hostLensFormulas, visualizationTypes } from './constants';
+
+export { MetricLayer, XYLayer, FormulaData } from './lens/visualization_types/layers';
 
 export { LensAttributesBuilder } from './lens/lens_attributes_builder';

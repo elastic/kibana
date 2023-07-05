@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { LensChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaValue, LayerValue } from '../../../types';
 
-export const diskWriteThroughput: LensChartConfig = {
-  title: 'Disk Write Throughput',
-  formula: {
-    formula: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
+export const diskWriteThroughput: LayerValue<FormulaValue> = {
+  name: 'Disk Write Throughput',
+  data: {
+    value: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
     format: {
       id: 'bytes',
       params: {
@@ -19,5 +18,4 @@ export const diskWriteThroughput: LensChartConfig = {
       },
     },
   },
-  getFilters,
 };

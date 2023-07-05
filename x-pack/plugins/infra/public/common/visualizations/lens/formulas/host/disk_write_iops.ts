@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { LensChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaValue, LayerValue } from '../../../types';
 
-export const diskIOWrite: LensChartConfig = {
-  title: 'Disk Write IOPS',
-  formula: {
-    formula: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
+export const diskIOWrite: LayerValue<FormulaValue> = {
+  name: 'Disk Write IOPS',
+  data: {
+    value: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
     format: {
       id: 'number',
       params: {
@@ -19,5 +18,4 @@ export const diskIOWrite: LensChartConfig = {
       },
     },
   },
-  getFilters,
 };

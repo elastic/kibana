@@ -17,30 +17,47 @@ import {
   type HostsLensFormulas,
   type HostsLensMetricChartFormulas,
   type HostsLensLineChartFormulas,
-  type LineChartOptions,
-  type MetricChartOptions,
+  type XYLayerOptions,
+  type MetricLayerOptions,
+  type ValueParameters,
   LensAttributesBuilder,
   LensAttributes,
   hostLensFormulas,
   visualizationTypes,
+  FormulaData,
 } from '../common/visualizations';
 import { useLazyRef } from './use_lazy_ref';
+import { layerTypes } from '../common/visualizations/constants';
 
-type Options = LineChartOptions | MetricChartOptions;
-interface UseLensAttributesBaseParams<T extends HostsLensFormulas, O extends Options> {
-  dataView?: DataView;
+type Options = XYLayerOptions | MetricLayerOptions;
+
+interface FormulaConfig<T extends HostsLensFormulas> {
   type: T;
-  options?: O;
+  label?: string;
+  params?: ValueParameters;
 }
 
-interface UseLensAttributesLineChartParams
-  extends UseLensAttributesBaseParams<HostsLensLineChartFormulas, LineChartOptions> {
+interface Layer<
+  TFormula extends HostsLensFormulas,
+  TFormulaConfig extends FormulaConfig<TFormula> | Array<FormulaConfig<TFormula>>
+> {
+  formula: TFormulaConfig;
+}
+
+interface UseLensAttributesLineChartParams extends UseLensAttributesBaseParams<XYLayerOptions> {
+  layer: Array<Layer<HostsLensLineChartFormulas, Array<FormulaConfig<HostsLensLineChartFormulas>>>>;
   visualizationType: 'lineChart';
 }
 
 interface UseLensAttributesMetricChartParams
-  extends UseLensAttributesBaseParams<HostsLensMetricChartFormulas, MetricChartOptions> {
+  extends UseLensAttributesBaseParams<MetricLayerOptions> {
+  layer: Layer<HostsLensMetricChartFormulas, FormulaConfig<HostsLensMetricChartFormulas>>;
   visualizationType: 'metricChart';
+}
+
+interface UseLensAttributesBaseParams<TOptions extends Options> {
+  dataView?: DataView;
+  options?: TOptions;
 }
 
 type UseLensAttributesParams =
@@ -48,7 +65,7 @@ type UseLensAttributesParams =
   | UseLensAttributesMetricChartParams;
 
 export const useLensAttributes = ({
-  type,
+  layer,
   dataView,
   options,
   visualizationType,
@@ -60,17 +77,32 @@ export const useLensAttributes = ({
   const { value, error } = useAsync(lens.stateHelperApi, [lens]);
   const { formula: formulaAPI } = value ?? {};
 
-  const lensChartConfig = hostLensFormulas[type];
+  const layers = Array.isArray(layer) ? layer : [layer];
   const Chart = visualizationTypes[visualizationType];
+  const Layer = layerTypes[visualizationType];
 
   const attributes = useLazyRef(() => {
     if (!dataView || !formulaAPI) {
       return null;
     }
 
-    const builder = new LensAttributesBuilder(
-      new Chart(lensChartConfig, dataView, formulaAPI, options)
-    );
+    const builder = new LensAttributesBuilder({
+      visualization: new Chart({
+        layers: layers.map((layerItem) => {
+          const formulas = Array.isArray(layerItem.formula)
+            ? layerItem.formula
+            : [layerItem.formula];
+          return new Layer({
+            data: formulas.map(
+              (formula) => new FormulaData(formulaAPI, hostLensFormulas[formula.type])
+            ),
+            options,
+          });
+        }),
+        dataView,
+        options,
+      }),
+    });
 
     return builder.build();
   });
@@ -127,8 +159,8 @@ export const useLensAttributes = ({
   );
 
   const {
-    formula: { formula },
-  } = lensChartConfig;
+    data: { formula },
+  } = formulaConfig;
 
   return { formula, attributes: attributes.current, getExtraActions, error };
 };

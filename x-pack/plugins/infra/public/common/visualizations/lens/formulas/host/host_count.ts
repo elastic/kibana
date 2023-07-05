@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { LensChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaValue, LayerValue } from '../../../types';
 
-export const hostCount: LensChartConfig = {
-  title: 'Hosts',
-  formula: {
-    formula: 'unique_count(host.name)',
+export const hostCount: LayerValue<FormulaValue> = {
+  name: 'Hosts',
+  data: {
+    value: 'unique_count(host.name)',
     format: {
       id: 'number',
       params: {
@@ -19,5 +18,4 @@ export const hostCount: LensChartConfig = {
       },
     },
   },
-  getFilters,
 };

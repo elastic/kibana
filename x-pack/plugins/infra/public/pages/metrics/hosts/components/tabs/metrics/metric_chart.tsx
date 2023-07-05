@@ -54,11 +54,18 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
   });
 
   const { attributes, getExtraActions, error } = useLensAttributes({
-    type,
+    layer: [
+      {
+        formula: [{ type }],
+      },
+    ],
     dataView,
     options: {
       title,
-      breakdownSize,
+      breakdown: {
+        size: breakdownSize,
+        sourceField: 'host.name',
+      },
     },
     visualizationType: 'lineChart',
   });

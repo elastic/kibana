@@ -70,11 +70,19 @@ export const Tile = ({
   };
 
   const { formula, attributes, getExtraActions, error } = useLensAttributes({
-    type,
+    layer: {
+      formula: {
+        type,
+        params: {
+          format: {
+            decimals,
+          },
+        },
+      },
+    },
     dataView,
     options: {
       backgroundColor,
-      decimals,
       subtitle: getSubtitle(),
       showTrendLine: trendLine,
       showTitle: false,

@@ -5,111 +5,65 @@
  * 2.0.
  */
 
-import type {
-  FormBasedPersistedState,
-  FormulaPublicApi,
-  PersistedIndexPatternLayer,
-  XYState,
-} from '@kbn/lens-plugin/public';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
+import type { FormBasedPersistedState, XYState } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
-import {
-  DEFAULT_LAYER_ID,
-  getBreakdownColumn,
-  getDefaultReferences,
-  getHistogramColumn,
-} from '../utils';
-import type { LensChartConfig, VisualizationAttributes, LineChartOptions } from '../../types';
+import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { DEFAULT_AD_HOC_DATA_VIEW_ID, DEFAULT_LAYER_ID } from '../utils';
+import type { Chart, XYChartConfig } from '../../types';
+import { getFilters } from '../formulas/host/utils';
 
-const BREAKDOWN_COLUMN_NAME = 'hosts_aggs_breakdown';
-const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const ACCESSOR = 'formula_accessor';
 
-export class LineChart implements VisualizationAttributes<XYState> {
-  constructor(
-    private chartConfig: LensChartConfig,
-    private dataView: DataView,
-    private formulaAPI: FormulaPublicApi,
-    private options?: LineChartOptions
-  ) {}
+export class LineChart implements Chart<XYState> {
+  constructor(private state: XYChartConfig) {}
 
   getVisualizationType(): string {
     return 'lnsXY';
   }
 
   getLayers(): FormBasedPersistedState['layers'] {
-    const baseLayer: PersistedIndexPatternLayer = {
-      columnOrder: [BREAKDOWN_COLUMN_NAME, HISTOGRAM_COLUMN_NAME],
-      columns: {
-        ...getBreakdownColumn({
-          columnName: BREAKDOWN_COLUMN_NAME,
-          overrides: {
-            sourceField: 'host.name',
-            breakdownSize: this.options?.breakdownSize,
-          },
-        }),
-        ...getHistogramColumn({
-          columnName: HISTOGRAM_COLUMN_NAME,
-          overrides: {
-            sourceField: this.dataView.timeFieldName,
-          },
-        }),
-      },
-    };
-
-    const dataLayer = this.formulaAPI.insertOrReplaceFormulaColumn(
-      ACCESSOR,
-      this.chartConfig.formula,
-      baseLayer,
-      this.dataView
-    );
-
-    if (!dataLayer) {
-      throw new Error('Error generating the data layer for the chart');
-    }
-
-    return { [DEFAULT_LAYER_ID]: dataLayer, ...this.chartConfig.lineChartConfig?.extraLayers };
+    return this.state.layers.reduce((acc, curr, index) => {
+      const layerId = `${DEFAULT_LAYER_ID}_${index}`;
+      const accessorId = `${ACCESSOR}_${index}`;
+      return {
+        ...acc,
+        ...curr.getLayer(layerId, accessorId, this.state.dataView),
+      };
+    }, {});
   }
 
   getVisualizationState(): XYState {
-    const extraVisualizationState = this.chartConfig.lineChartConfig?.extraVisualizationState;
-
     return getXYVisualizationState({
-      ...extraVisualizationState,
       layers: [
-        {
-          layerId: DEFAULT_LAYER_ID,
-          seriesType: 'line',
-          accessors: [ACCESSOR],
-          yConfig: [],
-          layerType: 'data',
-          xAccessor: HISTOGRAM_COLUMN_NAME,
-          splitAccessor: BREAKDOWN_COLUMN_NAME,
-        },
-        ...(extraVisualizationState?.layers ? extraVisualizationState?.layers : []),
+        ...this.state.layers.map((p, index) => {
+          const layerId = `${DEFAULT_LAYER_ID}_${index}`;
+          const accessorId = `${ACCESSOR}_${index}`;
+          return p.getLayerConfig(layerId, accessorId);
+        }),
       ],
     });
   }
 
   getReferences(): SavedObjectReference[] {
-    const extraReference = this.chartConfig.lineChartConfig?.extraReference;
-    return [
-      ...getDefaultReferences(this.dataView, DEFAULT_LAYER_ID),
-      ...(extraReference ? getDefaultReferences(this.dataView, extraReference) : []),
-    ];
+    return this.state.layers.flatMap((p, index) => {
+      const layerId = `${DEFAULT_LAYER_ID}_${index}`;
+      return p.getReference(layerId, this.state.dataView);
+    });
   }
 
   getDataView(): DataView {
-    return this.dataView;
+    return this.state.dataView;
   }
 
   getTitle(): string {
-    return this.options?.title ?? this.chartConfig.title ?? '';
+    return this.state.options?.title ?? this.state.layers[0].getName();
   }
 
   getFilters(): Filter[] {
-    return this.chartConfig.getFilters({ id: this.dataView.id ?? DEFAULT_LAYER_ID });
+    return getFilters({
+      id: this.state.dataView.id ?? DEFAULT_AD_HOC_DATA_VIEW_ID,
+    });
   }
 }
 

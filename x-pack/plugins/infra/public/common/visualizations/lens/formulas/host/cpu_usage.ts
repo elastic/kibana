@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { LensChartConfig, LensLineChartConfig } from '../../../types';
-import { getFilters } from './utils';
+import type { FormulaValue, LayerValue } from '../../../types';
 
-export const cpuLineChart: LensLineChartConfig = {
+export const lineChartConfig: LineChartConfig = {
   extraVisualizationState: {
     yLeftExtent: {
       mode: 'custom',
@@ -18,10 +17,10 @@ export const cpuLineChart: LensLineChartConfig = {
   },
 };
 
-export const cpuUsage: LensChartConfig = {
-  title: 'CPU Usage',
-  formula: {
-    formula:
+export const cpuUsage: LayerValue<FormulaValue> = {
+  name: 'CPU Usage',
+  data: {
+    value:
       '(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)',
     format: {
       id: 'percent',
@@ -30,7 +29,4 @@ export const cpuUsage: LensChartConfig = {
       },
     },
   },
-  getFilters,
-
-  lineChartConfig: cpuLineChart,
 };
