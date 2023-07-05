@@ -6,11 +6,7 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import {
-  ALL_VALUE,
-  kqlCustomIndicatorSchema,
-  timeslicesBudgetingMethodSchema,
-} from '@kbn/slo-schema';
+import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 
 import { InvalidTransformError } from '../../../errors';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
