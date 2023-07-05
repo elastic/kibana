@@ -15,7 +15,7 @@ function isAgentTamperingPolicyValidForLicense(
   policy: Partial<AgentPolicy>,
   license: ILicense | null
 ) {
-  if (license.hasAtLeast('platinum')) {
+  if (license && license.hasAtLeast('platinum')) {
     // platinum allows agent tamper protection
     return true;
   }
@@ -45,7 +45,7 @@ export const unsetAgentPolicyAccordingToLicenseLevel = (
   policy: Partial<AgentPolicy>,
   license: ILicense | null
 ): Partial<AgentPolicy> => {
-  if (license.hasAtLeast('platinum')) {
+  if (license && license.hasAtLeast('platinum')) {
     return policy;
   }
 
