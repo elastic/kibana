@@ -20,6 +20,8 @@ import {
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { filterSuggestions } from '../lib/filter_suggestions_for_autocomplete';
+import { AddMessageVariables } from './add_message_variables';
+import { templateActionVariable } from '../lib';
 
 interface Props {
   messageVariables?: ActionVariable[];
@@ -207,6 +209,21 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
     setListOpen(false);
   }, []);
 
+  const onSelectMessageVariable = useCallback(
+    (variable: ActionVariable) => {
+      if (!textAreaRef.current) return;
+      const { selectionStart: startPosition, selectionEnd: endPosition } = textAreaRef.current;
+      const templatedVar = templateActionVariable(variable);
+
+      const newValue =
+        (inputTargetValue ?? '').substring(0, startPosition) +
+        templatedVar +
+        (inputTargetValue ?? '').substring(endPosition, (inputTargetValue ?? '').length);
+      editAction(paramsProperty, newValue, index);
+    },
+    [editAction, index, inputTargetValue, paramsProperty]
+  );
+
   const renderSelectableOption = (option: any) => {
     if (searchWord) {
       return <EuiHighlight search={searchWord}>{option.label}</EuiHighlight>;
@@ -221,6 +238,13 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
       isDisabled={isDisabled}
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       label={label}
+      labelAppend={
+        <AddMessageVariables
+          messageVariables={messageVariables}
+          onSelectEventHandler={onSelectMessageVariable}
+          paramsProperty={paramsProperty}
+        />
+      }
     >
       <>
         <EuiOutsideClickDetector onOutsideClick={clickOutSideTextArea}>
