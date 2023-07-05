@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
 import {
   EuiSpacer,
@@ -20,7 +20,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
+import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public/request/send_request';
 
+import type { GetOneEnrollmentAPIKeyResponse } from '../../../../../../common/types';
 import { ENROLLMENT_API_KEYS_INDEX, SO_SEARCH_LIMIT } from '../../../constants';
 import { NewEnrollmentTokenModal } from '../../../components';
 import {
@@ -38,10 +40,17 @@ import { DefaultLayout } from '../../../layouts';
 
 import { ConfirmEnrollmentTokenDelete } from './components/confirm_delete_modal';
 
-const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }) => {
+export const ApiKeyField: React.FunctionComponent<{
+  apiKeyId: string;
+  length: number;
+  sendGetAPIKey: (id: string) => Promise<SendRequestResponse>;
+  tokenGetter: (response: SendRequestResponse) => string | undefined;
+}> = ({ apiKeyId, length, sendGetAPIKey, tokenGetter }) => {
   const { notifications } = useStartServices();
   const [state, setState] = useState<'VISIBLE' | 'HIDDEN' | 'LOADING'>('HIDDEN');
   const [key, setKey] = useState<string | undefined>();
+
+  const tokenMask = useMemo(() => '•'.repeat(length), [length]);
 
   const toggleKey = async () => {
     if (state === 'VISIBLE') {
@@ -49,11 +58,11 @@ const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }
     } else if (state === 'HIDDEN') {
       try {
         setState('LOADING');
-        const res = await sendGetOneEnrollmentAPIKey(apiKeyId);
+        const res = await sendGetAPIKey(apiKeyId);
         if (res.error) {
           throw res.error;
         }
-        setKey(res.data?.item.api_key);
+        setKey(tokenGetter(res));
         setState('VISIBLE');
       } catch (err) {
         notifications.toasts.addError(err as Error, {
@@ -68,9 +77,7 @@ const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }
     <EuiFlexGroup alignItems="center" gutterSize="xs">
       <EuiFlexItem>
         <EuiText color="subdued" size="xs">
-          {state === 'VISIBLE'
-            ? key
-            : '•••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••'}
+          {state === 'VISIBLE' ? key : tokenMask}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -98,6 +105,7 @@ const ApiKeyField: React.FunctionComponent<{ apiKeyId: string }> = ({ apiKeyId }
             color="text"
             onClick={toggleKey}
             iconType={state === 'VISIBLE' ? 'eyeClosed' : 'eye'}
+            data-test-subj="showHideTokenButton"
           />
         </EuiToolTip>
       </EuiFlexItem>
@@ -207,7 +215,16 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       }),
       width: '215px',
       render: (apiKeyId: string) => {
-        return <ApiKeyField apiKeyId={apiKeyId} />;
+        return (
+          <ApiKeyField
+            apiKeyId={apiKeyId}
+            sendGetAPIKey={sendGetOneEnrollmentAPIKey}
+            tokenGetter={(response: SendRequestResponse<GetOneEnrollmentAPIKeyResponse>) =>
+              response.data?.item.api_key
+            }
+            length={73}
+          />
+        );
       },
     },
     {

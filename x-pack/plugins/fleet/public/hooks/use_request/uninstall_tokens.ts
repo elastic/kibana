@@ -13,7 +13,7 @@ import type {
   GetUninstallTokenResponse,
 } from '../../../common/types/rest_spec/uninstall_token';
 
-import { useRequest } from './use_request';
+import { sendRequest, useRequest } from './use_request';
 
 export const useGetUninstallTokens = ({
   policyId,
@@ -35,6 +35,12 @@ export const useGetUninstallTokens = ({
 
 export const useGetUninstallToken = (uninstallTokenId: string) =>
   useRequest<GetUninstallTokenResponse>({
+    method: 'get',
+    path: uninstallTokensRouteService.getInfoPath(uninstallTokenId),
+  });
+
+export const sendGetUninstallToken = (uninstallTokenId: string) =>
+  sendRequest<GetUninstallTokenResponse>({
     method: 'get',
     path: uninstallTokensRouteService.getInfoPath(uninstallTokenId),
   });

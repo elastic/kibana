@@ -11,12 +11,19 @@ import { EuiBasicTable, EuiText } from '@elastic/eui';
 import React from 'react';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 
+import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
+
 import type { UninstallTokenMetadata } from '../../../../../../common/types/models/uninstall_token';
 
-import { useGetUninstallTokens } from '../../../../../hooks/use_request/uninstall_tokens';
+import {
+  sendGetUninstallToken,
+  useGetUninstallTokens,
+} from '../../../../../hooks/use_request/uninstall_tokens';
 
 import { useBreadcrumbs, usePagination } from '../../../hooks';
 import { DefaultLayout } from '../../../layouts';
+import { ApiKeyField } from '../enrollment_token_list_page';
+import type { GetUninstallTokenResponse } from '../../../../../../common/types/rest_spec/uninstall_token';
 
 export const UninstallTokenListPage = () => {
   useBreadcrumbs('uninstall_tokens');
@@ -56,7 +63,16 @@ export const UninstallTokenListPage = () => {
           {
             field: 'id',
             name: 'Token',
-            render: (uninstallTokenId: string) => '•••',
+            render: (uninstallTokenId: string) => (
+              <ApiKeyField
+                apiKeyId={uninstallTokenId}
+                sendGetAPIKey={sendGetUninstallToken}
+                tokenGetter={(response: SendRequestResponse<GetUninstallTokenResponse>) =>
+                  response.data?.item.token
+                }
+                length={32}
+              />
+            ),
           },
         ]}
         loading={isLoading}

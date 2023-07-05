@@ -8,16 +8,28 @@
 import React from 'react';
 import type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 
-import type { GetUninstallTokensMetadataResponse } from '../../../../../../common/types/rest_spec/uninstall_token';
+import { waitFor } from '@testing-library/react';
+
+import type {
+  GetUninstallTokensMetadataResponse,
+  GetUninstallTokenResponse,
+} from '../../../../../../common/types/rest_spec/uninstall_token';
 import type { RequestError } from '../../../../../hooks';
 import { createFleetTestRendererMock } from '../../../../../mock';
-import { useGetUninstallTokens } from '../../../../../hooks/use_request/uninstall_tokens';
-import type { UninstallTokenMetadata } from '../../../../../../common/types/models/uninstall_token';
+import {
+  useGetUninstallTokens,
+  sendGetUninstallToken,
+} from '../../../../../hooks/use_request/uninstall_tokens';
+import type {
+  UninstallToken,
+  UninstallTokenMetadata,
+} from '../../../../../../common/types/models/uninstall_token';
 
 import { UninstallTokenListPage } from '.';
 
 jest.mock('../../../../../hooks/use_request/uninstall_tokens', () => ({
   useGetUninstallTokens: jest.fn(),
+  sendGetUninstallToken: jest.fn(),
 }));
 
 type MockResponseType<DataType> = Pick<
@@ -33,6 +45,7 @@ describe('UninstallTokenList page', () => {
   };
 
   const useGetUninstallTokensMock = useGetUninstallTokens as jest.Mock;
+  const sendGetUninstallTokenMock = sendGetUninstallToken as jest.Mock;
 
   describe('when loading tokens', () => {
     it('should show loading message', () => {
@@ -66,19 +79,30 @@ describe('UninstallTokenList page', () => {
   });
 
   describe('when there are tokens', () => {
-    beforeEach(() => {
-      const uninstallTokenMetadataFixture: UninstallTokenMetadata = {
-        id: 'id-1',
-        policy_id: 'policy-id-1',
-        created_at: '2023-06-19T08:47:31.457Z',
-      };
+    const uninstallTokenMetadataFixture1: UninstallTokenMetadata = {
+      id: 'id-1',
+      policy_id: 'policy-id-1',
+      created_at: '2023-06-19T08:47:31.457Z',
+    };
 
+    const uninstallTokenMetadataFixture2: UninstallTokenMetadata = {
+      id: 'id-2',
+      policy_id: 'policy-id-2',
+      created_at: '2023-06-20T08:47:31.457Z',
+    };
+
+    const uninstallTokenFixture: UninstallToken = {
+      ...uninstallTokenMetadataFixture1,
+      token: '123456789',
+    };
+
+    beforeEach(() => {
       const getTokensResponseFixture: MockResponseType<GetUninstallTokensMetadataResponse> = {
         isLoading: false,
         error: null,
         data: {
-          items: [uninstallTokenMetadataFixture],
-          total: 1,
+          items: [uninstallTokenMetadataFixture1, uninstallTokenMetadataFixture2],
+          total: 2,
           page: 1,
           perPage: 20,
         },
@@ -87,11 +111,36 @@ describe('UninstallTokenList page', () => {
       useGetUninstallTokensMock.mockReturnValue(getTokensResponseFixture);
     });
 
-    it('should render table with one token', () => {
+    it('should render table with token', () => {
       const renderResult = render();
 
       expect(renderResult.queryByTestId('uninstallTokenListTable')).toBeInTheDocument();
       expect(renderResult.queryByText('policy-id-1')).toBeInTheDocument();
+    });
+
+    it('should hide token by default', () => {
+      const renderResult = render();
+
+      expect(renderResult.queryByText(uninstallTokenFixture.token)).not.toBeInTheDocument();
+      expect(renderResult.queryAllByText('••••••••••••••••••••••••••••••••').length).toBe(2);
+    });
+
+    it('should fetch and show token when clicking on the "Show" button', async () => {
+      const getTokenResponseFixture: MockResponseType<GetUninstallTokenResponse> = {
+        error: null,
+        isLoading: false,
+        data: { item: uninstallTokenFixture },
+      };
+      sendGetUninstallTokenMock.mockReturnValue(getTokenResponseFixture);
+
+      const renderResult = render();
+
+      renderResult.getAllByTestId('showHideTokenButton')[0].click();
+
+      await waitFor(() => {
+        expect(renderResult.queryByText(uninstallTokenFixture.token)).toBeInTheDocument();
+      });
+      expect(sendGetUninstallTokenMock).toHaveBeenCalledWith(uninstallTokenMetadataFixture1.id);
     });
   });
 });
