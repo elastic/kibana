@@ -22,7 +22,7 @@ import {
   AppNavLinkStatus,
   AppDeepLink,
 } from '@kbn/core/public';
-import { ConfigSchema, ManagementStart, NavigationCardsSubject } from './types';
+import { ConfigSchema, ManagementSetup, ManagementStart, NavigationCardsSubject } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
 import { ManagementAppLocatorDefinition } from '../common/locator';
