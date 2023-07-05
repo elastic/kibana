@@ -27,7 +27,11 @@ export const AddPrebuiltRulesHeaderButtons = () => {
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
       {shouldDisplayInstallSelectedRulesButton ? (
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={installSelectedRules} disabled={isRequestInProgress}>
+          <EuiButton
+            onClick={installSelectedRules}
+            disabled={isRequestInProgress}
+            data-test-subj="installSelectedRulesButton"
+          >
             {i18n.INSTALL_SELECTED_RULES(numberOfSelectedRules)}
             {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : undefined}
           </EuiButton>
