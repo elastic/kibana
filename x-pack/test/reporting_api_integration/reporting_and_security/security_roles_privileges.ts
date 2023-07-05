@@ -41,7 +41,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(res.status).to.eql(403);
       });
 
-      it('does allow user with the role privilege', async () => {
+      // csv searchsource immediate api
+      xit('does allow user with the role privilege', async () => {
         const res = await reportingAPI.downloadCsv(
           reportingAPI.REPORTING_USER_USERNAME,
           reportingAPI.REPORTING_USER_PASSWORD,

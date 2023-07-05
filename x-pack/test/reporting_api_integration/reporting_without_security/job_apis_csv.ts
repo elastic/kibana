@@ -70,9 +70,11 @@ export default function ({ getService }: FtrProviderContext) {
           "created_by": false,
           "jobtype": "csv_searchsource",
           "meta": Object {
+            "isDeprecated": false,
             "objectType": "search",
           },
           "payload": Object {
+            "isDeprecated": false,
             "title": "A Saved Search With a DATE FILTER",
           },
           "status": "pending",
@@ -98,9 +100,11 @@ export default function ({ getService }: FtrProviderContext) {
           "created_by": false,
           "jobtype": "csv_searchsource",
           "meta": Object {
+            "isDeprecated": false,
             "objectType": "search",
           },
           "payload": Object {
+            "isDeprecated": false,
             "title": "A Saved Search With a DATE FILTER",
           },
           "status": "pending",
@@ -122,9 +126,11 @@ export default function ({ getService }: FtrProviderContext) {
             "created_by": false,
             "jobtype": "csv_searchsource",
             "meta": Object {
+              "isDeprecated": false,
               "objectType": "search",
             },
             "payload": Object {
+              "isDeprecated": false,
               "title": "A Saved Search With a DATE FILTER",
             },
             "status": "pending",
@@ -145,9 +151,11 @@ export default function ({ getService }: FtrProviderContext) {
           "created_by": false,
           "jobtype": "csv_searchsource",
           "meta": Object {
+            "isDeprecated": false,
             "objectType": "search",
           },
           "payload": Object {
+            "isDeprecated": false,
             "title": "A Saved Search With a DATE FILTER",
           },
           "status": "pending",
@@ -170,9 +178,11 @@ export default function ({ getService }: FtrProviderContext) {
             "created_by": false,
             "jobtype": "csv_searchsource",
             "meta": Object {
+              "isDeprecated": false,
               "objectType": "search",
             },
             "payload": Object {
+              "isDeprecated": false,
               "title": "A Saved Search With a DATE FILTER",
             },
             "status": "pending",
@@ -193,9 +203,11 @@ export default function ({ getService }: FtrProviderContext) {
           "created_by": false,
           "jobtype": "csv_searchsource",
           "meta": Object {
+            "isDeprecated": false,
             "objectType": "search",
           },
           "payload": Object {
+            "isDeprecated": false,
             "title": "A Saved Search With a DATE FILTER",
           },
           "status": "pending",
@@ -214,9 +226,11 @@ export default function ({ getService }: FtrProviderContext) {
           "created_by": false,
           "jobtype": "csv_searchsource",
           "meta": Object {
+            "isDeprecated": false,
             "objectType": "search",
           },
           "payload": Object {
+            "isDeprecated": false,
             "title": "A Saved Search With a DATE FILTER",
           },
           "status": "pending",
