@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   calculateTimeRangeBucketSize,
   getAlertSummaryTimeRange,
   useTimeBuckets,
 } from '@kbn/observability-plugin/public';
 import { TimeRange } from '@kbn/es-query';
-import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
-
 import styled from 'styled-components';
-import { AlertStatus } from '../../../../pages/metrics/hosts/types';
+import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
+import type { AlertStatus } from '../../../../pages/metrics/hosts/types';
 import {
   DEFAULT_DATE_FORMAT,
   DEFAULT_INTERVAL,
@@ -24,32 +23,26 @@ import type {
   HostsState,
   HostsStateUpdater,
 } from '../../../../pages/metrics/hosts/hooks/use_unified_search_url_state';
-import {
-  AlertsEsQuery,
-  createAlertsEsQuery,
-} from '../../../../pages/metrics/hosts/hooks/use_alerts_query';
+import type { AlertsEsQuery } from '../../../../pages/metrics/hosts/hooks/use_alerts_query';
+
+// TODO replace once https://github.com/elastic/kibana/pull/160924 is ready
 import { useUnifiedSearchContext } from '../../../../pages/metrics/hosts/hooks/use_unified_search';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 
+const ALERT_STATUS: AlertStatus = 'all';
+
 export const AlertsSummaryContent = ({ nodeName }: { nodeName: string }) => {
-  // TODO check status and if we need to set it
-  const [alertStatus, _setAlertStatus] = useState<AlertStatus>('all');
+  // TODO replace once https://github.com/elastic/kibana/pull/160924 is ready
   const { onSubmit, searchCriteria } = useUnifiedSearchContext();
 
-  const getAlertsEsQuery = useCallback(
-    (status?: AlertStatus) =>
-      // TODO - hostNodes type
+  const alertsEsQueryByStatus = useMemo(
+    () =>
       createAlertsEsQuery({
         dateRange: searchCriteria.dateRange,
-        hostNodes: [{ name: nodeName }],
-        status,
+        hostNodeNames: [nodeName],
+        status: ALERT_STATUS,
       }),
     [nodeName, searchCriteria.dateRange]
-  );
-
-  const alertsEsQueryByStatus = useMemo(
-    () => getAlertsEsQuery(alertStatus),
-    [getAlertsEsQuery, alertStatus]
   );
 
   return (
@@ -78,22 +71,9 @@ const MemoAlertSummaryWidget = React.memo(
     const { charts, triggersActionsUi } = services;
     const { getAlertSummaryWidget: AlertSummaryWidget } = triggersActionsUi;
 
-    const onBrushEnd: BrushEndListener = (brushEvent) => {
-      const { x } = brushEvent as XYBrushEvent;
-      if (x) {
-        const [start, end] = x;
-
-        const from = new Date(start).toISOString();
-        const to = new Date(end).toISOString();
-
-        onRangeSelection({ dateRange: { from, to } });
-      }
-    };
-
     const chartProps = {
       theme: charts.theme.useChartsTheme(),
       baseTheme: charts.theme.useChartsBaseTheme(),
-      onBrushEnd,
     };
 
     return (
@@ -102,11 +82,17 @@ const MemoAlertSummaryWidget = React.memo(
         featureIds={infraAlertFeatureIds}
         filter={alertsQuery}
         timeRange={summaryTimeRange}
+
+        // Can be added to hide the chart
+        // once https://github.com/elastic/kibana/pull/161263 is merged
+        // fullSize
+        // shouldHideCharts
       />
     );
   }
 );
 
+// This will be removed once https://github.com/elastic/kibana/pull/161263 is merged
 const ContainerPanel = styled.div`
   && .euiPanel {
     border: none;
