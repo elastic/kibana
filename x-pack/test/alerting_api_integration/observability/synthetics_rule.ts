@@ -64,6 +64,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(firingAction).eql(resultAction.firingAction);
         expect(recoveredAction).eql(resultAction.recoveredAction);
       });
+
+      testActions.slice(0, 2).forEach((action) => {
+        const { recoveredAction, firingAction } = getActionById(tlsRule, action);
+        const resultAction = getActionById(tlsResult, action);
+        expect(firingAction).eql(resultAction.firingAction);
+        expect(recoveredAction).eql(resultAction.recoveredAction);
+      });
     });
 
     it('updates rules when settings are updated', async () => {
@@ -95,6 +102,12 @@ export default function ({ getService }: FtrProviderContext) {
       testActions.forEach((action) => {
         const { recoveredAction, firingAction } = getActionById(statusRule, action);
         const resultAction = getActionById(statusResult, action);
+        expect(firingAction).eql(resultAction.firingAction);
+        expect(recoveredAction).eql(resultAction.recoveredAction);
+      });
+      testActions.forEach((action) => {
+        const { recoveredAction, firingAction } = getActionById(tlsRule, action);
+        const resultAction = getActionById(tlsResult, action);
         expect(firingAction).eql(resultAction.firingAction);
         expect(recoveredAction).eql(resultAction.recoveredAction);
       });
@@ -341,25 +354,25 @@ const tlsRule = {
   mutedInstanceIds: [],
   revision: 0,
   running: false,
-  schedule: { interval: '10m' },
+  schedule: { interval: '1m' },
   actions: [
     {
       group: 'recovered',
       params: {
-        body: 'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}  \n- Last error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+        body: 'Alert for TLS certificate {{context.commonName}} from issuer {{context.issuer}} has recovered - Elastic Synthetics\n\nDetails:\n\n- Summary: {{context.summary}}\n- Common name: {{context.commonName}}\n- Issuer: {{context.issuer}}\n- Monitor: {{context.monitorName}}  \n- Monitor URL: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}',
       },
       frequency: { notifyWhen: 'onActionGroupChange', throttle: null, summary: false },
-      uuid: 'db85f255-9ba5-4823-ab13-38e17d0e4fbe',
+      uuid: '52070ef7-c288-40e7-ae5b-51c7d77463cb',
       actionTypeId: '.webhook',
       id: 'custom.ssl.noCustom',
     },
     {
       group: 'xpack.synthetics.alerts.actionGroups.tls',
       params: {
-        body: '"{{context.monitorName}}" is {{{context.status}}} from {{context.locationName}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- Checked at: {{context.checkedAt}}  \n- From: {{context.locationName}}  \n- Error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+        body: 'Detected TLS certificate {{context.commonName}} is {{context.status}} - Elastic Synthetics\n\nDetails:\n\n- Summary: {{context.summary}}\n- Common name: {{context.commonName}}\n- Issuer: {{context.issuer}}\n- Monitor: {{context.monitorName}}  \n- Monitor URL: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}',
       },
       frequency: { notifyWhen: 'onActionGroupChange', throttle: null, summary: false },
-      uuid: '29eada37-91c9-435f-926f-9ea6a6133e3f',
+      uuid: '4d003e7b-e37d-47e6-8ee6-2d80b61fa31f',
       actionTypeId: '.webhook',
       id: 'custom.ssl.noCustom',
     },
@@ -367,17 +380,16 @@ const tlsRule = {
       group: 'recovered',
       params: {
         to: ['test@gmail.com'],
-        subject:
-          '"{{context.monitorName}}" ({{context.locationName}}) {{context.recoveryStatus}} - Elastic Synthetics',
+        subject: 'Alert has resolved for certificate {{context.commonName}} - Elastic Synthetics',
         message:
-          'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}  \n- Last error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+          'Alert for TLS certificate {{context.commonName}} from issuer {{context.issuer}} has recovered - Elastic Synthetics\n\nDetails:\n\n- Summary: {{context.summary}}\n- Common name: {{context.commonName}}\n- Issuer: {{context.issuer}}\n- Monitor: {{context.monitorName}}  \n- Monitor URL: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}',
         messageHTML: null,
         cc: [],
         bcc: [],
         kibanaFooterLink: { path: '', text: '' },
       },
       frequency: { notifyWhen: 'onActionGroupChange', throttle: null, summary: false },
-      uuid: '52ea1e90-2186-4836-aa59-bc0183ceda5f',
+      uuid: 'b5035977-2236-448e-9e2b-6fbbe1cc7678',
       actionTypeId: '.email',
       id: 'notification-email',
     },
@@ -385,17 +397,16 @@ const tlsRule = {
       group: 'xpack.synthetics.alerts.actionGroups.tls',
       params: {
         to: ['test@gmail.com'],
-        subject:
-          '"{{context.monitorName}}" ({{context.locationName}}) is down - Elastic Synthetics',
+        subject: 'Alert triggered for certificate {{context.commonName}} - Elastic Synthetics',
         message:
-          '"{{context.monitorName}}" is {{{context.status}}} from {{context.locationName}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- Checked at: {{context.checkedAt}}  \n- From: {{context.locationName}}  \n- Error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+          'Detected TLS certificate {{context.commonName}} is {{context.status}} - Elastic Synthetics\n\nDetails:\n\n- Summary: {{context.summary}}\n- Common name: {{context.commonName}}\n- Issuer: {{context.issuer}}\n- Monitor: {{context.monitorName}}  \n- Monitor URL: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}',
         messageHTML: null,
         cc: [],
         bcc: [],
         kibanaFooterLink: { path: '', text: '' },
       },
       frequency: { notifyWhen: 'onActionGroupChange', throttle: null, summary: false },
-      uuid: '3cf88c44-1196-499c-adcb-4476f41fa1cc',
+      uuid: '85b9b6c4-2a61-49cf-aefb-78363167a584',
       actionTypeId: '.email',
       id: 'notification-email',
     },
@@ -415,7 +426,7 @@ const tlsRule = {
         indexOverride: null,
       },
       frequency: { notifyWhen: 'onActionGroupChange', throttle: null, summary: false },
-      uuid: '12045e75-f522-4764-8080-dee1c4413d30',
+      uuid: 'e7a23561-ee09-45b0-b093-189b51bad918',
       actionTypeId: '.index',
       id: 'preconfigured-es-index-action',
     },
@@ -434,7 +445,7 @@ const tlsRule = {
         indexOverride: null,
       },
       frequency: { notifyWhen: 'onActionGroupChange', throttle: null, summary: false },
-      uuid: 'ddf595e8-c4df-4b36-a35e-79b56ac530f8',
+      uuid: '2b40e26a-8dd7-4711-897e-95ce1d2ca4f6',
       actionTypeId: '.index',
       id: 'preconfigured-es-index-action',
     },
@@ -445,9 +456,9 @@ const tlsRule = {
         subActionParams: {
           incident: {
             short_description:
-              '"{{context.monitorName}}" is {{{context.status}}} from {{context.locationName}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- Checked at: {{context.checkedAt}}  \n- From: {{context.locationName}}  \n- Error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+              'Detected TLS certificate {{context.commonName}} is {{context.status}} - Elastic Synthetics\n\nDetails:\n\n- Summary: {{context.summary}}\n- Common name: {{context.commonName}}\n- Issuer: {{context.issuer}}\n- Monitor: {{context.monitorName}}  \n- Monitor URL: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}',
             description:
-              '"{{context.monitorName}}" is {{{context.status}}} from {{context.locationName}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- Checked at: {{context.checkedAt}}  \n- From: {{context.locationName}}  \n- Error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+              'Detected TLS certificate {{context.commonName}} is {{context.status}} - Elastic Synthetics\n\nDetails:\n\n- Summary: {{context.summary}}\n- Common name: {{context.commonName}}\n- Issuer: {{context.issuer}}\n- Monitor: {{context.monitorName}}  \n- Monitor URL: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}',
             impact: '2',
             severity: '2',
             urgency: '2',
@@ -461,7 +472,7 @@ const tlsRule = {
         },
       },
       frequency: { notifyWhen: 'onActionGroupChange', throttle: null, summary: false },
-      uuid: '9e531501-689f-4bd5-8e3c-053e8f63b1cd',
+      uuid: '172025b4-4032-4ada-bcfc-ccdc060409ab',
       actionTypeId: '.servicenow',
       id: 'my-deprecated-servicenow',
     },
@@ -469,10 +480,10 @@ const tlsRule = {
       group: 'recovered',
       params: {
         message:
-          'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}  \n- Last error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+          'Alert for TLS certificate {{context.commonName}} from issuer {{context.issuer}} has recovered - Elastic Synthetics\n\nDetails:\n\n- Summary: {{context.summary}}\n- Common name: {{context.commonName}}\n- Issuer: {{context.issuer}}\n- Monitor: {{context.monitorName}}  \n- Monitor URL: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}',
       },
       frequency: { notifyWhen: 'onActionGroupChange', throttle: null, summary: false },
-      uuid: '6b928af3-35c5-467b-85d7-04514c44d687',
+      uuid: '25822900-a030-4e59-b9c7-909ff665a862',
       actionTypeId: '.slack',
       id: 'my-slack1',
     },
@@ -480,10 +491,10 @@ const tlsRule = {
       group: 'xpack.synthetics.alerts.actionGroups.tls',
       params: {
         message:
-          '"{{context.monitorName}}" is {{{context.status}}} from {{context.locationName}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- Checked at: {{context.checkedAt}}  \n- From: {{context.locationName}}  \n- Error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+          'Detected TLS certificate {{context.commonName}} is {{context.status}} - Elastic Synthetics\n\nDetails:\n\n- Summary: {{context.summary}}\n- Common name: {{context.commonName}}\n- Issuer: {{context.issuer}}\n- Monitor: {{context.monitorName}}  \n- Monitor URL: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}',
       },
       frequency: { notifyWhen: 'onActionGroupChange', throttle: null, summary: false },
-      uuid: '05d41703-127f-4dc2-84b3-e8c931512e5c',
+      uuid: '07896abe-5ebe-4e7f-95e4-3944e6831843',
       actionTypeId: '.slack',
       id: 'my-slack1',
     },
