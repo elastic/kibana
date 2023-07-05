@@ -7,7 +7,7 @@
 
 import type { SavedObjectAttributes } from '@kbn/core/server';
 import { Filter } from '@kbn/es-query';
-import type { WeekdayStr } from 'rrule';
+import type { WeekdayStr } from '@kbn/rrule';
 import { IsoWeekday } from '../../../../common';
 import {
   ruleNotifyWhenAttributes,
