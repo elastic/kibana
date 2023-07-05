@@ -49,7 +49,7 @@ export const schemaTags = {
       validator: ({ value }: { value: string | string[] }) => {
         if (
           (!Array.isArray(value) && isTagCharactersInLimit(value)) ||
-          (Array.isArray(value) && value.length > 0 && value.find(isTagCharactersInLimit))
+          (Array.isArray(value) && value.length > 0 && value.some(isTagCharactersInLimit))
         ) {
           return {
             message: i18n.MAX_LENGTH_ERROR('tag', MAX_LENGTH_PER_TAG),

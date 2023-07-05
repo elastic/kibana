@@ -63,16 +63,6 @@ describe('Tags', () => {
     });
   });
 
-  it.skip('it disables the input when loading', async () => {
-    appMockRender.render(
-      <MockHookWrapperComponent>
-        <Tags isLoading={true} />
-      </MockHookWrapperComponent>
-    );
-
-    expect(screen.getByRole('combobox')).toBeDisabled();
-  });
-
   it('it changes the tags', async () => {
     appMockRender.render(
       <MockHookWrapperComponent>
@@ -101,9 +91,7 @@ describe('Tags', () => {
   });
 
   it('it shows error when tag is too long', async () => {
-    const longTag = Array(MAX_LENGTH_PER_TAG / 2 + 1)
-      .fill('z')
-      .toString();
+    const longTag = 'z'.repeat(MAX_LENGTH_PER_TAG + 1);
 
     appMockRender.render(
       <MockHookWrapperComponent>

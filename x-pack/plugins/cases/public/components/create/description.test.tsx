@@ -92,9 +92,7 @@ describe('Description', () => {
   });
 
   it('shows an error when description is too long', async () => {
-    const longDescription = Array(MAX_DESCRIPTION_LENGTH / 2 + 1)
-      .fill('a')
-      .toString();
+    const longDescription = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
 
     appMockRender.render(
       <MockHookWrapperComponent>

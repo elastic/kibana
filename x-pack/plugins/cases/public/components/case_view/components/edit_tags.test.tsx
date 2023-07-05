@@ -41,7 +41,7 @@ describe('EditTags ', () => {
     appMockRender = createAppMockRenderer();
   });
 
-  it('Renders no tags, and then edit', async () => {
+  it('renders no tags, and then edit', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
     expect(screen.getByTestId('no-tags')).toBeInTheDocument();
@@ -82,7 +82,7 @@ describe('EditTags ', () => {
     await waitFor(() => expect(onSubmit).toBeCalledWith(['dude']));
   });
 
-  it('Cancels on cancel', async () => {
+  it('cancels on cancel', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
     userEvent.click(screen.getByTestId('tag-list-edit-button'));
@@ -101,7 +101,7 @@ describe('EditTags ', () => {
     });
   });
 
-  it('it shows error when tag is empty', async () => {
+  it('shows error when tag is empty', async () => {
     appMockRender.render(<EditTags {...defaultProps} />);
 
     userEvent.click(screen.getByTestId('tag-list-edit-button'));
@@ -117,10 +117,8 @@ describe('EditTags ', () => {
     });
   });
 
-  it('it shows error when tag is too long', async () => {
-    const longTag = Array(MAX_LENGTH_PER_TAG / 2 + 1)
-      .fill('a')
-      .toString();
+  it('shows error when tag is too long', async () => {
+    const longTag = 'z'.repeat(MAX_LENGTH_PER_TAG + 1);
 
     appMockRender.render(<EditTags {...defaultProps} />);
 
