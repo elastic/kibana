@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { captureErrorMock } from './versioned_router.test.mocks';
+
 import Supertest from 'supertest';
 import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 import { schema } from '@kbn/config-schema';
@@ -59,6 +61,7 @@ describe('Routing versioned requests', () => {
   });
 
   afterEach(async () => {
+    captureErrorMock.mockReset();
     await server.stop();
   });
 
@@ -167,6 +170,7 @@ describe('Routing versioned requests', () => {
         message: expect.stringMatching(/expected value of type/),
       })
     );
+    expect(captureErrorMock).not.toHaveBeenCalled();
   });
 
   it('returns the version in response headers', async () => {
@@ -210,6 +214,7 @@ describe('Routing versioned requests', () => {
         message: expect.stringMatching(/Failed output validation/),
       })
     );
+    expect(captureErrorMock).not.toHaveBeenCalled();
   });
 
   it('does not run response validation in prod', async () => {
@@ -295,6 +300,7 @@ describe('Routing versioned requests', () => {
     ).resolves.toEqual(
       expect.objectContaining({ message: expect.stringMatching(/No handlers registered/) })
     );
+    expect(captureErrorMock).not.toHaveBeenCalled();
   });
 
   it('resolves the newest handler on serverless', async () => {
@@ -339,5 +345,22 @@ describe('Routing versioned requests', () => {
         .expect(200)
         .then(({ body }) => body.v)
     ).resolves.toEqual('oldest');
+  });
+
+  it('captures the error if handler throws', async () => {
+    const error = new Error(`some error`);
+
+    router.versioned
+      .get({ path: '/my-path', access: 'internal' })
+      .addVersion({ validate: false, version: '1' }, async (ctx, req, res) => {
+        throw error;
+      });
+
+    await server.start();
+
+    await supertest.get('/my-path').set('Elastic-Api-Version', '1').expect(500);
+
+    expect(captureErrorMock).toHaveBeenCalledTimes(1);
+    expect(captureErrorMock).toHaveBeenCalledWith(error);
   });
 });
