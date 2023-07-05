@@ -20,7 +20,7 @@ describe('RootDragDropProvider', () => {
       contexts.push(context);
       return (
         <div data-test-subj="test-component">
-          {name} {!!context.dragging}
+          {name} {!!context[0].dragging}
         </div>
       );
     };

@@ -107,7 +107,7 @@ export const FieldListSidebar: React.FC<FieldListSidebarProps> = ({
   );
 
   return (
-    <ChildDragDropProvider {...dragDropContext}>
+    <ChildDragDropProvider value={dragDropContext}>
       <FieldList
         isProcessing={isProcessing}
         prepend={<FieldListFilters {...fieldListFiltersProps} />}

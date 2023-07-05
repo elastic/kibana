@@ -138,7 +138,7 @@ export function TextBasedDataPanel({
         ...core,
       }}
     >
-      <ChildDragDropProvider {...dragDropContext}>
+      <ChildDragDropProvider value={dragDropContext}>
         <FieldList
           className="lnsInnerIndexPatternDataPanel"
           isProcessing={!dataHasLoaded}

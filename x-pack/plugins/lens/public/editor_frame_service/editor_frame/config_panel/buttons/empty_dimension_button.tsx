@@ -116,7 +116,7 @@ export function EmptyDimensionButton({
     };
   };
 }) {
-  const { dragging } = useContext(DragContext);
+  const [{ dragging }] = useContext(DragContext);
 
   let getDropProps;
 

@@ -126,11 +126,11 @@ const EXPRESSION_BUILD_ERROR_ID = 'expression_build_error';
 export const WorkspacePanel = React.memo(function WorkspacePanel(props: WorkspacePanelProps) {
   const { getSuggestionForField, ...restProps } = props;
 
-  const dragDropContext = useContext(DragContext);
+  const [{ dragging }] = useContext(DragContext);
 
   const suggestionForDraggedField = useMemo(
-    () => dragDropContext.dragging && getSuggestionForField(dragDropContext.dragging),
-    [dragDropContext.dragging, getSuggestionForField]
+    () => dragging && getSuggestionForField(dragging),
+    [dragging, getSuggestionForField]
   );
 
   return (
@@ -573,15 +573,15 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     );
   };
 
-  const dragDropContext = useContext(DragContext);
+  const [{ dragging }] = useContext(DragContext);
   const renderWorkspace = () => {
     const customWorkspaceRenderer =
       activeDatasourceId &&
       datasourceMap[activeDatasourceId]?.getCustomWorkspaceRenderer &&
-      dragDropContext.dragging
+      dragging
         ? datasourceMap[activeDatasourceId].getCustomWorkspaceRenderer!(
             datasourceStates[activeDatasourceId].state,
-            dragDropContext.dragging,
+            dragging,
             dataViews.indexPatterns
           )
         : undefined;

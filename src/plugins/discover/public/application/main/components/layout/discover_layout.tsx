@@ -182,8 +182,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const resizeRef = useRef<HTMLDivElement>(null);
 
-  const dragDropContext = useContext(DragContext);
-  const draggingFieldName = dragDropContext.dragging?.id;
+  const [{ dragging }] = useContext(DragContext);
+  const draggingFieldName = dragging?.id;
 
   const onDropFieldToTable = useMemo(() => {
     if (!draggingFieldName || currentColumns.includes(draggingFieldName)) {

@@ -34,8 +34,8 @@ export interface ExampleDropZoneProps {
 }
 
 export const ExampleDropZone: React.FC<ExampleDropZoneProps> = ({ onDropField }) => {
-  const dragDropContext = useContext(DragContext);
-  const draggingFieldName = dragDropContext.dragging?.id;
+  const [{ dragging }] = useContext(DragContext);
+  const draggingFieldName = dragging?.id;
 
   const onDroppingField = useMemo(() => {
     if (!draggingFieldName) {

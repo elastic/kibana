@@ -27,7 +27,7 @@ import {
   useExistingFieldsFetcher,
   useGroupedFields,
 } from '@kbn/unified-field-list';
-import { ChildDragDropProvider, DragContextState } from '@kbn/dom-drag-drop';
+import { ChildDragDropProvider, DragContextValue } from '@kbn/dom-drag-drop';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type {
   DatasourceDataPanelProps,
@@ -194,7 +194,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   fieldFormats: FieldFormatsStart;
   core: CoreStart;
   currentIndexPatternId: string;
-  dragDropContext: DragContextState;
+  dragDropContext: DragContextValue;
   charts: ChartsPluginSetup;
   frame: FramePublicAPI;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
@@ -398,7 +398,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   );
 
   return (
-    <ChildDragDropProvider {...dragDropContext}>
+    <ChildDragDropProvider value={dragDropContext}>
       <FieldList
         className="lnsInnerIndexPatternDataPanel"
         isProcessing={isProcessing}

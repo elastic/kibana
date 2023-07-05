@@ -820,11 +820,16 @@ describe('editor_frame', () => {
             getDatasourceSuggestionsForField: () => [generateSuggestion()],
             getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
             getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
-            renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
+            renderDataPanel: (_element, { dragDropContext: [{ dragging }, dndDispatch] }) => {
               if (!dragging || dragging.id !== 'draggedField') {
-                setDragging({
-                  id: 'draggedField',
-                  humanData: { label: 'draggedField' },
+                dndDispatch({
+                  type: 'startDragging',
+                  payload: {
+                    dragging: {
+                      id: 'draggedField',
+                      humanData: { label: 'draggedField' },
+                    },
+                  },
                 });
               }
             },
@@ -922,11 +927,16 @@ describe('editor_frame', () => {
             getDatasourceSuggestionsForField: () => [generateSuggestion()],
             getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
             getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
-            renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
+            renderDataPanel: (_element, { dragDropContext: [{ dragging }, dndDispatch] }) => {
               if (!dragging || dragging.id !== 'draggedField') {
-                setDragging({
-                  id: 'draggedField',
-                  humanData: { label: '1' },
+                dndDispatch({
+                  type: 'startDragging',
+                  payload: {
+                    dragging: {
+                      id: 'draggedField',
+                      humanData: { label: '1' },
+                    },
+                  },
                 });
               }
             },

@@ -34,7 +34,7 @@ export const AnnotationList = ({
     setNewAnnotationId(uuidv4());
   }, [annotations.length]);
 
-  const { dragging } = useContext(DragContext);
+  const [{ dragging }] = useContext(DragContext);
 
   const addAnnotationText = i18n.translate('eventAnnotation.annotationList.add', {
     defaultMessage: 'Add annotation',
