@@ -112,18 +112,6 @@ export function Overview({ slo }: Props) {
             subtitle={<EuiText size="s">{!!slo.description ? slo.description : '-'}</EuiText>}
           />
           <OverviewItem
-            title={i18n.translate('xpack.observability.slo.sloDetails.overview.createdAtTitle', {
-              defaultMessage: 'Created at',
-            })}
-            subtitle={<EuiText size="s">{moment(slo.createdAt).format(dateFormat)}</EuiText>}
-          />
-          <OverviewItem
-            title={i18n.translate('xpack.observability.slo.sloDetails.overview.updatedAtTitle', {
-              defaultMessage: 'Last update at',
-            })}
-            subtitle={<EuiText size="s">{moment(slo.updatedAt).format(dateFormat)}</EuiText>}
-          />
-          <OverviewItem
             title={i18n.translate('xpack.observability.slo.sloDetails.overview.tagsTitle', {
               defaultMessage: 'Tags',
             })}

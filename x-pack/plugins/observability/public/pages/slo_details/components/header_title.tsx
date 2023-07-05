@@ -39,7 +39,7 @@ export function HeaderTitle(props: Props) {
         </EuiFlexGroup>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="xs">
             <strong>
