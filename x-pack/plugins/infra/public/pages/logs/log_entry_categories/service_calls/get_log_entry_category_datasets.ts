@@ -6,7 +6,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import { PersistedLogViewReference } from '../../../../../common/log_views';
+import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 
 import {
   getLogEntryCategoryDatasetsRequestPayloadRT,
