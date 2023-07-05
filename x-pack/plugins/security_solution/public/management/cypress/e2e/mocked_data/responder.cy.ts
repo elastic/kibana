@@ -38,6 +38,7 @@ describe('When accessing Endpoint Response Console', () => {
     login();
   });
 
+  // Flaky: https://github.com/elastic/security-team/issues/7048
   describe.skip('from Cases', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let caseData: ReturnTypeFromChainable<typeof indexNewCase>;

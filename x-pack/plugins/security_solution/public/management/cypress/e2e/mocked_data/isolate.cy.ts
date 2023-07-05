@@ -88,6 +88,7 @@ describe('Isolate command', () => {
     });
   });
 
+  // Flaky: https://github.com/elastic/security-team/issues/7048
   describe.skip('from Alerts', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
