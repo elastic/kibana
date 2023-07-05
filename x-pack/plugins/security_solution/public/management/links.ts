@@ -76,6 +76,15 @@ const categories = [
   },
 ];
 
+if (ExperimentalFeaturesService.get()?.riskScoringRoutesEnabled) {
+  categories.unshift({
+    label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
+      defaultMessage: 'Entity Analytics',
+    }),
+    linkIds: [SecurityPageName.entityAnalyticsManagement],
+  });
+}
+
 export const links: LinkItem = {
   id: SecurityPageName.administration,
   title: SETTINGS,
@@ -220,19 +229,6 @@ export const getManagementFilteredLinks = async (
     // however, in this situation we allow to access only when there is data, otherwise the link won't be accessible.
     (canReadHostIsolationExceptions &&
       (await checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(core.http))));
-
-  if (ExperimentalFeaturesService.get()?.riskScoringRoutesEnabled) {
-    const existingCategories = links.categories ?? [];
-    links.categories = [
-      {
-        label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
-          defaultMessage: 'Entity Analytics',
-        }),
-        linkIds: [SecurityPageName.entityAnalyticsManagement],
-      },
-      ...existingCategories,
-    ];
-  }
 
   const linksToExclude: SecurityPageName[] = [];
 
