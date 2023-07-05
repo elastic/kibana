@@ -1286,4 +1286,15 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.events.callstacks.include_network_images',
+    first_supported_version: '8.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.include_network_images',
+      {
+        defaultMessage:
+          'Should executables and DLLs on network shares be parsed for call stack symbols?  This may cause Endpoint to hang on some networks. Default: false',
+      }
+    ),
+  },
 ];
