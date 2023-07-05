@@ -190,7 +190,7 @@ const uploadAndroidMapRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/androidmaps 2023-10-31',
   options: {
     tags: ['access:apm', 'access:apm_write'],
-    body: { accepts: ['multipart/form-data'] },
+    body: { accepts: ['multipart/form-data'], maxBytes: 30 * 1024 * 1024 },
   },
   params: t.type({
     body: t.type({
