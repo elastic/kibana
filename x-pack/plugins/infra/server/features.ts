@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
 import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
@@ -14,7 +15,6 @@ import {
 } from '../common/alerting/metrics';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { infraSourceConfigurationSavedObjectName } from './lib/sources/saved_object_type';
-import { logViewSavedObjectName } from './saved_objects';
 
 export const METRICS_FEATURE = {
   id: METRICS_FEATURE_ID,

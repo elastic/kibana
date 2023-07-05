@@ -9,7 +9,9 @@ import { useReducer } from 'react';
 
 const CLOSED = 'closed' as const;
 const OPEN = 'open' as const;
-const toggleReducer = (state: unknown) => {
+
+type ToggleReducerState = typeof CLOSED | typeof OPEN;
+const toggleReducer = (state: ToggleReducerState) => {
   return state === CLOSED ? OPEN : CLOSED;
 };
 
@@ -30,7 +32,7 @@ export interface UseAccordionStateValue {
 }
 
 /**
- * Tiny hook for controlled useAccordionState
+ * Tiny hook for controlled AccordionState
  * @param expandedInitially - is accordion expanded on first render
  */
 export const useAccordionState = (expandedInitially: boolean): UseAccordionStateValue => {

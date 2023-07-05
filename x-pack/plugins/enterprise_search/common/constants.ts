@@ -150,7 +150,7 @@ export const APPLICATIONS_PLUGIN = {
 export const VECTOR_SEARCH_PLUGIN = {
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.vectorSearch.description', {
     defaultMessage:
-      'Elasticsearch can be used as a vector database and search along with other semantic search methods.',
+      'Elasticsearch can be used as a vector database, which enables vector search and semantic search use cases.',
   }),
   ID: 'enterpriseSearchVectorSearch',
   LOGO: 'logoEnterpriseSearch',
@@ -210,3 +210,5 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
   hasNativeConnectors: true,
   hasWebCrawler: true,
 };
+
+export const CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX = '.search-acl-filter-';
