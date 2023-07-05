@@ -22,7 +22,11 @@ import {
   CATEGORY_EXAMPLES_VALIDATION_STATUS,
 } from '@kbn/category_validator';
 import { JobCreator } from './job_creator';
-import { Job, Datafeed, Detector } from '../../../../../../common/types/anomaly_detection_jobs';
+import type {
+  Job,
+  Datafeed,
+  Detector,
+} from '../../../../../../common/types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
 import {
   JOB_TYPE,

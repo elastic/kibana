@@ -7,8 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { IScopedClusterClient } from '@kbn/core/server';
 import { chunk } from 'lodash';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../common/constants/categorization';
 import type {
