@@ -11,10 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { DEFAULT_LOG_VIEW, LogViewReference } from '../../../../../common/log_views';
+import { LogStream } from '@kbn/logs-shared-plugin/public';
+import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
 import type { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { LogStream } from '../../../log_stream';
 import { findInventoryFields } from '../../../../../common/inventory_models';
 import { InfraLoadingPanel } from '../../../loading';
 
