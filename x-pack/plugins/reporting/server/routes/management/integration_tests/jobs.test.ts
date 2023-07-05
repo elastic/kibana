@@ -56,7 +56,12 @@ describe('GET /api/reporting/jobs/download', () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => ({ usesUiCapabilities: jest.fn(), registerExportTypes: jest.fn() })
+      () => ({
+        usesUiCapabilities: jest.fn(),
+        getSpaceId: jest.fn(),
+        getScreenshots: jest.fn(),
+        registerExportTypes: jest.fn(),
+      })
     );
 
     mockSetupDeps = createMockPluginSetup({

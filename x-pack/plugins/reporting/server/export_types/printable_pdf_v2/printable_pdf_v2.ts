@@ -54,7 +54,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
    * @param JobParamsPDFV2
    * @returns jobParams
    */
-  public createJob = ({ locatorParams, ...jobParams }: JobParamsPDFV2) => {
+  public createJob = async ({ locatorParams, ...jobParams }: JobParamsPDFV2) => {
     return {
       ...jobParams,
       locatorParams,
