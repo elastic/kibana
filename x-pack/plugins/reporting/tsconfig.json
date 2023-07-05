@@ -47,7 +47,7 @@
     "x-pack/plugins/reporting/server/export_types/csv_searchsource_immediate/*",
     "x-pack/plugins/reporting/server/export_types/csv_searchsource/*",
     "x-pack/plugins/reporting/server/export_types/csv_v2/*",
-    "x-pack/plugins/reporting/server/export_types/png_*/*",
+    "x-pack/plugins/reporting/server/export_types/png/*",
     "x-pack/plugins/reporting/server/export_types/printable_pdf/execute_job/*",
   ]
 }
