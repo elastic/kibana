@@ -41,7 +41,6 @@ export const useEmbeddablePanel = ({
       embeddablePromise,
       modulePromise,
     ]);
-    console.log('\n\n\n STUFF IS DONE \n\n');
     return { panelModule, unwrappedEmbeddable };
   }, []);
 
