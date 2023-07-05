@@ -21,3 +21,7 @@
     top: $kbnHeaderBannerHeight + $euiHeaderHeightCompensation;
   }
 }
+
+.header__firstBar {
+  z-index: 1001;
+}

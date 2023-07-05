@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useRef, useState, CSSProperties } from 'react';
-import { useChat } from '../../services';
+import { useChat, useHistory } from '../../services';
 import { getChatContext } from './get_chat_context';
 import { Props as ChatProps } from './chat';
 
@@ -25,6 +25,7 @@ const MESSAGE_WIDGET_READY = 'driftWidgetReady';
 const MESSAGE_IFRAME_READY = 'driftIframeReady';
 const MESSAGE_RESIZE = 'driftIframeResize';
 const MESSAGE_SET_CONTEXT = 'driftSetContext';
+const MESSAGE_UPDATE_CONTEXT = 'driftUpdateContext';
 
 type ChatConfigParams = Exclude<ChatProps, 'onHide'>;
 
@@ -37,6 +38,7 @@ export const useChatConfig = ({
 }: ChatConfigParams): UseChatType => {
   const ref = useRef<HTMLIFrameElement>(null);
   const chat = useChat();
+  const history = useHistory();
   const [style, setStyle] = useState<CSSProperties>({ height: 0, width: 0 });
   const [isReady, setIsReady] = useState(false);
   const [isResized, setIsResized] = useState(false);
@@ -106,6 +108,27 @@ export const useChatConfig = ({
 
     return () => window.removeEventListener('message', handleMessage);
   }, [chat, style, onReady, onResize, isReady, isResized]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    if (!history) return;
+
+    const unlisten = history.listen(() => {
+      // eslint-disable-next-line no-console
+      console.log('drift: posting update', getChatContext().window.location.href);
+      ref.current?.contentWindow?.postMessage(
+        {
+          type: MESSAGE_UPDATE_CONTEXT,
+          data: { context: getChatContext() },
+        },
+        '*'
+      );
+    });
+
+    return () => {
+      unlisten();
+    };
+  }, [history, isReady]);
 
   if (chat) {
     return { enabled: true, src: chat.chatURL, ref, style, isReady, isResized };

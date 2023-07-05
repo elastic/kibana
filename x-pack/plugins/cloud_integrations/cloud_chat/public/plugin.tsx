@@ -6,17 +6,23 @@
  */
 
 import React, { type FC } from 'react';
+import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { ReplaySubject } from 'rxjs';
+import { InternalApplicationSetup } from '@kbn/core-application-browser-internal';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import type { GetChatUserDataResponseBody } from '../common/types';
 import { GET_CHAT_USER_DATA_ROUTE_PATH } from '../common/constants';
 import { ChatConfig, ServicesProvider } from './services';
 import { isTodayInDateWindow } from '../common/util';
 import { Chat } from './components';
+import chatIcon from './chat_icon.svg';
 
 interface CloudChatSetupDeps {
   cloud: CloudSetup;
@@ -57,7 +63,14 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
       // There's a risk that the request for chat config will take too much time to complete, and the provider
       // will maintain a stale value.  To avoid this, we'll use an Observable.
       const chatConfig = useObservable(this.chatConfig$, undefined);
-      return <ServicesProvider chat={chatConfig}>{children}</ServicesProvider>;
+      return (
+        <ServicesProvider
+          chat={chatConfig}
+          history={(core.application as unknown as InternalApplicationSetup).history}
+        >
+          {children}
+        </ServicesProvider>
+      );
     };
     cloud.registerCloudService(CloudChatContextProvider);
   }
@@ -65,11 +78,43 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
   public start(core: CoreStart, { cloud }: CloudChatStartDeps) {
     const CloudContextProvider = cloud.CloudContextProvider;
 
-    core.chrome.setChatComponent(() => (
-      <CloudContextProvider>
-        <Chat />
-      </CloudContextProvider>
-    ));
+    // core.chrome.setChatComponent(() => (
+    //   <CloudContextProvider>
+    //     <Chat />
+    //   </CloudContextProvider>
+    // ));
+
+    function ChatHeaderMenuItem() {
+      const [show, setShow] = React.useState(false);
+
+      return (
+        <CloudContextProvider>
+          <KibanaThemeProvider theme$={core.theme.theme$}>
+            <I18nProvider>
+              <EuiHeaderSectionItemButton
+                data-test-subj="cloudChat"
+                notification={true}
+                onClick={() => setShow(!show)}
+              >
+                <EuiIcon type={chatIcon} size="m" />
+              </EuiHeaderSectionItemButton>
+            </I18nProvider>
+          </KibanaThemeProvider>
+          {show && <Chat />}
+        </CloudContextProvider>
+      );
+    }
+
+    core.chrome.navControls.registerRight({
+      order: 1000,
+      mount: (e) => {
+        ReactDOM.render(<ChatHeaderMenuItem />, e);
+
+        return () => {
+          ReactDOM.unmountComponentAtNode(e);
+        };
+      },
+    });
   }
 
   public stop() {}

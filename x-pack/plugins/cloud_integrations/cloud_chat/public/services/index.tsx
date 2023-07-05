@@ -6,6 +6,7 @@
  */
 
 import React, { FC, createContext, useContext } from 'react';
+import type { History } from 'history';
 
 export interface ChatConfig {
   chatURL: string;
@@ -21,6 +22,7 @@ export interface ChatConfig {
 
 export interface CloudChatServices {
   chat?: ChatConfig;
+  history?: History;
 }
 
 const ServicesContext = createContext<CloudChatServices>({});
@@ -39,4 +41,9 @@ export function useServices() {
 export function useChat(): ChatConfig | undefined {
   const { chat } = useServices();
   return chat;
+}
+
+export function useHistory(): History | undefined {
+  const { history } = useServices();
+  return history;
 }
