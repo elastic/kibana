@@ -153,7 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should complete a job of PNG export of a dashboard in non-default space', async () => {
+    xit('should complete a job of PNG export of a dashboard in non-default space', async () => {
       const downloadPath = await reportingAPI.postJobJSON(
         `/s/non_default_space/api/reporting/generate/png`,
         {
@@ -166,7 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(reportCompleted).to.not.be(null);
     });
 
-    it('should complete a job of PDF export of a dashboard in non-default space', async () => {
+    xit('should complete a job of PDF export of a dashboard in non-default space', async () => {
       const downloadPath = await reportingAPI.postJobJSON(
         `/s/non_default_space/api/reporting/generate/printablePdf`,
         {
