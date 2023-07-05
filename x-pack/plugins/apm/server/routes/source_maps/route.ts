@@ -49,16 +49,19 @@ export type SourceMap = t.TypeOf<typeof sourceMapRt>;
 const androidMapValidation = new t.Type<string, string, unknown>(
   'ANDROID_MAP_VALIDATION',
   t.string.is,
-  (input, context) =>
-    either.chain(t.string.validate(input, context), (str) => {
-      const firstLine = str.split('\n', 1)[0];
-      if (firstLine.trim() == '# compiler: R8') {
-        return t.success(str);
-      } else {
-        return t.failure(input, context);
+  (input, context): t.Validation<string> =>
+    either.chain(
+      t.string.validate(input, context),
+      (str): t.Validation<string> => {
+        const firstLine = str.split('\n', 1)[0];
+        if (firstLine.trim() === '# compiler: R8') {
+          return t.success(str);
+        } else {
+          return t.failure(input, context);
+        }
       }
-    }),
-  (a) => a
+    ),
+  (a): string => a
 );
 
 function throwNotImplementedIfSourceMapNotAvailable(
