@@ -48,8 +48,8 @@ const useGetCommandText = (
       };
     default:
       return {
-        title: '',
-        description: '',
+        title: name,
+        description: name,
       };
   }
 };

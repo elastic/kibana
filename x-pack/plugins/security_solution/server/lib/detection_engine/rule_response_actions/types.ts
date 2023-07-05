@@ -25,3 +25,25 @@ export interface AlertWithAgent extends Alert {
 export interface ResponseActionAlerts {
   alerts: AlertWithAgent[];
 }
+
+export type EndpointResponseActionAlerts = Record<
+  string, // agentId
+  {
+    agent: {
+      id: string;
+      name: string;
+    };
+    alert: AlertWithAgent;
+    pids?: Record<
+      string,
+      {
+        alertIds: string[];
+        agentId: string;
+        hosts: Record<string, { name: string }>;
+        parameters: Record<string, unknown>;
+      }
+    >;
+    alertIds: string[];
+    hosts: Record<string, { name: string }>;
+  }
+>;

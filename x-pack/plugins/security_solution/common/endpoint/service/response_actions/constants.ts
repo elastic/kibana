@@ -27,7 +27,12 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
 
 export type ResponseActionsApiCommandNames = typeof RESPONSE_ACTION_API_COMMANDS_NAMES[number];
 
-export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS = ['isolate'] as const;
+export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiCommandNames[] = [
+  'isolate',
+  'kill-process',
+  'suspend-process',
+  'running-processes',
+];
 
 export type EnabledAutomatedResponseActionsCommands =
   typeof ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS[number];
