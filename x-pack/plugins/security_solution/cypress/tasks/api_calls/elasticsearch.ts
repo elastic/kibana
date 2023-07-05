@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RuleLastRun } from '@kbn/alerting-plugin/common';
 import { rootRequest } from '../common';
 
 export const deleteIndex = (index: string) => {
@@ -35,41 +34,6 @@ export const indexDocument = (indexName: string, document: Record<string, unknow
     headers: { 'kbn-xsrf': 'cypress-creds' },
     body: document,
   });
-
-export const waitForRulesToFinishExecution = (ruleIds: string[]) => {
-  return cy.waitUntil(
-    () =>
-      rootRequest<{
-        hits: {
-          hits: Array<{
-            _source: { alert: { params: { ruleId: string }; lastRun?: RuleLastRun } };
-          }>;
-        };
-      }>({
-        method: 'GET',
-        url: `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_alerting_cases/_search`,
-        headers: { 'kbn-xsrf': 'cypress-creds' },
-        failOnStatusCode: false,
-        body: {
-          query: {
-            terms: {
-              'alert.params.ruleId': ruleIds,
-            },
-          },
-        },
-      }).then((response) => {
-        const areAllRulesFinished = ruleIds.every((ruleId) =>
-          response.body.hits.hits.some(
-            (ruleHit) =>
-              ruleHit._source.alert.params.ruleId === ruleId &&
-              typeof ruleHit._source.alert.lastRun !== 'undefined'
-          )
-        );
-        return areAllRulesFinished;
-      }),
-    { interval: 500, timeout: 12000 }
-  );
-};
 
 export const waitForNewDocumentToBeIndexed = (index: string, initialNumberOfDocuments: number) => {
   cy.waitUntil(

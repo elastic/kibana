@@ -20,13 +20,8 @@ import {
 
 import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 
-import { createRule } from '../../tasks/api_calls/rules';
-import {
-  deleteIndex,
-  createIndex,
-  indexDocument,
-  waitForRulesToFinishExecution,
-} from '../../tasks/api_calls/elasticsearch';
+import { createRule, waitForRulesToFinishExecution } from '../../tasks/api_calls/rules';
+import { deleteIndex, createIndex, indexDocument } from '../../tasks/api_calls/elasticsearch';
 
 import { getNewRule } from '../../objects/rule';
 
