@@ -136,11 +136,18 @@ export class UserProfileAPIClient {
    * @param data Application data to be written (merged with existing data).
    */
   public update<D extends UserProfileData>(data: D) {
+    // Optimistically update the user profile data.
+    const previous = this.userProfile$.getValue();
+    this.userProfile$.next(data);
     return this.http
       .post('/internal/security/user_profile/_data', { body: JSON.stringify(data) })
       .then(() => {
         this.internalDataUpdates$.next(data);
-        this.userProfile$.next(data);
+      })
+      .catch((err) => {
+        // Revert the user profile data to the previous state.
+        this.userProfile$.next(previous);
+        return Promise.reject(err);
       });
   }
 }

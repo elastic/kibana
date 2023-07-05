@@ -11,4 +11,7 @@ export type {
   UserProfileBulkGetParams,
   UserProfileGetCurrentParams,
   UserProfileSuggestParams,
+  UpdateUserProfileHook,
 } from './user_profile';
+
+export { getUseUpdateUserProfile } from './user_profile';

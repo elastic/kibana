@@ -30,23 +30,29 @@ interface Deps {
 
 interface Props {
   notificationSuccess?: {
+    /** Flag to indicate if a notification is shown after update. Default: `true` */
+    enabled?: boolean;
+    /** Customize the title of the notification */
     title?: string;
+    /** Customize the "page reload needed" text of the notification */
     pageReloadText?: string;
   };
 }
 
-type Hook = (props?: Props) => {
+export type UpdateUserProfileHook = (props?: Props) => {
   /** Update the user profile */
   update: (data: UserProfileData) => void;
   /** Update a single key/value user setting. */
   updateSetting: (data: UpdateSettingProps) => void;
+  /** Handler to show a notification after the user profile has been updated */
+  showSuccessNotification: (props: { isRefreshRequired: boolean }) => void;
   /** Flag to indicate if currently updating */
   isLoading: boolean;
   /** The current user profile data */
   userProfileData?: UserProfileData | null;
 };
 
-let useUpdateUserProfile: Hook | undefined;
+let useUpdateUserProfile: UpdateUserProfileHook | undefined;
 
 const i18nTexts = {
   notificationSuccess: {
@@ -71,6 +77,7 @@ export const getUseUpdateUserProfile = ({ apiClient, notifications }: Deps) => {
 
   useUpdateUserProfile = ({ notificationSuccess = {} }: Props = {}) => {
     const {
+      enabled: notificationSuccessEnabled = true,
       title: notificationTitle = i18nTexts.notificationSuccess.title,
       pageReloadText = i18nTexts.notificationSuccess.pageReloadText,
     } = notificationSuccess;
@@ -79,18 +86,8 @@ export const getUseUpdateUserProfile = ({ apiClient, notifications }: Deps) => {
     // Keep a snapshot before updating the user profile so we can compare previous and updated values
     const userProfileSnapshot = useRef<UserProfileData | null>();
 
-    const onUserProfileUpdate = useCallback(
-      (updatedData: UserProfileData) => {
-        setIsLoading(false);
-
-        let isRefreshRequired = false;
-        if (
-          userProfileSnapshot.current?.userSettings?.darkMode !==
-          updatedData?.userSettings?.darkMode
-        ) {
-          isRefreshRequired = true;
-        }
-
+    const showSuccessNotification = useCallback(
+      ({ isRefreshRequired }: { isRefreshRequired: boolean }) => {
         let successToastInput: ToastInput = {
           title: notificationTitle,
         };
@@ -130,6 +127,25 @@ export const getUseUpdateUserProfile = ({ apiClient, notifications }: Deps) => {
       [notificationTitle, pageReloadText]
     );
 
+    const onUserProfileUpdate = useCallback(
+      (updatedData: UserProfileData) => {
+        setIsLoading(false);
+
+        if (notificationSuccessEnabled) {
+          let isRefreshRequired = false;
+          if (
+            userProfileSnapshot.current?.userSettings?.darkMode !==
+            updatedData?.userSettings?.darkMode
+          ) {
+            isRefreshRequired = true;
+          }
+
+          showSuccessNotification({ isRefreshRequired });
+        }
+      },
+      [notificationSuccessEnabled, showSuccessNotification]
+    );
+
     const update = useCallback(
       (udpatedData: UserProfileData) => {
         userProfileSnapshot.current = userProfileData;
@@ -155,6 +171,7 @@ export const getUseUpdateUserProfile = ({ apiClient, notifications }: Deps) => {
     return {
       update,
       updateSetting,
+      showSuccessNotification,
       userProfileData,
       isLoading,
     };

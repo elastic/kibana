@@ -726,10 +726,10 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
   const { services } = useKibana<CoreStart>();
   const { userProfiles, users } = useSecurityApiClients();
 
-  const { update } = getUseUpdateUserProfile({
+  const { update, showSuccessNotification } = getUseUpdateUserProfile({
     apiClient: userProfiles,
     notifications: services.notifications,
-  })();
+  })({ notificationSuccess: { enabled: false } });
 
   const [initialValues, resetInitialValues] = useState<UserProfileFormValues>({
     user: {
@@ -795,6 +795,12 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
       }
 
       resetInitialValues(values);
+
+      let isRefreshRequired = false;
+      if (initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode) {
+        isRefreshRequired = true;
+      }
+      showSuccessNotification({ isRefreshRequired });
     },
     initialValues,
     enableReinitialize: true,

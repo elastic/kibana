@@ -24,7 +24,12 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 import type { SecurityLicense } from '../common/licensing';
 import { SecurityLicenseService } from '../common/licensing';
-import { accountManagementApp, UserProfileAPIClient } from './account_management';
+import type { UpdateUserProfileHook } from './account_management';
+import {
+  accountManagementApp,
+  getUseUpdateUserProfile,
+  UserProfileAPIClient,
+} from './account_management';
 import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
@@ -208,6 +213,12 @@ export class SecurityPlugin
           this.securityApiClients.userProfiles
         ),
       },
+      hooks: {
+        useUpdateUserProfile: getUseUpdateUserProfile({
+          apiClient: this.securityApiClients.userProfiles,
+          notifications: core.notifications,
+        }),
+      },
     };
   }
 
@@ -248,6 +259,13 @@ export interface SecurityPluginStart {
    * A set of methods to work with Kibana user profiles.
    */
   userProfiles: Pick<UserProfileAPIClient, 'getCurrent' | 'bulkGet' | 'suggest'>;
+
+  /**
+   * A set of hooks to work with Kibana user profiles
+   */
+  hooks: {
+    useUpdateUserProfile: UpdateUserProfileHook;
+  };
 
   /**
    * Exposes UI components that will be loaded asynchronously.
