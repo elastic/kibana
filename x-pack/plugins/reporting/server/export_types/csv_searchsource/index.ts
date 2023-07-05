@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { CsvSearchsourceExportType } from './csv_searchsource';
+export { CsvSearchSourceExportType } from './csv_searchsource';

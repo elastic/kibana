@@ -28,17 +28,17 @@ import { JobParamsCSV, TaskPayloadCSV } from './types';
  * @TODO move to be within @kbn/reporitng-export-types
  */
 
-type CsvSearchsourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
-interface CsvSearchsourceExportTypeStartDeps extends BaseExportTypeStartDeps {
+type CsvSearchSourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
+interface CsvSearchSourceExportTypeStartDeps extends BaseExportTypeStartDeps {
   discover: DiscoverServerPluginStart;
   data: DataPluginStart;
 }
 
-export class CsvSearchsourceExportType extends ExportType<
+export class CsvSearchSourceExportType extends ExportType<
   JobParamsCSV,
   TaskPayloadCSV,
-  CsvSearchsourceExportTypeSetupDeps,
-  CsvSearchsourceExportTypeStartDeps
+  CsvSearchSourceExportTypeSetupDeps,
+  CsvSearchSourceExportTypeStartDeps
 > {
   id = 'csv_searchsource';
   name = CSV_JOB_TYPE;

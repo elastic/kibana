@@ -22,7 +22,7 @@ import { Writable } from 'stream';
 import { ReportingCore } from '../..';
 import { CancellationToken } from '@kbn/reporting-common';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
-import { CsvSearchsourceExportType } from './csv_searchsource';
+import { CsvSearchSourceExportType } from './csv_searchsource';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
@@ -33,7 +33,7 @@ const headers = { sid: 'cooltestheaders' };
 let encryptedHeaders: string;
 let mockReportingCore: ReportingCore;
 let stream: jest.Mocked<Writable>;
-let mockCsvSearchsourceExportType: CsvSearchsourceExportType;
+let mockCsvSearchSourceExportType: CsvSearchSourceExportType;
 
 beforeAll(async () => {
   const crypto = nodeCrypto({ encryptionKey });
@@ -54,18 +54,18 @@ beforeAll(async () => {
 
   mockReportingCore = await createMockReportingCore(configType);
 
-  mockCsvSearchsourceExportType = new CsvSearchsourceExportType(
+  mockCsvSearchSourceExportType = new CsvSearchSourceExportType(
     mockCoreSetup,
     configType,
     mockLogger,
     context
   );
 
-  mockCsvSearchsourceExportType.setup({
+  mockCsvSearchSourceExportType.setup({
     basePath: { set: jest.fn() },
   });
 
-  mockCsvSearchsourceExportType.start({
+  mockCsvSearchSourceExportType.start({
     esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: mockCoreStart.savedObjects,
     uiSettings: mockCoreStart.uiSettings,
@@ -81,7 +81,7 @@ beforeEach(() => {
 });
 
 test('gets the csv content from job parameters', async () => {
-  const payload = await mockCsvSearchsourceExportType.runTask(
+  const payload = await mockCsvSearchSourceExportType.runTask(
     'cool-job-id',
     {
       headers: encryptedHeaders,
