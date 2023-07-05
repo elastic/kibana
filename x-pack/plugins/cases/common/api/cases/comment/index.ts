@@ -6,7 +6,11 @@
  */
 
 import * as rt from 'io-ts';
-import { MAX_BULK_GET_ATTACHMENTS, MAX_COMMENTS_PER_PAGE } from '../../../constants';
+import {
+  MAX_ADD_COMMENTS,
+  MAX_BULK_GET_ATTACHMENTS,
+  MAX_COMMENTS_PER_PAGE,
+} from '../../../constants';
 import { limitedArraySchema, paginationSchema } from '../../../schema';
 import { jsonValueRt } from '../../runtime_types';
 
@@ -300,7 +304,12 @@ export const FindCommentsQueryParamsRt = rt.intersection([
   paginationSchema({ maxPerPage: MAX_COMMENTS_PER_PAGE }),
 ]);
 
-export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
+export const BulkCreateCommentRequestRt = limitedArraySchema({
+  codec: CommentRequestRt,
+  min: 1,
+  max: MAX_ADD_COMMENTS,
+  fieldName: 'attachments',
+});
 
 export const BulkGetAttachmentsRequestRt = rt.strict({
   ids: limitedArraySchema({

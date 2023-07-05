@@ -70,6 +70,7 @@ import {
 import { User } from '../../../../common/lib/authentication/types';
 import { SECURITY_SOLUTION_FILE_KIND } from '../../../../common/lib/constants';
 import { arraysToEqual } from '../../../../common/lib/validation';
+import { MAX_ADD_COMMENTS } from '@kbn/cases-plugin/common/constants';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -107,21 +108,12 @@ export default ({ getService }: FtrProviderContext): void => {
     );
   };
 
-  describe('bulk_create_attachments', () => {
+  describe.only('bulk_create_attachments', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
 
     describe('creation', () => {
-      it('should no create an attachment on empty request', async () => {
-        const { theCase } = await createCaseAndBulkCreateAttachments({
-          supertest,
-          numberOfAttachments: 0,
-        });
-
-        expect(theCase.comments?.length).to.be(0);
-      });
-
       it('should create one attachment', async () => {
         const { theCase, attachments } = await createCaseAndBulkCreateAttachments({
           supertest,
@@ -691,6 +683,28 @@ export default ({ getService }: FtrProviderContext): void => {
             },
             postCommentAlertReq,
           ],
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when trying to add too many attachments', async () => {
+        await bulkCreateAttachments({
+          supertest,
+          caseId: 'whatever',
+          params: Array(MAX_ADD_COMMENTS + 1).fill({
+            type: CommentType.user,
+            comment: 'test',
+            owner: 'doesntmatter',
+          }),
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when passing zero attachments', async () => {
+        await bulkCreateAttachments({
+          supertest,
+          caseId: 'whatever',
+          params: [],
           expectedHttpCode: 400,
         });
       });

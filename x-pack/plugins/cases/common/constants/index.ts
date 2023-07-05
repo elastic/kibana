@@ -122,6 +122,7 @@ export const MAX_DESCRIPTION_LENGTH = 30000 as const;
 export const MAX_LENGTH_PER_TAG = 256 as const;
 export const MAX_TAGS_PER_CASE = 200 as const;
 export const MAX_DELETE_IDS_LENGTH = 100 as const;
+export const MAX_ADD_COMMENTS = 100 as const;
 
 /**
  * Cases features
