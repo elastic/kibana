@@ -23,3 +23,14 @@ export const FullSize = {
     },
   },
 };
+
+export const FullSizeWithoutChart = {
+  args: {
+    ...mockedAlertSummaryResponse,
+    shouldHideCharts: true,
+    chartProps: {
+      ...mockedChartProps,
+      onBrushEnd: action('brushEvent'),
+    },
+  },
+};
