@@ -18,6 +18,7 @@ import { createHttpServer, createConfigService } from '@kbn/core-http-server-moc
 import type { HttpService } from '@kbn/core-http-server-internal';
 import type { IRouter } from '@kbn/core-http-server';
 import type { CliArgs } from '@kbn/config';
+import { ELASTIC_HTTP_VERSION_QUERY_PARAM } from '@kbn/core-http-common';
 
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;
@@ -362,6 +363,35 @@ describe('Routing versioned requests', () => {
 
     expect(captureErrorMock).toHaveBeenCalledTimes(1);
     expect(captureErrorMock).toHaveBeenCalledWith(error);
+  });
+
+  it('reserves the query parameter "apiVersion" for version negotiation', async () => {
+    await setupServer({ serverless: false, dev: false });
+    router.versioned.get({ path: '/my-path', access: 'public' }).addVersion(
+      {
+        validate: {
+          request: {
+            query: schema.object({ [ELASTIC_HTTP_VERSION_QUERY_PARAM]: schema.string() }),
+          },
+        },
+        version: '2023-04-04',
+      },
+      async (ctx, req, res) => {
+        return res.ok({ body: 'ok' });
+      }
+    );
+
+    await server.start();
+
+    await expect(
+      supertest
+        .get('/my-path')
+        .query({ [ELASTIC_HTTP_VERSION_QUERY_PARAM]: '2023-04-04' })
+        .expect(400)
+        .then(({ body }) => body.message)
+    ).resolves.toEqual(
+      'Query parameter "apiVersion" is not allowed. Please specify the API version using the "elastic-api-version" header.'
+    );
   });
 
   describe('query parameter version negotiation', () => {
