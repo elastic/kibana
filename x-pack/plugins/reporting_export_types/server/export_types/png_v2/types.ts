@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { PNG_REPORT_TYPE_V2 } from '../../../common/constants';
-
-export const metadata = {
-  id: PNG_REPORT_TYPE_V2,
-  name: 'PNG',
-};
+export type {
+  JobParamsPNGV2,
+  TaskPayloadPNGV2,
+} from '@kbn/reporting-plugin/common/types/export_types/png_v2';

@@ -23,9 +23,9 @@ import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { ReportingConfigType } from '../../config';
-import { ReportingServerInfo } from '../../core';
-import { CreateJobFn, ReportingStart, RunTaskFn } from '../../types';
+import { ReportingConfigType } from '@kbn/reporting-plugin/server/config';
+import { ReportingServerInfo } from '@kbn/reporting-plugin/server/core';
+import { CreateJobFn, ReportingStart, RunTaskFn } from '@kbn/reporting-plugin/server/types';
 
 /**
  * @TODO move to be within @kbn-reporting-export-types

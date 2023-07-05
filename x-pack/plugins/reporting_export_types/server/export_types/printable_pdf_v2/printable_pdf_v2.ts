@@ -7,24 +7,25 @@
 
 import { Headers } from '@kbn/core/server';
 import { CancellationToken, TaskRunResult } from '@kbn/reporting-common';
+import {
+  PDF_REPORT_TYPE_V2,
+  PDF_JOB_TYPE_V2,
+  LICENSE_TYPE_TRIAL,
+  LICENSE_TYPE_CLOUD_STANDARD,
+  LICENSE_TYPE_GOLD,
+  LICENSE_TYPE_PLATINUM,
+  LICENSE_TYPE_ENTERPRISE,
+  REPORTING_TRANSACTION_TYPE,
+} from '@kbn/reporting-plugin/common/constants';
+import { JobParamsPDFV2, UrlOrUrlLocatorTuple } from '@kbn/reporting-plugin/common/types';
+import { TaskPayloadPDFV2 } from '@kbn/reporting-plugin/common/types/export_types/printable_pdf_v2';
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
 import { Writable } from 'stream';
-import {
-  LICENSE_TYPE_CLOUD_STANDARD,
-  LICENSE_TYPE_ENTERPRISE,
-  LICENSE_TYPE_GOLD,
-  LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_TRIAL,
-  PDF_JOB_TYPE_V2,
-  PDF_REPORT_TYPE_V2,
-  REPORTING_TRANSACTION_TYPE,
-} from '../../../common/constants';
-import { JobParamsPDFV2, UrlOrUrlLocatorTuple } from '../../../common/types';
-import { TaskPayloadPDFV2 } from '../../../common/types/export_types/printable_pdf_v2';
-import { decryptJobHeaders, ExportType, getCustomLogo } from '../common';
-import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
+import { getFullRedirectAppUrl } from '@kbn/reporting-plugin/server/export_types/common/v2/get_full_redirect_app_url';
+import { decryptJobHeaders, getCustomLogo } from '@kbn/reporting-plugin/server/export_types/common';
+import { ExportType } from '../export_type';
 import { generatePdfObservable } from './lib/generate_pdf';
 
 export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> {

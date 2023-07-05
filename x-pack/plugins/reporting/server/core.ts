@@ -43,7 +43,6 @@ import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
-import { PdfExportType } from './export_types/printable_pdf_v2';
 import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
@@ -104,7 +103,7 @@ export class ReportingCore {
   private monitorTask: MonitorReportsTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
-  private pdfExport: PdfExportType;
+  // private pdfExport: PdfExportType;
   private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
@@ -120,8 +119,8 @@ export class ReportingCore {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
 
-    this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
-    this.exportTypesRegistry.register(this.pdfExport);
+    // this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
+    // this.exportTypesRegistry.register(this.pdfExport);
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
@@ -148,7 +147,7 @@ export class ReportingCore {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
 
-    this.pdfExport.setup(setupDeps);
+    // this.pdfExport.setup(setupDeps);
 
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
@@ -163,7 +162,7 @@ export class ReportingCore {
   public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
-    this.pdfExport.start({ ...startDeps, reporting: this.getContract() });
+    // this.pdfExport.start({ ...startDeps, reporting: this.getContract() });
 
     await this.assertKibanaIsAvailable();
 

@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import { CSV_JOB_TYPE } from '../../../common/constants';
-
-export const metadata = {
-  id: 'csv_searchsource',
-  name: CSV_JOB_TYPE,
-};
+export { PngExportType } from './png_v2';
