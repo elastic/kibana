@@ -101,7 +101,7 @@ export const updateTimelineDates = () => {
   cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).first().should('not.have.text', 'Updating');
 };
 
-export const updatDateRangeInLocalDatePickers = (startDate: string, endDate: string) => {
+export const updateDateRangeInLocalDatePickers = (startDate: string, endDate: string) => {
   cy.get(SHOW_DATES_BUTTON).click();
   cy.get(DATE_PICKER_ABSOLUTE_TAB).first().click();
 

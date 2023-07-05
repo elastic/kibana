@@ -21,76 +21,72 @@ import { ENTITY_ANALYTICS_MANAGEMENT_URL, ALERTS_URL } from '../../urls/navigati
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { getNewRule } from '../../objects/rule';
 import { createRule } from '../../tasks/api_calls/rules';
-import { updatDateRangeInLocalDatePickers } from '../../tasks/date_picker';
+import { updateDateRangeInLocalDatePickers } from '../../tasks/date_picker';
 import { fillLocalSearchBar, submitLocalSearch } from '../../tasks/search_bar';
 
-describe(
-  'Entity analytics management page',
-  { env: { ftrConfig: { enableExperimental: ['riskScoringRoutesEnabled'] } } },
-  () => {
-    before(() => {
-      cleanKibana();
-      esArchiverLoad('all_users');
+describe('Entity analytics management page', () => {
+  before(() => {
+    cleanKibana();
+    esArchiverLoad('all_users');
+  });
+
+  beforeEach(() => {
+    login();
+    visitWithoutDateRange(ALERTS_URL);
+    createRule(getNewRule({ query: 'user.name:* or host.name:*', risk_score: 70 }));
+    visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
+  });
+
+  after(() => {
+    esArchiverUnload('all_users');
+  });
+
+  it('renders page as expected', () => {
+    cy.get(PAGE_TITLE).should('have.text', 'Entity Risk Score');
+  });
+
+  describe('Risk preview', () => {
+    it('risk scores reacts on change in datepicker', () => {
+      const START_DATE = 'Jan 18, 2019 @ 20:33:29.186';
+      const END_DATE = 'Jan 19, 2019 @ 20:33:29.186';
+
+      cy.get(HOST_RISK_PREVIEW_TABLE_ROWS).should('have.length', 5);
+      cy.get(USER_RISK_PREVIEW_TABLE_ROWS).should('have.length', 5);
+
+      updateDateRangeInLocalDatePickers(START_DATE, END_DATE);
+
+      cy.get(HOST_RISK_PREVIEW_TABLE).contains('No items found');
+      cy.get(USER_RISK_PREVIEW_TABLE).contains('No items found');
     });
 
-    beforeEach(() => {
-      login();
-      visitWithoutDateRange(ALERTS_URL);
-      createRule(getNewRule({ query: 'user.name:* or host.name:*', risk_score: 70 }));
-      visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
+    it('risk scores reacts on change in search bar query', () => {
+      cy.get(HOST_RISK_PREVIEW_TABLE_ROWS).should('have.length', 5);
+      cy.get(USER_RISK_PREVIEW_TABLE_ROWS).should('have.length', 5);
+
+      fillLocalSearchBar('host.name: "test-host1"');
+      submitLocalSearch();
+
+      cy.get(HOST_RISK_PREVIEW_TABLE_ROWS).should('have.length', 1);
+      cy.get(USER_RISK_PREVIEW_TABLE_ROWS).should('have.length', 1);
     });
 
-    after(() => {
-      esArchiverUnload('all_users');
-    });
-
-    it('renders page as expected', () => {
-      cy.get(PAGE_TITLE).should('have.text', 'Entity Risk Score');
-    });
-
-    describe('Risk preview', () => {
-      it('risk scores reacts on change in datepicker', () => {
-        const START_DATE = 'Jan 18, 2019 @ 20:33:29.186';
-        const END_DATE = 'Jan 19, 2019 @ 20:33:29.186';
-
-        cy.get(HOST_RISK_PREVIEW_TABLE_ROWS).should('have.length', 5);
-        cy.get(USER_RISK_PREVIEW_TABLE_ROWS).should('have.length', 5);
-
-        updatDateRangeInLocalDatePickers(START_DATE, END_DATE);
-
-        cy.get(HOST_RISK_PREVIEW_TABLE).contains('No items found');
-        cy.get(USER_RISK_PREVIEW_TABLE).contains('No items found');
+    it('show error panel if API returns error and then try to refetch data', () => {
+      cy.intercept('POST', '/internal/risk_score/preview', {
+        statusCode: 500,
       });
 
-      it('risk scores reacts on change in search bar query', () => {
-        cy.get(HOST_RISK_PREVIEW_TABLE_ROWS).should('have.length', 5);
-        cy.get(USER_RISK_PREVIEW_TABLE_ROWS).should('have.length', 5);
+      cy.get(RISK_PREVIEW_ERROR).contains('Preview failed');
 
-        fillLocalSearchBar('host.name: "test-host1"');
-        submitLocalSearch();
-
-        cy.get(HOST_RISK_PREVIEW_TABLE_ROWS).should('have.length', 1);
-        cy.get(USER_RISK_PREVIEW_TABLE_ROWS).should('have.length', 1);
+      cy.intercept('POST', '/internal/risk_score/preview', {
+        statusCode: 200,
+        body: {
+          scores: [],
+        },
       });
 
-      it('show error panel if API returns error and then try to refetch data', () => {
-        cy.intercept('POST', '/internal/risk_score/preview', {
-          statusCode: 500,
-        });
+      cy.get(RISK_PREVIEW_ERROR_BUTTON).click();
 
-        cy.get(RISK_PREVIEW_ERROR).contains('Preview failed');
-
-        cy.intercept('POST', '/internal/risk_score/preview', {
-          statusCode: 200,
-          body: {
-            scores: [],
-          },
-        });
-
-        cy.get(RISK_PREVIEW_ERROR_BUTTON).click();
-
-        cy.get(RISK_PREVIEW_ERROR).should('not.exist');
-      });
+      cy.get(RISK_PREVIEW_ERROR).should('not.exist');
     });
-  }
-);
+  });
+});
