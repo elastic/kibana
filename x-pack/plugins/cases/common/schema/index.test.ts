@@ -207,7 +207,7 @@ describe('schema', () => {
       `);
     });
 
-    it('fails when page > maxPerPage', () => {
+    it('fails when perPage > maxPerPage', () => {
       expect(PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ perPage: 4 })))
         .toMatchInlineSnapshot(`
         Array [

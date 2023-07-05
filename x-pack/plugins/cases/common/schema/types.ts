@@ -11,10 +11,10 @@ import { NumberFromString } from '../api/saved_object';
 const PageTypeRt = rt.union([rt.number, NumberFromString]);
 type PageNumberType = rt.TypeOf<typeof PageTypeRt>;
 
-export interface PaginationType {
+export interface Pagination {
   page: PageNumberType;
   perPage: PageNumberType;
 }
 
 export const PaginationSchemaRt = rt.exact(rt.partial({ page: PageTypeRt, perPage: PageTypeRt }));
-export type PartialPaginationType = Partial<PaginationType>;
+export type PartialPaginationType = Partial<Pagination>;
