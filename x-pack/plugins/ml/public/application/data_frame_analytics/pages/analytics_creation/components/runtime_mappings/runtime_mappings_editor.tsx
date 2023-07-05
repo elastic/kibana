@@ -33,7 +33,7 @@ export const RuntimeMappingsEditor: FC<Props> = memo(
   }) => {
     return (
       <div data-test-subj="mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor">
-        <CodeEditor // TODO theme provided in context by x-pack/plugins/ml/public/application/app.tsx
+        <CodeEditor
           height={250}
           languageId={'json'}
           onChange={(d: string) => {
