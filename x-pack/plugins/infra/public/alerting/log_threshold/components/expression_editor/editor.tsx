@@ -13,7 +13,8 @@ import {
   ForLastExpression,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { PersistedLogViewReference, ResolvedLogViewField } from '../../../../../common/log_views';
+import { LogViewProvider, useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import { PersistedLogViewReference, ResolvedLogViewField } from '@kbn/logs-shared-plugin/common';
 import {
   Comparator,
   isOptimizableGroupedThreshold,
@@ -28,7 +29,6 @@ import {
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { ObjectEntries } from '../../../../../common/utility_types';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { LogViewProvider, useLogViewContext } from '../../../../hooks/use_log_view';
 import { GroupByExpression } from '../../../common/group_by_expression/group_by_expression';
 import { errorsRT } from '../../validation';
 import { Criteria } from './criteria';
@@ -95,7 +95,7 @@ export const ExpressionEditor: React.FC<
 > = (props) => {
   const isInternal = props.metadata?.isInternal ?? false;
   const {
-    services: { logViews },
+    services: { logsShared },
   } = useKibanaContextForPlugin(); // injected during alert registration
 
   return (
@@ -105,7 +105,7 @@ export const ExpressionEditor: React.FC<
           <Editor {...props} />
         </SourceStatusWrapper>
       ) : (
-        <LogViewProvider logViews={logViews.client}>
+        <LogViewProvider logViews={logsShared.logViews.client}>
           <SourceStatusWrapper {...props}>
             <Editor {...props} />
           </SourceStatusWrapper>
