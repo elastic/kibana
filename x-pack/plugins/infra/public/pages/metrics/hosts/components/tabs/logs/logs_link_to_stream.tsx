@@ -8,7 +8,7 @@ import React from 'react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LogViewReference } from '../../../../../../../common/log_views';
+import { LogViewReference } from '@kbn/logs-shared-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 
 interface LogsLinkToStreamProps {
