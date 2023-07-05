@@ -15,15 +15,13 @@ export interface Props {
 
 export function OverviewItem({ title, subtitle }: Props) {
   return (
-    <EuiFlexItem grow={true}>
-      <EuiFlexGroup direction="column" gutterSize="xs">
-        <EuiFlexItem>
-          <EuiText size="xs">
-            <strong>{title}</strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>{subtitle}</EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs">
+          <strong>{title}</strong>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{subtitle}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

@@ -21,7 +21,7 @@ import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
-import { Overview as Overview } from './overview';
+import { Overview } from './overview/overview';
 import { SliChartPanel } from './sli_chart_panel';
 import { SloDetailsAlerts } from './slo_detail_alerts';
 import { BurnRates } from './burn_rates';
