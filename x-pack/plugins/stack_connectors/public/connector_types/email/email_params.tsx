@@ -13,9 +13,10 @@ import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithAutocomplete,
   TextFieldWithMessageVariables,
+  TextAreaWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EmailActionParams } from '../types';
-
+import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
 const noop = () => {};
 
 export const EmailParamsFields = ({
@@ -31,6 +32,7 @@ export const EmailParamsFields = ({
   showEmailSubjectAndMessage = true,
   useDefaultMessage,
 }: ActionParamsProps<EmailActionParams>) => {
+  const isMustacheAutocompleteOn = getIsExperimentalFeatureEnabled('isMustacheAutocompleteOn');
   const { to, cc, bcc, subject, message } = actionParams;
   const toOptions = to ? to.map((label: string) => ({ label })) : [];
   const ccOptions = cc ? cc.map((label: string) => ({ label })) : [];
@@ -230,22 +232,38 @@ export const EmailParamsFields = ({
           />
         </EuiFormRow>
       )}
-      {showEmailSubjectAndMessage && (
-        <TextAreaWithAutocomplete
-          index={index}
-          editAction={editAction}
-          messageVariables={messageVariables}
-          paramsProperty={'message'}
-          inputTargetValue={message}
-          label={i18n.translate(
-            'xpack.stackConnectors.components.email.messageTextAreaFieldLabel',
-            {
-              defaultMessage: 'Message',
-            }
-          )}
-          errors={(errors.message ?? []) as string[]}
-        />
-      )}
+      {showEmailSubjectAndMessage &&
+        (isMustacheAutocompleteOn ? (
+          <TextAreaWithAutocomplete
+            index={index}
+            editAction={editAction}
+            messageVariables={messageVariables}
+            paramsProperty={'message'}
+            inputTargetValue={message}
+            label={i18n.translate(
+              'xpack.stackConnectors.components.email.messageTextAreaFieldLabel',
+              {
+                defaultMessage: 'Message',
+              }
+            )}
+            errors={(errors.message ?? []) as string[]}
+          />
+        ) : (
+          <TextAreaWithMessageVariables
+            index={index}
+            editAction={editAction}
+            messageVariables={messageVariables}
+            paramsProperty={'message'}
+            inputTargetValue={message}
+            label={i18n.translate(
+              'xpack.stackConnectors.components.email.messageTextAreaFieldLabel',
+              {
+                defaultMessage: 'Message',
+              }
+            )}
+            errors={(errors.message ?? []) as string[]}
+          />
+        ))}
     </>
   );
 };

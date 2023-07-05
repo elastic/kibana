@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
-import { StackConnectorsPublicPlugin } from './plugin';
-
-export const plugin = (context: PluginInitializerContext) =>
-  new StackConnectorsPublicPlugin(context);
+export interface StackConnectorsConfigType {
+  enableExperimental: string[];
+}
