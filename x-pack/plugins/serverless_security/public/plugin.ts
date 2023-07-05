@@ -17,6 +17,9 @@ import {
   ServerlessSecurityPublicConfig,
 } from './types';
 import { registerUpsellings } from './components/upselling';
+import { createServices } from './common/services';
+import { subscribeNavigationTree } from './common/navigation/navigation_tree';
+import { subscribeBreadcrumbs } from './common/navigation/breadcrumbs';
 
 export class ServerlessSecurityPlugin
   implements
@@ -45,14 +48,21 @@ export class ServerlessSecurityPlugin
     core: CoreStart,
     startDeps: ServerlessSecurityPluginStartDependencies
   ): ServerlessSecurityPluginStart {
-    const { securitySolution, serverless } = startDeps;
+    const { securitySolution, serverless, management } = startDeps;
+    const { productTypes } = this.config;
+
+    const services = createServices(core, startDeps);
 
     securitySolution.setIsSidebarEnabled(false);
-    securitySolution.setGetStartedPage(
-      getSecurityGetStartedComponent(core, startDeps, this.config.productTypes)
-    );
+    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
+
     serverless.setProjectHome('/app/security');
-    serverless.setSideNavComponent(getSecuritySideNavComponent(core, startDeps));
+    serverless.setSideNavComponent(getSecuritySideNavComponent(services));
+
+    subscribeNavigationTree(services);
+    subscribeBreadcrumbs(services);
+
+    management.setLandingPageRedirect('/app/security/manage');
 
     return {};
   }

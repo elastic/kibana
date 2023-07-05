@@ -624,6 +624,10 @@ the infrastructure monitoring use-case within Kibana.
 using the CURL scripts in the scripts folder.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/logs_shared/README.md[logsShared]
+|Exposes the shared components and APIs to access and visualize logs.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/logstash[logstash]
 |WARNING: Missing README.
 

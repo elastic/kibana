@@ -39,7 +39,7 @@
     "requiredBundles": [
       "kibanaReact",
       "esUiShared",
-      "infra",
+      "logsShared",
       "kibanaUtils",
       "usageCollection",
       "unifiedSearch"

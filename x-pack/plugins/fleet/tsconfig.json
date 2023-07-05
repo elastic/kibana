@@ -41,7 +41,7 @@
     // requiredBundles from ./kibana.json
     "@kbn/kibana-react-plugin",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/infra-plugin",
+    "@kbn/logs-shared-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/storybook",

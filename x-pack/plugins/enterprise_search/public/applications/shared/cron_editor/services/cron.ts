@@ -56,18 +56,3 @@ export function cronPartsToExpression({
 }: FieldToValueMap): string {
   return `${second} ${minute} ${hour} ${date} ${month} ${day}`;
 }
-
-export function convertToEveryXMinute(
-  minute: FieldToValueMap['minute']
-): FieldToValueMap['minute'] {
-  if (!minute) return minute;
-  if (minute.startsWith('*/')) return minute;
-  return '*/' + minute;
-}
-
-export function convertFromEveryXMinute(
-  minute: FieldToValueMap['minute']
-): FieldToValueMap['minute'] {
-  if (!minute) return minute;
-  return minute.startsWith('*/') ? minute.slice(2) : minute;
-}
