@@ -12,9 +12,11 @@ import useAsync from 'react-use/lib/useAsync';
 
 import {
   EuiText,
+  EuiIcon,
   EuiForm,
   EuiTitle,
   EuiPanel,
+  IconType,
   EuiSwitch,
   EuiSpacer,
   EuiButton,
@@ -25,8 +27,6 @@ import {
   EuiButtonEmpty,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  IconType,
-  EuiIcon,
 } from '@elastic/eui';
 
 import { NavigationContainerInput } from '../../types';
@@ -40,20 +40,20 @@ import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/
 import './navigation_embeddable.scss';
 
 export const NavigationEmbeddablePanelEditor = ({
-  initialInput,
   onSave,
   onClose,
+  initialInput,
   currentDashboardId,
 }: {
+  onClose: () => void;
   initialInput: Partial<NavigationContainerInput>;
   onSave: (input: Partial<NavigationContainerInput>) => void;
-  onClose: () => void;
   currentDashboardId?: string;
 }) => {
   const [showLinkEditorFlyout, setShowLinkEditorFlyout] = useState(false);
   const [panels, setPanels] = useState(initialInput.panels);
 
-  const { loading: loadingLinkList, value: linkList } = useAsync(async () => {
+  const { value: linkList } = useAsync(async () => {
     if (!panels || isEmpty(panels)) return [];
 
     const links: Array<{ icon: IconType; label: string }> = await Promise.all(
@@ -111,27 +111,21 @@ export const NavigationEmbeddablePanelEditor = ({
                 </EuiPanel>
               ) : (
                 <>
-                  {loadingLinkList ? (
-                    <></>
-                  ) : (
-                    <>
-                      {linkList?.map((link) => {
-                        return (
-                          <>
-                            <EuiPanel hasBorder hasShadow={false} paddingSize="s">
-                              <EuiFlexGroup gutterSize="s">
-                                <EuiFlexItem grow={false}>
-                                  <EuiIcon type={link.icon} color="text" />
-                                </EuiFlexItem>
-                                <EuiFlexItem>{link.label}</EuiFlexItem>
-                              </EuiFlexGroup>
-                            </EuiPanel>
-                            <EuiSpacer size="s" />
-                          </>
-                        );
-                      })}
-                    </>
-                  )}
+                  {linkList?.map((link) => {
+                    return (
+                      <>
+                        <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+                          <EuiFlexGroup gutterSize="s">
+                            <EuiFlexItem grow={false}>
+                              <EuiIcon type={link.icon} color="text" />
+                            </EuiFlexItem>
+                            <EuiFlexItem>{link.label}</EuiFlexItem>
+                          </EuiFlexGroup>
+                        </EuiPanel>
+                        <EuiSpacer size="s" />
+                      </>
+                    );
+                  })}
                   <EuiButtonEmpty
                     size="s"
                     flush="left"
@@ -153,12 +147,7 @@ export const NavigationEmbeddablePanelEditor = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              // aria-label={`cancel-${currentInput.title}`}
-              data-test-subj="control-editor-cancel"
-              iconType="cross"
-              onClick={onClose}
-            >
+            <EuiButtonEmpty iconType="cross" onClick={onClose}>
               Cancel
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -177,8 +166,13 @@ export const NavigationEmbeddablePanelEditor = ({
 
       {showLinkEditorFlyout && (
         <NavigationEmbeddableLinkEditor
-          initialInput={initialInput}
-          onClose={() => setShowLinkEditorFlyout(false)}
+          onClose={(closeBothFlyouts: boolean) => {
+            if (closeBothFlyouts) {
+              onClose();
+            } else {
+              setShowLinkEditorFlyout(false);
+            }
+          }}
           onSave={(type, destination, label) => {
             addLink(initialInput, { type, destination, label });
             setPanels(initialInput.panels);

@@ -41,23 +41,11 @@ export const NavEmbeddableStrings = {
         i18n.translate('navEmbeddable.editor.dashboard.linkTypeLabel', {
           defaultMessage: 'Dashboard',
         }),
-      getSearchPlaceholder: () =>
-        i18n.translate('navEmbeddable.editor.dashboard.searchPlaceholder', {
-          defaultMessage: 'Search for a dashboard',
-        }),
-      getCurrentDashboardLabel: () =>
-        i18n.translate('navEmbeddable.editor.dashboard.currentDashboardLabel', {
-          defaultMessage: 'Current',
-        }),
     },
     external: {
       getLinkTypeLabel: () =>
         i18n.translate('navEmbeddable.editor.external.linkTypeLabel', {
           defaultMessage: 'URL',
-        }),
-      getPlaceholder: () =>
-        i18n.translate('navEmbeddable.editor.external.placeholder', {
-          defaultMessage: 'Enter external URL',
         }),
     },
   },

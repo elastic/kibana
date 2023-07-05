@@ -12,14 +12,13 @@ import { EuiFieldText } from '@elastic/eui';
 
 import { ExternalLinkInput } from '../types';
 import { LinkEditorDestinationProps } from '../../types';
-import { NavEmbeddableStrings } from '../../navigation_container/components/navigation_embeddable_strings';
+import { ExternalLinkEmbeddableStrings } from './external_link_strings';
 
 // TODO: As part of https://github.com/elastic/kibana/issues/154381, replace this regex URL check with more robust url validation
 const isValidUrl =
   /^https?:\/\/(?:www.)?[-a-zA-Z0-9@:%._+~#=]{1,256}.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
 
 export const ExternalLinkEditorDestinationPicker = ({
-  initialInput,
   setDestination,
   setPlaceholder,
   currentDashboardId,
@@ -31,7 +30,7 @@ export const ExternalLinkEditorDestinationPicker = ({
   return (
     <EuiFieldText
       {...other}
-      placeholder={NavEmbeddableStrings.editor.external.getPlaceholder()}
+      placeholder={ExternalLinkEmbeddableStrings.getPlaceholder()}
       isInvalid={!validUrl}
       onChange={(e) => {
         const url = e.target.value;

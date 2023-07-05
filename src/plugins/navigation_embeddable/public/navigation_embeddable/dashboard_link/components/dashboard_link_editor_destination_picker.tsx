@@ -22,11 +22,10 @@ import {
 
 import { LinkEditorDestinationProps } from '../../types';
 import { DashboardItem, DashboardLinkInput } from '../types';
+import { DashboardLinkEmbeddableStrings } from './dashboard_link_strings';
 import { memoizedFetchDashboards } from '../lib/dashboard_editor_tools';
-import { NavEmbeddableStrings } from '../../navigation_container/components/navigation_embeddable_strings';
 
 export const DashboardLinkEditorDestinationPicker = ({
-  initialInput,
   setDestination,
   setPlaceholder,
   currentDashboardId,
@@ -45,7 +44,6 @@ export const DashboardLinkEditorDestinationPicker = ({
         return {
           data: dashboard,
           label: dashboard.attributes.title,
-          // checked: initialSelection && initialSelection.id === dashboard.id ? 'on' : undefined,
         } as EuiSelectableOption;
       }) ?? [];
 
@@ -57,7 +55,7 @@ export const DashboardLinkEditorDestinationPicker = ({
     <div {...other}>
       <EuiFieldSearch
         isClearable={true}
-        placeholder={NavEmbeddableStrings.editor.dashboard.getSearchPlaceholder()}
+        placeholder={DashboardLinkEmbeddableStrings.getSearchPlaceholder()}
         onSearch={(value) => {
           setSearchString(value);
         }}
@@ -68,7 +66,6 @@ export const DashboardLinkEditorDestinationPicker = ({
         options={dashboardListOptions}
         isLoading={loadingDashboardList}
         onChange={(newOptions, _, selected) => {
-          // setSelectedDashboard(selected.checked ? (selected.data as DashboardItem) : undefined);
           if (selected.checked) {
             setDestination((selected.data as DashboardItem).id);
             setPlaceholder((selected.data as DashboardItem).attributes.title);
@@ -87,9 +84,7 @@ export const DashboardLinkEditorDestinationPicker = ({
               </EuiFlexItem>
               {option.id === currentDashboardId && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge>
-                    {NavEmbeddableStrings.editor.dashboard.getCurrentDashboardLabel()}
-                  </EuiBadge>
+                  <EuiBadge>{DashboardLinkEmbeddableStrings.getCurrentDashboardLabel()}</EuiBadge>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
-import { ImageEmbeddablePlugin } from './plugin';
+import { i18n } from '@kbn/i18n';
 
-export { type ImageClickContext, IMAGE_CLICK_TRIGGER } from './actions';
-
-export function plugin(context: PluginInitializerContext) {
-  return new ImageEmbeddablePlugin(context);
-}
+export const ExternalLinkEmbeddableStrings = {
+  getPlaceholder: () =>
+    i18n.translate('navEmbeddable.editor.external.placeholder', {
+      defaultMessage: 'Enter external URL',
+    }),
+};

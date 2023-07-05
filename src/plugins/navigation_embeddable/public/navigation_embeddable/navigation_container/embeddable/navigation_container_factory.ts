@@ -91,7 +91,7 @@ export class NavigationEmbeddableFactoryDefinition
 
   public getDisplayName() {
     return i18n.translate('navigationEmbeddable.navigationEmbeddableFactory.displayName', {
-      defaultMessage: 'Navigation',
+      defaultMessage: 'Links',
     });
   }
 

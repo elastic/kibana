@@ -32,10 +32,6 @@ export class DashboardLinkFactory
     return false;
   }
 
-  public getTest() {
-    return;
-  }
-
   public linkEditorDestinationComponent = DashboardLinkEditorDestinationPicker;
 
   public async create(initialInput: DashboardLinkInput, parent: NavigationContainer) {

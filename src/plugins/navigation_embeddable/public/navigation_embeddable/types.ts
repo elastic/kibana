@@ -39,7 +39,8 @@ export interface ILinkFactory<I extends LinkInput = LinkInput>
 }
 
 export interface LinkEditorDestinationProps<I extends LinkInput = LinkInput> {
-  initialInput?: Partial<I>;
+  /** TODO: As part of https://github.com/elastic/kibana/issues/161274, connect the initialInput so things are pre-selected when editing */
+  // initialInput?: Partial<I>; // Leaving this commented out so I don't forget the typing :)
   setDestination: (destination: string | undefined) => void;
   setPlaceholder: (placeholder: string | undefined) => void;
   currentDashboardId?: string;

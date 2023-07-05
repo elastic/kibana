@@ -27,7 +27,7 @@ import {
 import { css } from '@emotion/react';
 import { linksService } from '../../services/links_service';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
-import { ILinkFactory, NavigationContainerInput } from '../../types';
+import { ILinkFactory } from '../../types';
 import { EXTERNAL_LINK_EMBEDDABLE_TYPE } from '../../external_link/embeddable/external_link_embeddable_factory';
 import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
 
@@ -36,12 +36,10 @@ type LinkType = 'dashboardLink' | 'externalLink';
 export const NavigationEmbeddableLinkEditor = ({
   onSave,
   onClose,
-  initialInput,
   currentDashboardId,
 }: {
-  onClose: () => void;
+  onClose: (closeBoth: boolean) => void;
   currentDashboardId?: string;
-  initialInput: Partial<NavigationContainerInput>;
   onSave: (type: string, destination: string, label?: string) => void;
 }) => {
   const [linkLabel, setLinkLabel] = useState<string>('');
@@ -98,7 +96,7 @@ export const NavigationEmbeddableLinkEditor = ({
           flush="left"
           iconType={'arrowLeft'}
           color="text"
-          onClick={onClose}
+          onClick={() => onClose(false)}
         >
           <EuiTitle size="m">
             <h2>Add link</h2>
@@ -119,7 +117,6 @@ export const NavigationEmbeddableLinkEditor = ({
           <EuiFormRow label={NavEmbeddableStrings.editor.getLinkDestinationLabel()}>
             {linkFactory?.linkEditorDestinationComponent ? (
               <linkFactory.linkEditorDestinationComponent
-                initialInput={initialInput}
                 setDestination={setDestination}
                 setPlaceholder={setPlaceholder}
                 currentDashboardId={currentDashboardId}
@@ -154,7 +151,7 @@ export const NavigationEmbeddableLinkEditor = ({
               // aria-label={`cancel-${currentInput.title}`}
               data-test-subj="control-editor-cancel"
               iconType="cross"
-              onClick={onClose}
+              onClick={() => onClose(true)}
             >
               Cancel
             </EuiButtonEmpty>
@@ -166,7 +163,7 @@ export const NavigationEmbeddableLinkEditor = ({
                 // this check should always be true, since the button is disabled otherwise - this is just for type safety
                 if (linkFactory && destination) {
                   onSave(linkFactory.type, destination, linkLabel);
-                  onClose();
+                  onClose(false);
                 }
               }}
             >

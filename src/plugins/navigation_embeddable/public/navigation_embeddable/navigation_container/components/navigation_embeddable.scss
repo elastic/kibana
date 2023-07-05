@@ -1,11 +1,6 @@
 @import '../../mixins';
 
-// // .lnsDimensionContainer {
 .navEmbeddableEditor {
-
-  // Use the EuiFlyout style
   @include euiFlyout;
-  // But with custom positioning to keep it within the sidebar contents
   animation: euiFlyoutAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
-
 }
