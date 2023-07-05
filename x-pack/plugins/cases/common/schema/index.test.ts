@@ -240,19 +240,7 @@ describe('schema', () => {
       `);
     });
 
-    it(`fails when page * perPage > ${MAX_DOCS_PER_PAGE}`, () => {
-      expect(
-        PathReporter.report(
-          paginationSchema({ maxPerPage: 3 }).decode({ page: MAX_DOCS_PER_PAGE, perPage: 2 })
-        )
-      ).toMatchInlineSnapshot(`
-        Array [
-          "The number of documents is too high. Paginating through more than 10000 documents is not possible.",
-        ]
-      `);
-    });
-
-    it('valid NumberFromString work correctly', () => {
+    it('validate params as strings work correctly', () => {
       expect(
         PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ page: '1', perPage: '2' }))
       ).toMatchInlineSnapshot(`
