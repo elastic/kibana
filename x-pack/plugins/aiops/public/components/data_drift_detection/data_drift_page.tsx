@@ -21,10 +21,7 @@ import type { WindowParameters } from '@kbn/aiops-utils';
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 
-import {
-  DataSeriesDatum,
-  XYChartSeriesIdentifier,
-} from '@elastic/charts/dist/chart_types/xy_chart/utils/series';
+import { DataSeriesDatum } from '@elastic/charts/dist/chart_types/xy_chart/utils/series';
 import { useSearch } from '../../hooks/use_search';
 import { DataDriftView } from './data_drift_view';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -196,12 +193,7 @@ export const DataDriftDetectionPage: FC = () => {
                   initialAnalysisStart={initialAnalysisStart}
                   baselineLabel={'Reference'}
                   deviationLabel={'Production'}
-                  // barColorOverride={barColorOverride}
-                  // barHighlightColorOverride={barHighlightColorOverride}
-                  barStyleAccessor={(
-                    datum: DataSeriesDatum,
-                    seriesIdentifier: XYChartSeriesIdentifier
-                  ) => {
+                  barStyleAccessor={(datum: DataSeriesDatum) => {
                     if (!windowParameters) return null;
 
                     const start = datum.x;

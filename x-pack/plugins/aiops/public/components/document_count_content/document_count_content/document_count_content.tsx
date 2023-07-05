@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, type FC } from 'react';
+import React, { type FC } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { WindowParameters } from '@kbn/aiops-utils';
 
-import { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
+import {
+  BarStyleAccessor,
+  RectAnnotationSpec,
+} from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import { DocumentCountStats } from '../../../get_document_stats';
 
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
@@ -35,6 +38,8 @@ export interface DocumentCountContentProps {
   baselineLabel?: string;
   deviationLabel?: string;
   barStyleAccessor?: BarStyleAccessor;
+  baselineAnnotationStyle?: RectAnnotationSpec['style'];
+  deviationAnnotationStyle?: RectAnnotationSpec['style'];
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
