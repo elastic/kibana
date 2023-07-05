@@ -11,7 +11,6 @@ import {
   DefaultNavigation,
   NavigationKibanaProvider,
   NavigationTreeDefinition,
-  getPresets,
 } from '@kbn/shared-ux-chrome-navigation';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -25,60 +24,89 @@ const navigationTree: NavigationTreeDefinition = {
       title: 'Observability',
       icon: 'logoObservability',
       defaultIsCollapsed: false,
+      breadcrumbStatus: 'hidden',
       children: [
         {
-          id: 'services-infra',
+          id: 'discover-dashboard-alerts-slos',
           children: [
-            { link: 'apm:services' },
             {
-              title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
-                defaultMessage: 'Infrastructure',
-              }),
-              link: 'metrics:inventory',
+              link: 'discover',
             },
-          ],
-        },
-        {
-          id: 'alerts-cases-slos',
-          children: [
+            {
+              title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
+                defaultMessage: 'Dashboards',
+              }),
+              link: 'dashboards',
+            },
             {
               link: 'observability-overview:alerts',
             },
             {
+              link: 'observability-overview:slos',
+            },
+            {
+              id: 'aiops',
+              title: 'AIOps',
+              children: [
+                {
+                  title: i18n.translate('xpack.serverlessObservability.nav.ml.jobs', {
+                    defaultMessage: 'Anomaly detection',
+                  }),
+                  link: 'ml:anomalyDetection',
+                },
+                {
+                  title: i18n.translate('xpack.serverlessObservability.ml.spike.analysis', {
+                    defaultMessage: 'Spike analysis',
+                  }),
+                  link: 'ml:explainLogRateSpikes',
+                  icon: 'beaker',
+                },
+                {
+                  link: 'ml:changePointDetections',
+                  icon: 'beaker',
+                },
+                {
+                  title: i18n.translate('xpack.serverlessObservability.nav.ml.job.notifications', {
+                    defaultMessage: 'Job notifications',
+                  }),
+                  link: 'ml:notifications',
+                },
+              ],
+            },
+          ],
+        },
+
+        {
+          id: 'applications',
+          children: [
+            {
+              id: 'apm',
+              title: 'Applications',
+              children: [
+                {
+                  link: 'apm:services',
+                },
+                {
+                  link: 'apm:traces',
+                },
+                {
+                  link: 'apm:dependencies',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'cases-vis',
+          children: [
+            {
               link: 'observability-overview:cases',
             },
             {
-              link: 'observability-overview:slos',
-            },
-          ],
-        },
-        {
-          id: 'signals',
-          title: 'Signals',
-          children: [
-            {
-              link: 'apm:traces',
-            },
-            {
-              title: i18n.translate('xpack.serverlessObservability.nav.signalsLogs', {
-                defaultMessage: 'Logs',
-              }),
-              link: 'logs:stream',
-            },
-          ],
-        },
-        {
-          id: 'toolbox',
-          title: 'Toolbox',
-          children: [
-            {
-              title: i18n.translate('xpack.serverlessObservability.nav.toolBoxVisualization', {
-                defaultMessage: 'Visualization',
+              title: i18n.translate('xpack.serverlessObservability.nav.visualizations', {
+                defaultMessage: 'Visualizations',
               }),
               link: 'visualize',
-            },
-            {
-              link: 'dashboards',
             },
           ],
         },
@@ -87,28 +115,42 @@ const navigationTree: NavigationTreeDefinition = {
           children: [
             {
               title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
-                defaultMessage: 'Get started',
+                defaultMessage: 'Add data',
               }),
-              icon: 'launch',
               link: 'observabilityOnboarding',
             },
           ],
         },
       ],
     },
-    {
-      type: 'navGroup',
-      ...getPresets('analytics'),
-    },
-    {
-      type: 'navGroup',
-      ...getPresets('ml'),
-    },
   ],
   footer: [
     {
       type: 'navGroup',
-      ...getPresets('management'),
+      id: 'projest_settings_project_nav',
+      title: 'Project settings',
+      icon: 'gear',
+      defaultIsCollapsed: true,
+      breadcrumbStatus: 'hidden',
+      children: [
+        {
+          id: 'settings',
+          children: [
+            {
+              link: 'management',
+              title: i18n.translate('xpack.serverlessObservability.nav.mngt', {
+                defaultMessage: 'Management',
+              }),
+            },
+            {
+              link: 'integrations',
+            },
+            {
+              link: 'fleet',
+            },
+          ],
+        },
+      ],
     },
   ],
 };

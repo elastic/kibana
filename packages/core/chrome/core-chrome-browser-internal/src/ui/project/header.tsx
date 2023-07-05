@@ -19,21 +19,24 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import {
   ChromeBreadcrumb,
   ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
+  ChromeHelpMenuLink,
   ChromeNavControl,
 } from '@kbn/core-chrome-browser/src';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import React, { createRef, useCallback, useState } from 'react';
-import { Router } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { Router } from '@kbn/shared-ux-router';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable, debounceTime } from 'rxjs';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+
 import { HeaderActionMenu, useHeaderActionMenuMounter } from '../header/header_action_menu';
 import { HeaderBreadcrumbs } from '../header/header_breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
@@ -87,11 +90,12 @@ const headerStrings = {
 export interface Props {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   actionMenu$: Observable<MountPoint | undefined>;
-  kibanaDocLink: string;
+  docLinks: DocLinksStart;
   children: React.ReactNode;
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
+  helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
   homeHref$: Observable<string | undefined>;
   kibanaVersion: string;
   application: InternalApplicationStart;
@@ -158,10 +162,10 @@ const Logo = (
 
 export const ProjectHeader = ({
   application,
-  kibanaDocLink,
   kibanaVersion,
   children,
   prependBasePath,
+  docLinks,
   ...observables
 }: Props) => {
   const [navId] = useState(htmlIdGenerator()());
@@ -175,32 +179,30 @@ export const ProjectHeader = ({
         <EuiHeaderSection grow={false}>
           <EuiHeaderSectionItem css={headerCss.nav.toggleNavButton}>
             <Router history={application.history}>
-              <CompatRouter>
-                <ProjectNavigation
-                  isOpen={isOpen!}
-                  closeNav={() => {
-                    setIsOpen(false);
-                    if (toggleCollapsibleNavRef.current) {
-                      toggleCollapsibleNavRef.current.focus();
-                    }
-                  }}
-                  button={
-                    <EuiHeaderSectionItemButton
-                      data-test-subj="toggleNavButton"
-                      aria-label={headerStrings.nav.closeNavAriaLabel}
-                      onClick={() => setIsOpen(!isOpen)}
-                      aria-expanded={isOpen!}
-                      aria-pressed={isOpen!}
-                      aria-controls={navId}
-                      ref={toggleCollapsibleNavRef}
-                    >
-                      <EuiIcon type={isOpen ? 'menuLeft' : 'menuRight'} size="m" />
-                    </EuiHeaderSectionItemButton>
+              <ProjectNavigation
+                isOpen={isOpen!}
+                closeNav={() => {
+                  setIsOpen(false);
+                  if (toggleCollapsibleNavRef.current) {
+                    toggleCollapsibleNavRef.current.focus();
                   }
-                >
-                  {children}
-                </ProjectNavigation>
-              </CompatRouter>
+                }}
+                button={
+                  <EuiHeaderSectionItemButton
+                    data-test-subj="toggleNavButton"
+                    aria-label={headerStrings.nav.closeNavAriaLabel}
+                    onClick={() => setIsOpen(!isOpen)}
+                    aria-expanded={isOpen!}
+                    aria-pressed={isOpen!}
+                    aria-controls={navId}
+                    ref={toggleCollapsibleNavRef}
+                  >
+                    <EuiIcon type={isOpen ? 'menuLeft' : 'menuRight'} size="m" />
+                  </EuiHeaderSectionItemButton>
+                }
+              >
+                {children}
+              </ProjectNavigation>
             </Router>
           </EuiHeaderSectionItem>
 
@@ -224,7 +226,9 @@ export const ProjectHeader = ({
           </EuiHeaderSectionItem>
 
           <EuiHeaderSectionItem>
-            <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+            <RedirectAppLinks coreStart={{ application }}>
+              <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+            </RedirectAppLinks>
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
 
@@ -239,7 +243,9 @@ export const ProjectHeader = ({
               globalHelpExtensionMenuLinks$={observables.globalHelpExtensionMenuLinks$}
               helpExtension$={observables.helpExtension$}
               helpSupportUrl$={observables.helpSupportUrl$}
-              kibanaDocLink={kibanaDocLink}
+              defaultContentLinks$={observables.helpMenuLinks$}
+              kibanaDocLink={docLinks.links.elasticStackGetStarted}
+              docLinks={docLinks}
               kibanaVersion={kibanaVersion}
               navigateToUrl={application.navigateToUrl}
             />

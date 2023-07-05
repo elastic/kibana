@@ -8,9 +8,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Redirect } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -88,23 +87,21 @@ export async function mountManagementSection(
       <KibanaThemeProvider theme$={theme.theme$}>
         <I18nProvider>
           <Router history={params.history}>
-            <CompatRouter>
-              <Switch>
-                <Route path={['/create']}>
-                  <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
-                </Route>
-                <Route path={['/dataView/:id/field/:fieldName', '/dataView/:id/create-field/']}>
-                  <CreateEditFieldContainer />
-                </Route>
-                <Route path={['/dataView/:id']}>
-                  <EditIndexPatternContainer />
-                </Route>
-                <Redirect path={'/patterns*'} to={'dataView*'} />
-                <Route path={['/']}>
-                  <IndexPatternTableWithRouter canSave={canSave} />
-                </Route>
-              </Switch>
-            </CompatRouter>
+            <Routes>
+              <Route path={['/create']}>
+                <IndexPatternTableWithRouter canSave={canSave} showCreateDialog={true} />
+              </Route>
+              <Route path={['/dataView/:id/field/:fieldName', '/dataView/:id/create-field/']}>
+                <CreateEditFieldContainer />
+              </Route>
+              <Route path={['/dataView/:id']}>
+                <EditIndexPatternContainer />
+              </Route>
+              <Redirect path={'/patterns*'} to={'dataView*'} />
+              <Route path={['/']}>
+                <IndexPatternTableWithRouter canSave={canSave} />
+              </Route>
+            </Routes>
           </Router>
         </I18nProvider>
       </KibanaThemeProvider>

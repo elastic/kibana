@@ -5,22 +5,14 @@
  * 2.0.
  */
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
 
-import type {
-  SideNavComponent,
-  SideNavCompProps,
-} from '@kbn/core-chrome-browser/src/project_navigation';
-import { ServerlessSecurityPluginStartDependencies } from '../../types';
-import { SecuritySideNavigation } from './side_navigation';
-import { KibanaServicesProvider } from '../../services';
+import type { SideNavComponent } from '@kbn/core-chrome-browser/src/project_navigation';
+import { SecuritySideNavigation } from './lazy';
+import { KibanaServicesProvider, type Services } from '../../common/services';
 
-export const getSecuritySideNavComponent = (
-  core: CoreStart,
-  pluginsStart: ServerlessSecurityPluginStartDependencies
-): SideNavComponent => {
-  return (_props: SideNavCompProps) => (
-    <KibanaServicesProvider core={core} pluginsStart={pluginsStart}>
+export const getSecuritySideNavComponent = (services: Services): SideNavComponent => {
+  return () => (
+    <KibanaServicesProvider services={services}>
       <SecuritySideNavigation />
     </KibanaServicesProvider>
   );

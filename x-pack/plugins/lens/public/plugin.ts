@@ -126,6 +126,7 @@ import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator
 import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -216,6 +217,14 @@ export interface LensPublicStart {
    */
   SaveModalComponent: React.ComponentType<Omit<SaveModalContainerProps, 'lensServices'>>;
   /**
+   * React component which can be used to embed a Lens Visualization Config Panel Component.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  EditLensConfigPanelApi: () => Promise<EditLensConfigPanelComponent>;
+  /**
    * Method which navigates to the Lens editor, loading the state specified by the `input` parameter.
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.
    *
@@ -251,6 +260,8 @@ export interface LensPublicStart {
     suggestions: LensSuggestionsApi;
   }>;
 }
+
+export type EditLensConfigPanelComponent = React.ComponentType<EditLensConfigurationProps>;
 
 export type LensSuggestionsApi = (
   context: VisualizeFieldContext | VisualizeEditorContext,
@@ -648,6 +659,17 @@ export class LensPlugin {
             });
           },
         };
+      },
+      EditLensConfigPanelApi: async () => {
+        const { getEditLensConfiguration } = await import('./async_services');
+        if (!this.editorFrameService) {
+          this.initDependenciesForApi();
+        }
+        const [visualizationMap, datasourceMap] = await Promise.all([
+          this.editorFrameService!.loadVisualizations(),
+          this.editorFrameService!.loadDatasources(),
+        ]);
+        return getEditLensConfiguration(core, startDependencies, visualizationMap, datasourceMap);
       },
     };
   }

@@ -17,6 +17,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
+    "@kbn/management-plugin",
     "@kbn/security-plugin",
     "@kbn/security-solution-plugin",
     "@kbn/serverless",
@@ -29,6 +30,7 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/features-plugin",
     "@kbn/ess-security",
-    "@kbn/kibana-utils-plugin",
+    "@kbn/ml-plugin",
+    "@kbn/kibana-utils-plugin"
   ]
 }

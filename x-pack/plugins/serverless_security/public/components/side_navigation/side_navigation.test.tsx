@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { SecuritySideNavigation } from './side_navigation';
 import { useSideNavItems, useSideNavSelectedId } from '../../hooks/use_side_nav_items';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
-import { KibanaServicesProvider } from '../../services.mock';
+import { KibanaServicesProvider } from '../../common/services.mock';
 
 jest.mock('../../hooks/use_side_nav_items');
 const mockUseSideNavItems = useSideNavItems as jest.Mock;
@@ -18,6 +18,7 @@ const mockUseSideNavSelectedId = useSideNavSelectedId as jest.Mock;
 
 const mockSolutionSideNav = jest.fn((_props: unknown) => <div data-test-subj="solutionSideNav" />);
 jest.mock('@kbn/security-solution-side-nav', () => ({
+  ...jest.requireActual('@kbn/security-solution-side-nav'),
   SolutionSideNav: (props: unknown) => mockSolutionSideNav(props),
 }));
 
@@ -34,12 +35,11 @@ const sideNavItems = [
     href: '/alerts',
     onClick: jest.fn(),
   },
-];
-const sideNavFooterItems = [
   {
     id: SecurityPageName.administration,
     label: 'Manage',
     href: '/administration',
+    position: 'bottom',
     onClick: jest.fn(),
   },
 ];
@@ -74,17 +74,6 @@ describe('SecuritySideNavigation', () => {
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
         items: sideNavItems,
-      })
-    );
-  });
-
-  it('should pass footerItems props to the SolutionSideNav component', () => {
-    mockUseSideNavItems.mockReturnValueOnce(sideNavFooterItems);
-    render(<SecuritySideNavigation />, { wrapper: KibanaServicesProvider });
-
-    expect(mockSolutionSideNav).toHaveBeenCalledWith(
-      expect.objectContaining({
-        footerItems: sideNavFooterItems,
       })
     );
   });

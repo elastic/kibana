@@ -35,7 +35,9 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
-          " | undefined; fieldName: string; value: string | string[] | null | undefined; }) => void"
+          " | undefined; fieldName: string; value: ",
+          "DefaultActionsSupportedValue",
+          "; }) => void"
         ],
         "path": "packages/kbn-cell-actions/src/actions/filter/filter_in.ts",
         "deprecated": false,
@@ -92,7 +94,7 @@
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "string | string[] | null | undefined"
+                  "string[] | boolean[] | number[]"
                 ],
                 "path": "packages/kbn-cell-actions/src/actions/filter/filter_in.ts",
                 "deprecated": false,
@@ -120,7 +122,9 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
-          " | undefined; fieldName: string; value: string | string[] | null | undefined; }) => void"
+          " | undefined; fieldName: string; value: ",
+          "DefaultActionsSupportedValue",
+          "; }) => void"
         ],
         "path": "packages/kbn-cell-actions/src/actions/filter/filter_out.ts",
         "deprecated": false,
@@ -177,7 +181,7 @@
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "string | string[] | null | undefined"
+                  "string[] | boolean[] | number[]"
                 ],
                 "path": "packages/kbn-cell-actions/src/actions/filter/filter_out.ts",
                 "deprecated": false,
@@ -444,6 +448,14 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
+          "; notifications: ",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-common.NotificationsStart",
+            "text": "NotificationsStart"
+          },
           "; }) => ",
           {
             "pluginId": "@kbn/cell-actions",
@@ -508,6 +520,14 @@
             "section": "def-public.FilterManager",
             "text": "FilterManager"
           },
+          "; notifications: ",
+          {
+            "pluginId": "@kbn/core-notifications-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
+            "section": "def-common.NotificationsStart",
+            "text": "NotificationsStart"
+          },
           "; }) => ",
           {
             "pluginId": "@kbn/cell-actions",
@@ -564,7 +584,7 @@
         "label": "useDataGridColumnsCellActions",
         "description": [],
         "signature": [
-          "({ data, triggerId, metadata, dataGridRef, disabledActionTypes, }: ",
+          "({ fields, getCellValue, triggerId, metadata, dataGridRef, disabledActionTypes, }: ",
           {
             "pluginId": "@kbn/cell-actions",
             "scope": "common",
@@ -585,7 +605,7 @@
             "id": "def-common.useDataGridColumnsCellActions.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  data,\n  triggerId,\n  metadata,\n  dataGridRef,\n  disabledActionTypes = [],\n}",
+            "label": "{\n  fields,\n  getCellValue,\n  triggerId,\n  metadata,\n  dataGridRef,\n  disabledActionTypes = [],\n}",
             "description": [],
             "signature": [
               {
@@ -1094,7 +1114,7 @@
             "section": "def-common.CellActionsProps",
             "text": "CellActionsProps"
           },
-          ", \"metadata\" | \"triggerId\" | \"disabledActionTypes\">"
+          ", \"metadata\" | \"disabledActionTypes\">"
         ],
         "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
         "deprecated": false,
@@ -1102,13 +1122,15 @@
         "children": [
           {
             "parentPluginId": "@kbn/cell-actions",
-            "id": "def-common.UseDataGridColumnsCellActionsProps.data",
-            "type": "Array",
+            "id": "def-common.UseDataGridColumnsCellActionsProps.triggerId",
+            "type": "string",
             "tags": [],
-            "label": "data",
-            "description": [],
+            "label": "triggerId",
+            "description": [
+              "\nOptional trigger ID to used to retrieve the cell actions.\nreturns empty array if not provided"
+            ],
             "signature": [
-              "BulkData[] | undefined"
+              "string | undefined"
             ],
             "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
             "deprecated": false,
@@ -1116,11 +1138,92 @@
           },
           {
             "parentPluginId": "@kbn/cell-actions",
+            "id": "def-common.UseDataGridColumnsCellActionsProps.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [
+              "\nfields array, used to determine which actions to load.\nreturns empty array if not provided"
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cell-actions",
+            "id": "def-common.UseDataGridColumnsCellActionsProps.getCellValue",
+            "type": "Function",
+            "tags": [],
+            "label": "getCellValue",
+            "description": [
+              "\nFunction to get the cell value for a given field name and row index.\nthe `rowIndex` parameter is absolute, not relative to the current page"
+            ],
+            "signature": [
+              "(fieldName: string, rowIndex: number) => ",
+              {
+                "pluginId": "@kbn/cell-actions",
+                "scope": "common",
+                "docId": "kibKbnCellActionsPluginApi",
+                "section": "def-common.CellActionFieldValue",
+                "text": "CellActionFieldValue"
+              }
+            ],
+            "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cell-actions",
+                "id": "def-common.UseDataGridColumnsCellActionsProps.getCellValue.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/cell-actions",
+                "id": "def-common.UseDataGridColumnsCellActionsProps.getCellValue.$2",
+                "type": "number",
+                "tags": [],
+                "label": "rowIndex",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cell-actions",
             "id": "def-common.UseDataGridColumnsCellActionsProps.dataGridRef",
             "type": "Object",
             "tags": [],
             "label": "dataGridRef",
-            "description": [],
+            "description": [
+              "\nref to the EuiDataGrid instance"
+            ],
             "signature": [
               "React.MutableRefObject<",
               "EuiDataGridRefProps",
@@ -1160,6 +1263,29 @@
         ],
         "signature": [
           "Partial<C> & { id: string; }"
+        ],
+        "path": "packages/kbn-cell-actions/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cell-actions",
+        "id": "def-common.CellActionFieldValue",
+        "type": "Type",
+        "tags": [],
+        "label": "CellActionFieldValue",
+        "description": [],
+        "signature": [
+          "string[] | undefined[] | boolean[] | ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Serializable",
+            "text": "Serializable"
+          },
+          " | number[] | null[]"
         ],
         "path": "packages/kbn-cell-actions/src/types.ts",
         "deprecated": false,

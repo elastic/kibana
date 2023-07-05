@@ -25,10 +25,7 @@ export const createCopyToClipboardCellActionFactory = ({
     isCompatible: async ({ data }) => {
       const field = data[0]?.field;
 
-      return (
-        data.length === 1 && // TODO Add support for multiple values
-        fieldHasCellActions(field.name)
-      );
+      return fieldHasCellActions(field.name);
     },
   });
 };

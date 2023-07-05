@@ -64,6 +64,7 @@ actionExecutor.initialize({
       },
       isPreconfigured: true,
       isDeprecated: false,
+      isSystemAction: false,
     },
   ],
 });
@@ -285,6 +286,10 @@ test('successfully executes when http_request source is specified', async () => 
     },
     params: { foo: true },
     logger: loggerMock,
+    source: {
+      source: expect.anything(),
+      type: 'HTTP_REQUEST',
+    },
   });
 
   expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
@@ -435,6 +440,13 @@ test('successfully executes when saved_object source is specified', async () => 
     },
     params: { foo: true },
     logger: loggerMock,
+    source: {
+      source: {
+        id: '573891ae-8c48-49cb-a197-0cd5ec34a88b',
+        type: 'alert',
+      },
+      type: 'SAVED_OBJECT',
+    },
   });
 
   expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
@@ -977,6 +989,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
         },
         isPreconfigured: true,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ],
   });

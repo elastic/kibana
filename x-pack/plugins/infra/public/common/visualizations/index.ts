@@ -19,4 +19,4 @@ export type {
 
 export { hostLensFormulas, visualizationTypes } from './constants';
 
-export { buildLensAttributes } from './lens/build_lens_attributes';
+export { LensAttributesBuilder } from './lens/lens_attributes_builder';

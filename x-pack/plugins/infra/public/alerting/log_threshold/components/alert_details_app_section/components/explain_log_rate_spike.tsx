@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { pick } from 'lodash';
+import { pick, orderBy } from 'lodash';
 import moment from 'moment';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
@@ -28,7 +28,6 @@ import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import {
   Comparator,
   CountRuleParams,
-  hasGroupBy,
   isRatioRuleParams,
   PartialRuleParams,
   ruleParamsRT,
@@ -41,9 +40,11 @@ export interface AlertDetailsExplainLogRateSpikesSectionProps {
   alert: TopAlert<Record<string, any>>;
 }
 
-interface FieldValuePair {
+interface SignificantFieldValue {
   field: string;
   value: string | number;
+  docCount: number;
+  pValue: number | null;
 }
 
 export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionProps> = ({
@@ -51,18 +52,17 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   alert,
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const { dataViews, logViews } = services;
+  const { dataViews, logsShared } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
   const [logSpikeParams, setLogSpikeParams] = useState<
-    { significantFieldValues: FieldValuePair[] } | undefined
+    { significantFieldValues: SignificantFieldValue[] } | undefined
   >();
 
   useEffect(() => {
     const getDataView = async () => {
-      const { timestampField, dataViewReference } = await logViews.client.getResolvedLogView(
-        rule.params.logView
-      );
+      const { timestampField, dataViewReference } =
+        await logsShared.logViews.client.getResolvedLogView(rule.params.logView);
 
       if (dataViewReference.id) {
         const logDataView = await dataViews.get(dataViewReference.id);
@@ -74,7 +74,9 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
     const getQuery = (timestampField: string) => {
       const esSearchRequest = getESQueryForLogSpike(
         validatedParams as CountRuleParams,
-        timestampField
+        timestampField,
+        alert,
+        rule.params.groupBy
       ) as QueryDslQueryContainer;
 
       if (esSearchRequest) {
@@ -86,13 +88,12 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
 
     if (
       !isRatioRuleParams(validatedParams) &&
-      !hasGroupBy(validatedParams) &&
       (validatedParams.count.comparator === Comparator.GT ||
         validatedParams.count.comparator === Comparator.GT_OR_EQ)
     ) {
       getDataView();
     }
-  }, [rule, alert, dataViews, logViews]);
+  }, [rule, alert, dataViews, logsShared]);
 
   // Identify `intervalFactor` to adjust time ranges based on alert settings.
   // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.
@@ -163,13 +164,17 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   const onAnalysisCompleted = (
     analysisResults: ExplainLogRateSpikesAnalysisResults | undefined
   ) => {
-    const fieldValuePairs = analysisResults?.significantTerms?.map((term) => ({
-      field: term.fieldName,
-      value: term.fieldValue,
-    }));
-    setLogSpikeParams(
-      fieldValuePairs ? { significantFieldValues: fieldValuePairs?.slice(0, 2) } : undefined
-    );
+    const significantFieldValues = orderBy(
+      analysisResults?.significantTerms?.map((item) => ({
+        field: item.fieldName,
+        value: item.fieldValue,
+        docCount: item.doc_count,
+        pValue: item.pValue,
+      })),
+      ['pValue', 'docCount'],
+      ['asc', 'asc']
+    ).slice(0, 50);
+    setLogSpikeParams(significantFieldValues ? { significantFieldValues } : undefined);
   };
 
   const coPilotService = useCoPilot();
