@@ -12,15 +12,15 @@ import {
 } from '@kbn/core/server';
 import { RuleAttributes } from './types';
 
-export interface UpdateRuleSavedObjectParams {
+export interface UpdateRuleSoParams {
   savedObjectClient: SavedObjectsClientContract;
   id: string;
   updateRuleAttributes: Partial<RuleAttributes>;
   savedObjectUpdateOptions?: SavedObjectsUpdateOptions<RuleAttributes>;
 }
 
-export const updateRuleSavedObject = (
-  params: UpdateRuleSavedObjectParams
+export const updateRuleSo = (
+  params: UpdateRuleSoParams
 ): Promise<SavedObjectsUpdateResponse<RuleAttributes>> => {
   const { savedObjectClient, id, updateRuleAttributes, savedObjectUpdateOptions } = params;
 

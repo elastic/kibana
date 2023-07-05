@@ -7,13 +7,13 @@
 
 import { SavedObjectsClientContract, SavedObjectsDeleteOptions } from '@kbn/core/server';
 
-export interface DeleteRuleSavedObjectParams {
+export interface DeleteRuleSoParams {
   savedObjectClient: SavedObjectsClientContract;
   id: string;
   savedObjectDeleteOptions?: SavedObjectsDeleteOptions;
 }
 
-export const deleteRuleSavedObject = (params: DeleteRuleSavedObjectParams): Promise<{}> => {
+export const deleteRuleSo = (params: DeleteRuleSoParams): Promise<{}> => {
   const { savedObjectClient, id, savedObjectDeleteOptions } = params;
 
   return savedObjectClient.delete('alert', id, savedObjectDeleteOptions);

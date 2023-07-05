@@ -16,11 +16,7 @@ import { RulesClientContext } from '../types';
 import { updateMeta } from './update_meta';
 import { scheduleTask } from './schedule_task';
 import { getAlertFromRaw } from './get_alert_from_raw';
-import {
-  createRuleSavedObject as createRuleSavedObjectData,
-  deleteRuleSavedObject,
-  updateRuleSavedObject,
-} from '../../data/rule';
+import { createRuleSo, deleteRuleSo, updateRuleSo } from '../../data/rule';
 
 interface CreateRuleSavedObjectParams {
   intervalInMs: number;
@@ -70,7 +66,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
     createdAlert = (await withSpan(
       { name: 'unsecuredSavedObjectsClient.create', type: 'rules' },
       () =>
-        createRuleSavedObjectData({
+        createRuleSo({
           ruleAttributes: updateMeta(context, rawRule as RawRule) as RuleAttributes,
           savedObjectClient: context.unsecuredSavedObjectsClient,
           savedObjectCreateOptions: {
@@ -104,7 +100,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
     } catch (e) {
       // Cleanup data, something went wrong scheduling the task
       try {
-        await deleteRuleSavedObject({
+        await deleteRuleSo({
           savedObjectClient: context.unsecuredSavedObjectsClient,
           id: createdAlert.id,
         });
@@ -118,7 +114,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
     }
 
     await withSpan({ name: 'unsecuredSavedObjectsClient.update', type: 'rules' }, () =>
-      updateRuleSavedObject({
+      updateRuleSo({
         savedObjectClient: context.unsecuredSavedObjectsClient,
         id: createdAlert.id,
         updateRuleAttributes: {

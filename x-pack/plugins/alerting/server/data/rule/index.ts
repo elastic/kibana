@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export { createRuleSavedObject } from './create_rule_saved_object';
-export type { CreateRuleSavedObjectParams } from './create_rule_saved_object';
-export { updateRuleSavedObject } from './update_rule_saved_object';
-export type { UpdateRuleSavedObjectParams } from './update_rule_saved_object';
-export { deleteRuleSavedObject } from './delete_rule_saved_object';
-export type { DeleteRuleSavedObjectParams } from './delete_rule_saved_object';
+export { createRuleSo } from './create_rule_so';
+export type { CreateRuleSoParams } from './create_rule_so';
+export { updateRuleSo } from './update_rule_so';
+export type { UpdateRuleSoParams } from './update_rule_so';
+export { deleteRuleSo } from './delete_rule_so';
+export type { DeleteRuleSoParams } from './delete_rule_so';
