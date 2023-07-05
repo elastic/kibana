@@ -29,7 +29,7 @@ import {
   isValidRouteVersion,
   hasVersion,
   readVersion,
-  redactQueryVersion,
+  removeQueryVersion,
 } from './route_version_utils';
 import { injectResponseHeaders } from './inject_response_headers';
 
@@ -147,7 +147,7 @@ export class CoreVersionedRoute implements VersionedRoute {
       Boolean(validation.request.body || validation.request.params || validation.request.query)
     ) {
       if (this.enableQueryVersion) {
-        redactQueryVersion(mutableCoreKibanaRequest);
+        removeQueryVersion(mutableCoreKibanaRequest);
       }
       try {
         const { body, params, query } = validate(

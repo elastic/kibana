@@ -14,7 +14,7 @@ import {
   isAllowedPublicVersion,
   hasVersion,
   readVersion,
-  redactQueryVersion,
+  removeQueryVersion,
 } from './route_version_utils';
 
 describe('isAllowedPublicVersion', () => {
@@ -131,7 +131,7 @@ describe('redactQueryVersion', () => {
       query: { apiVersion: '1', baz: 'qux' },
     });
     expect(hasVersion(req, true)).toBe(true);
-    redactQueryVersion(req);
+    removeQueryVersion(req);
     expect(hasVersion(req, true)).toBe(false);
     expect(req.query).toEqual({ baz: 'qux' });
     expect(req.headers).toEqual({ foo: 'bar' });
