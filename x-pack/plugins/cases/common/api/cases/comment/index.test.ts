@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_ADD_COMMENTS } from '../../../constants';
 import {
   CommentAttributesBasicRt,
   CommentType,
@@ -775,6 +776,29 @@ describe('Comments', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: defaultRequest,
+      });
+    });
+
+    it('error when too many comments are passed', () => {
+      const query = BulkCreateCommentRequestRt.decode(
+        Array(MAX_ADD_COMMENTS + 1).fill({
+          comment: 'Solve this fast!',
+          type: CommentType.user,
+          owner: 'cases',
+          foo: 'bar',
+        })
+      );
+
+      expect(query).toEqual({
+        _tag: 'Left',
+        left: expect.any(Array),
+      });
+    });
+
+    it('error when no comments are passed', () => {
+      expect(BulkCreateCommentRequestRt.decode([])).toEqual({
+        _tag: 'Left',
+        left: expect.any(Array),
       });
     });
   });

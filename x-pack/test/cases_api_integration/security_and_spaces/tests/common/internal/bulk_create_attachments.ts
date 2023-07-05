@@ -108,7 +108,7 @@ export default ({ getService }: FtrProviderContext): void => {
     );
   };
 
-  describe.only('bulk_create_attachments', () => {
+  describe('bulk_create_attachments', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
@@ -696,15 +696,6 @@ export default ({ getService }: FtrProviderContext): void => {
             comment: 'test',
             owner: 'doesntmatter',
           }),
-          expectedHttpCode: 400,
-        });
-      });
-
-      it('400s when passing zero attachments', async () => {
-        await bulkCreateAttachments({
-          supertest,
-          caseId: 'whatever',
-          params: [],
           expectedHttpCode: 400,
         });
       });
