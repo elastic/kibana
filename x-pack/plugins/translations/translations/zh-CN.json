@@ -1185,7 +1185,6 @@
     "dashboard.listing.unsaved.editTitle": "继续编辑",
     "dashboard.listing.unsaved.loading": "正在加载",
     "dashboard.listing.unsaved.resetTitle": "重置更改",
-    "dashboard.loadingError.dashboardNotFound": "找不到请求的仪表板。",
     "dashboard.loadURLError.PanelTooOld": "无法通过在早于 7.3 的版本中创建的 URL 加载面板",
     "dashboard.noMatchRoute.bannerTitleText": "未找到页面",
     "dashboard.panel.AddToLibrary": "保存到库",
