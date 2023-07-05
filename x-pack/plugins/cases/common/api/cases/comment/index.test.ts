@@ -347,15 +347,19 @@ describe('Comments', () => {
 
       expect(CommentRequestRt.decode({ ...defaultRequest, comment: longComment })).toMatchObject({
         _tag: 'Left',
-        left: [{
-          context:[{
-          actual: {
-              ...defaultRequest,
-              comment: longComment,
-              message: "The length of the comment is too long. The maximum length is 30000."
-            }
-          }]
-        }]
+        left: [
+          {
+            context: [
+              {
+                actual: {
+                  ...defaultRequest,
+                  comment: longComment,
+                  message: 'The length of the comment is too long. The maximum length is 30000.',
+                },
+              },
+            ],
+          },
+        ],
       });
     });
   });
