@@ -326,6 +326,7 @@ describe('Comments', () => {
       type: CommentType.user,
       owner: 'cases',
     };
+
     it('has expected attributes in request', () => {
       const query = CommentRequestRt.decode(defaultRequest);
 
@@ -344,12 +345,66 @@ describe('Comments', () => {
       });
     });
 
-    it('throws error when comment is too long', () => {
-      const longComment = 'x'.repeat(MAX_COMMENT_LENGTH + 1);
+    describe('errors', () => {
+      describe('commentType: user', () => {
+        it('throws error when comment is too long', () => {
+          const longComment = 'x'.repeat(MAX_COMMENT_LENGTH + 1);
 
-      expect(
-        PathReporter.report(CommentRequestRt.decode({ ...defaultRequest, comment: longComment }))
-      ).toContain('The length of the comment is too long. The maximum length is 30000.');
+          expect(
+            PathReporter.report(
+              CommentRequestRt.decode({ ...defaultRequest, comment: longComment })
+            )
+          ).toContain('The length of the comment is too long. The maximum length is 30000.');
+        });
+
+        it('throws error when comment is empty', () => {
+          expect(
+            PathReporter.report(CommentRequestRt.decode({ ...defaultRequest, comment: '' }))
+          ).toContain('The comment field cannot be an empty string.');
+        });
+
+        it('throws error when comment string of empty characters', () => {
+          expect(
+            PathReporter.report(CommentRequestRt.decode({ ...defaultRequest, comment: '   ' }))
+          ).toContain('The comment field cannot be an empty string.');
+        });
+      });
+
+      describe('commentType: action', () => {
+        const request = {
+          type: CommentType.actions,
+          actions: {
+            targets: [
+              {
+                hostname: 'host1',
+                endpointId: '001',
+              },
+            ],
+            type: 'isolate',
+          },
+          owner: 'cases',
+        };
+
+        it('throws error when comment is too long', () => {
+          const longComment = 'x'.repeat(MAX_COMMENT_LENGTH + 1);
+
+          expect(
+            PathReporter.report(CommentRequestRt.decode({ ...request, comment: longComment }))
+          ).toContain('The length of the comment is too long. The maximum length is 30000.');
+        });
+
+        it('throws error when comment is empty', () => {
+          expect(
+            PathReporter.report(CommentRequestRt.decode({ ...request, comment: '' }))
+          ).toContain('The comment field cannot be an empty string.');
+        });
+
+        it('throws error when comment string of empty characters', () => {
+          expect(
+            PathReporter.report(CommentRequestRt.decode({ ...request, comment: '   ' }))
+          ).toContain('The comment field cannot be an empty string.');
+        });
+      });
     });
   });
 
