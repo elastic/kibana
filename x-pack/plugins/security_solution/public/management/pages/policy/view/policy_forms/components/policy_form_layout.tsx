@@ -21,6 +21,7 @@ import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import type { ApplicationStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { PolicySettingsForm } from '../../policy_settings_form';
 import { useShowEditableFormFields, usePolicyDetailsSelector } from '../../policy_hooks';
 import {
   policyDetails,
@@ -157,6 +158,20 @@ export const PolicyFormLayout = React.memo(() => {
           onConfirm={handleSaveConfirmation}
         />
       )}
+
+      <PolicySettingsForm policy={policyItem} onChange={() => {}} mode="edit" />
+
+      <div
+        style={{
+          height: '5em',
+          background: 'lightgrey',
+          margin: '2em 0 2em',
+          padding: '2em 1em 2em',
+        }}
+      >
+        {'ORIGINAL FORM BELOW'}
+      </div>
+
       <PolicyDetailsForm />
       <EuiSpacer size="xxl" />
       <EuiBottomBar paddingSize="s">
