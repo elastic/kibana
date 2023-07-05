@@ -16,6 +16,7 @@ import {
   CommentRequestExternalReferenceSOType,
   CommentType,
 } from '@kbn/cases-plugin/common/api';
+import { MAX_ADD_COMMENTS } from '@kbn/cases-plugin/common/constants';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
@@ -70,7 +71,6 @@ import {
 import { User } from '../../../../common/lib/authentication/types';
 import { SECURITY_SOLUTION_FILE_KIND } from '../../../../common/lib/constants';
 import { arraysToEqual } from '../../../../common/lib/validation';
-import { MAX_ADD_COMMENTS } from '@kbn/cases-plugin/common/constants';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
