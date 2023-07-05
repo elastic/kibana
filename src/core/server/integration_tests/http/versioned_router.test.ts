@@ -199,6 +199,24 @@ describe('Routing versioned requests', () => {
         async (ctx, req, res) => {
           return res.ok({ body: { v: '1' } });
         }
+      )
+      .addVersion(
+        {
+          validate: { response: { 200: { body: schema.object({}, { unknowns: 'forbid' }) } } },
+          version: '2',
+        },
+        async (ctx, req, res) => {
+          return res.ok({ body: { v: '2' } });
+        }
+      )
+      .addVersion(
+        {
+          validate: { response: { 200: { body: schema.object({}, { unknowns: 'allow' }) } } },
+          version: '3',
+        },
+        async (ctx, req, res) => {
+          return res.ok({ body: { v: '3' } });
+        }
       );
 
     await server.start();
@@ -214,6 +232,32 @@ describe('Routing versioned requests', () => {
         message: expect.stringMatching(/Failed output validation/),
       })
     );
+
+    await expect(
+      supertest
+        .get('/my-path')
+        .set('Elastic-Api-Version', '2')
+        .expect(500)
+        .then(({ body }) => body)
+    ).resolves.toEqual(
+      expect.objectContaining({
+        message: expect.stringMatching(/Failed output validation/),
+      })
+    );
+
+    // This should pass response validation
+    await expect(
+      supertest
+        .get('/my-path')
+        .set('Elastic-Api-Version', '3')
+        .expect(200)
+        .then(({ body }) => body)
+    ).resolves.toEqual(
+      expect.objectContaining({
+        v: '3',
+      })
+    );
+
     expect(captureErrorMock).not.toHaveBeenCalled();
   });
 
