@@ -1,0 +1,152 @@
+import { Canvas, Meta, Story } from '@storybook/addon-docs/blocks';
+
+<Meta title="infra/dataSearch/Overview" />
+
+# The `data` plugin and `SearchStrategies`
+
+The search functionality abstraction provided by the `search` service of the
+`data` plugin is pretty powerful:
+
+- The execution of the request is delegated to a search strategy, which is
+    executed on the Kibana server side.
+- Any plugin can register custom search strategies with custom parameters and
+    response shapes.
+- Search requests can be cancelled via an `AbortSignal`.
+- Search requests are decoupled from the transport layer. The service will poll
+    for new results transparently.
+- Partial responses can be returned as they become available if the search
+    takes longer.
+
+# Working with `data.search.search()` in the Browser
+
+The following chapters describe a set of React components and hooks that aim to
+make it easy to take advantage of these characteristics from client-side React
+code. They implement a producer/consumer pattern that decouples the craeation
+of search requests from the consumption of the responses. This keeps each
+code-path small and encourages the use of reactive processing, which in turn
+reduces the risk of race conditions and incorrect assumptions about the
+response timing.
+
+## Issuing new requests
+
+The main API to issue new requests is the `data.search.search()` function. It
+returns an `Observable` representing the stream of partial and final results
+without the consumer having to know the underlying transport mechanisms.
+Besides receiving a search-strategy-specific parameter object, it supports
+selection of the search strategy as well an `AbortSignal` used for request
+cancellation.
+
+The hook `useDataSearch()` is designed to ease the integration between the
+`Observable` world and the React world. It uses the function it is given to
+derive the parameters to use for the next search request. The request can then
+be issued by calling the returned `search()` function. For each new request the
+hook emits an object describing the request and its state in the `requests$`
+`Observable`.
+
+Since the specific response shape depends on the data strategy used, the hook
+takes a projection function, that is responsible for decoding the response in
+an appropriate way. Because most response projections follow a similar pattern
+there's a helper `normalizeDataSearchResponses(initialResponse,
+parseRawResponse)`, which generates an RxJS operator, that...
+
+- emits an initial response containing the given `initialResponse` value
+- applies `parseRawResponse` to the `rawResponse` property of each emitted response
+- transforms transport layer errors as well as parsing errors into
+  `SearchStrategyError`s
+
+```typescript
+const parseMyCustomSearchResponse = normalizeDataSearchResponses(
+  'initial value',
+  decodeOrThrow(myCustomSearchResponsePayloadRT)
+);
+
+const { search, requests$ } = useDataSearch({
+  getRequest: useCallback((searchTerm: string) => ({
+    request: {
+      params: {
+        searchTerm
+      },
+      options: {
+        strategy: 'my-custom-search-strategy',
+      },
+    },
+  }), []),
+  parseResponses: parseMyCustomSearchResponse,
+});
+```
+
+## Executing requests and consuming the responses
+
+The response `Observable`s emitted by `data.search.search()` is "cold", so it
+won't be executed unless a subscriber subscribes to it. And in order to cleanly
+cancel and garbage collect the subscription it should be integrated with the
+React component life-cycle.
+
+The `useLatestPartialDataSearchResponse()` does that in such a way that the
+newest response observable is subscribed to and that any previous response
+observables are unsubscribed from for proper cancellation if a new request has
+been created. This uses RxJS's `switchMap()` operator under the hood. The hook
+also makes sure that all observables are unsubscribed from on unmount.
+
+A request can fail due to various reasons that include servers-side errors,
+Elasticsearch shard failures and network failures. The intention is to map all
+of them to a common `SearchStrategyError` interface. While the
+`useLatestPartialDataSearchResponse()` hook does that for errors emitted
+natively by the response `Observable`, it's the responsibility of the
+projection function to handle errors that are encoded in the response body,
+which includes most server-side errors. Note that errors and partial results in
+a response are not mutually exclusive.
+
+The request status (running, partial, etc), the response
+and the errors are turned in to React component state so they can be used in
+the usual rendering cycle:
+
+```typescript
+const {
+  cancelRequest,
+  isRequestRunning,
+  isResponsePartial,
+  latestResponseData,
+  latestResponseErrors,
+  loaded,
+  total,
+} = useLatestPartialDataSearchResponse(requests$);
+```
+
+## Representing the request state to the user
+
+After the values have been made available to the React rendering process using
+the `useLatestPartialDataSearchResponse()` hook, normal component hierarchies
+can be used to make the request state and result available to the user. The
+following utility components can make that even easier.
+
+### Undetermined progress
+
+If `total` and `loaded` are not (yet) known, we can show an undetermined
+progress bar.
+
+<Canvas>
+  <Story id="infra-datasearch-datasearchprogress--undetermined-progress" />
+</Canvas>
+
+### Known progress
+
+If `total` and `loaded` are returned by the search strategy, they can be used
+to show a progress bar with the option to cancel the request if it takes too
+long.
+
+<Canvas>
+  <Story id="infra-datasearch-datasearchprogress--cancelable-determined-progress" />
+</Canvas>
+
+### Failed requests
+
+Assuming the errors are represented as an array of `SearchStrategyError`s in
+the `latestResponseErrors` return value, they can be rendered as appropriate
+for the respective part of the UI. For many cases a `EuiCallout` is suitable,
+so the `DataSearchErrorCallout` can serve as a starting point:
+
+<Canvas>
+  <Story id="infra-datasearch-datasearcherrorcallout--error-callout-with-retry" />
+</Canvas>
+
