@@ -21,18 +21,17 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { css } from '@emotion/css';
 import { useKibana, useRouterNavigate } from '../common/lib/kibana';
 import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
 import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
 import type { PackSavedObject } from './types';
 
-const updatedAtCss = css`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
+const updatedAtCss = {
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+};
 
 const EMPTY_ARRAY: PackSavedObject[] = [];
 

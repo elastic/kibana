@@ -19,16 +19,15 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
 
-import { css } from '@emotion/css';
 import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { EditSavedQueryForm } from './form';
 import { useDeleteSavedQuery, useUpdateSavedQuery, useSavedQuery } from '../../../saved_queries';
 
-const euiCalloutCss = css`
-  margin: 10px;
-`;
+const euiCalloutCss = {
+  margin: '10px',
+};
 
 const EditSavedQueryPageComponent = () => {
   const permissions = useKibana().services.application.capabilities.osquery;

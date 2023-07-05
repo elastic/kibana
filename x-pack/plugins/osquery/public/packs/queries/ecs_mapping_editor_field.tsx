@@ -42,7 +42,6 @@ import type { FieldErrors, UseFieldArrayRemove, UseFormReturn } from 'react-hook
 import { useForm, useController, useFieldArray, useFormContext } from 'react-hook-form';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
-import { css } from '@emotion/css';
 import type { ECSMappingArray } from '../../../common/schemas/common/utils';
 import {
   convertECSMappingToArray,
@@ -55,6 +54,16 @@ import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { overflowCss } from '../utils';
+import {
+  resultComboBoxCss,
+  fieldSpanCss,
+  fieldIconCss,
+  buttonWrapperCss,
+  descriptionWrapperCss,
+  semicolonWrapperCss,
+  ECSFieldWrapperCss,
+  euiSuperSelectCss,
+} from './ecs_field_css';
 
 export type ECSMappingFormReturn = UseFormReturn<{ ecsMappingArray: ECSMappingArray }>;
 
@@ -76,60 +85,6 @@ const typeMap = {
   boolean: 'boolean',
   constant_keyword: 'string',
 };
-
-const resultComboBoxCss = css`
-  &.euiComboBox {
-    position: relative;
-    left: -1px;
-
-    .euiComboBox__inputWrap {
-      border-radius: 0 6px 6px 0;
-    }
-  }
-`;
-
-const euiSuperSelectCss = css`
-  min-width: 70px;
-  border-radius: 6px 0 0 6px;
-
-  .euiIcon {
-    padding: 0;
-    width: 18px;
-    background: none;
-  }
-`;
-
-const fieldIconCss = css`
-  width: 32px;
-
-  > svg {
-    padding: 0 6px !important;
-  }
-`;
-
-const fieldSpanCss = css`
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-`;
-
-const descriptionWrapperCss = css`
-  overflow: hidden;
-`;
-
-// align the icon to the inputs
-const semicolonWrapperCss = css`
-  margin-top: 28px;
-`;
-
-// align the icon to the inputs
-const buttonWrapperCss = css`
-  margin-top: 28px;
-  width: 24px;
-`;
-
-const ECSFieldWrapperCss = css`
-  max-width: 100%;
-`;
 
 const SINGLE_SELECTION = { asPlainText: true };
 
@@ -584,6 +539,8 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
           {Prepend}
         </EuiFlexItem>
         <EuiFlexItem css={overflowCss}>
+          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+          {/* @ts-ignore*/}
           <EuiComboBox
             css={resultComboBoxCss}
             error={resultFieldState.error?.message}
@@ -668,10 +625,8 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
                 }}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <div css={semicolonWrapperCss}>
-                <EuiText>:</EuiText>
-              </div>
+            <EuiFlexItem grow={false} css={semicolonWrapperCss}>
+              <EuiText>:</EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -934,8 +889,8 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
           ?.map((selectItem: { type: string; name: string; alias?: string }) => {
             if (selectItem.type === 'identifier') {
               /*
-                  select * from routes, uptime;
-                */
+                select * from routes, uptime;
+              */
               if (ast?.result.length === 1 && selectItem.name === '*') {
                 return reduce(
                   astOsqueryTables,
@@ -960,8 +915,8 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
               }
 
               /*
-                  select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
-                */
+                select i.*, p.resident_size, p.user_time, p.system_time, time.minutes as counter from osquery_info i, processes p, time where p.pid = i.pid;
+              */
 
               const [table, column] = selectItem.name.includes('.')
                 ? selectItem.name?.split('.')
@@ -1005,18 +960,18 @@ export const ECSMappingEditorField = React.memo(({ euiFieldProps }: ECSMappingEd
             }
 
             /*
-                SELECT pid, uid, name, ROUND((
-                  (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
-                ) * 100, 2) AS percentage
-                FROM processes, (
-                SELECT (
-                  SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
-                  SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
-                  FROM cpu_time
-                ) AS cpu_time
-                ORDER BY user_time+system_time DESC
-                LIMIT 5;
-              */
+              SELECT pid, uid, name, ROUND((
+                (user_time + system_time) / (cpu_time.tsb - cpu_time.itsb)
+              ) * 100, 2) AS percentage
+              FROM processes, (
+              SELECT (
+                SUM(user) + SUM(nice) + SUM(system) + SUM(idle) * 1.0) AS tsb,
+                SUM(COALESCE(idle, 0)) + SUM(COALESCE(iowait, 0)) AS itsb
+                FROM cpu_time
+              ) AS cpu_time
+              ORDER BY user_time+system_time DESC
+              LIMIT 5;
+            */
 
             if (selectItem.type === 'function' && selectItem.alias) {
               return [

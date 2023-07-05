@@ -8,13 +8,12 @@
 import React from 'react';
 import { EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/css';
 
-const panelCss = css`
-  max-width: 500px;
-  margin-right: auto;
-  margin-left: auto;
-`;
+const panelCss = {
+  maxWidth: '500px',
+  marginRight: 'auto',
+  marginLeft: 'auto',
+};
 
 const MissingPrivilegesComponent = () => (
   <div>

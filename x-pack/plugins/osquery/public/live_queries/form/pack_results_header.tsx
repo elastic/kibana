@@ -7,7 +7,6 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/css';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 import { AddToCaseWrapper } from '../../cases/add_to_cases';
 
@@ -17,16 +16,16 @@ interface PackResultsHeadersProps {
   agentIds?: string[];
 }
 
-const resultsHeadingCss = css`
-  padding-right: 20px;
-  border-right: 2px solid #d3dae6;
-`;
+const resultsHeadingCss = {
+  paddingRight: '20px',
+  borderRight: '2px solid #d3dae6',
+};
 
-const iconsListCss = css`
-  align-content: center;
-  justify-content: center;
-  padding-left: 10px;
-`;
+const iconsListCss = {
+  alignContent: 'center',
+  justifyContent: 'center',
+  paddingLeft: '10px',
+};
 
 export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
   ({ actionId, agentIds, queryIds }) => {

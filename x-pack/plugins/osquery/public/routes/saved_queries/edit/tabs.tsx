@@ -9,15 +9,14 @@ import { EuiTabbedContent, EuiNotificationBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
-import { css } from '@emotion/css';
 import { ResultsTable } from '../../../results/results_table';
 import { ActionResultsSummary } from '../../../action_results/action_results_summary';
 
-const euiTabbedContentCss = css`
-  div.euiTabs {
-    padding-left: 8px;
-  }
-`;
+const euiTabbedContentCss = {
+  'div.euiTabs': {
+    paddingLeft: '8px',
+  },
+};
 
 interface ResultTabsProps {
   actionId: string;

@@ -10,15 +10,14 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useFormContext } from 'react-hook-form';
-import { css } from '@emotion/css';
 import { LiveQuery } from '../../live_queries';
 
-const euiFlyoutHeaderCss = css`
-  &.euiFlyoutHeader {
-    padding-top: 21px;
-    padding-bottom: 20px;
-  }
-`;
+const euiFlyoutHeaderCss = {
+  '&.euiFlyoutHeader': {
+    paddingTop: '21px',
+    paddingBottom: '20px',
+  },
+};
 
 interface PlaygroundFlyoutProps {
   enabled?: boolean;

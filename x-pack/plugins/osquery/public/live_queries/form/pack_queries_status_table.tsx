@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
-import { css } from '@emotion/css';
 import { QueryDetailsFlyout } from './query_details_flyout';
 import { PackResultsHeader } from './pack_results_header';
 import { Direction } from '../../../common/search_strategy';
@@ -34,42 +33,42 @@ import { PackViewInDiscoverAction } from '../../discover/pack_view_in_discover';
 import { AddToCaseWrapper } from '../../cases/add_to_cases';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 
-const truncateTooltipTextCss = css`
-  width: 100%;
+const truncateTooltipTextCss = {
+  width: '100%',
 
-  > span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-`;
+  '> span': {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+};
 
-const euiFlexItemCss = css`
-  cursor: pointer;
-`;
-
-const EMPTY_ARRAY: PackQueryStatusItem[] = [];
+const euiFlexItemCss = {
+  cursor: 'pointer',
+};
 
 // TODO fix types
-const euiBasicTableCss = css`
-  .euiTableRow.euiTableRow-isExpandedRow > td > div {
-    padding: 0;
-    border: 1px solid #d3dae6;
-  }
+const euiBasicTableCss = {
+  '.euiTableRow.euiTableRow-isExpandedRow > td > div': {
+    padding: '0',
+    border: '1px solid #d3dae6',
+  },
 
-  div.euiDataGrid__virtualized::-webkit-scrollbar {
-    display: none;
-  }
+  'div.euiDataGrid__virtualized::-webkit-scrollbar': {
+    display: 'none',
+  },
 
-  .euiDataGrid > div {
-    .euiDataGrid__scrollOverlay {
-      box-shadow: none;
-    }
+  '.euiDataGrid > div': {
+    '.euiDataGrid__scrollOverlay': {
+      boxShadow: 'none',
+    },
 
-    border-left: 0px;
-    border-right: 0px;
-  }
-`;
+    borderLeft: '0px',
+    borderRight: '0px',
+  },
+};
+
+const EMPTY_ARRAY: PackQueryStatusItem[] = [];
 
 export enum ViewResultsActionButtonType {
   icon = 'icon',

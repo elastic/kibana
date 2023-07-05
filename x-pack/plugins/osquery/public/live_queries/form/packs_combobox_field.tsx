@@ -12,13 +12,12 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow, EuiComboBox, EuiTextColor, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useController } from 'react-hook-form';
-import { css } from '@emotion/css';
 import type { PackSavedObject } from '../../packs/types';
 
-const textTruncateCss = css`
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
+const textTruncateCss = {
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+};
 
 interface PackComboBoxFieldProps {
   fieldProps?: {

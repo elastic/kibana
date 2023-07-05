@@ -6,7 +6,6 @@
  */
 
 import { get, isEmpty, isArray, isObject, isEqual, keys, map, reduce } from 'lodash/fp';
-import { css } from '@emotion/react';
 import type {
   EuiDataGridSorting,
   EuiDataGridProps,
@@ -47,14 +46,14 @@ import { AddToCaseWrapper } from '../cases/add_to_cases';
 
 const DataContext = createContext<ResultEdges>([]);
 
-const euiDataGridCss = css`
-  :not(.euiDataGrid--fullScreen) {
-    .euiDataGrid__virtualized {
-      height: 100% !important;
-      max-height: 500px;
-    }
-  }
-`;
+const euiDataGridCss = {
+  ':not(.euiDataGrid--fullScreen)': {
+    '.euiDataGrid__virtualized': {
+      height: '100% !important',
+      maxHeight: '500px',
+    },
+  },
+};
 
 export interface ResultsTableComponentProps {
   actionId: string;
@@ -428,9 +427,9 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         <EuiProgress
           color="primary"
           size="xs"
-          css={css`
-            margin-top: -2px;
-          `}
+          css={{
+            marginTop: '-2px',
+          }}
         />
       )}
 

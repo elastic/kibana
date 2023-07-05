@@ -10,15 +10,14 @@ import React, { useCallback, useMemo } from 'react';
 
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { css } from '@emotion/css';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { useAgentPolicy } from './use_agent_policy';
 
-const euiLinkCss = css`
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-`;
+const euiLinkCss = {
+  whiteSpace: 'nowrap',
+  textOverflow: 'ellipsis',
+  overflow: 'hidden',
+};
 
 interface AgentsPolicyLinkProps {
   policyId: string;

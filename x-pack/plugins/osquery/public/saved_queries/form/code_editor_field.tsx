@@ -11,13 +11,12 @@ import React from 'react';
 
 import { useController } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/css';
 import { OsquerySchemaLink } from '../../components/osquery_schema_link';
 import { OsqueryEditor } from '../../editor';
 
-const euiCodeBlockCss = css`
-  min-height: 100px;
-`;
+const euiCodeBlockCss = {
+  minHeight: '100px',
+};
 
 interface CodeEditorFieldProps {
   euiFieldProps?: Record<string, unknown>;

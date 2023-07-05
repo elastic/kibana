@@ -6,21 +6,20 @@
  */
 
 import { EuiColorPaletteDisplay } from '@elastic/eui';
-import { css } from '@emotion/css';
 import React, { useMemo } from 'react';
 
 import { AGENT_STATUSES, getColorForAgentStatus } from './services/agent_status';
 import type { ActionAgentStatus } from './types';
 
-const euiColorPaletteDisplayCss = css`
-  &.osquery-action-agent-status-bar {
-    border: none;
-    border-radius: 0;
-    &:after {
-      border: none;
-    }
-  }
-`;
+const euiColorPaletteDisplayCss = {
+  '&.osquery-action-agent-status-bar': {
+    border: 'none',
+    borderRadius: 0,
+    '&:after': {
+      border: 'none',
+    },
+  },
+};
 
 export const AgentStatusBar: React.FC<{
   agentStatus: { [k in ActionAgentStatus]: number };

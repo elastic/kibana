@@ -12,7 +12,6 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
-import { css } from '@emotion/css';
 
 const containerCss = ({ theme }: { theme: EuiThemeComputed }) => ({
   borderBottom: theme.border.thin,
@@ -28,12 +27,12 @@ const wrapperCss = ({ theme, maxWidth }: { theme: EuiThemeComputed; maxWidth?: n
   paddingRight: theme.size.m,
 });
 
-const tabsCss = css`
-  top: 1px;
-  &:before {
-    height: 0px;
-  }
-`;
+const tabsCss = {
+  top: '1px',
+  '&:before': {
+    height: '0px',
+  },
+};
 
 export interface HeaderProps {
   children?: React.ReactNode;
