@@ -197,7 +197,7 @@ export function MetricIndicator({
               <EuiButtonIcon
                 iconType="trash"
                 color="danger"
-                style={{ marginTop: '1em' }}
+                style={{ marginTop: '1.5em' }}
                 onClick={handleDeleteMetric(index)}
                 disabled={disableDelete}
                 title={i18n.translate(
