@@ -9,6 +9,7 @@ import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
+import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import {
@@ -107,6 +108,15 @@ export const createScopedLogger = (
       }
     },
   };
+};
+
+export const getAlertDetailsPageEnabledForApp = (
+  config: ObservabilityConfig['unsafe']['alertDetails'] | null,
+  appName: keyof ObservabilityConfig['unsafe']['alertDetails']
+): boolean => {
+  if (!config) return false;
+
+  return config[appName].enabled;
 };
 
 export const getViewInInventoryAppUrl = ({
