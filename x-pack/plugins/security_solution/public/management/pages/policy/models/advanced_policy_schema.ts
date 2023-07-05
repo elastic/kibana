@@ -1297,4 +1297,15 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.malware.networkshare',
+    first_supported_version: '8.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.malware.networkshare',
+      {
+        defaultMessage:
+          'Controls whether malware protection is applied to network drives. Default: true',
+      }
+    ),
+  },
 ];
