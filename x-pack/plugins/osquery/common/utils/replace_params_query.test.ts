@@ -9,7 +9,7 @@ import { replaceParamsQuery } from './replace_params_query';
 
 describe('replaceParamsQuery', () => {
   it('should return unchanged query, and skipped true', () => {
-    const query = 'SELECT * FROM processes WHERE version = {{params.version}}';
+    const query = 'SELECT * FROM processes WHERE version = {{rule.params.version}}';
     const { result, skipped } = replaceParamsQuery(query, {});
     expect(result).toBe(query);
     expect(skipped).toBe(true);

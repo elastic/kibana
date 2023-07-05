@@ -34,7 +34,7 @@ export function getRuleType(alerting: AlertingSetup): RuleTypeModel<EsQueryRuleP
         defaultMessage: `Elasticsearch query rule '\\{\\{rule.name\\}\\}' is active:
 
 - Value: \\{\\{context.value\\}\\}
-- Conditions Met: \\{\\{context.conditions\\}\\} over \\{\\{params.timeWindowSize\\}\\}\\{\\{params.timeWindowUnit\\}\\}
+- Conditions Met: \\{\\{context.conditions\\}\\} over \\{\\{rule.params.timeWindowSize\\}\\}\\{\\{rule.params.timeWindowUnit\\}\\}
 - Timestamp: \\{\\{context.date\\}\\}
 - Link: \\{\\{context.link\\}\\}`,
       }
