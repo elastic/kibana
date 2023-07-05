@@ -16,6 +16,9 @@ export const extractedSavedObjectParamReferenceNamePrefix = 'param:';
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
 export const preconfiguredConnectorActionRefPrefix = 'preconfigured:';
 
+// NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
+export const systemConnectorActionRefPrefix = 'system_action:';
+
 export const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.KQL,
   fieldNames: { ruleTypeId: 'alert.attributes.alertTypeId', consumer: 'alert.attributes.consumer' },

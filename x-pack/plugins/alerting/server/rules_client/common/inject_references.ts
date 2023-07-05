@@ -13,6 +13,7 @@ import { Rule, RawRule, RuleTypeParams } from '../../types';
 import {
   preconfiguredConnectorActionRefPrefix,
   extractedSavedObjectParamReferenceNamePrefix,
+  systemConnectorActionRefPrefix,
 } from './constants';
 
 export function injectReferencesIntoActions(
@@ -25,6 +26,13 @@ export function injectReferencesIntoActions(
       return {
         ...omit(action, 'actionRef'),
         id: action.actionRef.replace(preconfiguredConnectorActionRefPrefix, ''),
+      };
+    }
+
+    if (action.actionRef.startsWith(systemConnectorActionRefPrefix)) {
+      return {
+        ...omit(action, 'actionRef'),
+        id: action.actionRef.replace(systemConnectorActionRefPrefix, ''),
       };
     }
 

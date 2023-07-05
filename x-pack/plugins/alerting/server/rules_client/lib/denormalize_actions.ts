@@ -7,7 +7,10 @@
 
 import { SavedObjectReference } from '@kbn/core/server';
 import { RawRule } from '../../types';
-import { preconfiguredConnectorActionRefPrefix } from '../common/constants';
+import {
+  preconfiguredConnectorActionRefPrefix,
+  systemConnectorActionRefPrefix,
+} from '../common/constants';
 import { NormalizedAlertActionWithGeneratedValues, RulesClientContext } from '../types';
 
 export async function denormalizeActions(
@@ -32,6 +35,12 @@ export async function denormalizeActions(
           actions.push({
             ...alertAction,
             actionRef: `${preconfiguredConnectorActionRefPrefix}${id}`,
+            actionTypeId: actionResultValue.actionTypeId,
+          });
+        } else if (actionsClient.isSystemAction(id)) {
+          actions.push({
+            ...alertAction,
+            actionRef: `${systemConnectorActionRefPrefix}${id}`,
             actionTypeId: actionResultValue.actionTypeId,
           });
         } else {
