@@ -55,6 +55,10 @@ const euiDataGridCss = {
   },
 };
 
+const euiProgressCss = {
+  marginTop: '-2px',
+};
+
 export interface ResultsTableComponentProps {
   actionId: string;
   selectedAgent?: string;
@@ -423,15 +427,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   return (
     <>
-      {isLive && (
-        <EuiProgress
-          color="primary"
-          size="xs"
-          css={{
-            marginTop: '-2px',
-          }}
-        />
-      )}
+      {isLive && <EuiProgress color="primary" size="xs" css={euiProgressCss} />}
 
       {!allResultsData?.edges.length ? (
         <EuiPanel hasShadow={false} data-test-subj={'osqueryResultsPanel'}>
