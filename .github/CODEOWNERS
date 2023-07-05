@@ -871,6 +871,9 @@ x-pack/plugins/infra/server/lib/alerting @elastic/actionable-observability
 /x-pack/test/functional/services/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/synthetics @elastic/uptime
+/x-pack/test/alerting_api_integration/observability/synthetics_rule.ts @elastic/uptime
+/x-pack/test/alerting_api_integration/observability/index.ts @elastic/uptime
+
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime

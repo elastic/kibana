@@ -9,6 +9,8 @@ import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { invariant } from '../../../../../../../common/utils/invariant';
 
 import type {
+  AllFieldsDiff,
+  DiffableAllFields,
   DiffableCommonFields,
   DiffableCustomQueryFields,
   DiffableEqlFields,
@@ -50,6 +52,24 @@ export const calculateRuleFieldsDiff = (
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { base_version, current_version, target_version } = ruleVersions;
   const hasBaseVersion = base_version !== MissingVersion;
+
+  const isRuleTypeDifferentInTargetVersion = current_version.type !== target_version.type;
+  const isRuleTypeDifferentInBaseVersion = hasBaseVersion
+    ? current_version.type !== base_version.type
+    : false;
+
+  if (isRuleTypeDifferentInTargetVersion || isRuleTypeDifferentInBaseVersion) {
+    // If rule type has been changed by Elastic in the target version (can happen)
+    // or by user in the current version (should never happen), we can't calculate the diff
+    // only for fields of a single rule type, and need to calculate it for all fields
+    // of all the rule types we have.
+    // TODO: Try to get rid of "as" casting
+    return calculateAllFieldsDiff({
+      base_version: base_version as DiffableAllFields | MissingVersion,
+      current_version: current_version as DiffableAllFields,
+      target_version: target_version as DiffableAllFields,
+    }) as RuleFieldsDiff;
+  }
 
   switch (current_version.type) {
     case 'query': {
@@ -173,7 +193,7 @@ const calculateCustomQueryFieldsDiff = (
 
 const customQueryFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCustomQueryFields> = {
   type: simpleDiffAlgorithm,
-  data_query: simpleDiffAlgorithm,
+  kql_query: simpleDiffAlgorithm,
   data_source: simpleDiffAlgorithm,
   alert_suppression: simpleDiffAlgorithm,
 };
@@ -186,7 +206,7 @@ const calculateSavedQueryFieldsDiff = (
 
 const savedQueryFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableSavedQueryFields> = {
   type: simpleDiffAlgorithm,
-  data_query: simpleDiffAlgorithm,
+  kql_query: simpleDiffAlgorithm,
   data_source: simpleDiffAlgorithm,
   alert_suppression: simpleDiffAlgorithm,
 };
@@ -199,7 +219,7 @@ const calculateEqlFieldsDiff = (
 
 const eqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEqlFields> = {
   type: simpleDiffAlgorithm,
-  data_query: simpleDiffAlgorithm,
+  eql_query: simpleDiffAlgorithm,
   data_source: simpleDiffAlgorithm,
   event_category_override: simpleDiffAlgorithm,
   timestamp_field: simpleDiffAlgorithm,
@@ -214,7 +234,7 @@ const calculateThreatMatchFieldsDiff = (
 
 const threatMatchFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThreatMatchFields> = {
   type: simpleDiffAlgorithm,
-  data_query: simpleDiffAlgorithm,
+  kql_query: simpleDiffAlgorithm,
   data_source: simpleDiffAlgorithm,
   threat_query: simpleDiffAlgorithm,
   threat_index: simpleDiffAlgorithm,
@@ -232,7 +252,7 @@ const calculateThresholdFieldsDiff = (
 
 const thresholdFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableThresholdFields> = {
   type: simpleDiffAlgorithm,
-  data_query: simpleDiffAlgorithm,
+  kql_query: simpleDiffAlgorithm,
   data_source: simpleDiffAlgorithm,
   threshold: simpleDiffAlgorithm,
 };
@@ -258,8 +278,26 @@ const calculateNewTermsFieldsDiff = (
 
 const newTermsFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableNewTermsFields> = {
   type: simpleDiffAlgorithm,
-  data_query: simpleDiffAlgorithm,
+  kql_query: simpleDiffAlgorithm,
   data_source: simpleDiffAlgorithm,
   new_terms_fields: simpleDiffAlgorithm,
   history_window_start: simpleDiffAlgorithm,
+};
+
+const calculateAllFieldsDiff = (
+  ruleVersions: ThreeVersionsOf<DiffableAllFields>
+): AllFieldsDiff => {
+  return calculateFieldsDiffFor(ruleVersions, allFieldsDiffAlgorithms);
+};
+
+const allFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableAllFields> = {
+  ...commonFieldsDiffAlgorithms,
+  ...customQueryFieldsDiffAlgorithms,
+  ...savedQueryFieldsDiffAlgorithms,
+  ...eqlFieldsDiffAlgorithms,
+  ...threatMatchFieldsDiffAlgorithms,
+  ...thresholdFieldsDiffAlgorithms,
+  ...machineLearningFieldsDiffAlgorithms,
+  ...newTermsFieldsDiffAlgorithms,
+  type: simpleDiffAlgorithm,
 };
