@@ -14,14 +14,10 @@ export interface ExternalLinkInput extends LinkInput {
   url: string;
 }
 
-// export type ExternalinkDestination = ExternalLinkInput;
-
-export interface ExternalLinkComponentState {
-  deleteme?: boolean;
-}
-
-export type ExternalLinkReduxState = ReduxEmbeddableState<
-  ExternalLinkInput,
-  EmbeddableOutput,
-  ExternalLinkComponentState
->;
+/**
+ * TODO: There is currently no component state for external links;
+ * It is possible that having redux state for this embeddable type is overkill, and we may be able to just
+ * use basic `explicitInput` logic to grab the necessary information. However, we can fix that after-the-fact
+ * just in case there is something that we want toa dd that I haven't yet considered
+ */
+export type ExternalLinkReduxState = ReduxEmbeddableState<ExternalLinkInput, EmbeddableOutput, {}>;

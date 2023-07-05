@@ -17,7 +17,6 @@ import {
   EuiTitle,
   EuiPanel,
   IconType,
-  EuiSwitch,
   EuiSpacer,
   EuiButton,
   EuiFormRow,
@@ -147,10 +146,6 @@ export const NavigationEmbeddablePanelEditor = ({
                 </>
               )}
             </>
-          </EuiFormRow>
-          <EuiFormRow>
-            {/* TODO: As part of https://github.com/elastic/kibana/issues/154362, connect this to the library */}
-            <EuiSwitch label="Save to library" compressed onChange={() => {}} checked={false} />
           </EuiFormRow>
         </EuiForm>
       </EuiFlyoutBody>

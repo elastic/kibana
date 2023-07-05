@@ -62,6 +62,7 @@ export const DashboardLinkEditorDestinationPicker = ({
       />
       <EuiSpacer size="s" />
       <EuiSelectable
+        aria-label={DashboardLinkEmbeddableStrings.getDashboardPickerAriaLabel()}
         singleSelection={true}
         options={dashboardListOptions}
         isLoading={loadingDashboardList}

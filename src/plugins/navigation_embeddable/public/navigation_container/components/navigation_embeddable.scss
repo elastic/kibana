@@ -1,6 +1,6 @@
 @import '../mixins';
 
-.navEmbeddableEditor {
+.navEmbeddableLinkEditor {
   @include euiFlyout;
   animation: euiFlyoutAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
 }

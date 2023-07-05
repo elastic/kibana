@@ -8,9 +8,9 @@
 
 import React from 'react';
 
+import { EuiButtonEmpty } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { EuiButtonEmpty } from '@elastic/eui';
 import { useDashboardLinkEmbeddable } from '../embeddable/dashboard_link_embeddable';
 
 export const DashboardLinkComponent = () => {
@@ -27,7 +27,6 @@ export const DashboardLinkComponent = () => {
   const parentDashboardId = parentDashboard.select((state) => state.componentState.lastSavedId);
   return (
     <EuiButtonEmpty
-      id={'test1' + embeddable.id}
       isLoading={isLoading}
       iconType="dashboardApp"
       {...(dashboardLinkId === parentDashboardId

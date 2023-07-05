@@ -44,8 +44,14 @@ export class DashboardLinkFactory
   }
 
   public getDisplayName() {
-    return i18n.translate('navigationEmbeddable.navigationEmbeddableFactory.displayName', {
+    return i18n.translate('dashboardLinkEmbeddable.factory.displayName', {
       defaultMessage: 'Dashboard',
+    });
+  }
+
+  public getDescription() {
+    return i18n.translate('dashboardLinkEmbeddable.factory.description', {
+      defaultMessage: 'Go to dashboard',
     });
   }
 

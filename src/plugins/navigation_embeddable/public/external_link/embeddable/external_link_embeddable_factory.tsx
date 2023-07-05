@@ -42,8 +42,14 @@ export class ExternalLinkFactory
   }
 
   public getDisplayName() {
-    return i18n.translate('navigationEmbeddable.navigationEmbeddableFactory.displayName', {
+    return i18n.translate('externalLinkEmbeddable.factory.displayName', {
       defaultMessage: 'URL',
+    });
+  }
+
+  public getDescription() {
+    return i18n.translate('externalLinkEmbeddable.factory.description', {
+      defaultMessage: 'Go to URL',
     });
   }
 

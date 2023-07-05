@@ -13,6 +13,10 @@ export const DashboardLinkEmbeddableStrings = {
     i18n.translate('navEmbeddable.editor.dashboard.searchPlaceholder', {
       defaultMessage: 'Search for a dashboard',
     }),
+  getDashboardPickerAriaLabel: () =>
+    i18n.translate('navEmbeddable.editor.dashboard.dashboardPickerAriaLabel', {
+      defaultMessage: 'Search for a dashboard',
+    }),
   getCurrentDashboardLabel: () =>
     i18n.translate('navEmbeddable.editor.dashboard.currentDashboardLabel', {
       defaultMessage: 'Current',

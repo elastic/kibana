@@ -23,6 +23,7 @@ import {
   EuiButtonEmpty,
   EuiFlyoutHeader,
   EuiTitle,
+  EuiFocusTrap,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { linksService } from '../../services/links_service';
@@ -63,7 +64,7 @@ export const NavigationEmbeddableLinkEditor = ({
       return {
         id: factoryType,
         label: (
-          <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="center" aria-label={factory.getDescription()}>
             <EuiFlexItem grow={false}>
               <EuiIcon type={factory.getIconType()} color="text" />
             </EuiFlexItem>
@@ -75,7 +76,7 @@ export const NavigationEmbeddableLinkEditor = ({
   }, []);
 
   return (
-    <div className={'navEmbeddableEditor'}>
+    <EuiFocusTrap className={'navEmbeddableLinkEditor'}>
       <EuiFlyoutHeader hasBorder>
         <EuiButtonEmpty
           css={css`
@@ -86,7 +87,7 @@ export const NavigationEmbeddableLinkEditor = ({
           iconType={'arrowLeft'}
           onClick={() => onClose(false)}
         >
-          <EuiTitle size="m">
+          <EuiTitle size="m" aria-label="Go back to panel editor">
             <h2>{NavEmbeddableStrings.editor.getAddButtonLabel()}</h2>
           </EuiTitle>
         </EuiButtonEmpty>
@@ -157,6 +158,6 @@ export const NavigationEmbeddableLinkEditor = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </div>
+    </EuiFocusTrap>
   );
 };

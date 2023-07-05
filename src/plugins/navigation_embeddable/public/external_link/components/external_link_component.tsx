@@ -17,9 +17,5 @@ export const ExternalLinkComponent = () => {
   const linkLabel = embeddable.select((state) => state.explicitInput.label);
   const url = embeddable.select((state) => state.explicitInput.url);
 
-  return (
-    <EuiButtonEmpty id={'test1' + embeddable.id} iconType="link">
-      {linkLabel || url}
-    </EuiButtonEmpty>
-  );
+  return <EuiButtonEmpty iconType="link">{linkLabel || url}</EuiButtonEmpty>;
 };
