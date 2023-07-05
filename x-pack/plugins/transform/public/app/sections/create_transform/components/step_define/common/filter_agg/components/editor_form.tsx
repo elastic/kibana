@@ -19,7 +19,7 @@ export const FilterEditorForm: FilterAggConfigEditor['aggTypeConfig']['FilterAgg
   return (
     <>
       <EuiSpacer size="m" />
-      <CodeEditor // TODO theme is provided in context by x-pack/plugins/transform/public/app/app.tsx
+      <CodeEditor
         height={300}
         languageId={'json'}
         onChange={(d) => {
