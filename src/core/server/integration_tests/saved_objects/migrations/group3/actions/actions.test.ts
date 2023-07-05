@@ -1117,7 +1117,8 @@ describe('migration actions', () => {
     });
   });
 
-  describe('readWithPit', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/160994
+  describe.skip('readWithPit', () => {
     it('requests documents from an index using given PIT', async () => {
       const openPitTask = openPit({ client, index: 'existing_index_with_docs' });
       const pitResponse = (await openPitTask()) as Either.Right<OpenPitResponse>;

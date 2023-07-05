@@ -31,7 +31,7 @@ function testSorting({
   const datatable = input.map((v) => ({
     a: v,
   }));
-  const sorted = output.map((v) => ({ a: v }));
+  const sorted = [...output];
   if (direction === 'desc' && reverseOutput) {
     sorted.reverse();
     if (keepLast) {
@@ -41,7 +41,7 @@ function testSorting({
     }
   }
   const criteria = getSortingCriteria(type, 'a', getMockFormatter(), direction);
-  expect(datatable.sort(criteria)).toEqual(sorted);
+  expect(datatable.sort(criteria).map((row) => row.a)).toEqual(sorted);
 }
 
 describe('Data sorting criteria', () => {
@@ -61,6 +61,25 @@ describe('Data sorting criteria', () => {
         testSorting({
           input: [now, 0, now - 150000],
           output: [0, now - 150000, now],
+          direction,
+          type: 'date',
+        });
+      });
+
+      it(`should provide the number criteria of array numeric values (${direction})`, () => {
+        testSorting({
+          input: [7, [7, 1], [7, 2], [6], -Infinity, Infinity],
+          output: [-Infinity, [6], 7, [7, 1], [7, 2], Infinity],
+          direction,
+          type: 'number',
+        });
+      });
+
+      it(`should provide the number criteria for array date values (${direction})`, () => {
+        const now = Date.now();
+        testSorting({
+          input: [now, [0, now], [0], now - 150000],
+          output: [[0], [0, now], now - 150000, now],
           direction,
           type: 'date',
         });
@@ -116,6 +135,15 @@ describe('Data sorting criteria', () => {
           type: 'version',
         });
       });
+
+      it(`should provide the array version criteria for terms values (${direction})`, () => {
+        testSorting({
+          input: [['1.21.0'], ['1.1.0', '1.1.1'], ['1.21.1', '1.1.1'], '1.112.0', '1.0.0'],
+          output: ['1.0.0', ['1.1.0', '1.1.1'], ['1.21.0'], ['1.21.1', '1.1.1'], '1.112.0'],
+          direction,
+          type: 'version',
+        });
+      });
     }
 
     it('should sort non-version stuff to the end', () => {
@@ -148,10 +176,28 @@ describe('Data sorting criteria', () => {
         });
       });
 
+      it(`should provide the string criteria for array terms values (${direction})`, () => {
+        testSorting({
+          input: ['a', 'b', 'c', 'd', '12', ['a', 'b'], ['b', 'c']],
+          output: ['12', 'a', ['a', 'b'], 'b', ['b', 'c'], 'c', 'd'],
+          direction,
+          type: 'string',
+        });
+      });
+
       it(`should provide the string criteria for other types of values (${direction})`, () => {
         testSorting({
           input: [true, false, false],
           output: [false, false, true],
+          direction,
+          type: 'boolean',
+        });
+      });
+
+      it(`should provide the string criteria for other types of array values (${direction})`, () => {
+        testSorting({
+          input: [true, false, false, [true, false]],
+          output: [false, false, true, [true, false]],
           direction,
           type: 'boolean',
         });
@@ -257,6 +303,34 @@ describe('Data sorting criteria', () => {
           keepLast: true,
         });
       });
+
+      it(`should provide the IP criteria for array IP values (mixed values with invalid "Other" field) - ${direction}`, () => {
+        testSorting({
+          input: [
+            'fc00::123',
+            '192.168.1.50',
+            'Other',
+            '10.0.1.76',
+            '8.8.8.8',
+            '::1',
+            ['fc00::123', '192.168.1.50'],
+            ['::1', '10.0.1.76'],
+          ],
+          output: [
+            '::1',
+            ['::1', '10.0.1.76'],
+            '8.8.8.8',
+            '10.0.1.76',
+            '192.168.1.50',
+            'fc00::123',
+            ['fc00::123', '192.168.1.50'],
+            'Other',
+          ],
+          direction,
+          type: 'ip',
+          keepLast: true,
+        });
+      });
     }
 
     it('should sort undefined and null to the end', () => {
@@ -337,6 +411,34 @@ describe('Data sorting criteria', () => {
         testSorting({
           input: [{ gte: 1, lt: 5 }, { gte: 0, lt: 5 }, { gte: 0 }],
           output: [{ gte: 0, lt: 5 }, { gte: 0 }, { gte: 1, lt: 5 }],
+          direction,
+          type: 'range',
+        });
+      });
+
+      it(`should sort array values for both open and closed ranges - ${direction}`, () => {
+        testSorting({
+          input: [
+            { gte: 1, lt: 5 },
+            ,
+            [
+              { gte: 0, lt: 5 },
+              { gte: 1, lt: 5 },
+            ],
+            [{ gte: 0 }, { gte: 1, lt: 5 }],
+            { gte: 0, lt: 5 },
+            { gte: 0 },
+          ],
+          output: [
+            { gte: 0, lt: 5 },
+            [
+              { gte: 0, lt: 5 },
+              { gte: 1, lt: 5 },
+            ],
+            { gte: 0 },
+            [{ gte: 0 }, { gte: 1, lt: 5 }],
+            { gte: 1, lt: 5 },
+          ],
           direction,
           type: 'range',
         });
