@@ -1,6 +1,6 @@
 {
   "author": "Elastic",
-  "name": "@kbn/serverless-security",
+  "name": "@kbn/security-solution-serverless",
   "version": "1.0.0",
   "private": true,
   "license": "Elastic License 2.0",

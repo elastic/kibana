@@ -326,6 +326,8 @@ describe('split .kibana index into multiple system indices', () => {
         // .kibana_task_manager migrator is NOT involved in relocation, must not sync with other migrators
         '[.kibana_task_manager] READY_TO_REINDEX_SYNC',
         '[.kibana_task_manager] DONE_REINDEXING_SYNC',
+        // .kibana_task_manager migrator performed a REINDEX migration, it must update ALL types
+        '[.kibana_task_manager] Kibana is performing a compatible update and it will update the following SO types so that ES can pickup the updated mappings',
       ]);
 
       // new indices migrators did not exist, so they all have to reindex (create temp index + sync)
@@ -390,6 +392,9 @@ describe('split .kibana index into multiple system indices', () => {
       // should NOT retransform anything (we reindexed, thus we transformed already)
       ['.kibana', '.kibana_task_manager', '.kibana_so_ui', '.kibana_so_search'].forEach((index) => {
         expect(logs).not.toContainLogEntry(`[${index}] OUTDATED_DOCUMENTS_TRANSFORM`);
+        expect(logs).not.toContainLogEntry(
+          `[${index}] Kibana is performing a compatible update and it will update the following SO types so that ES can pickup the updated mappings`
+        );
       });
     });
 
@@ -407,9 +412,8 @@ describe('split .kibana index into multiple system indices', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/157510
-  // This test takes too long. Can be manually executed to verify the correct behavior.
-  describe.skip('when multiple Kibana migrators run in parallel', () => {
+  describe('when multiple Kibana migrators run in parallel', () => {
+    jest.setTimeout(1200000);
     it('correctly migrates 7.7.2_xpack_100k_obj.zip archive', async () => {
       esServer = await startElasticsearch({
         dataArchive: Path.join(__dirname, '..', 'archives', '7.7.2_xpack_100k_obj.zip'),
@@ -486,7 +490,7 @@ describe('split .kibana index into multiple system indices', () => {
           task: 5,
         },
       });
-    }, 1200000);
+    });
 
     afterEach(async () => {
       await esServer?.stop();

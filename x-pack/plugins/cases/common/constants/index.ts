@@ -101,10 +101,12 @@ export const MAX_ALERTS_PER_CASE = 1000 as const;
  * Searching
  */
 export const MAX_DOCS_PER_PAGE = 10000 as const;
-export const MAX_BULK_GET_ATTACHMENTS = MAX_DOCS_PER_PAGE;
+export const MAX_BULK_GET_ATTACHMENTS = 100 as const;
 export const MAX_CONCURRENT_SEARCHES = 10 as const;
 export const MAX_BULK_GET_CASES = 1000 as const;
 export const MAX_COMMENTS_PER_PAGE = 100 as const;
+export const MAX_CASES_PER_PAGE = 100 as const;
+export const MAX_USER_ACTIONS_PER_PAGE = 100 as const;
 export const MAX_CATEGORY_FILTER_LENGTH = 100 as const;
 export const MAX_TAGS_FILTER_LENGTH = 100 as const;
 export const MAX_ASSIGNEES_FILTER_LENGTH = 100 as const;
@@ -116,6 +118,10 @@ export const MAX_REPORTERS_FILTER_LENGTH = 100 as const;
 
 export const MAX_TITLE_LENGTH = 160 as const;
 export const MAX_CATEGORY_LENGTH = 50 as const;
+export const MAX_DESCRIPTION_LENGTH = 30000 as const;
+export const MAX_LENGTH_PER_TAG = 256 as const;
+export const MAX_TAGS_PER_CASE = 200 as const;
+export const MAX_DELETE_IDS_LENGTH = 100 as const;
 
 /**
  * Cases features

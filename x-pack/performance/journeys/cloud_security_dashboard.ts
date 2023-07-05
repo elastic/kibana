@@ -14,6 +14,7 @@ export const journey = new Journey({
       const response = await kibanaServer.request({
         path: '/internal/cloud_security_posture/status?check=init',
         method: 'GET',
+        headers: { 'elastic-api-version': '1' },
       });
       expect(response.status).to.eql(200);
       expect(response.data).to.eql({ isPluginInitialized: true });

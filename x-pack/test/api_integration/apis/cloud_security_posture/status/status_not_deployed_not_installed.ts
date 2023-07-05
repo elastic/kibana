@@ -6,6 +6,7 @@
  */
 import expect from '@kbn/expect';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createPackagePolicy } from '../helper';
 
@@ -50,14 +51,30 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        expect(res.kspm.status).to.be('not-deployed');
-        expect(res.cspm.status).to.be('not-installed');
-        expect(res.vuln_mgmt.status).to.be('not-installed');
-        expect(res.kspm.healthyAgents).to.be(0);
-        expect(res.kspm.installedPackagePolicies).to.be(1);
+        expect(res.kspm.status).to.eql(
+          'not-deployed',
+          `expected kspm status to be not-deployed but got ${res.kspm.status} instead`
+        );
+        expect(res.cspm.status).to.eql(
+          'not-installed',
+          `expected cspm status to be not-installed but got ${res.cspm.status} instead`
+        );
+        expect(res.vuln_mgmt.status).to.eql(
+          'not-installed',
+          `expected vuln_mgmt status to be not-installed but got ${res.vuln_mgmt.status} instead`
+        );
+        expect(res.kspm.healthyAgents).to.eql(
+          0,
+          `expected number of kspm healthy agents to be 0 but got ${res.kspm.healthyAgents} instead`
+        );
+        expect(res.kspm.installedPackagePolicies).to.eql(
+          1,
+          `expected number of kspm installed package policies to be 1 but got ${res.kspm.installedPackagePolicies} instead`
+        );
       });
 
       it(`Should return not-deployed when installed cspm, no findings on either indices and no healthy agents`, async () => {
@@ -72,14 +89,30 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        expect(res.cspm.status).to.be('not-deployed');
-        expect(res.kspm.status).to.be('not-installed');
-        expect(res.vuln_mgmt.status).to.be('not-installed');
-        expect(res.cspm.healthyAgents).to.be(0);
-        expect(res.cspm.installedPackagePolicies).to.be(1);
+        expect(res.cspm.status).to.eql(
+          'not-deployed',
+          `expected cspm status to be not-deployed but got ${res.cspm.status} instead`
+        );
+        expect(res.kspm.status).to.eql(
+          'not-installed',
+          `expected kspm status to be not-installed but got ${res.kspm.status} instead`
+        );
+        expect(res.vuln_mgmt.status).to.eql(
+          'not-installed',
+          `expected vuln_mgmt status to be not-installed but got ${res.vuln_mgmt.status} instead`
+        );
+        expect(res.cspm.healthyAgents).to.eql(
+          0,
+          `expected number of cspm healthy agents to be 0 but got ${res.cspm.healthyAgents} instead`
+        );
+        expect(res.cspm.installedPackagePolicies).to.eql(
+          1,
+          `expected number of cspm installed package policies to be 1 but got ${res.cspm.installedPackagePolicies} instead`
+        );
       });
 
       it(`Should return not-deployed when installed cnvm, no findings on either indices and no healthy agents`, async () => {
@@ -94,14 +127,30 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        expect(res.cspm.status).to.be('not-installed');
-        expect(res.kspm.status).to.be('not-installed');
-        expect(res.vuln_mgmt.status).to.be('not-deployed');
-        expect(res.vuln_mgmt.healthyAgents).to.be(0);
-        expect(res.vuln_mgmt.installedPackagePolicies).to.be(1);
+        expect(res.cspm.status).to.eql(
+          'not-installed',
+          `expected cspm status to be not-installed but got ${res.cspm.status} instead`
+        );
+        expect(res.kspm.status).to.eql(
+          'not-installed',
+          `expected kspm status to be not-installed but got ${res.kspm.status} instead`
+        );
+        expect(res.vuln_mgmt.status).to.eql(
+          'not-deployed',
+          `expected vuln_mgmt status to be not-deployed but got ${res.vuln_mgmt.status} instead`
+        );
+        expect(res.vuln_mgmt.healthyAgents).to.eql(
+          0,
+          `expected number of vuln_mgmt healthy agents to be 0 but got ${res.vuln_mgmt.healthyAgents} instead`
+        );
+        expect(res.vuln_mgmt.installedPackagePolicies).to.eql(
+          1,
+          `expected number of vuln_mgmt installed package policies to be 1 but got ${res.vuln_mgmt.installedPackagePolicies} instead`
+        );
       });
     });
   });
