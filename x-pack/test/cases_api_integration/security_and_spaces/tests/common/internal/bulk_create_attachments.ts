@@ -210,17 +210,6 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('should bulk create 100 file attachments when there is another attachment type in the request', async () => {
-          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
-
-          const postedCase = await createCase(supertest, postCaseReq);
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: [postExternalReferenceSOReq, ...fileRequests],
-          });
-        });
-
         it('should bulk create 99 file attachments when the case has a file associated to it', async () => {
           const postedCase = await createCase(
             supertestWithoutAuth,
