@@ -1766,7 +1766,7 @@ components:
     create_anomaly_detection_alert_rule_request:
       title: Create anomaly detection rule request
       description: |
-        A rule that checks if the anomaly detection job results contain anomalies that match the rule conditions.
+        A rule that checks if the anomaly detection job results contain anomalies that match the rule conditions. 
       type: object
       required:
         - consumer
@@ -2153,7 +2153,7 @@ components:
     create_es_query_rule_request:
       title: Create Elasticsearch query rule request
       description: |
-        A rule that runs a user-configured query, compares the number of matches to a configured threshold, and schedules actions to run when the threshold condition is met.
+        A rule that runs a user-configured query, compares the number of matches to a configured threshold, and schedules actions to run when the threshold condition is met.  
       type: object
       required:
         - consumer
@@ -2190,7 +2190,7 @@ components:
     create_geo_containment_rule_request:
       title: Create traacking containment rule request
       description: |
-        A rule that runs an Elasticsearch query over indices to determine whether any documents are currently contained within any boundaries from the specified boundary index. In the event that an entity is contained within a boundary, an alert may be generated.
+        A rule that runs an Elasticsearch query over indices to determine whether any documents are currently contained within any boundaries from the specified boundary index. In the event that an entity is contained within a boundary, an alert may be generated.  
       type: object
       required:
         - consumer
@@ -4360,7 +4360,7 @@ components:
             params:
               level: info
               message: |-
-                rule '{{rule.name}}' is active for group '{{context.group}}':
+                alert '{{alertName}}' is active for group '{{context.group}}':
 
                 - Value: {{context.value}}
                 - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
@@ -4401,7 +4401,7 @@ components:
             params:
               level: info
               message: |-
-                rule {{rule.name}} is active for group {{context.group} :
+                alert {{alertName}} is active for group {{context.group} :
 
                 - Value: {{context.value}}
                 - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
@@ -4493,7 +4493,7 @@ components:
             params:
               level: info
               message: |-
-                rule {{rule.name}} is active for group {{context.group}}:
+                alert {{alertName}} is active for group {{context.group}}:
 
                 - Value: {{context.value}}
                 - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
@@ -4527,7 +4527,7 @@ components:
             params:
               level: info
               message: |-
-                rule {{rule.name}} is active for group {{context.group}}:
+                alert {{alertName}} is active for group {{context.group}}:
 
                 - Value: {{context.value}}
                 - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
@@ -4596,7 +4596,7 @@ components:
             params:
               level: info
               message: |-
-                rule {{rule.name}} is active for group {{context.group}}:
+                alert {{alertName}} is active for group {{context.group}}:
 
                 - Value: {{context.value}}
                 - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
@@ -4670,7 +4670,7 @@ components:
                 params:
                   level: info
                   message: |-
-                    rule {{rule.name}} is active for group {{context.group}}:
+                    alert {{alertName}} is active for group {{context.group}}:
 
                     - Value: {{context.value}}
                     - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}

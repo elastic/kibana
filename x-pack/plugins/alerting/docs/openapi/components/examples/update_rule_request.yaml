@@ -8,17 +8,17 @@ value:
       id: 96b668d0-a1b6-11ed-afdf-d39a49596974
       params:
         level: info
-        message: "rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+        message: "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
   params:
     aggField: sheet.version
     aggType: avg
-    index: ['.test-index']
+    index: [".test-index"]
     groupBy: top
     termField: name.keyword
     termSize: 6
     threshold: [1000]
-    thresholdComparator: '>'
-    timeField: '@timestamp'
+    thresholdComparator: ">"
+    timeField: "@timestamp"
     timeWindowSize: 5
     timeWindowUnit: m
   name: new name
