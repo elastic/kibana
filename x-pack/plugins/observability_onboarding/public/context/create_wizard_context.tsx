@@ -13,9 +13,12 @@ import React, {
   useState,
   useRef,
 } from 'react';
+import { useHistory } from 'react-router-dom';
+import { generateNavEvents, NavEvent } from './nav_events';
+import { generatePath } from './path';
 
 export interface WizardContext<T, StepKey extends string> {
-  CurrentStep: ComponentType;
+  setCurrentStep: (step: StepKey) => void;
   goToStep: (step: StepKey) => void;
   goBack: () => void;
   getState: () => T;
@@ -32,115 +35,104 @@ export interface WizardContext<T, StepKey extends string> {
   };
 }
 
-export function createWizardContext<
-  T,
-  StepKey extends string,
-  InitialStepKey extends StepKey
->({
+export function createWizardContext<T, StepKey extends string>({
   initialState,
-  initialStep,
   steps,
 }: {
   initialState: T;
-  initialStep: InitialStepKey;
   steps: Record<StepKey, ComponentType>;
 }) {
   const context = createContext<WizardContext<T, StepKey>>({
-    CurrentStep: () => null,
+    setCurrentStep: () => {},
     goToStep: () => {},
     goBack: () => {},
     getState: () => initialState,
     setState: () => {},
     getPath: () => [],
-    getUsage: () => ({ timeSinceStart: 0, navEvents: [] }),
+    getUsage: () => ({
+      timeSinceStart: 0,
+      navEvents: new Array<NavEvent<StepKey>>(),
+    }),
   });
 
   function Provider({
     children,
     onChangeStep,
     transitionDuration,
+    basePath,
   }: {
-    children?: ReactNode;
+    children: ReactNode;
     onChangeStep?: (stepChangeEvent: {
       direction: 'back' | 'next';
       stepKey: StepKey;
       StepComponent: ComponentType;
     }) => void;
     transitionDuration?: number;
+    basePath: string;
   }) {
-    const [step, setStep] = useState<StepKey>(initialStep);
-    const pathRef = useRef<StepKey[]>([initialStep]);
+    const history = useHistory();
+    const [step, setStep] = useState<StepKey>();
+    const pathRef = useRef<StepKey[]>([]);
     const usageRef = useRef<ReturnType<WizardContext<T, StepKey>['getUsage']>>({
       timeSinceStart: 0,
-      navEvents: [
-        { type: 'initial', step, timestamp: Date.now(), duration: 0 },
-      ],
+      navEvents: new Array<NavEvent<StepKey>>(),
     });
     const [state, setState] = useState<T>(initialState);
+
     return (
       <context.Provider
         value={{
-          CurrentStep: steps[step],
-          goToStep(stepKey: StepKey) {
+          setCurrentStep(stepKey: StepKey) {
             if (stepKey === step) {
               return;
             }
-            pathRef.current.push(stepKey);
-            const navEvents = usageRef.current.navEvents;
-            const currentNavEvent = navEvents[navEvents.length - 1];
-            const timestamp = Date.now();
-            currentNavEvent.duration = timestamp - currentNavEvent.timestamp;
-            usageRef.current.navEvents.push({
-              type: 'progress',
+
+            setStep(stepKey);
+            const stepVisited = pathRef.current.find((key) => key === stepKey);
+
+            pathRef.current = generatePath({
               step: stepKey,
-              timestamp,
-              duration: 0,
+              path: pathRef.current,
             });
+
+            usageRef.current.navEvents = generateNavEvents({
+              type: stepVisited ? 'back' : 'progress',
+              step: stepKey,
+              navEvents: usageRef.current.navEvents as Array<NavEvent<StepKey>>,
+            });
+
             if (onChangeStep) {
               onChangeStep({
-                direction: 'next',
+                direction: stepVisited ? 'back' : 'next',
                 stepKey,
                 StepComponent: steps[stepKey],
               });
             }
+          },
+          goToStep(stepKey: StepKey) {
+            if (stepKey === step) {
+              return;
+            }
+            const stepUrl = `${basePath}/${stepKey}`;
+
             if (transitionDuration) {
               setTimeout(() => {
-                setStep(stepKey);
+                history.push(stepUrl);
               }, transitionDuration);
             } else {
-              setStep(stepKey);
+              history.push(stepUrl);
             }
           },
           goBack() {
-            if (step === initialStep) {
+            if (history.length === 1 || pathRef.current.length === 1) {
               return;
-            }
-            const path = pathRef.current;
-            path.pop();
-            const lastStep = path[path.length - 1];
-            const navEvents = usageRef.current.navEvents;
-            const currentNavEvent = navEvents[navEvents.length - 1];
-            const timestamp = Date.now();
-            currentNavEvent.duration = timestamp - currentNavEvent.timestamp;
-            usageRef.current.navEvents.push({
-              type: 'back',
-              step: lastStep,
-              timestamp,
-              duration: 0,
-            });
-            if (onChangeStep) {
-              onChangeStep({
-                direction: 'back',
-                stepKey: lastStep,
-                StepComponent: steps[lastStep],
-              });
             }
             if (transitionDuration) {
               setTimeout(() => {
-                setStep(lastStep);
+                history.goBack();
               }, transitionDuration);
             } else {
-              setStep(lastStep);
+              history.goBack();
             }
           },
           getState: () => state as T,
@@ -166,16 +158,9 @@ export function createWizardContext<
     );
   }
 
-  function Step() {
-    const { CurrentStep } = useContext(context);
-    return <CurrentStep />;
-  }
-
   function useWizard() {
-    // const { CurrentStep: _, ...rest } = useContext(context);
-    // return rest;
     return useContext(context);
   }
 
-  return { context, Provider, Step, useWizard };
+  return { context, Provider, useWizard };
 }

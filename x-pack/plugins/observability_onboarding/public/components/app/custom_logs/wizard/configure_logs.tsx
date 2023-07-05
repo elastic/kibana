@@ -33,6 +33,7 @@ import {
   StepPanelContent,
   StepPanelFooter,
 } from '../../../shared/step_panel';
+import { BackButton } from './back_button';
 import { getFilename, replaceSpecialChars } from './get_filename';
 
 export function ConfigureLogs() {
@@ -50,10 +51,6 @@ export function ConfigureLogs() {
   );
 
   const logFilePathNotConfigured = logFilePaths.every((filepath) => !filepath);
-
-  function onBack() {
-    goBack();
-  }
 
   function onContinue() {
     setState((state) => ({
@@ -100,11 +97,7 @@ export function ConfigureLogs() {
       panelFooter={
         <StepPanelFooter
           items={[
-            <EuiButton color="text" onClick={onBack}>
-              {i18n.translate('xpack.observability_onboarding.steps.back', {
-                defaultMessage: 'Back',
-              })}
-            </EuiButton>,
+            <BackButton onBack={goBack} />,
             <EuiButton
               color="primary"
               fill
