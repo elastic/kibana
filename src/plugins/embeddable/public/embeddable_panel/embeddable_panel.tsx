@@ -33,7 +33,7 @@ export const EmbeddablePanel = (panelProps: EmbeddablePanelProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   const headerId = useMemo(() => htmlIdGenerator()(), []);
-  const [fatalError, setFatalError] = useState<Error>();
+  const [outputError, setOutputError] = useState<Error>();
 
   /**
    * Universal actions are exposed on the context menu for every embeddable, they
@@ -78,9 +78,9 @@ export const EmbeddablePanel = (panelProps: EmbeddablePanelProps) => {
     }
     const errorSubscription = embeddable.getOutput$().subscribe({
       next: (output) => {
-        if (output.error) setFatalError(output.error);
+        setOutputError(output.error);
       },
-      error: (error) => setFatalError,
+      error: (error) => setOutputError(error),
     });
     return () => {
       embeddable?.destroy();
@@ -100,9 +100,9 @@ export const EmbeddablePanel = (panelProps: EmbeddablePanelProps) => {
   const contentAttrs = useMemo(() => {
     const attrs: { [key: string]: boolean } = {};
     if (loading) attrs['data-loading'] = true;
-    if (fatalError) attrs['data-error'] = true;
+    if (outputError) attrs['data-error'] = true;
     return attrs;
-  }, [loading, fatalError]);
+  }, [loading, outputError]);
 
   return (
     <EuiPanel
@@ -121,7 +121,7 @@ export const EmbeddablePanel = (panelProps: EmbeddablePanelProps) => {
           universalActions={universalActions}
         />
       )}
-      {fatalError && (
+      {outputError && (
         <EuiFlexGroup
           alignItems="center"
           className="eui-fullHeight embPanel__error"
@@ -129,7 +129,7 @@ export const EmbeddablePanel = (panelProps: EmbeddablePanelProps) => {
           justifyContent="center"
         >
           <EuiFlexItem>
-            <EmbeddableErrorHandler embeddable={embeddable} error={fatalError}>
+            <EmbeddableErrorHandler embeddable={embeddable} error={outputError}>
               {(error) => (
                 <EmbeddablePanelError
                   editPanelAction={universalActions.editPanel}

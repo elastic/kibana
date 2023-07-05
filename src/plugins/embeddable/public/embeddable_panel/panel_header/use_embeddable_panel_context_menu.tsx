@@ -9,14 +9,15 @@
 import classNames from 'classnames';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
+import useMountedState from 'react-use/lib/useMountedState';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+
 import {
   EuiButtonIcon,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiPopover,
 } from '@elastic/eui';
-
 import { Action, buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
 import { uiActions } from '../../kibana_services';
@@ -55,6 +56,8 @@ export const useEmbeddablePanelContextMenu = ({
   const title = useSelectFromEmbeddableInput('title', embeddable);
   const viewMode = useSelectFromEmbeddableInput('viewMode', embeddable);
 
+  const mounted = useMountedState();
+
   const getAllPanelActions = useCallback(async () => {
     let regularActions = await (async () => {
       if (getActions) return await getActions(CONTEXT_MENU_TRIGGER, { embeddable });
@@ -79,24 +82,23 @@ export const useEmbeddablePanelContextMenu = ({
     return sortedActions;
   }, [actionPredicate, embeddable, universalActions, getActions]);
 
+  const maybeUpdatePanelActions = useCallback(async () => {
+    const newActions = await getAllPanelActions();
+    if (!mounted()) return;
+    setContextMenuActions((currentActions) =>
+      deepEqual(currentActions, newActions) ? currentActions : newActions
+    );
+  }, [getAllPanelActions, mounted]);
+
   /**
    * On embeddable creation get all actions then subscribe to all
    * input updates to refresh them
    */
   useEffect(() => {
-    let mounted = true;
     let subscription: Subscription;
 
-    const maybeUpdatePanelActions = async () => {
-      const newActions = await getAllPanelActions();
-      if (!mounted) return;
-      setContextMenuActions((currentActions) =>
-        deepEqual(currentActions, newActions) ? currentActions : newActions
-      );
-    };
-
     maybeUpdatePanelActions().then(() => {
-      if (mounted) {
+      if (mounted()) {
         /**
          * since any piece of state could theoretically change which actions are available we need to
          * recalculate them on any input change or any parent input change.
@@ -111,15 +113,13 @@ export const useEmbeddablePanelContextMenu = ({
     });
     return () => {
       subscription?.unsubscribe();
-      mounted = false;
     };
-  }, [embeddable, getAllPanelActions]);
+  }, [embeddable, getAllPanelActions, maybeUpdatePanelActions, mounted]);
 
   /**
    * When actions are updated, build and set panels
    */
   useEffect(() => {
-    let isMounted = true;
     (async () => {
       const panels = await buildContextMenuForActions({
         actions: contextMenuActions.map((action) => ({
@@ -129,12 +129,9 @@ export const useEmbeddablePanelContextMenu = ({
         })),
         closeMenu: () => setIsContextMenuOpen(false),
       });
-      if (isMounted) setContextMenuPanels(panels);
+      if (mounted()) setContextMenuPanels(panels);
     })();
-    return () => {
-      isMounted = false;
-    };
-  }, [contextMenuActions, embeddable]);
+  }, [contextMenuActions, embeddable, mounted]);
 
   const showNotification = useMemo(
     () => contextMenuActions.some((action) => action.showNotification),
@@ -151,7 +148,12 @@ export const useEmbeddablePanelContextMenu = ({
     <EuiButtonIcon
       color="text"
       className="embPanel__optionsMenuButton"
-      onClick={() => setIsContextMenuOpen((isOpen) => !isOpen)}
+      onClick={() => {
+        maybeUpdatePanelActions().then(() => {
+          if (!mounted()) return;
+          setIsContextMenuOpen((isOpen) => !isOpen);
+        });
+      }}
       data-test-subj="embeddablePanelToggleMenuIcon"
       aria-label={getContextMenuAriaLabel(title, index)}
       iconType={viewMode === ViewMode.VIEW ? 'boxesHorizontal' : 'gear'}
