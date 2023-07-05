@@ -37728,7 +37728,6 @@
     "xpack.triggersActionsUI.sections.actionTypeForm.addNewConnectorEmptyButton": "添加连接器",
     "xpack.triggersActionsUI.sections.actionTypeForm.notifyWhenThrottleWarning": "定制操作时间间隔不能短于规则的检查时间间隔",
     "xpack.triggersActionsUI.sections.actionTypeForm.summaryGroupTitle": "告警的摘要",
-    "xpack.triggersActionsUI.sections.actionTypeForm.warning.publicUrl": "未设置 server.publicBaseUrl。操作将使用相对 URL。",
     "xpack.triggersActionsUI.sections.addConnectorForm.flyoutHeaderCompatibility": "兼容性：",
     "xpack.triggersActionsUI.sections.addConnectorForm.selectConnectorFlyoutTitle": "选择连接器",
     "xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText": "已创建“{connectorName}”",
