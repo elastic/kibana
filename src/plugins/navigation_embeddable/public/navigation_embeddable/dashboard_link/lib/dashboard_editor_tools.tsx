@@ -67,8 +67,6 @@ const fetchDashboards = async (
     }
   }
 
-  // console.log('currentDashboard', currentDashboard);
-
   /** Then, only return the parts of the dashboard object that we need */
   const simplifiedDashboardList = dashboardList.map((hit) => {
     return { id: hit.id, attributes: hit.attributes };

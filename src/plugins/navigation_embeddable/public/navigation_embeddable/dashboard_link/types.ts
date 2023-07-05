@@ -15,15 +15,9 @@ export interface DashboardLinkInput extends LinkInput {
   dashboardId: string;
 }
 
-// export interface DashboardLinkDestination {
-//   dashboardId: string;
-//   dashboardTitle: string;
-//   dashboardDescription?: string;
-// }
-
 export interface DashboardLinkComponentState {
   dashboardTitle?: string;
-  dashboardDescription?: string; // TODO: Remove this if we don't end up using it
+  dashboardDescription?: string; // TODO: Remove this as part of final cleanup if we don't end up using it
 }
 
 export interface DashboardItem {

@@ -34,7 +34,7 @@ import { ExternalLinkInput } from '../../external_link/types';
 import { DashboardLinkInput } from '../../dashboard_link/types';
 import { NavigationEmbeddableLinkEditor } from './navigation_embeddable_link_editor';
 import { memoizedFetchDashboard } from '../../dashboard_link/lib/dashboard_editor_tools';
-import { navigationContainerInputBuilder } from '../editor/navigation_container_input_builder';
+import { addLink } from '../editor/navigation_container_input_builder';
 import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
 
 import './navigation_embeddable.scss';
@@ -180,14 +180,7 @@ export const NavigationEmbeddablePanelEditor = ({
           initialInput={initialInput}
           onClose={() => setShowLinkEditorFlyout(false)}
           onSave={(type, destination, label) => {
-            /** TODO: Do this better */
-            if (type === DASHBOARD_LINK_EMBEDDABLE_TYPE) {
-              const { addDashboardLink } = navigationContainerInputBuilder;
-              addDashboardLink(initialInput, { dashboardId: destination, label });
-            } else {
-              const { addExternalLink } = navigationContainerInputBuilder;
-              addExternalLink(initialInput, { url: destination, label });
-            }
+            addLink(initialInput, { type, destination, label });
             setPanels(initialInput.panels);
           }}
           currentDashboardId={currentDashboardId}
