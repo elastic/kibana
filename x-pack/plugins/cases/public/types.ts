@@ -25,6 +25,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 
 import type {
   CasesBulkGetRequest,
@@ -58,6 +59,7 @@ import type { PersistableStateAttachmentTypeRegistry } from './client/attachment
 export interface CasesPluginSetup {
   files: FilesSetup;
   security: SecurityPluginSetup;
+  serverless?: ServerlessPluginSetup;
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
 }
@@ -72,6 +74,7 @@ export interface CasesPluginStart {
   licensing?: LicensingPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   security: SecurityPluginStart;
+  serverless?: ServerlessPluginStart;
   spaces?: SpacesPluginStart;
   storage: Storage;
   triggersActionsUi: TriggersActionsStart;
