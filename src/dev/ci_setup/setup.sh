@@ -39,6 +39,7 @@ if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   if [ "$GIT_CHANGES" ]; then
     echo -e "\n${RED}ERROR: 'yarn kbn bootstrap' caused changes to the following files:${C_RESET}\n"
     echo -e "$GIT_CHANGES\n"
+    git diff yarn.lock | cat
     exit 1
   fi
 fi

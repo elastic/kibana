@@ -56,6 +56,7 @@ check_for_changed_files() {
     else
       echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"
       echo -e "$GIT_CHANGES\n"
+      git diff yarn.lock | cat
       echo -e "\n${YELLOW}TO FIX: Run '$1' locally, commit the changes and push to your branch${C_RESET}\n"
       exit 1
     fi
