@@ -54,7 +54,6 @@ Review the following information about the {kib} 8.8.2 release.
 === Bug Fixes
 
 APM::
-* Circuit breaker and performance improvements for service map {kibana-pull}159883[#159883]
 * Fixes the latency graph displaying all service transactions, rather than the selected one, on the transaction detail page {kibana-pull}159085[#159085]
 
 Dashboard::
