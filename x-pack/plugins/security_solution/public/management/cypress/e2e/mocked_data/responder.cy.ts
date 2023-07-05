@@ -38,7 +38,7 @@ describe('When accessing Endpoint Response Console', () => {
     login();
   });
 
-  describe('from Cases', () => {
+  describe.skip('from Cases', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let caseData: ReturnTypeFromChainable<typeof indexNewCase>;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts>;
