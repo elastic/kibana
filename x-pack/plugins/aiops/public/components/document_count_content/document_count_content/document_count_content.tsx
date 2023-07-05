@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { useEffect, useState, type FC } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { WindowParameters } from '@kbn/aiops-utils';
 
+import { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import { DocumentCountStats } from '../../../get_document_stats';
 
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
@@ -29,6 +30,11 @@ export interface DocumentCountContentProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
+  windowParameters?: WindowParameters;
+  incomingInitialAnalysisStart?: number | WindowParameters;
+  baselineLabel?: string;
+  deviationLabel?: string;
+  barStyleAccessor?: BarStyleAccessor;
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
@@ -42,6 +48,9 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   initialAnalysisStart,
   barColorOverride,
   barHighlightColorOverride,
+  windowParameters,
+  incomingInitialAnalysisStart,
+  ...docCountChartProps
 }) => {
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
   const splitBucketTimestamps = Object.keys(documentCountStatsSplit?.buckets ?? {}).map(
@@ -95,6 +104,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
             autoAnalysisStart={initialAnalysisStart}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
+            {...docCountChartProps}
           />
         </EuiFlexItem>
       )}

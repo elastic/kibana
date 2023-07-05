@@ -8,6 +8,7 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common/query';
+import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
 import type { JobId } from './anomaly_detection_jobs/job';
@@ -58,6 +59,8 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.FILTER_LISTS_MANAGE
   | typeof ML_PAGES.FILTER_LISTS_NEW
   | typeof ML_PAGES.SETTINGS
+  | typeof ML_PAGES.DATA_COMPARISON
+  | typeof ML_PAGES.DATA_COMPARISON_INDEX_SELECT
   | typeof ML_PAGES.DATA_VISUALIZER
   | typeof ML_PAGES.DATA_VISUALIZER_FILE
   | typeof ML_PAGES.DATA_VISUALIZER_INDEX_SELECT
@@ -70,7 +73,6 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
   MlGenericUrlPageState | undefined
 >;
-
 export interface AnomalyDetectionQueryState {
   jobId?: JobId | string[];
   groupIds?: string[];

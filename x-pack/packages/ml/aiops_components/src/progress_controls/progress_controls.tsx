@@ -26,7 +26,7 @@ import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_ba
 // TODO Consolidate with duplicate component `CorrelationsProgressControls` in
 // `x-pack/plugins/apm/public/components/app/correlations/progress_controls.tsx`
 
-interface ProgressControlProps {
+export interface ProgressControlProps {
   isBrushCleared: boolean;
   progress: number;
   progressMessage: string;
@@ -35,6 +35,7 @@ interface ProgressControlProps {
   onReset: () => void;
   isRunning: boolean;
   shouldRerunAnalysis: boolean;
+  runAnalysisDisabled?: boolean;
 }
 
 export const ProgressControls: FC<ProgressControlProps> = ({
@@ -47,6 +48,7 @@ export const ProgressControls: FC<ProgressControlProps> = ({
   onReset,
   isRunning,
   shouldRerunAnalysis,
+  runAnalysisDisabled = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const runningProgressBarStyles = useAnimatedProgressBarBackground(euiTheme.colors.success);
@@ -57,6 +59,7 @@ export const ProgressControls: FC<ProgressControlProps> = ({
       <EuiFlexItem grow={false}>
         {!isRunning && (
           <EuiButton
+            disabled={runAnalysisDisabled}
             data-test-subj={`aiopsRerunAnalysisButton${shouldRerunAnalysis ? ' shouldRerun' : ''}`}
             size="s"
             onClick={onRefresh}

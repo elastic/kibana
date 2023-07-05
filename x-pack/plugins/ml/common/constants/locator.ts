@@ -15,6 +15,8 @@ export const ML_PAGES = {
   DATA_FRAME_ANALYTICS_SOURCE_SELECTION: 'data_frame_analytics/source_selection',
   DATA_FRAME_ANALYTICS_CREATE_JOB: 'data_frame_analytics/new_job',
   TRAINED_MODELS_MANAGE: 'trained_models',
+  DATA_COMPARISON_INDEX_SELECT: 'data_compare_index_select',
+  DATA_COMPARISON: 'data_compare',
   NODES: 'nodes',
   MEMORY_USAGE: 'memory_usage',
   DATA_FRAME_ANALYTICS_EXPLORATION: 'data_frame_analytics/exploration',

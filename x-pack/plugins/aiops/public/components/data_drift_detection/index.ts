@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export * from './models_list';
-export * from '../datavisualizer/data_compare';
+import { DataDriftDetectionAppState } from './data_drift_app_state';
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default DataDriftDetectionAppState;

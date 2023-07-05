@@ -69,3 +69,14 @@ export const ChangePointDetection: FC<ChangePointDetectionAppStateProps> = (prop
     <ChangePointDetectionLazy {...props} />
   </LazyWrapper>
 );
+
+const DataDriftLazy = React.lazy(() => import('./components/data_drift_detection'));
+/**
+ * Lazy-wrapped ChangePointDetectionAppStateProps React component
+ * @param {ChangePointDetectionAppStateProps}  props - properties specifying the data on which to run the analysis.
+ */
+export const DataDrift: FC<ChangePointDetectionAppStateProps> = (props) => (
+  <LazyWrapper>
+    <DataDriftLazy {...props} />
+  </LazyWrapper>
+);

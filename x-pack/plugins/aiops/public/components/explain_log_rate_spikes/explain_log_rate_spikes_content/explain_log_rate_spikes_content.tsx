@@ -106,6 +106,7 @@ export const ExplainLogRateSpikesContent: FC<ExplainLogRateSpikesContentProps> =
   const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
     documentStats;
 
+  // @TODO: refactor
   function brushSelectionUpdate(d: WindowParameters, force: boolean) {
     if (!isBrushCleared || force) {
       setWindowParameters(d);

@@ -28,6 +28,10 @@ import { getSnappedWindowParameters, getWindowParameters } from '@kbn/aiops-util
 import type { WindowParameters } from '@kbn/aiops-utils';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 
+import {
+  BarStyleAccessor,
+  RectAnnotationSpec,
+} from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 import { BrushBadge } from './brush_badge';
@@ -51,7 +55,7 @@ export interface DocumentCountChartPoint {
   value: number;
 }
 
-interface DocumentCountChartProps {
+export interface DocumentCountChartProps {
   brushSelectionUpdateHandler?: (d: WindowParameters, force: boolean) => void;
   width?: number;
   chartPoints: DocumentCountChartPoint[];
@@ -63,6 +67,11 @@ interface DocumentCountChartProps {
   isBrushCleared: boolean;
   /* Timestamp for start of initial analysis */
   autoAnalysisStart?: number | WindowParameters;
+  baselineLabel?: string;
+  deviationLabel?: string;
+  baselineAnnotationStyle?: RectAnnotationSpec['style'];
+  deviationAnnotationStyle?: RectAnnotationSpec['style'];
+  barStyleAccessor?: BarStyleAccessor;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
@@ -115,6 +124,11 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
   autoAnalysisStart,
   barColorOverride,
   barHighlightColorOverride,
+  baselineLabel,
+  deviationLabel,
+  baselineAnnotationStyle,
+  deviationAnnotationStyle,
+  barStyleAccessor,
 }) => {
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
@@ -339,18 +353,24 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
         <div className="aiopsHistogramBrushes" data-test-subj="aiopsHistogramBrushes">
           <div css={{ height: BADGE_HEIGHT }}>
             <BrushBadge
-              label={i18n.translate('xpack.aiops.documentCountChart.baselineBadgeLabel', {
-                defaultMessage: 'Baseline',
-              })}
+              label={
+                baselineLabel ??
+                i18n.translate('xpack.aiops.documentCountChart.baselineBadgeLabel', {
+                  defaultMessage: 'Baseline',
+                })
+              }
               marginLeft={baselineBadgeMarginLeft - baselineBadgeOverflow}
               timestampFrom={windowParameters.baselineMin}
               timestampTo={windowParameters.baselineMax}
               width={BADGE_WIDTH}
             />
             <BrushBadge
-              label={i18n.translate('xpack.aiops.documentCountChart.deviationBadgeLabel', {
-                defaultMessage: 'Deviation',
-              })}
+              label={
+                deviationLabel ??
+                i18n.translate('xpack.aiops.documentCountChart.deviationBadgeLabel', {
+                  defaultMessage: 'Deviation',
+                })
+              }
               marginLeft={mlBrushMarginLeft + (windowParametersAsPixels?.deviationMin ?? 0)}
               timestampFrom={windowParameters.deviationMin}
               timestampTo={windowParameters.deviationMax}
@@ -416,6 +436,7 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
               timeZone={timeZone}
               color={barColor}
               yNice
+              styleAccessor={barStyleAccessor}
             />
           )}
           {adjustedChartPointsSplit?.length && (
@@ -438,11 +459,13 @@ export const DocumentCountChart: FC<DocumentCountChartProps> = ({
                 id="aiopsBaseline"
                 min={windowParameters.baselineMin}
                 max={windowParameters.baselineMax}
+                style={baselineAnnotationStyle}
               />
               <DualBrushAnnotation
                 id="aiopsDeviation"
                 min={windowParameters.deviationMin}
                 max={windowParameters.deviationMax}
+                style={deviationAnnotationStyle}
               />
             </>
           )}
