@@ -12,7 +12,7 @@ export interface CodeBlockDetails {
   content: string;
   start: number;
   end: number;
-  controlContainer?: React.ReactNode;
+  getControlContainer?: () => Element | undefined;
   button?: React.ReactNode;
 }
 
@@ -34,7 +34,7 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
   const types = {
     eql: ['Event Query Language', 'EQL sequence query'],
     kql: ['Kibana Query Language', 'KQL Query'],
-    dsl: ['Elasticsearch QueryDSL', 'Elasticsearch Query DSL', 'Elasticsearch DSL'],
+    dsl: ['Elasticsearch QueryDSL', 'Elasticsearch Query DSL', 'Elasticsearch DSL', 'Query DSL'],
   };
 
   const result: CodeBlockDetails[] = matches.map((match) => {
@@ -43,7 +43,7 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
       const start = match.index || 0;
       const precedingText = markdown.slice(0, start);
       for (const [typeKey, keywords] of Object.entries(types)) {
-        if (keywords.some((kw) => precedingText.includes(kw))) {
+        if (keywords.some((kw) => precedingText.toLowerCase().includes(kw.toLowerCase()))) {
           type = typeKey;
           break;
         }
