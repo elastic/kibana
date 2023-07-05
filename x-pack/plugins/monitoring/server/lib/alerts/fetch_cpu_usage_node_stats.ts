@@ -233,10 +233,14 @@ async function fetchContainerStats(
         };
       }
 
-      const usageNanos = node.max_usage_nanos.value - node.min_usage_nanos.value;
-      const periods = node.max_periods.value - node.min_periods.value;
+      const usageDeltaNanos = node.max_usage_nanos.value - node.min_usage_nanos.value;
+      const periodsDelta = node.max_periods.value - node.min_periods.value;
 
-      const cpuUsage = (usageNanos / (node.quota_micros_max.value * periods * 1000)) * 100;
+      const cpuUsage = computeCfsPercentCpuUsage(
+        usageDeltaNanos,
+        node.quota_micros_max.value,
+        periodsDelta
+      );
 
       return {
         clusterUuid: cluster.key as string,
@@ -255,6 +259,14 @@ function findEmptyValues(fieldsWithValues: CpuUsageFieldsWithValues): string {
     .filter(([, value]) => value === null)
     .map(([key]) => key)
     .join(', ');
+}
+
+function computeCfsPercentCpuUsage(usageNanos: number, quotaMicros: number, periods: number) {
+  // See https://github.com/elastic/kibana/pull/159351 for an explanation of this formula
+  const quotaNanos = quotaMicros * 1000;
+  const limitNanos = quotaNanos * periods;
+  const usageAsFactor = usageNanos / limitNanos;
+  return usageAsFactor * 100;
 }
 
 async function fetchNonContainerStats(
@@ -370,16 +382,6 @@ async function fetchNonContainerStats(
 
       const runningInAContainer =
         node.quota_micros_min.value !== null || node.quota_micros_max.value !== null;
-      if (runningInAContainer) {
-        return {
-          clusterUuid: cluster.key as string,
-          nodeId: node.key as string,
-          cpuUsage: node.average_cpu.value ?? undefined,
-          nodeName,
-          ccs,
-          unexpectedLimits: true,
-        };
-      }
 
       return {
         clusterUuid: cluster.key as string,
@@ -387,6 +389,7 @@ async function fetchNonContainerStats(
         cpuUsage: node.average_cpu.value ?? undefined,
         nodeName,
         ccs,
+        unexpectedLimits: runningInAContainer,
       };
     });
   });

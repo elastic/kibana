@@ -63,9 +63,15 @@ export class CpuUsageRule extends BaseRule {
     const duration = parseDuration(params.duration);
     const endMs = +new Date();
     const startMs = endMs - duration;
-    const filterQuery = params.filterQuery
-      ? (JSON.parse(params.filterQuery) as QueryDslQueryContainer)
-      : undefined;
+
+    let filterQuery;
+    if (params.filterQuery) {
+      try {
+        filterQuery = JSON.parse(params.filterQuery) as QueryDslQueryContainer;
+      } catch (error) {
+        throw new Error(`Failed to parse filter query in CPU usage rule ${error}`);
+      }
+    }
 
     const stats = await fetchCpuUsageNodeStats(
       {
