@@ -82,12 +82,12 @@ export function fetchAll(
     const response =
       useSql && query
         ? fetchSql(query, dataView, data, services.expressions, inspectorAdapters)
-        : fetchDocuments(searchSource, fetchDeps);
+        : fetchDocuments(searchSource, fetchDeps, data);
     const fetchType = useSql && query ? 'fetchSql' : 'fetchDocuments';
     const startTime = window.performance.now();
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, textBasedQueryColumns }) => {
+      .then(({ records, textBasedQueryColumns, warnings }) => {
         if (services.analytics) {
           const duration = window.performance.now() - startTime;
           reportPerformanceMetricEvent(services.analytics, {
@@ -121,6 +121,7 @@ export function fetchAll(
           fetchStatus,
           result: records,
           textBasedQueryColumns,
+          warnings,
           recordRawType,
           query,
         });

@@ -8,6 +8,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { type DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { SearchResponseWarning } from '@kbn/data-plugin/public';
 
 export type ValueToStringConverter = (
   rowIndex: number,
@@ -43,4 +44,5 @@ export interface DataTableRecord {
 export interface RecordsFetchResponse {
   records: DataTableRecord[];
   textBasedQueryColumns?: DatatableColumn[];
+  warnings?: SearchResponseWarning[];
 }

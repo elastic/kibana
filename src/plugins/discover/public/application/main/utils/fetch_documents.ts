@@ -8,11 +8,18 @@
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
-import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
+import {
+  type DataPublicPluginStart,
+  isCompleteResponse,
+  ISearchSource,
+  type SearchResponseWarning,
+} from '@kbn/data-plugin/public';
 import type { RecordsFetchResponse, EsHitRecord } from '../../../types';
 import { buildDataTableRecordList } from '../../../utils/build_data_record';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
 import { FetchDeps } from './fetch_all';
+
+const DISABLE_SHARD_FAILURE_WARNING = true;
 
 /**
  * Requests the documents for Discover. This will return a promise that will resolve
@@ -20,7 +27,8 @@ import { FetchDeps } from './fetch_all';
  */
 export const fetchDocuments = (
   searchSource: ISearchSource,
-  { abortController, inspectorAdapters, searchSessionId, services }: FetchDeps
+  { abortController, inspectorAdapters, searchSessionId, services }: FetchDeps,
+  data: DataPublicPluginStart
 ): Promise<RecordsFetchResponse> => {
   searchSource.setField('size', services.uiSettings.get(SAMPLE_SIZE_SETTING));
   searchSource.setField('trackTotalHits', false);
@@ -53,6 +61,7 @@ export const fetchDocuments = (
         }),
       },
       executionContext,
+      disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
     })
     .pipe(
       filter((res) => isCompleteResponse(res)),
@@ -61,5 +70,18 @@ export const fetchDocuments = (
       })
     );
 
-  return lastValueFrom(fetch$).then((records) => ({ records }));
+  return lastValueFrom(fetch$).then((records) => {
+    const warnings: SearchResponseWarning[] = [];
+
+    if (DISABLE_SHARD_FAILURE_WARNING) {
+      data.search.showWarnings(inspectorAdapters.requests!, (warning) => {
+        if (warning.type === 'shard_failure') {
+          warnings.push(warning);
+          return true; // suppress the default behaviour
+        }
+      });
+    }
+
+    return { records, warnings: warnings.length ? warnings : undefined };
+  });
 };
