@@ -17,7 +17,10 @@ import { EXTERNAL_LINK_EMBEDDABLE_TYPE } from '../../external_link/embeddable/ex
 
 export type ControlGroupInputBuilder = typeof navigationContainerInputBuilder;
 
-export const addLink = (initialInput: Partial<NavigationContainerInput>, linkProps: LinkInput) => {
+export const addLink = (
+  initialInput: Partial<NavigationContainerInput>,
+  linkProps: Partial<LinkInput>
+) => {
   if ((linkProps as DashboardLinkInput).dashboardId) {
     navigationContainerInputBuilder.addDashboardLink(initialInput, linkProps as DashboardLinkInput);
   } else {

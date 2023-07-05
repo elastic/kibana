@@ -27,12 +27,11 @@ import { NavEmbeddableStrings } from '../../navigation_container/components/navi
 
 export const DashboardLinkEditorDestinationPicker = ({
   initialInput,
-  onChange,
+  setDestination,
   setPlaceholder,
   currentDashboardId,
   ...other
 }: LinkEditorDestinationProps<DashboardLinkInput>) => {
-  console.log('HERE!!');
   const [searchString, setSearchString] = useState<string>('');
   const [dashboardListOptions, setDashboardListOptions] = useState<EuiSelectableOption[]>([]);
 
@@ -71,9 +70,10 @@ export const DashboardLinkEditorDestinationPicker = ({
         onChange={(newOptions, _, selected) => {
           // setSelectedDashboard(selected.checked ? (selected.data as DashboardItem) : undefined);
           if (selected.checked) {
-            onChange({ ...initialInput, dashboardId: (selected.data as DashboardItem).id });
+            setDestination((selected.data as DashboardItem).id);
             setPlaceholder((selected.data as DashboardItem).attributes.title);
           } else {
+            setDestination(undefined);
             setPlaceholder(undefined);
           }
           setDashboardListOptions(newOptions);

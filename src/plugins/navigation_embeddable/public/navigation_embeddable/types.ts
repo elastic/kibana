@@ -40,7 +40,7 @@ export interface ILinkFactory<I extends LinkInput = LinkInput>
 
 export interface LinkEditorDestinationProps<I extends LinkInput = LinkInput> {
   initialInput?: Partial<I>;
-  onChange: (partial: Partial<I>) => void;
+  setDestination: (destination: string | undefined) => void;
   setPlaceholder: (placeholder: string | undefined) => void;
   currentDashboardId?: string;
 }

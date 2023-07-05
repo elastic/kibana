@@ -6,21 +6,11 @@
  * Side Public License, v 1.
  */
 
-import useAsync from 'react-use/lib/useAsync';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
-import {
-  EuiBadge,
-  EuiSpacer,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiHighlight,
-  EuiSelectable,
-  EuiFieldSearch,
-  EuiSelectableOption,
-  EuiFieldText,
-} from '@elastic/eui';
+import { EuiFieldText } from '@elastic/eui';
 
+import { ExternalLinkInput } from '../types';
 import { LinkEditorDestinationProps } from '../../types';
 import { NavEmbeddableStrings } from '../../navigation_container/components/navigation_embeddable_strings';
 
@@ -30,14 +20,12 @@ const isValidUrl =
 
 export const ExternalLinkEditorDestinationPicker = ({
   initialInput,
-  onChange,
+  setDestination,
   setPlaceholder,
   currentDashboardId,
   ...other
-}: LinkEditorDestinationProps<DashboardLinkInput>) => {
-  console.log('HERE!!');
+}: LinkEditorDestinationProps<ExternalLinkInput>) => {
   const [validUrl, setValidUrl] = useState<boolean>(true);
-  // const [selectedUrl, setSelectedUrl] = useState<string>();
 
   // {...other} is needed so all inner elements are treated as part of the form
   return (
@@ -49,11 +37,7 @@ export const ExternalLinkEditorDestinationPicker = ({
         const url = e.target.value;
         const isValid = isValidUrl.test(url);
         setValidUrl(isValid);
-
-        if (isValid) {
-          // setSelectedUrl(url);
-          onChange({ ...initialInput, url });
-        }
+        setDestination(isValid ? url : undefined);
       }}
     />
   );

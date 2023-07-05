@@ -25,32 +25,31 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ILinkFactory, LinkInput, NavigationContainerInput } from '../../types';
-import { NavEmbeddableStrings } from './navigation_embeddable_strings';
-import { addLink } from '../editor/navigation_container_input_builder';
-import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
-import { EXTERNAL_LINK_EMBEDDABLE_TYPE } from '../../external_link/embeddable/external_link_embeddable_factory';
 import { linksService } from '../../services/links_service';
+import { NavEmbeddableStrings } from './navigation_embeddable_strings';
+import { ILinkFactory, NavigationContainerInput } from '../../types';
+import { EXTERNAL_LINK_EMBEDDABLE_TYPE } from '../../external_link/embeddable/external_link_embeddable_factory';
+import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
 
 type LinkType = 'dashboardLink' | 'externalLink';
 
 export const NavigationEmbeddableLinkEditor = ({
-  initialInput,
   onSave,
   onClose,
+  initialInput,
   currentDashboardId,
 }: {
-  initialInput: Partial<NavigationContainerInput>;
-  onSave: (input: Partial<NavigationContainerInput>) => void;
   onClose: () => void;
   currentDashboardId?: string;
+  initialInput: Partial<NavigationContainerInput>;
+  onSave: (type: string, destination: string, label?: string) => void;
 }) => {
   const [linkLabel, setLinkLabel] = useState<string>('');
   const [linkFactory, setLinkFactory] = useState<ILinkFactory | undefined>();
 
   const [selectedLinkType, setSelectedLinkType] = useState<LinkType>('dashboardLink');
-  const [linkInput, setLinkInput] = useState<LinkInput>();
 
+  const [destination, setDestination] = useState<string | undefined>();
   const [placeholder, setPlaceholder] = useState<string | undefined>();
 
   useEffect(() => {
@@ -120,16 +119,15 @@ export const NavigationEmbeddableLinkEditor = ({
           <EuiFormRow label={NavEmbeddableStrings.editor.getLinkDestinationLabel()}>
             {linkFactory?.linkEditorDestinationComponent ? (
               <linkFactory.linkEditorDestinationComponent
-                currentDashboardId={currentDashboardId}
-                // initialInput={{ dashboardId: selectedDashboard }}
+                initialInput={initialInput}
+                setDestination={setDestination}
                 setPlaceholder={setPlaceholder}
-                onChange={(partialInput) => setLinkInput(partialInput)}
+                currentDashboardId={currentDashboardId}
               />
             ) : (
               <></>
             )}
           </EuiFormRow>
-
           <EuiFormRow label={NavEmbeddableStrings.editor.getLinkTextLabel()}>
             <EuiFieldText
               placeholder={placeholder || NavEmbeddableStrings.editor.getLinkTextPlaceholder()}
@@ -163,14 +161,13 @@ export const NavigationEmbeddableLinkEditor = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              // disabled={
-              //   isDashboardEditorSelected ? !selectedDashboard : !validUrl || isEmpty(selectedUrl)
-              // }
+              disabled={!linkFactory || !destination}
               onClick={() => {
-                console.log('linkInput', linkInput);
-                addLink(initialInput, linkInput);
-                onSave(initialInput);
-                onClose();
+                // this check should always be true, since the button is disabled otherwise - this is just for type safety
+                if (linkFactory && destination) {
+                  onSave(linkFactory.type, destination, linkLabel);
+                  onClose();
+                }
               }}
             >
               Add link

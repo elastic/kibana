@@ -6,28 +6,30 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
+  EuiText,
   EuiForm,
+  EuiTitle,
+  EuiPanel,
+  EuiSwitch,
+  EuiSpacer,
   EuiButton,
   EuiFormRow,
   EuiFlexItem,
   EuiFlexGroup,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiButtonEmpty,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiPanel,
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
-  EuiSwitch,
 } from '@elastic/eui';
-import { LinkInput, NavigationContainerInput } from '../../types';
+import { NavigationContainerInput } from '../../types';
 import { NavigationEmbeddableLinkEditor } from './navigation_embeddable_link_editor';
+import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
 
 import './navigation_embeddable.scss';
+import { navigationContainerInputBuilder } from '../editor/navigation_container_input_builder';
 
 export const NavigationEmbeddablePanelEditor = ({
   initialInput,
@@ -42,7 +44,10 @@ export const NavigationEmbeddablePanelEditor = ({
 }) => {
   const [showLinkEditorFlyout, setShowLinkEditorFlyout] = useState(false);
   const [panels, setPanels] = useState(initialInput.panels);
-  const [newLinks, setNewLinks] = useState<LinkInput[]>([]);
+
+  useEffect(() => {
+    console.log('panels changed', panels);
+  }, [panels]);
 
   return (
     <>
@@ -77,16 +82,29 @@ export const NavigationEmbeddablePanelEditor = ({
               ) : (
                 <>
                   {Object.keys(panels).map((panelId) => {
+                    console.log(panels[panelId]);
+                    if (panels[panelId].type === DASHBOARD_LINK_EMBEDDABLE_TYPE) {
+                      return (
+                        <>
+                          <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+                            {panels[panelId].explicitInput.dashboardId}
+                          </EuiPanel>
+                          <EuiSpacer size="s" />
+                        </>
+                      );
+                    }
                     return (
                       <>
                         <EuiPanel hasBorder hasShadow={false} paddingSize="s">
-                          {panels[panelId].explicitInput.id}
+                          {panels[panelId].explicitInput.url}
                         </EuiPanel>
                         <EuiSpacer size="s" />
                       </>
                     );
                   })}
                   <EuiButtonEmpty
+                    size="s"
+                    flush="left"
                     iconType="plusInCircle"
                     onClick={() => setShowLinkEditorFlyout(true)}
                   >
@@ -98,7 +116,7 @@ export const NavigationEmbeddablePanelEditor = ({
           </EuiFormRow>
           <EuiFormRow>
             {/* TODO: As part of https://github.com/elastic/kibana/issues/154362, connect this to the library */}
-            <EuiSwitch label="Save to library" onChange={() => {}} checked={false} />
+            <EuiSwitch label="Save to library" compressed onChange={() => {}} checked={false} />
           </EuiFormRow>
         </EuiForm>
       </EuiFlyoutBody>
@@ -131,8 +149,17 @@ export const NavigationEmbeddablePanelEditor = ({
         <NavigationEmbeddableLinkEditor
           initialInput={initialInput}
           onClose={() => setShowLinkEditorFlyout(false)}
-          onSave={(newInput) => {
-            setPanels(newInput.panels);
+          onSave={(type, destination, label) => {
+            // console.log(type, destination, label);
+            /** TODO: Do this better */
+            if (type === DASHBOARD_LINK_EMBEDDABLE_TYPE) {
+              const { addDashboardLink } = navigationContainerInputBuilder;
+              addDashboardLink(initialInput, { dashboardId: destination, label });
+            } else {
+              const { addExternalLink } = navigationContainerInputBuilder;
+              addExternalLink(initialInput, { url: destination, label });
+            }
+            setPanels(initialInput.panels);
           }}
           currentDashboardId={currentDashboardId}
         />
