@@ -38,7 +38,6 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/safer-lodash-set",
     "@kbn/test-jest-helpers",
-    "@kbn/test-subj-selector",
     "@kbn/controls-plugin",
     "@kbn/securitysolution-io-ts-types",
     "@kbn/config-schema",
@@ -67,6 +66,7 @@
     "@kbn/aiops-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/core-http-server",
+    "@kbn/logs-shared-plugin",
     "@kbn/licensing-plugin",
   ],
   "exclude": ["target/**/*"]

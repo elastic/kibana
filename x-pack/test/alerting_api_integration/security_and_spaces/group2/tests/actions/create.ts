@@ -60,6 +60,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 id: response.body.id,
                 is_preconfigured: false,
+                is_system_action: false,
                 is_deprecated: false,
                 is_missing_secrets: false,
                 name: 'My action',
@@ -296,6 +297,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 id: predefinedId,
                 is_preconfigured: false,
+                is_system_action: false,
                 is_deprecated: false,
                 is_missing_secrets: false,
                 name: 'My action',
