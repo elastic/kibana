@@ -11,60 +11,32 @@ import { EuiDataGridColumn } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
-  sortExplorationResultsFields,
   ML__ID_COPY,
   ML__INCREMENTAL_ID,
-  DEFAULT_RESULTS_FIELD,
   FEATURE_INFLUENCE,
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
 import {
   getFieldType,
-  getDataGridSchemasFromFieldTypes,
   showDataGridColumnChartErrorMessageToast,
-  useRenderCellValue,
   type UseIndexDataReturnType,
 } from '@kbn/ml-data-grid';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
-import {
-  useColorRange,
-  COLOR_RANGE,
-  COLOR_RANGE_SCALE,
-} from '../../../../../components/color_range_legend';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
-import { getIndexData, getIndexFields } from '../../../../common';
+import { getIndexData } from '../../../../common';
 
-import { getFeatureCount, getOutlierScoreFieldName } from './common';
+import { getOutlierScoreFieldName } from './common';
 import { useExplorationDataGrid } from '../exploration_results_table/use_exploration_data_grid';
 
 export const useOutlierData = (
   indexPattern: DataView | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
-  searchQuery: estypes.QueryDslQueryContainer
-): UseIndexDataReturnType => {
-  const needsDestIndexFields =
-    indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
-
-  const columns = useMemo(() => {
-    const newColumns: EuiDataGridColumn[] = [];
-
-    if (jobConfig !== undefined && indexPattern !== undefined) {
-      const resultsField = jobConfig.dest.results_field;
-      const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
-      newColumns.push(
-        ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField!).sort((a: any, b: any) =>
-          sortExplorationResultsFields(a.id, b.id, jobConfig)
-        )
-      );
-    }
-
-    return newColumns;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobConfig, indexPattern]);
-
+  searchQuery: estypes.QueryDslQueryContainer,
+  columns: EuiDataGridColumn[]
+): Omit<UseIndexDataReturnType, 'renderCellValue'> => {
   const dataGrid = useExplorationDataGrid(
     columns,
     // reduce default selected rows from 20 to 8 for performance reasons.
@@ -137,50 +109,5 @@ export const useOutlierData = (
     JSON.stringify([searchQuery, [...dataGrid.visibleColumns].sort()]),
   ]);
 
-  const colorRange = useColorRange(
-    COLOR_RANGE.BLUE,
-    COLOR_RANGE_SCALE.INFLUENCER,
-    jobConfig !== undefined
-      ? getFeatureCount(jobConfig.dest.results_field!, dataGrid.tableItems)
-      : 1
-  );
-
-  const renderCellValue = useRenderCellValue(
-    indexPattern,
-    dataGrid.pagination,
-    dataGrid.tableItems,
-    jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD,
-    (columnId, cellValue, fullItem, setCellProps) => {
-      const resultsField = jobConfig?.dest.results_field ?? '';
-      let backgroundColor: string | undefined;
-
-      const featureNames = fullItem[`${resultsField}.${FEATURE_INFLUENCE}`];
-
-      // column with feature values get color coded by its corresponding influencer value
-      if (Array.isArray(featureNames)) {
-        const featureForColumn = featureNames.find(
-          (feature) => columnId === feature.feature_name[0]
-        );
-        if (featureForColumn) {
-          backgroundColor = colorRange(featureForColumn.influence[0]);
-        }
-      }
-
-      // From EUI docs: Treated as React component allowing hooks, context, and other React concepts to be used.
-      // This is the recommended use of setCellProps: https://github.com/elastic/eui/blob/main/src/components/datagrid/data_grid_types.ts#L521-L525
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      useEffect(() => {
-        if (backgroundColor) {
-          setCellProps({
-            style: { backgroundColor: String(backgroundColor) },
-          });
-        }
-      }, [backgroundColor, setCellProps]);
-    }
-  );
-
-  return {
-    ...dataGrid,
-    renderCellValue,
-  };
+  return dataGrid;
 };
