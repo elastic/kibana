@@ -6,21 +6,31 @@
  * Side Public License, v 1.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, memoize } from 'lodash';
 
 import { DashboardItem } from '../types';
 import { dashboardServices } from '../../services/kibana_services';
 
-export const fetchCurrentDashboard = async (currentDashboardId: string): Promise<DashboardItem> => {
+export const memoizedFetchDashboard = memoize(async (dashboardId: string) => {
+  return await fetchDashboard(dashboardId);
+});
+
+export const memoizedFetchDashboards = memoize(
+  async (search: string = '', size: number = 10, currentDashboardId?: string) => {
+    return await fetchDashboards(search, size, currentDashboardId);
+  }
+);
+
+const fetchDashboard = async (dashboardId: string): Promise<DashboardItem> => {
   const findDashboardsService = await dashboardServices.findDashboardsService();
-  const response = (await findDashboardsService.findByIds([currentDashboardId]))[0];
+  const response = (await findDashboardsService.findByIds([dashboardId]))[0];
   if (response.status === 'error') {
     throw new Error('failure'); // TODO: better error handling
   }
   return response;
 };
 
-export const fetchDashboardList = async (
+const fetchDashboards = async (
   search: string = '',
   size: number = 10,
   currentDashboardId?: string
@@ -51,13 +61,13 @@ export const fetchDashboardList = async (
      * force it to the front of the list
      */
     if (!currentDashboard) {
-      currentDashboard = await fetchCurrentDashboard(currentDashboardId);
+      currentDashboard = await fetchDashboard(currentDashboardId);
       dashboardList.pop(); // the result should still be of `size,` so remove the dashboard at the end of the list
       dashboardList.unshift(currentDashboard); // in order to force the current dashboard to the start of the list
     }
   }
 
-  console.log('currentDashboard', currentDashboard);
+  // console.log('currentDashboard', currentDashboard);
 
   /** Then, only return the parts of the dashboard object that we need */
   const simplifiedDashboardList = dashboardList.map((hit) => {

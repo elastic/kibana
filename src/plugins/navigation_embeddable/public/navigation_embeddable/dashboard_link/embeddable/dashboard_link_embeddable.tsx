@@ -17,10 +17,11 @@ import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-
 
 import { dashboardLinkReducers } from '../dashboard_link_reducers';
 import { DashboardLinkComponent } from '../components/dashboard_link_component';
-import { coreServices, dashboardServices } from '../../services/kibana_services';
+import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from './dashboard_link_embeddable_factory';
 import { DashboardLinkInput, DashboardLinkReduxState } from '../types';
 import { NavigationContainer } from '../../navigation_container/embeddable/navigation_container';
+import { memoizedFetchDashboard } from '../lib/dashboard_editor_tools';
 
 export const DashboardLinkContext = createContext<DashboardLinkEmbeddable | null>(null);
 export const useDashboardLinkEmbeddable = (): DashboardLinkEmbeddable => {
@@ -86,12 +87,7 @@ export class DashboardLinkEmbeddable extends Embeddable<DashboardLinkInput> {
     this.dispatch.setLoading(true);
 
     const dashboardId = this.input.dashboardId;
-    const findDashboardsService = await dashboardServices.findDashboardsService();
-    const response = (await findDashboardsService.findByIds([dashboardId]))[0];
-    if (response.status === 'error') {
-      throw new Error('failure'); // TODO: better error handling
-    }
-
+    const response = await memoizedFetchDashboard(dashboardId);
     batch(() => {
       this.dispatch.setDashboardTitle(response.attributes.title);
       this.dispatch.setDashboardDescription(response.attributes.description);

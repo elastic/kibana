@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import { isEmpty } from 'lodash';
+import React, { useState } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 
 import {
   EuiText,
@@ -23,13 +25,19 @@ import {
   EuiButtonEmpty,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  IconType,
+  EuiIcon,
 } from '@elastic/eui';
+
 import { NavigationContainerInput } from '../../types';
+import { ExternalLinkInput } from '../../external_link/types';
+import { DashboardLinkInput } from '../../dashboard_link/types';
 import { NavigationEmbeddableLinkEditor } from './navigation_embeddable_link_editor';
+import { memoizedFetchDashboard } from '../../dashboard_link/lib/dashboard_editor_tools';
+import { navigationContainerInputBuilder } from '../editor/navigation_container_input_builder';
 import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
 
 import './navigation_embeddable.scss';
-import { navigationContainerInputBuilder } from '../editor/navigation_container_input_builder';
 
 export const NavigationEmbeddablePanelEditor = ({
   initialInput,
@@ -45,8 +53,30 @@ export const NavigationEmbeddablePanelEditor = ({
   const [showLinkEditorFlyout, setShowLinkEditorFlyout] = useState(false);
   const [panels, setPanels] = useState(initialInput.panels);
 
-  useEffect(() => {
-    console.log('panels changed', panels);
+  const { loading: loadingLinkList, value: linkList } = useAsync(async () => {
+    if (!panels || isEmpty(panels)) return [];
+
+    const links: Array<{ icon: IconType; label: string }> = await Promise.all(
+      Object.keys(panels).map(async (panelId) => {
+        let label = panels[panelId].explicitInput.label;
+        let icon = 'link';
+
+        if (panels[panelId].type === DASHBOARD_LINK_EMBEDDABLE_TYPE) {
+          icon = 'dashboardApp';
+          if (!label) {
+            const dashboard = await memoizedFetchDashboard(
+              (panels[panelId].explicitInput as DashboardLinkInput).dashboardId
+            );
+            label = dashboard.attributes.title;
+          }
+        } else if (!label) {
+          label = (panels[panelId].explicitInput as ExternalLinkInput).url;
+        }
+
+        return { label, icon };
+      })
+    );
+    return links;
   }, [panels]);
 
   return (
@@ -81,27 +111,27 @@ export const NavigationEmbeddablePanelEditor = ({
                 </EuiPanel>
               ) : (
                 <>
-                  {Object.keys(panels).map((panelId) => {
-                    console.log(panels[panelId]);
-                    if (panels[panelId].type === DASHBOARD_LINK_EMBEDDABLE_TYPE) {
-                      return (
-                        <>
-                          <EuiPanel hasBorder hasShadow={false} paddingSize="s">
-                            {panels[panelId].explicitInput.dashboardId}
-                          </EuiPanel>
-                          <EuiSpacer size="s" />
-                        </>
-                      );
-                    }
-                    return (
-                      <>
-                        <EuiPanel hasBorder hasShadow={false} paddingSize="s">
-                          {panels[panelId].explicitInput.url}
-                        </EuiPanel>
-                        <EuiSpacer size="s" />
-                      </>
-                    );
-                  })}
+                  {loadingLinkList ? (
+                    <></>
+                  ) : (
+                    <>
+                      {linkList?.map((link) => {
+                        return (
+                          <>
+                            <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+                              <EuiFlexGroup gutterSize="s">
+                                <EuiFlexItem grow={false}>
+                                  <EuiIcon type={link.icon} color="text" />
+                                </EuiFlexItem>
+                                <EuiFlexItem>{link.label}</EuiFlexItem>
+                              </EuiFlexGroup>
+                            </EuiPanel>
+                            <EuiSpacer size="s" />
+                          </>
+                        );
+                      })}
+                    </>
+                  )}
                   <EuiButtonEmpty
                     size="s"
                     flush="left"
@@ -150,7 +180,6 @@ export const NavigationEmbeddablePanelEditor = ({
           initialInput={initialInput}
           onClose={() => setShowLinkEditorFlyout(false)}
           onSave={(type, destination, label) => {
-            // console.log(type, destination, label);
             /** TODO: Do this better */
             if (type === DASHBOARD_LINK_EMBEDDABLE_TYPE) {
               const { addDashboardLink } = navigationContainerInputBuilder;

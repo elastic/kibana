@@ -21,8 +21,8 @@ import {
 } from '@elastic/eui';
 
 import { LinkEditorDestinationProps } from '../../types';
-import { fetchDashboardList } from '../lib/fetch_dashboards';
 import { DashboardItem, DashboardLinkInput } from '../types';
+import { memoizedFetchDashboards } from '../lib/dashboard_editor_tools';
 import { NavEmbeddableStrings } from '../../navigation_container/components/navigation_embeddable_strings';
 
 export const DashboardLinkEditorDestinationPicker = ({
@@ -36,7 +36,7 @@ export const DashboardLinkEditorDestinationPicker = ({
   const [dashboardListOptions, setDashboardListOptions] = useState<EuiSelectableOption[]>([]);
 
   const { loading: loadingDashboardList, value: dashboardList } = useAsync(async () => {
-    return await fetchDashboardList(searchString, undefined, currentDashboardId);
+    return await memoizedFetchDashboards(searchString, undefined, currentDashboardId);
   }, [searchString]);
 
   useEffect(() => {
