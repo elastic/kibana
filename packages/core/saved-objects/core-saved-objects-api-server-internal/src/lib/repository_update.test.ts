@@ -50,19 +50,11 @@ import {
   createBadRequestErrorPayload,
   createConflictErrorPayload,
   createGenericNotFoundErrorPayload,
-  getSuccess,
   mockTimestampFieldsWithCreated,
   updateBWCSuccess,
+  getSuccess,
 } from '../test_helpers/repository.test.common';
-
-// BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
-// so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
-
-interface ExpectedErrorResult {
-  type: string;
-  id: string;
-  error: Record<string, any>;
-}
+import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server/src/apis';
 
 describe('SavedObjectsRepository', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -74,10 +66,6 @@ describe('SavedObjectsRepository', () => {
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
 
-  const expectSuccess = ({ type, id }: { type: string; id: string }) => {
-    // @ts-expect-error TS is not aware of the extension
-    return expect.toBeDocumentWithoutError(type, id);
-  };
   // ADDED BY PIERRE IN https://github.com/elastic/kibana/pull/158251
   const expectMigrationArgs = (args: unknown, contains = true, n = 1) => {
     const obj = contains ? expect.objectContaining(args) : expect.not.objectContaining(args);
@@ -132,6 +120,8 @@ describe('SavedObjectsRepository', () => {
     managed: doc.managed ?? false,
     references: [{ name: 'search_0', type: 'search', id: '123' }],
   });
+  // ZDT IMPLEMENTATIONS: Using client.index || client.create to handle SOR.update REQUIRES refactoring
+  // all these tests.
   describe('#update', () => {
     const id = 'logstash-*';
     const type = 'index-pattern';
@@ -151,18 +141,26 @@ describe('SavedObjectsRepository', () => {
       mockPreflightCheckForCreate.mockImplementation(({ objects }) => {
         return Promise.resolve(objects.map(({ type, id }) => ({ type, id }))); // respond with no errors by default
       });
+      client.create.mockResponseImplementation((params) => {
+        return {
+          body: {
+            _id: params.id,
+            ...mockVersionProps,
+          } as estypes.CreateResponse,
+        };
+      });
     });
 
     describe('client calls', () => {
-      it(`should use the ES get action then update action when type is not multi-namespace`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes);
+      it(`should use the ES get action then index action when type is not multi-namespace for existing objects`, async () => {
+        await updateBWCSuccess(client, repository, registry, type, id, attributes);
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
-        expect(client.update).toHaveBeenCalledTimes(1);
+        expect(client.index).toHaveBeenCalledTimes(1);
       });
 
       it(`should use the ES get action then update action when type is multi-namespace`, async () => {
-        await updateSuccess(
+        await updateBWCSuccess(
           client,
           repository,
           registry,
@@ -176,14 +174,21 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`should use the ES get action then update action when type is namespace agnostic`, async () => {
-        await updateSuccess(client, repository, registry, NAMESPACE_AGNOSTIC_TYPE, id, attributes);
+        await updateBWCSuccess(
+          client,
+          repository,
+          registry,
+          NAMESPACE_AGNOSTIC_TYPE,
+          id,
+          attributes
+        );
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).not.toHaveBeenCalled();
         expect(client.update).toHaveBeenCalledTimes(1);
       });
 
       it(`should check for alias conflicts if a new multi-namespace object would be created`, async () => {
-        await updateSuccess(
+        await updateBWCSuccess(
           client,
           repository,
           registry,
@@ -199,7 +204,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`defaults to no references array`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes);
+        await updateBWCSuccess(client, repository, registry, type, id, attributes);
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             body: { doc: expect.not.objectContaining({ references: expect.anything() }) },
@@ -210,7 +215,9 @@ describe('SavedObjectsRepository', () => {
 
       it(`accepts custom references array`, async () => {
         const test = async (references: SavedObjectReference[]) => {
-          await updateSuccess(client, repository, registry, type, id, attributes, { references });
+          await updateBWCSuccess(client, repository, registry, type, id, attributes, {
+            references,
+          });
           expect(client.update).toHaveBeenCalledWith(
             expect.objectContaining({
               body: { doc: expect.objectContaining({ references }) },
@@ -225,7 +232,7 @@ describe('SavedObjectsRepository', () => {
       });
 
       it(`uses the 'upsertAttributes' option when specified for a single-namespace type`, async () => {
-        await updateSuccess(client, repository, registry, type, id, attributes, {
+        await updateBWCSuccess(client, repository, registry, type, id, attributes, {
           upsert: {
             title: 'foo',
             description: 'bar',
@@ -573,7 +580,7 @@ describe('SavedObjectsRepository', () => {
         mockPreflightCheckForCreate.mockResolvedValue([
           { type: 'type', id: 'id', error: { type: 'conflict' } },
         ]);
-        await updateSuccess(
+        await updateBWCSuccess(
           client,
           repository,
           registry,
@@ -585,67 +592,45 @@ describe('SavedObjectsRepository', () => {
         );
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
-        expect(client.update).toHaveBeenCalledTimes(1);
+        expect(client.create).toHaveBeenCalledTimes(1);
       });
 
-      it(`throws when ES is unable to find the document during update`, async () => {
-        const notFoundError = new EsErrors.ResponseError(
-          elasticsearchClientMock.createApiResponse({
-            statusCode: 404,
-            body: { error: { type: 'es_type', reason: 'es_reason' } },
-          })
-        );
-        client.update.mockResolvedValueOnce(
-          elasticsearchClientMock.createErrorTransportRequestPromise(notFoundError)
-        );
+      it(`does not throw when the document does not exist`, async () => {
+        expect(client.create).not.toHaveBeenCalled();
         await expectNotFoundError(type, id);
-        expect(client.update).toHaveBeenCalledTimes(1);
       });
     });
 
     // See bulkCreate tests for setting up and testing migrateDocument (used under the hood by migrateStorageDocument)
     describe.only('migration', () => {
       // Setup migration mock for creating an object
-      const mockMigrationVersion = { foo: '2.3.4' };
-      const mockMigrateDocument = (doc: SavedObjectUnsanitizedDoc<any>) => ({
-        ...doc,
-        attributes: {
-          ...doc.attributes,
-          ...(doc.attributes?.title && { title: `${doc.attributes.title}!!` }),
-        },
-        migrationVersion: mockMigrationVersion,
-        managed: doc.managed ?? false,
-        references: [{ name: 'search_0', type: 'search', id: '123' }],
-      });
-
       // use the repository get method to see what tests were added for `migrateStorageDocument`
       // use the repository create method to see what tests were added for `migrateInputDocument`
-      it.only('migrates the fetched document', async () => {
-        const migrationVersion = mockMigrationVersion;
-        const coreMigrationVersion = '8.0.0';
-        const managed = false;
-        /** @TINA TODO:
-         * `updateSuccess` needs to change to accept a mocked response from a get call to fetch the document.
-         * we then need to pass that response to repository.update and spy on the migrator.
-         * assert the migrator is called for `migrateStorageDocument` AND for migrating the doc inputs
-         * expect(migrator.migrateDocument).toHaveBeenCalledTimes(2); if a doc exists, 1 if it doesn't
-         */
+      it('migrates the fetched document from get', async () => {
+        const type = 'index-pattern';
+        const id = 'logstash-*';
+        migrator.migrateDocument.mockImplementation(mockMigrateDocument);
         // migrator.migrateDocument.mockReturnValueOnce(
         //   'migrated' as unknown as ReturnType<typeof migrator.migrateDocument>
         // );
+        // await expect(getSuccess(client, repository, registry, type, id)).resolves.toBe('migrated');
+        await updateBWCSuccess(client, repository, registry, type, id, attributes);
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
+        expectMigrationArgs({
+          id,
+          type,
+        });
+      });
 
-        const attribs = {
-          title: 'foo',
-          description: 'bar',
+      it('migrates the input arguments when upsert is used', async () => {
+        const options = {
+          upsert: {
+            title: 'foo',
+            description: 'bar',
+          },
         };
-        const optns = {
-          namespace,
-          references,
-          version: mockVersion,
-        };
-        const internalOpts = {
-          references,
-          mockGetResponseValue: getMockGetResponse(registry, { type, id }, namespace),
+        const internalOptions = {
+          mockGetResponseValue: { found: false } as estypes.GetResponse,
         };
         await updateBWCSuccess(
           client,
@@ -653,47 +638,15 @@ describe('SavedObjectsRepository', () => {
           registry,
           type,
           id,
-          attribs,
-          optns,
-          internalOpts
+          attributes,
+          options,
+          internalOptions
         );
         expect(migrator.migrateDocument).toHaveBeenCalledTimes(1);
         expectMigrationArgs({
           id,
           type,
         });
-      });
-
-      it('migrates the input arguments', async () => {
-        // TODO: come back and update after changing the client calls
-        // const migrationVersion = mockMigrationVersion;
-        // const coreMigrationVersion = '8.0.0';
-        // const managed = false;
-        await updateSuccess(client, repository, registry, type, id, attributes, {
-          upsert: {
-            title: 'foo',
-            description: 'bar',
-          },
-          // I need these too:
-          //   migrationVersion,
-          //   coreMigrationVersion,
-          //   managed,
-        });
-
-        const doc = {
-          type,
-          id,
-          attributes: { title: 'foo', description: 'bar' },
-          // references,
-          // managed,
-          // migrationVersion,
-          // coreMigrationVersion,
-          updated_at: mockTimestampFieldsWithCreated.updated_at,
-        };
-        expectMigrationArgs(doc);
-
-        const migratedDoc = migrator.migrateDocument(doc);
-        expect(serializer.savedObjectToRaw).toHaveBeenLastCalledWith(migratedDoc);
       });
     });
 

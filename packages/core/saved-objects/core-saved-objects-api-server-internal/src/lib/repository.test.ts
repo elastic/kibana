@@ -5267,7 +5267,7 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    describe.only('returns', () => {
+    describe('returns', () => {
       it(`returns _seq_no and _primary_term encoded as version`, async () => {
         const result = await updateSuccess(client, repository, registry, type, id, attributes, {
           namespace,
@@ -5305,7 +5305,7 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
-      it.only(`includes originId property if present in cluster call response`, async () => {
+      it(`includes originId property if present in cluster call response`, async () => {
         const result = await updateSuccess(
           client,
           repository,

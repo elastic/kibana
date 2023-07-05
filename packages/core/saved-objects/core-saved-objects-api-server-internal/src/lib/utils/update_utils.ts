@@ -15,8 +15,8 @@ import {
 
 /**
  * Downward compatible update control flow helpers
+ * unused ATM
  */
-
 export const updateProgressData: Record<string, unknown> = {
   unmigratedRawDoc: {},
   migratedOriginalSODoc: {},
@@ -24,33 +24,9 @@ export const updateProgressData: Record<string, unknown> = {
   safeToSendUpdatedNewSODoc: {},
   updateResult: {},
   retriesCount: 0,
-  safeToSendCreateUpsertSODoc: {},
+  safeToSendCreateUpsertedSODoc: {},
   createdResult: {},
   finalResponse: {},
-};
-
-export const isValidRequest = ({
-  allowedTypes,
-  type,
-  id,
-}: {
-  allowedTypes: string[];
-  type: string;
-  id?: string;
-}) => {
-  return !id
-    ? {
-        validRequest: false,
-        error: SavedObjectsErrorHelpers.createBadRequestError('id cannot be empty'),
-      }
-    : !allowedTypes.includes(type)
-    ? {
-        validRequest: false,
-        error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id),
-      }
-    : {
-        validRequest: true,
-      };
 };
 
 export interface UpdateErrorMap<E = DecoratedError | Error | unknown> {
@@ -79,9 +55,11 @@ export function errorMap(
       logger.info(`Cannot perform update request`);
       errorToReturn = error;
       break;
-    case 'saved object not found':
+    case 'saved_object_not_found':
       logger.info(`Saved object not found, ${error}`);
+      SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       errorToReturn = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+
       break;
     case 'saved object migrateStorageDocument error':
       logger.info(`Saved object migrateStorageDocument, ${error}`);
@@ -90,11 +68,34 @@ export function errorMap(
         'Failed to migrate document to the latest version.'
       );
     default:
-      errorToReturn = new Error('unknown error', error);
+      logger.info(`unknown error`);
+      errorToReturn = error;
   }
   return errorToReturn;
 }
-
+export const isValidRequest = ({
+  allowedTypes,
+  type,
+  id,
+}: {
+  allowedTypes: string[];
+  type: string;
+  id?: string;
+}) => {
+  return !id
+    ? {
+        validRequest: false,
+        error: SavedObjectsErrorHelpers.createBadRequestError('id cannot be empty'),
+      }
+    : !allowedTypes.includes(type)
+    ? {
+        validRequest: false,
+        error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id),
+      }
+    : {
+        validRequest: true,
+      };
+};
 export interface CanPerformUpdateParams<T = unknown> {
   logger: Logger;
   type: string;
@@ -132,7 +133,25 @@ export const canPerformUpdate = (params: CanPerformUpdateParams) => {
     );
   }
 };
-// TODO complete me
-// const canPerformUpsert = (params: CanPerformUpdateParams) => {
-//   return;
-// };
+export interface CanUpsertDocParams {
+  useUpsert: boolean;
+  preflightGetDocForUpdateResult: PreflightGetDocForUpdateResult;
+  preflightCheckNamespacesForUpdateResult: PreflightCheckNamespacesForUpdateResult;
+}
+export const canUpsertDoc = ({
+  useUpsert,
+  preflightGetDocForUpdateResult,
+  preflightCheckNamespacesForUpdateResult,
+}: CanUpsertDocParams) => {
+  let result = false;
+  if (
+    (useUpsert &&
+      preflightGetDocForUpdateResult &&
+      preflightGetDocForUpdateResult.checkDocFound === 'not_found') ||
+    (preflightCheckNamespacesForUpdateResult &&
+      preflightCheckNamespacesForUpdateResult.checkResult === 'not_found')
+  ) {
+    result = true;
+  }
+  return result;
+};

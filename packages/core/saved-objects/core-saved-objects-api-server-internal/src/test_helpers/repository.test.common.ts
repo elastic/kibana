@@ -53,6 +53,7 @@ import {
   type AuthorizationTypeMap,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
+import { option } from 'fp-ts/lib/Option';
 import { mockGetSearchDsl } from '../lib/repository.test.mock';
 import { SavedObjectsRepository } from '../lib/repository';
 
@@ -464,7 +465,6 @@ export const getMockGetResponse = (
       ...mockTimestampFields,
     } as SavedObjectsRawDocSource,
   } as estypes.GetResponse<SavedObjectsRawDocSource>;
-  console.log('mocked get result', result);
   return result;
 };
 
@@ -490,7 +490,7 @@ expect.extend({
     }
   },
 });
-
+// Todo: SOR update no longer calls esClient.update, it calls esClient.index/create
 export const mockUpdateResponse = (
   client: ElasticsearchClientMock,
   type: string,
@@ -501,7 +501,7 @@ export const mockUpdateResponse = (
 ) => {
   // @Tina added
   const migrationVersionCompatibility = options?.migrationVersionCompatibility || 'raw';
-
+  // needs to change to create/index, see SOR create unit tests
   client.update.mockResponseOnce(
     {
       _id: `${type}:${id}`,
@@ -523,6 +523,7 @@ export const mockUpdateResponse = (
     { statusCode: 200 }
   );
 };
+
 export const updateBWCSuccess = async <T extends Partial<unknown>>(
   client: ElasticsearchClientMock,
   repository: SavedObjectsRepository,
@@ -540,9 +541,32 @@ export const updateBWCSuccess = async <T extends Partial<unknown>>(
   const { mockGetResponseValue, originId } = internalOptions;
   const mockGetResponse =
     mockGetResponseValue ??
-    getMockGetResponse(registry, { type, id }, objNamespaces ?? options?.namespace);
+    getMockGetResponse(registry, { type, id, originId }, objNamespaces ?? options?.namespace);
   client.get.mockResponseOnce(mockGetResponse, { statusCode: 200 });
-  mockUpdateResponse(client, type, id, options, objNamespaces, originId);
+  // mockUpdateResponse(client, type, id, options, objNamespaces, originId); // mocks client.update response
+  if (!mockGetResponseValue) {
+    // create doc from existing doc
+    client.index.mockResponseImplementation((params) => {
+      return {
+        body: {
+          _id: params.id,
+          ...mockVersionProps,
+        } as estypes.CreateResponse,
+      };
+    });
+  }
+  if (mockGetResponseValue) {
+    // upsert case
+    client.create.mockResponseImplementation((params) => {
+      return {
+        body: {
+          _id: params.id,
+          ...mockVersionProps,
+        } as estypes.CreateResponse,
+      };
+    });
+  }
+
   const result = await repository.update(type, id, attributes, options);
   expect(client.get).toHaveBeenCalled(); // not asserting on the number of calls here, we end up testing the test mocks and not the actual implementation
   return result;

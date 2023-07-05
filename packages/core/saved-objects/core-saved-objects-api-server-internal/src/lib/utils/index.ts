@@ -16,4 +16,5 @@ export {
   canPerformUpdate,
   isValidRequest,
   errorMap,
+  canUpsertDoc,
 } from './update_utils';
