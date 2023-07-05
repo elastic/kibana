@@ -118,7 +118,9 @@ describe('EditTags ', () => {
   });
 
   it('it shows error when tag is too long', async () => {
-    const longTag = Array(MAX_LENGTH_PER_TAG).fill('z').toString();
+    const longTag = Array(MAX_LENGTH_PER_TAG / 2 + 1)
+      .fill('a')
+      .toString();
 
     appMockRender.render(<EditTags {...defaultProps} />);
 
@@ -128,7 +130,8 @@ describe('EditTags ', () => {
       expect(screen.getByTestId('edit-tags')).toBeInTheDocument();
     });
 
-    userEvent.type(screen.getByRole('combobox'), `${longTag}{enter}`);
+    userEvent.paste(screen.getByRole('combobox'), `${longTag}`);
+    userEvent.keyboard('{enter}');
 
     await waitFor(() => {
       expect(screen.getByText('The length of the tag is too long. The maximum length is 256.'));
