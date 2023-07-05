@@ -402,21 +402,23 @@ The current active alerts in the system are represented in the following table w
 - If the alert has a Case names value it is less urgent
 
 Display the selected alert row using the following template, if any of the variables are empty do not include that line in the response:
-🚨 The the alert with the highest priority right now has the following Reason: A
+🚨 The the alert with the highest priority right now has the following Rule Name: R
+    🤔 Reason: A
     🔗 Link: http://localhost:5601/kibana/app/observability/alerts/C
     🧯 Possible next steps: B
     ︖ The reason this alert has the highest priority is: D
     📂 Assigned to Case: E
-    📝 Case general summary: I
+        📝 Case general summary: I
     🔍 Related alerts: J
 
+R being the Rule Name column value
 A being the alert Reason column value
 B being a way to start the remediation of the alert for an SRE using Elastic Observability
 C being the Alert uuid value, concatenated after the string "http://localhost:5601/kibana/app/observability/alerts/"
-D being the reasoning why this alert is the most urgent between all of the alerts
+D being the reasoning why this alert is the most urgent compared to the rest of the alerts
 E being the summary in text of Case names values, Case status column value, Case severity column value and Case updatedAt column values
 I being a summary you generate about the properties of the Case
-J being which alerts belong to the same case or rule as the selected alert, include their alert id
+J being which alerts belong to the same case or rule as the selected alert, include their rule name and alert id
 
 ${header}
 ${rows}
