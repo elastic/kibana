@@ -6,9 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VALIDATION_RESULT } from '../types/categories';
 
-export const NUMBER_OF_CATEGORY_EXAMPLES = 5;
 export const CATEGORY_EXAMPLES_SAMPLE_SIZE = 1000;
 export const CATEGORY_EXAMPLES_WARNING_LIMIT = 0.75;
 export const CATEGORY_EXAMPLES_ERROR_LIMIT = 0.02;
@@ -21,6 +19,16 @@ export enum CATEGORY_EXAMPLES_VALIDATION_STATUS {
   VALID = 'valid',
   PARTIALLY_VALID = 'partially_valid',
   INVALID = 'invalid',
+}
+
+export enum VALIDATION_RESULT {
+  NO_EXAMPLES,
+  FAILED_TO_TOKENIZE,
+  TOO_MANY_TOKENS,
+  TOKEN_COUNT,
+  MEDIAN_LINE_LENGTH,
+  NULL_VALUES,
+  INSUFFICIENT_PRIVILEGES,
 }
 
 export const VALIDATION_CHECK_DESCRIPTION = {

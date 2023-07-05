@@ -106,6 +106,8 @@
       "@kbn/cases-components/*": ["packages/kbn-cases-components/*"],
       "@kbn/cases-plugin": ["x-pack/plugins/cases"],
       "@kbn/cases-plugin/*": ["x-pack/plugins/cases/*"],
+      "@kbn/category_validator": ["x-pack/packages/ml/category_validator"],
+      "@kbn/category_validator/*": ["x-pack/packages/ml/category_validator/*"],
       "@kbn/cell-actions": ["packages/kbn-cell-actions"],
       "@kbn/cell-actions/*": ["packages/kbn-cell-actions/*"],
       "@kbn/chart-expressions-common": ["src/plugins/chart_expressions/common"],

@@ -2970,6 +2970,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/category_validator@link:x-pack/packages/ml/category_validator":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cell-actions@link:packages/kbn-cell-actions":
   version "0.0.0"
   uid ""

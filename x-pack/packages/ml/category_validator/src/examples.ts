@@ -10,13 +10,12 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { chunk } from 'lodash';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
-import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/categorization_job';
-import {
+import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../common/constants/categorization';
+import type {
   Token,
   CategorizationAnalyzer,
   CategoryFieldExample,
-} from '../../../../../common/types/categories';
-import { IndicesOptions } from '../../../../../common/types/anomaly_detection_jobs';
+} from '../common/types/categories';
 import { ValidationResults } from './validation_results';
 
 const CHUNK_SIZE = 100;
@@ -37,7 +36,7 @@ export function categorizationExamplesProvider({
     end: number,
     analyzer: CategorizationAnalyzer,
     runtimeMappings: RuntimeMappings | undefined,
-    indicesOptions: IndicesOptions | undefined
+    indicesOptions: estypes.IndicesOptions | undefined
   ): Promise<{ examples: CategoryFieldExample[]; error?: any }> {
     if (timeField !== undefined) {
       const range = {
@@ -186,7 +185,7 @@ export function categorizationExamplesProvider({
     end: number,
     analyzer: CategorizationAnalyzer,
     runtimeMappings: RuntimeMappings | undefined,
-    indicesOptions: IndicesOptions | undefined
+    indicesOptions: estypes.IndicesOptions | undefined
   ) {
     const resp = await categorizationExamples(
       indexPatternTitle,
