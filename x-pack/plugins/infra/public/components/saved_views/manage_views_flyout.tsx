@@ -26,7 +26,7 @@ import { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
 import { SavedViewOperations, SavedViewItem } from '../../../common/saved_views';
 
-export interface ManageViewsFlyoutProps<TSavedViewState extends SavedViewItem, TViewState> {
+export interface ManageViewsFlyoutProps<TSavedViewState extends SavedViewItem> {
   views?: SavedViewItem[];
   loading: boolean;
   onClose(): void;
@@ -44,14 +44,14 @@ const searchConfig = {
   box: { incremental: true },
 };
 
-export function ManageViewsFlyout<TSavedViewState extends SavedViewItem, TViewState>({
+export function ManageViewsFlyout<TSavedViewState extends SavedViewItem>({
   onClose,
   views = [],
   onSwitchView,
   onMakeDefaultView,
   onDeleteView,
   loading,
-}: ManageViewsFlyoutProps<TSavedViewState, TViewState>) {
+}: ManageViewsFlyoutProps<TSavedViewState>) {
   // Add name as top level property to allow in memory search
   const namedViews = useMemo(() => views.map(addOwnName), [views]);
 

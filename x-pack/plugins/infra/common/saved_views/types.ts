@@ -39,7 +39,9 @@ export interface SavedViewOperations<
 }
 
 export interface SavedViewResult<
-  TView extends { id: TView['id'] },
+  TView extends {
+    id: TView['id'];
+  },
   TId extends string = '',
   TPayload = any,
   TConfig = any

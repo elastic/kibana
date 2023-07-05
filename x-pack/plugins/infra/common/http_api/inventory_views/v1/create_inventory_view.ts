@@ -6,15 +6,17 @@
  */
 
 import * as rt from 'io-ts';
-import { inventoryViewAttributesRT } from '../../../inventory_views';
+import { inventoryViewAttributesRT, inventoryViewRT } from '../../../inventory_views';
 
-export const createInventoryViewAttributesRequestPayloadRT = rt.intersection([
-  inventoryViewAttributesRT,
-  rt.partial({
-    isDefault: rt.undefined,
-    isStatic: rt.undefined,
-  }),
-]);
+export const createInventoryViewAttributesRequestPayloadRT = rt.exact(
+  rt.intersection([
+    inventoryViewAttributesRT,
+    rt.partial({
+      isDefault: rt.undefined,
+      isStatic: rt.undefined,
+    }),
+  ])
+);
 
 export type CreateInventoryViewAttributesRequestPayload = rt.TypeOf<
   typeof createInventoryViewAttributesRequestPayloadRT
@@ -23,3 +25,5 @@ export type CreateInventoryViewAttributesRequestPayload = rt.TypeOf<
 export const createInventoryViewRequestPayloadRT = rt.type({
   attributes: createInventoryViewAttributesRequestPayloadRT,
 });
+
+export type CreateInventoryViewResponsePayload = rt.TypeOf<typeof inventoryViewRT>;

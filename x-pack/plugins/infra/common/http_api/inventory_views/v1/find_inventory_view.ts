@@ -6,8 +6,10 @@
  */
 
 import * as rt from 'io-ts';
-import { inventoryViewRT } from '../../../inventory_views';
+import { singleInventoryViewRT } from '../../../inventory_views';
 
 export const findInventoryViewResponsePayloadRT = rt.type({
-  data: rt.array(inventoryViewRT),
+  data: rt.array(singleInventoryViewRT),
 });
+
+export type FindInventoryViewResponsePayload = rt.TypeOf<typeof findInventoryViewResponsePayloadRT>;

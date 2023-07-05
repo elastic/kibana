@@ -22,6 +22,7 @@
     "@kbn/observability-shared-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-chrome-navigation",
+    "@kbn/ml-plugin",
     "@kbn/i18n",
     "@kbn/management-cards-navigation",
   ]

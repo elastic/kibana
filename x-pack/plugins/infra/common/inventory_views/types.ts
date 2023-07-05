@@ -14,14 +14,14 @@ import {
 } from '../http_api/snapshot_api';
 import { ItemTypeRT } from '../inventory_models/types';
 
-export const inventoryColorPaletteRT = rt.union([
-  rt.literal('status'),
-  rt.literal('temperature'),
-  rt.literal('cool'),
-  rt.literal('warm'),
-  rt.literal('positive'),
-  rt.literal('negative'),
-]);
+export const inventoryColorPaletteRT = rt.keyof({
+  status: null,
+  temperature: null,
+  cool: null,
+  warm: null,
+  positive: null,
+  negative: null,
+});
 
 const inventoryLegendOptionsRT = rt.type({
   palette: inventoryColorPaletteRT,
@@ -68,21 +68,45 @@ export const inventoryOptionsStateRT = rt.intersection([
   rt.partial({ legend: inventoryLegendOptionsRT, source: rt.string, timelineOpen: rt.boolean }),
 ]);
 
+export const inventoryViewBasicAttributesRT = rt.type({
+  name: nonEmptyStringRt,
+});
+
+const inventoryViewFlagsRT = rt.partial({ isDefault: rt.boolean, isStatic: rt.boolean });
+
 export const inventoryViewAttributesRT = rt.intersection([
   inventoryOptionsStateRT,
+  inventoryViewBasicAttributesRT,
+  inventoryViewFlagsRT,
   rt.type({
-    name: nonEmptyStringRt,
     autoReload: rt.boolean,
     filterQuery: inventoryFiltersStateRT,
   }),
-  rt.partial({ time: rt.number, isDefault: rt.boolean, isStatic: rt.boolean }),
+  rt.partial({ time: rt.number }),
 ]);
+
+const singleInventoryViewAttributesRT = rt.exact(
+  rt.intersection([inventoryViewBasicAttributesRT, inventoryViewFlagsRT])
+);
 
 export const inventoryViewRT = rt.exact(
   rt.intersection([
     rt.type({
       id: rt.string,
       attributes: inventoryViewAttributesRT,
+    }),
+    rt.partial({
+      updatedAt: isoToEpochRt,
+      version: rt.string,
+    }),
+  ])
+);
+
+export const singleInventoryViewRT = rt.exact(
+  rt.intersection([
+    rt.type({
+      id: rt.string,
+      attributes: singleInventoryViewAttributesRT,
     }),
     rt.partial({
       updatedAt: isoToEpochRt,
