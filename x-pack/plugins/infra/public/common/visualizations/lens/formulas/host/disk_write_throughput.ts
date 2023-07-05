@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { FormulaValue, LayerValue } from '../../../types';
+import type { FormulaConfig } from '../../../types';
 
-export const diskWriteThroughput: LayerValue<FormulaValue> = {
-  name: 'Disk Write Throughput',
-  data: {
-    value: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
-    format: {
-      id: 'bytes',
-      params: {
-        decimals: 1,
-      },
+export const diskWriteThroughput: FormulaConfig = {
+  label: 'Disk Write Throughput',
+  formula: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
+  format: {
+    id: 'bytes',
+    params: {
+      decimals: 1,
     },
   },
 };

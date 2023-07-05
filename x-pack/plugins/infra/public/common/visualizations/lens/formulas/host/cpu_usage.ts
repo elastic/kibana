@@ -5,28 +5,16 @@
  * 2.0.
  */
 
-import type { FormulaValue, LayerValue } from '../../../types';
+import type { FormulaConfig } from '../../../types';
 
-export const lineChartConfig: LineChartConfig = {
-  extraVisualizationState: {
-    yLeftExtent: {
-      mode: 'custom',
-      lowerBound: 0,
-      upperBound: 1,
-    },
-  },
-};
-
-export const cpuUsage: LayerValue<FormulaValue> = {
-  name: 'CPU Usage',
-  data: {
-    value:
-      '(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)',
-    format: {
-      id: 'percent',
-      params: {
-        decimals: 0,
-      },
+export const cpuUsage: FormulaConfig = {
+  label: 'CPU Usage',
+  formula:
+    '(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)',
+  format: {
+    id: 'percent',
+    params: {
+      decimals: 0,
     },
   },
 };

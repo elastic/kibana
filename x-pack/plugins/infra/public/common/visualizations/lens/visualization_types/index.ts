@@ -8,4 +8,4 @@
 export { LineChart } from './line_chart';
 export { MetricChart } from './metric_chart';
 
-export { MetricLayer, XYLayer } from './layers';
+export * from './layers';

@@ -20,7 +20,6 @@ import {
   tx,
   hostCount,
 } from './lens/formulas/host';
-import { LineChart, MetricChart, XYLayer, MetricLayer } from './lens/visualization_types';
 
 export const hostLensFormulas = {
   cpuUsage,
@@ -36,13 +35,4 @@ export const hostLensFormulas = {
   memoryFree,
   rx,
   tx,
-};
-
-export const layerTypes = {
-  lineChart: XYLayer,
-  metricChart: MetricLayer,
-};
-export const visualizationTypes = {
-  lineChart: LineChart,
-  metricChart: MetricChart,
 };

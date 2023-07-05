@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { FormulaValue, LayerValue } from '../../../types';
+import type { FormulaConfig } from '../../../types';
 
-export const diskSpaceAvailable: LayerValue<FormulaValue> = {
-  name: 'Disk Space Available',
-  data: {
-    value: 'average(system.filesystem.free)',
-    format: {
-      id: 'bytes',
-      params: {
-        decimals: 0,
-      },
+export const diskSpaceAvailable: FormulaConfig = {
+  label: 'Disk Space Available',
+  formula: 'average(system.filesystem.free)',
+  format: {
+    id: 'bytes',
+    params: {
+      decimals: 0,
     },
   },
 };

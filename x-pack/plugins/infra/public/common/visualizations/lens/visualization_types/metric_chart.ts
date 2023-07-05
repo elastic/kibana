@@ -8,46 +8,36 @@
 import { FormBasedPersistedState, MetricVisualizationState } from '@kbn/lens-plugin/public';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Filter } from '@kbn/es-query';
-import { DEFAULT_AD_HOC_DATA_VIEW_ID, DEFAULT_LAYER_ID } from '../utils';
+import { DEFAULT_LAYER_ID } from '../utils';
 
-import type { Chart, MetricChartConfig } from '../../types';
-import { getFilters } from '../formulas/host/utils';
+import type { Chart, ChartConfig, ChartLayer } from '../../types';
 
 const ACCESSOR = 'metric_formula_accessor';
 
 export class MetricChart implements Chart<MetricVisualizationState> {
-  constructor(private state: MetricChartConfig) {}
+  constructor(private chartConfig: ChartConfig<ChartLayer<MetricVisualizationState>>) {}
 
   getVisualizationType(): string {
     return 'lnsMetric';
   }
 
   getLayers(): FormBasedPersistedState['layers'] {
-    return this.state.layers.getLayer(DEFAULT_LAYER_ID, ACCESSOR, this.state.dataView);
+    return this.chartConfig.layer.getLayer(DEFAULT_LAYER_ID, ACCESSOR, this.chartConfig.dataView);
   }
 
   getVisualizationState(): MetricVisualizationState {
-    return this.state.layers.getLayerConfig(DEFAULT_LAYER_ID, ACCESSOR);
+    return this.chartConfig.layer.getLayerConfig(DEFAULT_LAYER_ID, ACCESSOR);
   }
 
   getReferences(): SavedObjectReference[] {
-    return this.state.layers.getReference(DEFAULT_LAYER_ID, this.state.dataView);
+    return this.chartConfig.layer.getReference(DEFAULT_LAYER_ID, this.chartConfig.dataView);
   }
 
   getDataView(): DataView {
-    return this.state.dataView;
+    return this.chartConfig.dataView;
   }
 
   getTitle(): string {
-    return this.state.options?.showTitle
-      ? this.state.options?.title ?? this.state.layers.getName()
-      : '';
-  }
-
-  getFilters(): Filter[] {
-    return getFilters({
-      id: this.state.dataView.id ?? DEFAULT_AD_HOC_DATA_VIEW_ID,
-    });
+    return this.chartConfig.title ?? '';
   }
 }

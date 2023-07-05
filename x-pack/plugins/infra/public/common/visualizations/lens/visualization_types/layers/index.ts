@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export { MetricLayer } from './metric_layer';
-export { XYLayer } from './xy_layer';
+export { MetricLayer, type MetricLayerOptions } from './metric_layer';
+export { XYDataLayer, type XYLayerOptions } from './xy_data_layer';
+export { XYReferenceLinesLayer } from './xy_reference_lines_layer';
 
-export { FormulaData } from './data/formula';
+export { FormulaColumn as FormulaDataColumn } from './column/formula';
+export { ReferenceLineColumn } from './column/reference_line';

@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { FormulaValue, LayerValue } from '../../../types';
+import type { FormulaConfig } from '../../../types';
 
-export const hostCount: LayerValue<FormulaValue> = {
-  name: 'Hosts',
-  data: {
-    value: 'unique_count(host.name)',
-    format: {
-      id: 'number',
-      params: {
-        decimals: 0,
-      },
+export const hostCount: FormulaConfig = {
+  label: 'Hosts',
+  formula: 'unique_count(host.name)',
+  format: {
+    id: 'number',
+    params: {
+      decimals: 0,
     },
   },
 };

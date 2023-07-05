@@ -5,30 +5,28 @@
  * 2.0.
  */
 
-import type { FormBasedPersistedState, XYState } from '@kbn/lens-plugin/public';
+import type { FormBasedPersistedState, XYLayerConfig, XYState } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { Filter } from '@kbn/es-query';
 import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { DEFAULT_AD_HOC_DATA_VIEW_ID, DEFAULT_LAYER_ID } from '../utils';
-import type { Chart, XYChartConfig } from '../../types';
-import { getFilters } from '../formulas/host/utils';
+import { DEFAULT_LAYER_ID } from '../utils';
+import type { Chart, ChartConfig, ChartLayer } from '../../types';
 
 const ACCESSOR = 'formula_accessor';
 
 export class LineChart implements Chart<XYState> {
-  constructor(private state: XYChartConfig) {}
+  constructor(private chartConfig: ChartConfig<Array<ChartLayer<XYLayerConfig>>>) {}
 
   getVisualizationType(): string {
     return 'lnsXY';
   }
 
   getLayers(): FormBasedPersistedState['layers'] {
-    return this.state.layers.reduce((acc, curr, index) => {
+    return this.chartConfig.layer.reduce((acc, curr, index) => {
       const layerId = `${DEFAULT_LAYER_ID}_${index}`;
       const accessorId = `${ACCESSOR}_${index}`;
       return {
         ...acc,
-        ...curr.getLayer(layerId, accessorId, this.state.dataView),
+        ...curr.getLayer(layerId, accessorId, this.chartConfig.dataView),
       };
     }, {});
   }
@@ -36,34 +34,28 @@ export class LineChart implements Chart<XYState> {
   getVisualizationState(): XYState {
     return getXYVisualizationState({
       layers: [
-        ...this.state.layers.map((p, index) => {
+        ...this.chartConfig.layer.map((layerItem, index) => {
           const layerId = `${DEFAULT_LAYER_ID}_${index}`;
           const accessorId = `${ACCESSOR}_${index}`;
-          return p.getLayerConfig(layerId, accessorId);
+          return layerItem.getLayerConfig(layerId, accessorId);
         }),
       ],
     });
   }
 
   getReferences(): SavedObjectReference[] {
-    return this.state.layers.flatMap((p, index) => {
+    return this.chartConfig.layer.flatMap((p, index) => {
       const layerId = `${DEFAULT_LAYER_ID}_${index}`;
-      return p.getReference(layerId, this.state.dataView);
+      return p.getReference(layerId, this.chartConfig.dataView);
     });
   }
 
   getDataView(): DataView {
-    return this.state.dataView;
+    return this.chartConfig.dataView;
   }
 
   getTitle(): string {
-    return this.state.options?.title ?? this.state.layers[0].getName();
-  }
-
-  getFilters(): Filter[] {
-    return getFilters({
-      id: this.state.dataView.id ?? DEFAULT_AD_HOC_DATA_VIEW_ID,
-    });
+    return this.chartConfig.title ?? this.chartConfig.layer[0].getName();
   }
 }
 

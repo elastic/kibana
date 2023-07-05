@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { FormulaValue, LayerValue } from '../../../types';
+import type { FormulaConfig } from '../../../types';
 
-export const diskIOWrite: LayerValue<FormulaValue> = {
-  name: 'Disk Write IOPS',
-  data: {
-    value: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
-    format: {
-      id: 'number',
-      params: {
-        decimals: 0,
-      },
+export const diskIOWrite: FormulaConfig = {
+  label: 'Disk Write IOPS',
+  formula: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
+  format: {
+    id: 'number',
+    params: {
+      decimals: 0,
     },
   },
 };

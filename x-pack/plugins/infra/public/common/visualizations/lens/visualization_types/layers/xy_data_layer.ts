@@ -12,17 +12,30 @@ import {
   PersistedIndexPatternLayer,
   XYDataLayerConfig,
 } from '@kbn/lens-plugin/public';
-import { XYLayerSetting, Layer, XYLayerOptions } from '../../../types';
+import { ChartLayer } from '../../../types';
 import { getDefaultReferences, getHistogramColumn, getTopValuesColumn } from '../../utils';
+import { FormulaColumn } from './column/formula';
 
 const BREAKDOWN_COLUMN_NAME = 'hosts_aggs_breakdown';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 
-export class XYLayer implements Layer<XYDataLayerConfig> {
-  constructor(private setting: XYLayerSetting) {}
+export interface XYLayerOptions {
+  breakdown?: {
+    size: number;
+    sourceField: string;
+  };
+}
+
+interface XYLayerConfig {
+  column: FormulaColumn[];
+  options?: XYLayerOptions;
+}
+
+export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
+  constructor(private layerConfig: XYLayerConfig) {}
 
   getName(): string {
-    return this.setting.data[0].getName();
+    return this.layerConfig.column[0].getName();
   }
 
   getBaseColumnColumn(dataView: DataView, options?: XYLayerOptions) {
@@ -56,17 +69,17 @@ export class XYLayer implements Layer<XYDataLayerConfig> {
     const baseLayer: PersistedIndexPatternLayer = {
       columnOrder: [BREAKDOWN_COLUMN_NAME, HISTOGRAM_COLUMN_NAME],
       columns: {
-        ...this.getBaseColumnColumn(dataView, this.setting.options),
+        ...this.getBaseColumnColumn(dataView, this.layerConfig.options),
       },
     };
 
     return {
-      [layerId]: this.setting.data.reduce(
+      [layerId]: this.layerConfig.column.reduce(
         (acc, curr, index) => ({
           ...acc,
-          ...curr.getLayer(`${accessorId}_${index}`, dataView, baseLayer),
+          ...curr.getData(`${accessorId}_${index}`, dataView, acc),
         }),
-        {} as PersistedIndexPatternLayer
+        baseLayer
       ),
     };
   }
@@ -75,11 +88,11 @@ export class XYLayer implements Layer<XYDataLayerConfig> {
     return getDefaultReferences(dataView, layerId);
   }
 
-  getLayerConfig(layerId: string, acessorId: string): XYDataLayerConfig {
+  getLayerConfig(layerId: string, accessorId: string): XYDataLayerConfig {
     return {
       layerId,
       seriesType: 'line',
-      accessors: [acessorId],
+      accessors: this.layerConfig.column.map((_, index) => `${accessorId}_${index}`),
       yConfig: [],
       layerType: 'data',
       xAccessor: HISTOGRAM_COLUMN_NAME,

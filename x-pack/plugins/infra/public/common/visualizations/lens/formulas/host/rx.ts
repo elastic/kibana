@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import type { FormulaValue, LayerValue } from '../../../types';
+import type { FormulaConfig } from '../../../types';
 
-export const rx: LayerValue<FormulaValue> = {
-  name: 'Network Inbound (RX)',
-  data: {
-    value:
-      "average(host.network.ingress.bytes) * 8 / (max(metricset.period, kql='host.network.ingress.bytes: *') / 1000)",
-    format: {
-      id: 'bits',
-      params: {
-        decimals: 1,
-      },
+export const rx: FormulaConfig = {
+  label: 'Network Inbound (RX)',
+  formula:
+    "average(host.network.ingress.bytes) * 8 / (max(metricset.period, kql='host.network.ingress.bytes: *') / 1000)",
+  format: {
+    id: 'bits',
+    params: {
+      decimals: 1,
     },
   },
 };

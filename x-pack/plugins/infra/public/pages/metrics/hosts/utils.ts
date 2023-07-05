@@ -9,10 +9,32 @@ import {
   BooleanRelation,
   buildCombinedFilter,
   buildPhraseFilter,
+  buildExistsFilter,
   Filter,
   isCombinedFilter,
 } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
+
+export const buildExistsHostsFilter = ({
+  field,
+  dataView,
+}: {
+  field: string;
+  dataView?: DataView;
+}) => {
+  if (!dataView) {
+    return {
+      meta: {},
+      query: {
+        exists: {
+          field,
+        },
+      },
+    };
+  }
+  const indexField = dataView.getFieldByName(field)!;
+  return buildExistsFilter(indexField, dataView);
+};
 
 export const buildCombinedHostsFilter = ({
   field,
@@ -27,7 +49,7 @@ export const buildCombinedHostsFilter = ({
     return {
       query: {
         terms: {
-          'host.name': values,
+          [field]: values,
         },
       },
       meta: {},

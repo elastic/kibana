@@ -254,7 +254,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.cpuUsage}
             toolTip={TOOLTIP.cpuUsage}
-            formula={hostLensFormulas.cpuUsage.data.formula}
+            formula={hostLensFormulas.cpuUsage.formula}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -269,7 +269,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.normalizedLoad1m}
             toolTip={TOOLTIP.normalizedLoad1m}
-            formula={hostLensFormulas.normalizedLoad1m.data.formula}
+            formula={hostLensFormulas.normalizedLoad1m.formula}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -284,7 +284,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryUsage}
             toolTip={TOOLTIP.memoryUsage}
-            formula={hostLensFormulas.memoryUsage.data.formula}
+            formula={hostLensFormulas.memoryUsage.formula}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -299,7 +299,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryFree}
             toolTip={TOOLTIP.memoryFree}
-            formula={hostLensFormulas.memoryFree.data.formula}
+            formula={hostLensFormulas.memoryFree.formula}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -314,7 +314,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.diskSpaceUsage}
             toolTip={TOOLTIP.diskSpaceUsage}
-            formula={hostLensFormulas.diskSpaceUsage.data.formula}
+            formula={hostLensFormulas.diskSpaceUsage.formula}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -329,7 +329,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.rx}
             toolTip={TOOLTIP.rx}
-            formula={hostLensFormulas.rx.data.formula}
+            formula={hostLensFormulas.rx.formula}
             popoverContainerRef={popoverContainerRef}
           />
         ),
@@ -345,7 +345,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.tx}
             toolTip={TOOLTIP.tx}
-            formula={hostLensFormulas.tx.data.formula}
+            formula={hostLensFormulas.tx.formula}
             popoverContainerRef={popoverContainerRef}
           />
         ),

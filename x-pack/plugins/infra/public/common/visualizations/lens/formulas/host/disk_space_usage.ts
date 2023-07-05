@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { FormulaValue, LayerValue } from '../../../types';
+import type { FormulaConfig } from '../../../types';
 
-export const diskSpaceUsage: LayerValue<FormulaValue> = {
-  name: 'Disk Space Usage',
-  data: {
-    value: 'average(system.filesystem.used.pct)',
-    format: {
-      id: 'percent',
-      params: {
-        decimals: 0,
-      },
+export const diskSpaceUsage: FormulaConfig = {
+  label: 'Disk Space Usage',
+  formula: 'average(system.filesystem.used.pct)',
+  format: {
+    id: 'percent',
+    params: {
+      decimals: 0,
     },
   },
 };

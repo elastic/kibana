@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import type { FormulaValue, LayerValue } from '../../../types';
+import type { FormulaConfig } from '../../../types';
 
-export const tx: LayerValue<FormulaValue> = {
-  name: 'Network Outbound (TX)',
-  data: {
-    value:
-      "average(host.network.egress.bytes) * 8 / (max(metricset.period, kql='host.network.egress.bytes: *') / 1000)",
-    format: {
-      id: 'bits',
-      params: {
-        decimals: 1,
-      },
+export const tx: FormulaConfig = {
+  label: 'Network Outbound (TX)',
+  formula:
+    "average(host.network.egress.bytes) * 8 / (max(metricset.period, kql='host.network.egress.bytes: *') / 1000)",
+  format: {
+    id: 'bits',
+    params: {
+      decimals: 1,
     },
   },
 };

@@ -14,6 +14,7 @@ import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 
 export const DEFAULT_LAYER_ID = 'layer';
 export const DEFAULT_AD_HOC_DATA_VIEW_ID = 'infra_lens_ad_hoc_default';
+
 const DEFAULT_BREAKDOWN_SIZE = 10;
 
 export const getHistogramColumn = ({

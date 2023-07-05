@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { FormulaValue, LayerValue } from '../../../types';
+import type { FormulaConfig } from '../../../types';
 
-export const memoryFree: LayerValue<FormulaValue> = {
-  name: 'Memory Free',
-  data: {
-    value: 'max(system.memory.total) - average(system.memory.actual.used.bytes)',
-    format: {
-      id: 'bytes',
-      params: {
-        decimals: 1,
-      },
+export const memoryFree: FormulaConfig = {
+  label: 'Memory Free',
+  formula: 'max(system.memory.total) - average(system.memory.actual.used.bytes)',
+  format: {
+    id: 'bytes',
+    params: {
+      decimals: 1,
     },
   },
 };

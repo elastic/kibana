@@ -12,13 +12,26 @@ import {
   MetricVisualizationState,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
-import { Layer, MetricLayerSetting } from '../../../types';
+import { ChartLayer } from '../../../types';
 import { getDefaultReferences, getHistogramColumn } from '../../utils';
+import { FormulaColumn } from './column/formula';
 
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 
-export class MetricLayer implements Layer<MetricVisualizationState> {
-  constructor(private setting: MetricLayerSetting) {}
+export interface MetricLayerOptions {
+  backgroundColor?: string;
+  showTitle?: boolean;
+  showTrendLine?: boolean;
+  subtitle?: string;
+}
+
+interface MetricLayerConfig {
+  column: FormulaColumn;
+  options?: MetricLayerOptions;
+}
+
+export class MetricLayer implements ChartLayer<MetricVisualizationState> {
+  constructor(private layerConfig: MetricLayerConfig) {}
 
   getLayer(
     layerId: string,
@@ -42,29 +55,31 @@ export class MetricLayer implements Layer<MetricVisualizationState> {
 
     return {
       [layerId]: {
-        ...this.setting.data.getLayer(accessorId, dataView, {
+        ...this.layerConfig.column.getData(accessorId, dataView, {
           columnOrder: [],
           columns: {},
         }),
       },
-      [`${layerId}_trendline`]: this.setting.data.getLayer(
-        `${accessorId}_trendline`,
-        dataView,
-        baseLayer
-      ),
+      [`${layerId}_trendline`]: {
+        linkToLayers: [layerId],
+        ...this.layerConfig.column.getData(`${accessorId}_trendline`, dataView, baseLayer),
+      },
     };
   }
   getReference(layerId: string, dataView: DataView): SavedObjectReference[] {
-    return getDefaultReferences(dataView, layerId);
+    return [
+      ...getDefaultReferences(dataView, layerId),
+      ...getDefaultReferences(dataView, `${layerId}_trendline`),
+    ];
   }
 
-  getLayerConfig(layerId: string, acessorId: string): MetricVisualizationState {
-    const { options } = this.setting;
-    const { subtitle, backgroundColor, showTrendLine = true } = options ?? {};
+  getLayerConfig(layerId: string, accessorId: string): MetricVisualizationState {
+    const { subtitle, backgroundColor, showTrendLine = true } = this.layerConfig.options ?? {};
+
     return {
       layerId,
       layerType: 'data',
-      metricAccessor: acessorId,
+      metricAccessor: accessorId,
       color: backgroundColor,
       subtitle,
       showBar: false,
@@ -72,13 +87,13 @@ export class MetricLayer implements Layer<MetricVisualizationState> {
         ? {
             trendlineLayerId: `${layerId}_trendline`,
             trendlineLayerType: 'metricTrendline',
-            trendlineMetricAccessor: `${acessorId}_trendline`,
+            trendlineMetricAccessor: `${accessorId}_trendline`,
             trendlineTimeAccessor: HISTOGRAM_COLUMN_NAME,
           }
         : {}),
     };
   }
   getName(): string {
-    return this.setting.data.getName();
+    return this.layerConfig.column.getName();
   }
 }

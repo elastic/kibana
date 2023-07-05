@@ -5,27 +5,15 @@
  * 2.0.
  */
 
-import type { FormulaValue, LayerValue } from '../../../types';
+import type { FormulaConfig } from '../../../types';
 
-// const lineChartConfig: LineChartConfig = {
-//   extraVisualizationState: {
-//     yLeftExtent: {
-//       mode: 'custom',
-//       lowerBound: 0,
-//       upperBound: 1,
-//     },
-//   },
-// };
-
-export const memoryUsage: LayerValue<FormulaValue> = {
-  name: 'Memory Usage',
-  data: {
-    value: 'average(system.memory.actual.used.pct)',
-    format: {
-      id: 'percent',
-      params: {
-        decimals: 0,
-      },
+export const memoryUsage: FormulaConfig = {
+  label: 'Memory Usage',
+  formula: 'average(system.memory.actual.used.pct)',
+  format: {
+    id: 'percent',
+    params: {
+      decimals: 0,
     },
   },
 };

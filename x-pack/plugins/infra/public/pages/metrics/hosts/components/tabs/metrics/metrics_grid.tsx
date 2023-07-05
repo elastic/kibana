@@ -13,24 +13,59 @@ import { MetricChart, MetricChartProps } from './metric_chart';
 import { HostMetricsDocsLink } from '../../metric_explanation/host_metrics_docs_link';
 
 const DEFAULT_BREAKDOWN_SIZE = 20;
-const CHARTS_IN_ORDER: Array<Pick<MetricChartProps, 'title' | 'type'> & { fullRow?: boolean }> = [
+const CHARTS_IN_ORDER: Array<
+  Pick<MetricChartProps, 'title' | 'type' | 'overrides' | 'extraLayers'>
+> = [
   {
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.cpuUsage', {
       defaultMessage: 'CPU Usage',
     }),
     type: 'cpuUsage',
+    overrides: {
+      axisLeft: {
+        domain: {
+          min: 0,
+          max: 1,
+        },
+      },
+    },
   },
   {
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.normalizedLoad1m', {
       defaultMessage: 'Normalized Load',
     }),
     type: 'normalizedLoad1m',
+    extraLayers: [
+      {
+        formula: [
+          {
+            formula: '1',
+            format: {
+              id: 'percent',
+              params: {
+                decimals: 0,
+              },
+            },
+            color: '#6092c0',
+          },
+        ],
+        layerType: 'referenceLine',
+      },
+    ],
   },
   {
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.memoryUsage', {
       defaultMessage: 'Memory Usage',
     }),
     type: 'memoryUsage',
+    overrides: {
+      axisLeft: {
+        domain: {
+          min: 0,
+          max: 1,
+        },
+      },
+    },
   },
   {
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.memoryFree', {
@@ -43,6 +78,14 @@ const CHARTS_IN_ORDER: Array<Pick<MetricChartProps, 'title' | 'type'> & { fullRo
       defaultMessage: 'Disk Space Usage',
     }),
     type: 'diskSpaceUsage',
+    overrides: {
+      axisLeft: {
+        domain: {
+          min: 0,
+          max: 1,
+        },
+      },
+    },
   },
   {
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskSpaceAvailable', {
@@ -94,8 +137,8 @@ export const MetricsGrid = React.memo(() => {
       <HostMetricsDocsLink />
       <EuiSpacer size="s" />
       <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
-        {CHARTS_IN_ORDER.map(({ fullRow, ...chartProp }) => (
-          <EuiFlexItem key={chartProp.type} style={fullRow ? { gridColumn: '1/-1' } : {}}>
+        {CHARTS_IN_ORDER.map((chartProp) => (
+          <EuiFlexItem key={chartProp.type}>
             <MetricChart breakdownSize={DEFAULT_BREAKDOWN_SIZE} {...chartProp} />
           </EuiFlexItem>
         ))}

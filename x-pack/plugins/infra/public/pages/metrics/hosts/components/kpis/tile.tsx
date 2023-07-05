@@ -22,10 +22,13 @@ import { Action } from '@kbn/ui-actions-plugin/public';
 import { useLensAttributes } from '../../../../../hooks/use_lens_attributes';
 import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
-import { HostsLensMetricChartFormulas } from '../../../../../common/visualizations';
+import {
+  hostLensFormulas,
+  HostsLensMetricChartFormulas,
+} from '../../../../../common/visualizations';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { LensWrapper } from '../chart/lens_wrapper';
-import { buildCombinedHostsFilter } from '../../utils';
+import { buildCombinedHostsFilter, buildExistsHostsFilter } from '../../utils';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
 import { TooltipContent } from '../metric_explanation/tooltip_content';
@@ -43,7 +46,6 @@ export interface KPIChartProps {
 }
 
 export const Tile = ({
-  title,
   type,
   backgroundColor,
   toolTip,
@@ -70,25 +72,25 @@ export const Tile = ({
   };
 
   const { formula, attributes, getExtraActions, error } = useLensAttributes({
-    layer: {
+    dataView,
+    layers: {
       formula: {
-        type,
-        params: {
-          format: {
+        ...hostLensFormulas[type],
+        format: {
+          ...hostLensFormulas[type].format,
+          params: {
             decimals,
           },
         },
       },
+      layerType: 'data',
+      options: {
+        backgroundColor,
+        subtitle: getSubtitle(),
+        showTrendLine: trendLine,
+      },
     },
-    dataView,
-    options: {
-      backgroundColor,
-      subtitle: getSubtitle(),
-      showTrendLine: trendLine,
-      showTitle: false,
-      title,
-    },
-    visualizationType: 'metricChart',
+    visualizationType: 'lnsMetric',
   });
 
   const filters = useMemo(() => {
@@ -99,6 +101,7 @@ export const Tile = ({
         values: hostNodes.map((p) => p.name),
         dataView,
       }),
+      buildExistsHostsFilter({ field: 'host.name', dataView }),
     ];
   }, [searchCriteria.filters, hostNodes, dataView]);
 

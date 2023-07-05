@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { FormulaValue, LayerValue } from '../../../types';
+import type { FormulaConfig } from '../../../types';
 
-export const diskIORead: LayerValue<FormulaValue> = {
-  name: 'Disk Read IOPS',
-  data: {
-    value: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
-    format: {
-      id: 'number',
-      params: {
-        decimals: 0,
-      },
+export const diskIORead: FormulaConfig = {
+  label: 'Disk Read IOPS',
+  formula: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
+  format: {
+    id: 'number',
+    params: {
+      decimals: 0,
     },
   },
 };

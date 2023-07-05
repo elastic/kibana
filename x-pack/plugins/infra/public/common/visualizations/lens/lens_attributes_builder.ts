@@ -34,7 +34,7 @@ export class LensAttributesBuilder<T extends Chart<LensVisualizationState>>
           },
         },
         internalReferences: visualization.getReferences(),
-        filters: visualization.getFilters(),
+        filters: [],
         query: { language: 'kuery', query: '' },
         visualization: visualization.getVisualizationState(),
         adHocDataViews: getAdhocDataView(this.dataViewCache.getSpec(visualization.getDataView())),

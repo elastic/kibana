@@ -10,12 +10,13 @@ import { Action } from '@kbn/ui-actions-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useIntersectedOnce } from '../../../../../hooks/use_intersection_once';
 import { LensAttributes } from '../../../../../common/visualizations';
 import { ChartLoader } from './chart_loader';
 
-export interface LensWrapperProps {
+export interface LensWrapperProps extends Pick<TypedLensByValueInput, 'overrides'> {
   id: string;
   attributes: LensAttributes | null;
   dateRange: TimeRange;
@@ -41,6 +42,7 @@ export const LensWrapper = React.memo(
     style,
     onBrushEnd,
     lastReloadRequestTime,
+    overrides,
     loading = false,
     hasTitle = false,
   }: LensWrapperProps) => {
@@ -103,12 +105,14 @@ export const LensWrapper = React.memo(
             <EmbeddableComponent
               id={id}
               style={style}
+              hidePanelTitles={!hasTitle}
               attributes={state.attributes}
               viewMode={ViewMode.VIEW}
               timeRange={state.dateRange}
               query={state.query}
               filters={state.filters}
               extraActions={extraActions}
+              overrides={overrides}
               lastReloadRequestTime={state.lastReloadRequestTime}
               executionContext={{
                 type: 'infrastructure_observability_hosts_view',
