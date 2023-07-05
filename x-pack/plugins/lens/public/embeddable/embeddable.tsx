@@ -18,6 +18,7 @@ import {
   AggregateQuery,
   TimeRange,
   isOfQueryType,
+  getAggregateQueryMode,
 } from '@kbn/es-query';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
@@ -726,6 +727,18 @@ export class Embeddable
     }
     const query = this.savedVis.state.query;
     return !isOfQueryType(query);
+  }
+
+  public getTextBasedLanguage(): string | undefined {
+    if (!this.savedVis) {
+      return;
+    }
+    const query = this.savedVis.state.query;
+    if (isOfQueryType(query)) {
+      return;
+    }
+    const language = getAggregateQueryMode(query);
+    return String(language).toUpperCase();
   }
 
   async updateVisualization(datasourceState: unknown, visualizationState: unknown) {

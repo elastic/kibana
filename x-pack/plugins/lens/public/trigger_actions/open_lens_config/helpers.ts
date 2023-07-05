@@ -9,8 +9,7 @@ import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { OverlayRef, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type { Embeddable } from '../../embeddable';
-import { DOC_TYPE } from '../../../common/constants';
+import { isLensEmbeddable } from '../utils';
 import type { LensPluginStartDependencies } from '../../plugin';
 
 interface Context {
@@ -27,9 +26,6 @@ interface TracksOverlays {
 
 function tracksOverlays(root: unknown): root is TracksOverlays {
   return Boolean((root as TracksOverlays).openOverlay && (root as TracksOverlays).clearOverlays);
-}
-function isLensEmbeddable(embeddable: IEmbeddable): embeddable is Embeddable {
-  return embeddable.type === DOC_TYPE;
 }
 
 export async function isActionCompatible(embeddable: IEmbeddable) {

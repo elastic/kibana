@@ -9,6 +9,7 @@ import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import type { LensPluginStartDependencies } from '../../plugin';
+import { isLensEmbeddable } from '../utils';
 
 const ACTION_CONFIGURE_IN_LENS = 'ACTION_CONFIGURE_IN_LENS';
 
@@ -30,13 +31,15 @@ export class ConfigureInLensPanelAction implements Action<Context> {
   ) {}
 
   public getDisplayName({ embeddable }: Context): string {
-    return i18n.translate('xpack.lens.app.configureInLens', {
-      defaultMessage: 'Configure in Lens',
+    const language = isLensEmbeddable(embeddable) ? embeddable.getTextBasedLanguage() : undefined;
+    return i18n.translate('xpack.lens.app.editVisualizationLabel', {
+      defaultMessage: 'Edit {lang} visualization',
+      values: { lang: language },
     });
   }
 
   public getIconType() {
-    return 'lensApp';
+    return 'pencil';
   }
 
   public async isCompatible({ embeddable }: Context) {
