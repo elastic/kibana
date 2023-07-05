@@ -16,6 +16,7 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import byteSize from 'byte-size';
@@ -35,7 +36,11 @@ import {
   useFetchSessionViewAlerts,
   useFetchGetTotalIOBytes,
 } from './hooks';
-import { LOCAL_STORAGE_DISPLAY_OPTIONS_KEY } from '../../../common/constants';
+import {
+  LOCAL_STORAGE_DISPLAY_OPTIONS_KEY,
+  USAGE_COLLECTION_APP_NAME,
+} from '../../../common/constants';
+import { CLOUD_DEFEND_INDEX, ENDPOINT_INDEX } from '../../methods';
 import { REFRESH_SESSION, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from './translations';
 
 /**
@@ -52,12 +57,32 @@ export const SessionView = ({
   investigatedAlertId,
   loadAlertDetails,
   canReadPolicyManagement,
+  usageCollection,
 }: SessionViewDeps) => {
   // don't engage jumpTo if jumping to session leader.
   if (jumpToEntityId === sessionEntityId) {
     jumpToEntityId = undefined;
     jumpToCursor = undefined;
   }
+
+  // track session open telemetry
+  useEffect(() => {
+    let eventName = 'session_view_opened';
+
+    if (index === CLOUD_DEFEND_INDEX) {
+      eventName += '_cloud-defend';
+    } else if (index === ENDPOINT_INDEX) {
+      eventName += '_endpoint';
+    }
+
+    if (investigatedAlertId) {
+      eventName += '_alert';
+    } else {
+      eventName += '_log';
+    }
+
+    usageCollection?.reportUiCounter(USAGE_COLLECTION_APP_NAME, METRIC_TYPE.CLICK, eventName);
+  }, [index, investigatedAlertId, usageCollection]);
 
   const [showTTY, setShowTTY] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);

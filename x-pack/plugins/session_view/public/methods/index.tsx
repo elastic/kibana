@@ -8,6 +8,7 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { SessionViewDeps } from '../types';
 
 // Initializing react-query
@@ -48,13 +49,16 @@ export const getIndexPattern = (eventIndex?: string | null) => {
   return clusterStr + index;
 };
 
-export const getSessionViewLazy = (props: SessionViewDeps) => {
+export const getSessionViewLazy = (
+  props: SessionViewDeps,
+  usageCollection: UsageCollectionSetup
+) => {
   const index = getIndexPattern(props.index);
 
   return (
     <QueryClientProvider client={queryClient}>
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <SessionViewLazy {...props} index={index} />
+        <SessionViewLazy {...props} index={index} usageCollection={usageCollection} />
       </Suspense>
     </QueryClientProvider>
   );

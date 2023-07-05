@@ -5,9 +5,23 @@
  * 2.0.
  */
 import { ReactNode } from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
 
-export type SessionViewServices = CoreStart;
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SessionViewPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface SessionViewPluginStart {}
+
+export interface SessionViewPluginStartDeps {
+  usageCollection?: UsageCollectionStart;
+}
+
+export interface SessionViewPluginSetupDeps {
+  usageCollection?: UsageCollectionSetup;
+}
 
 export interface SessionViewDeps {
   // we pass in the index of the session leader that spawned session_view, this avoids having to query multiple cross cluster indices
@@ -35,6 +49,7 @@ export interface SessionViewDeps {
     handleOnAlertDetailsClosed: () => void
   ) => void;
   canReadPolicyManagement?: boolean;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface EuiTabProps {
