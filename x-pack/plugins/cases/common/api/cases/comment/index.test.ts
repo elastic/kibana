@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { PathReporter } from 'io-ts/lib/PathReporter';
+
 import {
   CommentAttributesBasicRt,
   CommentType,
@@ -342,21 +344,12 @@ describe('Comments', () => {
       });
     });
 
-    it.skip('throws error when comment is too long', () => {
+    it('throws error when comment is too long', () => {
       const longComment = 'x'.repeat(MAX_COMMENT_LENGTH + 1);
 
-      expect(CommentRequestRt.decode({ ...defaultRequest, comment: longComment })).toMatchObject({
-        _tag: 'Left',
-        left: [{
-          context:[{
-          actual: {
-              ...defaultRequest,
-              comment: longComment,
-              message: "The length of the comment is too long. The maximum length is 30000."
-            }
-          }]
-        }]
-      });
+      expect(
+        PathReporter.report(CommentRequestRt.decode({ ...defaultRequest, comment: longComment }))
+      ).toContain('The length of the comment is too long. The maximum length is 30000.');
     });
   });
 
