@@ -15,6 +15,7 @@
       "embeddable",
       "features",
       "infra",
+      "logsShared",
       "inspector",
       "licensing",
       "observability",
