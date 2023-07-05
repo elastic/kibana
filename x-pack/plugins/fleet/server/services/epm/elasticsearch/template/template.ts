@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable no-console */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
@@ -36,6 +37,10 @@ interface Properties {
 
 interface MultiFields {
   [key: string]: object;
+}
+
+interface RuntimeFields {
+  [key: string]: any;
 }
 
 export interface IndexTemplateMapping {
@@ -115,6 +120,7 @@ export function getTemplate({
 export function generateMappings(fields: Field[]): IndexTemplateMappings {
   const dynamicTemplates: Array<Record<string, Properties>> = [];
   const dynamicTemplateNames = new Set<string>();
+  const runtimeFields: RuntimeFields = {};
 
   const { properties } = _generateMappings(fields, {
     addDynamicMapping: (dynamicMapping: {
@@ -142,12 +148,21 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
       dynamicTemplateNames.add(name);
       dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
     },
+    addRuntimeField: (runtimeField: { path: string; properties: Properties }) => {
+      console.log('>> properties ', runtimeField.properties);
+      runtimeFields[`${runtimeField.path}`] = runtimeField.properties;
+    },
   });
 
   const indexTemplateMappings: IndexTemplateMappings = { properties };
   if (dynamicTemplates.length > 0) {
     indexTemplateMappings.dynamic_templates = dynamicTemplates;
   }
+  if (runtimeFields) {
+    console.log('>> adding runtime fields', runtimeFields);
+    indexTemplateMappings.runtime = runtimeFields;
+  }
+  console.log('Final index template mappings: ', indexTemplateMappings);
   return indexTemplateMappings;
 }
 
@@ -163,6 +178,7 @@ function _generateMappings(
   fields: Field[],
   ctx: {
     addDynamicMapping: any;
+    addRuntimeField: any;
     groupFieldName?: string;
   }
 ): {
@@ -177,6 +193,37 @@ function _generateMappings(
     fields.forEach((field) => {
       // If type is not defined, assume keyword
       const type = field.type || 'keyword';
+
+      if (field.runtime) {
+        let runtimeFieldProps: Properties = getDefaultProperties(field);
+        switch (type) {
+          case 'integer':
+            runtimeFieldProps.type = 'long';
+            break;
+          case 'scaled_float':
+            runtimeFieldProps = scaledFloat(field);
+            break;
+          case 'date':
+            const dateMappings = generateDateMapping(field);
+            runtimeFieldProps = { ...runtimeFieldProps, ...dateMappings, type: 'date' };
+            break;
+          default:
+            runtimeFieldProps.type = type;
+        }
+
+        if (typeof field.runtime === 'string') {
+          const scriptObject = {
+            source: field.runtime.trim(),
+          };
+          runtimeFieldProps.script = scriptObject;
+        }
+
+        console.log('There is a runtime field ', field.name);
+        console.log('Properties: ', runtimeFieldProps);
+        ctx.addRuntimeField({ path: field.name, properties: runtimeFieldProps });
+
+        return; // runtime fields should not be added as a property
+      }
 
       if (type === 'object' && field.object_type) {
         const path = ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name;

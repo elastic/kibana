@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+/* eslint-disable no-console */
 
 import { merge, concat, uniqBy, omit } from 'lodash';
 import Boom from '@hapi/boom';
@@ -332,6 +333,8 @@ export function buildComponentTemplates(params: {
     (dynampingTemplate) => Object.keys(dynampingTemplate)[0]
   );
 
+  const mappingsRuntimeFields = mappings.runtime;
+
   const isTimeSeriesEnabledByDefault = registryElasticsearch?.index_mode === 'time_series';
   const isSyntheticSourceEnabledByDefault = registryElasticsearch?.source_mode === 'synthetic';
 
@@ -341,6 +344,11 @@ export function buildComponentTemplates(params: {
       isSyntheticSourceEnabledByDefault ||
       isTimeSeriesEnabledByDefault);
 
+  console.log(
+    '>> installing -> indexTemplateMappings',
+    JSON.stringify(indexTemplateMappings, null, 2)
+  );
+  console.log('>> installing -> before assigning', JSON.stringify(mappingsRuntimeFields, null, 2));
   templatesMap[packageTemplateName] = {
     template: {
       settings: {
@@ -359,8 +367,9 @@ export function buildComponentTemplates(params: {
       },
       mappings: {
         properties: mappingsProperties,
+        runtime: mappingsRuntimeFields, // runtimeObject, // mappings?.runtime, //  mappingsRuntimeFields,
         dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
-        ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', '_source'),
+        ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', '_source', 'runtime'),
         ...(indexTemplateMappings?._source || sourceModeSynthetic
           ? {
               _source: {
@@ -537,6 +546,8 @@ export function prepareTemplate({
     experimentalDataStreamFeature,
   });
 
+  console.log('component templates 1', JSON.stringify(componentTemplates, null, 2));
+
   const template = getTemplate({
     templateIndexPattern,
     packageName,
@@ -548,6 +559,7 @@ export function prepareTemplate({
     isIndexModeTimeSeries,
   });
 
+  console.log('component templates 2', JSON.stringify(componentTemplates, null, 2));
   return {
     componentTemplates,
     indexTemplate: {
