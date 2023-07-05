@@ -106,7 +106,7 @@ export abstract class BaseLogFormat extends Stream.Transform {
     if (isResponseEvent(event)) {
       _.defaults(data, _.pick(event, ['method', 'statusCode']));
 
-      const source = _.get(event, 'source', {});
+      const source = _.get(event, 'source', {} as any);
       data.req = {
         url: event.path,
         method: event.method || '',

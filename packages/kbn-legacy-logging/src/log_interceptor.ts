@@ -44,7 +44,7 @@ function downgradeIfErrorType(errorType: string, event: AnyEvent) {
   }
 
   const matchesErrorType =
-    get(event, 'error.code') === errorType || get(event, 'error.errno') === errorType;
+    get(event, 'error.code', 'N/A') === errorType || get(event, 'error.errno', 'N/A') === errorType;
   if (!matchesErrorType) {
     return null;
   }
@@ -155,6 +155,7 @@ export class LogInterceptor extends Stream.Transform {
   downgradeIfHTTPWhenHTTPS(event: AnyEvent) {
     return downgradeIfErrorMessage(OPENSSL_GET_RECORD_REGEX, 'debug', event);
   }
+
   /**
    * When Kibana has HTTPS enabled and Kibana doesn't trust the certificate,
    * an error surfaces in the logs.

@@ -76,6 +76,7 @@
     "**/@types/babel__generator": "^7.6.4",
     "**/@types/babel__generator/@babel/types": "^7.21.0",
     "**/@types/node": "16.11.7",
+    "**/@types/react": "16.14.25",
     "**/@types/react-dom": "^16.9.8",
     "**/babel-jest": "29.3.1",
     "**/chokidar": "^3.4.3",
