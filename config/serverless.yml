@@ -16,7 +16,7 @@ migrations.zdt:
   runOnRoles: ["ui"]
 
 # Ess plugins
-xpack.ess.security.enabled: false
+xpack.securitySolutionEss.enabled: false
 
 # Management team plugins
 xpack.upgrade_assistant.enabled: false
