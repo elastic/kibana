@@ -8,14 +8,11 @@
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
-import {
-  isCompleteResponse,
-  ISearchSource,
-  type SearchResponseWarning,
-} from '@kbn/data-plugin/public';
+import { isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
 import type { RecordsFetchResponse, EsHitRecord } from '../../../types';
 import { buildDataTableRecordList } from '../../../utils/build_data_record';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
+import { getSearchResponseInterceptedWarnings } from '../../../utils/get_search_response_intercepted_warnings';
 import { FetchDeps } from './fetch_all';
 
 const DISABLE_SHARD_FAILURE_WARNING = true;
@@ -69,17 +66,20 @@ export const fetchDocuments = (
     );
 
   return lastValueFrom(fetch$).then((records) => {
-    const warnings: SearchResponseWarning[] = [];
+    const adapter = inspectorAdapters.requests;
+    const interceptedWarnings = adapter
+      ? getSearchResponseInterceptedWarnings({
+          services,
+          adapter,
+          options: {
+            disableShardFailureWarning: DISABLE_SHARD_FAILURE_WARNING,
+          },
+        })
+      : [];
 
-    if (DISABLE_SHARD_FAILURE_WARNING) {
-      services.data.search.showWarnings(inspectorAdapters.requests!, (warning) => {
-        if (warning.type === 'shard_failure') {
-          warnings.push(warning);
-          return true; // suppress the default behaviour
-        }
-      });
-    }
-
-    return { records, warnings: warnings.length ? warnings : undefined };
+    return {
+      records,
+      interceptedWarnings: interceptedWarnings.length ? interceptedWarnings : undefined,
+    };
   });
 };

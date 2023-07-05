@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { BehaviorSubject, filter, map, Observable, share, Subject, tap } from 'rxjs';
-import type { AutoRefreshDoneFn, SearchResponseWarning } from '@kbn/data-plugin/public';
+import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -26,7 +26,7 @@ import { validateTimeRange } from '../utils/validate_time_range';
 import { fetchAll } from '../utils/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../utils/get_fetch_observable';
-import { DataTableRecord } from '../../../types';
+import type { DataTableRecord, SearchResponseInterceptedWarning } from '../../../types';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -73,7 +73,7 @@ export interface DataMainMsg extends DataMsg {
 export interface DataDocumentsMsg extends DataMsg {
   result?: DataTableRecord[];
   textBasedQueryColumns?: DatatableColumn[]; // columns from text-based request
-  warnings?: SearchResponseWarning[]; // warnings (like shard failures)
+  interceptedWarnings?: SearchResponseInterceptedWarning[]; // warnings (like shard failures)
 }
 
 export interface DataTotalHitsMsg extends DataMsg {

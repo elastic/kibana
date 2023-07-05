@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { type DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SearchResponseWarning } from '@kbn/data-plugin/public';
@@ -15,6 +16,11 @@ export type ValueToStringConverter = (
   columnId: string,
   options?: { compatibleWithCSV?: boolean }
 ) => { formattedString: string; withFormula: boolean };
+
+export interface SearchResponseInterceptedWarning {
+  originalWarning: SearchResponseWarning;
+  action?: React.ReactNode;
+}
 
 export interface EsHitRecord extends Omit<estypes.SearchHit, '_source'> {
   _source?: Record<string, unknown>;
@@ -44,5 +50,5 @@ export interface DataTableRecord {
 export interface RecordsFetchResponse {
   records: DataTableRecord[];
   textBasedQueryColumns?: DatatableColumn[];
-  warnings?: SearchResponseWarning[];
+  interceptedWarnings?: SearchResponseInterceptedWarning[];
 }
