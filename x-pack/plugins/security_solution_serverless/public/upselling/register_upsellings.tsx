@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { lazy } from 'react';
+
+import React from 'react';
+import type { UpsellingService } from '@kbn/security-solution-plugin/public';
 import { SecurityPageName, AppFeatureKey } from '@kbn/security-solution-plugin/common';
 import type {
   UpsellingService,
@@ -14,9 +16,6 @@ import type {
 } from '@kbn/security-solution-plugin/public';
 import type { SecurityProductTypes } from '../../common/config';
 import { getProductAppFeatures } from '../../common/pli/pli_features';
-
-const GenericUpsellingPageLazy = lazy(() => import('./pages/generic_upselling_page'));
-const GenericUpsellingSectionLazy = lazy(() => import('./pages/generic_upselling_section'));
 
 interface UpsellingsConfig {
   pli: AppFeatureKey;
@@ -58,18 +57,22 @@ export const registerUpsellings = (
 
 // Upsellings for entire pages, linked to a SecurityPageName
 export const upsellingPages: UpsellingPages = [
-  {
-    pageName: SecurityPageName.entityAnalytics,
-    pli: AppFeatureKey.advancedInsights,
-    component: () => <GenericUpsellingPageLazy requiredPLI={AppFeatureKey.advancedInsights} />,
-  },
+  // Sample code for registering a Upselling page
+  // Make sure the component is lazy loaded `const GenericUpsellingPageLazy = lazy(() => import('./pages/generic_upselling_page'));`
+  // {
+  //   pageName: SecurityPageName.entityAnalytics,
+  //   pli: AppFeatureKey.advancedInsights,
+  //   component: () => <GenericUpsellingPageLazy requiredPLI={AppFeatureKey.advancedInsights} />,
+  // },
 ];
 
 // Upsellings for sections, linked by arbitrary ids
 export const upsellingSections: UpsellingSections = [
-  {
-    id: 'entity_analytics_panel',
-    pli: AppFeatureKey.advancedInsights,
-    component: () => <GenericUpsellingSectionLazy requiredPLI={AppFeatureKey.advancedInsights} />,
-  },
+  // Sample code for registering a Upselling section
+  // Make sure the component is lazy loaded `const GenericUpsellingSectionLazy = lazy(() => import('./pages/generic_upselling_section'));`
+  // {
+  //   id: 'entity_analytics_panel',
+  //   pli: AppFeatureKey.advancedInsights,
+  //   component: () => <GenericUpsellingSectionLazy requiredPLI={AppFeatureKey.advancedInsights} />,
+  // },
 ];
