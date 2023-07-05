@@ -136,9 +136,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setTimeout(() => setIsLoading(false), 200);
     }, [validationResultsNonNullFields]);
 
-    const { data: packagePolicyList } = usePackagePolicyList(packageInfo.name, {
-      enabled: canFetchIntegration,
-    });
+    const { data: packagePolicyList, invalidateQueryCache } = usePackagePolicyList(
+      packageInfo.name,
+      { enabled: canFetchIntegration }
+    );
 
     useEffect(() => {
       if (isEditPage) return;
@@ -167,6 +168,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       newPolicy,
       updatePolicy,
       setCanFetchIntegration,
+      invalidateQueryCache,
     });
 
     if (isLoading) {
@@ -279,6 +281,7 @@ const usePolicyTemplateInitialName = ({
   packagePolicyList,
   updatePolicy,
   setCanFetchIntegration,
+  invalidateQueryCache,
 }: {
   isEditPage: boolean;
   isLoading: boolean;
@@ -287,6 +290,7 @@ const usePolicyTemplateInitialName = ({
   packagePolicyList: PackagePolicy[] | undefined;
   updatePolicy: (policy: NewPackagePolicy) => void;
   setCanFetchIntegration: (canFetch: boolean) => void;
+  invalidateQueryCache: () => void;
 }) => {
   useEffect(() => {
     if (!integration) return;
@@ -308,6 +312,7 @@ const usePolicyTemplateInitialName = ({
       name: currentIntegrationName,
     });
     setCanFetchIntegration(false);
+    invalidateQueryCache();
     // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, integration, isEditPage, packagePolicyList]);

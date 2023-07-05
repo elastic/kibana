@@ -11,7 +11,7 @@ import {
   SO_SEARCH_LIMIT,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 
@@ -23,6 +23,12 @@ const PACKAGE_POLICY_LIST_QUERY_KEY = ['packagePolicyList'];
 
 export const usePackagePolicyList = (packageInfoName: string, { enabled = true }) => {
   const { http } = useKibana<CoreStart>().services;
+
+  const queryClient = useQueryClient();
+
+  const invalidateQueryCache = () => {
+    return queryClient.invalidateQueries({ queryKey: PACKAGE_POLICY_LIST_QUERY_KEY });
+  };
 
   const query = useQuery<PackagePolicyListData, Error>(
     PACKAGE_POLICY_LIST_QUERY_KEY,
@@ -45,9 +51,11 @@ export const usePackagePolicyList = (packageInfoName: string, { enabled = true }
       enabled,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
-      cacheTime: 0,
     }
   );
 
-  return query;
+  return {
+    ...query,
+    invalidateQueryCache,
+  };
 };
