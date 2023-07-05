@@ -30,15 +30,15 @@ import {
 } from '@elastic/eui';
 
 import { NavigationContainerInput } from '../types';
+import { addLink } from '../navigation_container_helpers';
 import { ExternalLinkInput } from '../../external_link/types';
 import { DashboardLinkInput } from '../../dashboard_link/types';
+import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { NavigationEmbeddableLinkEditor } from './navigation_embeddable_link_editor';
 import { memoizedFetchDashboard } from '../../dashboard_link/lib/dashboard_editor_tools';
-import { addLink } from '../editor/navigation_container_input_builder';
 import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
 
 import './navigation_embeddable.scss';
-import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 
 export const NavigationEmbeddablePanelEditor = ({
   onSave,
@@ -91,7 +91,7 @@ export const NavigationEmbeddablePanelEditor = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>Create links panel</h2>
+          <h2>{NavEmbeddableStrings.editor.panelEditor.getCreateFlyoutTitle()}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -102,7 +102,9 @@ export const NavigationEmbeddablePanelEditor = ({
                 <EuiPanel hasBorder={true}>
                   <EuiFlexGroup justifyContent="spaceAround">
                     <EuiFlexItem grow={false}>
-                      <EuiText size="s">{"You haven't added any links yet."}</EuiText>
+                      <EuiText size="s">
+                        {NavEmbeddableStrings.editor.panelEditor.getEmptyLinksMessage()}
+                      </EuiText>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                   <EuiSpacer size="s" />
@@ -155,8 +157,8 @@ export const NavigationEmbeddablePanelEditor = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onClose}>
-              Cancel
+            <EuiButtonEmpty onClick={onClose}>
+              {NavEmbeddableStrings.editor.getCancelButtonLabel()}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -166,7 +168,7 @@ export const NavigationEmbeddablePanelEditor = ({
                 onClose();
               }}
             >
-              Save
+              {NavEmbeddableStrings.editor.panelEditor.getSaveButtonLabel()}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

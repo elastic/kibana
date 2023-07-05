@@ -14,25 +14,41 @@ export const NavEmbeddableStrings = {
       i18n.translate('navEmbeddable.editor.addButtonLabel', {
         defaultMessage: 'Add link',
       }),
-    getApplyButtonLabel: () =>
-      i18n.translate('navEmbeddable.editor.confirmApplyButtonLabel', {
-        defaultMessage: 'Apply',
+    getCancelButtonLabel: () =>
+      i18n.translate('navEmbeddable.editor.cancelButtonLabel', {
+        defaultMessage: 'Close',
       }),
-    getLinkTypePickerLabel: () =>
-      i18n.translate('navEmbeddable.editor.linkTypeFormLabel', {
-        defaultMessage: 'Go to',
-      }),
-    getLinkDestinationLabel: () =>
-      i18n.translate('navEmbeddable.editor.linkDestinationLabel', {
-        defaultMessage: 'Choose destination',
-      }),
-    getLinkTextLabel: () =>
-      i18n.translate('navEmbeddable.editor.linkTextLabel', {
-        defaultMessage: 'Text',
-      }),
-    getLinkTextPlaceholder: () =>
-      i18n.translate('navEmbeddable.editor.linkTextPlaceholder', {
-        defaultMessage: 'Enter text for link',
-      }),
+    panelEditor: {
+      getEmptyLinksMessage: () =>
+        i18n.translate('navEmbeddable.panelEditor.emptyLinksMessage', {
+          defaultMessage: "You haven't added any links yet.",
+        }),
+      getCreateFlyoutTitle: () =>
+        i18n.translate('navEmbeddable.panelEditor.createFlyoutTitle', {
+          defaultMessage: 'Create links panel',
+        }),
+      getSaveButtonLabel: () =>
+        i18n.translate('navEmbeddable.panelEditor.saveButtonLabel', {
+          defaultMessage: 'Save',
+        }),
+    },
+    linkEditor: {
+      getLinkTypePickerLabel: () =>
+        i18n.translate('navEmbeddable.linkEditor.linkTypeFormLabel', {
+          defaultMessage: 'Go to',
+        }),
+      getLinkDestinationLabel: () =>
+        i18n.translate('navEmbeddable.linkEditor.linkDestinationLabel', {
+          defaultMessage: 'Choose destination',
+        }),
+      getLinkTextLabel: () =>
+        i18n.translate('navEmbeddable.linkEditor.linkTextLabel', {
+          defaultMessage: 'Text',
+        }),
+      getLinkTextPlaceholder: () =>
+        i18n.translate('navEmbeddable.linkEditor.linkTextPlaceholder', {
+          defaultMessage: 'Enter text for link',
+        }),
+    },
   },
 };

@@ -82,18 +82,18 @@ export const NavigationEmbeddableLinkEditor = ({
             height: auto;
           `}
           flush="left"
-          iconType={'arrowLeft'}
           color="text"
+          iconType={'arrowLeft'}
           onClick={() => onClose(false)}
         >
           <EuiTitle size="m">
-            <h2>Add link</h2>
+            <h2>{NavEmbeddableStrings.editor.getAddButtonLabel()}</h2>
           </EuiTitle>
         </EuiButtonEmpty>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiForm component="form">
-          <EuiFormRow label={NavEmbeddableStrings.editor.getLinkTypePickerLabel()}>
+          <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkTypePickerLabel()}>
             <EuiRadioGroup
               options={linkTypes}
               idSelected={selectedLinkType}
@@ -102,7 +102,7 @@ export const NavigationEmbeddableLinkEditor = ({
               }}
             />
           </EuiFormRow>
-          <EuiFormRow label={NavEmbeddableStrings.editor.getLinkDestinationLabel()}>
+          <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkDestinationLabel()}>
             {linkFactory?.linkEditorDestinationComponent ? (
               <linkFactory.linkEditorDestinationComponent
                 setDestination={setDestination}
@@ -113,9 +113,11 @@ export const NavigationEmbeddableLinkEditor = ({
               <></>
             )}
           </EuiFormRow>
-          <EuiFormRow label={NavEmbeddableStrings.editor.getLinkTextLabel()}>
+          <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkTextLabel()}>
             <EuiFieldText
-              placeholder={placeholder || NavEmbeddableStrings.editor.getLinkTextPlaceholder()}
+              placeholder={
+                placeholder || NavEmbeddableStrings.editor.linkEditor.getLinkTextPlaceholder()
+              }
               value={linkLabel}
               onChange={(e) => {
                 setLinkLabel(e.target.value);
@@ -135,13 +137,8 @@ export const NavigationEmbeddableLinkEditor = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              // aria-label={`cancel-${currentInput.title}`}
-              data-test-subj="control-editor-cancel"
-              iconType="cross"
-              onClick={() => onClose(true)}
-            >
-              Cancel
+            <EuiButtonEmpty onClick={() => onClose(true)}>
+              {NavEmbeddableStrings.editor.getCancelButtonLabel()}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -155,7 +152,7 @@ export const NavigationEmbeddableLinkEditor = ({
                 }
               }}
             >
-              Add link
+              {NavEmbeddableStrings.editor.getAddButtonLabel()}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
