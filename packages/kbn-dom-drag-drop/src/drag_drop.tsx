@@ -872,21 +872,20 @@ const ReorderableDrag = memo(function ReorderableDrag(
     );
   };
 
-  const areItemsReordered = isDragging && keyboardMode && reorderedItems.length;
+  const areItemsReordered = keyboardMode && isDragging && reorderedItems.length;
 
   return (
     <div
       data-test-subj={`${dataTestSubjPrefix}-reorderableDrag`}
-      className={
-        isDragging
-          ? 'domDragDrop-reorderable domDragDrop-translatableDrag'
-          : 'domDragDrop-reorderable'
-      }
+      className={classNames('domDragDrop-reorderable', {
+        ['domDragDrop-translatableDrag']: isDragging,
+        ['domDragDrop-isKeyboardReorderInProgress']: keyboardMode && isDragging,
+      })}
       style={
         areItemsReordered
           ? {
               transform: `translateY(${direction === '+' ? '-' : '+'}${reorderedItems.reduce(
-                (acc, cur) => acc + Number(cur.height || 0) + REORDER_OFFSET,
+                (acc, el) => acc + (el.height ?? 0) + REORDER_OFFSET,
                 0
               )}px)`,
             }
