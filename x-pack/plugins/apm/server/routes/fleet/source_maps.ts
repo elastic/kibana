@@ -26,7 +26,8 @@ interface ApmMapArtifactBody {
   sourceMap: string;
 }
 
-interface ApmSourceMapArtifactBody extends Omit<ApmMapArtifactBody, 'sourceMap'> {
+interface ApmSourceMapArtifactBody
+  extends Omit<ApmMapArtifactBody, 'sourceMap'> {
   sourceMap: SourceMap;
 }
 
@@ -110,9 +111,9 @@ export async function createFleetSourceMapArtifact({
 }
 
 export async function createFleetAndroidMapArtifact({
-                                               apmArtifactBody,
-                                               fleetPluginStart,
-                                             }: {
+  apmArtifactBody,
+  fleetPluginStart,
+}: {
   apmArtifactBody: ApmMapArtifactBody;
   fleetPluginStart: FleetPluginStart;
 }) {

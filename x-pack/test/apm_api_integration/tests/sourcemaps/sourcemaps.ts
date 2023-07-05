@@ -35,7 +35,7 @@ const SAMPLE_ANDROID_MAP = `# compiler: R8
 # pg_map_id: 127b14c
 # pg_map_hash: SHA-256 127b14c0be5dd1b55beee544a8d0e7c9414b432868ed8bc54ca5cc43cba12435
 a1.TableInfo$ForeignKey$$ExternalSyntheticOutline0 -> a1.e:
-# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}`
+# {"id":"sourceFile","fileName":"R8$$SyntheticClass"}`;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -110,10 +110,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   async function uploadAndroidMap({
-                                   serviceName,
-                                   serviceVersion,
-                                   androidMap,
-                                 }: {
+    serviceName,
+    serviceVersion,
+    androidMap,
+  }: {
     serviceName: string;
     serviceVersion: string;
     androidMap: string;
@@ -160,9 +160,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await Promise.all([deleteAllFleetSourceMaps(), deleteAllApmSourceMaps()]);
     });
 
-    async function getDecodedMapContent(
-      encodedContent?: string
-    ): Promise<SourceMap | undefined> {
+    async function getDecodedMapContent(encodedContent?: string): Promise<SourceMap | undefined> {
       if (encodedContent) {
         return (await unzip(Buffer.from(encodedContent, 'base64'))).toString();
       }
@@ -288,7 +286,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       after(async () => {
         await apmApiClient.writeUser({
           endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-10-31',
-          params: {path: {id: androidResp.id}},
+          params: { path: { id: androidResp.id } },
         });
       });
 
@@ -308,7 +306,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           size: 1,
           query: {
             bool: {
-              filter: [{term: {type: 'sourcemap'}}, {term: {package_name: 'apm'}}],
+              filter: [{ term: { type: 'sourcemap' } }, { term: { package_name: 'apm' } }],
             },
           },
         });
@@ -351,7 +349,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           await uploadAndroidMap({
             serviceName: 'uploading-test',
             serviceVersion: '1.0.0',
-            androidMap: "# compiler: R8\n# ANOTHER MAP",
+            androidMap: '# compiler: R8\n# ANOTHER MAP',
           });
 
           resAfter = await getSourceMapDocFromApmIndex();

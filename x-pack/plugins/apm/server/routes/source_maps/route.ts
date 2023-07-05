@@ -23,7 +23,10 @@ import {
   ListSourceMapArtifactsResponse,
   updateSourceMapsOnFleetPolicies,
 } from '../fleet/source_maps';
-import { createApmSourceMap, createApmAndroidMap } from './create_apm_source_map';
+import {
+  createApmSourceMap,
+  createApmAndroidMap,
+} from './create_apm_source_map';
 import { deleteApmSourceMap } from './delete_apm_sourcemap';
 import { runFleetSourcemapArtifactsMigration } from './schedule_source_map_migration';
 
@@ -48,10 +51,10 @@ const androidMapValidation = new t.Type<string, string, unknown>(
   t.string.is,
   (input, context) =>
     either.chain(t.string.validate(input, context), (str) => {
-      let firstLine = str.split("\n", 1)[0];
-      if(firstLine.trim() == "# compiler: R8"){
+      const firstLine = str.split('\n', 1)[0];
+      if (firstLine.trim() == '# compiler: R8') {
         return t.success(str);
-      }else {
+      } else {
         return t.failure(input, context);
       }
     }),
@@ -198,16 +201,16 @@ const uploadAndroidMapRoute = createApmServerRoute({
       service_version: t.string,
       map_file: t
         .union([t.string, stringFromBufferRt])
-        .pipe(androidMapValidation)
+        .pipe(androidMapValidation),
     }),
   }),
   handler: async ({
-                    params,
-                    plugins,
-                    core,
-                    logger,
-                    featureFlags,
-                  }): Promise<Artifact | undefined> => {
+    params,
+    plugins,
+    core,
+    logger,
+    featureFlags,
+  }): Promise<Artifact | undefined> => {
     throwNotImplementedIfSourceMapNotAvailable(featureFlags);
 
     const {
@@ -215,7 +218,7 @@ const uploadAndroidMapRoute = createApmServerRoute({
       service_version: serviceVersion,
       map_file: sourceMapContent,
     } = params.body;
-    const bundleFilePath = "android";
+    const bundleFilePath = 'android';
     const fleetPluginStart = await plugins.fleet?.start();
     const coreStart = await core.start();
     const internalESClient = coreStart.elasticsearch.client.asInternalUser;

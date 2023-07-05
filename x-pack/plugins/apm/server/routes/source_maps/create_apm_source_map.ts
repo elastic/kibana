@@ -10,7 +10,11 @@ import { Logger } from '@kbn/core/server';
 import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
 import { ApmSourceMap } from './create_apm_source_map_index_template';
 import { SourceMap } from './route';
-import { getEncodedSourceMapContent, getEncodedContent, getSourceMapId } from './sourcemap_utils';
+import {
+  getEncodedSourceMapContent,
+  getEncodedContent,
+  getSourceMapId,
+} from './sourcemap_utils';
 
 export async function createApmSourceMap({
   internalESClient,
@@ -31,7 +35,7 @@ export async function createApmSourceMap({
   serviceName: string;
   serviceVersion: string;
 }) {
-  const {contentEncoded, contentHash} = await getEncodedSourceMapContent(
+  const { contentEncoded, contentHash } = await getEncodedSourceMapContent(
     sourceMapContent
   );
   return await doCreateApmMap({
@@ -43,20 +47,20 @@ export async function createApmSourceMap({
     serviceName,
     serviceVersion,
     contentEncoded,
-    contentHash
-  })
+    contentHash,
+  });
 }
 
 export async function createApmAndroidMap({
-                                           internalESClient,
-                                           logger,
-                                           fleetId,
-                                           created,
-                                           mapContent,
-                                           bundleFilepath,
-                                           serviceName,
-                                           serviceVersion,
-                                         }: {
+  internalESClient,
+  logger,
+  fleetId,
+  created,
+  mapContent,
+  bundleFilepath,
+  serviceName,
+  serviceVersion,
+}: {
   internalESClient: ElasticsearchClient;
   logger: Logger;
   fleetId: string;
@@ -66,9 +70,7 @@ export async function createApmAndroidMap({
   serviceName: string;
   serviceVersion: string;
 }) {
-  const {contentEncoded, contentHash} = await getEncodedContent(
-    mapContent
-  );
+  const { contentEncoded, contentHash } = await getEncodedContent(mapContent);
   return await doCreateApmMap({
     internalESClient,
     logger,
@@ -78,20 +80,20 @@ export async function createApmAndroidMap({
     serviceName,
     serviceVersion,
     contentEncoded,
-    contentHash
-  })
+    contentHash,
+  });
 }
 async function doCreateApmMap({
-                                internalESClient,
-                                logger,
-                                fleetId,
-                                created,
-                                bundleFilepath,
-                                serviceName,
-                                serviceVersion,
-                                contentEncoded,
-                                contentHash
-                              }: {
+  internalESClient,
+  logger,
+  fleetId,
+  created,
+  bundleFilepath,
+  serviceName,
+  serviceVersion,
+  contentEncoded,
+  contentHash,
+}: {
   internalESClient: ElasticsearchClient;
   logger: Logger;
   fleetId: string;
@@ -107,11 +109,11 @@ async function doCreateApmMap({
     created,
     content: contentEncoded,
     content_sha256: contentHash,
-    file: {path: bundleFilepath},
-    service: {name: serviceName, version: serviceVersion},
+    file: { path: bundleFilepath },
+    service: { name: serviceName, version: serviceVersion },
   };
 
-  const id = getSourceMapId({serviceName, serviceVersion, bundleFilepath});
+  const id = getSourceMapId({ serviceName, serviceVersion, bundleFilepath });
   logger.debug(`Create APM source map: "${id}"`);
   return await internalESClient.index<ApmSourceMap>({
     index: APM_SOURCE_MAP_INDEX,

@@ -17,7 +17,7 @@ function asSha256Encoded(content: BinaryLike): string {
 }
 
 export async function getEncodedSourceMapContent(sourceMapContent: SourceMap) {
-  return getEncodedContent(JSON.stringify(sourceMapContent))
+  return getEncodedContent(JSON.stringify(sourceMapContent));
 }
 export async function getEncodedContent(textContent: string) {
   const contentBuffer = Buffer.from(textContent);
