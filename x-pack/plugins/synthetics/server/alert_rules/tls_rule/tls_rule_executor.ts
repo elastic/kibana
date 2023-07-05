@@ -105,6 +105,7 @@ export class TLSRuleExecutor {
 
     if (enabledMonitorQueryIds.length === 0) {
       return {
+        latestPings: [],
         certs: [],
         total: 0,
         foundCerts: false,
@@ -140,13 +141,27 @@ export class TLSRuleExecutor {
     return {
       latestPings,
       foundCerts,
-      certs,
       total,
       expiryThreshold,
       ageThreshold,
       absoluteExpirationThreshold,
       absoluteAgeThreshold,
+      certs: this.filterOutResolvedCerts(certs, latestPings),
     };
+  }
+
+  filterOutResolvedCerts(certs: CertResult['certs'], latestPings: TLSLatestPing[]) {
+    const latestPingsMap = new Map<string, TLSLatestPing>();
+    latestPings.forEach((ping) => {
+      latestPingsMap.set(ping.config_id!, ping);
+    });
+    return certs.filter((cert) => {
+      const lPing = latestPingsMap.get(cert.configId);
+      if (!lPing) {
+        return true;
+      }
+      return moment(lPing['@timestamp']).isBefore(cert['@timestamp']);
+    });
   }
   async getLatestPingsForMonitors(certs: CertResult['certs']) {
     if (certs.length === 0) {
@@ -159,6 +174,14 @@ export class TLSRuleExecutor {
         query: {
           bool: {
             filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-1d',
+                    lt: 'now',
+                  },
+                },
+              },
               {
                 terms: {
                   config_id: configIds,
@@ -182,15 +205,7 @@ export class TLSRuleExecutor {
         collapse: {
           field: 'config_id',
         },
-        _source: [
-          '@timestamp',
-          'monitor.id',
-          'monitor.name',
-          'url.full',
-          'monitor.type',
-          'config_id',
-          'tls.server.hash.sha256',
-        ],
+        _source: ['@timestamp', 'monitor', 'url', 'config_id', 'tls'],
         sort: [
           {
             '@timestamp': {
@@ -201,6 +216,8 @@ export class TLSRuleExecutor {
       },
     });
 
-    return body.hits.hits.map((hit) => hit._source as Ping);
+    return body.hits.hits.map((hit) => hit._source as TLSLatestPing);
   }
 }
+
+export type TLSLatestPing = Pick<Ping, '@timestamp' | 'monitor' | 'url' | 'tls' | 'config_id'>;

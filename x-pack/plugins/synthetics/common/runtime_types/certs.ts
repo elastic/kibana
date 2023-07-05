@@ -46,6 +46,7 @@ export const CertType = t.intersection([
     monitorType: t.string,
     monitorUrl: t.string,
     locationName: t.string,
+    '@timestamp': t.string,
   }),
 ]);
 

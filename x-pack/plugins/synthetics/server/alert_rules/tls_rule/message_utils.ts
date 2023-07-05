@@ -10,6 +10,8 @@ import { IBasePath } from '@kbn/core-http-server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { AlertsLocatorParams, getAlertUrl } from '@kbn/observability-plugin/common';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { i18n } from '@kbn/i18n';
+import { TLSLatestPing } from './tls_rule_executor';
 import { ALERT_DETAILS_URL } from '../action_variables';
 import { Cert } from '../../../common/runtime_types';
 import { tlsTranslations } from '../translations';
@@ -18,10 +20,10 @@ interface TLSContent {
   status?: string;
 }
 
-const getValidBefore = ({ not_before: date }: Cert): TLSContent => {
-  if (!date) return { summary: 'Error, missing `certificate_not_valid_before` date.' };
-  const relativeDate = moment().diff(date, 'days');
-  const formattedDate = moment(date).format('MMM D, YYYY z');
+const getValidBefore = (notBefore?: string): TLSContent => {
+  if (!notBefore) return { summary: 'Error, missing `certificate_not_valid_before` date.' };
+  const relativeDate = moment().diff(notBefore, 'days');
+  const formattedDate = moment(notBefore).format('MMM D, YYYY z');
   return relativeDate >= 0
     ? {
         summary: tlsTranslations.validBeforeExpiredString(formattedDate, relativeDate),
@@ -32,10 +34,10 @@ const getValidBefore = ({ not_before: date }: Cert): TLSContent => {
         status: tlsTranslations.invalidLabel,
       };
 };
-const getValidAfter = ({ not_after: date }: Cert): TLSContent => {
-  if (!date) return { summary: 'Error, missing `certificate_not_valid_after` date.' };
-  const relativeDate = moment().diff(date, 'days');
-  const formattedDate = moment(date).format('MMM D, YYYY z');
+const getValidAfter = (notAfter?: string): TLSContent => {
+  if (!notAfter) return { summary: 'Error, missing `certificate_not_valid_after` date.' };
+  const relativeDate = moment().diff(notAfter, 'days');
+  const formattedDate = moment(notAfter).format('MMM D, YYYY z');
   return relativeDate >= 0
     ? {
         summary: tlsTranslations.validAfterExpiredString(formattedDate, relativeDate),
@@ -46,19 +48,16 @@ const getValidAfter = ({ not_after: date }: Cert): TLSContent => {
         status: tlsTranslations.expiringLabel,
       };
 };
-const mapCertsToSummaryString = (
-  cert: Cert,
-  certLimitMessage: (cert: Cert) => TLSContent
-): TLSContent => certLimitMessage(cert);
+
 export const getCertSummary = (cert: Cert, expirationThreshold: number, ageThreshold: number) => {
   const isExpiring = new Date(cert.not_after ?? '').valueOf() < expirationThreshold;
   const isAging = new Date(cert.not_before ?? '').valueOf() < ageThreshold;
   let content: TLSContent | null = null;
 
   if (isExpiring) {
-    content = mapCertsToSummaryString(cert, getValidAfter);
+    content = getValidAfter(cert.not_after);
   } else if (isAging) {
-    content = mapCertsToSummaryString(cert, getValidBefore);
+    content = getValidBefore(cert.not_before);
   }
 
   const { summary = '', status = '' } = content || {};
@@ -71,10 +70,13 @@ export const getCertSummary = (cert: Cert, expirationThreshold: number, ageThres
     monitorType: cert.monitorType,
     locationName: cert.locationName,
     monitorUrl: cert.monitorUrl,
+    configId: cert.configId,
   };
 };
 
-export const setRecoveredAlertsContext = async ({
+type CertSummary = ReturnType<typeof getCertSummary>;
+
+export const setTLSRecoveredAlertsContext = async ({
   alertFactory,
   basePath,
   defaultStartedAt,
@@ -82,6 +84,7 @@ export const setRecoveredAlertsContext = async ({
   spaceId,
   alertsLocator,
   getAlertUuid,
+  latestPings,
 }: {
   alertFactory: RuleExecutorServices['alertFactory'];
   defaultStartedAt: string;
@@ -90,6 +93,7 @@ export const setRecoveredAlertsContext = async ({
   spaceId: string;
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
   getAlertUuid?: (alertId: string) => string | null;
+  latestPings: TLSLatestPing[];
 }) => {
   const { getRecoveredAlerts } = alertFactory.done();
 
@@ -98,7 +102,7 @@ export const setRecoveredAlertsContext = async ({
     const alertUuid = getAlertUuid?.(recoveredAlertId) || null;
     const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? defaultStartedAt;
 
-    const state = alert.getState();
+    const state = alert.getState() as CertSummary;
     const alertUrl = await getAlertUrl(
       alertUuid,
       spaceId,
@@ -107,8 +111,28 @@ export const setRecoveredAlertsContext = async ({
       basePath.publicBaseUrl
     );
 
+    const configId = state.configId;
+    const latestPing = latestPings.find((ping) => ping.config_id === configId);
+
+    const newCommonName = latestPing?.tls?.server?.x509?.subject.common_name ?? '';
+    const newExpiryDate = latestPing?.tls?.server?.x509?.not_after ?? '';
+    const previousStatus = i18n.translate('xpack.synthetics.alerts.tls.prevCertificate', {
+      defaultMessage: '{commonName} is {status}',
+      values: { commonName: state.commonName, status: state.status },
+    });
+
+    const { summary } = getValidAfter(newExpiryDate);
+
+    const newStatus = i18n.translate('xpack.synthetics.alerts.tls.newCertificate', {
+      defaultMessage: '{commonName} {summary}',
+      values: { commonName: newCommonName, summary },
+    });
+
     alert.setContext({
       ...state,
+      newStatus,
+      previousStatus,
+      summary: 'Monitor has a new certificate',
       [ALERT_DETAILS_URL]: alertUrl,
     });
   }
