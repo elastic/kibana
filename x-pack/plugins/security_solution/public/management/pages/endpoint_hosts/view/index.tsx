@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, memo, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import type { EuiBasicTableColumn, EuiSelectableProps } from '@elastic/eui';
 import {
-  EuiHorizontalRule,
   EuiBasicTable,
-  EuiText,
-  EuiLink,
-  EuiHealth,
-  EuiToolTip,
-  EuiSuperDatePicker,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHealth,
+  EuiHorizontalRule,
+  EuiLink,
+  EuiSpacer,
+  EuiSuperDatePicker,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -26,31 +26,32 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
 import type {
-  CreatePackagePolicyRouteState,
   AgentPolicyDetailsDeployAgentAction,
+  CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
 import { EndpointAgentStatus } from '../../../../common/components/endpoint/endpoint_agent_status';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
+import { getEndpointPendingActionsCallback } from '../store/selectors';
 import { useEndpointSelector } from './hooks';
 import { isPolicyOutOfDate } from '../utils';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import type { CreateStructuredSelector } from '../../../../common/store';
 import type {
-  Immutable,
   HostInfo,
+  Immutable,
   PolicyDetailsRouteState,
 } from '../../../../../common/endpoint/types';
 import { DEFAULT_POLL_INTERVAL, MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
-import { PolicyEmptyState, HostsEmptyState } from '../../../components/management_empty_state';
+import { HostsEmptyState, PolicyEmptyState } from '../../../components/management_empty_state';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import { SecurityPageName } from '../../../../app/types';
 import {
-  getEndpointListPath,
   getEndpointDetailsPath,
+  getEndpointListPath,
   getPoliciesPath,
 } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';
@@ -63,13 +64,13 @@ import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { TableRowActions } from './components/table_row_actions';
 import { CallOut } from '../../../../common/components/callouts';
 import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
-import { WARNING_TRANSFORM_STATES, APP_UI_ID } from '../../../../../common/constants';
+import { APP_UI_ID, WARNING_TRANSFORM_STATES } from '../../../../../common/constants';
 import type { BackToExternalAppButtonProps } from '../../../components/back_to_external_app_button/back_to_external_app_button';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button/back_to_external_app_button';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getEndpointPendingActionsCallback } from '../store/selectors';
+
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
 
@@ -151,7 +152,7 @@ export const EndpointList = () => {
       };
     }
 
-    // default back button is to the policy list
+    // the default back button is to the policy list
     const policyListPath = getPoliciesPath();
 
     return {

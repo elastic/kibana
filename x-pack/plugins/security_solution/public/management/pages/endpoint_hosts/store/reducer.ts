@@ -12,7 +12,6 @@ import type {
 } from './action';
 import {
   getCurrentIsolationRequestState,
-  getIsOnEndpointDetailsActivityLog,
   hasSelectedEndpoint,
   isOnEndpointPage,
   uiQueryParams,
@@ -108,27 +107,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       ...state,
       patternsError: action.payload,
     };
-  } else if (action.type === 'serverReturnedEndpointDetails') {
-    return {
-      ...state,
-      endpointDetails: {
-        ...state.endpointDetails,
-        hostInfo: action.payload,
-        hostInfoError: undefined,
-        isHostInfoLoading: false,
-      },
-      policyVersionInfo: action.payload.policy_info,
-      hostStatus: action.payload.host_status,
-    };
-  } else if (action.type === 'serverFailedToReturnEndpointDetails') {
-    return {
-      ...state,
-      endpointDetails: {
-        ...state.endpointDetails,
-        hostInfoError: action.payload,
-        isHostInfoLoading: false,
-      },
-    };
   } else if (action.type === 'endpointPendingActionsStateChanged') {
     return handleEndpointPendingActionsStateChanged(state, action);
   } else if (action.type === 'serverReturnedPoliciesForOnboarding') {
@@ -218,20 +196,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     const wasPreviouslyOnListPage = isOnEndpointPage(state) && !hasSelectedEndpoint(state);
     const isCurrentlyOnDetailsPage = isOnEndpointPage(newState) && hasSelectedEndpoint(newState);
     const wasPreviouslyOnDetailsPage = isOnEndpointPage(state) && hasSelectedEndpoint(state);
-    const wasPreviouslyOnActivityLogPage =
-      isOnEndpointPage(state) &&
-      hasSelectedEndpoint(state) &&
-      getIsOnEndpointDetailsActivityLog(state);
-
-    const isCurrentlyOnActivityLogPage =
-      isOnEndpointPage(newState) &&
-      hasSelectedEndpoint(newState) &&
-      getIsOnEndpointDetailsActivityLog(newState);
-
-    const isNotLoadingDetails =
-      isCurrentlyOnActivityLogPage ||
-      (wasPreviouslyOnActivityLogPage &&
-        uiQueryParams(state).selected_endpoint === uiQueryParams(newState).selected_endpoint);
 
     const stateUpdates: Partial<EndpointState> = {
       location: action.payload,
@@ -253,10 +217,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         return {
           ...state,
           ...stateUpdates,
-          endpointDetails: {
-            ...state.endpointDetails,
-            hostInfoError: undefined,
-          },
           loading: true,
           policyItemsLoading: true,
         };
@@ -267,11 +227,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         return {
           ...state,
           ...stateUpdates,
-          endpointDetails: {
-            ...state.endpointDetails,
-            hostInfoError: undefined,
-            isHostInfoLoading: !isNotLoadingDetails,
-          },
           detailsLoading: true,
           policyResponseLoading: true,
         };
@@ -280,11 +235,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         return {
           ...state,
           ...stateUpdates,
-          endpointDetails: {
-            ...state.endpointDetails,
-            hostInfoError: undefined,
-            isHostInfoLoading: true,
-          },
           loading: true,
           policyResponseLoading: true,
           policyItemsLoading: true,
@@ -295,10 +245,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     return {
       ...state,
       ...stateUpdates,
-      endpointDetails: {
-        ...state.endpointDetails,
-        hostInfoError: undefined,
-      },
       endpointsExist: true,
     };
   } else if (action.type === 'metadataTransformStatsChanged') {

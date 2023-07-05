@@ -43,11 +43,6 @@ describe('EndpointList store concerns', () => {
         total: 0,
         loading: false,
         error: undefined,
-        endpointDetails: {
-          hostInfo: undefined,
-          hostInfoError: undefined,
-          isHostInfoLoading: false,
-        },
         policyResponse: undefined,
         policyResponseLoading: false,
         policyResponseError: undefined,
@@ -70,7 +65,6 @@ describe('EndpointList store concerns', () => {
         agentsWithEndpointsTotalError: undefined,
         endpointsTotalError: undefined,
         queryStrategyVersion: undefined,
-        policyVersionInfo: undefined,
         isolationRequestState: {
           type: 'UninitialisedResourceState',
         },

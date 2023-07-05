@@ -28,7 +28,6 @@ import {
 } from '../../../state';
 
 import type { ServerApiError } from '../../../../common/types';
-import { isEndpointHostIsolated } from '../../../../common/utils/validators';
 import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
@@ -43,18 +42,6 @@ export const listLoading = (state: Immutable<EndpointState>): boolean => state.l
 
 export const listError = (state: Immutable<EndpointState>) => state.error;
 
-export const fullDetailsHostInfo = (
-  state: Immutable<EndpointState>
-): EndpointState['endpointDetails']['hostInfo'] => state.endpointDetails.hostInfo;
-
-export const isHostInfoLoading = (
-  state: Immutable<EndpointState>
-): EndpointState['endpointDetails']['isHostInfoLoading'] => state.endpointDetails.isHostInfoLoading;
-
-export const hostInfoError = (
-  state: Immutable<EndpointState>
-): EndpointState['endpointDetails']['hostInfoError'] => state.endpointDetails.hostInfoError;
-
 export const policyItems = (state: Immutable<EndpointState>) => state.policyItems;
 
 export const policyItemsLoading = (state: Immutable<EndpointState>) => state.policyItemsLoading;
@@ -68,14 +55,12 @@ export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.i
 
 export const autoRefreshInterval = (state: Immutable<EndpointState>) => state.autoRefreshInterval;
 
-export const policyVersionInfo = (state: Immutable<EndpointState>) => state.policyVersionInfo;
-
 export const endpointPackageVersion = createSelector(endpointPackageInfo, (info) =>
   isLoadedResourceState(info) ? info.data.version : undefined
 );
 
 /**
- * Returns the index patterns for the SearchBar to use for autosuggest
+ * Returns the index patterns for the SearchBar to use for auto-suggest
  */
 export const patterns = (state: Immutable<EndpointState>) => state.patterns;
 
@@ -254,10 +239,6 @@ export const getIsOnEndpointDetailsActivityLog: (state: Immutable<EndpointState>
   createSelector(uiQueryParams, (searchParams) => {
     return searchParams.show === EndpointDetailsTabsTypes.activityLog;
   });
-
-export const getIsEndpointHostIsolated = createSelector(fullDetailsHostInfo, (details) => {
-  return (details && isEndpointHostIsolated(details.metadata)) || false;
-});
 
 export const getEndpointPendingActionsState = (
   state: Immutable<EndpointState>
