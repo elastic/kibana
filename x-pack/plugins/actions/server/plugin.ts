@@ -256,6 +256,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           isPreconfigured: true,
           isSystemAction: false,
         };
+
         this.inMemoryConnectors.push({
           ...rawPreconfiguredConnector,
           isDeprecated: isConnectorDeprecated(rawPreconfiguredConnector),
@@ -395,6 +396,8 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes,
     });
+
+    this.throwIfSystemActionsInConfig();
 
     /**
      * Warning: this call mutates the inMemory collection
@@ -605,6 +608,20 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private setSystemActions = () => {
     const systemConnectors = createSystemConnectors(this.actionTypeRegistry?.list() ?? []);
     this.inMemoryConnectors = [...this.inMemoryConnectors, ...systemConnectors];
+  };
+
+  private throwIfSystemActionsInConfig = () => {
+    const preConfiguredConnectors = this.inMemoryConnectors.filter(
+      (connector) => connector.isPreconfigured
+    );
+
+    const systemActionAsPreconfiguredInConfig = preConfiguredConnectors.some((connector) =>
+      this.actionTypeRegistry!.isSystemActionType(connector.actionTypeId)
+    );
+
+    if (systemActionAsPreconfiguredInConfig) {
+      throw new Error('Setting system action types in preconfigured connectors is not allowed');
+    }
   };
 
   private createRouteHandlerContext = (
