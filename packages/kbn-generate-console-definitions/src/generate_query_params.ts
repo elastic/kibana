@@ -133,7 +133,7 @@ const convertInstanceOf = (
       return booleanFlagString;
     } else {
       // if default value, convert to string and put in an array
-      return serverDefault ? [serverDefault + ''] : '';
+      return serverDefault ? [serverDefault.toString()] : '';
     }
   } else {
     // if it's a defined type, try to convert it
@@ -209,7 +209,7 @@ const convertUnionOf = (
 
 const convertLiteralValue = (type: SpecificationTypes.LiteralValue): UrlParamValue | undefined => {
   // convert the value to a string
-  return [type.value + ''];
+  return [type.value.toString()];
 };
 
 const convertEnum = (enumDefinition: SpecificationTypes.Enum): UrlParamValue => {
