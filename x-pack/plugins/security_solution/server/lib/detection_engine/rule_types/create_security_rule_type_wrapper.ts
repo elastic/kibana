@@ -517,7 +517,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
         useLegacyAlerts: true,
         isSpaceAware: true,
         secondaryAlias: config.signalsIndex,
-        formatAlert: formatAlertForNotificationActions as FormatAlert,
+        formatAlert: formatAlertForNotificationActions as unknown as FormatAlert<never>,
       },
     });
   };

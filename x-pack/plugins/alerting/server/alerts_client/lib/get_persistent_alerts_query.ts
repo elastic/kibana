@@ -349,14 +349,14 @@ const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryConta
 
 const getHitsWithCount = <AlertData extends RuleAlertData>(
   response: SearchResult<AlertData>,
-  formatAlert?: FormatAlert
+  formatAlert?: FormatAlert<AlertData>
 ): PersistentAlertsChunk => {
   return {
     count: (response.total as SearchTotalHits).value,
     data: response.hits.map((hit) => {
       const { _id, _index, _source } = hit;
 
-      const formattedSource = formatAlert && _source ? formatAlert<AlertData>(_source) : _source;
+      const formattedSource = formatAlert && _source ? formatAlert(_source) : _source;
 
       const expandedSource = expandFlattenedAlert(formattedSource as object) as Alert & AlertData;
       return {

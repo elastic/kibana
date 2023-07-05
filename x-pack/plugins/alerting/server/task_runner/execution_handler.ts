@@ -634,7 +634,7 @@ export class ExecutionHandler<
       ...(formatAlert ? { formatAlert } : {}),
     };
 
-    let options: GetPersistentAlertsParams;
+    let options: GetPersistentAlertsParams<AlertData>;
 
     if (isActionOnInterval(action)) {
       const throttleMills = parseDuration(action.frequency!.throttle!);

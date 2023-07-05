@@ -177,7 +177,11 @@ export class AlertsService implements IAlertsService {
         }
       }
 
-      this.resourceInitializationHelper.retry(opts.ruleType.alerts, opts.namespace, initPromise);
+      this.resourceInitializationHelper.retry(
+        opts.ruleType.alerts as IRuleTypeAlerts,
+        opts.namespace,
+        initPromise
+      );
 
       const retryResult = await this.resourceInitializationHelper.getInitializedContext(
         opts.ruleType.alerts.context,

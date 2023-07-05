@@ -62,14 +62,14 @@ const alertTypes = {
   recovered: 'close',
 };
 
-export const getParamsByExecutionUuid: GetPersistentAlertsParams = {
+export const getParamsByExecutionUuid: GetPersistentAlertsParams<{}> = {
   ruleId: 'ruleId',
   spaceId: 'default',
   excludedAlertInstanceIds: [],
   isLifecycleAlert: true,
   executionUuid: '111',
 };
-export const getParamsByTimeQuery: GetPersistentAlertsParams = {
+export const getParamsByTimeQuery: GetPersistentAlertsParams<{}> = {
   ruleId: 'ruleId',
   spaceId: 'default',
   excludedAlertInstanceIds: [],

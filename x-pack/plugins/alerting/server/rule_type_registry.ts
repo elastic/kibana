@@ -20,6 +20,7 @@ import {
   RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
+  IRuleTypeAlerts,
 } from './types';
 import {
   RecoveredActionGroup,
@@ -294,7 +295,7 @@ export class RuleTypeRegistry {
     });
 
     if (this.alertsService && ruleType.alerts) {
-      this.alertsService.register(ruleType.alerts);
+      this.alertsService.register(ruleType.alerts as IRuleTypeAlerts);
     }
 
     // No need to notify usage on basic alert types

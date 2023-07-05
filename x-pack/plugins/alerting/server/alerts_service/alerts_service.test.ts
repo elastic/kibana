@@ -179,7 +179,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
 
 const ruleTypeWithAlertDefinition: jest.Mocked<UntypedNormalizedRuleType> = {
   ...ruleType,
-  alerts: TestRegistrationContext,
+  alerts: TestRegistrationContext as IRuleTypeAlerts<{}>,
 };
 
 describe('Alerts Service', () => {

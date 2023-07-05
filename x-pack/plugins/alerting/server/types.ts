@@ -20,7 +20,6 @@ import {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
-import { DeepPartial } from '@kbn/utility-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
@@ -199,11 +198,11 @@ interface ComponentTemplateSpec {
   fieldMap: FieldMap;
 }
 
-export type FormatAlert = <AlertData extends RuleAlertData>(
-  alert: Alert & AlertData
-) => DeepPartial<Alert & AlertData>;
+export type FormatAlert<AlertData extends RuleAlertData> = (
+  alert: Partial<AlertData>
+) => Partial<AlertData>;
 
-export interface IRuleTypeAlerts {
+export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   /**
    * Specifies the target alerts-as-data resource
    * for this rule type. All alerts created with the same
@@ -253,7 +252,7 @@ export interface IRuleTypeAlerts {
    */
   secondaryAlias?: string;
 
-  formatAlert?: FormatAlert;
+  formatAlert?: FormatAlert<AlertData>;
 }
 
 export interface RuleType<
@@ -302,7 +301,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
-  alerts?: IRuleTypeAlerts;
+  alerts?: IRuleTypeAlerts<AlertData>;
   /**
    * Determines whether framework should
    * automatically make recovery determination. Defaults to true.

@@ -30,7 +30,6 @@ import {
   getParamsByTimeQuery,
   mockAAD,
 } from './alerts_client_fixtures';
-import { DeepPartial } from '@kbn/utility-types';
 
 const date = '2023-03-28T22:27:28.159Z';
 const maxAlerts = 1000;
@@ -1208,7 +1207,6 @@ describe('Alerts Client', () => {
     });
 
     test('formats alerts with formatAlert when provided', async () => {
-      type Alert = typeof mockAAD._source;
       interface AlertData extends RuleAlertData {
         'signal.rule.consumer': string;
       }
@@ -1233,10 +1231,10 @@ describe('Alerts Client', () => {
         ...getParamsByExecutionUuid,
         isLifecycleAlert: false,
         formatAlert: (alert) => {
-          const alertCopy = { ...alert } as Partial<Alert & AlertData>;
-          alertCopy['kibana.alert.rule.consumer'] = alertCopy['signal.rule.consumer'];
+          const alertCopy = { ...alert } as Partial<AlertData>;
+          alertCopy['kibana.alert.rule.consumer'] = alert['signal.rule.consumer'];
           delete alertCopy['signal.rule.consumer'];
-          return alertCopy as DeepPartial<typeof alert>;
+          return alertCopy;
         },
       });
 
@@ -1375,7 +1373,7 @@ describe('Alerts Client', () => {
         const { ruleId, ...paramsWithoutRuleId } = getParamsByExecutionUuid;
 
         await expect(
-          alertsClient.getPersistentAlerts(paramsWithoutRuleId as GetPersistentAlertsParams)
+          alertsClient.getPersistentAlerts(paramsWithoutRuleId as GetPersistentAlertsParams<{}>)
         ).rejects.toThrowError(`Must specify both rule ID and space ID for AAD alert query.`);
       });
 
@@ -1383,7 +1381,7 @@ describe('Alerts Client', () => {
         const { spaceId, ...paramsWithoutSpaceId } = getParamsByExecutionUuid;
 
         await expect(
-          alertsClient.getPersistentAlerts(paramsWithoutSpaceId as GetPersistentAlertsParams)
+          alertsClient.getPersistentAlerts(paramsWithoutSpaceId as GetPersistentAlertsParams<{}>)
         ).rejects.toThrowError(`Must specify both rule ID and space ID for AAD alert query.`);
       });
 
@@ -1391,7 +1389,9 @@ describe('Alerts Client', () => {
         const { executionUuid, ...paramsWithoutExecutionUuid } = getParamsByExecutionUuid;
 
         await expect(
-          alertsClient.getPersistentAlerts(paramsWithoutExecutionUuid as GetPersistentAlertsParams)
+          alertsClient.getPersistentAlerts(
+            paramsWithoutExecutionUuid as GetPersistentAlertsParams<{}>
+          )
         ).rejects.toThrowError(
           'Must specify either execution UUID or time range for AAD alert query.'
         );
@@ -1401,7 +1401,7 @@ describe('Alerts Client', () => {
         const { start, ...paramsWithoutStart } = getParamsByTimeQuery;
 
         await expect(
-          alertsClient.getPersistentAlerts(paramsWithoutStart as GetPersistentAlertsParams)
+          alertsClient.getPersistentAlerts(paramsWithoutStart as GetPersistentAlertsParams<{}>)
         ).rejects.toThrowError(
           'Must specify either execution UUID or time range for AAD alert query.'
         );
@@ -1411,7 +1411,7 @@ describe('Alerts Client', () => {
         const { end, ...paramsWithoutEnd } = getParamsByTimeQuery;
 
         await expect(
-          alertsClient.getPersistentAlerts(paramsWithoutEnd as GetPersistentAlertsParams)
+          alertsClient.getPersistentAlerts(paramsWithoutEnd as GetPersistentAlertsParams<{}>)
         ).rejects.toThrowError(
           'Must specify either execution UUID or time range for AAD alert query.'
         );

@@ -426,7 +426,7 @@ export class AlertsClient<
     executionUuid,
     formatAlert,
     isLifecycleAlert = false,
-  }: GetPersistentAlertsParams): Promise<PersistentAlerts> {
+  }: GetPersistentAlertsParams<AlertData>): Promise<PersistentAlerts> {
     if (!ruleId || !spaceId) {
       throw new Error(`Must specify both rule ID and space ID for AAD alert query.`);
     }
