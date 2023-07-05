@@ -24,3 +24,9 @@ export type {
 } from './types';
 
 export { MANAGEMENT_APP_ID } from '../common/contants';
+
+export interface ConfigSchema {
+  serverless: {
+    enabled: boolean;
+  };
+}
