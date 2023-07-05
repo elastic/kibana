@@ -64,6 +64,7 @@ export const getCertSummary = (cert: Cert, expirationThreshold: number, ageThres
   return {
     summary,
     status,
+    sha256: cert.sha256 ?? '',
     commonName: cert.common_name ?? '',
     issuer: cert.issuer ?? '',
     monitorName: cert.monitorName,
@@ -114,25 +115,40 @@ export const setTLSRecoveredAlertsContext = async ({
     const configId = state.configId;
     const latestPing = latestPings.find((ping) => ping.config_id === configId);
 
+    const previousStatus = i18n.translate('xpack.synthetics.alerts.tls.previousStatus', {
+      defaultMessage: 'Certificate {commonName} {summary}',
+      values: { commonName: state.commonName, summary: state.summary },
+    });
+
     const newCommonName = latestPing?.tls?.server?.x509?.subject.common_name ?? '';
     const newExpiryDate = latestPing?.tls?.server?.x509?.not_after ?? '';
-    const previousStatus = i18n.translate('xpack.synthetics.alerts.tls.prevCertificate', {
-      defaultMessage: '{commonName} is {status}',
-      values: { commonName: state.commonName, status: state.status },
-    });
 
     const { summary } = getValidAfter(newExpiryDate);
 
-    const newStatus = i18n.translate('xpack.synthetics.alerts.tls.newCertificate', {
-      defaultMessage: '{commonName} {summary}',
+    let newStatus = i18n.translate('xpack.synthetics.alerts.tls.newStatus', {
+      defaultMessage: 'Certificate {commonName} {summary}',
       values: { commonName: newCommonName, summary },
     });
+
+    let newSummary = '';
+    if (state.sha256 !== latestPing?.tls?.server?.hash?.sha256) {
+      newSummary = i18n.translate('xpack.synthetics.alerts.tls.newSummary', {
+        defaultMessage: 'Monitor certificate has been updated.',
+      });
+    }
+    if (state.sha256 === latestPing?.tls?.server?.hash?.sha256 || !latestPing) {
+      // in this case it seems like threshold has been changed, but the cert is the same
+      newSummary = i18n.translate('xpack.synthetics.alerts.tls.newSummaryThreshold', {
+        defaultMessage: 'Expiry/Age threshold has been updated.',
+      });
+      newStatus = previousStatus;
+    }
 
     alert.setContext({
       ...state,
       newStatus,
       previousStatus,
-      summary: 'Monitor has a new certificate',
+      summary: newSummary,
       [ALERT_DETAILS_URL]: alertUrl,
     });
   }

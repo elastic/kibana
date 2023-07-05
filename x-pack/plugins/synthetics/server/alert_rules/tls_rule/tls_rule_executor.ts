@@ -22,7 +22,12 @@ import {
   getAllMonitors,
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import { CertResult, ConfigKey, EncryptedSyntheticsMonitor } from '../../../common/runtime_types';
+import {
+  CertResult,
+  ConfigKey,
+  EncryptedSyntheticsMonitor,
+  Ping,
+} from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';

@@ -75,7 +75,7 @@ export const SyntheticsMonitorStatusTranslations = {
 
 export const TlsTranslations = {
   defaultActionMessage: i18n.translate('xpack.synthetics.rules.tls.defaultActionMessage', {
-    defaultMessage: `Detected TLS certificate {commonName} is {status} - Elastic Synthetics\n\nDetails:\n\n- Summary: {summary}\n- Common name: {commonName}\n- Issuer: {issuer}\n- Monitor: {monitorName}  \n- Monitor URL: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}`,
+    defaultMessage: `TLS certificate {commonName} {status} - Elastic Synthetics\n\nDetails:\n\n- Summary: {summary}\n- Common name: {commonName}\n- Issuer: {issuer}\n- Monitor: {monitorName}  \n- Monitor URL: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}`,
     values: {
       commonName: '{{context.commonName}}',
       issuer: '{{context.issuer}}',
@@ -88,7 +88,7 @@ export const TlsTranslations = {
     },
   }),
   defaultRecoveryMessage: i18n.translate('xpack.synthetics.rules.tls.defaultRecoveryMessage', {
-    defaultMessage: `TLS alert for monitor "{monitorName}" has recovered - Elastic Synthetics\n\nDetails:\n\n- Summary: {summary}\n- New status : {newCertificate}\n- Previous status: {prevCertificate}\n- Monitor: {monitorName}  \n- Monitor URL: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}`,
+    defaultMessage: `TLS alert for monitor "{monitorName}" has recovered - Elastic Synthetics\n\nDetails:\n\n- Summary: {summary}\n- New status : {newStatus}\n- Previous status: {previousStatus}\n- Monitor: {monitorName}  \n- Monitor URL: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}`,
     values: {
       summary: '{{context.summary}}',
       previousStatus: '{{context.previousStatus}}',

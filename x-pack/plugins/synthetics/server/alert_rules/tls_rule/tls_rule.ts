@@ -100,7 +100,7 @@ export const registerSyntheticsTLSCheckRule = (
           return;
         }
 
-        const alertId = `${cert.common_name}-${cert.issuer?.replace(/\s/g, '_')}-${cert.sha256}`;
+        const alertId = cert.sha256;
         const alertUuid = getAlertUuid(alertId);
         const indexedStartedAt = getAlertStartedDate(alertId) ?? startedAt.toISOString();
 

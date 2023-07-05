@@ -184,7 +184,7 @@ export const tlsTranslations = {
     }),
   validBeforeExpiredString: (date: string, relativeDate: number) =>
     i18n.translate('xpack.synthetics.rules.tls.validBeforeExpiredString', {
-      defaultMessage: 'valid since {date}, {relativeDate} days ago.',
+      defaultMessage: 'Valid since {date}, {relativeDate} days ago.',
       values: {
         date,
         relativeDate,
@@ -192,22 +192,22 @@ export const tlsTranslations = {
     }),
   validBeforeExpiringString: (date: string, relativeDate: number) =>
     i18n.translate('xpack.synthetics.rules.tls.validBeforeExpiringString', {
-      defaultMessage: 'invalid until {date}, {relativeDate} days from now.',
+      defaultMessage: 'Invalid until {date}, {relativeDate} days from now.',
       values: {
         date,
         relativeDate,
       },
     }),
   expiredLabel: i18n.translate('xpack.synthetics.rules.tls.expiredLabel', {
-    defaultMessage: 'expired',
+    defaultMessage: 'has expired',
   }),
   expiringLabel: i18n.translate('xpack.synthetics.rules.tls.expiringLabel', {
-    defaultMessage: 'expiring',
+    defaultMessage: 'is expiring soon',
   }),
   agingLabel: i18n.translate('xpack.synthetics.rules.tls.agingLabel', {
-    defaultMessage: 'becoming too old',
+    defaultMessage: 'is becoming too old',
   }),
   invalidLabel: i18n.translate('xpack.synthetics.rules.tls.invalidLabel', {
-    defaultMessage: 'invalid',
+    defaultMessage: 'is invalid',
   }),
 };
