@@ -211,17 +211,19 @@ export const coPilotPrompts = {
 
           The request it occurred for is called ${transactionName}.
 
-          ${logStacktrace
+          ${
+            logStacktrace
               ? `The log stacktrace:
           ${logStacktrace}`
               : ''
-            }
+          }
 
-          ${exceptionStacktrace
+          ${
+            exceptionStacktrace
               ? `The exception stacktrace:
           ${exceptionStacktrace}`
               : ''
-            }
+          }
           `,
           role: 'user',
         },
@@ -363,12 +365,12 @@ export const coPilotPrompts = {
     }),
     messages: ({ alertCaseData }) => {
       const header =
-        'alert uuid;start time;reason;rule name;rule category;case names;case status;case updatedAt;case severity;case totalComments;case tags;case categories;case assignees';
+        'alert uuid;alert URL;start time;reason;rule name;rule category;case names;case status;case updatedAt;case severity;case totalComments;case tags;case categories;case assignees';
       const add = (accumulator: number, a: number) => {
         return accumulator + a;
       };
       const rows = alertCaseData
-        .map(({ id, reason, start, ruleName, ruleCategory, cases }) => {
+        .map(({ id, alertUrl, reason, start, ruleName, ruleCategory, cases }) => {
           let casesRow: string = '';
           if (cases) {
             const casesName = cases.map((item: any) => item.name).join(',');
@@ -383,7 +385,7 @@ export const coPilotPrompts = {
           } else {
             casesRow = ';;;;;;';
           }
-          return `${id};${start};${reason};${ruleName};${ruleCategory};${casesRow}`;
+          return `${id};${alertUrl};${start};${reason};${ruleName};${ruleCategory};${casesRow}`;
         })
         .join('\n');
 
@@ -404,7 +406,7 @@ The current active alerts in the system are represented in the following table w
 Display the selected alert row using the following template, if any of the variables are empty do not include that line in the response:
 🚨 The the alert with the highest priority right now has the following Rule Name: R
     🤔 Reason: A
-    🔗 Link: http://localhost:5601/kibana/app/observability/alerts/C
+    🔗 Link: C
     🧯 Possible next steps: B
     ︖ The reason this alert has the highest priority is: D
     📂 Assigned to Case: E
@@ -414,7 +416,7 @@ Display the selected alert row using the following template, if any of the varia
 R being the Rule Name column value
 A being the alert Reason column value
 B being a way to start the remediation of the alert for an SRE using Elastic Observability
-C being the Alert uuid value, concatenated after the string "http://localhost:5601/kibana/app/observability/alerts/"
+C being the alert URL column value
 D being the reasoning why this alert is the most urgent compared to the rest of the alerts
 E being the summary in text of Case names values, Case status column value, Case severity column value and Case updatedAt column values
 I being a summary you generate about the properties of the Case

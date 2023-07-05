@@ -17,6 +17,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
+  ALERT_URL,
 } from '@kbn/rule-data-utils';
 import { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import {
@@ -153,6 +154,9 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           ? actions.reduce((next, action) => Object.assign(next, action.context), {})
           : {};
 
+      const alertInstanceId1 = (alertContext?.group || id) as string;
+      const alertUuid1 = getAlertUuid(alertInstanceId1);
+
       const alert = alertWithLifecycle({
         id,
         fields: {
@@ -160,6 +164,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           [ALERT_EVALUATION_VALUE]: value,
           [ALERT_REASON]: reason,
           [ALERT_CONTEXT]: alertContext,
+          [ALERT_URL]: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid1),
           ...flattenAdditionalContext(rootLevelContext),
         },
       });
