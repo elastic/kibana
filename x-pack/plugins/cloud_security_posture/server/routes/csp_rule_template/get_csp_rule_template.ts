@@ -60,9 +60,9 @@ const findCspRuleTemplateHandler = async (
     filter: getBenchmarkTypeFilter(benchmarkId),
   });
 
-  const cspRulesTemplates = cspRulesTemplatesSo.saved_objects.map((cspRuleTemplate) => {
-    return { ...cspRuleTemplate.attributes };
-  });
+  const cspRulesTemplates = cspRulesTemplatesSo.saved_objects.map(
+    (cspRuleTemplate) => cspRuleTemplate.attributes
+  );
 
   return {
     items: cspRulesTemplates,

@@ -24,6 +24,7 @@ import {
   MAX_ASSIGNEES_FILTER_LENGTH,
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
+  MAX_BULK_GET_CASES,
 } from '../../constants';
 
 export const AttachmentTotalsRt = rt.strict({
@@ -509,7 +510,7 @@ export const GetCategoriesResponseRt = rt.array(rt.string);
 export const GetReportersResponseRt = rt.array(UserRt);
 
 export const CasesBulkGetRequestRt = rt.strict({
-  ids: rt.array(rt.string),
+  ids: limitedArraySchema({ codec: rt.string, min: 1, max: MAX_BULK_GET_CASES, fieldName: 'ids' }),
 });
 
 export const CasesBulkGetResponseRt = rt.strict({
