@@ -167,7 +167,7 @@ export interface DataViewsServicePublicMethods {
    */
   createSavedObject: (
     indexPattern: DataView,
-    override?: boolean,
+    overwrite?: boolean,
     displayErrors?: boolean
   ) => Promise<DataView>;
   /**
@@ -964,12 +964,16 @@ export class DataViewsService {
 
   async createAndSave(
     spec: DataViewSpec,
-    override = false,
+    overwrite = false,
     skipFetchFields = false,
     displayErrors = true
   ) {
     const indexPattern = await this.createFromSpec(spec, skipFetchFields, displayErrors);
-    const createdIndexPattern = await this.createSavedObject(indexPattern, override, displayErrors);
+    const createdIndexPattern = await this.createSavedObject(
+      indexPattern,
+      overwrite,
+      displayErrors
+    );
     await this.setDefault(createdIndexPattern.id!);
     return createdIndexPattern!;
   }
@@ -981,14 +985,14 @@ export class DataViewsService {
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
 
-  async createSavedObject(dataView: DataView, override = false, displayErrors = true) {
+  async createSavedObject(dataView: DataView, overwrite = false, displayErrors = true) {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError();
     }
     const dupe = await findByName(this.savedObjectsClient, dataView.getName());
 
     if (dupe) {
-      if (override) {
+      if (overwrite) {
         await this.delete(dupe.id);
       } else {
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
@@ -1000,6 +1004,7 @@ export class DataViewsService {
     const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(body, {
       id: dataView.id,
       initialNamespaces: dataView.namespaces.length > 0 ? dataView.namespaces : undefined,
+      overwrite,
     })) as SavedObject<DataViewAttributes>;
 
     const createdIndexPattern = await this.initFromSavedObject(response, displayErrors);

@@ -8816,6 +8816,10 @@
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
               },
@@ -13290,10 +13294,6 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
-              },
-              {
-                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
@@ -16818,7 +16818,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -16860,10 +16860,8 @@
                 "id": "def-server.DataViewsService.createAndSave.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists."
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -16927,7 +16925,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -16969,10 +16967,8 @@
                 "id": "def-server.DataViewsService.createSavedObject.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists"
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -19218,7 +19214,8 @@
             "label": "timeSeriesMetric",
             "description": [],
             "signature": [
-              "\"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined"
+              "MappingTimeSeriesMetricType",
+              " | undefined"
             ],
             "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
             "deprecated": false,
@@ -20945,10 +20942,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_sub_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -23488,7 +23481,9 @@
                 "section": "def-common.RuntimeFieldSpec",
                 "text": "RuntimeFieldSpec"
               },
-              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
+              "MappingTimeSeriesMetricType",
+              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -23855,7 +23850,8 @@
               "\nreturns type of TSDB metric or undefined"
             ],
             "signature": [
-              "\"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined"
+              "MappingTimeSeriesMetricType",
+              " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -25344,7 +25340,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -25386,10 +25382,8 @@
                 "id": "def-common.DataViewsService.createAndSave.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists."
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -25453,7 +25447,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean, displayErrors?: boolean) => Promise<",
+              ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -25495,10 +25489,8 @@
                 "id": "def-common.DataViewsService.createSavedObject.$2",
                 "type": "boolean",
                 "tags": [],
-                "label": "override",
-                "description": [
-                  "Overwrite if existing index pattern exists"
-                ],
+                "label": "overwrite",
+                "description": [],
                 "signature": [
                   "boolean"
                 ],
@@ -27634,6 +27626,10 @@
                 "path": "x-pack/plugins/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
+                "plugin": "osquery",
+                "path": "x-pack/plugins/osquery/server/routes/pack/read_pack_route.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
               },
@@ -28330,7 +28326,7 @@
             "section": "def-common.DataViewSpec",
             "text": "DataViewSpec"
           },
-          ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
+          ", overwrite?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -28346,7 +28342,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", override?: boolean, displayErrors?: boolean) => Promise<",
+          ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -28556,7 +28552,9 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
+          "MappingTimeSeriesMetricType",
+          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,

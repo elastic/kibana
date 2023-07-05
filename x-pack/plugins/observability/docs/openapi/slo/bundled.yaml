@@ -8,14 +8,17 @@ info:
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
+servers:
+  - url: http://localhost:5601
+    description: local
+security:
+  - basicAuth: []
+  - apiKeyAuth: []
 tags:
   - name: slo
     description: SLO APIs enable you to define, manage and track service-level objectives
   - name: composite slo
     description: Composite SLO APIs enable you to define, manage and track a group of SLOs.
-servers:
-  - url: http://localhost:5601
-    description: local
 paths:
   /s/{spaceId}/api/observability/composite_slos:
     post:
@@ -46,19 +49,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '409':
           description: Conflict - The Composite SLO id already exists
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/409_response'
     get:
       summary: Retrieves a paginated list of composite SLOs with summary
       operationId: findCompositeSlo
@@ -114,13 +123,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
+        '404':
+          description: Not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
   /s/{spaceId}/api/observability/composite_slos/{compositeSloId}:
     get:
       summary: Retrieves a composite SLO
@@ -145,13 +166,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
+        '404':
+          description: Not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
     put:
       summary: Updates a composite SLO
       operationId: updateCompositeSlo
@@ -181,13 +214,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
+        '404':
+          description: Not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
     delete:
       summary: Deletes a composite SLO
       operationId: deleteCompositeSlo
@@ -207,13 +252,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
+        '404':
+          description: Not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
   /s/{spaceId}/api/observability/slos:
     post:
       summary: Creates an SLO.
@@ -243,19 +300,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '409':
           description: Conflict - The SLO id already exists
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/409_response'
       servers:
         - url: https://localhost:5601
     get:
@@ -329,13 +392,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
+        '404':
+          description: Not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
   /s/{spaceId}/api/observability/slos/{sloId}:
     get:
       summary: Retrieves a SLO
@@ -360,13 +435,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
+        '404':
+          description: Not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
     put:
       summary: Updates an SLO
       operationId: updateSlo
@@ -396,13 +483,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
+        '404':
+          description: Not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
     delete:
       summary: Deletes an SLO
       operationId: deleteSlo
@@ -422,13 +521,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
+        '404':
+          description: Not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
   /s/{spaceId}/api/observability/slos/{sloId}/enable:
     post:
       summary: Enables an SLO
@@ -449,13 +560,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
+        '404':
+          description: Not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
   /s/{spaceId}/api/observability/slos/{sloId}/disable:
     post:
       summary: Disables an SLO
@@ -476,13 +599,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
+        '404':
+          description: Not found response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
   /s/{spaceId}/internal/observability/slos/_historical_summary:
     post:
       summary: Retrieves the historical summary for a list of SLOs
@@ -512,13 +647,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/4xx_response'
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
 components:
   securitySchemes:
     basicAuth:
@@ -723,8 +864,25 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/composite_slo_response'
-    4xx_response:
-      title: Bad response
+    400_response:
+      title: Bad request
+      type: object
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: number
+          example: 400
+        error:
+          type: string
+          example: Bad Request
+        message:
+          type: string
+          example: 'Invalid value ''foo'' supplied to: [...]'
+    401_response:
+      title: Unauthorized
       type: object
       required:
         - statusCode
@@ -740,6 +898,40 @@ components:
         message:
           type: string
           example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+    403_response:
+      title: Unauthorized
+      type: object
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: number
+          example: 403
+        error:
+          type: string
+          example: Unauthorized
+        message:
+          type: string
+          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+    404_response:
+      title: Not found
+      type: object
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: number
+          example: 404
+        error:
+          type: string
+          example: Not Found
+        message:
+          type: string
+          example: SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found
     create_composite_slo_request:
       title: Create composite SLO request
       description: |
@@ -780,6 +972,23 @@ components:
         id:
           type: string
           example: 8853df00-ae2e-11ed-90af-09bb6422b258
+    409_response:
+      title: Conflict
+      type: object
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: number
+          example: 409
+        error:
+          type: string
+          example: Conflict
+        message:
+          type: string
+          example: SLO [d077e940-1515-11ee-9c50-9d096392f520] already exists
     update_composite_slo_request:
       title: Update composite SLO request
       description: |
@@ -1196,7 +1405,7 @@ components:
         - objective
       properties:
         id:
-          description: A unique identifier for the SLO. Must be between 8 and 36 chars
+          description: A optional and unique identifier for the SLO. Must be between 8 and 36 chars
           type: string
           example: my-super-slo-id
         name:
@@ -1294,6 +1503,3 @@ components:
               example: 0.9836
             errorBudget:
               $ref: '#/components/schemas/error_budget'
-security:
-  - basicAuth: []
-  - apiKeyAuth: []
