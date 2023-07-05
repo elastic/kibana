@@ -8,6 +8,12 @@
 import * as rt from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 
+export interface LimitedSchemaType {
+  fieldName: string;
+  min: number;
+  max: number;
+}
+
 export const NonEmptyString = new rt.Type<string, string, unknown>(
   'NonEmptyString',
   rt.string.is,
@@ -22,7 +28,7 @@ export const NonEmptyString = new rt.Type<string, string, unknown>(
   rt.identity
 );
 
-export const limitedStringSchema = (fieldName: string, min: number, max: number) =>
+export const limitedStringSchema = ({ fieldName, min, max }: LimitedSchemaType) =>
   new rt.Type<string, string, unknown>(
     'LimitedString',
     rt.string.is,
@@ -55,12 +61,12 @@ export const limitedStringSchema = (fieldName: string, min: number, max: number)
     rt.identity
   );
 
-export const limitedArraySchema = <T extends rt.Mixed>(
-  codec: T,
-  min: number,
-  max: number,
-  fieldName: string
-) =>
+export const limitedArraySchema = <T extends rt.Mixed>({
+  codec,
+  fieldName,
+  min,
+  max,
+}: { codec: T } & LimitedSchemaType) =>
   new rt.Type<Array<rt.TypeOf<typeof codec>>, Array<rt.TypeOf<typeof codec>>, unknown>(
     'LimitedArray',
     (input): input is T[] => rt.array(codec).is(input),
