@@ -17,8 +17,10 @@ const createMockDebugLogger = () => {
   return jest.fn();
 };
 
-const createMockConfig = (mockConfig: ConfigType = { enabled: true, maxSpaces: 1000 }) => {
-  return ConfigSchema.validate(mockConfig);
+const createMockConfig = (
+  mockConfig: ConfigType = { enabled: true, maxSpaces: 1000, allowFeatureVisibility: true }
+) => {
+  return ConfigSchema.validate(mockConfig, { serverless: !mockConfig.allowFeatureVisibility });
 };
 
 describe('#getAll', () => {
@@ -97,7 +99,7 @@ describe('#getAll', () => {
     mockCallWithRequestRepository.find.mockResolvedValue({
       saved_objects: savedObjects,
     } as any);
-    const mockConfig = createMockConfig({ enabled: true, maxSpaces: 1234 });
+    const mockConfig = createMockConfig();
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
     const actualSpaces = await client.getAll();
@@ -207,7 +209,7 @@ describe('#create', () => {
       total: maxSpaces - 1,
     } as any);
 
-    const mockConfig = createMockConfig({ enabled: true, maxSpaces });
+    const mockConfig = createMockConfig({ enabled: true, maxSpaces, allowFeatureVisibility: true });
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
 
@@ -233,7 +235,7 @@ describe('#create', () => {
       total: maxSpaces,
     } as any);
 
-    const mockConfig = createMockConfig({ enabled: true, maxSpaces });
+    const mockConfig = createMockConfig({ enabled: true, maxSpaces, allowFeatureVisibility: true });
 
     const client = new SpacesClient(mockDebugLogger, mockConfig, mockCallWithRequestRepository, []);
 
@@ -247,6 +249,79 @@ describe('#create', () => {
       perPage: 0,
     });
     expect(mockCallWithRequestRepository.create).not.toHaveBeenCalled();
+  });
+
+  describe('when config.allowFeatureVisibility is disabled', () => {
+    test(`creates space without disabledFeatures`, async () => {
+      const maxSpaces = 5;
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.create.mockResolvedValue(savedObject);
+      mockCallWithRequestRepository.find.mockResolvedValue({
+        total: maxSpaces - 1,
+      } as any);
+
+      const mockConfig = createMockConfig({
+        enabled: true,
+        maxSpaces,
+        allowFeatureVisibility: false,
+      });
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        []
+      );
+
+      const actualSpace = await client.create(spaceToCreate);
+
+      expect(actualSpace).toEqual(expectedReturnedSpace);
+      expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
+        type: 'space',
+        page: 1,
+        perPage: 0,
+      });
+      expect(mockCallWithRequestRepository.create).toHaveBeenCalledWith('space', attributes, {
+        id,
+      });
+    });
+
+    test(`throws bad request when creating space with disabledFeatures`, async () => {
+      const maxSpaces = 5;
+      const mockDebugLogger = createMockDebugLogger();
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.create.mockResolvedValue(savedObject);
+      mockCallWithRequestRepository.find.mockResolvedValue({
+        total: maxSpaces - 1,
+      } as any);
+
+      const mockConfig = createMockConfig({
+        enabled: true,
+        maxSpaces,
+        allowFeatureVisibility: false,
+      });
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        []
+      );
+
+      expect(
+        client.create({ ...spaceToCreate, disabledFeatures: ['some-feature'] })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to create Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled"`
+      );
+
+      expect(mockCallWithRequestRepository.find).toHaveBeenCalledWith({
+        type: 'space',
+        page: 1,
+        perPage: 0,
+      });
+      expect(mockCallWithRequestRepository.create).not.toHaveBeenCalled();
+    });
   });
 });
 
@@ -297,6 +372,60 @@ describe('#update', () => {
     expect(actualSpace).toEqual(expectedReturnedSpace);
     expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, attributes);
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
+  });
+
+  describe('when config.allowFeatureVisibility is disabled', () => {
+    test(`updates space without disabledFeatures`, async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig({
+        enabled: true,
+        maxSpaces: 1000,
+        allowFeatureVisibility: false,
+      });
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        []
+      );
+      const id = savedObject.id;
+      const actualSpace = await client.update(id, spaceToUpdate);
+
+      expect(actualSpace).toEqual(expectedReturnedSpace);
+      expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith('space', id, attributes);
+      expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
+    });
+
+    test(`throws bad request when updating space with disabledFeatures`, async () => {
+      const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig({
+        enabled: true,
+        maxSpaces: 1000,
+        allowFeatureVisibility: false,
+      });
+      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
+      mockCallWithRequestRepository.get.mockResolvedValue(savedObject);
+
+      const client = new SpacesClient(
+        mockDebugLogger,
+        mockConfig,
+        mockCallWithRequestRepository,
+        []
+      );
+      const id = savedObject.id;
+
+      expect(
+        client.update(id, { ...spaceToUpdate, disabledFeatures: ['some-feature'] })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to update Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled"`
+      );
+
+      expect(mockCallWithRequestRepository.update).not.toHaveBeenCalled();
+      expect(mockCallWithRequestRepository.get).not.toHaveBeenCalled();
+    });
   });
 });
 

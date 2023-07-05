@@ -4182,10 +4182,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ess-security@link:x-pack/plugins/ess_security":
-  version "0.0.0"
-  uid ""
-
 "@kbn/event-annotation-plugin@link:src/plugins/event_annotation":
   version "0.0.0"
   uid ""
@@ -4615,6 +4611,10 @@
   uid ""
 
 "@kbn/logging@link:packages/kbn-logging":
+  version "0.0.0"
+  uid ""
+
+"@kbn/logs-shared-plugin@link:x-pack/plugins/logs_shared":
   version "0.0.0"
   uid ""
 
@@ -5062,11 +5062,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-solution-ess@link:x-pack/plugins/security_solution_ess":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-solution-fixtures-plugin@link:x-pack/test/cases_api_integration/common/plugins/security_solution":
   version "0.0.0"
   uid ""
 
 "@kbn/security-solution-plugin@link:x-pack/plugins/security_solution":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-solution-serverless@link:x-pack/plugins/security_solution_serverless":
   version "0.0.0"
   uid ""
 
@@ -5171,10 +5179,6 @@
   uid ""
 
 "@kbn/serverless-search@link:x-pack/plugins/serverless_search":
-  version "0.0.0"
-  uid ""
-
-"@kbn/serverless-security@link:x-pack/plugins/serverless_security":
   version "0.0.0"
   uid ""
 

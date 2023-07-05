@@ -8,9 +8,12 @@
 import { HttpStart } from '@kbn/core/public';
 import {
   CreateInventoryViewAttributesRequestPayload,
+  CreateInventoryViewResponsePayload,
+  FindInventoryViewResponsePayload,
+  GetInventoryViewResposePayload,
   UpdateInventoryViewAttributesRequestPayload,
+  UpdateInventoryViewResponsePayload,
 } from '../../../common/http_api/latest';
-import type { InventoryView } from '../../../common/inventory_views';
 
 export type InventoryViewsServiceSetup = void;
 
@@ -23,14 +26,14 @@ export interface InventoryViewsServiceStartDeps {
 }
 
 export interface IInventoryViewsClient {
-  findInventoryViews(): Promise<InventoryView[]>;
-  getInventoryView(inventoryViewId: string): Promise<InventoryView>;
+  findInventoryViews(): Promise<FindInventoryViewResponsePayload['data']>;
+  getInventoryView(inventoryViewId: string): Promise<GetInventoryViewResposePayload>;
   createInventoryView(
     inventoryViewAttributes: CreateInventoryViewAttributesRequestPayload
-  ): Promise<InventoryView>;
+  ): Promise<CreateInventoryViewResponsePayload>;
   updateInventoryView(
     inventoryViewId: string,
     inventoryViewAttributes: UpdateInventoryViewAttributesRequestPayload
-  ): Promise<InventoryView>;
+  ): Promise<UpdateInventoryViewResponsePayload>;
   deleteInventoryView(inventoryViewId: string): Promise<null>;
 }
