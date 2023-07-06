@@ -19,7 +19,7 @@ import {
 import React from 'react';
 
 const style: TooltipCellStyle = { textAlign: 'right' };
-export const DataDriftChartTooltipBody: TooltipSpec['body'] = ({ items }) => {
+export const DataComparisonChartTooltipBody: TooltipSpec['body'] = ({ items }) => {
   return (
     <TooltipTable gridTemplateColumns={`repeat(${4}, auto)`} maxHeight={120}>
       <TooltipTableHeader>
@@ -49,14 +49,10 @@ export const DataDriftChartTooltipBody: TooltipSpec['body'] = ({ items }) => {
 
           <TooltipTableCell style={style}>
             {items[1].datum.doc_count - items[0].datum.doc_count}
-            {/* {items.reduce((s, { datum: { doc_count: docCount } }) => s - docCount, 0)}*/}
           </TooltipTableCell>
           <TooltipTableCell style={style}>
             {`${((items[1].datum.percentage - items[0].datum.percentage) * 100).toFixed(1)}%`}
           </TooltipTableCell>
-          {/* <TooltipTableCell style={style}>*/}
-          {/*  {items.reduce((s, { datum: { z } }) => s + z, 0)}*/}
-          {/* </TooltipTableCell>*/}
         </TooltipTableRow>
       </TooltipTableFooter>
     </TooltipTable>

@@ -37,13 +37,19 @@ import { ProgressControls } from '@kbn/aiops-components';
 import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
+import { getDataComparisonType, useFetchDataComparisonResult } from './use_data_drift_result';
+import { DataComparisonChartTooltipBody } from './data_comparison_chart_tooltip_body';
 import { UseTableState, useTableState } from '../log_categorization/category_table/use_table_state';
 import type { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
-import { getDataDriftType, useFetchDataDriftResult } from './use_data_drift_result';
-import { DATA_DRIFT_TYPE, DATA_DRIFT_TYPE_LABEL, PRODUCTION_LABEL } from './constants';
-import type { Histogram, ComparisionHistogram, Feature, DataDriftField, TimeRange } from './types';
-import { DataDriftChartTooltipBody } from './data_drift_chart_tooltip_body';
+import { DATA_COMPARISON_TYPE, DATA_COMPARISON_TYPE_LABEL, PRODUCTION_LABEL } from './constants';
+import type {
+  Histogram,
+  ComparisionHistogram,
+  Feature,
+  TimeRange,
+  DataComparisonField,
+} from './types';
 
 const formatSignificanceLevel = (significanceLevel: number) => {
   if (typeof significanceLevel !== 'number' || isNaN(significanceLevel)) return '';
@@ -64,7 +70,7 @@ export const ReferenceDistribution = ({
 }: {
   data: Histogram[];
   color?: SeriesColorAccessor;
-  fieldType?: DataDriftField['type'];
+  fieldType?: DataComparisonField['type'];
 }) => {
   return (
     <Chart>
@@ -72,7 +78,9 @@ export const ReferenceDistribution = ({
       <BarSeries
         id="reference-distr-viz"
         name="Reference distribution"
-        xScaleType={fieldType === DATA_DRIFT_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal}
+        xScaleType={
+          fieldType === DATA_COMPARISON_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal
+        }
         yScaleType={ScaleType.Linear}
         xAccessor="key"
         yAccessors={['percentage']}
@@ -91,7 +99,7 @@ export const ProductionDistribution = ({
 }: {
   data: Histogram[];
   color?: SeriesColorAccessor;
-  fieldType?: DataDriftField['type'];
+  fieldType?: DataComparisonField['type'];
 }) => {
   return (
     <Chart>
@@ -99,7 +107,9 @@ export const ProductionDistribution = ({
       <BarSeries
         id="production-distr-viz"
         name="Production distribution"
-        xScaleType={fieldType === DATA_DRIFT_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal}
+        xScaleType={
+          fieldType === DATA_COMPARISON_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal
+        }
         yScaleType={ScaleType.Linear}
         xAccessor="key"
         yAccessors={['percentage']}
@@ -118,22 +128,24 @@ const OverlapDistributionComparison = ({
 }: {
   data: ComparisionHistogram[];
   colors: { referenceColor: string; productionColor: string };
-  fieldType?: DataDriftField['type'];
-  fieldName?: DataDriftField['field'];
+  fieldType?: DataComparisonField['type'];
+  fieldName?: DataComparisonField['field'];
 }) => {
   return (
     <Chart>
-      <Tooltip body={DataDriftChartTooltipBody} />
+      <Tooltip body={DataComparisonChartTooltipBody} />
 
       <Settings showLegend={false} />
       <AreaSeries
         id="aiops.overlapDistributionComparisonChart"
-        name={i18n.translate('xpack.aiops.dataDrift.distributionComparisonChartName', {
+        name={i18n.translate('xpack.aiops.dataComparison.distributionComparisonChartName', {
           defaultMessage:
             'Distribution comparison of reference and production data for {fieldName}',
           values: { fieldName },
         })}
-        xScaleType={fieldType === DATA_DRIFT_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal}
+        xScaleType={
+          fieldType === DATA_COMPARISON_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal
+        }
         yScaleType={ScaleType.Linear}
         xAccessor="key"
         yAccessors={['percentage']}
@@ -149,7 +161,7 @@ const OverlapDistributionComparison = ({
   );
 };
 
-const DataDriftChart = ({
+const DataComparisonChart = ({
   featureName,
   fieldType,
   data,
@@ -162,7 +174,7 @@ const DataDriftChart = ({
 }) => {
   return (
     <Chart>
-      <Tooltip body={DataDriftChartTooltipBody} />
+      <Tooltip body={DataComparisonChartTooltipBody} />
       <Settings />
       <Axis id="bottom" position={Position.Bottom} title="Feature values" />
       <Axis
@@ -174,7 +186,9 @@ const DataDriftChart = ({
       <BarSeries
         id="data-drift-viz"
         name={featureName}
-        xScaleType={fieldType === DATA_DRIFT_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal}
+        xScaleType={
+          fieldType === DATA_COMPARISON_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal
+        }
         yScaleType={ScaleType.Linear}
         xAccessor="key"
         yAccessors={['percentage']}
@@ -189,19 +203,19 @@ const DataDriftChart = ({
   );
 };
 
-const dataDriftedYesLabel = i18n.translate('xpack.aiops.dataDrift.fieldTypeYesLabel', {
+const dataComparisonedYesLabel = i18n.translate('xpack.aiops.dataComparison.fieldTypeYesLabel', {
   defaultMessage: 'Yes',
 });
-const dataDriftedNoLabel = i18n.translate('xpack.aiops.dataDrift.driftDetectedNoLabel', {
+const dataComparisonedNoLabel = i18n.translate('xpack.aiops.dataComparison.driftDetectedNoLabel', {
   defaultMessage: 'No',
 });
 
 const showOnlyDriftedFieldsOptionLabel = i18n.translate(
-  'xpack.aiops.dataDrift.showOnlyDriftedFieldsOptionLabel',
+  'xpack.aiops.dataComparison.showOnlyDriftedFieldsOptionLabel',
   { defaultMessage: 'Show only fields with data drifted' }
 );
 
-interface DataDriftViewProps {
+interface DataComparisonViewProps {
   windowParameters?: WindowParameters;
   dataView: DataView;
   searchString: Query['query'];
@@ -212,7 +226,7 @@ interface DataDriftViewProps {
   onReset: () => void;
 }
 // Data drift view
-export const DataDriftView = ({
+export const DataComparisonView = ({
   windowParameters,
   dataView,
   searchString,
@@ -220,8 +234,8 @@ export const DataDriftView = ({
   searchQueryLanguage,
   onReset,
   isBrushCleared,
-}: DataDriftViewProps) => {
-  const [showDataDriftedOnly, setShowDataDriftedOnly] = useState(false);
+}: DataComparisonViewProps) => {
+  const [showDataComparisonedOnly, setShowDataComparisonedOnly] = useState(false);
 
   const [currentAnalysisWindowParameters, setCurrentAnalysisWindowParameters] = useState<
     WindowParameters | undefined
@@ -229,7 +243,7 @@ export const DataDriftView = ({
 
   const [fetchInfo, setFetchIno] = useState<
     | {
-        fields: DataDriftField[];
+        fields: DataComparisonField[];
         currentDataView: DataView;
         timeRanges?: { reference: TimeRange; production: TimeRange };
       }
@@ -238,7 +252,7 @@ export const DataDriftView = ({
 
   const updateFieldsAndTime = useCallback(() => {
     setCurrentAnalysisWindowParameters(windowParameters);
-    const mergedFields: DataDriftField[] = [];
+    const mergedFields: DataComparisonField[] = [];
     if (dataView) {
       mergedFields.push(
         ...dataView.fields
@@ -247,12 +261,12 @@ export const DataDriftView = ({
               f.aggregatable === true &&
               // @ts-ignore metadata does exist
               f.spec.metadata_field! !== true &&
-              getDataDriftType(f.type) !== 'unsupported' &&
+              getDataComparisonType(f.type) !== 'unsupported' &&
               mergedFields.findIndex((merged) => merged.field === f.name) === -1
           )
           .map((f) => ({
             field: f.name,
-            type: getDataDriftType(f.type),
+            type: getDataComparisonType(f.type),
             displayName: f.displayName,
           }))
       );
@@ -276,7 +290,7 @@ export const DataDriftView = ({
         : {}),
     });
   }, [dataView, windowParameters]);
-  const result = useFetchDataDriftResult({
+  const result = useFetchDataComparisonResult({
     ...fetchInfo,
     searchString,
     searchQueryLanguage,
@@ -286,13 +300,13 @@ export const DataDriftView = ({
   const filteredData = useMemo(() => {
     if (!result?.data) return [];
 
-    switch (showDataDriftedOnly) {
+    switch (showDataComparisonedOnly) {
       case true:
         return result.data.filter((d) => d.driftDetected === true);
       default:
         return result.data;
     }
-  }, [result.data, showDataDriftedOnly]);
+  }, [result.data, showDataComparisonedOnly]);
 
   const { onTableChange, pagination, sorting, setPageIndex } = useTableState<Feature>(
     filteredData ?? [],
@@ -307,8 +321,8 @@ export const DataDriftView = ({
     [currentAnalysisWindowParameters, windowParameters]
   );
 
-  const onShowDataDriftedOnlyToggle = (e: EuiSwitchEvent) => {
-    setShowDataDriftedOnly(e.target.checked);
+  const onShowDataComparisonedOnlyToggle = (e: EuiSwitchEvent) => {
+    setShowDataComparisonedOnly(e.target.checked);
     setPageIndex(0);
   };
 
@@ -321,8 +335,8 @@ export const DataDriftView = ({
       title={
         <h2>
           <FormattedMessage
-            id="xpack.aiops.dataDrift.emptyPromptTitle"
-            defaultMessage="Click a time range in the histogram chart to compare baseline and deviation data."
+            id="xpack.aiops.dataComparison.emptyPromptTitle"
+            defaultMessage="Select a time range for reference and production data in the histogram chart to compare data distribution."
           />
         </h2>
       }
@@ -330,8 +344,9 @@ export const DataDriftView = ({
       body={
         <p>
           <FormattedMessage
-            id="xpack.aiops.dataDrift.emptyPromptBody"
-            defaultMessage="The data drift feature identifies statistically significant field/value combinations that contribute to a log rate spike."
+            id="xpack.aiops.dataComparison.emptyPromptBody"
+            defaultMessage="The Data Comparison Viewer visualizes changes in the model input data, which can lead to model performance degradation over time. Detecting data drifts enables you to identify potential performance issues.
+"
           />
         </p>
       }
@@ -355,8 +370,8 @@ export const DataDriftView = ({
             <EuiSwitch
               label={showOnlyDriftedFieldsOptionLabel}
               aria-label={showOnlyDriftedFieldsOptionLabel}
-              checked={showDataDriftedOnly}
-              onChange={onShowDataDriftedOnlyToggle}
+              checked={showDataComparisonedOnly}
+              onChange={onShowDataComparisonedOnlyToggle}
               compressed
             />
           </EuiFormRow>
@@ -365,7 +380,7 @@ export const DataDriftView = ({
       {result.error ? <EuiEmptyPrompt color="danger">{result.error}</EuiEmptyPrompt> : null}
 
       {filteredData ? (
-        <DataDriftOverviewTable
+        <DataComparisonOverviewTable
           data={filteredData}
           onTableChange={onTableChange}
           pagination={pagination}
@@ -377,7 +392,7 @@ export const DataDriftView = ({
   );
 };
 
-export const DataDriftOverviewTable = ({
+export const DataComparisonOverviewTable = ({
   data,
   onTableChange,
   pagination,
@@ -446,41 +461,41 @@ export const DataDriftOverviewTable = ({
 
     {
       field: 'featureName',
-      name: i18n.translate('xpack.aiops.dataDrift.fieldNameLabel', {
+      name: i18n.translate('xpack.aiops.dataComparison.fieldNameLabel', {
         defaultMessage: 'Field name',
       }),
-      'data-test-subj': 'mlDataDriftOverviewTableFeatureName',
+      'data-test-subj': 'mlDataComparisonOverviewTableFeatureName',
       sortable: true,
       textOnly: true,
     },
     {
       field: 'fieldType',
-      name: i18n.translate('xpack.aiops.dataDrift.fieldTypeLabel', {
+      name: i18n.translate('xpack.aiops.dataComparison.fieldTypeLabel', {
         defaultMessage: 'Field type',
       }),
-      'data-test-subj': 'mlDataDriftOverviewTableFeatureType',
+      'data-test-subj': 'mlDataComparisonOverviewTableFeatureType',
       sortable: true,
       textOnly: true,
-      render: (fieldType: DataDriftField['type']) => {
-        return <span>{DATA_DRIFT_TYPE_LABEL[fieldType]}</span>;
+      render: (fieldType: DataComparisonField['type']) => {
+        return <span>{DATA_COMPARISON_TYPE_LABEL[fieldType]}</span>;
       },
     },
     {
       field: 'driftDetected',
-      name: i18n.translate('xpack.aiops.dataDrift.driftDetectedLabel', {
+      name: i18n.translate('xpack.aiops.dataComparison.driftDetectedLabel', {
         defaultMessage: 'Drift detected',
       }),
-      'data-test-subj': 'mlDataDriftOverviewTableDriftDetected',
+      'data-test-subj': 'mlDataComparisonOverviewTableDriftDetected',
       sortable: true,
       textOnly: true,
       render: (driftDetected: boolean) => {
-        return <span>{driftDetected ? dataDriftedYesLabel : dataDriftedNoLabel}</span>;
+        return <span>{driftDetected ? dataComparisonedYesLabel : dataComparisonedNoLabel}</span>;
       },
     },
     {
       field: 'similarityTestPValue',
       name: 'Similarity test p-value',
-      'data-test-subj': 'mlDataDriftOverviewTableSimilarityTestPValue',
+      'data-test-subj': 'mlDataComparisonOverviewTableSimilarityTestPValue',
       sortable: true,
       textOnly: true,
       render: (similarityTestPValue: number, feature: Feature) => {
@@ -490,7 +505,7 @@ export const DataDriftOverviewTable = ({
     {
       field: 'referenceHistogram',
       name: 'Reference distribution',
-      'data-test-subj': 'mlDataDriftOverviewTableReferenceDistribution',
+      'data-test-subj': 'mlDataComparisonOverviewTableReferenceDistribution',
       sortable: false,
       render: (referenceHistogram: Feature['referenceHistogram'], item) => {
         return (
@@ -507,7 +522,7 @@ export const DataDriftOverviewTable = ({
     {
       field: 'productionHistogram',
       name: 'Production distribution',
-      'data-test-subj': 'mlDataDriftOverviewTableProductionDistribution',
+      'data-test-subj': 'mlDataComparisonOverviewTableProductionDistribution',
       sortable: false,
       render: (productionDistribution: Feature['productionHistogram'], item) => {
         return (
@@ -524,7 +539,7 @@ export const DataDriftOverviewTable = ({
     {
       field: 'comparisonDistribution',
       name: 'Comparison',
-      'data-test-subj': 'mlDataDriftOverviewTableProductionDistribution',
+      'data-test-subj': 'mlDataComparisonOverviewTableProductionDistribution',
       sortable: false,
       render: (comparisonDistribution: Feature['comparisonDistribution'], item) => {
         return (
@@ -543,8 +558,8 @@ export const DataDriftOverviewTable = ({
 
   const getRowProps = (item: Feature) => {
     return {
-      'data-test-subj': `mlDataDriftOverviewTableRow row-${item.featureName}`,
-      className: 'mlDataDriftOverviewTableRow',
+      'data-test-subj': `mlDataComparisonOverviewTableRow row-${item.featureName}`,
+      className: 'mlDataComparisonOverviewTableRow',
       onClick: () => {},
     };
   };
@@ -552,8 +567,8 @@ export const DataDriftOverviewTable = ({
   const getCellProps = (item: Feature, column: EuiTableFieldDataColumnType<Feature>) => {
     const { field } = column;
     return {
-      className: 'mlDataDriftOverviewTableCell',
-      'data-test-subj': `mlDataDriftOverviewTableCell row-${item.featureName}-column-${String(
+      className: 'mlDataComparisonOverviewTableCell',
+      'data-test-subj': `mlDataComparisonOverviewTableCell row-${item.featureName}-column-${String(
         field
       )}`,
       textOnly: true,
@@ -569,7 +584,7 @@ export const DataDriftOverviewTable = ({
       const { featureName, comparisonDistribution } = item;
       itemIdToExpandedRowMapValues[item.featureName] = (
         <div css={{ width: '100%', height: 200 }}>
-          <DataDriftChart
+          <DataComparisonChart
             featureName={featureName}
             fieldType={item.fieldType}
             data={comparisonDistribution}
@@ -583,8 +598,8 @@ export const DataDriftOverviewTable = ({
 
   return (
     <EuiBasicTable
-      tableCaption={i18n.translate('xpack.aiops.dataDrift.dataDriftTableCaption', {
-        defaultMessage: 'Data drift overview',
+      tableCaption={i18n.translate('xpack.aiops.dataComparison.dataComparisonTableCaption', {
+        defaultMessage: 'Data comparison overview',
       })}
       items={features}
       rowHeader="featureName"

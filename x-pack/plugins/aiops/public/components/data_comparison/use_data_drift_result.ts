@@ -24,7 +24,7 @@ import {
   DRIFT_P_VALUE_THRESHOLD,
   CRITICAL_VALUES_TABLE,
   SIGNIFICANCE_LEVELS,
-  DATA_DRIFT_TYPE,
+  DATA_COMPARISON_TYPE,
 } from './constants';
 
 import {
@@ -36,19 +36,19 @@ import {
   Result,
   isNumericDriftData,
   Feature,
-  DataDriftField,
+  DataComparisonField,
   TimeRange,
 } from './types';
 
-export const getDataDriftType = (kibanaType: string): DataDriftField['type'] => {
+export const getDataComparisonType = (kibanaType: string): DataComparisonField['type'] => {
   switch (kibanaType) {
     case 'number':
-      return DATA_DRIFT_TYPE.NUMERIC;
+      return DATA_COMPARISON_TYPE.NUMERIC;
     case 'boolean':
     case 'string':
-      return DATA_DRIFT_TYPE.CATEGORICAL;
+      return DATA_COMPARISON_TYPE.CATEGORICAL;
     default:
-      return DATA_DRIFT_TYPE.UNSUPPORTED;
+      return DATA_COMPARISON_TYPE.UNSUPPORTED;
   }
 };
 
@@ -173,7 +173,7 @@ const normalizeTerms = (
   };
 };
 
-const processDataDriftResult = (
+const processDataComparisonResult = (
   result: Record<string, NumericDriftData | CategoricalDriftData>
 ): Feature[] => {
   return Object.entries(result).map(([featureName, data]) => {
@@ -184,7 +184,7 @@ const processDataDriftResult = (
 
       return {
         featureName,
-        fieldType: DATA_DRIFT_TYPE.NUMERIC,
+        fieldType: DATA_COMPARISON_TYPE.NUMERIC,
         driftDetected: data.pValue < DRIFT_P_VALUE_THRESHOLD,
         similarityTestPValue: data.pValue,
         referenceHistogram: referenceHistogram ?? [],
@@ -252,7 +252,7 @@ const processDataDriftResult = (
     const pValue: number = computeChi2PValue(normalizedBaselineTerms, normalizedDriftedTerms);
     return {
       featureName,
-      fieldType: DATA_DRIFT_TYPE.CATEGORICAL,
+      fieldType: DATA_COMPARISON_TYPE.CATEGORICAL,
       driftDetected: pValue < DRIFT_P_VALUE_THRESHOLD,
       similarityTestPValue: pValue,
       referenceHistogram: normalizedBaselineTerms ?? [],
@@ -265,7 +265,7 @@ const processDataDriftResult = (
   });
 };
 
-const getDataDriftQuery = ({
+const getDataComparisonQuery = ({
   runtimeFields,
   searchQuery,
   datetimeField,
@@ -301,14 +301,14 @@ const getDataDriftQuery = ({
   return refDataQuery;
 };
 
-export const useFetchDataDriftResult = ({
+export const useFetchDataComparisonResult = ({
   fields,
   currentDataView,
   timeRanges,
   searchQuery,
   searchString,
 }: {
-  fields?: DataDriftField[];
+  fields?: DataComparisonField[];
   currentDataView?: DataView;
   timeRanges?: { reference: TimeRange; production: TimeRange };
   searchQuery?: Query['query'];
@@ -347,7 +347,7 @@ export const useFetchDataDriftResult = ({
 
         const runtimeFields = currentDataView?.getRuntimeMappings();
 
-        const refDataQuery = getDataDriftQuery({
+        const refDataQuery = getDataComparisonQuery({
           searchQuery,
           datetimeField: currentDataView?.timeFieldName,
           runtimeFields,
@@ -367,7 +367,7 @@ export const useFetchDataDriftResult = ({
           // for each field with type "numeric", add a percentiles agg to the request
           for (const { field, type } of fields) {
             // if the field is numeric, add a percentiles and stats aggregations to the request
-            if (type === DATA_DRIFT_TYPE.NUMERIC) {
+            if (type === DATA_COMPARISON_TYPE.NUMERIC) {
               baselineRequest.body.aggs[`${field}_percentiles`] = {
                 percentiles: {
                   field,
@@ -381,7 +381,7 @@ export const useFetchDataDriftResult = ({
               };
             }
             // if the field is categorical, add a terms aggregation to the request
-            if (type === DATA_DRIFT_TYPE.CATEGORICAL) {
+            if (type === DATA_COMPARISON_TYPE.CATEGORICAL) {
               baselineRequest.body.aggs[`${field}_terms`] = {
                 terms: {
                   field,
@@ -404,7 +404,7 @@ export const useFetchDataDriftResult = ({
             return;
           }
 
-          const prodDataQuery = getDataDriftQuery({
+          const prodDataQuery = getDataComparisonQuery({
             searchQuery,
             datetimeField: currentDataView?.timeFieldName,
             runtimeFields,
@@ -424,7 +424,7 @@ export const useFetchDataDriftResult = ({
           for (const { field, type } of fields) {
             if (
               isPopulatedObject(baselineResponse?.aggregations, [`${field}_percentiles`]) &&
-              type === DATA_DRIFT_TYPE.NUMERIC
+              type === DATA_COMPARISON_TYPE.NUMERIC
             ) {
               // create ranges based on percentiles
               const percentiles = Object.values<number>(
@@ -461,7 +461,7 @@ export const useFetchDataDriftResult = ({
               };
             }
             // if feature is categoric perform terms aggregation
-            if (type === DATA_DRIFT_TYPE.CATEGORICAL) {
+            if (type === DATA_COMPARISON_TYPE.CATEGORICAL) {
               driftedRequest.body.aggs[`${field}_terms`] = {
                 terms: {
                   field,
@@ -505,7 +505,7 @@ export const useFetchDataDriftResult = ({
 
           for (const { field, type } of fields) {
             // add histogram aggregation with min and max from baseline
-            if (type === DATA_DRIFT_TYPE.NUMERIC) {
+            if (type === DATA_COMPARISON_TYPE.NUMERIC) {
               const numBins = 10;
               const min = Math.min(
                 baselineResponse.aggregations[`${field}_stats`].min,
@@ -554,9 +554,9 @@ export const useFetchDataDriftResult = ({
 
           const data: Record<string, NumericDriftData | CategoricalDriftData> = {};
           for (const { field, type } of fields) {
-            if (type === DATA_DRIFT_TYPE.NUMERIC) {
+            if (type === DATA_COMPARISON_TYPE.NUMERIC) {
               data[field] = {
-                type: DATA_DRIFT_TYPE.NUMERIC,
+                type: DATA_COMPARISON_TYPE.NUMERIC,
                 pValue: driftedResp.aggregations[`${field}_ks_test`].two_sided,
                 range: fieldRange[field],
                 referenceHistogram:
@@ -565,9 +565,9 @@ export const useFetchDataDriftResult = ({
                   productionHistogramResponse.aggregations[`${field}_histogram`]?.buckets ?? [],
               };
             }
-            if (type === DATA_DRIFT_TYPE.CATEGORICAL) {
+            if (type === DATA_COMPARISON_TYPE.CATEGORICAL) {
               data[field] = {
-                type: DATA_DRIFT_TYPE.CATEGORICAL,
+                type: DATA_COMPARISON_TYPE.CATEGORICAL,
                 driftedTerms: driftedResp.aggregations[`${field}_terms`].buckets,
                 driftedSumOtherDocCount:
                   driftedResp.aggregations[`${field}_terms`].sum_other_doc_count,
@@ -579,13 +579,13 @@ export const useFetchDataDriftResult = ({
           }
 
           setResult({
-            data: processDataDriftResult(data),
+            data: processDataComparisonResult(data),
             status: FETCH_STATUS.SUCCESS,
           });
           setLoaded(1);
         } catch (e) {
           // eslint-disable-next-line no-console
-          console.error(`An error occurred while fetching data drift data:`, e);
+          console.error(`An error occurred while fetching data comparison data:`, e);
           setResult({
             data: undefined,
             status: FETCH_STATUS.FAILURE,
@@ -603,6 +603,6 @@ export const useFetchDataDriftResult = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [dataSearch, JSON.stringify({ fields, timeRanges }), currentDataView?.id, searchString]
   );
-  const dataDriftResult = useMemo(() => ({ ...result, loaded }), [result, loaded]);
-  return dataDriftResult;
+  const dataComparisonResult = useMemo(() => ({ ...result, loaded }), [result, loaded]);
+  return dataComparisonResult;
 };

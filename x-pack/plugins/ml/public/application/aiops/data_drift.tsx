@@ -8,27 +8,25 @@
 import React, { FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataDrift } from '@kbn/aiops-plugin/public';
+import { DataComparison } from '@kbn/aiops-plugin/public';
 import { pick } from 'lodash';
 import { useMlKibana } from '../contexts/kibana';
 import { useDataSource } from '../contexts/ml';
 import { MlPageHeader } from '../components/page_header';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 
-export const DataDriftWithDocCountPage: FC = () => {
-  console.log(`--@@"DataDriftWithDocCountPage`);
+export const DataComparisonWithDocCountPage: FC = () => {
   const { services } = useMlKibana();
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
-  console.log(`--@@DataDriftWithDocCountPage dataView`, dataView, 'savedSearch', savedSearch);
   return (
     <>
       <MlPageHeader>
         <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
           <EuiFlexItem grow={false}>
             <FormattedMessage
-              id="xpack.ml.DataDriftWithDocCount.pageHeader"
-              defaultMessage="Data drift"
+              id="xpack.ml.dataComparisonWithDocCount.pageHeader"
+              defaultMessage="Data comparison"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -37,7 +35,7 @@ export const DataDriftWithDocCountPage: FC = () => {
         </EuiFlexGroup>
       </MlPageHeader>
       {dataView && (
-        <DataDrift
+        <DataComparison
           dataView={dataView}
           savedSearch={savedSearch}
           appDependencies={pick(services, [

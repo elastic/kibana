@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DATA_DRIFT_TYPE = {
+export const DATA_COMPARISON_TYPE = {
   NUMERIC: 'numeric',
   CATEGORICAL: 'categorical',
   UNSUPPORTED: 'unsupported',
@@ -32,10 +32,10 @@ export const PRODUCTION_LABEL = i18n.translate('xpack.aiops.driftData.production
   defaultMessage: 'Production',
 });
 
-export const DATA_DRIFT_TYPE_LABEL = {
-  [DATA_DRIFT_TYPE.NUMERIC]: NUMERIC_TYPE_LABEL,
-  [DATA_DRIFT_TYPE.CATEGORICAL]: CATEGORICAL_TYPE_LABEL,
-  [DATA_DRIFT_TYPE.UNSUPPORTED]: UNSUPPORTED_LABEL,
+export const DATA_COMPARISON_TYPE_LABEL = {
+  [DATA_COMPARISON_TYPE.NUMERIC]: NUMERIC_TYPE_LABEL,
+  [DATA_COMPARISON_TYPE.CATEGORICAL]: CATEGORICAL_TYPE_LABEL,
+  [DATA_COMPARISON_TYPE.UNSUPPORTED]: UNSUPPORTED_LABEL,
 } as const;
 
 export const DRIFT_P_VALUE_THRESHOLD = 0.05;

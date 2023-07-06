@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DataSourceContextProvider } from '../../../contexts/ml';
-import { DataDriftWithDocCountPage } from '../../../aiops/data_drift';
+import { DataComparisonWithDocCountPage } from '../../../aiops/data_drift';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath } from '../../../contexts/kibana';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
@@ -16,13 +16,13 @@ import { useRouteResolver } from '../../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { basicResolvers } from '../../resolvers';
 
-export const dataDriftRouteFactory = (
+export const dataComparisonRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
   id: 'data_comparison',
   path: createPath(ML_PAGES.DATA_COMPARISON),
-  title: i18n.translate('xpack.ml.modelManagement.dataDrift.docTitle', {
+  title: i18n.translate('xpack.ml.dataVisualizer.dataComparison.docTitle', {
     defaultMessage: 'Data Comparison',
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
@@ -44,7 +44,7 @@ const PageWrapper: FC<PageProps> = () => {
   return (
     <PageLoader context={context}>
       <DataSourceContextProvider>
-        <DataDriftWithDocCountPage />
+        <DataComparisonWithDocCountPage />
       </DataSourceContextProvider>
     </PageLoader>
   );

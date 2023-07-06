@@ -237,7 +237,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           {
             id: 'data_compare',
             pathId: ML_PAGES.DATA_COMPARISON_INDEX_SELECT,
-            name: i18n.translate('xpack.ml.navMenu.dataDriftText', {
+            name: i18n.translate('xpack.ml.navMenu.dataComparisonText', {
               defaultMessage: 'Data Comparison',
             }),
             disabled: disableLinks,

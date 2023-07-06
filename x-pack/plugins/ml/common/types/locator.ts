@@ -10,7 +10,6 @@ import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common/query';
 import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
-import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
 import type { JobId } from './anomaly_detection_jobs/job';
 import type { SearchQueryLanguage } from '../constants/search';
 import type { ListingPageUrlState } from './common';

@@ -17,7 +17,7 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
-import { DataDriftDetectionPage } from './data_drift_page';
+import { DataComparisonPage } from './data_comparison_page';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContext } from '../../hooks/use_data_source';
@@ -25,7 +25,7 @@ import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 const localStorage = new Storage(window.localStorage);
 
-export interface DataDriftDetectionAppStateProps {
+export interface DataComparisonDetectionAppStateProps {
   /** The data view to analyze. */
   dataView: DataView;
   /** The saved search to analyze. */
@@ -34,7 +34,7 @@ export interface DataDriftDetectionAppStateProps {
   appDependencies: AiopsAppDependencies;
 }
 
-export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = ({
+export const DataComparisonDetectionAppState: FC<DataComparisonDetectionAppStateProps> = ({
   dataView,
   savedSearch,
   appDependencies,
@@ -56,7 +56,7 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
         <DataSourceContext.Provider value={{ dataView, savedSearch }}>
           <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
             <DatePickerContextProvider {...datePickerDeps}>
-              <DataDriftDetectionPage />
+              <DataComparisonPage />
             </DatePickerContextProvider>
           </StorageContextProvider>
         </DataSourceContext.Provider>

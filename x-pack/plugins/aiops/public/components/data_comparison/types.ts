@@ -6,7 +6,7 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { DATA_DRIFT_TYPE } from './constants';
+import { DATA_COMPARISON_TYPE } from './constants';
 
 export interface Histogram {
   doc_count: 0;
@@ -21,7 +21,7 @@ export interface ComparisionHistogram extends Histogram {
 // Show the overview table
 export interface Feature {
   featureName: string;
-  fieldType: DataDriftField['type'];
+  fieldType: DataComparisonField['type'];
   driftDetected: boolean;
   similarityTestPValue: number;
   productionHistogram: Histogram[];
@@ -29,9 +29,9 @@ export interface Feature {
   comparisonDistribution: ComparisionHistogram[];
 }
 
-export interface DataDriftField {
+export interface DataComparisonField {
   field: string;
-  type: DataDriftType;
+  type: DataComparisonType;
   displayName: string;
 }
 export enum FETCH_STATUS {
@@ -74,11 +74,11 @@ export interface CategoricalDriftData {
 }
 
 export const isNumericDriftData = (arg: any): arg is NumericDriftData => {
-  return isPopulatedObject(arg, ['type']) && arg.type === DATA_DRIFT_TYPE.NUMERIC;
+  return isPopulatedObject(arg, ['type']) && arg.type === DATA_COMPARISON_TYPE.NUMERIC;
 };
 
 export const isCategoricalDriftData = (arg: any): arg is CategoricalDriftData => {
-  return isPopulatedObject(arg, ['type']) && arg.type === DATA_DRIFT_TYPE.CATEGORICAL;
+  return isPopulatedObject(arg, ['type']) && arg.type === DATA_COMPARISON_TYPE.CATEGORICAL;
 };
 
-export type DataDriftType = typeof DATA_DRIFT_TYPE[keyof typeof DATA_DRIFT_TYPE];
+export type DataComparisonType = typeof DATA_COMPARISON_TYPE[keyof typeof DATA_COMPARISON_TYPE];

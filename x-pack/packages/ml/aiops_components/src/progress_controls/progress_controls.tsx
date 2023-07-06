@@ -26,7 +26,7 @@ import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_ba
 // TODO Consolidate with duplicate component `CorrelationsProgressControls` in
 // `x-pack/plugins/apm/public/components/app/correlations/progress_controls.tsx`
 
-export interface ProgressControlProps {
+interface ProgressControlProps {
   isBrushCleared: boolean;
   progress: number;
   progressMessage: string;

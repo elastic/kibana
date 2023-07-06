@@ -121,8 +121,8 @@ export const FILTER_LISTS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
 });
 
 export const DATA_COMPARISON_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.settings.breadcrumbs.dataDriftLabel', {
-    defaultMessage: 'Data drift',
+  text: i18n.translate('xpack.ml.settings.breadcrumbs.dataComparisonLabel', {
+    defaultMessage: 'Data comparison',
   }),
   href: '/data_compare',
 });

@@ -22,8 +22,9 @@ import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 
 import { DataSeriesDatum } from '@elastic/charts/dist/chart_types/xy_chart/utils/series';
+import { PRODUCTION_LABEL, REFERENCE_LABEL } from './constants';
 import { useSearch } from '../../hooks/use_search';
-import { DataDriftView } from './data_drift_view';
+import { DataComparisonView } from './data_comparison_view';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { SearchQueryLanguage } from '../../application/utils/search_utils';
@@ -38,7 +39,7 @@ import { SearchPanel } from '../search_panel';
 import { PageHeader } from '../page_header';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 
-export const DataDriftDetectionPage: FC = () => {
+export const DataComparisonPage: FC = () => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
@@ -146,7 +147,7 @@ export const DataDriftDetectionPage: FC = () => {
 
   const euiTheme = useEuiTheme();
   const colors = {
-    referenceColor: euiTheme.euiColorVis5,
+    referenceColor: euiTheme.euiColorVis2,
     productionColor: euiTheme.euiColorVis1,
   };
 
@@ -166,7 +167,7 @@ export const DataDriftDetectionPage: FC = () => {
   }
 
   return (
-    <EuiPageBody data-test-subj="aiopsDataDriftDetectionPage" paddingSize="none" panelled={false}>
+    <EuiPageBody data-test-subj="aiopsDataComparisonPage" paddingSize="none" panelled={false}>
       <PageHeader />
       <EuiSpacer size="m" />
       <EuiPageSection paddingSize="none">
@@ -191,8 +192,8 @@ export const DataDriftDetectionPage: FC = () => {
                   totalCount={totalCount}
                   sampleProbability={sampleProbability}
                   initialAnalysisStart={initialAnalysisStart}
-                  baselineLabel={'Reference'}
-                  deviationLabel={'Production'}
+                  baselineLabel={REFERENCE_LABEL}
+                  deviationLabel={PRODUCTION_LABEL}
                   barStyleAccessor={(datum: DataSeriesDatum) => {
                     if (!windowParameters) return null;
 
@@ -235,7 +236,7 @@ export const DataDriftDetectionPage: FC = () => {
 
           <EuiFlexItem>
             <EuiPanel paddingSize="m">
-              <DataDriftView
+              <DataComparisonView
                 isBrushCleared={isBrushCleared}
                 onReset={clearSelection}
                 windowParameters={windowParameters}

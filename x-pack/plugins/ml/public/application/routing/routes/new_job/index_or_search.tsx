@@ -78,16 +78,6 @@ const getChangePointDetectionBreadcrumbs = (navigateToPath: NavigateToPath, base
   },
 ];
 
-const getTrainedModelsBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
-  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-  getBreadcrumbWithUrlForApp('TRAINED_MODELS', navigateToPath, basePath),
-  {
-    text: i18n.translate('xpack.ml.selectDataViewLabel', {
-      defaultMessage: 'Select Data View',
-    }),
-  },
-];
-
 export const indexOrSearchRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
@@ -184,7 +174,7 @@ export const changePointDetectionIndexOrSearchRouteFactory = (
   breadcrumbs: getChangePointDetectionBreadcrumbs(navigateToPath, basePath),
 });
 
-export const dataDriftIndexOrSearchRouteFactory = (
+export const dataComparisonIndexOrSearchRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
@@ -201,7 +191,7 @@ export const dataDriftIndexOrSearchRouteFactory = (
       mode={MODE.DATAVISUALIZER}
     />
   ),
-  breadcrumbs: getTrainedModelsBreadcrumbs(navigateToPath, basePath),
+  breadcrumbs: getDataVisBreadcrumbs(navigateToPath, basePath),
 });
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode }) => {
