@@ -160,7 +160,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await Promise.all([deleteAllFleetSourceMaps(), deleteAllApmSourceMaps()]);
     });
 
-    async function getDecodedMapContent(encodedContent?: string): Promise<string> {
+    async function getDecodedMapContent(encodedContent?: string): Promise<string | undefined> {
       if (encodedContent) {
         return (await unzip(Buffer.from(encodedContent, 'base64'))).toString();
       }
