@@ -20,4 +20,11 @@ export const config: PluginConfigDescriptor<ServerlessSecurityConfig> = {
     productTypes: true,
   },
   schema: configSchema,
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot(
+      'xpack.serverless.security.productTypes',
+      'xpack.securitySolutionServerless.productTypes',
+      { silent: true, level: 'warning' }
+    ),
+  ],
 };

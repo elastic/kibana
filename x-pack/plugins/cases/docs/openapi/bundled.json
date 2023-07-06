@@ -5198,6 +5198,8 @@
           "cases": {
             "type": "array",
             "description": "An array containing one or more case objects.",
+            "maxItems": 100,
+            "minItems": 1,
             "items": {
               "type": "object",
               "required": [
@@ -5553,6 +5555,7 @@
           "comment": {
             "description": "The new comment. It is required only when `type` is `user`.",
             "type": "string",
+            "maxLength": 30000,
             "example": "A new comment."
           },
           "owner": {
@@ -5642,6 +5645,7 @@
           "comment": {
             "description": "The new comment. It is required only when `type` is `user`.",
             "type": "string",
+            "maxLength": 30000,
             "example": "A new comment."
           },
           "id": {

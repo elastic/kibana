@@ -714,7 +714,9 @@
               "SearchResponse",
               "<unknown, Record<string, ",
               "AggregationsAggregate",
-              ">>>; setField: <K extends keyof ",
+              ">>>; history: ",
+              "SearchRequest",
+              "[]; setField: <K extends keyof ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -738,9 +740,7 @@
                 "section": "def-common.SearchSource",
                 "text": "SearchSource"
               },
-              "; history: ",
-              "SearchRequest",
-              "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
+              "; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; removeField: <K extends keyof ",
               {
                 "pluginId": "data",
                 "scope": "common",
