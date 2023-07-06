@@ -18,13 +18,41 @@ describe('<Overview />', () => {
     expect(wrapper).toBeDefined();
   });
 
-  test.todo('getting started');
-  test.todo('select client');
-  test.todo('install client');
-  test.todo('api key');
-  test.todo('configure client');
-  test.todo('test connection');
-  test.todo('ingest data');
-  test.todo('build query');
-  test.todo("what's next?");
+  test('getting started', () => {
+    const { getByRole } = render(<Overview />);
+    expect(getByRole('heading', { name: 'Get started with Elasticsearch' })).toBeDefined();
+  });
+
+  test('select client', () => {
+    const { getByRole } = render(<Overview />);
+    expect(getByRole('heading', { name: 'Select your client' })).toBeDefined();
+  });
+  test('install client', () => {
+    const { getByRole } = render(<Overview />);
+    expect(getByRole('heading', { name: 'Install a client' })).toBeDefined();
+  });
+  test('api key', () => {
+    const { getByRole } = render(<Overview />);
+    expect(getByRole('heading', { name: 'Store your API key and Cloud ID' })).toBeDefined();
+  });
+  test('configure client', () => {
+    const { getByRole } = render(<Overview />);
+    expect(getByRole('heading', { name: 'Configure your client' })).toBeDefined();
+  });
+  test('test connection', () => {
+    const { getByRole } = render(<Overview />);
+    expect(getByRole('heading', { name: 'Test your connection' })).toBeDefined();
+  });
+  test('ingest data', () => {
+    const { getByRole } = render(<Overview />);
+    expect(getByRole('heading', { name: 'Ingest data' })).toBeDefined();
+  });
+  test('build query', () => {
+    const { getByRole } = render(<Overview />);
+    expect(getByRole('heading', { name: 'Build your first search query' })).toBeDefined();
+  });
+  test("what's next?", () => {
+    const { getByRole } = render(<Overview />);
+    expect(getByRole('heading', { name: "What's next?" })).toBeDefined();
+  });
 });

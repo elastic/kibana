@@ -15,10 +15,9 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { userProfileMock } from '@kbn/security-plugin/common/model/user_profile.mock';
-import type { ServerlessSearchContext } from '../application/hooks/use_kibana';
 
 export const core = coreMock.createStart();
-export const services: ServerlessSearchContext = {
+export const services = {
   cloud: cloudMock.createStart(),
   share: sharePluginMock.createStartContract(),
   userProfile: userProfileMock.createWithSecurity(),
