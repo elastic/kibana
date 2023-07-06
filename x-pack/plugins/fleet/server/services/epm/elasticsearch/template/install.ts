@@ -333,7 +333,7 @@ export function buildComponentTemplates(params: {
     (dynampingTemplate) => Object.keys(dynampingTemplate)[0]
   );
 
-  const mappingsRuntimeFields = mappings.runtime;
+  const mappingsRuntimeFields = merge(mappings.runtime, indexTemplateMappings.runtime ?? {});
 
   const isTimeSeriesEnabledByDefault = registryElasticsearch?.index_mode === 'time_series';
   const isSyntheticSourceEnabledByDefault = registryElasticsearch?.source_mode === 'synthetic';
@@ -367,7 +367,7 @@ export function buildComponentTemplates(params: {
       },
       mappings: {
         properties: mappingsProperties,
-        runtime: mappingsRuntimeFields, // runtimeObject, // mappings?.runtime, //  mappingsRuntimeFields,
+        runtime: mappingsRuntimeFields,
         dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
         ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', '_source', 'runtime'),
         ...(indexTemplateMappings?._source || sourceModeSynthetic

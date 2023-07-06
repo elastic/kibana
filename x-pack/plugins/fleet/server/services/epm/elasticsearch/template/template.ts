@@ -194,7 +194,7 @@ function _generateMappings(
       // If type is not defined, assume keyword
       const type = field.type || 'keyword';
 
-      if (field.runtime) {
+      if (field.runtime !== undefined) {
         let runtimeFieldProps: Properties = getDefaultProperties(field);
         switch (type) {
           case 'integer':
