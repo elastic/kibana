@@ -6,17 +6,10 @@
  */
 
 import { useCallback } from 'react';
-import {
-  useWaffleOptionsContext,
-  DEFAULT_WAFFLE_OPTIONS_STATE,
-  WaffleOptionsState,
-} from './use_waffle_options';
+import { InventoryViewAttributes } from '../../../../../common/inventory_views';
+import { useWaffleOptionsContext, DEFAULT_WAFFLE_OPTIONS_STATE } from './use_waffle_options';
 import { useWaffleTimeContext, DEFAULT_WAFFLE_TIME_STATE } from './use_waffle_time';
-import {
-  useWaffleFiltersContext,
-  DEFAULT_WAFFLE_FILTERS_STATE,
-  WaffleFiltersState,
-} from './use_waffle_filters';
+import { useWaffleFiltersContext, DEFAULT_WAFFLE_FILTERS_STATE } from './use_waffle_filters';
 
 export const DEFAULT_WAFFLE_VIEW_STATE: WaffleViewState = {
   ...DEFAULT_WAFFLE_OPTIONS_STATE,
@@ -65,8 +58,8 @@ export const useWaffleViewState = () => {
   };
 
   const onViewChange = useCallback(
-    (newState) => {
-      const attributes = newState.attributes as WaffleViewState;
+    (newState: { attributes: WaffleViewState }) => {
+      const attributes = newState.attributes;
 
       setWaffleOptionsState({
         sort: attributes.sort,
@@ -102,8 +95,7 @@ export const useWaffleViewState = () => {
   };
 };
 
-export type WaffleViewState = WaffleOptionsState & {
-  time: number;
-  autoReload: boolean;
-  filterQuery: WaffleFiltersState;
-};
+export type WaffleViewState = Omit<
+  InventoryViewAttributes,
+  'name' | 'isDefault' | 'isStatic' | 'source'
+>;
