@@ -438,7 +438,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     const { disabledActions } = this.props.embeddable.getInput();
 
     let allActions = regularActions.concat(
-      Object.values(this.state.universalActions || {}) as Array<Action<object>>
+      Object.values(this.state.universalActions ?? {}) as Array<Action<object>>
     );
     if (disabledActions) {
       const removeDisabledActions = removeById(disabledActions);
