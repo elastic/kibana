@@ -198,7 +198,7 @@ FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE='docker.elastic.co/package-registry/distribu
 
 #### Cypress tests
 
-We support testing UI end to end with cypress, you can find more information on how to run those tests [fleet/cypress/README.md](./fleet/cypress/README.md).
+We support UI end-to-end testing with Cypress. Refer to [cypress/README.md](./cypress/README.md) for how to run these tests.
 
 #### Jest integration tests
 
