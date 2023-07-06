@@ -55,7 +55,7 @@ describe('POST risk_engine/preview route', () => {
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
         expect(response.status).toEqual(200);
-        expect(mockRiskScoreService.getScores).toHaveBeenCalledWith(
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
           expect.objectContaining({ index: 'default-alerts-index' })
         );
       });
@@ -73,7 +73,7 @@ describe('POST risk_engine/preview route', () => {
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
         expect(response.status).toEqual(200);
-        expect(mockRiskScoreService.getScores).toHaveBeenCalledWith(
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
           expect.objectContaining({ index: 'custom-dataview-index' })
         );
       });
@@ -87,7 +87,7 @@ describe('POST risk_engine/preview route', () => {
         expect(response.body.message).toEqual(
           'The specified dataview (custom-dataview-id) was not found. Please use an existing dataview, or omit the parameter to use the default risk inputs.'
         );
-        expect(mockRiskScoreService.getScores).not.toHaveBeenCalled();
+        expect(mockRiskScoreService.calculateScores).not.toHaveBeenCalled();
       });
     });
 
@@ -97,7 +97,7 @@ describe('POST risk_engine/preview route', () => {
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
         expect(response.status).toEqual(200);
-        expect(mockRiskScoreService.getScores).toHaveBeenCalledWith(
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
           expect.objectContaining({ range: { start: 'now-15d', end: 'now' } })
         );
       });
@@ -107,7 +107,7 @@ describe('POST risk_engine/preview route', () => {
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
         expect(response.status).toEqual(200);
-        expect(mockRiskScoreService.getScores).toHaveBeenCalledWith(
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
           expect.objectContaining({ range: { start: 'now-30d', end: 'now-20d' } })
         );
       });
@@ -142,7 +142,7 @@ describe('POST risk_engine/preview route', () => {
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
         expect(response.status).toEqual(200);
-        expect(mockRiskScoreService.getScores).toHaveBeenCalledWith(
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
           expect.objectContaining({
             filter: {
               bool: {
@@ -176,7 +176,7 @@ describe('POST risk_engine/preview route', () => {
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
         expect(response.status).toEqual(200);
-        expect(mockRiskScoreService.getScores).toHaveBeenCalledWith(
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
           expect.objectContaining({
             weights: [
               {
@@ -232,7 +232,7 @@ describe('POST risk_engine/preview route', () => {
         const response = await server.inject(request, requestContextMock.convertContext(context));
 
         expect(response.status).toEqual(200);
-        expect(mockRiskScoreService.getScores).toHaveBeenCalledWith(
+        expect(mockRiskScoreService.calculateScores).toHaveBeenCalledWith(
           expect.objectContaining({ afterKeys: { host: afterKey } })
         );
       });

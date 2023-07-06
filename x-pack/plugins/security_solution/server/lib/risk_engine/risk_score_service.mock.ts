@@ -23,7 +23,7 @@ const createRiskScoreMock = (overrides: Partial<RiskScore> = {}): RiskScore => (
 });
 
 const createRiskScoreServiceMock = (): jest.Mocked<RiskScoreService> => ({
-  getScores: jest.fn(),
+  calculateScores: jest.fn(),
 });
 
 export const riskScoreServiceMock = {

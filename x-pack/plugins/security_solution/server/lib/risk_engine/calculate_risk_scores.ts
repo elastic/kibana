@@ -25,8 +25,8 @@ import {
 } from './risk_weights';
 import type {
   CalculateRiskScoreAggregations,
-  GetScoresParams,
-  GetScoresResponse,
+  CalculateScoresParams,
+  CalculateScoresResponse,
   RiskScore,
   RiskScoreBucket,
 } from './types';
@@ -56,7 +56,7 @@ const bucketToResponse = ({
   })),
 });
 
-const filterFromRange = (range: GetScoresParams['range']): QueryDslQueryContainer => ({
+const filterFromRange = (range: CalculateScoresParams['range']): QueryDslQueryContainer => ({
   range: { '@timestamp': { lt: range.end, gte: range.start } },
 });
 
@@ -195,7 +195,7 @@ export const calculateRiskScores = async ({
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-} & GetScoresParams): Promise<GetScoresResponse> =>
+} & CalculateScoresParams): Promise<CalculateScoresResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
     const now = new Date().toISOString();
 

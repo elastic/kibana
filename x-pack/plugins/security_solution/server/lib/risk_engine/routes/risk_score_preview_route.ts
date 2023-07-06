@@ -69,7 +69,7 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
         const range = userRange ?? { start: 'now-15d', end: 'now' };
         const pageSize = userPageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
 
-        const result = await riskScore.getScores({
+        const result = await riskScore.calculateScores({
           afterKeys,
           debug,
           pageSize,
