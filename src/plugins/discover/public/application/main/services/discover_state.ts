@@ -134,7 +134,7 @@ export interface DiscoverStateContainer {
      * Used by the Data View Picker
      * @param pattern
      */
-    onCreateDefaultAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<void>;
+    onCreateDefaultAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<DataView>;
     /**
      * Triggered when a new data view is created
      * @param dataView
@@ -400,6 +400,7 @@ export function getDiscoverStateContainer({
     internalStateContainer.transitions.appendAdHocDataViews(newDataView);
 
     await onChangeDataView(newDataView);
+    return newDataView;
   };
   /**
    * Triggered when a user submits a query in the search bar

@@ -5,28 +5,25 @@
  * 2.0.
  */
 
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { InvokeCreator } from 'xstate';
 import { LogExplorerProfileContext, LogExplorerProfileEvent } from './types';
 
 interface LogExplorerProfileDataViewStateDependencies {
-  dataViews: DataViewsPublicPluginStart;
   stateContainer: DiscoverStateContainer;
 }
 
 export const createAndSetDataView =
   ({
-    dataViews,
     stateContainer,
   }: LogExplorerProfileDataViewStateDependencies): InvokeCreator<
     LogExplorerProfileContext,
     LogExplorerProfileEvent
   > =>
   async (context) => {
-    const dataView = await dataViews.create(context.datasetSelection.toDataviewSpec());
-
-    stateContainer.actions.onDataViewCreated(dataView);
+    const dataView = await stateContainer.actions.onCreateDefaultAdHocDataView(
+      context.datasetSelection.toDataviewSpec()
+    );
     /**
      * We can't fully rely on the url update of the index param to create and restore the data view
      * due to a race condition where Discover, when initializing its internal logic,
@@ -36,6 +33,4 @@ export const createAndSetDataView =
      * We set explicitly the data view here to be used when restoring the data view on the initial load.
      */
     stateContainer.actions.setDataView(dataView);
-
-    return dataView;
   };

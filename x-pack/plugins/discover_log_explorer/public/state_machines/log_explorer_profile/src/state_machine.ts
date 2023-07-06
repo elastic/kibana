@@ -109,14 +109,12 @@ export const createPureLogExplorerProfileStateMachine = (
 
 export interface LogExplorerProfileStateMachineDependencies {
   initialContext?: LogExplorerProfileContext;
-  dataViews: DataViewsPublicPluginStart;
   stateContainer: DiscoverStateContainer;
   toasts: IToasts;
 }
 
 export const createLogExplorerProfileStateMachine = ({
   initialContext = DEFAULT_CONTEXT,
-  dataViews,
   stateContainer,
   toasts,
 }: LogExplorerProfileStateMachineDependencies) =>
@@ -148,11 +146,9 @@ export const createLogExplorerProfileStateMachine = ({
       },
     },
     services: {
-      createDataView: createAndSetDataView({ dataViews, stateContainer }),
+      createDataView: createAndSetDataView({ stateContainer }),
+      initializeFromUrl: initializeFromUrl({ stateContainer }),
       listenUrlChange: listenUrlChange({ stateContainer }),
-      initializeFromUrl: initializeFromUrl({
-        stateContainer,
-      }),
     },
   });
 

@@ -22,9 +22,6 @@ export class DiscoverLogExplorerPlugin
   public start(core: CoreStart, plugins: DiscoverLogExplorerStartDeps) {
     const { discover } = plugins;
 
-    discover.customize(
-      LOG_EXPLORER_PROFILE_ID,
-      createLogExplorerProfileCustomizations({ core, plugins })
-    );
+    discover.customize(LOG_EXPLORER_PROFILE_ID, createLogExplorerProfileCustomizations({ core }));
   }
 }

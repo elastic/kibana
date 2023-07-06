@@ -16,11 +16,10 @@ const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selecto
 
 interface CreateLogExplorerProfileCustomizationsDeps {
   core: CoreStart;
-  plugins: DiscoverLogExplorerStartDeps;
 }
 
 export const createLogExplorerProfileCustomizations =
-  ({ core, plugins }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
+  ({ core }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
     // Lazy load dependencies
     const datasetServiceModuleLoadable = import('../services/datasets');
@@ -34,7 +33,6 @@ export const createLogExplorerProfileCustomizations =
     });
 
     const logExplorerProfileStateService = initializeLogExplorerProfileStateService({
-      dataViews: plugins.dataViews,
       stateContainer,
       toasts: core.notifications.toasts,
     });
