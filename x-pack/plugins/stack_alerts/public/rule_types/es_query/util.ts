@@ -7,7 +7,7 @@
 
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { FieldOption, NORMALIZED_FIELD_TYPES } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { estypes } from '@elastic/elasticsearch';
 import { EsQueryRuleParams, SearchType } from './types';
 
@@ -50,7 +50,7 @@ export const convertRawRuntimeFieldtoFieldOption = (
     const rawField = rawFields[name];
     const type = rawField.type;
 
-    const normalizedType = type;
+    const normalizedType = NORMALIZED_FIELD_TYPES[type] || type;
     const aggregatable = true;
     const searchable = true;
 
