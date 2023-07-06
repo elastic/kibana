@@ -2,7 +2,7 @@
 
 exports[`<ToolbarButton /> is rendered - default 1`] = `
 <button
-  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-EuiButton"
+  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-EuiButton"
   intl="[object Object]"
   type="button"
 >
@@ -20,7 +20,7 @@ exports[`<ToolbarButton /> is rendered - default 1`] = `
 
 exports[`<ToolbarButton /> is rendered - primary 1`] = `
 <button
-  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
   intl="[object Object]"
   type="button"
 >

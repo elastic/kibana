@@ -34,7 +34,7 @@ const durationSchema = schema.object({
 const windowSchema = schema.object({
   id: schema.string(),
   burnRateThreshold: schema.number(),
-  maxBurnRateThreshold: schema.number(),
+  maxBurnRateThreshold: schema.nullable(schema.number()),
   longWindow: durationSchema,
   shortWindow: durationSchema,
   actionGroup: schema.string(),

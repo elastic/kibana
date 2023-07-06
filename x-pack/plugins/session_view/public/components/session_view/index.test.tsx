@@ -235,9 +235,7 @@ describe('SessionView component', () => {
         render();
 
         await waitFor(() => {
-          expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')?.classList[2]).toContain(
-            'disabled'
-          );
+          expect(renderResult.queryByTestId('sessionView:TTYPlayerToggle')).toBeDisabled();
         });
       });
     });

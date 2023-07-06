@@ -37,7 +37,7 @@ export const createDashboard = async (
   creationOptions?: DashboardCreationOptions,
   dashboardCreationStartTime?: number,
   savedObjectId?: string
-): Promise<DashboardContainer> => {
+): Promise<DashboardContainer | undefined> => {
   const {
     data: { dataViews },
     dashboardContentManagement: { loadDashboardState },
@@ -75,11 +75,13 @@ export const createDashboard = async (
   // --------------------------------------------------------------------------------------
   // Initialize Dashboard integrations
   // --------------------------------------------------------------------------------------
-  const { input, searchSessionId } = await initializeDashboard({
+  const initializeResult = await initializeDashboard({
     loadDashboardReturn: savedObjectResult,
     untilDashboardReady,
     creationOptions,
   });
+  if (!initializeResult) return;
+  const { input, searchSessionId } = initializeResult;
 
   // --------------------------------------------------------------------------------------
   // Build and return the dashboard container.
@@ -140,13 +142,12 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Run validation.
   // --------------------------------------------------------------------------------------
-  if (
-    loadDashboardReturn &&
-    validateLoadedSavedObject &&
-    !validateLoadedSavedObject(loadDashboardReturn)
-  ) {
+  const validationResult = loadDashboardReturn && validateLoadedSavedObject?.(loadDashboardReturn);
+  if (validationResult === 'invalid') {
     // throw error to stop the rest of Dashboard loading and make the factory return an ErrorEmbeddable.
     throw new Error('Dashboard failed saved object result validation');
+  } else if (validationResult === 'redirected') {
+    return;
   }
 
   // --------------------------------------------------------------------------------------
