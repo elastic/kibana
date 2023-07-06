@@ -161,7 +161,7 @@ export interface DocLinks {
     readonly searchApplicationsTemplates: string;
     readonly searchApplicationsSearchApi: string;
     readonly searchApplications: string;
-    readonly searchApplicationsGettingStarted: string;
+    readonly searchApplicationsSearch: string;
     readonly searchTemplates: string;
     readonly start: string;
     readonly supportedNlpModels: string;
@@ -401,6 +401,7 @@ export interface DocLinks {
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
+    sloBurnRateRule: string;
   }>;
   readonly alerting: Readonly<{
     guide: string;
