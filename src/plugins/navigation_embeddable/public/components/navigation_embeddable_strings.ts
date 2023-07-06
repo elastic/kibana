@@ -33,6 +33,10 @@ export const NavEmbeddableStrings = {
         }),
     },
     linkEditor: {
+      getGoBackAriaLabel: () =>
+        i18n.translate('navigationEmbeddable.linkEditor.goBackAriaLabel', {
+          defaultMessage: 'Go back to panel editor.',
+        }),
       getLinkTypePickerLabel: () =>
         i18n.translate('navigationEmbeddable.linkEditor.linkTypeFormLabel', {
           defaultMessage: 'Go to',

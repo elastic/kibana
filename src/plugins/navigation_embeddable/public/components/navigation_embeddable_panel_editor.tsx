@@ -32,12 +32,14 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 
 import {
   DASHBOARD_LINK_TYPE,
+  EXTERNAL_LINK_TYPE,
   NavigationEmbeddableInput,
   NavigationEmbeddableLink,
+  NavigationLinkInfo,
 } from '../embeddable/types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
-import { NavigationEmbeddableLinkEditor } from './navigation_embeddable_link_editor';
 import { memoizedFetchDashboard } from './dashboard_link/dashboard_link_tools';
+import { NavigationEmbeddableLinkEditor } from './navigation_embeddable_link_editor';
 
 import './navigation_embeddable.scss';
 
@@ -65,13 +67,13 @@ export const NavigationEmbeddablePanelEditor = ({
   const { value: linkList } = useAsync(async () => {
     if (!links || isEmpty(links)) return [];
 
-    const links2: Array<{ id: string; icon: IconType; label: string }> = await Promise.all(
+    const newLinks: Array<{ id: string; icon: IconType; label: string }> = await Promise.all(
       Object.keys(links).map(async (panelId) => {
         let label = links[panelId].label;
-        let icon = 'link';
+        let icon = NavigationLinkInfo[EXTERNAL_LINK_TYPE].icon;
 
         if (links[panelId].type === DASHBOARD_LINK_TYPE) {
-          icon = 'dashboardApp';
+          icon = NavigationLinkInfo[DASHBOARD_LINK_TYPE].icon;
           if (!label) {
             const dashboard = await memoizedFetchDashboard(links[panelId].destination);
             label = dashboard.attributes.title;
@@ -81,7 +83,7 @@ export const NavigationEmbeddablePanelEditor = ({
         return { id: panelId, label: label || links[panelId].destination, icon };
       })
     );
-    return links2;
+    return newLinks;
   }, [links]);
 
   return (
@@ -150,12 +152,13 @@ export const NavigationEmbeddablePanelEditor = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>
+            <EuiButtonEmpty onClick={onClose} iconType="cross">
               {NavEmbeddableStrings.editor.getCancelButtonLabel()}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              disabled={!links || isEmpty(links)}
               onClick={() => {
                 onSave({ ...initialInput, links });
                 onClose();

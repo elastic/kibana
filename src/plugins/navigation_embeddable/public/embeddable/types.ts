@@ -61,13 +61,10 @@ export const NavigationLinkInfo: {
 /**
  *  Navigation embeddable redux state
  */
-export interface NavigationEmbeddableComponentState {
-  totalDashboards?: number;
-  currentDashboard?: DashboardItem;
-}
+// export interface NavigationEmbeddableComponentState {} // TODO: Uncomment this if we end up needing component state
 
 export type NavigationEmbeddableReduxState = ReduxEmbeddableState<
   NavigationEmbeddableInput,
   EmbeddableOutput,
-  NavigationEmbeddableComponentState
+  {} // We currently don't have any component state - TODO: Replace with `NavigationEmbeddableComponentState` if necessary
 >;

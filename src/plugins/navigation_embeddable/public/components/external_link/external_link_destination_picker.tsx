@@ -24,6 +24,7 @@ export const ExternalLinkDestinationPicker = ({
 }) => {
   const [validUrl, setValidUrl] = useState<boolean>(true);
 
+  /* {...other} is needed so all inner elements are treated as part of the form */
   return (
     <div {...other}>
       <EuiFieldText

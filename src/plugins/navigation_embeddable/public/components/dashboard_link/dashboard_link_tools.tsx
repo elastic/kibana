@@ -7,25 +7,21 @@
  */
 
 import { isEmpty, memoize } from 'lodash';
+import { DashboardItem } from '../../embeddable/types';
 
-import { DashboardItem } from '../../../dashboard_link/types';
 import { dashboardServices } from '../../services/kibana_services';
 
+/**
+ * Memoized fetch dashboard will only refetch the dashboard information if the given `dashboardId` changed between
+ * calls; otherwise, it will use the cached dashboard, which may not take into account changes to the dashboard's title
+ * description, etc. Be mindful when choosing the memoized version.
+ */
 export const memoizedFetchDashboard = memoize(
   async (dashboardId: string) => {
     return await fetchDashboard(dashboardId);
   },
   (dashboardId) => {
     return dashboardId;
-  }
-);
-
-export const memoizedFetchDashboards = memoize(
-  async (search: string = '', size: number = 10, currentDashboardId?: string) => {
-    return await fetchDashboards(search, size, currentDashboardId);
-  },
-  (search, size, currentDashboardId) => {
-    return [search, size, currentDashboardId].join('|');
   }
 );
 
@@ -37,6 +33,15 @@ export const fetchDashboard = async (dashboardId: string): Promise<DashboardItem
   }
   return response;
 };
+
+export const memoizedFetchDashboards = memoize(
+  async (search: string = '', size: number = 10, currentDashboardId?: string) => {
+    return await fetchDashboards(search, size, currentDashboardId);
+  },
+  (search, size, currentDashboardId) => {
+    return [search, size, currentDashboardId].join('|');
+  }
+);
 
 const fetchDashboards = async (
   search: string = '',

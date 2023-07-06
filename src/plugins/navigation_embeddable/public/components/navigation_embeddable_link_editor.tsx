@@ -25,10 +25,8 @@ import {
   EuiFocusTrap,
   EuiFieldText,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-// import { linksService } from '../../services/links_service';
-import { NavEmbeddableStrings } from './navigation_embeddable_strings';
+
 import {
   DASHBOARD_LINK_TYPE,
   EXTERNAL_LINK_TYPE,
@@ -36,8 +34,9 @@ import {
   NavigationLinkInfo,
   NavigationLinkType,
 } from '../embeddable/types';
-import { DashboardLinkDestinationPicker } from './dashboard_link/dashboard_link_destination_picker';
+import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { ExternalLinkDestinationPicker } from './external_link/external_link_destination_picker';
+import { DashboardLinkDestinationPicker } from './dashboard_link/dashboard_link_destination_picker';
 
 export const NavigationEmbeddableLinkEditor = ({
   onSave,
@@ -76,15 +75,16 @@ export const NavigationEmbeddableLinkEditor = ({
     <EuiFocusTrap className={'navEmbeddableLinkEditor'}>
       <EuiFlyoutHeader hasBorder>
         <EuiButtonEmpty
-          css={css`
-            height: auto;
-          `}
+          className="linkEditorBackButton"
           flush="left"
           color="text"
           iconType={'arrowLeft'}
           onClick={() => onClose(false)}
         >
-          <EuiTitle size="m" aria-label="Go back to panel editor">
+          <EuiTitle
+            size="m"
+            aria-label={NavEmbeddableStrings.editor.linkEditor.getGoBackAriaLabel()}
+          >
             <h2>{NavEmbeddableStrings.editor.getAddButtonLabel()}</h2>
           </EuiTitle>
         </EuiButtonEmpty>
@@ -138,7 +138,7 @@ export const NavigationEmbeddableLinkEditor = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => onClose(true)}>
+            <EuiButtonEmpty onClick={() => onClose(true)} iconType="cross">
               {NavEmbeddableStrings.editor.getCancelButtonLabel()}
             </EuiButtonEmpty>
           </EuiFlexItem>

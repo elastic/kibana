@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { isEmpty } from 'lodash';
+
 import { i18n } from '@kbn/i18n';
 import {
   ACTION_ADD_PANEL,
@@ -47,25 +49,20 @@ export class NavigationEmbeddableFactoryDefinition
   }
 
   public async create(initialInput: NavigationEmbeddableInput, parent: DashboardContainer) {
+    if (!initialInput.links || isEmpty(initialInput.links)) {
+      // don't create an empty navigation embeddable - it should always have at least one link
+      return;
+    }
+
     await untilPluginStartServicesReady();
+
     const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
     const { NavigationEmbeddable } = await import('./navigation_embeddable');
+    const editable = await this.isEditable();
 
-    /**
-     * TODO: What are our conditions to ensure this embeddable is editable?
-     * Example from Lens:
-     *   private getIsEditable() {
-     *      return (
-     *        this.deps.capabilities.canSaveVisualizations ||
-     *        (!this.inputIsRefType(this.getInput()) &&
-     *          this.deps.capabilities.canSaveDashboards &&
-     *          this.deps.capabilities.canOpenVisualizations)
-     *      );
-     *   }
-     */
     return new NavigationEmbeddable(
       reduxEmbeddablePackage,
-      // { editable: true },
+      { editable },
       { ...getDefaultNavigationEmbeddableInput(), ...initialInput },
       parent
     );
@@ -84,7 +81,10 @@ export class NavigationEmbeddableFactoryDefinition
     const input = await createNavigationEmbeddable(
       { ...getDefaultNavigationEmbeddableInput(), ...initialInput },
       parent
-    );
+    ).catch(() => {
+      // swallow the promise rejection that happens when the flyout is closed
+      return {};
+    });
 
     return input;
   }

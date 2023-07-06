@@ -13,6 +13,7 @@ import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public'
 import { NAVIGATION_EMBEDDABLE_TYPE } from './embeddable';
 import { setKibanaServices } from './services/kibana_services';
 import { NavigationEmbeddableFactoryDefinition } from './embeddable';
+
 export interface NavigationEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;
 }
@@ -47,8 +48,6 @@ export class NavigationEmbeddablePlugin
 
   public start(core: CoreStart, plugins: NavigationEmbeddableStartDependencies) {
     setKibanaServices(core, plugins);
-
-    return {};
   }
 
   public stop() {}

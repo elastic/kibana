@@ -7,13 +7,15 @@
  */
 
 import React from 'react';
+import { Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { skip, take, takeUntil } from 'rxjs/operators';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { NavigationEmbeddableInput } from '../embeddable/types';
 import { coreServices } from '../services/kibana_services';
+import { NavigationEmbeddableInput } from '../embeddable/types';
 import { NavigationEmbeddablePanelEditor } from '../components/navigation_embeddable_panel_editor';
 
 /**
@@ -24,6 +26,8 @@ export async function openCreateNewFlyout(
   parentDashboard?: DashboardContainer
 ): Promise<Partial<NavigationEmbeddableInput>> {
   return new Promise((resolve, reject) => {
+    const closed$ = new Subject<true>();
+
     const onSave = (containerInput: Partial<NavigationEmbeddableInput>) => {
       resolve(containerInput);
       editorFlyout.close();
@@ -34,22 +38,34 @@ export async function openCreateNewFlyout(
       editorFlyout.close();
     };
 
+    // Close the flyout whenever the breadcrumbs change - i.e. when the dashboard's title changes, or when
+    // the user navigates away from the given dashboard (to the listing page **or** to another app), etc.
+    coreServices.chrome
+      .getBreadcrumbs$()
+      .pipe(takeUntil(closed$), skip(1), take(1))
+      .subscribe(() => {
+        editorFlyout.close();
+      });
+
     const editorFlyout = coreServices.overlays.openFlyout(
       toMountPoint(
         <NavigationEmbeddablePanelEditor
           initialInput={{ id: uuidv4(), ...initialInput }}
-          onClose={() => editorFlyout.close()}
+          onClose={onCancel}
           onSave={onSave}
           parentDashboard={parentDashboard}
         />,
         { theme$: coreServices.theme.theme$ }
       ),
       {
+        ownFocus: true,
         outsideClickCloses: false,
-        onClose: () => {
-          onCancel();
-        },
+        onClose: onCancel,
       }
     );
+
+    editorFlyout.onClose.then(() => {
+      closed$.next(true);
+    });
   });
 }

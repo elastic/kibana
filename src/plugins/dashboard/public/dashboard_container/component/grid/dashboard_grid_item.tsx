@@ -152,5 +152,6 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props,
 
   const isPrintMode = dashboard.select((state) => state.explicitInput.viewMode) === ViewMode.PRINT;
   const isEnabled = !isPrintMode && isProjectEnabledInLabs('labs:dashboard:deferBelowFold');
+
   return isEnabled ? <ObservedItem ref={ref} {...props} /> : <Item ref={ref} {...props} />;
 });

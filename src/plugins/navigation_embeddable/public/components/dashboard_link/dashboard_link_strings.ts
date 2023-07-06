@@ -23,7 +23,7 @@ export const DashboardLinkEmbeddableStrings = {
     }),
   getDashboardPickerAriaLabel: () =>
     i18n.translate('navigationEmbeddable.dashboardLink.editor.dashboardPickerAriaLabel', {
-      defaultMessage: 'Search for a dashboard',
+      defaultMessage: 'Pick a destination dashboard',
     }),
   getCurrentDashboardLabel: () =>
     i18n.translate('navigationEmbeddable.dashboardLink.editor.currentDashboardLabel', {

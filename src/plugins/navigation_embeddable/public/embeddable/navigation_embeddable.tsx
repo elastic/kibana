@@ -6,15 +6,12 @@
  * Side Public License, v 1.
  */
 
-import ReactDOM from 'react-dom';
 import React, { createContext, useContext } from 'react';
 
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Embeddable, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
-import { coreServices } from '../services/kibana_services';
 import { navigationEmbeddableReducers } from './navigation_embeddable_reducers';
 import { NavigationEmbeddableInput, NavigationEmbeddableReduxState } from './types';
 import { NavigationEmbeddableComponent } from '../components/navigation_embeddable_component';
@@ -35,10 +32,12 @@ type NavigationReduxEmbeddableTools = ReduxEmbeddableTools<
   typeof navigationEmbeddableReducers
 >;
 
+export interface NavigationEmbeddableConfig {
+  editable: boolean;
+}
+
 export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput, EmbeddableOutput> {
   public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
-
-  private node?: HTMLElement;
 
   // state management
   public select: NavigationReduxEmbeddableTools['select'];
@@ -50,14 +49,14 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput, 
 
   constructor(
     reduxToolsPackage: ReduxToolsPackage,
-    // config: NavigationEmbeddableConfig,
+    config: NavigationEmbeddableConfig,
     initialInput: NavigationEmbeddableInput,
     parent?: DashboardContainer
   ) {
     super(
       initialInput,
       {
-        editable: true,
+        editable: config.editable,
         editableWithExplicitInput: true,
       },
       parent
@@ -86,21 +85,13 @@ export class NavigationEmbeddable extends Embeddable<NavigationEmbeddableInput, 
   public destroy() {
     super.destroy();
     this.cleanupStateTools();
-    if (this.node) ReactDOM.unmountComponentAtNode(this.node);
   }
 
-  public render(node: HTMLElement) {
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
-    }
-    this.node = node;
-    ReactDOM.render(
-      <KibanaThemeProvider theme$={coreServices.theme.theme$}>
-        <NavigationEmbeddableContext.Provider value={this}>
-          <NavigationEmbeddableComponent />
-        </NavigationEmbeddableContext.Provider>
-      </KibanaThemeProvider>,
-      node
+  public render() {
+    return (
+      <NavigationEmbeddableContext.Provider value={this}>
+        <NavigationEmbeddableComponent />
+      </NavigationEmbeddableContext.Provider>
     );
   }
 }
