@@ -17,7 +17,7 @@ const { downloadSnapshot, installSnapshot, installSource, installArchive } = req
 const { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } = require('./paths');
 const {
   log: defaultLog,
-  parseDockerLog,
+  parseEsDockerLog,
   parseEsLog,
   extractConfigFiles,
   NativeRealm,
@@ -461,7 +461,7 @@ exports.Cluster = class Cluster {
     // parse and forward es stdout to the log
     this._process.stdout.on('data', (data) => {
       const chunk = data.toString();
-      const lines = isDocker ? parseDockerLog(chunk) : parseEsLog(chunk);
+      const lines = isDocker ? parseEsDockerLog(chunk) : parseEsLog(chunk);
       lines.forEach((line) => {
         if (!reportSent && line.message.includes('publish_address')) {
           reportSent = true;

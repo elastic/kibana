@@ -51,7 +51,7 @@ export const docker: Command = {
   description: 'Run an Elasticsearch Docker image',
   usage: 'es docker [<args>]',
   help: (defaults: Record<string, any> = {}) => {
-    const { version, password = 'changeme' } = defaults;
+    const { version, password } = defaults;
 
     // TODO: enrollment token + env params?
     // TODO: private registry?
