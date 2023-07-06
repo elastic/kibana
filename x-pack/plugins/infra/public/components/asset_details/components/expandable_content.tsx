@@ -25,13 +25,7 @@ export const ExpandableContent = (props: ExpandableContentProps) => {
   const shouldShowMore = hasOthers && !isExpanded;
 
   return (
-    <EuiFlexGroup
-      gutterSize={'xs'}
-      responsive={false}
-      alignItems={'baseline'}
-      wrap={true}
-      direction="column"
-    >
+    <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="baseline" wrap direction="column">
       <div>
         {first}
         {shouldShowMore && (

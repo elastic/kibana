@@ -17,7 +17,7 @@ import { useMetadata } from '../../hooks/use_metadata';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { MetadataSummary } from './metadata_summary';
 import { KPIGrid } from './kpi_grid';
-import type { StringDateRange, TabIds } from '../../types';
+import type { StringDateRange } from '../../types';
 
 export interface MetadataSearchUrlState {
   metadataSearchUrlState: string;
@@ -32,7 +32,6 @@ export interface OverviewProps extends KPIProps {
   currentTimeRange: MetricsTimeInput;
   nodeName: string;
   nodeType: InventoryItemType;
-  onTabsStateChange?: (tabId: TabIds) => void;
 }
 
 const DEFAULT_DATE_RANGE = {

@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import type { Meta, Story } from '@storybook/react/types-6-0';
 import { i18n } from '@kbn/i18n';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { AssetDetails } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
