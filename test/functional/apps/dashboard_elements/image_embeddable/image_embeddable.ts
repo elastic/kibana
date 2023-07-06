@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'discover', 'header']);
   const testSubjects = getService('testSubjects');
+  const dashboardAddPanel = getService('dashboardAddPanel');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
 
@@ -36,7 +37,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should create an image embeddable', async () => {
       // create an image embeddable
-      await testSubjects.click(`dashboardQuickButtonimage`);
+      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.clickAddNewEmbeddableLink('image');
       await testSubjects.exists(`createImageEmbeddableFlyout`);
       await PageObjects.common.setFileInputPath(require.resolve('./elastic_logo.png'));
       await testSubjects.clickWhenNotDisabled(`imageEmbeddableEditorSave`);

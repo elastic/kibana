@@ -6,28 +6,9 @@
  */
 
 import { MAX_ASSIGNEES_PER_CASE } from '../constants';
-import { isInvalidTag, areTotalAssigneesInvalid } from './validators';
+import { areTotalAssigneesInvalid } from './validators';
 
 describe('validators', () => {
-  describe('isInvalidTag', () => {
-    it('validates a whitespace correctly', () => {
-      expect(isInvalidTag(' ')).toBe(true);
-    });
-
-    it('validates an empty string correctly', () => {
-      expect(isInvalidTag('')).toBe(true);
-    });
-
-    it('returns false if the string is not empty', () => {
-      expect(isInvalidTag('string')).toBe(false);
-    });
-
-    it('returns false if the string contains spaces', () => {
-      // Ending space has been put intentionally
-      expect(isInvalidTag('my string ')).toBe(false);
-    });
-  });
-
   describe('areTotalAssigneesInvalid', () => {
     const generateAssignees = (num: number) =>
       Array.from(Array(num).keys()).map((uid) => {

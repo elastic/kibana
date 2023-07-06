@@ -398,7 +398,7 @@ export const QueryBarTopRow = React.memo(
     );
 
     function shouldRenderQueryInput(): boolean {
-      return Boolean(showQueryInput && props.indexPatterns && props.query && storage);
+      return Boolean(showQueryInput && props.query && storage);
     }
 
     function shouldRenderDatePicker(): boolean {
