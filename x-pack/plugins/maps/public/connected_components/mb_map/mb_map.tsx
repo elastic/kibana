@@ -13,7 +13,6 @@ import { Filter } from '@kbn/es-query';
 import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { maplibregl } from '@kbn/mapbox-gl';
 import type { Map as MapboxMap, MapOptions, MapMouseEvent } from '@kbn/mapbox-gl';
-import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
@@ -86,7 +85,6 @@ interface State {
 }
 
 export class MbMap extends Component<Props, State> {
-  private _checker?: ResizeChecker;
   private _isMounted: boolean = false;
   private _containerRef: HTMLDivElement | null = null;
   private _prevCustomIcons?: CustomIcon[];
@@ -111,9 +109,6 @@ export class MbMap extends Component<Props, State> {
 
   componentWillUnmount() {
     this._isMounted = false;
-    if (this._checker) {
-      this._checker.destroy();
-    }
     if (this.state.mbMap) {
       this.state.mbMap.remove();
       this.state.mbMap = undefined;
@@ -240,7 +235,6 @@ export class MbMap extends Component<Props, State> {
 
     this.setState({ mbMap }, () => {
       this._loadMakiSprites(mbMap);
-      this._initResizerChecker();
       this._registerMapEventListeners(mbMap);
       this.props.onMapReady(this._getMapExtentState());
     });
@@ -283,14 +277,6 @@ export class MbMap extends Component<Props, State> {
         this.props.clearMouseCoordinates();
       });
     }
-  }
-
-  _initResizerChecker() {
-    this.state.mbMap?.resize(); // ensure map is sized for container prior to monitoring
-    this._checker = new ResizeChecker(this._containerRef!);
-    this._checker.on('resize', () => {
-      this.state.mbMap?.resize();
-    });
   }
 
   _reportUsage() {
