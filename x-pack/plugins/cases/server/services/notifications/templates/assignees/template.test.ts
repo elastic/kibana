@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment-timezone';
 import { mockCases } from '../../../../mocks';
 import { getByText } from '@testing-library/dom';
 import { assigneesTemplateRenderer } from './renderer';
@@ -24,6 +25,11 @@ describe('Assignees template', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    moment.tz.setDefault('UTC');
+  });
+
+  afterEach(() => {
+    moment.tz.setDefault('Browser');
   });
 
   it('renders case data correctly', async () => {
@@ -72,5 +78,14 @@ describe('Assignees template', () => {
     const container = await getHTMLNode(caseSO, null);
 
     expect(container.querySelector('.btn')).not.toBeTruthy();
+  });
+
+  it('renders current year correctly', async () => {
+    const currentYear = moment().year();
+    const footerText = `© ${currentYear} Elasticsearch B.V. All Rights Reserved.`;
+
+    const container = await getHTMLNode(caseSO, mockCaseUrl);
+
+    expect(getByText(container, footerText, { exact: false })).toBeTruthy();
   });
 });

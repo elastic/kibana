@@ -7,6 +7,7 @@
 
 import fs from 'fs';
 import mustache from 'mustache';
+import moment from 'moment-timezone';
 import { join } from 'path';
 import { assertNever } from '@elastic/eui';
 import type { CaseSavedObjectTransformed } from '../../../../common/types/case';
@@ -79,6 +80,7 @@ export const assigneesTemplateRenderer = async (
         ? `${caseData.attributes.description.slice(0, DESCRIPTION_LIMIT)}...`
         : caseData.attributes.description,
     url: caseUrl,
+    currentYear: moment().year(),
   });
 
   return template;
