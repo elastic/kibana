@@ -686,7 +686,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('Input Packages', () => {
-      it('TMPDEBUGME should install index templates when upgrading from input package to integration package', async () => {
+      it('should install index templates when upgrading from input package to integration package', async () => {
         const { body: packagePolicyResponse } = await supertest
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
