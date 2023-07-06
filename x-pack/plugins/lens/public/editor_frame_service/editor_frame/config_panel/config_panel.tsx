@@ -247,6 +247,14 @@ export function LayerPanels(
   const addLayer: AddLayerFunction = (layerType, extraArg, ignoreInitialValues) => {
     const layerId = generateId();
     dispatchLens(addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues }));
+
+    if (activeDatasourceId && onUpdateStateCb) {
+      const newState = lensStore.getState().lens;
+      onUpdateStateCb(
+        newState.datasourceStates[activeDatasourceId].state,
+        newState.visualization.state
+      );
+    }
     setNextFocusedLayerId(layerId);
   };
 
