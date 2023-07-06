@@ -25,6 +25,19 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
               type: 'keyword',
               ignore_above: 256,
             },
+            budgetingMethod: {
+              type: 'keyword',
+            },
+            timeWindow: {
+              properties: {
+                duration: {
+                  type: 'keyword',
+                },
+                type: {
+                  type: 'keyword',
+                },
+              },
+            },
           },
         },
         sliValue: {
