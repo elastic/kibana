@@ -12,7 +12,7 @@ import React, { useMemo, useCallback } from 'react';
 import useSet from 'react-use/lib/useSet';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { PersistedLogViewReference } from '../../../../../../common/log_views';
+import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 import {
   LogEntryCategory,
   LogEntryCategoryDataset,

@@ -9,15 +9,18 @@ import { HttpStart } from '@kbn/core/public';
 import {
   CreateInventoryViewAttributesRequestPayload,
   createInventoryViewRequestPayloadRT,
+  CreateInventoryViewResponsePayload,
+  FindInventoryViewResponsePayload,
   findInventoryViewResponsePayloadRT,
+  GetInventoryViewResposePayload,
   getInventoryViewUrl,
   inventoryViewResponsePayloadRT,
   UpdateInventoryViewAttributesRequestPayload,
+  UpdateInventoryViewResponsePayload,
 } from '../../../common/http_api/latest';
 import {
   DeleteInventoryViewError,
   FetchInventoryViewError,
-  InventoryView,
   UpsertInventoryViewError,
 } from '../../../common/inventory_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
@@ -26,7 +29,7 @@ import { IInventoryViewsClient } from './types';
 export class InventoryViewsClient implements IInventoryViewsClient {
   constructor(private readonly http: HttpStart) {}
 
-  async findInventoryViews(): Promise<InventoryView[]> {
+  async findInventoryViews(): Promise<FindInventoryViewResponsePayload['data']> {
     const response = await this.http.get(getInventoryViewUrl()).catch((error) => {
       throw new FetchInventoryViewError(`Failed to fetch inventory views: ${error}`);
     });
@@ -40,7 +43,7 @@ export class InventoryViewsClient implements IInventoryViewsClient {
     return data;
   }
 
-  async getInventoryView(inventoryViewId: string): Promise<InventoryView> {
+  async getInventoryView(inventoryViewId: string): Promise<GetInventoryViewResposePayload> {
     const response = await this.http.get(getInventoryViewUrl(inventoryViewId)).catch((error) => {
       throw new FetchInventoryViewError(
         `Failed to fetch inventory view "${inventoryViewId}": ${error}`
@@ -60,7 +63,7 @@ export class InventoryViewsClient implements IInventoryViewsClient {
 
   async createInventoryView(
     inventoryViewAttributes: CreateInventoryViewAttributesRequestPayload
-  ): Promise<InventoryView> {
+  ): Promise<CreateInventoryViewResponsePayload> {
     const response = await this.http
       .post(getInventoryViewUrl(), {
         body: JSON.stringify(
@@ -85,7 +88,7 @@ export class InventoryViewsClient implements IInventoryViewsClient {
   async updateInventoryView(
     inventoryViewId: string,
     inventoryViewAttributes: UpdateInventoryViewAttributesRequestPayload
-  ): Promise<InventoryView> {
+  ): Promise<UpdateInventoryViewResponsePayload> {
     const response = await this.http
       .put(getInventoryViewUrl(inventoryViewId), {
         body: JSON.stringify(

@@ -6,6 +6,7 @@
  */
 
 import { actions, assign, createMachine, raise } from 'xstate';
+import { AllDatasetSelection, SingleDatasetSelection } from '../../../utils/dataset_selection';
 import { UNMANAGED_STREAMS_PANEL_ID } from '../constants';
 import { defaultSearch, DEFAULT_CONTEXT } from './defaults';
 import {
@@ -19,83 +20,107 @@ import {
 export const createPureDatasetsSelectorStateMachine = (
   initialContext: Partial<DefaultDatasetsSelectorContext> = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVsztgZTABswBjdAewCcA6Ew87CAYgBUB5AcQ4BkBRAbQAMAXUSgADgwCW6KeQB2YkAA9EAVgBMAGhABPRAA4AjNTWDzggJxqjAFgODbANicBfVzrSZsuAsTJU1OTiYPJMAMLcbHgCIkqSsDJyikgqiEZGLtTO9hrWBgZqThpqOvoItraC1EYA7E6CdgYAzIJFghrN7p4YWDj4RKQUNMGhrJw8saKpCUkKSqoIGQ3ULrWWjU6WzbW2dmXqzbbZarUaxmZqzoJuHiBefb6DASMh8tSEUrCy8lAAkvJ0GAoJQMMlYBEABIAQQAchxeAB9AAKcN43CE0wk0lk81Si1szRMLTU2xsTk0RksBgOCEstQM1B2Ng6jlsGnOtW6916PgG-mGQTeHy+P3+gOBoNx8gh4Rh8KRqNh6P4RixIFm0oWiEJxOapP1mUp1NpRUs1BuGlqzX1DnaGm5Dz5fiGgVG70+3ykvwBQJBYIUELw4QASmxuNxEexEX9YSxeBwQ9CWH82LC8IiAEJsFjsACymPiOOS2oQBlqFosVerzVp9Q0NVqVJtnWpxiMjt5-RdLyFoRFXp9Ev90qDvGhIblWYAmojYdC81Mi4ktfj0ldVpY7OZ2fTbKcaXpEE5moz6mpSQyjESbAZO95u89Be6B2LfZKAzKmHg2CGWDPEV-ZBeBDQsZmLPFQEWTIGxaDRBCJKwMlOIxTSMNQmVJDRilPJx2Ww+9Hn5V1Xn7T032HKVkjwdBKDAVAAFtZXlBEUTRDE4nAlcSzXBBigwqk1COWp1gMSx6UPcpb1MYomy2NoXEI50nzdYVyO9cU-SohQaLoxixz4cJ-2QZNoRiFgwOxbjILSJZr0ZJx1kcm1TyKEpaQpBtLXqLZWmaJwOzuJ1HwFVSyNFDT3xHajaPopjv3HSdIQA+dF0sjUIJSKDDCqahsKKIwEJbIw8lpZpLGOdCT1k7YGXLLogq7J5QtIj0IqHLTP10uKg1-f9M1nICQPSzUeOyst7ErcrCo6ToOUsWkrWqWozA6a1HLaCqGp6B9mpIvs2sHKAAFV5AY1B5FQGAIG6-SoThVilRVTirLmLLbP4mprGE0TxIZWlLCtahyzMQp-O2c5bh2oie2fNT2pOs6LquyBbvimJDOM0zzJGzLSwyU9Vic60bUKfiAcqbINCpdkXBaOxbCUkL9pfdTflO87LuutGxwnKcBrnBcly4t7SwMXLGgK6m5v82paQcZpsicMTsLsalKi5RrduI3tWYRjnke52K7p-P8AKG0CXoy6z3sWcWKwMeCrWw2oOjpjyHAtWSyfQsw8ncO55HICA4CUYK9peZdRd4gBaRlxITxPE7OWkY4wpPHEKQSjiZiPBToBhICj1dxuvQkvqEuoxNw6wPMcGSrT9i9rihnltdhsL3tGmzFnKytqwH2sjyWFo8tWq1Zc2wlc51uH+wAC1FYuxtswqnAb+w6lPHYjEd2l92OfVtgCtp1gvQLoeUlqDtfSLKM-eARZL1ebg34xrRaJtxflk9VhKRwSpbAZCJGeHdWq3w6h+aUPNl490MIICslhlZnAaMsfUpoOQNy2I7eCt4L5txhipcBbNEacxRjdY2TFYG23gYg5B2FGiZHQcPbYxIVo3DpnsAwFIA6uCAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVsztgZTABswBjdAewCcA6AB3PoDcwaTDzsIBiAFQHkA4gIAyAUQDaABgC6iUPVgBLdIvIA7OSAAeiALQBmAKzUALAEZDAdgBslk4ckAmEwA5HhkwBoQAT0T6LakdHFzMLMLN9dzsAXxjvNExsXAJiMio6BnJmGgYwNS4AYWE+PAkZTQVlVQ0kbUQzSQBOY0szd31zE0lrJutrbz8EVxdTM0solya3YP64hIwsHHwiUgoaeiYWajyC-iExKVk6qpV1TR0ERr7qa0cwx0lJE0tLF0l9QcQTbtveyXa1gB+j6LnmIESSxSq3SGyyOR2tHy1EIilgKjUUAAkmp0GAoJQMDVYEUABIAQQAcgJRAB9AAKVNEwiOlQ41XOdUu+iit0MhjMtgsnQFjgGvkQTQBQV6YXMhncj0c4MhyRWaXWmS2uSRahRaIx2Nx+MJZzUJMKFOpdMZlOZ4jMx3k7LNF0QhiBpn6Hh+7kMTU+EoQ70s1EkHmBjiM+ksTWV8QhizVqTWGU22W2u316MUmJxeIJRPUJLwhQASnxhMJafxaVjKTxRAIy+SeFi+JS8LSAEJ8Hj8ACyrJOLpqboQujMJn01Bad2e7m6Fi8QcsYuoCpMTXGTl9thVSeWKdhWozOuRqJzeeNhbNJdE5LLlp7AE1aZTyQPyk6QKcx1y9DMJomlnBxHDjacWhcCZLC+YN3GoSwekkN4106awpgPJIjxhTV0wRLNL0NfMTSLc0uDwPgyx4V9aSo5BRDLYdnSUV0AInMJjHuCYxSaJDgiQww4MaZ5Z3MZxXHcFwFUsLCoXVVM4W1RELwNXMjQLU1iQo5lREKGjySrWkSgELtkFbckyh4Zjf1HTlQEuRobDDGwjG3cwzCmcUhhcEEgj6R4XGsF5DDk5NcLTeFM11bNiJvLT1DwdBKDAVAAFsLStGkGSZFkKhHVj-wc-wFWoRoRRE-QAUMFw4N6UNrE8qwWgmHkarCnCNUi5TCLU69NLIpKUvS+9H2fbs3w-L8bL-ez6gQBwTFMKMozXUIPSqoSgy3JbBOA-R-iicZQoTVVOsU08CJioj1JI28aiG1KMooqiaImuiywYpj8pYjlamKhBYyW7pmmeMIWhMZw4J2xDkMkKYtzCeGOuhLqlLPFS9Ru-rSLNR6Rp0sR9NpcyeEs0RrJ+2zCrmxz4eMH4mheYCXmeWqgwwyRqCCtdGtsD0ejBU7D1Ri78Oi1SrygABVNQ0tQNRUBgCB8eey0qWy217Sp2b-vmzpHGoEE7n5qMQ1goNGnMI2mYO6YpJklGFJPcXzyxvqZblhWlcgVXRqfUlaKm782RpvXLhko2nPpxwkMFQMhk44wHHCaN-T4kwnePPCord2L1Nl+XFeVv2Xuo2j6MYma7PDxA3FGPjt1trcmYmYSLGT6rIkMNyM6ziL0auyXDUL72S+Sp77yJmjSfJymf118cnOsMNIZMDC1wcBUtsT54QKlF4tysRH1-7tHqGwDUagv9TiEJvSDKMkyzIsqzq7D8cMKCbpIOcRqgpQnBAUG43BAm6Hbe4LghYLGwqLE8l81jXyUJiO+ZRp4k1fhTd+f1xy6D-rDDwrVRS2G8noA6MpBRAjXNuAB8YYHyWzhkBBZBr6oEIIQe+xNZ5vx1jXcc25uYBACL5VwUppgJz0K8bm1gapRgBFOeucQExqHIBAOAmgzpwPWKHHB7EDDTlAk4CCIIap2Dgng0qQVZEfGnAEV40DEywOdjnbUOi2IAzwS0Qx4FnAmOgiuIYAlEIhGXLxHunQz5i1ztQNgHBIBuKKvNSIRhubTFavYSIHw4IxlDN0f+bwarhkaNYSJLtom7ASbTPQzhQwtCMb4qCMFoY9GkeBKc0xXABBKcLJxjDB4Sz1AACwNJU2uE4lpPHlL5HofRmqOGhkzI2dxtwHQcHYbcpSXEY16lLO6CVzSjKXlzIw9gpRVTuCCdmPlgE2G3FOCwionCbO6ts66Hs9mDQniNQ57F-SG3kSEIK3EXD2DqlORCnk2gRBsSEZ5-S87Y09kXH2KsvkZR+QDGqS0oFM39HYFOUxhJPC5j-dZx93LdPoeFc+zD3HU10R48Cu1wwvDaoCGwATAIyKWbIwUrwQawp6QwgeF9cJINvmADF81dC2EQrGEFTgeRFLaHBN4phtz+k2h6DCvk4WiqvuoagbDCBSu5NymMwV3BOCsDGTlwYubAQsAGcM2qoH6CUTEIAA */
   createMachine<DatasetsSelectorContext, DatasetsSelectorEvent, DatasetsSelectorTypestate>(
     {
       context: { ...DEFAULT_CONTEXT, ...initialContext },
       preserveActionOrder: true,
       predictableActionArguments: true,
       id: 'DatasetsSelector',
-      initial: 'closed',
+      type: 'parallel',
       states: {
-        closed: {
-          id: 'closed',
-          on: {
-            TOGGLE: 'open.hist',
+        popover: {
+          initial: 'closed',
+          states: {
+            closed: {
+              id: 'closed',
+              on: {
+                TOGGLE: 'open.hist',
+              },
+            },
+            open: {
+              initial: 'listingIntegrations',
+              on: {
+                CLOSE: 'closed',
+                TOGGLE: 'closed',
+              },
+              states: {
+                hist: {
+                  type: 'history',
+                },
+                listingIntegrations: {
+                  entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
+                  on: {
+                    CHANGE_PANEL: [
+                      {
+                        cond: 'isUnmanagedStreamsId',
+                        target: 'listingUnmanagedStreams',
+                      },
+                      {
+                        target: 'listingIntegrationStreams',
+                      },
+                    ],
+                    SCROLL_TO_INTEGRATIONS_BOTTOM: {
+                      actions: 'loadMoreIntegrations',
+                    },
+                    SEARCH_BY_NAME: {
+                      actions: ['storeSearch', 'searchIntegrations'],
+                    },
+                    SORT_BY_ORDER: {
+                      actions: ['storeSearch', 'sortIntegrations'],
+                    },
+                    SELECT_ALL_LOGS_DATASET: '#closed',
+                  },
+                },
+                listingIntegrationStreams: {
+                  entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
+                  on: {
+                    CHANGE_PANEL: 'listingIntegrations',
+                    SEARCH_BY_NAME: {
+                      actions: ['storeSearch', 'searchIntegrationsStreams'],
+                    },
+                    SORT_BY_ORDER: {
+                      actions: ['storeSearch', 'sortIntegrationsStreams'],
+                    },
+                    SELECT_DATASET: '#closed',
+                  },
+                },
+                listingUnmanagedStreams: {
+                  entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
+                  on: {
+                    CHANGE_PANEL: 'listingIntegrations',
+                    SEARCH_BY_NAME: {
+                      actions: ['storeSearch', 'searchUnmanagedStreams'],
+                    },
+                    SORT_BY_ORDER: {
+                      actions: ['storeSearch', 'sortUnmanagedStreams'],
+                    },
+                    SELECT_DATASET: '#closed',
+                  },
+                },
+              },
+            },
           },
         },
-        open: {
-          initial: 'listingIntegrations',
-          on: {
-            CLOSE: 'closed',
-            TOGGLE: 'closed',
-          },
+        selection: {
+          initial: 'single',
           states: {
-            hist: {
-              type: 'history',
-            },
-            listingIntegrations: {
-              entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
+            single: {
               on: {
-                CHANGE_PANEL: [
-                  {
-                    cond: 'isUnmanagedStreamsId',
-                    target: 'listingUnmanagedStreams',
-                  },
-                  {
-                    target: 'listingIntegrationStreams',
-                  },
-                ],
-                SCROLL_TO_INTEGRATIONS_BOTTOM: {
-                  actions: 'loadMoreIntegrations',
+                SELECT_ALL_LOGS_DATASET: {
+                  actions: ['storeAllSelection', 'notifySelectionChanged'],
+                  target: 'all',
                 },
-                SEARCH_BY_NAME: {
-                  actions: ['storeSearch', 'searchIntegrations'],
-                },
-                SORT_BY_ORDER: {
-                  actions: ['storeSearch', 'sortIntegrations'],
+                SELECT_DATASET: {
+                  actions: ['storeSingleSelection', 'notifySelectionChanged'],
                 },
               },
             },
-            listingIntegrationStreams: {
-              entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
+            all: {
               on: {
-                CHANGE_PANEL: 'listingIntegrations',
                 SELECT_DATASET: {
-                  actions: ['storeSelected', 'selectStream'],
-                  target: '#closed',
-                },
-                SEARCH_BY_NAME: {
-                  actions: ['storeSearch', 'searchIntegrationsStreams'],
-                },
-                SORT_BY_ORDER: {
-                  actions: ['storeSearch', 'sortIntegrationsStreams'],
-                },
-              },
-            },
-            listingUnmanagedStreams: {
-              entry: ['storePanelId', 'retrieveSearchFromCache', 'maybeRestoreSearchResult'],
-              on: {
-                CHANGE_PANEL: 'listingIntegrations',
-                SELECT_DATASET: {
-                  actions: ['storeSelected', 'selectStream'],
-                  target: '#closed',
-                },
-                SEARCH_BY_NAME: {
-                  actions: ['storeSearch', 'searchUnmanagedStreams'],
-                },
-                SORT_BY_ORDER: {
-                  actions: ['storeSearch', 'sortUnmanagedStreams'],
+                  actions: ['storeSingleSelection', 'notifySelectionChanged'],
+                  target: 'single',
                 },
               },
             },
@@ -118,8 +143,11 @@ export const createPureDatasetsSelectorStateMachine = (
           }
           return {};
         }),
-        storeSelected: assign((_context, event) =>
-          'dataset' in event ? { selected: event.dataset } : {}
+        storeAllSelection: assign((_context) => ({
+          selection: AllDatasetSelection.create(),
+        })),
+        storeSingleSelection: assign((_context, event) =>
+          'dataset' in event ? { selection: SingleDatasetSelection.create(event.dataset) } : {}
         ),
         retrieveSearchFromCache: assign((context, event) =>
           'panelId' in event
@@ -150,15 +178,13 @@ export const createDatasetsSelectorStateMachine = ({
   onIntegrationsStreamsSort,
   onUnmanagedStreamsSearch,
   onUnmanagedStreamsSort,
-  onDatasetSelected,
+  onSelectionChange,
   onUnmanagedStreamsReload,
 }: DatasetsSelectorStateMachineDependencies) =>
   createPureDatasetsSelectorStateMachine(initialContext).withConfig({
     actions: {
-      selectStream: (_context, event) => {
-        if ('dataset' in event) {
-          return onDatasetSelected(event.dataset);
-        }
+      notifySelectionChanged: (context) => {
+        return onSelectionChange(context.selection);
       },
       loadMoreIntegrations: onIntegrationsLoadMore,
       relaodIntegrations: onIntegrationsReload,
