@@ -68,7 +68,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
+      for (const job of testSetupJobConfigs) {
+        await ml.api.deleteAnomalyDetectionJobES(job.job_id);
+      }
       await ml.api.cleanMlIndices();
+      await ml.testResources.cleanMLSavedObjects();
     });
 
     it('returns expected list of groups after update', async () => {
