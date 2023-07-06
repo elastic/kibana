@@ -77,22 +77,22 @@ export const useData = (
   const overallStatsRequest = useMemo(() => {
     return fieldStatsRequest
       ? {
-        ...fieldStatsRequest,
-        selectedSignificantTerm,
-        selectedGroup,
-        includeSelectedSignificantTerm: false,
-      }
+          ...fieldStatsRequest,
+          selectedSignificantTerm,
+          selectedGroup,
+          includeSelectedSignificantTerm: false,
+        }
       : undefined;
   }, [fieldStatsRequest, selectedSignificantTerm, selectedGroup]);
 
   const selectedSignificantTermStatsRequest = useMemo(() => {
     return fieldStatsRequest && (selectedSignificantTerm || selectedGroup)
       ? {
-        ...fieldStatsRequest,
-        selectedSignificantTerm,
-        selectedGroup,
-        includeSelectedSignificantTerm: true,
-      }
+          ...fieldStatsRequest,
+          selectedSignificantTerm,
+          selectedGroup,
+          includeSelectedSignificantTerm: true,
+        }
       : undefined;
   }, [fieldStatsRequest, selectedSignificantTerm, selectedGroup]);
 
