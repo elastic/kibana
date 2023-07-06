@@ -88,8 +88,7 @@ describe('Isolate command', () => {
     });
   });
 
-  // Flaky: https://github.com/elastic/security-team/issues/7048
-  describe.skip('from Alerts', () => {
+  describe('from Alerts', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
     let hostname: string;
@@ -190,7 +189,8 @@ describe('Isolate command', () => {
     });
   });
 
-  describe('from Cases', () => {
+  // Flaky: https://github.com/elastic/security-team/issues/7048
+  describe.skip('from Cases', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let caseData: ReturnTypeFromChainable<typeof indexNewCase> | undefined;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts> | undefined;
