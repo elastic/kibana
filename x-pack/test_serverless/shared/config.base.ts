@@ -23,7 +23,6 @@ export default async () => {
     esTestCluster: {
       license: 'trial',
       from: 'snapshot',
-      serverArgs: ['xpack.security.enabled=false'],
     },
 
     kbnTestServer: {
