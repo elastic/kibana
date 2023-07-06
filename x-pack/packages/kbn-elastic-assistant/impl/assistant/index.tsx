@@ -78,6 +78,7 @@ const AssistantComponent: React.FC<Props> = ({
     getComments,
     http,
     promptContexts,
+    setLastConversationId,
     title,
   } = useAssistantContext();
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
@@ -105,7 +106,11 @@ const AssistantComponent: React.FC<Props> = ({
     [conversations, selectedConversationId]
   );
 
-  const { data: connectors, refetch: refetchConnectors } = useLoadConnectors({ http });
+  const {
+    data: connectors,
+    isSuccess: areConnectorsFetched,
+    refetch: refetchConnectors,
+  } = useLoadConnectors({ http });
   const defaultConnectorId = useMemo(() => connectors?.[0]?.id, [connectors]);
   const defaultProvider = useMemo(
     () =>
@@ -113,6 +118,15 @@ const AssistantComponent: React.FC<Props> = ({
         ?.config?.apiProvider,
     [connectors]
   );
+
+  // Remember last selection for reuse after keyboard shortcut is pressed.
+  // Clear it if there is no connectors
+  useEffect(() => {
+    if (areConnectorsFetched && !connectors?.length) {
+      return setLastConversationId('');
+    }
+    setLastConversationId(selectedConversationId);
+  }, [areConnectorsFetched, connectors?.length, selectedConversationId, setLastConversationId]);
 
   const isWelcomeSetup = (connectors?.length ?? 0) === 0;
 
@@ -178,11 +192,11 @@ const AssistantComponent: React.FC<Props> = ({
 
   // Scroll to bottom on conversation change
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'auto' });
+    bottomRef.current?.scrollIntoView?.({ behavior: 'auto' });
   }, []);
   useEffect(() => {
     setTimeout(() => {
-      bottomRef.current?.scrollIntoView({ behavior: 'auto' });
+      bottomRef.current?.scrollIntoView?.({ behavior: 'auto' });
       promptTextAreaRef?.current?.focus();
     }, 0);
   }, [currentConversation.messages.length, selectedPromptContextsCount]);

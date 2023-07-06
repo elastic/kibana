@@ -32,7 +32,7 @@ export const AssistantOverlay: React.FC = React.memo(() => {
     WELCOME_CONVERSATION_TITLE
   );
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
-  const { setShowAssistantOverlay } = useAssistantContext();
+  const { setShowAssistantOverlay, localStorageLastConversationId } = useAssistantContext();
 
   // Bind `showAssistantOverlay` in SecurityAssistantContext to this modal instance
   const showOverlay = useCallback(
@@ -52,15 +52,25 @@ export const AssistantOverlay: React.FC = React.memo(() => {
     setShowAssistantOverlay(showOverlay);
   }, [setShowAssistantOverlay, showOverlay]);
 
+  // Called whenever platform specific shortcut for assistant is pressed
+  const handleShortcutPress = useCallback(() => {
+    // Try to restore the last conversation on shortcut pressed
+    if (!isModalVisible) {
+      setConversationId(localStorageLastConversationId || WELCOME_CONVERSATION_TITLE);
+    }
+
+    setIsModalVisible(!isModalVisible);
+  }, [isModalVisible, localStorageLastConversationId]);
+
   // Register keyboard listener to show the modal when cmd + ; is pressed
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === ';' && (isMac ? event.metaKey : event.ctrlKey)) {
         event.preventDefault();
-        setIsModalVisible(!isModalVisible);
+        handleShortcutPress();
       }
     },
-    [isModalVisible]
+    [handleShortcutPress]
   );
   useEvent('keydown', onKeyDown);
 
