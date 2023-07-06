@@ -6,6 +6,8 @@
  */
 
 import {
+  EuiBadge,
+  EuiBadgeGroup,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -557,6 +559,46 @@ function UserPasswordEditor({
   );
 }
 
+function UserRoles({ user }: { user: AuthenticatedUser }) {
+  return (
+    <EuiDescribedFormGroup
+      fullWidth
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.userRoles"
+            defaultMessage="User Roles"
+          />
+        </h2>
+      }
+      description={
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.userRoleDescription"
+          defaultMessage="Information about your access and permissions."
+        />
+      }
+    >
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.userRolesLabel"
+            defaultMessage="User Roles"
+          />
+        }
+        fullWidth
+      >
+        <EuiBadgeGroup gutterSize="s">
+          {user.roles.map((role) => (
+            <EuiBadge key={role} color="hollow">
+              {role}
+            </EuiBadge>
+          ))}
+        </EuiBadgeGroup>
+      </EuiFormRow>
+    </EuiDescribedFormGroup>
+  );
+}
+
 export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data }) => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<CoreStart>();
@@ -699,6 +741,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   user={user}
                   onShowPasswordForm={() => setShowChangePasswordForm(true)}
                 />
+                <UserRoles user={user} />
                 {isCloudUser ? null : (
                   <UserSettingsEditor
                     formik={formik}
