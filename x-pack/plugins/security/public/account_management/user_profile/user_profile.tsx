@@ -587,9 +587,9 @@ function UserRoles({ user }: { user: AuthenticatedUser }) {
         }
         fullWidth
       >
-        <EuiBadgeGroup gutterSize="s">
+        <EuiBadgeGroup gutterSize="s" data-test-subj="userRoles">
           {user.roles.map((role) => (
-            <EuiBadge key={role} color="hollow">
+            <EuiBadge key={role} color="hollow" data-test-subj={`role${role}`}>
               {role}
             </EuiBadge>
           ))}

@@ -395,4 +395,33 @@ describe('useUserProfileForm', () => {
       });
     });
   });
+
+  describe('User roles section', () => {
+    it('should display the user roles', () => {
+      const data: UserProfileData = {};
+
+      const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
+      coreStart.settings.client.get.mockReturnValue(false);
+      coreStart.settings.client.isOverridden.mockReturnValue(true);
+
+      const testWrapper = mount(
+        <Providers
+          services={coreStart}
+          theme$={theme$}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <UserProfile user={nonCloudUser} data={data} />
+        </Providers>
+      );
+      expect(testWrapper.exists('EuiBadgeGroup[data-test-subj="userRoles"]')).toBeTruthy();
+
+      const rolesList = testWrapper.find('EuiBadgeGroup[data-test-subj="userRoles"]').children();
+      expect(rolesList.length).toEqual(nonCloudUser.roles.length);
+    });
+  });
 });
