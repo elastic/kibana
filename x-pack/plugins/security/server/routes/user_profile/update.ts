@@ -55,7 +55,7 @@ export function defineUpdateUserProfileDataRoute({
         const isUpdateAllowed = keysToUpdate.every((key) =>
           ALLOWED_KEYS_UPDATE_CLOUD.includes(key)
         );
-        if (!isUpdateAllowed) {
+        if (keysToUpdate.length === 0 || !isUpdateAllowed) {
           logger.warn(
             `Elastic Cloud SSO users aren't allowed to update profiles in Kibana. (sid: ${getPrintableSessionId(
               session.value.sid
