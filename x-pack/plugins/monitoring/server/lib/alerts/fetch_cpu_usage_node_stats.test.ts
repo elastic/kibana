@@ -102,6 +102,7 @@ describe('fetchCpuUsageNodeStats', () => {
           nodeName: 'test-node',
           ccs: undefined,
           cpuUsage: 45,
+          unexpectedLimits: false,
         },
       ]);
 
