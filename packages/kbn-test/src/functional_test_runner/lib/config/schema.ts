@@ -89,6 +89,7 @@ export const schema = Joi.object()
     rootTags: Joi.array().items(Joi.string()),
     testFiles: Joi.array().items(Joi.string()),
     testRunner: Joi.func(),
+    serverless: Joi.boolean().default(false),
 
     suiteFiles: Joi.object()
       .keys({

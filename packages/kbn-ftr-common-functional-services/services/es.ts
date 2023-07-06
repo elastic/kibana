@@ -13,9 +13,7 @@ import { FtrProviderContext } from './ftr_provider_context';
 
 export function EsProvider({ getService }: FtrProviderContext): Client {
   const config = getService('config');
-  const isServerless =
-    config.get('kbnTestServer.serverArgs').filter((arg: string) => arg.startsWith('--serverless'))
-      .length > 0;
+  const isServerless = !!config.get('serverless');
 
   return createEsClientForFtrConfig(
     config,
