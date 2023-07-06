@@ -77,6 +77,7 @@ export const ThemDarkModeToggle = ({ useUpdateUserProfile }: Props) => {
             const on = darkMode === 'light' ? true : false;
             toggleDarkMode(on);
           }}
+          data-test-subj="darkModeToggle"
         >
           {i18n.translate('xpack.cloudLinks.userMenuLinks.darkModeToggle', {
             defaultMessage: 'Dark mode',
@@ -100,6 +101,7 @@ export const ThemDarkModeToggle = ({ useUpdateUserProfile }: Props) => {
             toggleDarkMode(e.target.checked);
           }}
           aria-describedby={toggleTextSwitchId}
+          data-test-subj="darkModeToggleSwitch"
           compressed
         />
       </EuiFlexItem>

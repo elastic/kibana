@@ -53,7 +53,12 @@ const ContextMenuContent = ({ items }: ContextMenuProps) => {
             return <Fragment key={i}>{item.content}</Fragment>;
           }
           return (
-            <EuiContextMenuItem key={i} icon={item.icon} size="s">
+            <EuiContextMenuItem
+              key={i}
+              icon={item.icon}
+              size="s"
+              data-test-subj={item['data-test-subj']}
+            >
               {item.name}
             </EuiContextMenuItem>
           );
