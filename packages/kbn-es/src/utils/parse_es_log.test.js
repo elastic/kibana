@@ -95,4 +95,14 @@ describe('parseEsDockerLog', () => {
     expect(lines).toHaveLength(1);
     expect(lines[0].message).toMatchSnapshot();
   });
+
+  test('parses non json log', () => {
+    const data = dedent(`
+    Node [{c468318b091c}{26kYJn8jQt2MDYMEj_6Duw}]
+  `);
+
+    const lines = parseEsDockerLog(data);
+    expect(lines).toHaveLength(1);
+    expect(lines[0].message).toMatchSnapshot();
+  });
 });

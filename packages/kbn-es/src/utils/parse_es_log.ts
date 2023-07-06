@@ -74,15 +74,10 @@ export function parseEsLog(data: string) {
 
 function extractDockerLog(capture: RegExpExecArray) {
   const [jsonStringLog] = capture;
+  const log = JSON.parse(jsonStringLog);
+  const { 'log.level': level, message, 'service.name': location } = log;
 
-  try {
-    const log = JSON.parse(jsonStringLog);
-    const { 'log.level': level, message, 'service.name': location } = log;
-
-    return { level, location, message };
-  } catch {
-    return {};
-  }
+  return { level, location, message };
 }
 
 /**
