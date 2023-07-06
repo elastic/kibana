@@ -43,7 +43,7 @@ export const AddTimeSliderControlButton = ({ closePopover, controlGroup, ...rest
   return (
     <EuiContextMenuItem
       {...rest}
-      icon="plusInCircle"
+      icon="timeslider"
       onClick={async () => {
         await controlGroup.addTimeSliderControl();
         dashboard.scrollToTop();
