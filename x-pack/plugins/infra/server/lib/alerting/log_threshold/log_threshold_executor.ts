@@ -154,7 +154,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           ? actions.reduce((next, action) => Object.assign(next, action.context), {})
           : {};
 
-      const alertInstanceId1 = (alertContext?.group || id) as string;
+      const alertInstanceId1 = ((alertContext as any)?.group || id) as string;
       const alertUuid1 = getAlertUuid(alertInstanceId1);
 
       const alert = alertWithLifecycle({

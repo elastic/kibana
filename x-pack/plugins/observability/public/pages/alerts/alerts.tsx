@@ -65,6 +65,7 @@ const mapCopilotParams = (alerts: any[], cases: any) => {
           ? caseData.cases.map((item: any) => ({
               id: item.id,
               name: item.title,
+              description: item.description,
               status: item.status,
               createdAt: item.created_at,
               updatedAt: item.updated_at,

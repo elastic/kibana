@@ -365,7 +365,7 @@ export const coPilotPrompts = {
     }),
     messages: ({ alertCaseData }) => {
       const header =
-        'alert uuid;alert URL;start time;reason;rule name;rule category;case names;case status;case updatedAt;case severity;case totalComments;case tags;case categories;case assignees';
+        'alert uuid;alert URL;start time;reason;rule name;rule category;case names;case status;case updatedAt;case severity;case totalComments;case tags;case categories;case assignees;case description';
       const add = (accumulator: number, a: number) => {
         return accumulator + a;
       };
@@ -374,6 +374,7 @@ export const coPilotPrompts = {
           let casesRow: string = '';
           if (cases) {
             const casesName = cases.map((item: any) => item.name).join(',');
+            const casesDescription = cases.map((item: any) => item.description).join(',');
             const casesStatus = cases.map((item: any) => item.status).join(',');
             const casesUpdatedAt = cases.map((item: any) => item.updatedAt).join(',');
             const casesSeverity = cases.map((item: any) => item.severity).join(',');
@@ -381,7 +382,7 @@ export const coPilotPrompts = {
             const casesTags = cases.map((item: any) => item.tags).join(',');
             const casesCategories = cases.map((item: any) => item.category).join(',');
             const casesAssignees = cases.map((item: any) => item.assignees).reduce(add, 0);
-            casesRow = `${casesName};${casesStatus};${casesUpdatedAt};${casesSeverity};${casesTotalComments};${casesTags};${casesCategories};${casesAssignees}`;
+            casesRow = `${casesName};${casesStatus};${casesUpdatedAt};${casesSeverity};${casesTotalComments};${casesTags};${casesCategories};${casesAssignees};${casesDescription}`;
           } else {
             casesRow = ';;;;;;';
           }
