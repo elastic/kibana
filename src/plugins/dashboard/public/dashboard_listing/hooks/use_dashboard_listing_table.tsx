@@ -12,6 +12,8 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
+import { OpenContentEditorParams } from '@kbn/content-management-content-editor';
+import { i18n } from '@kbn/i18n';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import { pluginServices } from '../../services/plugin_services';
 import {
@@ -81,8 +83,13 @@ export const useDashboardListingTable = ({
   const {
     dashboardSessionStorage,
     dashboardCapabilities: { showWriteControls },
-    dashboardContentManagement: { findDashboards, deleteDashboards, updateDashboardMeta },
     settings: { uiSettings },
+    dashboardContentManagement: {
+      findDashboards,
+      deleteDashboards,
+      updateDashboardMeta,
+      checkForDuplicateDashboardTitle,
+    },
     notifications: { toasts },
   } = pluginServices.getServices();
 
@@ -109,6 +116,56 @@ export const useDashboardListingTable = ({
     }
     goToDashboard();
   }, [dashboardSessionStorage, goToDashboard, useSessionStorageIntegration]);
+
+  const updateItemMeta = useCallback(
+    async ({ id, title, description, tags }) => {
+      await updateDashboardMeta({ id, title, description, tags });
+
+      setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
+    },
+    [dashboardSessionStorage, updateDashboardMeta]
+  );
+
+  const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
+    () => ({
+      title: [
+        {
+          type: 'warning',
+          fn: async (value: string, id: string) => {
+            if (id) {
+              try {
+                const [dashboard] = await findDashboards.findByIds([id]);
+                if (dashboard.status === 'error') {
+                  return;
+                }
+
+                const validTitle = await checkForDuplicateDashboardTitle({
+                  title: value,
+                  copyOnSave: false,
+                  lastSavedTitle: dashboard.attributes.title,
+                  isTitleDuplicateConfirmed: false,
+                });
+
+                if (!validTitle) {
+                  throw new Error(
+                    i18n.translate('dashboard.dashboardListingEditErrorTitle.duplicateWarning', {
+                      defaultMessage: 'Saving "{value}" creates a duplicate title',
+                      values: {
+                        value,
+                      },
+                    })
+                  );
+                }
+              } catch (e) {
+                return e.message;
+              }
+            }
+          },
+        },
+      ],
+    }),
+    [checkForDuplicateDashboardTitle, findDashboards]
+  );
 
   const emptyPrompt = useMemo(
     () => (
@@ -221,8 +278,8 @@ export const useDashboardListingTable = ({
     () => ({
       contentEditor: {
         isReadonly: !showWriteControls,
-        onSave: updateDashboardMeta,
-        customValidators: undefined,
+        onSave: updateItemMeta,
+        customValidators: contentEditorValidators,
       },
       createItem: !showWriteControls ? undefined : createItem,
       deleteItems: !showWriteControls ? undefined : deleteItems,
@@ -243,6 +300,7 @@ export const useDashboardListingTable = ({
       urlStateEnabled,
     }),
     [
+      contentEditorValidators,
       createItem,
       dashboardListingId,
       deleteItems,
@@ -259,7 +317,7 @@ export const useDashboardListingTable = ({
       onFetchSuccess,
       showWriteControls,
       title,
-      updateDashboardMeta,
+      updateItemMeta,
       urlStateEnabled,
     ]
   );
