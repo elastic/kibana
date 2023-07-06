@@ -20,6 +20,7 @@ import type {
   TrainedModelStat,
   NodesOverviewResponse,
   MemoryUsageInfo,
+  SimulateIngestPipelineResponse,
 } from '../../../../common/types/trained_models';
 
 export interface InferenceQueryParams {
@@ -105,6 +106,50 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       return httpService.http<ModelPipelines[]>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${model}/pipelines`,
         method: 'GET',
+        version: '1',
+      });
+    },
+
+    /**
+     * Fetches all ingest pipelines
+     *
+     *
+     */
+    getAllIngestPipelines() {
+      return httpService.http<NodesOverviewResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/ingest_pipelines`,
+        method: 'GET',
+        version: '1',
+      });
+    },
+
+    /**
+     * Simulates the effect of the pipeline on given documents
+     *
+     *
+     */
+    simulateInferencePipeline(
+      docs: estypes.IngestSimulateDocument[],
+      pipeline: estypes.IngestPipeline
+    ) {
+      return httpService.http<SimulateIngestPipelineResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/simulate_pipeline`,
+        method: 'POST',
+        body: JSON.stringify({ docs, pipeline }),
+        version: '1',
+      });
+    },
+
+    /**
+     * Creates inference pipeline
+     *
+     *
+     */
+    createInferencePipeline(pipelineName: string, pipeline: estypes.IngestPipeline) {
+      return httpService.http<SimulateIngestPipelineResponse>({
+        path: `${ML_INTERNAL_BASE_PATH}/trained_models/create_inference_pipeline`,
+        method: 'POST',
+        body: JSON.stringify({ pipeline, pipelineName }),
         version: '1',
       });
     },

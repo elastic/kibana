@@ -245,6 +245,10 @@ export interface NodesOverviewResponse {
   nodes: NodeDeploymentStatsResponse[];
 }
 
+export interface SimulateIngestPipelineResponse {
+  docs: Array<Record<string, any>>;
+}
+
 export interface MemoryUsageInfo {
   id: string;
   type: MlSavedObjectType;

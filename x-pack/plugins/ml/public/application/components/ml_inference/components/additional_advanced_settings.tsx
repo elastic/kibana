@@ -1,0 +1,188 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { FC, useState, memo, useMemo } from 'react';
+
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFieldText,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiLink,
+  EuiPanel,
+  EuiSwitch,
+  EuiTextArea,
+  htmlIdGenerator,
+  EuiSwitchEvent,
+} from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { AdditionalSettings, MlInferenceState } from '../types';
+import { SaveChangesButton } from './save_changes_button';
+import { useMlKibana } from '../../../contexts/kibana';
+
+interface Props {
+  handleAdvancedConfigUpdate: (configUpdate: Partial<MlInferenceState>) => void;
+}
+
+export const AdditionalAdvancedSettings: FC<Props> = memo(({ handleAdvancedConfigUpdate }) => {
+  const [additionalSettings, setAdditionalSettings] = useState<
+    Partial<AdditionalSettings> | undefined
+  >();
+
+  const {
+    services: {
+      docLinks: { links },
+    },
+  } = useMlKibana();
+
+  const handleAdditionalSettingsChange = (settingsChange: Partial<AdditionalSettings>) => {
+    setAdditionalSettings({ ...additionalSettings, ...settingsChange });
+  };
+
+  const accordionId = useMemo(() => htmlIdGenerator()(), []);
+  const additionalSettingsUpdated = useMemo(
+    () =>
+      (additionalSettings?.tag !== undefined && additionalSettings.tag !== '') ||
+      (additionalSettings?.condition !== undefined && additionalSettings.condition !== '') ||
+      (additionalSettings?.ignoreFailure !== undefined &&
+        additionalSettings.ignoreFailure !== false),
+    [additionalSettings]
+  );
+
+  const updateAdditionalSettings = () => {
+    handleAdvancedConfigUpdate({ ...additionalSettings });
+  };
+
+  return (
+    <EuiAccordion
+      id={accordionId}
+      buttonContent={
+        <EuiFlexGroup gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <FormattedMessage
+              id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.additionalSettingsLabel"
+              defaultMessage="Additional settings"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {additionalSettingsUpdated ? (
+              <SaveChangesButton
+                onClick={updateAdditionalSettings}
+                disabled={additionalSettings === undefined}
+              />
+            ) : null}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      <EuiPanel color="subdued">
+        <EuiFlexGroup>
+          {/* CONDITION */}
+          <EuiFlexItem>
+            <EuiFormRow
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.conditionLabel"
+                  defaultMessage="Condition (optional)"
+                />
+              }
+              helpText={
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.conditionHelpText"
+                  defaultMessage="This condition should be written as a {painlessDocs} script. If provided, this inference processor will only run when condition is true."
+                  values={{
+                    painlessDocs: (
+                      <EuiLink
+                        external
+                        target="_blank"
+                        href={links.scriptedFields.painlessWalkthrough}
+                      >
+                        Painless
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              }
+            >
+              <EuiTextArea
+                aria-label={i18n.translate(
+                  'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.conditionAriaLabel',
+                  { defaultMessage: 'Optional condition for running the processor' }
+                )}
+                value={additionalSettings?.condition ?? ''}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                  handleAdditionalSettingsChange({ condition: e.target.value })
+                }
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          {/* TAG AND IGNORE FAILURE */}
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem>
+                <EuiFormRow
+                  fullWidth
+                  label={
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.TagLabel"
+                      defaultMessage="Tag (optional)"
+                    />
+                  }
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.tagHelpText"
+                      defaultMessage="Identifier for the processor. Useful for debugging and metrics."
+                    />
+                  }
+                >
+                  <EuiFieldText
+                    value={additionalSettings?.tag ?? ''}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      handleAdditionalSettingsChange({ tag: e.target.value })
+                    }
+                    aria-label={i18n.translate(
+                      'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.tagAriaLabel',
+                      { defaultMessage: 'Optional tag identifier for the processor' }
+                    )}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  fullWidth
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.ignoreFailureHelpText"
+                      defaultMessage="Ignore failures for this processor."
+                    />
+                  }
+                >
+                  <EuiSwitch
+                    label={
+                      <FormattedMessage
+                        id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.ignoreFailureLabel"
+                        defaultMessage="Ignore failure"
+                      />
+                    }
+                    checked={additionalSettings?.ignoreFailure ?? false}
+                    onChange={(e: EuiSwitchEvent) =>
+                      handleAdditionalSettingsChange({ ignoreFailure: e.target.checked })
+                    }
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </EuiAccordion>
+  );
+});

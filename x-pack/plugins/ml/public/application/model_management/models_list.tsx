@@ -62,6 +62,7 @@ import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../routing/use_refresh';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { TestTrainedModelFlyout } from './test_models';
+import { AddInferencePipelineFlyout } from '../components/ml_inference';
 
 type Stats = Omit<TrainedModelStat, 'model_id' | 'deployment_stats'>;
 
@@ -134,6 +135,7 @@ export const ModelsList: FC<Props> = ({
   const [items, setItems] = useState<ModelItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<ModelItem[]>([]);
   const [modelsToDelete, setModelsToDelete] = useState<ModelItem[]>([]);
+  const [modelToDeploy, setModelToDeploy] = useState<ModelItem | undefined>();
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
     {}
   );
@@ -349,6 +351,7 @@ export const ModelsList: FC<Props> = ({
     fetchModels: fetchModelsData,
     onTestAction: setModelToTest,
     onModelsDeleteRequest: setModelsToDelete,
+    onModelDeployRequest: setModelToDeploy,
     onLoading: setIsLoading,
     modelAndDeploymentIds,
   });
@@ -642,6 +645,12 @@ export const ModelsList: FC<Props> = ({
       {modelToTest === null ? null : (
         <TestTrainedModelFlyout model={modelToTest} onClose={setModelToTest.bind(null, null)} />
       )}
+      {modelToDeploy !== undefined ? (
+        <AddInferencePipelineFlyout
+          onClose={setModelToDeploy.bind(null, undefined)}
+          model={modelToDeploy}
+        />
+      ) : null}
     </>
   );
 };

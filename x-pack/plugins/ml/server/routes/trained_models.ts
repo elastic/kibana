@@ -22,6 +22,8 @@ import {
   putTrainedModelQuerySchema,
   threadingParamsSchema,
   updateDeploymentParamsSchema,
+  simulateIngestPipelineSchema,
+  createIngestPipelineSchema,
 } from './schemas/inference_schema';
 import { TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
@@ -230,6 +232,112 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
           const result = await modelsProvider(client).getModelsPipelines(modelId.split(','));
           return response.ok({
             body: [...result].map(([id, pipelines]) => ({ model_id: id, pipelines })),
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {get} /internal/ml/trained_models/ingest_pipelines Get ingest pipelines
+   * @apiName GetIngestPipelines
+   * @apiDescription Retrieves pipelines
+   */
+  router.versioned
+    .get({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/ingest_pipelines`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canGetTrainedModels'], // TODO: update permissions
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
+        try {
+          const body = await modelsProvider(client).getPipelines();
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /internal/ml/trained_models/simulate_pipeline simulate the ingest pipelines
+   * @apiName SimulateIngestPipeline
+   * @apiDescription Simulates the pipeline
+   */
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/simulate_pipeline`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canCreateTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: simulateIngestPipelineSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
+        try {
+          const { docs, pipeline } = request.body;
+          const body = await modelsProvider(client).simulatePipeline(docs, pipeline);
+          return response.ok({
+            body,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      })
+    );
+
+  /**
+   * @apiGroup TrainedModels
+   *
+   * @api {post} /internal/ml/trained_models/create_inference_pipeline creates the pipeline with inference processor
+   * @apiName CreateInferencePipeline
+   * @apiDescription Creates the inference pipeline
+   */
+  router.versioned
+    .post({
+      path: `${ML_INTERNAL_BASE_PATH}/trained_models/create_inference_pipeline`,
+      access: 'internal',
+      options: {
+        tags: ['access:ml:canCreateTrainedModels'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: createIngestPipelineSchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(async ({ client, request, mlClient, response }) => {
+        try {
+          const { pipeline, pipelineName } = request.body;
+          const body = await modelsProvider(client).createInferencePipeline(pipeline, pipelineName);
+          return response.ok({
+            body,
           });
         } catch (e) {
           return response.customError(wrapError(e));
