@@ -9,7 +9,7 @@ import type { FormulaConfig } from '../../../types';
 
 export const normalizedLoad1m: FormulaConfig = {
   label: 'Normalized Load',
-  formula: 'average(system.load.1) / max(system.load.cores)',
+  value: 'average(system.load.1) / max(system.load.cores)',
   format: {
     id: 'percent',
     params: {

@@ -8,11 +8,12 @@
 import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { DataView } from '@kbn/data-views-plugin/common';
 import {
+  FormulaPublicApi,
   FormBasedPersistedState,
   MetricVisualizationState,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
-import { ChartLayer } from '../../../types';
+import { ChartColumn, ChartLayer, FormulaConfig } from '../../../types';
 import { getDefaultReferences, getHistogramColumn } from '../../utils';
 import { FormulaColumn } from './column/formula';
 
@@ -26,12 +27,16 @@ export interface MetricLayerOptions {
 }
 
 interface MetricLayerConfig {
-  column: FormulaColumn;
+  data: FormulaConfig;
   options?: MetricLayerOptions;
+  formulaAPI: FormulaPublicApi;
 }
 
 export class MetricLayer implements ChartLayer<MetricVisualizationState> {
-  constructor(private layerConfig: MetricLayerConfig) {}
+  private column: ChartColumn;
+  constructor(private layerConfig: MetricLayerConfig) {
+    this.column = new FormulaColumn(layerConfig.data, layerConfig.formulaAPI);
+  }
 
   getLayer(
     layerId: string,
@@ -55,15 +60,19 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
 
     return {
       [layerId]: {
-        ...this.layerConfig.column.getData(accessorId, dataView, {
+        ...this.column.getData(accessorId, dataView, {
           columnOrder: [],
           columns: {},
         }),
       },
-      [`${layerId}_trendline`]: {
-        linkToLayers: [layerId],
-        ...this.layerConfig.column.getData(`${accessorId}_trendline`, dataView, baseLayer),
-      },
+      ...(this.layerConfig.options?.showTrendLine
+        ? {
+            [`${layerId}_trendline`]: {
+              linkToLayers: [layerId],
+              ...this.column.getData(`${accessorId}_trendline`, dataView, baseLayer),
+            },
+          }
+        : {}),
     };
   }
   getReference(layerId: string, dataView: DataView): SavedObjectReference[] {
@@ -74,7 +83,7 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
   }
 
   getLayerConfig(layerId: string, accessorId: string): MetricVisualizationState {
-    const { subtitle, backgroundColor, showTrendLine = true } = this.layerConfig.options ?? {};
+    const { subtitle, backgroundColor, showTrendLine } = this.layerConfig.options ?? {};
 
     return {
       layerId,
@@ -94,6 +103,6 @@ export class MetricLayer implements ChartLayer<MetricVisualizationState> {
     };
   }
   getName(): string {
-    return this.layerConfig.column.getName();
+    return this.column.getName();
   }
 }

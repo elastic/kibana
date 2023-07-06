@@ -13,7 +13,7 @@ import type { Chart, ChartConfig, ChartLayer } from '../../types';
 
 const ACCESSOR = 'formula_accessor';
 
-export class LineChart implements Chart<XYState> {
+export class XYChart implements Chart<XYState> {
   constructor(private chartConfig: ChartConfig<Array<ChartLayer<XYLayerConfig>>>) {}
 
   getVisualizationType(): string {
@@ -21,7 +21,7 @@ export class LineChart implements Chart<XYState> {
   }
 
   getLayers(): FormBasedPersistedState['layers'] {
-    return this.chartConfig.layer.reduce((acc, curr, index) => {
+    return this.chartConfig.layers.reduce((acc, curr, index) => {
       const layerId = `${DEFAULT_LAYER_ID}_${index}`;
       const accessorId = `${ACCESSOR}_${index}`;
       return {
@@ -34,7 +34,7 @@ export class LineChart implements Chart<XYState> {
   getVisualizationState(): XYState {
     return getXYVisualizationState({
       layers: [
-        ...this.chartConfig.layer.map((layerItem, index) => {
+        ...this.chartConfig.layers.map((layerItem, index) => {
           const layerId = `${DEFAULT_LAYER_ID}_${index}`;
           const accessorId = `${ACCESSOR}_${index}`;
           return layerItem.getLayerConfig(layerId, accessorId);
@@ -44,7 +44,7 @@ export class LineChart implements Chart<XYState> {
   }
 
   getReferences(): SavedObjectReference[] {
-    return this.chartConfig.layer.flatMap((p, index) => {
+    return this.chartConfig.layers.flatMap((p, index) => {
       const layerId = `${DEFAULT_LAYER_ID}_${index}`;
       return p.getReference(layerId, this.chartConfig.dataView);
     });
@@ -55,7 +55,7 @@ export class LineChart implements Chart<XYState> {
   }
 
   getTitle(): string {
-    return this.chartConfig.title ?? this.chartConfig.layer[0].getName();
+    return this.chartConfig.title ?? this.chartConfig.layers[0].getName();
   }
 }
 

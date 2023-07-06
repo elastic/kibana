@@ -18,15 +18,15 @@ import {
   type XYLayerOptions,
   type MetricLayerOptions,
   type FormulaConfig,
+  type LensAttributes,
   LensAttributesBuilder,
-  LensAttributes,
-  FormulaDataColumn,
   XYDataLayer,
   MetricLayer,
-  LineChart,
+  XYChart,
   MetricChart,
   XYReferenceLinesLayer,
-  ReferenceLineColumn,
+  Chart,
+  LensVisualizationState,
 } from '../common/visualizations';
 import { useLazyRef } from './use_lazy_ref';
 
@@ -39,23 +39,23 @@ export interface Layer<
   TLayerType extends LayerType = LayerType
 > {
   layerType: TLayerType;
-  formula: TFormulaConfig;
+  data: TFormulaConfig;
   options?: TOptions;
 }
 
 interface UseLensAttributesBaseParams<
   TOptions extends Options,
-  TLayer extends Array<Layer<TOptions, FormulaConfig[]>> | Layer<TOptions, FormulaConfig>
+  TLayers extends Array<Layer<TOptions, FormulaConfig[]>> | Layer<TOptions, FormulaConfig>
 > {
   dataView?: DataView;
-  layers: TLayer;
+  layers: TLayers;
   title?: string;
 }
 
 interface UseLensAttributesXYChartParams
   extends UseLensAttributesBaseParams<
     XYLayerOptions,
-    Array<Layer<XYLayerOptions, FormulaConfig[]>>
+    Array<Layer<XYLayerOptions, FormulaConfig[], 'data' | 'referenceLine'>>
   > {
   visualizationType: 'lnsXY';
 }
@@ -161,12 +161,19 @@ export const useLensAttributes = ({
   );
 
   const getFormula = () => {
-    const mainLayer = Array.isArray(layers) ? layers[0] : layers;
-    const mainFormulaConfig = Array.isArray(mainLayer.formula)
-      ? mainLayer.formula[0]
-      : mainLayer.formula;
+    const firstDataLayer = [...(Array.isArray(layers) ? layers : [layers])].find(
+      (p) => p.layerType === 'data'
+    );
 
-    return mainFormulaConfig.formula;
+    if (!firstDataLayer) {
+      return '';
+    }
+
+    const mainFormulaConfig = Array.isArray(firstDataLayer.data)
+      ? firstDataLayer.data[0]
+      : firstDataLayer.data;
+
+    return mainFormulaConfig.value;
   };
 
   return { formula: getFormula(), attributes: attributes.current, getExtraActions, error };
@@ -174,7 +181,7 @@ export const useLensAttributes = ({
 
 const chartFactory = <
   TOptions,
-  TLayer extends Array<Layer<TOptions, FormulaConfig[]>> | Layer<TOptions, FormulaConfig>
+  TLayers extends Array<Layer<TOptions, FormulaConfig[]>> | Layer<TOptions, FormulaConfig>
 >({
   dataView,
   formulaAPI,
@@ -184,51 +191,52 @@ const chartFactory = <
 }: {
   dataView: DataView;
   formulaAPI: FormulaPublicApi;
-  layers: TLayer;
-  title?: string;
   visualizationType: ChartType;
-}) => {
+  layers: TLayers;
+  title?: string;
+}): Chart<LensVisualizationState> => {
   switch (visualizationType) {
     case 'lnsXY':
       if (!Array.isArray(layers)) {
-        throw new Error(`Invalid layers type. Expected an array.`);
+        throw new Error(`Invalid layers type. Expected an array of layers.`);
       }
 
-      const createLayerInstance = (layerItem: Layer<TOptions, FormulaConfig[]>) => {
-        switch (layerItem.layerType) {
+      const getLayerClass = (layerType: LayerType) => {
+        switch (layerType) {
           case 'data': {
-            return new XYDataLayer({
-              column: layerItem.formula.map(
-                (formulaItem) => new FormulaDataColumn(formulaItem, formulaAPI)
-              ),
-              options: layerItem.options,
-            });
+            return XYDataLayer;
           }
           case 'referenceLine': {
-            return new XYReferenceLinesLayer({
-              column: layerItem.formula.map((formulaItem) => new ReferenceLineColumn(formulaItem)),
-            });
+            return XYReferenceLinesLayer;
           }
           default:
-            throw new Error(`Invalid layerType`);
+            throw new Error(`Invalid layerType: ${layerType}`);
         }
       };
 
-      return new LineChart({
+      return new XYChart({
         dataView,
-        layer: layers.map((layerItem) => createLayerInstance(layerItem)),
+        layers: layers.map((layerItem) => {
+          const Layer = getLayerClass(layerItem.layerType);
+          return new Layer({
+            data: layerItem.data,
+            formulaAPI,
+            options: layerItem.options,
+          });
+        }),
         title,
       });
 
     case 'lnsMetric':
       if (Array.isArray(layers)) {
-        throw new Error(`Invalid layers type. Expected a single object.`);
+        throw new Error(`Invalid layers type. Expected a single layer object.`);
       }
 
       return new MetricChart({
         dataView,
-        layer: new MetricLayer({
-          column: new FormulaDataColumn(layers.formula, formulaAPI),
+        layers: new MetricLayer({
+          data: layers.data,
+          formulaAPI,
           options: layers.options,
         }),
         title,

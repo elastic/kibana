@@ -9,7 +9,7 @@ import type { FormulaConfig } from '../../../types';
 
 export const diskIORead: FormulaConfig = {
   label: 'Disk Read IOPS',
-  formula: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
+  value: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
   format: {
     id: 'number',
     params: {

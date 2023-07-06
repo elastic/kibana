@@ -9,7 +9,7 @@ import type { FormulaConfig } from '../../../types';
 
 export const hostCount: FormulaConfig = {
   label: 'Hosts',
-  formula: 'unique_count(host.name)',
+  value: 'unique_count(host.name)',
   format: {
     id: 'number',
     params: {

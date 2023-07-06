@@ -9,7 +9,7 @@ import type { FormulaConfig } from '../../../types';
 
 export const tx: FormulaConfig = {
   label: 'Network Outbound (TX)',
-  formula:
+  value:
     "average(host.network.egress.bytes) * 8 / (max(metricset.period, kql='host.network.egress.bytes: *') / 1000)",
   format: {
     id: 'bits',

@@ -9,7 +9,7 @@ import type { FormulaConfig } from '../../../types';
 
 export const memoryUsage: FormulaConfig = {
   label: 'Memory Usage',
-  formula: 'average(system.memory.actual.used.pct)',
+  value: 'average(system.memory.actual.used.pct)',
   format: {
     id: 'percent',
     params: {

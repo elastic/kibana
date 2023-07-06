@@ -12,19 +12,22 @@ import {
   PersistedIndexPatternLayer,
   XYReferenceLineLayerConfig,
 } from '@kbn/lens-plugin/public';
-import { ChartLayer } from '../../../types';
+import { ChartColumn, ChartLayer, FormulaConfig } from '../../../types';
 import { getDefaultReferences } from '../../utils';
 import { ReferenceLineColumn } from './column/reference_line';
 
 interface XYReferenceLinesLayerConfig {
-  column: ReferenceLineColumn[];
+  data: FormulaConfig[];
 }
 
 export class XYReferenceLinesLayer implements ChartLayer<XYReferenceLineLayerConfig> {
-  constructor(private layerConfig: XYReferenceLinesLayerConfig) {}
+  private column: ChartColumn[];
+  constructor(layerConfig: XYReferenceLinesLayerConfig) {
+    this.column = layerConfig.data.map((p) => new ReferenceLineColumn(p));
+  }
 
   getName(): string {
-    return this.layerConfig.column[0].getName();
+    return this.column[0].getName();
   }
 
   getLayer(
@@ -34,10 +37,10 @@ export class XYReferenceLinesLayer implements ChartLayer<XYReferenceLineLayerCon
   ): FormBasedPersistedState['layers'] {
     const baseLayer = { columnOrder: [], columns: {} } as PersistedIndexPatternLayer;
     return {
-      [`${layerId}_reference`]: this.layerConfig.column.reduce((acc, curr, index) => {
+      [`${layerId}_reference`]: this.column.reduce((acc, curr, index) => {
         return {
           ...acc,
-          ...curr.getData(`${accessorId}_${index}_referenceColumn`, dataView, acc),
+          ...curr.getData(`${accessorId}_${index}_reference_column`, dataView, acc),
         };
       }, baseLayer),
     };
@@ -51,12 +54,10 @@ export class XYReferenceLinesLayer implements ChartLayer<XYReferenceLineLayerCon
     return {
       layerId: `${layerId}_reference`,
       layerType: 'referenceLine',
-      accessors: this.layerConfig.column.map(
-        (_, index) => `${accessorId}_${index}_referenceColumn`
-      ),
-      yConfig: this.layerConfig.column.map((layer, index) => ({
+      accessors: this.column.map((_, index) => `${accessorId}_${index}_reference_column`),
+      yConfig: this.column.map((layer, index) => ({
         color: layer.getFormulaConfig().color,
-        forAccessor: `${accessorId}_${index}_referenceColumn`,
+        forAccessor: `${accessorId}_${index}_reference_column`,
         axisMode: 'left',
       })),
     };

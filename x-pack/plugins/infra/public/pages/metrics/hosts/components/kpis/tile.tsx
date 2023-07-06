@@ -74,7 +74,7 @@ export const Tile = ({
   const { formula, attributes, getExtraActions, error } = useLensAttributes({
     dataView,
     layers: {
-      formula: {
+      data: {
         ...hostLensFormulas[type],
         format: {
           ...hostLensFormulas[type].format,

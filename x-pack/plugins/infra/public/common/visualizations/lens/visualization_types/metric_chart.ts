@@ -22,15 +22,15 @@ export class MetricChart implements Chart<MetricVisualizationState> {
   }
 
   getLayers(): FormBasedPersistedState['layers'] {
-    return this.chartConfig.layer.getLayer(DEFAULT_LAYER_ID, ACCESSOR, this.chartConfig.dataView);
+    return this.chartConfig.layers.getLayer(DEFAULT_LAYER_ID, ACCESSOR, this.chartConfig.dataView);
   }
 
   getVisualizationState(): MetricVisualizationState {
-    return this.chartConfig.layer.getLayerConfig(DEFAULT_LAYER_ID, ACCESSOR);
+    return this.chartConfig.layers.getLayerConfig(DEFAULT_LAYER_ID, ACCESSOR);
   }
 
   getReferences(): SavedObjectReference[] {
-    return this.chartConfig.layer.getReference(DEFAULT_LAYER_ID, this.chartConfig.dataView);
+    return this.chartConfig.layers.getReference(DEFAULT_LAYER_ID, this.chartConfig.dataView);
   }
 
   getDataView(): DataView {

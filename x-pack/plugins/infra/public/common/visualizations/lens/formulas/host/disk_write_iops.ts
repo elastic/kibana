@@ -9,7 +9,7 @@ import type { FormulaConfig } from '../../../types';
 
 export const diskIOWrite: FormulaConfig = {
   label: 'Disk Write IOPS',
-  formula: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
+  value: "counter_rate(max(system.diskio.write.count), kql='system.diskio.write.count: *')",
   format: {
     id: 'number',
     params: {

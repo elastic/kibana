@@ -9,8 +9,7 @@ import type { FormulaConfig } from '../../../types';
 
 export const cpuUsage: FormulaConfig = {
   label: 'CPU Usage',
-  formula:
-    '(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)',
+  value: '(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)',
   format: {
     id: 'percent',
     params: {

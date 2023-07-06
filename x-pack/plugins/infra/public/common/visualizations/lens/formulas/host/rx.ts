@@ -9,7 +9,7 @@ import type { FormulaConfig } from '../../../types';
 
 export const rx: FormulaConfig = {
   label: 'Network Inbound (RX)',
-  formula:
+  value:
     "average(host.network.ingress.bytes) * 8 / (max(metricset.period, kql='host.network.ingress.bytes: *') / 1000)",
   format: {
     id: 'bits',

@@ -9,7 +9,7 @@ import type { FormulaConfig } from '../../../types';
 
 export const diskSpaceAvailable: FormulaConfig = {
   label: 'Disk Space Available',
-  formula: 'average(system.filesystem.free)',
+  value: 'average(system.filesystem.free)',
   format: {
     id: 'bytes',
     params: {

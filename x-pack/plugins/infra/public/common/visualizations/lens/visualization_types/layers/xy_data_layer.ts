@@ -8,15 +8,16 @@
 import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { DataView } from '@kbn/data-views-plugin/common';
 import {
+  FormulaPublicApi,
   FormBasedPersistedState,
   PersistedIndexPatternLayer,
   XYDataLayerConfig,
 } from '@kbn/lens-plugin/public';
-import { ChartLayer } from '../../../types';
+import { ChartColumn, ChartLayer, FormulaConfig } from '../../../types';
 import { getDefaultReferences, getHistogramColumn, getTopValuesColumn } from '../../utils';
 import { FormulaColumn } from './column/formula';
 
-const BREAKDOWN_COLUMN_NAME = 'hosts_aggs_breakdown';
+const BREAKDOWN_COLUMN_NAME = 'aggs_breakdown';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 
 export interface XYLayerOptions {
@@ -27,15 +28,19 @@ export interface XYLayerOptions {
 }
 
 interface XYLayerConfig {
-  column: FormulaColumn[];
+  data: FormulaConfig[];
   options?: XYLayerOptions;
+  formulaAPI: FormulaPublicApi;
 }
 
 export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
-  constructor(private layerConfig: XYLayerConfig) {}
+  private column: ChartColumn[];
+  constructor(private layerConfig: XYLayerConfig) {
+    this.column = layerConfig.data.map((p) => new FormulaColumn(p, layerConfig.formulaAPI));
+  }
 
   getName(): string {
-    return this.layerConfig.column[0].getName();
+    return this.column[0].getName();
   }
 
   getBaseColumnColumn(dataView: DataView, options?: XYLayerOptions) {
@@ -74,7 +79,7 @@ export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
     };
 
     return {
-      [layerId]: this.layerConfig.column.reduce(
+      [layerId]: this.column.reduce(
         (acc, curr, index) => ({
           ...acc,
           ...curr.getData(`${accessorId}_${index}`, dataView, acc),
@@ -92,7 +97,7 @@ export class XYDataLayer implements ChartLayer<XYDataLayerConfig> {
     return {
       layerId,
       seriesType: 'line',
-      accessors: this.layerConfig.column.map((_, index) => `${accessorId}_${index}`),
+      accessors: this.column.map((_, index) => `${accessorId}_${index}`),
       yConfig: [],
       layerType: 'data',
       xAccessor: HISTOGRAM_COLUMN_NAME,

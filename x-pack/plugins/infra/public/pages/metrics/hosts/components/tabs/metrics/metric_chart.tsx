@@ -70,7 +70,7 @@ export const MetricChart = ({
     dataView,
     layers: [
       {
-        formula: [hostLensFormulas[type]],
+        data: [hostLensFormulas[type]],
         layerType: 'data',
         options: {
           breakdown: {

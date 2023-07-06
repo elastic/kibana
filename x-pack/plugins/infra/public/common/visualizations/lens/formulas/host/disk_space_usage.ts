@@ -9,7 +9,7 @@ import type { FormulaConfig } from '../../../types';
 
 export const diskSpaceUsage: FormulaConfig = {
   label: 'Disk Space Usage',
-  formula: 'average(system.filesystem.used.pct)',
+  value: 'average(system.filesystem.used.pct)',
   format: {
     id: 'percent',
     params: {

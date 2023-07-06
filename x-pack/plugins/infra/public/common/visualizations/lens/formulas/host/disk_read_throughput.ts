@@ -9,7 +9,7 @@ import type { FormulaConfig } from '../../../types';
 
 export const diskReadThroughput: FormulaConfig = {
   label: 'Disk Read Throughput',
-  formula: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
+  value: "counter_rate(max(system.diskio.read.count), kql='system.diskio.read.count: *')",
   format: {
     id: 'bytes',
     params: {

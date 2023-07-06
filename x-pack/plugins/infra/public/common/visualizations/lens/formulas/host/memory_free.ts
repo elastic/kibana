@@ -9,7 +9,7 @@ import type { FormulaConfig } from '../../../types';
 
 export const memoryFree: FormulaConfig = {
   label: 'Memory Free',
-  formula: 'max(system.memory.total) - average(system.memory.actual.used.bytes)',
+  value: 'max(system.memory.total) - average(system.memory.actual.used.bytes)',
   format: {
     id: 'bytes',
     params: {

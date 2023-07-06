@@ -25,9 +25,10 @@ export class FormulaColumn implements ChartColumn {
     dataView: DataView,
     baseLayer: PersistedIndexPatternLayer
   ): PersistedIndexPatternLayer {
+    const { value, ...rest } = this.getFormulaConfig();
     const formulaLayer = this.formulaAPI.insertOrReplaceFormulaColumn(
       id,
-      this.getFormulaConfig(),
+      { formula: value, ...rest },
       baseLayer,
       dataView
     );

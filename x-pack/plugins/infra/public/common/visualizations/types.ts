@@ -7,45 +7,38 @@
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
-import {
+import type {
   FormBasedPersistedState,
-  FormulaPublicApi,
   MetricVisualizationState,
   PersistedIndexPatternLayer,
   TypedLensByValueInput,
   XYState,
   XYDataLayerConfig,
 } from '@kbn/lens-plugin/public';
-
+import type { FormatParams } from '@kbn/visualizations-plugin/common';
 import { hostLensFormulas } from './constants';
-
 export type LensAttributes = TypedLensByValueInput['attributes'];
 
 // Attributes
 export type LensVisualizationState = XYState | MetricVisualizationState;
-export interface Chart<TVisualizationState extends LensVisualizationState> {
-  getTitle(): string;
-  getVisualizationType(): string;
-  getLayers(): FormBasedPersistedState['layers'];
-  getVisualizationState(): TVisualizationState;
-  getReferences(): SavedObjectReference[];
-  getDataView(): DataView;
-}
-
-export type LensLayerConfig = XYDataLayerConfig | MetricVisualizationState;
-export interface ChartConfig<
-  TLayer extends ChartLayer<LensLayerConfig> | Array<ChartLayer<LensLayerConfig>>
-> {
-  dataView: DataView;
-  layer: TLayer;
-  title?: string;
-  filters?: Filter[];
-}
 
 export interface VisualizationAttributesBuilder {
   build(): LensAttributes;
 }
+
+// Column
+export interface ChartColumn {
+  getData(
+    id: string,
+    dataView: DataView,
+    baseLayer: PersistedIndexPatternLayer
+  ): PersistedIndexPatternLayer;
+  getFormulaConfig(): FormulaConfig;
+  getName(): string;
+}
+
+// Layer
+export type LensLayerConfig = XYDataLayerConfig | MetricVisualizationState;
 
 export interface ChartLayer<TLayerConfig extends LensLayerConfig> {
   getName(): string;
@@ -58,22 +51,31 @@ export interface ChartLayer<TLayerConfig extends LensLayerConfig> {
   getLayerConfig(layerId: string, acessorId: string): TLayerConfig;
 }
 
-export interface ChartColumn {
-  getData(
-    id: string,
-    dataView: DataView,
-    baseLayer: PersistedIndexPatternLayer
-  ): PersistedIndexPatternLayer;
-  getFormulaConfig(): FormulaConfig;
-  getName(): string;
+// Chart
+export interface Chart<TVisualizationState extends LensVisualizationState> {
+  getTitle(): string;
+  getVisualizationType(): string;
+  getLayers(): FormBasedPersistedState['layers'];
+  getVisualizationState(): TVisualizationState;
+  getReferences(): SavedObjectReference[];
+  getDataView(): DataView;
+}
+export interface ChartConfig<
+  TLayer extends ChartLayer<LensLayerConfig> | Array<ChartLayer<LensLayerConfig>>
+> {
+  dataView: DataView;
+  layers: TLayer;
+  title?: string;
 }
 
-export type LensFormula = Parameters<FormulaPublicApi['insertOrReplaceFormulaColumn']>[1];
+// Formula
 
-export type FormulaConfig = Pick<LensFormula, 'label' | 'formula'> & {
-  format: NonNullable<LensFormula['format']>;
+export interface FormulaConfig {
+  label?: string;
   color?: string;
-};
+  format: NonNullable<FormatParams['format']>;
+  value: string;
+}
 
 export type HostsLensFormulas = keyof typeof hostLensFormulas;
 export type HostsLensMetricChartFormulas = Exclude<HostsLensFormulas, 'diskIORead' | 'diskIOWrite'>;

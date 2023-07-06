@@ -37,9 +37,9 @@ const CHARTS_IN_ORDER: Array<
     type: 'normalizedLoad1m',
     extraLayers: [
       {
-        formula: [
+        data: [
           {
-            formula: '1',
+            value: '1',
             format: {
               id: 'percent',
               params: {
