@@ -130,7 +130,9 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
 
     if (currentWord.startsWith('{{')) {
       const filteredMatches = filterSuggestions({
-        actionVariablesList: messageVariables?.map(({ name }) => name),
+        actionVariablesList: messageVariables
+          ?.filter(({ deprecated }) => !deprecated)
+          .map(({ name }) => name),
         propertyPath: currentWord.slice(2),
       });
       setSearchWord(currentWord.slice(2));
