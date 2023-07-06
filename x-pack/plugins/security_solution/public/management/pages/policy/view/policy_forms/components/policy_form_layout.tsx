@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,6 +14,8 @@ import {
   EuiLoadingSpinner,
   EuiBottomBar,
   EuiSpacer,
+  EuiPanel,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -21,6 +23,8 @@ import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import type { ApplicationStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import type { PolicySettingsFormProps } from '../../policy_settings_form/policy_settings_form';
+import { useFetchEndpointPolicy } from '../../../../../hooks/policy/use_fetch_endpoint_policy';
 import { PolicySettingsForm } from '../../policy_settings_form';
 import { useShowEditableFormFields, usePolicyDetailsSelector } from '../../policy_hooks';
 import {
@@ -159,24 +163,7 @@ export const PolicyFormLayout = React.memo(() => {
         />
       )}
 
-      <PolicySettingsForm
-        policy={policyItem.inputs[0].config.policy.value}
-        onChange={(changes) => {
-          window.console.log(changes);
-        }}
-        mode="edit"
-      />
-
-      <div
-        style={{
-          height: '5em',
-          background: 'lightgrey',
-          margin: '2em 0 2em',
-          padding: '2em 1em 2em',
-        }}
-      >
-        {'ORIGINAL FORM BELOW'}
-      </div>
+      <PolicyFormPoC policyId={policyItem.id} />
 
       <PolicyDetailsForm />
       <EuiSpacer size="xxl" />
@@ -217,3 +204,48 @@ export const PolicyFormLayout = React.memo(() => {
 });
 
 PolicyFormLayout.displayName = 'PolicyFormLayout';
+
+export const PolicyFormPoC = memo<{ policyId: string }>(({ policyId }) => {
+  const { error, data } = useFetchEndpointPolicy(policyId);
+  const [policySettings, setPolicySettings] = useState(data?.settings);
+
+  const handleSettingsOnChange: PolicySettingsFormProps['onChange'] = useCallback(
+    ({ updatedPolicy }) => {
+      setPolicySettings(updatedPolicy);
+    },
+    []
+  );
+
+  // Once data is retrieved, store it locally so that we keep track of changes
+  useEffect(() => {
+    if (data && data.settings && !policySettings) {
+      setPolicySettings(data.settings);
+    }
+  }, [data, policySettings]);
+
+  if (error) {
+    return <EuiPanel color="danger">{error.message}</EuiPanel>;
+  }
+
+  if (!policySettings) {
+    return <EuiSkeletonText lines={5} />;
+  }
+
+  return (
+    <div>
+      <PolicySettingsForm policy={policySettings} onChange={handleSettingsOnChange} mode="edit" />
+
+      <div
+        style={{
+          height: '5em',
+          background: 'lightgrey',
+          margin: '2em 0 2em',
+          padding: '2em 1em 2em',
+        }}
+      >
+        {'ORIGINAL FORM BELOW'}
+      </div>
+    </div>
+  );
+});
+PolicyFormPoC.displayName = 'PolicyFormPoC';
