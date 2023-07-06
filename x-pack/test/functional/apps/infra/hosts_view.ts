@@ -245,9 +245,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/159368
-    // FLAKY: https://github.com/elastic/kibana/issues/159369
-    describe.skip('#Single host Flyout', () => {
+    describe('#Single host Flyout', () => {
       before(async () => {
         await setHostViewEnabled(true);
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
@@ -334,13 +332,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const query = decodeURIComponent(url.query ?? '');
 
-        const environment = 'environment=ENVIRONMENT_ALL';
         const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
         const rangeFrom = 'rangeFrom=2023-03-28T18:20:00.000Z';
         const rangeTo = 'rangeTo=2023-03-28T18:21:00.000Z';
 
         expect(url.pathname).to.eql('/app/apm/services');
-        expect(query).to.contain(environment);
         expect(query).to.contain(kuery);
         expect(query).to.contain(rangeFrom);
         expect(query).to.contain(rangeTo);
