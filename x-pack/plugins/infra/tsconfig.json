@@ -69,6 +69,7 @@
     "@kbn/logs-shared-plugin",
     "@kbn/licensing-plugin",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/visualizations-plugin",
   ],
   "exclude": ["target/**/*"]
 }
