@@ -37,6 +37,7 @@
     "@kbn/expression-tagcloud-plugin",
     "@kbn/data-view-editor-plugin",
     "@kbn/event-annotation-plugin",
+    "@kbn/event-annotation-application-plugin",
     "@kbn/expression-xy-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/random-sampling",

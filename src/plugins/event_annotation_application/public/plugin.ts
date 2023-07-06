@@ -22,7 +22,7 @@ import type { EventAnnotationListingPageServices } from './get_table_list';
 
 export interface EventAnnotationApplicationStartDependencies {
   savedObjectsManagement: SavedObjectsManagementPluginStart;
-  eventAnnotationService: EventAnnotationPluginStart;
+  eventAnnotation: EventAnnotationPluginStart;
   data: DataPublicPluginStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
@@ -41,8 +41,16 @@ export type EventAnnotationApplicationPluginSetup = void;
 
 /** @public */
 export class EventAnnotationPlugin
-  implements Plugin<EventAnnotationApplicationPluginSetup, EventAnnotationApplicationPluginStart>
+  implements
+    Plugin<
+      EventAnnotationApplicationPluginSetup,
+      EventAnnotationApplicationPluginStart,
+      {},
+      EventAnnotationApplicationStartDependencies
+    >
 {
+  public start() {}
+
   public setup(
     core: CoreSetup<EventAnnotationApplicationStartDependencies>,
     dependencies: SetupDependencies
@@ -55,7 +63,7 @@ export class EventAnnotationPlugin
       getTableList: async (props) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
 
-        const eventAnnotationService = await pluginsStart.eventAnnotationService.getService();
+        const eventAnnotationService = await pluginsStart.eventAnnotation.getService();
 
         const ids = await pluginsStart.dataViews.getIds();
         const dataViews = await Promise.all(ids.map((id) => pluginsStart.dataViews.get(id)));

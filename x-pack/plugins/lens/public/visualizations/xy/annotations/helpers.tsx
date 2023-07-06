@@ -7,10 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import {
-  getAnnotationAccessor,
-  isQueryAnnotationConfig,
-} from '@kbn/event-annotation-plugin/public';
+import { isQueryAnnotationConfig } from '@kbn/event-annotation-plugin/public';
+import { getAnnotationAccessor } from '@kbn/event-annotation-application-plugin/public';
 import {
   createCopiedAnnotation,
   EventAnnotationConfig,
