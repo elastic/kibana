@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AttackSurfaceReductionCard } from './components/attack_surface_reduction_card';
 import { BehaviourProtectionCard } from './components/behaviour_protection_card';
 import { MemoryProtectionCard } from './components/memory_protection_card';
 import { RansomwareProtectionCard } from './components/ransomware_protection_card';
@@ -44,6 +45,9 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
       <EuiSpacer size="l" />
 
       <BehaviourProtectionCard {...props} data-test-subj={getTestId('behaviour')} />
+      <EuiSpacer size="l" />
+
+      <AttackSurfaceReductionCard {...props} data-test-subj={getTestId('attachSurface')} />
       <EuiSpacer size="l" />
 
       <EuiSpacer size="m" />
