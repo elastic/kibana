@@ -1021,6 +1021,78 @@ describe('EPM template', () => {
     expect(JSON.stringify(mappings)).toEqual(JSON.stringify(fieldMapping));
   });
 
+  it('tests processing runtime fields without script', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: runtime_field
+  type: boolean
+  runtime: true
+`;
+    const runtimeFieldMapping = {
+      properties: {},
+      runtime: {
+        runtime_field: {
+          type: 'boolean',
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing runtime fields with painless script', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: day_of_week
+  type: date
+  runtime: |
+    emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))
+`;
+    const runtimeFieldMapping = {
+      properties: {},
+      runtime: {
+        day_of_week: {
+          type: 'date',
+          script: {
+            source:
+              "emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing runtime fields defined in a group', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: responses
+  type: group
+  fields:
+    - name: day_of_week
+      type: date
+      runtime: |
+        emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))
+`;
+    const runtimeFieldMapping = {
+      properties: {},
+      runtime: {
+        'responses.day_of_week': {
+          type: 'date',
+          script: {
+            source:
+              "emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))",
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
   it('tests priority and index pattern for data stream without dataset_is_prefix', () => {
     const dataStreamDatasetIsPrefixUnset = {
       type: 'metrics',
