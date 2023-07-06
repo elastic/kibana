@@ -17,7 +17,7 @@
     "cypress.config.ts",
     "../../../typings/**/*",
     // ECS and Osquery schema files
-    "public/common/schemas/*/**.json",
+    "public/common/schemas/*/**.json", "../../packages/kbn-elastic-assistant/impl/assistant/use_langchain/prompt.ts", "../../packages/kbn-elastic-assistant/impl/assistant/use_langchain/index.tsx",
   ],
   "kbn_references": [
     "@kbn/core",

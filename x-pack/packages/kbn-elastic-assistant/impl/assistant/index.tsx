@@ -38,7 +38,7 @@ import { PromptTextArea } from './prompt_textarea';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
 import { useConversation } from './use_conversation';
 import { CodeBlockDetails } from './use_conversation/helpers';
-import { useSendMessages } from './use_send_messages';
+// import { useSendMessages } from './use_send_messages';
 import type { Message } from '../assistant_context/types';
 import { ConversationSelector } from './conversations/conversation_selector';
 import { PromptEditor } from './prompt_editor';
@@ -50,6 +50,7 @@ import { ConnectorSetup } from '../connectorland/connector_setup';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import { BASE_CONVERSATIONS } from './use_conversation/sample_conversations';
 import { AssistantSettingsButton } from './settings/assistant_settings_button';
+import { useLangchain } from './use_langchain';
 
 const CommentsContainer = styled.div`
   max-height: 600px;
@@ -88,6 +89,8 @@ const AssistantComponent: React.FC<Props> = ({
     actionTypeRegistry,
     augmentMessageCodeBlocks,
     conversations,
+    data,
+    dataViews,
     defaultAllow,
     defaultAllowReplacement,
     getComments,
@@ -105,13 +108,23 @@ const AssistantComponent: React.FC<Props> = ({
 
   const { appendMessage, appendReplacements, clearConversation, createConversation } =
     useConversation();
-  const { isLoading, sendMessages } = useSendMessages();
+  // const { isLoading, sendMessages } = useSendMessages();
 
   const [selectedConversationId, setSelectedConversationId] = useState<string>(conversationId);
   const currentConversation = useMemo(
     () => conversations[selectedConversationId] ?? createConversation({ conversationId }),
     [conversationId, conversations, createConversation, selectedConversationId]
   );
+
+  const { mutate: sendMessages, isLoading } = useLangchain({
+    data,
+    dataViews,
+    apiConfig: currentConversation.apiConfig,
+    appendMessage: (message) => {
+      const responseMessage: Message = getMessageFromRawResponse(message);
+      appendMessage({ conversationId: selectedConversationId, message: responseMessage });
+    },
+  });
 
   // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
   // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
@@ -223,13 +236,13 @@ const AssistantComponent: React.FC<Props> = ({
       setSelectedPromptContexts({});
       setPromptTextPreview('');
 
-      const rawResponse = await sendMessages({
-        http,
-        apiConfig: currentConversation.apiConfig,
+      sendMessages({
         messages: updatedMessages,
+        appendMessage: (message) => {
+          const responseMessage: Message = getMessageFromRawResponse(message);
+          appendMessage({ conversationId: selectedConversationId, message: responseMessage });
+        },
       });
-      const responseMessage: Message = getMessageFromRawResponse(rawResponse);
-      appendMessage({ conversationId: selectedConversationId, message: responseMessage });
     },
     [
       appendMessage,
@@ -237,7 +250,6 @@ const AssistantComponent: React.FC<Props> = ({
       currentConversation.apiConfig,
       currentConversation.messages.length,
       currentConversation.replacements,
-      http,
       selectedConversationId,
       selectedPromptContexts,
       sendMessages,
@@ -334,6 +346,8 @@ const AssistantComponent: React.FC<Props> = ({
       ) ?? false;
     setShowMissingConnectorCallout(!connectorExists);
   }, [connectors, currentConversation]);
+
+  // console.error('currentConv', currentConversation);
 
   return (
     <EuiSplitPanel.Outer

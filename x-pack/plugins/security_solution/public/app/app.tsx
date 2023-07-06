@@ -63,6 +63,8 @@ const StartAppComponent: FC<StartAppComponent> = ({
     http,
     triggersActionsUi: { actionTypeRegistry },
     uiActions,
+    data,
+    dataViews,
   } = useKibana().services;
 
   const { conversations, setConversations } = useConversationStore();
@@ -93,6 +95,8 @@ const StartAppComponent: FC<StartAppComponent> = ({
                   basePromptContexts={Object.values(PROMPT_CONTEXTS)}
                   baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS}
                   baseSystemPrompts={BASE_SECURITY_SYSTEM_PROMPTS}
+                  data={data}
+                  dataViews={dataViews}
                   getInitialConversations={getInitialConversation}
                   getComments={getComments}
                   http={http}

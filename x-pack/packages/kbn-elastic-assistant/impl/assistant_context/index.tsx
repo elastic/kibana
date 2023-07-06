@@ -12,6 +12,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage } from 'react-use';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -54,6 +56,8 @@ interface AssistantProviderProps {
   baseQuickPrompts?: QuickPrompt[];
   baseSystemPrompts?: Prompt[];
   children: React.ReactNode;
+  data: DataPublicPluginStart;
+  dataViews: DataViewsServicePublic;
   getComments: ({
     currentConversation,
     lastCommentRef,
@@ -86,6 +90,8 @@ interface UseAssistantContext {
   baseSystemPrompts: Prompt[];
   conversationIds: string[];
   conversations: Record<string, Conversation>;
+  data: DataPublicPluginStart;
+  dataViews: DataViewsServicePublic;
   getComments: ({
     currentConversation,
     lastCommentRef,
@@ -122,6 +128,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   augmentMessageCodeBlocks,
   baseAllow,
   baseAllowReplacement,
+  data,
+  dataViews,
   defaultAllow,
   defaultAllowReplacement,
   basePromptContexts = [],
@@ -243,6 +251,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseSystemPrompts,
       conversationIds,
       conversations,
+      data,
+      dataViews,
       defaultAllow: uniq(defaultAllow),
       defaultAllowReplacement: uniq(defaultAllowReplacement),
       getComments,
@@ -274,6 +284,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       baseSystemPrompts,
       conversationIds,
       conversations,
+      data,
+      dataViews,
       defaultAllow,
       defaultAllowReplacement,
       getComments,

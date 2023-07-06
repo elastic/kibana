@@ -84,7 +84,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Elastic AI Assistant
    */
-  assistantEnabled: false,
+  assistantEnabled: true,
 
   /*
    * Enables new Set of filters on the Alerts page.

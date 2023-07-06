@@ -214,6 +214,16 @@ export function getWebpackConfig(
           },
         },
         {
+          test: /[\/\\]node_modules[\/\\](langchain|js-tiktoken)/,
+          exclude: /[\/\\]node_modules[\/\\]langchain[\/\\]node_modules/,
+          use: {
+            loader: 'esbuild-loader',
+            options: {
+              target: 'es2015',
+            },
+          },
+        },
+        {
           test: /\.(js|tsx?)$/,
           exclude: /node_modules/,
           use: {
