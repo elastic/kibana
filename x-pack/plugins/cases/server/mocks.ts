@@ -9,6 +9,7 @@ import type { SavedObject } from '@kbn/core/server';
 import type {
   CasePostRequest,
   CommentAttributes,
+  CommentRequestActionsType,
   CommentRequestAlertType,
   CommentRequestUserType,
   ConnectorMappings,
@@ -662,6 +663,21 @@ export const comment: CommentRequestUserType = {
   comment: 'a comment',
   type: CommentType.user as const,
   owner: SECURITY_SOLUTION_OWNER,
+};
+
+export const actionComment: CommentRequestActionsType = {
+  type: CommentType.actions,
+  comment: 'I just isolated the host!',
+  actions: {
+    targets: [
+      {
+        hostname: 'host1',
+        endpointId: '001',
+      },
+    ],
+    type: 'isolate',
+  },
+  owner: 'cases',
 };
 
 export const alertComment: CommentRequestAlertType = {

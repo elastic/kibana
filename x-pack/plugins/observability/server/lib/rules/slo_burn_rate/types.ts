@@ -25,7 +25,7 @@ export enum AlertStates {
 export interface WindowSchema {
   id: string;
   burnRateThreshold: number;
-  maxBurnRateThreshold: number;
+  maxBurnRateThreshold: number | null;
   longWindow: { value: number; unit: string };
   shortWindow: { value: number; unit: string };
   actionGroup: string;
