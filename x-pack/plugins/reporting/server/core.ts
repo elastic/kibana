@@ -39,12 +39,14 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
-import { filter, map, switchMap, take } from 'rxjs/operators';
+import { filter, first, map, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
-import { PngExportType } from './export_types/png_v2';
+import { CsvSearchSourceExportType } from './export_types/csv_searchsource';
+import { CsvV2ExportType } from './export_types/csv_v2';
 import { PdfExportType } from './export_types/printable_pdf_v2';
+import { PngExportType } from './export_types/png_v2';
 import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
@@ -105,8 +107,10 @@ export class ReportingCore {
   private monitorTask: MonitorReportsTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
-  private pngExport: PngExportType;
+  private csvSearchSourceExport: CsvSearchSourceExportType;
+  private csvV2ExportType: CsvV2ExportType;
   private pdfExport: PdfExportType;
+  private pngExport: PngExportType;
   private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
@@ -122,8 +126,20 @@ export class ReportingCore {
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
 
+    this.csvSearchSourceExport = new CsvSearchSourceExportType(
+      this.core,
+      this.config,
+      this.logger,
+      this.context
+    );
+    this.exportTypesRegistry.register(this.csvSearchSourceExport);
+
+    this.csvV2ExportType = new CsvV2ExportType(this.core, this.config, this.logger, this.context);
+    this.exportTypesRegistry.register(this.csvV2ExportType);
+    
     this.pngExport = new PngExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.pngExport);
+
     this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.pdfExport);
 
@@ -152,8 +168,13 @@ export class ReportingCore {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
 
-    this.pngExport.setup(setupDeps);
+
+    this.csvSearchSourceExport.setup(setupDeps);
+    this.csvV2ExportType.setup(setupDeps);
+
     this.pdfExport.setup(setupDeps);
+    
+    this.pngExport.setup(setupDeps);
 
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
@@ -170,8 +191,10 @@ export class ReportingCore {
     this.pluginStartDeps = startDeps; // cache
     const reportingStart = this.getContract();
 
-    this.pngExport.start({ ...startDeps, reporting: reportingStart });
+    this.csvSearchSourceExport.start({ ...startDeps, reporting: reportingStart });
+    this.csvV2ExportType.start({ ...startDeps, reporting: reportingStart });
     this.pdfExport.start({ ...startDeps, reporting: reportingStart });
+    this.pngExport.start({ ...startDeps, reporting: reportingStart });
 
     await this.assertKibanaIsAvailable();
 
@@ -196,7 +219,6 @@ export class ReportingCore {
       status.overall$.pipe(filter((current) => current.level === ServiceStatusLevels.available))
     );
   }
-
   /*
    * Blocks the caller until setup is done
    */
@@ -387,7 +409,7 @@ export class ReportingCore {
     options: PngScreenshotOptions | PdfScreenshotOptions
   ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
-      switchMap(({ screenshotting }) => {
+      Rx.switchMap(({ screenshotting }) => {
         return screenshotting.getScreenshots({
           ...options,
           urls: options.urls.map((url) =>

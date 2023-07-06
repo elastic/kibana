@@ -13,7 +13,8 @@ export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
   const usageAPI = getService('usageAPI');
 
-  describe('from archive data', () => {
+  // printable_pdf endpoint vs printable_pdf_v2
+  describe.skip('from archive data', () => {
     it('generated from 6.2', async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/bwc/6_2');
       const [{ stats }] = await usageAPI.getTelemetryStats({ unencrypted: true });

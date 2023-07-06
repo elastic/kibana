@@ -27,6 +27,7 @@ export const IntervalTimerangeSelector: FC<IntervalTimerangeSelectorProps> = ({
     <>
       <EuiSpacer size="xs" />
       <EuiSwitch
+        data-test-subj="mlJobCustomUrlIntervalTimeRangeSwitch"
         disabled={disabled}
         showLabel={true}
         label={i18n.translate('xpack.ml.customUrlsEditor.addIntervalTimeRangeSwitchLabel', {

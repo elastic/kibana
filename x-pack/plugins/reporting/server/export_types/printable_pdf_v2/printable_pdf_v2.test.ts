@@ -58,10 +58,10 @@ beforeEach(async () => {
     basePath: { set: jest.fn() },
   });
   mockPdfExportType.start({
+    esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: mockCoreStart.savedObjects,
     uiSettings: mockCoreStart.uiSettings,
     screenshotting: {} as unknown as ScreenshottingStart,
-    esClient: elasticsearchServiceMock.createClusterClient(),
     reporting: mockReportingCore.getContract(),
   });
 });

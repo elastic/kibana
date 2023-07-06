@@ -12,7 +12,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/reporting',
   coverageReporters: ['text', 'html'],
   testPathIgnorePatterns: [
-    '<rootDir>/x-pack/plugins/reporting/server/export_types/csv_searchsource/*',
     '<rootDir>/x-pack/plugins/reporting/server/export_types/common/get_full_urls.test.ts',
     '<rootDir>/x-pack/plugins/reporting/server/usage/reporting_usage_collector.test.ts',
     '<rootDir>/x-pack/plugins/reporting/server/export_types/png/execute_job/index.test.ts',
