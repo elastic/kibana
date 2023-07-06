@@ -179,6 +179,19 @@ const configSchema = schema.object(
        * same-build browsers can access the Kibana server.
        */
       strictClientVersionCheck: schema.boolean({ defaultValue: true }),
+
+      /**
+       * When true, all requests to versioned endpoints must have a version specified.
+       *
+       * @note If true, this overrides the `versionResolution` as no resolution will be attempted.
+       * @note Useful for ensuring that a given client always specifies a version.
+       */
+      strictRequestVersionCheck: schema.conditional(
+        schema.contextRef('dev'),
+        true,
+        schema.boolean({ defaultValue: true }),
+        schema.boolean({ defaultValue: false })
+      ),
     }),
   },
   {
