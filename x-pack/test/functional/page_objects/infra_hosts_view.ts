@@ -68,6 +68,14 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('hostsView-flyout-apm-services-link');
     },
 
+    async clickAddMetadataPin() {
+      return testSubjects.click('infraMetadataEmbeddableAddPin');
+    },
+
+    async clickRemoveMetadataPin() {
+      return testSubjects.click('infraMetadataEmbeddableRemovePin');
+    },
+
     async clickAddMetadataFilter() {
       return testSubjects.click('hostsView-flyout-metadata-add-filter');
     },
@@ -207,6 +215,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       const tabElement = await this.getMetadataTab();
       const tabTitle = await tabElement.findByClassName('euiTab__content');
       return tabTitle.getVisibleText();
+    },
+
+    async getRemovePinExist() {
+      return testSubjects.exists('infraMetadataEmbeddableRemovePin');
     },
 
     async getAppliedFilter() {
