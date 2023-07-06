@@ -7,7 +7,11 @@
 
 import { SLO_RESOURCES_VERSION } from '../constants';
 
-export const getSLOIndexTemplate = (name: string, indexPattern: string, composedOf: string[]) => ({
+export const getSLOSummaryIndexTemplate = (
+  name: string,
+  indexPattern: string,
+  composedOf: string[]
+) => ({
   name,
   index_patterns: [indexPattern],
   composed_of: composedOf,
