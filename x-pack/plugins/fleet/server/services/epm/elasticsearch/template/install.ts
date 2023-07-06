@@ -362,7 +362,9 @@ export function buildComponentTemplates(params: {
       },
       mappings: {
         properties: mappingsProperties,
-        runtime: mappingsRuntimeFields,
+        ...(Object.keys(mappingsRuntimeFields).length > 0
+          ? { runtime: mappingsRuntimeFields }
+          : {}),
         dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
         ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', '_source', 'runtime'),
         ...(indexTemplateMappings?._source || sourceModeSynthetic
