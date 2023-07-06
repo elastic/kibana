@@ -16,7 +16,7 @@ import { fetchStreaming as fetchStreamingStatic, FetchStreamingParams } from './
 import { DISABLE_BFETCH_COMPRESSION, removeLeadingSlash } from '../common';
 import { createStreamingBatchedFunction, StreamingBatchedFunctionParams } from './batching';
 import { BatchedFunc } from './batching/types';
-import { BFETCH_ROUTE_VERSION_1 } from '../common/constants';
+import { BFETCH_ROUTE_VERSION_LATEST } from '../common/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BfetchPublicSetupDependencies {}
@@ -59,7 +59,7 @@ export class BfetchPublicPlugin
       startServices().core.uiSettings.get<boolean>(DISABLE_BFETCH_COMPRESSION);
 
     const fetchStreaming = this.fetchStreaming(
-      BFETCH_ROUTE_VERSION_1,
+      BFETCH_ROUTE_VERSION_LATEST,
       kibanaVersion,
       basePath,
       getIsCompressionDisabled

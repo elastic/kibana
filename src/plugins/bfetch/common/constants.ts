@@ -8,4 +8,4 @@
 
 export const DISABLE_BFETCH_COMPRESSION = 'bfetch:disableCompression';
 export const DISABLE_BFETCH = 'bfetch:disable';
-export const BFETCH_ROUTE_VERSION_1 = '1';
+export const BFETCH_ROUTE_VERSION_LATEST = '1';
