@@ -70,7 +70,16 @@ export const ThemDarkModeToggle = ({ useUpdateUserProfile }: Props) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={{ paddingRight: euiTheme.size.m }}>
         <EuiSwitch
-          label={checked ? 'on' : 'off'}
+          label={
+            checked
+              ? i18n.translate('xpack.cloudLinks.userMenuLinks.darkModeOnLabel', {
+                  defaultMessage: 'on',
+                })
+              : i18n.translate('xpack.cloudLinks.userMenuLinks.darkModeOffLabel', {
+                  defaultMessage: 'off',
+                })
+          }
+          showLabel={false}
           checked={checked}
           onChange={(e) => {
             const on = e.target.checked;
