@@ -20,7 +20,7 @@ import {
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
-import { CertResult, EncryptedSyntheticsMonitor } from '../../../common/runtime_types';
+import { CertResult, ConfigKey, EncryptedSyntheticsMonitor } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { monitorAttributes } from '../../../common/types/saved_objects';
@@ -55,9 +55,10 @@ export class TLSRuleExecutor {
   }
 
   async getMonitors() {
+    const HTTP_OR_TCP = `${monitorAttributes}.${ConfigKey.MONITOR_TYPE}: http or ${monitorAttributes}.${ConfigKey.MONITOR_TYPE}: tcp`;
     this.monitors = await getAllMonitors({
       soClient: this.soClient,
-      filter: `${monitorAttributes}.${AlertConfigKey.TLS_ENABLED}: true`,
+      filter: `${monitorAttributes}.${AlertConfigKey.TLS_ENABLED}: true and (${HTTP_OR_TCP})`,
     });
 
     const {
