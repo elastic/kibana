@@ -83,12 +83,17 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   return {
-    assertResponseStatusCode(expectedStatus: number, actualStatus: number, responseBody: object) {
+    assertResponseStatusCode(
+      expectedStatus: number,
+      actualStatus: number,
+      responseBody: object,
+      extraText?: string
+    ) {
       expect(actualStatus).to.eql(
         expectedStatus,
         `Expected status code ${expectedStatus}, got ${actualStatus} with body '${JSON.stringify(
           responseBody
-        )}'`
+        )}' ${extraText ?? ''}`
       );
     },
 
@@ -685,7 +690,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         .put(`${space ? `/s/${space}` : ''}/internal/ml/anomaly_detectors/${jobId}`)
         .set(getCommonRequestHeader('1'))
         .send(jobConfig);
-      this.assertResponseStatusCode(200, status, body);
+      this.assertResponseStatusCode(200, status, body, 'createAnomalyDetectionJob');
 
       await this.waitForAnomalyDetectionJobToExist(jobId);
       log.debug('> AD job created.');

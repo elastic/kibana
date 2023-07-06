@@ -108,7 +108,7 @@ export function MachineLearningTestResourcesProvider(
       const { body: findResponse, status } = await supertest
         .get(`/api/saved_objects/_find?type=${objectType}&per_page=10000`)
         .set(getCommonRequestHeader('1'));
-      mlApi.assertResponseStatusCode(200, status, findResponse);
+      mlApi.assertResponseStatusCode(200, status, findResponse, 'getSavedObjectIdsByType');
 
       findResponse.saved_objects.forEach((element: any) => {
         savedObjectIds.push(element.id);
@@ -338,7 +338,7 @@ export function MachineLearningTestResourcesProvider(
           .delete(`${space ? `/s/${space}` : ''}/api/saved_objects/${objectType}/${id}`)
           .set(getCommonRequestHeader('1'))
           .query({ force });
-        mlApi.assertResponseStatusCode(200, status, body);
+        mlApi.assertResponseStatusCode(200, status, body, 'deleteSavedObjectById');
 
         await this.assertSavedObjectNotExistsById(id, objectType, space);
 
