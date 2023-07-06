@@ -115,14 +115,13 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
           creationOptions,
           savedObjectId
         );
+        setLoading(false);
 
-        if (canceled) {
+        if (canceled || !container) {
           setDashboardContainer(undefined);
-          container.destroy();
+          container?.destroy();
           return;
         }
-
-        setLoading(false);
 
         if (isErrorEmbeddable(container)) {
           setFatalError(container);
