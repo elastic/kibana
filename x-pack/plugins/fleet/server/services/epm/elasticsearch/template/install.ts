@@ -344,11 +344,6 @@ export function buildComponentTemplates(params: {
       isSyntheticSourceEnabledByDefault ||
       isTimeSeriesEnabledByDefault);
 
-  console.log(
-    '>> installing -> indexTemplateMappings',
-    JSON.stringify(indexTemplateMappings, null, 2)
-  );
-  console.log('>> installing -> before assigning', JSON.stringify(mappingsRuntimeFields, null, 2));
   templatesMap[packageTemplateName] = {
     template: {
       settings: {
@@ -391,6 +386,7 @@ export function buildComponentTemplates(params: {
     _meta,
   };
 
+  console.log('>> installing -> templatesMap', JSON.stringify(templatesMap, null, 2));
   return templatesMap;
 }
 
@@ -546,8 +542,6 @@ export function prepareTemplate({
     experimentalDataStreamFeature,
   });
 
-  console.log('component templates 1', JSON.stringify(componentTemplates, null, 2));
-
   const template = getTemplate({
     templateIndexPattern,
     packageName,
@@ -559,7 +553,6 @@ export function prepareTemplate({
     isIndexModeTimeSeries,
   });
 
-  console.log('component templates 2', JSON.stringify(componentTemplates, null, 2));
   return {
     componentTemplates,
     indexTemplate: {
