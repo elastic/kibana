@@ -26,6 +26,14 @@ import { formatTestDuration } from '../../../utils/monitor_test_result/test_time
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 
+function isErrorActive(lastError: PingState, currentError: PingState, latestPing?: Ping) {
+  return (
+    latestPing?.monitor.status === 'down' &&
+    lastError['@timestamp'] === currentError['@timestamp'] &&
+    typeof currentError['@timestamp'] !== undefined
+  );
+}
+
 export const ErrorsList = ({
   errorStates,
   loading,
@@ -76,12 +84,7 @@ export const ErrorsList = ({
           />
         );
 
-        const isErrorActive =
-          latestPing?.monitor.status === 'down' &&
-          lastErrorTestRun['@timestamp'] === item['@timestamp'] &&
-          typeof item['@timestamp'] !== undefined;
-
-        if (isErrorActive) {
+        if (isErrorActive(lastErrorTestRun, item, latestPing)) {
           return (
             <EuiFlexGroup gutterSize="m" alignItems="center" wrap={true}>
               <EuiFlexItem grow={false} className="eui-textNoWrap">
@@ -116,7 +119,7 @@ export const ErrorsList = ({
               }
               return failedStep.synthetics?.step?.name;
             },
-            render: (value: string, item: PingState) => {
+            render: (value: string) => {
               const failedStep = failedSteps.find((step) => step.monitor.check_group === value);
               if (!failedStep) {
                 return <>--</>;
@@ -140,18 +143,13 @@ export const ErrorsList = ({
       align: 'right' as const,
       sortable: true,
       render: (value: string, item: PingState) => {
-        const isActive = isErrorActive(
-          latestPing?.monitor.status,
-          lastErrorTestRun['@timestamp'],
-          item['@timestamp']
-        );
         let activeDuration = 0;
         if (item.monitor.timespan) {
           const diff = moment(item.monitor.timespan.lt).diff(
             moment(item.monitor.timespan.gte),
             'millisecond'
           );
-          if (isActive) {
+          if (isErrorActive(lastErrorTestRun, item, latestPing)) {
             const currentDiff = moment().diff(item['@timestamp']);
 
             activeDuration = currentDiff < diff ? currentDiff : diff;
