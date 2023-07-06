@@ -10,22 +10,13 @@ import React from 'react';
 import { partition } from 'lodash';
 import { queryToAst } from '@kbn/data-plugin/common';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import {
-  CoreStart,
-  SavedObjectReference,
-  SavedObjectsFindOptions,
-  SavedObjectsFindOptionsReference,
-} from '@kbn/core/public';
+import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { defaultAnnotationLabel } from '../../common/manual_event_annotation';
 import { EventAnnotationGroupContent } from '../../common/types';
-import {
-  EventAnnotationConfig,
-  EventAnnotationGroupConfig,
-  EVENT_ANNOTATION_GROUP_TYPE,
-} from '../../common';
+import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
 import { EventAnnotationServiceType } from './types';
 import {
   defaultAnnotationColor,
@@ -144,27 +135,21 @@ export function getEventAnnotationService(
   const findAnnotationGroupContent = async (
     searchTerm: string,
     pageSize: number,
-    references?: SavedObjectsFindOptionsReference[],
-    referencesToExclude?: SavedObjectsFindOptionsReference[]
+    tagsToInclude?: string[],
+    tagsToExclude?: string[]
   ): Promise<{ total: number; hits: EventAnnotationGroupContent[] }> => {
-    const searchOptions: SavedObjectsFindOptions = {
-      type: [EVENT_ANNOTATION_GROUP_TYPE],
-      searchFields: ['title^3', 'description'],
-      search: searchTerm ? `${searchTerm}*` : undefined,
-      perPage: pageSize,
-      page: 1,
-      defaultSearchOperator: 'AND' as const,
-      hasReference: references,
-      hasNoReference: referencesToExclude,
-    };
-
     const { pagination, hits } = await client.search<
       EventAnnotationGroupSearchIn,
       EventAnnotationGroupSearchOut
     >({
       contentTypeId: CONTENT_ID,
       query: {
-        text: searchOptions.search,
+        text: searchTerm ? `${searchTerm}*` : undefined,
+        limit: pageSize,
+        tags: {
+          included: tagsToInclude,
+          excluded: tagsToExclude,
+        },
       },
     });
 
