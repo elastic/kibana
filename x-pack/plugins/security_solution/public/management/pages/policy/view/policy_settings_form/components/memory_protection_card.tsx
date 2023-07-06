@@ -5,59 +5,61 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ProtectionSettingCardSwitch } from './protection_setting_card_switch';
 import { NotifyUserOption } from './notify_user_option';
 import { DetectPreventProtectionLevel } from './detect_prevent_protection_lavel';
-import { SettingCard } from './setting_card';
-import type { PolicyFormComponentCommonProps } from '../types';
+import { ProtectionSettingCardSwitch } from './protection_setting_card_switch';
+import { SettingLockedCard } from './setting_locked_card';
 import type { Immutable } from '../../../../../../../common/endpoint/types';
 import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
-import type { RansomwareProtectionOSes } from '../../../types';
+import type { MemoryProtectionOSes } from '../../../types';
 import { LinkToApp } from '../../../../../../common/components/endpoint/link_to_app';
 import { APP_UI_ID, SecurityPageName } from '../../../../../../../common';
 import { useLicense } from '../../../../../../common/hooks/use_license';
-import { SettingLockedCard } from './setting_locked_card';
+import type { PolicyFormComponentCommonProps } from '../types';
+import { SettingCard } from './setting_card';
 
-const RANSOMEWARE_OS_VALUES: Immutable<RansomwareProtectionOSes[]> = [
-  PolicyOperatingSystem.windows,
-];
-
-const LOCKED_CARD_RAMSOMWARE_TITLE = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.details.ransomware',
+const LOCKED_CARD_MEMORY_TITLE = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.memory',
   {
-    defaultMessage: 'Ransomware',
+    defaultMessage: 'Memory Threat',
   }
 );
 
-type RansomwareProtectionCardProps = PolicyFormComponentCommonProps;
+const MEMORY_PROTECTION_OS_VALUES: Immutable<MemoryProtectionOSes[]> = [
+  PolicyOperatingSystem.windows,
+  PolicyOperatingSystem.mac,
+  PolicyOperatingSystem.linux,
+];
 
-export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps>(
+type MemoryProtectionCardProps = PolicyFormComponentCommonProps;
+
+export const MemoryProtectionCard = memo<MemoryProtectionCardProps>(
   ({ policy, onChange, mode }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const protection = 'ransomware';
+    const protection = 'memory_protection';
     const protectionLabel = i18n.translate(
-      'xpack.securitySolution.endpoint.policy.protections.ransomware',
+      'xpack.securitySolution.endpoint.policy.protections.memory',
       {
-        defaultMessage: 'Ransomware protections',
+        defaultMessage: 'Memory threat protections',
       }
     );
 
     if (!isPlatinumPlus) {
-      return <SettingLockedCard title={LOCKED_CARD_RAMSOMWARE_TITLE} />;
+      return <SettingLockedCard title={LOCKED_CARD_MEMORY_TITLE} />;
     }
 
     return (
       <SettingCard
-        type={i18n.translate('xpack.securitySolution.endpoint.policy.details.ransomware', {
-          defaultMessage: 'Ransomware',
+        type={i18n.translate('xpack.securitySolution.endpoint.policy.details.memory_protection', {
+          defaultMessage: 'Memory threat',
         })}
-        supportedOss={[OperatingSystem.WINDOWS]}
-        dataTestSubj="ransomwareProtectionsForm"
+        supportedOss={[OperatingSystem.WINDOWS, OperatingSystem.MAC, OperatingSystem.LINUX]}
+        dataTestSubj="memoryProtectionsForm"
         rightCorner={
           <ProtectionSettingCardSwitch
             policy={policy}
@@ -65,16 +67,16 @@ export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps
             mode={mode}
             protection={protection}
             protectionLabel={protectionLabel}
-            osList={RANSOMEWARE_OS_VALUES}
+            osList={MEMORY_PROTECTION_OS_VALUES}
           />
         }
       >
         <DetectPreventProtectionLevel
-          protection={protection}
-          osList={RANSOMEWARE_OS_VALUES}
-          onChange={onChange}
           policy={policy}
+          onChange={onChange}
           mode={mode}
+          protection={protection}
+          osList={MEMORY_PROTECTION_OS_VALUES}
         />
 
         <NotifyUserOption
@@ -82,10 +84,10 @@ export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps
           onChange={onChange}
           mode={mode}
           protection={protection}
-          osList={RANSOMEWARE_OS_VALUES}
+          osList={MEMORY_PROTECTION_OS_VALUES}
         />
-        <EuiSpacer size="m" />
 
+        <EuiSpacer size="m" />
         <EuiCallOut iconType="iInCircle">
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policy.details.detectionRulesMessage"
@@ -106,4 +108,4 @@ export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps
     );
   }
 );
-RansomwareProtectionCard.displayName = 'RansomwareProtectionCard';
+MemoryProtectionCard.displayName = 'MemoryProtectionCard';
