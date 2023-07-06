@@ -6,7 +6,6 @@
  */
 
 import { IToasts } from '@kbn/core/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { actions, createMachine, interpret, InterpreterFrom } from 'xstate';
