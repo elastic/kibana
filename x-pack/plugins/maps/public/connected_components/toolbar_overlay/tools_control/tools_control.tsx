@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EuiButtonIcon,
   EuiPopover,
@@ -88,7 +88,7 @@ export class ToolsControl extends Component<Props, State> {
     indexPatternId?: string;
     geoFieldName?: string;
     geoFieldType?: ES_GEO_FIELD_TYPE;
-    relation?: estypes.GeoShapeRelation;
+    relation?: GeoShapeRelation;
   }) => {
     this.props.initiateDraw({
       drawShape: DRAW_SHAPE.POLYGON,
@@ -103,7 +103,7 @@ export class ToolsControl extends Component<Props, State> {
     indexPatternId?: string;
     geoFieldName?: string;
     geoFieldType?: ES_GEO_FIELD_TYPE;
-    relation?: estypes.GeoShapeRelation;
+    relation?: GeoShapeRelation;
   }) => {
     this.props.initiateDraw({
       drawShape: DRAW_SHAPE.BOUNDS,

@@ -6,7 +6,7 @@
  */
 
 import React, { ChangeEvent, Component } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EuiForm,
   EuiFormRow,
@@ -50,7 +50,7 @@ interface Props {
   }: {
     actionId: string;
     geometryLabel: string;
-    relation: estypes.GeoShapeRelation;
+    relation: GeoShapeRelation;
   }) => void;
   errorMsg?: string;
   className?: string;
@@ -60,7 +60,7 @@ interface Props {
 interface State {
   actionId: string;
   geometryLabel: string;
-  relation: estypes.GeoShapeRelation;
+  relation: GeoShapeRelation;
 }
 
 export class GeometryFilterForm extends Component<Props, State> {
@@ -78,7 +78,7 @@ export class GeometryFilterForm extends Component<Props, State> {
 
   _onRelationChange = (e: ChangeEvent<HTMLSelectElement>) => {
     this.setState({
-      relation: e.target.value as estypes.GeoShapeRelation,
+      relation: e.target.value as GeoShapeRelation,
     });
   };
 

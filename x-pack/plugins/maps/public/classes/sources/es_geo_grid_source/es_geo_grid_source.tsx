@@ -10,7 +10,7 @@ import React, { ReactElement } from 'react';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsCompositeAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ISearchSource } from '@kbn/data-plugin/common/search/search_source';
 import { DataView } from '@kbn/data-plugin/common';
@@ -347,7 +347,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       const requestId: string = afterKey
         ? `${this.getId()} afterKey ${afterKey.geoSplit}`
         : this.getId();
-      const esResponse: estypes.SearchResponse<unknown> = await this._runEsQuery({
+      const esResponse: SearchResponse<unknown> = await this._runEsQuery({
         requestId,
         requestName: i18n.translate('xpack.maps.source.esGrid.compositeInspector.requestName', {
           defaultMessage: '{layerName} {bucketsName} composite request ({requestCount})',
@@ -382,7 +382,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.requestType));
 
       const aggr = esResponse.aggregations
-        ?.compositeSplit as estypes.AggregationsCompositeAggregate;
+        ?.compositeSplit as AggregationsCompositeAggregate;
       afterKey = aggr.after_key;
       if (aggr.buckets.length < gridsPerRequest) {
         // Finished because request did not get full resultset back

@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { GeoShapeRelation, QueryDslFieldLookup } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
@@ -26,7 +26,7 @@ interface Props {
   addFilters: (filters: Filter[], actionId: string) => Promise<void>;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
-  loadPreIndexedShape?: () => Promise<estypes.QueryDslFieldLookup | null>;
+  loadPreIndexedShape?: () => Promise<QueryDslFieldLookup | null>;
   geoFieldNames: string[];
 }
 
@@ -78,7 +78,7 @@ export class FeatureGeometryFilterForm extends Component<Props, State> {
     relation,
   }: {
     geometryLabel: string;
-    relation: estypes.GeoShapeRelation;
+    relation: GeoShapeRelation;
   }) => {
     this.setState({ errorMsg: undefined });
     const preIndexedShape = await this._loadPreIndexedShape();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 
 export function getDataSourceLabel() {
@@ -20,7 +20,7 @@ export function getUrlLabel() {
   });
 }
 
-export function getEsSpatialRelationLabel(spatialRelation: estypes.GeoShapeRelation) {
+export function getEsSpatialRelationLabel(spatialRelation: GeoShapeRelation) {
   switch (spatialRelation) {
     case 'intersects':
       return i18n.translate('xpack.maps.common.esSpatialRelation.intersectsLabel', {

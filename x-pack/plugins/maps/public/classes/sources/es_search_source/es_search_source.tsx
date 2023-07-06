@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslFieldLookup } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
@@ -802,7 +802,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   // Returns geo_shape indexed_shape context for spatial quering by pre-indexed shapes
   async _getPreIndexedShape(
     properties: GeoJsonProperties
-  ): Promise<estypes.QueryDslFieldLookup | null> {
+  ): Promise<QueryDslFieldLookup | null> {
     if (properties === null) {
       return null;
     }

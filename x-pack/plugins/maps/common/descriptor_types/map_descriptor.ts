@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ReactNode } from 'react';
 import { GeoJsonProperties } from 'geojson';
 import { Geometry } from 'geojson';
@@ -76,7 +76,7 @@ export type DrawState = {
   drawShape?: DRAW_SHAPE;
   filterLabel?: string; // point radius filter alias
   geometryLabel?: string;
-  relation?: estypes.GeoShapeRelation;
+  relation?: GeoShapeRelation;
 };
 
 export type EditState = {

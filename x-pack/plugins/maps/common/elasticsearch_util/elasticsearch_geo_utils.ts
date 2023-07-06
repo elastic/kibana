@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TopLeftBottomRightGeoBounds } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { Feature, FeatureCollection, Geometry, Polygon, Point, Position } from 'geojson';
 import { BBox } from '@turf/helpers';
@@ -214,7 +214,7 @@ export function makeESBbox({
   maxLon,
   minLat,
   minLon,
-}: MapExtent): estypes.TopLeftBottomRightGeoBounds {
+}: MapExtent): TopLeftBottomRightGeoBounds {
   const bottom = clampToLatBounds(minLat);
   const top = clampToLatBounds(maxLat);
   let esBbox;

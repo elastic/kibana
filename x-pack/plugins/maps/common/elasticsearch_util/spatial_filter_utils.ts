@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { GeoShapeRelation, QueryDslFieldLookup, QueryDslGeoBoundingBoxQuery, QueryDslGeoDistanceQuery, QueryDslGeoShapeFieldQuery, QueryDslGeoShapeQuery } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { Feature, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
 // @ts-expect-error
@@ -18,15 +18,15 @@ import { makeESBbox } from './elasticsearch_geo_utils';
 const SPATIAL_FILTER_TYPE = FILTERS.SPATIAL_FILTER;
 
 type GeoFilter = Filter & {
-  geo_bounding_box?: estypes.QueryDslGeoBoundingBoxQuery;
-  geo_distance?: estypes.QueryDslGeoDistanceQuery;
+  geo_bounding_box?: QueryDslGeoBoundingBoxQuery;
+  geo_distance?: QueryDslGeoDistanceQuery;
   geo_grid?: {
     [geoFieldName: string]: {
       geohex?: string;
       geotile?: string;
     };
   };
-  geo_shape?: estypes.QueryDslGeoShapeQuery;
+  geo_shape?: QueryDslGeoShapeQuery;
 };
 
 // wrapper around boiler plate code for creating bool.should clause with nested bool.must clauses
@@ -115,11 +115,11 @@ export function buildGeoShapeFilter({
   geoFieldNames,
   relation = 'intersects',
 }: {
-  preIndexedShape?: estypes.QueryDslFieldLookup | null;
+  preIndexedShape?: QueryDslFieldLookup | null;
   geometry?: MultiPolygon | Polygon;
   geometryLabel: string;
   geoFieldNames: string[];
-  relation?: estypes.GeoShapeRelation;
+  relation?: GeoShapeRelation;
 }): GeoFilter {
   const meta: FilterMeta = {
     type: SPATIAL_FILTER_TYPE,
@@ -129,7 +129,7 @@ export function buildGeoShapeFilter({
   };
 
   function createGeoFilter(geoFieldName: string) {
-    const shapeQuery: estypes.QueryDslGeoShapeFieldQuery = {
+    const shapeQuery: QueryDslGeoShapeFieldQuery = {
       relation,
     };
     if (preIndexedShape) {
@@ -232,9 +232,9 @@ function extractGeometryFromFilter(geoFieldName: string, filter: GeoFilter): Geo
   if (
     filter.geo_shape &&
     filter.geo_shape[geoFieldName] &&
-    (filter.geo_shape[geoFieldName] as estypes.QueryDslGeoShapeFieldQuery).shape
+    (filter.geo_shape[geoFieldName] as QueryDslGeoShapeFieldQuery).shape
   ) {
-    return (filter.geo_shape[geoFieldName] as estypes.QueryDslGeoShapeFieldQuery).shape;
+    return (filter.geo_shape[geoFieldName] as QueryDslGeoShapeFieldQuery).shape;
   }
 }
 
