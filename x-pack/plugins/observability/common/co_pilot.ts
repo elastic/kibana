@@ -211,19 +211,17 @@ export const coPilotPrompts = {
 
           The request it occurred for is called ${transactionName}.
 
-          ${
-            logStacktrace
+          ${logStacktrace
               ? `The log stacktrace:
           ${logStacktrace}`
               : ''
-          }
+            }
 
-          ${
-            exceptionStacktrace
+          ${exceptionStacktrace
               ? `The exception stacktrace:
           ${exceptionStacktrace}`
               : ''
-          }
+            }
           `,
           role: 'user',
         },
@@ -400,9 +398,8 @@ Your limitations:
 - Do not include a summary
 - You will respond with the indicated templates filling variables, if any of the variables are empty do not include that line in the response
 
-The current active alerts in the system are represented in the following table with csv format separated by semicolon. Pick only one alert based on the following conditions:
-- Sort the alerts on urgency based on the content of the columns
-- If the alert has a Case names value it is less urgent
+The current active alerts in the system are represented in the following table with csv format separated by semicolon. Pick only the most urgent alert based on the following conditions:
+- Sort the alerts based on the impact they will have on the final client usage of the application
 
 Display the selected alert row using the following template, if any of the variables are empty do not include that line in the response:
 🚨 The the alert with the highest priority right now has the following Rule Name: R
@@ -417,11 +414,11 @@ Display the selected alert row using the following template, if any of the varia
 R being the Rule Name column value
 A being the alert Reason column value
 B being a way to start the remediation of the alert for an SRE using Elastic Observability
-C being the alert URL column value
+C being http://localhost:5601/kibana/app/observability/alerts/ concatenated with the alert id value
 D being the reasoning why this alert is the most urgent compared to the rest of the alerts
-E being the summary in text of Case names values, Case status column value, Case severity column value and Case updatedAt column values
+E being the summary in text of Case names values, Case status column value, Case severity column value and Case updatedAt column values, do not show the Rule Name
 I being a summary you generate about the properties of the Case
-J being which alerts belong to the same case or rule as the selected alert, include their rule name and alert id
+J being which other related alerts belong to the same case or rule name as the selected alert, include their rule name and alert id in a bulleted list
 
 ${header}
 ${rows}
