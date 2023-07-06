@@ -6,8 +6,8 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from '../query_client';
+import { ThemeProvider as EmotionThemeProvider } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import type { OsqueryResponseActionsParamsFormProps } from './osquery_response_action_type';
 
 const OsqueryResponseActionParamsForm = lazy(() => import('./osquery_response_action_type'));
@@ -16,16 +16,17 @@ export const getLazyOsqueryResponseActionTypeForm =
   // eslint-disable-next-line react/display-name
   () => (props: OsqueryResponseActionsParamsFormProps) => {
     const { onError, defaultValues, onChange } = props;
+    const { euiTheme } = useEuiTheme();
 
     return (
       <Suspense fallback={null}>
-        <QueryClientProvider client={queryClient}>
+        <EmotionThemeProvider theme={euiTheme}>
           <OsqueryResponseActionParamsForm
             onChange={onChange}
             defaultValues={defaultValues}
             onError={onError}
           />
-        </QueryClientProvider>
+        </EmotionThemeProvider>
       </Suspense>
     );
   };
