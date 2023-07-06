@@ -29,6 +29,7 @@ import {
   getCspPackagePolicies,
 } from '../../lib/fleet_util';
 import { BenchmarkId } from '../../../common/types';
+import { endpointUsageReportingService } from '../usage/post_usage';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
@@ -141,6 +142,32 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
             ...cspPackagePolicies,
             items: benchmarks,
           };
+
+          const usageReportResponse = await endpointUsageReportingService.reportUsage([
+            {
+              id: '123456789',
+              usage_timestamp: '2023-07-06T10:00:00Z',
+              creation_timestamp: '2023-07-06T10:05:00Z',
+              usage: {
+                type: 'data',
+                sub_type: 'storage',
+                quantity: 100,
+                period_seconds: 3600,
+                cause: 'backup',
+                metadata: {
+                  key1: 'value1',
+                  key2: 'value2',
+                },
+              },
+              source: {
+                id: 'source123',
+                instance_group_id: 'group123',
+                instance_group_type: 'typeA',
+              },
+            },
+          ]);
+
+          console.log({ usageReportResponse });
 
           return response.ok({
             body: getBenchmarkResponse,
