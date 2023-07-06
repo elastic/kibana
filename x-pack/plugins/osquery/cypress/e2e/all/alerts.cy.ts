@@ -328,7 +328,9 @@ describe('Alert Event Details', () => {
       cy.contains('Add to timeline investigation');
       cy.contains('Save for later').click();
       cy.contains('Save query');
-      cy.get('.euiButtonEmpty--flushLeft').contains('Cancel').click();
+      cy.get('[data-test-subj="osquery-save-query-flyout"]').within(() => {
+        cy.get('.euiButtonEmpty').contains('Cancel').click();
+      });
       cy.getBySel('add-to-timeline').first().click();
       cy.getBySel('globalToastList').contains('Added');
       closeToastIfVisible();
