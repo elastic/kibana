@@ -30,6 +30,20 @@ import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_fra
 import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
 import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
+import type { LensAppServices } from '../app_plugin/types';
+
+const getQueryFromContext = (
+  context: VisualizeFieldContext | VisualizeEditorContext,
+  data: LensAppServices['data']
+) => {
+  if ('searchQuery' in context && context.searchQuery) {
+    return context.searchQuery;
+  }
+  if ('query' in context && context.query) {
+    return context.query;
+  }
+  return data.query.queryString.getQuery();
+};
 
 export const initialState: LensAppState = {
   persistedDoc: undefined,
@@ -95,11 +109,7 @@ export const getPreloadedState = ({
 
   const query = !initialContext
     ? data.query.queryString.getDefaultQuery()
-    : 'searchQuery' in initialContext && initialContext.searchQuery
-    ? initialContext.searchQuery
-    : 'query' in initialContext && initialContext.query
-    ? initialContext.query
-    : data.query.queryString.getQuery();
+    : getQueryFromContext(initialContext, data);
 
   const state = {
     ...initialState,

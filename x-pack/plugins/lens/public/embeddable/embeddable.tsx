@@ -731,13 +731,10 @@ export class Embeddable
   }
 
   public getTextBasedLanguage(): string | undefined {
-    if (!this.savedVis) {
+    if (!this.isTextBasedLanguage() || !this.savedVis?.state.query) {
       return;
     }
-    const query = this.savedVis.state.query;
-    if (isOfQueryType(query)) {
-      return;
-    }
+    const query = this.savedVis?.state.query as unknown as AggregateQuery;
     const language = getAggregateQueryMode(query);
     return String(language).toUpperCase();
   }
