@@ -11,28 +11,28 @@ import React, { useMemo, useState } from 'react';
 import {
   EuiForm,
   EuiIcon,
+  EuiTitle,
   EuiButton,
   EuiFormRow,
   EuiFlexItem,
+  EuiFieldText,
+  EuiFocusTrap,
   EuiFlexGroup,
   EuiRadioGroup,
   EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiRadioGroupOption,
   EuiButtonEmpty,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiTitle,
-  EuiFocusTrap,
-  EuiFieldText,
+  EuiRadioGroupOption,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
-  DASHBOARD_LINK_TYPE,
-  EXTERNAL_LINK_TYPE,
-  NavigationEmbeddableLink,
   NavigationLinkInfo,
   NavigationLinkType,
+  EXTERNAL_LINK_TYPE,
+  DASHBOARD_LINK_TYPE,
+  NavigationEmbeddableLink,
 } from '../embeddable/types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { ExternalLinkDestinationPicker } from './external_link/external_link_destination_picker';
