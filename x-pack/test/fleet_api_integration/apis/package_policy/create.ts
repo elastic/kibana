@@ -539,6 +539,37 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('Simplified package policy', () => {
+      it('should support providing an id', async () => {
+        const id = `test-id-${Date.now()}`;
+
+        await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            id,
+            name: `create-simplified-package-policy-required-variables-${Date.now()}`,
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            inputs: {
+              'with_required_variables-test_input': {
+                streams: {
+                  'with_required_variables.log': {
+                    vars: { test_var_required: 'I am required' },
+                  },
+                },
+              },
+            },
+            package: {
+              name: 'with_required_variables',
+              version: '0.1.0',
+            },
+          })
+          .expect(200);
+
+        await await supertest.get(`/api/fleet/package_policies/${id}`).expect(200);
+      });
+
       it('should work with valid values', async () => {
         await supertest
           .post(`/api/fleet/package_policies`)
