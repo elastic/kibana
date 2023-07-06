@@ -58,7 +58,7 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
   const onClickEditIcon = useCallback(() => setEditMode(true), []);
   const onClickSubmit = useCallback((): void => {
     if (!newTitle.trim().length) {
-      setErrors([i18n.REQUIRED_FIELD]);
+      setErrors([i18n.TITLE_REQUIRED]);
       return;
     }
 

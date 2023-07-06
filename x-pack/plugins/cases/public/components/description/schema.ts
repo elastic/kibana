@@ -20,7 +20,7 @@ export const schema: FormSchema<Content> = {
     type: FIELD_TYPES.TEXTAREA,
     validations: [
       {
-        validator: emptyField(i18n.REQUIRED_FIELD),
+        validator: emptyField(i18n.DESCRIPTION_REQUIRED),
       },
       {
         validator: maxLengthField({

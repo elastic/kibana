@@ -121,7 +121,7 @@ describe('Description', () => {
     userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '');
 
     await waitFor(() => {
-      expect(screen.getByText('Required field')).toBeInTheDocument();
+      expect(screen.getByText('A description is required.')).toBeInTheDocument();
     });
   });
 
