@@ -6,13 +6,15 @@
  */
 
 import * as rt from 'io-ts';
-import { MAX_BULK_GET_ATTACHMENTS, MAX_COMMENTS_PER_PAGE } from '../../../constants';
-import { limitedArraySchema, paginationSchema } from '../../../schema';
+import {
+  MAX_BULK_GET_ATTACHMENTS,
+  MAX_COMMENTS_PER_PAGE,
+  MAX_COMMENT_LENGTH,
+} from '../../../constants';
+import { limitedArraySchema, paginationSchema, limitedStringSchema } from '../../../schema';
 import { jsonValueRt } from '../../runtime_types';
 
 import { UserRt } from '../../user';
-import { limitedStringSchema } from '../../../schema';
-import { MAX_COMMENT_LENGTH } from '../../../constants';
 
 export * from './files';
 
