@@ -11,7 +11,6 @@ import type {
   AppLocation,
   EndpointPendingActions,
   HostInfo,
-  HostStatus,
   Immutable,
   PolicyData,
   ResponseActionApiResponse,
@@ -65,9 +64,6 @@ export interface EndpointState {
   endpointsTotal: number;
   /** api error for total, actual Endpoints */
   endpointsTotalError?: ServerApiError;
-  // TODO: remove hostStatus, we get it from HostInfo.host_status
-  /** The status of the host, which is mapped to the Elastic Agent status in Fleet */
-  hostStatus?: HostStatus;
   /** Host isolation request state for a single endpoint */
   isolationRequestState: AsyncResourceState<ResponseActionApiResponse>;
   /**

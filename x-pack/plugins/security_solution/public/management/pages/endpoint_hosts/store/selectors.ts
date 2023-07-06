@@ -12,7 +12,6 @@ import { matchPath } from 'react-router-dom';
 import { decode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
 import type { EndpointPendingActions, Immutable } from '../../../../../common/endpoint/types';
-import { HostStatus } from '../../../../../common/endpoint/types';
 import type { EndpointIndexUIQueryParams, EndpointState } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
 import {
@@ -144,16 +143,6 @@ export const showView: (state: EndpointState) => EndpointIndexUIQueryParams['sho
   createSelector(uiQueryParams, (searchParams) => {
     return searchParams.show ?? 'details';
   });
-
-/**
- * Returns the Host Status which is connected the fleet agent
- */
-export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = createSelector(
-  (state: Immutable<EndpointState>) => state.hostStatus,
-  (hostStatus) => {
-    return hostStatus ? hostStatus : HostStatus.UNHEALTHY;
-  }
-);
 
 /**
  * returns the list of known non-existing polices that may have been in the Endpoint API response.

@@ -34,7 +34,6 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     agentsWithEndpointsTotalError: undefined,
     endpointsTotal: 0,
     endpointsTotalError: undefined,
-    hostStatus: undefined,
     isolationRequestState: createUninitialisedResourceState(),
     endpointPendingActions: createLoadedResourceState(new Map()),
     metadataTransformStats: createUninitialisedResourceState(),
