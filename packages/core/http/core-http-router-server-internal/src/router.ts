@@ -124,8 +124,8 @@ export interface RouterOptions {
   /** Whether we are running in development */
   isDev?: boolean;
   /**
-   * Which route resolution algo to use
-   * @default 'oldest'
+   * Which route resolution algo to use.
+   * @note default to "oldest", but when running in dev default to "none"
    */
   versionedRouteResolution?: 'newest' | 'oldest' | 'none';
 }
