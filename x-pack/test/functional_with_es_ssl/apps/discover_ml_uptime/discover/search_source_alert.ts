@@ -171,8 +171,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     await monacoEditor.setCodeEditorValue(`{
-      "rule_id": "{{ruleId}}",
-      "rule_name": "{{ruleName}}",
+      "rule_id": "{{rule.id}}",
+      "rule_name": "{{rule.name}}",
       "alert_id": "{{alert.id}}",
       "context_message": "{{context.message}}"
     }`);
