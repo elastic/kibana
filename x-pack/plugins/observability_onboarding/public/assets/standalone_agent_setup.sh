@@ -150,8 +150,7 @@ downloadElasticAgentConfig() {
     updateStepProgress "ea-config" "complete"
   else
     updateStepProgress "ea-config" "warning"
-    echo "Failed to download elastic-agent.yml"
-    exit 1
+    fail "Failed to download elastic-agent.yml"
   fi
 }
 
