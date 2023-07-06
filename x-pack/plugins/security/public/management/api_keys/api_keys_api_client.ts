@@ -7,13 +7,15 @@
 
 import type { HttpStart } from '@kbn/core/public';
 
-import type { ApiKey, ApiKeyRoleDescriptors, ApiKeyToInvalidate } from '../../../common/model';
+import type { ApiKey, ApiKeyToInvalidate } from '../../../common/model';
+import type {
+  CreateAPIKeyParams,
+  CreateAPIKeyResult,
+  UpdateAPIKeyParams,
+  UpdateAPIKeyResult,
+} from '../../../server/routes/api_keys';
 
-export interface CheckPrivilegesResponse {
-  areApiKeysEnabled: boolean;
-  isAdmin: boolean;
-  canManage: boolean;
-}
+export type { CreateAPIKeyParams, CreateAPIKeyResult, UpdateAPIKeyParams, UpdateAPIKeyResult };
 
 export interface InvalidateApiKeysResponse {
   itemsInvalidated: ApiKeyToInvalidate[];
@@ -22,30 +24,9 @@ export interface InvalidateApiKeysResponse {
 
 export interface GetApiKeysResponse {
   apiKeys: ApiKey[];
-}
-
-export interface CreateApiKeyRequest {
-  name: string;
-  expiration?: string;
-  role_descriptors?: ApiKeyRoleDescriptors;
-  metadata?: Record<string, any>;
-}
-
-export interface CreateApiKeyResponse {
-  id: string;
-  name: string;
-  expiration: number;
-  api_key: string;
-}
-
-export interface UpdateApiKeyRequest {
-  id: string;
-  role_descriptors?: ApiKeyRoleDescriptors;
-  metadata?: Record<string, any>;
-}
-
-export interface UpdateApiKeyResponse {
-  updated: boolean;
+  canManageCrossClusterApiKeys: boolean;
+  canManageApiKeys: boolean;
+  canManageOwnApiKeys: boolean;
 }
 
 const apiKeysUrl = '/internal/security/api_key';
@@ -53,12 +34,8 @@ const apiKeysUrl = '/internal/security/api_key';
 export class APIKeysAPIClient {
   constructor(private readonly http: HttpStart) {}
 
-  public async checkPrivileges() {
-    return await this.http.get<CheckPrivilegesResponse>(`${apiKeysUrl}/privileges`);
-  }
-
-  public async getApiKeys(isAdmin = false) {
-    return await this.http.get<GetApiKeysResponse>(apiKeysUrl, { query: { isAdmin } });
+  public async getApiKeys() {
+    return await this.http.get<GetApiKeysResponse>(apiKeysUrl);
   }
 
   public async invalidateApiKeys(apiKeys: ApiKeyToInvalidate[], isAdmin = false) {
@@ -67,14 +44,14 @@ export class APIKeysAPIClient {
     });
   }
 
-  public async createApiKey(apiKey: CreateApiKeyRequest) {
-    return await this.http.post<CreateApiKeyResponse>(apiKeysUrl, {
+  public async createApiKey(apiKey: CreateAPIKeyParams) {
+    return await this.http.post<CreateAPIKeyResult>(apiKeysUrl, {
       body: JSON.stringify(apiKey),
     });
   }
 
-  public async updateApiKey(apiKey: UpdateApiKeyRequest) {
-    return await this.http.put<UpdateApiKeyResponse>(apiKeysUrl, {
+  public async updateApiKey(apiKey: UpdateAPIKeyParams) {
+    return await this.http.put<UpdateAPIKeyResult>(apiKeysUrl, {
       body: JSON.stringify(apiKey),
     });
   }

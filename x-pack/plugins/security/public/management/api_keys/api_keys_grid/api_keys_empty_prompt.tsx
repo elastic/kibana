@@ -160,7 +160,7 @@ export const ApiKeysEmptyPrompt: FunctionComponent<ApiKeysEmptyPromptProps> = ({
         <p>
           <FormattedMessage
             id="xpack.security.management.apiKeysEmptyPrompt.emptyMessage"
-            defaultMessage="Allow applications to access Elastic on your behalf."
+            defaultMessage="Allow external services to access the Elastic Stack on your behalf."
           />
         </p>
       }
