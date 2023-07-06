@@ -212,6 +212,7 @@ export const PolicyFormPoC = memo<{ policyId: string }>(({ policyId }) => {
   const handleSettingsOnChange: PolicySettingsFormProps['onChange'] = useCallback(
     ({ updatedPolicy }) => {
       setPolicySettings(updatedPolicy);
+      window.console.log(updatedPolicy);
     },
     []
   );
