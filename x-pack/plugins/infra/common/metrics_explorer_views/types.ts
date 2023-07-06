@@ -9,7 +9,7 @@ import { nonEmptyStringRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
 
 export const metricsExplorerViewAttributesRT = rt.intersection([
-  rt.strict({
+  rt.type({
     name: nonEmptyStringRt,
     isDefault: rt.boolean,
     isStatic: rt.boolean,
