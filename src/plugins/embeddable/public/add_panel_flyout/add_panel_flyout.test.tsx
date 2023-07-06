@@ -72,7 +72,7 @@ describe('add panel flyout', () => {
   });
 
   test('add panel flyout renders SavedObjectFinder', async () => {
-    const component = mount(<AddPanelFlyout container={container} onClose={jest.fn()} />);
+    const component = mount(<AddPanelFlyout container={container} />);
 
     // https://github.com/elastic/kibana/issues/64789
     expect(component.exists(EuiFlyout)).toBe(false);
@@ -80,7 +80,7 @@ describe('add panel flyout', () => {
   });
 
   test('add panel adds embeddable to container', async () => {
-    const component = mount(<AddPanelFlyout container={container} onClose={jest.fn()} />);
+    const component = mount(<AddPanelFlyout container={container} />);
 
     expect(Object.values(container.getInput().panels).length).toBe(0);
     component.find('#soFinderDummyButton').simulate('click');
@@ -91,7 +91,7 @@ describe('add panel flyout', () => {
   });
 
   test('shows a success toast on add', async () => {
-    const component = mount(<AddPanelFlyout container={container} onClose={jest.fn()} />);
+    const component = mount(<AddPanelFlyout container={container} />);
     component.find('#soFinderDummyButton').simulate('click');
     // flush promises
     await new Promise((r) => setTimeout(r, 1));
@@ -103,7 +103,7 @@ describe('add panel flyout', () => {
   });
 
   test('runs telemetry function on add', async () => {
-    const component = mount(<AddPanelFlyout container={container} onClose={jest.fn()} />);
+    const component = mount(<AddPanelFlyout container={container} />);
 
     expect(Object.values(container.getInput().panels).length).toBe(0);
     component.find('#soFinderDummyButton').simulate('click');
