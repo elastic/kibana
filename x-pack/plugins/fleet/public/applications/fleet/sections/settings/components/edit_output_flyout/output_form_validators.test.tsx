@@ -145,8 +145,8 @@ describe('Output form validation', () => {
       expect(emptyValue?.length).toEqual(1);
       expect(emptyValue).toEqual([
         {
-          hasKeyError: true,
-          hasValueError: false,
+          hasKeyError: false,
+          hasValueError: true,
           index: 0,
           message: 'Missing value for key "test"',
         },
@@ -156,8 +156,8 @@ describe('Output form validation', () => {
       expect(emptyKey?.length).toEqual(1);
       expect(emptyKey).toEqual([
         {
-          hasKeyError: false,
-          hasValueError: true,
+          hasKeyError: true,
+          hasValueError: false,
           index: 0,
           message: 'Missing key for value "test"',
         },
@@ -194,8 +194,8 @@ describe('Output form validation', () => {
           message: 'Duplicate key "test"',
         },
         {
-          hasKeyError: true,
-          hasValueError: false,
+          hasKeyError: false,
+          hasValueError: true,
           index: 3,
           message: 'Missing value for key "test3"',
         },

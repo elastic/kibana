@@ -71,7 +71,15 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
 
   const matchErrorsByIndex = useMemo(
     () => (index: number, errorType: 'key' | 'value') => {
-      return errors
+      const headersErrors = errors as
+        | Array<{
+            message: string;
+            index: number;
+            hasKeyError: boolean;
+            hasValueError: boolean;
+          }>
+        | undefined;
+      return headersErrors
         ?.filter(
           (error) =>
             error.index === index && (errorType === 'key' ? error.hasKeyError : error.hasValueError)
@@ -118,8 +126,8 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
                       defaultMessage="Key"
                     />
                   }
-                  error={displayErrors(valueErrors)}
-                  isInvalid={(valueErrors?.length ?? 0) > 0}
+                  error={displayErrors(keyErrors)}
+                  isInvalid={(keyErrors?.length ?? 0) > 0}
                 >
                   <EuiFieldText
                     fullWidth
@@ -139,8 +147,8 @@ export const OutputFormKafkaHeaders: React.FunctionComponent<{ inputs: OutputFor
                       defaultMessage="Value"
                     />
                   }
-                  error={displayErrors(keyErrors)}
-                  isInvalid={(keyErrors?.length ?? 0) > 0}
+                  error={displayErrors(valueErrors)}
+                  isInvalid={(valueErrors?.length ?? 0) > 0}
                 >
                   <>
                     <EuiFieldText

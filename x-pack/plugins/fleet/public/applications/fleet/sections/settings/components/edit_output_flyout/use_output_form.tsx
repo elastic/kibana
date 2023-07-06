@@ -37,7 +37,7 @@ import {
   useFleetStatus,
   useRadioInput,
   sendPutOutput,
-  useCustomInput,
+  useKeyValueInput,
   useTopicsInput,
 } from '../../../../hooks';
 import type { Output } from '../../../../types';
@@ -95,7 +95,7 @@ export interface OutputFormInputsType {
   kafkaPartitionTypeRandomInput: ReturnType<typeof useInput>;
   kafkaPartitionTypeHashInput: ReturnType<typeof useInput>;
   kafkaPartitionTypeRoundRobinInput: ReturnType<typeof useInput>;
-  kafkaHeadersInput: ReturnType<typeof useCustomInput>;
+  kafkaHeadersInput: ReturnType<typeof useKeyValueInput>;
   kafkaClientIdInput: ReturnType<typeof useInput>;
   kafkaDefaultTopicInput: ReturnType<typeof useInput>;
   kafkaTopicsInput: ReturnType<typeof useTopicsInput>;
@@ -352,7 +352,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     validateKafkaTopics,
     isDisabled('topics')
   );
-  const kafkaHeadersInput = useCustomInput(
+  const kafkaHeadersInput = useKeyValueInput(
     'kafkaHeadersComboBox',
     kafkaOutput?.headers ?? [{ key: '', value: '' }],
     validateKafkaHeaders,

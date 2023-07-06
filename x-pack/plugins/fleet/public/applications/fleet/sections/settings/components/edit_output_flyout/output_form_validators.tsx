@@ -259,8 +259,8 @@ export function validateKafkaHeaders(pairs: Array<{ key: string; value: string }
           values: { key },
         }),
         index,
-        hasKeyError: true,
-        hasValueError: false,
+        hasKeyError: false,
+        hasValueError: true,
       });
     } else if (!hasKey && hasValue) {
       errors.push({
@@ -269,8 +269,8 @@ export function validateKafkaHeaders(pairs: Array<{ key: string; value: string }
           values: { value },
         }),
         index,
-        hasKeyError: false,
-        hasValueError: true,
+        hasKeyError: true,
+        hasValueError: false,
       });
     } else if (hasKey && hasValue) {
       if (existingKeys.has(key)) {

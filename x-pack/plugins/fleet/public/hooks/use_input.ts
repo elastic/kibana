@@ -134,13 +134,13 @@ export function useSwitchInput(defaultValue = false, disabled = false) {
   };
 }
 
-export function useComboInput(
+function useCustomInput<T>(
   id: string,
-  defaultValue: string[] = [],
-  validate?: (value: string[]) => Array<{ message: string; index?: number }> | undefined,
+  defaultValue: T,
+  validate?: (value: T) => Array<{ message: string; index?: number }> | undefined,
   disabled = false
 ) {
-  const [value, setValue] = useState<string[]>(defaultValue);
+  const [value, setValue] = useState<T>(defaultValue);
   const [errors, setErrors] = useState<Array<{ message: string; index?: number }> | undefined>();
   const [hasChanged, setHasChanged] = useState(false);
 
@@ -148,10 +148,7 @@ export function useComboInput(
     if (hasChanged) {
       return;
     }
-    if (
-      value.length !== defaultValue.length ||
-      value.some((val, idx) => val !== defaultValue[idx])
-    ) {
+    if (JSON.stringify(value) !== JSON.stringify(defaultValue)) {
       setHasChanged(true);
     }
   }, [hasChanged, value, defaultValue]);
@@ -170,10 +167,10 @@ export function useComboInput(
   }, [validate, value]);
 
   const onChange = useCallback(
-    (newValues: string[]) => {
-      setValue(newValues);
+    (newValue: T) => {
+      setValue(newValue);
       if (errors && validate) {
-        setErrors(validate(newValues));
+        setErrors(validate(newValue));
       }
     },
     [validate, errors]
@@ -194,7 +191,7 @@ export function useComboInput(
     },
     value,
     clear: () => {
-      setValue([]);
+      setValue(defaultValue);
     },
     setValue,
     validate: validateCallback,
@@ -202,8 +199,16 @@ export function useComboInput(
   };
 }
 
-// TODO: unify with useComboInput
-export function useCustomInput(
+export function useComboInput(
+  id: string,
+  defaultValue: string[] = [],
+  validate?: (value: string[]) => Array<{ message: string; index?: number }> | undefined,
+  disabled = false
+) {
+  return useCustomInput<string[]>(id, defaultValue, validate, disabled);
+}
+
+export function useKeyValueInput(
   id: string,
   defaultValue: Array<{ key: string; value: string }> = [],
   validate?: (
@@ -213,69 +218,12 @@ export function useCustomInput(
     | undefined,
   disabled = false
 ) {
-  const [value, setValue] = useState<typeof defaultValue>(defaultValue);
-  const [errors, setErrors] = useState<
-    | Array<{ message: string; index: number; hasKeyError: boolean; hasValueError: boolean }>
-    | undefined
-  >();
-  const [hasChanged, setHasChanged] = useState(false);
-
-  useEffect(() => {
-    if (hasChanged) {
-      return;
-    }
-    if (
-      value.length !== defaultValue.length ||
-      value.some((val, idx) => val !== defaultValue[idx])
-    ) {
-      setHasChanged(true);
-    }
-  }, [hasChanged, value, defaultValue]);
-
-  const isInvalid = errors !== undefined;
-
-  const validateCallback = useCallback(() => {
-    if (validate) {
-      const newErrors = validate(value);
-      setErrors(newErrors);
-
-      return newErrors === undefined;
-    }
-
-    return true;
-  }, [validate, value]);
-
-  const onChange = useCallback(
-    (newValues) => {
-      setValue(newValues);
-      if (errors && validate) {
-        setErrors(validate(newValues));
-      }
-    },
-    [validate, errors]
+  return useCustomInput<Array<{ key: string; value: string }>>(
+    id,
+    defaultValue,
+    validate,
+    disabled
   );
-
-  return {
-    props: {
-      id,
-      value,
-      onChange,
-      errors,
-      isInvalid,
-      disabled,
-    },
-    formRowProps: {
-      error: errors,
-      isInvalid,
-    },
-    value,
-    clear: () => {
-      setValue([]);
-    },
-    setValue,
-    validate: validateCallback,
-    hasChanged,
-  };
 }
 
 type Topic = Array<{
@@ -286,73 +234,13 @@ type Topic = Array<{
   };
 }>;
 
-// TODO: Unify with useCustomInput
 export function useTopicsInput(
   id: string,
   defaultValue: Topic = [],
   validate?: (value: Topic) => Array<{ message: string; index: number }> | undefined,
   disabled = false
 ) {
-  const [value, setValue] = useState<typeof defaultValue>(defaultValue);
-  const [errors, setErrors] = useState<Array<{ message: string; index: number }> | undefined>();
-  const [hasChanged, setHasChanged] = useState(false);
-
-  useEffect(() => {
-    if (hasChanged) {
-      return;
-    }
-    if (
-      value.length !== defaultValue.length ||
-      value.some((val, idx) => val !== defaultValue[idx])
-    ) {
-      setHasChanged(true);
-    }
-  }, [hasChanged, value, defaultValue]);
-
-  const isInvalid = errors !== undefined;
-
-  const validateCallback = useCallback(() => {
-    if (validate) {
-      const newErrors = validate(value);
-      setErrors(newErrors);
-
-      return newErrors === undefined;
-    }
-
-    return true;
-  }, [validate, value]);
-
-  const onChange = useCallback(
-    (newValues: Topic) => {
-      setValue(newValues);
-      if (errors && validate) {
-        setErrors(validate(newValues));
-      }
-    },
-    [validate, errors]
-  );
-
-  return {
-    props: {
-      id,
-      value,
-      onChange,
-      errors,
-      isInvalid,
-      disabled,
-    },
-    formRowProps: {
-      error: errors,
-      isInvalid,
-    },
-    value,
-    clear: () => {
-      setValue([]);
-    },
-    setValue,
-    validate: validateCallback,
-    hasChanged,
-  };
+  return useCustomInput<Topic>(id, defaultValue, validate, disabled);
 }
 
 export function useNumberInput(
