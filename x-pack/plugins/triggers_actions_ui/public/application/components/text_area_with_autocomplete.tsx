@@ -59,13 +59,14 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
       'data-test-subj': `${variable}-selectableOption`,
     }));
   }, [matches]);
+
   const onOptionPick = useCallback(
     (newOptions: EuiSelectableOption[]) => {
       if (!textAreaRef.current) return;
-      const { value, selectionStart } = textAreaRef.current; // check for selectionEnd, should be when the start is?
-      const lastCloseBracketIndex = value.slice(0, selectionStart).lastIndexOf(' ');
-      const lastDoubleCurlyBracket = value.slice(0, selectionStart).lastIndexOf('{{');
-      const currentWordStartIndex = Math.max(lastCloseBracketIndex, lastDoubleCurlyBracket);
+      const { value, selectionStart, scrollTop } = textAreaRef.current;
+      const lastSpaceIndex = value.slice(0, selectionStart).lastIndexOf(' ');
+      const lastOpenDoubleCurlyBracketsIndex = value.slice(0, selectionStart).lastIndexOf('{{');
+      const currentWordStartIndex = Math.max(lastSpaceIndex, lastOpenDoubleCurlyBracketsIndex);
 
       const checkedElement = newOptions.find(({ checked }) => checked === 'on');
       if (checkedElement) {
@@ -76,9 +77,17 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
           '}}' +
           value.slice(selectionStart);
 
-        editAction(paramsProperty, newInputText, index);
+        editAction(paramsProperty, newInputText.trim(), index);
         setMatches([]);
         textAreaRef.current.focus();
+        setTimeout(() => {
+          if (textAreaRef.current) {
+            textAreaRef.current.selectionStart =
+              currentWordStartIndex + checkedElement.label.length + 4;
+            textAreaRef.current.selectionEnd = textAreaRef.current.selectionStart;
+            textAreaRef.current.scrollTop = scrollTop;
+          }
+        }, 0);
       }
     },
     [editAction, index, paramsProperty]
@@ -111,13 +120,14 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
       }
     }, 0);
 
-    const lastCloseBracketIndex = value.slice(0, selectionStart).lastIndexOf(' ');
-    const lastDoubleCurlyBracket = value.slice(0, selectionStart).lastIndexOf('{{');
-    const currentWordStartIndex = Math.max(lastCloseBracketIndex, lastDoubleCurlyBracket);
+    const lastSpaceIndex = value.slice(0, selectionStart).lastIndexOf(' ');
+    const lastOpenDoubleCurlyBracketsIndex = value.slice(0, selectionStart).lastIndexOf('{{');
+    const currentWordStartIndex = Math.max(lastSpaceIndex, lastOpenDoubleCurlyBracketsIndex);
 
     const currentWord = value
       .slice(currentWordStartIndex === -1 ? 0 : currentWordStartIndex, selectionStart)
       .trim();
+
     if (currentWord.startsWith('{{')) {
       const filteredMatches = filterSuggestions({
         actionVariablesList: messageVariables?.map(({ name }) => name),
@@ -217,6 +227,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
         (inputTargetValue ?? '').substring(0, startPosition) +
         templatedVar +
         (inputTargetValue ?? '').substring(endPosition, (inputTargetValue ?? '').length);
+
       editAction(paramsProperty, newValue, index);
     },
     [editAction, index, inputTargetValue, paramsProperty]
