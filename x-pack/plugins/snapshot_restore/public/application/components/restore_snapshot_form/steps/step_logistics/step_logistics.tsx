@@ -646,7 +646,9 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               defaultMessage="Restores the configuration, history, and other data stored in Elasticsearch by a feature such as Elasticsearch security."
             />
 
-            {/* Only display callout if includeFeatureState is enabled and the snapshot was created by ES 7.12+ */}
+            {/* Only display callout if includeFeatureState is enabled and the snapshot was created by ES 7.12+
+            The versionId field represents the build id of the ES version. We check if the current ES version is >7.12
+            by comparing its build id with the build id of ES 7.12, which is 7120099. */}
             {versionId > 7120099 && isFeatureStatesToggleEnabled && (
               <>
                 <EuiSpacer size="s" />
