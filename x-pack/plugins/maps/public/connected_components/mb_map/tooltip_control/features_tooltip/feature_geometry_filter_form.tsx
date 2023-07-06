@@ -6,7 +6,10 @@
  */
 
 import React, { Component } from 'react';
-import type { GeoShapeRelation, QueryDslFieldLookup } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  GeoShapeRelation,
+  QueryDslFieldLookup,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';

@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { GeoShapeRelation, QueryDslFieldLookup, QueryDslGeoBoundingBoxQuery, QueryDslGeoDistanceQuery, QueryDslGeoShapeFieldQuery, QueryDslGeoShapeQuery } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  GeoShapeRelation,
+  QueryDslFieldLookup,
+  QueryDslGeoBoundingBoxQuery,
+  QueryDslGeoDistanceQuery,
+  QueryDslGeoShapeFieldQuery,
+  QueryDslGeoShapeQuery,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { Feature, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
 // @ts-expect-error
