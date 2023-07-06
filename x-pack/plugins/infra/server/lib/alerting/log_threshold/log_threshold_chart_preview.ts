@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ResolvedLogView } from '@kbn/logs-shared-plugin/common';
 import {
   ExecutionTimeRange,
   GroupedSearchQueryResponse,
@@ -19,7 +20,6 @@ import {
   Point,
   Series,
 } from '../../../../common/http_api';
-import { ResolvedLogView } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { KibanaFramework } from '../../adapters/framework/kibana_framework_adapter';

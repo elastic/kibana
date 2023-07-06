@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { badRequest, forbidden, failedDependency } from '@hapi/boom';
+import { forbidden, failedDependency } from '@hapi/boom';
 import {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
@@ -68,7 +68,7 @@ const createSLORoute = createObservabilityServerRoute({
     const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
 
     if (!hasCorrectLicense) {
-      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+      throw forbidden('Platinum license or higher is needed to make use of this feature.');
     }
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -95,7 +95,7 @@ const updateSLORoute = createObservabilityServerRoute({
     const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
 
     if (!hasCorrectLicense) {
-      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+      throw forbidden('Platinum license or higher is needed to make use of this feature.');
     }
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -127,7 +127,7 @@ const deleteSLORoute = createObservabilityServerRoute({
     const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
 
     if (!hasCorrectLicense) {
-      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+      throw forbidden('Platinum license or higher is needed to make use of this feature.');
     }
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -153,7 +153,7 @@ const getSLORoute = createObservabilityServerRoute({
     const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
 
     if (!hasCorrectLicense) {
-      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+      throw forbidden('Platinum license or higher is needed to make use of this feature.');
     }
 
     const soClient = (await context.core).savedObjects.client;
@@ -178,7 +178,7 @@ const enableSLORoute = createObservabilityServerRoute({
     const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
 
     if (!hasCorrectLicense) {
-      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+      throw forbidden('Platinum license or higher is needed to make use of this feature.');
     }
 
     const soClient = (await context.core).savedObjects.client;
@@ -204,7 +204,7 @@ const disableSLORoute = createObservabilityServerRoute({
     const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
 
     if (!hasCorrectLicense) {
-      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+      throw forbidden('Platinum license or higher is needed to make use of this feature.');
     }
 
     const soClient = (await context.core).savedObjects.client;
@@ -230,7 +230,7 @@ const findSLORoute = createObservabilityServerRoute({
     const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
 
     if (!hasCorrectLicense) {
-      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+      throw forbidden('Platinum license or higher is needed to make use of this feature.');
     }
 
     const soClient = (await context.core).savedObjects.client;
@@ -255,7 +255,7 @@ const fetchHistoricalSummary = createObservabilityServerRoute({
     const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
 
     if (!hasCorrectLicense) {
-      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+      throw forbidden('Platinum license or higher is needed to make use of this feature.');
     }
 
     const soClient = (await context.core).savedObjects.client;
@@ -317,7 +317,7 @@ const getSloBurnRates = createObservabilityServerRoute({
     const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
 
     if (!hasCorrectLicense) {
-      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+      throw forbidden('Platinum license or higher is needed to make use of this feature.');
     }
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -340,7 +340,7 @@ const getPreviewData = createObservabilityServerRoute({
     const hasCorrectLicense = await isLicenseAtLeastPlatinum(context);
 
     if (!hasCorrectLicense) {
-      throw badRequest('Platinum license or higher is needed to make use of this feature.');
+      throw forbidden('Platinum license or higher is needed to make use of this feature.');
     }
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
