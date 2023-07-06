@@ -67,7 +67,9 @@ describe('Entity analytics management page', () => {
       submitLocalSearch();
 
       cy.get(HOST_RISK_PREVIEW_TABLE_ROWS).should('have.length', 1);
+      cy.get(HOST_RISK_PREVIEW_TABLE_ROWS).contains('test-host1');
       cy.get(USER_RISK_PREVIEW_TABLE_ROWS).should('have.length', 1);
+      cy.get(USER_RISK_PREVIEW_TABLE_ROWS).contains('test1');
     });
 
     it('show error panel if API returns error and then try to refetch data', () => {
