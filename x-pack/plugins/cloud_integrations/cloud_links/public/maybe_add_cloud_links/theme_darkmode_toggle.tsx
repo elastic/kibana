@@ -32,6 +32,9 @@ export const ThemDarkModeToggle = ({ useUpdateUserProfile }: Props) => {
       title: 'Color theme updated',
       pageReloadText: 'Reload the page to see the changes',
     },
+    pageReloadChecker: (prev, next) => {
+      return prev?.userSettings?.darkMode !== next.userSettings?.darkMode;
+    },
   });
 
   const { userSettings: { darkMode = 'light' } = { darkMode: undefined } } = userProfileData ?? {};

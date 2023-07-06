@@ -37,6 +37,11 @@ interface Props {
     /** Customize the "page reload needed" text of the notification */
     pageReloadText?: string;
   };
+  /** Predicate to indicate if the update requires a page reload */
+  pageReloadChecker?: (
+    previsous: UserProfileData | null | undefined,
+    next: UserProfileData
+  ) => boolean;
 }
 
 export type UpdateUserProfileHook = (props?: Props) => {
@@ -75,7 +80,7 @@ export const getUseUpdateUserProfile = ({ apiClient, notifications }: Deps) => {
 
   const { userProfile$ } = apiClient;
 
-  useUpdateUserProfile = ({ notificationSuccess = {} }: Props = {}) => {
+  useUpdateUserProfile = ({ notificationSuccess = {}, pageReloadChecker }: Props = {}) => {
     const {
       enabled: notificationSuccessEnabled = true,
       title: notificationTitle = i18nTexts.notificationSuccess.title,
@@ -87,7 +92,7 @@ export const getUseUpdateUserProfile = ({ apiClient, notifications }: Deps) => {
     const userProfileSnapshot = useRef<UserProfileData | null>();
 
     const showSuccessNotification = useCallback(
-      ({ isRefreshRequired }: { isRefreshRequired: boolean }) => {
+      ({ isRefreshRequired = false }: { isRefreshRequired?: boolean } = {}) => {
         let successToastInput: ToastInput = {
           title: notificationTitle,
         };
@@ -132,18 +137,11 @@ export const getUseUpdateUserProfile = ({ apiClient, notifications }: Deps) => {
         setIsLoading(false);
 
         if (notificationSuccessEnabled) {
-          let isRefreshRequired = false;
-          if (
-            userProfileSnapshot.current?.userSettings?.darkMode !==
-            updatedData?.userSettings?.darkMode
-          ) {
-            isRefreshRequired = true;
-          }
-
+          const isRefreshRequired = pageReloadChecker?.(userProfileSnapshot.current, updatedData);
           showSuccessNotification({ isRefreshRequired });
         }
       },
-      [notificationSuccessEnabled, showSuccessNotification]
+      [notificationSuccessEnabled, showSuccessNotification, pageReloadChecker]
     );
 
     const update = useCallback(
