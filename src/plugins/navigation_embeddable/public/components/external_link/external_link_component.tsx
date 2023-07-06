@@ -9,13 +9,8 @@
 import React from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
-import { useExternalLinkEmbeddable } from '../embeddable/external_link_embeddable';
+import { NavigationEmbeddableLink } from '../../embeddable/types';
 
-export const ExternalLinkComponent = () => {
-  const embeddable = useExternalLinkEmbeddable();
-
-  const linkLabel = embeddable.select((state) => state.explicitInput.label);
-  const url = embeddable.select((state) => state.explicitInput.url);
-
-  return <EuiButtonEmpty iconType="link">{linkLabel || url}</EuiButtonEmpty>;
+export const ExternalLinkComponent = ({ link }: { link: NavigationEmbeddableLink }) => {
+  return <EuiButtonEmpty iconType="link">{link.label || link.destination}</EuiButtonEmpty>;
 };

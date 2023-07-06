@@ -7,6 +7,7 @@
  */
 
 import { isEmpty } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
@@ -27,15 +28,16 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
 } from '@elastic/eui';
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { NavigationContainerInput } from '../types';
-import { addLink } from '../navigation_container_helpers';
-import { ExternalLinkInput } from '../../external_link/types';
-import { DashboardLinkInput } from '../../dashboard_link/types';
+import {
+  DASHBOARD_LINK_TYPE,
+  NavigationEmbeddableInput,
+  NavigationEmbeddableLink,
+} from '../embeddable/types';
 import { NavEmbeddableStrings } from './navigation_embeddable_strings';
 import { NavigationEmbeddableLinkEditor } from './navigation_embeddable_link_editor';
-import { memoizedFetchDashboard } from '../../dashboard_link/lib/dashboard_editor_tools';
-import { DASHBOARD_LINK_EMBEDDABLE_TYPE } from '../../dashboard_link/embeddable/dashboard_link_embeddable_factory';
+import { memoizedFetchDashboard } from './dashboard_link/dashboard_link_tools';
 
 import './navigation_embeddable.scss';
 
@@ -43,15 +45,15 @@ export const NavigationEmbeddablePanelEditor = ({
   onSave,
   onClose,
   initialInput,
-  currentDashboardId,
+  parentDashboard,
 }: {
   onClose: () => void;
-  initialInput: Partial<NavigationContainerInput>;
-  onSave: (input: Partial<NavigationContainerInput>) => void;
-  currentDashboardId?: string;
+  initialInput: Partial<NavigationEmbeddableInput>;
+  onSave: (input: Partial<NavigationEmbeddableInput>) => void;
+  parentDashboard?: DashboardContainer;
 }) => {
   const [showLinkEditorFlyout, setShowLinkEditorFlyout] = useState(false);
-  const [panels, setPanels] = useState(initialInput.panels);
+  const [links, setLinks] = useState(initialInput.links);
 
   /**
    * TODO: There is probably a more efficient way of storing the dashboard information "temporarily" for any new
@@ -61,30 +63,26 @@ export const NavigationEmbeddablePanelEditor = ({
    * blocking so much other work :)
    */
   const { value: linkList } = useAsync(async () => {
-    if (!panels || isEmpty(panels)) return [];
+    if (!links || isEmpty(links)) return [];
 
-    const links: Array<{ id: string; icon: IconType; label: string }> = await Promise.all(
-      Object.keys(panels).map(async (panelId) => {
-        let label = panels[panelId].explicitInput.label;
+    const links2: Array<{ id: string; icon: IconType; label: string }> = await Promise.all(
+      Object.keys(links).map(async (panelId) => {
+        let label = links[panelId].label;
         let icon = 'link';
 
-        if (panels[panelId].type === DASHBOARD_LINK_EMBEDDABLE_TYPE) {
+        if (links[panelId].type === DASHBOARD_LINK_TYPE) {
           icon = 'dashboardApp';
           if (!label) {
-            const dashboard = await memoizedFetchDashboard(
-              (panels[panelId].explicitInput as DashboardLinkInput).dashboardId
-            );
+            const dashboard = await memoizedFetchDashboard(links[panelId].destination);
             label = dashboard.attributes.title;
           }
-        } else if (!label) {
-          label = (panels[panelId].explicitInput as ExternalLinkInput).url;
         }
 
-        return { id: panelId, label, icon };
+        return { id: panelId, label: label || links[panelId].destination, icon };
       })
     );
-    return links;
-  }, [panels]);
+    return links2;
+  }, [links]);
 
   return (
     <>
@@ -97,7 +95,7 @@ export const NavigationEmbeddablePanelEditor = ({
         <EuiForm fullWidth>
           <EuiFormRow>
             <>
-              {!panels || Object.keys(panels).length === 0 ? (
+              {!links || Object.keys(links).length === 0 ? (
                 <EuiPanel hasBorder={true}>
                   <EuiFlexGroup justifyContent="spaceAround">
                     <EuiFlexItem grow={false}>
@@ -159,7 +157,7 @@ export const NavigationEmbeddablePanelEditor = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={() => {
-                onSave({ ...initialInput, panels });
+                onSave({ ...initialInput, links });
                 onClose();
               }}
             >
@@ -178,11 +176,10 @@ export const NavigationEmbeddablePanelEditor = ({
               setShowLinkEditorFlyout(false);
             }
           }}
-          onSave={(type, linkInput) => {
-            addLink(initialInput, { type, input: linkInput });
-            setPanels(initialInput.panels);
+          onSave={(newLink: NavigationEmbeddableLink) => {
+            setLinks({ ...links, [uuidv4()]: newLink });
           }}
-          currentDashboardId={currentDashboardId}
+          parentDashboard={parentDashboard}
         />
       )}
     </>

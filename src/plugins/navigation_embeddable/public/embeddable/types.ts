@@ -1,0 +1,65 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
+import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
+
+/**
+ * Explicit Input
+ */
+
+export const DASHBOARD_LINK_TYPE = 'dashboardLink';
+export const EXTERNAL_LINK_TYPE = 'externalLink';
+
+export const NavigationLinkInfo: {
+  [id in NavigationLinkType]: { icon: string; displayName: string; description: string };
+} = {
+  [DASHBOARD_LINK_TYPE]: {
+    icon: 'dashboardApp',
+    displayName: 'Dashboard',
+    description: 'Go to dashboard',
+  },
+  [EXTERNAL_LINK_TYPE]: {
+    icon: 'link',
+    displayName: 'URL',
+    description: 'Go to URL',
+  },
+};
+
+export interface DashboardItem {
+  id: string;
+  attributes: DashboardAttributes;
+}
+
+export type NavigationLinkType = typeof DASHBOARD_LINK_TYPE | typeof EXTERNAL_LINK_TYPE;
+
+export interface NavigationEmbeddableLink {
+  type: NavigationLinkType;
+  destination: string;
+  // order: number; TODO: Use this as part of https://github.com/elastic/kibana/issues/154361
+  label?: string;
+}
+
+export interface NavigationEmbeddableInput extends EmbeddableInput {
+  links: { [id: string]: NavigationEmbeddableLink };
+}
+
+/**
+ * Redux state
+ */
+export interface NavigationEmbeddableComponentState {
+  totalDashboards?: number;
+  currentDashboard?: DashboardItem;
+}
+
+export type NavigationEmbeddableReduxState = ReduxEmbeddableState<
+  NavigationEmbeddableInput,
+  EmbeddableOutput,
+  NavigationEmbeddableComponentState
+>;

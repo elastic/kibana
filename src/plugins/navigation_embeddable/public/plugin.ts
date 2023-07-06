@@ -10,20 +10,9 @@ import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 
-import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_container';
-import { ILinkFactory, LinkFactory } from './navigation_container/types';
-import { linksService } from './services/links_service';
-import { NavigationEmbeddableFactoryDefinition } from './navigation_container';
+import { NAVIGATION_EMBEDDABLE_TYPE } from './embeddable';
 import { setKibanaServices } from './services/kibana_services';
-import {
-  ExternalLinkFactory,
-  EXTERNAL_LINK_EMBEDDABLE_TYPE,
-} from './external_link/embeddable/external_link_embeddable_factory';
-import {
-  DashboardLinkFactory,
-  DASHBOARD_LINK_EMBEDDABLE_TYPE,
-} from './dashboard_link/embeddable/dashboard_link_embeddable_factory';
-
+import { NavigationEmbeddableFactoryDefinition } from './embeddable';
 export interface NavigationEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;
 }
@@ -44,10 +33,6 @@ export class NavigationEmbeddablePlugin
 {
   constructor() {}
 
-  private transferEditorFunctions(factoryDef: ILinkFactory, factory: LinkFactory) {
-    (factory as ILinkFactory).linkEditorComponent = factoryDef.linkEditorComponent ?? undefined;
-  }
-
   public setup(
     core: CoreSetup<NavigationEmbeddableStartDependencies>,
     plugins: NavigationEmbeddableSetupDependencies
@@ -57,23 +42,6 @@ export class NavigationEmbeddablePlugin
         NAVIGATION_EMBEDDABLE_TYPE,
         new NavigationEmbeddableFactoryDefinition()
       );
-
-      // Dashboard link embeddable factory setup
-      const dashboardLinkFactoryDef = new DashboardLinkFactory();
-      const dashboardLinkFactory: LinkFactory = plugins.embeddable.registerEmbeddableFactory(
-        DASHBOARD_LINK_EMBEDDABLE_TYPE,
-        dashboardLinkFactoryDef
-      )();
-      this.transferEditorFunctions(dashboardLinkFactoryDef, dashboardLinkFactory);
-      linksService.registerLinkType(dashboardLinkFactory);
-
-      const externalLinkFactoryDef = new ExternalLinkFactory();
-      const externalLinkFactory = plugins.embeddable.registerEmbeddableFactory(
-        EXTERNAL_LINK_EMBEDDABLE_TYPE,
-        externalLinkFactoryDef
-      )();
-      this.transferEditorFunctions(externalLinkFactoryDef, externalLinkFactory);
-      linksService.registerLinkType(externalLinkFactory);
     });
   }
 

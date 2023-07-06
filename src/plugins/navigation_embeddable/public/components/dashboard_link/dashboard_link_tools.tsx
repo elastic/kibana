@@ -8,20 +8,28 @@
 
 import { isEmpty, memoize } from 'lodash';
 
-import { DashboardItem } from '../types';
+import { DashboardItem } from '../../../dashboard_link/types';
 import { dashboardServices } from '../../services/kibana_services';
 
-export const memoizedFetchDashboard = memoize(async (dashboardId: string) => {
-  return await fetchDashboard(dashboardId);
-});
+export const memoizedFetchDashboard = memoize(
+  async (dashboardId: string) => {
+    return await fetchDashboard(dashboardId);
+  },
+  (dashboardId) => {
+    return dashboardId;
+  }
+);
 
 export const memoizedFetchDashboards = memoize(
   async (search: string = '', size: number = 10, currentDashboardId?: string) => {
     return await fetchDashboards(search, size, currentDashboardId);
+  },
+  (search, size, currentDashboardId) => {
+    return [search, size, currentDashboardId].join('|');
   }
 );
 
-const fetchDashboard = async (dashboardId: string): Promise<DashboardItem> => {
+export const fetchDashboard = async (dashboardId: string): Promise<DashboardItem> => {
   const findDashboardsService = await dashboardServices.findDashboardsService();
   const response = (await findDashboardsService.findByIds([dashboardId]))[0];
   if (response.status === 'error') {

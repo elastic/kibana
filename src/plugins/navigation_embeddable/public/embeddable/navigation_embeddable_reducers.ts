@@ -10,19 +10,19 @@ import { WritableDraft } from 'immer/dist/types/types-external';
 
 import { PayloadAction } from '@reduxjs/toolkit';
 
-import { NavigationContainerReduxState } from './types';
+import { DashboardItem, NavigationEmbeddableReduxState } from './types';
 
 export const navigationEmbeddableReducers = {
   setLoading: (
-    state: WritableDraft<NavigationContainerReduxState>,
+    state: WritableDraft<NavigationEmbeddableReduxState>,
     action: PayloadAction<boolean>
   ) => {
     state.output.loading = action.payload;
   },
-  setCurrentDashboardId: (
-    state: WritableDraft<NavigationContainerReduxState>,
-    action: PayloadAction<string | undefined>
+  setCurrentDashboard: (
+    state: WritableDraft<NavigationEmbeddableReduxState>,
+    action: PayloadAction<DashboardItem | undefined>
   ) => {
-    state.componentState.currentDashboardId = action.payload;
+    state.componentState.currentDashboard = action.payload;
   },
 };

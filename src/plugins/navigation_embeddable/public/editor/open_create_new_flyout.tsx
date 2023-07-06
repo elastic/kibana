@@ -10,20 +10,21 @@ import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { NavigationContainerInput } from '../types';
-import { coreServices } from '../../services/kibana_services';
+import { NavigationEmbeddableInput } from '../embeddable/types';
+import { coreServices } from '../services/kibana_services';
 import { NavigationEmbeddablePanelEditor } from '../components/navigation_embeddable_panel_editor';
 
 /**
  * @throws in case user cancels
  */
 export async function openCreateNewFlyout(
-  initialInput?: Omit<NavigationContainerInput, 'id'>,
-  currentDashboardId?: string
-): Promise<Partial<NavigationContainerInput>> {
+  initialInput?: Omit<NavigationEmbeddableInput, 'id'>,
+  parentDashboard?: DashboardContainer
+): Promise<Partial<NavigationEmbeddableInput>> {
   return new Promise((resolve, reject) => {
-    const onSave = (containerInput: Partial<NavigationContainerInput>) => {
+    const onSave = (containerInput: Partial<NavigationEmbeddableInput>) => {
       resolve(containerInput);
       editorFlyout.close();
     };
@@ -39,7 +40,7 @@ export async function openCreateNewFlyout(
           initialInput={{ id: uuidv4(), ...initialInput }}
           onClose={() => editorFlyout.close()}
           onSave={onSave}
-          currentDashboardId={currentDashboardId}
+          parentDashboard={parentDashboard}
         />,
         { theme$: coreServices.theme.theme$ }
       ),

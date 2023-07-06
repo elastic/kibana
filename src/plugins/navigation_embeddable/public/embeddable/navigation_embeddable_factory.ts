@@ -15,19 +15,19 @@ import {
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { NavigationContainerInput } from '../types';
-import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_container';
-import { coreServices, untilPluginStartServicesReady } from '../../services/kibana_services';
+import { NavigationEmbeddableInput } from './types';
+import { NAVIGATION_EMBEDDABLE_TYPE } from './navigation_embeddable';
+import { coreServices, untilPluginStartServicesReady } from '../services/kibana_services';
 
 export type NavigationEmbeddableFactory = EmbeddableFactory;
 
-const getDefaultNavigationContainerInput = (): Omit<NavigationContainerInput, 'id'> => ({
-  panels: {},
+const getDefaultNavigationEmbeddableInput = (): Omit<NavigationEmbeddableInput, 'id'> => ({
+  links: {},
   disabledActions: [ACTION_ADD_PANEL, 'OPEN_FLYOUT_ADD_DRILLDOWN'],
 });
 
 export class NavigationEmbeddableFactoryDefinition
-  implements EmbeddableFactoryDefinition<NavigationContainerInput>
+  implements EmbeddableFactoryDefinition<NavigationEmbeddableInput>
 {
   public readonly type = NAVIGATION_EMBEDDABLE_TYPE;
 
@@ -42,14 +42,14 @@ export class NavigationEmbeddableFactoryDefinition
     return true;
   }
 
-  public getDefaultInput(): Partial<NavigationContainerInput> {
-    return getDefaultNavigationContainerInput();
+  public getDefaultInput(): Partial<NavigationEmbeddableInput> {
+    return getDefaultNavigationEmbeddableInput();
   }
 
-  public async create(initialInput: NavigationContainerInput, parent: DashboardContainer) {
+  public async create(initialInput: NavigationEmbeddableInput, parent: DashboardContainer) {
     await untilPluginStartServicesReady();
     const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
-    const { NavigationContainer } = await import('./navigation_container');
+    const { NavigationEmbeddable } = await import('./navigation_embeddable');
 
     /**
      * TODO: What are our conditions to ensure this embeddable is editable?
@@ -63,27 +63,27 @@ export class NavigationEmbeddableFactoryDefinition
      *      );
      *   }
      */
-    return new NavigationContainer(
+    return new NavigationEmbeddable(
       reduxEmbeddablePackage,
       // { editable: true },
-      { ...getDefaultNavigationContainerInput(), ...initialInput },
+      { ...getDefaultNavigationEmbeddableInput(), ...initialInput },
       parent
     );
   }
 
   public async getExplicitInput(
-    initialInput?: NavigationContainerInput,
+    initialInput?: NavigationEmbeddableInput,
     parent?: DashboardContainer
   ) {
     if (!parent) return {};
 
-    const { openCreateNewFlyout: createNavigationContainer } = await import(
+    const { openCreateNewFlyout: createNavigationEmbeddable } = await import(
       '../editor/open_create_new_flyout'
     );
 
-    const input = await createNavigationContainer(
-      { ...getDefaultNavigationContainerInput(), ...initialInput },
-      parent.getState().componentState.lastSavedId
+    const input = await createNavigationEmbeddable(
+      { ...getDefaultNavigationEmbeddableInput(), ...initialInput },
+      parent
     );
 
     return input;
