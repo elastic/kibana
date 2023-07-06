@@ -55,6 +55,11 @@ export interface SecurityLicenseFeatures {
   readonly allowRoleFieldLevelSecurity: boolean;
 
   /**
+   * Indicates whether we allow users to define remote index privileges in roles.
+   */
+  readonly allowRoleRemoteIndexPrivileges: boolean;
+
+  /**
    * Indicates whether we allow Role-based access control (RBAC).
    */
   readonly allowRbac: boolean;

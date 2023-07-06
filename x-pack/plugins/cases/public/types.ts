@@ -22,7 +22,14 @@ import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } fr
 import type { DistributiveOmit } from '@elastic/eui';
 import type { ApmBase } from '@elastic/apm-rum';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+
 import type {
+  CasesBulkGetRequest,
+  CasesBulkGetResponse,
   CasesByAlertId,
   CasesByAlertIDRequest,
   CasesFindRequest,
@@ -30,6 +37,7 @@ import type {
   CasesStatusRequest,
   CommentRequestAlertType,
   CommentRequestExternalReferenceNoSOType,
+  CommentRequestExternalReferenceSOType,
   CommentRequestPersistableStateType,
   CommentRequestUserType,
 } from '../common/api';
@@ -40,32 +48,37 @@ import type { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event
 import type { GetCasesContextProps } from './client/ui/get_cases_context';
 import type { GetCasesProps } from './client/ui/get_cases';
 import type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
-import type { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyout';
 import type { GetRecentCasesProps } from './client/ui/get_recent_cases';
-import type { Cases, CasesStatus, CasesMetrics } from '../common/ui';
-import type { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
+import type { CasesStatus, CasesMetrics, CasesFindResponseUI } from '../common/ui';
+import type { GroupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import type { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 
 export interface CasesPluginSetup {
+  files: FilesSetup;
   security: SecurityPluginSetup;
+  serverless?: ServerlessPluginSetup;
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
 }
 
 export interface CasesPluginStart {
+  apm?: ApmBase;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
-  licensing?: LicensingPluginStart;
+  features: FeaturesPluginStart;
+  files: FilesStart;
   lens: LensPublicStart;
+  licensing?: LicensingPluginStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  security: SecurityPluginStart;
+  serverless?: ServerlessPluginStart;
+  spaces?: SpacesPluginStart;
   storage: Storage;
   triggersActionsUi: TriggersActionsStart;
-  features: FeaturesPluginStart;
-  security: SecurityPluginStart;
-  spaces?: SpacesPluginStart;
-  apm?: ApmBase;
+  uiActions: UiActionsStart;
 }
 
 /**
@@ -94,9 +107,10 @@ export interface CasesUiStart {
   api: {
     getRelatedCases: (alertId: string, query: CasesByAlertIDRequest) => Promise<CasesByAlertId>;
     cases: {
-      find: (query: CasesFindRequest, signal?: AbortSignal) => Promise<Cases>;
+      find: (query: CasesFindRequest, signal?: AbortSignal) => Promise<CasesFindResponseUI>;
       getCasesStatus: (query: CasesStatusRequest, signal?: AbortSignal) => Promise<CasesStatus>;
       getCasesMetrics: (query: CasesMetricsRequest, signal?: AbortSignal) => Promise<CasesMetrics>;
+      bulkGet: (params: CasesBulkGetRequest, signal?: AbortSignal) => Promise<CasesBulkGetResponse>;
     };
   };
   ui: {
@@ -117,14 +131,6 @@ export interface CasesUiStart {
       props: GetAllCasesSelectorModalProps
     ) => ReactElement<GetAllCasesSelectorModalProps>;
     /**
-     * Flyout with the form to create a case for the owner
-     * @param props GetCreateCaseFlyoutProps
-     * @returns A react component that is a flyout for creating a case
-     */
-    getCreateCaseFlyout: (
-      props: GetCreateCaseFlyoutProps
-    ) => ReactElement<GetCreateCaseFlyoutProps>;
-    /**
      * Get the recent cases component
      * @param props GetRecentCasesProps
      * @returns A react component for showing recent cases
@@ -132,8 +138,8 @@ export interface CasesUiStart {
     getRecentCases: (props: GetRecentCasesProps) => ReactElement<GetRecentCasesProps>;
   };
   hooks: {
-    getUseCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
-    getUseCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
+    useCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
+    useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
   };
   helpers: {
     /**
@@ -147,7 +153,7 @@ export interface CasesUiStart {
     canUseCases: ReturnType<typeof canUseCases>;
     getUICapabilities: typeof getUICapabilities;
     getRuleIdFromEvent: typeof getRuleIdFromEvent;
-    groupAlertsByRule: typeof groupAlertsByRule;
+    groupAlertsByRule: GroupAlertsByRule;
   };
 }
 
@@ -155,7 +161,8 @@ export type SupportedCaseAttachment =
   | CommentRequestAlertType
   | CommentRequestUserType
   | CommentRequestPersistableStateType
-  | CommentRequestExternalReferenceNoSOType;
+  | CommentRequestExternalReferenceNoSOType
+  | CommentRequestExternalReferenceSOType;
 
 export type CaseAttachments = SupportedCaseAttachment[];
 export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;

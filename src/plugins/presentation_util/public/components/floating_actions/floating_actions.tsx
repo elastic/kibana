@@ -5,94 +5,85 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { FC, ReactElement, useCallback, useRef, useState } from 'react';
+import React, { FC, ReactElement, useEffect, useState } from 'react';
+import classNames from 'classnames';
 
-import { EuiPortal, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import {
+  type ViewMode,
+  type IEmbeddable,
+  type EmbeddableInput,
+  panelHoverTrigger,
+  PANEL_HOVER_TRIGGER,
+} from '@kbn/embeddable-plugin/public';
+import { Action } from '@kbn/ui-actions-plugin/public';
+
+import { pluginServices } from '../../services';
+import './floating_actions.scss';
 
 export interface FloatingActionsProps {
-  className?: string;
-  actions?: JSX.Element;
   children: ReactElement;
+
+  className?: string;
   isEnabled?: boolean;
-  usingTwoLineLayout?: boolean;
+  embeddable?: IEmbeddable;
+  viewMode?: ViewMode;
+  disabledActions?: EmbeddableInput['disabledActions'];
 }
 
 export const FloatingActions: FC<FloatingActionsProps> = ({
-  className = '',
-  actions,
-  isEnabled,
-  usingTwoLineLayout,
   children,
+  viewMode,
+  isEnabled,
+  embeddable,
+  className = '',
+  disabledActions,
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const anchorRef = useRef<HTMLSpanElement>(null);
-  const actionsRef = useRef<HTMLDivElement>(null);
-  const [areFloatingActionsVisible, setFloatingActionsVisible] = useState<boolean>(false);
+  const {
+    uiActions: { getTriggerCompatibleActions },
+  } = pluginServices.getServices();
 
-  const showFloatingActions = useCallback(
-    () => isEnabled && setFloatingActionsVisible(true),
-    [isEnabled, setFloatingActionsVisible]
-  );
-  const hideFloatingActions = useCallback(
-    () => setFloatingActionsVisible(false),
-    [setFloatingActionsVisible]
-  );
+  const [floatingActions, setFloatingActions] = useState<JSX.Element | undefined>(undefined);
 
-  const anchorBoundingRect = anchorRef.current?.getBoundingClientRect();
-  const actionsBoundingRect = actionsRef.current?.getBoundingClientRect();
+  useEffect(() => {
+    if (!embeddable) return;
 
-  const hiddenActionsStyles = `
-  visibility: hidden;
-  opacity: 0;
+    const getActions = async () => {
+      const context = {
+        embeddable,
+        trigger: panelHoverTrigger,
+      };
+      const actions = (await getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context))
+        .filter((action): action is Action & { MenuItem: React.FC } => {
+          return action.MenuItem !== undefined && (disabledActions ?? []).indexOf(action.id) === -1;
+        })
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+      if (actions.length > 0) {
+        setFloatingActions(
+          <>
+            {actions.map((action) =>
+              React.createElement(action.MenuItem, {
+                key: action.id,
+                context,
+              })
+            )}
+          </>
+        );
+      } else {
+        setFloatingActions(undefined);
+      }
+    };
 
-  // slower transition on hover leave in case the user accidentally stops hover
-  transition: visibility 0.3s, opacity 0.3s;
-  `;
-  const visibleActionsStyles = `
-  transition: visibility 0.1s, opacity 0.1s;
-  visibility: visible;
-  opacity: 1;
-  `;
-
-  const floatingActionStyles =
-    anchorBoundingRect && actionsBoundingRect
-      ? css`
-          top: ${anchorBoundingRect.top -
-          (usingTwoLineLayout ? parseInt(euiTheme.size.xs, 10) : parseInt(euiTheme.size.l, 10))}px;
-          left: ${anchorBoundingRect.right -
-          actionsBoundingRect.width -
-          parseInt(euiTheme.size.xs, 10)}px;
-
-          ${areFloatingActionsVisible ? visibleActionsStyles : hiddenActionsStyles}
-        `
-      : undefined;
+    getActions();
+  }, [embeddable, getTriggerCompatibleActions, viewMode, disabledActions]);
 
   return (
-    <>
-      <span
-        className="floatingActions__anchor"
-        ref={anchorRef}
-        onMouseOver={showFloatingActions}
-        onFocus={showFloatingActions}
-        onMouseLeave={hideFloatingActions}
-        onBlur={hideFloatingActions}
-      >
-        {children}
-      </span>
-      <EuiPortal>
-        <div
-          ref={actionsRef}
-          className={className}
-          css={floatingActionStyles}
-          onMouseOver={showFloatingActions}
-          onFocus={showFloatingActions}
-          onMouseLeave={hideFloatingActions}
-          onBlur={hideFloatingActions}
-        >
-          {actions}
+    <div className="presentationUtil__floatingActionsWrapper">
+      {children}
+      {isEnabled && floatingActions && (
+        <div className={classNames('presentationUtil__floatingActions', className)}>
+          {floatingActions}
         </div>
-      </EuiPortal>
-    </>
+      )}
+    </div>
   );
 };

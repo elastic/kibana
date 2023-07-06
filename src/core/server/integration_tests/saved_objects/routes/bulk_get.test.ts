@@ -19,6 +19,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
+import { setupConfig } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -55,7 +56,9 @@ describe('POST /api/saved_objects/_bulk_get', () => {
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
-    registerBulkGetRoute(router, { coreUsageData, logger });
+
+    const config = setupConfig();
+    registerBulkGetRoute(router, { config, coreUsageData, logger });
 
     await server.start();
   });
@@ -109,7 +112,9 @@ describe('POST /api/saved_objects/_bulk_get', () => {
       .expect(200);
 
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
-    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(docs);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(docs, {
+      migrationVersionCompatibility: 'compatible',
+    });
   });
 
   it('returns with status 400 when a type is hidden from the HTTP APIs', async () => {

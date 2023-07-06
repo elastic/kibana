@@ -7,20 +7,23 @@
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
-import { EuiButtonEmpty, EuiLink, useEuiTheme } from '@elastic/eui';
-import { Switch, useHistory } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
-
+import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { Routes, Route } from '@kbn/shared-ux-router';
+import { useHistory, useLocation } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
-import { useInspectorContext } from '@kbn/observability-plugin/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
+import { CertificateTitle } from './components/certificates/certificate_title';
+import { CertRefreshBtn } from './components/certificates/cert_refresh_btn';
+import { useSyntheticsPrivileges } from './hooks/use_synthetics_priviliges';
 import { ClientPluginsStart } from '../../plugin';
 import { getMonitorsRoute } from './components/monitors_page/route_config';
+import { SyntheticsPageTemplateComponent } from './components/common/page_template/synthetics_page_template';
 import { getMonitorDetailsRoute } from './components/monitor_details/route_config';
 import { getStepDetailsRoute } from './components/step_details_page/route_config';
 import { getTestRunDetailsRoute } from './components/test_run_details/route_config';
@@ -30,10 +33,12 @@ import { MonitorAddPageWithServiceAllowed } from './components/monitor_add_edit/
 import { MonitorEditPageWithServiceAllowed } from './components/monitor_add_edit/monitor_edit_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
 import {
+  InspectMonitorPortalNode,
   MonitorDetailsLinkPortalNode,
   MonitorTypePortalNode,
 } from './components/monitor_add_edit/portals';
 import {
+  CERTIFICATES_ROUTE,
   GETTING_STARTED_ROUTE,
   MONITOR_ADD_ROUTE,
   MONITOR_EDIT_ROUTE,
@@ -42,6 +47,7 @@ import {
 import { PLUGIN } from '../../../common/constants/plugin';
 import { apiService } from '../../utils/api_service';
 import { getErrorDetailsRouteConfig } from './components/error_details/route_config';
+import { CertificatesPage } from './components/certificates/certificates';
 
 export type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
@@ -54,16 +60,10 @@ const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
   defaultMessage: 'Synthetics - Kibana',
 });
 
-export const MONITOR_MANAGEMENT_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.heading',
-  {
-    defaultMessage: 'Monitor Management',
-  }
-);
-
 const getRoutes = (
   euiTheme: EuiThemeComputed,
   history: ReturnType<typeof useHistory>,
+  location: ReturnType<typeof useLocation>,
   syntheticsPath: string
 ): RouteProps[] => {
   return [
@@ -72,7 +72,7 @@ const getRoutes = (
     getTestRunDetailsRoute(history, syntheticsPath, baseTitle),
     getStepDetailsRoute(history, syntheticsPath, baseTitle),
     ...getMonitorDetailsRoute(history, syntheticsPath, baseTitle),
-    ...getMonitorsRoute(history, syntheticsPath, baseTitle),
+    ...getMonitorsRoute(history, location, syntheticsPath, baseTitle),
     {
       title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
         defaultMessage: 'Synthetics Getting Started | {baseTitle}',
@@ -102,22 +102,7 @@ const getRoutes = (
             defaultMessage="Create Monitor"
           />
         ),
-        children: (
-          <FormattedMessage
-            id="xpack.synthetics.addMonitor.pageHeader.description"
-            defaultMessage="For more information about available monitor types and other options, see our {docs}."
-            values={{
-              docs: (
-                <EuiLink target="_blank" href="#">
-                  <FormattedMessage
-                    id="xpack.synthetics.addMonitor.pageHeader.docsLink"
-                    defaultMessage="documentation"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        ),
+        rightSideItems: [<OutPortal node={InspectMonitorPortalNode} />],
       },
     },
     {
@@ -136,7 +121,10 @@ const getRoutes = (
             defaultMessage="Edit Monitor"
           />
         ),
-        rightSideItems: [<OutPortal node={MonitorTypePortalNode} />],
+        rightSideItems: [
+          <OutPortal node={MonitorTypePortalNode} />,
+          <OutPortal node={InspectMonitorPortalNode} />,
+        ],
         breadcrumbs: [
           {
             text: <OutPortal node={MonitorDetailsLinkPortalNode} />,
@@ -161,6 +149,19 @@ const getRoutes = (
         ),
       },
     },
+    {
+      title: i18n.translate('xpack.synthetics.certificatesRoute.title', {
+        defaultMessage: `Certificates | {baseTitle}`,
+        values: { baseTitle },
+      }),
+      path: CERTIFICATES_ROUTE,
+      component: CertificatesPage,
+      dataTestSubj: 'uptimeCertificatesPage',
+      pageHeader: {
+        pageTitle: <CertificateTitle />,
+        rightSideItems: [<CertRefreshBtn />],
+      },
+    },
   ];
 };
 
@@ -172,22 +173,25 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }
 };
 
 export const PageRouter: FC = () => {
-  const { application, observability } = useKibana<ClientPluginsStart>().services;
+  const { application } = useKibana<ClientPluginsStart>().services;
   const { addInspectorRequest } = useInspectorContext();
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
+  const location = useLocation();
 
   const routes = getRoutes(
     euiTheme,
     history,
+    location,
     application.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID)
   );
-  const PageTemplateComponent = observability.navigation.PageTemplate;
 
   apiService.addInspectorRequest = addInspectorRequest;
 
+  const isUnPrivileged = useSyntheticsPrivileges();
+
   return (
-    <Switch>
+    <Routes>
       {routes.map(
         ({
           title,
@@ -200,24 +204,25 @@ export const PageRouter: FC = () => {
           <Route path={path} key={dataTestSubj} exact={true}>
             <div className={APP_WRAPPER_CLASS} data-test-subj={dataTestSubj}>
               <RouteInit title={title} path={path} />
-              <PageTemplateComponent
-                pageHeader={pageHeader}
+              <SyntheticsPageTemplateComponent
+                pageHeader={isUnPrivileged ? undefined : pageHeader}
                 data-test-subj={'synthetics-page-template'}
                 isPageDataLoaded={true}
                 {...pageTemplateProps}
               >
-                <RouteComponent />
-              </PageTemplateComponent>
+                {isUnPrivileged || <RouteComponent />}
+              </SyntheticsPageTemplateComponent>
             </div>
           </Route>
         )
       )}
       <Route
         component={() => (
-          <PageTemplateComponent>
+          <SyntheticsPageTemplateComponent>
             <NotFoundPrompt
               actions={[
                 <EuiButtonEmpty
+                  data-test-subj="syntheticsPageRouterGoToSyntheticsHomePageButton"
                   iconType="arrowLeft"
                   flush="both"
                   onClick={() => {
@@ -230,9 +235,9 @@ export const PageRouter: FC = () => {
                 </EuiButtonEmpty>,
               ]}
             />
-          </PageTemplateComponent>
+          </SyntheticsPageTemplateComponent>
         )}
       />
-    </Switch>
+    </Routes>
   );
 };

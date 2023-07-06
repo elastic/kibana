@@ -11,9 +11,10 @@ import React, { useMemo, memo, useContext, useEffect, useCallback } from 'react'
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { DragContext, DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { Easteregg } from './easteregg';
 import { NativeRenderer } from '../../native_renderer';
-import { DragContext, DragDropIdentifier } from '../../drag_drop';
 import {
   StateSetter,
   DatasourceDataPanelProps,
@@ -44,7 +45,11 @@ interface DataPanelWrapperProps {
   core: DatasourceDataPanelProps['core'];
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
   hasSuggestionForField: (field: DragDropIdentifier) => boolean;
-  plugins: { uiActions: UiActionsStart; dataViews: DataViewsPublicPluginStart };
+  plugins: {
+    uiActions: UiActionsStart;
+    dataViews: DataViewsPublicPluginStart;
+    eventAnnotationService: EventAnnotationServiceType;
+  };
   indexPatternService: IndexPatternServiceAPI;
   frame: FramePublicAPI;
 }
@@ -80,6 +85,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
       initializeSources(
         {
           datasourceMap: props.datasourceMap,
+          eventAnnotationService: props.plugins.eventAnnotationService,
           visualizationMap: props.visualizationMap,
           visualizationState,
           datasourceStates,
@@ -127,6 +133,7 @@ export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
     dispatchLens,
     props.plugins.dataViews,
     props.core.uiSettings,
+    props.plugins.eventAnnotationService,
   ]);
 
   const onChangeIndexPattern = useCallback(

@@ -8,13 +8,14 @@
 import expect from '@kbn/expect';
 import {
   ActionTypes,
-  CaseResponse,
+  Case,
   CaseSeverity,
   CaseStatuses,
   CommentUserAction,
   ConnectorTypes,
   FindTypes,
 } from '@kbn/cases-plugin/common/api';
+import { MAX_USER_ACTIONS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -131,7 +132,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('pagination', () => {
-      let theCase: CaseResponse;
+      let theCase: Case;
 
       beforeEach(async () => {
         theCase = await createCase(supertest, getPostCaseRequest());
@@ -236,6 +237,24 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(response.total).to.be(3);
         expect(response.userActions[0].type).to.eql('create_case');
         expect(response.userActions[0].action).to.eql('create');
+      });
+
+      it(`400s when perPage > ${MAX_USER_ACTIONS_PER_PAGE} supplied`, async () => {
+        await findCaseUserActions({
+          caseID: theCase.id,
+          supertest,
+          options: { perPage: MAX_USER_ACTIONS_PER_PAGE + 1 },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('400s when trying to fetch more than 10,000 documents', async () => {
+        await findCaseUserActions({
+          caseID: theCase.id,
+          supertest,
+          options: { page: 209, perPage: 100 },
+          expectedHttpCode: 400,
+        });
       });
     });
 
@@ -793,9 +812,9 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('rbac', () => {
         const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-        let secCase: CaseResponse;
-        let obsCase: CaseResponse;
-        let secCaseSpace2: CaseResponse;
+        let secCase: Case;
+        let obsCase: Case;
+        let secCaseSpace2: Case;
 
         beforeEach(async () => {
           [secCase, obsCase, secCaseSpace2] = await Promise.all([

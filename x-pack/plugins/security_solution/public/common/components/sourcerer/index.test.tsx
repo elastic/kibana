@@ -25,7 +25,8 @@ import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/supe
 import { waitFor } from '@testing-library/dom';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
-import { TimelineId, TimelineType } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline/api';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 

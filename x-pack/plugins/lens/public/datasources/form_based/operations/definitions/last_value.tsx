@@ -28,6 +28,7 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
+  getExistsFilter,
 } from './helpers';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { isRuntimeField, isScriptedField } from './terms/helpers';
@@ -141,13 +142,6 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
     showArrayValues: boolean;
     // last value on numeric fields can be formatted
     format?: ValueFormatConfig;
-  };
-}
-
-function getExistsFilter(field: string) {
-  return {
-    query: `${field}: *`,
-    language: 'kuery',
   };
 }
 
@@ -285,9 +279,12 @@ export const lastValueOperation: OperationDefinition<
       // time shift is added to wrapping aggFilteredMetric if filter is set
       timeShift: column.filter ? undefined : column.timeShift,
     } as const;
+    // do not use unsupported top hits when using a counter field type
+    const isCounterMetricFieldUsed =
+      indexPattern.getFieldByName(column.sourceField)?.timeSeriesMetric === 'counter';
 
     return (
-      column.params.showArrayValues
+      column.params.showArrayValues && !isCounterMetricFieldUsed
         ? buildExpressionFunction<AggFunctionsMapping['aggTopHit']>('aggTopHit', {
             ...initialArgs,
             aggregate: 'concat',

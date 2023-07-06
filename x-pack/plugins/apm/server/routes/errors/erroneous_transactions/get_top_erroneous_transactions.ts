@@ -127,6 +127,16 @@ async function getTopErroneousTransactions({
   );
 }
 
+export interface TopErroneousTransactionsResponse {
+  topErroneousTransactions: Array<{
+    transactionName: string;
+    currentPeriodTimeseries: Array<{ x: number; y: number }>;
+    previousPeriodTimeseries: Array<{ x: number; y: number }>;
+    transactionType: string | undefined;
+    occurrences: number;
+  }>;
+}
+
 export async function getTopErroneousTransactionsPeriods({
   kuery,
   serviceName,
@@ -147,7 +157,7 @@ export async function getTopErroneousTransactionsPeriods({
   start: number;
   end: number;
   offset?: string;
-}) {
+}): Promise<TopErroneousTransactionsResponse> {
   const [currentPeriod, previousPeriod] = await Promise.all([
     getTopErroneousTransactions({
       environment,

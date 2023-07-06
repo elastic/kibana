@@ -8,9 +8,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiFormRow } from '@elastic/eui';
+import { ChildDragDropProvider, DragDrop } from '@kbn/dom-drag-drop';
 import { FramePublicAPI, Visualization, VisualizationConfigProps } from '../../../types';
 import { LayerPanel } from './layer_panel';
-import { ChildDragDropProvider, DragDrop } from '../../../drag_drop';
+import { LayerActions } from './layer_actions';
 import { coreMock } from '@kbn/core/public/mocks';
 import { generateId } from '../../../id_generator';
 import {
@@ -21,6 +22,7 @@ import {
   mountWithProvider,
 } from '../../../mocks';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
+import { DimensionButton } from '@kbn/visualization-ui-components/public';
 
 jest.mock('../../../id_generator');
 
@@ -51,6 +53,7 @@ afterEach(() => {
 });
 
 const defaultContext = {
+  dataTestSubjPrefix: 'lnsDragDrop',
   dragging: undefined,
   setDragging: jest.fn(),
   setActiveDropTarget: () => {},
@@ -114,6 +117,7 @@ describe('LayerPanel', () => {
       onChangeIndexPattern: jest.fn(),
       indexPatternService: createIndexPatternServiceMock(),
       getUserMessages: () => [],
+      displayLayerSettings: true,
     };
   }
 
@@ -201,6 +205,13 @@ describe('LayerPanel', () => {
       expect(optionalLabel.text()).toEqual('Optional');
     });
 
+    it('should hide the layer actions if displayLayerSettings is set to false', async () => {
+      const { instance } = await mountWithProvider(
+        <LayerPanel {...getDefaultProps()} displayLayerSettings={false} />
+      );
+      expect(instance.find(LayerActions).exists()).toBe(false);
+    });
+
     it('should render the group with a way to add a new column', async () => {
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
@@ -265,8 +276,8 @@ describe('LayerPanel', () => {
             dimensionsTooMany: 1,
           },
           {
-            groupLabel: 'A',
-            groupId: 'a',
+            groupLabel: 'C',
+            groupId: 'c',
             accessors: [{ columnId: 'x' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
@@ -713,9 +724,7 @@ describe('LayerPanel', () => {
 
       expect(instance.exists('[data-test-subj="lns-fakeDimension"]')).toBeTruthy();
       expect(
-        instance
-          .find('[data-test-subj="lns-fakeDimension"] .lnsLayerPanel__triggerTextLabel')
-          .text()
+        instance.find('[data-test-subj="lns-fakeDimension"] .dimensionTrigger__textLabel').text()
       ).toBe(fakeAccessorLabel);
     });
 
@@ -775,7 +784,7 @@ describe('LayerPanel', () => {
       );
 
       const dragDropElement = instance
-        .find('[data-test-subj="lnsGroup"] DragDrop .lnsDragDrop')
+        .find('[data-test-subj="lnsGroup"] DragDrop .domDragDrop')
         .first();
 
       dragDropElement.simulate('dragOver');
@@ -825,7 +834,8 @@ describe('LayerPanel', () => {
       const dragDropElement = instance
         .find('[data-test-subj="lnsGroup"] DragDrop')
         .first()
-        .find('.lnsLayerPanel__dimension');
+        .find(DimensionButton)
+        .first();
 
       dragDropElement.simulate('dragOver');
       dragDropElement.simulate('drop');
@@ -889,7 +899,7 @@ describe('LayerPanel', () => {
       // Simulate drop on the pre-populated dimension
 
       const dragDropElement = instance
-        .find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop')
+        .find('[data-test-subj="lnsGroupB"] DragDrop .domDragDrop')
         .at(0);
       dragDropElement.simulate('dragOver');
       dragDropElement.simulate('drop');
@@ -904,8 +914,8 @@ describe('LayerPanel', () => {
       // Simulate drop on the empty dimension
 
       const updatedDragDropElement = instance
-        .find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop')
-        .at(2);
+        .find('[data-test-subj="lnsGroupB"] DragDrop .domDragDrop')
+        .last();
 
       updatedDragDropElement.simulate('dragOver');
       updatedDragDropElement.simulate('drop');

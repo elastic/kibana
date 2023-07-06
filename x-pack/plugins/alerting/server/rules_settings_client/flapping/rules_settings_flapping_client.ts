@@ -92,7 +92,8 @@ export class RulesSettingsFlappingClient {
           flapping: {
             ...attributes.flapping,
             ...newFlappingProperties,
-            ...modificationMetadata,
+            updatedAt: modificationMetadata.updatedAt,
+            updatedBy: modificationMetadata.updatedBy,
           },
         },
         {

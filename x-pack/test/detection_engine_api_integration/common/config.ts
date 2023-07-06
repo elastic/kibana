@@ -76,8 +76,25 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
           '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'previewTelemetryUrlEnabled',
+            'riskScoringPersistence',
+            'riskScoringRoutesEnabled',
+            'detectionsCoverageOverview',
           ])}`,
           '--xpack.task_manager.poll_interval=1000',
+          `--xpack.actions.preconfigured=${JSON.stringify({
+            'my-test-email': {
+              actionTypeId: '.email',
+              name: 'TestEmail#xyz',
+              config: {
+                from: 'me@test.com',
+                service: '__json',
+              },
+              secrets: {
+                user: 'user',
+                password: 'password',
+              },
+            },
+          })}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

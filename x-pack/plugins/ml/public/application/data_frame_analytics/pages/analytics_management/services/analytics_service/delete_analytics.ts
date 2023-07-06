@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+
 import { ml } from '../../../../../services/ml_api_service';
 import { ToastNotificationService } from '../../../../../services/toast_notification_service';
 import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';

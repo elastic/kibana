@@ -11,7 +11,6 @@ import {
   Settings,
   Partition,
   PartitionLayout,
-  ShapeTreeNode,
   LIGHT_THEME,
   DARK_THEME,
 } from '@elastic/charts';
@@ -20,11 +19,12 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsDarkTheme } from '@kbn/ml-kibana-theme';
 import { MemoryUsageInfo } from '../../../../common/types/trained_models';
 import { JobType, MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { LoadingWrapper } from '../../jobs/new_job/pages/components/charts/loading_wrapper';
-import { useFieldFormatter, useUiSettings } from '../../contexts/kibana';
+import { useFieldFormatter, useMlKibana } from '../../contexts/kibana';
 
 import { useRefresh } from '../../routing/use_refresh';
 import { getMemoryItemColor } from '../memory_item_colors';
@@ -66,7 +66,11 @@ const TYPE_OPTIONS: EuiComboBoxOptionOption[] = Object.entries(TYPE_LABELS).map(
 );
 
 export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
-  const isDarkTheme = useUiSettings().get('theme:darkMode');
+  const {
+    services: { theme: themeService },
+  } = useMlKibana();
+  const isDarkTheme = useIsDarkTheme(themeService);
+
   const { theme, baseTheme } = useMemo(
     () =>
       isDarkTheme
@@ -158,7 +162,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
                     valueFormatter: (size: number) => bytesFormatter(size),
                   },
                   shape: {
-                    fillColor: (d: ShapeTreeNode) => getMemoryItemColor(d.dataName as JobType),
+                    fillColor: (dataName) => getMemoryItemColor(dataName as JobType),
                   },
                 },
                 {
@@ -170,7 +174,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
                     },
                   },
                   shape: {
-                    fillColor: (d: ShapeTreeNode) => {
+                    fillColor: (dataName, index, d) => {
                       // color the shape the same as its parent.
                       const parentId = d.parent.path[d.parent.path.length - 1].value as JobType;
                       return getMemoryItemColor(parentId);
@@ -183,7 +187,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
         ) : (
           <EuiEmptyPrompt
             titleSize="xs"
-            iconType="alert"
+            iconType="warning"
             data-test-subj="mlEmptyMemoryUsageTreeMap"
             title={
               <h2>

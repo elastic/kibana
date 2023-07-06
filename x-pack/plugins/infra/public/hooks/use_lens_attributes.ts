@@ -5,32 +5,53 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
-import { InfraClientSetupDeps, LensAttributes, LensOptions } from '../types';
+import { InfraClientSetupDeps } from '../types';
 import {
-  buildLensAttributes,
-  HostLensAttributesTypes,
-  hostMetricsLensAttributes,
+  type HostsLensFormulas,
+  type HostsLensMetricChartFormulas,
+  type HostsLensLineChartFormulas,
+  type LineChartOptions,
+  type MetricChartOptions,
+  LensAttributesBuilder,
+  LensAttributes,
+  hostLensFormulas,
+  visualizationTypes,
 } from '../common/visualizations';
+import { useLazyRef } from './use_lazy_ref';
 
-interface UseLensAttributesParams {
-  type: HostLensAttributesTypes;
-  dataView: DataView | undefined;
-  options?: LensOptions;
+type Options = LineChartOptions | MetricChartOptions;
+interface UseLensAttributesBaseParams<T extends HostsLensFormulas, O extends Options> {
+  dataView?: DataView;
+  type: T;
+  options?: O;
 }
+
+interface UseLensAttributesLineChartParams
+  extends UseLensAttributesBaseParams<HostsLensLineChartFormulas, LineChartOptions> {
+  visualizationType: 'lineChart';
+}
+
+interface UseLensAttributesMetricChartParams
+  extends UseLensAttributesBaseParams<HostsLensMetricChartFormulas, MetricChartOptions> {
+  visualizationType: 'metricChart';
+}
+
+type UseLensAttributesParams =
+  | UseLensAttributesLineChartParams
+  | UseLensAttributesMetricChartParams;
 
 export const useLensAttributes = ({
   type,
   dataView,
-  options = {
-    breakdownSize: 10,
-  },
+  options,
+  visualizationType,
 }: UseLensAttributesParams) => {
   const {
     services: { lens },
@@ -39,77 +60,98 @@ export const useLensAttributes = ({
   const { value, error } = useAsync(lens.stateHelperApi, [lens]);
   const { formula: formulaAPI } = value ?? {};
 
-  const attributes: LensAttributes | null = useMemo(() => {
+  const lensChartConfig = hostLensFormulas[type];
+  const Chart = visualizationTypes[visualizationType];
+
+  const attributes = useLazyRef(() => {
     if (!dataView || !formulaAPI) {
       return null;
     }
 
-    const VisualizationClass = hostMetricsLensAttributes[type];
-    const visualizationAttributes = buildLensAttributes(
-      new VisualizationClass(dataView, options, formulaAPI)
+    const builder = new LensAttributesBuilder(
+      new Chart(lensChartConfig, dataView, formulaAPI, options)
     );
 
-    return visualizationAttributes;
-  }, [dataView, formulaAPI, options, type]);
+    return builder.build();
+  });
 
-  const injectData = (data: {
-    filters: Filter[];
-    query: Query;
-    title?: string;
-  }): LensAttributes | null => {
-    if (!attributes) {
-      return null;
-    }
+  const injectFilters = useCallback(
+    ({
+      filters,
+      query = { language: 'kuery', query: '' },
+    }: {
+      filters: Filter[];
+      query?: Query;
+    }): LensAttributes | null => {
+      if (!attributes.current) {
+        return null;
+      }
+      return {
+        ...attributes.current,
+        state: {
+          ...attributes.current.state,
+          query,
+          filters: [...attributes.current.state.filters, ...filters],
+        },
+      };
+    },
+    [attributes]
+  );
 
-    return {
-      ...attributes,
-      ...(!!data.title ? { title: data.title } : {}),
-      state: {
-        ...attributes.state,
-        query: data.query,
-        filters: [...attributes.state.filters, ...data.filters],
-      },
-    };
-  };
-
-  const getExtraActions = (currentAttributes: LensAttributes | null, timeRange: TimeRange) => {
-    return {
-      openInLens: {
-        id: 'openInLens',
-
-        getDisplayName(_context: ActionExecutionContext): string {
-          return i18n.translate(
-            'xpack.infra.hostsViewPage.tabs.metricsCharts.actions.openInLines',
+  const openInLensAction = useCallback(
+    ({ timeRange, filters, query }: { timeRange: TimeRange; filters: Filter[]; query?: Query }) =>
+      () => {
+        const injectedAttributes = injectFilters({ filters, query });
+        if (injectedAttributes) {
+          navigateToPrefilledEditor(
             {
-              defaultMessage: 'Open in Lens',
+              id: '',
+              timeRange,
+              attributes: injectedAttributes,
+            },
+            {
+              openInNewTab: true,
             }
           );
-        },
-        getIconType(_context: ActionExecutionContext): string | undefined {
-          return 'visArea';
-        },
-        type: 'actionButton',
-        async isCompatible(_context: ActionExecutionContext): Promise<boolean> {
-          return true;
-        },
-        async execute(_context: ActionExecutionContext): Promise<void> {
-          if (currentAttributes) {
-            navigateToPrefilledEditor(
-              {
-                id: '',
-                timeRange,
-                attributes: currentAttributes,
-              },
-              {
-                openInNewTab: true,
-              }
-            );
-          }
-        },
-        order: 100,
+        }
       },
-    };
-  };
+    [injectFilters, navigateToPrefilledEditor]
+  );
 
-  return { attributes, injectData, getExtraActions, error };
+  const getExtraActions = useCallback(
+    ({ timeRange, filters, query }: { timeRange: TimeRange; filters: Filter[]; query?: Query }) => {
+      const openInLens = getOpenInLensAction(openInLensAction({ timeRange, filters, query }));
+      return [openInLens];
+    },
+    [openInLensAction]
+  );
+
+  const {
+    formula: { formula },
+  } = lensChartConfig;
+
+  return { formula, attributes: attributes.current, getExtraActions, error };
+};
+
+const getOpenInLensAction = (onExecute: () => void): Action => {
+  return {
+    id: 'openInLens',
+
+    getDisplayName(_context: ActionExecutionContext): string {
+      return i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.actions.openInLines', {
+        defaultMessage: 'Open in Lens',
+      });
+    },
+    getIconType(_context: ActionExecutionContext): string | undefined {
+      return 'visArea';
+    },
+    type: 'actionButton',
+    async isCompatible(_context: ActionExecutionContext): Promise<boolean> {
+      return true;
+    },
+    async execute(_context: ActionExecutionContext): Promise<void> {
+      onExecute();
+    },
+    order: 100,
+  };
 };

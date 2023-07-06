@@ -38,10 +38,6 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
 
   describe('test metadata apis', () => {
-    before(async () => {
-      await endpointTestResources.setMetadataTransformFrequency('1s');
-    });
-
     describe('list endpoints GET route', () => {
       const numberOfHostsInFixture = 2;
 
@@ -90,6 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
         const res = await supertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', '2023-10-31')
           .query({
             page: 0,
             pageSize: 10,
@@ -106,6 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', '2023-10-31')
           .query({
             page: 1,
             pageSize: 1,
@@ -121,6 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', '2023-10-31')
           .query({
             page: 3,
             pageSize: 10,
@@ -136,6 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', '2023-10-31')
           .query({
             page: 1,
             pageSize: 0,
@@ -148,6 +148,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', '2023-10-31')
           .query({
             kuery: 'not (united.endpoint.host.ip:10.101.149.26)',
           })
@@ -163,6 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', '2023-10-31')
           .query({
             page: 0,
             pageSize: 10,
@@ -185,6 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', '2023-10-31')
           .query({
             kuery: `united.endpoint.host.os.Ext.variant:${variantValue}`,
           })
@@ -204,6 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', '2023-10-31')
           .query({
             kuery: `united.endpoint.host.ip:${targetEndpointIp}`,
           })
@@ -222,6 +226,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', '2023-10-31')
           .query({
             kuery: 'not (united.endpoint.Endpoint.policy.applied.status:success)',
           })
@@ -241,6 +246,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', '2023-10-31')
           .query({
             kuery: `united.endpoint.elastic.agent.id:${targetElasticAgentId}`,
           })
@@ -262,6 +268,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', '2023-10-31')
           .query({
             kuery: `united.endpoint.host.hostname:${targetAgentHostname}`,
           })
@@ -280,6 +287,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .get(HOST_METADATA_LIST_ROUTE)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', '2023-10-31')
           .expect(200);
         expect(body.data.length).to.eql(numberOfHostsInFixture);
         expect(body.total).to.eql(numberOfHostsInFixture);
@@ -295,6 +303,7 @@ export default function ({ getService }: FtrProviderContext) {
         await getService('supertestWithoutAuth')
           .get(METADATA_TRANSFORMS_STATUS_ROUTE)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', '2023-10-31')
           .expect(401);
       });
 
@@ -305,6 +314,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .get(METADATA_TRANSFORMS_STATUS_ROUTE)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', '2023-10-31')
           .expect(200);
 
         const transforms = (body.transforms as TransformGetTransformStatsTransformStats[]).filter(
@@ -332,6 +342,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .get(METADATA_TRANSFORMS_STATUS_ROUTE)
           .set('kbn-xsrf', 'xxx')
+          .set('Elastic-Api-Version', '2023-10-31')
           .expect(200);
 
         const transforms = (body.transforms as TransformGetTransformStatsTransformStats[]).filter(

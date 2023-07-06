@@ -9,7 +9,6 @@ import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type { RuleCreateProps } from '../../../../../../common/detection_engine/rule_schema';
-import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
 import { convertCreateAPIToInternalSchema } from '../../normalization/rule_converters';
 import type { RuleParams } from '../../../rule_schema';
 
@@ -38,11 +37,6 @@ export const createRules = async ({
     data: internalRule,
     allowMissingConnectorSecrets,
   });
-
-  // Mute the rule if it is first created with the explicit no actions
-  if (params.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
-    await rulesClient.muteAll({ id: rule.id });
-  }
 
   return rule;
 };

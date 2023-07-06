@@ -42,15 +42,13 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
         return (
           <SecurityCellActions
             key={escapeDataProviderId(`networkDns-table--name-${dnsName}`)}
-            mode={CellActionsMode.HOVER}
+            mode={CellActionsMode.HOVER_DOWN}
             visibleCellActions={5}
             showActionTooltips
             triggerId={SecurityCellActionsTrigger.DEFAULT}
-            field={{
-              name: 'dns.question.registered_domain',
+            data={{
               value: dnsName,
-              type: 'keyword',
-              aggregatable: true,
+              field: 'dns.question.registered_domain',
             }}
           >
             {defaultToEmptyTag(dnsName)}

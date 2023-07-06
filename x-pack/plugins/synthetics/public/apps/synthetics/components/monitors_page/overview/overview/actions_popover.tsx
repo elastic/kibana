@@ -16,7 +16,7 @@ import {
   EuiContextMenuPanelItemDescriptor,
   EuiToolTip,
 } from '@elastic/eui';
-import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { PRIVATE_AVAILABLE_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
@@ -27,19 +27,11 @@ import {
 import { toggleStatusAlert } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
 import { useSelectedMonitor } from '../../../monitor_details/hooks/use_selected_monitor';
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
-import {
-  ConfigKey,
-  EncryptedSyntheticsMonitor,
-  MonitorOverviewItem,
-} from '../../../../../../../common/runtime_types';
+import { ConfigKey, MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
-import {
-  useMonitorEnableHandler,
-  useLocationName,
-  useCanUpdatePrivateMonitor,
-} from '../../../../hooks';
+import { useMonitorEnableHandler, useLocationName } from '../../../../hooks';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
-import { useEditMonitorLocator } from '../../hooks/use_edit_monitor_locator';
+import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locator';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { NoPermissionsTooltip } from '../../../common/components/permissions';
 
@@ -76,6 +68,7 @@ interface Props {
   position: PopoverPosition;
   iconHasPanel?: boolean;
   iconSize?: 's' | 'xs';
+  locationId: string;
 }
 
 const CustomShadowPanel = styled(EuiPanel)<{ shadow: string }>`
@@ -107,25 +100,23 @@ export function ActionsPopover({
   position,
   iconHasPanel = true,
   iconSize = 's',
+  locationId,
 }: Props) {
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
-  const location = useLocationName({ locationId: monitor.location.id });
+  const location = useLocationName({ locationId });
   const locationName = location?.label || monitor.location.id;
 
   const isPrivateLocation = !Boolean(location?.isServiceManaged);
 
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
-    locationId: monitor.location.id,
+    locationId: locationId ?? monitor.location.id,
   });
   const editUrl = useEditMonitorLocator({ configId: monitor.configId });
 
   const { monitor: monitorFields } = useSelectedMonitor(monitor.configId);
   const canEditSynthetics = useCanEditSynthetics();
-  const canUpdatePrivateMonitor = useCanUpdatePrivateMonitor(
-    monitorFields as EncryptedSyntheticsMonitor
-  );
 
   const labels = useMemo(
     () => ({
@@ -204,28 +195,22 @@ export function ActionsPopover({
     },
     {
       name: (
-        <NoPermissionsTooltip
-          canEditSynthetics={canEditSynthetics}
-          canUpdatePrivateMonitor={canUpdatePrivateMonitor}
-        >
+        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
           {actionsMenuEditMonitorName}
         </NoPermissionsTooltip>
       ),
       icon: 'pencil',
-      disabled: !canEditSynthetics || !canUpdatePrivateMonitor,
+      disabled: !canEditSynthetics,
       href: editUrl,
     },
     {
       name: (
-        <NoPermissionsTooltip
-          canEditSynthetics={canEditSynthetics}
-          canUpdatePrivateMonitor={canUpdatePrivateMonitor}
-        >
+        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
           {enableLabel}
         </NoPermissionsTooltip>
       ),
       icon: 'invert',
-      disabled: !canEditSynthetics || !canUpdatePrivateMonitor,
+      disabled: !canEditSynthetics,
       onClick: () => {
         if (status !== FETCH_STATUS.LOADING) {
           updateMonitorEnabledState(!monitor.isEnabled);
@@ -233,7 +218,12 @@ export function ActionsPopover({
       },
     },
     {
-      name: monitor.isStatusAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel,
+      name: (
+        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+          {monitor.isStatusAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel}
+        </NoPermissionsTooltip>
+      ),
+      disabled: !canEditSynthetics,
       icon: alertLoading ? (
         <EuiLoadingSpinner size="s" />
       ) : monitor.isStatusAlertEnabled ? (
@@ -343,28 +333,28 @@ const loadingLabel = (isEnabled: boolean) =>
 const enableMonitorLabel = i18n.translate(
   'xpack.synthetics.overview.actions.enableLabelEnableMonitor',
   {
-    defaultMessage: 'Enable monitor',
+    defaultMessage: 'Enable monitor (all locations)',
   }
 );
 
 const disableMonitorLabel = i18n.translate(
   'xpack.synthetics.overview.actions.enableLabelDisableMonitor',
   {
-    defaultMessage: 'Disable monitor',
+    defaultMessage: 'Disable monitor (all locations)',
   }
 );
 
 const disableAlertLabel = i18n.translate(
   'xpack.synthetics.overview.actions.disableLabelDisableAlert',
   {
-    defaultMessage: 'Disable status alerts',
+    defaultMessage: 'Disable status alerts (all locations)',
   }
 );
 
 const enableMonitorAlertLabel = i18n.translate(
   'xpack.synthetics.overview.actions.enableLabelDisableAlert',
   {
-    defaultMessage: 'Enable status alerts',
+    defaultMessage: 'Enable status alerts (all locations)',
   }
 );
 

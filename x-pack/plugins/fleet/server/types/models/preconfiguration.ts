@@ -11,9 +11,10 @@ import semverValid from 'semver/functions/valid';
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
 import type { PreconfiguredOutput } from '../../../common/types';
 
+import { ElasticSearchSchema, KafkaSchema, LogstashSchema } from './output';
+
 import { AgentPolicyBaseSchema } from './agent_policy';
 import { NamespaceSchema } from './package_policy';
-import { NewOutputSchema } from './output';
 
 const varsSchema = schema.maybe(
   schema.arrayOf(
@@ -73,16 +74,20 @@ function validatePreconfiguredOutputs(outputs: PreconfiguredOutput[]) {
   }
 }
 
+const PreconfiguredOutputBaseSchema = {
+  id: schema.string(),
+  config: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  config_yaml: schema.never(),
+  allow_edit: schema.maybe(schema.arrayOf(schema.string())),
+};
+
 export const PreconfiguredOutputsSchema = schema.arrayOf(
-  NewOutputSchema.extends({
-    id: schema.string(),
-    config: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-    config_yaml: schema.never(),
-  }),
-  {
-    defaultValue: [],
-    validate: validatePreconfiguredOutputs,
-  }
+  schema.oneOf([
+    schema.object({ ...ElasticSearchSchema }).extends(PreconfiguredOutputBaseSchema),
+    schema.object({ ...LogstashSchema }).extends(PreconfiguredOutputBaseSchema),
+    schema.object({ ...KafkaSchema }).extends(PreconfiguredOutputBaseSchema),
+  ]),
+  { defaultValue: [], validate: validatePreconfiguredOutputs }
 );
 
 export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
@@ -129,7 +134,16 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
         id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
         name: schema.string(),
         package: schema.object({
-          name: schema.string(),
+          name: schema.string({
+            validate: (value) => {
+              if (value === 'synthetics') {
+                return i18n.translate('xpack.fleet.config.disableSynthetics', {
+                  defaultMessage:
+                    'Synthetics package is not supported via kibana.yml config. Please use Synthetics App to create monitors in private locations. https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html',
+                });
+              }
+            },
+          }),
         }),
         description: schema.maybe(schema.string()),
         namespace: schema.maybe(NamespaceSchema),

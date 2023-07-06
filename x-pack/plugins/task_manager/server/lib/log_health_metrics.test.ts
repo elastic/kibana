@@ -41,16 +41,30 @@ describe('logHealthMetrics', () => {
     const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
 
     // We must change from OK to Warning
-    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(() => HealthStatus.OK);
+    (
+      calculateHealthStatus as jest.Mock<{ status: HealthStatus; reason?: string }>
+    ).mockImplementation(() => ({
+      status: HealthStatus.OK,
+    }));
     logHealthMetrics(health, logger, config, true, docLinks);
-    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(
-      () => HealthStatus.Warning
-    );
+    (
+      calculateHealthStatus as jest.Mock<{ status: HealthStatus; reason?: string }>
+    ).mockImplementation(() => ({
+      status: HealthStatus.Warning,
+    }));
     logHealthMetrics(health, logger, config, true, docLinks);
     // We must change from OK to Error
-    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(() => HealthStatus.OK);
+    (
+      calculateHealthStatus as jest.Mock<{ status: HealthStatus; reason?: string }>
+    ).mockImplementation(() => ({
+      status: HealthStatus.OK,
+    }));
     logHealthMetrics(health, logger, config, true, docLinks);
-    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(() => HealthStatus.Error);
+    (
+      calculateHealthStatus as jest.Mock<{ status: HealthStatus; reason?: string }>
+    ).mockImplementation(() => ({
+      status: HealthStatus.Error,
+    }));
     logHealthMetrics(health, logger, config, true, docLinks);
 
     const debugCalls = (logger as jest.Mocked<Logger>).debug.mock.calls;
@@ -175,9 +189,11 @@ describe('logHealthMetrics', () => {
     });
     const health = getMockMonitoredHealth();
     const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
-    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(
-      () => HealthStatus.Warning
-    );
+    (
+      calculateHealthStatus as jest.Mock<{ status: HealthStatus; reason?: string }>
+    ).mockImplementation(() => ({
+      status: HealthStatus.Warning,
+    }));
 
     logHealthMetrics(health, logger, config, true, docLinks);
 
@@ -201,7 +217,11 @@ describe('logHealthMetrics', () => {
     });
     const health = getMockMonitoredHealth();
     const { calculateHealthStatus } = jest.requireMock('./calculate_health_status');
-    (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(() => HealthStatus.Error);
+    (
+      calculateHealthStatus as jest.Mock<{ status: HealthStatus; reason?: string }>
+    ).mockImplementation(() => ({
+      status: HealthStatus.Error,
+    }));
 
     logHealthMetrics(health, logger, config, true, docLinks);
 
@@ -402,7 +422,6 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
         value: {
           max_workers: 10,
           poll_interval: 3000,
-          max_poll_inactivity_cycles: 10,
           request_capacity: 1000,
           monitored_aggregated_stats_refresh_rate: 5000,
           monitored_stats_running_average_window: 50,

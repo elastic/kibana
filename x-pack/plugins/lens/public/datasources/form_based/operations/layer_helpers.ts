@@ -9,8 +9,8 @@ import { partition, mapValues, pickBy } from 'lodash';
 import { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DateRange } from '../../../../common';
+import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { DateRange } from '../../../../common/types';
 import type {
   DatasourceFixAction,
   FrameDatasourceAPI,
@@ -360,7 +360,7 @@ export function insertNewColumn({
       // TODO: need to create on the fly the new columns for Formula,
       // like we do for fullReferences to show a seamless transition
     }
-    const possibleOperation = operationDefinition.getPossibleOperation();
+    const possibleOperation = operationDefinition.getPossibleOperation(indexPattern);
     const isBucketed = Boolean(possibleOperation?.isBucketed);
     const addOperationFn = isBucketed ? addBucket : addMetric;
     const buildColumnFn = columnParams
@@ -555,11 +555,7 @@ function replaceFormulaColumn(
 
   // when coming to Formula keep the custom label
   const regeneratedColumn = newLayer.columns[columnId];
-  if (
-    !shouldResetLabel &&
-    regeneratedColumn.operationType !== previousColumn.operationType &&
-    previousColumn.customLabel
-  ) {
+  if (!shouldResetLabel && previousColumn.customLabel) {
     regeneratedColumn.customLabel = true;
     regeneratedColumn.label = previousColumn.label;
   }
@@ -840,12 +836,16 @@ export function replaceColumn({
       { ...layer, columns: { ...layer.columns, [columnId]: newColumn } },
       columnId
     );
-    return adjustColumnReferencesForChangedColumn(
-      {
-        ...newLayer,
-        columnOrder: getColumnOrder(newLayer),
-      },
-      columnId
+
+    return updateDefaultLabels(
+      adjustColumnReferencesForChangedColumn(
+        {
+          ...newLayer,
+          columnOrder: getColumnOrder(newLayer),
+        },
+        columnId
+      ),
+      indexPattern
     );
   } else if (operationDefinition.input === 'managedReference') {
     // Just changing a param in a formula column should trigger
@@ -1580,7 +1580,8 @@ export function getErrorMessages(
           columnId,
           indexPattern,
           { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
-          operationDefinitionMap
+          operationDefinitionMap,
+          core.uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
         );
       }
     })
@@ -1693,7 +1694,7 @@ export function isOperationAllowedAsReference({
     hasValidMetadata =
       Boolean(metadata) && validation.validateMetadata(metadata!, operationType, field.name);
   } else if (operationDefinition.input === 'none') {
-    const metadata = operationDefinition.getPossibleOperation();
+    const metadata = operationDefinition.getPossibleOperation(indexPattern);
     hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!, operationType);
   } else if (operationDefinition.input === 'fullReference') {
     const metadata = operationDefinition.getPossibleOperation(indexPattern);

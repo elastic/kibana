@@ -6,7 +6,7 @@ Example:
 ```JSX
 <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
     [...]
-    <CellActions mode={CellActionsMode.HOVER} triggerId={MY_TRIGGER_ID} config={{ field: 'fieldName', value: 'fieldValue', fieldType: 'text' }}>
+    <CellActions mode={CellActionsMode.HOVER_DOWN} triggerId={MY_TRIGGER_ID} config={{ field: 'fieldName', value: 'fieldValue', fieldType: 'text' }}>
         Hover me
     </CellActions>
 </CellActionsProvider>

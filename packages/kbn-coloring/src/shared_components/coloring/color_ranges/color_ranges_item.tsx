@@ -23,6 +23,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import { isValidColor } from '../../../color_manipulation';
 import {
   PaletteContinuity,
   checkIsMaxContinuity,
@@ -32,7 +33,6 @@ import {
 
 import { RelatedIcon } from '../assets/related';
 import { getAutoBoundInformation, isLastItem } from './utils';
-import { isValidColor } from '../utils';
 import {
   ColorRangeDeleteButton,
   ColorRangeAutoDetectButton,

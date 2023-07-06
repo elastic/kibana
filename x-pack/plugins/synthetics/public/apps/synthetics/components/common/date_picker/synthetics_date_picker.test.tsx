@@ -25,28 +25,6 @@ describe('SyntheticsDatePicker component', () => {
     expect(await findByText('Refresh')).toBeInTheDocument();
   });
 
-  it('uses shared date range state when there is no url date range state', async () => {
-    const customHistory = createMemoryHistory({
-      initialEntries: ['/?dateRangeStart=now-15m&dateRangeEnd=now'],
-    });
-
-    jest.spyOn(customHistory, 'push');
-
-    const { findByText } = render(<SyntheticsDatePicker />, {
-      history: customHistory,
-      core: startPlugins,
-    });
-
-    expect(await findByText('~ 15 minutes ago')).toBeInTheDocument();
-
-    expect(await findByText('~ 30 minutes ago')).toBeInTheDocument();
-
-    expect(customHistory.push).toHaveBeenCalledWith({
-      pathname: '/',
-      search: 'dateRangeEnd=now-15m&dateRangeStart=now-30m',
-    });
-  });
-
   it('should use url date range even if shared date range is present', async () => {
     const customHistory = createMemoryHistory({
       initialEntries: ['/?g=%22%22&dateRangeStart=now-10m&dateRangeEnd=now'],

@@ -14,13 +14,14 @@ import {
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { AlwaysShowPattern, ElasticsearchIndexWithPrivileges } from '../../../common/types/indices';
+import { isNotNullish } from '../../../common/utils/is_not_nullish';
 
 import { fetchIndexCounts } from './fetch_index_counts';
 import { fetchIndexPrivileges } from './fetch_index_privileges';
 import { fetchIndexStats } from './fetch_index_stats';
 import { expandAliases, getAlwaysShowAliases } from './utils/extract_always_show_indices';
 import { getIndexDataMapper } from './utils/get_index_data';
-import { getIndexData } from './utils/get_index_data';
+import { getIndexData, getSearchIndexData } from './utils/get_index_data';
 
 export interface TotalIndexData {
   allIndexMatches: IndicesGetResponse;
@@ -29,35 +30,23 @@ export interface TotalIndexData {
   indicesStats: Record<string, IndicesStatsIndicesStats>;
 }
 
-export const fetchIndices = async (
+export const fetchSearchIndices = async (
   client: IScopedClusterClient,
-  indexPattern: string,
-  returnHiddenIndices: boolean,
-  includeAliases: boolean,
-  alwaysShowPattern?: AlwaysShowPattern
-): Promise<ElasticsearchIndexWithPrivileges[]> => {
-  // This call retrieves alias and settings information about indices
-  // If we provide an override pattern with alwaysShowPattern we get everything and filter out hiddens.
+  alwaysShowPattern: AlwaysShowPattern
+) => {
   const expandWildcards: ExpandWildcard[] =
-    returnHiddenIndices || alwaysShowPattern?.alias_pattern || alwaysShowPattern?.index_pattern
+    alwaysShowPattern.alias_pattern || alwaysShowPattern.index_pattern
       ? ['hidden', 'all']
       : ['open'];
 
   const { allIndexMatches, indexAndAliasNames, indicesNames, alwaysShowMatchNames } =
-    await getIndexData(
-      client,
-      indexPattern,
-      expandWildcards,
-      returnHiddenIndices,
-      includeAliases,
-      alwaysShowPattern
-    );
+    await getSearchIndexData(client, '*', expandWildcards, false, true, alwaysShowPattern);
 
   if (indicesNames.length === 0) {
     return [];
   }
 
-  const indicesStats = await fetchIndexStats(client, indexPattern, expandWildcards);
+  const indicesStats = await fetchIndexStats(client, '*', expandWildcards);
 
   const indexPrivileges = await fetchIndexPrivileges(client, indexAndAliasNames);
 
@@ -81,23 +70,21 @@ export const fetchIndices = async (
         name,
         privileges: { manage: false, read: false, ...indexPrivileges[name] },
       };
-      return includeAliases
-        ? [
-            indexEntry,
-            ...expandAliases(
-              name,
-              aliases,
-              indexData,
-              totalIndexData,
-              ...(name.startsWith('.ent-search-engine-documents') ? [alwaysShowPattern] : [])
-            ),
-          ]
-        : [indexEntry];
+      return [
+        indexEntry,
+        ...expandAliases(
+          name,
+          aliases,
+          indexData,
+          totalIndexData,
+          ...(name.startsWith('.ent-search-engine-documents') ? [alwaysShowPattern] : [])
+        ),
+      ];
     });
 
   let indicesData = regularIndexData;
 
-  if (alwaysShowPattern?.alias_pattern && includeAliases) {
+  if (alwaysShowPattern?.alias_pattern) {
     const indexNamesAlreadyIncluded = regularIndexData.map(({ name }) => name);
 
     const itemsToInclude = getAlwaysShowAliases(indexNamesAlreadyIncluded, alwaysShowMatchNames)
@@ -115,4 +102,66 @@ export const fetchIndices = async (
       // and aliases can point to multiple indices
       array.findIndex((engineData) => engineData.name === name) === index
   );
+};
+
+export const fetchIndices = async (
+  client: IScopedClusterClient,
+  searchQuery: string | undefined,
+  returnHiddenIndices: boolean,
+  onlyShowSearchOptimizedIndices: boolean,
+  from: number,
+  size: number
+): Promise<{
+  indexNames: string[];
+  indices: ElasticsearchIndexWithPrivileges[];
+  totalResults: number;
+}> => {
+  const { indexData, indexNames } = await getIndexData(
+    client,
+    onlyShowSearchOptimizedIndices,
+    returnHiddenIndices,
+    searchQuery
+  );
+  const indexNameSlice = indexNames.slice(from, from + size).filter(isNotNullish);
+  if (indexNameSlice.length === 0) {
+    return {
+      indexNames: [],
+      indices: [],
+      totalResults: indexNames.length,
+    };
+  }
+
+  const { indices: indicesStats = {} } = await client.asCurrentUser.indices.stats({
+    index: indexNameSlice,
+    metric: ['docs', 'store'],
+  });
+
+  const indexPrivileges = await fetchIndexPrivileges(client, indexNameSlice);
+
+  const indexCounts = await fetchIndexCounts(client, indexNameSlice);
+
+  const totalIndexData: TotalIndexData = {
+    allIndexMatches: indexData,
+    indexCounts,
+    indexPrivileges,
+    indicesStats,
+  };
+
+  const indices = indexNameSlice
+    .map(getIndexDataMapper(totalIndexData))
+    .map(({ name, ...index }) => {
+      return {
+        ...index,
+        alias: false,
+        count: indexCounts[name] ?? 0,
+        name,
+        privileges: { manage: false, read: false, ...indexPrivileges[name] },
+      };
+    });
+
+  return {
+    indexNames: indexNameSlice,
+    indices,
+    totalResults: indexNames.length,
+  };
 };

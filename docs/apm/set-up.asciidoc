@@ -8,11 +8,7 @@
 
 APM is available via the navigation sidebar in {Kib}.
 If you have not already installed and configured Elastic APM,
-follow the three steps on the *Add data* page to get started:
-
-. Start APM Server
-. Add APM agents
-. Load Kibana objects
+follow the steps on the *Add data* page to get started.
 
 [role="screenshot"]
 image::apm/images/apm-setup.png[Installation instructions on the APM page in Kibana]

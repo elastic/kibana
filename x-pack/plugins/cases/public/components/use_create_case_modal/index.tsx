@@ -6,11 +6,11 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import type { Case } from '../../../common/ui/types';
+import type { CaseUI } from '../../../common/ui/types';
 import { CreateCaseModal } from './create_case_modal';
 
 export interface UseCreateCaseModalProps {
-  onCaseCreated: (theCase: Case) => void;
+  onCaseCreated: (theCase: CaseUI) => void;
 }
 export interface UseCreateCaseModalReturnedValues {
   modal: JSX.Element;

@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
-
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
-import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
+import { useMemo } from 'react';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
+import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { isSecurityJob } from '../../../../../common/machine_learning/is_security_job';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { useHttp } from '../../../lib/kibana';
-import { useMlCapabilities } from './use_ml_capabilities';
 import * as i18n from '../translations';
-import { useGetJobsSummary } from './use_get_jobs_summary';
+import { useFetchJobsSummaryQuery } from './use_fetch_jobs_summary_query';
+import { useMlCapabilities } from './use_ml_capabilities';
 
 export interface UseInstalledSecurityJobsReturn {
   loading: boolean;
@@ -35,35 +33,24 @@ export interface UseInstalledSecurityJobsReturn {
  *
  */
 export const useInstalledSecurityJobs = (): UseInstalledSecurityJobsReturn => {
-  const [jobs, setJobs] = useState<MlSummaryJob[]>([]);
   const { addError } = useAppToasts();
   const mlCapabilities = useMlCapabilities();
-  const http = useHttp();
-  const { error, loading, result, start } = useGetJobsSummary();
-
   const isMlUser = hasMlUserPermissions(mlCapabilities);
   const isLicensed = hasMlLicense(mlCapabilities);
 
-  useEffect(() => {
-    if (isMlUser && isLicensed) {
-      start({ http });
+  const { isFetching, data: jobs = [] } = useFetchJobsSummaryQuery(
+    {},
+    {
+      enabled: isMlUser && isLicensed,
+      onError: (error) => {
+        addError(error, { title: i18n.SIEM_JOB_FETCH_FAILURE });
+      },
     }
-  }, [http, isMlUser, isLicensed, start]);
+  );
 
-  useEffect(() => {
-    if (result) {
-      const securityJobs = result.filter(isSecurityJob);
-      setJobs(securityJobs);
-    }
-  }, [result]);
+  const securityJobs = jobs.filter(isSecurityJob);
 
-  useEffect(() => {
-    if (error) {
-      addError(error, { title: i18n.SIEM_JOB_FETCH_FAILURE });
-    }
-  }, [addError, error]);
-
-  return { isLicensed, isMlUser, jobs, loading };
+  return { isLicensed, isMlUser, jobs: securityJobs, loading: isFetching };
 };
 
 export const useInstalledSecurityJobsIds = () => {

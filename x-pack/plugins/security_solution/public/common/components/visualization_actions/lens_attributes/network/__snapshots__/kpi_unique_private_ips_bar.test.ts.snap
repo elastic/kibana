@@ -40,7 +40,7 @@ Object {
                     Object {
                       "input": Object {
                         "language": "kuery",
-                        "query": "",
+                        "query": "destination.ip: *",
                       },
                       "label": "Dest.",
                     },
@@ -91,7 +91,7 @@ Object {
                     Object {
                       "input": Object {
                         "language": "kuery",
-                        "query": "",
+                        "query": "source.ip: *",
                       },
                       "label": "Src.",
                     },

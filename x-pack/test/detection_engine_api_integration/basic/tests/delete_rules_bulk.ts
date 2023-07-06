@@ -12,8 +12,8 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
+  deleteAllRules,
   deleteAllAlerts,
-  deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
@@ -26,6 +26,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('delete_rules_bulk', () => {
     describe('deleting rules bulk using DELETE', () => {
@@ -34,8 +35,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
       });
 
       it('should delete a single rule with a rule_id', async () => {
@@ -146,8 +147,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
       });
 
       it('should delete a single rule with a rule_id', async () => {

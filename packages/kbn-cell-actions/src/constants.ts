@@ -10,6 +10,7 @@ export const FILTER_CELL_ACTION_TYPE = 'cellAction-filter';
 export const COPY_CELL_ACTION_TYPE = 'cellAction-copy';
 
 export enum CellActionsMode {
-  HOVER = 'hover',
+  HOVER_DOWN = 'hover-down',
+  HOVER_RIGHT = 'hover-right',
   INLINE = 'inline',
 }

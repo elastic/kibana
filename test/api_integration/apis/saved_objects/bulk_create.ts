@@ -73,7 +73,9 @@ export default function ({ getService }: FtrProviderContext) {
                 migrationVersion: {
                   dashboard: resp.body.saved_objects[1].migrationVersion.dashboard,
                 },
-                coreMigrationVersion: '8.0.0',
+                coreMigrationVersion: '8.8.0',
+                typeMigrationVersion: resp.body.saved_objects[1].typeMigrationVersion,
+                managed: false,
                 references: [],
                 namespaces: [SPACE_ID],
               },

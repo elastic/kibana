@@ -12,7 +12,12 @@ import { Page } from 'playwright';
 import callsites from 'callsites';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FtrConfigProvider } from '@kbn/test';
-import { FtrProviderContext, KibanaServer } from '@kbn/ftr-common-functional-services';
+import {
+  FtrProviderContext,
+  KibanaServer,
+  Es,
+  RetryService,
+} from '@kbn/ftr-common-functional-services';
 
 import { Auth } from '../services/auth';
 import { InputDelays } from '../services/input_delays';
@@ -28,6 +33,9 @@ export interface BaseStepCtx {
   inputDelays: InputDelays;
   kbnUrl: KibanaUrl;
   kibanaServer: KibanaServer;
+  es: Es;
+  retry: RetryService;
+  auth: Auth;
 }
 
 export type AnyStep = Step<{}>;
@@ -96,7 +104,16 @@ export class Journey<CtxExt extends object> {
 
   /**
    * Define a step of this Journey. Steps are only separated from each other
-   * to aid in reading/debuging the journey and reading it's logging output.
+   * to aid in reading/debugging the journey and reading it's logging output.
+   * These services might be helpful:
+   *
+   * page: methods to interact with a single tab in a browser
+   *
+   * kbnUrl: get the URL for a Kibana plugin
+   *
+   * kibanaServer: basic Kibana server client
+   *
+   * es: basic Elasticsearch client
    *
    * If a journey fails, a failure report will be created with a screenshot
    * at the point of failure as well as a screenshot at the end of every
@@ -119,6 +136,8 @@ export class Journey<CtxExt extends object> {
       getService('config'),
       getService('esArchiver'),
       getService('kibanaServer'),
+      getService('es'),
+      getService('retry'),
       new Auth(getService('config'), getService('log'), getService('kibanaServer')),
       this.config
     ).initMochaSuite(this.#steps);

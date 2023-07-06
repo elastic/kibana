@@ -27,6 +27,7 @@ export interface TemplateContext {
   baseImage: 'none' | 'ubi8' | 'ubi9' | 'ubuntu';
   baseImageName: string;
   cloud?: boolean;
+  serverless?: boolean;
   metricbeatTarball?: string;
   filebeatTarball?: string;
   ironbank?: boolean;

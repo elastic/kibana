@@ -12,7 +12,7 @@ import type {
   SavedObjectsServiceSetup,
 } from '@kbn/core/server';
 import moment from 'moment';
-import type { CounterMetric } from './usage_counter';
+import { UsageCounters } from '../../common/types';
 
 /**
  * The attributes stored in the UsageCounters' SavedObjects
@@ -83,7 +83,7 @@ export const serializeCounterKey = ({
 };
 
 export const storeCounter = async (
-  counterMetric: CounterMetric,
+  counterMetric: UsageCounters.v1.CounterMetric,
   internalRepository: Pick<SavedObjectsRepository, 'incrementCounter'>
 ) => {
   const { counterName, counterType, domainId, incrementBy } = counterMetric;

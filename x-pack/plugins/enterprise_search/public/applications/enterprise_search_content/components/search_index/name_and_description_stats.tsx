@@ -72,7 +72,7 @@ export const NameAndDescriptionStats: React.FC = () => {
         {stats.map((item, index) => (
           <EuiFlexItem key={index}>
             <EuiPanel color={'subdued'} hasShadow={false} paddingSize="l">
-              <EuiStat {...item} />
+              <EuiStat titleSize="m" {...item} />
             </EuiPanel>
           </EuiFlexItem>
         ))}

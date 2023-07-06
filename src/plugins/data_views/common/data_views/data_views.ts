@@ -10,9 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '..';
 import { SavedObjectsClientCommon } from '../types';
 
 import { createDataViewCache } from '.';
@@ -31,6 +29,7 @@ import {
   DataViewFieldMap,
   TypeMeta,
 } from '../types';
+
 import { META_FIELDS, SavedObject } from '..';
 import { DataViewMissingIndices } from '../lib';
 import { findByName } from '../utils';
@@ -168,14 +167,14 @@ export interface DataViewsServicePublicMethods {
    */
   createSavedObject: (
     indexPattern: DataView,
-    override?: boolean,
+    overwrite?: boolean,
     displayErrors?: boolean
   ) => Promise<DataView>;
   /**
    * Delete data view
    * @param indexPatternId - Id of the data view to delete.
    */
-  delete: (indexPatternId: string) => Promise<{}>;
+  delete: (indexPatternId: string) => Promise<void>;
   /**
    * Takes field array and field attributes and returns field map by name.
    * @param fields - Array of fieldspecs
@@ -349,8 +348,7 @@ export class DataViewsService {
    * Refresh cache of index pattern ids and titles.
    */
   private async refreshSavedObjectsCache() {
-    const so = await this.savedObjectsClient.find<DataViewSavedObjectAttrs>({
-      type: DATA_VIEW_SAVED_OBJECT_TYPE,
+    const so = await this.savedObjectsClient.find({
       fields: ['title', 'type', 'typeMeta', 'name'],
       perPage: 10000,
     });
@@ -392,11 +390,10 @@ export class DataViewsService {
    * @returns DataView[]
    */
   find = async (search: string, size: number = 10): Promise<DataView[]> => {
-    const savedObjects = await this.savedObjectsClient.find<DataViewSavedObjectAttrs>({
-      type: DATA_VIEW_SAVED_OBJECT_TYPE,
+    const savedObjects = await this.savedObjectsClient.find({
       fields: ['title'],
       search,
-      searchFields: ['title'],
+      searchFields: ['title', 'name'],
       perPage: size,
     });
     const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
@@ -515,12 +512,12 @@ export class DataViewsService {
    */
   getFieldsForIndexPattern = async (
     indexPattern: DataView | DataViewSpec,
-    options?: GetFieldsOptions
+    options?: Omit<GetFieldsOptions, 'allowNoIndex'>
   ) =>
     this.getFieldsForWildcard({
       type: indexPattern.type,
       rollupIndex: indexPattern?.typeMeta?.params?.rollup_index,
-      allowNoIndex: indexPattern.allowNoIndex,
+      allowNoIndex: true,
       ...options,
       pattern: indexPattern.title as string,
     });
@@ -530,7 +527,7 @@ export class DataViewsService {
     return this.apiClient.getFieldsForWildcard({
       type: dataView.type,
       rollupIndex: dataView?.typeMeta?.params?.rollup_index,
-      allowNoIndex: dataView.allowNoIndex,
+      allowNoIndex: true,
       pattern: dataView.getIndexPattern(),
       metaFields,
     });
@@ -538,12 +535,12 @@ export class DataViewsService {
 
   private getFieldsAndIndicesForWildcard = async (options: GetFieldsOptions) => {
     const metaFields = await this.config.get<string[]>(META_FIELDS);
-    return await this.apiClient.getFieldsForWildcard({
+    return this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
       type: options.type,
       rollupIndex: options.rollupIndex,
-      allowNoIndex: options.allowNoIndex,
+      allowNoIndex: true,
       indexFilter: options.indexFilter,
     });
   };
@@ -569,8 +566,8 @@ export class DataViewsService {
   };
 
   /**
-   * Refresh field list for a given index pattern.
-   * @param indexPattern
+   * Refresh field list for a given data view.
+   * @param dataView
    * @param displayErrors  - If set false, API consumer is responsible for displaying and handling errors.
    */
   refreshFields = async (dataView: DataView, displayErrors: boolean = true) => {
@@ -582,22 +579,19 @@ export class DataViewsService {
       await this.refreshFieldsFn(dataView);
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        this.onNotification(
-          { title: err.message, color: 'danger', iconType: 'alert' },
-          `refreshFields:${dataView.getIndexPattern()}`
+        // not considered an error, check dataView.matchedIndices.length to be 0
+      } else {
+        this.onError(
+          err,
+          {
+            title: i18n.translate('dataViews.fetchFieldErrorTitle', {
+              defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
+              values: { id: dataView.id, title: dataView.getIndexPattern() },
+            }),
+          },
+          dataView.getIndexPattern()
         );
       }
-
-      this.onError(
-        err,
-        {
-          title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-            values: { id: dataView.id, title: dataView.getIndexPattern() },
-          }),
-        },
-        dataView.getIndexPattern()
-      );
     }
   };
 
@@ -635,13 +629,11 @@ export class DataViewsService {
       return { fields: this.fieldArrayToMap(updatedFieldList, fieldAttrs), indices };
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        if (displayErrors) {
-          this.onNotification(
-            { title: err.message, color: 'danger', iconType: 'alert' },
-            `refreshFieldSpecMap:${title}`
-          );
-        }
+        // not considered an error, check dataView.matchedIndices.length to be 0
         return {};
+      }
+      if (!displayErrors) {
+        throw err;
       }
 
       this.onError(
@@ -731,14 +723,7 @@ export class DataViewsService {
     id: string,
     displayErrors: boolean = true
   ): Promise<DataView> => {
-    const savedObject = await this.savedObjectsClient.get<DataViewAttributes>(
-      DATA_VIEW_SAVED_OBJECT_TYPE,
-      id
-    );
-
-    if (!savedObject.version) {
-      throw new SavedObjectNotFound('data view', id, 'management/kibana/dataViews');
-    }
+    const savedObject = await this.savedObjectsClient.get(id);
 
     return this.initFromSavedObject(savedObject, displayErrors);
   };
@@ -798,19 +783,13 @@ export class DataViewsService {
         const fieldsAndIndices = await this.initFromSavedObjectLoadFields({
           savedObjectId: savedObject.id,
           spec,
+          displayErrors,
         });
         fields = fieldsAndIndices.fields;
         indices = fieldsAndIndices.indices;
       } catch (err) {
         if (err instanceof DataViewMissingIndices) {
-          this.onNotification(
-            {
-              title: err.message,
-              color: 'danger',
-              iconType: 'alert',
-            },
-            `initFromSavedObject:${spec.title}`
-          );
+          // not considered an error, check dataView.matchedIndices.length to be 0
         } else {
           this.onError(
             err,
@@ -985,12 +964,16 @@ export class DataViewsService {
 
   async createAndSave(
     spec: DataViewSpec,
-    override = false,
+    overwrite = false,
     skipFetchFields = false,
     displayErrors = true
   ) {
     const indexPattern = await this.createFromSpec(spec, skipFetchFields, displayErrors);
-    const createdIndexPattern = await this.createSavedObject(indexPattern, override, displayErrors);
+    const createdIndexPattern = await this.createSavedObject(
+      indexPattern,
+      overwrite,
+      displayErrors
+    );
     await this.setDefault(createdIndexPattern.id!);
     return createdIndexPattern!;
   }
@@ -1002,14 +985,14 @@ export class DataViewsService {
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
 
-  async createSavedObject(dataView: DataView, override = false, displayErrors = true) {
+  async createSavedObject(dataView: DataView, overwrite = false, displayErrors = true) {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError();
     }
     const dupe = await findByName(this.savedObjectsClient, dataView.getName());
 
     if (dupe) {
-      if (override) {
+      if (overwrite) {
         await this.delete(dupe.id);
       } else {
         throw new DuplicateDataViewError(`Duplicate data view: ${dataView.getName()}`);
@@ -1017,13 +1000,12 @@ export class DataViewsService {
     }
 
     const body = dataView.getAsSavedObjectBody();
-    const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(
-      DATA_VIEW_SAVED_OBJECT_TYPE,
-      body,
-      {
-        id: dataView.id,
-      }
-    )) as SavedObject<DataViewAttributes>;
+
+    const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(body, {
+      id: dataView.id,
+      initialNamespaces: dataView.namespaces.length > 0 ? dataView.namespaces : undefined,
+      overwrite,
+    })) as SavedObject<DataViewAttributes>;
 
     const createdIndexPattern = await this.initFromSavedObject(response, displayErrors);
     if (this.savedObjectsCache) {
@@ -1065,7 +1047,7 @@ export class DataViewsService {
     });
 
     return this.savedObjectsClient
-      .update(DATA_VIEW_SAVED_OBJECT_TYPE, indexPattern.id, body, {
+      .update(indexPattern.id, body, {
         version: indexPattern.version,
       })
       .then((response) => {
@@ -1146,7 +1128,7 @@ export class DataViewsService {
       throw new DataViewInsufficientAccessError(indexPatternId);
     }
     this.dataViewCache.clear(indexPatternId);
-    return this.savedObjectsClient.delete(DATA_VIEW_SAVED_OBJECT_TYPE, indexPatternId);
+    return this.savedObjectsClient.delete(indexPatternId);
   }
 
   /**

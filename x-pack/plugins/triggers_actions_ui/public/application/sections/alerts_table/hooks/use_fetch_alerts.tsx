@@ -6,6 +6,7 @@
  */
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import { set } from '@kbn/safer-lodash-set';
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash';
 import { useCallback, useEffect, useReducer, useRef, useMemo } from 'react';
@@ -13,16 +14,17 @@ import { Subscription } from 'rxjs';
 
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import type {
-  EcsFieldsResponse,
   RuleRegistrySearchRequest,
+  RuleRegistrySearchRequestPagination,
   RuleRegistrySearchResponse,
 } from '@kbn/rule-registry-plugin/common/search_strategy';
 import type {
+  MappingRuntimeFields,
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { GetInspectQuery, InspectQuery } from '../../../../types';
+import type { Alert, Alerts, GetInspectQuery, InspectQuery } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DefaultSort } from './constants';
 import * as i18n from './translations';
@@ -35,16 +37,28 @@ export interface FetchAlertsArgs {
     pageIndex: number;
     pageSize: number;
   };
+  onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
+  runtimeMappings?: MappingRuntimeFields;
   sort: SortCombinations[];
   skip: boolean;
 }
 
-type AlertRequest = Omit<FetchAlertsArgs, 'featureIds' | 'skip'>;
+type AlertRequest = Omit<FetchAlertsArgs, 'featureIds' | 'skip' | 'onPageChange'>;
 
 type Refetch = () => void;
 
 export interface FetchAlertResp {
-  alerts: EcsFieldsResponse[];
+  /**
+   * We need to have it because of lot code is expecting this format
+   * @deprecated
+   */
+  oldAlertsData: Array<Array<{ field: string; value: string[] }>>;
+  /**
+   * We need to have it because of lot code is expecting this format
+   * @deprecated
+   */
+  ecsAlertsData: unknown[];
+  alerts: Alerts;
   isInitializing: boolean;
   getInspectQuery: GetInspectQuery;
   refetch: Refetch;
@@ -55,15 +69,21 @@ export interface FetchAlertResp {
 type AlertResponseState = Omit<FetchAlertResp, 'getInspectQuery' | 'refetch'>;
 interface AlertStateReducer {
   loading: boolean;
-  request: Omit<FetchAlertsArgs, 'skip'>;
+  request: Omit<FetchAlertsArgs, 'skip' | 'onPageChange'>;
   response: AlertResponseState;
 }
 
 type AlertActions =
   | { type: 'loading'; loading: boolean }
-  | { type: 'response'; alerts: EcsFieldsResponse[]; totalAlerts: number }
+  | {
+      type: 'response';
+      alerts: Alerts;
+      totalAlerts: number;
+      oldAlertsData: Array<Array<{ field: string; value: string[] }>>;
+      ecsAlertsData: unknown[];
+    }
   | { type: 'resetPagination' }
-  | { type: 'request'; request: Omit<FetchAlertsArgs, 'skip'> };
+  | { type: 'request'; request: Omit<FetchAlertsArgs, 'skip' | 'onPageChange'> };
 
 const initialAlertState: AlertStateReducer = {
   loading: false,
@@ -81,6 +101,8 @@ const initialAlertState: AlertStateReducer = {
   },
   response: {
     alerts: [],
+    oldAlertsData: [],
+    ecsAlertsData: [],
     totalAlerts: -1,
     isInitializing: true,
     updatedAt: 0,
@@ -99,6 +121,8 @@ function alertReducer(state: AlertStateReducer, action: AlertActions) {
           isInitializing: false,
           alerts: action.alerts,
           totalAlerts: action.totalAlerts,
+          oldAlertsData: action.oldAlertsData,
+          ecsAlertsData: action.ecsAlertsData,
           updatedAt: Date.now(),
         },
       };
@@ -124,6 +148,8 @@ export type UseFetchAlerts = ({
   fields,
   query,
   pagination,
+  onPageChange,
+  runtimeMappings,
   skip,
   sort,
 }: FetchAlertsArgs) => [boolean, FetchAlertResp];
@@ -132,6 +158,8 @@ const useFetchAlerts = ({
   fields,
   query,
   pagination,
+  onPageChange,
+  runtimeMappings,
   skip,
   sort,
 }: FetchAlertsArgs): [boolean, FetchAlertResp] => {
@@ -171,7 +199,7 @@ const useFetchAlerts = ({
         if (data && data.search) {
           searchSubscription$.current = data.search
             .search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(
-              { ...request, featureIds, fields: undefined, query },
+              { ...request, featureIds, fields, query },
               {
                 strategy: 'privateRuleRegistryAlertsSearchStrategy',
                 abortSignal: abortCtrl.current.signal,
@@ -191,19 +219,44 @@ const useFetchAlerts = ({
                   } else if (rawResponse.hits.total && typeof rawResponse.hits.total === 'object') {
                     totalAlerts = rawResponse.hits.total?.value ?? 0;
                   }
+                  const alerts = rawResponse.hits.hits.reduce<Alerts>((acc, hit) => {
+                    if (hit.fields) {
+                      acc.push({
+                        ...hit.fields,
+                        _id: hit._id,
+                        _index: hit._index,
+                      } as Alert);
+                    }
+                    return acc;
+                  }, []);
+
+                  const { oldAlertsData, ecsAlertsData } = alerts.reduce<{
+                    oldAlertsData: Array<Array<{ field: string; value: string[] }>>;
+                    ecsAlertsData: unknown[];
+                  }>(
+                    (acc, alert) => {
+                      const itemOldData = Object.entries(alert).reduce<
+                        Array<{ field: string; value: string[] }>
+                      >((oldData, [key, value]) => {
+                        oldData.push({ field: key, value: value as string[] });
+                        return oldData;
+                      }, []);
+                      const ecsData = Object.entries(alert).reduce((ecs, [key, value]) => {
+                        set(ecs, key, value ?? []);
+                        return ecs;
+                      }, {});
+                      acc.oldAlertsData.push(itemOldData);
+                      acc.ecsAlertsData.push(ecsData);
+                      return acc;
+                    },
+                    { oldAlertsData: [], ecsAlertsData: [] }
+                  );
+
                   dispatch({
                     type: 'response',
-                    alerts: rawResponse.hits.hits.reduce<EcsFieldsResponse[]>((acc, hit) => {
-                      if (hit.fields) {
-                        acc.push({
-                          ...hit.fields,
-                          _id: hit._id,
-                          _index: hit._index,
-                        } as EcsFieldsResponse);
-                      }
-
-                      return acc;
-                    }, []),
+                    alerts,
+                    oldAlertsData,
+                    ecsAlertsData,
                     totalAlerts,
                   });
                   searchSubscription$.current.unsubscribe();
@@ -227,9 +280,12 @@ const useFetchAlerts = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [skip, data, featureIds, query]
+    [skip, data, featureIds, query, fields]
   );
 
+  // FUTURE ENGINEER
+  // This useEffect is only to fetch the alert when these props below changed
+  // fields, pagination, sort, runtimeMappings
   useEffect(() => {
     if (featureIds.length === 0) {
       return;
@@ -238,7 +294,8 @@ const useFetchAlerts = ({
       featureIds,
       fields,
       pagination,
-      query,
+      query: prevAlertRequest.current?.query ?? {},
+      runtimeMappings,
       sort,
     };
     if (
@@ -250,7 +307,37 @@ const useFetchAlerts = ({
         request: newAlertRequest,
       });
     }
-  }, [featureIds, fields, pagination, query, sort]);
+  }, [featureIds, fields, pagination, sort, runtimeMappings]);
+
+  // FUTURE ENGINEER
+  // This useEffect is only to fetch the alert when query props changed
+  // because we want to reset the pageIndex of pagination to 0
+  useEffect(() => {
+    if (featureIds.length === 0 || !prevAlertRequest.current) {
+      return;
+    }
+    const resetPagination = {
+      pageIndex: 0,
+      pageSize: prevAlertRequest.current?.pagination?.pageSize ?? 50,
+    };
+    const newAlertRequest = {
+      ...prevAlertRequest.current,
+      featureIds,
+      pagination: resetPagination,
+      query,
+    };
+
+    if (
+      (newAlertRequest?.fields ?? []).length > 0 &&
+      !deepEqual(newAlertRequest.query, prevAlertRequest.current.query)
+    ) {
+      dispatch({
+        type: 'request',
+        request: newAlertRequest,
+      });
+      onPageChange(resetPagination);
+    }
+  }, [featureIds, onPageChange, query]);
 
   useEffect(() => {
     if (alertRequest.featureIds.length > 0 && !deepEqual(alertRequest, prevAlertRequest.current)) {

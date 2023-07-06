@@ -8,6 +8,7 @@
 
 import { PluginInitializerContext } from '@kbn/core/public';
 import { KibanaPluginServiceParams } from '@kbn/presentation-util-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
 import { DashboardStartDependencies } from '../plugin';
 import { DashboardAnalyticsService } from './analytics/types';
@@ -16,7 +17,7 @@ import { DashboardChromeService } from './chrome/types';
 import { DashboardCoreContextService } from './core_context/types';
 import { DashboardCustomBrandingService } from './custom_branding/types';
 import { DashboardCapabilitiesService } from './dashboard_capabilities/types';
-import { DashboardSavedObjectService } from './dashboard_saved_object/types';
+import { DashboardContentManagementService } from './dashboard_content_management/types';
 import { DashboardSessionStorageServiceType } from './dashboard_session_storage/types';
 import { DashboardDataService } from './data/types';
 import { DashboardDataViewEditorService } from './data_view_editor/types';
@@ -40,8 +41,8 @@ export type DashboardPluginServiceParams = KibanaPluginServiceParams<DashboardSt
   initContext: PluginInitializerContext; // need a custom type so that initContext is a required parameter for initializerContext
 };
 export interface DashboardServices {
-  dashboardSavedObject: DashboardSavedObjectService;
   dashboardSessionStorage: DashboardSessionStorageServiceType;
+  dashboardContentManagement: DashboardContentManagementService;
 
   analytics: DashboardAnalyticsService;
   application: DashboardApplicationService;
@@ -66,4 +67,5 @@ export interface DashboardServices {
   usageCollection: DashboardUsageCollectionService; // TODO: make this optional in follow up
   visualizations: DashboardVisualizationsService;
   customBranding: DashboardCustomBrandingService;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }

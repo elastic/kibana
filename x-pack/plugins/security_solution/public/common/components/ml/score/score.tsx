@@ -26,12 +26,10 @@ export const ScoreComponent = ({
 
   return (
     <SecurityCellActions
-      mode={CellActionsMode.HOVER}
-      field={{
-        name: score.entityName,
+      mode={CellActionsMode.HOVER_DOWN}
+      data={{
         value: score.entityValue,
-        type: 'keyword',
-        aggregatable: true,
+        field: score.entityName,
       }}
       triggerId={SecurityCellActionsTrigger.DEFAULT}
       visibleCellActions={5}

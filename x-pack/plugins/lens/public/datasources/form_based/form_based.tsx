@@ -17,14 +17,16 @@ import { flatten, isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { DataPublicPluginStart, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
+import { DimensionTrigger } from '@kbn/visualization-ui-components/public';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -36,11 +38,11 @@ import type {
   IndexPatternField,
   IndexPattern,
   IndexPatternRef,
-  DatasourceLayerSettingsProps,
   DataSourceInfo,
   UserMessage,
   FrameDatasourceAPI,
   StateSetter,
+  IndexPatternMap,
 } from '../../types';
 import {
   changeIndexPattern,
@@ -68,8 +70,9 @@ import {
   getVisualDefaultsForLayer,
   isColumnInvalid,
   cloneLayer,
+  getNotifiableFeatures,
 } from './utils';
-import { isDraggedDataViewField } from '../../utils';
+import { getUniqueLabelGenerator, isDraggedDataViewField } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
@@ -92,14 +95,12 @@ import { mergeLayer, mergeLayers } from './state_helpers';
 import type { Datasource, VisualizeEditorContext } from '../../types';
 import { deleteColumn, isReferenced } from './operations';
 import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
-import type { DraggingIdentifier } from '../../drag_drop';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
-import { FormBasedLayer } from '../..';
-import { DimensionTrigger } from '../../shared_components/dimension_trigger';
+import { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
@@ -111,24 +112,31 @@ function wrapOnDot(str?: string) {
   return str ? str.replace(/\./g, '.\u200B') : '';
 }
 
+function getSortingHint(column: GenericIndexPatternColumn, dataView?: IndexPattern | DataView) {
+  if (column.dataType === 'string') {
+    const fieldTypes =
+      'sourceField' in column ? dataView?.getFieldByName(column.sourceField)?.esTypes : undefined;
+    return fieldTypes?.[0] || undefined;
+  }
+  if (isColumnOfType<LastValueIndexPatternColumn>('last_value', column)) {
+    return column.dataType;
+  }
+}
+
 export function columnToOperation(
   column: GenericIndexPatternColumn,
   uniqueLabel?: string,
   dataView?: IndexPattern | DataView
 ): OperationDescriptor {
   const { dataType, label, isBucketed, scale, operationType, timeShift, reducedTimeRange } = column;
-  const fieldTypes =
-    'sourceField' in column ? dataView?.getFieldByName(column.sourceField)?.esTypes : undefined;
+
   return {
     dataType: normalizeOperationDataType(dataType),
     isBucketed,
     scale,
     label: uniqueLabel || label,
     isStaticValue: operationType === 'static_value',
-    sortingHint:
-      column.dataType === 'string' && fieldTypes?.includes(ES_FIELD_TYPES.VERSION)
-        ? 'version'
-        : undefined,
+    sortingHint: getSortingHint(column, dataView),
     hasTimeShift: Boolean(timeShift),
     hasReducedTimeRange: Boolean(reducedTimeRange),
     interval: isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
@@ -168,13 +176,15 @@ export function getFormBasedDatasource({
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }) {
-  const uiSettings = core.uiSettings;
+  const { uiSettings, settings } = core;
 
   const DATASOURCE_ID = 'formBased';
+  const ALIAS_IDS = ['indexpattern'];
 
   // Not stateful. State is persisted to the frame
   const formBasedDatasource: Datasource<FormBasedPrivateState, FormBasedPersistedState> = {
     id: DATASOURCE_ID,
+    alias: ALIAS_IDS,
 
     initialize(
       persistedState?: FormBasedPersistedState,
@@ -186,7 +196,7 @@ export function getFormBasedDatasource({
       return loadInitialState({
         persistedState,
         references,
-        defaultIndexPatternId: core.uiSettings.get('defaultIndex'),
+        defaultIndexPatternId: uiSettings.get('defaultIndex'),
         storage,
         initialContext,
         indexPatternRefs,
@@ -425,13 +435,18 @@ export function getFormBasedDatasource({
       return fields;
     },
 
-    toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) =>
-      toExpression(state, layerId, indexPatterns, uiSettings, dateRange, searchSessionId),
+    toExpression: (state, layerId, indexPatterns, dateRange, nowInstant, searchSessionId) =>
+      toExpression(
+        state,
+        layerId,
+        indexPatterns,
+        uiSettings,
+        dateRange,
+        nowInstant,
+        searchSessionId
+      ),
 
-    renderLayerSettings(
-      domElement: Element,
-      props: DatasourceLayerSettingsProps<FormBasedPrivateState>
-    ) {
+    renderLayerSettings(domElement, props) {
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <I18nProvider>
@@ -491,31 +506,26 @@ export function getFormBasedDatasource({
       );
     },
 
-    uniqueLabels(state: FormBasedPrivateState) {
+    uniqueLabels(state: FormBasedPrivateState, indexPatternsMap: IndexPatternMap) {
       const layers = state.layers;
       const columnLabelMap = {} as Record<string, string>;
-      const counts = {} as Record<string, number>;
 
-      const makeUnique = (label: string) => {
-        let uniqueLabel = label;
+      const uniqueLabelGenerator = getUniqueLabelGenerator();
 
-        while (counts[uniqueLabel] >= 0) {
-          const num = ++counts[uniqueLabel];
-          uniqueLabel = i18n.translate('xpack.lens.indexPattern.uniqueLabel', {
-            defaultMessage: '{label} [{num}]',
-            values: { label, num },
-          });
-        }
-
-        counts[uniqueLabel] = 0;
-        return uniqueLabel;
-      };
       Object.values(layers).forEach((layer) => {
         if (!layer.columns) {
           return;
         }
         Object.entries(layer.columns).forEach(([columnId, column]) => {
-          columnLabelMap[columnId] = makeUnique(column.label);
+          columnLabelMap[columnId] = uniqueLabelGenerator(
+            column.customLabel
+              ? column.label
+              : operationDefinitionMap[column.operationType].getDefaultLabel(
+                  column,
+                  indexPatternsMap[layer.indexPatternId],
+                  layer.columns
+                )
+          );
         });
       });
 
@@ -526,7 +536,7 @@ export function getFormBasedDatasource({
       domElement: Element,
       props: DatasourceDimensionTriggerProps<FormBasedPrivateState>
     ) => {
-      const columnLabelMap = formBasedDatasource.uniqueLabels(props.state);
+      const columnLabelMap = formBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
       const uniqueLabel = columnLabelMap[props.columnId];
       const formattedLabel = wrapOnDot(uniqueLabel);
 
@@ -538,6 +548,7 @@ export function getFormBasedDatasource({
                 appName: 'lens',
                 storage,
                 uiSettings,
+                settings,
                 data,
                 fieldFormats,
                 savedObjects: core.savedObjects,
@@ -557,7 +568,7 @@ export function getFormBasedDatasource({
       domElement: Element,
       props: DatasourceDimensionEditorProps<FormBasedPrivateState>
     ) => {
-      const columnLabelMap = formBasedDatasource.uniqueLabels(props.state);
+      const columnLabelMap = formBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
 
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
@@ -567,6 +578,7 @@ export function getFormBasedDatasource({
                 appName: 'lens',
                 storage,
                 uiSettings,
+                settings,
                 data,
                 fieldFormats,
                 savedObjects: core.savedObjects,
@@ -579,12 +591,12 @@ export function getFormBasedDatasource({
                 uiSettings={uiSettings}
                 storage={storage}
                 fieldFormats={fieldFormats}
-                savedObjectsClient={core.savedObjects.client}
                 http={core.http}
                 data={data}
                 unifiedSearch={unifiedSearch}
                 dataViews={dataViews}
                 uniqueLabel={columnLabelMap[props.columnId]}
+                notifications={core.notifications}
                 {...props}
               />
             </KibanaContextProvider>
@@ -601,18 +613,32 @@ export function getFormBasedDatasource({
       const { onChangeIndexPattern, ...otherProps } = props;
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
-          <LayerPanel
-            onChangeIndexPattern={(indexPatternId) => {
-              triggerActionOnIndexPatternChange({
-                indexPatternId,
-                state: props.state,
-                layerId: props.layerId,
-                uiActions,
-              });
-              onChangeIndexPattern(indexPatternId, DATASOURCE_ID, props.layerId);
-            }}
-            {...otherProps}
-          />
+          <I18nProvider>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                data,
+                dataViews,
+                fieldFormats,
+                charts,
+                unifiedSearch,
+                share,
+              }}
+            >
+              <LayerPanel
+                onChangeIndexPattern={(indexPatternId) => {
+                  triggerActionOnIndexPatternChange({
+                    indexPatternId,
+                    state: props.state,
+                    layerId: props.layerId,
+                    uiActions,
+                  });
+                  onChangeIndexPattern(indexPatternId, DATASOURCE_ID, props.layerId);
+                }}
+                {...otherProps}
+              />
+            </KibanaContextProvider>
+          </I18nProvider>
         </KibanaThemeProvider>,
         domElement
       );
@@ -736,12 +762,13 @@ export function getFormBasedDatasource({
     },
 
     getPublicAPI({ state, layerId, indexPatterns }: PublicAPIProps<FormBasedPrivateState>) {
-      const columnLabelMap = formBasedDatasource.uniqueLabels(state);
+      const columnLabelMap = formBasedDatasource.uniqueLabels(state, indexPatterns);
       const layer = state.layers[layerId];
       const visibleColumnIds = layer.columnOrder.filter((colId) => !isReferenced(layer, colId));
 
       return {
         datasourceId: DATASOURCE_ID,
+        datasourceAliasIds: ALIAS_IDS,
         getTableSpec: () => {
           // consider also referenced columns in this case
           // but map fields to the top referencing column
@@ -818,7 +845,7 @@ export function getFormBasedDatasource({
     getDatasourceSuggestionsForVisualizeField,
     getDatasourceSuggestionsForVisualizeCharts,
 
-    getUserMessages(state, { frame: frameDatasourceAPI, setState }) {
+    getUserMessages(state, { frame: frameDatasourceAPI, setState, visualizationInfo }) {
       if (!state) {
         return [];
       }
@@ -840,7 +867,8 @@ export function getFormBasedDatasource({
             layer,
             columnId,
             frameDatasourceAPI.dataViews.indexPatterns[layer.indexPatternId],
-            frameDatasourceAPI.dateRange
+            frameDatasourceAPI.dateRange,
+            uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
           );
         }
       );
@@ -872,7 +900,9 @@ export function getFormBasedDatasource({
         ),
       ];
 
-      return [...layerErrorMessages, ...dimensionErrorMessages, ...warningMessages];
+      const infoMessages = getNotifiableFeatures(state, frameDatasourceAPI, visualizationInfo);
+
+      return layerErrorMessages.concat(dimensionErrorMessages, warningMessages, infoMessages);
     },
 
     getSearchWarningMessages: (state, warning, request, response) => {
@@ -973,6 +1003,7 @@ function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedL
     columns: {},
     columnOrder: [],
     sampling: 1,
+    ignoreGlobalFilters: false,
   };
 }
 

@@ -18,11 +18,16 @@ import type {
   TaskManagerStartContract,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
+import {
+  CancellationToken,
+  ReportingError,
+  QueueTimeoutError,
+  KibanaShuttingDownError,
+  TaskRunResult,
+} from '@kbn/reporting-common';
+import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import { getContentStream } from '..';
 import type { ReportingCore } from '../..';
-import { CancellationToken } from '../../../common/cancellation_token';
-import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
-import { ReportingError, QueueTimeoutError, KibanaShuttingDownError } from '../../../common/errors';
 import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
 import type { ReportOutput } from '../../../common/types';
 import type { ReportingConfigType } from '../../config';
@@ -30,13 +35,7 @@ import type { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
 import type { ReportDocument, ReportingStore } from '../store';
 import { Report, SavedReport } from '../store';
 import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
-import {
-  ReportingTask,
-  ReportingTaskStatus,
-  REPORTING_EXECUTE_TYPE,
-  ReportTaskParams,
-  TaskRunResult,
-} from '.';
+import { ReportingTask, ReportingTaskStatus, REPORTING_EXECUTE_TYPE, ReportTaskParams } from '.';
 import { errorLogger } from './error_logger';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
@@ -117,9 +116,9 @@ export class ExecuteReportTask implements ReportingTask {
 
     this.taskExecutors = executors;
 
-    const config = reporting.getConfig();
-    this.kibanaId = config.kbnConfig.get('server', 'uuid');
-    this.kibanaName = config.kbnConfig.get('server', 'name');
+    const { uuid, name } = reporting.getServerInfo();
+    this.kibanaId = uuid;
+    this.kibanaName = name;
   }
 
   /*

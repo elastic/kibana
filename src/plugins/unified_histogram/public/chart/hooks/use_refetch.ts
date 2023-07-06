@@ -8,6 +8,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Suggestion } from '@kbn/lens-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import { filter, share, tap } from 'rxjs';
@@ -29,6 +30,7 @@ export const useRefetch = ({
   filters,
   query,
   relativeTimeRange,
+  currentSuggestion,
   disableAutoFetching,
   input$,
   beforeRefetch,
@@ -42,6 +44,7 @@ export const useRefetch = ({
   filters: Filter[];
   query: Query | AggregateQuery;
   relativeTimeRange: TimeRange;
+  currentSuggestion?: Suggestion;
   disableAutoFetching?: boolean;
   input$: UnifiedHistogramInput$;
   beforeRefetch: () => void;
@@ -67,6 +70,7 @@ export const useRefetch = ({
       filters,
       query,
       relativeTimeRange,
+      currentSuggestion,
     });
 
     if (!isEqual(refetchDeps.current, newRefetchDeps)) {
@@ -80,6 +84,7 @@ export const useRefetch = ({
     breakdown,
     chart,
     chartVisible,
+    currentSuggestion,
     dataView,
     disableAutoFetching,
     filters,
@@ -111,6 +116,7 @@ const getRefetchDeps = ({
   filters,
   query,
   relativeTimeRange,
+  currentSuggestion,
 }: {
   dataView: DataView;
   request: UnifiedHistogramRequestContext | undefined;
@@ -121,6 +127,7 @@ const getRefetchDeps = ({
   filters: Filter[];
   query: Query | AggregateQuery;
   relativeTimeRange: TimeRange;
+  currentSuggestion?: Suggestion;
 }) =>
   cloneDeep([
     dataView.id,
@@ -133,4 +140,5 @@ const getRefetchDeps = ({
     filters,
     query,
     relativeTimeRange,
+    currentSuggestion?.visualizationId,
   ]);

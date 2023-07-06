@@ -326,4 +326,12 @@ describe('SavedObjectsClient', () => {
     );
     expect(result).toBe(returnValue);
   });
+
+  test(`#getCurrentNamespace`, () => {
+    mockRepository.getCurrentNamespace.mockReturnValue('ns');
+    const client = new SavedObjectsClient(mockRepository);
+
+    expect(client.getCurrentNamespace()).toEqual('ns');
+    expect(mockRepository.getCurrentNamespace).toHaveBeenCalledWith();
+  });
 });

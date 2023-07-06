@@ -108,7 +108,7 @@ const RiskyHostsComponent: React.FC<{
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="alert" color={euiLightVars.euiColorDarkestShade} size="l" />
+                <EuiIcon type="warning" color={euiLightVars.euiColorDarkestShade} size="l" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <StatusTitle className="eui-textTruncate" data-test-subj="riskyHostsTotal">

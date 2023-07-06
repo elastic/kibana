@@ -8,12 +8,13 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlexItemProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { statusColors } from '../../../common/constants';
-import { DASHBOARD_COUNTER_CARDS } from '../test_subjects';
+import { DASHBOARD_COUNTER_CARDS, DASHBOARD_SUMMARY_CONTAINER } from '../test_subjects';
 import { CspCounterCard, CspCounterCardProps } from '../../../components/csp_counter_card';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
 import { ChartPanel } from '../../../components/chart_panel';
-import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
+import { ComplianceScoreChart } from '../compliance_charts/compliance_score_chart';
 import type {
   ComplianceDashboardData,
   Evaluation,
@@ -21,6 +22,7 @@ import type {
 } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
 import {
+  NavFilter,
   useNavigateFindings,
   useNavigateFindingsByResource,
 } from '../../../common/hooks/use_navigate_findings';
@@ -36,12 +38,12 @@ export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
   third: 8,
 };
 
-export const getPolicyTemplateQuery = (policyTemplate: PosturePolicyTemplate) => {
-  if (policyTemplate === CSPM_POLICY_TEMPLATE)
+export const getPolicyTemplateQuery = (policyTemplate: PosturePolicyTemplate): NavFilter => {
+  if (policyTemplate === CSPM_POLICY_TEMPLATE) {
     return { 'rule.benchmark.posture_type': CSPM_POLICY_TEMPLATE };
-  if (policyTemplate === KSPM_POLICY_TEMPLATE)
-    return { 'rule.benchmark.posture_type': KSPM_POLICY_TEMPLATE };
-  return {};
+  }
+
+  return { 'rule.benchmark.posture_type': { value: CSPM_POLICY_TEMPLATE, negate: true } };
 };
 
 export const SummarySection = ({
@@ -123,8 +125,22 @@ export const SummarySection = ({
     ]
   );
 
+  const chartTitle = i18n.translate('xpack.csp.dashboard.summarySection.postureScorePanelTitle', {
+    defaultMessage: 'Overall {type} Posture Score',
+    values: {
+      type: dashboardType === KSPM_POLICY_TEMPLATE ? 'Kubernetes' : 'Cloud',
+    },
+  });
+
   return (
-    <EuiFlexGroup gutterSize="l">
+    <EuiFlexGroup
+      gutterSize="l"
+      css={css`
+        // height for compliance by cis section with max rows
+        height: 310px;
+      `}
+      data-test-subj={DASHBOARD_SUMMARY_CONTAINER}
+    >
       <EuiFlexItem grow={dashboardColumnsGrow.first}>
         <EuiFlexGroup direction="column">
           {counters.map((counter) => (
@@ -135,12 +151,8 @@ export const SummarySection = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={dashboardColumnsGrow.second}>
-        <ChartPanel
-          title={i18n.translate('xpack.csp.dashboard.summarySection.cloudPostureScorePanelTitle', {
-            defaultMessage: 'Cloud Posture Score',
-          })}
-        >
-          <CloudPostureScoreChart
+        <ChartPanel title={chartTitle}>
+          <ComplianceScoreChart
             id="cloud_posture_score_chart"
             data={complianceData.stats}
             trend={complianceData.trend}

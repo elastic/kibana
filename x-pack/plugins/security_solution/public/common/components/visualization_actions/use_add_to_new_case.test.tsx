@@ -14,6 +14,7 @@ import {
   readCasesPermissions,
   writeCasesPermissions,
 } from '../../../cases_test_utils';
+import { CommentType } from '@kbn/cases-plugin/common';
 
 jest.mock('../../lib/kibana/kibana_react');
 
@@ -32,7 +33,7 @@ jest.mock('../../lib/kibana', () => {
         ...mockedUseKibana.services,
         cases: {
           hooks: {
-            getUseCasesAddToNewCaseFlyout: mockGetUseCasesAddToNewCaseFlyout,
+            useCasesAddToNewCaseFlyout: mockGetUseCasesAddToNewCaseFlyout,
           },
         },
       },
@@ -49,7 +50,7 @@ describe('useAddToNewCase', () => {
     (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
   });
 
-  it('getUseCasesAddToNewCaseFlyout with attachments', () => {
+  it('useCasesAddToNewCaseFlyout with attachments', () => {
     const { result } = renderHook(() =>
       useAddToNewCase({
         lensAttributes: kpiHostMetricLensAttributes,
@@ -104,5 +105,33 @@ describe('useAddToNewCase', () => {
       })
     );
     expect(result.current.disabled).toEqual(true);
+  });
+
+  it('should open create case flyout', () => {
+    const mockOpenCaseFlyout = jest.fn();
+    mockGetUseCasesAddToNewCaseFlyout.mockReturnValue({ open: mockOpenCaseFlyout });
+
+    const mockClick = jest.fn();
+
+    const { result } = renderHook(() =>
+      useAddToNewCase({
+        lensAttributes: kpiHostMetricLensAttributes,
+        timeRange,
+        onClick: mockClick,
+      })
+    );
+
+    result.current.onAddToNewCaseClicked();
+
+    expect(mockOpenCaseFlyout).toHaveBeenCalledWith({
+      attachments: [
+        {
+          persistableStateAttachmentState: { attributes: kpiHostMetricLensAttributes, timeRange },
+          persistableStateAttachmentTypeId: '.lens',
+          type: CommentType.persistableState as const,
+        },
+      ],
+    });
+    expect(mockClick).toHaveBeenCalled();
   });
 });

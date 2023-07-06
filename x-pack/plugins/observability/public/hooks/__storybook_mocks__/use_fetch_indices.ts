@@ -9,19 +9,16 @@ import { Index, UseFetchIndicesResponse } from '../use_fetch_indices';
 
 export const useFetchIndices = (): UseFetchIndicesResponse => {
   return {
-    loading: false,
-    error: false,
-    indices: [
+    isLoading: false,
+    isError: false,
+    isSuccess: true,
+    data: [
       ...Array(10)
         .fill(0)
-        .map((_, i) => ({
-          name: `.index-${i}`,
-        })),
+        .map((_, i) => `.index-${i}`),
       ...Array(10)
         .fill(0)
-        .map((_, i) => ({
-          name: `.some-other-index-${i}`,
-        })),
+        .map((_, i) => `.some-other-index-${i}`),
     ] as Index[],
   };
 };

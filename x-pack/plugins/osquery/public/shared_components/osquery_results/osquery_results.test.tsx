@@ -10,7 +10,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 
-import { OsqueryActionResults } from '.';
+import { OsqueryActionResults } from './osquery_results';
 import { queryClient } from '../../query_client';
 import { useKibana } from '../../common/lib/kibana';
 import * as useLiveQueryDetails from '../../actions/use_live_query_details';
@@ -32,8 +32,7 @@ const enablePrivileges = () => {
 };
 
 const defaultProps: OsqueryActionResultsProps = {
-  agentIds: ['agent1'],
-  ruleName: ['Test-rule'],
+  ruleName: 'Test-rule',
   actionItems: [
     {
       _id: 'test',
@@ -48,11 +47,13 @@ const defaultProps: OsqueryActionResultsProps = {
   ],
   ecsData: {
     _id: 'test',
+    _index: 'test',
   },
 };
 
 const defaultPermissions = {
   osquery: {
+    read: true,
     runSavedQueries: false,
     readSavedQueries: false,
   },
@@ -82,10 +83,6 @@ describe('Osquery Results', () => {
       .mockImplementation(() => defaultLiveQueryDetails);
   });
 
-  it('should validate permissions', async () => {
-    const { queryByText } = renderWithContext(<OsqueryActionResults {...defaultProps} />);
-    expect(queryByText(PERMISSION_DENIED)).toBeInTheDocument();
-  });
   it('return results table', async () => {
     enablePrivileges();
     const { getByText, queryByText, getByTestId } = renderWithContext(

@@ -76,7 +76,7 @@
             "label": "createInternalStartContract",
             "description": [],
             "signature": [
-              "({ ui, backgroundTasks, }?: { ui: boolean; backgroundTasks: boolean; }) => jest.Mocked<",
+              "({ ui, backgroundTasks, migrator, }?: { ui: boolean; backgroundTasks: boolean; migrator: boolean; }) => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-node-server-internal",
                 "scope": "common",
@@ -99,7 +99,7 @@
                 "label": "__0",
                 "description": [],
                 "signature": [
-                  "{ ui: boolean; backgroundTasks: boolean; }"
+                  "{ ui: boolean; backgroundTasks: boolean; migrator: boolean; }"
                 ],
                 "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
                 "deprecated": false,

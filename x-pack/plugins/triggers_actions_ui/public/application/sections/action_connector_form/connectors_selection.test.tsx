@@ -45,6 +45,7 @@ describe('connectors_selection', () => {
       group: 'group',
       class: 'test class',
     },
+    uuid: '123-456',
   };
 
   const actionTypeIndex: Record<string, ActionType> = {
@@ -68,6 +69,7 @@ describe('connectors_selection', () => {
       id: 'testId',
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false as const,
       name: 'test pagerduty',
       secrets: {},
     },

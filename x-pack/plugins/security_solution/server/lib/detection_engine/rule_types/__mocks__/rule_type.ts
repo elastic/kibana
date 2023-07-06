@@ -17,7 +17,7 @@ import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 import { eventLogServiceMock } from '@kbn/event-log-plugin/server/mocks';
 import type { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
 import type { ConfigType } from '../../../../config';
-import type { AlertAttributes } from '../../signals/types';
+import type { AlertAttributes } from '../types';
 import { createRuleMock } from './rule';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import type { QueryRuleParams, RuleParams } from '../../rule_schema';

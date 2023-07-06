@@ -39,6 +39,7 @@ import type { PackagePolicyFormState } from '../../types';
 import { SelectedPolicyTab } from '../../components';
 import { useOnSaveNavigate } from '../../hooks';
 import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
+import { getCloudFormationTemplateUrlFromPackagePolicy } from '../../../../../services';
 
 async function createAgentPolicy({
   packagePolicy,
@@ -219,15 +220,24 @@ export function useOnSubmit({
     init();
   }, [packageInfo, agentPolicy, updatePackagePolicy, integrationToEnable, isInitialized]);
 
+  useEffect(() => {
+    if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
+      updatePackagePolicy({
+        policy_id: agentPolicy.id,
+        namespace: agentPolicy.namespace,
+      });
+    }
+  }, [packagePolicy, agentPolicy, updatePackagePolicy]);
+
   const onSaveNavigate = useOnSaveNavigate({
     packagePolicy,
     queryParamsPolicyId,
   });
 
-  const navigateAddAgent = (policy?: PackagePolicy) =>
+  const navigateAddAgent = (policy: PackagePolicy) =>
     onSaveNavigate(policy, ['openEnrollmentFlyout']);
 
-  const navigateAddAgentHelp = (policy?: PackagePolicy) =>
+  const navigateAddAgentHelp = (policy: PackagePolicy) =>
     onSaveNavigate(policy, ['showAddAgentHelp']);
 
   const onSubmit = useCallback(
@@ -248,9 +258,9 @@ export function useOnSubmit({
         try {
           setFormState('LOADING');
           if ((withSysMonitoring || newAgentPolicy.monitoring_enabled?.length) ?? 0 > 0) {
-            const packagesToPreinstall: string[] = [];
+            const packagesToPreinstall: Array<string | { name: string; version: string }> = [];
             if (packageInfo) {
-              packagesToPreinstall.push(packageInfo.name);
+              packagesToPreinstall.push({ name: packageInfo.name, version: packageInfo.version });
             }
             if (withSysMonitoring) {
               packagesToPreinstall.push(FLEET_SYSTEM_PACKAGE);
@@ -289,11 +299,24 @@ export function useOnSubmit({
         policy_id: createdPolicy?.id ?? packagePolicy.policy_id,
         force,
       });
-      setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+
+      const hasCloudFormation = data?.item
+        ? getCloudFormationTemplateUrlFromPackagePolicy(data.item)
+        : false;
+
+      if (hasCloudFormation) {
+        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
+      } else {
+        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+      }
       if (!error) {
         setSavedPackagePolicy(data!.item);
 
         const hasAgentsAssigned = agentCount && agentPolicy;
+        if (!hasAgentsAssigned && hasCloudFormation) {
+          setFormState('SUBMITTED_CLOUD_FORMATION');
+          return;
+        }
         if (!hasAgentsAssigned) {
           setFormState('SUBMITTED_NO_AGENTS');
           return;

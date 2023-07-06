@@ -7,13 +7,9 @@
 
 import moment from 'moment';
 import React, { useCallback } from 'react';
-import {
-  AllSeries,
-  fromQuery,
-  RECORDS_FIELD,
-  toQuery,
-  useTheme,
-} from '@kbn/observability-plugin/public';
+import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { AllSeries, RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
 import { useHistory } from 'react-router-dom';
 
 import { getExploratoryViewFilter } from '../../../../services/data/get_exp_view_filter';
@@ -31,7 +27,7 @@ export function PageViewsChart({ breakdown }: Props) {
   const { dataViewTitle } = useDataView();
   const history = useHistory();
   const kibana = useKibanaServices();
-  const { ExploratoryViewEmbeddable } = kibana.observability;
+  const { ExploratoryViewEmbeddable } = kibana.exploratoryView!;
 
   const { uxUiFilters, urlParams } = useLegacyUrlParams();
 

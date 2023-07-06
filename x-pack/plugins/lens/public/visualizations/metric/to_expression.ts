@@ -143,6 +143,7 @@ export const toExpression = (
     subtitle: state.subtitle ?? undefined,
     progressDirection: state.progressDirection as LayoutDirection,
     color: state.color || getDefaultColor(state),
+    icon: state.icon,
     palette: state.palette?.params
       ? [
           paletteService

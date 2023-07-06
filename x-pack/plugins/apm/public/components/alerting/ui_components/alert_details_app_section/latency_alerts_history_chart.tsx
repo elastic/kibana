@@ -5,29 +5,37 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import moment from 'moment';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
-import { EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { EuiText } from '@elastic/eui';
 import {
   AnnotationDomainType,
   LineAnnotation,
   Position,
 } from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
-import { EuiBadge } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { convertTo } from '@kbn/observability-plugin/public';
-import { useFetchTriggeredAlertsHistory } from '../../../../hooks/use_fetch_triggered_alert_history';
-import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import moment from 'moment';
+import React, { useMemo } from 'react';
+import { useAlertsHistory } from '@kbn/observability-alert-details';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ApmDocumentType } from '../../../../../common/document_type';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
+import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { filterNil } from '../../../shared/charts/latency_chart';
+import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
@@ -54,6 +62,14 @@ export function LatencyAlertsHistoryChart({
   timeZone,
   ruleId,
 }: LatencyAlertsHistoryChartProps) {
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery: '',
+    numBuckets: 100,
+    type: ApmDocumentType.ServiceTransactionMetric,
+  });
+  const { http, notifications } = useKibana().services;
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (
@@ -61,7 +77,8 @@ export function LatencyAlertsHistoryChart({
         start &&
         end &&
         transactionType &&
-        latencyAggregationType
+        latencyAggregationType &&
+        preferred
       ) {
         return callApmApi(
           `GET /internal/apm/services/{serviceName}/transactions/charts/latency`,
@@ -71,11 +88,17 @@ export function LatencyAlertsHistoryChart({
               query: {
                 environment,
                 kuery: '',
-                start: moment().subtract(30, 'days').toISOString(),
-                end: moment().toISOString(),
+                start,
+                end,
                 transactionType,
                 transactionName: undefined,
                 latencyAggregationType,
+                bucketSizeInSeconds: preferred.bucketSizeInSeconds,
+                documentType: preferred.source.documentType,
+                rollupInterval: preferred.source.rollupInterval,
+                useDurationSummary:
+                  preferred.source.hasDurationSummaryField &&
+                  latencyAggregationType === LatencyAggregationType.avg,
               },
             },
           }
@@ -89,6 +112,7 @@ export function LatencyAlertsHistoryChart({
       serviceName,
       start,
       transactionType,
+      preferred,
     ]
   );
   const memoizedData = useMemo(
@@ -107,10 +131,38 @@ export function LatencyAlertsHistoryChart({
   const timeseriesLatency = [currentPeriod, previousPeriod].filter(filterNil);
   const latencyMaxY = getMaxY(timeseriesLatency);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
-  const { triggeredAlertsData } = useFetchTriggeredAlertsHistory({
-    features: 'apm',
+  const {
+    data: {
+      totalTriggeredAlerts,
+      avgTimeToRecoverUS,
+      histogramTriggeredAlerts,
+    },
+    isError,
+    isLoading,
+  } = useAlertsHistory({
+    http,
+    featureIds: [AlertConsumers.APM],
     ruleId,
+    dateRange: { from: start, to: end },
   });
+
+  if (isError) {
+    notifications?.toasts.addDanger({
+      title: i18n.translate(
+        'xpack.apm.alertDetails.latencyAlertHistoryChart.error.toastTitle',
+        {
+          defaultMessage: 'Latency alerts history chart error',
+        }
+      ),
+      text: i18n.translate(
+        'xpack.apm.alertDetails.latencyAlertHistoryChart.error.toastDescription',
+        {
+          defaultMessage: `An error occurred when fetching latency alert history chart data for {serviceName}`,
+          values: { serviceName },
+        }
+      ),
+    });
+  }
 
   return (
     <EuiPanel hasBorder={true}>
@@ -141,7 +193,13 @@ export function LatencyAlertsHistoryChart({
             <EuiFlexItem grow={false}>
               <EuiText color="danger">
                 <EuiTitle size="s">
-                  <h3>{triggeredAlertsData?.totalTriggeredAlerts || '-'}</h3>
+                  <h3>
+                    {isLoading ? (
+                      <EuiLoadingSpinner size="s" />
+                    ) : (
+                      totalTriggeredAlerts || '-'
+                    )}
+                  </h3>
                 </EuiTitle>
               </EuiText>
             </EuiFlexItem>
@@ -162,13 +220,17 @@ export function LatencyAlertsHistoryChart({
             <EuiText>
               <EuiTitle size="s">
                 <h3>
-                  {triggeredAlertsData?.avgTimeToRecoverUS
-                    ? convertTo({
-                        unit: 'minutes',
-                        microseconds: triggeredAlertsData?.avgTimeToRecoverUS,
-                        extended: true,
-                      }).formatted
-                    : '-'}
+                  {isLoading ? (
+                    <EuiLoadingSpinner size="s" />
+                  ) : avgTimeToRecoverUS ? (
+                    convertTo({
+                      unit: 'minutes',
+                      microseconds: avgTimeToRecoverUS,
+                      extended: true,
+                    }).formatted
+                  ) : (
+                    '-'
+                  )}
                 </h3>
               </EuiTitle>
             </EuiText>
@@ -195,8 +257,8 @@ export function LatencyAlertsHistoryChart({
             key={'annotationsAlertHistory'}
             domainType={AnnotationDomainType.XDomain}
             dataValues={
-              triggeredAlertsData?.histogramTriggeredAlerts
-                .filter((annotation) => annotation.doc_count > 0)
+              histogramTriggeredAlerts
+                ?.filter((annotation) => annotation.doc_count > 0)
                 .map((annotation) => {
                   return {
                     dataValue: annotation.key,
@@ -214,7 +276,9 @@ export function LatencyAlertsHistoryChart({
                 opacity: 1,
               },
             }}
-            marker={<EuiIcon type="alert" color={CHART_ANNOTATION_RED_COLOR} />}
+            marker={
+              <EuiIcon type="warning" color={CHART_ANNOTATION_RED_COLOR} />
+            }
             markerBody={(annotationData) => (
               <>
                 <EuiBadge color={CHART_ANNOTATION_RED_COLOR}>

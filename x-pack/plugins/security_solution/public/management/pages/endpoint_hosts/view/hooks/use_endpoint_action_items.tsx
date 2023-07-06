@@ -10,9 +10,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useWithShowEndpointResponder } from '../../../../hooks';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { APP_UI_ID } from '../../../../../../common/constants';
-import { getEndpointDetailsPath } from '../../../../common/routing';
+import { getEndpointDetailsPath, getEndpointListPath } from '../../../../common/routing';
 import type { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from './hooks';
 import { agentPolicies, uiQueryParams } from '../../store/selectors';
@@ -37,9 +36,6 @@ export const useEndpointActionItems = (
   const fleetAgentPolicies = useEndpointSelector(agentPolicies);
   const allCurrentUrlParams = useEndpointSelector(uiQueryParams);
   const showEndpointResponseActionsConsole = useWithShowEndpointResponder();
-  const isResponseActionsConsoleEnabled = useIsExperimentalFeatureEnabled(
-    'responseActionsConsoleEnabled'
-  );
   const {
     canAccessResponseConsole,
     canIsolateHost,
@@ -123,7 +119,7 @@ export const useEndpointActionItems = (
 
       return [
         ...isolationActions,
-        ...(isResponseActionsConsoleEnabled && canAccessResponseConsole
+        ...(canAccessResponseConsole
           ? [
               {
                 'data-test-subj': 'console',
@@ -236,6 +232,12 @@ export const useEndpointActionItems = (
                       agentId: fleetAgentId,
                     })[1]
                   }?openReassignFlyout=true`,
+                  state: {
+                    onDoneNavigateTo: [
+                      APP_UI_ID,
+                      { path: getEndpointListPath({ name: 'endpointList' }) },
+                    ],
+                  },
                 },
                 href: `${getAppUrl({ appId: 'fleet' })}${
                   pagePathGetters.agent_details({
@@ -262,7 +264,6 @@ export const useEndpointActionItems = (
     endpointMetadata,
     fleetAgentPolicies,
     getAppUrl,
-    isResponseActionsConsoleEnabled,
     showEndpointResponseActionsConsole,
     options?.isEndpointList,
     canIsolateHost,

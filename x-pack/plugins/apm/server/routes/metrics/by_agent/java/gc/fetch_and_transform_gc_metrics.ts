@@ -17,6 +17,8 @@ import {
   AGENT_NAME,
   LABEL_NAME,
   METRIC_JAVA_GC_COUNT,
+  LABEL_GC,
+  METRIC_OTEL_JVM_GC_DURATION,
   METRIC_JAVA_GC_TIME,
   SERVICE_NAME,
 } from '../../../../../../common/es_fields/apm';
@@ -30,6 +32,9 @@ import {
 import { APMConfig } from '../../../../..';
 import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 
+export const RATE = 'rate';
+export const TIME = 'time';
+
 export async function fetchAndTransformGcMetrics({
   environment,
   kuery,
@@ -38,10 +43,11 @@ export async function fetchAndTransformGcMetrics({
   serviceName,
   serviceNodeName,
   chartBase,
-  fieldName,
+  rateOrTime,
   operationName,
   start,
   end,
+  isOpenTelemetry,
 }: {
   environment: string;
   kuery: string;
@@ -52,10 +58,25 @@ export async function fetchAndTransformGcMetrics({
   start: number;
   end: number;
   chartBase: ChartBase;
-  fieldName: typeof METRIC_JAVA_GC_COUNT | typeof METRIC_JAVA_GC_TIME;
+  rateOrTime: typeof RATE | typeof TIME;
   operationName: string;
+  isOpenTelemetry?: boolean;
 }) {
   const { bucketSize } = getBucketSize({ start, end });
+
+  const groupByField = isOpenTelemetry ? LABEL_GC : LABEL_NAME;
+
+  const targetField = isOpenTelemetry
+    ? METRIC_OTEL_JVM_GC_DURATION
+    : rateOrTime === RATE
+    ? METRIC_JAVA_GC_COUNT
+    : METRIC_JAVA_GC_TIME;
+
+  const fieldAggregation = isOpenTelemetry
+    ? rateOrTime === RATE
+      ? { value_count: { field: targetField } }
+      : { sum: { field: targetField } }
+    : { max: { field: targetField } };
 
   // GC rate and time are reported by the agents as monotonically
   // increasing counters, which means that we have to calculate
@@ -76,7 +97,7 @@ export async function fetchAndTransformGcMetrics({
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
-            { exists: { field: fieldName } },
+            { exists: { field: targetField } },
             { terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } },
           ],
         },
@@ -84,7 +105,7 @@ export async function fetchAndTransformGcMetrics({
       aggs: {
         per_pool: {
           terms: {
-            field: `${LABEL_NAME}`,
+            field: `${groupByField}`,
           },
           aggs: {
             timeseries: {
@@ -95,11 +116,7 @@ export async function fetchAndTransformGcMetrics({
               }),
               aggs: {
                 // get the max value
-                max: {
-                  max: {
-                    field: fieldName,
-                  },
-                },
+                max: fieldAggregation,
                 // get the derivative, which is the delta y
                 derivative: {
                   derivative: {
@@ -147,7 +164,7 @@ export async function fetchAndTransformGcMetrics({
 
       // convert to milliseconds if we're calculating time, but not for rate
       const y =
-        unconvertedY !== null && fieldName === METRIC_JAVA_GC_TIME
+        unconvertedY !== null && rateOrTime === TIME
           ? unconvertedY * 1000
           : unconvertedY;
 

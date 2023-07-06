@@ -44,7 +44,9 @@ export type AgentActionType =
   | 'CANCEL'
   | 'FORCE_UNENROLL'
   | 'UPDATE_TAGS'
-  | 'REQUEST_DIAGNOSTICS';
+  | 'REQUEST_DIAGNOSTICS'
+  | 'POLICY_CHANGE'
+  | 'INPUT_ACTION';
 
 type FleetServerAgentComponentStatusTuple = typeof FleetServerAgentComponentStatuses;
 export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTuple[number];
@@ -77,6 +79,8 @@ export interface AgentAction extends NewAgentAction {
 export interface AgentMetadata {
   [x: string]: any;
 }
+
+// SO definition for this type is declared in server/types/interfaces
 interface AgentBase {
   type: AgentType;
   active: boolean;
@@ -97,6 +101,7 @@ interface AgentBase {
   local_metadata: AgentMetadata;
   tags?: string[];
   components?: FleetServerAgentComponent[];
+  agent?: FleetServerAgentMetadata;
 }
 
 export interface AgentMetrics {
@@ -104,26 +109,24 @@ export interface AgentMetrics {
   memory_size_byte_avg?: number;
 }
 
+export interface OutputMap {
+  [key: string]: {
+    api_key_id: string;
+    type: string;
+    to_retire_api_key_ids?: FleetServerAgent['default_api_key_history'];
+  };
+}
+
 export interface Agent extends AgentBase {
   id: string;
   access_api_key?: string;
   // @deprecated
   default_api_key_history?: FleetServerAgent['default_api_key_history'];
-  outputs?: Record<
-    string,
-    {
-      api_key_id: string;
-      to_retire_api_key_ids?: FleetServerAgent['default_api_key_history'];
-    }
-  >;
+  outputs?: OutputMap;
   status?: AgentStatus;
   packages: string[];
   sort?: Array<number | string | null>;
   metrics?: AgentMetrics;
-}
-
-export interface AgentSOAttributes extends AgentBase {
-  packages?: string[];
 }
 
 export interface CurrentUpgrade {
@@ -133,6 +136,13 @@ export interface CurrentUpgrade {
   nbAgentsAck: number;
   version: string;
   startTime?: string;
+}
+
+export interface ActionErrorResult {
+  agentId: string;
+  error: string;
+  timestamp: string;
+  hostname?: string;
 }
 
 export interface ActionStatus {
@@ -145,7 +155,7 @@ export interface ActionStatus {
   nbAgentsFailed: number;
   version?: string;
   startTime?: string;
-  type?: string;
+  type: AgentActionType;
   // how many agents were actioned by the user
   nbAgentsActioned: number;
   status: 'COMPLETE' | 'EXPIRED' | 'CANCELLED' | 'FAILED' | 'IN_PROGRESS' | 'ROLLOUT_PASSED';
@@ -155,6 +165,9 @@ export interface ActionStatus {
   newPolicyId?: string;
   creationTime: string;
   hasRolloutPeriod?: boolean;
+  latestErrors?: ActionErrorResult[];
+  revision?: number;
+  policyId?: string;
 }
 
 export interface AgentDiagnostics {
@@ -168,6 +181,9 @@ export interface AgentDiagnostics {
 }
 
 // Generated from FleetServer schema.json
+/**
+ * Fleet Server agent component unit
+ */
 export interface FleetServerAgentComponentUnit {
   id: string;
   type: 'input' | 'output';
@@ -178,7 +194,10 @@ export interface FleetServerAgentComponentUnit {
   };
 }
 
-interface FleetServerAgentComponent {
+/**
+ * Fleet server agent component
+ */
+export interface FleetServerAgentComponent {
   id: string;
   type: string;
   status: FleetServerAgentComponentStatus;
@@ -302,6 +321,11 @@ export interface FleetServerAgent {
    * Components array
    */
   components?: FleetServerAgentComponent[];
+
+  /**
+   * Outputs map
+   */
+  outputs?: OutputMap;
 }
 /**
  * An Elastic Agent metadata
@@ -377,7 +401,10 @@ export interface FleetServerAgentAction {
   data?: {
     [k: string]: unknown;
   };
-
   total?: number;
+
+  /** Trace id */
+  traceparent?: string | null;
+
   [k: string]: unknown;
 }

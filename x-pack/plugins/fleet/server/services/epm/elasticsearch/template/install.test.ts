@@ -286,4 +286,45 @@ describe('EPM index template install', () => {
       index: { mode: 'time_series' },
     });
   });
+
+  it('test prepareTemplate to set ignore_malformed in settings', () => {
+    const dataStream = {
+      type: 'logs',
+      dataset: 'package.dataset',
+      title: 'test data stream',
+      release: 'experimental',
+      package: 'package',
+      path: 'path',
+      ingest_pipeline: 'default',
+      elasticsearch: {
+        'index_template.settings': {
+          index: {
+            mapping: {
+              ignored_malformed: true,
+            },
+          },
+        },
+      },
+    } as RegistryDataStream;
+
+    const pkg = {
+      name: 'package',
+      version: '0.0.1',
+    };
+
+    const { componentTemplates } = prepareTemplate({
+      pkg,
+      dataStream,
+    });
+
+    const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
+
+    if (!('settings' in packageTemplate)) {
+      throw new Error('no mappings on package template');
+    }
+
+    expect(packageTemplate.settings?.index?.mapping).toEqual(
+      expect.objectContaining({ ignored_malformed: true })
+    );
+  });
 });

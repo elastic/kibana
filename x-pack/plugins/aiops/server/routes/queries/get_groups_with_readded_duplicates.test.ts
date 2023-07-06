@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { changePointGroups } from '../../../common/__mocks__/artificial_logs/change_point_groups';
-import { changePoints } from '../../../common/__mocks__/artificial_logs/change_points';
+import { significantTermGroups } from '../../../common/__mocks__/artificial_logs/significant_term_groups';
+import { significantTerms } from '../../../common/__mocks__/artificial_logs/significant_terms';
 
 import { duplicateIdentifier } from './duplicate_identifier';
 import { getGroupsWithReaddedDuplicates } from './get_groups_with_readded_duplicates';
@@ -16,15 +16,15 @@ import { getMarkedDuplicates } from './get_marked_duplicates';
 
 describe('getGroupsWithReaddedDuplicates', () => {
   it('gets groups with readded duplicates', () => {
-    const groupedChangePoints = groupDuplicates(changePoints, duplicateIdentifier).filter(
+    const groupedSignificantTerms = groupDuplicates(significantTerms, duplicateIdentifier).filter(
       (g) => g.group.length > 1
     );
 
-    const fieldValuePairCounts = getFieldValuePairCounts(changePointGroups);
-    const markedDuplicates = getMarkedDuplicates(changePointGroups, fieldValuePairCounts);
+    const fieldValuePairCounts = getFieldValuePairCounts(significantTermGroups);
+    const markedDuplicates = getMarkedDuplicates(significantTermGroups, fieldValuePairCounts);
     const groupsWithReaddedDuplicates = getGroupsWithReaddedDuplicates(
       markedDuplicates,
-      groupedChangePoints
+      groupedSignificantTerms
     );
 
     expect(groupsWithReaddedDuplicates).toEqual([
@@ -32,19 +32,18 @@ describe('getGroupsWithReaddedDuplicates', () => {
         docCount: 792,
         group: [
           {
-            duplicate: false,
             fieldName: 'response_code',
             fieldValue: '500',
+            duplicate: 1,
+            docCount: 1819,
+            pValue: 2.9589053032077285e-12,
           },
           {
-            duplicate: false,
             fieldName: 'url',
             fieldValue: 'home.php',
-          },
-          {
-            duplicate: false,
-            fieldName: 'url',
-            fieldValue: 'login.php',
+            duplicate: 1,
+            docCount: 1744,
+            pValue: 0.010770456205312423,
           },
         ],
         id: '2038579476',

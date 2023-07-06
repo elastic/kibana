@@ -11,6 +11,7 @@ import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../constants';
 import {
   RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
+  RESPONSE_ACTION_TYPE,
 } from '../service/response_actions/constants';
 
 const BaseActionRequestSchema = {
@@ -104,6 +105,8 @@ const commandsSchema = schema.oneOf(
 // TODO: fix the odd TS error
 // @ts-expect-error TS2769: No overload matches this call
 const statusesSchema = schema.oneOf(RESPONSE_ACTION_STATUS.map((status) => schema.literal(status)));
+// @ts-expect-error TS2769: No overload matches this call
+const typesSchema = schema.oneOf(RESPONSE_ACTION_TYPE.map((type) => schema.literal(type)));
 
 export const EndpointActionListRequestSchema = {
   query: schema.object({
@@ -150,6 +153,9 @@ export const EndpointActionListRequestSchema = {
           },
         }),
       ])
+    ),
+    types: schema.maybe(
+      schema.oneOf([schema.arrayOf(typesSchema, { minSize: 1, maxSize: 2 }), typesSchema])
     ),
   }),
 };
@@ -218,3 +224,26 @@ export const ResponseActionBodySchema = schema.oneOf([
   EndpointActionGetFileSchema.body,
   ExecuteActionRequestSchema.body,
 ]);
+
+export const UploadActionRequestSchema = {
+  body: schema.object({
+    ...BaseActionRequestSchema,
+
+    parameters: schema.object({
+      overwrite: schema.maybe(schema.boolean({ defaultValue: false })),
+    }),
+
+    file: schema.stream(),
+  }),
+};
+
+/** Type used by the server's API for `upload` action */
+export type UploadActionApiRequestBody = TypeOf<typeof UploadActionRequestSchema.body>;
+
+/**
+ * Type used on the UI side. The `file` definition is different on the UI side, thus the
+ * need for a separate type.
+ */
+export type UploadActionUIRequestBody = Omit<UploadActionApiRequestBody, 'file'> & {
+  file: File;
+};

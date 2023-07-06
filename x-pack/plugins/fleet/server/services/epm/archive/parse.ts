@@ -38,7 +38,7 @@ import { pkgToPkgKey } from '../registry';
 import { unpackBufferEntries } from '.';
 
 const readFileAsync = promisify(readFile);
-const MANIFEST_NAME = 'manifest.yml';
+export const MANIFEST_NAME = 'manifest.yml';
 
 const DEFAULT_RELEASE_VALUE = 'ga';
 
@@ -182,7 +182,9 @@ export function parseAndVerifyArchive(
   const toplevelDir = topLevelDirOverride || paths[0].split('/')[0];
   paths.forEach((filePath) => {
     if (!filePath.startsWith(toplevelDir)) {
-      throw new PackageInvalidArchiveError('Package contains more than one top-level directory.');
+      throw new PackageInvalidArchiveError(
+        `Package contains more than one top-level directory; top-level directory found: ${toplevelDir}; filePath: ${filePath}`
+      );
     }
   });
 
@@ -190,7 +192,9 @@ export function parseAndVerifyArchive(
   const manifestFile = path.posix.join(toplevelDir, MANIFEST_NAME);
   const manifestBuffer = manifests[manifestFile];
   if (!paths.includes(manifestFile) || !manifestBuffer) {
-    throw new PackageInvalidArchiveError(`Package must contain a top-level ${MANIFEST_NAME} file.`);
+    throw new PackageInvalidArchiveError(
+      `Package at top-level directory ${toplevelDir} must contain a top-level ${MANIFEST_NAME} file.`
+    );
   }
 
   // ... which must be valid YAML
@@ -198,7 +202,9 @@ export function parseAndVerifyArchive(
   try {
     manifest = yaml.safeLoad(manifestBuffer.toString());
   } catch (error) {
-    throw new PackageInvalidArchiveError(`Could not parse top-level package manifest: ${error}.`);
+    throw new PackageInvalidArchiveError(
+      `Could not parse top-level package manifest at top-level directory ${toplevelDir}: ${error}.`
+    );
   }
 
   // must have mandatory fields
@@ -208,7 +214,7 @@ export function parseAndVerifyArchive(
   if (!requiredKeysMatch) {
     const list = requiredArchivePackageProps.join(', ');
     throw new PackageInvalidArchiveError(
-      `Invalid top-level package manifest: one or more fields missing of ${list}`
+      `Invalid top-level package manifest at top-level directory ${toplevelDir} (package name: ${manifest.name}): one or more fields missing of ${list}.`
     );
   }
 
@@ -324,7 +330,7 @@ export function parseAndVerifyDataStreams(opts: {
       streams: manifestStreams,
       elasticsearch,
       ...restOfProps
-    } = manifest;
+    } = expandDottedObject(manifest);
 
     if (!(dataStreamTitle && type)) {
       throw new PackageInvalidArchiveError(
@@ -576,6 +582,14 @@ export function parseDataStreamElasticsearchEntry(
 
   if (expandedElasticsearch?.index_mode) {
     parsedElasticsearchEntry.index_mode = expandedElasticsearch.index_mode;
+  }
+
+  if (expandedElasticsearch?.dynamic_dataset) {
+    parsedElasticsearchEntry.dynamic_dataset = expandedElasticsearch.dynamic_dataset;
+  }
+
+  if (expandedElasticsearch?.dynamic_namespace) {
+    parsedElasticsearchEntry.dynamic_namespace = expandedElasticsearch.dynamic_namespace;
   }
 
   return parsedElasticsearchEntry;

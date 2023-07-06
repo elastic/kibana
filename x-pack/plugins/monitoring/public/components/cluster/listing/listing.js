@@ -230,6 +230,14 @@ const getColumns = (
         );
       },
     },
+    {
+      name: i18n.translate('xpack.monitoring.cluster.listing.versionColumnTitle', {
+        defaultMessage: 'Version',
+      }),
+      field: 'version',
+      'data-test-subj': 'clusterVersion',
+      sortable: true,
+    },
   ];
 };
 

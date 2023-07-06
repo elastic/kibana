@@ -47,6 +47,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
                 meta: {
                   title: 'my title',
                 },
+                managed: false,
               },
             ],
           });

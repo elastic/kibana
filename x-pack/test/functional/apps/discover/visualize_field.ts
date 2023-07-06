@@ -26,6 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'security',
     'spaceSelector',
     'header',
+    'unifiedFieldList',
   ]);
   const monacoEditor = getService('monacoEditor');
 
@@ -58,13 +59,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('shows "visualize" field button', async () => {
-      await PageObjects.discover.clickFieldListItem('bytes');
-      await PageObjects.discover.expectFieldListItemVisualize('bytes');
+      await PageObjects.unifiedFieldList.clickFieldListItem('bytes');
+      await PageObjects.unifiedFieldList.expectFieldListItemVisualize('bytes');
     });
 
     it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
-      await PageObjects.discover.findFieldByName('bytes');
-      await PageObjects.discover.clickFieldListItemVisualize('bytes');
+      await PageObjects.unifiedFieldList.findFieldByName('bytes');
+      await PageObjects.unifiedFieldList.clickFieldListItemVisualize('bytes');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
@@ -79,8 +80,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         operation: 'is between',
         value: { from: '3500', to: '4000' },
       });
-      await PageObjects.discover.findFieldByName('geo.src');
-      await PageObjects.discover.clickFieldListItemVisualize('geo.src');
+      await PageObjects.unifiedFieldList.findFieldByName('geo.src');
+      await PageObjects.unifiedFieldList.clickFieldListItemVisualize('geo.src');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await filterBar.hasFilter('bytes', '3,500 to 4,000')).to.be(true);
@@ -89,8 +90,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should preserve query in lens', async () => {
       await queryBar.setQuery('machine.os : ios');
       await queryBar.submitQuery();
-      await PageObjects.discover.findFieldByName('geo.dest');
-      await PageObjects.discover.clickFieldListItemVisualize('geo.dest');
+      await PageObjects.unifiedFieldList.findFieldByName('geo.dest');
+      await PageObjects.unifiedFieldList.clickFieldListItemVisualize('geo.dest');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       expect(await queryBar.getQueryString()).to.equal('machine.os : ios');
@@ -113,7 +114,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         expect(await breakdownLabel.getVisibleText()).to.eql('Top 3 values of extension.raw');
-        expect(values).to.eql(['Other', 'png', 'css', 'jpg']);
+        expect(values).to.eql(['jpg', 'css', 'png', 'Other']);
       });
     });
 
@@ -130,7 +131,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    it('should visualize correctly text based language queries', async () => {
+    it('should visualize correctly text based language queries in Discover', async () => {
       await PageObjects.discover.selectTextBaseLang('SQL');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
@@ -138,12 +139,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
+      expect(await testSubjects.exists('heatmapChart')).to.be(true);
 
-      await testSubjects.click('textBased-visualize');
+      await PageObjects.discover.chooseLensChart('Donut');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await testSubjects.exists('partitionVisChart')).to.be(true);
+    });
+
+    it('should visualize correctly text based language queries in Lens', async () => {
+      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue(
+        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('TextBasedLangEditor-expand');
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await retry.waitFor('lens visualization', async () => {
+      await retry.waitFor('lens flyout', async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
         return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'average';
       });
@@ -157,15 +174,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-
-      await testSubjects.click('textBased-visualize');
+      await testSubjects.click('TextBasedLangEditor-expand');
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await retry.waitFor('lens visualization', async () => {
+      await retry.waitFor('lens flyout', async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
         return dimensions.length === 2 && (await dimensions[1].getVisibleText()) === 'average';
       });
+    });
+
+    it('should save correctly chart to dashboard', async () => {
+      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue(
+        'SELECT extension, AVG("bytes") as average FROM "logstash*" GROUP BY extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('TextBasedLangEditor-expand');
+      await testSubjects.click('unifiedHistogramSaveVisualization');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.lens.saveModal('TextBasedChart', false, false, false, 'new');
+      await testSubjects.existOrFail('embeddablePanelHeading-TextBasedChart');
     });
   });
 }

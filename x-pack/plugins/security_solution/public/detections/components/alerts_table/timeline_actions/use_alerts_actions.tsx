@@ -19,7 +19,6 @@ interface Props {
   closePopover: () => void;
   eventId: string;
   scopeId: string;
-  indexName: string;
   refetch?: () => void;
 }
 
@@ -28,7 +27,6 @@ export const useAlertsActions = ({
   closePopover,
   eventId,
   scopeId,
-  indexName,
   refetch,
 }: Props) => {
   const dispatch = useDispatch();
@@ -42,7 +40,7 @@ export const useAlertsActions = ({
   }, [closePopover, refetch]);
 
   const scopedActions = getScopedActions(scopeId);
-  const setEventsLoading = useCallback(
+  const localSetEventsLoading = useCallback(
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
       if (scopedActions) {
         dispatch(scopedActions.setEventsLoading({ id: scopeId, eventIds, isLoading }));
@@ -63,8 +61,7 @@ export const useAlertsActions = ({
   const actionItems = useBulkActionItems({
     eventIds: [eventId],
     currentStatus: alertStatus as AlertWorkflowStatus,
-    indexName,
-    setEventsLoading,
+    setEventsLoading: localSetEventsLoading,
     setEventsDeleted,
     onUpdateSuccess: onStatusUpdate,
     onUpdateFailure: onStatusUpdate,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CustomUrlAnomalyRecordDoc } from '../../../common/types/custom_urls';
+import type { MlCustomUrlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import { Detector } from '../../../common/types/anomaly_detection_jobs';
 
 import {
@@ -18,7 +18,7 @@ import {
 
 describe('ML - string utils', () => {
   describe('replaceStringTokens', () => {
-    const testRecord: CustomUrlAnomalyRecordDoc = {
+    const testRecord: MlCustomUrlAnomalyRecordDoc = {
       job_id: 'test_job',
       result_type: 'record',
       probability: 0.0191711,

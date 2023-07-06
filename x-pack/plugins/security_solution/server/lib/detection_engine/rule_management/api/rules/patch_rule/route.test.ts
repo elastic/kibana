@@ -22,20 +22,10 @@ import {
 } from '../../../../routes/__mocks__/request_responses';
 
 import { getMlRuleParams, getQueryRuleParams } from '../../../../rule_schema/mocks';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 
 import { patchRuleRoute } from './route';
 
 jest.mock('../../../../../machine_learning/authz');
-
-jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
-  const actual = jest.requireActual('../../../logic/rule_actions/legacy_action_migration');
-  return {
-    ...actual,
-    legacyMigrate: jest.fn(),
-  };
-});
 
 describe('Patch rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -51,8 +41,6 @@ describe('Patch rule route', () => {
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
 
-    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
-
     patchRuleRoute(server.router, ml);
   });
 
@@ -67,7 +55,6 @@ describe('Patch rule route', () => {
 
     test('returns 404 when updating a single rule that does not exist', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      (legacyMigrate as jest.Mock).mockResolvedValue(null);
       const response = await server.inject(
         getPatchRequest(),
         requestContextMock.convertContext(context)
@@ -80,7 +67,6 @@ describe('Patch rule route', () => {
     });
 
     test('returns error if requesting a non-rule', async () => {
-      (legacyMigrate as jest.Mock).mockResolvedValue(null);
       clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
       const response = await server.inject(
         getPatchRequest(),
@@ -114,7 +100,6 @@ describe('Patch rule route', () => {
         ...getFindResultWithSingleHit(),
         data: [getRuleMock(getMlRuleParams())],
       });
-      (legacyMigrate as jest.Mock).mockResolvedValueOnce(getRuleMock(getMlRuleParams()));
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,

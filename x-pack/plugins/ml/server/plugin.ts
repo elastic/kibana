@@ -24,8 +24,9 @@ import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import { jsonSchemaRoutes } from './routes/json_schema';
 import { notificationsRoutes } from './routes/notifications';
-import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
+import type { MlFeatures, PluginsSetup, PluginsStart, RouteInitialization } from './types';
 import { PLUGIN_ID } from '../common/constants/app';
 import type { MlCapabilities } from '../common/types/capabilities';
 
@@ -67,8 +68,18 @@ import { ML_ALERT_TYPES } from '../common/constants/alerts';
 import { alertingRoutes } from './routes/alerting';
 import { registerCollector } from './usage';
 import { SavedObjectsSyncService } from './saved_objects/sync_task';
+import {
+  CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
+  CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
+} from '../common/constants/cases';
 
-export type MlPluginSetup = SharedServices;
+type SetFeaturesEnabled = (features: MlFeatures) => void;
+
+interface MlSetup {
+  setFeaturesEnabled: SetFeaturesEnabled;
+}
+
+export type MlPluginSetup = SharedServices & MlSetup;
 export type MlPluginStart = void;
 
 export class MlServerPlugin
@@ -88,6 +99,11 @@ export class MlServerPlugin
   private isMlReady: Promise<void>;
   private setMlReady: () => void = () => {};
   private savedObjectsSyncService: SavedObjectsSyncService;
+  private enabledFeatures: MlFeatures = {
+    ad: true,
+    dfa: true,
+    nlp: true,
+  };
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
@@ -144,7 +160,12 @@ export class MlServerPlugin
     registerKibanaSettings(coreSetup);
 
     // initialize capabilities switcher to add license filter to ml capabilities
-    setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
+    setupCapabilitiesSwitcher(
+      coreSetup,
+      plugins.licensing.license$,
+      this.enabledFeatures,
+      this.log
+    );
     setupSavedObjects(coreSetup.savedObjects);
     this.savedObjectsSyncService.registerSyncTask(
       plugins.taskManager,
@@ -203,6 +224,7 @@ export class MlServerPlugin
         coreSetup.getStartServices
       ),
       mlLicense: this.mlLicense,
+      enabledFeatures: this.enabledFeatures,
     };
 
     annotationRoutes(routeInit, plugins.security);
@@ -232,6 +254,7 @@ export class MlServerPlugin
     });
     trainedModelsRoutes(routeInit);
     notificationsRoutes(routeInit);
+    jsonSchemaRoutes(routeInit);
     alertingRoutes(routeInit, sharedServicesProviders);
 
     initMlServerLog({ log: this.log });
@@ -246,10 +269,36 @@ export class MlServerPlugin
     }
 
     if (plugins.usageCollection) {
-      registerCollector(plugins.usageCollection, coreSetup.savedObjects.getKibanaIndex());
+      const getIndexForType = (type: string) =>
+        coreSetup
+          .getStartServices()
+          .then(([coreStart]) => coreStart.savedObjects.getIndexForType(type));
+      registerCollector(plugins.usageCollection, getIndexForType);
     }
 
-    return sharedServicesProviders;
+    if (plugins.cases) {
+      plugins.cases.attachmentFramework.registerPersistableState({
+        id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
+      });
+
+      plugins.cases.attachmentFramework.registerPersistableState({
+        id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
+      });
+    }
+
+    const setFeaturesEnabled = (features: MlFeatures) => {
+      if (features.ad !== undefined) {
+        this.enabledFeatures.ad = features.ad;
+      }
+      if (features.dfa !== undefined) {
+        this.enabledFeatures.dfa = features.dfa;
+      }
+      if (features.nlp !== undefined) {
+        this.enabledFeatures.nlp = features.nlp;
+      }
+    };
+
+    return { ...sharedServicesProviders, setFeaturesEnabled };
   }
 
   public start(coreStart: CoreStart, plugins: PluginsStart): MlPluginStart {

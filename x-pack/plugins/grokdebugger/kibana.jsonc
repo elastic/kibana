@@ -16,8 +16,7 @@
       "devTools"
     ],
     "requiredBundles": [
-      "kibanaReact",
-      "esUiShared"
+      "kibanaReact"
     ]
   }
 }

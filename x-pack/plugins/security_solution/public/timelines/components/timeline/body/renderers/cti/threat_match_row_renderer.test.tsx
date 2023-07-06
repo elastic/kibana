@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { TimelineId } from '../../../../../../../common/types';
-import { render } from '@testing-library/react';
+import { TimelineId } from '../../../../../../../common/types/timeline';
+import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
+import { get } from 'lodash';
 
 import { getThreatMatchDetectionAlert, TestProviders } from '../../../../../../common/mock';
+import type { Fields } from '../../../../../../../common/search_strategy';
 
 import { threatMatchRowRenderer } from './threat_match_row_renderer';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { mockTimelines } from '../../../../../../common/mock/mock_timelines_plugin';
+import { ENRICHMENT_DESTINATION_PATH } from '../../../../../../../common/constants';
+import type { ThreatEnrichmentEcs } from '@kbn/securitysolution-ecs/src/threat';
 
 jest.mock('../../../../../../common/lib/kibana');
 describe('threatMatchRowRenderer', () => {
@@ -72,6 +76,37 @@ describe('threatMatchRowRenderer', () => {
       const { getByTestId } = render(<TestProviders>{children}</TestProviders>);
 
       expect(getByTestId('threat-match-details')).toBeInTheDocument();
+    });
+
+    it('rendered when indicator matches are more than MAX rendered', async () => {
+      const NO_OF_MATCHES = 20;
+      const largeNoOfIndicatorMatches = new Array(NO_OF_MATCHES)
+        .fill({})
+        .map(() => get(threatMatchData, ENRICHMENT_DESTINATION_PATH)[0] as Fields);
+
+      const modThreatMatchData: typeof threatMatchData = {
+        ...threatMatchData,
+        threat: {
+          enrichments: largeNoOfIndicatorMatches as ThreatEnrichmentEcs[],
+        },
+      };
+
+      const children = threatMatchRowRenderer.renderRow({
+        data: modThreatMatchData,
+        isDraggable: true,
+        scopeId: TimelineId.test,
+      });
+      const { getByTestId, queryAllByTestId, findAllByTestId, findByTestId } = render(
+        <TestProviders>{children}</TestProviders>
+      );
+      expect(getByTestId('threat-match-row-show-all')).toBeVisible();
+      expect(queryAllByTestId('threat-match-row').length).toBe(2);
+
+      fireEvent.click(getByTestId('threat-match-row-show-all'));
+
+      expect(await findByTestId('threat-match-row-modal')).toBeVisible();
+
+      expect((await findAllByTestId('threat-match-row')).length).toBe(NO_OF_MATCHES + 2);
     });
   });
 });

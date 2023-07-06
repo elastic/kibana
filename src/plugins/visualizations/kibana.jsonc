@@ -23,7 +23,11 @@
       "dataViews",
       "dataViewEditor",
       "unifiedSearch",
-      "usageCollection"
+      "usageCollection",
+      "savedObjectsFinder",
+      "savedObjectsManagement",
+      "savedSearch",
+      "contentManagement",
     ],
     "optionalPlugins": [
       "home",
@@ -33,7 +37,6 @@
     ],
     "requiredBundles": [
       "kibanaUtils",
-      "savedSearch",
       "kibanaReact",
       "charts"
     ],

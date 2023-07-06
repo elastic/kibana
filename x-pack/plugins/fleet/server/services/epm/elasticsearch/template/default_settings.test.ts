@@ -8,6 +8,8 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+
 import { appContextService } from '../../../app_context';
 
 import { buildDefaultSettings } from './default_settings';
@@ -15,6 +17,10 @@ import { buildDefaultSettings } from './default_settings';
 jest.mock('../../../app_context');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
+
 let mockedLogger: jest.Mocked<Logger>;
 describe('buildDefaultSettings', () => {
   beforeEach(() => {
@@ -62,6 +68,9 @@ describe('buildDefaultSettings', () => {
           "codec": "best_compression",
           "lifecycle": Object {
             "name": "logs",
+          },
+          "mapping": Object {
+            "ignore_malformed": true,
           },
           "query": Object {
             "default_field": Array [

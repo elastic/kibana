@@ -130,12 +130,12 @@ To save space on the dashboard, hide the axis labels.
 . Open the *Left axis* menu, then select *None* from the *Axis title* dropdown.
 +
 [role="screenshot"]
-image::images/lens_lineChartMetricOverTimeLeftAxis_8.3.png[Left axis menu]
+image::images/lens_lineChartMetricOverTimeLeftAxis_8.7.png[Left axis menu]
 
 . Open the *Bottom axis* menu, then select *None* from the *Axis title* dropdown.
 +
 [role="screenshot"]
-image::images/lens_lineChartMetricOverTimeBottomAxis_8.3.png[Bottom axis menu]
+image::images/lens_lineChartMetricOverTimeBottomAxis_8.7.png[Bottom axis menu]
 
 . Click *Save and return*
 

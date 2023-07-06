@@ -12,7 +12,13 @@ import { EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-export const TotalCountHeader = ({ totalCount }: { totalCount: number }) => (
+export const TotalCountHeader = ({
+  sampleProbability,
+  totalCount,
+}: {
+  sampleProbability?: number;
+  totalCount: number;
+}) => (
   <EuiFlexItem>
     <EuiText size="s" data-test-subj="aiopsTotalDocCountHeader">
       <FormattedMessage
@@ -30,6 +36,26 @@ export const TotalCountHeader = ({ totalCount }: { totalCount: number }) => (
           ),
         }}
       />
+      {sampleProbability !== undefined && sampleProbability < 1 && (
+        <>
+          {' '}
+          <FormattedMessage
+            id="xpack.aiops.searchPanel.sampleProbabilityLabel"
+            defaultMessage="Sampling probability: {strongSamplingProbability}"
+            values={{
+              strongSamplingProbability: (
+                <strong data-test-subj="aiopsSamplingProbability">
+                  <FormattedMessage
+                    id="xpack.aiops.searchPanel.sampleProbabilityNumber"
+                    defaultMessage="{sampleProbability, plural, one {#} other {#}}"
+                    values={{ sampleProbability }}
+                  />
+                </strong>
+              ),
+            }}
+          />
+        </>
+      )}
     </EuiText>
   </EuiFlexItem>
 );

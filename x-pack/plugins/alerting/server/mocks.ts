@@ -22,6 +22,7 @@ import {
   PublicRuleResultService,
   PublicRuleMonitoringService,
 } from './types';
+import { publicAlertsClientMock } from './alerts_client/alerts_client.mock';
 
 export { rulesClientMock };
 
@@ -30,7 +31,10 @@ const createSetupMock = () => {
     registerType: jest.fn(),
     getSecurityHealth: jest.fn(),
     getConfig: jest.fn(),
-    getFrameworkAlertsEnabled: jest.fn(),
+    frameworkAlerts: {
+      enabled: jest.fn(),
+      getContextInitializationPromise: jest.fn(),
+    },
   };
   return mock;
 };
@@ -53,6 +57,7 @@ const createShareStartMock = () => {
 const createStartMock = () => {
   const mock: jest.Mocked<PluginStartContract> = {
     listTypes: jest.fn(),
+    getType: jest.fn(),
     getAllTypes: jest.fn(),
     getAlertingAuthorizationWithRequest: jest.fn(),
     getRulesClientWithRequest: jest.fn().mockResolvedValue(rulesClientMock.create()),
@@ -77,6 +82,7 @@ export const createAlertFactoryMock = {
       getScheduledActionOptions: jest.fn(),
       unscheduleActions: jest.fn(),
       getState: jest.fn(),
+      getUuid: jest.fn(),
       scheduleActions: jest.fn(),
       replaceState: jest.fn(),
       updateLastScheduledActions: jest.fn(),
@@ -158,6 +164,7 @@ const createRuleExecutorServicesMock = <
       },
       done: jest.fn().mockReturnValue(alertFactoryMockDone),
     },
+    alertsClient: publicAlertsClientMock.create(),
     savedObjectsClient: savedObjectsClientMock.create(),
     uiSettingsClient: uiSettingsServiceMock.createClient(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),

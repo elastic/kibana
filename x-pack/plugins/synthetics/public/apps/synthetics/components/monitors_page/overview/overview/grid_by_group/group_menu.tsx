@@ -49,32 +49,38 @@ export const GroupMenu = ({ groupOptions, orderByOptions, groupField }: Props) =
   };
 
   const button = (
-    <EuiButtonEmpty size="xs" iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
+    <EuiButtonEmpty
+      data-test-subj="syntheticsGroupMenuButton"
+      size="xs"
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={onButtonClick}
+    >
       {groupField}
     </EuiButtonEmpty>
   );
 
   const items = [
-    <EuiPanel paddingSize="s" hasShadow={false}>
+    <EuiPanel paddingSize="s" hasShadow={false} key="group_title_panel">
       <EuiText size="xs">
         <h4>{GROUP_TITLE}</h4>
       </EuiText>
     </EuiPanel>,
 
     ...groupOptions.map((option) => (
-      <ContextMenuItem option={option} onClosePopover={closePopover} />
+      <ContextMenuItem option={option} onClosePopover={closePopover} key={option.value} />
     )),
 
     <EuiHorizontalRule key="hr" margin="none" />,
 
-    <EuiPanel paddingSize="s" hasShadow={false}>
+    <EuiPanel paddingSize="s" hasShadow={false} key="order_by_title">
       <EuiText size="xs">
         <h4>{ORDER_BY_TITLE}</h4>
       </EuiText>
     </EuiPanel>,
 
     ...orderByOptions.map((option) => (
-      <ContextMenuItem option={option} onClosePopover={closePopover} />
+      <ContextMenuItem option={option} onClosePopover={closePopover} key={option.value} />
     )),
   ];
 

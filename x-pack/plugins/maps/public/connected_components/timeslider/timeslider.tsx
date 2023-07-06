@@ -11,17 +11,14 @@ import { Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
-  ControlGroupContainer,
   type ControlGroupInput,
-  type controlGroupInputBuilder,
-  LazyControlGroupRenderer,
+  type ControlGroupInputBuilder,
+  type AwaitingControlGroupAPI,
+  ControlGroupRenderer,
 } from '@kbn/controls-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
 import { first } from 'rxjs/operators';
 import type { TimeRange } from '@kbn/es-query';
 import { Timeslice } from '../../../common/descriptor_types';
-
-const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 export interface Props {
   setTimeslice: (timeslice?: Timeslice) => void;
@@ -42,20 +39,22 @@ export class Timeslider extends Component<Props, {}> {
     this._isMounted = true;
   }
 
-  _getInitialInput = async (
+  _getCreationOptions = async (
     initialInput: Partial<ControlGroupInput>,
-    builder: typeof controlGroupInputBuilder
+    builder: ControlGroupInputBuilder
   ) => {
     builder.addTimeSliderControl(initialInput);
     return {
-      ...initialInput,
-      viewMode: ViewMode.VIEW,
-      timeRange: this.props.timeRange,
+      initialInput: {
+        ...initialInput,
+        viewMode: ViewMode.VIEW,
+        timeRange: this.props.timeRange,
+      },
     };
   };
 
-  _onLoadComplete = (controlGroup: ControlGroupContainer) => {
-    if (!this._isMounted) {
+  _onLoadComplete = (controlGroup: AwaitingControlGroupAPI) => {
+    if (!this._isMounted || !controlGroup) {
       return;
     }
 
@@ -90,8 +89,8 @@ export class Timeslider extends Component<Props, {}> {
     return (
       <div className="mapTimeslider mapTimeslider--animation">
         <ControlGroupRenderer
-          onLoadComplete={this._onLoadComplete}
-          getInitialInput={this._getInitialInput}
+          ref={this._onLoadComplete}
+          getCreationOptions={this._getCreationOptions}
           timeRange={this.props.timeRange}
         />
       </div>

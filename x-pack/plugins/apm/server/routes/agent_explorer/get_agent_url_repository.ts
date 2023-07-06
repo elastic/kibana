@@ -28,6 +28,7 @@ const agentsDocPageName: Partial<Record<AgentName, string>> = {
   'opentelemetry/php': 'php',
   'opentelemetry/python': 'python',
   'opentelemetry/ruby': 'ruby',
+  'opentelemetry/rust': 'rust',
   'opentelemetry/swift': 'swift',
   'opentelemetry/webjs': 'js',
 };

@@ -23,9 +23,14 @@ import {
   DOWNLOAD_SOURCE_API_ROUTES,
   FLEET_SERVER_HOST_API_ROUTES,
   FLEET_PROXY_API_ROUTES,
+  UNINSTALL_TOKEN_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
+  getVerificationKeyIdPath: () => {
+    return EPM_API_ROUTES.VERIFICATION_KEY_ID;
+  },
+
   getCategoriesPath: () => {
     return EPM_API_ROUTES.CATEGORIES_PATTERN;
   },
@@ -78,6 +83,15 @@ export const epmRouteService = {
       '{pkgVersion}',
       pkgVersion
     );
+  },
+
+  getReauthorizeTransformsPath: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS.replace('{pkgName}', pkgName)
+      .replace('{pkgVersion}', pkgVersion)
+      .replace(/\/$/, ''); // trim trailing slash
+  },
+  getBulkAssetsPath: () => {
+    return EPM_API_ROUTES.BULK_ASSETS_PATTERN;
   },
 };
 
@@ -216,6 +230,7 @@ export const agentRouteService = {
       '{fileName}',
       fileName
     ),
+  getAgentsByActionsPath: () => AGENT_API_ROUTES.LIST_PATTERN,
 };
 
 export const outputRoutesService = {
@@ -267,6 +282,12 @@ export const enrollmentAPIKeyRouteService = {
   getInfoPath: (keyId: string) => ENROLLMENT_API_KEY_ROUTES.INFO_PATTERN.replace('{keyId}', keyId),
   getDeletePath: (keyId: string) =>
     ENROLLMENT_API_KEY_ROUTES.DELETE_PATTERN.replace('{keyId}', keyId),
+};
+
+export const uninstallTokensRouteService = {
+  getListPath: () => UNINSTALL_TOKEN_ROUTES.LIST_PATTERN,
+  getInfoPath: (uninstallTokenId: string) =>
+    UNINSTALL_TOKEN_ROUTES.INFO_PATTERN.replace('{uninstallTokenId}', uninstallTokenId),
 };
 
 export const setupRouteService = {

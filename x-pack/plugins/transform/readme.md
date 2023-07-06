@@ -104,33 +104,45 @@ Run the following commands from the `x-pack` directory and use separate terminal
 for test server and test runner. The test server command starts an Elasticsearch
 and Kibana instance that the tests will be run against.
 
-1. Functional UI tests with `Trial` license (default config):
+Functional tests are broken up into independent groups with their own configuration.
+Test server and runner need to be pointed to the configuration to run. The basic
+commands are
 
-        node scripts/functional_tests_server.js --config test/functional/apps/transform/config.ts
-        node scripts/functional_test_runner.js --config test/functional/apps/transform/config.ts
+    node scripts/functional_tests_server.js --config PATH_TO_CONFIG
+    node scripts/functional_test_runner.js --config PATH_TO_CONFIG
 
-    Transform functional `Trial` license tests are located in `x-pack/test/functional/apps/transform`.
+With PATH_TO_CONFIG and other options as follows.
 
-1. Functional UI tests with `Basic` license:
+1. Functional UI tests with `Trial` license:
 
-        node scripts/functional_tests_server.js --config test/functional_basic/config.ts
-        node scripts/functional_test_runner.js --config test/functional_basic/config.ts --include-tag transform
+    Group | PATH_TO_CONFIG
+    ----- | --------------
+    creation - index pattern | `test/functional/apps/transform/creation/index_pattern/config.ts`
+    creation - runtime mappings, saved searches | `test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts`
+    edit, clone | `test/functional/apps/transform/edit_clone/config.ts`
+    feature controls | `test/functional/apps/transform/feature_controls/config.ts`
+    permissions | `test/functional/apps/transform/permissions/config.ts`
+    actions | `test/functional/apps/transform/actions/config.ts`
 
-    Transform functional `Basic` license tests are located in `x-pack/test/functional_basic/apps/transform`.
+1.  Functional UI tests with `Basic` license:
+
+    Group | PATH_TO_CONFIG
+    ----- | --------------
+    creation - index pattern | `test/functional_basic/apps/transform/creation/index_pattern/config.ts`
+    creation - runtime mappings, saved searches | `test/functional_basic/apps/transform/creation/runtime_mappings_saved_search/config.ts`
+    edit, clone | `test/functional_basic/apps/transform/edit_clone/config.ts`
+    feature controls | `test/functional_basic/apps/transform/feature_controls/config.ts`
+    permissions | `test/functional_basic/apps/transform/permissions/config.ts`
+    actions | `test/functional_basic/apps/transform/actions/config.ts`
 
 1. API integration tests with `Trial` license:
 
-        node scripts/functional_tests_server.js --config test/api_integration/config.ts
-        node scripts/functional_test_runner.js --config test/api_integration/config.ts --include-tag transform
-        
-   Transform API integration `Trial` license tests are located in `x-pack/test/api_integration/apis/transform`.
+    - PATH_TO_CONFIG: `test/api_integration/apis/transform/config.ts`
 
 1. API integration tests with `Basic` license:
 
-        node scripts/functional_tests_server.js --config test/api_integration_basic/config.ts
-        node scripts/functional_test_runner.js --config test/api_integration_basic/config.ts --include-tag transform
-        
-   Transform API integration `Basic` license tests are located in `x-pack/test/api_integration_basic/apis/ml`.
+    - PATH_TO_CONFIG: `test/api_integration_basic/config.ts`
+    - Add `--include-tag transform` to the test runner command
    
 1.  Accessibility tests:
 

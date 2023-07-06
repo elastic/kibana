@@ -69,11 +69,12 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   box-shadow: none;
   display: flex;
   flex-direction: column;
+  margin-top: ${({ theme }) => theme.eui.euiSizeM}
   padding: 0;
 
   &.euiFlyoutHeader {
     ${({ theme }) =>
-      `padding: 0 ${theme.eui.euiSizeS} ${theme.eui.euiSizeS} ${theme.eui.euiSizeS};`}
+      `padding: 0 ${theme.eui.euiSizeM} ${theme.eui.euiSizeS} ${theme.eui.euiSizeS};`}
   }
 `;
 
@@ -111,15 +112,6 @@ const FullWidthFlexGroup = styled(EuiFlexGroup)`
 const ScrollableFlexItem = styled(EuiFlexItem)`
   overflow: hidden;
 `;
-
-const DatePicker = styled(EuiFlexItem)`
-  .euiSuperDatePicker__flexWrapper {
-    max-width: none;
-    width: auto;
-  }
-`;
-
-DatePicker.displayName = 'DatePicker';
 
 const VerticalRule = styled.div`
   width: 2px;
@@ -276,9 +268,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                   setFullScreen={setTimelineFullScreen}
                 />
               )}
-              <DatePicker grow={10}>
-                <SuperDatePicker id={InputsModelId.timeline} timelineId={timelineId} />
-              </DatePicker>
+              <EuiFlexItem grow={10}>
+                <SuperDatePicker width="auto" id={InputsModelId.timeline} timelineId={timelineId} />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <TimelineDatePickerLock />
               </EuiFlexItem>

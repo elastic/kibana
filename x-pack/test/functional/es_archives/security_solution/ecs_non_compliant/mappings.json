@@ -55,6 +55,24 @@
                 }
               }
             }
+          },
+          "process.command_line": {
+            "type": "keyword",
+            "ignore_above": 10, 
+            "fields": {
+              "text": {
+                "type": "text"
+              }
+            }
+          },
+          "nonEcs.command_line": {
+            "type": "keyword",
+            "ignore_above": 10, 
+            "fields": {
+              "text": {
+                "type": "text"
+              }
+            }
           }
         }
       },

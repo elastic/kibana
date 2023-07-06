@@ -1,0 +1,58 @@
+{
+  "id": "@kbn/saved-objects-settings",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/saved-objects-settings",
+        "id": "def-common.LISTING_LIMIT_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "LISTING_LIMIT_SETTING",
+        "description": [],
+        "signature": [
+          "\"savedObjects:listingLimit\""
+        ],
+        "path": "packages/kbn-saved-objects-settings/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/saved-objects-settings",
+        "id": "def-common.PER_PAGE_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "PER_PAGE_SETTING",
+        "description": [],
+        "signature": [
+          "\"savedObjects:perPage\""
+        ],
+        "path": "packages/kbn-saved-objects-settings/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

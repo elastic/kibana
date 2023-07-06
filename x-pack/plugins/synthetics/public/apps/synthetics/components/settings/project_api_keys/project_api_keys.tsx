@@ -8,10 +8,10 @@ import React, { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiText, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { HelpCommands } from './help_commands';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
-import { fetchServiceAPIKey } from '../../../state/monitor_management/api';
+import { fetchProjectAPIKey } from '../../../state/monitor_management/api';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { ApiKeyBtn } from './api_key_btn';
 import { useEnablement } from '../../../hooks';
@@ -33,7 +33,7 @@ export const ProjectAPIKeys = () => {
 
   const { data, loading } = useFetcher(async () => {
     if (loadAPIKey) {
-      return fetchServiceAPIKey();
+      return fetchProjectAPIKey();
     }
     return null;
   }, [loadAPIKey]);
@@ -59,7 +59,12 @@ export const ProjectAPIKeys = () => {
               <EuiText>
                 {GET_API_KEY_LABEL_DESCRIPTION}{' '}
                 {!canSaveIntegrations ? `${API_KEY_DISCLAIMER} ` : ''}
-                <EuiLink href={syntheticsTestRunDocsLink} external target="_blank">
+                <EuiLink
+                  data-test-subj="syntheticsProjectAPIKeysLink"
+                  href={syntheticsTestRunDocsLink}
+                  external
+                  target="_blank"
+                >
                   {LEARN_MORE_LABEL}
                 </EuiLink>
               </EuiText>
@@ -68,7 +73,12 @@ export const ProjectAPIKeys = () => {
             <>
               <EuiText>
                 {GET_API_KEY_REDUCED_PERMISSIONS_LABEL}{' '}
-                <EuiLink href={syntheticsTestRunDocsLink} external target="_blank">
+                <EuiLink
+                  data-test-subj="syntheticsProjectAPIKeysLink"
+                  href={syntheticsTestRunDocsLink}
+                  external
+                  target="_blank"
+                >
                   {LEARN_MORE_LABEL}
                 </EuiLink>
               </EuiText>

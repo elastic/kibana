@@ -13,6 +13,8 @@ export {
   DATA_VIEW_SAVED_OBJECT_TYPE,
 } from './constants';
 
+export { LATEST_VERSION } from './content_management/v1/constants';
+
 export type { ToSpecConfig } from './fields';
 export type { IIndexPatternFieldList } from './fields';
 export {
@@ -79,3 +81,4 @@ export type {
   IndexPatternLoadExpressionFunctionDefinition,
 } from './expressions';
 export { getIndexPatternLoadMeta } from './expressions';
+export { DataViewMissingIndices } from './lib/errors';

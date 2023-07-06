@@ -7,7 +7,15 @@
 import { sha256 } from 'js-sha256';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
-import { scheduleToMilli } from '../../../common/lib/schedule_to_time';
+import type { MonitorUpdateEvent } from '../../telemetry/types';
+
+import { TelemetryEventsSender } from '../../telemetry/sender';
+import {
+  MONITOR_UPDATE_CHANNEL,
+  MONITOR_CURRENT_CHANNEL,
+  MONITOR_ERROR_EVENTS_CHANNEL,
+} from '../../telemetry/constants';
+import { MonitorErrorEvent } from '../../telemetry/types';
 import {
   MonitorFields,
   EncryptedSyntheticsMonitor,
@@ -15,20 +23,7 @@ import {
   ServiceLocationErrors,
   SourceType,
 } from '../../../common/runtime_types';
-import type { MonitorUpdateEvent } from '../../legacy_uptime/lib/telemetry/types';
-
-import { TelemetryEventsSender } from '../../legacy_uptime/lib/telemetry/sender';
-import {
-  MONITOR_UPDATE_CHANNEL,
-  MONITOR_CURRENT_CHANNEL,
-  MONITOR_ERROR_EVENTS_CHANNEL,
-} from '../../legacy_uptime/lib/telemetry/constants';
-import { MonitorErrorEvent } from '../../legacy_uptime/lib/telemetry/types';
-
-export interface UpgradeError {
-  key?: string;
-  message: string | string[];
-}
+import { scheduleToMilli } from '../../../common/lib/schedule_to_time';
 
 export function sendTelemetryEvents(
   logger: Logger,
@@ -165,8 +160,6 @@ function getScriptType(
   isInlineScript: boolean
 ): MonitorUpdateEvent['scriptType'] | undefined {
   switch (true) {
-    case Boolean(attributes[ConfigKey.SOURCE_ZIP_URL]):
-      return 'zip';
     case Boolean(
       isInlineScript && attributes[ConfigKey.METADATA]?.script_source?.is_generated_script
     ):

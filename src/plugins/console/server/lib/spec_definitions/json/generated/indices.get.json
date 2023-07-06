@@ -11,6 +11,11 @@
         "none",
         "all"
       ],
+      "features": [
+        "aliases",
+        "mappings",
+        "settings"
+      ],
       "flat_settings": "__flag__",
       "include_defaults": "__flag__",
       "master_timeout": ""

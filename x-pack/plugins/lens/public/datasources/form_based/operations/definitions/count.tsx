@@ -101,10 +101,16 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       sourceField: field.name,
     };
   },
-  getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
+  getPossibleOperationForField: ({
+    aggregationRestrictions,
+    aggregatable,
+    type,
+    timeSeriesMetric,
+  }) => {
     if (
       type === 'document' ||
       (aggregatable &&
+        timeSeriesMetric !== 'counter' &&
         (!aggregationRestrictions || aggregationRestrictions.value_count) &&
         supportedTypes.has(type))
     ) {
@@ -112,7 +118,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     }
   },
   getDefaultLabel: (column, indexPattern) => {
-    const field = indexPattern.getFieldByName(column.sourceField);
+    const field = indexPattern?.getFieldByName(column.sourceField);
     return ofName(field, column.timeShift, column.timeScale, column.reducedTimeRange);
   },
   buildColumn({ field, previousColumn }, columnParams) {

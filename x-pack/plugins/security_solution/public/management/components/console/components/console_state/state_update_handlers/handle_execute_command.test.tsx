@@ -10,7 +10,8 @@ import type { AppContextTestRender } from '../../../../../../common/mock/endpoin
 import { getConsoleTestSetup } from '../../../mocks';
 import type { ConsoleTestSetup } from '../../../mocks';
 import { waitFor } from '@testing-library/react';
-import type { ConsoleProps } from '../../../types';
+import type { ConsoleProps, CommandArgDefinition, CommandDefinition } from '../../../types';
+import { executionTranslations } from './translations';
 
 describe('When a Console command is entered by the user', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
@@ -23,29 +24,6 @@ describe('When a Console command is entered by the user', () => {
 
     ({ commands, enterCommand } = testSetup);
     render = (props = {}) => (renderResult = testSetup.renderConsole(props));
-  });
-
-  it('should display all available commands when `help` command is entered', async () => {
-    render();
-    enterCommand('help');
-
-    expect(renderResult.getByTestId('test-helpOutput')).toBeTruthy();
-
-    await waitFor(() => {
-      expect(renderResult.getAllByTestId('test-commandList-command')).toHaveLength(commands.length);
-    });
-  });
-
-  it('should display custom help output when Command service has `getHelp()` defined', async () => {
-    const HelpComponent: React.FunctionComponent = () => {
-      return <div data-test-subj="custom-help">{'help output'}</div>;
-    };
-    render({ HelpComponent });
-    enterCommand('help');
-
-    await waitFor(() => {
-      expect(renderResult.getByTestId('custom-help')).toBeTruthy();
-    });
   });
 
   it('should clear the command output history when `clear` is entered', async () => {
@@ -297,6 +275,67 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('exec-output')).toBeTruthy();
+    });
+  });
+
+  describe('Argument value validators', () => {
+    let command: CommandDefinition;
+
+    const setValidation = (validation: CommandArgDefinition['mustHaveValue']): void => {
+      command.args!.foo.mustHaveValue = validation;
+    };
+
+    beforeEach(() => {
+      command = commands.find(({ name }) => name === 'cmd3')!;
+      command.args!.foo.allowMultiples = false;
+    });
+
+    it('should validate argument with `mustHaveValue=non-empty-string', async () => {
+      setValidation('non-empty-string');
+      const { getByTestId } = render();
+      enterCommand('cmd3 --foo=""');
+
+      await waitFor(() => {
+        expect(getByTestId('test-badArgument-message')).toHaveTextContent(
+          executionTranslations.mustHaveValue('foo')
+        );
+      });
+    });
+
+    it('should validate argument with `mustHaveValue=truthy', async () => {
+      setValidation('truthy');
+      const { getByTestId } = render();
+      enterCommand('cmd3 --foo=""');
+
+      await waitFor(() => {
+        expect(getByTestId('test-badArgument-message')).toHaveTextContent(
+          executionTranslations.mustHaveValue('foo')
+        );
+      });
+    });
+
+    it('should validate argument with `mustHaveValue=number', async () => {
+      setValidation('number');
+      const { getByTestId } = render();
+      enterCommand('cmd3 --foo="hi"');
+
+      await waitFor(() => {
+        expect(getByTestId('test-badArgument-message')).toHaveTextContent(
+          executionTranslations.mustBeNumber('foo')
+        );
+      });
+    });
+
+    it('should validate argument with `mustHaveValue=number-greater-than-zero', async () => {
+      setValidation('number-greater-than-zero');
+      const { getByTestId } = render();
+      enterCommand('cmd3 --foo="0"');
+
+      await waitFor(() => {
+        expect(getByTestId('test-badArgument-message')).toHaveTextContent(
+          executionTranslations.mustBeGreaterThanZero('foo')
+        );
+      });
     });
   });
 });

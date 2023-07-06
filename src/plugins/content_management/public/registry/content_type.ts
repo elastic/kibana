@@ -31,4 +31,8 @@ export class ContentType {
   public get crud(): CrudClient | undefined {
     return this.definition.crud;
   }
+
+  public get version(): ContentTypeDefinition['version'] {
+    return this.definition.version;
+  }
 }

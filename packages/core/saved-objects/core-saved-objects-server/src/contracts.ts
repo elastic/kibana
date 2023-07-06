@@ -136,7 +136,14 @@ export interface SavedObjectsServiceSetup {
   /**
    * Returns the default index used for saved objects.
    */
-  getKibanaIndex: () => string;
+  getDefaultIndex: () => string;
+
+  /**
+   * Returns all (aliases to) kibana system indices used for saved object storage.
+   *
+   * @deprecated use the `start` contract counterpart.
+   */
+  getAllIndices: () => string[];
 }
 
 /**
@@ -209,4 +216,25 @@ export interface SavedObjectsServiceStart {
    * {@link SavedObjectsType | saved object types}
    */
   getTypeRegistry: () => ISavedObjectTypeRegistry;
+  /**
+   * Returns the (alias to the) index that the specified saved object type is stored in.
+   *
+   * @param type The SO type to retrieve the index/alias for.
+   */
+  getIndexForType: (type: string) => string;
+  /**
+   * Returns the (alias to the) index that the specified saved object type is stored in.
+   *
+   * @remark if multiple types are living in the same index, duplicates will be removed.
+   * @param types The SO types to retrieve the index/alias for.
+   */
+  getIndicesForTypes: (types: string[]) => string[];
+  /**
+   * Returns the default index used for saved objects.
+   */
+  getDefaultIndex: () => string;
+  /**
+   * Returns all (aliases to) kibana system indices used for saved object storage.
+   */
+  getAllIndices: () => string[];
 }

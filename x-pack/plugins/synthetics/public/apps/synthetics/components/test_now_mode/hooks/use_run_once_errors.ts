@@ -7,7 +7,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { kibanaService } from '../../../../../utils/kibana_service';
 import { Locations, ServiceLocationErrors } from '../../monitor_add_edit/types';
 
 export function useRunOnceErrors({
@@ -15,7 +14,9 @@ export function useRunOnceErrors({
   serviceError,
   errors,
   locations,
+  showErrors = true,
 }: {
+  showErrors?: boolean;
   testRunId: string;
   serviceError?: Error;
   errors: ServiceLocationErrors;
@@ -55,58 +56,61 @@ export function useRunOnceErrors({
   const expectPings =
     publicLocations.length - (locationErrors ?? []).filter(({ locationId }) => !!locationId).length;
 
+  const locationErrorReasons = useMemo(() => {
+    return (locationErrors ?? [])
+      .map(({ error }) => error?.reason)
+      .filter((reason) => !!reason)
+      .filter((reason, i, arr) => arr.indexOf(reason) === i);
+  }, [locationErrors]);
   const hasBlockingError =
     !!runOnceServiceError ||
     (locationErrors?.length && locationErrors?.length === publicLocations.length);
 
   const errorMessages = useMemo(() => {
     if (hasBlockingError) {
-      return [{ name: 'Error', message: PushErrorService, title: PushErrorLabel }];
+      return locationErrorReasons.length === 1
+        ? [
+            {
+              name: 'Error',
+              message: locationErrorReasons[0] ?? PushErrorService,
+              title: RunErrorLabel,
+            },
+          ]
+        : [{ name: 'Error', message: PushErrorService, title: RunErrorLabel }];
     } else if (locationErrors?.length > 0) {
       // If only some of the locations were unsuccessful
       return locationErrors
-        .map(({ locationId }) => locationsById[locationId])
-        .filter((location) => !!location)
-        .map((location) => ({
+        .map(({ locationId, error }) => ({ location: locationsById[locationId], error }))
+        .filter((locationWithError) => !!locationWithError.location)
+        .map(({ location, error }) => ({
           name: 'Error',
-          message: getLocationTestErrorLabel(location.label),
+          message: getLocationTestErrorLabel(location.label, error?.reason ?? ''),
           title: RunErrorLabel,
         }));
     }
 
     return [];
-  }, [locationsById, locationErrors, hasBlockingError]);
-
-  useEffect(() => {
-    errorMessages.forEach(
-      ({ name, message, title }: { name: string; message: string; title: string }) => {
-        kibanaService.toasts.addError({ name, message }, { title });
-      }
-    );
-  }, [errorMessages]);
+  }, [locationsById, locationErrors, locationErrorReasons, hasBlockingError]);
 
   return {
     expectPings,
     hasBlockingError,
-    blockingErrorMessage: hasBlockingError ? PushErrorService : null,
+    blockingErrorTitle: hasBlockingError ? RunErrorLabel : null,
+    blockingErrorMessage: hasBlockingError ? `${errorMessages[0]?.message}` : null,
     errorMessages,
   };
 }
 
-const PushErrorLabel = i18n.translate('xpack.synthetics.testRun.pushErrorLabel', {
-  defaultMessage: 'Push error',
-});
-
 const RunErrorLabel = i18n.translate('xpack.synthetics.testRun.runErrorLabel', {
-  defaultMessage: 'Error running test',
+  defaultMessage: "Can't run the test now",
 });
 
-const getLocationTestErrorLabel = (locationName: string) =>
-  i18n.translate('xpack.synthetics.testRun.runErrorLocation', {
-    defaultMessage: 'Failed to run monitor on location {locationName}.',
-    values: { locationName },
+const getLocationTestErrorLabel = (locationName: string, reason: string) =>
+  i18n.translate('xpack.synthetics.testRun.runErrorLocation.reason', {
+    defaultMessage: 'Failed to run test on location {locationName}. {reason}',
+    values: { locationName, reason },
   });
 
 const PushErrorService = i18n.translate('xpack.synthetics.testRun.pushError', {
-  defaultMessage: 'Failed to push the monitor to service.',
+  defaultMessage: 'This test cannot be executed at this time. Try again later.',
 });

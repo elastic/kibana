@@ -572,8 +572,6 @@ describe('heatmap', () => {
                         // X-axis
                         isXAxisLabelVisible: [false],
                         isXAxisTitleVisible: [false],
-                        xTitle: [''],
-                        yTitle: [''],
                       },
                     },
                   ],

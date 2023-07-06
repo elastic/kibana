@@ -7,11 +7,12 @@
 
 import { useMemo } from 'react';
 import { CSSObject } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, useEuiBackgroundColor } from '@elastic/eui';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
-  const { size } = euiTheme;
+  const { border, size } = euiTheme;
+  const accordionColor = useEuiBackgroundColor('subdued');
 
   return useMemo(() => {
     const options: CSSObject = {
@@ -20,6 +21,24 @@ export const useStyles = () => {
       right: size.m,
     };
 
-    return { options };
-  }, [size.m]);
+    const accordion: CSSObject = {
+      borderRadius: border.radius.medium,
+      '> .euiAccordion__triggerWrapper': {
+        padding: size.m,
+      },
+      backgroundColor: accordionColor,
+    };
+
+    const accordionHeader: CSSObject = {
+      '> *': {
+        display: 'inline-block',
+        verticalAlign: 'middle',
+      },
+      '> b': {
+        marginRight: size.s,
+      },
+    };
+
+    return { options, accordion, accordionHeader };
+  }, [accordionColor, border.radius.medium, size.m, size.s]);
 };

@@ -125,7 +125,7 @@ export class AuthorizationService {
     this.applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
 
     const mode = authorizationModeFactory(license);
-    const actions = new Actions(packageVersion);
+    const actions = new Actions();
     this.privileges = privilegesFactory(actions, features, license);
 
     const { checkPrivilegesWithRequest, checkUserProfilesPrivileges } = checkPrivilegesFactory(
@@ -156,7 +156,7 @@ export class AuthorizationService {
         // If we have a license which doesn't enable security, or we're a legacy user we shouldn't
         // disable any ui capabilities
         if (!mode.useRbacForRequest(request)) {
-          return uiCapabilities;
+          return {};
         }
 
         const disableUICapabilities = disableUICapabilitiesFactory(

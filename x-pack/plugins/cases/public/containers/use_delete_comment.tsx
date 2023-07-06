@@ -16,20 +16,19 @@ import * as i18n from './translations';
 interface MutationArgs {
   caseId: string;
   commentId: string;
+  successToasterTitle: string;
 }
 
 export const useDeleteComment = () => {
-  const { showErrorToast } = useCasesToast();
+  const { showErrorToast, showSuccessToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
   return useMutation(
-    ({ caseId, commentId }: MutationArgs) => {
-      const abortCtrlRef = new AbortController();
-      return deleteComment({ caseId, commentId, signal: abortCtrlRef.signal });
-    },
+    ({ caseId, commentId }: MutationArgs) => deleteComment({ caseId, commentId }),
     {
       mutationKey: casesMutationsKeys.deleteComment,
-      onSuccess: () => {
+      onSuccess: (_, { successToasterTitle }) => {
+        showSuccessToast(successToasterTitle);
         refreshCaseViewPage();
       },
       onError: (error: ServerError) => {

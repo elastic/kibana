@@ -13,7 +13,7 @@ import { EuiOutsideClickDetector } from '@elastic/eui';
 import { EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useLinkProps } from '@kbn/observability-plugin/public';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { MetricsTab } from './tabs/metrics/metrics';
@@ -114,6 +114,7 @@ export const NodeContextPopover = ({
                   {canCreateAlerts && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
+                        data-test-subj="infraNodeContextPopoverCreateInventoryRuleButton"
                         onClick={openAlertFlyout}
                         size="xs"
                         iconSide={'left'}
@@ -129,6 +130,7 @@ export const NodeContextPopover = ({
                   )}
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      data-test-subj="infraNodeContextPopoverOpenAsPageButton"
                       size="xs"
                       iconSide={'left'}
                       iconType={'popout'}

@@ -14,12 +14,11 @@ import {
   TRANSFORM_MODE,
   TRANSFORM_STATE,
   TRANSFORM_HEALTH,
-  TRANSFORM_HEALTH_COLOR,
-  TRANSFORM_HEALTH_LABEL,
 } from '../../../../../../common/constants';
 import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
 import { TransformListRow } from '../../../../common';
 import { TransformTaskStateBadge } from './transform_task_state_badge';
+import { TransformHealthColoredDot } from './transform_health_colored_dot';
 
 export const transformFilters: SearchFilterConfig[] = [
   {
@@ -56,15 +55,7 @@ export const transformFilters: SearchFilterConfig[] = [
     options: Object.values(TRANSFORM_HEALTH).map((val) => ({
       value: val,
       name: val,
-      view: (
-        <EuiBadge
-          className="transform__TaskHealthBadge"
-          // For the color icon 'subdued' is used but for the badge we need 'hollow' instead.
-          color={TRANSFORM_HEALTH_COLOR[val] === 'subdued' ? 'hollow' : TRANSFORM_HEALTH_COLOR[val]}
-        >
-          {TRANSFORM_HEALTH_LABEL[val]}
-        </EuiBadge>
-      ),
+      view: <TransformHealthColoredDot compact={true} showToolTip={false} healthStatus={val} />,
     })),
   },
 ];

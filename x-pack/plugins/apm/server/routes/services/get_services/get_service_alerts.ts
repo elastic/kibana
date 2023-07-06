@@ -24,8 +24,8 @@ import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { MAX_NUMBER_OF_SERVICES } from './get_services_items';
+import { serviceGroupWithOverflowQuery } from '../../../lib/service_group_query_with_overflow';
 
 interface ServiceAggResponse {
   buckets: Array<
@@ -35,6 +35,11 @@ interface ServiceAggResponse {
     }
   >;
 }
+
+export type ServiceAlertsResponse = Array<{
+  serviceName: string;
+  alertsCount: number;
+}>;
 
 export async function getServicesAlerts({
   apmAlertsClient,
@@ -54,7 +59,7 @@ export async function getServicesAlerts({
   start: number;
   end: number;
   environment?: string;
-}) {
+}): Promise<ServiceAlertsResponse> {
   const params = {
     size: 0,
     query: {
@@ -64,7 +69,7 @@ export async function getServicesAlerts({
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
           ...rangeQuery(start, end),
           ...kqlQuery(kuery),
-          ...serviceGroupQuery(serviceGroup),
+          ...serviceGroupWithOverflowQuery(serviceGroup),
           ...termQuery(SERVICE_NAME, serviceName),
           ...environmentQuery(environment),
         ],

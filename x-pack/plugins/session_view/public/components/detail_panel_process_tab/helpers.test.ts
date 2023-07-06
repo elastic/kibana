@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { DASH } from '../../constants';
-import { getProcessExecutableCopyText, formatProcessArgs, getIsInterativeString } from './helpers';
+import { getProcessExecutableCopyText, formatProcessArgs } from './helpers';
 
 describe('detail panel process tab helpers tests', () => {
   it('getProcessExecutableCopyText works with empty array', () => {
@@ -47,18 +47,5 @@ describe('detail panel process tab helpers tests', () => {
     // returns formatted string comma separating each arg
     result = formatProcessArgs(['ls', '--color=auto']);
     expect(result).toEqual("['ls', '--color=auto']");
-  });
-
-  it('getIsInterativeString works', () => {
-    let result = getIsInterativeString(undefined);
-    expect(result).toBe('False');
-
-    result = getIsInterativeString({
-      char_device: {
-        major: 8,
-        minor: 1,
-      },
-    });
-    expect(result).toBe('True');
   });
 });

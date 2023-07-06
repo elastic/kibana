@@ -19,6 +19,7 @@ import type {
   EntriesArray,
   ExceptionListItemType,
   ExceptionListItemTypeOrUndefined,
+  ExceptionListSchema,
   ExceptionListType,
   ExceptionListTypeOrUndefined,
   ExpireTimeOrUndefined,
@@ -274,8 +275,6 @@ export interface CreateEndpointListItemOptions {
   comments: CreateCommentsArray;
   /** The entries of the endpoint list item */
   entries: EntriesArray;
-  /** an optional datetime string with an expiration time */
-  expireTime: ExpireTimeOrUndefined;
   /** The item id of the list item */
   itemId: ItemId;
   /** The name of the list item */
@@ -297,10 +296,12 @@ export interface CreateEndpointListItemOptions {
  * {@link ExceptionListClient.duplicateExceptionListAndItems}
  */
 export interface DuplicateExceptionListOptions {
-  /** The single list id to do the search against */
-  listId: ListId;
+  /** The list to be duplicated */
+  list: ExceptionListSchema;
   /** saved object namespace (single | agnostic) */
   namespaceType: NamespaceType;
+  /** determines whether exception items with an expired TTL are included in duplication */
+  includeExpiredExceptions: boolean;
 }
 
 /**
@@ -347,8 +348,6 @@ export interface UpdateEndpointListItemOptions {
   comments: UpdateCommentsArray;
   /** The entries of the endpoint list item */
   entries: EntriesArray;
-  /** an optional datetime string with an expiration time */
-  expireTime: ExpireTimeOrUndefined;
   /** The id of the list item (Either this or itemId has to be defined) */
   id: IdOrUndefined;
   /** The item id of the list item (Either this or id has to be defined) */

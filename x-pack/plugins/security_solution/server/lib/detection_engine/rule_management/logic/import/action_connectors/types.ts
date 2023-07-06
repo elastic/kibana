@@ -6,10 +6,7 @@
  */
 import type { ISavedObjectsImporter, SavedObject } from '@kbn/core-saved-objects-server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type {
-  SavedObjectsImportFailure,
-  SavedObjectsImportSuccess,
-} from '@kbn/core-saved-objects-common';
+import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import type { RuleToImport } from '../../../../../../../common/detection_engine/rule_management';
 import type { WarningSchema } from '../../../../../../../common/detection_engine/schemas/response';
 import type { BulkError } from '../../../../routes/utils';
@@ -17,9 +14,9 @@ import type { BulkError } from '../../../../routes/utils';
 export interface ImportRuleActionConnectorsResult {
   success: boolean;
   successCount: number;
-  successResults?: SavedObjectsImportSuccess[];
   errors: BulkError[] | [];
   warnings: WarningSchema[] | [];
+  rulesWithMigratedActions?: Array<RuleToImport | Error>;
 }
 
 export interface ImportRuleActionConnectorsParams {

@@ -13,7 +13,7 @@ import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 interface RequestArgs<JobType extends string> {
   spaceId: string;
-  sourceId: string;
+  logViewId: string;
   jobTypes: JobType[];
 }
 
@@ -21,12 +21,13 @@ export const callJobsSummaryAPI = async <JobType extends string>(
   requestArgs: RequestArgs<JobType>,
   fetch: HttpHandler
 ) => {
-  const { spaceId, sourceId, jobTypes } = requestArgs;
-  const response = await fetch('/api/ml/jobs/jobs_summary', {
+  const { spaceId, logViewId, jobTypes } = requestArgs;
+  const response = await fetch('/internal/ml/jobs/jobs_summary', {
     method: 'POST',
+    version: '1',
     body: JSON.stringify(
       fetchJobStatusRequestPayloadRT.encode({
-        jobIds: jobTypes.map((jobType) => getJobId(spaceId, sourceId, jobType)),
+        jobIds: jobTypes.map((jobType) => getJobId(spaceId, logViewId, jobType)),
       })
     ),
   });

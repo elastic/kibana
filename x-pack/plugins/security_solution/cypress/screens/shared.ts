@@ -6,3 +6,5 @@
  */
 
 export const TOAST_ERROR = '.euiToast--danger';
+
+export const SELECT_ALL_CHECKBOX = '[data-test-subj="checkboxSelectAll"]';

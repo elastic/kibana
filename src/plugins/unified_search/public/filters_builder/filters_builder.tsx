@@ -22,6 +22,7 @@ export interface FiltersBuilderProps {
   dataView: DataView;
   onChange: (filters: Filter[]) => void;
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   maxDepth?: number;
   hideOr?: boolean;
   disabled?: boolean;
@@ -35,6 +36,7 @@ function FiltersBuilder({
   dataView,
   filters,
   timeRangeForSuggestionsOverride,
+  filtersForSuggestions,
   maxDepth = DEFAULT_MAX_DEPTH,
   hideOr = false,
   disabled = false,
@@ -124,6 +126,7 @@ function FiltersBuilder({
           dispatch,
           dropTarget,
           timeRangeForSuggestionsOverride,
+          filtersForSuggestions,
           disabled,
         }}
       >

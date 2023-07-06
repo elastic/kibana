@@ -83,6 +83,7 @@ export function getConnectorType(): ESIndexConnectorType {
       SecurityConnectorFeatureId,
     ],
     validate: {
+      secrets: { schema: schema.object({}, { defaultValue: {} }) },
       config: {
         schema: ConfigSchema,
       },

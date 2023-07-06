@@ -12,7 +12,9 @@ import type {
   CreateFileArgs,
   UpdateFileArgs,
   DeleteFileArgs,
+  BulkDeleteFilesArgs,
   GetByIdArgs,
+  BulkGetByIdArgs,
   FindFileArgs,
 } from './file_action_types';
 
@@ -44,11 +46,35 @@ export interface FileServiceStart {
   delete(args: DeleteFileArgs): Promise<void>;
 
   /**
+   * Delete multiple files at once.
+   *
+   * @param args - delete files args
+   */
+  bulkDelete(args: BulkDeleteFilesArgs): Promise<Array<PromiseSettledResult<void>>>;
+
+  /**
    * Get a file by ID. Will throw if file cannot be found.
    *
    * @param args - get file by ID args
    */
   getById<M>(args: GetByIdArgs): Promise<File<M>>;
+
+  /**
+   * Bulk get files by IDs. Will throw if any of the files fail to load (set `throwIfNotFound` to `false` to not throw and return `null` instead)
+   *
+   * @param args - bulk get files by IDs args
+   */
+  bulkGetById<M>(args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound?: true }): Promise<File[]>;
+  bulkGetById<M>(
+    args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound?: true; format: 'map' }
+  ): Promise<{ [id: string]: File }>;
+  bulkGetById<M>(
+    args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound: false }
+  ): Promise<Array<File | null>>;
+  bulkGetById<M>(
+    args: Pick<BulkGetByIdArgs, 'ids'> & { throwIfNotFound: false; format: 'map' }
+  ): Promise<{ [id: string]: File | null }>;
+  bulkGetById<M>(args: BulkGetByIdArgs): Promise<Array<File<M> | { [id: string]: File | null }>>;
 
   /**
    * Find files given a set of parameters.

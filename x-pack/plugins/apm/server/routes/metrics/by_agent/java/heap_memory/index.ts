@@ -11,6 +11,11 @@ import {
   METRIC_JAVA_HEAP_MEMORY_MAX,
   METRIC_JAVA_HEAP_MEMORY_COMMITTED,
   METRIC_JAVA_HEAP_MEMORY_USED,
+  METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE,
+  METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED,
+  METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT,
+  VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP,
+  LABEL_TYPE,
   AGENT_NAME,
 } from '../../../../../../common/es_fields/apm';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
@@ -62,6 +67,7 @@ export function getHeapMemoryChart({
   serviceNodeName,
   start,
   end,
+  isOpenTelemetry,
 }: {
   environment: string;
   kuery: string;
@@ -71,7 +77,27 @@ export function getHeapMemoryChart({
   serviceNodeName?: string;
   start: number;
   end: number;
+  isOpenTelemetry?: boolean;
 }) {
+  const maxMemoryField = isOpenTelemetry
+    ? METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT
+    : METRIC_JAVA_HEAP_MEMORY_MAX;
+
+  const committedMemoryField = isOpenTelemetry
+    ? METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED
+    : METRIC_JAVA_HEAP_MEMORY_COMMITTED;
+
+  const usedMemoryField = isOpenTelemetry
+    ? METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE
+    : METRIC_JAVA_HEAP_MEMORY_USED;
+
+  const additionalFilters = isOpenTelemetry
+    ? [
+        { terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } },
+        { term: { [LABEL_TYPE]: VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP } },
+      ]
+    : [{ terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } }];
+
   return fetchAndTransformMetrics({
     environment,
     kuery,
@@ -83,13 +109,13 @@ export function getHeapMemoryChart({
     end,
     chartBase,
     aggs: {
-      heapMemoryMax: { avg: { field: METRIC_JAVA_HEAP_MEMORY_MAX } },
+      heapMemoryUsed: { avg: { field: usedMemoryField } },
       heapMemoryCommitted: {
-        avg: { field: METRIC_JAVA_HEAP_MEMORY_COMMITTED },
+        avg: { field: committedMemoryField },
       },
-      heapMemoryUsed: { avg: { field: METRIC_JAVA_HEAP_MEMORY_USED } },
+      heapMemoryMax: { avg: { field: maxMemoryField } },
     },
-    additionalFilters: [{ terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } }],
+    additionalFilters,
     operationName: 'get_heap_memory_charts',
   });
 }

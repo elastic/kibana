@@ -1,0 +1,30 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/data-views-plugin",
+    "@kbn/es-query",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/shared-svg",
+    "@kbn/ui-theme",
+    "@kbn/analytics",
+  ]
+}

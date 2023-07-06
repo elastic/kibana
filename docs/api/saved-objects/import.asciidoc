@@ -40,13 +40,19 @@ Saved objects can only be imported into the same version, a newer minor on the s
   (Optional, boolean) Creates copies of saved objects, regenerates each object ID, and resets the origin. When used, potential conflict
   errors are avoided.
 +
-NOTE: This cannot be used with the `overwrite` option.
+NOTE: This option cannot be used with the `overwrite` and `compatibilityMode` options.
 
 `overwrite`::
   (Optional, boolean) Overwrites saved objects when they already exist. When used, potential conflict errors are automatically resolved by
   overwriting the destination object.
 +
-NOTE: This cannot be used with the `createNewCopies` option.
+NOTE: This option cannot be used with the `createNewCopies` option.
+
+`compatibilityMode`::
+  (Optional, boolean) Applies various adjustments to the saved objects that are being imported to maintain compatibility between different {kib}
+  versions. Use this option only if you encounter issues with imported saved objects.
++
+NOTE: This option cannot be used with the `createNewCopies` option.
 
 [[saved-objects-api-import-request-body]]
 ==== Request body

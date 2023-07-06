@@ -13,6 +13,9 @@ export interface AlertsByGroupingAgg {
     sum_other_doc_count: number;
     buckets: BucketItem[];
   };
+  missingFields: {
+    doc_count: number;
+  };
 }
 export interface AlertsProgressBarData {
   key: string;

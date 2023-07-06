@@ -33,9 +33,10 @@
       "expressionMetricVis",
       "expressionHeatmap",
       "expressionXY",
+      "expressionTagcloud",
       "eventAnnotation",
       "unifiedSearch",
-      "unifiedFieldList"
+      "contentManagement"
     ],
     "optionalPlugins": [
       "expressionLegacyMetricVis",
@@ -53,7 +54,8 @@
       "kibanaReact",
       "embeddable",
       "fieldFormats",
-      "charts"
+      "charts",
+      "visualizationUiComponents"
     ],
     "extraPublicDirs": [
       "common/constants"

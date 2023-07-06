@@ -96,6 +96,7 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
             },
           }
         : { extra: 'payload' };
+    const agentId = overrides?._source?.agent?.id ?? this.randomUUID();
 
     return merge<
       estypes.SearchHit<FleetServerAgent>,
@@ -111,7 +112,7 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
           active: true,
           enrolled_at: now,
           agent: {
-            id: this.randomUUID(),
+            id: agentId,
             version: this.randomVersion(),
           },
           local_metadata: {
@@ -120,7 +121,7 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
                 'build.original': `8.0.0-SNAPSHOT (build: ${this.randomString(
                   5
                 )} at 2021-05-07 18:42:49 +0000 UTC)`,
-                id: this.randomUUID(),
+                id: agentId,
                 log_level: 'info',
                 snapshot: true,
                 upgradeable: true,

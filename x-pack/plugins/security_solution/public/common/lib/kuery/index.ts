@@ -16,7 +16,8 @@ import { flow, get, isEmpty, isString } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import type { BrowserFields } from '../../../../common/search_strategy';
 import type { DataProvider, DataProvidersAnd } from '../../../../common/types';
-import { DataProviderType, EXISTS_OPERATOR } from '../../../../common/types';
+import { DataProviderType } from '../../../../common/types/timeline/api';
+import { EXISTS_OPERATOR } from '../../../../common/types/timeline';
 
 export type PrimitiveOrArrayOfPrimitives =
   | string
@@ -95,6 +96,15 @@ export const getBrowserFieldPath = (field: string, browserFields: BrowserFields)
     return ['base', 'fields', field];
   }
   return [splitFields[0], 'fields', field];
+};
+
+export const getFieldEsTypes = (field: string, browserFields: BrowserFields): string[] => {
+  const pathBrowserField = getBrowserFieldPath(field, browserFields);
+  const browserField = get(pathBrowserField, browserFields);
+  if (browserField != null) {
+    return browserField.esTypes;
+  }
+  return [];
 };
 
 export const checkIfFieldTypeIsDate = (field: string, browserFields: BrowserFields) => {

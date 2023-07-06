@@ -7,6 +7,7 @@
  */
 
 module.exports = {
+  bail: true, // only report 1 issue
   // TODO replace the line below with
   // preset: '@kbn/test/jest_integration_node
   // to do so, we must fix all integration tests first

@@ -5,55 +5,68 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
-import { useCallback, useMemo } from 'react';
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+  useQuery,
+} from '@tanstack/react-query';
 import { GetSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useDataFetcher } from '../use_data_fetcher';
+import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
 export interface UseFetchSloDetailsResponse {
-  loading: boolean;
+  isInitialLoading: boolean;
+  isLoading: boolean;
+  isRefetching: boolean;
+  isSuccess: boolean;
+  isError: boolean;
   slo: SLOWithSummaryResponse | undefined;
+  refetch: <TPageData>(
+    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
+  ) => Promise<QueryObserverResult<GetSLOResponse | undefined, unknown>>;
 }
 
-export function useFetchSloDetails(sloId?: string): UseFetchSloDetailsResponse {
-  const params = useMemo(() => ({ sloId }), [sloId]);
-  const shouldExecuteApiCall = useCallback(
-    (apiCallParams: { sloId?: string }) => params.sloId === apiCallParams.sloId,
-    [params]
+const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
+
+export function useFetchSloDetails({
+  sloId,
+  shouldRefetch,
+}: {
+  sloId?: string;
+  shouldRefetch?: boolean;
+}): UseFetchSloDetailsResponse {
+  const { http } = useKibana().services;
+
+  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
+    {
+      queryKey: sloKeys.detail(sloId),
+      queryFn: async ({ signal }) => {
+        try {
+          const response = await http.get<GetSLOResponse>(`/api/observability/slos/${sloId}`, {
+            query: {},
+            signal,
+          });
+
+          return response;
+        } catch (error) {
+          // ignore error for retrieving slos
+        }
+      },
+      keepPreviousData: true,
+      enabled: Boolean(sloId),
+      refetchInterval: shouldRefetch ? LONG_REFETCH_INTERVAL : undefined,
+      refetchOnWindowFocus: false,
+    }
   );
 
-  const { loading, data: slo } = useDataFetcher<
-    { sloId?: string },
-    SLOWithSummaryResponse | undefined
-  >({
-    paramsForApiCall: params,
-    initialDataState: undefined,
-    executeApiCall: fetchSlo,
-    shouldExecuteApiCall,
-  });
-
-  return { loading, slo };
+  return {
+    slo: data,
+    isLoading,
+    isInitialLoading,
+    isRefetching,
+    isSuccess,
+    isError,
+    refetch,
+  };
 }
-
-const fetchSlo = async (
-  params: { sloId?: string },
-  abortController: AbortController,
-  http: HttpSetup
-): Promise<SLOWithSummaryResponse | undefined> => {
-  if (params.sloId === undefined) {
-    return undefined;
-  }
-
-  try {
-    const response = await http.get<GetSLOResponse>(`/api/observability/slos/${params.sloId}`, {
-      query: {},
-      signal: abortController.signal,
-    });
-
-    return response;
-  } catch (error) {
-    // ignore error for retrieving slos
-  }
-
-  return undefined;
-};

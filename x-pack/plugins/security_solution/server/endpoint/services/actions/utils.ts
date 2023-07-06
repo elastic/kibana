@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EcsError } from '@kbn/ecs';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import {
   ENDPOINT_ACTIONS_DS,
@@ -58,6 +59,10 @@ interface NormalizedActionRequest {
   command: ResponseActionsApiCommandNames;
   comment?: string;
   parameters?: EndpointActionDataParameterTypes;
+  alertIds?: string[];
+  ruleId?: string;
+  ruleName?: string;
+  error?: EcsError;
 }
 
 /**
@@ -83,6 +88,10 @@ export const mapToNormalizedActionRequest = (
       id: actionRequest.EndpointActions.action_id,
       type,
       parameters: actionRequest.EndpointActions.data.parameters,
+      alertIds: actionRequest.EndpointActions.data.alert_id,
+      ruleId: actionRequest.rule?.id,
+      ruleName: actionRequest.rule?.name,
+      error: actionRequest.error,
     };
   }
 
@@ -106,11 +115,12 @@ type ActionCompletionInfo = Pick<
 >;
 
 export const getActionCompletionInfo = (
-  /** List of agents that the action was sent to */
-  agentIds: string[],
+  /** The normalized action request */
+  action: NormalizedActionRequest,
   /** List of action Log responses received for the action */
   actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>
 ): ActionCompletionInfo => {
+  const agentIds = action.agents;
   const completedInfo: ActionCompletionInfo = {
     completedAt: undefined,
     errors: undefined,
@@ -180,6 +190,25 @@ export const getActionCompletionInfo = (
     if (responseErrors.length) {
       completedInfo.errors = responseErrors;
     }
+  }
+
+  // If the action request has an Error, then we'll never get actual response from all of the agents
+  // to which this action sent. In this case, we adjust the completion information to all be "complete"
+  // and un-successful
+  if (action.error?.message) {
+    const errorMessage = action.error.message;
+
+    completedInfo.completedAt = action.createdAt;
+    completedInfo.isCompleted = true;
+    completedInfo.wasSuccessful = false;
+    completedInfo.errors = [errorMessage];
+
+    Object.values(completedInfo.agentState).forEach((agentState) => {
+      agentState.completedAt = action.createdAt;
+      agentState.isCompleted = true;
+      agentState.wasSuccessful = false;
+      agentState.errors = [errorMessage];
+    });
   }
 
   return completedInfo;

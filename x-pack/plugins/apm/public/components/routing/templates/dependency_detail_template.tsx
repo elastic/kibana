@@ -8,17 +8,14 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  getKueryBarBoolFilter,
-  kueryBarPlaceholder,
-} from '../../../../common/dependencies';
+import { unifiedSearchBarPlaceholder } from '../../../../common/dependencies';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { BetaBadge } from '../../shared/beta_badge';
-import { SearchBar } from '../../shared/search_bar';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { SpanIcon } from '../../shared/span_icon';
 import { ApmMainTemplate } from './apm_main_template';
 
@@ -29,7 +26,7 @@ interface Props {
 export function DependencyDetailTemplate({ children }: Props) {
   const {
     query,
-    query: { dependencyName, rangeFrom, rangeTo, environment },
+    query: { dependencyName, rangeFrom, rangeTo },
   } = useApmParams('/dependencies');
 
   const router = useApmRouter();
@@ -37,11 +34,6 @@ export function DependencyDetailTemplate({ children }: Props) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const path = useApmRoutePath();
-
-  const kueryBarBoolFilter = getKueryBarBoolFilter({
-    environment,
-    dependencyName,
-  });
 
   const dependencyMetadataFetch = useFetcher(
     (callApmApi) => {
@@ -113,8 +105,7 @@ export function DependencyDetailTemplate({ children }: Props) {
     >
       <SearchBar
         showTimeComparison
-        kueryBarPlaceholder={kueryBarPlaceholder}
-        kueryBarBoolFilter={kueryBarBoolFilter}
+        searchBarPlaceholder={unifiedSearchBarPlaceholder}
       />
       {children}
     </ApmMainTemplate>

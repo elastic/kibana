@@ -242,6 +242,52 @@ describe('createRouter', () => {
         },
       });
     });
+
+    it('returns params for the best-matching path regardless of the order', () => {
+      history.push('/services/opbeans-java/errors/foo?rangeFrom=now-15m&rangeTo=now');
+
+      expect(
+        router.getParams(
+          '/services/{serviceName}/errors',
+          '/services/{serviceName}/errors/*',
+          history.location
+        ).path
+      ).toEqual(
+        expect.objectContaining({
+          groupId: 'foo',
+        })
+      );
+
+      expect(
+        router.getParams(
+          '/services/{serviceName}/errors/*',
+          '/services/{serviceName}/errors',
+          history.location
+        ).path
+      ).toEqual(
+        expect.objectContaining({
+          groupId: 'foo',
+        })
+      );
+
+      expect(router.getParams('/*', history.location).path).toEqual(
+        expect.objectContaining({
+          groupId: 'foo',
+        })
+      );
+
+      expect(
+        router.getParams(
+          '/services/{serviceName}/errors',
+          '/services/{serviceName}/errors/{groupId}',
+          history.location
+        ).path
+      ).toEqual(
+        expect.objectContaining({
+          groupId: 'foo',
+        })
+      );
+    });
   });
 
   describe('matchRoutes', () => {

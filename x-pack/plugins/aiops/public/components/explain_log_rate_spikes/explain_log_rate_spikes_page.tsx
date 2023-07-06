@@ -7,63 +7,41 @@
 
 import React, { useCallback, useEffect, useState, FC } from 'react';
 
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageBody,
-  EuiPageSection,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { EuiFlexGroup, EuiFlexItem, EuiPageBody, EuiPageSection, EuiSpacer } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import type { WindowParameters } from '@kbn/aiops-utils';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { SearchQueryLanguage } from '../../application/utils/search_utils';
 import { useData } from '../../hooks/use_data';
+import { useSearch } from '../../hooks/use_search';
+import {
+  getDefaultAiOpsListState,
+  type AiOpsPageUrlState,
+} from '../../application/utils/url_state';
 
-import { DocumentCountContent } from '../document_count_content/document_count_content';
 import { SearchPanel } from '../search_panel';
-import type { GroupTableItem } from '../spike_analysis_table/types';
 import { useSpikeAnalysisTableRowContext } from '../spike_analysis_table/spike_analysis_table_row_provider';
 import { PageHeader } from '../page_header';
 
-import { restorableDefaults, type AiOpsPageUrlState } from './explain_log_rate_spikes_app_state';
-import { ExplainLogRateSpikesAnalysis } from './explain_log_rate_spikes_analysis';
-
-function getDocumentCountStatsSplitLabel(changePoint?: ChangePoint, group?: GroupTableItem) {
-  if (changePoint) {
-    return `${changePoint?.fieldName}:${changePoint?.fieldValue}`;
-  } else if (group) {
-    return i18n.translate('xpack.aiops.spikeAnalysisPage.documentCountStatsSplitGroupLabel', {
-      defaultMessage: 'Selected group',
-    });
-  }
+import { ExplainLogRateSpikesContent } from './explain_log_rate_spikes_content/explain_log_rate_spikes_content';
+interface Props {
+  stickyHistogram?: boolean;
 }
 
-export const ExplainLogRateSpikesPage: FC = () => {
+export const ExplainLogRateSpikesPage: FC<Props> = ({ stickyHistogram }) => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
-  const {
-    currentSelectedChangePoint,
-    currentSelectedGroup,
-    setPinnedChangePoint,
-    setPinnedGroup,
-    setSelectedChangePoint,
-    setSelectedGroup,
-  } = useSpikeAnalysisTableRowContext();
+  const { currentSelectedSignificantTerm, currentSelectedGroup } =
+    useSpikeAnalysisTableRowContext();
 
   const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
     'AIOPS_INDEX_VIEWER',
-    restorableDefaults
+    getDefaultAiOpsListState()
   );
   const [globalState, setGlobalState] = useUrlState('_g');
 
@@ -77,7 +55,7 @@ export const ExplainLogRateSpikesPage: FC = () => {
 
   const setSearchParams = useCallback(
     (searchParams: {
-      searchQuery: Query['query'];
+      searchQuery: estypes.QueryDslQueryContainer;
       searchString: Query['query'];
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
@@ -99,23 +77,19 @@ export const ExplainLogRateSpikesPage: FC = () => {
     [selectedSavedSearch, aiopsListState, setAiopsListState]
   );
 
-  const {
-    documentStats,
-    timefilter,
-    earliest,
-    latest,
-    searchQueryLanguage,
-    searchString,
-    searchQuery,
-  } = useData(
-    { selectedDataView: dataView, selectedSavedSearch },
-    aiopsListState,
-    setGlobalState,
-    currentSelectedChangePoint,
-    currentSelectedGroup
+  const { searchQueryLanguage, searchString, searchQuery } = useSearch(
+    { dataView, savedSearch },
+    aiopsListState
   );
 
-  const { totalCount, documentCountStats, documentCountStatsCompare } = documentStats;
+  const { timefilter } = useData(
+    dataView,
+    'explain_log_rage_spikes',
+    searchQuery,
+    setGlobalState,
+    currentSelectedSignificantTerm,
+    currentSelectedGroup
+  );
 
   useEffect(
     // TODO: Consolidate this hook/function with with Data visualizer's
@@ -131,8 +105,6 @@ export const ExplainLogRateSpikesPage: FC = () => {
     },
     [dataService.query.filterManager]
   );
-
-  const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
 
   useEffect(() => {
     if (globalState?.time !== undefined) {
@@ -159,14 +131,6 @@ export const ExplainLogRateSpikesPage: FC = () => {
     });
   }, [dataService, searchQueryLanguage, searchString]);
 
-  function clearSelection() {
-    setWindowParameters(undefined);
-    setPinnedChangePoint(null);
-    setPinnedGroup(null);
-    setSelectedChangePoint(null);
-    setSelectedGroup(null);
-  }
-
   return (
     <EuiPageBody data-test-subj="aiopsExplainLogRateSpikesPage" paddingSize="none" panelled={false}>
       <PageHeader />
@@ -182,59 +146,12 @@ export const ExplainLogRateSpikesPage: FC = () => {
               setSearchParams={setSearchParams}
             />
           </EuiFlexItem>
-          {documentCountStats !== undefined && (
-            <EuiFlexItem>
-              <EuiPanel paddingSize="m">
-                <DocumentCountContent
-                  brushSelectionUpdateHandler={setWindowParameters}
-                  clearSelectionHandler={clearSelection}
-                  documentCountStats={documentCountStats}
-                  documentCountStatsSplit={documentCountStatsCompare}
-                  documentCountStatsSplitLabel={getDocumentCountStatsSplitLabel(
-                    currentSelectedChangePoint,
-                    currentSelectedGroup
-                  )}
-                  totalCount={totalCount}
-                  windowParameters={windowParameters}
-                />
-              </EuiPanel>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <EuiPanel paddingSize="m">
-              {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
-                <ExplainLogRateSpikesAnalysis
-                  dataView={dataView}
-                  earliest={earliest}
-                  latest={latest}
-                  windowParameters={windowParameters}
-                  searchQuery={searchQuery}
-                />
-              )}
-              {windowParameters === undefined && (
-                <EuiEmptyPrompt
-                  title={
-                    <h2>
-                      <FormattedMessage
-                        id="xpack.aiops.explainLogRateSpikesPage.emptyPromptTitle"
-                        defaultMessage="Click a spike in the histogram chart to start the analysis."
-                      />
-                    </h2>
-                  }
-                  titleSize="xs"
-                  body={
-                    <p>
-                      <FormattedMessage
-                        id="xpack.aiops.explainLogRateSpikesPage.emptyPromptBody"
-                        defaultMessage="The explain log rate spikes feature identifies statistically significant field/value combinations that contribute to a log rate spike."
-                      />
-                    </p>
-                  }
-                  data-test-subj="aiopsNoWindowParametersEmptyPrompt"
-                />
-              )}
-            </EuiPanel>
-          </EuiFlexItem>
+          <ExplainLogRateSpikesContent
+            dataView={dataView}
+            setGlobalState={setGlobalState}
+            esSearchQuery={searchQuery}
+            stickyHistogram={stickyHistogram}
+          />
         </EuiFlexGroup>
       </EuiPageSection>
     </EuiPageBody>

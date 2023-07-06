@@ -9,15 +9,24 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibanaUrl } from '../../hooks/use_kibana_url';
+import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 
 export function InvalidLicenseNotification() {
-  const manageLicenseURL = useKibanaUrl(
+  const {
+    plugins: { licenseManagement },
+  } = useApmPluginContext();
+  const licensePageUrl = useKibanaUrl(
     '/app/management/stack/license_management'
   );
+  const manageLicenseURL = licenseManagement?.locator
+    ? licenseManagement?.locator?.useUrl({
+        page: 'dashboard',
+      })
+    : licensePageUrl;
 
   return (
     <EuiEmptyPrompt
-      iconType="alert"
+      iconType="warning"
       iconColor="warning"
       title={
         <h1>
@@ -35,7 +44,10 @@ export function InvalidLicenseNotification() {
         </p>
       }
       actions={[
-        <EuiButton href={manageLicenseURL}>
+        <EuiButton
+          data-test-subj="apmInvalidLicenseNotificationManageYourLicenseButton"
+          href={manageLicenseURL}
+        >
           {i18n.translate('xpack.apm.invalidLicense.licenseManagementLink', {
             defaultMessage: 'Manage your license',
           })}

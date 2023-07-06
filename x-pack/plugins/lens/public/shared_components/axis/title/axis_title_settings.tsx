@@ -8,8 +8,9 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
 import type { AxesSettingsConfig } from '../../../visualizations/xy/types';
-import { type LabelMode, useDebouncedValue, VisLabel } from '../..';
+import { type LabelMode, VisLabel } from '../..';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 
@@ -83,7 +84,7 @@ export const AxisTitleSettings: React.FunctionComponent<AxisTitleSettingsProps> 
             defaultMessage: 'Axis title',
           })}
           dataTestSubj={`lns${axis}AxisTitle`}
-          label={localAxisState.title || ''}
+          label={localAxisState.title}
           mode={localAxisState.visibility}
           placeholder={i18n.translate('xpack.lens.shared.overwriteAxisTitle', {
             defaultMessage: 'Overwrite axis title',

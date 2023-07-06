@@ -77,7 +77,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
 
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { services, overlays } = kibana;
-  const { http, uiSettings, application, data } = services;
+  const { http, uiSettings, application, data, savedObjectsManagement } = services;
   const [hasDataViews, setHasDataViews] = useState<boolean>(true);
 
   useEffect(() => {
@@ -90,7 +90,7 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
   if (!overlays || !application) return null;
 
   const onOpenDatasourcePicker = () => {
-    openSourceModal({ overlays, http, uiSettings }, onIndexPatternSelected);
+    openSourceModal({ overlays, http, uiSettings, savedObjectsManagement }, onIndexPatternSelected);
   };
 
   let content = (

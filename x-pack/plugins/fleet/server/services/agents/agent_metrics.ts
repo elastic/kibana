@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
+import { DATA_TIERS } from '../../../common/constants';
 
 export async function fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents: Agent[]) {
   try {
@@ -54,7 +55,7 @@ async function _fetchAndAssignAgentMetrics(esClient: ElasticsearchClient, agents
     return {
       ...agent,
       metrics: {
-        cpu_avg: results?.sum_cpu ? Math.trunc(results.sum_cpu * 10000) / 10000 : undefined,
+        cpu_avg: results?.sum_cpu ? Math.trunc(results.sum_cpu * 100000) / 100000 : undefined,
         memory_size_byte_avg: results?.sum_memory_size
           ? Math.trunc(results?.sum_memory_size)
           : undefined,
@@ -70,6 +71,11 @@ const aggregationQueryBuilder = (agentIds: string[]) => ({
   query: {
     bool: {
       must: [
+        {
+          terms: {
+            _tier: DATA_TIERS,
+          },
+        },
         {
           range: {
             '@timestamp': {
@@ -161,7 +167,7 @@ const aggregationQueryBuilder = (agentIds: string[]) => ({
                     },
                     script: {
                       source: `if (params.cpu_total > 0) {
-                      return params.cpu_total / params._interval  
+                      return params.cpu_total / params._interval
                     }
                     `,
                       lang: 'painless',

@@ -14,6 +14,7 @@ import { FieldFormatter, LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../common/
 import {
   AbstractSourceDescriptor,
   Attribution,
+  DataFilters,
   DataRequestMeta,
   StyleDescriptor,
   Timeslice,
@@ -29,6 +30,7 @@ export type OnSourceChangeArgs = {
 
 export type SourceEditorArgs = {
   currentLayerType: string;
+  hasSpatialJoins: boolean;
   numberOfJoins: number;
   onChange: (...args: OnSourceChangeArgs[]) => Promise<void>;
   onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void;
@@ -44,24 +46,28 @@ export type ImmutableSourceProperty = {
 export interface ISource {
   getDisplayName(): Promise<string>;
   getType(): string;
+  /*
+   * Re-fetch flag. When function returns true, source will re-fetch on requestMeta.fieldNames changes.
+   * Example uses of fieldNames change requiring re-fetch:
+   * 1) Data driven styling
+   * 2) Term join
+   * 3) Feature masking.
+   */
   isFieldAware(): boolean;
   isFilterByMapBounds(): boolean;
-  isGeoGridPrecisionAware(): boolean;
   isQueryAware(): boolean;
   isTimeAware(): Promise<boolean>;
-  getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
+  getImmutableProperties(dataFilters: DataFilters): Promise<ImmutableSourceProperty[]>;
   getAttributionProvider(): (() => Promise<Attribution[]>) | null;
   isESSource(): boolean;
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
   cloneDescriptor(): AbstractSourceDescriptor;
-  getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
   getApplyGlobalTime(): boolean;
   getApplyForceRefresh(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
-  getGeoGridPrecision(zoom: number): number;
   createFieldFormatter(field: IField): Promise<FieldFormatter | null>;
   getValueSuggestions(field: IField, query: string): Promise<string[]>;
   getMinZoom(): number;
@@ -109,16 +115,8 @@ export class AbstractSource implements ISource {
     return false;
   }
 
-  isGeoGridPrecisionAware(): boolean {
-    return false;
-  }
-
   isQueryAware(): boolean {
     return false;
-  }
-
-  getFieldNames(): string[] {
-    return [];
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
@@ -143,10 +141,6 @@ export class AbstractSource implements ISource {
 
   getQueryableIndexPatternIds(): string[] {
     return [];
-  }
-
-  getGeoGridPrecision(zoom: number): number {
-    return 0;
   }
 
   isESSource(): boolean {

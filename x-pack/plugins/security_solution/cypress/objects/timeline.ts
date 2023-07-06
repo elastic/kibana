@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimelineResponse } from '../../common/types/timeline';
+import type { TimelineResponse } from '../../common/types/timeline/api';
 
 export interface Timeline {
   title: string;
@@ -108,9 +108,9 @@ export const expectedExportedTimelineTemplate = (
     templateTimelineVersion: 1,
     timelineType: 'template',
     created: timelineTemplateBody.created,
-    createdBy: 'elastic',
+    createdBy: 'system_indices_superuser',
     updated: timelineTemplateBody.updated,
-    updatedBy: 'elastic',
+    updatedBy: 'system_indices_superuser',
     sort: [],
     eventNotes: [],
     globalNotes: [],
@@ -143,9 +143,9 @@ export const expectedExportedTimeline = (timelineResponse: Cypress.Response<Time
     description: timelineBody.description,
     title: timelineBody.title,
     created: timelineBody.created,
-    createdBy: 'elastic',
+    createdBy: 'system_indices_superuser',
     updated: timelineBody.updated,
-    updatedBy: 'elastic',
+    updatedBy: 'system_indices_superuser',
     timelineType: 'default',
     sort: [],
     eventNotes: [],

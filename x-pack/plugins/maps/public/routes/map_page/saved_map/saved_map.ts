@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { ScopedHistory } from '@kbn/core/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
+import type { MapAttributes } from '../../../../common/content_management';
 import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
 import { MapSettings } from '../../../../common/descriptor_types';
@@ -71,7 +71,7 @@ function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
 }
 
 export class SavedMap {
-  private _attributes: MapSavedObjectAttributes | null = null;
+  private _attributes: MapAttributes | null = null;
   private _sharingSavedObjectProps: SharingSavedObjectProps | null = null;
   private readonly _defaultLayers: LayerDescriptor[];
   private readonly _embeddableId?: string;
@@ -385,7 +385,7 @@ export class SavedMap {
     return this._attributes.title !== undefined ? this._attributes.title : '';
   }
 
-  public getAttributes(): MapSavedObjectAttributes {
+  public getAttributes(): MapAttributes {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await whenReady before calling getAttributes');
     }

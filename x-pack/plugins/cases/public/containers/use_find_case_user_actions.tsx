@@ -6,30 +6,32 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { FindCaseUserActions } from '../../common/ui/types';
+import type { FindCaseUserActions, CaseUserActionTypeWithAll } from '../../common/ui/types';
 import { findCaseUserActions } from './api';
 import type { ServerError } from '../types';
-import { useToasts } from '../common/lib/kibana';
+import { useCasesToast } from '../common/use_cases_toast';
 import { ERROR_TITLE } from './translations';
 import { casesQueriesKeys } from './constants';
 
-export const useFindCaseUserActions = (caseId: string) => {
-  const toasts = useToasts();
-  const abortCtrlRef = new AbortController();
+export const useFindCaseUserActions = (
+  caseId: string,
+  params: {
+    type: CaseUserActionTypeWithAll;
+    sortOrder: 'asc' | 'desc';
+    page: number;
+    perPage: number;
+  },
+  isEnabled: boolean
+) => {
+  const { showErrorToast } = useCasesToast();
 
   return useQuery<FindCaseUserActions, ServerError>(
-    casesQueriesKeys.userActions(caseId),
-    async () => {
-      return findCaseUserActions(caseId, abortCtrlRef.signal);
-    },
+    casesQueriesKeys.caseUserActions(caseId, params),
+    async ({ signal }) => findCaseUserActions(caseId, params, signal),
     {
+      enabled: isEnabled,
       onError: (error: ServerError) => {
-        if (error.name !== 'AbortError') {
-          toasts.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
-            { title: ERROR_TITLE }
-          );
-        }
+        showErrorToast(error, { title: ERROR_TITLE });
       },
     }
   );

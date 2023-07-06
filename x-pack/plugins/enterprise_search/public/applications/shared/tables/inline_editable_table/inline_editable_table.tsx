@@ -11,8 +11,10 @@ import classNames from 'classnames';
 
 import { useActions, useValues, BindLogic } from 'kea';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { PageIntroduction } from '../../page_introduction/page_introduction';
 
 import { ReorderableTable } from '../reorderable_table';
 
@@ -29,7 +31,7 @@ export interface InlineEditableTableProps<Item extends ItemWithAnID> {
   items: Item[];
   defaultItem?: Partial<Item>;
   emptyPropertyAllowed?: boolean;
-  title: string;
+  title: string | React.ReactNode;
   addButtonText?: string;
   canRemoveLastItem?: boolean;
   className?: string;
@@ -129,28 +131,10 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
 
   return (
     <>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          {!!title && (
-            <EuiTitle size="xs" data-test-subj="inlineEditableTableTitle">
-              <h3>{title}</h3>
-            </EuiTitle>
-          )}
-          {!!description && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiText
-                data-test-subj="inlineEditableTableDescription"
-                color="subdued"
-                size="s"
-                className="inlineEditableTable__descriptionText"
-              >
-                {description}
-              </EuiText>
-            </>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+      <PageIntroduction
+        description={description || ''}
+        title={title || ''}
+        actions={[
           <EuiButton
             size="s"
             iconType="plusInCircle"
@@ -163,10 +147,10 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
               i18n.translate('xpack.enterpriseSearch.inlineEditableTable.newRowButtonLabel', {
                 defaultMessage: 'New row',
               })}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
+          </EuiButton>,
+        ]}
+      />
+      <EuiSpacer size="l" />
       <ReorderableTable
         className={classNames(className, 'editableTable')}
         items={displayedItems}

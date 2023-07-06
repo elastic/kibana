@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Loading } from '../../../../components';
 
-import type { IntegrationCardItem } from '../../../../../../../common/types/models';
+import type { IntegrationCardItem } from '../../screens/home';
 
 import type { ExtendedIntegrationCategory } from '../../screens/home/category_facets';
 
@@ -49,7 +49,7 @@ export const ControlsColumn = ({ controls, title }: ControlsColumnProps) => {
     );
   }
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup direction="column" gutterSize="none" className="kbnStickyMenu">
       {titleContent}
       {controls}
     </EuiFlexGroup>

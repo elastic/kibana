@@ -81,7 +81,7 @@ export function getIngestionStatus(index?: ElasticsearchIndexWithIngestion): Ing
   if (!index || isApiIndex(index)) {
     return IngestionStatus.CONNECTED;
   }
-  if (isConnectorIndex(index) || isCrawlerIndex(index)) {
+  if (isConnectorIndex(index) || (isCrawlerIndex(index) && index.connector)) {
     if (
       index.connector.last_seen &&
       moment(index.connector.last_seen).isBefore(moment().subtract(30, 'minutes'))
@@ -106,6 +106,17 @@ export function getIngestionStatus(index?: ElasticsearchIndexWithIngestion): Ing
 
 export function getLastUpdated(index?: ElasticsearchIndexWithIngestion): string | null {
   return isConnectorIndex(index) ? index.connector.last_synced ?? 'never' : null;
+}
+
+export function getContentExtractionDisabled(index?: ElasticsearchIndexWithIngestion): boolean {
+  if (!index) return false;
+  if (isConnectorIndex(index)) {
+    const contentExtractionDisabled =
+      index.connector.configuration?.use_text_extraction_service?.value;
+    return !!contentExtractionDisabled;
+  }
+
+  return false;
 }
 
 export function indexToViewIndex(index: ElasticsearchIndex): ConnectorViewIndex;

@@ -150,7 +150,6 @@ describe('Model service', () => {
       },
       nodes: [
         {
-          name: 'node3',
           allocated_models: [
             {
               allocation_status: {
@@ -158,12 +157,12 @@ describe('Model service', () => {
                 state: 'started',
                 target_allocation_count: 3,
               },
+              deployment_id: 'distilbert-base-uncased-finetuned-sst-2-english',
               inference_threads: 1,
+              key: 'distilbert-base-uncased-finetuned-sst-2-english_node3',
               model_id: 'distilbert-base-uncased-finetuned-sst-2-english',
               model_size_bytes: 267386880,
-              required_native_memory_bytes: 534773760,
               model_threads: 1,
-              state: 'started',
               node: {
                 average_inference_time_ms: 0,
                 inference_count: 0,
@@ -171,6 +170,8 @@ describe('Model service', () => {
                   routing_state: 'started',
                 },
               },
+              required_native_memory_bytes: 534773760,
+              state: 'started',
             },
             {
               allocation_status: {
@@ -178,12 +179,12 @@ describe('Model service', () => {
                 state: 'started',
                 target_allocation_count: 3,
               },
+              deployment_id: 'elastic__distilbert-base-cased-finetuned-conll03-english',
               inference_threads: 1,
+              key: 'elastic__distilbert-base-cased-finetuned-conll03-english_node3',
               model_id: 'elastic__distilbert-base-cased-finetuned-conll03-english',
               model_size_bytes: 260947500,
-              required_native_memory_bytes: 521895000,
               model_threads: 1,
-              state: 'started',
               node: {
                 average_inference_time_ms: 0,
                 inference_count: 0,
@@ -191,6 +192,8 @@ describe('Model service', () => {
                   routing_state: 'started',
                 },
               },
+              required_native_memory_bytes: 521895000,
+              state: 'started',
             },
             {
               allocation_status: {
@@ -198,12 +201,12 @@ describe('Model service', () => {
                 state: 'started',
                 target_allocation_count: 3,
               },
+              deployment_id: 'sentence-transformers__msmarco-minilm-l-12-v3',
               inference_threads: 1,
+              key: 'sentence-transformers__msmarco-minilm-l-12-v3_node3',
               model_id: 'sentence-transformers__msmarco-minilm-l-12-v3',
               model_size_bytes: 133378867,
-              required_native_memory_bytes: 266757734,
               model_threads: 1,
-              state: 'started',
               node: {
                 average_inference_time_ms: 0,
                 inference_count: 0,
@@ -211,6 +214,8 @@ describe('Model service', () => {
                   routing_state: 'started',
                 },
               },
+              required_native_memory_bytes: 266757734,
+              state: 'started',
             },
             {
               allocation_status: {
@@ -218,12 +223,12 @@ describe('Model service', () => {
                 state: 'started',
                 target_allocation_count: 3,
               },
+              deployment_id: 'typeform__mobilebert-uncased-mnli',
               inference_threads: 1,
+              key: 'typeform__mobilebert-uncased-mnli_node3',
               model_id: 'typeform__mobilebert-uncased-mnli',
               model_size_bytes: 100139008,
-              required_native_memory_bytes: 200278016,
               model_threads: 1,
-              state: 'started',
               node: {
                 average_inference_time_ms: 0,
                 inference_count: 0,
@@ -231,6 +236,8 @@ describe('Model service', () => {
                   routing_state: 'started',
                 },
               },
+              required_native_memory_bytes: 200278016,
+              state: 'started',
             },
           ],
           attributes: {
@@ -239,7 +246,6 @@ describe('Model service', () => {
           },
           id: '3qIoLFnbSi-DwVrYioUCdw',
           memory_overview: {
-            ml_max_in_bytes: 1073741824,
             anomaly_detection: {
               total: 0,
             },
@@ -250,6 +256,7 @@ describe('Model service', () => {
               jvm: 1073741824,
               total: 15599742976,
             },
+            ml_max_in_bytes: 1073741824,
             trained_models: {
               by_model: [
                 {
@@ -272,10 +279,10 @@ describe('Model service', () => {
               total: 1555161790,
             },
           },
+          name: 'node3',
           roles: ['data', 'ingest', 'master', 'ml', 'transform'],
         },
         {
-          name: 'node2',
           allocated_models: [
             {
               allocation_status: {
@@ -283,18 +290,20 @@ describe('Model service', () => {
                 state: 'started',
                 target_allocation_count: 3,
               },
+              deployment_id: 'distilbert-base-uncased-finetuned-sst-2-english',
               inference_threads: 1,
+              key: 'distilbert-base-uncased-finetuned-sst-2-english_node2',
               model_id: 'distilbert-base-uncased-finetuned-sst-2-english',
               model_size_bytes: 267386880,
-              required_native_memory_bytes: 534773760,
               model_threads: 1,
-              state: 'started',
               node: {
                 routing_state: {
                   reason: 'The object cannot be set twice!',
                   routing_state: 'failed',
                 },
               },
+              required_native_memory_bytes: 534773760,
+              state: 'started',
             },
             {
               allocation_status: {
@@ -302,18 +311,20 @@ describe('Model service', () => {
                 state: 'started',
                 target_allocation_count: 3,
               },
+              deployment_id: 'elastic__distilbert-base-cased-finetuned-conll03-english',
               inference_threads: 1,
+              key: 'elastic__distilbert-base-cased-finetuned-conll03-english_node2',
               model_id: 'elastic__distilbert-base-cased-finetuned-conll03-english',
               model_size_bytes: 260947500,
-              required_native_memory_bytes: 521895000,
               model_threads: 1,
-              state: 'started',
               node: {
                 routing_state: {
                   reason: 'The object cannot be set twice!',
                   routing_state: 'failed',
                 },
               },
+              required_native_memory_bytes: 521895000,
+              state: 'started',
             },
             {
               allocation_status: {
@@ -321,18 +332,20 @@ describe('Model service', () => {
                 state: 'started',
                 target_allocation_count: 3,
               },
+              deployment_id: 'sentence-transformers__msmarco-minilm-l-12-v3',
               inference_threads: 1,
+              key: 'sentence-transformers__msmarco-minilm-l-12-v3_node2',
               model_id: 'sentence-transformers__msmarco-minilm-l-12-v3',
               model_size_bytes: 133378867,
-              required_native_memory_bytes: 266757734,
               model_threads: 1,
-              state: 'started',
               node: {
                 routing_state: {
                   reason: 'The object cannot be set twice!',
                   routing_state: 'failed',
                 },
               },
+              required_native_memory_bytes: 266757734,
+              state: 'started',
             },
             {
               allocation_status: {
@@ -340,18 +353,20 @@ describe('Model service', () => {
                 state: 'started',
                 target_allocation_count: 3,
               },
+              deployment_id: 'typeform__mobilebert-uncased-mnli',
               inference_threads: 1,
+              key: 'typeform__mobilebert-uncased-mnli_node2',
               model_id: 'typeform__mobilebert-uncased-mnli',
               model_size_bytes: 100139008,
-              required_native_memory_bytes: 200278016,
               model_threads: 1,
-              state: 'started',
               node: {
                 routing_state: {
                   reason: 'The object cannot be set twice!',
                   routing_state: 'failed',
                 },
               },
+              required_native_memory_bytes: 200278016,
+              state: 'started',
             },
           ],
           attributes: {
@@ -360,7 +375,6 @@ describe('Model service', () => {
           },
           id: 'DpCy7SOBQla3pu0Dq-tnYw',
           memory_overview: {
-            ml_max_in_bytes: 1073741824,
             anomaly_detection: {
               total: 0,
             },
@@ -371,6 +385,7 @@ describe('Model service', () => {
               jvm: 1073741824,
               total: 15599742976,
             },
+            ml_max_in_bytes: 1073741824,
             trained_models: {
               by_model: [
                 {
@@ -393,6 +408,7 @@ describe('Model service', () => {
               total: 1555161790,
             },
           },
+          name: 'node2',
           roles: ['data', 'master', 'ml', 'transform'],
         },
         {
@@ -403,12 +419,12 @@ describe('Model service', () => {
                 state: 'started',
                 target_allocation_count: 3,
               },
+              deployment_id: 'distilbert-base-uncased-finetuned-sst-2-english',
               inference_threads: 1,
+              key: 'distilbert-base-uncased-finetuned-sst-2-english_node1',
               model_id: 'distilbert-base-uncased-finetuned-sst-2-english',
               model_size_bytes: 267386880,
-              required_native_memory_bytes: 534773760,
               model_threads: 1,
-              state: 'started',
               node: {
                 average_inference_time_ms: 0,
                 inference_count: 0,
@@ -416,6 +432,8 @@ describe('Model service', () => {
                   routing_state: 'started',
                 },
               },
+              required_native_memory_bytes: 534773760,
+              state: 'started',
             },
             {
               allocation_status: {
@@ -423,12 +441,12 @@ describe('Model service', () => {
                 state: 'started',
                 target_allocation_count: 3,
               },
+              deployment_id: 'elastic__distilbert-base-cased-finetuned-conll03-english',
               inference_threads: 1,
+              key: 'elastic__distilbert-base-cased-finetuned-conll03-english_node1',
               model_id: 'elastic__distilbert-base-cased-finetuned-conll03-english',
               model_size_bytes: 260947500,
-              required_native_memory_bytes: 521895000,
               model_threads: 1,
-              state: 'started',
               node: {
                 average_inference_time_ms: 0,
                 inference_count: 0,
@@ -436,6 +454,8 @@ describe('Model service', () => {
                   routing_state: 'started',
                 },
               },
+              required_native_memory_bytes: 521895000,
+              state: 'started',
             },
             {
               allocation_status: {
@@ -443,12 +463,12 @@ describe('Model service', () => {
                 state: 'started',
                 target_allocation_count: 3,
               },
+              deployment_id: 'sentence-transformers__msmarco-minilm-l-12-v3',
               inference_threads: 1,
+              key: 'sentence-transformers__msmarco-minilm-l-12-v3_node1',
               model_id: 'sentence-transformers__msmarco-minilm-l-12-v3',
               model_size_bytes: 133378867,
-              required_native_memory_bytes: 266757734,
               model_threads: 1,
-              state: 'started',
               node: {
                 average_inference_time_ms: 0,
                 inference_count: 0,
@@ -456,6 +476,8 @@ describe('Model service', () => {
                   routing_state: 'started',
                 },
               },
+              required_native_memory_bytes: 266757734,
+              state: 'started',
             },
             {
               allocation_status: {
@@ -463,12 +485,12 @@ describe('Model service', () => {
                 state: 'started',
                 target_allocation_count: 3,
               },
+              deployment_id: 'typeform__mobilebert-uncased-mnli',
               inference_threads: 1,
+              key: 'typeform__mobilebert-uncased-mnli_node1',
               model_id: 'typeform__mobilebert-uncased-mnli',
               model_size_bytes: 100139008,
-              required_native_memory_bytes: 200278016,
               model_threads: 1,
-              state: 'started',
               node: {
                 average_inference_time_ms: 0,
                 inference_count: 0,
@@ -476,6 +498,8 @@ describe('Model service', () => {
                   routing_state: 'started',
                 },
               },
+              required_native_memory_bytes: 200278016,
+              state: 'started',
             },
           ],
           attributes: {
@@ -484,7 +508,6 @@ describe('Model service', () => {
           },
           id: 'pt7s6lKHQJaP4QHKtU-Q0Q',
           memory_overview: {
-            ml_max_in_bytes: 1073741824,
             anomaly_detection: {
               total: 0,
             },
@@ -495,6 +518,7 @@ describe('Model service', () => {
               jvm: 1073741824,
               total: 15599742976,
             },
+            ml_max_in_bytes: 1073741824,
             trained_models: {
               by_model: [
                 {

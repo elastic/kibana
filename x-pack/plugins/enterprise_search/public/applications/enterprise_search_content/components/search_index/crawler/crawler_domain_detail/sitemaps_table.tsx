@@ -31,9 +31,15 @@ interface SitemapsTableProps {
   domain: CrawlerDomain;
   indexName: string;
   items: Sitemap[];
+  title?: React.ReactNode;
 }
 
-export const SitemapsTable: React.FC<SitemapsTableProps> = ({ domain, indexName, items }) => {
+export const SitemapsTable: React.FC<SitemapsTableProps> = ({
+  domain,
+  indexName,
+  items,
+  title,
+}) => {
   const { updateSitemaps } = useActions(CrawlerDomainDetailLogic);
   const field = 'url';
 
@@ -113,7 +119,7 @@ export const SitemapsTable: React.FC<SitemapsTableProps> = ({ domain, indexName,
         updateSitemaps(newSitemaps as Sitemap[]);
         clearFlashMessages();
       }}
-      title=""
+      title={title || ''}
       disableReordering
     />
   );

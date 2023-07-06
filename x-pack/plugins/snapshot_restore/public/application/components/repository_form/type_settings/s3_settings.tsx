@@ -76,6 +76,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
     'reduced_redundancy',
     'standard_ia',
     'intelligent_tiering',
+    'onezone_ia',
   ].map((option) => ({
     value: option,
     text: option,

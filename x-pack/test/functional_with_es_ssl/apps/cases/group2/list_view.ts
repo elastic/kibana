@@ -279,7 +279,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('filtering', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/152925
+    describe.skip('filtering', () => {
       const caseTitle = 'matchme';
       const caseIds: string[] = [];
 
@@ -292,6 +293,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const case1 = await cases.api.createCase({
           title: caseTitle,
           tags: ['one'],
+          category: 'foobar',
           description: 'lots of information about an incident',
         });
         const case2 = await cases.api.createCase({ title: 'test2', tags: ['two'] });
@@ -427,6 +429,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await tags.getVisibleText()).to.be('one');
       });
 
+      it('filters cases by category', async () => {
+        await cases.casesTable.filterByCategory('foobar');
+        await cases.casesTable.refreshTable();
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        const row = await cases.casesTable.getCaseByIndex(0);
+        const category = await row.findByTestSubject('case-table-column-category-foobar');
+        expect(await category.getVisibleText()).to.be('foobar');
+      });
+
       it('filters cases by status', async () => {
         await cases.casesTable.changeStatus(CaseStatuses['in-progress'], 0);
         await testSubjects.existOrFail(`case-status-badge-${CaseStatuses['in-progress']}`);
@@ -448,7 +459,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
       });
 
-      describe('assignees filtering', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/152928
+      describe.skip('assignees filtering', () => {
         it('filters cases by the first cases all user assignee', async () => {
           await cases.casesTable.filterByAssignee('all');
           await cases.casesTable.validateCasesTableHasNthRows(1);
@@ -590,8 +602,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/148468
-      // FLAKY: https://github.com/elastic/kibana/issues/148469
+      // FLAKY: https://github.com/elastic/kibana/issues/160622
       describe.skip('Severity', () => {
         before(async () => {
           await cases.api.createNthRandomCases(1);

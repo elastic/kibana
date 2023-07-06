@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit, pickBy, mapValues } from 'lodash';
 import { buildRangeFilter, Filter } from '@kbn/es-query';
 import {
   DataView,
@@ -122,14 +123,25 @@ export function updateSearchSource(
       // add additional filter for documents with a timestamp greater then
       // the timestamp of the previous run, so that those documents are not counted twice
       const field = index.fields.find((f) => f.name === timeFieldName);
-      const addTimeRangeField = buildRangeFilter(field!, { gt: latestTimestamp }, index);
+      const addTimeRangeField = buildRangeFilter(
+        field!,
+        { gt: latestTimestamp, format: 'strict_date_optional_time' },
+        index
+      );
       filters.push(addTimeRangeField);
     }
   }
 
   const searchSourceChild = searchSource.createChild();
   searchSourceChild.setField('filter', filters as Filter[]);
-  searchSourceChild.setField('sort', [{ [timeFieldName]: SortDirection.desc }]);
+  searchSourceChild.setField('sort', [
+    {
+      [timeFieldName]: {
+        order: SortDirection.desc,
+        format: 'strict_date_optional_time||epoch_millis',
+      },
+    },
+  ]);
   searchSourceChild.setField(
     'aggs',
     buildAggregation({
@@ -175,12 +187,15 @@ async function generateLink(
   const updatedFilters = updateFilterReferences(prevFilters, dataViewToUpdate.id!, newDataView.id!);
 
   const redirectUrlParams: DiscoverAppLocatorParams = {
-    dataViewSpec: newDataView.toSpec(false),
+    dataViewSpec: getSmallerDataViewSpec(newDataView),
     filters: updatedFilters,
     query: searchSource.getField('query'),
     timeRange: { from: dateStart, to: dateEnd },
     isAlertResults: true,
   };
+
+  // use `lzCompress` flag for making the link readable during debugging/testing
+  // const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { lzCompress: false });
   const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
   const [start, end] = redirectUrl.split('/app');
 
@@ -188,7 +203,7 @@ async function generateLink(
 }
 
 function updateFilterReferences(filters: Filter[], fromDataView: string, toDataView: string) {
-  return filters.map((filter) => {
+  return (filters || []).map((filter) => {
     if (filter.meta.index === fromDataView) {
       return {
         ...filter,
@@ -201,4 +216,24 @@ function updateFilterReferences(filters: Filter[], fromDataView: string, toDataV
       return filter;
     }
   });
+}
+
+export function getSmallerDataViewSpec(
+  dataView: DataView
+): DiscoverAppLocatorParams['dataViewSpec'] {
+  const dataViewSpec = dataView.toSpec(false);
+
+  if (dataViewSpec.fieldAttrs) {
+    // remove `count` props
+    dataViewSpec.fieldAttrs = pickBy(
+      mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => omit(fieldAttrs, 'count')),
+      (trimmedFieldAttrs) => Object.keys(trimmedFieldAttrs).length > 0
+    );
+
+    if (Object.keys(dataViewSpec.fieldAttrs).length === 0) {
+      dataViewSpec.fieldAttrs = undefined;
+    }
+  }
+
+  return dataViewSpec;
 }

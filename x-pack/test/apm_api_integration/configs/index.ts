@@ -20,6 +20,7 @@ const apmFtrConfigs = {
     kibanaConfig: {
       'xpack.apm.forceSyntheticSource': 'true',
       'logging.loggers': [apmDebugLogger],
+      'server.publicBaseUrl': 'http://mockedPublicBaseUrl',
     },
   },
   trial: {
@@ -33,6 +34,14 @@ const apmFtrConfigs = {
     license: 'trial' as const,
     kibanaConfig: {
       'xpack.ruleRegistry.write.enabled': 'true',
+      'xpack.apm.forceSyntheticSource': 'true',
+      'logging.loggers': [apmDebugLogger],
+    },
+  },
+  cloud: {
+    license: 'basic' as const,
+    kibanaConfig: {
+      'xpack.apm.agent.migrations.enabled': 'true',
       'xpack.apm.forceSyntheticSource': 'true',
       'logging.loggers': [apmDebugLogger],
     },

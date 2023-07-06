@@ -61,6 +61,14 @@ describe('isIncompatibleMappingExceptionError', () => {
       })
     ).toEqual(true);
   });
+  it('returns true for `document_parsing_exception` errors', () => {
+    expect(
+      isIncompatibleMappingException({
+        type: 'document_parsing_exception',
+        reason: 'idk',
+      })
+    ).toEqual(true);
+  });
   it('returns false undefined', () => {
     expect(isIncompatibleMappingException(undefined)).toEqual(false);
   });

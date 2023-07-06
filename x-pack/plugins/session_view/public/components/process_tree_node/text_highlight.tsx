@@ -20,7 +20,6 @@ const css: CSSObject = {
     display: 'inline',
     fontSize: 0,
     lineHeight: 0,
-    verticalAlign: 'middle',
   },
 };
 // Component that takes an array of matching indices in a text and pass down a highlight

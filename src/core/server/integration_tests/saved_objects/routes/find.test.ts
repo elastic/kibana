@@ -21,6 +21,7 @@ import {
   registerFindRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
+import { setupConfig } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -66,9 +67,13 @@ describe('GET /api/saved_objects/_find', () => {
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsFind.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
+
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
-    registerFindRoute(router, { coreUsageData, logger });
+
+    const config = setupConfig();
+
+    registerFindRoute(router, { config, coreUsageData, logger });
 
     await server.start();
   });
@@ -171,6 +176,7 @@ describe('GET /api/saved_objects/_find', () => {
       defaultSearchOperator: 'OR',
       hasReferenceOperator: 'OR',
       hasNoReferenceOperator: 'OR',
+      migrationVersionCompatibility: 'compatible',
     });
   });
 
@@ -181,7 +187,7 @@ describe('GET /api/saved_objects/_find', () => {
 
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
 
-    const options = savedObjectsClient.find.mock.calls[0][0];
+    const [[options]] = savedObjectsClient.find.mock.calls;
     expect(options).toEqual(expect.objectContaining({ perPage: 10, page: 50 }));
   });
 

@@ -74,14 +74,18 @@ export const useSignalHelpers = (): {
           dispatch(sourcererActions.setSourcererDataViews(sourcererDataView));
         }
       } catch (err) {
-        addError(err, {
-          title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
-            defaultMessage: 'Error updating Security Data View',
-          }),
-          toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
-            defaultMessage: 'Refresh the page',
-          }),
-        });
+        if (err.name === 'AbortError') {
+          // the fetch was canceled, we don't need to do anything about it
+        } else {
+          addError(err, {
+            title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
+              defaultMessage: 'Error updating Security Data View',
+            }),
+            toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
+              defaultMessage: 'Refresh the page',
+            }),
+          });
+        }
       }
     };
 

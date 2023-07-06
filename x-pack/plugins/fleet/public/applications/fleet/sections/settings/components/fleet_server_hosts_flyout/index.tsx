@@ -80,7 +80,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
         <EuiCallOut
           size="m"
           color="warning"
-          iconType="alert"
+          iconType="warning"
           title={
             <FormattedMessage
               id="xpack.fleet.settings.fleetServerHostsFlyout.warningCalloutTitle"

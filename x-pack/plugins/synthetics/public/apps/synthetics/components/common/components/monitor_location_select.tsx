@@ -11,8 +11,9 @@ import {
   EuiHealth,
   EuiIcon,
   EuiLink,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiPopover,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState, useCallback } from 'react';
@@ -38,6 +39,7 @@ export const MonitorLocationSelect = ({
   selectedLocation?: ServiceLocation | null;
   monitorLocations?: EncryptedSyntheticsSavedMonitor['locations'];
 }) => {
+  const theme = useEuiTheme();
   const { locations: locationsStatus, loading: loadingLocationsStatus } = useStatusByLocation({
     configId,
     monitorLocations,
@@ -57,8 +59,12 @@ export const MonitorLocationSelect = ({
 
     if (monitorLocations.length > 1 || showSelection) {
       const button = (
-        <EuiLink onClick={openLocationList} disabled={isDisabled}>
-          {selectedLocation.label} <EuiIcon type="arrowDown" />
+        <EuiLink
+          data-test-subj="syntheticsLocationListLink"
+          onClick={openLocationList}
+          disabled={isDisabled}
+        >
+          {selectedLocation.label} {!isDisabled ? <EuiIcon type="arrowDown" /> : null}
         </EuiLink>
       );
 
@@ -71,10 +77,23 @@ export const MonitorLocationSelect = ({
                   <EuiContextMenuItem
                     key={location.label}
                     icon={<EuiHealth color={location.color} />}
-                    onClick={() => {
-                      closeLocationList();
-                      onChange(location.id, location.label);
-                    }}
+                    css={
+                      selectedLocation?.id === location.id
+                        ? {
+                            textDecoration: 'underline',
+                            backgroundColor: theme.euiTheme.colors.lightShade,
+                            pointerEvents: 'none',
+                          }
+                        : undefined
+                    }
+                    onClick={
+                      selectedLocation?.id !== location.id
+                        ? () => {
+                            closeLocationList();
+                            onChange(location.id, location.label);
+                          }
+                        : undefined
+                    }
                   >
                     {location.label}
                   </EuiContextMenuItem>
@@ -112,13 +131,22 @@ export const MonitorLocationSelect = ({
     onChange,
     openLocationList,
     selectedLocation,
+    theme.euiTheme.colors.lightShade,
   ]);
 
   if (!selectedLocation || !monitorLocations) {
+    if (selectedLocation) {
+      return (
+        <EuiDescriptionList
+          compressed={compressed}
+          listItems={[{ title: LOCATION_LABEL, description: selectedLocation?.label }]}
+        />
+      );
+    }
     return (
       <EuiDescriptionList
         compressed={compressed}
-        listItems={[{ title: LOCATION_LABEL, description: <EuiLoadingContent lines={1} /> }]}
+        listItems={[{ title: LOCATION_LABEL, description: <EuiSkeletonText lines={1} /> }]}
       />
     );
   }

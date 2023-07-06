@@ -1,0 +1,38 @@
+steps:
+  - label: 'Pre-Build'
+    command: .buildkite/scripts/lifecycle/pre_build.sh
+    agents:
+      queue: kibana-default
+
+  - wait
+
+  - label: 'Build Kibana Distribution and Plugins'
+    command: .buildkite/scripts/steps/build_kibana.sh
+    agents:
+      queue: n2-16-spot
+    key: build
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - label: ':kibana: APIs Capacity Tests'
+    command: .buildkite/scripts/steps/scalability/api_capacity_testing.sh
+    agents:
+      queue: kb-static-scalability
+    depends_on: build
+    timeout_in_minutes: 90
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - wait: ~
+    continue_on_failure: true
+
+  - label: 'Post-Build'
+    command: .buildkite/scripts/lifecycle/post_build.sh
+    agents:
+      queue: kibana-default

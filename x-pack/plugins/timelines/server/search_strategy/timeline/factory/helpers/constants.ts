@@ -10,6 +10,7 @@ import {
   ALERT_RISK_SCORE,
   ALERT_SEVERITY,
   ALERT_RULE_PARAMETERS,
+  ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-data-utils';
 import { ENRICHMENT_DESTINATION_PATH } from '../../../../../common/constants';
 
@@ -49,7 +50,9 @@ export const CTI_ROW_RENDERER_FIELDS = [
 export const TIMELINE_EVENTS_FIELDS = [
   ALERT_RULE_CONSUMER,
   '@timestamp',
+  'kibana.alert.ancestors.index',
   'kibana.alert.workflow_status',
+  ALERT_WORKFLOW_TAGS,
   'kibana.alert.group.id',
   'kibana.alert.original_time',
   'kibana.alert.reason',
@@ -230,6 +233,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   'process.entry_leader.entity_id',
   'process.entry_leader.name',
   'process.entry_leader.pid',
+  'process.entry_leader.start',
   'process.session_leader.entity_id',
   'process.session_leader.name',
   'process.session_leader.pid',

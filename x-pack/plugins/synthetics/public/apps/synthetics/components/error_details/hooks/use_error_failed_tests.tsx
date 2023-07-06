@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-plugin/public';
+import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
 import { Ping } from '../../../../../../common/runtime_types';
@@ -57,7 +57,8 @@ export function useErrorFailedTests() {
   return useMemo(() => {
     const failedTests =
       data?.hits.hits?.map((doc) => {
-        return doc._source as Ping;
+        const source = doc._source as any;
+        return { ...source, timestamp: source['@timestamp'] } as Ping;
       }) ?? [];
 
     return {

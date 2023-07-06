@@ -6,14 +6,16 @@
  */
 import { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
 import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
-import { Rule, RuleAction, ResolvedRule, RuleLastRun } from '../../../types';
+import type { Rule, RuleAction, ResolvedRule, RuleLastRun } from '../../../types';
 
 const transformAction: RewriteRequestCase<RuleAction> = ({
+  uuid,
   group,
   id,
   connector_type_id: actionTypeId,
   params,
   frequency,
+  alerts_filter: alertsFilter,
 }) => ({
   group,
   id,
@@ -28,6 +30,8 @@ const transformAction: RewriteRequestCase<RuleAction> = ({
         },
       }
     : {}),
+  ...(alertsFilter ? { alertsFilter } : {}),
+  ...(uuid && { uuid }),
 });
 
 const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
@@ -59,6 +63,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   created_at: createdAt,
   updated_at: updatedAt,
   api_key_owner: apiKeyOwner,
+  api_key_created_by_user: apiKeyCreatedByUser,
   notify_when: notifyWhen,
   mute_all: muteAll,
   muted_alert_ids: mutedInstanceIds,
@@ -91,6 +96,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   activeSnoozes,
   ...(lastRun ? { lastRun: transformLastRun(lastRun) } : {}),
   ...(nextRun ? { nextRun } : {}),
+  ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
   ...rest,
 });
 

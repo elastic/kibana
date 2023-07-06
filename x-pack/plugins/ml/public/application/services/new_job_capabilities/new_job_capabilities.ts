@@ -6,7 +6,7 @@
  */
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { Aggregation, Field, NewJobCaps } from '../../../../common/types/fields';
+import type { Aggregation, Field, NewJobCaps } from '@kbn/ml-anomaly-utils';
 
 // create two lists, one removing text fields if there are keyword equivalents and vice versa
 export function processTextAndKeywordFields(fields: Field[]) {
@@ -61,5 +61,9 @@ export class NewJobCapabilitiesServiceBase {
   public getAggById(id: string): Aggregation | null {
     const agg = this._aggs.find((f) => f.id === id);
     return agg === undefined ? null : agg;
+  }
+
+  protected removeCounterFields() {
+    this._fields = this._fields.filter((f) => f.counter === false);
   }
 }

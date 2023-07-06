@@ -9,6 +9,7 @@ import { ScalabilitySetup } from '@kbn/journeys';
 
 export interface ScalabilityJourney {
   journeyName: string;
+  configPath?: string;
   scalabilitySetup: ScalabilitySetup;
   testData?: {
     esArchives: string[];

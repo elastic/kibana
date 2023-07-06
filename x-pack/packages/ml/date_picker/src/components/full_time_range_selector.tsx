@@ -26,7 +26,10 @@ import type { DataView } from '@kbn/data-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDatePickerContext } from '../hooks/use_date_picker_context';
-import { setFullTimeRange } from '../services/full_time_range_selector_service';
+import {
+  setFullTimeRange,
+  type SetFullTimeRangeApiPath,
+} from '../services/full_time_range_selector_service';
 import type { GetTimeFieldRangeResponse } from '../services/types';
 import { FROZEN_TIER_PREFERENCE, type FrozenTierPreference } from '../storage';
 
@@ -64,6 +67,11 @@ export interface FullTimeRangeSelectorProps {
    * @param value - The time field range response.
    */
   callback?: (value: GetTimeFieldRangeResponse) => void;
+  /**
+   * Optional API path.
+   * @param value - The time field range response.
+   */
+  apiPath?: SetFullTimeRangeApiPath;
 }
 
 /**
@@ -83,6 +91,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     query,
     disabled,
     callback,
+    apiPath,
   } = props;
   const {
     http,
@@ -90,43 +99,40 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
   } = useDatePickerContext();
 
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
-  const setRange = useCallback(
-    async (i: DataView, q?: QueryDslQueryContainer, excludeFrozenData?: boolean) => {
-      try {
-        const fullTimeRange = await setFullTimeRange(
-          timefilter,
-          i,
-          toasts,
-          http,
-          q,
-          excludeFrozenData
-        );
-        if (typeof callback === 'function') {
-          callback(fullTimeRange);
-        }
-      } catch (e) {
-        toasts.addDanger(
-          i18n.translate(
-            'xpack.ml.datePicker.fullTimeRangeSelector.errorSettingTimeRangeNotification',
-            {
-              defaultMessage: 'An error occurred setting the time range.',
-            }
-          )
-        );
+  const setRange = useCallback(async () => {
+    try {
+      const fullTimeRange = await setFullTimeRange(
+        timefilter,
+        dataView,
+        toasts,
+        http,
+        query,
+        frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE,
+        apiPath
+      );
+      if (typeof callback === 'function' && fullTimeRange !== undefined) {
+        callback(fullTimeRange);
       }
-    },
-    [callback, http, timefilter, toasts]
-  );
+    } catch (e) {
+      toasts.addDanger(
+        i18n.translate(
+          'xpack.ml.datePicker.fullTimeRangeSelector.errorSettingTimeRangeNotification',
+          {
+            defaultMessage: 'An error occurred setting the time range.',
+          }
+        )
+      );
+    }
+  }, [callback, dataView, frozenDataPreference, http, query, timefilter, toasts, apiPath]);
 
   const [isPopoverOpen, setPopover] = useState(false);
 
   const setPreference = useCallback(
     (id: string) => {
       setFrozenDataPreference(id as FrozenTierPreference);
-      setRange(dataView, query, id === FROZEN_TIER_PREFERENCE.EXCLUDE);
       closePopover();
     },
-    [dataView, query, setFrozenDataPreference, setRange]
+    [setFrozenDataPreference]
   );
 
   const onButtonClick = () => {
@@ -195,7 +201,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
       <EuiToolTip content={buttonTooltip}>
         <EuiButton
           isDisabled={disabled}
-          onClick={() => setRange(dataView, query, true)}
+          onClick={() => setRange()}
           data-test-subj="mlDatePickerButtonUseFullData"
         >
           <FormattedMessage

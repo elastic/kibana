@@ -112,6 +112,7 @@ export const ResultsLinks: FC<Props> = ({
         getAdditionalLinks.map(async (asyncCardGetter) => {
           const results = await asyncCardGetter({
             dataViewId,
+            globalState,
           });
           if (Array.isArray(results)) {
             return await Promise.all(
@@ -268,7 +269,7 @@ export const ResultsLinks: FC<Props> = ({
       </EuiFlexItem>
       {Array.isArray(asyncHrefCards) &&
         asyncHrefCards.map((link) => (
-          <EuiFlexItem>
+          <EuiFlexItem key={link.title}>
             <EuiCard
               icon={<EuiIcon size="xxl" type={link.icon} />}
               data-test-subj="fileDataVisLink"

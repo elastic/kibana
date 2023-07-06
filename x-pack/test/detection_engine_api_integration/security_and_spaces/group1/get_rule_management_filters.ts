@@ -9,11 +9,9 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { RULE_MANAGEMENT_FILTERS_URL } from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/urls';
-import { PREBUILT_RULES_URL } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { deleteAllAlerts, getSimpleRule } from '../../utils';
-import { createPrebuiltRuleAssetSavedObjects } from '../../utils/create_prebuilt_rule_saved_objects';
-import { deleteAllPrebuiltRules } from '../../utils/delete_all_prebuilt_rules';
+import { deleteAllRules, getSimpleRule, installMockPrebuiltRules } from '../../utils';
+import { deleteAllPrebuiltRuleAssets } from '../../utils/prebuilt_rules/delete_all_prebuilt_rule_assets';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -23,7 +21,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('get_rule_management_filters', () => {
     beforeEach(async () => {
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     it('should return the correct result when there are no rules', async () => {
@@ -80,12 +78,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('when there are installed prebuilt rules', () => {
       beforeEach(async () => {
-        await createPrebuiltRuleAssetSavedObjects(es);
-        await supertest.put(PREBUILT_RULES_URL).set('kbn-xsrf', 'true').send().expect(200);
-      });
-
-      afterEach(async () => {
-        await deleteAllPrebuiltRules(es);
+        await deleteAllPrebuiltRuleAssets(es);
+        await installMockPrebuiltRules(supertest, es);
       });
 
       it('should return the correct number of installed prepacked rules after pre-packaged rules have been installed', async () => {

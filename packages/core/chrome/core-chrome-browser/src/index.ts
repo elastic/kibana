@@ -20,10 +20,23 @@ export type {
   ChromeHelpExtensionMenuGitHubLink,
   ChromeGlobalHelpExtensionMenuLink,
 } from './help_extension';
-export type { ChromeNavControls, ChromeNavControl } from './nav_controls';
+export type { ChromeNavControls, ChromeNavControl, ChromeHelpMenuLink } from './nav_controls';
 export type { ChromeNavLinks, ChromeNavLink } from './nav_links';
 export type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
 } from './recently_accessed';
-export type { ChromeBadge, ChromeUserBanner } from './types';
+export type { ChromeBadge, ChromeUserBanner, ChromeStyle } from './types';
+
+export type {
+  ChromeProjectNavigation,
+  ChromeProjectNavigationNode,
+  AppDeepLinkId,
+  AppId,
+  SideNavCompProps,
+  SideNavComponent,
+  ChromeSetProjectBreadcrumbsParams,
+  ChromeProjectBreadcrumb,
+  NodeDefinition,
+  NodeDefinitionWithChildren,
+} from './project_navigation';

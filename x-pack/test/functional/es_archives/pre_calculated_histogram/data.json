@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "index-pattern:histogram-test",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "index-pattern": {
         "title": "histogram-test"

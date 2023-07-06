@@ -41,13 +41,12 @@ export const AnomalyScoresComponent = ({
   } else {
     return (
       <>
-        <EuiFlexGroup gutterSize="none" responsive={false}>
+        <EuiFlexGroup gutterSize="none" responsive={false} data-test-subj="anomaly-scores">
           {getTopSeverityJobs(anomalies.anomalies, limit).map((score, index) => {
             const jobKey = createJobKey(score);
             return (
               <AnomalyScore
                 key={jobKey}
-                jobKey={jobKey}
                 startDate={startDate}
                 endDate={endDate}
                 index={index}

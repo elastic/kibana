@@ -25,8 +25,13 @@ export interface FilterContextType {
   addControl: (controls: FilterItemObj) => void;
 }
 
-export type FilterItemObj = Omit<AddOptionsListControlProps, 'controlId' | 'dataViewId'> &
-  Pick<OptionsListEmbeddableInput, 'existsSelected' | 'exclude'>;
+export type FilterItemObj = Omit<AddOptionsListControlProps, 'controlId' | 'dataViewId'> & {
+  /*
+   * Determines the present and order of a control
+   *
+   * */
+  persist?: boolean;
+};
 
 export type FilterGroupHandler = ControlGroupContainer;
 

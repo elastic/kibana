@@ -29,7 +29,9 @@ export type {
   AlertingApiRequestHandlerContext,
   RuleParamsAndRefs,
   GetSummarizedAlertsFnOpts,
+  SummarizedAlertsChunk,
   ExecutorType,
+  IRuleTypeAlerts,
 } from './types';
 export { RuleNotifyWhen } from '../common';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
@@ -42,6 +44,7 @@ export type {
   BulkEditOptionsFilter,
   BulkEditOptionsIds,
 } from './rules_client';
+export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration, isRuleSnoozed } from './lib';
 export { getEsErrorMessage } from './lib/errors';
@@ -56,13 +59,24 @@ export {
 export {
   DEFAULT_ALERTS_ILM_POLICY,
   DEFAULT_ALERTS_ILM_POLICY_NAME,
-} from './alerts_service/default_lifecycle_policy';
+  ECS_COMPONENT_TEMPLATE_NAME,
+  ECS_CONTEXT,
+  TOTAL_FIELDS_LIMIT,
+  getComponentTemplate,
+  type PublicFrameworkAlertsService,
+  createOrUpdateIlmPolicy,
+  createOrUpdateComponentTemplate,
+  getIndexTemplate,
+  createOrUpdateIndexTemplate,
+  createConcreteWriteIndex,
+  installWithTimeout,
+} from './alerts_service';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
 
 export const config: PluginConfigDescriptor<AlertsConfigType> = {
   schema: configSchema,
-  deprecations: ({ renameFromRoot }) => [
+  deprecations: ({ renameFromRoot, deprecate }) => [
     renameFromRoot('xpack.alerts.healthCheck', 'xpack.alerting.healthCheck', { level: 'warning' }),
     renameFromRoot(
       'xpack.alerts.invalidateApiKeysTask.interval',
@@ -76,6 +90,10 @@ export const config: PluginConfigDescriptor<AlertsConfigType> = {
     ),
     renameFromRoot('xpack.alerting.defaultRuleTaskTimeout', 'xpack.alerting.rules.run.timeout', {
       level: 'warning',
+    }),
+    deprecate('maxEphemeralActionsPerAlert', 'a future version', {
+      level: 'warning',
+      message: `Configuring "xpack.alerting.maxEphemeralActionsPerAlert" is deprecated and will be removed in a future version. Remove this setting to increase action execution resiliency.`,
     }),
   ],
 };

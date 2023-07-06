@@ -14,6 +14,7 @@ import { Status } from '../../../../../common/types/api';
 
 import { IngestPipelineParams } from '../../../../../common/types/connectors';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
+import { KibanaLogic } from '../../../shared/kibana';
 
 import {
   FetchDefaultPipelineApiLogic,
@@ -70,6 +71,7 @@ export const SettingsLogic = kea<MakeLogicType<PipelinesValues, PipelinesActions
   },
   events: ({ actions }) => ({
     afterMount: () => {
+      if (KibanaLogic.values.productFeatures.hasDefaultIngestPipeline === false) return;
       actions.fetchDefaultPipeline(undefined);
     },
   }),

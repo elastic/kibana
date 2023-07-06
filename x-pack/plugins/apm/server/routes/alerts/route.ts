@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { Coordinate } from '../../../typings/timeseries';
 import { getTransactionDurationChartPreview } from './rule_types/transaction_duration/get_transaction_duration_chart_preview';
 import { getTransactionErrorCountChartPreview } from './rule_types/error_count/get_error_count_chart_preview';
 import { getTransactionErrorRateChartPreview } from './rule_types/transaction_error_rate/get_transaction_error_rate_chart_preview';
@@ -22,14 +23,29 @@ const alertParamsRt = t.intersection([
       t.literal(AggregationType.P99),
     ]),
     serviceName: t.string,
+    errorGroupingKey: t.string,
     transactionType: t.string,
+    transactionName: t.string,
   }),
   environmentRt,
   rangeRt,
   t.type({
     interval: t.string,
   }),
+  t.partial({
+    groupBy: t.array(t.string),
+  }),
 ]);
+
+export interface PreviewChartResponseItem {
+  name: string;
+  data: Coordinate[];
+}
+
+export interface PreviewChartResponse {
+  series: PreviewChartResponseItem[];
+  totalGroups: number;
+}
 
 export type AlertParams = t.TypeOf<typeof alertParamsRt>;
 
@@ -39,7 +55,9 @@ const transactionErrorRateChartPreview = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (
     resources
-  ): Promise<{ errorRateChartPreview: Array<{ x: number; y: number }> }> => {
+  ): Promise<{
+    errorRateChartPreview: PreviewChartResponse;
+  }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, config } = resources;
     const { _inspect, ...alertParams } = params.query;
@@ -60,7 +78,9 @@ const transactionErrorCountChartPreview = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (
     resources
-  ): Promise<{ errorCountChartPreview: Array<{ x: number; y: number }> }> => {
+  ): Promise<{
+    errorCountChartPreview: PreviewChartResponse;
+  }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
 
@@ -82,10 +102,7 @@ const transactionDurationChartPreview = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    latencyChartPreview: Array<{
-      name: string;
-      data: Array<{ x: number; y: number | null }>;
-    }>;
+    latencyChartPreview: PreviewChartResponse;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
 
@@ -105,7 +122,6 @@ const transactionDurationChartPreview = createApmServerRoute({
 
 export const alertsChartPreviewRouteRepository = {
   ...transactionErrorRateChartPreview,
-  ...transactionDurationChartPreview,
   ...transactionErrorCountChartPreview,
   ...transactionDurationChartPreview,
 };

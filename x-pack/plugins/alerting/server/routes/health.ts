@@ -30,13 +30,6 @@ const rewriteBodyRes: RewriteResponseCase<AlertingFrameworkHealth> = ({
     execution_health: alertingFrameworkHealth.executionHealth,
     read_health: alertingFrameworkHealth.readHealth,
   },
-  alerting_framework_heath: {
-    // Legacy: pre-v8.0 typo
-    _deprecated: 'This state property has a typo, use "alerting_framework_health" instead.',
-    decryption_health: alertingFrameworkHealth.decryptionHealth,
-    execution_health: alertingFrameworkHealth.executionHealth,
-    read_health: alertingFrameworkHealth.readHealth,
-  },
 });
 
 export const healthRoute = (
@@ -54,7 +47,7 @@ export const healthRoute = (
         try {
           const alertingContext = await context.alerting;
           // Verify that user has access to at least one rule type
-          const ruleTypes = Array.from(await alertingContext.getRulesClient().listAlertTypes());
+          const ruleTypes = Array.from(await alertingContext.getRulesClient().listRuleTypes());
           if (ruleTypes.length > 0) {
             const alertingFrameworkHealth = await alertingContext.getFrameworkHealth();
 

@@ -32,11 +32,11 @@ import { NewsLoadingPrompt } from './loading_news';
 export const NewsfeedFlyout = (props: Partial<EuiFlyoutProps> & { showPlainSpinner: boolean }) => {
   const { newsFetchResult, setFlyoutVisible } = useContext(NewsfeedContext);
   const closeFlyout = useCallback(() => setFlyoutVisible(false), [setFlyoutVisible]);
-
+  const { showPlainSpinner, ...rest } = props;
   return (
     <EuiPortal>
       <EuiFlyout
-        {...props}
+        {...rest}
         onClose={closeFlyout}
         size="s"
         aria-labelledby="flyoutSmallTitle"

@@ -8,7 +8,7 @@
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { getCaseMetrics } from './get_case_metrics';
-import type { CaseResponse } from '../../../common/api';
+import type { Case } from '../../../common/api';
 import { CaseStatuses } from '../../../common/api';
 import type { CasesClientMock } from '../mocks';
 import { createCasesClientMock } from '../mocks';
@@ -21,7 +21,7 @@ import {
 } from '../../services/mocks';
 import { mockAlertsService } from './test_utils/alerts';
 import { createStatusChangeSavedObject } from './test_utils/lifespan';
-import type { CaseSavedObject } from '../../common/types';
+import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
 describe('getCaseMetrics', () => {
   const inProgressStatusChangeTimestamp = new Date('2021-11-23T20:00:43Z');
@@ -164,7 +164,7 @@ function createMockClient() {
     return {
       created_at: '2021-11-23T19:59:43Z',
       closed_at: '2021-11-23T19:59:44Z',
-    } as unknown as CaseResponse;
+    } as unknown as Case;
   });
 
   client.attachments.getAllAlertsAttachToCase.mockImplementation(async () => {
@@ -191,7 +191,7 @@ function createMockClientArgs() {
       attributes: {
         owner: 'security',
       },
-    } as unknown as CaseSavedObject;
+    } as unknown as CaseSavedObjectTransformed;
   });
 
   const alertsService = mockAlertsService();

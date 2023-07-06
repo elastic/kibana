@@ -11,6 +11,7 @@ import type { Filter } from '@kbn/es-query';
 
 export const PLUGIN_ID = 'lens';
 export const APP_ID = 'lens';
+export const LENS_APP_NAME = 'lens';
 export const LENS_EMBEDDABLE_TYPE = 'lens';
 export const DOC_TYPE = 'lens';
 export const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';

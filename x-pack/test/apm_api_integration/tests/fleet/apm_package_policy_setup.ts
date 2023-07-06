@@ -11,7 +11,7 @@ export function setupFleet(bettertest: BetterTest) {
   return bettertest({ pathname: '/api/fleet/setup', method: 'post' });
 }
 
-export async function createAgentPolicy(bettertest: BetterTest) {
+export async function createAgentPolicy(bettertest: BetterTest, id?: string) {
   const agentPolicyResponse = await bettertest<{ item: AgentPolicy }>({
     pathname: '/api/fleet/agent_policies',
     method: 'post',
@@ -19,6 +19,7 @@ export async function createAgentPolicy(bettertest: BetterTest) {
     body: {
       name: 'test_agent_policy',
       description: '',
+      id,
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
     },
@@ -27,7 +28,11 @@ export async function createAgentPolicy(bettertest: BetterTest) {
   return agentPolicyResponse.body.item.id;
 }
 
-export async function createPackagePolicy(bettertest: BetterTest, agentPolicyId: string) {
+export async function createPackagePolicy(
+  bettertest: BetterTest,
+  agentPolicyId: string,
+  id?: string
+) {
   // Get version of available APM package
   const apmPackageResponse = await bettertest<{ item: any }>({
     pathname: `/api/fleet/epm/packages/apm`,
@@ -43,6 +48,7 @@ export async function createPackagePolicy(bettertest: BetterTest, agentPolicyId:
       description: '',
       namespace: 'default',
       policy_id: agentPolicyId,
+      id,
       enabled: true,
       inputs: [{ type: 'apm', policy_template: 'apmserver', enabled: true, streams: [], vars: {} }],
       package: { name: 'apm', title: 'Elastic APM', version: apmPackageVersion },

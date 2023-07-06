@@ -68,7 +68,12 @@ export const OverviewGrid = memo(() => {
 
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline" responsive={false}>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        alignItems="baseline"
+        responsive={false}
+        wrap={true}
+      >
         <EuiFlexItem grow={true}>
           <OverviewPaginationInfo
             page={page}
@@ -126,6 +131,7 @@ export const OverviewGrid = memo(() => {
           {currentMonitors.length === monitors.length && currentMonitors.length > perPage && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="syntheticsOverviewGridButton"
                 onClick={() => window.scrollTo(0, 0)}
                 iconType="sortUp"
                 iconSide="right"

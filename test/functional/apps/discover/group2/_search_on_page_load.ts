@@ -16,7 +16,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const queryBar = getService('queryBar');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'timePicker',
+    'unifiedFieldList',
+  ]);
   const testSubjects = getService('testSubjects');
   const security = getService('security');
   const refreshButtonSelector = 'refreshDataButton';
@@ -72,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should not fetch data from ES initially', async function () {
         expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
-        expect(await PageObjects.discover.doesSidebarShowFields()).to.be(false);
+        expect(await PageObjects.unifiedFieldList.doesSidebarShowFields()).to.be(false);
       });
 
       it('should not fetch on indexPattern change', async function () {
@@ -83,56 +89,56 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
-        expect(await PageObjects.discover.doesSidebarShowFields()).to.be(false);
+        expect(await PageObjects.unifiedFieldList.doesSidebarShowFields()).to.be(false);
       });
 
       it('should fetch data from ES after refreshDataButton click', async function () {
         expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
-        expect(await PageObjects.discover.doesSidebarShowFields()).to.be(false);
+        expect(await PageObjects.unifiedFieldList.doesSidebarShowFields()).to.be(false);
 
         await testSubjects.click(refreshButtonSelector);
         await testSubjects.missingOrFail(refreshButtonSelector);
 
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
-        expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
+        expect(await PageObjects.unifiedFieldList.doesSidebarShowFields()).to.be(true);
       });
 
       it('should fetch data from ES after submit query', async function () {
         expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
-        expect(await PageObjects.discover.doesSidebarShowFields()).to.be(false);
+        expect(await PageObjects.unifiedFieldList.doesSidebarShowFields()).to.be(false);
 
         await queryBar.submitQuery();
         await testSubjects.missingOrFail(refreshButtonSelector);
 
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
-        expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
+        expect(await PageObjects.unifiedFieldList.doesSidebarShowFields()).to.be(true);
       });
 
       it('should fetch data from ES after choosing commonly used time range', async function () {
         await PageObjects.discover.selectIndexPattern('logstash-*');
         expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
-        expect(await PageObjects.discover.doesSidebarShowFields()).to.be(false);
+        expect(await PageObjects.unifiedFieldList.doesSidebarShowFields()).to.be(false);
 
         await PageObjects.timePicker.setCommonlyUsedTime('This_week');
         await testSubjects.missingOrFail(refreshButtonSelector);
 
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
-        expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
+        expect(await PageObjects.unifiedFieldList.doesSidebarShowFields()).to.be(true);
       });
 
       it('should fetch data when a search is saved', async function () {
         await PageObjects.discover.selectIndexPattern('logstash-*');
 
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
-        expect(await PageObjects.discover.doesSidebarShowFields()).to.be(false);
+        expect(await PageObjects.unifiedFieldList.doesSidebarShowFields()).to.be(false);
 
         await PageObjects.discover.saveSearch(savedSearchName);
 
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
-        expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
+        expect(await PageObjects.unifiedFieldList.doesSidebarShowFields()).to.be(true);
       });
 
       it('should reset state after opening a saved search and pressing New', async function () {
@@ -140,20 +146,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.waitFor('number of fetches to be 1', waitForFetches(1));
-        expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
+        expect(await PageObjects.unifiedFieldList.doesSidebarShowFields()).to.be(true);
 
         await testSubjects.click('discoverNewButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
-        expect(await PageObjects.discover.doesSidebarShowFields()).to.be(false);
+        expect(await PageObjects.unifiedFieldList.doesSidebarShowFields()).to.be(false);
       });
     });
 
     it(`when it's true should fetch data from ES initially`, async function () {
       await initSearchOnPageLoad(true);
       await retry.waitFor('number of fetches to be 1', waitForFetches(1));
-      expect(await PageObjects.discover.doesSidebarShowFields()).to.be(true);
+      expect(await PageObjects.unifiedFieldList.doesSidebarShowFields()).to.be(true);
     });
   });
 }

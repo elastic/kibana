@@ -66,7 +66,7 @@ export const getOneOuputHandler: RequestHandler<
   }
 };
 
-export const putOuputHandler: RequestHandler<
+export const putOutputHandler: RequestHandler<
   TypeOf<typeof PutOutputRequestSchema.params>,
   undefined,
   TypeOf<typeof PutOutputRequestSchema.body>
@@ -75,7 +75,7 @@ export const putOuputHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
-    await outputService.update(soClient, request.params.outputId, request.body);
+    await outputService.update(soClient, esClient, request.params.outputId, request.body);
     const output = await outputService.get(soClient, request.params.outputId);
     if (output.is_default || output.is_default_monitoring) {
       await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
@@ -99,7 +99,7 @@ export const putOuputHandler: RequestHandler<
   }
 };
 
-export const postOuputHandler: RequestHandler<
+export const postOutputHandler: RequestHandler<
   undefined,
   undefined,
   TypeOf<typeof PostOutputRequestSchema.body>
@@ -109,7 +109,7 @@ export const postOuputHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
     const { id, ...data } = request.body;
-    const output = await outputService.create(soClient, data, { id });
+    const output = await outputService.create(soClient, esClient, data, { id });
     if (output.is_default || output.is_default_monitoring) {
       await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
     }

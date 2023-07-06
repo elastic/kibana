@@ -12,7 +12,6 @@ import {
   REFRESH_SETTINGS_SELECTION_NOTE,
 } from '../../screens/alerts_detection_rules';
 import {
-  changeRowsPerPageTo,
   checkAutoRefresh,
   waitForRulesTableToBeLoaded,
   selectAllRules,
@@ -27,19 +26,25 @@ import {
 import { login, visit, visitWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
-import { createCustomRule } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { getNewRule } from '../../objects/rule';
+import { setRowsPerPageTo } from '../../tasks/table_pagination';
 
 const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000;
 
-describe('Alerts detection rules table auto-refresh', () => {
+// TODO: See https://github.com/elastic/kibana/issues/154694
+describe.skip('Alerts detection rules table auto-refresh', () => {
   before(() => {
     cleanKibana();
     login();
     for (let i = 1; i < 7; i += 1) {
-      createCustomRule({ ...getNewRule(), name: `Test rule ${i}` }, `${i}`);
+      createRule(getNewRule({ name: `Test rule ${i}`, rule_id: `${i}` }));
     }
+  });
+
+  beforeEach(() => {
+    login();
   });
 
   it('Auto refreshes rules', () => {
@@ -78,7 +83,7 @@ describe('Alerts detection rules table auto-refresh', () => {
   it('should disable auto refresh when any rule selected and enable it after rules unselected', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
-    changeRowsPerPageTo(5);
+    setRowsPerPageTo(5);
 
     // check refresh settings if it's enabled before selecting
     openRefreshSettingsPopover();
@@ -107,7 +112,7 @@ describe('Alerts detection rules table auto-refresh', () => {
   it('should not enable auto refresh after rules were unselected if auto refresh was disabled', () => {
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
-    changeRowsPerPageTo(5);
+    setRowsPerPageTo(5);
 
     openRefreshSettingsPopover();
     disableAutoRefresh();

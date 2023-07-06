@@ -53,7 +53,8 @@ export const FIELD_CONFLICT_INDICES_WARNING_TITLE = i18n.translate(
 export const FIELD_CONFLICT_INDICES_WARNING_DESCRIPTION = i18n.translate(
   'autocomplete.conflictIndicesWarning.description',
   {
-    defaultMessage: 'This field is defined as several types across different indices.',
+    defaultMessage:
+      'This field is defined as different types across the following indices or is unmapped. This can cause unexpected query results.',
   }
 );
 

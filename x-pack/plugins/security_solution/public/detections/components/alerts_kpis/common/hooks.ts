@@ -14,6 +14,7 @@ import type { BrowserField } from '@kbn/timelines-plugin/common';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 import { getScopeFromPath, useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { getAllFieldsByName } from '../../../../common/containers/source';
+import { isLensSupportedType } from '../../../../common/utils/lens';
 
 export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   response: string;
@@ -65,20 +66,22 @@ export function isDataViewFieldSubtypeNested(field: Partial<BrowserField>) {
   return !!subTypeNested?.nested?.path;
 }
 
-export function isKeyword(field: Partial<BrowserField>) {
-  return field.esTypes && field.esTypes?.indexOf('keyword') >= 0;
+export interface GetAggregatableFields {
+  [fieldName: string]: Partial<BrowserField>;
 }
 
 export function getAggregatableFields(
-  fields: {
-    [fieldName: string]: Partial<BrowserField>;
-  },
+  fields: GetAggregatableFields,
   useLensCompatibleFields?: boolean
 ): EuiComboBoxOptionOption[] {
   const result = [];
   for (const [key, field] of Object.entries(fields)) {
     if (useLensCompatibleFields) {
-      if (field.aggregatable === true && isKeyword(field) && !isDataViewFieldSubtypeNested(field)) {
+      if (
+        !!field.aggregatable &&
+        isLensSupportedType(field.type) &&
+        !isDataViewFieldSubtypeNested(field)
+      ) {
         result.push({ label: key, value: key });
       }
     } else {

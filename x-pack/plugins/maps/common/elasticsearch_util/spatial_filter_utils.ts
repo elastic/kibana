@@ -5,18 +5,36 @@
  * 2.0.
  */
 
+import type {
+  GeoShapeRelation,
+  QueryDslFieldLookup,
+  QueryDslGeoBoundingBoxQuery,
+  QueryDslGeoDistanceQuery,
+  QueryDslGeoShapeFieldQuery,
+  QueryDslGeoShapeQuery,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { Feature, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
 // @ts-expect-error
 import turfCircle from '@turf/circle';
-import { FilterMeta, FILTERS } from '@kbn/es-query';
+import { Filter, FilterMeta, FILTERS } from '@kbn/es-query';
 import { MapExtent } from '../descriptor_types';
-import { ES_SPATIAL_RELATIONS } from '../constants';
 import { getEsSpatialRelationLabel } from '../i18n_getters';
-import { GeoFilter, GeoShapeQueryBody, PreIndexedShape } from './types';
 import { makeESBbox } from './elasticsearch_geo_utils';
 
 const SPATIAL_FILTER_TYPE = FILTERS.SPATIAL_FILTER;
+
+type GeoFilter = Filter & {
+  geo_bounding_box?: QueryDslGeoBoundingBoxQuery;
+  geo_distance?: QueryDslGeoDistanceQuery;
+  geo_grid?: {
+    [geoFieldName: string]: {
+      geohex?: string;
+      geotile?: string;
+    };
+  };
+  geo_shape?: QueryDslGeoShapeQuery;
+};
 
 // wrapper around boiler plate code for creating bool.should clause with nested bool.must clauses
 // ensuring geoField exists prior to running geoField query
@@ -34,7 +52,7 @@ function createMultiGeoFieldFilter(
     return {
       meta: {
         ...meta,
-        key: geoFieldNames[0],
+        isMultiIndex: true,
       },
       query: {
         bool: {
@@ -54,7 +72,6 @@ function createMultiGeoFieldFilter(
   return {
     meta: {
       ...meta,
-      key: undefined,
       isMultiIndex: true,
     },
     query: {
@@ -103,24 +120,23 @@ export function buildGeoShapeFilter({
   geometry,
   geometryLabel,
   geoFieldNames,
-  relation = ES_SPATIAL_RELATIONS.INTERSECTS,
+  relation = 'intersects',
 }: {
-  preIndexedShape?: PreIndexedShape | null;
+  preIndexedShape?: QueryDslFieldLookup | null;
   geometry?: MultiPolygon | Polygon;
   geometryLabel: string;
   geoFieldNames: string[];
-  relation?: ES_SPATIAL_RELATIONS;
+  relation?: GeoShapeRelation;
 }): GeoFilter {
   const meta: FilterMeta = {
     type: SPATIAL_FILTER_TYPE,
     negate: false,
-    key: geoFieldNames.length === 1 ? geoFieldNames[0] : undefined,
     alias: `${getEsSpatialRelationLabel(relation)} ${geometryLabel}`,
     disabled: false,
   };
 
   function createGeoFilter(geoFieldName: string) {
-    const shapeQuery: GeoShapeQueryBody = {
+    const shapeQuery: QueryDslGeoShapeFieldQuery = {
       relation,
     };
     if (preIndexedShape) {
@@ -139,9 +155,6 @@ export function buildGeoShapeFilter({
     };
   }
 
-  // Currently no way to create an object with exclude property from index signature
-  // typescript error for "ignore_unmapped is not assignable to type 'GeoShapeQueryBody'" expected"
-  // @ts-expect-error
   return createMultiGeoFieldFilter(geoFieldNames, meta, createGeoFilter);
 }
 
@@ -159,7 +172,6 @@ export function buildGeoGridFilter({
     {
       type: SPATIAL_FILTER_TYPE,
       negate: false,
-      key: geoFieldNames.length === 1 ? geoFieldNames[0] : undefined,
       alias: i18n.translate('xpack.maps.common.esSpatialRelation.clusterFilterLabel', {
         defaultMessage: 'intersects cluster {gridId}',
         values: { gridId },
@@ -217,14 +229,19 @@ export function createDistanceFilterWithMeta({
 
 function extractGeometryFromFilter(geoFieldName: string, filter: GeoFilter): Geometry | undefined {
   if (filter.geo_distance && filter.geo_distance[geoFieldName]) {
+    // @ts-expect-error QueryDslGeoDistanceQuery incorrectly types distance as optional
     const distanceSplit = filter.geo_distance.distance.split('km');
     const distance = parseFloat(distanceSplit[0]);
     const circleFeature = turfCircle(filter.geo_distance[geoFieldName], distance);
     return circleFeature.geometry;
   }
 
-  if (filter.geo_shape && filter.geo_shape[geoFieldName] && filter.geo_shape[geoFieldName].shape) {
-    return filter.geo_shape[geoFieldName].shape;
+  if (
+    filter.geo_shape &&
+    filter.geo_shape[geoFieldName] &&
+    (filter.geo_shape[geoFieldName] as QueryDslGeoShapeFieldQuery).shape
+  ) {
+    return (filter.geo_shape[geoFieldName] as QueryDslGeoShapeFieldQuery).shape;
   }
 }
 
@@ -236,18 +253,13 @@ export function extractFeaturesFromFilters(filters: GeoFilter[]): Feature[] {
     })
     .forEach((filter) => {
       let geometry: Geometry | undefined;
-      if (filter.meta.isMultiIndex) {
-        const geoFieldName = filter?.query?.bool?.should?.[0]?.bool?.must?.[0]?.exists?.field;
-        const spatialClause = filter?.query?.bool?.should?.[0]?.bool?.must?.[1];
-        if (geoFieldName && spatialClause) {
-          geometry = extractGeometryFromFilter(geoFieldName, spatialClause);
-        }
-      } else {
-        const geoFieldName = filter.meta.key;
-        const spatialClause = filter?.query?.bool?.must?.[1];
-        if (geoFieldName && spatialClause) {
-          geometry = extractGeometryFromFilter(geoFieldName, spatialClause);
-        }
+      const must = filter?.query?.bool?.should?.length
+        ? filter?.query?.bool?.should?.[0]?.bool?.must
+        : filter?.query?.bool?.must;
+      const geoFieldName = must?.[0]?.exists?.field;
+      const spatialClause = must?.[1];
+      if (geoFieldName && spatialClause) {
+        geometry = extractGeometryFromFilter(geoFieldName, spatialClause);
       }
 
       if (geometry) {

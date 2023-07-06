@@ -208,7 +208,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
   } = props;
 
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
-  const [currentlyOpenNotify, setCurrentlyOpenNotify] = useState<string>();
   const [isLoadingMap, setIsLoadingMap] = useState<Record<string, boolean>>({});
 
   const isRuleUsingExecutionStatus = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
@@ -342,7 +341,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         ),
         sortable: true,
         truncateText: true,
-        width: '25%',
+        width: '22%',
         'data-test-subj': 'rulesTableCell-name',
         render: (name: string, rule: RuleTableItem) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
@@ -485,12 +484,9 @@ export const RulesListTable = (props: RulesListTableProps) => {
           return (
             <RulesListNotifyBadge
               showOnHover
-              rule={rule}
-              isLoading={!!isLoadingMap[rule.id]}
-              onLoading={(newIsLoading) => onLoading(rule.id, newIsLoading)}
-              isOpen={currentlyOpenNotify === rule.id}
-              onClick={() => setCurrentlyOpenNotify(rule.id)}
-              onClose={() => setCurrentlyOpenNotify('')}
+              snoozeSettings={rule}
+              loading={!!isLoadingMap[rule.id]}
+              disabled={!rule.isEditable}
               onRuleChanged={onRuleChanged}
               snoozeRule={async (snoozeSchedule) => {
                 await onSnoozeRule(rule, snoozeSchedule);
@@ -769,7 +765,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
     ];
   }, [
     config.minimumScheduleInterval,
-    currentlyOpenNotify,
     isLoadingMap,
     isRuleTypeEditableInContext,
     onRuleChanged,

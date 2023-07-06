@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { data, MockTelemetryFindings } from './data';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -26,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
       log.debug('Check CSP plugin is initialized');
       const response = await supertest
         .get('/internal/cloud_security_posture/status?check=init')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .expect(200);
       expect(response.body).to.eql({ isPluginInitialized: true });
       log.debug('CSP plugin is initialized');
@@ -82,6 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
           failed_findings_count: 0,
           benchmark_name: 'CIS Kubernetes V1.23',
           benchmark_id: 'cis_k8s',
+          kubernetes_version: 'v1.23.0',
           benchmark_version: 'v1.0.0',
           agents_count: 2,
           nodes_count: 2,
@@ -134,6 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
           benchmark_name: 'CIS Amazon Web Services Foundations',
           benchmark_id: 'cis_aws',
           benchmark_version: 'v1.5.0',
+          kubernetes_version: null,
           agents_count: 1,
           nodes_count: 1,
           pods_count: 0,
@@ -178,6 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
           benchmark_name: 'CIS Amazon Web Services Foundations',
           benchmark_id: 'cis_aws',
           benchmark_version: 'v1.5.0',
+          kubernetes_version: null,
           agents_count: 1,
           nodes_count: 1,
           pods_count: 0,
@@ -191,6 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
           benchmark_name: 'CIS Kubernetes V1.23',
           benchmark_id: 'cis_k8s',
           benchmark_version: 'v1.0.0',
+          kubernetes_version: 'v1.23.0',
           agents_count: 2,
           nodes_count: 2,
           pods_count: 0,
@@ -228,7 +234,7 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
     });
 
-    it('includes only KSPM findings without posture_type', async () => {
+    it(`'includes only KSPM findings without posture_type'`, async () => {
       await index.add(data.kspmFindingsNoPostureType);
 
       const {
@@ -252,6 +258,7 @@ export default function ({ getService }: FtrProviderContext) {
           benchmark_name: 'CIS Kubernetes V1.23',
           benchmark_id: 'cis_k8s',
           benchmark_version: 'v1.0.0',
+          kubernetes_version: 'v1.23.0',
           agents_count: 2,
           nodes_count: 2,
           pods_count: 0,
@@ -305,6 +312,7 @@ export default function ({ getService }: FtrProviderContext) {
           benchmark_name: 'CIS Amazon Web Services Foundations',
           benchmark_id: 'cis_aws',
           benchmark_version: 'v1.5.0',
+          kubernetes_version: null,
           agents_count: 1,
           nodes_count: 1,
           pods_count: 0,
@@ -318,6 +326,7 @@ export default function ({ getService }: FtrProviderContext) {
           benchmark_name: 'CIS Kubernetes V1.23',
           benchmark_id: 'cis_k8s',
           benchmark_version: 'v1.0.0',
+          kubernetes_version: 'v1.23.0',
           agents_count: 2,
           nodes_count: 2,
           pods_count: 0,

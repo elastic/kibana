@@ -28,7 +28,9 @@
       "taskManager",
       "triggersActionsUi",
       "uiActions",
-      "unifiedSearch"
+      "unifiedSearch",
+      "savedObjectsManagement",
+      "savedSearch"
     ],
     "optionalPlugins": [
       "alerting",
@@ -52,10 +54,8 @@
       "kibanaUtils",
       "lens",
       "maps",
-      "savedObjects",
-      "savedSearch",
+      "savedObjectsFinder",
       "usageCollection",
-      "unifiedFieldList",
       "unifiedSearch"
     ],
     "extraPublicDirs": [

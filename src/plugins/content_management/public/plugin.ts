@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreStart, Plugin } from '@kbn/core/public';
 import {
   ContentManagementPublicStart,
   ContentManagementPublicSetup,
   SetupDependencies,
   StartDependencies,
 } from './types';
-import type { ContentClient } from './content_client';
-import type { ContentTypeRegistry } from './registry';
+import { ContentClient } from './content_client';
+import { ContentTypeRegistry } from './registry';
+import { RpcClient } from './rpc_client';
 
 export class ContentManagementPlugin
   implements
@@ -25,21 +26,33 @@ export class ContentManagementPlugin
       StartDependencies
     >
 {
-  public setup(core: CoreSetup, deps: SetupDependencies) {
-    // don't actually expose the client and the registry until it is used to avoid increasing bundle size
+  private contentTypeRegistry: ContentTypeRegistry;
+
+  constructor() {
+    this.contentTypeRegistry = new ContentTypeRegistry();
+  }
+
+  public setup() {
     return {
-      registry: {} as ContentTypeRegistry,
+      registry: {
+        register: this.contentTypeRegistry.register.bind(this.contentTypeRegistry),
+      },
     };
   }
 
   public start(core: CoreStart, deps: StartDependencies) {
-    // don't actually expose the client and the registry until it is used to avoid increasing bundle size
-    // const rpcClient = new RpcClient(core.http);
-    // const contentTypeRegistry = new ContentTypeRegistry();
-    // const contentClient = new ContentClient(
-    //   (contentType) => contentTypeRegistry.get(contentType)?.crud() ?? rpcClient
-    // );
-    // return { client: contentClient, registry: contentTypeRegistry };
-    return { client: {} as ContentClient, registry: {} as ContentTypeRegistry };
+    const rpcClient = new RpcClient(core.http);
+
+    const contentClient = new ContentClient((contentType) => {
+      if (!contentType) return rpcClient;
+      return this.contentTypeRegistry.get(contentType)?.crud ?? rpcClient;
+    }, this.contentTypeRegistry);
+    return {
+      client: contentClient,
+      registry: {
+        get: this.contentTypeRegistry.get.bind(this.contentTypeRegistry),
+        getAll: this.contentTypeRegistry.getAll.bind(this.contentTypeRegistry),
+      },
+    };
   }
 }

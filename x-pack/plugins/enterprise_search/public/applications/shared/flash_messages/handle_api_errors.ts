@@ -33,7 +33,7 @@ interface Options {
   isQueued?: boolean;
 }
 
-export const defaultErrorMessage = i18n.translate(
+export const defaultErrorMessage: string = i18n.translate(
   'xpack.enterpriseSearch.shared.flashMessages.defaultErrorMessage',
   {
     defaultMessage: 'An unexpected error occurred',

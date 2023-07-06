@@ -13,19 +13,20 @@ import { InlineActions } from './inline_actions';
 import { CellActionExecutionContext } from '../types';
 import { CellActionsProvider } from '../context';
 
+const defaultProps = {
+  anchorPosition: 'rightCenter' as const,
+  disabledActionTypes: [],
+  visibleCellActions: 5,
+  actionContext: { trigger: { id: 'triggerId' } } as CellActionExecutionContext,
+  showActionTooltips: false,
+};
 describe('InlineActions', () => {
-  const actionContext = { trigger: { id: 'triggerId' } } as CellActionExecutionContext;
   it('renders', async () => {
     const getActionsPromise = Promise.resolve([]);
     const getActions = () => getActionsPromise;
     const { queryByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <InlineActions
-          disabledActionTypes={[]}
-          visibleCellActions={5}
-          actionContext={actionContext}
-          showActionTooltips={false}
-        />
+        <InlineActions {...defaultProps} />
       </CellActionsProvider>
     );
 
@@ -47,12 +48,7 @@ describe('InlineActions', () => {
     const getActions = () => getActionsPromise;
     const { queryAllByRole } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
-        <InlineActions
-          disabledActionTypes={[]}
-          visibleCellActions={5}
-          actionContext={actionContext}
-          showActionTooltips={false}
-        />
+        <InlineActions {...defaultProps} />
       </CellActionsProvider>
     );
 

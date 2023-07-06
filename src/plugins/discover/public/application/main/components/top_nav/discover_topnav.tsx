@@ -6,23 +6,20 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
+import { useDiscoverCustomization } from '../../../../customizations';
 
-export type DiscoverTopNavProps = Pick<
-  DiscoverLayoutProps,
-  'navigateTo' | 'savedSearch' | 'searchSource'
-> & {
+export interface DiscoverTopNavProps {
   onOpenInspector: () => void;
   query?: Query | AggregateQuery;
   savedQuery?: string;
@@ -31,16 +28,10 @@ export type DiscoverTopNavProps = Pick<
     isUpdate?: boolean
   ) => void;
   stateContainer: DiscoverStateContainer;
-  resetSavedSearch: () => void;
-  onChangeDataView: (dataView: string) => void;
-  onDataViewCreated: (dataView: DataView) => void;
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
   onFieldEdited: () => Promise<void>;
-  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
-  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
-  updateDataViewList: (newAdHocDataViews: DataView[]) => void;
-};
+}
 
 export const DiscoverTopNav = ({
   onOpenInspector,
@@ -48,27 +39,21 @@ export const DiscoverTopNav = ({
   savedQuery,
   stateContainer,
   updateQuery,
-  searchSource,
-  navigateTo,
-  savedSearch,
-  resetSavedSearch,
-  onChangeDataView,
-  onDataViewCreated,
   isPlainRecord,
   textBasedLanguageModeErrors,
   onFieldEdited,
-  persistDataView,
-  updateAdHocDataViewId,
-  updateDataViewList,
 }: DiscoverTopNavProps) => {
-  const history = useHistory();
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
-  const showDatePicker = useMemo(
-    () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
-    [dataView]
-  );
+  const savedSearch = useSavedSearchInitial();
+  const showDatePicker = useMemo(() => {
+    // always show the timepicker for text based languages
+    return (
+      isPlainRecord ||
+      (!isPlainRecord && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
+    );
+  }, [dataView, isPlainRecord]);
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, dataViews } = services;
 
@@ -79,17 +64,6 @@ export const DiscoverTopNav = ({
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   const { AggregateQueryTopNavMenu } = navigation.ui;
-
-  const onOpenSavedSearch = useCallback(
-    (newSavedSearchId: string) => {
-      if (savedSearch.id && savedSearch.id === newSavedSearchId) {
-        resetSavedSearch();
-      } else {
-        history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
-      }
-    },
-    [history, resetSavedSearch, savedSearch.id]
-  );
 
   useEffect(() => {
     return () => {
@@ -131,57 +105,31 @@ export const DiscoverTopNav = ({
 
   const createNewDataView = useCallback(() => {
     closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: onDataViewCreated,
+      onSave: stateContainer.actions.onDataViewCreated,
       allowAdHocDataView: true,
     });
-  }, [dataViewEditor, onDataViewCreated]);
+  }, [dataViewEditor, stateContainer]);
 
-  const onCreateDefaultAdHocDataView = useCallback(
-    async (pattern: string) => {
-      const newDataView = await dataViews.create({
-        title: pattern,
-      });
-      if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
-        newDataView.timeFieldName = '@timestamp';
-      }
-
-      stateContainer.actions.appendAdHocDataViews(newDataView);
-      onChangeDataView(newDataView.id!);
-    },
-    [dataViews, onChangeDataView, stateContainer.actions]
-  );
-
+  const topNavCustomization = useDiscoverCustomization('top_nav');
   const topNavMenu = useMemo(
     () =>
       getTopNavLinks({
         dataView,
-        navigateTo,
-        savedSearch,
         services,
         state: stateContainer,
         onOpenInspector,
-        searchSource,
-        onOpenSavedSearch,
         isPlainRecord,
         adHocDataViews,
-        updateDataViewList,
-        persistDataView,
-        updateAdHocDataViewId,
+        topNavCustomization,
       }),
     [
+      adHocDataViews,
       dataView,
-      navigateTo,
-      savedSearch,
+      isPlainRecord,
+      onOpenInspector,
       services,
       stateContainer,
-      onOpenInspector,
-      searchSource,
-      onOpenSavedSearch,
-      isPlainRecord,
-      adHocDataViews,
-      persistDataView,
-      updateAdHocDataViewId,
-      updateDataViewList,
+      topNavCustomization,
     ]
   );
 
@@ -192,16 +140,16 @@ export const DiscoverTopNav = ({
       dataViews.clearInstanceCache(editedDataView.id);
       stateContainer.actions.setDataView(await dataViews.create(editedDataView.toSpec(), true));
     } else {
-      await updateAdHocDataViewId(editedDataView);
+      await stateContainer.actions.updateAdHocDataViewId();
     }
     stateContainer.actions.loadDataViewList();
     stateContainer.dataState.fetch();
   };
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
-    const { appState, setAppState } = stateContainer;
+    const { appState } = stateContainer;
     if (newSavedQueryId) {
-      setAppState({ savedQuery: newSavedQueryId });
+      appState.update({ savedQuery: newSavedQueryId });
     } else {
       // remove savedQueryId from state
       const newState = {
@@ -228,8 +176,8 @@ export const DiscoverTopNav = ({
     currentDataViewId: dataView?.id,
     onAddField: addField,
     onDataViewCreated: createNewDataView,
-    onCreateDefaultAdHocDataView,
-    onChangeDataView,
+    onCreateDefaultAdHocDataView: stateContainer.actions.onCreateDefaultAdHocDataView,
+    onChangeDataView: stateContainer.actions.onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
     adHocDataViews,
     savedDataViews,
@@ -239,18 +187,17 @@ export const DiscoverTopNav = ({
   const onTextBasedSavedAndExit = useCallback(
     ({ onSave, onCancel }) => {
       onSaveSearch({
-        savedSearch,
+        savedSearch: stateContainer.savedSearchState.getState(),
         services,
-        dataView,
-        navigateTo,
         state: stateContainer,
         onClose: onCancel,
         onSaveCb: onSave,
-        updateAdHocDataViewId,
       });
     },
-    [dataView, navigateTo, savedSearch, services, stateContainer, updateAdHocDataViewId]
+    [services, stateContainer]
   );
+
+  const searchBarCustomization = useDiscoverCustomization('search_bar');
 
   return (
     <AggregateQueryTopNavMenu
@@ -267,7 +214,14 @@ export const DiscoverTopNav = ({
       showSaveQuery={!isPlainRecord && Boolean(services.capabilities.discover.saveQuery)}
       showSearchBar={true}
       useDefaultBehaviors={true}
-      dataViewPickerComponentProps={dataViewPickerProps}
+      dataViewPickerOverride={
+        searchBarCustomization?.CustomDataViewPicker ? (
+          <searchBarCustomization.CustomDataViewPicker />
+        ) : undefined
+      }
+      dataViewPickerComponentProps={
+        searchBarCustomization?.CustomDataViewPicker ? undefined : dataViewPickerProps
+      }
       displayStyle="detached"
       textBasedLanguageModeErrors={
         textBasedLanguageModeErrors ? [textBasedLanguageModeErrors] : undefined

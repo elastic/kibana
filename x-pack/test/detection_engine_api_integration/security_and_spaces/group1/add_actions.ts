@@ -11,14 +11,14 @@ import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteAllAlerts,
-  deleteSignalsIndex,
+  deleteAllRules,
   removeServerGeneratedProperties,
   getWebHookAction,
   getRuleWithWebHookAction,
   getSimpleRuleOutputWithWebHookAction,
-  waitForRuleSuccessOrStatus,
+  waitForRuleSuccess,
   createRule,
+  deleteAllAlerts,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -26,6 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
+  const es = getService('es');
 
   describe('add_actions', () => {
     describe('adding actions', () => {
@@ -42,8 +43,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
       });
 
       it('should be able to create a new webhook action and attach it to a rule', async () => {
@@ -57,7 +58,10 @@ export default ({ getService }: FtrProviderContext) => {
         const rule = await createRule(supertest, log, getRuleWithWebHookAction(hookAction.id));
         const bodyToCompare = removeServerGeneratedProperties(rule);
         expect(bodyToCompare).to.eql(
-          getSimpleRuleOutputWithWebHookAction(`${bodyToCompare?.actions?.[0].id}`)
+          getSimpleRuleOutputWithWebHookAction(
+            `${bodyToCompare?.actions?.[0].id}`,
+            `${bodyToCompare?.actions?.[0].uuid}`
+          )
         );
       });
 
@@ -74,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
           log,
           getRuleWithWebHookAction(hookAction.id, true)
         );
-        await waitForRuleSuccessOrStatus(supertest, log, rule.id);
+        await waitForRuleSuccess({ supertest, log, id: rule.id });
       });
 
       it('should be able to create a new webhook action and attach it to a rule with a meta field and run it correctly', async () => {
@@ -92,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const rule = await createRule(supertest, log, ruleWithAction);
-        await waitForRuleSuccessOrStatus(supertest, log, rule.id);
+        await waitForRuleSuccess({ supertest, log, id: rule.id });
       });
     });
   });

@@ -11,7 +11,7 @@ import {
   IKibanaSearchResponse,
   isCompleteResponse,
 } from '@kbn/data-plugin/common';
-import { useKibana } from '../../../hooks';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useSourcererDataView } from './use_sourcerer_data_view';
 import type { RawIndicatorsResponse } from '../services/fetch_indicators';
 

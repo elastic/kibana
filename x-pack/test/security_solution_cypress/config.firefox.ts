@@ -6,10 +6,10 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 
-import { SecuritySolutionCypressCliFirefoxTestRunner } from './runner';
+import type { FtrProviderContext } from './runner';
+import { SecuritySolutionConfigurableCypressTestRunner } from './runner';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
@@ -47,6 +47,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ],
     },
 
-    testRunner: SecuritySolutionCypressCliFirefoxTestRunner,
+    testRunner: (context: FtrProviderContext) =>
+      SecuritySolutionConfigurableCypressTestRunner(context),
   };
 }

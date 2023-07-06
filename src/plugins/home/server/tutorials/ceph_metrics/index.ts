@@ -56,6 +56,6 @@ export function cephMetricsSpecProvider(context: TutorialContext): TutorialSchem
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['network', 'security'],
+    integrationBrowserCategories: ['observability', 'datastore'],
   };
 }

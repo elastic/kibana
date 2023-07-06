@@ -553,6 +553,48 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
+            "id": "def-common.ConditionalType.extendsDeep",
+            "type": "Function",
+            "tags": [],
+            "label": "extendsDeep",
+            "description": [],
+            "signature": [
+              "(options: ",
+              "ExtendsDeepOptions",
+              ") => ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ConditionalType",
+                "text": "ConditionalType"
+              },
+              "<A, B, C>"
+            ],
+            "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-common.ConditionalType.extendsDeep.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ExtendsDeepOptions"
+                ],
+                "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/config-schema",
             "id": "def-common.ConditionalType.handleError",
             "type": "Function",
             "tags": [],
@@ -747,6 +789,48 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/config-schema",
+            "id": "def-common.ObjectType.extendsDeep",
+            "type": "Function",
+            "tags": [],
+            "label": "extendsDeep",
+            "description": [],
+            "signature": [
+              "(options: ",
+              "ExtendsDeepOptions",
+              ") => ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ObjectType",
+                "text": "ObjectType"
+              },
+              "<P>"
+            ],
+            "path": "packages/kbn-config-schema/src/types/object_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-common.ObjectType.extendsDeep.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ExtendsDeepOptions"
+                ],
+                "path": "packages/kbn-config-schema/src/types/object_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -1028,6 +1112,48 @@
                 "signature": [
                   "TypeOptions",
                   "<V>"
+                ],
+                "path": "packages/kbn-config-schema/src/types/type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/config-schema",
+            "id": "def-common.Type.extendsDeep",
+            "type": "Function",
+            "tags": [],
+            "label": "extendsDeep",
+            "description": [],
+            "signature": [
+              "(newOptions: ",
+              "ExtendsDeepOptions",
+              ") => ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.Type",
+                "text": "Type"
+              },
+              "<V>"
+            ],
+            "path": "packages/kbn-config-schema/src/types/type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-common.Type.extendsDeep.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "newOptions",
+                "description": [],
+                "signature": [
+                  "ExtendsDeepOptions"
                 ],
                 "path": "packages/kbn-config-schema/src/types/type.ts",
                 "deprecated": false,

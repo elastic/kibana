@@ -13,7 +13,7 @@ import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { formatFieldValue } from '../../../utils/format_value';
-import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
+import { DocViewRenderProps } from '../../../services/doc_views/doc_views_types';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
 import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
@@ -31,26 +31,32 @@ export interface TableRowProps {
   columns: string[];
   filter: DocViewFilterFn;
   filters?: Filter[];
+  isPlainRecord?: boolean;
   savedSearchId?: string;
   row: DataTableRecord;
+  rows: DataTableRecord[];
   dataView: DataView;
   useNewFieldsApi: boolean;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   onAddColumn?: (column: string) => void;
   onRemoveColumn?: (column: string) => void;
+  DocViewer: React.ComponentType<DocViewRenderProps>;
 }
 
 export const TableRow = ({
   filters,
+  isPlainRecord,
   columns,
   filter,
   savedSearchId,
   row,
+  rows,
   dataView,
   useNewFieldsApi,
   shouldShowFieldHandler,
   onAddColumn,
   onRemoveColumn,
+  DocViewer,
 }: TableRowProps) => {
   const { uiSettings, fieldFormats } = useDiscoverServices();
   const [maxEntries, hideTimeColumn] = useMemo(
@@ -151,7 +157,8 @@ export const TableRow = ({
       />
     );
   } else {
-    columns.forEach(function (column: string) {
+    columns.forEach(function (column: string, index) {
+      const cellKey = `${column}-${index}`;
       if (useNewFieldsApi && !mapping(column) && row.raw.fields && !row.raw.fields[column]) {
         const innerColumns = Object.fromEntries(
           Object.entries(row.raw.fields).filter(([key]) => {
@@ -161,7 +168,7 @@ export const TableRow = ({
 
         rowCells.push(
           <TableCell
-            key={column}
+            key={cellKey}
             timefield={false}
             sourcefield={true}
             formatted={formatTopLevelObject(row, innerColumns, dataView, maxEntries)}
@@ -180,7 +187,7 @@ export const TableRow = ({
         );
         rowCells.push(
           <TableCell
-            key={column}
+            key={cellKey}
             timefield={false}
             sourcefield={column === '_source'}
             formatted={displayField(column)}
@@ -209,6 +216,7 @@ export const TableRow = ({
             columns={columns}
             filters={filters}
             savedSearchId={savedSearchId}
+            isPlainRecord={isPlainRecord}
           >
             <DocViewer
               columns={columns}
@@ -217,6 +225,7 @@ export const TableRow = ({
               dataView={dataView}
               onAddColumn={onAddColumn}
               onRemoveColumn={onRemoveColumn}
+              textBasedHits={isPlainRecord ? rows : undefined}
             />
           </TableRowDetails>
         )}

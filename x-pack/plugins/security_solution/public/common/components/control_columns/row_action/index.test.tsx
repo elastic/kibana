@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TableId } from '../../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { RowAction } from '.';
@@ -40,7 +40,7 @@ describe('RowAction', () => {
   const defaultProps = {
     columnHeaders: defaultHeaders,
     controlColumn: getDefaultControlColumn(5)[0],
-    data: [sampleData],
+    data: sampleData,
     disabled: false,
     index: 1,
     isEventViewer: false,

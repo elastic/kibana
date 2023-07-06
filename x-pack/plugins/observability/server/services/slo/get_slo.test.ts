@@ -53,7 +53,7 @@ describe('GetSLO', () => {
             service: 'irrelevant',
             transactionName: 'irrelevant',
             transactionType: 'irrelevant',
-            goodStatusCodes: ['2xx', '3xx', '4xx'],
+            index: 'metrics-apm*',
           },
           type: 'sli.apm.transactionErrorRate',
         },
@@ -62,10 +62,9 @@ describe('GetSLO', () => {
         },
         timeWindow: {
           duration: '7d',
-          isRolling: true,
+          type: 'rolling',
         },
         settings: {
-          timestampField: '@timestamp',
           syncDelay: '1m',
           frequency: '1m',
         },
@@ -79,6 +78,7 @@ describe('GetSLO', () => {
             isEstimated: false,
           },
         },
+        tags: ['critical', 'k8s'],
         createdAt: slo.createdAt.toISOString(),
         updatedAt: slo.updatedAt.toISOString(),
         enabled: slo.enabled,

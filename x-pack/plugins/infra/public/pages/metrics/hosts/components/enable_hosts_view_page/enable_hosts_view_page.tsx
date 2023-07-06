@@ -10,10 +10,12 @@ import { EuiPageTemplate, EuiImage, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useEuiBackgroundColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { useIsDarkMode } from '../../../../../hooks/use_is_dark_mode';
 import { MetricsPageTemplate } from '../../../page_template';
-import hostsLandingBeta from './hosts_landing_beta.svg';
-import { ExperimentalBadge } from '../../../../../components/experimental_badge';
+import hostsLandingBetaLight from './hosts_landing_beta_light.svg';
+import hostsLandingBetaDark from './hosts_landing_beta_dark.svg';
+import { BetaBadge } from '../../../../../components/beta_badge';
 
 interface Props {
   actions?: ReactNode;
@@ -21,6 +23,7 @@ interface Props {
 
 export const EnableHostsViewPage = ({ actions }: Props) => {
   const backgroundColor = useEuiBackgroundColor('subdued');
+  const isDarkMode = useIsDarkMode();
 
   useTrackPageview({ app: 'infra_metrics', path: 'hosts_feature_enable_landing_page' });
   useTrackPageview({
@@ -36,32 +39,39 @@ export const EnableHostsViewPage = ({ actions }: Props) => {
         title={
           <h2>
             {i18n.translate('xpack.infra.hostsViewPage.landing.introTitle', {
-              defaultMessage: 'Introducing: Host Analysis',
+              defaultMessage: 'Host Analysis',
             })}
           </h2>
         }
         alignment="center"
-        icon={<EuiImage size="fullWidth" src={hostsLandingBeta} alt="" />}
+        icon={
+          <EuiImage
+            size="fullWidth"
+            src={isDarkMode ? hostsLandingBetaDark : hostsLandingBetaLight}
+            alt="Hosts Landing Page Image"
+          />
+        }
         color="plain"
         layout="horizontal"
         body={
           <>
-            <ExperimentalBadge />
+            <BetaBadge />
             <EuiSpacer />
             <p>
               {i18n.translate('xpack.infra.hostsViewPage.landing.introMessage', {
-                defaultMessage: `Introducing our new 'Hosts' feature, now available in technical preview!
-                With this powerful tool, you can easily view and analyse your hosts and identify any
-                issues so you address them quickly. Get a detailed view of metrics for your hosts, see
-                which ones are triggering the most alerts and filter the hosts you want to analyse
-                using any KQL filter and easy breakdowns such as cloud provider and operating system.`,
+                defaultMessage: `Welcome to the 'Hosts' feature, now available in beta! With this powerful tool, 
+                you can easily view and analyse your hosts and identify any issues so you address them quickly. 
+                Get a detailed view of metrics for your hosts, see which ones are triggering the most alerts and filter 
+                the hosts you want to analyse using any KQL filter and easy breakdowns such as cloud provider and 
+                operating system.`,
               })}
             </p>
             <p>
               {i18n.translate('xpack.infra.hostsViewPage.landing.tryTheFeatureMessage', {
-                defaultMessage: `This is an early version of the feature and we would love your feedback as we continue
-                to develop and improve it. To access the feature, simply enable below. Don't miss
-                out on this powerful new addition to our platform - try it out today!`,
+                defaultMessage: `This is a beta version of the feature and we would love your 
+                feedback as we continue to develop and improve it. To access the feature, 
+                simply enable below (or reach out to your internal administrator if not available). 
+                Don't miss out on this powerful feature - try it out today!`,
               })}
             </p>
           </>

@@ -27,32 +27,45 @@ import { indexToViewIndex } from '../../utils/indices';
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 
+jest.mock('../../../shared/kibana/kibana_logic', () => ({
+  KibanaLogic: { values: { productAccess: { hasDocumentLevelSecurityEnabled: true } } },
+}));
+
 // We can't test fetchTimeOutId because this will get set whenever the logic is created
 // And the timeoutId is non-deterministic. We use expect.object.containing throughout this test file
 const DEFAULT_VALUES = {
   connector: undefined,
+  connectorError: undefined,
   connectorId: null,
   error: null,
-  fetchIndexApiData: undefined,
-  fetchIndexApiStatus: Status.IDLE,
+  fetchIndexApiData: {},
+  fetchIndexApiStatus: Status.SUCCESS,
   hasAdvancedFilteringFeature: false,
   hasBasicFilteringFeature: false,
+  hasDocumentLevelSecurityFeature: false,
   hasFilteringFeature: false,
-  index: undefined,
-  indexData: null,
+  hasIncrementalSyncFeature: false,
+  htmlExtraction: undefined,
+  index: {
+    ingestionMethod: IngestionMethod.API,
+    ingestionStatus: IngestionStatus.CONNECTED,
+    lastUpdated: null,
+  },
+  indexData: {},
   indexName: 'index-name',
   ingestionMethod: IngestionMethod.API,
   ingestionStatus: IngestionStatus.CONNECTED,
   isCanceling: false,
   isConnectorIndex: false,
-  isInitialLoading: true,
+  isHiddenIndex: false,
+  isInitialLoading: false,
   isSyncing: false,
   isWaitingForSync: false,
   lastUpdated: null,
-  localSyncNowValue: false,
   pipelineData: undefined,
   recheckIndexLoading: false,
   syncStatus: null,
+  syncTriggeredLocally: false,
 };
 
 const CONNECTOR_VALUES = {
@@ -68,7 +81,7 @@ const CONNECTOR_VALUES = {
 describe('IndexViewLogic', () => {
   const { mount: apiLogicMount } = new LogicMounter(StartSyncApiLogic);
   const { mount: fetchIndexMount } = new LogicMounter(CachedFetchIndexApiLogic);
-  const indexNameLogic = new LogicMounter(IndexNameLogic);
+  const { mount: indexNameMount } = new LogicMounter(IndexNameLogic);
   const { mount } = new LogicMounter(IndexViewLogic);
   const { flashSuccessToast } = mockFlashMessageHelpers;
   const { http } = mockHttpValues;
@@ -76,16 +89,15 @@ describe('IndexViewLogic', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();
-    indexNameLogic.mount({ indexName: 'index-name' }, { indexName: 'index-name' });
+    http.get.mockReturnValueOnce(Promise.resolve({}));
+    const indexNameLogic = indexNameMount();
     apiLogicMount();
-    fetchIndexMount({ indexName: 'index-name' }, { indexName: 'index-name' });
-    mount({ indexName: 'index-name' }, { indexName: 'index-name' });
+    fetchIndexMount();
+    mount();
+    indexNameLogic.actions.setIndexName('index-name');
   });
 
   it('has expected default values', () => {
-    http.get.mockReturnValueOnce(Promise.resolve(() => ({})));
-    mount({ indexName: 'index-name' }, { indexName: 'index-name' });
-
     expect(IndexViewLogic.values).toEqual(DEFAULT_VALUES);
   });
 
@@ -94,32 +106,7 @@ describe('IndexViewLogic', () => {
       it('should update values', () => {
         CachedFetchIndexApiLogic.actions.apiSuccess({
           ...CONNECTOR_VALUES.index,
-          connector: { ...connectorIndex.connector!, sync_now: true },
-        });
-
-        expect(IndexViewLogic.values.connector).toEqual({
-          ...connectorIndex.connector,
-          sync_now: true,
-        });
-
-        expect(IndexViewLogic.values.fetchIndexApiData).toEqual({
-          ...CONNECTOR_VALUES.index,
-          connector: { ...connectorIndex.connector, sync_now: true },
-        });
-
-        expect(IndexViewLogic.values.fetchIndexApiData).toEqual({
-          ...CONNECTOR_VALUES.index,
-          connector: { ...connectorIndex.connector, sync_now: true },
-        });
-
-        expect(IndexViewLogic.values.index).toEqual({
-          ...CONNECTOR_VALUES.index,
-          connector: { ...connectorIndex.connector, sync_now: true },
-        });
-
-        expect(IndexViewLogic.values.indexData).toEqual({
-          ...CONNECTOR_VALUES.index,
-          connector: { ...connectorIndex.connector, sync_now: true },
+          has_pending_syncs: true,
         });
 
         expect(IndexViewLogic.values).toEqual(
@@ -130,7 +117,6 @@ describe('IndexViewLogic', () => {
             isConnectorIndex: true,
             isWaitingForSync: true,
             lastUpdated: CONNECTOR_VALUES.lastUpdated,
-            localSyncNowValue: true,
             pipelineData: undefined,
             syncStatus: SyncStatus.COMPLETED,
           })
@@ -194,12 +180,14 @@ describe('IndexViewLogic', () => {
 
     describe('StartSyncApiLogic.apiSuccess', () => {
       it('should set localSyncNow to true', async () => {
-        mount({
-          localSyncNowValue: false,
-        });
         StartSyncApiLogic.actions.apiSuccess({});
-
-        expect(IndexViewLogic.values.localSyncNowValue).toEqual(true);
+        expect(IndexViewLogic.values).toEqual(
+          expect.objectContaining({
+            ...DEFAULT_VALUES,
+            isWaitingForSync: true,
+            syncTriggeredLocally: true,
+          })
+        );
       });
     });
   });

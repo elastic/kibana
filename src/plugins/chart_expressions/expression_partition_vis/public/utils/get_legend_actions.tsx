@@ -54,6 +54,7 @@ export const getLegendActions = (
       visData,
       columnIndex,
       formatter.deserialize,
+      // FIXME key could be a RangeKey see https://github.com/elastic/kibana/issues/153437
       pieSeries.key
     );
 
@@ -130,6 +131,9 @@ export const getLegendActions = (
         data-test-subj={`legend-${title}`}
         onKeyPress={() => setPopoverOpen(!popoverOpen)}
         onClick={() => setPopoverOpen(!popoverOpen)}
+        aria-label={i18n.translate('expressionPartitionVis.legend.legendActionsAria', {
+          defaultMessage: 'Legend actions',
+        })}
       >
         <EuiIcon size="s" type="boxesVertical" />
       </div>

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { AgentName } from '../typings/es_schemas/ui/fields/agent';
+import {
+  AgentName,
+  OpenTelemetryAgentName,
+} from '../typings/es_schemas/ui/fields/agent';
 import { ServerlessType } from './serverless';
 
 /*
@@ -27,6 +30,7 @@ export const OPEN_TELEMETRY_AGENT_NAMES: AgentName[] = [
   'opentelemetry/php',
   'opentelemetry/python',
   'opentelemetry/ruby',
+  'opentelemetry/rust',
   'opentelemetry/swift',
   'opentelemetry/webjs',
 ];
@@ -46,8 +50,11 @@ export const AGENT_NAMES: AgentName[] = [
   ...OPEN_TELEMETRY_AGENT_NAMES,
 ];
 
-export const isOpenTelemetryAgentName = (agentName: AgentName) =>
-  OPEN_TELEMETRY_AGENT_NAMES.includes(agentName);
+export function isOpenTelemetryAgentName(
+  agentName: string
+): agentName is OpenTelemetryAgentName {
+  return OPEN_TELEMETRY_AGENT_NAMES.includes(agentName as AgentName);
+}
 
 export const JAVA_AGENT_NAMES: AgentName[] = ['java', 'opentelemetry/java'];
 
@@ -71,6 +78,10 @@ export function isRumAgentName(
 
 export function isMobileAgentName(agentName?: string) {
   return isIosAgentName(agentName) || isAndroidAgentName(agentName);
+}
+
+export function isRumOrMobileAgent(agentName?: string) {
+  return isRumAgentName(agentName) || isMobileAgentName(agentName);
 }
 
 export function isIosAgentName(agentName?: string) {

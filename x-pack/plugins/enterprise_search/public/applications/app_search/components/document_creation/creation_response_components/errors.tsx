@@ -20,14 +20,14 @@ export const Errors: React.FC = () => {
   return (
     <>
       {errors.length > 0 && (
-        <EuiCallOut color="danger" iconType="alert" title={DOCUMENT_CREATION_ERRORS.TITLE}>
+        <EuiCallOut color="danger" iconType="warning" title={DOCUMENT_CREATION_ERRORS.TITLE}>
           {errors.map((message, index) => (
             <p key={index}>{message}</p>
           ))}
         </EuiCallOut>
       )}
       {warnings.length > 0 && (
-        <EuiCallOut color="warning" iconType="alert" title={DOCUMENT_CREATION_WARNINGS.TITLE}>
+        <EuiCallOut color="warning" iconType="warning" title={DOCUMENT_CREATION_WARNINGS.TITLE}>
           {warnings.map((message, index) => (
             <p key={index}>{message}</p>
           ))}

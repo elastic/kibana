@@ -52,7 +52,7 @@ import {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_USER,
 } from '@kbn/rule-data-utils';
-import { TableId } from '../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 import type { TimelineEventsType } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
@@ -70,6 +70,7 @@ export interface TopNOption {
 export const detectionAlertsTables: string[] = [
   TableId.alertsOnAlertsPage,
   TableId.alertsOnRuleDetailsPage,
+  TableId.alertsOnCasePage,
   TimelineId.casePage,
 ];
 

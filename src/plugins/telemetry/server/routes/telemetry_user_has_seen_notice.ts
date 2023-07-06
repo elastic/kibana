@@ -8,13 +8,14 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { TELEMETRY_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { v2 } from '../../common/types';
 import {
   type TelemetrySavedObjectAttributes,
   getTelemetrySavedObject,
   updateTelemetrySavedObject,
 } from '../saved_objects';
 
-export function registerTelemetryUserHasSeenNotice(router: IRouter) {
+export function registerTelemetryUserHasSeenNotice(router: IRouter, currentKibanaVersion: string) {
   router.put(
     {
       path: '/api/telemetry/v2/userHasSeenNotice',
@@ -30,10 +31,23 @@ export function registerTelemetryUserHasSeenNotice(router: IRouter) {
       const updatedAttributes: TelemetrySavedObjectAttributes = {
         ...telemetrySavedObject,
         userHasSeenNotice: true,
+        // We need to store that the user was notified in this version.
+        // Otherwise, it'll continuously show the banner if previously opted-out.
+        lastVersionChecked: currentKibanaVersion,
       };
       await updateTelemetrySavedObject(soClient, updatedAttributes);
 
-      return res.ok({ body: updatedAttributes });
+      const body: v2.Telemetry = {
+        allowChangingOptInStatus: updatedAttributes.allowChangingOptInStatus,
+        enabled: updatedAttributes.enabled,
+        lastReported: updatedAttributes.lastReported,
+        lastVersionChecked: updatedAttributes.lastVersionChecked,
+        reportFailureCount: updatedAttributes.reportFailureCount,
+        reportFailureVersion: updatedAttributes.reportFailureVersion,
+        sendUsageFrom: updatedAttributes.sendUsageFrom,
+        userHasSeenNotice: updatedAttributes.userHasSeenNotice,
+      };
+      return res.ok({ body });
     }
   );
 }

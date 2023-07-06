@@ -35,6 +35,7 @@ export type RouteSpyState =
   | GenericRouteSpyState<SecurityPageName.alerts, AlertDetailRouteType>
   | GenericRouteSpyState<SecurityPageName.administration, AdministrationType>
   | GenericRouteSpyState<SecurityPageName.rules, AllRulesTabs>
+  | GenericRouteSpyState<SecurityPageName.dashboards>
   | GenericRouteSpyState<
       Exclude<
         SecurityPageName,
@@ -59,6 +60,7 @@ export type AdministrationRouteSpyState = GenericRouteSpyState<
   SecurityPageName.administration,
   AdministrationType
 >;
+export type DashboardsRouteSpyState = GenericRouteSpyState<SecurityPageName.dashboards>;
 
 export type RouteSpyAction =
   | {

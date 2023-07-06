@@ -22,11 +22,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { LazyControlGroupRenderer, ControlGroupContainer } from '@kbn/controls-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { PLUGIN_ID } from './constants';
-
-const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 interface Props {
   data: DataPublicPluginStart;
@@ -36,7 +33,7 @@ interface Props {
 
 export const SearchExample = ({ data, dataView, navigation }: Props) => {
   const [controlFilters, setControlFilters] = useState<Filter[]>([]);
-  const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
+  const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>();
   const [hits, setHits] = useState(0);
   const [filters, setFilters] = useState<Filter[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -47,16 +44,16 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-7d', to: 'now' });
 
   useEffect(() => {
-    if (!controlGroup) {
+    if (!controlGroupAPI) {
       return;
     }
-    const subscription = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
+    const subscription = controlGroupAPI.onFiltersPublished$.subscribe((newFilters) => {
       setControlFilters([...newFilters]);
     });
     return () => {
       subscription.unsubscribe();
     };
-  }, [controlGroup]);
+  }, [controlGroupAPI]);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -133,7 +130,7 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
         />
         <ControlGroupRenderer
           filters={filters}
-          getInitialInput={async (initialInput, builder) => {
+          getCreationOptions={async (initialInput, builder) => {
             await builder.addDataControlFromField(initialInput, {
               dataViewId: dataView.id!,
               title: 'Destintion country',
@@ -149,14 +146,14 @@ export const SearchExample = ({ data, dataView, navigation }: Props) => {
               title: 'Bytes',
             });
             return {
-              ...initialInput,
-              viewMode: ViewMode.VIEW,
+              initialInput: {
+                ...initialInput,
+                viewMode: ViewMode.VIEW,
+              },
             };
           }}
-          onLoadComplete={async (newControlGroup) => {
-            setControlGroup(newControlGroup);
-          }}
           query={query}
+          ref={setControlGroupAPI}
           timeRange={timeRange}
         />
         <EuiCallOut title="Search results">

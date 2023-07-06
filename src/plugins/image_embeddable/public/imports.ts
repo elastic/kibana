@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FileKind } from '@kbn/shared-ux-file-types';
-import { defaultImageFileKind } from '@kbn/files-plugin/common';
+import { DefaultFileKind } from '@kbn/files-plugin/common';
 
 export type {
   FilesClient,
@@ -27,4 +26,4 @@ export type { ApplicationStart, OverlayStart, ThemeServiceStart } from '@kbn/cor
 
 export type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 
-export const imageEmbeddableFileKind: FileKind = defaultImageFileKind;
+export const imageEmbeddableFileKind = DefaultFileKind.kind;

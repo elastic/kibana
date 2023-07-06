@@ -40,15 +40,19 @@ export const METADATA_UNITED_TRANSFORM = 'endpoint.metadata_united-default';
 // united metadata transform destination index
 export const METADATA_UNITED_INDEX = '.metrics-endpoint.metadata_united_default';
 
+export const POLICY_RESPONSE_INDEX = 'metrics-endpoint.policy-default';
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
+
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
 
 // File storage indexes supporting endpoint Upload/download
 export const FILE_STORAGE_METADATA_INDEX = getFileMetadataIndexName('endpoint');
 export const FILE_STORAGE_DATA_INDEX = getFileDataIndexName('endpoint');
 
-// Endpoint API routes
+// Location from where all Endpoint related APIs are mounted
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
+
+// Endpoint API routes
 export const HOST_METADATA_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
 export const HOST_METADATA_GET_ROUTE = `${HOST_METADATA_LIST_ROUTE}/{id}`;
 export const METADATA_TRANSFORMS_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata/transforms`;
@@ -79,6 +83,7 @@ export const KILL_PROCESS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/kill_process`;
 export const SUSPEND_PROCESS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/suspend_process`;
 export const GET_FILE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/get_file`;
 export const EXECUTE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/execute`;
+export const UPLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/upload`;
 
 /** Endpoint Actions Routes */
 export const ENDPOINT_ACTION_LOG_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_log/{agent_id}`;
@@ -86,6 +91,7 @@ export const ACTION_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_status`;
 export const ACTION_DETAILS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}`;
 export const ACTION_AGENT_FILE_INFO_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/file/{file_id}`;
 export const ACTION_AGENT_FILE_DOWNLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/file/{file_id}/download`;
+export const ACTION_STATE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/state`;
 
 export const failedFleetActionErrorCode = '424';
 
@@ -98,3 +104,4 @@ export const ENDPOINT_ERROR_CODES: Record<string, number> = {
 };
 
 export const ENDPOINT_FIELDS_SEARCH_STRATEGY = 'endpointFields';
+export const ENDPOINT_SEARCH_STRATEGY = 'endpointSearchStrategy';

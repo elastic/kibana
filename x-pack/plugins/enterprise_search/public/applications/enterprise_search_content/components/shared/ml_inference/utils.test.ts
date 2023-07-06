@@ -58,6 +58,13 @@ describe('ml inference utils', () => {
           },
           model_id: 'mock-fill_mask',
         }),
+        makeFakeModel({
+          inference_config: {
+            classification: {},
+          },
+          model_id: 'lang_ident_model_1',
+          model_type: 'lang_ident',
+        }),
       ];
 
       for (const model of models) {
@@ -109,6 +116,9 @@ describe('ml inference utils', () => {
     test.each(NLP_CONFIG_KEYS)('%s should have a title defined', (type) =>
       expect(getModelDisplayTitle(type)).not.toBe('')
     );
+    it('returns title for lang_ident', () => {
+      expect(getModelDisplayTitle('lang_ident')).toBe('Language Identification');
+    });
     it('unsupported model type should return empty title', () => {
       // This should technically never happen given the above test.
       expect(getModelDisplayTitle('foo')).toBe(undefined);

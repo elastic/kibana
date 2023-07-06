@@ -61,7 +61,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps> {
     return (
       <div>
         <EuiSpacer size="xl" />
-        <EuiCallOut title={this.props.callOutTitle} iconType="alert">
+        <EuiCallOut title={this.props.callOutTitle} iconType="warning">
           <p>{this.props.callOutSubtitle}</p>
         </EuiCallOut>
         <EuiSpacer size="xl" />

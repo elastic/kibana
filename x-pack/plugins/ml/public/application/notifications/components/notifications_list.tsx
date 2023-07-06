@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiCallOut,
-  EuiInMemoryTable,
+  EuiBasicTable,
   EuiSearchBar,
   EuiSpacer,
   IconColor,
@@ -73,10 +73,12 @@ export const NotificationsList: FC = () => {
   const timeRange = useTimeRangeUpdates();
 
   useMount(function setTimeRangeOnMount() {
-    timeFilter.setTime({
-      from: moment(latestRequestedAt).toISOString(),
-      to: 'now',
-    });
+    if (latestRequestedAt !== null) {
+      timeFilter.setTime({
+        from: moment(latestRequestedAt).toISOString(),
+        to: 'now',
+      });
+    }
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -294,6 +296,12 @@ export const NotificationsList: FC = () => {
 
   const newNotificationsCount = Object.values(notificationsCounts).reduce((a, b) => a + b);
 
+  const itemsPerPage = useMemo(() => {
+    const fromIndex = pagination.pageIndex * pagination.pageSize;
+    const toIndex = fromIndex + pagination.pageSize;
+    return items.slice(fromIndex, toIndex);
+  }, [items, pagination]);
+
   return (
     <>
       <SavedObjectsWarning onCloseFlyout={fetchNotifications} forceRefresh={isLoading} />
@@ -374,7 +382,7 @@ export const NotificationsList: FC = () => {
               />
             }
             color="danger"
-            iconType="alert"
+            iconType="warning"
           >
             <p>{queryError}</p>
           </EuiCallOut>
@@ -382,12 +390,12 @@ export const NotificationsList: FC = () => {
         </>
       ) : null}
 
-      <EuiInMemoryTable<NotificationItem>
+      <EuiBasicTable<NotificationItem>
         columns={columns}
         hasActions={false}
         isExpandable={false}
         isSelectable={false}
-        items={items}
+        items={itemsPerPage}
         itemId={'id'}
         loading={isLoading}
         rowProps={(item) => ({
@@ -397,7 +405,7 @@ export const NotificationsList: FC = () => {
         onChange={onTableChange}
         sorting={sorting}
         data-test-subj={isLoading ? 'mlNotificationsTable loading' : 'mlNotificationsTable loaded'}
-        message={
+        noItemsMessage={
           <FormattedMessage
             id="xpack.ml.notifications.noItemsFoundMessage"
             defaultMessage="No notifications found"

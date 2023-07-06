@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import type { ExceptionList, ExceptionListItem } from '../../objects/exception';
+import type {
+  ExceptionListSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionList, ExceptionListItem, RuleExceptionItem } from '../../objects/exception';
+import { rootRequest } from '../common';
 
-export const createEndpointExceptionList = () =>
-  cy.request({
+export const createEndpointExceptionList = <T = unknown>() =>
+  rootRequest<T>({
     method: 'POST',
     url: '/api/endpoint_list',
     headers: { 'kbn-xsrf': 'cypress-creds' },
@@ -19,7 +24,7 @@ export const createExceptionList = (
   exceptionList: ExceptionList,
   exceptionListId = 'exception_list_testing'
 ) =>
-  cy.request({
+  rootRequest<ExceptionListSchema>({
     method: 'POST',
     url: 'api/exception_lists',
     body: {
@@ -36,7 +41,7 @@ export const createExceptionListItem = (
   exceptionListId: string,
   exceptionListItem?: ExceptionListItem
 ) =>
-  cy.request({
+  rootRequest<ExceptionListItemSchema>({
     method: 'POST',
     url: '/api/exception_lists/items',
     body: {
@@ -59,6 +64,18 @@ export const createExceptionListItem = (
           value: ['some host', 'another host'],
         },
       ],
+      expire_time: exceptionListItem?.expire_time,
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
+  });
+
+export const createRuleExceptionItem = (ruleId: string, exceptionListItems: RuleExceptionItem[]) =>
+  rootRequest({
+    method: 'POST',
+    url: `/api/detection_engine/rules/${ruleId}/exceptions`,
+    body: {
+      items: exceptionListItems,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,
@@ -68,7 +85,7 @@ export const updateExceptionListItem = (
   exceptionListItemId: string,
   exceptionListItemUpdate?: Partial<ExceptionListItem>
 ) =>
-  cy.request({
+  rootRequest({
     method: 'PUT',
     url: '/api/exception_lists/items',
     body: {
@@ -80,7 +97,7 @@ export const updateExceptionListItem = (
   });
 
 export const deleteExceptionList = (listId: string, namespaceType: string) =>
-  cy.request({
+  rootRequest({
     method: 'DELETE',
     url: `/api/exception_lists?list_id=${listId}&namespace_type=${namespaceType}`,
     headers: { 'kbn-xsrf': 'cypress-creds' },

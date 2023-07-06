@@ -11,8 +11,8 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
+  deleteAllRules,
   deleteAllAlerts,
-  deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleAsNdjson,
   getSimpleRuleOutput,
@@ -24,6 +24,7 @@ import {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('import_rules', () => {
     describe('importing rules with an index', () => {
@@ -32,8 +33,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {
@@ -360,7 +361,7 @@ export default ({ getService }: FtrProviderContext): void => {
           output_index: '',
         };
         ruleOutput.name = 'some other name';
-        ruleOutput.version = 2;
+        ruleOutput.revision = 0;
         expect(bodyToCompare).to.eql(ruleOutput);
       });
 

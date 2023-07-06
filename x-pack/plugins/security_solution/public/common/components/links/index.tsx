@@ -64,11 +64,13 @@ const UserDetailsLinkComponent: React.FC<{
   title?: string;
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void;
-}> = ({ children, Component, userName, isButton, onClick, title, userTab }) => {
+}> = ({ children, Component, userName, isButton, onClick: onClickParam, title, userTab }) => {
   const encodedUserName = encodeURIComponent(userName);
-
   const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    application: { navigateToApp },
+    telemetry,
+  } = useKibana().services;
   const goToUsersDetails = useCallback(
     (ev) => {
       ev.preventDefault();
@@ -92,22 +94,27 @@ const UserDetailsLinkComponent: React.FC<{
     [formatUrl, encodedUserName, userTab]
   );
 
+  const onClick = useCallback(
+    (e: SyntheticEvent) => {
+      telemetry.reportEntityDetailsClicked({ entity: 'user' });
+      const callback = onClickParam ?? goToUsersDetails;
+      callback(e);
+    },
+    [goToUsersDetails, onClickParam, telemetry]
+  );
+
   return isButton ? (
     <GenericLinkButton
       Component={Component}
       dataTestSubj="data-grid-user-details"
       href={href}
-      onClick={onClick ?? goToUsersDetails}
+      onClick={onClick}
       title={title ?? userName}
     >
       {children ? children : userName}
     </GenericLinkButton>
   ) : (
-    <LinkAnchor
-      data-test-subj="users-link-anchor"
-      onClick={onClick ?? goToUsersDetails}
-      href={href}
-    >
+    <LinkAnchor data-test-subj="users-link-anchor" onClick={onClick} href={href}>
       {children ? children : userName}
     </LinkAnchor>
   );
@@ -124,9 +131,12 @@ const HostDetailsLinkComponent: React.FC<{
   onClick?: (e: SyntheticEvent) => void;
   hostTab?: HostsTableType;
   title?: string;
-}> = ({ children, Component, hostName, isButton, onClick, title, hostTab }) => {
+}> = ({ children, Component, hostName, isButton, onClick: onClickParam, title, hostTab }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
-  const { navigateToApp } = useKibana().services.application;
+  const {
+    application: { navigateToApp },
+    telemetry,
+  } = useKibana().services;
 
   const encodedHostName = encodeURIComponent(hostName);
 
@@ -151,23 +161,30 @@ const HostDetailsLinkComponent: React.FC<{
       ),
     [formatUrl, encodedHostName, hostTab]
   );
+
+  const onClick = useCallback(
+    (e: SyntheticEvent) => {
+      telemetry.reportEntityDetailsClicked({ entity: 'host' });
+
+      const callback = onClickParam ?? goToHostDetails;
+      callback(e);
+    },
+    [goToHostDetails, onClickParam, telemetry]
+  );
+
   return isButton ? (
     <GenericLinkButton
       Component={Component}
       dataTestSubj="data-grid-host-details"
       href={href}
       iconType="expand"
-      onClick={onClick ?? goToHostDetails}
+      onClick={onClick}
       title={title ?? hostName}
     >
       {children}
     </GenericLinkButton>
   ) : (
-    <LinkAnchor
-      onClick={onClick ?? goToHostDetails}
-      href={href}
-      data-test-subj="host-details-button"
-    >
+    <LinkAnchor onClick={onClick} href={href} data-test-subj="host-details-button">
       {children ? children : hostName}
     </LinkAnchor>
   );
@@ -259,12 +276,28 @@ const NetworkDetailsLinkComponent: React.FC<{
 
 export const NetworkDetailsLink = React.memo(NetworkDetailsLinkComponent);
 
-const CaseDetailsLinkComponent: React.FC<{
+export interface CaseDetailsLinkComponentProps {
   children?: React.ReactNode;
+  /**
+   * Will be used to construct case url
+   */
   detailName: string;
+  /**
+   * Link title
+   */
   title?: string;
+  /**
+   * Link index
+   */
   index?: number;
-}> = ({ index, children, detailName, title }) => {
+}
+
+const CaseDetailsLinkComponent: React.FC<CaseDetailsLinkComponentProps> = ({
+  index,
+  children,
+  detailName,
+  title,
+}) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const { activeStep, isTourShown } = useTourContext();
@@ -554,7 +587,7 @@ interface LinkProps {
   href: string;
 }
 
-type GetSecuritySolutionProps = (
+export type GetSecuritySolutionProps = (
   params: SecuritySolutionLinkProps & { onClick?: MouseEventHandler }
 ) => LinkProps;
 

@@ -16,6 +16,7 @@ import { addConnector } from '../../../lib/connectors/add_connector';
 import { deleteConnectorById } from '../../../lib/connectors/delete_connector';
 import { fetchConnectorByIndexName } from '../../../lib/connectors/fetch_connectors';
 import { fetchCrawlerByIndexName } from '../../../lib/crawler/fetch_crawlers';
+import { recreateConnectorDocument } from '../../../lib/crawler/post_connector';
 import { updateHtmlExtraction } from '../../../lib/crawler/put_html_extraction';
 import { deleteIndex } from '../../../lib/indices/delete_index';
 import { RouteDependencies } from '../../../plugin';
@@ -426,6 +427,37 @@ export function registerCrawlerRoutes(routeDependencies: RouteDependencies) {
           statusCode: 404,
         });
       }
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/crawler/connector',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const connector = await fetchConnectorByIndexName(client, request.params.indexName);
+      if (connector) {
+        return createError({
+          errorCode: ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.recreateConnector.connectorExistsError',
+            {
+              defaultMessage: 'A connector for this index already exists',
+            }
+          ),
+          response,
+          statusCode: 409,
+        });
+      }
+
+      const connectorId = await recreateConnectorDocument(client, request.params.indexName);
+      return response.ok({ body: { connector_id: connectorId } });
     })
   );
 

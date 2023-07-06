@@ -251,7 +251,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async openEnterViewNameAndSave() {
-      await testSubjects.setValue('savedViewViweName', 'View1');
+      await testSubjects.setValue('savedViewName', 'View1');
       await testSubjects.click('createSavedViewButton');
     },
 
@@ -261,6 +261,18 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async getNoMetricsDataPrompt() {
       return await testSubjects.find('noMetricsDataPrompt');
+    },
+
+    async getNoRemoteClusterPrompt() {
+      return await testSubjects.find('infraHostsNoRemoteCluster');
+    },
+
+    async getInfraMissingMetricsIndicesCallout() {
+      return await testSubjects.find('infraIndicesPanelSettingsWarningCallout');
+    },
+
+    async getInfraMissingRemoteClusterIndicesCallout() {
+      return await testSubjects.find('infraIndicesPanelSettingsDangerCallout');
     },
 
     async openSourceConfigurationFlyout() {

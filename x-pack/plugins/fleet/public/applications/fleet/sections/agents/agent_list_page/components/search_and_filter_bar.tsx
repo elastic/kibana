@@ -24,6 +24,7 @@ import styled from 'styled-components';
 import type { Agent, AgentPolicy } from '../../../../types';
 import { SearchBar } from '../../../../components';
 import { AGENTS_INDEX } from '../../../../constants';
+import { useFleetServerStandalone } from '../../../../hooks';
 
 import { MAX_TAG_DISPLAY_LENGTH, truncateTag } from '../utils';
 
@@ -31,16 +32,13 @@ import { AgentBulkActions } from './bulk_actions';
 import type { SelectionMode } from './types';
 import { AgentActivityButton } from './agent_activity_button';
 import { AgentStatusFilter } from './agent_status_filter';
+import { DashboardsButtons } from './dashboards_buttons';
 
 const ClearAllTagsFilterItem = styled(EuiFilterSelectItem)`
   padding: ${(props) => props.theme.eui.euiSizeS};
 `;
 
-const FlexEndEuiFlexItem = styled(EuiFlexItem)`
-  align-self: flex-end;
-`;
-
-export const SearchAndFilterBar: React.FunctionComponent<{
+export interface SearchAndFilterBarProps {
   agentPolicies: AgentPolicy[];
   draftKuery: string;
   onDraftKueryChange: (kuery: string) => void;
@@ -65,7 +63,9 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   visibleAgents: Agent[];
   onClickAgentActivity: () => void;
   showAgentActivityTour: { isOpen: boolean };
-}> = ({
+}
+
+export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps> = ({
   agentPolicies,
   draftKuery,
   onDraftKueryChange,
@@ -91,6 +91,9 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   onClickAgentActivity,
   showAgentActivityTour,
 }) => {
+  const { isFleetServerStandalone } = useFleetServerStandalone();
+  const showAddFleetServerBtn = !isFleetServerStandalone;
+
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
 
@@ -118,34 +121,37 @@ export const SearchAndFilterBar: React.FunctionComponent<{
 
   return (
     <>
-      {/* Search and filter bar */}
       <EuiFlexGroup direction="column">
-        <FlexEndEuiFlexItem>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>
+        {/* Top Buttons and Links */}
+        <EuiFlexGroup>
+          <EuiFlexItem>{totalAgents > 0 && <DashboardsButtons />}</EuiFlexItem>
+          <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
               <AgentActivityButton
                 onClickAgentActivity={onClickAgentActivity}
                 showAgentActivityTour={showAgentActivityTour}
               />
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiToolTip
-                content={
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.addFleetServerButton.tooltip"
-                    defaultMessage="Fleet Server is a component of the Elastic Stack used to centrally manage Elastic Agents"
-                  />
-                }
-              >
-                <EuiButton onClick={onClickAddFleetServer} data-test-subj="addFleetServerButton">
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.addFleetServerButton"
-                    defaultMessage="Add Fleet Server"
-                  />
-                </EuiButton>
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem>
+            {showAddFleetServerBtn && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.fleet.agentList.addFleetServerButton.tooltip"
+                      defaultMessage="Fleet Server is a component of the Elastic Stack used to centrally manage Elastic Agents"
+                    />
+                  }
+                >
+                  <EuiButton onClick={onClickAddFleetServer} data-test-subj="addFleetServerButton">
+                    <FormattedMessage
+                      id="xpack.fleet.agentList.addFleetServerButton"
+                      defaultMessage="Add Fleet Server"
+                    />
+                  </EuiButton>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={
                   <FormattedMessage
@@ -163,7 +169,8 @@ export const SearchAndFilterBar: React.FunctionComponent<{
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </FlexEndEuiFlexItem>
+        </EuiFlexGroup>
+        {/* Search and filters */}
         <EuiFlexItem grow={4}>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={6}>
@@ -244,7 +251,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                       >
                         <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
                           <EuiFlexItem grow={false}>
-                            <EuiIcon type="crossInACircleFilled" color="danger" size="s" />
+                            <EuiIcon type="error" color="danger" size="s" />
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>Clear all</EuiFlexItem>
                         </EuiFlexGroup>

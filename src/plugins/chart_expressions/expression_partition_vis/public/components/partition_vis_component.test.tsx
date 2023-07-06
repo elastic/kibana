@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Settings, TooltipType, SeriesIdentifier } from '@elastic/charts';
+import { Settings, TooltipType, SeriesIdentifier, Tooltip } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -83,6 +83,7 @@ describe('PartitionVisComponent', function () {
         data: dataPluginMock.createStartContract(),
         fieldFormats: fieldFormatsServiceMock.createStartContract(),
       },
+      hasOpenedOnAggBasedEditor: false,
     };
   });
 
@@ -238,14 +239,14 @@ describe('PartitionVisComponent', function () {
 
   it('defaults on displaying the tooltip', () => {
     const component = shallow(<PartitionVisComponent {...wrapperProps} />);
-    expect(component.find(Settings).prop('tooltip')).toStrictEqual({ type: TooltipType.Follow });
+    expect(component.find(Tooltip).prop('type')).toBe(TooltipType.Follow);
   });
 
   it('doesnt show the tooltip when the user requests it', () => {
     const newParams = { ...visParams, addTooltip: false };
     const newProps = { ...wrapperProps, visParams: newParams };
     const component = shallow(<PartitionVisComponent {...newProps} />);
-    expect(component.find(Settings).prop('tooltip')).toStrictEqual({ type: TooltipType.None });
+    expect(component.find(Tooltip).prop('type')).toBe(TooltipType.None);
   });
 
   it('calls filter callback', () => {
@@ -328,5 +329,20 @@ describe('PartitionVisComponent', function () {
     expect(findTestSubject(component, 'partitionVisNegativeValues').text()).toEqual(
       "Pie chart can't render with negative values."
     );
+  });
+
+  describe('overrides', () => {
+    it('should apply overrides to the settings component', () => {
+      const component = shallow(
+        <PartitionVisComponent
+          {...wrapperProps}
+          overrides={{ settings: { onBrushEnd: 'ignore', ariaUseDefaultSummary: true } }}
+        />
+      );
+
+      const settingsComponent = component.find(Settings);
+      expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
+      expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
+    });
   });
 });

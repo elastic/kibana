@@ -31,6 +31,7 @@ import { SearchIndexTabId } from '../search_index';
 const StatusPanel: React.FC<{ ingestionStatus: IngestionStatus }> = ({ ingestionStatus }) => (
   <EuiPanel color={ingestionStatusToColor(ingestionStatus)} hasShadow={false} paddingSize="l">
     <EuiStat
+      titleSize="m"
       description={i18n.translate('xpack.enterpriseSearch.connector.ingestionStatus.title', {
         defaultMessage: 'Ingestion status',
       })}
@@ -47,6 +48,8 @@ export const ConnectorOverviewPanels: React.FC = () => {
       <EuiFlexItem grow={1}>
         <EuiPanel color="primary" hasShadow={false} paddingSize="l">
           <EuiStat
+            data-test-subj="entSearchContent-indexOverview-totalStats-documentCount"
+            titleSize="m"
             description={i18n.translate(
               'xpack.enterpriseSearch.content.searchIndex.totalStats.documentCountCardLabel',
               {
@@ -57,7 +60,10 @@ export const ConnectorOverviewPanels: React.FC = () => {
           />
         </EuiPanel>
       </EuiFlexItem>
-      <EuiFlexItem grow={1}>
+      <EuiFlexItem
+        grow={1}
+        data-test-subj="entSearchContent-indexOverview-connectorStats-ingestionStatus"
+      >
         {ingestionStatus === IngestionStatus.INCOMPLETE ? (
           <EuiLinkTo
             to={generateEncodedPath(SEARCH_INDEX_TAB_PATH, {

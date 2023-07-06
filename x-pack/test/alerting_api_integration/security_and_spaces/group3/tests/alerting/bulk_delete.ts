@@ -13,6 +13,7 @@ import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common
 const getDefaultRules = (response: any) => ({
   id: response.body.rules[0].id,
   apiKey: response.body.rules[0].apiKey,
+  apiKeyCreatedByUser: false,
   notifyWhen: 'onThrottleInterval',
   enabled: true,
   name: 'abc',
@@ -35,6 +36,7 @@ const getDefaultRules = (response: any) => ({
   scheduledTaskId: response.body.rules[0].scheduledTaskId,
   executionStatus: response.body.rules[0].executionStatus,
   monitoring: response.body.rules[0].monitoring,
+  revision: 0,
   ...(response.body.rules[0].nextRun ? { nextRun: response.body.rules[0].nextRun } : {}),
   ...(response.body.rules[0].lastRun ? { lastRun: response.body.rules[0].lastRun } : {}),
 });
@@ -45,6 +47,7 @@ const getThreeRules = (response: any) => {
     rules.push({
       id: response.body.rules[i].id,
       apiKey: response.body.rules[i].apiKey,
+      apiKeyCreatedByUser: false,
       notifyWhen: 'onThrottleInterval',
       enabled: true,
       name: 'abc',
@@ -67,6 +70,7 @@ const getThreeRules = (response: any) => {
       scheduledTaskId: response.body.rules[i].scheduledTaskId,
       executionStatus: response.body.rules[i].executionStatus,
       monitoring: response.body.rules[i].monitoring,
+      revision: 0,
       ...(response.body.rules[i].nextRun ? { nextRun: response.body.rules[i].nextRun } : {}),
       ...(response.body.rules[i].lastRun ? { lastRun: response.body.rules[i].lastRun } : {}),
     });

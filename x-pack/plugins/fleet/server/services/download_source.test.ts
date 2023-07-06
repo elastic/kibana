@@ -7,7 +7,9 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import type { DownloadSourceAttributes } from '../types';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+
+import type { DownloadSourceSOAttributes } from '../types';
 
 import { DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE } from '../constants';
 
@@ -19,6 +21,10 @@ jest.mock('./app_context');
 jest.mock('./agent_policy');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
+
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
 function mockDownloadSourceSO(id: string, attributes: any = {}) {
@@ -152,7 +158,7 @@ describe('Download Service', () => {
 
       // ID should always be the same for a predefined id
       expect(soClient.create.mock.calls[0][2]?.id).toEqual('download-source-test');
-      expect((soClient.create.mock.calls[0][1] as DownloadSourceAttributes).source_id).toEqual(
+      expect((soClient.create.mock.calls[0][1] as DownloadSourceSOAttributes).source_id).toEqual(
         'download-source-test'
       );
     });

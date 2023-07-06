@@ -8,6 +8,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
+import { API_VERSIONS } from '../../common/constants';
 import { createFilter } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
 import type { ActionEdges, ActionsStrategyResponse } from '../../common/search_strategy';
@@ -17,10 +18,10 @@ import { useErrorToast } from '../common/hooks/use_error_toast';
 import { Direction } from '../../common/search_strategy';
 
 export interface UseAllLiveQueriesConfig {
-  activePage: number;
+  activePage?: number;
   direction?: Direction;
-  limit: number;
-  sortField: string;
+  limit?: number;
+  sortField?: string;
   filterQuery?: ESTermQuery | ESExistsQuery | string;
   skip?: boolean;
   alertId?: string;
@@ -30,10 +31,10 @@ export interface UseAllLiveQueriesConfig {
 const ACTIONS_QUERY_KEY = 'actions';
 
 export const useAllLiveQueries = ({
-  activePage,
+  activePage = 0,
   direction = Direction.desc,
-  limit,
-  sortField,
+  limit = 100,
+  sortField = '@timestamp',
   filterQuery,
   skip = false,
   alertId,
@@ -50,6 +51,7 @@ export const useAllLiveQueries = ({
       http.get<{ data: Omit<ActionsStrategyResponse, 'edges'> & { items: ActionEdges } }>(
         '/api/osquery/live_queries',
         {
+          version: API_VERSIONS.public.v1,
           query: {
             filterQuery: createFilter(filterQuery),
             page: activePage,

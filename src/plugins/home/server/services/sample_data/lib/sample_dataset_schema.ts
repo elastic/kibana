@@ -30,6 +30,9 @@ const dataIndexSchema = schema.object({
   // should index be created as data stream
   isDataStream: schema.maybe(schema.boolean({ defaultValue: false })),
 
+  // additional index settings
+  indexSettings: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+
   // Reference to now in your test data set.
   // When data is installed, timestamps are converted to the present time.
   // The distance between a timestamp and currentTimeMarker is preserved but the date and time will change.

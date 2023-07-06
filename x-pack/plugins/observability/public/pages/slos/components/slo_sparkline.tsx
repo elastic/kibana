@@ -5,10 +5,21 @@
  * 2.0.
  */
 
-import { AreaSeries, Chart, Fit, LineSeries, ScaleType, Settings } from '@elastic/charts';
+import {
+  AreaSeries,
+  Axis,
+  Chart,
+  Fit,
+  LineSeries,
+  ScaleType,
+  Settings,
+  Tooltip,
+  TooltipType,
+} from '@elastic/charts';
 import React from 'react';
 import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
+
 import { useKibana } from '../../../utils/kibana_react';
 
 interface Data {
@@ -23,10 +34,10 @@ export interface Props {
   data: Data[];
   chart: ChartType;
   state: State;
-  loading: boolean;
+  isLoading: boolean;
 }
 
-export function SloSparkline({ chart, data, id, loading, state }: Props) {
+export function SloSparkline({ chart, data, id, isLoading, state }: Props) {
   const charts = useKibana().services.charts;
   const theme = charts.theme.useChartsTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
@@ -35,28 +46,40 @@ export function SloSparkline({ chart, data, id, loading, state }: Props) {
 
   const color = state === 'error' ? euiTheme.colors.danger : euiTheme.colors.success;
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
+  const LineAxisComponent =
+    chart === 'line' ? (
+      <Axis
+        id="axis"
+        hide
+        domain={{
+          min: 0,
+          max: 1,
+        }}
+        gridLine={{
+          visible: false,
+        }}
+      />
+    ) : null;
 
-  if (loading) {
-    return <EuiLoadingChart size="m" mono />;
+  if (isLoading) {
+    return <EuiLoadingChart style={{ minWidth: 60, justifyContent: 'center' }} size="m" mono />;
   }
 
   return (
-    <Chart size={{ height: 28, width: 80 }}>
+    <Chart size={{ height: 28, width: 60 }}>
       <Settings
         baseTheme={baseTheme}
         showLegend={false}
         theme={[theme, EUI_SPARKLINE_THEME_PARTIAL]}
-        tooltip="none"
       />
+      <Tooltip type={TooltipType.None} />
+      {LineAxisComponent}
       <ChartComponent
         color={color}
         data={data}
         fit={Fit.Nearest}
         id={id}
         lineSeriesStyle={{
-          line: {
-            strokeWidth: 1,
-          },
           point: { visible: false },
         }}
         xAccessor={'key'}

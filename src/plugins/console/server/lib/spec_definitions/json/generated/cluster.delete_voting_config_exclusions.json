@@ -1,7 +1,8 @@
 {
   "cluster.delete_voting_config_exclusions": {
     "url_params": {
-      "wait_for_removal": "__flag__"
+      "wait_for_removal": "__flag__",
+      "master_timeout": ""
     },
     "methods": [
       "DELETE"

@@ -8,11 +8,12 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBetaBadge, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LinkDescriptor, useLinkProps } from '@kbn/observability-plugin/public';
+import { LinkDescriptor, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { css } from '@emotion/react';
 import { EuiLinkColor } from '@elastic/eui';
-import { ExperimentalBadge } from './experimental_badge';
+import { BetaBadge } from './beta_badge';
 
+type OnClickEvent = React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>;
 interface Props {
   color?: EuiLinkColor;
   'data-test-subj'?: string;
@@ -20,7 +21,7 @@ interface Props {
   label: string;
   link: LinkDescriptor;
   hideBadge?: boolean;
-  onClick?: () => void;
+  onClick?: (e?: OnClickEvent) => void;
 }
 export const TryItButton = ({
   label,
@@ -33,6 +34,11 @@ export const TryItButton = ({
 }: Props) => {
   const linkProps = useLinkProps({ ...link });
 
+  const handleClick = (event: OnClickEvent) => {
+    if (linkProps.onClick) linkProps.onClick(event);
+    if (onClick) onClick(event);
+  };
+
   return (
     <EuiFlexGroup responsive={false} alignItems="center" gutterSize="m">
       {!hideBadge && (
@@ -40,7 +46,7 @@ export const TryItButton = ({
           <EuiLink
             data-test-subj={`${props['data-test-subj']}-badge`}
             {...linkProps}
-            onClick={onClick}
+            onClick={handleClick}
           >
             <EuiBetaBadge
               css={css`
@@ -60,12 +66,12 @@ export const TryItButton = ({
           data-test-subj={props['data-test-subj']}
           {...linkProps}
           color={color}
-          onClick={onClick}
+          onClick={handleClick}
         >
           <EuiFlexGroup wrap={false} responsive={false} gutterSize="m" alignItems="center">
             {experimental && (
               <EuiFlexItem grow={false}>
-                <ExperimentalBadge iconType="beaker" tooltipPosition="top" />
+                <BetaBadge iconType="beta" tooltipPosition="top" />
               </EuiFlexItem>
             )}
             <EuiFlexItem>{label}</EuiFlexItem>

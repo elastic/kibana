@@ -33,6 +33,8 @@ export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 
+export const CREATE_NEW_TIMELINE_WITH_BORDER = '[data-test-subj="timeline-new-with-border"]';
+
 export const CREATE_NEW_TIMELINE_TEMPLATE = '[data-test-subj="template-timeline-new"]';
 
 export const DATA_PROVIDERS = '.field-value';
@@ -92,6 +94,8 @@ export const NOTES_AUTHOR = '.euiCommentEvent__headerUsername';
 
 export const NOTES_LINK = '[data-test-subj="markdown-link"]';
 
+export const DELETE_NOTE = '[data-test-subj="delete-note"]';
+
 export const MARKDOWN_INVESTIGATE_BUTTON =
   '[data-test-subj="insight-investigate-in-timeline-button"]';
 
@@ -112,6 +116,8 @@ export const PROCESS_KPI = '[data-test-subj="siem-timeline-process-kpi"';
 
 export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
 
+export const PROVIDER_BADGE_DELETE = '.delete-data-provider';
+
 export const RESET_FIELDS =
   '[data-test-subj="fields-browser-container"] [data-test-subj="reset-fields"]';
 
@@ -128,6 +134,8 @@ export const QUERY_EVENT_TABLE_CELL =
 export const QUERY_TAB_BUTTON = '[data-test-subj="timelineTabs-query"]';
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
+
+export const ALERTS_TABLE_COUNT = `[data-test-subj="toolbar-alerts-count"]`;
 
 export const SOURCE_IP_KPI = '[data-test-subj="siem-timeline-source-ip-kpi"]';
 
@@ -203,7 +211,7 @@ export const TIMELINE_FILTER_OPERATOR = '[data-test-subj="filterOperatorList"]';
 export const TIMELINE_FILTER_VALUE =
   '[data-test-subj="filterParamsComboBox phraseParamsComboxBox"]';
 
-export const TIMELINE_FLYOUT = '[data-test-subj="eui-flyout"]';
+export const TIMELINE_FLYOUT = '[data-test-subj="timeline-flyout"]';
 
 export const TIMELINE_FLYOUT_HEADER = '[data-test-subj="query-tab-flyout-header"]';
 
@@ -293,7 +301,11 @@ export const EDIT_TIMELINE_TOOLTIP = '[data-test-subj="save-timeline-btn-tooltip
 export const ALERT_TABLE_SEVERITY_VALUES =
   '[data-test-subj="formatted-field-kibana.alert.severity"]';
 
+export const ALERT_TABLE_ACTIONS_HEADER = '[data-gridcell-column-id="expandColumn"]';
+
 export const ALERT_TABLE_FILE_NAME_HEADER = '[data-gridcell-column-id="file.name"]';
+
+export const ALERT_TABLE_SEVERITY_HEADER = '[data-gridcell-column-id="kibana.alert.severity"]';
 
 export const ALERT_TABLE_FILE_NAME_VALUES =
   '[data-gridcell-column-id="file.name"][data-test-subj="dataGridRowCell"]'; // empty column for the test data
@@ -308,12 +320,17 @@ export const EMPTY_DROPPABLE_DATA_PROVIDER_GROUP = `.empty-providers-group`;
 
 export const TIMELINE_DATA_PROVIDERS_CONTAINER = '[data-test-subj="dataProviders"]';
 
+export const TIMELINE_VIEW_IN_ANALYZER = '[data-test-subj="view-in-analyzer"]';
+
 export const EMPTY_DATA_PROVIDER_AREA = `.timeline-drop-area-empty`;
 
 export const HOVER_ACTIONS = {
-  ADD_TO_TIMELINE: '[data-test-subj="add-to-timeline"]',
-  FILTER_FOR: '[data-test-subj="filter-for-value"]',
-  FILTER_OUT: '[data-test-subj="filter-out-value"]',
-  COPY: '[data-test-subj="clipboard"]',
-  SHOW_TOP: 'show-top-field',
+  ADD_TO_TIMELINE: '[data-test-subj="hover-actions-add-timeline"]',
+  FILTER_FOR: '[data-test-subj="hover-actions-filter-for"]',
+  FILTER_OUT: '[data-test-subj="hovhover-actions-filter-out"]',
+  COPY: '[data-test-subj="hover-actions-copy-button"]',
+};
+
+export const GET_TIMELINE_HEADER = (fieldName: string) => {
+  return `[data-test-subj="timeline"] [data-test-subj="header-text-${fieldName}"]`;
 };

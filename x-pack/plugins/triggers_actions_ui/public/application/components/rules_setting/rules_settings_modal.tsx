@@ -66,7 +66,7 @@ export const RulesSettingsErrorPrompt = memo(() => {
     <EuiEmptyPrompt
       data-test-subj="rulesSettingsErrorPrompt"
       color="danger"
-      iconType="alert"
+      iconType="warning"
       title={
         <h4>
           <FormattedMessage

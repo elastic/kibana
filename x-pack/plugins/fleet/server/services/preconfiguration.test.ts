@@ -270,8 +270,13 @@ jest.mock('./app_context', () => ({
           },
         }
       ),
+    getUninstallTokenService: () => ({
+      generateTokenForPolicyId: jest.fn(),
+    }),
   },
 }));
+
+jest.mock('./audit_logging');
 
 const spyAgentPolicyServiceUpdate = jest.spyOn(agentPolicy.agentPolicyService, 'update');
 const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = jest.spyOn(
@@ -931,6 +936,7 @@ describe('comparePreconfiguredPolicyToCurrent', () => {
         policy_id: 'abc123',
       },
     ],
+    is_protected: false,
   };
 
   it('should return hasChanged when a top-level policy field changes', () => {

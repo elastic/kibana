@@ -107,6 +107,7 @@ export class SecurityPlugin
       securityLicense: license,
       logoutUrl: getLogoutUrl(core.http),
       securityApiClients: this.securityApiClients,
+      showNavLinks: this.config.showNavLinks,
     });
 
     this.analyticsService.setup({
@@ -131,6 +132,7 @@ export class SecurityPlugin
         authc: this.authc,
         fatalErrors: core.fatalErrors,
         getStartServices: core.getStartServices,
+        uiConfig: this.config.ui,
       });
     }
 
@@ -179,7 +181,10 @@ export class SecurityPlugin
     this.securityCheckupService.start({ http, notifications, docLinks });
 
     if (management) {
-      this.managementService.start({ capabilities: application.capabilities });
+      this.managementService.start({
+        capabilities: application.capabilities,
+        uiConfig: this.config.ui,
+      });
     }
 
     if (share) {

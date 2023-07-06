@@ -11,22 +11,18 @@ import {
   RULE_SWITCH,
   SECOND_RULE,
   FOURTH_RULE,
-  RULES_TABLE,
-  pageSelector,
+  RULES_MANAGEMENT_TABLE,
   RULES_ROW,
 } from '../../screens/alerts_detection_rules';
 import {
   enableRule,
-  changeRowsPerPageTo,
-  goToPage,
-  sortByEnabledRules,
   waitForRulesTableToBeLoaded,
   waitForRuleToUpdate,
 } from '../../tasks/alerts_detection_rules';
 import { login, visit } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
-import { createCustomRule } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import {
   getExistingRule,
@@ -34,15 +30,21 @@ import {
   getNewRule,
   getNewThresholdRule,
 } from '../../objects/rule';
+import { goToTablePage, setRowsPerPageTo, sortByTableColumn } from '../../tasks/table_pagination';
+import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../screens/table_pagination';
 
 describe('Alerts detection rules', () => {
   before(() => {
     cleanKibana();
     login();
-    createCustomRule(getNewRule(), '1');
-    createCustomRule(getExistingRule(), '2');
-    createCustomRule(getNewOverrideRule(), '3');
-    createCustomRule(getNewThresholdRule(), '4');
+    createRule(getNewRule({ rule_id: '1' }));
+    createRule(getExistingRule({ rule_id: '2' }));
+    createRule(getNewOverrideRule({ rule_id: '3' }));
+    createRule(getNewThresholdRule({ rule_id: '4' }));
+  });
+
+  beforeEach(() => {
+    login();
   });
 
   it('Sorts by enabled rules', () => {
@@ -57,38 +59,35 @@ describe('Alerts detection rules', () => {
     cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
     cy.get(RULE_SWITCH).eq(FOURTH_RULE).should('have.attr', 'role', 'switch');
 
-    sortByEnabledRules();
+    sortByTableColumn('Enabled', 'desc');
 
     cy.get(RULE_SWITCH).eq(FIRST_RULE).should('have.attr', 'role', 'switch');
     cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
   });
 
   it('Pagination updates page number and results', () => {
-    createCustomRule({ ...getNewRule(), name: 'Test a rule' }, '5');
-    createCustomRule({ ...getNewRule(), name: 'Not same as first rule' }, '6');
+    createRule(getNewRule({ name: 'Test a rule', rule_id: '5' }));
+    createRule(getNewRule({ name: 'Not same as first rule', rule_id: '6' }));
 
     visit(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
-    changeRowsPerPageTo(5);
+    setRowsPerPageTo(5);
 
-    const FIRST_PAGE_SELECTOR = pageSelector(1);
-    const SECOND_PAGE_SELECTOR = pageSelector(2);
+    cy.get(RULES_MANAGEMENT_TABLE).find(TABLE_FIRST_PAGE).should('have.attr', 'aria-current');
 
-    cy.get(RULES_TABLE).find(FIRST_PAGE_SELECTOR).should('have.attr', 'aria-current');
-
-    cy.get(RULES_TABLE)
+    cy.get(RULES_MANAGEMENT_TABLE)
       .find(RULE_NAME)
       .first()
       .invoke('text')
       .then((ruleNameFirstPage) => {
-        goToPage(2);
+        goToTablePage(2);
         // Check that the rules table shows at least one row
-        cy.get(RULES_TABLE).find(RULES_ROW).should('have.length.gte', 1);
+        cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length.gte', 1);
         // Check that the rules table doesn't show the rule from the first page
-        cy.get(RULES_TABLE).should('not.contain', ruleNameFirstPage);
+        cy.get(RULES_MANAGEMENT_TABLE).should('not.contain', ruleNameFirstPage);
       });
 
-    cy.get(RULES_TABLE).find(FIRST_PAGE_SELECTOR).should('not.have.attr', 'aria-current');
-    cy.get(RULES_TABLE).find(SECOND_PAGE_SELECTOR).should('have.attr', 'aria-current');
+    cy.get(RULES_MANAGEMENT_TABLE).find(TABLE_FIRST_PAGE).should('not.have.attr', 'aria-current');
+    cy.get(RULES_MANAGEMENT_TABLE).find(TABLE_SECOND_PAGE).should('have.attr', 'aria-current');
   });
 });

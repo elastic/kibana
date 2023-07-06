@@ -27,7 +27,7 @@ import type {
 export function buildActiveMappings(
   typeDefinitions: SavedObjectsTypeMappingDefinitions | SavedObjectsMappingProperties
 ): IndexMapping {
-  const mapping = defaultMapping();
+  const mapping = getBaseMappings();
 
   const mergedProperties = validateAndMerge(mapping.properties, typeDefinitions);
 
@@ -51,7 +51,7 @@ export function diffMappings(actual: IndexMapping, expected: IndexMapping) {
     return { changedProp: 'dynamic' };
   }
 
-  if (!actual._meta || !actual._meta.migrationMappingPropertyHashes) {
+  if (!actual._meta?.migrationMappingPropertyHashes) {
     return { changedProp: '_meta' };
   }
 
@@ -62,6 +62,30 @@ export function diffMappings(actual: IndexMapping, expected: IndexMapping) {
 
   return changedProp ? { changedProp: `properties.${changedProp}` } : undefined;
 }
+
+/**
+ * Compares the actual vs expected mappings' hashes.
+ * Returns a list with all the hashes that have been updated.
+ */
+export const getUpdatedHashes = ({
+  actual,
+  expected,
+}: {
+  actual: IndexMapping;
+  expected: IndexMapping;
+}): string[] => {
+  if (!actual._meta?.migrationMappingPropertyHashes) {
+    return Object.keys(expected._meta!.migrationMappingPropertyHashes!);
+  }
+
+  const updatedHashes = Object.keys(expected._meta!.migrationMappingPropertyHashes!).filter(
+    (key) =>
+      actual._meta!.migrationMappingPropertyHashes![key] !==
+      expected._meta!.migrationMappingPropertyHashes![key]
+  );
+
+  return updatedHashes;
+};
 
 // Convert an object to an md5 hash string, using a stable serialization (canonicalStringify)
 function md5Object(obj: any) {
@@ -114,16 +138,10 @@ function findChangedProp(actual: any, expected: any) {
  *
  * @returns {IndexMapping}
  */
-function defaultMapping(): IndexMapping {
+export function getBaseMappings(): IndexMapping {
   return {
     dynamic: 'strict',
     properties: {
-      migrationVersion: {
-        // Saved Objects can't redefine dynamic, but we cheat here to support migrations
-        // @ts-expect-error
-        dynamic: 'true',
-        type: 'object',
-      },
       type: {
         type: 'keyword',
       },
@@ -158,6 +176,12 @@ function defaultMapping(): IndexMapping {
       },
       coreMigrationVersion: {
         type: 'keyword',
+      },
+      typeMigrationVersion: {
+        type: 'version',
+      },
+      managed: {
+        type: 'boolean',
       },
     },
   };

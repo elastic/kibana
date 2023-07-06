@@ -6,13 +6,180 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
+
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { StepDefineRule, aggregatableFields } from '.';
-import { stepDefineDefaultValue } from '../../../pages/detection_engine/rules/utils';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
+import { useRuleFromTimeline } from '../../../containers/detection_engine/rules/use_rule_from_timeline';
+import { fireEvent, render, within } from '@testing-library/react';
+import { TestProviders } from '../../../../common/mock';
+import { useRuleForms } from '../../../../detection_engine/rule_creation_ui/pages/form';
+import { stepActionsDefaultValue } from '../step_rule_actions';
+import {
+  defaultSchedule,
+  stepAboutDefaultValue,
+  stepDefineDefaultValue,
+} from '../../../pages/detection_engine/rules/utils';
+import type { FormHook } from '../../../../shared_imports';
+import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/components/query_bar', () => {
+  return {
+    QueryBar: jest.fn(({ filterQuery }) => {
+      return <div data-test-subj="query-bar">{`${filterQuery.query} ${filterQuery.language}`}</div>;
+    }),
+  };
+});
+
+const mockRedirectLegacyUrl = jest.fn();
+const mockGetLegacyUrlConflict = jest.fn();
+jest.mock('../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+      remove: jest.fn(),
+    }),
+    useKibana: () => ({
+      services: {
+        ...originalModule.useKibana().services,
+        storage: {
+          get: jest.fn().mockReturnValue(true),
+        },
+        application: {
+          getUrlForApp: (appId: string, options?: { path?: string }) =>
+            `/app/${appId}${options?.path}`,
+          navigateToApp: jest.fn(),
+          capabilities: {
+            actions: {
+              delete: true,
+              save: true,
+              show: true,
+            },
+          },
+        },
+        data: {
+          dataViews: {
+            getIdsWithTitle: async () =>
+              Promise.resolve([{ id: 'myfakeid', title: 'hello*,world*,refreshed*' }]),
+            create: async ({ title }: { title: string }) =>
+              Promise.resolve({
+                id: 'myfakeid',
+                matchedIndices: ['hello', 'world', 'refreshed'],
+                fields: [
+                  {
+                    name: 'bytes',
+                    type: 'number',
+                    esTypes: ['long'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 10,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                  {
+                    name: 'ssl',
+                    type: 'boolean',
+                    esTypes: ['boolean'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 20,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                  {
+                    name: '@timestamp',
+                    type: 'date',
+                    esTypes: ['date'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 30,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                ],
+                getIndexPattern: () => 'hello*,world*,refreshed*',
+                getRuntimeMappings: () => ({
+                  myfield: {
+                    type: 'keyword',
+                  },
+                }),
+              }),
+            get: async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
+              Promise.resolve({
+                id: dataViewId,
+                matchedIndices: refreshFields
+                  ? ['hello', 'world', 'refreshed']
+                  : ['hello', 'world'],
+                fields: [
+                  {
+                    name: 'bytes',
+                    type: 'number',
+                    esTypes: ['long'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 10,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                  {
+                    name: 'ssl',
+                    type: 'boolean',
+                    esTypes: ['boolean'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 20,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                  {
+                    name: '@timestamp',
+                    type: 'date',
+                    esTypes: ['date'],
+                    aggregatable: true,
+                    searchable: true,
+                    count: 30,
+                    readFromDocValues: true,
+                    scripted: false,
+                    isMapped: true,
+                  },
+                ],
+                getIndexPattern: () => 'hello*,world*,refreshed*',
+                getRuntimeMappings: () => ({
+                  myfield: {
+                    type: 'keyword',
+                  },
+                }),
+              }),
+          },
+          search: {
+            search: () => ({
+              subscribe: () => ({
+                unsubscribe: jest.fn(),
+              }),
+            }),
+          },
+        },
+        spaces: {
+          ui: {
+            components: { getLegacyUrlConflict: mockGetLegacyUrlConflict },
+            redirectLegacyUrl: mockRedirectLegacyUrl,
+          },
+        },
+      },
+    }),
+  };
+});
 jest.mock('../../../../common/hooks/use_selector', () => {
   const actual = jest.requireActual('../../../../common/hooks/use_selector');
   return {
@@ -61,6 +228,8 @@ jest.mock('react-redux', () => {
   };
 });
 
+jest.mock('../../../containers/detection_engine/rules/use_rule_from_timeline');
+
 test('aggregatableFields', function () {
   expect(
     aggregatableFields([
@@ -108,18 +277,130 @@ test('aggregatableFields with aggregatable: true', function () {
   ]);
 });
 
+const mockUseRuleFromTimeline = useRuleFromTimeline as jest.Mock;
+const onOpenTimeline = jest.fn();
 describe('StepDefineRule', () => {
-  it('renders correctly', () => {
-    const wrapper = shallow(
+  const TestComp = ({
+    setFormRef,
+    ruleType = stepDefineDefaultValue.ruleType,
+  }: {
+    setFormRef: (form: FormHook<DefineStepRule, DefineStepRule>) => void;
+    ruleType?: Type;
+  }) => {
+    const { defineStepForm, eqlOptionsSelected, setEqlOptionsSelected } = useRuleForms({
+      defineStepDefault: { ...stepDefineDefaultValue, ruleType },
+      aboutStepDefault: stepAboutDefaultValue,
+      scheduleStepDefault: defaultSchedule,
+      actionsStepDefault: stepActionsDefaultValue,
+    });
+
+    setFormRef(defineStepForm);
+
+    return (
       <StepDefineRule
-        isReadOnlyView={false}
         isLoading={false}
+        form={defineStepForm}
         indicesConfig={[]}
         threatIndicesConfig={[]}
-        defaultValues={stepDefineDefaultValue}
+        optionsSelected={eqlOptionsSelected}
+        setOptionsSelected={setEqlOptionsSelected}
+        indexPattern={{ fields: [], title: '' }}
+        isIndexPatternLoading={false}
+        browserFields={{}}
+        isQueryBarValid={true}
+        setIsQueryBarValid={() => {}}
+        setIsThreatQueryBarValid={() => {}}
+        ruleType={ruleType}
+        index={stepDefineDefaultValue.index}
+        threatIndex={stepDefineDefaultValue.threatIndex}
+        groupByFields={stepDefineDefaultValue.groupByFields}
+        dataSourceType={stepDefineDefaultValue.dataSourceType}
+        shouldLoadQueryDynamically={stepDefineDefaultValue.shouldLoadQueryDynamically}
+        queryBarTitle=""
+        queryBarSavedId=""
       />
     );
+  };
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseRuleFromTimeline.mockReturnValue({ onOpenTimeline, loading: false });
+  });
+  it('renders correctly', () => {
+    const wrapper = mount(<TestComp setFormRef={() => {}} />, {
+      wrappingComponent: TestProviders,
+    });
 
     expect(wrapper.find('Form[data-test-subj="stepDefineRule"]')).toHaveLength(1);
+  });
+
+  const kqlQuery = {
+    index: ['.alerts-security.alerts-default', 'logs-*', 'packetbeat-*'],
+    queryBar: {
+      filters: [],
+      query: {
+        query: 'host.name:*',
+        language: 'kuery',
+      },
+      saved_id: null,
+    },
+  };
+
+  const eqlQuery = {
+    index: ['.alerts-security.alerts-default', 'logs-*', 'packetbeat-*'],
+    queryBar: {
+      filters: [],
+      query: {
+        query: 'process where true',
+        language: 'eql',
+      },
+      saved_id: null,
+    },
+    eqlOptions: {
+      eventCategoryField: 'cool.field',
+      tiebreakerField: 'another.field',
+      timestampField: 'cool.@timestamp',
+      query: 'process where true',
+      size: 77,
+    },
+  };
+  it('handleSetRuleFromTimeline correctly updates the query', () => {
+    mockUseRuleFromTimeline.mockImplementation((handleSetRuleFromTimeline) => {
+      handleSetRuleFromTimeline(kqlQuery);
+      return { onOpenTimeline, loading: false };
+    });
+    const { getAllByTestId } = render(
+      <TestProviders>
+        <TestComp setFormRef={() => {}} />
+      </TestProviders>
+    );
+    expect(getAllByTestId('query-bar')[0].textContent).toEqual(
+      `${kqlQuery.queryBar.query.query} ${kqlQuery.queryBar.query.language}`
+    );
+  });
+  it('handleSetRuleFromTimeline correctly updates eql query', async () => {
+    mockUseRuleFromTimeline
+      .mockImplementationOnce(() => ({ onOpenTimeline, loading: false }))
+      .mockImplementationOnce((handleSetRuleFromTimeline) => {
+        handleSetRuleFromTimeline(eqlQuery);
+        return { onOpenTimeline, loading: false };
+      });
+    const { getByTestId } = render(
+      <TestProviders>
+        <TestComp setFormRef={() => {}} ruleType="eql" />
+      </TestProviders>
+    );
+    expect(getByTestId(`eqlQueryBarTextInput`).textContent).toEqual(eqlQuery.queryBar.query.query);
+    fireEvent.click(getByTestId(`eql-settings-trigger`));
+    expect(
+      within(getByTestId(`eql-event-category-field`)).queryByText(
+        eqlQuery.eqlOptions.eventCategoryField
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(getByTestId(`eql-tiebreaker-field`)).queryByText(eqlQuery.eqlOptions.tiebreakerField)
+    ).toBeInTheDocument();
+    expect(
+      within(getByTestId(`eql-timestamp-field`)).queryByText(eqlQuery.eqlOptions.timestampField)
+    ).toBeInTheDocument();
   });
 });

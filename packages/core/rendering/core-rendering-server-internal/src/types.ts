@@ -20,6 +20,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { InternalCustomBrandingSetup } from '@kbn/core-custom-branding-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
 
 /** @internal */
 export interface RenderingMetadata {
@@ -48,6 +49,7 @@ export interface RenderingSetupDeps {
   status: InternalStatusServiceSetup;
   uiPlugins: UiPlugins;
   customBranding: InternalCustomBrandingSetup;
+  userSettings: InternalUserSettingsServiceSetup;
 }
 
 /** @internal */

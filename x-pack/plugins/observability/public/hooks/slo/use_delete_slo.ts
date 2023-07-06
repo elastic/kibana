@@ -5,42 +5,80 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
+import { FindSLOResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
+import { sloKeys } from './query_key_factory';
 
-interface UseDeleteSlo {
-  loading: boolean;
-  success: boolean;
-  error: string | undefined;
-  deleteSlo: (id: string) => void;
-}
+export function useDeleteSlo() {
+  const {
+    http,
+    notifications: { toasts },
+  } = useKibana().services;
+  const queryClient = useQueryClient();
 
-export function useDeleteSlo(): UseDeleteSlo {
-  const { http } = useKibana().services;
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | undefined>(undefined);
-
-  const deleteSlo = useCallback(
-    async (id: string) => {
-      setLoading(true);
-      setError('');
-      setSuccess(false);
-
+  return useMutation<
+    string,
+    string,
+    { id: string; name: string },
+    { previousData?: FindSLOResponse; queryKey?: QueryKey }
+  >(
+    ['deleteSlo'],
+    ({ id }) => {
       try {
-        await http.delete<string>(`/api/observability/slos/${id}`);
-        setSuccess(true);
-      } catch (e) {
-        setError(e);
+        return http.delete<string>(`/api/observability/slos/${id}`);
+      } catch (error) {
+        return Promise.reject(`Something went wrong: ${String(error)}`);
       }
     },
-    [http]
-  );
+    {
+      onMutate: async (slo) => {
+        await queryClient.cancelQueries({ queryKey: sloKeys.lists(), exact: false });
 
-  return {
-    loading,
-    error,
-    success,
-    deleteSlo,
-  };
+        const queriesData = queryClient.getQueriesData<FindSLOResponse>({
+          queryKey: sloKeys.lists(),
+          exact: false,
+        });
+        const [queryKey, previousData] = queriesData?.at(0) ?? [];
+
+        const optimisticUpdate = {
+          page: previousData?.page ?? 1,
+          perPage: previousData?.perPage ?? 25,
+          total: previousData?.total ? previousData.total - 1 : 0,
+          results: previousData?.results?.filter((result) => result.id !== slo.id) ?? [],
+        };
+
+        if (queryKey) {
+          queryClient.setQueryData(queryKey, optimisticUpdate);
+        }
+
+        return { previousData, queryKey };
+      },
+      // If the mutation fails, use the context returned from onMutate to roll back
+      onError: (_err, { name }, context) => {
+        if (context?.previousData && context?.queryKey) {
+          queryClient.setQueryData(context.queryKey, context.previousData);
+        }
+
+        toasts.addDanger(
+          i18n.translate('xpack.observability.slo.slo.delete.errorNotification', {
+            defaultMessage: 'Failed to delete {name}',
+            values: { name },
+          })
+        );
+      },
+      onSuccess: (_data, { name }) => {
+        toasts.addSuccess(
+          i18n.translate('xpack.observability.slo.slo.delete.successNotification', {
+            defaultMessage: 'Deleted {name}',
+            values: { name },
+          })
+        );
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
+      },
+    }
+  );
 }

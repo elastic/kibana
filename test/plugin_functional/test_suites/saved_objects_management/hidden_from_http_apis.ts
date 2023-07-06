@@ -107,9 +107,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       describe('find', () => {
         it('returns saved objects registered as hidden from the http Apis', async () => {
           await supertest
-            .get(
-              `/api/kibana/management/saved_objects/_find?type=${hiddenFromHttpApisType.type}&fields=title`
-            )
+            .get(`/api/kibana/management/saved_objects/_find?type=${hiddenFromHttpApisType.type}`)
             .set('kbn-xsrf', 'true')
             .expect(200)
             .then((resp) => {
@@ -190,6 +188,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
                       title: 'I am hidden from http apis but the client can still see me',
                     },
                     type: 'test-hidden-from-http-apis-importable-exportable',
+                    managed: false,
                   },
                   {
                     id: 'not-hidden-from-http-apis-import1',
@@ -197,6 +196,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
                       title: 'I am not hidden from http apis',
                     },
                     type: 'test-not-hidden-from-http-apis-importable-exportable',
+                    managed: false,
                   },
                 ],
                 warnings: [],

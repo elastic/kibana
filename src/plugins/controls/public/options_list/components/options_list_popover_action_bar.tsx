@@ -17,12 +17,11 @@ import {
   EuiToolTip,
   EuiText,
 } from '@elastic/eui';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
-import { OptionsListReduxState } from '../types';
 import { OptionsListStrings } from './options_list_strings';
-import { optionsListReducers } from '../options_list_reducers';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
+import { OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE } from '../../../common/options_list/types';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
@@ -35,20 +34,20 @@ export const OptionsListPopoverActionBar = ({
   updateSearchString,
   setShowOnlySelected,
 }: OptionsListPopoverProps) => {
-  // Redux embeddable container Context
-  const {
-    useEmbeddableDispatch,
-    useEmbeddableSelector: select,
-    actions: { clearSelections },
-  } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
-  const dispatch = useEmbeddableDispatch();
+  const optionsList = useOptionsList();
 
-  // Select current state from Redux using multiple selectors to avoid rerenders.
-  const allowExpensiveQueries = select((state) => state.componentState.allowExpensiveQueries);
-  const invalidSelections = select((state) => state.componentState.invalidSelections);
-  const totalCardinality = select((state) => state.componentState.totalCardinality) ?? 0;
-  const searchString = select((state) => state.componentState.searchString);
-  const hideSort = select((state) => state.explicitInput.hideSort);
+  const totalCardinality =
+    optionsList.select((state) => state.componentState.totalCardinality) ?? 0;
+  const searchString = optionsList.select((state) => state.componentState.searchString);
+  const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+
+  const searchTechnique = optionsList.select((state) => state.explicitInput.searchTechnique);
+
+  const allowExpensiveQueries = optionsList.select(
+    (state) => state.componentState.allowExpensiveQueries
+  );
+
+  const hideSort = optionsList.select((state) => state.explicitInput.hideSort);
 
   return (
     <div className="optionsList__actions">
@@ -63,8 +62,9 @@ export const OptionsListPopoverActionBar = ({
               onChange={(event) => updateSearchString(event.target.value)}
               value={searchString.value}
               data-test-subj="optionsList-control-search-input"
-              placeholder={OptionsListStrings.popover.getSearchPlaceholder()}
-              autoFocus={true}
+              placeholder={OptionsListStrings.popover.searchPlaceholder[
+                searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE
+              ].getPlaceholderText()}
             />
           </EuiFlexItem>
           {!hideSort && (
@@ -131,21 +131,6 @@ export const OptionsListPopoverActionBar = ({
                         ? OptionsListStrings.popover.getAllOptionsButtonTitle()
                         : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
                     }
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                >
-                  <EuiButtonIcon
-                    size="xs"
-                    color="danger"
-                    iconType="eraser"
-                    onClick={() => dispatch(clearSelections({}))}
-                    data-test-subj="optionsList-control-clear-all-selections"
-                    aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
                   />
                 </EuiToolTip>
               </EuiFlexItem>

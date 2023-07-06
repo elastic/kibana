@@ -63,6 +63,12 @@ export function mlSavedObjectServiceFactory(
     (options: SavedObjectsFindOptions) => JSON.stringify(options)
   );
 
+  function _clearSavedObjectsClientCache() {
+    if (_savedObjectsClientFindMemo.cache.clear) {
+      _savedObjectsClientFindMemo.cache.clear();
+    }
+  }
+
   async function _getJobObjects(
     jobType?: JobType,
     jobId?: string,
@@ -118,6 +124,7 @@ export function mlSavedObjectServiceFactory(
         } else {
           // the saved object has no spaces, this is unexpected, attempt a normal delete
           await savedObjectsClient.delete(ML_JOB_SAVED_OBJECT_TYPE, id, { force: true });
+          _clearSavedObjectsClientCache();
         }
       }
     } catch (error) {
@@ -128,11 +135,12 @@ export function mlSavedObjectServiceFactory(
     await savedObjectsClient.create<JobObject>(ML_JOB_SAVED_OBJECT_TYPE, job, {
       id,
     });
+    _clearSavedObjectsClientCache();
   }
 
   async function _bulkCreateJobs(jobs: Array<{ job: JobObject; namespaces: string[] }>) {
     await isMlReady();
-    return await savedObjectsClient.bulkCreate<JobObject>(
+    const results = await savedObjectsClient.bulkCreate<JobObject>(
       jobs.map((j) => ({
         type: ML_JOB_SAVED_OBJECT_TYPE,
         id: _jobSavedObjectId(j.job),
@@ -140,6 +148,8 @@ export function mlSavedObjectServiceFactory(
         initialNamespaces: j.namespaces,
       }))
     );
+    _clearSavedObjectsClientCache();
+    return results;
   }
 
   function _jobSavedObjectId(job: JobObject) {
@@ -154,6 +164,7 @@ export function mlSavedObjectServiceFactory(
     }
 
     await savedObjectsClient.delete(ML_JOB_SAVED_OBJECT_TYPE, job.id, { force: true });
+    _clearSavedObjectsClientCache();
   }
 
   async function _forceDeleteJob(jobType: JobType, jobId: string, namespace: string) {
@@ -169,6 +180,7 @@ export function mlSavedObjectServiceFactory(
       namespace: namespace === '*' ? undefined : namespace,
       force: true,
     });
+    _clearSavedObjectsClientCache();
   }
 
   async function createAnomalyDetectionJob(jobId: string, datafeedId?: string) {
@@ -236,8 +248,7 @@ export function mlSavedObjectServiceFactory(
       filter,
     };
 
-    const jobs = await _savedObjectsClientFindMemo<JobObject>(options);
-    return jobs.saved_objects;
+    return (await internalSavedObjectsClient.find<JobObject>(options)).saved_objects;
   }
 
   async function addDatafeed(datafeedId: string, jobId: string) {
@@ -250,6 +261,7 @@ export function mlSavedObjectServiceFactory(
     const jobObject = job.attributes;
     jobObject.datafeed_id = datafeedId;
     await savedObjectsClient.update<JobObject>(ML_JOB_SAVED_OBJECT_TYPE, job.id, jobObject);
+    _clearSavedObjectsClientCache();
   }
 
   async function deleteDatafeed(datafeedId: string) {
@@ -262,6 +274,7 @@ export function mlSavedObjectServiceFactory(
     const jobObject = job.attributes;
     jobObject.datafeed_id = null;
     await savedObjectsClient.update<JobObject>(ML_JOB_SAVED_OBJECT_TYPE, job.id, jobObject);
+    _clearSavedObjectsClientCache();
   }
 
   async function _getIds(jobType: JobType, idType: keyof JobObject) {
@@ -372,6 +385,8 @@ export function mlSavedObjectServiceFactory(
         spacesToAdd,
         spacesToRemove
       );
+      _clearSavedObjectsClientCache();
+
       updateResult.objects.forEach(({ id: objectId, error }) => {
         const jobId = jobObjectIdMap.get(objectId)!;
         if (error) {
@@ -492,6 +507,7 @@ export function mlSavedObjectServiceFactory(
           await savedObjectsClient.delete(ML_TRAINED_MODEL_SAVED_OBJECT_TYPE, modelId, {
             force: true,
           });
+          _clearSavedObjectsClientCache();
         }
       }
     } catch (error) {
@@ -518,6 +534,7 @@ export function mlSavedObjectServiceFactory(
         ...(initialNamespaces ? { initialNamespaces } : {}),
       }
     );
+    _clearSavedObjectsClientCache();
   }
 
   async function _bulkCreateTrainedModel(models: TrainedModelObject[], namespaceFallback?: string) {
@@ -528,7 +545,7 @@ export function mlSavedObjectServiceFactory(
       return acc;
     }, {} as Record<string, string[] | undefined>);
 
-    return await savedObjectsClient.bulkCreate<TrainedModelObject>(
+    const results = await savedObjectsClient.bulkCreate<TrainedModelObject>(
       models.map((m) => {
         let initialNamespaces = m.job && namespacesPerJob[m.job.job_id];
         if (!initialNamespaces?.length && namespaceFallback) {
@@ -546,6 +563,8 @@ export function mlSavedObjectServiceFactory(
         };
       })
     );
+    _clearSavedObjectsClientCache();
+    return results;
   }
 
   async function getAllTrainedModelObjectsForAllSpaces(modelIds?: string[]) {
@@ -577,6 +596,7 @@ export function mlSavedObjectServiceFactory(
     }
 
     await savedObjectsClient.delete(ML_TRAINED_MODEL_SAVED_OBJECT_TYPE, model.id, { force: true });
+    _clearSavedObjectsClientCache();
   }
 
   async function _forceDeleteTrainedModel(modelId: string, namespace: string) {
@@ -586,6 +606,7 @@ export function mlSavedObjectServiceFactory(
       namespace: namespace === '*' ? undefined : namespace,
       force: true,
     });
+    _clearSavedObjectsClientCache();
   }
 
   async function filterTrainedModelsForSpace<T>(list: T[], field: keyof T): Promise<T[]> {
@@ -729,6 +750,8 @@ export function mlSavedObjectServiceFactory(
         spacesToAdd,
         spacesToRemove
       );
+      _clearSavedObjectsClientCache();
+
       updateResult.objects.forEach(({ id: objectId, error }) => {
         const model = trainedModelObjectIdMap.get(objectId)!;
         if (error) {

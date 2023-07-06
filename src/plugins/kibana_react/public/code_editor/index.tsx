@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiDelayRender, EuiErrorBoundary, EuiLoadingContent } from '@elastic/eui';
+import { EuiDelayRender, EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
 
 import { useUiSetting } from '../ui_settings';
 import type { Props } from './code_editor';
@@ -25,7 +25,7 @@ const Fallback: React.FunctionComponent<{ height: Props['height'] }> = ({ height
       {/* when height is known, set minHeight to avoid layout shift */}
       <div style={height ? { minHeight: height } : {}}>
         <EuiDelayRender>
-          <EuiLoadingContent lines={3} />
+          <EuiSkeletonText lines={3} />
         </EuiDelayRender>
       </div>
     </>

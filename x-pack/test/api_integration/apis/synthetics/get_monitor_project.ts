@@ -6,27 +6,22 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import type SuperTest from 'supertest';
-import { format as formatUrl } from 'url';
 import {
   LegacyProjectMonitorsRequest,
   ProjectMonitor,
   ProjectMonitorMetaData,
 } from '@kbn/synthetics-plugin/common/runtime_types';
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getFixtureJson } from '../uptime/rest/helper/get_fixture_json';
+import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
-import { parseStreamApiResponse } from './add_monitor_project_legacy';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('GetProjectMonitors', function () {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
-    const config = getService('config');
-    const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
-    const projectMonitorEndpoint = kibanaServerUrl + API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY;
 
     let projectMonitors: LegacyProjectMonitorsRequest;
     let httpProjectMonitors: LegacyProjectMonitorsRequest;
@@ -44,12 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      await supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
-      await supertest
-        .post('/api/fleet/epm/packages/synthetics/0.11.4')
-        .set('kbn-xsrf', 'true')
-        .send({ force: true })
-        .expect(200);
+      await testPrivateLocations.installSyntheticsPackage();
 
       const testPolicyName = 'Fleet test server policy' + Date.now();
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
@@ -76,17 +66,37 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       try {
-        await parseStreamApiResponse(
-          projectMonitorEndpoint,
-          JSON.stringify({
-            ...projectMonitors,
-            project,
-            monitors,
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(0, 250),
           })
-        );
+          .expect(200);
+
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(250, 500),
+          })
+          .expect(200);
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(500, 600),
+          })
+          .expect(200);
 
         const firstPageResponse = await supertest
-          .get(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -97,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(afterKey).to.eql('test browser id 548');
 
         const secondPageResponse = await supertest
-          .get(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .query({
             search_after: afterKey,
@@ -108,15 +118,29 @@ export default function ({ getService }: FtrProviderContext) {
         expect(secondPageMonitors.length).to.eql(100);
         checkFields([...firstPageMonitors, ...secondPageMonitors], monitors);
       } finally {
-        await parseStreamApiResponse(
-          projectMonitorEndpoint,
-          JSON.stringify({
-            ...projectMonitors,
-            project,
-            keep_stale: false,
-            monitors: [],
-          })
-        );
+        const monitorsToDelete = monitors.map((monitor) => monitor.id);
+
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(0, 250) })
+          .expect(200);
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(250, 500) })
+          .expect(200);
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(500, 600) })
+          .expect(200);
       }
     });
 
@@ -132,17 +156,37 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       try {
-        await parseStreamApiResponse(
-          projectMonitorEndpoint,
-          JSON.stringify({
-            ...projectMonitors,
-            project,
-            monitors,
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(0, 250),
           })
-        );
+          .expect(200);
+
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(250, 500),
+          })
+          .expect(200);
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(500, 600),
+          })
+          .expect(200);
 
         const firstPageResponse = await supertest
-          .get(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -157,7 +201,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(afterKey).to.eql('test http id 548');
 
         const secondPageResponse = await supertest
-          .get(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .query({
             search_after: afterKey,
@@ -168,15 +212,29 @@ export default function ({ getService }: FtrProviderContext) {
         expect(secondPageProjectMonitors.length).to.eql(100);
         checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
       } finally {
-        await parseStreamApiResponse(
-          projectMonitorEndpoint,
-          JSON.stringify({
-            ...projectMonitors,
-            project,
-            keep_stale: false,
-            monitors: [],
-          })
-        );
+        const monitorsToDelete = monitors.map((monitor) => monitor.id);
+
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(0, 250) })
+          .expect(200);
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(250, 500) })
+          .expect(200);
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(500, 600) })
+          .expect(200);
       }
     });
 
@@ -192,17 +250,37 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       try {
-        await parseStreamApiResponse(
-          projectMonitorEndpoint,
-          JSON.stringify({
-            ...projectMonitors,
-            project,
-            monitors,
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(0, 250),
           })
-        );
+          .expect(200);
+
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(250, 500),
+          })
+          .expect(200);
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(500, 600),
+          })
+          .expect(200);
 
         const firstPageResponse = await supertest
-          .get(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -217,7 +295,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(afterKey).to.eql('test tcp id 548');
 
         const secondPageResponse = await supertest
-          .get(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .query({
             search_after: afterKey,
@@ -228,15 +306,29 @@ export default function ({ getService }: FtrProviderContext) {
         expect(secondPageProjectMonitors.length).to.eql(100);
         checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
       } finally {
-        await parseStreamApiResponse(
-          projectMonitorEndpoint,
-          JSON.stringify({
-            ...projectMonitors,
-            project,
-            keep_stale: false,
-            monitors: [],
-          })
-        );
+        const monitorsToDelete = monitors.map((monitor) => monitor.id);
+
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(0, 250) })
+          .expect(200);
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(250, 500) })
+          .expect(200);
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(500, 600) })
+          .expect(200);
       }
     });
 
@@ -252,17 +344,36 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       try {
-        await parseStreamApiResponse(
-          projectMonitorEndpoint,
-          JSON.stringify({
-            ...projectMonitors,
-            project,
-            monitors,
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(0, 250),
           })
-        );
+          .expect(200);
 
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(250, 500),
+          })
+          .expect(200);
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(500, 600),
+          })
+          .expect(200);
         const firstPageResponse = await supertest
-          .get(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -277,7 +388,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(afterKey).to.eql('test icmp id 548');
 
         const secondPageResponse = await supertest
-          .get(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .query({
             search_after: afterKey,
@@ -289,15 +400,29 @@ export default function ({ getService }: FtrProviderContext) {
 
         checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
       } finally {
-        await parseStreamApiResponse(
-          projectMonitorEndpoint,
-          JSON.stringify({
-            ...projectMonitors,
-            project,
-            keep_stale: false,
-            monitors: [],
-          })
-        );
+        const monitorsToDelete = monitors.map((monitor) => monitor.id);
+
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(0, 250) })
+          .expect(200);
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(250, 500) })
+          .expect(200);
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(500, 600) })
+          .expect(200);
       }
     });
 
@@ -313,19 +438,50 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       try {
-        await parseStreamApiResponse(
-          projectMonitorEndpoint,
-          JSON.stringify({
-            ...projectMonitors,
-            project: projectName,
-            keep_stale: false,
-            monitors,
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              projectName
+            )
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(0, 250),
           })
-        );
+          .expect(200);
+
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              projectName
+            )
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(250, 500),
+          })
+          .expect(200);
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
+              '{projectName}',
+              projectName
+            )
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(500, 600),
+          })
+          .expect(200);
 
         const firstPageResponse = await supertest
           .get(
-            API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', encodeURI(projectName))
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace(
+              '{projectName}',
+              encodeURI(projectName)
+            )
           )
           .set('kbn-xsrf', 'true')
           .send()
@@ -342,7 +498,10 @@ export default function ({ getService }: FtrProviderContext) {
 
         const secondPageResponse = await supertest
           .get(
-            API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', encodeURI(projectName))
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace(
+              '{projectName}',
+              encodeURI(projectName)
+            )
           )
           .set('kbn-xsrf', 'true')
           .query({
@@ -355,20 +514,44 @@ export default function ({ getService }: FtrProviderContext) {
 
         checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
       } finally {
-        await parseStreamApiResponse(
-          projectMonitorEndpoint,
-          JSON.stringify({
-            ...projectMonitors,
-            project: projectName,
-            keep_stale: false,
-            monitors: [],
-          })
-        );
+        const monitorsToDelete = monitors.map((monitor) => monitor.id);
+
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+              '{projectName}',
+              encodeURI(projectName)
+            )
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(0, 250) })
+          .expect(200);
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+              '{projectName}',
+              encodeURI(projectName)
+            )
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(250, 500) })
+          .expect(200);
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+              '{projectName}',
+              encodeURI(projectName)
+            )
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(500, 600) })
+          .expect(200);
       }
     });
 
     it('project monitors - handles per_page parameter', async () => {
       const monitors = [];
+      const project = 'test-suite';
       const perPage = 250;
       for (let i = 0; i < 600; i++) {
         monitors.push({
@@ -379,20 +562,42 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       try {
-        await parseStreamApiResponse(
-          projectMonitorEndpoint,
-          JSON.stringify({
-            ...projectMonitors,
-            monitors,
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(0, 250),
           })
-        );
+          .expect(200);
+
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(250, 500),
+          })
+          .expect(200);
+        await supertest
+          .put(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors: monitors.slice(500, 600),
+          })
+          .expect(200);
+
         let count = Number.MAX_VALUE;
         let afterId;
         const fullResponse: ProjectMonitorMetaData[] = [];
         let page = 1;
         while (count >= 250) {
           const response: SuperTest.Response = await supertest
-            .get(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', 'test-suite'))
+            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
             .set('kbn-xsrf', 'true')
             .query({
               per_page: perPage,
@@ -417,14 +622,29 @@ export default function ({ getService }: FtrProviderContext) {
         // expect(fullResponse.length).to.eql(600);
         // checkFields(fullResponse, monitors);
       } finally {
-        await parseStreamApiResponse(
-          projectMonitorEndpoint,
-          JSON.stringify({
-            ...projectMonitors,
-            keep_stale: false,
-            monitors: [],
-          })
-        );
+        const monitorsToDelete = monitors.map((monitor) => monitor.id);
+
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(0, 250) })
+          .expect(200);
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(250, 500) })
+          .expect(200);
+        await supertest
+          .delete(
+            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete.slice(500, 600) })
+          .expect(200);
       }
     });
   });

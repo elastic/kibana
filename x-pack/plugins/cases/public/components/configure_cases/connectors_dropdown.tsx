@@ -31,6 +31,16 @@ const EuiIconExtended = styled(EuiIcon)`
   margin-bottom: 0 !important;
 `;
 
+const AddNewConnectorOption = styled.span`
+  font-size: ${(props) => props.theme.eui.euiFontSizeXS};
+  font-weight: ${(props) => props.theme.eui.euiFontWeightMedium};
+  line-height: ${(props) => props.theme.eui.euiSizeL};
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 const noConnectorOption = {
   value: 'none',
   inputDisplay: (
@@ -48,11 +58,7 @@ const noConnectorOption = {
 
 const addNewConnector = {
   value: 'add-connector',
-  inputDisplay: (
-    <span className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft">
-      {i18n.ADD_NEW_CONNECTOR}
-    </span>
-  ),
+  inputDisplay: <AddNewConnectorOption>{i18n.ADD_NEW_CONNECTOR}</AddNewConnectorOption>,
   'data-test-subj': 'dropdown-connector-add-connector',
 };
 
@@ -96,7 +102,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                     <StyledEuiIconTip
                       aria-label={i18n.DEPRECATED_TOOLTIP_CONTENT}
                       size={ICON_SIZE}
-                      type="alert"
+                      type="warning"
                       color="warning"
                       content={i18n.DEPRECATED_TOOLTIP_CONTENT}
                     />

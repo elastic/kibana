@@ -37,6 +37,15 @@ const ecsData: Ecs = {
   },
 };
 
+const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/test', search: '?' });
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+  return {
+    ...original,
+    useLocation: () => mockUseLocation(),
+  };
+});
+
 jest.mock('../../../../../common/endpoint/service/host_isolation/utils', () => {
   return {
     isIsolationSupported: jest.fn().mockReturnValue(true),
@@ -143,7 +152,8 @@ describe('event details panel component', () => {
           }),
         },
         osquery: {
-          OsqueryResults: jest.fn().mockReturnValue(null),
+          OsqueryResult: jest.fn().mockReturnValue(null),
+          fetchAllLiveQueries: jest.fn().mockReturnValue({ data: { data: { items: [] } } }),
         },
       },
     });

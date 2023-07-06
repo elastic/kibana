@@ -89,7 +89,7 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
       content = (
         <EuiCallOut
           data-test-subj="policyRequestInvalidAlert"
-          iconType="alert"
+          iconType="warning"
           color="danger"
           title={i18n.translate(
             'xpack.indexLifecycleMgmt.policyJsonFlyout.validationErrorCallout.title',

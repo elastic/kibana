@@ -8,11 +8,14 @@
 import {
   createStackFrameID,
   createStackFrameMetadata,
+  FrameSymbolStatus,
   FrameType,
   getAddressFromStackFrameID,
   getCalleeFunction,
   getCalleeSource,
   getFileIDFromStackFrameID,
+  getFrameSymbolStatus,
+  getLanguageType,
 } from './profiling';
 
 describe('Stack frame operations', () => {
@@ -87,4 +90,44 @@ describe('Stack frame metadata operations', () => {
     });
     expect(getCalleeSource(metadata)).toEqual('runtime/malloc.go');
   });
+});
+
+describe('getFrameSymbolStatus', () => {
+  it('returns partially symbolized when metadata has executable name but no source name and source line', () => {
+    expect(getFrameSymbolStatus({ sourceFilename: '', sourceLine: 0, exeFileName: 'foo' })).toEqual(
+      FrameSymbolStatus.PARTIALLY_SYMBOLYZED
+    );
+  });
+  it('returns not symbolized when metadata has no source name and source line and executable name', () => {
+    expect(getFrameSymbolStatus({ sourceFilename: '', sourceLine: 0 })).toEqual(
+      FrameSymbolStatus.NOT_SYMBOLIZED
+    );
+  });
+
+  it('returns symbolized when metadata has source name and source line', () => {
+    expect(getFrameSymbolStatus({ sourceFilename: 'foo', sourceLine: 10 })).toEqual(
+      FrameSymbolStatus.SYMBOLIZED
+    );
+  });
+});
+
+describe('getLanguageType', () => {
+  [FrameType.Native, FrameType.Kernel].map((type) =>
+    it(`returns native for ${type}`, () => {
+      expect(getLanguageType({ frameType: type })).toEqual('NATIVE');
+    })
+  );
+  [
+    FrameType.JVM,
+    FrameType.JavaScript,
+    FrameType.PHP,
+    FrameType.PHPJIT,
+    FrameType.Perl,
+    FrameType.Python,
+    FrameType.Ruby,
+  ].map((type) =>
+    it(`returns interpreted for ${type}`, () => {
+      expect(getLanguageType({ frameType: type })).toEqual('INTERPRETED');
+    })
+  );
 });

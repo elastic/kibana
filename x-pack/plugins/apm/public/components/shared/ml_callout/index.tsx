@@ -57,7 +57,7 @@ export function MLCallout({
     | undefined;
 
   const getLearnMoreLink = (color: 'primary' | 'success') => (
-    <EuiButton color={color}>
+    <EuiButton data-test-subj="apmGetLearnMoreLinkButton" color={color}>
       <LegacyAPMLink
         path="/settings/anomaly-detection"
         style={{ whiteSpace: 'nowrap' }}
@@ -84,6 +84,7 @@ export function MLCallout({
         color: 'primary',
         primaryAction: isOnSettingsPage ? (
           <EuiButton
+            data-test-subj="apmMLCalloutCreateMlJobButton"
             color="primary"
             onClick={() => {
               onCreateJobClick?.();
@@ -113,6 +114,7 @@ export function MLCallout({
         icon: 'wrench',
         primaryAction: isOnSettingsPage ? (
           <EuiButton
+            data-test-subj="apmMLCalloutUpdateJobsButton"
             color="success"
             isLoading={loading}
             onClick={() => {
@@ -147,7 +149,10 @@ export function MLCallout({
         icon: 'iInCircle',
         color: 'primary',
         primaryAction: (
-          <EuiButton href={mlManageJobsHref}>
+          <EuiButton
+            data-test-subj="apmMLCalloutReviewJobsButton"
+            href={mlManageJobsHref}
+          >
             {i18n.translate(
               'xpack.apm.settings.anomaly_detection.legacy_jobs.button',
               { defaultMessage: 'Review jobs' }
@@ -173,7 +178,11 @@ export function MLCallout({
       )}
       {dismissable && (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onDismiss} color={properties.color}>
+          <EuiButtonEmpty
+            data-test-subj="apmMLCalloutButton"
+            onClick={onDismiss}
+            color={properties.color}
+          >
             {i18n.translate('xpack.apm.mlCallout.dismissButton', {
               defaultMessage: `Dismiss`,
             })}

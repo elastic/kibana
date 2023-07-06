@@ -9,11 +9,9 @@ const EVENT_LOG_NAME_SUFFIX = `-event-log`;
 
 export interface EsNames {
   base: string;
-  alias: string;
+  dataStream: string;
   ilmPolicy: string;
   indexPattern: string;
-  indexPatternWithVersion: string;
-  initialIndex: string;
   indexTemplate: string;
 }
 
@@ -26,11 +24,9 @@ export function getEsNames(baseName: string, kibanaVersion: string): EsNames {
   }${EVENT_LOG_NAME_SUFFIX}-policy`;
   return {
     base: baseName,
-    alias: eventLogNameWithVersion,
+    dataStream: eventLogNameWithVersion,
     ilmPolicy: `${eventLogPolicyName}`,
     indexPattern: `${eventLogName}-*`,
-    indexPatternWithVersion: `${eventLogNameWithVersion}-*`,
-    initialIndex: `${eventLogNameWithVersion}-000001`,
     indexTemplate: `${eventLogNameWithVersion}-template`,
   };
 }

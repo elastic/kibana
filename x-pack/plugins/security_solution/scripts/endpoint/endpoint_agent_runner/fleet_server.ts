@@ -36,34 +36,38 @@ import type {
   PostFleetServerHostsResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import chalk from 'chalk';
+import { dump } from './utils';
 import { isLocalhost } from '../common/localhost_services';
-import {
-  fetchFleetAgents,
-  fetchFleetServerUrl,
-  waitForHostToEnroll,
-} from '../common/fleet_services';
+import { fetchFleetServerUrl, waitForHostToEnroll } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 
-export const runFleetServerIfNeeded = async (): Promise<string | undefined> => {
+export const runFleetServerIfNeeded = async (): Promise<
+  { fleetServerContainerId: string; fleetServerAgentPolicyId: string } | undefined
+> => {
   let fleetServerContainerId;
+  let fleetServerAgentPolicyId;
+
   const {
     log,
     kibana: { isLocalhost: isKibanaOnLocalhost },
+    kbnClient,
   } = getRuntimeServices();
 
   log.info(`Setting up fleet server (if necessary)`);
   log.indent(4);
 
-  const fleetServerAlreadyEnrolled = await isFleetServerEnrolled();
+  const currentFleetServerUrl = await fetchFleetServerUrl(kbnClient);
 
-  if (fleetServerAlreadyEnrolled) {
-    log.info(`Fleet server is already enrolled with Fleet. Nothing to do.`);
+  if (currentFleetServerUrl) {
+    log.info(
+      `Fleet server is already enrolled with Fleet - URL:\n${currentFleetServerUrl}\nNothing to do.`
+    );
     log.indent(-4);
     return;
   }
 
   try {
-    const fleetServerAgentPolicyId = await getOrCreateFleetServerAgentPolicyId();
+    fleetServerAgentPolicyId = await getOrCreateFleetServerAgentPolicyId();
     const serviceToken = await generateFleetServiceToken();
 
     if (isKibanaOnLocalhost) {
@@ -75,31 +79,14 @@ export const runFleetServerIfNeeded = async (): Promise<string | undefined> => {
       serviceToken,
     });
   } catch (error) {
-    log.error(error);
+    log.error(dump(error));
     log.indent(-4);
     throw error;
   }
 
   log.indent(-4);
 
-  return fleetServerContainerId;
-};
-
-const isFleetServerEnrolled = async () => {
-  const { kbnClient } = getRuntimeServices();
-  const policyId = (await getFleetServerPackagePolicy())?.policy_id;
-
-  if (!policyId) {
-    return false;
-  }
-
-  const fleetAgentsResponse = await fetchFleetAgents(kbnClient, {
-    kuery: `(policy_id: "${policyId}" and active : true) and (status:online)`,
-    showInactive: false,
-    perPage: 1,
-  });
-
-  return Boolean(fleetAgentsResponse.total);
+  return { fleetServerContainerId, fleetServerAgentPolicyId };
 };
 
 const getFleetServerPackagePolicy = async (): Promise<PackagePolicy | undefined> => {
@@ -193,6 +180,7 @@ export const startFleetServerWithDocker = async ({
     log,
     localhostRealIp,
     elastic: { url: elasticUrl, isLocalhost: isElasticOnLocalhost },
+    fleetServer: { port: fleetServerPort },
     kbnClient,
     options: { version },
   } = getRuntimeServices();
@@ -201,7 +189,7 @@ export const startFleetServerWithDocker = async ({
   log.indent(4);
 
   const esURL = new URL(elasticUrl);
-  const containerName = `dev-fleet-server.${esURL.hostname}`;
+  const containerName = `dev-fleet-server.${fleetServerPort}`;
   let esUrlWithRealIp: string = elasticUrl;
 
   if (isElasticOnLocalhost) {
@@ -243,7 +231,7 @@ export const startFleetServerWithDocker = async ({
       `FLEET_SERVER_POLICY=${policyId}`,
 
       '--publish',
-      '8220:8220',
+      `${fleetServerPort}:8220`,
 
       `docker.elastic.co/beats/elastic-agent:${version}`,
     ];
@@ -260,7 +248,7 @@ export const startFleetServerWithDocker = async ({
 (This is ok if one was not running already)`);
       });
 
-    await addFleetServerHostToFleetSettings(`https://${localhostRealIp}:8220`);
+    await addFleetServerHostToFleetSettings(`https://${localhostRealIp}:${fleetServerPort}`);
 
     log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);
 
@@ -276,9 +264,10 @@ export const startFleetServerWithDocker = async ({
 
   View running output:  ${chalk.bold(`docker attach ---sig-proxy=false ${containerName}`)}
   Shell access:         ${chalk.bold(`docker exec -it ${containerName} /bin/bash`)}
+  Kill container:       ${chalk.bold(`docker kill ${containerId}`)}
 `);
   } catch (error) {
-    log.error(error);
+    log.error(dump(error));
     log.indent(-4);
     throw error;
   }
@@ -345,7 +334,7 @@ const configureFleetIfNeeded = async () => {
       }
     }
   } catch (error) {
-    log.error(error);
+    log.error(dump(error));
     log.indent(-4);
     throw error;
   }
@@ -383,7 +372,7 @@ const addFleetServerHostToFleetSettings = async (
 
     return item;
   } catch (error) {
-    log.error(error);
+    log.error(dump(error));
     log.indent(-4);
     throw error;
   }

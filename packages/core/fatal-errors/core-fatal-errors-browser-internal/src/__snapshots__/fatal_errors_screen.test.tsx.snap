@@ -51,7 +51,7 @@ exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
           </p>
         }
         iconColor="danger"
-        iconType="alert"
+        iconType="warning"
         title={
           <h2>
             <FormattedMessage
@@ -64,7 +64,7 @@ exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
       />
       <EuiCallOut
         color="danger"
-        iconType="alert"
+        iconType="warning"
         key="0"
         title="foo"
       >
@@ -80,7 +80,7 @@ Error: foo
       </EuiCallOut>
       <EuiCallOut
         color="danger"
-        iconType="alert"
+        iconType="warning"
         key="1"
         title="bar"
       >

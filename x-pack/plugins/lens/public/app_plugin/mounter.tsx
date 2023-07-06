@@ -9,8 +9,8 @@ import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { HashRouter, RouteComponentProps, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { RouteComponentProps } from 'react-router-dom';
+import { HashRouter, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
@@ -35,7 +35,7 @@ import { App } from './app';
 import { EditorFrameStart, LensTopNavMenuEntryGenerator, VisualizeEditorContext } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensPluginStartDependencies } from '../plugin';
-import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common';
+import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
 import {
   LensEmbeddableInput,
   LensByReferenceInput,
@@ -58,6 +58,7 @@ import {
   LENS_SHARE_STATE_ACTION,
   MainHistoryLocationState,
 } from '../../common/locator/locator';
+import { SavedObjectIndexStore } from '../persistence';
 
 function getInitialContext(history: AppMountParameters['history']) {
   const historyLocationState = history.location.state as
@@ -95,6 +96,7 @@ export async function getLensServices(
     inspector,
     navigation,
     embeddable,
+    eventAnnotation,
     savedObjectsTagging,
     usageCollection,
     fieldFormats,
@@ -106,6 +108,7 @@ export async function getLensServices(
   const storage = new Storage(localStorage);
   const stateTransfer = embeddable?.getStateTransfer();
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
+  const eventAnnotationService = await eventAnnotation.getService();
 
   return {
     data,
@@ -117,15 +120,17 @@ export async function getLensServices(
     usageCollection,
     savedObjectsTagging,
     attributeService,
+    eventAnnotationService,
     executionContext: coreStart.executionContext,
     http: coreStart.http,
     uiActions: startDependencies.uiActions,
     chrome: coreStart.chrome,
     overlays: coreStart.overlays,
     uiSettings: coreStart.uiSettings,
+    settings: coreStart.settings,
     application: coreStart.application,
     notifications: coreStart.notifications,
-    savedObjectsClient: coreStart.savedObjects.client,
+    savedObjectStore: new SavedObjectIndexStore(startDependencies.contentManagement.client),
     presentationUtil: startDependencies.presentationUtil,
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,
@@ -181,7 +186,7 @@ export async function mountApp(
     locator
   );
 
-  const { stateTransfer, data } = lensServices;
+  const { stateTransfer, data, savedObjectStore } = lensServices;
 
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
@@ -372,6 +377,7 @@ export async function mountApp(
             topNavMenuEntryGenerators={topNavMenuEntryGenerators}
             theme$={core.theme.theme$}
             coreStart={coreStart}
+            savedObjectStore={savedObjectStore}
           />
         </Provider>
       );
@@ -409,7 +415,7 @@ export async function mountApp(
         <KibanaContextProvider services={lensServices}>
           <PresentationUtilContext>
             <HashRouter>
-              <Switch>
+              <Routes>
                 <Route exact path="/edit/:id" component={EditorRoute} />
                 <Route
                   exact
@@ -418,7 +424,7 @@ export async function mountApp(
                 />
                 <Route exact path="/" component={EditorRoute} />
                 <Route path="/" component={NotFound} />
-              </Switch>
+              </Routes>
             </HashRouter>
           </PresentationUtilContext>
         </KibanaContextProvider>

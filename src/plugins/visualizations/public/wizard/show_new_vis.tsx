@@ -19,6 +19,7 @@ import {
   getEmbeddable,
   getDocLinks,
   getTheme,
+  getSavedObjectsManagement,
 } from '../services';
 import type { BaseVisType } from '../vis_types';
 
@@ -81,6 +82,7 @@ export function showNewVisModal({
             addBasePath={getHttp().basePath.prepend}
             uiSettings={getUISettings()}
             http={getHttp()}
+            savedObjectsManagement={getSavedObjectsManagement()}
             application={getApplication()}
             docLinks={getDocLinks()}
             showAggsSelection={showAggsSelection}

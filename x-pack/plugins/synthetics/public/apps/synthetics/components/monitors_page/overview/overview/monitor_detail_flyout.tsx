@@ -25,14 +25,11 @@ import {
   EuiTitle,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
-import { SavedObject } from '@kbn/core/public';
-import { FetcherResult } from '@kbn/observability-plugin/public/hooks/use_fetcher';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme, FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import { LocationsStatus, useStatusByLocation } from '../../../../hooks/use_status_by_location';
@@ -45,16 +42,11 @@ import {
   setFlyoutConfig,
 } from '../../../../state';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
-import {
-  ConfigKey,
-  EncryptedSyntheticsMonitor,
-  MonitorOverviewItem,
-  SyntheticsMonitor,
-} from '../types';
+import { ConfigKey, EncryptedSyntheticsMonitor, MonitorOverviewItem } from '../types';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
-import { fetchSyntheticsMonitor } from '../../../../state/overview/api';
 import { MonitorStatus } from '../../../common/components/monitor_status';
 import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
+import { fetchSyntheticsMonitor } from '../../../../state/monitor_details/api';
 
 interface Props {
   configId: string;
@@ -98,8 +90,9 @@ function DetailFlyoutDurationChart({
 >) {
   const theme = useTheme();
 
-  const { observability } = useKibana<ClientPluginsStart>().services;
-  const { ExploratoryViewEmbeddable } = observability;
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
   return (
     <EuiPageSection bottomBorder="extended">
       <EuiTitle size="xs">
@@ -262,17 +255,14 @@ export function MonitorDetailFlyout(props: Props) {
     error,
     status,
     loading,
-  }: FetcherResult<SavedObject<SyntheticsMonitor>> = useFetcher(
-    () => fetchSyntheticsMonitor(configId),
-    [configId, upsertSuccess]
-  );
+  } = useFetcher(() => fetchSyntheticsMonitor({ monitorId: configId }), [configId, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
   const monitorDetail = useMonitorDetail(configId, props.location);
   const { locations } = useStatusByLocation({
     configId,
-    monitorLocations: monitorSavedObject?.attributes.locations,
+    monitorLocations: monitorSavedObject?.locations,
   });
 
   const isOverlay = useIsWithinMaxBreakpoint('xl');
@@ -293,7 +283,7 @@ export function MonitorDetailFlyout(props: Props) {
               <EuiFlexGroup responsive={false} gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
-                    <h2>{monitorSavedObject?.attributes[ConfigKey.NAME]}</h2>
+                    <h2>{monitorSavedObject?.[ConfigKey.NAME]}</h2>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -306,6 +296,7 @@ export function MonitorDetailFlyout(props: Props) {
                       position="default"
                       iconHasPanel={false}
                       iconSize="xs"
+                      locationId={locationId}
                     />
                   )}
                 </EuiFlexItem>
@@ -316,7 +307,7 @@ export function MonitorDetailFlyout(props: Props) {
                 locations={locations}
                 setCurrentLocation={setLocation}
                 configId={configId}
-                monitor={monitorSavedObject.attributes}
+                monitor={monitorSavedObject}
                 onEnabledChange={props.onEnabledChange}
               />
             </EuiPanel>
@@ -324,12 +315,13 @@ export function MonitorDetailFlyout(props: Props) {
           <EuiFlyoutBody>
             <DetailFlyoutDurationChart {...props} location={props.location} />
             <MonitorDetailsPanel
+              hasBorder={false}
               hideEnabled
               latestPing={monitorDetail.data}
               configId={configId}
               monitor={{
-                ...monitorSavedObject.attributes,
-                id: monitorSavedObject.id,
+                ...monitorSavedObject,
+                id,
                 updated_at: monitorSavedObject.updated_at!,
                 created_at: monitorSavedObject.created_at!,
               }}
@@ -340,10 +332,16 @@ export function MonitorDetailFlyout(props: Props) {
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l" color="transparent">
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={props.onClose}>{CLOSE_FLYOUT_TEXT}</EuiButtonEmpty>
+                  <EuiButtonEmpty
+                    data-test-subj="syntheticsMonitorDetailFlyoutButton"
+                    onClick={props.onClose}
+                  >
+                    {CLOSE_FLYOUT_TEXT}
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
+                    data-test-subj="syntheticsMonitorDetailFlyoutButton"
                     // `detailLink` can be undefined, in this case, disable the button
                     isDisabled={!detailLink}
                     href={detailLink}
@@ -382,7 +380,7 @@ const PREVIOUS_PERIOD_SERIES_NAME = i18n.translate(
 );
 
 const ENABLED_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.enabledItemText', {
-  defaultMessage: 'Enabled',
+  defaultMessage: 'Enabled (all locations)',
 });
 
 const CLOSE_FLYOUT_TEXT = i18n.translate('xpack.synthetics.monitorList.closeFlyoutText', {

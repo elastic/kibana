@@ -9,22 +9,22 @@
 
 import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
+  deleteAllRules,
   deleteAllAlerts,
-  deleteSignalsIndex,
   getRule,
   getRuleForSignalTesting,
-  installPrePackagedRules,
+  installMockPrebuiltRules,
   getSecurityTelemetryStats,
   createExceptionList,
   createExceptionListItem,
   removeTimeFieldsFromTelemetryStats,
 } from '../../../../utils';
 import { deleteAllExceptions } from '../../../../../lists_api_integration/utils';
-import { ELASTIC_SECURITY_RULE_ID } from '../../../../utils/create_prebuilt_rule_saved_objects';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -48,8 +48,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
+      await deleteAllRules(supertest, log);
       await deleteAllExceptions(supertest, log);
     });
 
@@ -338,7 +338,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('pre-built/immutable/elastic rules should show detection_rules telemetry data for each list type', () => {
       beforeEach(async () => {
         // install prepackaged rules to get immutable rules for testing
-        await installPrePackagedRules(supertest, es, log);
+        await installMockPrebuiltRules(supertest, es);
       });
 
       it('should return mutating types such as "id", "@timestamp", etc... for list of type "detection"', async () => {
@@ -783,7 +783,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('pre-built/immutable/elastic rules should show detection_rules telemetry data for multiple list items and types', () => {
       beforeEach(async () => {
         // install prepackaged rules to get immutable rules for testing
-        await installPrePackagedRules(supertest, es, log);
+        await installMockPrebuiltRules(supertest, es);
       });
 
       it('should give telemetry/stats for 2 exception lists to the type of "detection"', async () => {

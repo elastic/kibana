@@ -9,7 +9,7 @@
 import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { FileKind, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
+import { FileKindBrowser, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
 import { FileUpload, Props } from './file_upload';
@@ -37,7 +37,7 @@ const fileKinds = {
     allowedMimeTypes: ['application/zip'],
   },
 };
-const getFileKind = (id: string) => (fileKinds as any)[id] as FileKind;
+const getFileKind = (id: string) => (fileKinds as any)[id] as FileKindBrowser;
 
 const defaultArgs: Props = {
   kind,

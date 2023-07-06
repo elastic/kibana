@@ -17,7 +17,8 @@
       "dataViews",
       "data",
       "uiActions",
-      "screenshotMode"
+      "screenshotMode",
+      "savedObjectsManagement"
     ],
     "optionalPlugins": [
       "usageCollection"
@@ -25,7 +26,8 @@
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
-      "data"
+      "data",
+      "textBasedLanguages"
     ]
   }
 }

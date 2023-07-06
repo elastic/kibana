@@ -6,14 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
-import { $Values } from '@kbn/utility-types';
+import { type AxisProps, HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
+import type { $Values } from '@kbn/utility-types';
 import type { PaletteOutput } from '@kbn/coloring';
-import { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type {
+  Datatable,
+  DatatableColumnMeta,
+  ExpressionFunctionDefinition,
+} from '@kbn/expressions-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 import { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
+import { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
 import {
   AxisExtentModes,
   FillStyles,
@@ -333,6 +338,7 @@ export interface ReferenceLineArgs extends Omit<ReferenceLineDecorationConfig, '
   name?: string;
   value: number;
   fill: FillStyle;
+  valueMeta?: DatatableColumnMeta;
 }
 
 export interface ReferenceLineLayerArgs {
@@ -496,4 +502,12 @@ export type ExtendedAnnotationLayerFn = ExpressionFunctionDefinition<
   null,
   ExtendedAnnotationLayerArgs,
   ExtendedAnnotationLayerConfigResult
+>;
+
+export type AllowedXYOverrides = Partial<
+  Record<
+    'axisX' | 'axisLeft' | 'axisRight',
+    // id and groupId should not be overridden
+    Simplify<Omit<MakeOverridesSerializable<AxisProps>, 'id' | 'groupId'>>
+  >
 >;

@@ -21,6 +21,7 @@ export const buildRuleSchemas = <R extends t.Props, O extends t.Props, D extends
   fields: RuleFields<R, O, D>
 ) => {
   return {
+    ...fields,
     create: buildCreateRuleSchema(fields.required, fields.optional, fields.defaultable),
     patch: buildPatchRuleSchema(fields.required, fields.optional, fields.defaultable),
     response: buildResponseRuleSchema(fields.required, fields.optional, fields.defaultable),
@@ -59,8 +60,15 @@ const buildPatchRuleSchema = <
   ]);
 };
 
-type OrUndefined<P extends t.Props> = {
+export type OrUndefined<P extends t.Props> = {
   [K in keyof P]: P[K] | t.UndefinedC;
+};
+
+export const orUndefined = <P extends t.Props>(props: P): OrUndefined<P> => {
+  return Object.keys(props).reduce<t.Props>((acc, key) => {
+    acc[key] = t.union([props[key], t.undefined]);
+    return acc;
+  }, {}) as OrUndefined<P>;
 };
 
 export const buildResponseRuleSchema = <
@@ -78,10 +86,7 @@ export const buildResponseRuleSchema = <
   // the conversion from internal schema to response schema TS will report an error. If we just used t.partial
   // instead, then optional fields can be accidentally omitted from the conversion - and any actual values
   // in those fields internally will be stripped in the response.
-  const optionalWithUndefined = Object.keys(optionalFields).reduce<t.Props>((acc, key) => {
-    acc[key] = t.union([optionalFields[key], t.undefined]);
-    return acc;
-  }, {}) as OrUndefined<Optional>;
+  const optionalWithUndefined = orUndefined(optionalFields);
   return t.intersection([
     t.exact(t.type(requiredFields)),
     t.exact(t.type(optionalWithUndefined)),

@@ -1,0 +1,137 @@
+{
+  "id": "@kbn/ml-route-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-route-utils",
+        "id": "def-common.createExecutionContext",
+        "type": "Function",
+        "tags": [],
+        "label": "createExecutionContext",
+        "description": [
+          "\nCreates an execution context to be passed on as part of ES queries.\nThis allows you to identify the source triggering a request when debugging slow logs.\n"
+        ],
+        "signature": [
+          "(coreStart: ",
+          {
+            "pluginId": "@kbn/core-lifecycle-server",
+            "scope": "common",
+            "docId": "kibKbnCoreLifecycleServerPluginApi",
+            "section": "def-common.CoreStart",
+            "text": "CoreStart"
+          },
+          ", name: string, id: string | undefined, type: string) => ",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
+          }
+        ],
+        "path": "x-pack/packages/ml/route_utils/src/create_execution_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-route-utils",
+            "id": "def-common.createExecutionContext.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "coreStart",
+            "description": [
+              "Kibana CoreStart"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-lifecycle-server",
+                "scope": "common",
+                "docId": "kibKbnCoreLifecycleServerPluginApi",
+                "section": "def-common.CoreStart",
+                "text": "CoreStart"
+              }
+            ],
+            "path": "x-pack/packages/ml/route_utils/src/create_execution_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-route-utils",
+            "id": "def-common.createExecutionContext.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "Context name, usually the plugin id"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/route_utils/src/create_execution_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-route-utils",
+            "id": "def-common.createExecutionContext.$3",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "Optional context id, can be used to override the default usage of page as id"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/packages/ml/route_utils/src/create_execution_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-route-utils",
+            "id": "def-common.createExecutionContext.$4",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "Optional context type, defaults to `application`."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/packages/ml/route_utils/src/create_execution_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

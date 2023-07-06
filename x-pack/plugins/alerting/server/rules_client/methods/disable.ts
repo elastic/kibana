@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { SavedObjectReference } from '@kbn/core/server';
 
 import { RawRule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import { recoverRuleAlerts, updateMeta } from '../lib';
+import { recoverRuleAlerts, updateMeta, migrateLegacyActions } from '../lib';
 
 export async function disable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(
@@ -23,6 +24,7 @@ export async function disable(context: RulesClientContext, { id }: { id: string 
 async function disableWithOCC(context: RulesClientContext, { id }: { id: string }) {
   let attributes: RawRule;
   let version: string | undefined;
+  let references: SavedObjectReference[];
 
   try {
     const decryptedAlert =
@@ -31,12 +33,14 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
       });
     attributes = decryptedAlert.attributes;
     version = decryptedAlert.version;
+    references = decryptedAlert.references;
   } catch (e) {
     context.logger.error(`disable(): Failed to load API key of alert ${id}: ${e.message}`);
     // Still attempt to load the attributes and version using SOC
     const alert = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
     attributes = alert.attributes;
     version = alert.version;
+    references = alert.references;
   }
 
   await recoverRuleAlerts(context, id, attributes);
@@ -70,6 +74,13 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   if (attributes.enabled === true) {
+    const migratedActions = await migrateLegacyActions(context, {
+      ruleId: id,
+      actions: attributes.actions,
+      references,
+      attributes,
+    });
+
     await context.unsecuredSavedObjectsClient.update(
       'alert',
       id,
@@ -80,8 +91,16 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
         updatedBy: await context.getUserName(),
         updatedAt: new Date().toISOString(),
         nextRun: null,
+        ...(migratedActions.hasLegacyActions
+          ? { actions: migratedActions.resultedActions, throttle: undefined, notifyWhen: undefined }
+          : {}),
       }),
-      { version }
+      {
+        version,
+        ...(migratedActions.hasLegacyActions
+          ? { references: migratedActions.resultedReferences }
+          : {}),
+      }
     );
 
     // If the scheduledTaskId does not match the rule id, we should

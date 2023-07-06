@@ -12,7 +12,7 @@ export const CASE_CONNECTOR = '[data-test-subj="connector-fields"] .euiCard__tit
 export const CASE_DELETE = '[data-test-subj="property-actions-trash"]';
 
 export const CASE_DETAILS_DESCRIPTION =
-  '[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]';
+  '[data-test-subj="description"] [data-test-subj="scrollable-markdown"]';
 
 export const CASE_DETAILS_PAGE_TITLE = '[data-test-subj="header-page-title"]';
 
@@ -21,13 +21,10 @@ export const CASE_DETAILS_STATUS = '[data-test-subj="case-view-status-dropdown"]
 export const CASE_DETAILS_TAGS = '[data-test-subj="case-tags"]';
 
 export const CASE_DETAILS_TIMELINE_LINK_MARKDOWN =
-  '[data-test-subj="description-action"] [data-test-subj="user-action-markdown"] button';
+  '[data-test-subj="description"] [data-test-subj="scrollable-markdown"] button';
 
 export const CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT =
-  '[data-test-subj="description-action"] .euiCommentEvent__headerEvent';
-
-export const CASE_DETAILS_USER_ACTION_DESCRIPTION_USERNAME =
-  '[data-test-subj="description-action"] .euiCommentEvent__headerUsername';
+  '[data-test-subj="description"] [data-test-subj="description-title"]';
 
 export const CASE_DETAILS_USERNAMES = '[data-test-subj="user-profile-username"]';
 
@@ -41,7 +38,7 @@ export const CASES_TAGS = (tagName: string) => {
   return `[data-test-subj="tag-${tagName}"]`;
 };
 
-export const CASE_USER_ACTION = '[data-test-subj="user-action-markdown"]';
+export const CASE_USER_ACTION = '[data-test-subj="scrollable-markdown"]';
 
 export const CONNECTOR_CARD_DETAILS = '[data-test-subj="connector-card-details"]';
 

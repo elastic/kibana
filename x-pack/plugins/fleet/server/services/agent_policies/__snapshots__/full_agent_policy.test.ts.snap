@@ -14,6 +14,11 @@ Object {
       "namespace": "default",
       "use_output": "default",
     },
+    "protection": Object {
+      "enabled": false,
+      "signing_key": "",
+      "uninstall_token_hash": "",
+    },
   },
   "fleet": Object {
     "hosts": Array [
@@ -63,6 +68,11 @@ Object {
     },
   },
   "revision": 1,
+  "secret_references": Array [],
+  "signed": Object {
+    "data": "",
+    "signature": "",
+  },
 }
 `;
 
@@ -80,6 +90,11 @@ Object {
       "namespace": "default",
       "use_output": "monitoring-output-id",
     },
+    "protection": Object {
+      "enabled": false,
+      "signing_key": "",
+      "uninstall_token_hash": "",
+    },
   },
   "fleet": Object {
     "hosts": Array [
@@ -129,6 +144,11 @@ Object {
     },
   },
   "revision": 1,
+  "secret_references": Array [],
+  "signed": Object {
+    "data": "",
+    "signature": "",
+  },
 }
 `;
 
@@ -145,6 +165,11 @@ Object {
       "metrics": true,
       "namespace": "default",
       "use_output": "monitoring-output-id",
+    },
+    "protection": Object {
+      "enabled": false,
+      "signing_key": "",
+      "uninstall_token_hash": "",
     },
   },
   "fleet": Object {
@@ -195,5 +220,10 @@ Object {
     },
   },
   "revision": 1,
+  "secret_references": Array [],
+  "signed": Object {
+    "data": "",
+    "signature": "",
+  },
 }
 `;

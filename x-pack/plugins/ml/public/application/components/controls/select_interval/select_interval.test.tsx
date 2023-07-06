@@ -5,58 +5,43 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { MemoryRouter } from 'react-router-dom';
-import { mount } from 'enzyme';
-
-import { EuiSelect } from '@elastic/eui';
-
-import { UrlStateProvider } from '@kbn/ml-url-state';
+import React, { useState } from 'react';
+import { render, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { SelectInterval } from './select_interval';
 
-describe('SelectInterval', () => {
-  test('creates correct initial selected value', () => {
-    const wrapper = mount(
-      <MemoryRouter>
-        <UrlStateProvider>
-          <SelectInterval />
-        </UrlStateProvider>
-      </MemoryRouter>
-    );
-    const select = wrapper.find(EuiSelect);
+// The following mock setup is necessary so that we can simulate
+// both triggering the update callback and the internal state update
+// to update the dropdown to the new state.
+const mockUpdateCallback = jest.fn();
+const mockUseState = jest.fn().mockImplementation(useState);
+jest.mock('@kbn/ml-url-state', () => ({
+  usePageUrlState: () => {
+    const [interval, setInterval] = mockUseState({ display: 'Auto', val: 'auto' });
+    return [interval, mockUpdateCallback.mockImplementation((d) => setInterval(d))];
+  },
+}));
 
-    const defaultSelectedValue = select.props().value;
-    expect(defaultSelectedValue).toBe('auto');
+describe('SelectInterval', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  test('currently selected value is updated correctly on click', (done) => {
-    const wrapper = mount(
-      <MemoryRouter>
-        <UrlStateProvider>
-          <SelectInterval />
-        </UrlStateProvider>
-      </MemoryRouter>
-    );
-    const select = wrapper.find(EuiSelect).first();
-    const defaultSelectedValue = select.props().value;
-    expect(defaultSelectedValue).toBe('auto');
+  it('updates the selected value correctly on click', () => {
+    // arrange
+    const { getByText, getByTestId } = render(<SelectInterval />);
 
-    const onChange = select.props().onChange;
+    // assert initial state
+    expect((getByText('Auto') as HTMLOptionElement).selected).toBeTruthy();
 
+    // update
     act(() => {
-      if (onChange !== undefined) {
-        onChange({ target: { value: 'day' } } as React.ChangeEvent<HTMLSelectElement>);
-      }
+      userEvent.selectOptions(getByTestId('mlAnomalyIntervalControls'), getByText('1 hour'));
     });
 
-    setImmediate(() => {
-      wrapper.update();
-      const updatedSelect = wrapper.find(EuiSelect).first();
-      const updatedSelectedValue = updatedSelect.props().value;
-      expect(updatedSelectedValue).toBe('day');
-      done();
-    });
+    // assert updated state
+    expect(mockUpdateCallback).toBeCalledWith({ display: '1 hour', val: 'hour' });
+    expect((getByText('1 hour') as HTMLOptionElement).selected).toBeTruthy();
   });
 });

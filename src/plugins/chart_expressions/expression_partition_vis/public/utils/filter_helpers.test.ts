@@ -7,7 +7,12 @@
  */
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { getFilterClickData, getFilterEventData, getFilterPopoverTitle } from './filter_helpers';
+import {
+  getFilterClickData,
+  getFilterEventData,
+  getFilterPopoverTitle,
+  getAccessor,
+} from './filter_helpers';
 import { createMockBucketColumns, createMockVisData, createMockPieParams } from '../mocks';
 import { consolidateMetricColumns } from '../../common/utils';
 import { LayerValue } from '@elastic/charts';
@@ -264,6 +269,26 @@ describe('getFilterEventData', () => {
     expect(data[0].value).toEqual('JetBeats');
     expect(data[0].row).toEqual(2);
     expect(data[0].column).toEqual(0);
+  });
+});
+
+describe('getAccessor', () => {
+  it('returns the correct accessor for ExpressionValueVisDimension', () => {
+    const accessor = getAccessor(visParams.dimensions.buckets, 2);
+    expect(accessor).toStrictEqual({
+      accessor: 2,
+      format: {
+        id: 'terms',
+        params: { id: 'boolean', missingBucketLabel: 'Missing', otherBucketLabel: 'Other' },
+      },
+      type: 'vis_dimension',
+    });
+  });
+
+  it('returns the correct accessor for strings', () => {
+    const buckets = ['bucket1', 'bucket2'];
+    const accessor = getAccessor(buckets, 0);
+    expect(accessor).toStrictEqual('bucket1');
   });
 });
 

@@ -1,5 +1,5 @@
 {
-  "journeyName": "POST /api/metrics/vis/data",
+  "journeyName": "POST /internal/metrics/vis/data",
   "scalabilitySetup": {
     "responseTimeThreshold": {
       "threshold1": 5000,
@@ -33,7 +33,7 @@
         {
           "http": {
             "method": "POST",
-            "path": "/api/metrics/vis/data",
+            "path": "/internal/metrics/vis/data",
             "headers": {
               "Cookie": "",
               "Kbn-Version": "",

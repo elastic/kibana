@@ -4,22 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { parseAlertsTypeData } from './helpers';
-import * as mock from './mock_data';
-import type { AlertsByTypeAgg } from './types';
+import { parseAlertsTypeData, parseAlertsRuleData } from './helpers';
+import * as mockType from './mock_type_data';
+import * as mockRule from './mock_rule_data';
+import type { AlertsByTypeAgg, AlertsByRuleAgg } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 
 describe('parse alerts by type data', () => {
   test('parse alerts with data', () => {
     const res = parseAlertsTypeData(
-      mock.mockAlertsData as AlertSearchResponse<{}, AlertsByTypeAgg>
+      mockType.mockAlertsData as AlertSearchResponse<{}, AlertsByTypeAgg>
     );
-    expect(res).toEqual(mock.parsedAlerts);
+    expect(res).toEqual(mockType.parsedAlerts);
   });
 
   test('parse alerts without data', () => {
     const res = parseAlertsTypeData(
-      mock.mockAlertsEmptyData as AlertSearchResponse<{}, AlertsByTypeAgg>
+      mockType.mockAlertsEmptyData as AlertSearchResponse<{}, AlertsByTypeAgg>
+    );
+    expect(res).toEqual([]);
+  });
+});
+
+describe('parse alerts by rule data', () => {
+  test('parse alerts with data', () => {
+    const res = parseAlertsRuleData(
+      mockRule.mockAlertsData as AlertSearchResponse<{}, AlertsByRuleAgg>
+    );
+    expect(res).toEqual(mockRule.parsedAlerts);
+  });
+
+  test('parse alerts without data', () => {
+    const res = parseAlertsRuleData(
+      mockRule.mockAlertsEmptyData as AlertSearchResponse<{}, AlertsByRuleAgg>
     );
     expect(res).toEqual([]);
   });

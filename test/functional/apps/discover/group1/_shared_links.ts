@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import expect from '@kbn/expect';
+import { decompressFromBase64 } from 'lz-string';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -73,19 +75,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('permalink', function () {
         it('should allow for copying the snapshot URL', async function () {
-          const expectedUrl =
-            baseUrl +
-            '/app/discover?_t=1453775307251#' +
-            '/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time' +
-            ":(from:'2015-09-19T06:31:44.000Z',to:'2015-09" +
-            "-23T18:31:44.000Z'))&_a=(columns:!(),filters:!(),index:'logstash-" +
-            "*',interval:auto,query:(language:kuery,query:'')" +
-            ",sort:!(!('@timestamp',desc)))";
           const actualUrl = await PageObjects.share.getSharedUrl();
-          // strip the timestamp out of each URL
-          expect(actualUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP')).to.be(
-            expectedUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP')
-          );
+          expect(actualUrl).to.contain(`?l=${DISCOVER_APP_LOCATOR}`);
+          const urlSearchParams = new URLSearchParams(actualUrl);
+          expect(JSON.parse(decompressFromBase64(urlSearchParams.get('lz')!)!)).to.eql({
+            query: {
+              language: 'kuery',
+              query: '',
+            },
+            sort: [['@timestamp', 'desc']],
+            columns: [],
+            index: 'logstash-*',
+            interval: 'auto',
+            filters: [],
+            dataViewId: 'logstash-*',
+            timeRange: {
+              from: '2015-09-19T06:31:44.000Z',
+              to: '2015-09-23T18:31:44.000Z',
+            },
+            refreshInterval: {
+              value: 60000,
+              pause: true,
+            },
+          });
         });
 
         it('should allow for copying the snapshot URL as a short URL', async function () {
@@ -99,12 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should allow for copying the saved object URL', async function () {
           const expectedUrl =
-            baseUrl +
-            '/app/discover#' +
-            '/view/ab12e3c0-f231-11e6-9486-733b1ac9221a' +
-            '?_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A60000)' +
-            "%2Ctime%3A(from%3A'2015-09-19T06%3A31%3A44.000Z'%2C" +
-            "to%3A'2015-09-23T18%3A31%3A44.000Z'))";
+            baseUrl + '/app/discover#' + '/view/ab12e3c0-f231-11e6-9486-733b1ac9221a' + '?_g=()';
           await PageObjects.discover.loadSavedSearch('A Saved Search');
           await PageObjects.share.clickShareTopNavButton();
           await PageObjects.share.exportAsSavedObject();

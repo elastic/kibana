@@ -24,7 +24,7 @@ import {
   LibraryNotificationPopover,
   LibraryNotificationProps,
 } from './library_notification_popover';
-import { getSampleDashboardInput } from '../mocks';
+import { buildMockDashboard } from '../mocks';
 import { pluginServices } from '../services/plugin_services';
 import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
 
@@ -38,8 +38,7 @@ describe('LibraryNotificationPopover', () => {
   let defaultProps: LibraryNotificationProps;
 
   beforeEach(async () => {
-    container = new DashboardContainer(getSampleDashboardInput());
-    await container.untilInitialized();
+    container = buildMockDashboard();
 
     const contactCardEmbeddable = await container.addNewEmbeddable<
       ContactCardEmbeddableInput,

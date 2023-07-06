@@ -5,47 +5,56 @@
  * 2.0.
  */
 
+import { RuleMonitoring, RuleMonitoringHistory } from '../types';
 import {
   getExecutionDurationPercentiles,
   updateMonitoring,
   convertMonitoringFromRawAndVerify,
+  resetMonitoringLastRun,
 } from './monitoring';
-import { RuleMonitoring } from '../types';
 
-const mockHistory = [
+const mockHistory: RuleMonitoringHistory[] = [
   {
+    timestamp: 1655427600000,
     success: true,
     duration: 100,
   },
   {
+    timestamp: 1655427900000,
     success: true,
     duration: 200,
   },
   {
+    timestamp: 1655428200000,
     success: false,
     duration: 300,
   },
   {
+    timestamp: 1655428500000,
     success: false,
     duration: 100,
   },
   {
+    timestamp: 1655428800000,
     success: false,
   },
   {
+    timestamp: 1655429100000,
     success: true,
   },
   {
+    timestamp: 1655429400000,
     success: true,
     duration: 400,
   },
   {
+    timestamp: 1655429700000,
     success: true,
     duration: 500,
   },
 ];
 
-const mockRuleMonitoring = {
+const mockRuleMonitoring: RuleMonitoring = {
   run: {
     history: mockHistory,
     calculated_metrics: {
@@ -58,7 +67,7 @@ const mockRuleMonitoring = {
       },
     },
   },
-} as RuleMonitoring;
+};
 
 describe('getExecutionDurationPercentiles', () => {
   it('Calculates the percentile given partly undefined durations', () => {
@@ -70,20 +79,54 @@ describe('getExecutionDurationPercentiles', () => {
 
   it('Returns empty object when given all undefined durations', () => {
     // remove all duration fields
-    const nullDurationHistory = mockHistory.map((history) => ({
+    const nullDurationHistory: RuleMonitoringHistory[] = mockHistory.map((history) => ({
+      timestamp: history.timestamp,
       success: history.success,
     }));
 
-    const newMockRuleMonitoring = {
+    const newMockRuleMonitoring: RuleMonitoring = {
       ...mockRuleMonitoring,
       run: {
         ...mockRuleMonitoring.run,
         history: nullDurationHistory,
       },
-    } as RuleMonitoring;
+    };
 
     const percentiles = getExecutionDurationPercentiles(newMockRuleMonitoring.run.history);
     expect(Object.keys(percentiles).length).toEqual(0);
+  });
+});
+
+describe('resetMonitoringLastRun', () => {
+  it('resets last run metrics to the initial default value', () => {
+    const result = resetMonitoringLastRun(mockRuleMonitoring);
+    expect(result.run.last_run.metrics).toEqual({
+      duration: 0,
+      total_search_duration_ms: null,
+      total_indexing_duration_ms: null,
+      total_alerts_detected: null,
+      total_alerts_created: null,
+      gap_duration_s: null,
+    });
+  });
+
+  it('preserves last run timestamp', () => {
+    const expectedTimestamp = mockRuleMonitoring.run.last_run.timestamp;
+    const result = resetMonitoringLastRun(mockRuleMonitoring);
+    expect(result.run.last_run.timestamp).toEqual(expectedTimestamp);
+  });
+
+  it('preserves other monitoring properties', () => {
+    const { run: originalRun, ...originalRestOfMonitoringObject } = mockRuleMonitoring;
+    const { last_run: originalLastRun, ...originalRestOfRunObject } = originalRun;
+
+    const result = resetMonitoringLastRun(mockRuleMonitoring);
+
+    const { run: actualRun, ...actualRestOfMonitoringObject } = result;
+    const { last_run: actualLastRun, ...actualRestOfRunObject } = actualRun;
+
+    expect(actualRestOfMonitoringObject).toEqual(originalRestOfMonitoringObject);
+    expect(actualRestOfRunObject).toEqual(originalRestOfRunObject);
   });
 });
 

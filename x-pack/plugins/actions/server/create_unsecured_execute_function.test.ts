@@ -10,7 +10,10 @@ import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 import { actionTypeRegistryMock } from './action_type_registry.mock';
-import { asSavedObjectExecutionSource } from './lib/action_execution_source';
+import {
+  asNotificationExecutionSource,
+  asSavedObjectExecutionSource,
+} from './lib/action_execution_source';
 
 const mockTaskManager = taskManagerMock.createStart();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
@@ -29,6 +32,7 @@ describe('bulkExecute()', () => {
           config: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'x',
           secrets: {},
         },
@@ -59,10 +63,12 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
+        source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
       },
       {
         id: '123',
         params: { baz: true },
+        source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
       },
     ]);
     expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
@@ -102,6 +108,7 @@ describe('bulkExecute()', () => {
           actionId: '123',
           params: { baz: false },
           apiKey: null,
+          source: 'NOTIFICATION',
         },
         references: [],
       },
@@ -111,6 +118,7 @@ describe('bulkExecute()', () => {
           actionId: '123',
           params: { baz: true },
           apiKey: null,
+          source: 'NOTIFICATION',
         },
         references: [],
       },
@@ -130,6 +138,7 @@ describe('bulkExecute()', () => {
           config: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'x',
           secrets: {},
         },
@@ -171,6 +180,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: true },
+        source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
       },
     ]);
     expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
@@ -210,6 +220,7 @@ describe('bulkExecute()', () => {
           actionId: '123',
           params: { baz: false },
           apiKey: null,
+          source: 'SAVED_OBJECT',
         },
         references: [
           {
@@ -225,6 +236,7 @@ describe('bulkExecute()', () => {
           actionId: '123',
           params: { baz: true },
           apiKey: null,
+          source: 'NOTIFICATION',
         },
         references: [],
       },
@@ -244,6 +256,7 @@ describe('bulkExecute()', () => {
           config: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'x',
           secrets: {},
         },
@@ -291,6 +304,7 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: true },
+        source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
         relatedSavedObjects: [
           {
             id: 'some-id',
@@ -337,6 +351,7 @@ describe('bulkExecute()', () => {
           actionId: '123',
           params: { baz: false },
           apiKey: null,
+          source: 'SAVED_OBJECT',
         },
         references: [
           {
@@ -352,6 +367,7 @@ describe('bulkExecute()', () => {
           actionId: '123',
           params: { baz: true },
           apiKey: null,
+          source: 'NOTIFICATION',
           relatedSavedObjects: [
             {
               id: 'related_some-type_0',
@@ -382,6 +398,7 @@ describe('bulkExecute()', () => {
           config: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'x',
           secrets: {},
         },
@@ -392,10 +409,12 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
+          source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
         },
         {
           id: 'not-preconfigured',
           params: { baz: true },
+          source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
         },
       ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -415,6 +434,7 @@ describe('bulkExecute()', () => {
           config: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'x',
           secrets: {},
         },
@@ -429,10 +449,12 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
+          source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
         },
         {
           id: '123',
           params: { baz: true },
+          source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
         },
       ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
@@ -449,6 +471,7 @@ describe('bulkExecute()', () => {
           config: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'x',
           secrets: {},
         },
@@ -458,6 +481,7 @@ describe('bulkExecute()', () => {
           config: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
           name: 'x',
           secrets: {},
         },
@@ -468,10 +492,12 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
+          source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
         },
         {
           id: '456',
           params: { baz: true },
+          source: asNotificationExecutionSource({ connectorId: 'abc', requesterId: 'foo' }),
         },
       ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(

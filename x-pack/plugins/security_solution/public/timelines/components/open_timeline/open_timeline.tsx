@@ -10,7 +10,7 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import styled from 'styled-components';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline/api';
 import { ImportDataModal } from '../../../common/components/import_data_modal';
 import {
   UtilityBarGroup,
@@ -45,6 +45,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     itemIdToExpandedNotesRowMap,
     importDataModalToggle,
     onCreateRule,
+    onCreateRuleFromEql,
     onDeleteSelected,
     onlyFavorites,
     onOpenTimeline,
@@ -152,10 +153,12 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
     const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
       if (kibanaSecuritySolutionsPrivileges.crud) {
         const createRule: ActionTimelineToShow[] = ['createRule'];
+        const createRuleFromEql: ActionTimelineToShow[] = ['createRuleFromEql'];
         const timelineActions: ActionTimelineToShow[] = [
           'createFrom',
           'duplicate',
           ...(onCreateRule != null ? createRule : []),
+          ...(onCreateRuleFromEql != null ? createRuleFromEql : []),
         ];
 
         if (timelineStatus !== TimelineStatus.immutable) {
@@ -180,6 +183,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       return [];
     }, [
       onCreateRule,
+      onCreateRuleFromEql,
       timelineStatus,
       onDeleteSelected,
       deleteTimelines,
@@ -278,6 +282,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
             itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
             enableExportTimelineDownloader={enableExportTimelineDownloader}
             onCreateRule={onCreateRule}
+            onCreateRuleFromEql={onCreateRuleFromEql}
             onOpenDeleteTimelineModal={onOpenDeleteTimelineModal}
             onOpenTimeline={onOpenTimeline}
             onSelectionChange={onSelectionChange}

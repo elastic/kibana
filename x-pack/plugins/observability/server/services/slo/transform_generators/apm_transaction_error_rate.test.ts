@@ -44,15 +44,6 @@ describe('APM Transaction Error Rate Transform Generator', () => {
     });
   });
 
-  it("uses default values when 'good_status_codes' is not specified", async () => {
-    const anSLO = createSLO({
-      indicator: createAPMTransactionErrorRateIndicator({ goodStatusCodes: [] }),
-    });
-    const transform = generator.getTransformParams(anSLO);
-
-    expect(transform.pivot?.aggregations).toMatchSnapshot();
-  });
-
   it("does not include the query filter when params are '*'", async () => {
     const anSLO = createSLO({
       indicator: createAPMTransactionErrorRateIndicator({

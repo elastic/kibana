@@ -7,32 +7,51 @@
  */
 
 import React from 'react';
-import { EuiContextMenuPanel } from '@elastic/eui';
-import { SolutionToolbarPopover } from '@kbn/presentation-util-plugin/public';
+
+import { EuiContextMenuPanel, useEuiTheme } from '@elastic/eui';
+import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
+
 import { getControlButtonTitle } from '../../_dashboard_app_strings';
 import { AddDataControlButton } from './add_data_control_button';
 import { AddTimeSliderControlButton } from './add_time_slider_control_button';
+import { EditControlGroupButton } from './edit_control_group_button';
 
 export function ControlsToolbarButton({ controlGroup }: { controlGroup: ControlGroupContainer }) {
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <SolutionToolbarPopover
+    <ToolbarPopover
       ownFocus
-      label={getControlButtonTitle()}
-      iconType="arrowDown"
-      iconSide="right"
+      repositionOnScroll
       panelPaddingSize="none"
+      label={getControlButtonTitle()}
+      zIndex={Number(euiTheme.levels.header) - 1}
+      size="s"
+      iconType="controlsHorizontal"
       data-test-subj="dashboard-controls-menu-button"
     >
       {({ closePopover }: { closePopover: () => void }) => (
         <EuiContextMenuPanel
           items={[
-            <AddDataControlButton controlGroup={controlGroup} closePopover={closePopover} />,
-            <AddTimeSliderControlButton controlGroup={controlGroup} closePopover={closePopover} />,
-            controlGroup.getEditControlGroupButton(closePopover),
+            <AddDataControlButton
+              key="addControl"
+              controlGroup={controlGroup}
+              closePopover={closePopover}
+            />,
+            <AddTimeSliderControlButton
+              key="addTimeSliderControl"
+              controlGroup={controlGroup}
+              closePopover={closePopover}
+            />,
+            <EditControlGroupButton
+              key="manageControls"
+              controlGroup={controlGroup}
+              closePopover={closePopover}
+            />,
           ]}
         />
       )}
-    </SolutionToolbarPopover>
+    </ToolbarPopover>
   );
 }

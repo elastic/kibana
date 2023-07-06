@@ -23,6 +23,10 @@ import pRetry from 'p-retry';
 
 import { uniqBy } from 'lodash';
 
+import type { LicenseType } from '@kbn/licensing-plugin/server';
+
+import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
+
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
@@ -45,8 +49,14 @@ import type {
   PackageVerificationResult,
   RegistryDataStream,
 } from '../../../types';
-import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common/constants';
-import { FleetError, PackageOutdatedError, PackagePolicyValidationError } from '../../../errors';
+import { AUTO_UPGRADE_POLICIES_PACKAGES, DATASET_VAR_NAME } from '../../../../common/constants';
+import {
+  type FleetError,
+  PackageOutdatedError,
+  PackagePolicyValidationError,
+  ConcurrentInstallOperationError,
+  FleetUnauthorizedError,
+} from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import { dataStreamService, licenseService } from '../..';
 import { appContextService } from '../../app_context';
@@ -67,6 +77,10 @@ import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 import { prepareToInstallPipelines } from '../elasticsearch/ingest_pipeline';
 
 import { prepareToInstallTemplates } from '../elasticsearch/template/install';
+
+import { auditLoggingService } from '../../audit_logging';
+
+import { getFilteredInstallPackages } from '../filtered_packages';
 
 import { formatVerificationResultForSO } from './package_verification';
 
@@ -116,6 +130,7 @@ export async function ensureInstalledPackage(options: {
   pkgVersion?: string;
   spaceId?: string;
   force?: boolean;
+  authorizationHeader?: HTTPAuthorizationHeader | null;
 }): Promise<Installation> {
   const {
     savedObjectsClient,
@@ -124,6 +139,7 @@ export async function ensureInstalledPackage(options: {
     pkgVersion,
     force = false,
     spaceId = DEFAULT_SPACE_ID,
+    authorizationHeader,
   } = options;
 
   // If pkgVersion isn't specified, find the latest package version
@@ -148,6 +164,7 @@ export async function ensureInstalledPackage(options: {
     esClient,
     neverIgnoreVerificationError: !force,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
+    authorizationHeader,
   });
 
   if (installResult.error) {
@@ -184,6 +201,7 @@ export async function handleInstallPackageFailure({
   installedPkg,
   esClient,
   spaceId,
+  authorizationHeader,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   error: FleetError | Boom.Boom | Error;
@@ -192,8 +210,9 @@ export async function handleInstallPackageFailure({
   installedPkg: SavedObject<Installation> | undefined;
   esClient: ElasticsearchClient;
   spaceId: string;
+  authorizationHeader?: HTTPAuthorizationHeader | null;
 }) {
-  if (error instanceof FleetError) {
+  if (error instanceof ConcurrentInstallOperationError) {
     return;
   }
   const logger = appContextService.getLogger();
@@ -208,9 +227,16 @@ export async function handleInstallPackageFailure({
     if (installType === 'install' || installType === 'reinstall') {
       logger.error(`uninstalling ${pkgkey} after error installing: [${error.toString()}]`);
       await removeInstallation({ savedObjectsClient, pkgName, pkgVersion, esClient });
+      return;
     }
 
-    await updateInstallStatus({ savedObjectsClient, pkgName, status: 'install_failed' });
+    await updateInstallStatus({ savedObjectsClient, pkgName, status: 'install_failed' }).catch(
+      (err) => {
+        if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          logger.error(`failed to update package status to: install_failed  ${err}`);
+        }
+      }
+    );
 
     if (installType === 'update') {
       if (!installedPkg) {
@@ -228,9 +254,18 @@ export async function handleInstallPackageFailure({
         esClient,
         spaceId,
         force: true,
+        authorizationHeader,
       });
     }
   } catch (e) {
+    // If an error happens while removing the integration or while doing a rollback update the status to failed
+    await updateInstallStatus({ savedObjectsClient, pkgName, status: 'install_failed' }).catch(
+      (err) => {
+        if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+          logger.error(`failed to update package status to: install_failed  ${err}`);
+        }
+      }
+    );
     logger.error(`failed to uninstall or rollback package after installation error ${e}`);
   }
 }
@@ -251,6 +286,7 @@ interface InstallRegistryPackageParams {
   neverIgnoreVerificationError?: boolean;
   ignoreConstraints?: boolean;
   prerelease?: boolean;
+  authorizationHeader?: HTTPAuthorizationHeader | null;
 }
 interface InstallUploadedArchiveParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -259,6 +295,7 @@ interface InstallUploadedArchiveParams {
   contentType: string;
   spaceId: string;
   version?: string;
+  authorizationHeader?: HTTPAuthorizationHeader | null;
 }
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
@@ -286,6 +323,7 @@ async function installPackageFromRegistry({
   pkgkey,
   esClient,
   spaceId,
+  authorizationHeader,
   force = false,
   ignoreConstraints = false,
   neverIgnoreVerificationError = false,
@@ -362,6 +400,7 @@ async function installPackageFromRegistry({
       packageInfo,
       paths,
       verificationResult,
+      authorizationHeader,
     });
   } catch (e) {
     sendEvent({
@@ -374,6 +413,12 @@ async function installPackageFromRegistry({
       installSource,
     };
   }
+}
+
+function getElasticSubscription(packageInfo: ArchivePackage) {
+  const subscription = packageInfo.conditions?.elastic?.subscription as LicenseType | undefined;
+  // Keep packageInfo.license for backward compatibility
+  return subscription || packageInfo.license || 'basic';
 }
 
 async function installPackageCommon(options: {
@@ -390,6 +435,7 @@ async function installPackageCommon(options: {
   paths: string[];
   verificationResult?: PackageVerificationResult;
   telemetryEvent?: PackageUpdateEvent;
+  authorizationHeader?: HTTPAuthorizationHeader | null;
 }): Promise<InstallResult> {
   const {
     pkgName,
@@ -404,6 +450,7 @@ async function installPackageCommon(options: {
     packageInfo,
     paths,
     verificationResult,
+    authorizationHeader,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -428,6 +475,11 @@ async function installPackageCommon(options: {
       installType,
     });
 
+    const filteredPackages = getFilteredInstallPackages();
+    if (filteredPackages.includes(pkgName)) {
+      throw new FleetUnauthorizedError(`${pkgName} installation is not authorized`);
+    }
+
     // if the requested version is the same as installed version, check if we allow it based on
     // current installed package status and force flag, if we don't allow it,
     // just return the asset references from the existing installation
@@ -448,9 +500,9 @@ async function installPackageCommon(options: {
         };
       }
     }
-
-    if (!licenseService.hasAtLeast(packageInfo.license || 'basic')) {
-      const err = new Error(`Requires ${packageInfo.license} license`);
+    const elasticSubscription = getElasticSubscription(packageInfo);
+    if (!licenseService.hasAtLeast(elasticSubscription)) {
+      const err = new Error(`Requires ${elasticSubscription} license`);
       sendEvent({
         ...telemetryEvent,
         errorMessage: err.message,
@@ -486,6 +538,8 @@ async function installPackageCommon(options: {
       spaceId,
       verificationResult,
       installSource,
+      authorizationHeader,
+      force,
     })
       .then(async (assets) => {
         await removeOldAssets({
@@ -509,6 +563,7 @@ async function installPackageCommon(options: {
           installedPkg,
           spaceId,
           esClient,
+          authorizationHeader,
         });
         sendEvent({
           ...telemetryEvent!,
@@ -538,6 +593,7 @@ async function installPackageByUpload({
   contentType,
   spaceId,
   version,
+  authorizationHeader,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
@@ -585,6 +641,7 @@ async function installPackageByUpload({
       force: true, // upload has implicit force
       packageInfo,
       paths,
+      authorizationHeader,
     });
   } catch (e) {
     return {
@@ -612,6 +669,8 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
   const logger = appContextService.getLogger();
   const { savedObjectsClient, esClient } = args;
 
+  const authorizationHeader = args.authorizationHeader;
+
   const bundledPackages = await getBundledPackages();
 
   if (args.installSource === 'registry') {
@@ -634,6 +693,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
         contentType: 'application/zip',
         spaceId,
         version: matchingBundledPackage.version,
+        authorizationHeader,
       });
 
       return { ...response, installSource: 'bundled' };
@@ -649,6 +709,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       neverIgnoreVerificationError,
       ignoreConstraints,
       prerelease,
+      authorizationHeader,
     });
     return response;
   } else if (args.installSource === 'upload') {
@@ -659,6 +720,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       archiveBuffer,
       contentType,
       spaceId,
+      authorizationHeader,
     });
     return response;
   }
@@ -670,6 +732,12 @@ export const updateVersion = async (
   pkgName: string,
   pkgVersion: string
 ) => {
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'update',
+    id: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+
   return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     version: pkgVersion,
   });
@@ -684,6 +752,12 @@ export const updateInstallStatus = async ({
   pkgName: string;
   status: EpmPackageInstallStatus;
 }) => {
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'update',
+    id: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+
   return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     install_status: status,
   });
@@ -712,6 +786,12 @@ export async function restartInstallation(options: {
       ...formatVerificationResultForSO(verificationResult),
     };
   }
+
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'update',
+    id: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
 
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, savedObjectUpdate);
 }
@@ -757,6 +837,12 @@ export async function createInstallation(options: {
     savedObject = { ...savedObject, ...formatVerificationResultForSO(verificationResult) };
   }
 
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'create',
+    id: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+
   const created = await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     savedObject,
@@ -771,6 +857,12 @@ export const saveKibanaAssetsRefs = async (
   pkgName: string,
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>
 ) => {
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'update',
+    id: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+
   const assetRefs = Object.values(kibanaAssets).flat().map(toAssetReference);
   // Because Kibana assets are installed in parallel with ES assets with refresh: false, we almost always run into an
   // issue that causes a conflict error due to this issue: https://github.com/elastic/kibana/issues/126240. This is safe
@@ -829,6 +921,12 @@ export const updateEsAssetReferences = async (
     ({ type, id }) => `${type}-${id}`
   );
 
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'update',
+    id: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+
   const {
     attributes: { installed_es: updatedAssets },
   } =
@@ -864,7 +962,13 @@ export const optimisticallyAddEsAssetReferences = async (
   assetsToAdd: EsAssetReference[]
 ): Promise<EsAssetReference[]> => {
   const addEsAssets = async () => {
+    // TODO: Should this be replaced by a `get()` call from epm/get.ts?
     const so = await savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'get',
+      id: pkgName,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
 
     const installedEs = so.attributes.installed_es ?? [];
 
@@ -872,6 +976,12 @@ export const optimisticallyAddEsAssetReferences = async (
       [...installedEs, ...assetsToAdd],
       ({ type, id }) => `${type}-${id}`
     );
+
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id: pkgName,
+      savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+    });
 
     const {
       attributes: { installed_es: updatedAssets },
@@ -1033,7 +1143,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
   const paths = await getArchiveFilelist(pkgInfo);
   if (!paths) throw new Error('No paths found for ');
 
-  const datasetName = packagePolicy.inputs[0].streams[0].vars?.['data_stream.dataset']?.value;
+  const datasetName = packagePolicy.inputs[0].streams[0].vars?.[DATASET_VAR_NAME]?.value;
   const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName);
   const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
     type: dataStream.type,

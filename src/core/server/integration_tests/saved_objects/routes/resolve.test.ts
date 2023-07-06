@@ -24,6 +24,7 @@ import {
 } from '@kbn/core-saved-objects-server-internal';
 import { createHiddenTypeVariants } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock } from '@kbn/logging-mocks';
+import { setupConfig } from './routes_test_utils';
 
 const coreId = Symbol('core');
 
@@ -77,7 +78,9 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
-    registerResolveRoute(router, { coreUsageData, logger });
+    const config = setupConfig();
+
+    registerResolveRoute(router, { config, coreUsageData, logger });
 
     await server.start();
   });
@@ -115,9 +118,9 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
       .expect(200);
 
     expect(savedObjectsClient.resolve).toHaveBeenCalled();
-
-    const args = savedObjectsClient.resolve.mock.calls[0];
-    expect(args).toEqual(['index-pattern', 'logstash-*']);
+    expect(savedObjectsClient.resolve).nthCalledWith(1, 'index-pattern', 'logstash-*', {
+      migrationVersionCompatibility: 'compatible',
+    });
   });
 
   it('returns with status 400 is a type is hidden from the HTTP APIs', async () => {

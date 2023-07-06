@@ -25,7 +25,7 @@ import { createStore } from '../../store';
 import type { Props } from './top_n';
 import { StatefulTopN } from '.';
 import { TimelineId } from '../../../../common/types/timeline';
-import { TableId } from '../../../../common/types';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { detectionAlertsTables } from './helpers';
 
 jest.mock('react-router-dom', () => {
@@ -44,8 +44,8 @@ jest.mock('../link_to');
 jest.mock('../../lib/kibana');
 jest.mock('../../../timelines/store/timeline/actions');
 jest.mock('../visualization_actions/actions');
+jest.mock('../visualization_actions/lens_embeddable');
 const field = 'process.name';
-const value = 'nice';
 
 const state: State = {
   ...mockGlobalState,
@@ -159,7 +159,6 @@ const testProps = {
   scopeId: TableId.hostsPageEvents,
   toggleTopN: jest.fn(),
   onFilterAdded: jest.fn(),
-  value,
 };
 
 describe('StatefulTopN', () => {

@@ -3,6 +3,7 @@
 exports[`anomaly_scores renders correctly against snapshot 1`] = `
 <Fragment>
   <EuiFlexItem
+    data-test-subj="anomaly-score"
     grow={false}
   >
     <Score

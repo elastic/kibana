@@ -5,52 +5,46 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { useRef } from 'react';
-import { useDataFetcher } from './use_data_fetcher';
+import { useQuery } from '@tanstack/react-query';
+import { useKibana } from '../utils/kibana_react';
+
+export type Index = string;
 
 export interface UseFetchIndicesResponse {
-  indices: Index[];
-  loading: boolean;
-  error: boolean;
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  data: Index[] | undefined;
 }
 
-export interface Index {
-  name: string;
+interface Params {
+  search?: string;
 }
 
-export function useFetchIndices(): UseFetchIndicesResponse {
-  const hasFetched = useRef<boolean>(false);
+interface ResolveIndexReponse {
+  indices: Array<{ name: string }>;
+}
 
-  const {
-    data: indices,
-    loading,
-    error,
-  } = useDataFetcher({
-    paramsForApiCall: {},
-    initialDataState: undefined,
-    executeApiCall: async (
-      _: any,
-      abortController: AbortController,
-      http: HttpSetup
-    ): Promise<any> => {
+export function useFetchIndices({ search }: Params): UseFetchIndicesResponse {
+  const { http } = useKibana().services;
+
+  const { isLoading, isError, isSuccess, data } = useQuery({
+    queryKey: ['fetchIndices', search],
+    queryFn: async () => {
+      const searchPattern = search?.endsWith('*') ? search : `${search}*`;
       try {
-        const response = await http.get<Index[]>(`/api/index_management/indices`, {
-          signal: abortController.signal,
-        });
-
-        if (response !== undefined) {
-          hasFetched.current = true;
-          return response;
-        }
-      } catch (e) {
-        // ignore error for retrieving slos
+        const response = await http.get<ResolveIndexReponse>(
+          `/internal/index-pattern-management/resolve_index/${searchPattern}`
+        );
+        return response.indices.map((index) => index.name);
+      } catch (error) {
+        throw new Error(`Something went wrong. Error: ${error}`);
       }
-
-      return;
     },
-    shouldExecuteApiCall: () => (hasFetched.current === false ? true : false),
+    retry: false,
+    enabled: Boolean(search),
+    refetchOnWindowFocus: false,
   });
 
-  return { indices, loading, error };
+  return { isLoading, isError, isSuccess, data };
 }

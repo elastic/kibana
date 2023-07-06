@@ -11,6 +11,7 @@ export interface StatefulEventContextType {
   timelineID: string;
   enableHostDetailsFlyout: boolean;
   enableIpDetailsFlyout: boolean;
+  onRuleChange?: () => void;
 }
 
 export const StatefulEventContext = createContext<StatefulEventContextType | null>(null);

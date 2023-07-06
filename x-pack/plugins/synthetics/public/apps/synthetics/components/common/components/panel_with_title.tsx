@@ -9,8 +9,16 @@ import { EuiPanel, EuiTitle, useEuiTheme, EuiPanelProps } from '@elastic/eui';
 import React from 'react';
 
 export const PanelWithTitle: React.FC<
-  { title?: string; titleLeftAlign?: boolean } & EuiPanelProps
-> = ({ title, hasBorder = true, hasShadow = false, children, titleLeftAlign, ...props }) => {
+  { title?: string; titleLeftAlign?: boolean; margin?: string } & EuiPanelProps
+> = ({
+  title,
+  hasBorder = true,
+  hasShadow = false,
+  children,
+  titleLeftAlign,
+  margin,
+  ...props
+}) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -19,7 +27,7 @@ export const PanelWithTitle: React.FC<
         <EuiTitle size="xs">
           <h3
             css={{
-              margin: euiTheme.size.s,
+              margin: margin ?? euiTheme.size.s,
               marginBottom: 0,
               ...(titleLeftAlign ? { marginLeft: 0 } : {}),
             }}

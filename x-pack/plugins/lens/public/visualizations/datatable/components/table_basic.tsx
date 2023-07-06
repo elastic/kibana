@@ -31,7 +31,7 @@ import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import type { LensTableRowContextMenuEvent } from '../../../types';
-import type { FormatFactory } from '../../../../common';
+import type { FormatFactory } from '../../../../common/types';
 import type { LensGridDirection } from '../../../../common/expressions';
 import { VisualizationContainer } from '../../../visualization_container';
 import { findMinMaxByColumnId } from '../../../shared_components';
@@ -388,10 +388,10 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         formatters,
         columnConfig,
         DataContext,
-        props.uiSettings,
+        props.theme,
         props.args.fitRowToContent
       ),
-    [formatters, columnConfig, props.uiSettings, props.args.fitRowToContent]
+    [formatters, columnConfig, props.theme, props.args.fitRowToContent]
   );
 
   const columnVisibility = useMemo(

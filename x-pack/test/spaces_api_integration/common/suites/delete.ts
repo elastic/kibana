@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { getAggregatedSpaceData, getTestScenariosForSpace } from '../lib/space_test_utils';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
@@ -105,7 +106,7 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
     // Since Space 2 was deleted, any multi-namespace objects that existed in that space
     // are updated to remove it, and of those, any that don't exist in any space are deleted.
     const multiNamespaceResponse = await es.search<Record<string, any>>({
-      index: '.kibana',
+      index: ALL_SAVED_OBJECT_INDICES,
       size: 100,
       body: { query: { terms: { type: ['sharedtype'] } } },
     });

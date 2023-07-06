@@ -19,6 +19,10 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import {
+  SYNTHETICS_STATUS_RULE,
+  SYNTHETICS_TLS_RULE,
+} from '../../../../../common/constants/synthetics_alerts';
 import { ManageRulesLink } from '../common/links/manage_rules_link';
 import { ClientPluginsStart } from '../../../../plugin';
 import { ToggleFlyoutTranslations } from './hooks/translations';
@@ -48,7 +52,29 @@ export const ToggleAlertFlyoutButton = () => {
       </EuiFlexGroup>
     ),
     onClick: () => {
-      dispatch(setAlertFlyoutVisible(true));
+      dispatch(setAlertFlyoutVisible(SYNTHETICS_STATUS_RULE));
+      setIsOpen(false);
+    },
+    toolTipContent: !hasUptimeWrite ? noWritePermissionsTooltipContent : null,
+    disabled: !hasUptimeWrite || loading,
+    icon: 'bell',
+  };
+
+  const tlsAlertContextMenuItem: EuiContextMenuPanelItemDescriptor = {
+    'aria-label': ToggleFlyoutTranslations.toggleMonitorStatusAriaLabel,
+    'data-test-subj': 'xpack.synthetics.toggleAlertFlyout.tls',
+    name: (
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>{ToggleFlyoutTranslations.toggleTlsContent}</EuiFlexItem>
+        {loading && (
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    ),
+    onClick: () => {
+      dispatch(setAlertFlyoutVisible(SYNTHETICS_TLS_RULE));
       setIsOpen(false);
     },
     toolTipContent: !hasUptimeWrite ? noWritePermissionsTooltipContent : null,
@@ -66,7 +92,7 @@ export const ToggleAlertFlyoutButton = () => {
   const panels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 0,
-      items: [monitorStatusAlertContextMenuItem, managementContextItem],
+      items: [monitorStatusAlertContextMenuItem, tlsAlertContextMenuItem, managementContextItem],
     },
   ];
 
@@ -100,8 +126,8 @@ export const ToggleAlertFlyoutButton = () => {
 };
 
 const noWritePermissionsTooltipContent = i18n.translate(
-  'xpack.synthetics.alertDropdown.noWritePermissions',
+  'xpack.synthetics.alertDropdown.noPermissions',
   {
-    defaultMessage: 'You need read-write access to Uptime to create alerts in this app.',
+    defaultMessage: 'You do not have sufficient permissions to perform this action.',
   }
 );

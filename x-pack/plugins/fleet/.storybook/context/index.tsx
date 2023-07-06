@@ -15,7 +15,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { CoreScopedHistory } from '@kbn/core/public';
 import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/storybook';
-import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 
 import { IntegrationsAppContext } from '../../public/applications/integrations/app';
 import type { FleetConfigType, FleetStartServices } from '../../public/plugin';
@@ -111,7 +110,7 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
           writeIntegrationPolicies: true,
         },
       },
-      guidedOnboarding: guidedOnboardingMock.createStart(),
+      guidedOnboarding: {},
     }),
     [isCloudEnabled]
   );

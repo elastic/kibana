@@ -13,14 +13,14 @@ import type {
   RequestHandler,
   SavedObjectsClientContract,
   CoreSetup,
-  CoreStart,
 } from '@kbn/core/server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { createExecutionContext } from '@kbn/ml-route-utils';
+
 import { PLUGIN_ID } from '../../common/constants/app';
 import { mlSavedObjectServiceFactory, MLSavedObjectService } from '../saved_objects';
 import type { MlLicense } from '../../common/license';
@@ -117,7 +117,7 @@ export class RouteGuard {
       );
 
       const [coreStart] = await this._getStartServices();
-      const executionContext = await createExecutionContext(coreStart, request.route.path);
+      const executionContext = createExecutionContext(coreStart, PLUGIN_ID, request.route.path);
 
       return await coreStart.executionContext.withContext(executionContext, () =>
         handler({
@@ -137,15 +137,4 @@ export class RouteGuard {
       );
     };
   }
-}
-
-async function createExecutionContext(coreStart: CoreStart, id?: string) {
-  const labels = coreStart.executionContext.getAsLabels();
-  const page = labels.page as string;
-  return {
-    type: 'application',
-    name: PLUGIN_ID,
-    id: id ?? page,
-    page,
-  };
 }

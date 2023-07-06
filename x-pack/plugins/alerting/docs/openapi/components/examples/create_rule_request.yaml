@@ -1,14 +1,14 @@
 summary: Create an index threshold rule.
 value:
   actions:
-    - id: dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2
+    - id: 48de3460-f401-11ed-9f8e-399c75a2deeb
       frequency:
         notify_when: onActionGroupChange
         summary: false
       group: threshold met
       params:
         level: info
-        message: "alert '{{alertName}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+        message: "Rule '{{rule.name}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
   consumer: alerts
   name: my rule
   params:

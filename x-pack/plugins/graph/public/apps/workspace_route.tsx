@@ -27,7 +27,7 @@ export const WorkspaceRoute = ({
   deps: {
     toastNotifications,
     coreStart,
-    savedObjectsClient,
+    contentClient,
     graphSavePolicy,
     chrome,
     canEditDrillDownUrls,
@@ -43,6 +43,7 @@ export const WorkspaceRoute = ({
     spaces,
     indexPatterns: getIndexPatternProvider,
     inspect,
+    savedObjectsManagement,
   },
 }: WorkspaceRouteProps) => {
   /**
@@ -70,9 +71,10 @@ export const WorkspaceRoute = ({
       storage,
       data,
       unifiedSearch,
+      savedObjectsManagement,
       ...coreStart,
     }),
-    [coreStart, data, storage, unifiedSearch]
+    [coreStart, data, storage, unifiedSearch, savedObjectsManagement]
   );
 
   const { loading, requestAdapter, callNodeProxy, callSearchNodeProxy, handleSearchQueryError } =
@@ -106,8 +108,8 @@ export const WorkspaceRoute = ({
       notifications: coreStart.notifications,
       http: coreStart.http,
       overlays: coreStart.overlays,
-      savedObjectsClient,
       savePolicy: graphSavePolicy,
+      contentClient,
       changeUrl: (newUrl) => history.push(newUrl),
       notifyReact: () => setRenderCounter((cur) => cur + 1),
       chrome,
@@ -118,7 +120,7 @@ export const WorkspaceRoute = ({
   const loaded = useWorkspaceLoader({
     workspaceRef,
     store,
-    savedObjectsClient,
+    contentClient,
     spaces,
     coreStart,
     data,

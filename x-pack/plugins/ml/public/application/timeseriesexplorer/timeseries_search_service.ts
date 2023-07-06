@@ -9,6 +9,7 @@ import { each, find, get, filter } from 'lodash';
 
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import { ml } from '../services/ml_api_service';
 import {
   isModelPlotChartableForDetector,
@@ -19,12 +20,11 @@ import { buildConfigFromDetector } from '../util/chart_config_builder';
 import { mlResultsService } from '../services/results_service';
 import { ModelPlotOutput } from '../services/results_service/result_service_rx';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
-import { EntityField } from '../../../common/util/anomaly_utils';
 
 function getMetricData(
   job: Job,
   detectorIndex: number,
-  entityFields: EntityField[],
+  entityFields: MlEntityField[],
   earliestMs: number,
   latestMs: number,
   intervalMs: number,

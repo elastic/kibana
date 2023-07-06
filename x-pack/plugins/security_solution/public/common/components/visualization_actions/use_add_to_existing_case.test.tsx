@@ -14,6 +14,7 @@ import {
   readCasesPermissions,
   writeCasesPermissions,
 } from '../../../cases_test_utils';
+import { CommentType } from '@kbn/cases-plugin/common';
 
 const mockedUseKibana = mockUseKibana();
 const mockGetUseCasesAddToExistingCaseModal = jest.fn();
@@ -30,7 +31,7 @@ jest.mock('../../lib/kibana', () => {
         ...mockedUseKibana.services,
         cases: {
           hooks: {
-            getUseCasesAddToExistingCaseModal: mockGetUseCasesAddToExistingCaseModal,
+            useCasesAddToExistingCaseModal: mockGetUseCasesAddToExistingCaseModal,
           },
         },
       },
@@ -49,7 +50,7 @@ describe('useAddToExistingCase', () => {
     (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
   });
 
-  it('getUseCasesAddToExistingCaseModal with attachments', () => {
+  it('useCasesAddToExistingCaseModal with attachments', () => {
     const { result } = renderHook(() =>
       useAddToExistingCase({
         lensAttributes: kpiHostMetricLensAttributes,
@@ -59,7 +60,9 @@ describe('useAddToExistingCase', () => {
     );
     expect(mockGetUseCasesAddToExistingCaseModal).toHaveBeenCalledWith({
       onClose: mockOnAddToCaseClicked,
-      toastContent: 'Successfully added visualization to the case',
+      successToaster: {
+        title: 'Successfully added visualization to the case',
+      },
     });
     expect(result.current.disabled).toEqual(false);
   });
@@ -110,5 +113,35 @@ describe('useAddToExistingCase', () => {
       })
     );
     expect(result.current.disabled).toEqual(true);
+  });
+
+  it('should open add to existing case modal', () => {
+    const mockOpenCaseModal = jest.fn();
+    const mockClick = jest.fn();
+
+    mockGetUseCasesAddToExistingCaseModal.mockReturnValue({ open: mockOpenCaseModal });
+
+    const { result } = renderHook(() =>
+      useAddToExistingCase({
+        lensAttributes: kpiHostMetricLensAttributes,
+        timeRange,
+        onAddToCaseClicked: mockClick,
+      })
+    );
+
+    result.current.onAddToExistingCaseClicked();
+    const attachments = mockOpenCaseModal.mock.calls[0][0].getAttachments();
+
+    expect(attachments).toEqual([
+      {
+        persistableStateAttachmentState: {
+          attributes: kpiHostMetricLensAttributes,
+          timeRange,
+        },
+        persistableStateAttachmentTypeId: '.lens',
+        type: CommentType.persistableState as const,
+      },
+    ]);
+    expect(mockClick).toHaveBeenCalled();
   });
 });

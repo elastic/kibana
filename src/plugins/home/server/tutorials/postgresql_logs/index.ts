@@ -62,6 +62,6 @@ export function postgresqlLogsSpecProvider(context: TutorialContext): TutorialSc
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['datastore'],
+    integrationBrowserCategories: ['datastore', 'observability'],
   };
 }

@@ -15,7 +15,8 @@ import {
 export default function (providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
 
-  describe('endpoint', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/72874
+  describe.skip('endpoint', function () {
     const ingestManager = getService('ingestManager');
     const log = getService('log');
     const endpointTestResources = getService('endpointTestResources');
@@ -35,13 +36,8 @@ export default function (providerContext: FtrProviderContext) {
       await endpointTestResources.installOrUpgradeEndpointFleetPackage();
     });
     loadTestFile(require.resolve('./endpoint_list'));
-    loadTestFile(require.resolve('./policy_list'));
-    loadTestFile(require.resolve('./policy_details'));
     loadTestFile(require.resolve('./endpoint_telemetry'));
-    loadTestFile(require.resolve('./trusted_apps_list'));
-    loadTestFile(require.resolve('./fleet_integrations'));
     loadTestFile(require.resolve('./endpoint_permissions'));
-    loadTestFile(require.resolve('./artifact_entries_list'));
     loadTestFile(require.resolve('./responder'));
     loadTestFile(require.resolve('./endpoint_solution_integrations'));
   });

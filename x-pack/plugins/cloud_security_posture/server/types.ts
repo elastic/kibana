@@ -34,6 +34,7 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { FleetStartContract, FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { CspStatusCode, IndexDetails } from '../common/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginSetup {}
@@ -97,3 +98,18 @@ export type CspRequestHandler<
  * @internal
  */
 export type CspRouter = IRouter<CspRequestHandlerContext>;
+
+export interface StatusResponseInfo {
+  statusCspm: CspStatusCode;
+  statusKspm: CspStatusCode;
+  statusVulnMgmt: CspStatusCode;
+  healthyAgentsCspm: number;
+  healthyAgentsKspm: number;
+  healthyAgentsVulMgmt: number;
+  installedPackagePoliciesTotalKspm: number;
+  installedPackagePoliciesTotalCspm: number;
+  installedPackagePoliciesTotalVulnMgmt: number;
+  indicesDetails: IndexDetails[];
+  latestCspPackageVersion: string;
+  isPluginInitialized: boolean;
+}

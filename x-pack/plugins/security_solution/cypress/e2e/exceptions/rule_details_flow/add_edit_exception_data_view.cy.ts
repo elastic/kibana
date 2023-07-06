@@ -5,24 +5,18 @@
  * 2.0.
  */
 
-import { LOADING_INDICATOR } from '../../../screens/security_header';
 import { getNewRule } from '../../../objects/rule';
-import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../../screens/alerts';
-import { createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
+import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
-  addExceptionFromFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
   goToOpenedAlertsOnRuleDetailsPage,
 } from '../../../tasks/alerts';
 import {
-  addExceptionConditions,
-  addExceptionFlyoutItemName,
   editException,
   editExceptionFlyoutItemName,
-  selectBulkCloseAlerts,
   submitEditedExceptionItem,
-  submitNewExceptionItem,
 } from '../../../tasks/exceptions';
 import {
   esArchiverLoad,
@@ -47,8 +41,8 @@ import {
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_CARD_ITEM_CONDITIONS,
   EXCEPTION_ITEM_CONTAINER,
-  FIELD_INPUT,
   VALUES_INPUT,
+  FIELD_INPUT_PARENT,
 } from '../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
@@ -69,19 +63,15 @@ describe('Add exception using data views from rule details', () => {
 
   beforeEach(() => {
     deleteAlertsAndRules();
-    createCustomRuleEnabled(
-      {
-        ...getNewRule(),
-        customQuery: 'agent.name:*',
-        dataSource: { dataView: 'exceptions-*', type: 'dataView' },
-        runsEvery: {
-          interval: '10',
-          timeType: 'Seconds',
-          type: 's',
-        },
-      },
-      'rule_testing'
+    createRule(
+      getNewRule({
+        query: 'agent.name:*',
+        data_view_id: 'exceptions-*',
+        interval: '10s',
+        rule_id: 'rule_testing',
+      })
     );
+    login();
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
     waitForAlertsToPopulate();
@@ -91,49 +81,7 @@ describe('Add exception using data views from rule details', () => {
     esArchiverUnload('exceptions_2');
   });
 
-  it('Creates an exception item from alert actions overflow menu', () => {
-    cy.get(LOADING_INDICATOR).should('not.exist');
-    addExceptionFromFirstAlert();
-    addExceptionConditions({
-      field: 'agent.name',
-      operator: 'is',
-      values: ['foo'],
-    });
-    addExceptionFlyoutItemName(ITEM_NAME);
-    selectBulkCloseAlerts();
-    submitNewExceptionItem();
-
-    // Alerts table should now be empty from having added exception and closed
-    // matching alert
-    cy.get(EMPTY_ALERT_TABLE).should('exist');
-
-    // Closed alert should appear in table
-    goToClosedAlertsOnRuleDetailsPage();
-    cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
-
-    // Remove the exception and load an event that would have matched that exception
-    // to show that said exception now starts to show up again
-    goToExceptionsTab();
-
-    // when removing exception and again, no more exist, empty screen shows again
-    removeException();
-    cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
-
-    // load more docs
-    esArchiverLoad('exceptions_2');
-
-    // now that there are no more exceptions, the docs should match and populate alerts
-    goToAlertsTab();
-    goToOpenedAlertsOnRuleDetailsPage();
-    waitForTheRuleToBeExecuted();
-    waitForAlertsToPopulate();
-
-    cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', '2 alerts');
-  });
-
-  it('Creates an exception item', () => {
+  it('Creates an exception item and close all matching alerts', () => {
     goToExceptionsTab();
     // when no exceptions exist, empty component shows with action to add exception
     cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
@@ -160,7 +108,7 @@ describe('Add exception using data views from rule details', () => {
     // Closed alert should appear in table
     goToClosedAlertsOnRuleDetailsPage();
     cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
+    cy.get(ALERTS_COUNT).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
 
     // Remove the exception and load an event that would have matched that exception
     // to show that said exception now starts to show up again
@@ -180,7 +128,7 @@ describe('Add exception using data views from rule details', () => {
     waitForAlertsToPopulate();
 
     cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', '2 alerts');
+    cy.get(ALERTS_COUNT).should('have.text', '2 alerts');
   });
 
   it('Edits an exception item', () => {
@@ -212,7 +160,11 @@ describe('Add exception using data views from rule details', () => {
     editExceptionFlyoutItemName(NEW_ITEM_NAME);
 
     // check that the existing item's field is being populated
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT).eq(0).should('have.text', ITEM_FIELD);
+    cy.get(EXCEPTION_ITEM_CONTAINER)
+      .eq(0)
+      .find(FIELD_INPUT_PARENT)
+      .eq(0)
+      .should('have.text', ITEM_FIELD);
     cy.get(VALUES_INPUT).should('have.text', 'foo');
 
     // edit conditions

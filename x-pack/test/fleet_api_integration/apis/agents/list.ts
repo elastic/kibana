@@ -192,7 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
       const agent1: Agent = apiResponse.items.find((agent: any) => agent.id === 'agent1');
 
       expect(agent1.metrics?.memory_size_byte_avg).to.eql('25510920');
-      expect(agent1.metrics?.cpu_avg).to.eql('0.0166');
+      expect(agent1.metrics?.cpu_avg).to.eql('0.01666');
 
       const agent2: Agent = apiResponse.items.find((agent: any) => agent.id === 'agent2');
       expect(agent2.metrics?.memory_size_byte_avg).equal(undefined);

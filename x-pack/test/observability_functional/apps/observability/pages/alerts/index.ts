@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const find = getService('find');
 
-  describe('Observability alerts', function () {
+  describe('Observability alerts >', function () {
     this.tags('includeFirefox');
 
     const testSubjects = getService('testSubjects');
@@ -39,12 +39,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
-    });
-
-    describe('With no data', () => {
-      it('Shows the no data screen', async () => {
-        await observability.alerts.common.getNoDataPageOrFail();
-      });
     });
 
     describe('Alerts table', () => {

@@ -16,18 +16,24 @@ interface Props {
   name: string;
   configId: string;
   locationId?: string;
+  updateUrl?: boolean;
 }
 
-export const MonitorDetailsLinkPortal = ({ name, configId, locationId }: Props) => {
+export const MonitorDetailsLinkPortal = ({ name, configId, locationId, updateUrl }: Props) => {
   return (
     <InPortal node={MonitorDetailsLinkPortalNode}>
-      <MonitorDetailsLink name={name} configId={configId} locationId={locationId} />
+      <MonitorDetailsLink
+        name={name}
+        configId={configId}
+        locationId={locationId}
+        updateUrl={updateUrl}
+      />
     </InPortal>
   );
 };
 
-export const MonitorDetailsLink = ({ name, configId, locationId }: Props) => {
-  const selectedLocation = useSelectedLocation();
+export const MonitorDetailsLink = ({ name, configId, locationId, updateUrl }: Props) => {
+  const selectedLocation = useSelectedLocation(updateUrl);
 
   let locId = locationId;
 
@@ -40,7 +46,7 @@ export const MonitorDetailsLink = ({ name, configId, locationId }: Props) => {
     pathname: locId ? `monitor/${configId}?locationId=${locId}` : `monitor/${configId}`,
   });
   return (
-    <EuiLink href={href}>
+    <EuiLink data-test-subj="syntheticsMonitorDetailsLinkLink" href={href}>
       <EuiIcon type="arrowLeft" /> {name}
     </EuiLink>
   );

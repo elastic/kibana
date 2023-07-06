@@ -18,10 +18,9 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useSimpleMonitor } from './use_simple_monitor';
 import { ServiceLocationsField } from './form_fields/service_locations';
-import { ConfigKey, ServiceLocation, ServiceLocations } from '../../../../../common/runtime_types';
+import { ConfigKey, ServiceLocations } from '../../../../../common/runtime_types';
 import { useCanEditSynthetics } from '../../../../hooks/use_capabilities';
 import { useFormWrapped } from '../../../../hooks/use_form_wrapped';
-import { useFleetPermissions } from '../../hooks';
 import { NoPermissionsTooltip } from '../common/components/permissions';
 
 export interface SimpleFormData {
@@ -35,7 +34,6 @@ export const SimpleMonitorForm = () => {
     register,
     handleSubmit,
     formState: { errors, isValid, isSubmitted },
-    getValues,
   } = useFormWrapped({
     mode: 'onSubmit',
     reValidateMode: 'onChange',
@@ -52,11 +50,6 @@ export const SimpleMonitorForm = () => {
   const { loading, data: newMonitor } = useSimpleMonitor({ monitorData });
 
   const canEditSynthetics = useCanEditSynthetics();
-  const { canSaveIntegrations } = useFleetPermissions();
-  const hasAnyPrivateLocationSelected = (getValues(ConfigKey.LOCATIONS) as ServiceLocations)?.some(
-    ({ isServiceManaged }: ServiceLocation) => !isServiceManaged
-  );
-  const canSavePrivateLocation = !hasAnyPrivateLocationSelected || canSaveIntegrations;
 
   const hasURLError = !!errors?.[ConfigKey.URLS];
 
@@ -75,7 +68,6 @@ export const SimpleMonitorForm = () => {
         error={hasURLError ? URL_REQUIRED_LABEL : undefined}
       >
         <EuiFieldText
-          placeholder={WEBSITE_URL_PLACEHOLDER}
           fullWidth
           {...register(ConfigKey.URLS, { required: true })}
           isInvalid={!!errors?.[ConfigKey.URLS]}
@@ -88,17 +80,14 @@ export const SimpleMonitorForm = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <NoPermissionsTooltip
-            canEditSynthetics={canEditSynthetics}
-            canAddPrivateMonitor={canSavePrivateLocation}
-          >
+          <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
             <EuiButton
               type="submit"
               fill
               iconType="plusInCircleFilled"
               isLoading={loading}
               data-test-subj="syntheticsMonitorConfigSubmitButton"
-              disabled={!canEditSynthetics || !canSavePrivateLocation}
+              disabled={!canEditSynthetics}
             >
               {CREATE_MONITOR_LABEL}
             </EuiButton>
@@ -126,7 +115,7 @@ export const WEBSITE_URL_PLACEHOLDER = i18n.translate(
 export const WEBSITE_URL_HELP_TEXT = i18n.translate(
   'xpack.synthetics.monitorManagement.websiteUrlHelpText',
   {
-    defaultMessage: `For example, your company's homepage or https://elastic.co`,
+    defaultMessage: `For example, your company's homepage or https://elastic.co.`,
   }
 );
 
@@ -139,6 +128,13 @@ export const MONITOR_SUCCESS_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.monitorAddedSuccessMessage',
   {
     defaultMessage: 'Monitor added successfully.',
+  }
+);
+
+export const MONITOR_FAILURE_LABEL = i18n.translate(
+  'xpack.synthetics.monitorManagement.monitorFailureMessage',
+  {
+    defaultMessage: 'Monitor was unable to be saved. Please try again later.',
   }
 );
 

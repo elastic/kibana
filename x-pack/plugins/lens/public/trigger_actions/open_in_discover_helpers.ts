@@ -11,7 +11,7 @@ import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Embeddable } from '../embeddable';
-import { DOC_TYPE } from '../../common';
+import { DOC_TYPE } from '../../common/constants';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {
   timeRange?: TimeRange;

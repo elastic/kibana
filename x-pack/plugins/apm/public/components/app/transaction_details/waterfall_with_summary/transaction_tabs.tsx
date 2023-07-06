@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTab, EuiTabs, EuiLoadingContent } from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LogStream } from '@kbn/infra-plugin/public';
+import { LogStream } from '@kbn/logs-shared-plugin/public';
 import React, { useMemo } from 'react';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionMetadata } from '../../../shared/metadata_table/transaction_metadata';
@@ -121,7 +121,7 @@ export function TransactionTabs({
 
       <EuiSpacer />
       {isLoading || !transaction ? (
-        <EuiLoadingContent lines={3} data-test-sub="loading-content" />
+        <EuiSkeletonText lines={3} data-test-sub="loading-content" />
       ) : (
         <> {TabContent}</>
       )}

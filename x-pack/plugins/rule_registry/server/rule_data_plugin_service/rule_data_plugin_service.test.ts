@@ -18,6 +18,11 @@ jest.mock('../rule_data_client/rule_data_client', () => ({
   RuleDataClient: jest.fn().mockImplementation(() => mockCreateRuleDataClient()),
 }));
 
+const frameworkAlertsService = {
+  enabled: () => false,
+  getContextInitializationPromise: async () => ({ result: false }),
+};
+
 describe('ruleDataPluginService', () => {
   let pluginStop$: Subject<void>;
 
@@ -43,7 +48,7 @@ describe('ruleDataPluginService', () => {
         isWriteEnabled: true,
         disabledRegistrationContexts: ['observability.logs'],
         isWriterCacheEnabled: true,
-        areFrameworkAlertsEnabled: false,
+        frameworkAlerts: frameworkAlertsService,
         pluginStop$,
       });
       expect(ruleDataService.isRegistrationContextDisabled('observability.logs')).toBe(true);
@@ -60,7 +65,7 @@ describe('ruleDataPluginService', () => {
         isWriteEnabled: true,
         disabledRegistrationContexts: ['observability.logs'],
         isWriterCacheEnabled: true,
-        areFrameworkAlertsEnabled: false,
+        frameworkAlerts: frameworkAlertsService,
         pluginStop$,
       });
       expect(ruleDataService.isRegistrationContextDisabled('observability.apm')).toBe(false);
@@ -79,7 +84,7 @@ describe('ruleDataPluginService', () => {
         isWriteEnabled: true,
         disabledRegistrationContexts: ['observability.logs'],
         isWriterCacheEnabled: true,
-        areFrameworkAlertsEnabled: false,
+        frameworkAlerts: frameworkAlertsService,
         pluginStop$,
       });
 
@@ -99,7 +104,7 @@ describe('ruleDataPluginService', () => {
         isWriteEnabled: true,
         disabledRegistrationContexts: ['observability.logs'],
         isWriterCacheEnabled: true,
-        areFrameworkAlertsEnabled: false,
+        frameworkAlerts: frameworkAlertsService,
         pluginStop$,
       });
       const indexOptions = {

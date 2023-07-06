@@ -20,7 +20,7 @@ Object {
         >
           <button
             aria-label="Closes this modal window"
-            class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles-euiModal__closeIcon"
+            class="euiButtonIcon euiModal__closeIcon emotion-euiButtonIcon-xs-empty-text-euiModal__closeIcon"
             type="button"
           >
             <span
@@ -77,7 +77,6 @@ Object {
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          aria-invalid="false"
                           class="euiFieldText euiFieldText--fullWidth"
                           data-test-subj="editModalNameTextField"
                           id="generated-id"
@@ -107,15 +106,23 @@ Object {
                   <div
                     class="euiFormRow__fieldWrapper"
                   >
-                    <textarea
-                      class="euiTextArea euiTextArea--resizeVertical euiTextArea--fullWidth"
-                      data-test-subj="editModalDescriptionTextField"
-                      id="generated-id"
-                      name="description"
-                      rows="6"
+                    <div
+                      class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--euiTextArea"
                     >
-                      list description
-                    </textarea>
+                      <div
+                        class="euiFormControlLayout__childrenWrapper"
+                      >
+                        <textarea
+                          class="euiTextArea euiTextArea--resizeVertical euiTextArea--fullWidth"
+                          data-test-subj="editModalDescriptionTextField"
+                          id="generated-id"
+                          name="description"
+                          rows="6"
+                        >
+                          list description
+                        </textarea>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </form>
@@ -125,22 +132,22 @@ Object {
             class="euiModalFooter emotion-euiModalFooter"
           >
             <button
-              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
               data-test-subj="editModalCancelBtn"
               type="button"
             >
               <span
-                class="euiButtonContent euiButtonEmpty__content"
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__text"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
                   Cancel
                 </span>
               </span>
             </button>
             <button
-              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
               data-test-subj="editModalSaveBtn"
               form="modalForm_generated-id"
               type="submit"

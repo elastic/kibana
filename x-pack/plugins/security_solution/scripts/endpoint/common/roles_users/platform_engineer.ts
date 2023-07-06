@@ -17,7 +17,18 @@ export const getPlatformEngineer: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siem: ['minimal_all', 'actions_log_management_read'],
+          siem: [
+            'minimal_all',
+
+            'policy_management_all',
+
+            'trusted_applications_all',
+            'event_filters_all',
+            'host_isolation_exceptions_all',
+            'blocklist_all',
+
+            'actions_log_management_read',
+          ],
         },
       },
     ],

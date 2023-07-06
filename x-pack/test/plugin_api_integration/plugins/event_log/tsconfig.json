@@ -12,6 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/event-log-plugin"
+    "@kbn/event-log-plugin",
+    "@kbn/config-schema"
   ]
 }

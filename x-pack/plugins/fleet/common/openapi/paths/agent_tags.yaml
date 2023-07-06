@@ -1,6 +1,7 @@
 get:
-  summary: Agent Tags - List
-  description: List all agent tags
+  summary: List agent tags
+  tags:
+    - Agents
   responses:
     '200':
       description: OK
@@ -8,4 +9,6 @@ get:
         application/json:
           schema:
             $ref: ../components/schemas/get_agent_tags_response.yaml
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-agent-tags

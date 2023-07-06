@@ -7,7 +7,10 @@
 
 import { ITelemetryClient } from './types';
 
-export const createLogViewsClientMock = (): jest.Mocked<ITelemetryClient> => ({
+export const createTelemetryClientMock = (): jest.Mocked<ITelemetryClient> => ({
   reportHostEntryClicked: jest.fn(),
   reportHostsViewQuerySubmitted: jest.fn(),
+  reportHostFlyoutFilterRemoved: jest.fn(),
+  reportHostFlyoutFilterAdded: jest.fn(),
+  reportHostsViewTotalHostCountRetrieved: jest.fn(),
 });

@@ -43,7 +43,6 @@ import {
   ToastsSetup,
 } from '@kbn/core/public';
 
-import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
@@ -70,7 +69,7 @@ import {
 } from '../errors';
 import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
-import { createRequestHash } from './utils';
+import { createRequestHash, getSearchErrorOverrideDisplay } from './utils';
 import { SearchAbortController } from './search_abort_controller';
 import { SearchConfigSchema } from '../../../config';
 
@@ -299,9 +298,11 @@ export class SearchInterceptor {
           isSavedToBackground = true;
         });
 
-    const cancel = once(() => {
-      if (id && !isSavedToBackground) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
+    const sendCancelRequest = once(() => {
+      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' });
     });
+
+    const cancel = () => id && !isSavedToBackground && sendCancelRequest();
 
     return pollSearch(search, cancel, {
       pollInterval: this.deps.searchConfig.asyncSearch.pollInterval,
@@ -347,6 +348,7 @@ export class SearchInterceptor {
       const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
       return this.deps.http
         .post(`/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`, {
+          version: '1',
           signal: abortSignal,
           context: executionContext,
           body: JSON.stringify({
@@ -518,25 +520,17 @@ export class SearchInterceptor {
     if (e instanceof AbortError || e instanceof SearchTimeoutError) {
       // The SearchTimeoutError is shown by the interceptor in getSearchError (regardless of how the app chooses to handle errors)
       return;
-    } else if (e instanceof EsError) {
-      this.deps.toasts.addDanger({
-        title: i18n.translate('data.search.esErrorTitle', {
-          defaultMessage: 'Cannot retrieve search results',
-        }),
-        text: toMountPoint(e.getErrorMessage(this.application), { theme$: this.deps.theme.theme$ }),
-      });
-    } else if (e.constructor.name === 'HttpFetchError' || e instanceof BfetchRequestError) {
-      const defaultMsg = i18n.translate('data.errors.fetchError', {
-        defaultMessage: 'Check your network connection and try again.',
-      });
+    }
 
+    const overrideDisplay = getSearchErrorOverrideDisplay({
+      error: e,
+      application: this.application,
+    });
+
+    if (overrideDisplay) {
       this.deps.toasts.addDanger({
-        title: i18n.translate('data.search.httpErrorTitle', {
-          defaultMessage: 'Unable to connect to the Kibana server',
-        }),
-        text: toMountPoint(e.message || defaultMsg, {
-          theme$: this.deps.theme.theme$,
-        }),
+        title: overrideDisplay.title,
+        text: toMountPoint(overrideDisplay.body, { theme$: this.deps.theme.theme$ }),
       });
     } else {
       this.deps.toasts.addError(e, {

@@ -102,6 +102,7 @@ export function SpanLinksTable({ items }: Props) {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiLink
+                  data-test-subj="apmColumnsLink"
                   href={router.link('/link-to/transaction/{transactionId}', {
                     path: { transactionId: details.transactionId },
                     query: { waterfallItemId: spanId },
@@ -157,6 +158,7 @@ export function SpanLinksTable({ items }: Props) {
               {details?.transactionId && (
                 <EuiFlexItem>
                   <EuiLink
+                    data-test-subj="apmColumnsGoToTraceLink"
                     href={router.link('/link-to/transaction/{transactionId}', {
                       path: { transactionId: details.transactionId },
                     })}
@@ -172,6 +174,7 @@ export function SpanLinksTable({ items }: Props) {
                 <EuiCopy textToCopy={traceId}>
                   {(copy) => (
                     <EuiButtonEmpty
+                      data-test-subj="apmColumnsCopyParentTraceIdButton"
                       onClick={() => {
                         copy();
                         setIdActionMenuOpen(undefined);
@@ -189,6 +192,7 @@ export function SpanLinksTable({ items }: Props) {
               {details?.transactionId && (
                 <EuiFlexItem>
                   <EuiLink
+                    data-test-subj="apmColumnsGoToSpanDetailsLink"
                     href={router.link('/link-to/transaction/{transactionId}', {
                       path: { transactionId: details.transactionId },
                       query: { waterfallItemId: spanId },
@@ -205,6 +209,7 @@ export function SpanLinksTable({ items }: Props) {
                 <EuiCopy textToCopy={spanId}>
                   {(copy) => (
                     <EuiButtonEmpty
+                      data-test-subj="apmColumnsCopySpanIdButton"
                       onClick={() => {
                         copy();
                         setIdActionMenuOpen(undefined);

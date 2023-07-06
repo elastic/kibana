@@ -27,9 +27,9 @@ import {
   EuiPortal,
   EuiTitle,
 } from '@elastic/eui';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
+import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 import { CytoscapeContext } from './cytoscape';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/util/date_utils';
-import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { useMlLocator, useNotifications, useNavigateToPath } from '../../../../contexts/kibana';

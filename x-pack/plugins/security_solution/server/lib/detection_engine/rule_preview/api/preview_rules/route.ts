@@ -32,17 +32,18 @@ import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
 import { convertCreateAPIToInternalSchema } from '../../../rule_management';
 import type { RuleParams } from '../../../rule_schema';
-import { createPreviewRuleExecutionLogger } from '../../../signals/preview/preview_rule_execution_logger';
-import { parseInterval } from '../../../signals/utils';
+import { createPreviewRuleExecutionLogger } from './preview_rule_execution_logger';
+import { parseInterval } from '../../../rule_types/utils/utils';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
+import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import type { RuleExecutionContext, StatusChangeArgs } from '../../../rule_monitoring';
 
 import type { ConfigType } from '../../../../../config';
-import { alertInstanceFactoryStub } from '../../../signals/preview/alert_instance_factory_stub';
+import { alertInstanceFactoryStub } from './alert_instance_factory_stub';
 import type {
   CreateRuleOptions,
   CreateSecurityRuleTypeWrapperProps,
@@ -61,6 +62,7 @@ import { wrapScopedClusterClient } from './wrap_scoped_cluster_client';
 import { wrapSearchSourceClient } from './wrap_search_source_client';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
+const MAX_ROUTE_CONCURRENCY = 10;
 
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
@@ -80,7 +82,7 @@ export const previewRulesRoute = async (
         body: buildRouteValidation(previewRulesSchema),
       },
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
       },
     },
     async (context, request, response) => {
@@ -95,8 +97,6 @@ export const previewRulesRoute = async (
         const searchSourceClient = await data.search.searchSource.asScoped(request);
         const savedObjectsClient = coreContext.savedObjects.client;
         const siemClient = (await context.securitySolution).getAppClient();
-        const { getQueryRuleAdditionalOptions: queryRuleAdditionalOptions } =
-          await context.securitySolution;
 
         const timeframeEnd = request.body.timeframeEnd;
         let invocationCount = request.body.invocationCount;
@@ -134,8 +134,8 @@ export const previewRulesRoute = async (
           .atSpace(spaceId, {
             elasticsearch: {
               index: {
-                [`${DEFAULT_PREVIEW_INDEX}`]: ['read'],
-                [`.internal${DEFAULT_PREVIEW_INDEX}-`]: ['read'],
+                [`${DEFAULT_PREVIEW_INDEX}-${spaceId}`]: ['read'],
+                [`.internal${DEFAULT_PREVIEW_INDEX}-${spaceId}-*`]: ['read'],
               },
               cluster: [],
             },
@@ -193,6 +193,8 @@ export const previewRulesRoute = async (
               | 'setContext'
               | 'getContext'
               | 'hasContext'
+              | 'getUuid'
+              | 'getStart'
             >;
             alertLimit: {
               getValue: () => number;
@@ -221,6 +223,7 @@ export const previewRulesRoute = async (
             createdAt: new Date(),
             createdBy: username ?? 'preview-created-by',
             producer: 'preview-producer',
+            revision: 0,
             ruleTypeId,
             ruleTypeName,
             updatedAt: new Date(),
@@ -247,6 +250,7 @@ export const previewRulesRoute = async (
               services: {
                 shouldWriteAlerts,
                 shouldStopExecution: () => false,
+                alertsClient: null,
                 alertFactory,
                 savedObjectsClient: coreContext.savedObjects.client,
                 scopedClusterClient: wrapScopedClusterClient({
@@ -300,7 +304,6 @@ export const previewRulesRoute = async (
             const queryAlertType = previewRuleTypeWrapper(
               createQueryAlertType({
                 ...ruleOptions,
-                ...queryRuleAdditionalOptions,
                 id: QUERY_RULE_TYPE_ID,
                 name: 'Custom Query Rule',
               })
@@ -325,7 +328,6 @@ export const previewRulesRoute = async (
             const savedQueryAlertType = previewRuleTypeWrapper(
               createQueryAlertType({
                 ...ruleOptions,
-                ...queryRuleAdditionalOptions,
                 id: SAVED_QUERY_RULE_TYPE_ID,
                 name: 'Saved Query Rule',
               })

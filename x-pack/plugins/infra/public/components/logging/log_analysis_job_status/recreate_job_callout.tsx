@@ -14,7 +14,7 @@ export const RecreateJobCallout: React.FC<{
   onRecreateMlJob: () => void;
   title?: React.ReactNode;
 }> = ({ children, hasSetupCapabilities, onRecreateMlJob, title }) => (
-  <EuiCallOut color="warning" iconType="alert" title={title}>
+  <EuiCallOut color="warning" iconType="warning" title={title}>
     {children}
     <RecreateJobButton
       color="warning"

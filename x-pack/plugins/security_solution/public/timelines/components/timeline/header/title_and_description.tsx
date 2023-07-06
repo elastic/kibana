@@ -22,7 +22,8 @@ import { useDispatch } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
 
 import { getUseField, Field, Form, useForm } from '../../../../shared_imports';
-import { TimelineId, TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline/api';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { NOTES_PANEL_WIDTH } from '../properties/notes_size';
@@ -201,7 +202,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
               <EuiCallOut
                 title={calloutMessage}
                 color="danger"
-                iconType="alert"
+                iconType="warning"
                 data-test-subj="save-timeline-callout"
               />
               <EuiSpacer size="m" />

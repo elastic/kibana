@@ -12,8 +12,7 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteAllAlerts,
-  deleteSignalsIndex,
+  deleteAllRules,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
@@ -21,6 +20,7 @@ import {
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleMlRule,
+  deleteAllAlerts,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -28,6 +28,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('create_rules', () => {
     describe('creating rules', () => {
@@ -44,8 +45,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
       });
 
       it('should create a single rule with a rule_id', async () => {
@@ -99,9 +100,9 @@ export default ({ getService }: FtrProviderContext) => {
           to: 'now',
           type: 'query',
           threat: [],
-          throttle: 'no_actions',
           exceptions_list: [],
           version: 1,
+          revision: 0,
         };
 
         const { body } = await supertest

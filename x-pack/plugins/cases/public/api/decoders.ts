@@ -15,8 +15,10 @@ import type {
   CasesFindResponse,
   CasesStatusResponse,
   CasesMetricsResponse,
+  CasesBulkGetResponse,
 } from '../../common/api';
 import {
+  CasesBulkGetResponseRt,
   CasesFindResponseRt,
   CasesStatusResponseRt,
   CasesMetricsResponseRt,
@@ -36,3 +38,9 @@ export const decodeCasesMetricsResponse = (metrics?: CasesMetricsResponse) =>
     CasesMetricsResponseRt.decode(metrics),
     fold(throwErrors(createToasterPlainError), identity)
   );
+
+export const decodeCasesBulkGetResponse = (res: CasesBulkGetResponse) => {
+  pipe(CasesBulkGetResponseRt.decode(res), fold(throwErrors(createToasterPlainError), identity));
+
+  return res;
+};

@@ -33,7 +33,7 @@ import {
   Timeslice,
   StyleMetaDescriptor,
 } from '../../../common/descriptor_types';
-import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
+import { ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 import { LICENSED_FEATURES } from '../../licensed_features';
@@ -66,9 +66,8 @@ export interface ILayer {
   getStyle(): IStyle;
   getStyleForEditing(): IStyle;
   getCurrentStyle(): IStyle;
-  getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
-  isLayerLoading(): boolean;
+  isLayerLoading(zoom: number): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
@@ -87,7 +86,6 @@ export interface ILayer {
   ownsMbSourceId(mbSourceId: string): boolean;
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;
   getLayerTypeIconName(): string;
-  isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getType(): LAYER_TYPE;
@@ -127,7 +125,7 @@ export type LayerIcon = {
 };
 
 export interface ILayerArguments {
-  layerDescriptor: LayerDescriptor;
+  layerDescriptor: Partial<LayerDescriptor>;
   source: ISource;
 }
 
@@ -339,11 +337,6 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.query ? this._descriptor.query : null;
   }
 
-  async getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]> {
-    const source = this.getSource();
-    return await source.getImmutableProperties();
-  }
-
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs) {
     return this.getSourceForEditing().renderSourceSettingsEditor(sourceEditorArgs);
   }
@@ -376,12 +369,23 @@ export class AbstractLayer implements ILayer {
     return this._dataRequests.find((dataRequest) => dataRequest.getDataId() === id);
   }
 
-  isLayerLoading(): boolean {
-    const areTilesLoading =
-      typeof this._descriptor.__areTilesLoaded !== 'undefined'
-        ? !this._descriptor.__areTilesLoaded
-        : false;
-    return areTilesLoading || this._dataRequests.some((dataRequest) => dataRequest.isLoading());
+  isLayerLoading(zoom: number): boolean {
+    if (!this.isVisible() || !this.showAtZoomLevel(zoom)) {
+      return false;
+    }
+    const hasOpenDataRequests = this._dataRequests.some((dataRequest) => dataRequest.isLoading());
+
+    if (this._isTiled()) {
+      return (
+        hasOpenDataRequests ||
+        this._descriptor.__areTilesLoaded === undefined ||
+        !this._descriptor.__areTilesLoaded
+      );
+    }
+
+    return !this.getSourceDataRequest()
+      ? true // layer is loading until source data request has been created
+      : hasOpenDataRequests;
   }
 
   hasErrors(): boolean {
@@ -416,11 +420,6 @@ export class AbstractLayer implements ILayer {
 
   getLayerTypeIconName(): string {
     throw new Error('should implement Layer#getLayerTypeIconName');
-  }
-
-  isInitialDataLoadComplete(): boolean {
-    const sourceDataRequest = this.getSourceDataRequest();
-    return sourceDataRequest ? sourceDataRequest.hasData() : false;
   }
 
   async getBounds(
@@ -492,5 +491,9 @@ export class AbstractLayer implements ILayer {
 
   _getMetaFromTiles(): TileMetaFeature[] {
     return this._descriptor.__metaFromTiles || [];
+  }
+
+  _isTiled(): boolean {
+    throw new Error('Must implement AbstractLayer#_isTiled');
   }
 }

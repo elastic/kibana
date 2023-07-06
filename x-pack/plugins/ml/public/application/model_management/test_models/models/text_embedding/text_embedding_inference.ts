@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { estypes } from '@elastic/elasticsearch';
+import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { InferenceBase, INPUT_TYPE } from '../inference_base';
 import type { InferResponse } from '../inference_base';
 import { getGeneralInputComponent } from '../text_input';
 import { getTextEmbeddingOutputComponent } from './text_embedding_output';
-import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../common/constants/trained_models';
 import { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
 
 export interface RawTextEmbeddingResponse {
@@ -42,9 +42,10 @@ export class TextEmbeddingInference extends InferenceBase<TextEmbeddingResponse>
   constructor(
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
-    inputType: INPUT_TYPE
+    inputType: INPUT_TYPE,
+    deploymentId: string
   ) {
-    super(trainedModelsApi, model, inputType);
+    super(trainedModelsApi, model, inputType, deploymentId);
 
     this.initialize();
   }

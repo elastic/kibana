@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 
+import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { testUsers } from '../test_users';
@@ -22,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       await es.create({
         id: 'ingest-agent-policies:policy-inactivity-timeout',
-        index: '.kibana',
+        index: INGEST_SAVED_OBJECT_INDEX,
         refresh: 'wait_for',
         document: {
           type: 'ingest-agent-policies',
@@ -38,9 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
             updated_by: 'system',
             inactivity_timeout: 60,
           },
-          migrationVersion: {
-            'ingest-agent-policies': '7.10.0',
-          },
+          typeMigrationVersion: '7.10.0',
         },
       });
       // 2 agents online
@@ -219,6 +218,8 @@ export default function ({ getService }: FtrProviderContext) {
           other: 0,
           total: 8,
           online: 2,
+          active: 8,
+          all: 11,
           error: 2,
           offline: 1,
           updating: 3,
@@ -268,7 +269,7 @@ export default function ({ getService }: FtrProviderContext) {
         policiesToAdd.map((policyId) =>
           es.create({
             id: 'ingest-agent-policies:' + policyId,
-            index: '.kibana',
+            index: INGEST_SAVED_OBJECT_INDEX,
             refresh: 'wait_for',
             document: {
               type: 'ingest-agent-policies',
@@ -284,9 +285,7 @@ export default function ({ getService }: FtrProviderContext) {
                 updated_by: 'system',
                 inactivity_timeout: 60,
               },
-              migrationVersion: {
-                'ingest-agent-policies': '7.10.0',
-              },
+              typeMigrationVersion: '7.10.0',
             },
           })
         )
@@ -298,6 +297,8 @@ export default function ({ getService }: FtrProviderContext) {
           other: 0,
           total: 10,
           online: 3,
+          active: 10,
+          all: 11,
           error: 2,
           offline: 1,
           updating: 4,

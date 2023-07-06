@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { getExternalAlertLensAttributes } from './lens_attributes/common/external_alert';
 import { useLensAttributes } from './use_lens_attributes';
 import {
-  hostNameExistsFilter,
+  fieldNameExistsFilter,
   getDetailsPageFilter,
   getIndexFilters,
   sourceOrDestinationIpExistsFilter,
@@ -70,7 +70,7 @@ describe('useLensAttributes', () => {
     expect(result?.current?.state.filters).toEqual([
       ...getExternalAlertLensAttributes().state.filters,
       ...getDetailsPageFilter('hosts', 'mockHost'),
-      ...hostNameExistsFilter,
+      ...fieldNameExistsFilter('hosts'),
       ...getIndexFilters(['auditbeat-*']),
       ...filterFromSearchBar,
     ]);

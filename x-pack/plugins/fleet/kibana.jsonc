@@ -17,13 +17,13 @@
       "navigation",
       "customIntegrations",
       "share",
-      "spaces",
       "security",
       "unifiedSearch",
       "savedObjectsTagging",
       "taskManager",
       "guidedOnboarding",
-      "files"
+      "files",
+      "uiActions"
     ],
     "optionalPlugins": [
       "features",
@@ -33,13 +33,14 @@
       "globalSearch",
       "telemetry",
       "discover",
-      "ingestPipelines"
+      "ingestPipelines",
+      "spaces",
     ],
     "requiredBundles": [
       "kibanaReact",
       "cloudChat",
       "esUiShared",
-      "infra",
+      "logsShared",
       "kibanaUtils",
       "usageCollection",
       "unifiedSearch"

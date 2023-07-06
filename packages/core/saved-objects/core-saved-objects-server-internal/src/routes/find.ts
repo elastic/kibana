@@ -7,19 +7,21 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors, throwOnHttpHiddenTypes } from './utils';
-
+import { logWarnOnExternalRequest } from './utils';
 interface RouteDependencies {
+  config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
 }
 
 export const registerFindRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger }: RouteDependencies
 ) => {
   const referenceSchema = schema.object({
     type: schema.string(),
@@ -28,7 +30,7 @@ export const registerFindRoute = (
   const searchOperatorSchema = schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
     defaultValue: 'OR',
   });
-
+  const { allowHttpApiAccess } = config;
   router.get(
     {
       path: '/_find',
@@ -61,7 +63,12 @@ export const registerFindRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
-      logger.warn("The find saved object API '/api/saved_objects/_find' is deprecated.");
+      logWarnOnExternalRequest({
+        method: 'get',
+        path: '/api/saved_objects/_find',
+        req,
+        logger,
+      });
       const query = req.query;
 
       const namespaces =
@@ -95,7 +102,7 @@ export const registerFindRoute = (
           return fullType.name;
         }
       });
-      if (unsupportedTypes.length > 0) {
+      if (unsupportedTypes.length > 0 && !allowHttpApiAccess) {
         throwOnHttpHiddenTypes(unsupportedTypes);
       }
 
@@ -116,6 +123,7 @@ export const registerFindRoute = (
         filter: query.filter,
         aggs,
         namespaces,
+        migrationVersionCompatibility: 'compatible',
       });
 
       return res.ok({ body: result });

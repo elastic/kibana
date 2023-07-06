@@ -176,5 +176,47 @@ describe('loadActions hooks', () => {
 
       expect(result.current.value).toEqual([[actionEnabled], [actionEnabled]]);
     });
+
+    it('should re-render when contexts is changed', async () => {
+      const { result, rerender, waitForNextUpdate } = renderHook(useBulkLoadActions, {
+        initialProps: [actionContext],
+      });
+
+      await waitForNextUpdate();
+      expect(mockGetActions).toHaveBeenCalledWith(actionContext);
+
+      rerender([actionContext2]);
+      await waitForNextUpdate();
+      expect(mockGetActions).toHaveBeenCalledWith(actionContext2);
+
+      mockGetActions.mockClear();
+
+      rerender([]);
+      await waitForNextUpdate();
+      expect(mockGetActions).toHaveBeenCalledTimes(0);
+
+      expect(result.current.value).toBeInstanceOf(Array);
+      expect(result.current.value).toHaveLength(0);
+      expect(result.current.loading).toBe(false);
+    });
+
+    it('should return the same array after re-render when contexts is undefined', async () => {
+      const { result, rerender, waitFor } = renderHook(useBulkLoadActions, {
+        initialProps: undefined,
+      });
+
+      await waitFor(() => expect(result.current.value).toEqual([]));
+      expect(result.current.loading).toBe(false);
+      expect(mockGetActions).not.toHaveBeenCalled();
+
+      const initialResultValue = result.current.value;
+
+      rerender(undefined);
+
+      await waitFor(() => expect(result.current.value).toEqual([]));
+      expect(result.current.value).toBe(initialResultValue);
+      expect(result.current.loading).toBe(false);
+      expect(mockGetActions).not.toHaveBeenCalled();
+    });
   });
 });

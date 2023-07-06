@@ -373,12 +373,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         values={{ searchValue }}
       />
     ),
-    'euiComboBoxOptionsList.delimiterMessage': ({ delimiter }: EuiValues) =>
-      i18n.translate('core.euiComboBoxOptionsList.delimiterMessage', {
-        defaultMessage: 'Add each item separated by {delimiter}',
-        values: { delimiter },
-        description: 'Screen reader text describing adding delimited options',
-      }),
+    'euiComboBoxOptionsList.delimiterMessage': ({ delimiter }: EuiValues) => (
+      <FormattedMessage
+        id="core.euiComboBoxOptionsList.delimiterMessage"
+        defaultMessage="Add each item separated by {delimiter}"
+        values={{ delimiter }}
+      />
+    ),
     'euiComboBoxPill.removeSelection': ({ children }: EuiValues) =>
       i18n.translate('core.euiComboBoxPill.removeSelection', {
         defaultMessage: 'Remove {children} from selection in this group',
@@ -777,6 +778,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         description: 'ARIA label on a button that removes any entry in a form field',
       }
     ),
+    'euiFormControlLayoutDelimited.delimiterLabel': i18n.translate(
+      'core.euiFormControlLayoutDelimited.delimiterLabel',
+      {
+        defaultMessage: 'to',
+      }
+    ),
     'euiFullscreenSelector.fullscreenButton': i18n.translate(
       'core.euiFullscreenSelector.fullscreenButton',
       {
@@ -805,6 +812,22 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiImageButton.closeFullScreen': i18n.translate('core.euiImageButton.closeFullScreen', {
       defaultMessage: 'Press Escape or click to close image fullscreen mode',
     }),
+    'euiInlineEditForm.activateEditModeDescription': i18n.translate(
+      'core.euiInlineEditForm.activateEditModeDescription',
+      { defaultMessage: 'Click to edit this text inline.' }
+    ),
+    'euiInlineEditForm.inputKeyboardInstructions': i18n.translate(
+      'core.euiInlineEditForm.inputKeyboardInstructions',
+      { defaultMessage: 'Press Enter to save your edited text. Press Escape to cancel your edit.' }
+    ),
+    'euiInlineEditForm.cancelButtonAriaLabel': i18n.translate(
+      'core.euiInlineEditForm.cancelButtonAriaLabel',
+      { defaultMessage: 'Cancel edit' }
+    ),
+    'euiInlineEditForm.saveButtonAriaLabel': i18n.translate(
+      'core.euiInlineEditForm.saveButtonAriaLabel',
+      { defaultMessage: 'Save edit' }
+    ),
     'euiLink.external.ariaLabel': i18n.translate('core.euiLink.external.ariaLabel', {
       defaultMessage: 'External link',
     }),
@@ -1475,7 +1498,7 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiSelectable.screenReaderInstructions',
       {
         defaultMessage:
-          'Use up and down arrows to move focus over options. Enter to select. Escape to collapse options.',
+          'Use the Up and Down arrow keys to move focus over options. Press Enter to select. Press Escape to collapse options.',
       }
     ),
     'euiSelectable.searchResults': ({ resultsLength }: EuiValues) =>
@@ -1492,40 +1515,50 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Checked option.',
       }
     ),
-    'euiSelectableListItem.checkedOptionInstructions': i18n.translate(
-      'core.euiSelectableListItem.checkedOptionInstructions',
-      {
-        defaultMessage: 'To uncheck this option, press enter.',
-      }
-    ),
-    'euiSelectableListItem.includedOption': i18n.translate(
-      'core.euiSelectableListItem.includedOption',
-      {
-        defaultMessage: 'Selected option.',
-      }
-    ),
-    'euiSelectableListItem.includedOptionInstructions': i18n.translate(
-      'core.euiSelectableListItem.includedOptionInstructions',
-      {
-        defaultMessage: 'To exclude this option, press enter.',
-      }
-    ),
     'euiSelectableListItem.excludedOption': i18n.translate(
       'core.euiSelectableListItem.excludedOption',
       {
         defaultMessage: 'Excluded option.',
       }
     ),
-    'euiSelectableListItem.excludedOptionInstructions': i18n.translate(
-      'core.euiSelectableListItem.excludedOptionInstructions',
+    'euiSelectableListItem.checkOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.checkOptionInstructions',
       {
-        defaultMessage: 'To uncheck this option, press enter.',
+        defaultMessage: 'To check this option, press Enter.',
       }
     ),
-    'euiSelectableListItem.unckeckedOptionInstructions': i18n.translate(
-      'core.euiSelectableListItem.unckeckedOptionInstructions',
+    'euiSelectableListItem.uncheckOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.uncheckOptionInstructions',
       {
-        defaultMessage: 'To select this option, press enter.',
+        defaultMessage: 'To uncheck this option, press Enter.',
+      }
+    ),
+    'euiSelectableListItem.excludeOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.excludeOptionInstructions',
+      {
+        defaultMessage: 'To exclude this option, press Enter.',
+      }
+    ),
+    'euiSelectableListItem.mixedOption': i18n.translate('core.euiSelectableListItem.mixedOption', {
+      defaultMessage: 'Mixed (indeterminate) option.',
+    }),
+
+    'euiSelectableListItem.mixedOptionInstructions': i18n.translate(
+      'core.euiSelectableListItem.mixedOptionInstructions',
+      {
+        defaultMessage: 'To check this option for all, press Enter once.',
+      }
+    ),
+    'euiSelectableListItem.mixedOptionUncheckInstructions': i18n.translate(
+      'core.euiSelectableListItem.mixedOptionUncheckInstructions',
+      {
+        defaultMessage: 'To uncheck this option for all, press Enter twice.',
+      }
+    ),
+    'euiSelectableListItem.mixedOptionExcludeInstructions': i18n.translate(
+      'core.euiSelectableListItem.mixedOptionExcludeInstructions',
+      {
+        defaultMessage: 'To exclude this option for all, press Enter twice.',
       }
     ),
     'euiSelectableTemplateSitewide.loadingResults': i18n.translate(
@@ -1664,11 +1697,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
           'You are in a form selector and must select a single option. Use the Up and Down arrow keys to navigate or Escape to close.',
       }
     ),
-    'euiSuperSelectControl.selectAnOption': ({ selectedValue }: EuiValues) =>
-      i18n.translate('core.euiSuperSelectControl.selectAnOption', {
-        defaultMessage: 'Select an option: {selectedValue}, is selected',
-        values: { selectedValue },
-      }),
     'euiSuperUpdateButton.cannotUpdateTooltip': i18n.translate(
       'core.euiSuperUpdateButton.cannotUpdateTooltip',
       {
@@ -1812,5 +1840,25 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Loaded {contentAriaLabel}',
         values: { contentAriaLabel },
       }),
+    'euiDualRange.sliderScreenReaderInstructions': i18n.translate(
+      'core.euiDualRange.sliderScreenReaderInstructions',
+      {
+        defaultMessage:
+          'You are in a custom range slider. Use the Up and Down arrow keys to change the minimum value. Press Tab to interact with the maximum value.',
+        description: 'Screen reader instructions for changing dual range slider values.',
+      }
+    ),
+    'euiRange.sliderScreenReaderInstructions': i18n.translate(
+      'core.euiRange.sliderScreenReaderInstructions',
+      {
+        defaultMessage:
+          'You are in a custom range slider. Use the Up and Down arrow keys to change the value.',
+        description: 'Screen reader instructions for changing range slider values.',
+      }
+    ),
+    'euiSuperSelect.ariaLabel': i18n.translate('core.euiSuperSelect.ariaLabel', {
+      defaultMessage: 'Select listbox',
+      description: 'Accessible label for Super Selects without a visible label.',
+    }),
   };
 };

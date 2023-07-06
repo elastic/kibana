@@ -7,12 +7,14 @@
 export enum SecurityCellActionsTrigger {
   DEFAULT = 'security-default-cellActions',
   DETAILS_FLYOUT = 'security-detailsFlyout-cellActions',
+  ALERTS_COUNT = 'security-alertsCount-cellActions',
 }
 
 export enum SecurityCellActionType {
   FILTER = 'security-cellAction-type-filter',
   COPY = 'security-cellAction-type-copyToClipboard',
   ADD_TO_TIMELINE = 'security-cellAction-type-addToTimeline',
+  INVESTIGATE_IN_NEW_TIMELINE = 'security-cellAction-type-investigateInNewTimeline',
   SHOW_TOP_N = 'security-cellAction-type-showTopN',
   TOGGLE_COLUMN = 'security-cellAction-type-toggleColumn',
 }

@@ -12,61 +12,105 @@
  * 2.0.
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import createContainer from 'constate';
+import { BoolQuery } from '@kbn/es-query';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useSourceContext } from '../../../../containers/metrics_source';
-import type { UseSnapshotRequest } from '../../inventory_view/hooks/use_snaphot';
 import { useUnifiedSearchContext } from './use_unified_search';
+import {
+  GetInfraMetricsRequestBodyPayload,
+  GetInfraMetricsResponsePayload,
+  InfraAssetMetricType,
+} from '../../../../../common/http_api';
+import { StringDateRange } from './use_unified_search_url_state';
 
-export interface HostViewState {
-  totalHits: number;
-  loading: boolean;
-  error: string | null;
-}
+const HOST_TABLE_METRICS: Array<{ type: InfraAssetMetricType }> = [
+  { type: 'cpu' },
+  { type: 'diskSpaceUsage' },
+  { type: 'memory' },
+  { type: 'memoryFree' },
+  { type: 'normalizedLoad1m' },
+  { type: 'rx' },
+  { type: 'tx' },
+];
 
-export const INITAL_VALUE = {
-  error: null,
-  loading: true,
-  totalHits: 0,
-};
+const BASE_INFRA_METRICS_PATH = '/api/metrics/infra';
 
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
-  const { buildQuery, getDateRangeAsTimestamp } = useUnifiedSearchContext();
-  const [hostViewState, setHostViewState] = useState<HostViewState>(INITAL_VALUE);
+  const {
+    services: { http },
+  } = useKibanaContextForPlugin();
+  const { buildQuery, getParsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const abortCtrlRef = useRef(new AbortController());
 
-  const baseRequest = useMemo(() => {
-    const esQuery = buildQuery();
-    const { from, to } = getDateRangeAsTimestamp();
+  const baseRequest = useMemo(
+    () =>
+      createInfraMetricsRequest({
+        dateRange: getParsedDateRange(),
+        esQuery: buildQuery(),
+        sourceId,
+        limit: searchCriteria.limit,
+      }),
+    [buildQuery, getParsedDateRange, sourceId, searchCriteria.limit]
+  );
 
-    const snapshotRequest: UseSnapshotRequest = {
-      filterQuery: esQuery ? JSON.stringify(esQuery) : null,
-      metrics: [],
-      groupBy: [],
-      nodeType: 'host',
-      sourceId,
-      currentTime: to,
-      includeTimeseries: false,
-      sendRequestImmediately: true,
-      timerange: {
-        interval: '1m',
-        from,
-        to,
-        ignoreLookback: true,
-      },
-      // The user might want to click on the submit button without changing the filters
-      // This makes sure all child components will re-render.
-      requestTs: Date.now(),
-    };
-    return snapshotRequest;
-  }, [buildQuery, getDateRangeAsTimestamp, sourceId]);
+  const [state, refetch] = useAsyncFn(
+    () => {
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
+
+      return http.post<GetInfraMetricsResponsePayload>(`${BASE_INFRA_METRICS_PATH}`, {
+        signal: abortCtrlRef.current.signal,
+        body: JSON.stringify(baseRequest),
+      });
+    },
+    [baseRequest, http],
+    { loading: true }
+  );
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
+  const { value, error, loading } = state;
 
   return {
-    baseRequest,
-    hostViewState,
-    setHostViewState,
+    requestTs: baseRequest.requestTs,
+    loading,
+    error,
+    hostNodes: value?.nodes ?? [],
   };
 };
 
 export const HostsView = createContainer(useHostsView);
 export const [HostsViewProvider, useHostsViewContext] = HostsView;
+
+/**
+ * Helpers
+ */
+
+const createInfraMetricsRequest = ({
+  esQuery,
+  sourceId,
+  dateRange,
+  limit,
+}: {
+  esQuery: { bool: BoolQuery };
+  sourceId: string;
+  dateRange: StringDateRange;
+  limit: number;
+}): GetInfraMetricsRequestBodyPayload & { requestTs: number } => ({
+  type: 'host',
+  query: esQuery,
+  range: {
+    from: dateRange.from,
+    to: dateRange.to,
+  },
+  metrics: HOST_TABLE_METRICS,
+  limit,
+  sourceId,
+  requestTs: Date.now(),
+});

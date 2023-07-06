@@ -21,6 +21,7 @@ import type { AlertsTypeData, AlertType } from './types';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { getAlertsTypeTableColumns } from './columns';
 import { ALERT_TYPE_COLOR } from './helpers';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const Wrapper = styled.div`
   margin-top: -${({ theme }) => theme.eui.euiSizeM};
@@ -43,7 +44,11 @@ export interface AlertsByTypeProps {
 }
 
 export const AlertsByType: React.FC<AlertsByTypeProps> = ({ data, isLoading }) => {
-  const columns = useMemo(() => getAlertsTypeTableColumns(), []);
+  const isAlertTypeEnabled = useIsExperimentalFeatureEnabled('alertTypeEnabled');
+  const columns = useMemo(
+    () => getAlertsTypeTableColumns(isAlertTypeEnabled),
+    [isAlertTypeEnabled]
+  );
 
   const subtotals = useMemo(
     () =>
@@ -92,30 +97,33 @@ export const AlertsByType: React.FC<AlertsByTypeProps> = ({ data, isLoading }) =
 
   return (
     <Wrapper data-test-subj="alerts-by-type">
-      <EuiFlexGroup gutterSize="xs" data-test-subj="alerts-by-type-palette-display">
-        {(Object.keys(subtotals) as AlertType[]).map((type) => (
-          <EuiFlexItem key={type} grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <EuiHealth className="eui-alignMiddle" color={ALERT_TYPE_COLOR[type]}>
-                  <EuiText size="xs">
-                    <h4>{`${type}:`}</h4>
-                  </EuiText>
-                </EuiHealth>
+      {isAlertTypeEnabled && (
+        <>
+          <EuiFlexGroup gutterSize="xs" data-test-subj="alerts-by-type-palette-display">
+            {(Object.keys(subtotals) as AlertType[]).map((type) => (
+              <EuiFlexItem key={type} grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiHealth className="eui-alignMiddle" color={ALERT_TYPE_COLOR[type]}>
+                      <EuiText size="xs">
+                        <h4>{`${type}:`}</h4>
+                      </EuiText>
+                    </EuiHealth>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs">
+                      <FormattedCount count={subtotals[type] || 0} />
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <FormattedCount count={subtotals[type] || 0} />
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        ))}
-        <EuiSpacer size="xs" />
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-      <StyledEuiColorPaletteDisplay size="xs" palette={palette} />
-
+            ))}
+            <EuiSpacer size="xs" />
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+          <StyledEuiColorPaletteDisplay size="xs" palette={palette} />
+        </>
+      )}
       <EuiSpacer size="xs" />
       <TableWrapper className="eui-yScroll">
         <EuiInMemoryTable

@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 
-export const ServiceNowITSMFieldsRT = rt.type({
+export const ServiceNowITSMFieldsRT = rt.strict({
   impact: rt.union([rt.string, rt.null]),
   severity: rt.union([rt.string, rt.null]),
   urgency: rt.union([rt.string, rt.null]),

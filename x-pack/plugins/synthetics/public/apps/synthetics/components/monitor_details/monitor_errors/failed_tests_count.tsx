@@ -12,14 +12,24 @@ import { FAILED_TESTS_LABEL } from './failed_tests';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
-export const FailedTestsCount = (time: { to: string; from: string }) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
+export const FailedTestsCount = ({
+  from,
+  to,
+  id,
+  location,
+}: {
+  to: string;
+  from: string;
+  id: string;
+  location: ReturnType<typeof useSelectedLocation>;
+}) => {
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const monitorId = useMonitorQueryId();
 
-  const selectedLocation = useSelectedLocation();
+  const selectedLocation = location;
 
   if (!monitorId || !selectedLocation) {
     return null;
@@ -27,10 +37,11 @@ export const FailedTestsCount = (time: { to: string; from: string }) => {
 
   return (
     <ExploratoryViewEmbeddable
+      id={id}
       reportType="single-metric"
       attributes={[
         {
-          time,
+          time: { from, to },
           reportDefinitions: {
             'monitor.id': [monitorId],
             'observer.geo.name': [selectedLocation?.label],

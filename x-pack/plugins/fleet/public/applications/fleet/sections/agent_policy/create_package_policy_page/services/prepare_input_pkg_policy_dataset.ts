@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DATASET_VAR_NAME } from '../../../../../../../common/constants';
+
 import type { NewPackagePolicy } from '../../../../types';
 
 export function prepareInputPackagePolicyDataset(newPolicy: NewPackagePolicy): {
@@ -27,16 +29,16 @@ export function prepareInputPackagePolicyDataset(newPolicy: NewPackagePolicy): {
     const newStreams = streams.map((stream) => {
       if (
         !stream.vars ||
-        !stream.vars['data_stream.dataset'] ||
-        !stream.vars['data_stream.dataset'].value?.package
+        !stream.vars[DATASET_VAR_NAME] ||
+        !stream.vars[DATASET_VAR_NAME].value?.package
       ) {
         return stream;
       }
 
-      const datasetVar = stream.vars['data_stream.dataset'];
+      const datasetVar = stream.vars[DATASET_VAR_NAME];
 
       forceCreateNeeded = datasetVar.value?.package !== newPolicy?.package?.name;
-      stream.vars['data_stream.dataset'] = {
+      stream.vars[DATASET_VAR_NAME] = {
         ...datasetVar,
         value: datasetVar.value?.dataset,
       };

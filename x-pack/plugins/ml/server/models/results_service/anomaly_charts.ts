@@ -12,8 +12,21 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { extent, max, min } from 'd3';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
+import {
+  aggregationTypeTransform,
+  getEntityFieldList,
+  isMultiBucketAnomaly,
+  type InfluencersFilterQuery,
+  type MlAnomalyRecordDoc,
+  type MlEntityField,
+  type MlRecordForInfluencer,
+  _DOC_COUNT,
+  DOC_COUNT,
+  ES_AGGREGATION,
+  ML_JOB_AGGREGATION,
+} from '@kbn/ml-anomaly-utils';
+import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { MlClient } from '../../lib/ml_client';
-import { isRuntimeMappings } from '../../../common';
 import type {
   MetricData,
   ModelPlotOutput,
@@ -34,17 +47,8 @@ import {
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
 import { CriteriaField } from './results_service';
-import {
-  aggregationTypeTransform,
-  EntityField,
-  getEntityFieldList,
-  isMultiBucketAnomaly,
-} from '../../../common/util/anomaly_utils';
-import { InfluencersFilterQuery } from '../../../common/types/es_client';
-import { AnomalyRecordDoc, CombinedJob, Datafeed, RecordForInfluencer } from '../../shared';
-import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
+import type { CombinedJob, Datafeed } from '../../shared';
 import { parseInterval } from '../../../common/util/parse_interval';
-import { _DOC_COUNT, DOC_COUNT } from '../../../common/constants/field_types';
 
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { findAggField } from '../../../common/util/validation_utils';
@@ -129,7 +133,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
   async function fetchMetricData(
     index: string,
-    entityFields: EntityField[],
+    entityFields: MlEntityField[],
     query: object | undefined,
     metricFunction: string | null, // ES aggregation name
     metricFieldName: string | undefined,
@@ -453,7 +457,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
   function processRecordsForDisplay(
     combinedJobRecords: Record<string, MlJob>,
-    anomalyRecords: RecordForInfluencer[]
+    anomalyRecords: MlRecordForInfluencer[]
   ): { records: ChartRecord[]; errors: Record<string, Set<string>> | undefined } {
     // Aggregate the anomaly data by detector, and entity (by/over/partition).
     if (anomalyRecords.length === 0) {
@@ -733,7 +737,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     // Add extra properties used by the explorer dashboard charts.
     fullSeriesConfig.functionDescription = record.function_description;
 
-    const parsedBucketSpan = parseInterval(job.analysis_config.bucket_span);
+    const parsedBucketSpan = parseInterval(job.analysis_config.bucket_span!);
     if (parsedBucketSpan !== null) {
       fullSeriesConfig.bucketSpanSeconds = parsedBucketSpan.asSeconds();
     }
@@ -1131,7 +1135,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
     function getChartDataForPointSearch(
       chartData: ChartPoint[],
-      record: AnomalyRecordDoc,
+      record: MlAnomalyRecordDoc,
       chartType: ChartType
     ) {
       if (
@@ -1439,8 +1443,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
   async function getEventDistributionData(
     index: string,
-    splitField: EntityField | undefined | null,
-    filterField: EntityField | undefined | null,
+    splitField: MlEntityField | undefined | null,
+    filterField: MlEntityField | undefined | null,
     query: any,
     metricFunction: string | undefined | null, // ES aggregation name
     metricFieldName: string | undefined,
@@ -1645,7 +1649,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
   }
 
   async function getRecordsForCriteriaChart(config: SeriesConfigWithMetadata, range: ChartRange) {
-    let criteria: EntityField[] = [];
+    let criteria: MlEntityField[] = [];
     criteria.push({ fieldName: 'detector_index', fieldValue: config.detectorIndex });
     criteria = criteria.concat(config.entityFields);
 
@@ -1812,13 +1816,13 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
   async function getRecordsForInfluencer(
     jobIds: string[],
-    influencers: EntityField[],
+    influencers: MlEntityField[],
     threshold: number,
     earliestMs: number,
     latestMs: number,
     maxResults: number,
     influencersFilterQuery?: InfluencersFilterQuery
-  ): Promise<RecordForInfluencer[]> {
+  ): Promise<MlRecordForInfluencer[]> {
     // Build the criteria to use in the bool filter part of the request.
     // Add criteria for the time range, record score, plus any specified job IDs.
     const boolCriteria: estypes.QueryDslBoolQuery['must'] = [
@@ -1894,7 +1898,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       });
     }
 
-    const response = await mlClient.anomalySearch<estypes.SearchResponse<RecordForInfluencer>>(
+    const response = await mlClient.anomalySearch<estypes.SearchResponse<MlRecordForInfluencer>>(
       {
         body: {
           size: maxResults !== undefined ? maxResults : 100,
@@ -1933,7 +1937,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
    */
   async function getAnomalyChartsData(options: {
     jobIds: string[];
-    influencers: EntityField[];
+    influencers: MlEntityField[];
     threshold: number;
     earliestMs: number;
     latestMs: number;

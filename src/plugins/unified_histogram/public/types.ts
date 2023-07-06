@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Theme } from '@kbn/charts-plugin/public/plugin';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -17,6 +16,7 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Subject } from 'rxjs';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
 /**
  * The fetch status of a Unified Histogram request
@@ -34,12 +34,13 @@ export enum UnifiedHistogramFetchStatus {
  */
 export interface UnifiedHistogramServices {
   data: DataPublicPluginStart;
-  theme: Theme;
   uiActions: UiActionsStart;
   uiSettings: IUiSettingsClient;
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
   storage: Storage;
+  expressions: ExpressionsStart;
+  capabilities: Capabilities;
 }
 
 /**

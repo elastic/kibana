@@ -32,6 +32,7 @@ interface ExceptionListHeaderComponentProps {
   onDeleteList: () => void;
   onManageRules: () => void;
   onExportList: () => void;
+  onDuplicateList: () => void;
 }
 
 export interface BackOptions {
@@ -54,6 +55,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
   onDeleteList,
   onManageRules,
   onExportList,
+  onDuplicateList,
 }) => {
   const { isModalVisible, listDetails, onEdit, onSave, onCancel } = useExceptionListHeader({
     name,
@@ -100,6 +102,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
             onDeleteList={onDeleteList}
             onManageRules={onManageRules}
             onExportList={onExportList}
+            onDuplicateList={onDuplicateList}
           />,
         ]}
         breadcrumbs={[

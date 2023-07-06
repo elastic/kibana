@@ -16,7 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const toasts = getService('toasts');
 
-  describe('console context menu', function testContextMenu() {
+  // FLAKY: https://github.com/elastic/kibana/issues/155029
+  describe.skip('console context menu', function testContextMenu() {
     before(async () => {
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with

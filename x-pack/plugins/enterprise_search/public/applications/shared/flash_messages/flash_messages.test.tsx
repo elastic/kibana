@@ -69,7 +69,7 @@ describe('Toasts', () => {
       },
       {
         color: 'danger',
-        iconType: 'alert',
+        iconType: 'error',
         title: 'Oh no!',
         text: <div data-test-subj="error">Something went wrong</div>,
         id: 'errorToastId',

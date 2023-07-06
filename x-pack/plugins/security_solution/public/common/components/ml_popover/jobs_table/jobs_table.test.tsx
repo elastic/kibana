@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shallow, mount } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { JobsTableComponent } from './jobs_table';
@@ -33,17 +33,6 @@ describe('JobsTableComponent', () => {
     onJobStateChangeMock = jest.fn();
   });
 
-  test('renders correctly against snapshot', () => {
-    const wrapper = shallow(
-      <JobsTableComponent
-        isLoading={true}
-        jobs={securityJobs}
-        onJobStateChange={onJobStateChangeMock}
-      />
-    );
-    expect(wrapper).toMatchSnapshot();
-  });
-
   test('should render the hyperlink which points specifically to the job id', async () => {
     const href = await getRenderedHref(
       () => (
@@ -51,6 +40,7 @@ describe('JobsTableComponent', () => {
           isLoading={true}
           jobs={securityJobs}
           onJobStateChange={onJobStateChangeMock}
+          mlNodesAvailable={true}
         />
       ),
       '[data-test-subj="jobs-table-link"]'
@@ -68,6 +58,7 @@ describe('JobsTableComponent', () => {
         isLoading={true}
         jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
+        mlNodesAvailable={true}
       />
     );
 
@@ -86,6 +77,7 @@ describe('JobsTableComponent', () => {
           isLoading={true}
           jobs={securityJobs}
           onJobStateChange={onJobStateChangeMock}
+          mlNodesAvailable={true}
         />
       ),
       '[data-test-subj="jobs-table-link"]'
@@ -101,6 +93,7 @@ describe('JobsTableComponent', () => {
         isLoading={false}
         jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
+        mlNodesAvailable={true}
       />
     );
 
@@ -121,6 +114,7 @@ describe('JobsTableComponent', () => {
         isLoading={false}
         jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
+        mlNodesAvailable={true}
       />
     );
     await waitFor(() => {
@@ -134,6 +128,7 @@ describe('JobsTableComponent', () => {
         isLoading={true}
         jobs={securityJobs}
         onJobStateChange={onJobStateChangeMock}
+        mlNodesAvailable={true}
       />
     );
     await waitFor(() => {

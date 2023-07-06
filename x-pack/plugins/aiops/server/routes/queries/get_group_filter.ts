@@ -7,18 +7,18 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { ChangePointGroup } from '@kbn/ml-agg-utils';
+import type { SignificantTermGroup } from '@kbn/ml-agg-utils';
 
-// Transforms a list of change point items from a group in a query filter.
+// Transforms a list of significant terms from a group in a query filter.
 // Uses a `term` filter for single field value combinations.
 // For fields with multiple values it creates a single `terms` filter that includes
 // all values. This avoids queries not returning any results otherwise because
 // separate `term` filter for multiple values for the same field would rule each other out.
 export function getGroupFilter(
-  changePointGroup: ChangePointGroup
+  significantTermGroup: SignificantTermGroup
 ): estypes.QueryDslQueryContainer[] {
   return Object.entries(
-    changePointGroup.group.reduce<Record<string, Array<string | number>>>((p, c) => {
+    significantTermGroup.group.reduce<Record<string, Array<string | number>>>((p, c) => {
       if (p[c.fieldName]) {
         p[c.fieldName].push(c.fieldValue);
       } else {

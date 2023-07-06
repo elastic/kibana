@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
   AppDeepLink,
@@ -26,6 +27,12 @@ import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+  NavigationEntry,
+} from '@kbn/observability-shared-plugin/public';
 import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import {
@@ -43,32 +50,32 @@ import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/publi
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
+import { RulesLocatorDefinition } from './locators/rules';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
-import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
-import { createLazyObservabilityPageTemplate } from './components/shared';
-import { registerDataHandler } from './data_handler';
+import { SloDetailsLocatorDefinition } from './locators/slo_details';
+import { observabilityAppId, observabilityFeatureId } from '../common';
+import { registerDataHandler } from './context/has_data_context/data_handler';
 import {
   createObservabilityRuleTypeRegistry,
   ObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
-import { createCallObservabilityApi } from './services/call_observability_api';
-import { createNavigationRegistry, NavigationEntry } from './services/navigation_registry';
-import { updateGlobalNavigation } from './update_global_navigation';
-import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
-import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
-import { createUseRulesLink } from './hooks/create_use_rules_link';
-import getAppDataView from './utils/observability_data_views/get_app_data_view';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import { createUseRulesLink } from './hooks/create_use_rules_link';
+import {
+  ALERTS_PATH,
+  CASES_PATH,
+  OBSERVABILITY_BASE_PATH,
+  OVERVIEW_PATH,
+  RULES_PATH,
+  SLOS_PATH,
+} from './routes/paths';
+import { createCoPilotService } from './context/co_pilot_context/create_co_pilot_service';
+import { type CoPilotService } from './typings/co_pilot';
 
 export interface ConfigSchema {
   unsafe: {
-    slo: {
-      enabled: boolean;
-    };
     alertDetails: {
-      apm: {
-        enabled: boolean;
-      };
       metrics: {
         enabled: boolean;
       };
@@ -79,12 +86,20 @@ export interface ConfigSchema {
         enabled: boolean;
       };
     };
+    thresholdRule: {
+      enabled: boolean;
+    };
+  };
+  compositeSlo: { enabled: boolean };
+  aiAssistant?: {
+    enabled?: boolean;
   };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   home?: HomePublicPluginSetup;
@@ -97,19 +112,23 @@ export interface ObservabilityPublicPluginsStart {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
+  exploratoryView: ExploratoryViewPublicStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   security: SecurityPluginStart;
   share: SharePluginStart;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   home?: HomePublicPluginStart;
+  cloud?: CloudStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -124,9 +143,10 @@ export class Plugin
     >
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private readonly navigationRegistry = createNavigationRegistry();
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
+
+  private coPilotService: CoPilotService | undefined;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -137,7 +157,7 @@ export class Plugin
         defaultMessage: 'Alerts',
       }),
       order: 8001,
-      path: '/alerts',
+      path: ALERTS_PATH,
       navLinkStatus: AppNavLinkStatus.hidden,
       deepLinks: [
         {
@@ -145,7 +165,7 @@ export class Plugin
           title: i18n.translate('xpack.observability.rulesLinkTitle', {
             defaultMessage: 'Rules',
           }),
-          path: '/alerts/rules',
+          path: RULES_PATH,
           navLinkStatus: AppNavLinkStatus.hidden,
         },
       ],
@@ -157,10 +177,10 @@ export class Plugin
       }),
       navLinkStatus: AppNavLinkStatus.hidden,
       order: 8002,
-      path: '/slos',
+      path: SLOS_PATH,
     },
     getCasesDeepLinks({
-      basePath: casesPath,
+      basePath: CASES_PATH,
       extend: {
         [CasesDeepLinkId.cases]: {
           order: 8003,
@@ -189,36 +209,44 @@ export class Plugin
     const config = this.initContext.config.get();
     const kibanaVersion = this.initContext.env.packageInfo.version;
 
-    createCallObservabilityApi(coreSetup.http);
-
     this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
-    pluginsSetup.share.url.locators.create(new RuleDetailsLocatorDefinition());
+
+    const rulesLocator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
+
+    const ruleDetailsLocator = pluginsSetup.share.url.locators.create(
+      new RuleDetailsLocatorDefinition()
+    );
+
+    const sloDetailsLocator = pluginsSetup.share.url.locators.create(
+      new SloDetailsLocatorDefinition()
+    );
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
       const { renderApp } = await import('./application');
       // Get start services
-      const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
+      const [coreStart, pluginsStart] = await coreSetup.getStartServices();
 
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
+
       return renderApp({
-        core: coreStart,
-        config,
-        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         appMountParameters: params,
-        observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-        ObservabilityPageTemplate: navigation.PageTemplate,
-        usageCollection: pluginsSetup.usageCollection,
+        config,
+        core: coreStart,
         isDev: this.initContext.env.mode.dev,
         kibanaVersion,
+        observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
+        ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
+        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
+        usageCollection: pluginsSetup.usageCollection,
       });
     };
 
     const appUpdater$ = this.appUpdater$;
     const app = {
-      appRoute: '/app/observability',
+      appRoute: OBSERVABILITY_BASE_PATH,
       category,
       deepLinks: this.deepLinks,
       euiIconType,
@@ -260,12 +288,12 @@ export class Plugin
             'Consolidate your logs, metrics, application traces, and system availability with purpose-built UIs.',
         }),
         icon: 'logoObservability',
-        path: '/app/observability/',
+        path: `${OBSERVABILITY_BASE_PATH}/`,
         order: 200,
       });
     }
 
-    this.navigationRegistry.registerSections(
+    pluginsSetup.observabilityShared.navigation.registerSections(
       from(appUpdater$).pipe(
         map((value) => {
           const deepLinks = value(app)?.deepLinks ?? [];
@@ -275,7 +303,7 @@ export class Plugin
               defaultMessage: 'Overview',
             }),
             app: observabilityAppId,
-            path: '/overview',
+            path: OVERVIEW_PATH,
           };
 
           // Reformat the visible links to be NavigationEntry objects instead of
@@ -290,7 +318,6 @@ export class Plugin
           // See https://github.com/elastic/kibana/issues/103325.
           const otherLinks: NavigationEntry[] = deepLinks
             .filter((link) => link.navLinkStatus === AppNavLinkStatus.visible)
-            .filter((link) => (link.id === 'slos' ? config.unsafe.slo.enabled : link)) // might not be useful anymore
             .map((link) => ({
               app: observabilityAppId,
               label: link.title,
@@ -310,13 +337,19 @@ export class Plugin
       )
     );
 
+    this.coPilotService = createCoPilotService({
+      enabled: !!config.aiAssistant?.enabled,
+      http: coreSetup.http,
+    });
+
     return {
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      navigation: {
-        registerSections: this.navigationRegistry.registerSections,
-      },
       useRulesLink: createUseRulesLink(),
+      rulesLocator,
+      ruleDetailsLocator,
+      sloDetailsLocator,
+      getCoPilotService: () => this.coPilotService!,
     };
   }
 
@@ -324,45 +357,29 @@ export class Plugin
     const { application } = coreStart;
     const config = this.initContext.config.get();
 
-    const filterSlo = (link: AppDeepLink) =>
-      link.id === 'slos' ? config.unsafe.slo.enabled : link;
-
-    updateGlobalNavigation({
+    pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
-      deepLinks: this.deepLinks.filter(filterSlo),
+      deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
     });
 
-    const PageTemplate = createLazyObservabilityPageTemplate({
-      currentAppId$: application.currentAppId$,
-      getUrlForApp: application.getUrlForApp,
-      navigateToApp: application.navigateToApp,
-      navigationSections$: this.navigationRegistry.sections$,
-      guidedOnboardingApi: pluginsStart.guidedOnboarding.guidedOnboardingApi,
-      getPageTemplateServices: () => ({ coreStart }),
-    });
-
     const getAsyncO11yAlertsTableConfiguration = async () => {
-      const { getO11yAlertsTableConfiguration } = await import(
-        './config/register_alerts_table_configuration'
+      const { getAlertsTableConfiguration } = await import(
+        './components/alerts_table/get_alerts_table_configuration'
       );
-      return getO11yAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
+      return getAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
     };
 
     const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
+
     getAsyncO11yAlertsTableConfiguration().then((alertsTableConfig) => {
       alertsTableConfigurationRegistry.register(alertsTableConfig);
     });
 
     return {
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
-      navigation: {
-        PageTemplate,
-      },
-      createExploratoryViewUrl,
-      getAppDataView: getAppDataView(pluginsStart.dataViews),
-      ExploratoryViewEmbeddable: getExploratoryViewEmbeddable({ ...coreStart, ...pluginsStart }),
       useRulesLink: createUseRulesLink(),
+      getCoPilotService: () => this.coPilotService!,
     };
   }
 }

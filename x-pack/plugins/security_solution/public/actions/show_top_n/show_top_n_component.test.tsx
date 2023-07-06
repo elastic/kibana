@@ -21,6 +21,7 @@ jest.mock('react-router-dom', () => {
   };
 });
 jest.mock('../../common/components/visualization_actions/actions');
+jest.mock('../../common/components/visualization_actions/lens_embeddable');
 
 const casesService = {
   ui: { getCasesContext: () => mockCasesContext },
@@ -30,7 +31,17 @@ const element = document.createElement('div');
 document.body.appendChild(element);
 
 const context = {
-  field: { name: 'user.name', value: 'the-value', type: 'keyword' },
+  data: [
+    {
+      value: 'the-value',
+      field: {
+        name: 'user.name',
+        type: 'keyword',
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+  ],
   trigger: { id: 'trigger' },
   nodeRef: {
     current: element,

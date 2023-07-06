@@ -18,7 +18,7 @@ describe('MLModelsApiLogic', () => {
     it('calls the ml api', async () => {
       http.get.mockResolvedValue(mlModelStats);
       const result = await getMLModelsStats();
-      expect(http.get).toHaveBeenCalledWith('/api/ml/trained_models/_stats');
+      expect(http.get).toHaveBeenCalledWith('/internal/ml/trained_models/_stats', { version: '1' });
       expect(result).toEqual(mlModelStats);
     });
   });

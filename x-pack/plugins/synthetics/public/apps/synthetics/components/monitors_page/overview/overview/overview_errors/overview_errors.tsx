@@ -8,7 +8,7 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -16,9 +16,10 @@ import {
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { useMonitorQueryIds } from '../overview_alerts';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { OverviewErrorsSparklines } from './overview_errors_sparklines';
-import { useAbsoluteDate } from '../../../../../hooks';
+import { useRefreshedRange, useGetUrlParams } from '../../../../../hooks';
 import { OverviewErrorsCount } from './overview_errors_count';
 
 export function OverviewErrors() {
@@ -26,7 +27,11 @@ export function OverviewErrors() {
 
   const loading = !status?.allIds || status?.allIds.length === 0;
 
-  const { from, to } = useAbsoluteDate({ from: 'now-6h', to: 'now' });
+  const { from, to } = useRefreshedRange(6, 'hours');
+
+  const { locations } = useGetUrlParams();
+
+  const monitorIds = useMonitorQueryIds();
 
   return (
     <EuiPanel hasShadow={false} hasBorder>
@@ -35,21 +40,23 @@ export function OverviewErrors() {
       </EuiTitle>
       <EuiSpacer size="s" />
       {loading ? (
-        <EuiLoadingContent lines={3} />
+        <EuiSkeletonText lines={3} />
       ) : (
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem grow={false}>
             <OverviewErrorsCount
               from={from}
               to={to}
-              monitorIds={status?.enabledMonitorQueryIds ?? []}
+              monitorIds={monitorIds}
+              locations={locations}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
             <OverviewErrorsSparklines
               from={from}
               to={to}
-              monitorIds={status?.enabledMonitorQueryIds ?? []}
+              monitorIds={monitorIds}
+              locations={locations}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

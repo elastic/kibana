@@ -1,54 +1,36 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-plugin",
-  "owner": "@elastic/observability-ui",
+  "owner": "@elastic/actionable-observability",
   "plugin": {
     "id": "observability",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "observability"
-    ],
+    "configPath": ["xpack", "observability"],
     "requiredPlugins": [
       "alerting",
       "cases",
       "charts",
       "data",
       "dataViews",
+      "dataViewEditor",
+      "embeddable",
+      "exploratoryView",
       "features",
+      "files",
+      "guidedOnboarding",
       "inspector",
+      "lens",
+      "observabilityShared",
       "ruleRegistry",
       "triggersActionsUi",
-      "inspector",
-      "unifiedSearch",
       "security",
-      "guidedOnboarding",
       "share",
-      "spaces"
-    ],
-    "optionalPlugins": [
-      "discover",
-      "embeddable",
-      "home",
-      "lens",
-      "licensing",
-      "spaces",
-      "usageCollection"
-    ],
-    "requiredBundles": [
       "unifiedSearch",
-      "data",
-      "dataViews",
-      "embeddable",
-      "kibanaReact",
-      "kibanaUtils",
-      "lens",
-      "usageCollection",
       "visualizations"
     ],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "optionalPlugins": ["discover", "home", "licensing", "usageCollection", "cloud", "spaces"],
+    "requiredBundles": ["data", "kibanaReact", "kibanaUtils", "unifiedSearch", "cloudChat", "stackAlerts", "spaces"],
+    "extraPublicDirs": ["common"]
   }
 }

@@ -1,0 +1,6 @@
+- name: metrics_test_name
+  title: metrics_test_title
+  type: keyword
+- name: metrics_test_name2
+  title: metrics_test_title2
+  type: keyword

@@ -6,12 +6,11 @@
  */
 
 import type { SecurityAppStore } from '../../../common/store/types';
-import { TableId } from '../../../../common/types';
+import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
 import { createToggleColumnCellActionFactory } from './toggle_column';
 
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { mockGlobalState } from '../../../common/mock';
-import { dataTableActions } from '../../../common/store/data_table';
 
 const mockDispatch = jest.fn();
 const mockGetState = jest.fn().mockReturnValue(mockGlobalState);
@@ -23,7 +22,12 @@ const store = {
 const value = 'the-value';
 const fieldName = 'user.name';
 const context = {
-  field: { name: fieldName, value, type: 'text' },
+  data: [
+    {
+      field: { name: fieldName, type: 'text', searchable: true, aggregatable: true },
+      value,
+    },
+  ],
   metadata: {
     scopeId: TableId.test,
   },
@@ -79,7 +83,10 @@ describe('createToggleColumnCellActionFactory', () => {
 
     it('should add column', async () => {
       const name = 'fake-field-name';
-      await toggleColumnAction.execute({ ...context, field: { ...context.field, name } });
+      await toggleColumnAction.execute({
+        ...context,
+        data: [{ ...context.data[0], field: { ...context.data[0].field, name } }],
+      });
       expect(mockDispatch).toHaveBeenCalledWith(
         dataTableActions.upsertColumn({
           column: {

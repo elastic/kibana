@@ -19,6 +19,7 @@ exports[`Should render default props 1`] = `
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="m"
+  repositionOnScroll={true}
 >
   <div
     style={
@@ -29,7 +30,7 @@ exports[`Should render default props 1`] = `
   >
     <EuiPopoverTitle>
       <FormattedMessage
-        defaultMessage="Metrics"
+        defaultMessage="Configure join metrics"
         id="xpack.maps.layerPanel.metricsExpression.metricsPopoverTitle"
         values={Object {}}
       />
@@ -38,7 +39,7 @@ exports[`Should render default props 1`] = `
       className="mapJoinExpressionHelpText"
     >
       <FormattedMessage
-        defaultMessage="Configure the metrics for the right source. These values are added to the layer features."
+        defaultMessage="Metrics are added to layer features and used for data driven styling and tooltip content."
         id="xpack.maps.layerPanel.metricsExpression.helpText"
         values={Object {}}
       />
@@ -46,6 +47,7 @@ exports[`Should render default props 1`] = `
     <MetricsEditor
       allowMultipleMetrics={true}
       fields={Array []}
+      isJoin={true}
       metrics={
         Array [
           Object {
@@ -78,6 +80,7 @@ exports[`Should render metrics expression for metrics 1`] = `
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="m"
+  repositionOnScroll={true}
 >
   <div
     style={
@@ -88,7 +91,7 @@ exports[`Should render metrics expression for metrics 1`] = `
   >
     <EuiPopoverTitle>
       <FormattedMessage
-        defaultMessage="Metrics"
+        defaultMessage="Configure join metrics"
         id="xpack.maps.layerPanel.metricsExpression.metricsPopoverTitle"
         values={Object {}}
       />
@@ -97,7 +100,7 @@ exports[`Should render metrics expression for metrics 1`] = `
       className="mapJoinExpressionHelpText"
     >
       <FormattedMessage
-        defaultMessage="Configure the metrics for the right source. These values are added to the layer features."
+        defaultMessage="Metrics are added to layer features and used for data driven styling and tooltip content."
         id="xpack.maps.layerPanel.metricsExpression.helpText"
         values={Object {}}
       />
@@ -105,6 +108,7 @@ exports[`Should render metrics expression for metrics 1`] = `
     <MetricsEditor
       allowMultipleMetrics={true}
       fields={Array []}
+      isJoin={true}
       metrics={
         Array [
           Object {

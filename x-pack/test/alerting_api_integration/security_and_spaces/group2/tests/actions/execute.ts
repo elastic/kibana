@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/lib/action_execution_source';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -115,6 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
                 outcome: 'success',
                 actionTypeId: 'test.index-record',
                 message: `action executed: test.index-record:${createdAction.id}: My action`,
+                source: ActionExecutionSourceType.HTTP_REQUEST,
               });
               break;
             default:
@@ -502,10 +504,11 @@ export default function ({ getService }: FtrProviderContext) {
     outcome: string;
     message: string;
     errorMessage?: string;
+    source?: string;
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
-    const { spaceId, connectorId, actionTypeId, outcome, message, errorMessage } = params;
+    const { spaceId, connectorId, actionTypeId, outcome, message, errorMessage, source } = params;
 
     const events: IValidatedEvent[] = await retry.try(async () => {
       return await getEventLog({
@@ -558,6 +561,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     expect(executeEvent?.message).to.eql(message);
     expect(startExecuteEvent?.message).to.eql(message.replace('executed', 'started'));
+
+    if (source) {
+      expect(executeEvent?.kibana?.action?.execution?.source).to.eql(source.toLowerCase());
+    }
 
     if (errorMessage) {
       expect(executeEvent?.error?.message).to.eql(errorMessage);

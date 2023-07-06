@@ -102,6 +102,7 @@ Object {
       ],
       "type": "datatable",
     },
+    "overrides": undefined,
     "syncCursor": true,
     "syncTooltips": false,
   },

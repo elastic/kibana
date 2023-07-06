@@ -6,30 +6,73 @@
  */
 import React from 'react';
 
-import { EuiFlexGrid, EuiFlexItem, EuiFlexGroup, EuiText, EuiI18n } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
 import { MetricChart, MetricChartProps } from './metric_chart';
+import { HostMetricsDocsLink } from '../../metric_explanation/host_metrics_docs_link';
 
 const DEFAULT_BREAKDOWN_SIZE = 20;
 const CHARTS_IN_ORDER: Array<Pick<MetricChartProps, 'title' | 'type'> & { fullRow?: boolean }> = [
   {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.load', {
-      defaultMessage: 'Normalized Load',
-    }),
-    type: 'load',
-  },
-  {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.cpu', {
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.cpuUsage', {
       defaultMessage: 'CPU Usage',
     }),
-    type: 'cpu',
+    type: 'cpuUsage',
   },
   {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.memory', {
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.normalizedLoad1m', {
+      defaultMessage: 'Normalized Load',
+    }),
+    type: 'normalizedLoad1m',
+  },
+  {
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.memoryUsage', {
       defaultMessage: 'Memory Usage',
     }),
-    type: 'memory',
-    fullRow: true,
+    type: 'memoryUsage',
+  },
+  {
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.memoryFree', {
+      defaultMessage: 'Memory Free',
+    }),
+    type: 'memoryFree',
+  },
+  {
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskSpaceUsed', {
+      defaultMessage: 'Disk Space Usage',
+    }),
+    type: 'diskSpaceUsage',
+  },
+  {
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskSpaceAvailable', {
+      defaultMessage: 'Disk Space Available',
+    }),
+    type: 'diskSpaceAvailable',
+  },
+  {
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskIORead', {
+      defaultMessage: 'Disk Read IOPS',
+    }),
+    type: 'diskIORead',
+  },
+  {
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskIOWrite', {
+      defaultMessage: 'Disk Write IOPS',
+    }),
+    type: 'diskIOWrite',
+  },
+  {
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskReadThroughput', {
+      defaultMessage: 'Disk Read Throughput',
+    }),
+    type: 'diskReadThroughput',
+  },
+  {
+    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskWriteThroughput', {
+      defaultMessage: 'Disk Write Throughput',
+    }),
+    type: 'diskWriteThroughput',
   },
   {
     title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.rx', {
@@ -43,48 +86,20 @@ const CHARTS_IN_ORDER: Array<Pick<MetricChartProps, 'title' | 'type'> & { fullRo
     }),
     type: 'tx',
   },
-  {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.diskIORead', {
-      defaultMessage: 'Disk Read IOPS',
-    }),
-    type: 'diskIORead',
-  },
-  {
-    title: i18n.translate('xpack.infra.hostsViewPage.tabs.metricsCharts.DiskIOWrite', {
-      defaultMessage: 'Disk Write IOPS',
-    }),
-    type: 'diskIOWrite',
-  },
 ];
 
-export const MetricsGrid = () => {
+export const MetricsGrid = React.memo(() => {
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="hostsView-metricChart">
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false} style={{ flex: 1 }}>
-            <EuiText size="xs">
-              <EuiI18n
-                token="xpack.infra.hostsViewPage.tabs.metricsCharts.sortingCriteria"
-                default="Showing for Top {maxHosts} hosts by {attribute}"
-                values={{
-                  maxHosts: <strong>{DEFAULT_BREAKDOWN_SIZE}</strong>,
-                  attribute: <strong>name</strong>,
-                }}
-              />
-            </EuiText>
+    <>
+      <HostMetricsDocsLink />
+      <EuiSpacer size="s" />
+      <EuiFlexGrid columns={2} gutterSize="s" data-test-subj="hostsView-metricChart">
+        {CHARTS_IN_ORDER.map(({ fullRow, ...chartProp }) => (
+          <EuiFlexItem key={chartProp.type} style={fullRow ? { gridColumn: '1/-1' } : {}}>
+            <MetricChart breakdownSize={DEFAULT_BREAKDOWN_SIZE} {...chartProp} />
           </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGrid columns={2} gutterSize="s">
-          {CHARTS_IN_ORDER.map(({ fullRow, ...chartProp }) => (
-            <EuiFlexItem style={fullRow ? { gridColumn: '1/-1' } : {}}>
-              <MetricChart breakdownSize={DEFAULT_BREAKDOWN_SIZE} {...chartProp} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        ))}
+      </EuiFlexGrid>
+    </>
   );
-};
+});

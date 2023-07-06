@@ -11,6 +11,15 @@ import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { AxisTitleSettings, AxisTitleSettingsProps } from './axis_title_settings';
 import { Label, VisLabel } from '../../vis_label';
 
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
+
 describe('Axes Title settings', () => {
   let props: AxisTitleSettingsProps;
   beforeEach(() => {
@@ -67,5 +76,25 @@ describe('Axes Title settings', () => {
       'custom'
     );
     expect(component.find('[data-test-subj="lnsxAxisTitle"]').last().prop('value')).toBe('');
+  });
+
+  it('should reset the label when moving from custom to auto', () => {
+    let component = mount(
+      <AxisTitleSettings {...props} isAxisTitleVisible={true} axisTitle={'Custom title'} />
+    );
+
+    // switch mode
+    // Perform the change down one level to check the actual value swap
+    act(() => {
+      component.find(VisLabel).find('EuiSelect').prop('onChange')!({
+        target: { value: 'auto' },
+      } as React.ChangeEvent<HTMLSelectElement>);
+    });
+    component = component.update();
+    expect(component.find('[data-test-subj="lnsxAxisTitle-select"]').last().prop('value')).toBe(
+      'auto'
+    );
+    expect(component.find('[data-test-subj="lnsxAxisTitle"]').last().prop('value')).toBe('');
+    expect(props.updateTitleState).toHaveBeenCalledWith({ title: undefined, visible: true }, 'x');
   });
 });

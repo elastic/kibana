@@ -19,8 +19,10 @@ import {
   ClickTriggerEvent,
   MultiClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
+import { emptyTitleText } from '@kbn/visualization-ui-components/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { ISearchStart } from '@kbn/data-plugin/public';
+import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
 import type { Document } from './persistence/saved_object_store';
 import {
   Datasource,
@@ -35,7 +37,6 @@ import {
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
-import type { DraggingIdentifier } from './drag_drop';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
@@ -175,6 +176,7 @@ export function getIndexPatternsIds({
     }
     return currentId;
   }, undefined);
+
   const referencesIds = references
     .filter(({ type }) => type === 'index-pattern')
     .map(({ id }) => id);
@@ -361,3 +363,29 @@ export const getSearchWarningMessages = (
 
   return [...warningsMap.values()].flat();
 };
+
+function getSafeLabel(label: string) {
+  return label.trim().length ? label : emptyTitleText;
+}
+
+export function getUniqueLabelGenerator() {
+  const counts = {} as Record<string, number>;
+  return function makeUnique(label: string) {
+    let uniqueLabel = getSafeLabel(label);
+
+    while (counts[uniqueLabel] >= 0) {
+      const num = ++counts[uniqueLabel];
+      uniqueLabel = i18n.translate('xpack.lens.uniqueLabel', {
+        defaultMessage: '{label} [{num}]',
+        values: { label: getSafeLabel(label), num },
+      });
+    }
+
+    counts[uniqueLabel] = 0;
+    return uniqueLabel;
+  };
+}
+
+export function nonNullable<T>(v: T): v is NonNullable<T> {
+  return v != null;
+}

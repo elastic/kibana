@@ -11,12 +11,7 @@ import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/s
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
-import {
-  ExecutorError,
-  getActionTypeFeatureUsageName,
-  TaskRunnerFactory,
-  ILicenseState,
-} from './lib';
+import { getActionTypeFeatureUsageName, TaskRunnerFactory, ILicenseState } from './lib';
 import {
   ActionType,
   PreConfiguredAction,
@@ -109,6 +104,18 @@ export class ActionTypeRegistry {
     Params extends ActionTypeParams = ActionTypeParams,
     ExecutorResultData = void
   >(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>) {
+    // TODO: Remove when system action are supported
+    if (actionType.isSystemAction) {
+      throw new Error(
+        i18n.translate(
+          'xpack.actions.actionTypeRegistry.register.systemActionsNotSupportedErrorMessage',
+          {
+            defaultMessage: 'System actions are not supported',
+          }
+        )
+      );
+    }
+
     if (this.has(actionType.id)) {
       throw new Error(
         i18n.translate(
@@ -157,15 +164,7 @@ export class ActionTypeRegistry {
       [`actions:${actionType.id}`]: {
         title: actionType.name,
         maxAttempts,
-        getRetry(attempts: number, error: unknown) {
-          if (error instanceof ExecutorError) {
-            return error.retry == null ? false : error.retry;
-          }
-          // Only retry other kinds of errors based on attempts
-          return attempts < maxAttempts;
-        },
-        createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create(context, maxAttempts),
+        createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
       },
     });
     // No need to notify usage on basic action types

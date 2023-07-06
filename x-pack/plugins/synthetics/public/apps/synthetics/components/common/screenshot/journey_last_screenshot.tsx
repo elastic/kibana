@@ -14,8 +14,10 @@ import { ScreenshotImageSize } from './screenshot_size';
 export const JourneyLastScreenshot = ({
   checkGroupId,
   size,
+  timestamp,
 }: {
   checkGroupId: string;
+  timestamp?: string;
   size: ScreenshotImageSize;
 }) => {
   const { loading: stepsLoading, stepEnds } = useJourneySteps(checkGroupId);
@@ -40,6 +42,7 @@ export const JourneyLastScreenshot = ({
       allStepsLoaded={!stepsLoading}
       retryFetchOnRevisit={false}
       size={size}
+      timestamp={timestamp}
     />
   );
 };

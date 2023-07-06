@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiLoadingContent, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiCodeBlock, EuiSkeletonText, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { JourneyStep, SyntheticsJourneyApiResponse } from '../../../../../common/runtime_types';
@@ -54,6 +54,23 @@ export const StepTabs = ({
     }
   }, [isFailedStep]);
 
+  const getBrowserConsoles = useCallback(
+    (index: number) => {
+      return stepsList
+        ?.filter(
+          (stepF) =>
+            stepF.synthetics?.type === 'journey/browserconsole' &&
+            stepF.synthetics?.step?.index! === index
+        )
+        .map((stepF) => stepF.synthetics?.payload?.text!);
+    },
+    [stepsList]
+  );
+
+  if (!loading && stepsList?.length === 0) {
+    return null;
+  }
+
   const onSelectedTabChanged = (id: TabId) => {
     setSelectedTabId(id);
   };
@@ -72,7 +89,7 @@ export const StepTabs = ({
 
   const renderTabContent = () => {
     if (loading) {
-      return <EuiLoadingContent />;
+      return <EuiSkeletonText />;
     }
     switch (selectedTabId) {
       case 'code':
@@ -102,19 +119,6 @@ export const StepTabs = ({
         );
     }
   };
-
-  const getBrowserConsoles = useCallback(
-    (index: number) => {
-      return stepsList
-        ?.filter(
-          (stepF) =>
-            stepF.synthetics?.type === 'journey/browserconsole' &&
-            stepF.synthetics?.step?.index! === index
-        )
-        .map((stepF) => stepF.synthetics?.payload?.text!);
-    },
-    [stepsList]
-  );
 
   return (
     <>

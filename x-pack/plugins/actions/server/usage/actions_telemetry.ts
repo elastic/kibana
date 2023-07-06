@@ -68,10 +68,10 @@ export async function getTotalCount(
     const countByType = Object.keys(aggs).reduce(
       // ES DSL aggregations are returned as `any` by esClient.search
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (obj: any, key: string) => ({
-        ...obj,
-        [replaceFirstAndLastDotSymbols(key)]: aggs[key],
-      }),
+      (obj: any, key: string) => {
+        obj[replaceFirstAndLastDotSymbols(key)] = aggs[key];
+        return obj;
+      },
       {}
     );
     if (preconfiguredActions && preconfiguredActions.length) {

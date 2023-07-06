@@ -10,7 +10,7 @@ import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security
 import type { InfluencerInput, Anomalies, CriteriaFields } from '../types';
 import { useAnomaliesTableData } from './use_anomalies_table_data';
 
-interface ChildrenArgs {
+export interface AnomalyTableProviderChildrenProps {
   isLoadingAnomaliesData: boolean;
   anomaliesData: Anomalies | null;
   jobNameById: Record<string, string | undefined>;
@@ -21,7 +21,7 @@ interface Props {
   startDate: string;
   endDate: string;
   criteriaFields?: CriteriaFields[];
-  children: (args: ChildrenArgs) => React.ReactNode;
+  children: (args: AnomalyTableProviderChildrenProps) => React.ReactNode;
   skip: boolean;
 }
 

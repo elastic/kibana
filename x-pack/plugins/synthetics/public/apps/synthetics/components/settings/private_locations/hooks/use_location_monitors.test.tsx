@@ -5,59 +5,58 @@
  * 2.0.
  */
 
+import * as reactRedux from 'react-redux';
 import { renderHook } from '@testing-library/react-hooks';
-import { defaultCore, WrappedHelper } from '../../../../utils/testing';
+import { WrappedHelper } from '../../../../utils/testing';
 
 import { useLocationMonitors } from './use_location_monitors';
 
 describe('useLocationMonitors', () => {
-  it('returns expected results', () => {
-    const { result } = renderHook(() => useLocationMonitors(), { wrapper: WrappedHelper });
-
-    expect(result.current).toStrictEqual({ locationMonitors: [], loading: false });
-    expect(defaultCore.savedObjects.client.find).toHaveBeenCalledWith({
-      aggs: {
-        locations: {
-          terms: { field: 'synthetics-monitor.attributes.locations.id', size: 10000 },
+  let useSelectorSpy: jest.SpyInstance;
+  beforeEach(() => {
+    useSelectorSpy = jest.spyOn(reactRedux, 'useSelector').mockReturnValue({
+      locationMonitors: [
+        {
+          id: 'Private location',
+          count: 2,
         },
-      },
-      perPage: 0,
-      type: 'synthetics-monitor',
+      ],
+      loading: false,
     });
   });
 
-  it('returns expected results after data', async () => {
-    defaultCore.savedObjects.client.find = jest.fn().mockReturnValue({
-      aggregations: {
-        locations: {
-          buckets: [
-            { key: 'Test', doc_count: 5 },
-            { key: 'Test 1', doc_count: 0 },
-          ],
-        },
-      },
-    });
+  it('returns expected results', () => {
+    useSelectorSpy.mockReturnValue({ locationMonitors: [], loading: false });
+    const { result } = renderHook(() => useLocationMonitors(), { wrapper: WrappedHelper });
 
-    const { result, waitForNextUpdate } = renderHook(() => useLocationMonitors(), {
+    expect(result.current).toStrictEqual({ locationMonitors: [], loading: false });
+  });
+
+  it('calls fetch action', () => {
+    const dispatchSpy = jest.fn();
+    jest.spyOn(reactRedux, 'useDispatch').mockReturnValue(dispatchSpy);
+
+    renderHook(() => useLocationMonitors());
+
+    expect(dispatchSpy).toHaveBeenCalledTimes(1);
+    const action = dispatchSpy.mock.calls[0][0];
+    expect(action.payload).toBeUndefined();
+    expect(action.type).toEqual('GET LOCATION MONITORS');
+  });
+
+  it('returns expected results after data', async () => {
+    const { result } = renderHook(() => useLocationMonitors(), {
       wrapper: WrappedHelper,
     });
 
-    expect(result.current).toStrictEqual({ locationMonitors: [], loading: true });
-
-    await waitForNextUpdate();
-
     expect(result.current).toStrictEqual({
-      loading: false,
       locationMonitors: [
         {
-          id: 'Test',
-          count: 5,
-        },
-        {
-          id: 'Test 1',
-          count: 0,
+          id: 'Private location',
+          count: 2,
         },
       ],
+      loading: false,
     });
   });
 });

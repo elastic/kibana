@@ -32,3 +32,8 @@ export type DataControlInput = ControlInput & {
   fieldName: string;
   dataViewId: string;
 };
+
+export type ControlInputTransform = (
+  newState: Partial<ControlInput>,
+  controlType: string
+) => Partial<ControlInput>;

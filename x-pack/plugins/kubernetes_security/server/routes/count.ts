@@ -5,48 +5,79 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { IRouter } from '@kbn/core/server';
-import { PROCESS_EVENTS_INDEX } from '@kbn/session-view-plugin/common/constants';
-import { COUNT_ROUTE } from '../../common/constants';
+import { IRouter, Logger } from '@kbn/core/server';
+import {
+  COUNT_ROUTE,
+  ORCHESTRATOR_CLUSTER_ID,
+  ORCHESTRATOR_RESOURCE_ID,
+  ORCHESTRATOR_NAMESPACE,
+  ORCHESTRATOR_CLUSTER_NAME,
+  CONTAINER_IMAGE_NAME,
+  CLOUD_INSTANCE_NAME,
+  ENTRY_LEADER_ENTITY_ID,
+} from '../../common/constants';
 
-export const registerCountRoute = (router: IRouter) => {
-  router.get(
-    {
+export const registerCountRoute = (router: IRouter, logger: Logger) => {
+  router.versioned
+    .get({
+      access: 'internal',
       path: COUNT_ROUTE,
-      validate: {
-        query: schema.object({
-          query: schema.string(),
-          field: schema.string(),
-          index: schema.maybe(schema.string()),
-        }),
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: schema.object({
+              index: schema.string(),
+              query: schema.string(),
+              field: schema.oneOf([
+                schema.literal(ORCHESTRATOR_CLUSTER_ID),
+                schema.literal(ORCHESTRATOR_RESOURCE_ID),
+                schema.literal(ORCHESTRATOR_NAMESPACE),
+                schema.literal(ORCHESTRATOR_CLUSTER_NAME),
+                schema.literal(CLOUD_INSTANCE_NAME),
+                schema.literal(CONTAINER_IMAGE_NAME),
+                schema.literal(CONTAINER_IMAGE_NAME),
+                schema.literal(ENTRY_LEADER_ENTITY_ID),
+              ]),
+            }),
+          },
+        },
       },
-    },
-    async (context, request, response) => {
-      const client = (await context.core).elasticsearch.client.asCurrentUser;
-      const { query, field, index } = request.query;
+      async (context, request, response) => {
+        const client = (await context.core).elasticsearch.client.asCurrentUser;
+        const { query, field, index } = request.query;
 
-      try {
-        const body = await doCount(client, query, field, index);
+        try {
+          const body = await doCount(client, index, query, field);
 
-        return response.ok({ body });
-      } catch (err) {
-        return response.badRequest(err.message);
+          return response.ok({ body });
+        } catch (err) {
+          const error = transformError(err);
+          logger.error(`Failed to fetch k8s counts: ${err}`);
+
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };
 
 export const doCount = async (
   client: ElasticsearchClient,
+  index: string,
   query: string,
-  field: string,
-  index?: string
+  field: string
 ) => {
   const queryDSL = JSON.parse(query);
 
   const search = await client.search({
-    index: [index || PROCESS_EVENTS_INDEX],
+    index: [index],
     body: {
       query: queryDSL,
       size: 0,

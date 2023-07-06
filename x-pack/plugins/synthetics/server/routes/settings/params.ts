@@ -5,44 +5,70 @@
  * 2.0.
  */
 
+import { IKibanaResponse } from '@kbn/core/server';
 import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
+import { SyntheticsRestApiRouteFactory } from '../types';
 import { syntheticsParamType } from '../../../common/types/saved_objects';
-import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import { SyntheticsParams, SyntheticsParamsReadonly } from '../../../common/runtime_types';
 
-export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = () => ({
+type SyntheticsParamsResponse =
+  | IKibanaResponse<SyntheticsParams[]>
+  | IKibanaResponse<SyntheticsParamsReadonly[]>;
+export const getSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
+  SyntheticsParamsResponse
+> = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.PARAMS,
   validate: {},
-  handler: async ({ savedObjectsClient, request, server }): Promise<any> => {
-    const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
+  handler: async ({ savedObjectsClient, request, response, server, spaceId }) => {
+    try {
+      const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
+      const canSave =
+        (await server.coreStart?.capabilities.resolveCapabilities(request)).uptime.save ?? false;
 
-    const canSave =
-      (await server.coreStart?.capabilities.resolveCapabilities(request)).uptime.save ?? false;
+      if (canSave) {
+        const finder =
+          await encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsParams>(
+            {
+              type: syntheticsParamType,
+              perPage: 1000,
+              namespaces: [spaceId],
+            }
+          );
 
-    if (canSave) {
-      const finder =
-        await encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser({
-          type: syntheticsParamType,
-          perPage: 1000,
-          namespaces: [spaceId],
+        const hits: Array<SavedObjectsFindResult<SyntheticsParams>> = [];
+        for await (const result of finder.find()) {
+          hits.push(...result.saved_objects);
+        }
+
+        return response.ok({
+          body: hits.map(({ id, attributes, namespaces }) => ({
+            ...attributes,
+            id,
+            namespaces,
+          })),
         });
-
-      const hits: SavedObjectsFindResult[] = [];
-      for await (const result of finder.find()) {
-        hits.push(...result.saved_objects);
+      } else {
+        const data = await savedObjectsClient.find<SyntheticsParamsReadonly>({
+          type: syntheticsParamType,
+          perPage: 10000,
+        });
+        return response.ok({
+          body: data.saved_objects.map(({ id, attributes, namespaces }) => ({
+            ...attributes,
+            namespaces,
+            id,
+          })),
+        });
+      }
+    } catch (error) {
+      if (error.output?.statusCode === 404) {
+        return response.notFound({ body: { message: `Kibana space '${spaceId}' does not exist` } });
       }
 
-      return { data: hits };
-    } else {
-      const data = await savedObjectsClient.find({
-        type: syntheticsParamType,
-        perPage: 10000,
-      });
-
-      return { data: data.saved_objects };
+      throw error;
     }
   },
 });

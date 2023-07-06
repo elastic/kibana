@@ -39,5 +39,25 @@ export const JSON_EDITOR = "[data-test-subj='actionJsonEditor']";
 
 export const INDEX_SELECTOR = "[data-test-subj='.index-siem-ActionTypeSelectOption']";
 
+export const INDEX_CONNECTOR_COMBO_BOX_INPUT =
+  '[data-test-subj="connectorIndexesComboBox"] [data-test-subj="comboBoxInput"]';
+
 export const actionFormSelector = (position: number) =>
   `[data-test-subj="alertActionAccordion-${position}"]`;
+
+export const ACTIONS_SUMMARY_BUTTON = '[data-test-subj="summaryOrPerRuleSelect"]';
+
+export const ACTIONS_NOTIFY_WHEN_BUTTON = '[data-test-subj="notifyWhenSelect"]';
+
+export const ACTIONS_NOTIFY_PER_RULE_RUN_BUTTON = '[data-test-subj="onActiveAlert"]';
+
+export const ACTIONS_NOTIFY_CUSTOM_FREQUENCY_BUTTON = '[data-test-subj="onThrottleInterval"]';
+
+export const ACTIONS_THROTTLE_INPUT = '[data-test-subj="throttleInput"]';
+
+export const ACTIONS_THROTTLE_UNIT_INPUT = '[data-test-subj="throttleUnitInput"]';
+
+export const ACTIONS_SUMMARY_ALERT_BUTTON = '[data-test-subj="actionNotifyWhen-option-summary"]';
+
+export const ACTIONS_SUMMARY_FOR_EACH_ALERT_BUTTON =
+  '[data-test-subj="actionNotifyWhen-option-for_each"]';

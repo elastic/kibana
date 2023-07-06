@@ -515,7 +515,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
               />
             }
             color="danger"
-            iconType="alert"
+            iconType="warning"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepLogistics.selectRepository.policyRepositoryNotFoundDescription"

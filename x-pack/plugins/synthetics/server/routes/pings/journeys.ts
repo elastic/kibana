@@ -6,12 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
-import { UMServerLibs } from '../../legacy_uptime/uptime_server';
-import { UMRestApiRouteFactory } from '../../legacy_uptime/routes/types';
+import { getJourneyFailedSteps } from '../../legacy_uptime/lib/requests/get_journey_failed_steps';
+import { SyntheticsRestApiRouteFactory } from '../types';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getJourneyDetails } from '../../queries/get_journey_details';
+import { getJourneySteps } from '../../legacy_uptime/lib/requests/get_journey_steps';
 
-export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createJourneyRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.JOURNEY,
   validate: {
@@ -32,7 +33,7 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
 
     try {
       const [result, details] = await Promise.all([
-        await libs.requests.getJourneySteps({
+        await getJourneySteps({
           uptimeEsClient,
           checkGroup,
           syntheticEventTypes,
@@ -54,9 +55,9 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
   },
 });
 
-export const createJourneyFailedStepsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
+export const createJourneyFailedStepsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
-  path: API_URLS.JOURNEY_FAILED_STEPS,
+  path: SYNTHETICS_API_URLS.JOURNEY_FAILED_STEPS,
   validate: {
     query: schema.object({
       checkGroups: schema.arrayOf(schema.string()),
@@ -65,7 +66,7 @@ export const createJourneyFailedStepsRoute: UMRestApiRouteFactory = (libs: UMSer
   handler: async ({ uptimeEsClient, request, response }): Promise<any> => {
     const { checkGroups } = request.query;
     try {
-      const result = await libs.requests.getJourneyFailedSteps({
+      const result = await getJourneyFailedSteps({
         uptimeEsClient,
         checkGroups,
       });

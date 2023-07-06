@@ -40,38 +40,19 @@ export {
 } from './components';
 
 export {
-  useReduxEmbeddableContext,
-  lazyLoadReduxEmbeddablePackage,
+  lazyLoadReduxToolsPackage,
   cleanFiltersForSerialize,
   type ReduxEmbeddableState,
   type ReduxEmbeddableTools,
-  type ReduxEmbeddablePackage,
-} from './redux_embeddables';
+  type ReduxTools,
+  type ReduxToolsPackage,
+} from './redux_tools';
 
 export type {
   ExpressionInputEditorRef,
   ExpressionInputProps,
   OnExpressionInputEditorDidMount,
 } from './components/types';
-
-/** @deprecated QuickButtonProps - use `IconButtonGroupProps` from `@kbn/shared-ux-button-toolbar` */
-export type { QuickButtonProps } from './components/solution_toolbar';
-
-export {
-  /** @deprecated AddFromLibraryButton  - use `AddFromLibraryButton` from `@kbn/shared-ux-button-toolbar` */
-  AddFromLibraryButton,
-  /** @deprecated PrimaryActionButton  - use `PrimaryButton` from `@kbn/shared-ux-button-toolbar` */
-  PrimaryActionButton,
-  /** @deprecated SolutionToolbarPopover  - use `ToolbarPopover` from `@kbn/shared-ux-button-toolbar` */
-  PrimaryActionPopover,
-  /** @deprecated QuickButtonGroup  - use `IconButtonGroup` from `@kbn/shared-ux-button-toolbar` */
-  QuickButtonGroup,
-  SolutionToolbar,
-  /** @deprecated SolutionToolbarButton  - use `PrimaryButton` from `@kbn/shared-ux-button-toolbar` */
-  SolutionToolbarButton,
-  /** @deprecated SolutionToolbarPopover  - use `ToolbarPopover` from `@kbn/shared-ux-button-toolbar` */
-  SolutionToolbarPopover,
-} from './components/solution_toolbar';
 
 /**
  * Register a set of Expression Functions with the Presentation Utility ExpressionInput.  This allows

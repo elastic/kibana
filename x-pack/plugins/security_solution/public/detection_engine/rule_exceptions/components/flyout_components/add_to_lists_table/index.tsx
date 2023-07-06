@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiText, EuiSpacer, EuiInMemoryTable, EuiPanel, EuiLoadingContent } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiInMemoryTable, EuiPanel, EuiSkeletonText } from '@elastic/eui';
 
 import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/detection_engine/rule_exceptions';
 import type { ExceptionsAddToListsComponentProps } from './use_add_to_lists_table';
@@ -43,10 +43,7 @@ const ExceptionsAddToListsComponent: React.FC<ExceptionsAddToListsComponentProps
           loading={isLoading}
           message={
             isLoading ? (
-              <EuiLoadingContent
-                lines={4}
-                data-test-subj="exceptionItemViewerEmptyPrompts-loading"
-              />
+              <EuiSkeletonText lines={4} data-test-subj="exceptionItemViewerEmptyPrompts-loading" />
             ) : undefined
           }
           columns={listTableColumnsWithLinkSwitch}

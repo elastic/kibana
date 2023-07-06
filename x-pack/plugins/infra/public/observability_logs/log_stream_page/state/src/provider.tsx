@@ -7,6 +7,7 @@
 
 import { useInterpret } from '@xstate/react';
 import createContainer from 'constate';
+import useMount from 'react-use/lib/useMount';
 import { isDevMode } from '../../../../utils/dev_mode';
 import {
   createLogStreamPageStateMachine,
@@ -21,9 +22,17 @@ export const useLogStreamPageState = ({
   filterManagerService,
   urlStateStorage,
   useDevTools = isDevMode(),
+  timeFilterService,
 }: {
   useDevTools?: boolean;
 } & LogStreamPageStateMachineDependencies) => {
+  useMount(() => {
+    // eslint-disable-next-line no-console
+    console.log(
+      "A warning in console stating: 'The result of getSnapshot should be cached to avoid an infinite loop' is expected. This will be fixed once we can upgrade versions."
+    );
+  });
+
   const logStreamPageStateService = useInterpret(
     () =>
       createLogStreamPageStateMachine({
@@ -33,6 +42,7 @@ export const useLogStreamPageState = ({
         toastsService,
         filterManagerService,
         urlStateStorage,
+        timeFilterService,
       }),
     { devTools: useDevTools }
   );

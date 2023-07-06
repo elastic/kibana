@@ -64,6 +64,19 @@ export interface SavedObjectsImportOptions {
   createNewCopies: boolean;
   /** Refresh setting, defaults to `wait_for` */
   refresh?: boolean | 'wait_for';
+  /**
+   * If true, Kibana will apply various adjustments to the data that's being imported to maintain compatibility between
+   * different Kibana versions (e.g. generate legacy URL aliases for all imported objects that have to change IDs).
+   */
+  compatibilityMode?: boolean;
+  /**
+   * If true, will import as a managed object, else will import as not managed.
+   *
+   * This can be leveraged by applications to e.g. prevent edits to a managed
+   * saved object. Instead, users can be guided to create a copy first and
+   * make their edits to the copy.
+   */
+  managed?: boolean;
 }
 
 /**
@@ -79,6 +92,19 @@ export interface SavedObjectsResolveImportErrorsOptions {
   namespace?: string;
   /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
   createNewCopies: boolean;
+  /**
+   * If true, Kibana will apply various adjustments to the data that's being retried to import to maintain compatibility between
+   * different Kibana versions (e.g. generate legacy URL aliases for all imported objects that have to change IDs).
+   */
+  compatibilityMode?: boolean;
+  /**
+   * If true, will import as a managed object, else will import as not managed.
+   *
+   * This can be leveraged by applications to e.g. prevent edits to a managed
+   * saved object. Instead, users can be guided to create a copy first and
+   * make their edits to the copy.
+   */
+  managed?: boolean;
 }
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };

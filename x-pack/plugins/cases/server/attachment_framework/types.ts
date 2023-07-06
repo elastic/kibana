@@ -14,17 +14,22 @@ export type PersistableStateAttachmentState = Pick<
 >;
 
 export interface PersistableStateAttachmentType
-  extends PersistableState<PersistableStateAttachmentState> {
+  extends Omit<PersistableState<PersistableStateAttachmentState>, 'migrations'> {
   id: string;
 }
 
 export interface PersistableStateAttachmentTypeSetup
-  extends PersistableStateDefinition<PersistableStateAttachmentState> {
+  extends Omit<PersistableStateDefinition<PersistableStateAttachmentState>, 'migrations'> {
   id: string;
 }
 
 export interface ExternalReferenceAttachmentType {
   id: string;
+  /**
+   * A function to validate data stored with the attachment type. This function should throw an error
+   * if the data is not in the form it expects.
+   */
+  schemaValidator?: (data: unknown) => void;
 }
 
 export interface AttachmentFramework {

@@ -5,9 +5,17 @@
  * 2.0.
  */
 import * as React from 'react';
-import { ReactWrapper } from 'enzyme';
-import { act } from '@testing-library/react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import {
+  act,
+  render,
+  screen,
+  cleanup,
+  waitForElementToBeRemoved,
+  fireEvent,
+} from '@testing-library/react';
+import { IToasts } from '@kbn/core/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { RulesList } from './rules_list';
@@ -19,7 +27,6 @@ import {
   getDisabledByLicenseRuleTypeFromApi,
   ruleType,
 } from './test_helpers';
-import { IToasts } from '@kbn/core/public';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -30,7 +37,6 @@ jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
   loadAllActions: jest.fn(),
 }));
-
 jest.mock('../../../lib/rule_api/rules_kuery_filter', () => ({
   loadRulesWithKueryFilter: jest.fn(),
 }));
@@ -55,10 +61,8 @@ jest.mock('../../../lib/rule_api/health', () => ({
     hasPermanentEncryptionKey: true,
   })),
 }));
-
 jest.mock('../../../lib/rule_api/aggregate_kuery_filter');
 jest.mock('../../../lib/rule_api/rules_kuery_filter');
-
 jest.mock('../../../../common/lib/health_api', () => ({
   triggersActionsUiHealth: jest.fn(() => ({ isRulesAvailable: true })),
 }));
@@ -75,7 +79,6 @@ jest.mock('react-router-dom', () => ({
     pathname: '/triggersActions/rules/',
   }),
 }));
-
 jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
   hasSaveRulesCapability: jest.fn(() => true),
@@ -85,10 +88,15 @@ jest.mock('../../../lib/capabilities', () => ({
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
+jest.mock('../../../lib/rule_api/aggregate_kuery_filter', () => ({
+  loadRuleAggregationsWithKueryFilter: jest.fn(),
+}));
 
+const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
+  '../../../lib/rule_api/aggregate_kuery_filter'
+);
 const { loadRuleTypes } = jest.requireMock('../../../lib/rule_api/rule_types');
 const { bulkEnableRules } = jest.requireMock('../../../lib/rule_api/bulk_enable');
-
 const { loadRulesWithKueryFilter } = jest.requireMock('../../../lib/rule_api/rules_kuery_filter');
 const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 
@@ -99,58 +107,40 @@ ruleTypeRegistry.list.mockReturnValue([ruleType]);
 actionTypeRegistry.list.mockReturnValue([]);
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-
-beforeEach(() => {
-  (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
 });
 
-// Test are too slow. It's breaking the build. So we skipp it now and waiting for improvment according this ticket:
-// https://github.com/elastic/kibana/issues/145122
-describe.skip('Rules list bulk enable', () => {
-  let wrapper: ReactWrapper<any>;
+const AllTheProviders = ({ children }: { children: any }) => (
+  <IntlProvider locale="en">
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  </IntlProvider>
+);
 
-  const setup = async (authorized: boolean = true) => {
+const renderWithProviders = (ui: any) => {
+  return render(ui, { wrapper: AllTheProviders });
+};
+
+describe('Rules list Bulk Enable', () => {
+  beforeAll(async () => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
     loadRulesWithKueryFilter.mockResolvedValue({
       page: 1,
       perPage: 10000,
       total: 6,
-      data: mockedRulesData.map((rule) => ({ ...rule, enabled: false })),
+      data: mockedRulesData,
     });
-
-    loadActionTypes.mockResolvedValue([
-      {
-        id: 'test',
-        name: 'Test',
-      },
-      {
-        id: 'test2',
-        name: 'Test2',
-      },
-    ]);
-    loadRuleTypes.mockResolvedValue([
-      ruleTypeFromApi,
-      getDisabledByLicenseRuleTypeFromApi(authorized),
-    ]);
+    loadActionTypes.mockResolvedValue([]);
+    loadRuleTypes.mockResolvedValue([ruleTypeFromApi, getDisabledByLicenseRuleTypeFromApi()]);
     loadAllActions.mockResolvedValue([]);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+    loadRuleAggregationsWithKueryFilter.mockResolvedValue({});
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
-    wrapper = mountWithIntl(<RulesList />);
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-  };
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  beforeAll(async () => {
-    await setup();
     useKibanaMock().services.notifications.toasts = {
       addSuccess: jest.fn(),
       addError: jest.fn(),
@@ -159,22 +149,26 @@ describe.skip('Rules list bulk enable', () => {
     } as unknown as IToasts;
   });
 
-  beforeEach(() => {
-    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
-    wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
-    // Unselect something to test filtering
-    wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
-    wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
+  afterEach(() => {
+    jest.clearAllMocks();
+    queryClient.clear();
+    cleanup();
+  });
+
+  beforeEach(async () => {
+    renderWithProviders(<RulesList />);
+    await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+
+    fireEvent.click(screen.getByTestId('checkboxSelectRow-1'));
+    fireEvent.click(screen.getByTestId('selectAllRulesButton'));
+    fireEvent.click(screen.getByTestId('checkboxSelectRow-2'));
+    fireEvent.click(screen.getByTestId('showBulkActionButton'));
   });
 
   it('can bulk enable', async () => {
-    wrapper.find('button[data-test-subj="bulkEnable"]').first().simulate('click');
-
     await act(async () => {
-      await nextTick();
-      wrapper.update();
+      fireEvent.click(screen.getByTestId('bulkEnable'));
     });
-
     const filter = bulkEnableRules.mock.calls[0][0].filter;
 
     expect(filter.function).toEqual('and');
@@ -188,19 +182,16 @@ describe.skip('Rules list bulk enable', () => {
         ids: [],
       })
     );
-    expect(
-      wrapper.find('[data-test-subj="checkboxSelectRow-1"]').first().prop('checked')
-    ).toBeFalsy();
-    expect(wrapper.find('button[data-test-subj="bulkEnable"]').exists()).toBeFalsy();
+    expect(screen.getByTestId('checkboxSelectRow-1').closest('tr')).not.toHaveClass(
+      'euiTableRow-isSelected'
+    );
+    expect(screen.queryByTestId('bulkEnable')).not.toBeInTheDocument();
   });
 
   describe('Toast', () => {
     it('should have success toast message', async () => {
-      wrapper.find('button[data-test-subj="bulkEnable"]').first().simulate('click');
-
       await act(async () => {
-        await nextTick();
-        wrapper.update();
+        fireEvent.click(screen.getByTestId('bulkEnable'));
       });
 
       expect(useKibanaMock().services.notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
@@ -223,11 +214,8 @@ describe.skip('Rules list bulk enable', () => {
         total: 10,
       });
 
-      wrapper.find('button[data-test-subj="bulkEnable"]').first().simulate('click');
-
       await act(async () => {
-        await nextTick();
-        wrapper.update();
+        fireEvent.click(screen.getByTestId('bulkEnable'));
       });
 
       expect(useKibanaMock().services.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
@@ -252,11 +240,8 @@ describe.skip('Rules list bulk enable', () => {
         total: 1,
       });
 
-      wrapper.find('button[data-test-subj="bulkEnable"]').first().simulate('click');
-
       await act(async () => {
-        await nextTick();
-        wrapper.update();
+        fireEvent.click(screen.getByTestId('bulkEnable'));
       });
 
       expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);

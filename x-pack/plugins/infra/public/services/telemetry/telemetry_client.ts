@@ -8,6 +8,8 @@
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import {
   HostEntryClickedParams,
+  HostFlyoutFilterActionParams,
+  HostsViewQueryHostsCountRetrievedParams,
   HostsViewQuerySubmittedParams,
   InfraTelemetryEventTypes,
   ITelemetryClient,
@@ -30,7 +32,32 @@ export class TelemetryClient implements ITelemetryClient {
     });
   };
 
+  public reportHostFlyoutFilterRemoved = ({
+    field_name: fieldName,
+  }: HostFlyoutFilterActionParams) => {
+    this.analytics.reportEvent(InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_REMOVED, {
+      field_name: fieldName,
+    });
+  };
+
+  public reportHostFlyoutFilterAdded = ({
+    field_name: fieldName,
+  }: HostFlyoutFilterActionParams) => {
+    this.analytics.reportEvent(InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_ADDED, {
+      field_name: fieldName,
+    });
+  };
+
   public reportHostsViewQuerySubmitted = (params: HostsViewQuerySubmittedParams) => {
     this.analytics.reportEvent(InfraTelemetryEventTypes.HOSTS_VIEW_QUERY_SUBMITTED, params);
   };
+
+  public reportHostsViewTotalHostCountRetrieved(
+    params: HostsViewQueryHostsCountRetrievedParams
+  ): void {
+    this.analytics.reportEvent(
+      InfraTelemetryEventTypes.HOST_VIEW_TOTAL_HOST_COUNT_RETRIEVED,
+      params
+    );
+  }
 }

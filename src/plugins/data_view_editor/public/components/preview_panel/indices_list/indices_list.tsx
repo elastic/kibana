@@ -25,13 +25,14 @@ import {
 } from '@elastic/eui';
 
 import { Pager } from '@elastic/eui';
-
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MatchedItem, Tag } from '@kbn/data-views-plugin/public';
 
-interface IndicesListProps {
+export interface IndicesListProps {
   indices: MatchedItem[];
   query: string;
+  isExactMatch: (indexName: string) => boolean;
 }
 
 interface IndicesListState {
@@ -41,15 +42,20 @@ interface IndicesListState {
 }
 
 const PER_PAGE_INCREMENTS = [5, 10, 20, 50];
+export const PER_PAGE_STORAGE_KEY = 'dataViews.previewPanel.indicesPerPage';
 
 export class IndicesList extends React.Component<IndicesListProps, IndicesListState> {
   pager: Pager;
+  storage: Storage;
+
   constructor(props: IndicesListProps) {
     super(props);
 
+    this.storage = new Storage(localStorage);
+
     this.state = {
       page: 0,
-      perPage: PER_PAGE_INCREMENTS[1],
+      perPage: this.storage.get(PER_PAGE_STORAGE_KEY) || PER_PAGE_INCREMENTS[1],
       isPerPageControlOpen: false,
     };
 
@@ -75,6 +81,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     this.setState({ perPage });
     this.resetPageTo0();
     this.closePerPageControl();
+    this.storage.set(PER_PAGE_STORAGE_KEY, perPage);
   };
 
   openPerPageControl = () => {
@@ -144,11 +151,20 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
   }
 
   highlightIndexName(indexName: string, query: string) {
+    const { isExactMatch } = this.props;
+
     if (!query) {
       return indexName;
     }
 
-    const queryAsArray = query.split(',').map((q) => q.trim());
+    if (isExactMatch(indexName)) {
+      return <strong>{indexName}</strong>;
+    }
+
+    const queryAsArray = query
+      .split(',')
+      .map((q) => q.trim())
+      .filter(Boolean);
     let queryIdx = -1;
     let queryWithoutWildcard = '';
     for (let i = 0; i < queryAsArray.length; i++) {
@@ -162,6 +178,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
         break;
       }
     }
+
     if (queryIdx === -1) {
       return indexName;
     }
@@ -179,7 +196,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
   }
 
   render() {
-    const { indices, query, ...rest } = this.props;
+    const { indices, query, isExactMatch, ...rest } = this.props;
 
     const paginatedIndices = indices.slice(this.pager.firstItemIndex, this.pager.lastItemIndex + 1);
     const rows = paginatedIndices.map((index, key) => {

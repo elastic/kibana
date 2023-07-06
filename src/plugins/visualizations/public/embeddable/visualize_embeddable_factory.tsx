@@ -8,7 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
-import type { SavedObjectMetaData, OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 
 import {
@@ -27,7 +28,6 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { checkForDuplicateTitle } from '../utils/saved_objects_utils/check_for_duplicate_title';
-import type { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import type {
   VisualizeByReferenceInput,
   VisualizeByValueInput,
@@ -39,7 +39,7 @@ import type {
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import type { SerializedVis, Vis } from '../vis';
 import { createVisAsync } from '../vis_async';
-import { getCapabilities, getTypes, getUISettings } from '../services';
+import { getCapabilities, getTypes } from '../services';
 import { showNewVisModal } from '../wizard';
 import {
   convertToSerializedVis,
@@ -54,7 +54,6 @@ import {
   injectControlsReferences,
 } from '../utils/saved_visualization_references';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import type { VisualizationsStartDeps } from '../plugin';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
@@ -65,12 +64,7 @@ export interface VisualizeEmbeddableFactoryDeps {
   start: StartServicesGetter<
     Pick<
       VisualizationsStartDeps,
-      | 'inspector'
-      | 'embeddable'
-      | 'savedObjectsClient'
-      | 'data'
-      | 'savedObjectsTaggingOss'
-      | 'spaces'
+      'inspector' | 'embeddable' | 'data' | 'savedObjectsTaggingOss' | 'spaces'
     >
   >;
 }
@@ -80,7 +74,7 @@ export class VisualizeEmbeddableFactory
     EmbeddableFactoryDefinition<
       VisualizeInput,
       VisualizeOutput | EmbeddableOutput,
-      VisualizeEmbeddable | DisabledLabEmbeddable,
+      VisualizeEmbeddable,
       VisualizationAttributes
     >
 {
@@ -110,13 +104,7 @@ export class VisualizeEmbeddableFactory
       try {
         const typeName: string = JSON.parse(savedObject.attributes.visState).type;
         const visType = getTypes().get(typeName);
-        if (!visType) {
-          return false;
-        }
-        if (getUISettings().get(VISUALIZE_ENABLE_LABS_SETTING)) {
-          return true;
-        }
-        return visType.stage !== 'experimental';
+        return Boolean(visType);
       } catch {
         return false;
       }
@@ -162,13 +150,12 @@ export class VisualizeEmbeddableFactory
     savedObjectId: string,
     input: Partial<VisualizeInput> & { id: string },
     parent?: IContainer
-  ): Promise<VisualizeEmbeddable | ErrorEmbeddable | DisabledLabEmbeddable> {
+  ): Promise<VisualizeEmbeddable | ErrorEmbeddable> {
     const startDeps = await this.deps.start();
 
     try {
       const savedObject = await getSavedVisualization(
         {
-          savedObjectsClient: startDeps.core.savedObjects.client,
           search: startDeps.plugins.data.search,
           dataViews: startDeps.plugins.data.dataViews,
           spaces: startDeps.plugins.spaces,
@@ -253,7 +240,6 @@ export class VisualizeEmbeddableFactory
       }
       const { core, plugins } = await this.deps.start();
       const id = await saveVisualization(savedVis, saveOptions, {
-        savedObjectsClient: core.savedObjects.client,
         overlays: core.overlays,
         savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
       });
@@ -272,7 +258,6 @@ export class VisualizeEmbeddableFactory
   }
 
   public async checkTitle(props: OnSaveProps): Promise<boolean> {
-    const savedObjectsClient = await this.deps.start().core.savedObjects.client;
     const overlays = await this.deps.start().core.overlays;
 
     return checkForDuplicateTitle(
@@ -285,7 +270,6 @@ export class VisualizeEmbeddableFactory
       props.isTitleDuplicateConfirmed,
       props.onTitleDuplicate,
       {
-        savedObjectsClient,
         overlays,
       }
     );

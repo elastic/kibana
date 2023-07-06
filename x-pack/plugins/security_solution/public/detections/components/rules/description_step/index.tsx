@@ -46,6 +46,7 @@ import {
   buildRequiredFieldsDescription,
   buildAlertSuppressionDescription,
   buildAlertSuppressionWindowDescription,
+  buildAlertSuppressionMissingFieldsDescription,
 } from './helpers';
 import { buildMlJobsDescription } from './build_ml_jobs_description';
 import { buildActionsDescription } from './actions_description';
@@ -56,6 +57,7 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import type { LicenseService } from '../../../../../common/license';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
+  max-width: 600px;
   &.euiDescriptionList--column .euiDescriptionList__title {
     width: 30%;
   }
@@ -198,6 +200,8 @@ export const getDescriptionItem = (
       savedQueryName,
       indexPatterns,
     });
+  } else if (field === 'responseActions') {
+    return [];
   } else if (field === 'groupByFields') {
     const values: string[] = get(field, data);
     return buildAlertSuppressionDescription(label, values, license);
@@ -212,6 +216,13 @@ export const getDescriptionItem = (
         license,
         get('groupByRadioSelection', data)
       );
+    } else {
+      return [];
+    }
+  } else if (field === 'suppressionMissingFields') {
+    if (get('groupByFields', data).length > 0) {
+      const value = get(field, data);
+      return buildAlertSuppressionMissingFieldsDescription(label, value, license);
     } else {
       return [];
     }
@@ -274,8 +285,6 @@ export const getDescriptionItem = (
   } else if (field === 'threatMapping') {
     const threatMap: ThreatMapping = get(field, data);
     return buildThreatMappingDescription(label, threatMap);
-  } else if (field === 'dataViewId') {
-    return [];
   } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
     const values: string[] = get(field, data);
     return buildStringArrayDescription(label, field, values);

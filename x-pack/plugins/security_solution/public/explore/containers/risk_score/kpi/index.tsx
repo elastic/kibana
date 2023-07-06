@@ -17,7 +17,7 @@ import {
 } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 import { isIndexNotFoundError } from '../../../../common/utils/exceptions';
-import type { ESTermQuery } from '../../../../../common/typed_json';
+import type { ESQuery } from '../../../../../common/typed_json';
 import type { SeverityCount } from '../../../components/risk_score/severity/types';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
@@ -37,7 +37,7 @@ interface RiskScoreKpi {
 }
 
 interface UseRiskScoreKpiProps {
-  filterQuery?: string | ESTermQuery;
+  filterQuery?: string | ESQuery;
   skip?: boolean;
   riskEntity: RiskScoreEntity;
   timerange?: { to: string; from: string };

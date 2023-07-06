@@ -10,9 +10,10 @@ import { useDispatch } from 'react-redux';
 
 import { EuiCheckbox } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { TableId } from '../../../../common/types';
-import { dataTableActions } from '../../store/data_table';
-import { RowRendererId } from '../../../../common/types/timeline';
+import { dataTableActions } from '@kbn/securitysolution-data-table';
+import type { TableId } from '@kbn/securitysolution-data-table';
+import type { CustomBulkAction } from '../../../../common/types';
+import { RowRendererId } from '../../../../common/types/timeline/api';
 import { StatefulEventsViewer } from '../events_viewer';
 import { eventsDefaultModel } from '../events_viewer/default_model';
 import { MatrixHistogram } from '../matrix_histogram';
@@ -45,6 +46,7 @@ import {
   useReplaceUrlParams,
 } from '../../utils/global_query_string/helpers';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
+import { SecurityCellActionsTrigger } from '../cell_actions';
 
 export const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
 
@@ -156,7 +158,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     from: startDate,
     to: endDate,
     scopeId: SourcererScopeName.default,
-  });
+  }) as CustomBulkAction;
 
   const bulkActions = useMemo<BulkActionsProp | boolean>(() => {
     return {
@@ -181,6 +183,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
       )}
       <StatefulEventsViewer
         additionalFilters={toggleExternalAlertsCheckbox}
+        cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
         start={startDate}
         end={endDate}
         leadingControlColumns={leadingControlColumns}

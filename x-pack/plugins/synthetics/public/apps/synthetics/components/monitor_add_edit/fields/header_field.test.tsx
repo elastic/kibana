@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { HeaderField, contentTypes } from './header_field';
-import { Mode } from '../types';
+import { CodeEditorMode } from '../types';
 
 describe('<HeaderField />', () => {
   const onChange = jest.fn();
@@ -95,15 +95,46 @@ describe('<HeaderField />', () => {
   });
 
   it('handles content mode', async () => {
-    const contentMode: Mode = Mode.PLAINTEXT;
+    const contentMode: CodeEditorMode = CodeEditorMode.PLAINTEXT;
     render(
       <HeaderField defaultValue={defaultValue} onChange={onChange} contentMode={contentMode} />
     );
 
     await waitFor(() => {
       expect(onChange).toBeCalledWith({
-        'Content-Type': contentTypes[Mode.PLAINTEXT],
+        'Content-Type': contentTypes[CodeEditorMode.PLAINTEXT],
       });
     });
+  });
+
+  it('shows custom Content-Type', async () => {
+    const contentMode: CodeEditorMode = CodeEditorMode.PLAINTEXT;
+    const { getByTestId } = render(
+      <HeaderField
+        defaultValue={{ ...defaultValue, 'Content-Type': 'custom' }}
+        onChange={onChange}
+        contentMode={contentMode}
+      />
+    );
+
+    const key = getByTestId('keyValuePairsKey0') as HTMLInputElement;
+    const value = getByTestId('keyValuePairsValue0') as HTMLInputElement;
+
+    expect(key.value).toBe('Content-Type');
+    expect(value.value).toBe('custom');
+  });
+
+  it('hides default Content-Type', async () => {
+    const contentMode: CodeEditorMode = CodeEditorMode.PLAINTEXT;
+    const { queryByTestId } = render(
+      <HeaderField
+        defaultValue={{ ...defaultValue, 'Content-Type': 'text/plain' }}
+        onChange={onChange}
+        contentMode={contentMode}
+      />
+    );
+
+    expect(queryByTestId('keyValuePairsKey0')).not.toBeInTheDocument();
+    expect(queryByTestId('keyValuePairsValue0')).not.toBeInTheDocument();
   });
 });

@@ -41,10 +41,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     this.#importSizeLimit = importSizeLimit;
     this.#importHooks = typeRegistry.getAllTypes().reduce((hooks, type) => {
       if (type.management?.onImport) {
-        return {
-          ...hooks,
-          [type.name]: [type.management.onImport],
-        };
+        hooks[type.name] = [type.management.onImport];
       }
       return hooks;
     }, {} as Record<string, SavedObjectsImportHook[]>);
@@ -56,6 +53,8 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     namespace,
     overwrite,
     refresh,
+    compatibilityMode,
+    managed,
   }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
     return importSavedObjectsFromStream({
       readStream,
@@ -63,28 +62,34 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       namespace,
       overwrite,
       refresh,
+      compatibilityMode,
       objectLimit: this.#importSizeLimit,
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,
       importHooks: this.#importHooks,
+      managed,
     });
   }
 
   public resolveImportErrors({
     readStream,
     createNewCopies,
+    compatibilityMode,
     namespace,
     retries,
+    managed,
   }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
     return resolveSavedObjectsImportErrors({
       readStream,
       createNewCopies,
+      compatibilityMode,
       namespace,
       retries,
       objectLimit: this.#importSizeLimit,
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,
       importHooks: this.#importHooks,
+      managed,
     });
   }
 }

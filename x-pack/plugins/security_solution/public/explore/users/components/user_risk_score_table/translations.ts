@@ -25,10 +25,6 @@ export const USER_RISK_TOOLTIP = i18n.translate(
   }
 );
 
-export const USER_RISK = i18n.translate('xpack.securitySolution.usersRiskTable.riskTitle', {
-  defaultMessage: 'User risk classification',
-});
-
 export const VIEW_USERS_BY_SEVERITY = (severity: string) =>
   i18n.translate('xpack.securitySolution.usersRiskTable.filteredUsersTitle', {
     values: { severity },

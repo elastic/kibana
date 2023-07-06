@@ -32,17 +32,13 @@ import {
 import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   IEventLogClientService,
   IEventLogger,
   IEventLogService,
 } from '@kbn/event-log-plugin/server';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
-import {
-  ensureCleanupFailedExecutionsTaskScheduled,
-  registerCleanupFailedExecutionsTaskDefinition,
-} from './cleanup_failed_executions';
 
 import { ActionsConfig, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
@@ -71,7 +67,7 @@ import {
   ActionsRequestHandlerContext,
 } from './types';
 
-import { getActionsConfigurationUtilities } from './actions_config';
+import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
@@ -120,16 +116,20 @@ export interface PluginSetupContract {
   >(
     actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
   ): void;
+
   registerSubActionConnectorType<
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets
   >(
     connector: SubActionConnectorType<Config, Secrets>
   ): void;
+
   isPreconfiguredConnector(connectorId: string): boolean;
+
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
+  getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
 }
 
 export interface PluginStartContract {
@@ -177,6 +177,7 @@ export interface ActionsPluginsStart {
   licensing: LicensingPluginStart;
   eventLog: IEventLogClientService;
   spaces?: SpacesPluginStart;
+  security?: SecurityPluginStart;
 }
 
 const includedHiddenTypes = [
@@ -201,7 +202,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private readonly telemetryLogger: Logger;
   private readonly preconfiguredActions: PreConfiguredAction[];
   private inMemoryMetrics: InMemoryMetrics;
-  private kibanaIndex?: string;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -218,8 +218,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     core: CoreSetup<ActionsPluginsStart>,
     plugins: ActionsPluginsSetup
   ): PluginSetupContract {
-    this.kibanaIndex = core.savedObjects.getKibanaIndex();
-
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
@@ -255,6 +253,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           ...this.actionsConfig.preconfigured[preconfiguredId],
           id: preconfiguredId,
           isPreconfigured: true,
+          isSystemAction: false,
         };
         this.preconfiguredActions.push({
           ...rawPreconfiguredConnector,
@@ -299,17 +298,15 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
     core.http.registerRouteHandlerContext<ActionsRequestHandlerContext, 'actions'>(
       'actions',
-      this.createRouteHandlerContext(core, this.kibanaIndex)
+      this.createRouteHandlerContext(core)
     );
     if (usageCollection) {
       const eventLogIndex = this.eventLogService.getIndexPattern();
-      const kibanaIndex = this.kibanaIndex;
 
       initializeActionsTelemetry(
         this.telemetryLogger,
         plugins.taskManager,
         core,
-        kibanaIndex,
         this.preconfiguredActions,
         eventLogIndex
       );
@@ -343,18 +340,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       usageCounter: this.usageCounter,
     });
 
-    // Cleanup failed execution task definition
-    if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
-      registerCleanupFailedExecutionsTaskDefinition(plugins.taskManager, {
-        actionTypeRegistry,
-        logger: this.logger,
-        coreStartServices: core.getStartServices(),
-        config: this.actionsConfig.cleanupFailedExecutionsTask,
-        kibanaIndex: this.kibanaIndex,
-        taskManagerIndex: plugins.taskManager.index,
-      });
-    }
-
     return {
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
@@ -387,6 +372,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
           hasPermanentEncryptionKey: plugins.encryptedSavedObjects.canEncrypt,
         };
       },
+      getActionsConfigurationUtilities: () => actionsConfigUtils,
     };
   }
 
@@ -397,7 +383,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       actionExecutor,
       actionTypeRegistry,
       taskRunnerFactory,
-      kibanaIndex,
       isESOCanEncrypt,
       preconfiguredActions,
       instantiateAuthorization,
@@ -429,7 +414,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         logger,
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
-        defaultKibanaIndex: kibanaIndex!,
+        kibanaIndices: core.savedObjects.getAllIndices(),
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
         preconfiguredActions,
         request,
@@ -507,7 +492,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       logger,
       eventLogger: this.eventLogger!,
       spaces: plugins.spaces?.spacesService,
-      getActionsClientWithRequest,
+      security: plugins.security,
       getServices: this.getServicesFactory(
         getScopedSavedObjectsClientWithoutAccessToActions,
         core.elasticsearch,
@@ -525,8 +510,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       encryptedSavedObjectsClient,
       basePathService: core.http.basePath,
       spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
-      getUnsecuredSavedObjectsClient: (request: KibanaRequest) =>
-        this.getUnsecuredSavedObjectsClient(core.savedObjects, request),
+      savedObjectsRepository: core.savedObjects.createInternalRepository([
+        ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      ]),
     });
 
     this.eventLogService!.isEsContextReady().then(() => {
@@ -538,15 +524,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         client: core.elasticsearch.client.asInternalUser,
         logger: this.logger,
       });
-    }
-
-    // Cleanup failed execution task
-    if (this.actionsConfig.cleanupFailedExecutionsTask.enabled) {
-      ensureCleanupFailedExecutionsTaskScheduled(
-        plugins.taskManager,
-        this.logger,
-        this.actionsConfig.cleanupFailedExecutionsTask
-      );
     }
 
     return {
@@ -613,8 +590,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   }
 
   private createRouteHandlerContext = (
-    core: CoreSetup<ActionsPluginsStart>,
-    defaultKibanaIndex: string
+    core: CoreSetup<ActionsPluginsStart>
   ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
       actionTypeRegistry,
@@ -647,7 +623,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
             logger,
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
-            defaultKibanaIndex,
+            kibanaIndices: savedObjects.getAllIndices(),
             scopedClusterClient: coreContext.elasticsearch.client,
             preconfiguredActions,
             request,

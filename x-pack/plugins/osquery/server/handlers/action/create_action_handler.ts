@@ -11,11 +11,7 @@ import { filter, flatten, isEmpty, map, omit, pick, pickBy, some } from 'lodash'
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import {
-  containsDynamicQuery,
-  replaceParamsQuery,
-} from '../../../common/utils/replace_params_query';
-import { createDynamicQueries, createQueries } from './create_queries';
+import { createDynamicQueries, replacedQueries } from './create_queries';
 import { getInternalSavedObjectsClient } from '../../routes/utils';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
@@ -24,7 +20,8 @@ import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/r
 import { convertSOQueriesToPack } from '../../routes/pack/utils';
 import { ACTIONS_INDEX } from '../../../common/constants';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
-import type { PackSavedObjectAttributes } from '../../common/types';
+import type { PackSavedObject } from '../../common/types';
+import { CustomHttpRequestError } from '../../common/error';
 
 interface Metadata {
   currentUser: string | undefined;
@@ -34,6 +31,7 @@ interface CreateActionHandlerOptions {
   soClient?: SavedObjectsClientContract;
   metadata?: Metadata;
   alertData?: ParsedTechnicalFields;
+  error?: string;
 }
 
 export const createActionHandler = async (
@@ -46,7 +44,7 @@ export const createActionHandler = async (
   const internalSavedObjectsClient = await getInternalSavedObjectsClient(
     osqueryContext.getStartServices
   );
-  const { soClient, metadata, alertData } = options;
+  const { soClient, metadata, alertData, error } = options;
   const savedObjectsClient = soClient ?? coreStartServices.savedObjects.createInternalRepository();
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -59,16 +57,13 @@ export const createActionHandler = async (
   });
 
   if (!selectedAgents.length) {
-    throw new Error('No agents found for selection');
+    throw new CustomHttpRequestError('No agents found for selection', 400);
   }
 
   let packSO;
 
   if (params.pack_id) {
-    packSO = await savedObjectsClient.get<PackSavedObjectAttributes>(
-      packSavedObjectType,
-      params.pack_id
-    );
+    packSO = await savedObjectsClient.get<PackSavedObject>(packSavedObjectType, params.pack_id);
   }
 
   const osqueryAction = {
@@ -94,16 +89,14 @@ export const createActionHandler = async (
       : undefined,
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
-          const dynamicQueryPresent = packQuery.query && containsDynamicQuery(packQuery.query);
+          const replacedQuery = replacedQueries(packQuery.query, alertData);
 
           return pickBy(
             {
               action_id: uuidv4(),
               id: packQueryId,
-              query:
-                dynamicQueryPresent && alertData
-                  ? replaceParamsQuery(packQuery.query, alertData).result
-                  : packQuery.query,
+              ...replacedQuery,
+              ...(error ? { error } : {}),
               ecs_mapping: packQuery.ecs_mapping,
               version: packQuery.version,
               platform: packQuery.platform,
@@ -112,31 +105,39 @@ export const createActionHandler = async (
             (value) => !isEmpty(value)
           );
         })
-      : alertData
-      ? await createDynamicQueries(params, alertData, osqueryContext)
-      : await createQueries(params, selectedAgents, osqueryContext),
+      : await createDynamicQueries({
+          params,
+          alertData,
+          agents: selectedAgents,
+          osqueryContext,
+          error,
+        }),
   };
 
-  const fleetActions = map(
-    filter(osqueryAction.queries, (query) => !query.error),
-    (query) => ({
-      action_id: query.action_id,
-      '@timestamp': moment().toISOString(),
-      expiration: moment().add(5, 'minutes').toISOString(),
-      type: 'INPUT_ACTION',
-      input_type: 'osquery',
-      agents: query.agents,
-      user_id: metadata?.currentUser,
-      data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
-    })
-  );
+  const fleetActions = !error
+    ? map(
+        filter(osqueryAction.queries, (query) => !query.error),
+        (query) => ({
+          action_id: query.action_id,
+          '@timestamp': moment().toISOString(),
+          expiration: moment().add(5, 'minutes').toISOString(),
+          type: 'INPUT_ACTION',
+          input_type: 'osquery',
+          agents: query.agents,
+          user_id: metadata?.currentUser,
+          data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
+        })
+      )
+    : [];
 
-  await esClientInternal.bulk({
-    refresh: 'wait_for',
-    body: flatten(
-      fleetActions.map((action) => [{ index: { _index: AGENT_ACTIONS_INDEX } }, action])
-    ),
-  });
+  if (fleetActions.length) {
+    await esClientInternal.bulk({
+      refresh: 'wait_for',
+      body: flatten(
+        fleetActions.map((action) => [{ index: { _index: AGENT_ACTIONS_INDEX } }, action])
+      ),
+    });
+  }
 
   const actionsComponentTemplateExists = await esClientInternal.indices.exists({
     index: `${ACTIONS_INDEX}*`,
@@ -150,11 +151,12 @@ export const createActionHandler = async (
   }
 
   osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
-    ...omit(osqueryAction, ['type', 'input_type', 'user_id']),
+    ...omit(osqueryAction, ['type', 'input_type', 'user_id', 'error']),
     agents: osqueryAction.agents.length,
   });
 
   return {
     response: osqueryAction,
+    fleetActionsCount: fleetActions.length,
   };
 };

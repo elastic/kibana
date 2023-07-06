@@ -29,6 +29,7 @@ import {
   savedObjectsImporterMock,
 } from '@kbn/core-saved-objects-import-export-server-mocks';
 import { migrationMocks } from '@kbn/core-saved-objects-migration-server-mocks';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
@@ -41,6 +42,10 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
     createExporter: jest.fn(),
     createImporter: jest.fn(),
     getTypeRegistry: jest.fn(),
+    getDefaultIndex: jest.fn(),
+    getIndexForType: jest.fn(),
+    getIndicesForTypes: jest.fn(),
+    getAllIndices: jest.fn(),
   };
 
   startContrat.getScopedClient.mockReturnValue(savedObjectsClientMock.create());
@@ -49,6 +54,10 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
   startContrat.getTypeRegistry.mockReturnValue(typeRegistry ?? typeRegistryMock.create());
   startContrat.createExporter.mockReturnValue(savedObjectsExporterMock.create());
   startContrat.createImporter.mockReturnValue(savedObjectsImporterMock.create());
+  startContrat.getDefaultIndex.mockReturnValue(MAIN_SAVED_OBJECT_INDEX);
+  startContrat.getIndexForType.mockReturnValue(MAIN_SAVED_OBJECT_INDEX);
+  startContrat.getIndicesForTypes.mockReturnValue([MAIN_SAVED_OBJECT_INDEX]);
+  startContrat.getAllIndices.mockReturnValue([MAIN_SAVED_OBJECT_INDEX]);
 
   return startContrat;
 };
@@ -67,10 +76,12 @@ const createSetupContractMock = () => {
     setSecurityExtension: jest.fn(),
     setSpacesExtension: jest.fn(),
     registerType: jest.fn(),
-    getKibanaIndex: jest.fn(),
+    getDefaultIndex: jest.fn(),
+    getAllIndices: jest.fn(),
   };
 
-  setupContract.getKibanaIndex.mockReturnValue('.kibana');
+  setupContract.getDefaultIndex.mockReturnValue(MAIN_SAVED_OBJECT_INDEX);
+  setupContract.getAllIndices.mockReturnValue([MAIN_SAVED_OBJECT_INDEX]);
 
   return setupContract;
 };

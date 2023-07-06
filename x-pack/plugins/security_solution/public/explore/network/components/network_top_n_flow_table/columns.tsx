@@ -68,15 +68,13 @@ export const getNetworkTopNFlowColumns = (
           <>
             <SecurityCellActions
               key={id}
-              mode={CellActionsMode.HOVER}
+              mode={CellActionsMode.HOVER_DOWN}
               visibleCellActions={5}
               showActionTooltips
               triggerId={SecurityCellActionsTrigger.DEFAULT}
-              field={{
-                name: ipAttr,
+              data={{
                 value: ip,
-                type: 'keyword',
-                aggregatable: true,
+                field: ipAttr,
               }}
             >
               <NetworkDetailsLink ip={ip} flowTarget={flowTarget} />
@@ -85,15 +83,13 @@ export const getNetworkTopNFlowColumns = (
             {geo && (
               <SecurityCellActions
                 key={`${id}-${geo}`}
-                mode={CellActionsMode.HOVER}
+                mode={CellActionsMode.HOVER_DOWN}
                 visibleCellActions={5}
                 showActionTooltips
                 triggerId={SecurityCellActionsTrigger.DEFAULT}
-                field={{
-                  name: geoAttrName,
+                data={{
                   value: geo,
-                  type: 'keyword',
-                  aggregatable: true,
+                  field: geoAttrName,
                 }}
               >
                 {' '}
@@ -121,8 +117,6 @@ export const getNetworkTopNFlowColumns = (
         return getRowItemsWithActions({
           values: domains,
           fieldName: domainAttr,
-          fieldType: 'keyword',
-          aggregatable: true,
           idPrefix: id,
           displayCount: 1,
         });
@@ -145,8 +139,6 @@ export const getNetworkTopNFlowColumns = (
               getRowItemsWithActions({
                 values: [as.name],
                 fieldName: `${flowTarget}.as.organization.name`,
-                fieldType: 'keyword',
-                aggregatable: true,
                 idPrefix: `${id}-name`,
               })}
 
@@ -157,8 +149,6 @@ export const getNetworkTopNFlowColumns = (
                   values: [`${as.number}`],
                   fieldName: `${flowTarget}.as.number`,
                   idPrefix: `${id}-number`,
-                  fieldType: 'keyword',
-                  aggregatable: true,
                 })}
               </>
             )}

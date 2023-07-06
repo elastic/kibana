@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
+import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
+import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
 import { SloListItem } from './slo_list_item';
 import { SloListEmpty } from './slo_list_empty';
 import { SloListError } from './slo_list_error';
@@ -17,28 +20,17 @@ export interface Props {
   sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
-  onCloned: () => void;
-  onCloning: () => void;
-  onDeleted: () => void;
-  onDeleting: () => void;
 }
 
-export function SloListItems({
-  sloList,
-  loading,
-  error,
-  onCloned,
-  onCloning,
-  onDeleted,
-  onDeleting,
-}: Props) {
-  const [sloIds, setSloIds] = useState<string[]>([]);
-  useEffect(() => {
-    setSloIds(sloList.map((slo) => slo.id));
-  }, [sloList]);
+export function SloListItems({ sloList, loading, error }: Props) {
+  const sloIds = sloList.map((slo) => slo.id);
 
-  const { loading: historicalSummaryLoading, data: historicalSummaryBySlo } =
+  const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIds });
+  const { data: rulesBySlo } = useFetchRulesForSlo({ sloIds });
+  const { isLoading: historicalSummaryLoading, sloHistoricalSummaryResponse } =
     useFetchHistoricalSummary({ sloIds });
+
+  const { mutate: deleteSlo } = useDeleteSlo();
 
   if (!loading && !error && sloList.length === 0) {
     return <SloListEmpty />;
@@ -47,18 +39,21 @@ export function SloListItems({
     return <SloListError />;
   }
 
+  const handleDelete = (slo: SLOWithSummaryResponse) => {
+    deleteSlo({ id: slo.id, name: slo.name });
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       {sloList.map((slo) => (
         <EuiFlexItem key={slo.id}>
           <SloListItem
-            slo={slo}
-            historicalSummary={historicalSummaryBySlo[slo.id]}
+            activeAlerts={activeAlertsBySlo[slo.id]}
+            rules={rulesBySlo?.[slo.id]}
+            historicalSummary={sloHistoricalSummaryResponse?.[slo.id]}
             historicalSummaryLoading={historicalSummaryLoading}
-            onCloned={onCloned}
-            onCloning={onCloning}
-            onDeleted={onDeleted}
-            onDeleting={onDeleting}
+            slo={slo}
+            onConfirmDelete={handleDelete}
           />
         </EuiFlexItem>
       ))}

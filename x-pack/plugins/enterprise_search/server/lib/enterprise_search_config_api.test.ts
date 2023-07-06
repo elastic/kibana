@@ -29,6 +29,8 @@ describe('callEnterpriseSearchConfigAPI', () => {
     host: 'http://localhost:3002',
     accessCheckTimeout: 200,
     accessCheckTimeoutWarning: 100,
+    hasNativeConnectors: true,
+    hasWebCrawler: true,
   };
   const mockRequest = {
     headers: { authorization: '==someAuth' },
@@ -70,7 +72,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
       name: 'someuser',
       access: {
         app_search: true,
-        search_engines: true,
         workplace_search: false,
       },
       app_search: {
@@ -124,8 +125,11 @@ describe('callEnterpriseSearchConfigAPI', () => {
       kibanaVersion: '1.0.0',
       access: {
         hasAppSearchAccess: true,
-        hasSearchEnginesAccess: true,
         hasWorkplaceSearchAccess: false,
+      },
+      features: {
+        hasNativeConnectors: true,
+        hasWebCrawler: true,
       },
       publicUrl: 'http://some.vanity.url',
     });
@@ -138,8 +142,11 @@ describe('callEnterpriseSearchConfigAPI', () => {
       kibanaVersion: '1.0.0',
       access: {
         hasAppSearchAccess: false,
-        hasSearchEnginesAccess: false,
         hasWorkplaceSearchAccess: false,
+      },
+      features: {
+        hasNativeConnectors: true,
+        hasWebCrawler: true,
       },
       publicUrl: undefined,
       readOnlyMode: false,
@@ -193,10 +200,28 @@ describe('callEnterpriseSearchConfigAPI', () => {
     });
   });
 
-  it('returns early if config.host is not set', async () => {
-    const config = { host: '' };
+  it('returns access & features if config.host is not set', async () => {
+    const config = {
+      hasConnectors: false,
+      hasDefaultIngestPipeline: false,
+      hasNativeConnectors: false,
+      hasWebCrawler: false,
+      host: '',
+    };
 
-    expect(await callEnterpriseSearchConfigAPI({ ...mockDependencies, config })).toEqual({});
+    expect(await callEnterpriseSearchConfigAPI({ ...mockDependencies, config })).toEqual({
+      access: {
+        hasAppSearchAccess: false,
+        hasWorkplaceSearchAccess: false,
+      },
+      features: {
+        hasConnectors: false,
+        hasDefaultIngestPipeline: false,
+        hasNativeConnectors: false,
+        hasWebCrawler: false,
+      },
+      kibanaVersion: '1.0.0',
+    });
     expect(fetch).not.toHaveBeenCalled();
   });
 

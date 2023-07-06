@@ -76,6 +76,7 @@ export const RuleEdit = ({
   onClose,
   reloadRules,
   onSave,
+  hideInterval,
   ruleTypeRegistry,
   actionTypeRegistry,
   metadata: initialMetadata,
@@ -233,6 +234,7 @@ export const RuleEdit = ({
                 dispatch={dispatch}
                 errors={ruleErrors}
                 actionTypeRegistry={actionTypeRegistry}
+                hideInterval={hideInterval}
                 ruleTypeRegistry={ruleTypeRegistry}
                 canChangeTrigger={false}
                 setHasActionsDisabled={setHasActionsDisabled}
@@ -272,7 +274,7 @@ export const RuleEdit = ({
                     {config.isUsingSecurity && (
                       <EuiFlexItem grow={false}>
                         <EuiIconTip
-                          type="alert"
+                          type="warning"
                           position="top"
                           data-test-subj="changeInPrivilegesTip"
                           content={i18n.translate(

@@ -43,7 +43,7 @@ export function initPlugin(router: IRouter, path: string) {
           cc: null,
           bcc: null,
           subject: 'email-subject',
-          html: `<p>email-message</p>\n<p>--</p>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`,
+          html: `<p>email-message</p>\n<hr>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`,
           text: 'email-message\n\n--\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).',
           headers: {},
         },

@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import chroma from 'chroma-js';
-
 import {
   DataBounds,
   PaletteOutput,
@@ -243,22 +241,6 @@ export function mergePaletteParams(
       ...newParams,
     },
   };
-}
-
-function isValidPonyfill(colorString: string) {
-  // we're using an old version of chroma without the valid function
-  try {
-    chroma(colorString);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-export function isValidColor(colorString: string) {
-  // chroma can handle also hex values with alpha channel/transparency
-  // chroma accepts also hex without #, so test for it
-  return colorString !== '' && /^#/.test(colorString) && isValidPonyfill(colorString);
 }
 
 function getSwitchToCustomParams(

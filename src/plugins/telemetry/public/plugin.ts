@@ -21,7 +21,8 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
 
 import { of } from 'rxjs';
-import { FetchTelemetryConfigResponse, FetchTelemetryConfigRoute } from '../common/routes';
+import { FetchTelemetryConfigRoute } from '../common/routes';
+import type { v2 } from '../common/types';
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
 
@@ -102,6 +103,8 @@ export interface TelemetryPluginConfig {
   hidePrivacyStatement?: boolean;
   /** Extra labels to add to the telemetry context */
   labels: Record<string, unknown>;
+  /** Whether to use Serverless-specific channels when reporting Snapshot Telemetry */
+  appendServerlessChannelsSuffix: boolean;
 }
 
 function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
@@ -170,7 +173,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     if (home && !this.config.hidePrivacyStatement) {
       home.welcomeScreen.registerOnRendered(() => {
         if (this.telemetryService?.userCanChangeSettings) {
-          this.telemetryNotifications?.setOptedInNoticeSeen();
+          this.telemetryNotifications?.setOptInStatusNoticeSeen();
         }
       });
 
@@ -229,14 +232,13 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       this.maybeStartTelemetryPoller();
       if (telemetryBanner) {
         this.maybeShowOptedInNotificationBanner();
-        this.maybeShowOptInBanner();
       }
     });
 
     return {
       telemetryService: this.getTelemetryServicePublicApis(),
       telemetryNotifications: {
-        setOptedInNoticeSeen: () => telemetryNotifications.setOptedInNoticeSeen(),
+        setOptedInNoticeSeen: () => telemetryNotifications.setOptInStatusNoticeSeen(),
       },
       telemetryConstants,
     };
@@ -299,19 +301,9 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     if (!this.telemetryNotifications) {
       return;
     }
-    const shouldShowBanner = this.telemetryNotifications.shouldShowOptedInNoticeBanner();
+    const shouldShowBanner = this.telemetryNotifications.shouldShowOptInStatusNoticeBanner();
     if (shouldShowBanner) {
-      this.telemetryNotifications.renderOptedInNoticeBanner();
-    }
-  }
-
-  private maybeShowOptInBanner() {
-    if (!this.telemetryNotifications) {
-      return;
-    }
-    const shouldShowBanner = this.telemetryNotifications.shouldShowOptInBanner();
-    if (shouldShowBanner) {
-      this.telemetryNotifications.renderOptInBanner();
+      this.telemetryNotifications.renderOptInStatusNoticeBanner();
     }
   }
 
@@ -322,7 +314,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
    */
   private async fetchUpdatedConfig(http: HttpStart | HttpSetup): Promise<TelemetryPluginConfig> {
     const { allowChangingOptInStatus, optIn, sendUsageFrom, telemetryNotifyUserAboutOptInDefault } =
-      await http.get<FetchTelemetryConfigResponse>(FetchTelemetryConfigRoute);
+      await http.get<v2.FetchTelemetryConfigResponse>(FetchTelemetryConfigRoute);
 
     return {
       ...this.config,

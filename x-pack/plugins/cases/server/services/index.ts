@@ -6,7 +6,6 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { ConnectorTypes } from '../../common/api';
 
 export { CasesService } from './cases';
 export { CaseConfigureService } from './configure';
@@ -18,15 +17,4 @@ export { UserProfileService } from './user_profiles';
 
 export interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
-}
-
-export type ESConnectorFields = Array<{
-  key: string;
-  value: unknown;
-}>;
-
-export interface ESCaseConnector {
-  name: string;
-  type: ConnectorTypes;
-  fields: ESConnectorFields | null;
 }

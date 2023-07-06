@@ -174,6 +174,7 @@ describe('rule_edit', () => {
         status: 'unknown',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
       },
+      revision: 0,
       ...initialRuleFields,
     };
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);

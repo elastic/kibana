@@ -11,10 +11,13 @@ import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 import Url from 'url';
 import type { Role } from '@kbn/security-plugin/common';
+import { getWithResponseActionsRole } from '../../../../scripts/endpoint/common/roles_users/with_response_actions_role';
+import { getNoResponseActionsRole } from '../../../../scripts/endpoint/common/roles_users/without_response_actions_role';
+import { request } from './common';
 import { getT1Analyst } from '../../../../scripts/endpoint/common/roles_users/t1_analyst';
 import { getT2Analyst } from '../../../../scripts/endpoint/common/roles_users/t2_analyst';
 import { getHunter } from '../../../../scripts/endpoint/common/roles_users/hunter';
-import { getThreadIntelligenceAnalyst } from '../../../../scripts/endpoint/common/roles_users/thread_intelligence_analyst';
+import { getThreatIntelligenceAnalyst } from '../../../../scripts/endpoint/common/roles_users/threat_intelligence_analyst';
 import { getSocManager } from '../../../../scripts/endpoint/common/roles_users/soc_manager';
 import { getPlatformEngineer } from '../../../../scripts/endpoint/common/roles_users/platform_engineer';
 import { getEndpointOperationsAnalyst } from '../../../../scripts/endpoint/common/roles_users/endpoint_operations_analyst';
@@ -25,24 +28,28 @@ export enum ROLE {
   t1_analyst = 't1Analyst',
   t2_analyst = 't2Analyst',
   analyst_hunter = 'hunter',
-  thread_intelligence_analyst = 'threadIntelligenceAnalyst',
+  threat_intelligence_analyst = 'threatIntelligenceAnalyst',
   detections_engineer = 'detectionsEngineer',
   soc_manager = 'socManager',
   platform_engineer = 'platformEngineer',
   endpoint_operations_analyst = 'endpointOperationsAnalyst',
   endpoint_security_policy_manager = 'endpointSecurityPolicyManager',
+  endpoint_response_actions_access = 'endpointResponseActionsAccess',
+  endpoint_response_actions_no_access = 'endpointResponseActionsNoAccess',
 }
 
 export const rolesMapping: { [key in ROLE]: Omit<Role, 'name'> } = {
   t1Analyst: getT1Analyst(),
   t2Analyst: getT2Analyst(),
   hunter: getHunter(),
-  threadIntelligenceAnalyst: getThreadIntelligenceAnalyst(),
+  threatIntelligenceAnalyst: getThreatIntelligenceAnalyst(),
   socManager: getSocManager(),
   platformEngineer: getPlatformEngineer(),
   endpointOperationsAnalyst: getEndpointOperationsAnalyst(),
   endpointSecurityPolicyManager: getEndpointSecurityPolicyManager(),
   detectionsEngineer: getDetectionsEngineer(),
+  endpointResponseActionsAccess: getWithResponseActionsRole(),
+  endpointResponseActionsNoAccess: getNoResponseActionsRole(),
 };
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -78,13 +85,6 @@ const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
  * The Kibana server endpoint used for authentication
  */
 const LOGIN_API_ENDPOINT = '/internal/security/login';
-
-const API_AUTH = {
-  user: Cypress.env(ELASTICSEARCH_USERNAME),
-  pass: Cypress.env(ELASTICSEARCH_PASSWORD),
-};
-
-const API_HEADERS = { 'kbn-xsrf': 'cypress' };
 
 /**
  * cy.visit will default to the baseUrl which uses the default kibana test user
@@ -151,52 +151,40 @@ export const createRoleAndUser = (role: ROLE) => {
 };
 
 export const createCustomRoleAndUser = (role: string, rolePrivileges: Omit<Role, 'name'>) => {
-  const env = getCurlScriptEnvVars();
-
   // post the role
-  cy.request({
+  request({
     method: 'PUT',
-    url: `${env.KIBANA_URL}/api/security/role/${role}`,
+    url: `/api/security/role/${role}`,
     body: rolePrivileges,
-    headers: API_HEADERS,
-    auth: API_AUTH,
   });
 
   // post the user associated with the role to elasticsearch
-  cy.request({
+  request({
     method: 'POST',
-    url: `${env.KIBANA_URL}/internal/security/users/${role}`,
-    headers: API_HEADERS,
+    url: `/internal/security/users/${role}`,
     body: {
       username: role,
       password: Cypress.env(ELASTICSEARCH_PASSWORD),
       roles: [role],
     },
-    auth: API_AUTH,
   });
 };
 
 export const deleteRoleAndUser = (role: ROLE) => {
-  const env = getCurlScriptEnvVars();
-
-  cy.request({
+  request({
     method: 'DELETE',
-    auth: API_AUTH,
-    headers: API_HEADERS,
-    url: `${env.KIBANA_URL}/internal/security/users/${role}`,
+    url: `/internal/security/users/${role}`,
   });
-  cy.request({
+  request({
     method: 'DELETE',
-    auth: API_AUTH,
-    headers: API_HEADERS,
-    url: `${env.KIBANA_URL}/api/security/role/${role}`,
+    url: `/api/security/role/${role}`,
   });
 };
 
 export const loginWithUser = (user: User) => {
   const url = Cypress.config().baseUrl;
 
-  cy.request({
+  request({
     body: {
       providerType: 'basic',
       providerName: url && !url.includes('localhost') ? 'cloud-basic' : 'basic',
@@ -218,16 +206,12 @@ export const loginWithRole = async (role: ROLE) => {
 
 export const loginWithCustomRole = async (role: string, rolePrivileges: Omit<Role, 'name'>) => {
   createCustomRoleAndUser(role, rolePrivileges);
-  const theUrl = Url.format({
-    auth: `${role}:changeme`,
-    username: role,
-    password: Cypress.env(ELASTICSEARCH_PASSWORD),
-    protocol: Cypress.env('protocol'),
-    hostname: Cypress.env('hostname'),
-    port: Cypress.env('configport'),
-  } as UrlObject);
+  const theUrl = new URL(String(Cypress.config().baseUrl));
+  theUrl.username = role;
+  theUrl.password = Cypress.env(ELASTICSEARCH_PASSWORD);
+
   cy.log(`origin: ${theUrl}`);
-  cy.request({
+  request({
     body: {
       providerType: 'basic',
       providerName: 'basic',
@@ -282,7 +266,7 @@ const loginViaEnvironmentCredentials = () => {
   );
 
   // programmatically authenticate without interacting with the Kibana login page
-  cy.request({
+  request({
     body: {
       providerType: 'basic',
       providerName: url && !url.includes('localhost') ? 'cloud-basic' : 'basic',
@@ -313,7 +297,7 @@ const loginViaConfig = () => {
     const config = yaml.safeLoad(kibanaDevYml);
 
     // programmatically authenticate without interacting with the Kibana login page
-    cy.request({
+    request({
       body: {
         providerType: 'basic',
         providerName: 'basic',

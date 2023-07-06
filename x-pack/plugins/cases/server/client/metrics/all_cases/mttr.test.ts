@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CaseResponse } from '../../../../common/api';
+import type { Case } from '../../../../common/api';
 import { createCasesClientMock } from '../../mocks';
 import type { CasesClientArgs } from '../../types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -32,7 +32,7 @@ const constructorOptions = { casesClient: clientMock, clientArgs };
 describe('MTTR', () => {
   beforeAll(() => {
     getAuthorizationFilter.mockResolvedValue({});
-    clientMock.cases.get.mockResolvedValue({ id: '' } as unknown as CaseResponse);
+    clientMock.cases.get.mockResolvedValue({ id: '' } as unknown as Case);
   });
 
   beforeEach(() => {

@@ -11,7 +11,8 @@
       "charts",
       "data",
       "lens",
-      "licensing"
+      "licensing",
+      "uiActions",
     ],
     "requiredBundles": [
       "fieldFormats",

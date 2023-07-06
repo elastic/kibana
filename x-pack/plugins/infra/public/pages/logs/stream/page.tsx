@@ -6,11 +6,11 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
+import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
-import { useLogViewContext } from '../../../hooks/use_log_view';
 import { LogStreamPageStateProvider } from '../../../observability_logs/log_stream_page/state';
 import { streamTitle } from '../../../translations';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../utils/kbn_url_state_context';
@@ -31,7 +31,11 @@ export const StreamPage = () => {
   const {
     services: {
       data: {
-        query: { queryString: queryStringService, filterManager: filterManagerService },
+        query: {
+          queryString: queryStringService,
+          filterManager: filterManagerService,
+          timefilter: { timefilter: timeFilterService },
+        },
       },
       notifications: { toasts: toastsService },
     },
@@ -49,6 +53,7 @@ export const StreamPage = () => {
         toastsService={toastsService}
         filterManagerService={filterManagerService}
         urlStateStorage={urlStateStorage}
+        timeFilterService={timeFilterService}
       >
         <ConnectedStreamPageContentMemo />
       </LogStreamPageStateProvider>

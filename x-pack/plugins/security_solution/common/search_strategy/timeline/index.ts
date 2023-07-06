@@ -11,7 +11,7 @@ import type {
   TimelineType,
   TimelineStatus,
   RowRendererId,
-} from '../../types/timeline';
+} from '../../types/timeline/api';
 
 export * from './events';
 

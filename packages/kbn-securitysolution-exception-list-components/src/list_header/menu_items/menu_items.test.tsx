@@ -15,6 +15,7 @@ import { securityLinkAnchorComponentMock } from '../../mocks/security_link_compo
 const onExportList = jest.fn();
 const onDeleteList = jest.fn();
 const onManageRules = jest.fn();
+const onDuplicateList = jest.fn();
 describe('MenuItems', () => {
   it('should render linkedRules, manageRules and menuActions', () => {
     const wrapper = render(
@@ -24,12 +25,13 @@ describe('MenuItems', () => {
         securityLinkAnchorComponent={securityLinkAnchorComponentMock}
         onExportList={onExportList}
         onDeleteList={onDeleteList}
+        onDuplicateList={onDuplicateList}
         onManageRules={onManageRules}
       />
     );
     expect(wrapper).toMatchSnapshot();
     expect(wrapper.getByTestId('LinkedRulesMenuItems')).toHaveTextContent('Linked to 1 rules');
-    expect(wrapper.getByTestId('ManageRulesButton')).toBeInTheDocument();
+    expect(wrapper.getByTestId('LinkRulesButton')).toBeInTheDocument();
     expect(wrapper.getByTestId('MenuActionsButtonIcon')).toBeInTheDocument();
   });
   it('should not render linkedRules HeaderMenu component, instead should render a text', () => {
@@ -40,6 +42,7 @@ describe('MenuItems', () => {
         securityLinkAnchorComponent={securityLinkAnchorComponentMock}
         onExportList={onExportList}
         onDeleteList={onDeleteList}
+        onDuplicateList={onDuplicateList}
         onManageRules={onManageRules}
       />
     );
@@ -55,6 +58,7 @@ describe('MenuItems', () => {
         securityLinkAnchorComponent={securityLinkAnchorComponentMock}
         onExportList={onExportList}
         onDeleteList={onDeleteList}
+        onDuplicateList={onDuplicateList}
         onManageRules={onManageRules}
       />
     );
@@ -62,8 +66,9 @@ describe('MenuItems', () => {
     expect(wrapper).toMatchSnapshot();
     expect(wrapper.getByTestId('MenuActionsActionItem1')).toBeEnabled();
     expect(wrapper.getByTestId('MenuActionsActionItem2')).toBeEnabled();
+    expect(wrapper.getByTestId('MenuActionsActionItem3')).toBeEnabled();
   });
-  it('should render delete action disabled', () => {
+  it('should render delete action disabled when "canUserEditList" is "false"', () => {
     const wrapper = render(
       <MenuItems
         isReadonly={false}
@@ -72,12 +77,15 @@ describe('MenuItems', () => {
         securityLinkAnchorComponent={securityLinkAnchorComponentMock}
         onExportList={onExportList}
         onDeleteList={onDeleteList}
+        onDuplicateList={onDuplicateList}
         onManageRules={onManageRules}
       />
     );
     fireEvent.click(wrapper.getByTestId('MenuActionsButtonIcon'));
     expect(wrapper).toMatchSnapshot();
+    expect(wrapper.getByTestId('MenuActionsActionItem1')).toBeEnabled();
     expect(wrapper.getByTestId('MenuActionsActionItem2')).toBeDisabled();
+    expect(wrapper.getByTestId('MenuActionsActionItem3')).toBeDisabled();
   });
   it('should not render Manage rules', () => {
     const wrapper = render(
@@ -88,11 +96,12 @@ describe('MenuItems', () => {
         securityLinkAnchorComponent={securityLinkAnchorComponentMock}
         onExportList={onExportList}
         onDeleteList={onDeleteList}
+        onDuplicateList={onDuplicateList}
         onManageRules={onManageRules}
       />
     );
     expect(wrapper).toMatchSnapshot();
-    expect(wrapper.queryByTestId('ManageRulesButton')).not.toBeInTheDocument();
+    expect(wrapper.queryByTestId('LinkRulesButton')).not.toBeInTheDocument();
   });
   it('should call onManageRules', () => {
     const wrapper = render(
@@ -102,10 +111,11 @@ describe('MenuItems', () => {
         securityLinkAnchorComponent={securityLinkAnchorComponentMock}
         onExportList={onExportList}
         onDeleteList={onDeleteList}
+        onDuplicateList={onDuplicateList}
         onManageRules={onManageRules}
       />
     );
-    fireEvent.click(wrapper.getByTestId('ManageRulesButton'));
+    fireEvent.click(wrapper.getByTestId('LinkRulesButton'));
     expect(onManageRules).toHaveBeenCalled();
   });
   it('should call onExportModalOpen', () => {
@@ -116,6 +126,7 @@ describe('MenuItems', () => {
         securityLinkAnchorComponent={securityLinkAnchorComponentMock}
         onExportList={onExportList}
         onDeleteList={onDeleteList}
+        onDuplicateList={onDuplicateList}
         onManageRules={onManageRules}
       />
     );
@@ -132,12 +143,31 @@ describe('MenuItems', () => {
         securityLinkAnchorComponent={securityLinkAnchorComponentMock}
         onExportList={onExportList}
         onDeleteList={onDeleteList}
+        onDuplicateList={onDuplicateList}
+        onManageRules={onManageRules}
+      />
+    );
+    fireEvent.click(wrapper.getByTestId('MenuActionsButtonIcon'));
+    fireEvent.click(wrapper.getByTestId('MenuActionsActionItem3'));
+
+    expect(onDeleteList).toHaveBeenCalled();
+  });
+
+  it('should call onDuplicateList', () => {
+    const wrapper = render(
+      <MenuItems
+        isReadonly={false}
+        linkedRules={rules}
+        securityLinkAnchorComponent={securityLinkAnchorComponentMock}
+        onExportList={onExportList}
+        onDeleteList={onDeleteList}
+        onDuplicateList={onDuplicateList}
         onManageRules={onManageRules}
       />
     );
     fireEvent.click(wrapper.getByTestId('MenuActionsButtonIcon'));
     fireEvent.click(wrapper.getByTestId('MenuActionsActionItem2'));
 
-    expect(onDeleteList).toHaveBeenCalled();
+    expect(onDuplicateList).toHaveBeenCalled();
   });
 });

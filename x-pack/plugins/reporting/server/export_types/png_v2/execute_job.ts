@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { TaskRunResult } from '@kbn/reporting-common';
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
 import { REPORTING_TRANSACTION_TYPE } from '../../../common/constants';
-import { TaskRunResult } from '../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders, generatePngObservable } from '../common';
 import { getFullRedirectAppUrl } from '../common/v2/get_full_redirect_app_url';
@@ -17,8 +17,7 @@ import { TaskPayloadPNGV2 } from './types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
   function executeJobFactoryFn(reporting, parentLogger) {
-    const config = reporting.getConfig();
-    const encryptionKey = config.get('encryptionKey');
+    const { encryptionKey } = reporting.getConfig();
 
     return function runTask(jobId, job, cancellationToken, stream) {
       const apmTrans = apm.startTransaction('execute-job-png-v2', REPORTING_TRANSACTION_TYPE);
@@ -29,13 +28,26 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
         mergeMap((headers) => {
-          const url = getFullRedirectAppUrl(config, job.spaceId, job.forceNow);
+          const url = getFullRedirectAppUrl(
+            reporting.getConfig(),
+            reporting.getServerInfo(),
+            job.spaceId,
+            job.forceNow
+          );
           const [locatorParams] = job.locatorParams;
 
           apmGetAssets?.end();
           apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
 
-          return generatePngObservable(reporting, jobLogger, {
+          const screenshotFn = () =>
+            reporting.getScreenshots({
+              headers,
+              browserTimezone: job.browserTimezone,
+              layout: { ...job.layout, id: 'preserve_layout' },
+              urls: [[url, locatorParams]],
+            });
+
+          return generatePngObservable(screenshotFn, jobLogger, {
             headers,
             browserTimezone: job.browserTimezone,
             layout: { ...job.layout, id: 'preserve_layout' },

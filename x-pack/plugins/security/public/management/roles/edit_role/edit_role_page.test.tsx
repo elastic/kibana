@@ -140,11 +140,13 @@ function getProps({
   role,
   canManageSpaces = true,
   spacesEnabled = true,
+  canUseRemoteIndices = true,
 }: {
   action: 'edit' | 'clone';
   role?: Role;
   canManageSpaces?: boolean;
   spacesEnabled?: boolean;
+  canUseRemoteIndices?: boolean;
 }) {
   const rolesAPIClient = rolesAPIClientMock.create();
   rolesAPIClient.getRole.mockResolvedValue(role);
@@ -171,11 +173,14 @@ function getProps({
   const { fatalErrors } = coreMock.createSetup();
   const { http, docLinks, notifications } = coreMock.createStart();
   http.get.mockImplementation(async (path: any) => {
-    if (!spacesEnabled) {
-      throw { response: { status: 404 } }; // eslint-disable-line no-throw-literal
-    }
     if (path === '/api/spaces/space') {
+      if (!spacesEnabled) {
+        throw { response: { status: 404 } }; // eslint-disable-line no-throw-literal
+      }
       return buildSpaces();
+    }
+    if (path === '/internal/security/_check_role_mapping_features') {
+      return { canUseRemoteIndices };
     }
   });
 
@@ -265,6 +270,8 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
       expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
+      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
       expectReadOnlyFormButtons(wrapper);
     });
 
@@ -291,6 +298,8 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find(SpaceAwarePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
       expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
+      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
       expectSaveFormButtons(wrapper);
     });
 
@@ -308,6 +317,8 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(
         false
       );
+      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
+      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
       expectSaveFormButtons(wrapper);
     });
 
@@ -480,6 +491,8 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
       expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
+      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
       expectReadOnlyFormButtons(wrapper);
     });
 
@@ -507,6 +520,8 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find(SimplePrivilegeSection)).toHaveLength(1);
       expect(wrapper.find('[data-test-subj="userCannotManageSpacesCallout"]')).toHaveLength(0);
       expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(true);
+      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
+      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
       expectSaveFormButtons(wrapper);
     });
 
@@ -524,6 +539,8 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find('input[data-test-subj="roleFormNameInput"]').prop('disabled')).toBe(
         false
       );
+      expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
+      expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
       expectSaveFormButtons(wrapper);
     });
 
@@ -610,6 +627,19 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find(TransformErrorSection)).toHaveLength(1);
       expectReadOnlyFormButtons(wrapper);
     });
+  });
+
+  it('hides remote index privileges section when not supported', async () => {
+    const wrapper = mountWithIntl(
+      <KibanaContextProvider services={coreStart}>
+        <EditRolePage {...getProps({ action: 'edit', canUseRemoteIndices: false })} />
+      </KibanaContextProvider>
+    );
+
+    await waitForRender(wrapper);
+
+    expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
+    expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(0);
   });
 
   it('registers fatal error if features endpoint fails unexpectedly', async () => {

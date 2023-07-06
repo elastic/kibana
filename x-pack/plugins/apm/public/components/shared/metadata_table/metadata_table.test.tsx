@@ -28,11 +28,10 @@ const renderOptions = {
 describe('MetadataTable', () => {
   it('shows sections', () => {
     const sections: SectionDescriptor[] = [
-      { key: 'foo', label: 'Foo', required: true, properties: [] },
+      { key: 'foo', label: 'Foo', properties: [] },
       {
         key: 'bar',
         label: 'Bar',
-        required: false,
         properties: [
           { field: 'props.A', value: ['A'] },
           { field: 'props.B', value: ['B'] },
@@ -59,7 +58,6 @@ describe('MetadataTable', () => {
         {
           key: 'foo',
           label: 'Foo',
-          required: true,
           properties: [],
         },
       ];

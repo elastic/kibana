@@ -14,11 +14,20 @@ import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 import { useUrlParams } from '../../../hooks';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { useSelectedLocation } from '../hooks/use_selected_location';
 
-export const MonitorFailedTests = ({ time }: { time: { to: string; from: string } }) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
+export const MonitorFailedTests = ({
+  time,
+  allowBrushing = true,
+  location,
+}: {
+  time: { to: string; from: string };
+  allowBrushing?: boolean;
+  location: ReturnType<typeof useSelectedLocation>;
+}) => {
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const monitorId = useMonitorQueryId();
 
@@ -33,6 +42,7 @@ export const MonitorFailedTests = ({ time }: { time: { to: string; from: string 
   return (
     <>
       <ExploratoryViewEmbeddable
+        id={'failedTestsLineSeries'}
         customHeight={'120px'}
         reportType="heatmap"
         axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
@@ -41,7 +51,9 @@ export const MonitorFailedTests = ({ time }: { time: { to: string; from: string 
           {
             time,
             reportDefinitions: {
-              ...(monitorId ? { 'monitor.id': [monitorId] } : { 'state.id': [errorStateId] }),
+              ...(monitorId ? { 'monitor.id': [monitorId] } : {}),
+              ...(errorStateId ? { 'state.id': [errorStateId] } : {}),
+              'observer.geo.name': [location?.label || ''],
             },
             dataType: 'synthetics',
             selectedMetricField: 'failed_tests',
@@ -49,21 +61,25 @@ export const MonitorFailedTests = ({ time }: { time: { to: string; from: string 
           },
         ]}
         onBrushEnd={({ range }) => {
-          updateUrl({
-            dateRangeStart: moment(range[0]).toISOString(),
-            dateRangeEnd: moment(range[1]).toISOString(),
-          });
+          if (allowBrushing) {
+            updateUrl({
+              dateRangeStart: moment(range[0]).toISOString(),
+              dateRangeEnd: moment(range[1]).toISOString(),
+            });
+          }
         }}
       />
       <EuiFlexGroup>
         <EuiFlexItem grow style={{ marginLeft: 10 }}>
           <EuiHealth color="danger">{FAILED_TESTS_LABEL}</EuiHealth>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="s">
-            {BRUSH_LABEL}
-          </EuiText>
-        </EuiFlexItem>
+        {allowBrushing && (
+          <EuiFlexItem grow={false}>
+            <EuiText color="subdued" size="s">
+              {BRUSH_LABEL}
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );

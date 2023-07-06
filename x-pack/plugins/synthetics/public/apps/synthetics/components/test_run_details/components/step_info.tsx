@@ -9,7 +9,7 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -36,7 +36,7 @@ export const StepMetaInfo = ({
   if (!step) {
     return (
       <EuiFlexItem grow={true}>
-        <EuiLoadingContent lines={4} />
+        <EuiSkeletonText lines={4} />
       </EuiFlexItem>
     );
   }
@@ -44,17 +44,17 @@ export const StepMetaInfo = ({
   const isFailed = step.synthetics.step?.status === 'failed';
 
   return (
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem grow={true}>
       <EuiTitle size="xxs">
         <h3>{STEP_NAME}</h3>
       </EuiTitle>
       <EuiText size="m">{step?.synthetics.step?.name}</EuiText>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="m" alignItems="center">
+      <EuiFlexGroup gutterSize="m" alignItems="center" wrap={false}>
         <EuiFlexItem grow={false}>
           <StatusBadge status={parseBadgeStatus(step?.synthetics.step?.status)} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={true}>
           {AFTER_LABEL}
           {formatTestDuration(step?.synthetics.step?.duration.us)}
         </EuiFlexItem>
@@ -69,7 +69,7 @@ export const StepMetaInfo = ({
         <EuiFlexItem grow={false}>
           <StepDetailsLinkIcon
             asButton
-            checkGroup={checkGroupId}
+            checkGroup={checkGroupId ?? step.monitor.check_group}
             configId={monitorId}
             stepIndex={stepIndex}
             label={VIEW_PERFORMANCE}

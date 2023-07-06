@@ -58,8 +58,12 @@ describe('Responder header endpoint info', () => {
     );
     expect(agentStatus.textContent).toBe(`UnhealthyIsolating`);
   });
-  it('should show last updated time', async () => {
+  it('should show last checkin time', async () => {
     const lastUpdated = await renderResult.findByTestId('responderHeaderLastSeen');
     expect(lastUpdated).toBeTruthy();
+  });
+  it('should show platform icon', async () => {
+    const platformIcon = await renderResult.findByTestId('responderHeaderEndpointPlatformIcon');
+    expect(platformIcon).toBeTruthy();
   });
 });

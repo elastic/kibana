@@ -16,14 +16,20 @@ export const ErrorDetailsLink = ({
   stateId,
   configId,
   label,
+  locationId,
 }: {
   configId: string;
   stateId: string;
   label: string;
+  locationId?: string;
 }) => {
-  const link = useErrorDetailsLink({ configId, stateId });
+  const link = useErrorDetailsLink({ configId, stateId, locationId });
 
-  return <EuiLink href={link}>{label ?? VIEW_DETAILS}</EuiLink>;
+  return (
+    <EuiLink data-test-subj="syntheticsErrorDetailsLinkLink" href={link}>
+      {label ?? VIEW_DETAILS}
+    </EuiLink>
+  );
 };
 
 export const ErrorDetailsButton = ({
@@ -39,7 +45,13 @@ export const ErrorDetailsButton = ({
   const link = useErrorDetailsLink({ configId, stateId, locationId: selectedLocation?.id });
 
   return (
-    <EuiButtonEmpty flush="left" iconType="alert" color="danger" href={link}>
+    <EuiButtonEmpty
+      data-test-subj="syntheticsErrorDetailsButtonButton"
+      flush="left"
+      iconType="warning"
+      color="danger"
+      href={link}
+    >
       {label ?? VIEW_DETAILS}
     </EuiButtonEmpty>
   );

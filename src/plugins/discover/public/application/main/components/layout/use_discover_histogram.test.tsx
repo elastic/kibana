@@ -7,22 +7,12 @@
  */
 
 import React, { ReactElement } from 'react';
-import { buildDataTableRecord } from '../../../../utils/build_data_record';
-import { esHits } from '../../../../__mocks__/es_hits';
+import { AggregateQuery, Query } from '@kbn/es-query';
 import { act, renderHook, WrapperComponent } from '@testing-library/react-hooks';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { FetchStatus } from '../../../types';
-import {
-  AvailableFields$,
-  DataDocuments$,
-  DataFetch$,
-  DataMain$,
-  DataTotalHits$,
-  RecordRawType,
-} from '../../services/discover_data_state_container';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { useDiscoverHistogram, UseDiscoverHistogramProps } from './use_discover_histogram';
 import { setTimeout } from 'timers/promises';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -30,7 +20,6 @@ import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import {
   UnifiedHistogramFetchStatus,
-  UnifiedHistogramInitializeOptions,
   UnifiedHistogramState,
 } from '@kbn/unified-histogram-plugin/public';
 import { createMockUnifiedHistogramApi } from '@kbn/unified-histogram-plugin/public/mocks';
@@ -38,11 +27,11 @@ import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_message
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 
 const mockData = dataPluginMock.createStartContract();
-const mockQueryState = {
+let mockQueryState = {
   query: {
     query: 'query',
     language: 'kuery',
-  },
+  } as Query | AggregateQuery,
   filters: [],
   time: {
     from: 'now-15m',
@@ -60,8 +49,10 @@ jest.mock('../../../../hooks/use_discover_services', () => {
   };
 });
 
-jest.mock('@kbn/unified-field-list-plugin/public', () => {
-  const originalModule = jest.requireActual('@kbn/unified-field-list-plugin/public');
+jest.mock('@kbn/unified-field-list/src/hooks/use_query_subscriber', () => {
+  const originalModule = jest.requireActual(
+    '@kbn/unified-field-list/src/hooks/use_query_subscriber'
+  );
   return {
     ...originalModule,
     useQuerySubscriber: jest.fn(() => ({
@@ -86,62 +77,34 @@ const mockCheckHitCount = checkHitCount as jest.MockedFunction<typeof checkHitCo
 describe('useDiscoverHistogram', () => {
   const getStateContainer = () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    stateContainer.setAppState({
+    stateContainer.appState.update({
       interval: 'auto',
       hideChart: false,
       breakdownField: 'extension',
     });
-    const wrappedStateContainer = Object.create(stateContainer);
-    wrappedStateContainer.setAppState = jest.fn((newState) => stateContainer.setAppState(newState));
-    return wrappedStateContainer;
+    const appState = stateContainer.appState;
+    const wrappedStateContainer = Object.create(appState);
+    wrappedStateContainer.update = jest.fn((newState) => appState.update(newState));
+    stateContainer.appState = wrappedStateContainer;
+    return stateContainer;
   };
 
   const renderUseDiscoverHistogram = async ({
     stateContainer = getStateContainer(),
-    searchSessionId = '123',
     inspectorAdapters = { requests: new RequestAdapter() },
-    totalHits$ = new BehaviorSubject({
-      fetchStatus: FetchStatus.COMPLETE,
-      result: Number(esHits.length),
-    }) as DataTotalHits$,
-    main$ = new BehaviorSubject({
-      fetchStatus: FetchStatus.COMPLETE,
-      recordRawType: RecordRawType.DOCUMENT,
-      foundDocuments: true,
-    }) as DataMain$,
-    savedSearchFetch$ = new Subject() as DataFetch$,
+    hideChart = false,
+    isPlainRecord = false,
   }: {
     stateContainer?: DiscoverStateContainer;
-    searchSessionId?: string;
     inspectorAdapters?: InspectorAdapters;
-    totalHits$?: DataTotalHits$;
-    main$?: DataMain$;
-    savedSearchFetch$?: DataFetch$;
+    hideChart?: boolean;
+    isPlainRecord?: boolean;
   } = {}) => {
-    const documents$ = new BehaviorSubject({
-      fetchStatus: FetchStatus.COMPLETE,
-      result: esHits.map((esHit) => buildDataTableRecord(esHit, dataViewWithTimefieldMock)),
-    }) as DataDocuments$;
-
-    const availableFields$ = new BehaviorSubject({
-      fetchStatus: FetchStatus.COMPLETE,
-      fields: [] as string[],
-    }) as AvailableFields$;
-
-    const savedSearchData$ = {
-      main$,
-      documents$,
-      totalHits$,
-      availableFields$,
-    };
-
     const initialProps = {
       stateContainer,
-      savedSearchData$,
-      savedSearchFetch$,
-      dataView: dataViewWithTimefieldMock,
       inspectorAdapters,
-      searchSessionId,
+      hideChart,
+      isPlainRecord,
     };
 
     const Wrapper: WrapperComponent<UseDiscoverHistogramProps> = ({ children }) => (
@@ -164,42 +127,32 @@ describe('useDiscoverHistogram', () => {
   };
 
   describe('initialization', () => {
-    it('should pass the expected parameters to initialize', async () => {
+    it('should return the expected parameters from getCreationOptions', async () => {
       const { hook } = await renderUseDiscoverHistogram();
-      const api = createMockUnifiedHistogramApi();
-      let params: UnifiedHistogramInitializeOptions | undefined;
-      api.initialize = jest.fn((p) => {
-        params = p;
-      });
-      act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
-      });
-      expect(api.initialize).toHaveBeenCalled();
+      const params = hook.result.current.getCreationOptions();
       expect(params?.localStorageKeyPrefix).toBe('discover');
       expect(params?.disableAutoFetching).toBe(true);
       expect(Object.keys(params?.initialState ?? {})).toEqual([
-        'dataView',
-        'query',
-        'filters',
-        'timeRange',
         'chartHidden',
         'timeInterval',
         'breakdownField',
-        'searchSessionId',
         'totalHitsStatus',
         'totalHitsResult',
-        'requestAdapter',
       ]);
     });
   });
 
   describe('state', () => {
+    beforeEach(() => {
+      mockCheckHitCount.mockClear();
+    });
+
     it('should subscribe to state changes', async () => {
       const { hook } = await renderUseDiscoverHistogram();
-      const api = createMockUnifiedHistogramApi({ initialized: true });
+      const api = createMockUnifiedHistogramApi();
       jest.spyOn(api.state$, 'subscribe');
       act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
+        hook.result.current.ref(api);
       });
       expect(api.state$.subscribe).toHaveBeenCalledTimes(2);
     });
@@ -216,13 +169,13 @@ describe('useDiscoverHistogram', () => {
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
-      const api = createMockUnifiedHistogramApi({ initialized: true });
+      const api = createMockUnifiedHistogramApi();
       api.state$ = new BehaviorSubject({ ...state, lensRequestAdapter });
       act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
+        hook.result.current.ref(api);
       });
       expect(inspectorAdapters.lensRequests).toBe(lensRequestAdapter);
-      expect(stateContainer.setAppState).toHaveBeenCalledWith({
+      expect(stateContainer.appState.update).toHaveBeenCalledWith({
         interval: state.timeInterval,
         hideChart: state.chartHidden,
         breakdownField: state.breakdownField,
@@ -240,22 +193,19 @@ describe('useDiscoverHistogram', () => {
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
-      const api = createMockUnifiedHistogramApi({ initialized: true });
+      const api = createMockUnifiedHistogramApi();
       api.state$ = new BehaviorSubject(state);
       act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
+        hook.result.current.ref(api);
       });
-      expect(stateContainer.setAppState).not.toHaveBeenCalled();
+      expect(stateContainer.appState.update).not.toHaveBeenCalled();
     });
 
     it('should sync the state container state with Unified Histogram', async () => {
       const stateContainer = getStateContainer();
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
-      const api = createMockUnifiedHistogramApi({ initialized: true });
+      const api = createMockUnifiedHistogramApi();
       let params: Partial<UnifiedHistogramState> = {};
-      api.setRequestParams = jest.fn((p) => {
-        params = { ...params, ...p };
-      });
       api.setTotalHits = jest.fn((p) => {
         params = { ...params, ...p };
       });
@@ -269,31 +219,25 @@ describe('useDiscoverHistogram', () => {
         params = { ...params, breakdownField };
       });
       act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
+        hook.result.current.ref(api);
       });
-      expect(api.setRequestParams).toHaveBeenCalled();
+      stateContainer.appState.update({ hideChart: true, interval: '1m', breakdownField: 'test' });
       expect(api.setTotalHits).toHaveBeenCalled();
       expect(api.setChartHidden).toHaveBeenCalled();
       expect(api.setTimeInterval).toHaveBeenCalled();
       expect(api.setBreakdownField).toHaveBeenCalled();
       expect(Object.keys(params ?? {})).toEqual([
-        'dataView',
-        'query',
-        'filters',
-        'timeRange',
-        'searchSessionId',
-        'requestAdapter',
         'totalHitsStatus',
         'totalHitsResult',
-        'chartHidden',
-        'timeInterval',
         'breakdownField',
+        'timeInterval',
+        'chartHidden',
       ]);
     });
 
     it('should exclude totalHitsStatus and totalHitsResult from Unified Histogram state updates after the first load', async () => {
       const stateContainer = getStateContainer();
-      const { hook, initialProps } = await renderUseDiscoverHistogram({ stateContainer });
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       const containerState = stateContainer.appState.getState();
       const state = {
         timeInterval: containerState.interval,
@@ -302,10 +246,10 @@ describe('useDiscoverHistogram', () => {
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
-      const api = createMockUnifiedHistogramApi({ initialized: true });
+      const api = createMockUnifiedHistogramApi();
       let params: Partial<UnifiedHistogramState> = {};
-      api.setRequestParams = jest.fn((p) => {
-        params = { ...params, ...p };
+      api.setChartHidden = jest.fn((chartHidden) => {
+        params = { ...params, chartHidden };
       });
       api.setTotalHits = jest.fn((p) => {
         params = { ...params, ...p };
@@ -313,20 +257,16 @@ describe('useDiscoverHistogram', () => {
       const subject$ = new BehaviorSubject(state);
       api.state$ = subject$;
       act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
+        hook.result.current.ref(api);
       });
+      stateContainer.appState.update({ hideChart: true });
       expect(Object.keys(params ?? {})).toEqual([
-        'dataView',
-        'query',
-        'filters',
-        'timeRange',
-        'searchSessionId',
-        'requestAdapter',
         'totalHitsStatus',
         'totalHitsResult',
+        'chartHidden',
       ]);
       params = {};
-      hook.rerender({ ...initialProps, searchSessionId: '321' });
+      stateContainer.appState.update({ hideChart: false });
       act(() => {
         subject$.next({
           ...state,
@@ -334,29 +274,12 @@ describe('useDiscoverHistogram', () => {
           totalHitsResult: 100,
         });
       });
-      expect(Object.keys(params ?? {})).toEqual([
-        'dataView',
-        'query',
-        'filters',
-        'timeRange',
-        'searchSessionId',
-        'requestAdapter',
-      ]);
+      expect(Object.keys(params ?? {})).toEqual(['chartHidden']);
     });
 
     it('should update total hits when the total hits state changes', async () => {
-      mockCheckHitCount.mockClear();
-      const totalHits$ = new BehaviorSubject({
-        fetchStatus: FetchStatus.LOADING,
-        result: undefined,
-      }) as DataTotalHits$;
-      const main$ = new BehaviorSubject({
-        fetchStatus: FetchStatus.COMPLETE,
-        recordRawType: RecordRawType.DOCUMENT,
-        foundDocuments: true,
-      }) as DataMain$;
       const stateContainer = getStateContainer();
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer, totalHits$, main$ });
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       const containerState = stateContainer.appState.getState();
       const state = {
         timeInterval: containerState.interval,
@@ -365,30 +288,44 @@ describe('useDiscoverHistogram', () => {
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
-      const api = createMockUnifiedHistogramApi({ initialized: true });
+      const api = createMockUnifiedHistogramApi();
       api.state$ = new BehaviorSubject({
         ...state,
         totalHitsStatus: UnifiedHistogramFetchStatus.complete,
         totalHitsResult: 100,
       });
-      act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
-      });
-      expect(totalHits$.value).toEqual({
+      expect(stateContainer.dataState.data$.totalHits$.value).not.toEqual({
         fetchStatus: FetchStatus.COMPLETE,
         result: 100,
+        recordRawType: stateContainer.dataState.data$.totalHits$.value.recordRawType,
       });
-      expect(mockCheckHitCount).toHaveBeenCalledWith(main$, 100);
+      act(() => {
+        hook.result.current.ref(api);
+      });
+      expect(stateContainer.dataState.data$.totalHits$.value).toEqual({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: 100,
+        recordRawType: stateContainer.dataState.data$.totalHits$.value.recordRawType,
+      });
+      expect(mockCheckHitCount).toHaveBeenCalledWith(stateContainer.dataState.data$.main$, 100);
     });
 
     it('should not update total hits when the total hits state changes to an error', async () => {
-      mockCheckHitCount.mockClear();
-      const totalHits$ = new BehaviorSubject({
-        fetchStatus: FetchStatus.UNINITIALIZED,
-        result: undefined,
-      }) as DataTotalHits$;
+      mockQueryState = {
+        query: {
+          query: 'query',
+          language: 'kuery',
+        } as Query | AggregateQuery,
+        filters: [],
+        time: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      };
+
+      mockData.query.getState = () => mockQueryState;
       const stateContainer = getStateContainer();
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer, totalHits$ });
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       const containerState = stateContainer.appState.getState();
       const error = new Error('test');
       const state = {
@@ -398,19 +335,25 @@ describe('useDiscoverHistogram', () => {
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
-      const api = createMockUnifiedHistogramApi({ initialized: true });
+      const api = createMockUnifiedHistogramApi();
       api.state$ = new BehaviorSubject({
         ...state,
         totalHitsStatus: UnifiedHistogramFetchStatus.error,
         totalHitsResult: error,
       });
-      act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
-      });
-      expect(sendErrorTo).toHaveBeenCalledWith(mockData, totalHits$);
-      expect(totalHits$.value).toEqual({
+      expect(stateContainer.dataState.data$.totalHits$.value).not.toEqual({
         fetchStatus: FetchStatus.ERROR,
         error,
+        recordRawType: stateContainer.dataState.data$.totalHits$.value.recordRawType,
+      });
+      act(() => {
+        hook.result.current.ref(api);
+      });
+      expect(sendErrorTo).toHaveBeenCalledWith(stateContainer.dataState.data$.totalHits$);
+      expect(stateContainer.dataState.data$.totalHits$.value).toEqual({
+        fetchStatus: FetchStatus.ERROR,
+        error,
+        recordRawType: stateContainer.dataState.data$.totalHits$.value.recordRawType,
       });
       expect(mockCheckHitCount).not.toHaveBeenCalled();
     });
@@ -422,10 +365,12 @@ describe('useDiscoverHistogram', () => {
         reset: boolean;
         searchSessionId: string;
       }>();
-      const { hook } = await renderUseDiscoverHistogram({ savedSearchFetch$ });
-      const api = createMockUnifiedHistogramApi({ initialized: true });
+      const stateContainer = getStateContainer();
+      stateContainer.dataState.fetch$ = savedSearchFetch$;
+      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const api = createMockUnifiedHistogramApi();
       act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
+        hook.result.current.ref(api);
       });
       expect(api.refetch).not.toHaveBeenCalled();
       act(() => {
@@ -435,21 +380,22 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should skip the next refetch when hideChart changes from true to false', async () => {
-      const stateContainer = getStateContainer();
       const savedSearchFetch$ = new Subject<{
         reset: boolean;
         searchSessionId: string;
       }>();
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer, savedSearchFetch$ });
-      const api = createMockUnifiedHistogramApi({ initialized: true });
+      const stateContainer = getStateContainer();
+      stateContainer.dataState.fetch$ = savedSearchFetch$;
+      const { hook, initialProps } = await renderUseDiscoverHistogram({ stateContainer });
+      const api = createMockUnifiedHistogramApi();
       act(() => {
-        hook.result.current.setUnifiedHistogramApi(api);
+        hook.result.current.ref(api);
       });
       act(() => {
-        stateContainer.setAppState({ hideChart: true });
+        hook.rerender({ ...initialProps, hideChart: true });
       });
       act(() => {
-        stateContainer.setAppState({ hideChart: false });
+        hook.rerender({ ...initialProps, hideChart: false });
       });
       act(() => {
         savedSearchFetch$.next({ reset: false, searchSessionId: '1234' });

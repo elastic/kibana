@@ -26,7 +26,11 @@ export const PLUGIN = {
   },
 };
 
-export const API_BASE_PATH = '/api/transform/';
+const INTERNAL_API_BASE_PATH = '/internal/transform/';
+const EXTERNAL_API_BASE_PATH = '/api/transform/';
+
+export const addInternalBasePath = (uri: string): string => `${INTERNAL_API_BASE_PATH}${uri}`;
+export const addExternalBasePath = (uri: string): string => `${EXTERNAL_API_BASE_PATH}${uri}`;
 
 // In order to create a transform, the API requires the following privileges:
 // - transform_admin (builtin)
@@ -58,6 +62,7 @@ export const APP_CLUSTER_PRIVILEGES = [
   'cluster:admin/transform/preview',
   'cluster:admin/transform/put',
   'cluster:admin/transform/reset',
+  'cluster:admin/transform/schedule_now',
   'cluster:admin/transform/start',
   'cluster:admin/transform/start_task',
   'cluster:admin/transform/stop',
@@ -84,7 +89,7 @@ export const APP_CREATE_TRANSFORM_CLUSTER_PRIVILEGES = [
 
 export const APP_INDEX_PRIVILEGES = ['monitor'];
 
-// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
+// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L214
 export const TRANSFORM_STATE = {
   ABORTING: 'aborting',
   FAILED: 'failed',
@@ -98,10 +103,10 @@ export const TRANSFORM_STATE = {
 export type TransformState = typeof TRANSFORM_STATE[keyof typeof TRANSFORM_STATE];
 
 export const TRANSFORM_HEALTH = {
-  GREEN: 'green',
-  UNKNOWN: 'unknown',
-  YELLOW: 'yellow',
-  RED: 'red',
+  green: 'green',
+  unknown: 'unknown',
+  yellow: 'yellow',
+  red: 'red',
 } as const;
 
 export type TransformHealth = typeof TRANSFORM_HEALTH[keyof typeof TRANSFORM_HEALTH];
@@ -124,7 +129,7 @@ export const TRANSFORM_HEALTH_LABEL = {
     defaultMessage: 'Degraded',
   }),
   red: i18n.translate('xpack.transform.transformHealth.redLabel', {
-    defaultMessage: 'Outage',
+    defaultMessage: 'Unavailable',
   }),
 } as const;
 
@@ -187,6 +192,17 @@ export const TRANSFORM_HEALTH_CHECK_NAMES: Record<
       'xpack.transform.alertTypes.transformHealth.errorMessagesCheckDescription',
       {
         defaultMessage: 'Get alerts if a transform contains errors in the transform messages.',
+      }
+    ),
+  },
+  healthCheck: {
+    name: i18n.translate('xpack.transform.alertTypes.transformHealth.healthCheckName', {
+      defaultMessage: 'Unhealthy transform',
+    }),
+    description: i18n.translate(
+      'xpack.transform.alertTypes.transformHealth.healthCheckDescription',
+      {
+        defaultMessage: 'Get alerts if a transform health status is not green.',
       }
     ),
   },

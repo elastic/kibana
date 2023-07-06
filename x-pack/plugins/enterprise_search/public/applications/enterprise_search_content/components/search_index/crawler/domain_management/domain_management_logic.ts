@@ -27,6 +27,7 @@ interface DomainManagementValues {
   domains: CrawlerDomain[];
   getData: CrawlerDomainsWithMeta | null;
   getStatus: Status;
+  indexName: string;
   isLoading: boolean;
   meta: Meta;
 }
@@ -54,6 +55,8 @@ export const DomainManagementLogic = kea<
       ['status as getStatus', 'data as getData'],
       DeleteCrawlerDomainApiLogic,
       ['status as deleteStatus'],
+      IndexNameLogic,
+      ['indexName'],
     ],
   },
   path: ['enterprise_search', 'domain_management'],
@@ -69,11 +72,11 @@ export const DomainManagementLogic = kea<
       actions.getDomains(values.meta);
     },
     deleteDomain: ({ domain }) => {
-      const { indexName } = IndexNameLogic.values;
+      const { indexName } = values;
       DeleteCrawlerDomainApiLogic.actions.makeRequest({ domain, indexName });
     },
     getDomains: ({ meta }) => {
-      const { indexName } = IndexNameLogic.values;
+      const { indexName } = values;
       GetCrawlerDomainsApiLogic.actions.makeRequest({ indexName, meta });
     },
     onPaginate: ({ newPageIndex }) => {
@@ -99,10 +102,5 @@ export const DomainManagementLogic = kea<
         getStatus === Status.LOADING ||
         deleteStatus === Status.LOADING,
     ],
-  }),
-  events: ({ actions, values }) => ({
-    afterMount: () => {
-      actions.getDomains(values.meta);
-    },
   }),
 });

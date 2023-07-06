@@ -6,9 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { IO_EVENTS_ROUTE } from '@kbn/session-view-plugin/common/constants';
+import { IO_EVENTS_ROUTE, CURRENT_API_VERSION } from '@kbn/session-view-plugin/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
+const MOCK_INDEX = 'logs-endpoint.events.process*';
+const MOCK_SESSION_START_TIME = '2022-05-08T13:44:00.13Z';
 const MOCK_SESSION_ENTITY_ID =
   'MDEwMTAxMDEtMDEwMS0wMTAxLTAxMDEtMDEwMTAxMDEwMTAxLTUyMDU3LTEzMjk2NDkxMDQwLjEzMDAwMDAwMA==';
 const MOCK_IO_EVENT_TOTAL = 8;
@@ -19,6 +21,13 @@ const MOCK_PAGE_SIZE = 2;
 export default function ioEventsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+
+  function getTestRoute() {
+    return supertest
+      .get(IO_EVENTS_ROUTE)
+      .set('kbn-xsrf', 'foo')
+      .set('Elastic-Api-Version', CURRENT_API_VERSION);
+  }
 
   describe(`Session view - ${IO_EVENTS_ROUTE} - with a basic license`, () => {
     before(async () => {
@@ -31,9 +40,24 @@ export default function ioEventsTests({ getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/session_view/io_events');
     });
 
+    it(`${IO_EVENTS_ROUTE} fails when an invalid api version is specified`, async () => {
+      const response = await supertest
+        .get(IO_EVENTS_ROUTE)
+        .set('kbn-xsrf', 'foo')
+        .set('Elastic-Api-Version', '999999')
+        .query({
+          index: MOCK_INDEX,
+          sessionEntityId: MOCK_SESSION_ENTITY_ID,
+          sessionStartTime: MOCK_SESSION_START_TIME,
+        });
+      expect(response.status).to.be(400);
+    });
+
     it(`${IO_EVENTS_ROUTE} returns a page of IO events`, async () => {
-      const response = await supertest.get(IO_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
+      const response = await getTestRoute().query({
+        index: MOCK_INDEX,
         sessionEntityId: MOCK_SESSION_ENTITY_ID,
+        sessionStartTime: MOCK_SESSION_START_TIME,
         pageSize: MOCK_PAGE_SIZE,
       });
       expect(response.status).to.be(200);
@@ -52,8 +76,10 @@ export default function ioEventsTests({ getService }: FtrProviderContext) {
     });
 
     it(`${IO_EVENTS_ROUTE} returns a page of IO events (w cursor)`, async () => {
-      const response = await supertest.get(IO_EVENTS_ROUTE).set('kbn-xsrf', 'foo').query({
+      const response = await getTestRoute().query({
+        index: MOCK_INDEX,
         sessionEntityId: MOCK_SESSION_ENTITY_ID,
+        sessionStartTime: MOCK_SESSION_START_TIME,
         pageSize: MOCK_PAGE_SIZE,
         cursor: MOCK_CURSOR,
       });

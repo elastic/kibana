@@ -14,11 +14,13 @@ import type {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
 } from '@kbn/telemetry-collection-manager-plugin/server';
+import type { v2 } from '../../common/types';
 import { EncryptedTelemetryPayload, UnencryptedTelemetryPayload } from '../../common/types';
 import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
 import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 
 interface SendTelemetryOptInStatusConfig {
+  appendServerlessChannelsSuffix: boolean;
   sendUsageTo: 'staging' | 'prod';
   newOptInStatus: boolean;
   currentKibanaVersion: string;
@@ -29,8 +31,10 @@ export async function sendTelemetryOptInStatus(
   config: SendTelemetryOptInStatusConfig,
   statsGetterConfig: StatsGetterConfig
 ): Promise<void> {
-  const { sendUsageTo, newOptInStatus, currentKibanaVersion } = config;
+  const { appendServerlessChannelsSuffix, sendUsageTo, newOptInStatus, currentKibanaVersion } =
+    config;
   const optInStatusUrl = getTelemetryChannelEndpoint({
+    appendServerlessChannelsSuffix,
     env: sendUsageTo,
     channelName: 'optInStatus',
   });
@@ -90,7 +94,8 @@ export function registerTelemetryOptInStatsRoutes(
           newOptInStatus,
           statsGetterConfig
         );
-        return res.ok({ body: optInStatus });
+        const body: v2.OptInStatsResponse = optInStatus;
+        return res.ok({ body });
       } catch (err) {
         return res.ok({ body: [] });
       }

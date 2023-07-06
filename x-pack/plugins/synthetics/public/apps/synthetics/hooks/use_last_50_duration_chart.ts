@@ -28,20 +28,23 @@ export function useLast50DurationChart({
     size: 50,
     timestamp,
   });
-  const { data, averageDuration } = useMemo(() => {
+  const { data, median, min, max, avg } = useMemo(() => {
     if (loading) {
       return {
         data: [],
-        averageDuration: 0,
+        median: 0,
+        avg: 0,
+        min: 0,
+        max: 0,
       };
     }
-    let totalDuration = 0;
+
+    // calculate min, max, average duration and median
 
     const coords = hits
       .reverse() // results are returned in desc order by timestamp. Reverse to ensure the data is in asc order by timestamp
       .map((hit, index) => {
         const duration = hit?.['monitor.duration.us']?.[0];
-        totalDuration += duration || 0;
         if (duration === undefined) {
           return null;
         }
@@ -52,18 +55,30 @@ export function useLast50DurationChart({
       })
       .filter((item) => item !== null);
 
+    const sortedByDuration = [...hits].sort(
+      (a, b) => (a?.['monitor.duration.us']?.[0] || 0) - (b?.['monitor.duration.us']?.[0] || 0)
+    );
+
     return {
       data: coords as Array<{ x: number; y: number }>,
-      averageDuration: totalDuration / coords.length,
+      median: sortedByDuration[Math.floor(hits.length / 2)]?.['monitor.duration.us']?.[0] || 0,
+      avg:
+        sortedByDuration.reduce((acc, curr) => acc + (curr?.['monitor.duration.us']?.[0] || 0), 0) /
+        hits.length,
+      min: sortedByDuration[0]?.['monitor.duration.us']?.[0] || 0,
+      max: sortedByDuration[sortedByDuration.length - 1]?.['monitor.duration.us']?.[0] || 0,
     };
   }, [hits, loading]);
 
   return useMemo(
     () => ({
       data,
-      averageDuration,
+      medianDuration: median,
+      avgDuration: avg,
+      minDuration: min,
+      maxDuration: max,
       loading,
     }),
-    [loading, data, averageDuration]
+    [data, median, avg, min, max, loading]
   );
 }

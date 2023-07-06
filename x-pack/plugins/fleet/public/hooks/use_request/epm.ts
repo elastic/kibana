@@ -24,6 +24,9 @@ import type {
   DeletePackageResponse,
   UpdatePackageRequest,
   UpdatePackageResponse,
+  GetBulkAssetsRequest,
+  GetBulkAssetsResponse,
+  GetVerificationKeyIdResponse,
 } from '../../types';
 import type { FleetErrorResponse, GetStatsResponse } from '../../../common/types';
 
@@ -142,6 +145,22 @@ export const useGetPackageStats = (pkgName: string) => {
   });
 };
 
+export const useGetPackageVerificationKeyId = () => {
+  const { data, ...rest } = useQuery<GetVerificationKeyIdResponse, RequestError>(
+    ['verification_key_id'],
+    () =>
+      sendRequestForRq<GetVerificationKeyIdResponse>({
+        path: epmRouteService.getVerificationKeyIdPath(),
+        method: 'get',
+      })
+  );
+
+  return {
+    packageVerificationKeyId: data?.id || undefined,
+    ...rest,
+  };
+};
+
 export const sendGetPackageInfoByKey = (
   pkgName: string,
   pkgVersion?: string,
@@ -187,7 +206,9 @@ export const sendInstallPackage = (pkgName: string, pkgVersion: string, force: b
   });
 };
 
-export const sendBulkInstallPackages = (packages: string[]) => {
+export const sendBulkInstallPackages = (
+  packages: Array<string | { name: string; version: string }>
+) => {
   return sendRequest<InstallPackageResponse, FleetErrorResponse>({
     path: epmRouteService.getBulkInstallPath(),
     method: 'post',
@@ -204,6 +225,18 @@ export const sendRemovePackage = (pkgName: string, pkgVersion: string, force: bo
     body: {
       force,
     },
+  });
+};
+
+export const sendRequestReauthorizeTransforms = (
+  pkgName: string,
+  pkgVersion: string,
+  transforms: Array<{ transformId: string }>
+) => {
+  return sendRequest<InstallPackageResponse, FleetErrorResponse>({
+    path: epmRouteService.getReauthorizeTransformsPath(pkgName, pkgVersion),
+    method: 'post',
+    body: { transforms },
   });
 };
 
@@ -232,6 +265,14 @@ export const sendUpdatePackage = (
   return sendRequest<UpdatePackageResponse>({
     path: epmRouteService.getUpdatePath(pkgName, pkgVersion),
     method: 'put',
+    body,
+  });
+};
+
+export const sendGetBulkAssets = (body: GetBulkAssetsRequest['body']) => {
+  return sendRequest<GetBulkAssetsResponse>({
+    path: epmRouteService.getBulkAssetsPath(),
+    method: 'post',
     body,
   });
 };

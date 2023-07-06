@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const expectNoDataRenders = async () => {
     await pieChart.expectEmptyPieChart();
-    await dashboardExpect.seriesElementCount(0);
+    await dashboardExpect.heatMapNoResults();
     await dashboardExpect.dataTableNoResult();
     await dashboardExpect.savedSearchNoResult();
     await dashboardExpect.inputControlItemCount(5);
@@ -100,7 +100,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await dashboardExpect.vegaTextsDoNotExist(['5,000']);
   };
 
-  describe('dashboard embeddable rendering', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/158529
+  describe.skip('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'animals', 'test_logstash_reader']);
       await kibanaServer.savedObjects.cleanStandardList();

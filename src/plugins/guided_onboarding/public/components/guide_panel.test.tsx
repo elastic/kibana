@@ -457,7 +457,7 @@ describe('Guided setup', () => {
 
         expect(
           find('guidePanelStepDescription')
-            .last()
+            .first()
             .containsMatchingElement(<p>{testGuideConfig.steps[2].description}</p>)
         ).toBe(true);
       });

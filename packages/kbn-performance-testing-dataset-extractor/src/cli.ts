@@ -77,6 +77,7 @@ export async function runExtractor() {
       return extractor({
         param: {
           journeyName: journey.config.getName(),
+          configPath,
           scalabilitySetup,
           testData,
           buildId,

@@ -89,6 +89,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
                     title: 'Saved object type that is not visible in management',
                   },
                   type: 'test-not-visible-in-management',
+                  managed: false,
                 },
               ],
               warnings: [],

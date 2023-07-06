@@ -8,7 +8,7 @@
 import { FtrService } from '../../../functional/ftr_provider_context';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
-const ALERT_TABLE_ROW_CSS_SELECTOR = '[data-test-subj="events-viewer-panel"] .euiDataGridRow';
+const ALERT_TABLE_ROW_CSS_SELECTOR = '[data-test-subj="alertsTable"] .euiDataGridRow';
 
 export class DetectionsPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
@@ -66,7 +66,7 @@ export class DetectionsPageObject extends FtrService {
   }
 
   async closeImportQueryModal(): Promise<void> {
-    await this.find.clickByCssSelector('.euiButtonIcon.euiButtonIcon--text.euiModal__closeIcon');
+    await this.find.clickByCssSelector('.euiButtonIcon.euiModal__closeIcon');
   }
 
   async selectMachineLearningJob(): Promise<void> {
@@ -206,7 +206,7 @@ export class DetectionsPageObject extends FtrService {
    */
   async clickRefresh(): Promise<void> {
     await this.ensureOnAlertsPage();
-    this.testSubjects.click('querySubmitButton');
+    await this.testSubjects.click('querySubmitButton');
 
     // wait for refresh to complete
     await this.retry.waitFor(

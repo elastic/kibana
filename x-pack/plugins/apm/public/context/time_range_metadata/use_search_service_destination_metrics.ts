@@ -9,17 +9,17 @@ import { FETCH_STATUS } from '../../hooks/use_fetcher';
 import { useTimeRangeMetadata } from './use_time_range_metadata_context';
 
 export function useSearchServiceDestinationMetrics({
-  rangeFrom,
-  rangeTo,
+  start,
+  end,
   kuery,
 }: {
-  rangeFrom: string;
-  rangeTo: string;
+  start: string;
+  end: string;
   kuery: string;
 }) {
   const { status, data } = useTimeRangeMetadata({
-    rangeFrom,
-    rangeTo,
+    start,
+    end,
     kuery,
   });
 

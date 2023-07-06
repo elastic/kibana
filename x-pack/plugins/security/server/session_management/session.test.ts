@@ -19,7 +19,12 @@ import { ConfigSchema, createConfig } from '../config';
 import { sessionCookieMock, sessionIndexMock, sessionMock } from './index.mock';
 import { getPrintableSessionId, Session, type SessionValueContentToEncrypt } from './session';
 import type { SessionCookie } from './session_cookie';
-import { SessionExpiredError, SessionMissingError, SessionUnexpectedError } from './session_errors';
+import {
+  SessionConcurrencyLimitError,
+  SessionExpiredError,
+  SessionMissingError,
+  SessionUnexpectedError,
+} from './session_errors';
 import type { SessionIndex } from './session_index';
 
 describe('Session', () => {
@@ -233,7 +238,7 @@ describe('Session', () => {
       mockSessionIndex.isWithinConcurrentSessionLimit.mockResolvedValue(false);
 
       await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toEqual({
-        error: expect.any(SessionUnexpectedError),
+        error: expect.any(SessionConcurrencyLimitError),
         value: null,
       });
       expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);

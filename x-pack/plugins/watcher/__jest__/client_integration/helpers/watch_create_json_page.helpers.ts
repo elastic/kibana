@@ -81,4 +81,7 @@ export type TestSubjects =
   | 'simulateResultsFlyoutTitle'
   | 'simulateWatchButton'
   | 'tab'
-  | 'triggeredTimeInput';
+  | 'triggeredTimeInput'
+  | 'simulateResultsTable'
+  | 'conditionMetStatus'
+  | 'conditionNotMetStatus';

@@ -10,8 +10,8 @@ import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { Router, Redirect, Switch, useRouteMatch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect, useRouteMatch } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -30,7 +30,7 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
 import { PackageInstallProvider } from '../integrations/hooks';
 
-import { useAuthz, useFleetStatus, useFlyoutContext } from './hooks';
+import { type FleetStatusProviderProps, useAuthz, useFleetStatus, useFlyoutContext } from './hooks';
 
 import {
   ConfigContext,
@@ -240,6 +240,7 @@ export const FleetAppContext: React.FC<{
   theme$: AppMountParameters['theme$'];
   /** For testing purposes only */
   routerHistory?: History<any>;
+  fleetStatus?: FleetStatusProviderProps;
 }> = memo(
   ({
     children,
@@ -250,6 +251,7 @@ export const FleetAppContext: React.FC<{
     extensions,
     routerHistory,
     theme$,
+    fleetStatus,
   }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
 
@@ -265,7 +267,7 @@ export const FleetAppContext: React.FC<{
                       <QueryClientProvider client={queryClient}>
                         <ReactQueryDevtools initialIsOpen={false} />
                         <UIExtensionsContext.Provider value={extensions}>
-                          <FleetStatusProvider>
+                          <FleetStatusProvider defaultFleetStatus={fleetStatus}>
                             <Router history={history}>
                               <PackageInstallProvider
                                 notifications={startServices.notifications}
@@ -323,7 +325,7 @@ export const AppRoutes = memo(
       <>
         <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
 
-        <Switch>
+        <Routes>
           <Route path={FLEET_ROUTING_PATHS.agents}>
             <AgentsApp />
           </Route>
@@ -366,7 +368,7 @@ export const AppRoutes = memo(
               );
             }}
           />
-        </Switch>
+        </Routes>
 
         {flyoutContext.isEnrollmentFlyoutOpen && (
           <EuiPortal>

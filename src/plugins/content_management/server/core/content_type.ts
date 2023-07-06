@@ -36,4 +36,8 @@ export class ContentType {
   public get crud() {
     return this.contentCrud;
   }
+
+  public get version() {
+    return this._definition.version;
+  }
 }

@@ -27,6 +27,7 @@ interface CreateTestConfigOptions {
   testFiles?: string[];
   reportName?: string;
   useDedicatedTaskRunner: boolean;
+  enableFooterInEmail?: boolean;
 }
 
 // test.not-enabled is specifically not enabled
@@ -43,7 +44,10 @@ const enabledActionTypes = [
   '.servicenow-itom',
   '.jira',
   '.resilient',
+  '.gen-ai',
+  '.d3security',
   '.slack',
+  '.slack_api',
   '.tines',
   '.webhook',
   '.xmatters',
@@ -75,6 +79,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     testFiles = undefined,
     reportName = undefined,
     useDedicatedTaskRunner,
+    enableFooterInEmail = true,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -172,12 +177,15 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'localhost',
             'some.non.existent.com',
             'smtp.live.com',
+            'slack.com',
           ])}`,
+          `--xpack.actions.enableFooterInEmail=${enableFooterInEmail}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
           '--xpack.alerting.healthCheck.interval="1s"',
           '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
           '--xpack.alerting.rules.run.alerts.max=20',
+          '--xpack.observability.unsafe.thresholdRule.enabled=true',
           `--xpack.alerting.rules.run.actions.connectorTypeOverrides=${JSON.stringify([
             { id: 'test.capped', max: '1' },
           ])}`,
@@ -199,6 +207,18 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'my-test-email': {
               actionTypeId: '.email',
               name: 'TestEmail#xyz',
+              config: {
+                from: 'me@test.com',
+                service: '__json',
+              },
+              secrets: {
+                user: 'user',
+                password: 'password',
+              },
+            },
+            'notification-email': {
+              actionTypeId: '.email',
+              name: 'Notification Email Connector',
               config: {
                 from: 'me@test.com',
                 service: '__json',
@@ -310,6 +330,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
               ]
             : []),
+          '--notifications.connectors.default.email=notification-email',
         ],
       },
     };

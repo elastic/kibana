@@ -33,7 +33,7 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
 import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
@@ -54,8 +54,10 @@ export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps 
   onRemove: () => void;
   intl: InjectedIntl;
   uiSettings: IUiSettingsClient;
+  docLinks: DocLinksStart;
   hiddenPanelOptions?: FilterPanelOption[];
   timeRangeForSuggestionsOverride?: boolean;
+  filtersForSuggestions?: Filter[];
   readOnly?: boolean;
 }
 
@@ -83,7 +85,7 @@ function FilterItemComponent(props: FilterItemProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const [renderedComponent, setRenderedComponent] = useState('menu');
-  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false } = props;
+  const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false, docLinks } = props;
 
   const closePopover = useCallback(() => {
     onCloseFilterPopover([() => setIsPopoverOpen(false)]);
@@ -391,6 +393,8 @@ function FilterItemComponent(props: FilterItemProps) {
                 onLocalFilterCreate={onLocalFilterCreate}
                 onCancel={() => setIsPopoverOpen(false)}
                 timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+                filtersForSuggestions={props.filtersForSuggestions}
+                docLinks={docLinks}
               />
             </div>,
           ]}

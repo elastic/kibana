@@ -7,6 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { safeLoad } from 'js-yaml';
+import deepMerge from 'deepmerge';
 
 import type {
   FullAgentPolicy,
@@ -24,6 +25,7 @@ import { DEFAULT_OUTPUT } from '../../constants';
 
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
+import { appContextService } from '../app_context';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -105,6 +107,9 @@ export async function getFullAgentPolicy(
       packageInfoCache,
       getOutputIdForAgentPolicy(dataOutput)
     ),
+    secret_references: (agentPolicy?.package_policies || []).flatMap(
+      (policy) => policy.secret_references || []
+    ),
     revision: agentPolicy.revision,
     agent: {
       download: {
@@ -124,6 +129,15 @@ export async function getFullAgentPolicy(
         acc[name] = featureConfig;
         return acc;
       }, {} as NonNullable<FullAgentPolicy['agent']>['features']),
+      protection: {
+        enabled: agentPolicy.is_protected,
+        uninstall_token_hash: '',
+        signing_key: '',
+      },
+    },
+    signed: {
+      data: '',
+      signature: '',
     },
   };
 
@@ -173,6 +187,40 @@ export async function getFullAgentPolicy(
   if (!standalone && fleetServerHosts) {
     fullAgentPolicy.fleet = generateFleetConfig(fleetServerHosts, proxies);
   }
+
+  // populate protection and signed properties
+  const messageSigningService = appContextService.getMessageSigningService();
+  if (messageSigningService && fullAgentPolicy.agent) {
+    const publicKey = await messageSigningService.getPublicKey();
+    const tokenHash =
+      (await appContextService
+        .getUninstallTokenService()
+        ?.getHashedTokenForPolicyId(fullAgentPolicy.id)) ?? '';
+
+    fullAgentPolicy.agent.protection = {
+      enabled: agentPolicy.is_protected,
+      uninstall_token_hash: tokenHash,
+      signing_key: publicKey,
+    };
+
+    const dataToSign = {
+      id: fullAgentPolicy.id,
+      agent: {
+        protection: fullAgentPolicy.agent.protection,
+      },
+    };
+
+    const { data: signedData, signature } = await messageSigningService.sign(dataToSign);
+    fullAgentPolicy.signed = {
+      data: signedData.toString('base64'),
+      signature,
+    };
+  }
+
+  if (agentPolicy.overrides) {
+    return deepMerge<FullAgentPolicy>(fullAgentPolicy, agentPolicy.overrides);
+  }
+
   return fullAgentPolicy;
 }
 
@@ -191,11 +239,19 @@ export function generateFleetConfig(
     if (fleetServerHostproxy.proxy_headers) {
       config.proxy_headers = fleetServerHostproxy.proxy_headers;
     }
-    if (fleetServerHostproxy.certificate_authorities) {
+    if (
+      fleetServerHostproxy.certificate_authorities ||
+      fleetServerHostproxy.certificate ||
+      fleetServerHostproxy.certificate_key
+    ) {
       config.ssl = {
-        certificate_authorities: [fleetServerHostproxy.certificate_authorities],
         renegotiation: 'never',
         verification_mode: '',
+        ...(fleetServerHostproxy.certificate_authorities && {
+          certificate_authorities: [fleetServerHostproxy.certificate_authorities],
+        }),
+        ...(fleetServerHostproxy.certificate && { certificate: fleetServerHostproxy.certificate }),
+        ...(fleetServerHostproxy.certificate_key && { key: fleetServerHostproxy.certificate_key }),
       };
     }
   }
@@ -216,6 +272,55 @@ export function transformOutputToFullPolicyOutput(
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
   let shipperDiskQueueData = {};
   let generalShipperData;
+  let kafkaData = {};
+
+  if (type === outputType.Kafka) {
+    /* eslint-disable @typescript-eslint/naming-convention */
+    const {
+      client_id,
+      version,
+      key,
+      compression,
+      compression_level,
+      auth_type,
+      username,
+      password,
+      sasl,
+      partition,
+      random,
+      round_robin,
+      hash,
+      topics,
+      headers,
+      timeout,
+      broker_timeout,
+      broker_buffer_size,
+      broker_ack_reliability,
+    } = output;
+    /* eslint-enable @typescript-eslint/naming-convention */
+
+    kafkaData = {
+      client_id,
+      version,
+      key,
+      compression,
+      compression_level,
+      auth_type,
+      username,
+      password,
+      sasl,
+      partition,
+      random,
+      round_robin,
+      hash,
+      topics,
+      headers,
+      timeout,
+      broker_timeout,
+      broker_buffer_size,
+      broker_ack_reliability,
+    };
+  }
 
   if (shipper) {
     if (!isShipperDisabled) {
@@ -245,6 +350,7 @@ export function transformOutputToFullPolicyOutput(
     ...shipperDiskQueueData,
     type,
     hosts,
+    ...kafkaData,
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ssl ? { ssl } : {}),

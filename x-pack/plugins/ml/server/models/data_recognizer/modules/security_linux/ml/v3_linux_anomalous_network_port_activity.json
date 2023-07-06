@@ -1,27 +1,17 @@
 {
   "description": "Security: Linux - Looks for unusual destination port activity that could indicate command-and-control, persistence mechanism, or data exfiltration activity.",
-  "groups": [
-    "security",
-    "auditbeat",
-    "endpoint",
-    "linux",
-    "network"
-  ],
+  "groups": ["security", "linux"],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "Detects rare destination.port values.",
+        "detector_description": "Detects rare destination ports.",
         "function": "rare",
-        "by_field_name": "destination.port"
+        "by_field_name": "destination.port",
+        "detector_index": 0
       }
     ],
-    "influencers": [
-      "host.name",
-      "process.name",
-      "user.name",
-      "destination.ip"
-    ]
+    "influencers": ["host.name", "process.name", "user.name", "destination.ip"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
@@ -31,32 +21,9 @@
     "time_field": "@timestamp"
   },
   "custom_settings": {
-    "job_tags": {
-      "euid": "4005",
-      "maturity": "release",
-      "author": "@randomuserid/Elastic",
-      "version": "3",
-      "updated_date": "5/16/2022"
-  },
     "created_by": "ml-module-security-linux-v3",
-    "custom_urls": [
-      {
-        "url_name": "Host Details by process name",
-        "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
-      },
-      {
-        "url_name": "Host Details by user name",
-        "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
-      },
-      {
-        "url_name": "Hosts Overview by process name",
-        "url_value": "security/hosts/ml-hosts?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
-      },
-      {
-        "url_name": "Hosts Overview by user name",
-        "url_value": "security/hosts/ml-hosts?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
-      }
-    ],
-    "security_app_display_name": "Unusual Linux Network Port Activity"
+    "security_app_display_name": "Unusual Linux Network Port Activity",
+    "managed": true,
+    "job_revision": 4
   }
 }

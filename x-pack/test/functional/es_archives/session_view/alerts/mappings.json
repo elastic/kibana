@@ -3,7 +3,6 @@
   "value": {
     "aliases": {
       ".alerts-security.alerts-default": {
-        "is_write_index": true
       },
       ".siem-signals-default": {
         "is_write_index": false

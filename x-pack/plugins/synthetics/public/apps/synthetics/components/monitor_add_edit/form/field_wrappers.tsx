@@ -25,7 +25,13 @@ import {
   EuiButtonGroupProps,
   EuiComboBox,
   EuiComboBoxProps,
+  EuiTextArea,
+  EuiTextAreaProps,
 } from '@elastic/eui';
+import {
+  ThrottlingConfigField,
+  ThrottlingConfigFieldProps,
+} from '../fields/throttling/throttling_config_field';
 import { SourceField, SourceFieldProps } from '../fields/source_field';
 import {
   FormattedComboBox as DefaultFormattedComboBox,
@@ -43,6 +49,10 @@ import {
   HeaderField as DefaultHeaderField,
   HeaderFieldProps as DefaultHeaderFieldProps,
 } from '../fields/header_field';
+import {
+  KeyValuePairsField as DefaultKeyValuePairsField,
+  KeyValuePairsFieldProps as DefaultKeyValuePairsFieldProps,
+} from '../fields/key_value_field';
 import {
   RequestBodyField as DefaultRequestBodyField,
   RequestBodyFieldProps as DefaultRequestBodyFieldProps,
@@ -70,14 +80,19 @@ export type FormattedComboBoxProps = Omit<DefaultFormattedComboBoxProps, Control
 export const FieldText = React.forwardRef<HTMLInputElement, EuiFieldTextProps>(
   (props, ref: Ref<HTMLInputElement>) => (
     <EuiFieldText
+      data-test-subj="syntheticsFieldTextFieldText"
       {...(omit(props, ['defaultValue', 'selectedOptions']) as EuiFieldTextProps)}
       inputRef={ref}
     />
   )
 );
 
+export const TextArea = React.forwardRef<HTMLTextAreaElement, EuiTextAreaProps>((props, ref) => (
+  <EuiTextArea data-test-subj="syntheticsTextAreaTextArea" {...props} inputRef={ref} />
+));
+
 export const FieldNumber = React.forwardRef<HTMLInputElement, EuiFieldNumberProps>((props, ref) => (
-  <EuiFieldNumber {...props} inputRef={ref} />
+  <EuiFieldNumber data-test-subj="syntheticsFieldNumberFieldNumber" {...props} inputRef={ref} />
 ));
 
 export const FieldPassword = React.forwardRef<HTMLInputElement, EuiFieldPasswordProps>(
@@ -89,7 +104,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, EuiCheckboxProps>((pr
 ));
 
 export const Select = React.forwardRef<HTMLSelectElement, EuiSelectProps>((props, ref) => (
-  <EuiSelect {...props} inputRef={ref} />
+  <EuiSelect data-test-subj="syntheticsSelectSelect" {...props} inputRef={ref} />
 ));
 
 export const Switch = React.forwardRef<unknown, EuiSwitchProps>((props, _ref) => (
@@ -124,10 +139,18 @@ export const HeaderField = React.forwardRef<unknown, DefaultHeaderFieldProps>((p
   <DefaultHeaderField {...props} />
 ));
 
+export const KeyValuePairsField = React.forwardRef<unknown, DefaultKeyValuePairsFieldProps>(
+  (props, _ref) => <DefaultKeyValuePairsField {...props} />
+);
+
 export const RequestBodyField = React.forwardRef<unknown, DefaultRequestBodyFieldProps>(
   (props, _ref) => <DefaultRequestBodyField {...props} />
 );
 
 export const ResponseBodyIndexField = React.forwardRef<unknown, DefaultResponseBodyIndexFieldProps>(
   (props, _ref) => <DefaultResponseBodyIndexField {...props} />
+);
+
+export const ThrottlingWrapper = React.forwardRef<unknown, ThrottlingConfigFieldProps>(
+  (props, _ref) => <ThrottlingConfigField {...props} />
 );

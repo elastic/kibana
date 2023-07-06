@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
 import { TIMELINE_SEARCHBOX, EUI_SELECTABLE_LIST_ITEM } from '../screens/common/controls';
 
 import {
@@ -39,18 +40,19 @@ import {
   UPDATE_SCHEDULE_LOOKBACK_INPUT,
   RULES_BULK_EDIT_SCHEDULES_WARNING,
   RULES_BULK_EDIT_OVERWRITE_ACTIONS_CHECKBOX,
-  RULES_BULK_EDIT_ACTIONS_THROTTLE_INPUT,
 } from '../screens/rules_bulk_edit';
 import { SCHEDULE_DETAILS } from '../screens/rule_details';
 
 export const clickApplyTimelineTemplatesMenuItem = () => {
   cy.get(BULK_ACTIONS_BTN).click();
-  cy.get(APPLY_TIMELINE_RULE_BULK_MENU_ITEM).click().should('not.exist');
+  cy.get(APPLY_TIMELINE_RULE_BULK_MENU_ITEM).click();
+  cy.get(APPLY_TIMELINE_RULE_BULK_MENU_ITEM).should('not.exist');
 };
 
 const clickIndexPatternsMenuItem = () => {
   cy.get(BULK_ACTIONS_BTN).click();
-  cy.get(INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click().should('not.exist');
+  cy.get(INDEX_PATTERNS_RULE_BULK_MENU_ITEM).click();
+  cy.get(INDEX_PATTERNS_RULE_BULK_MENU_ITEM).should('not.exist');
 };
 
 const clickTagsMenuItem = () => {
@@ -65,7 +67,8 @@ export const clickAddTagsMenuItem = () => {
 
 export const clickUpdateScheduleMenuItem = () => {
   cy.get(BULK_ACTIONS_BTN).click();
-  cy.get(UPDATE_SCHEDULE_MENU_ITEM).click().should('not.exist');
+  cy.get(UPDATE_SCHEDULE_MENU_ITEM).click();
+  cy.get(UPDATE_SCHEDULE_MENU_ITEM).should('not.exist');
 };
 
 export const clickAddIndexPatternsMenuItem = () => {
@@ -185,7 +188,9 @@ export const waitForMixedRulesBulkEditModal = (customRulesCount: number) => {
 export const checkOverwriteTagsCheckbox = () => {
   cy.get(RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX)
     .should('have.text', "Overwrite all selected rules' tags")
-    .click()
+    .click();
+  cy.get(RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX)
+    .should('have.text', "Overwrite all selected rules' tags")
     .get('input')
     .should('be.checked');
 };
@@ -193,7 +198,9 @@ export const checkOverwriteTagsCheckbox = () => {
 export const checkOverwriteIndexPatternsCheckbox = () => {
   cy.get(RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX)
     .should('have.text', "Overwrite all selected rules' index patterns")
-    .click()
+    .click();
+  cy.get(RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX)
+    .should('have.text', "Overwrite all selected rules' index patterns")
     .get('input')
     .should('be.checked');
 };
@@ -202,51 +209,64 @@ export const checkOverwriteRuleActionsCheckbox = () => {
   cy.get(RULES_BULK_EDIT_OVERWRITE_ACTIONS_CHECKBOX)
     .should('have.text', 'Overwrite all selected rules actions')
     .find('input')
-    .click({ force: true })
+    .click({ force: true });
+  cy.get(RULES_BULK_EDIT_OVERWRITE_ACTIONS_CHECKBOX)
+    .should('have.text', 'Overwrite all selected rules actions')
+    .find('input')
     .should('be.checked');
 };
 
 export const checkOverwriteDataViewCheckbox = () => {
   cy.get(RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX)
     .should('have.text', 'Apply changes to rules configured with data views')
-    .click()
+    .click();
+
+  cy.get(RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX)
+    .should('have.text', 'Apply changes to rules configured with data views')
     .get('input')
     .should('be.checked');
 };
 
 export const selectTimelineTemplate = (timelineTitle: string) => {
-  cy.get(RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR).click();
-  cy.get(TIMELINE_SEARCHBOX).type(`${timelineTitle}{enter}`).should('not.exist');
+  recurse(
+    () => {
+      cy.get(RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR).click();
+      cy.get(TIMELINE_SEARCHBOX).clear();
+      cy.get(TIMELINE_SEARCHBOX).type(`${timelineTitle}{enter}`);
+      // eslint-disable-next-line cypress/no-unnecessary-waiting
+      cy.wait(500);
+      return cy.get(TIMELINE_SEARCHBOX).should(Cypress._.noop);
+    },
+    ($el) => !$el.length
+  );
 };
 
 /**
  * check if rule tags filter populated with a list of tags
  * @param tags
+ * @param srOnlyText SR-only text appended by EUI
  */
-export const checkTagsInTagsFilter = (tags: string[]) => {
+export const checkTagsInTagsFilter = (tags: string[], srOnlyText: string = '') => {
   cy.get(RULES_TAGS_FILTER_BTN).contains(`Tags${tags.length}`).click();
 
   cy.get(EUI_SELECTABLE_LIST_ITEM)
     .should('have.length', tags.length)
     .each(($el, index) => {
-      cy.wrap($el).should('have.text', tags[index]);
+      cy.wrap($el).should('have.text', `${tags[index]}${srOnlyText}`);
     });
 };
 
 export const typeScheduleInterval = (interval: string) => {
-  cy.get(UPDATE_SCHEDULE_INTERVAL_INPUT)
-    .find('input')
-    .type('{selectAll}')
-    .type(interval.toString())
-    .blur();
+  cy.get(UPDATE_SCHEDULE_INTERVAL_INPUT).find('input').type(`{selectAll}${interval.toString()}`);
+  cy.get(UPDATE_SCHEDULE_INTERVAL_INPUT).find('input').blur();
 };
 
 export const typeScheduleLookback = (lookback: string) => {
   cy.get(UPDATE_SCHEDULE_LOOKBACK_INPUT)
     .find('input')
-    .type('{selectAll}', { waitForAnimations: true })
-    .type(lookback.toString(), { waitForAnimations: true })
-    .blur();
+    .type(`{selectAll}${lookback.toString()}`, { waitForAnimations: true });
+
+  cy.get(UPDATE_SCHEDULE_LOOKBACK_INPUT).find('input').blur();
 };
 
 interface ScheduleFormFields {
@@ -291,8 +311,4 @@ export const assertRuleScheduleValues = ({ interval, lookback }: RuleSchedule) =
     cy.get('dd').eq(0).should('contain.text', interval);
     cy.get('dd').eq(1).should('contain.text', lookback);
   });
-};
-
-export const pickActionFrequency = (frequency: string) => {
-  cy.get(RULES_BULK_EDIT_ACTIONS_THROTTLE_INPUT).select(frequency);
 };

@@ -110,7 +110,7 @@ export class RuleRegistryPlugin
         const deps = await startDependencies;
         return deps.core.elasticsearch.client.asInternalUser;
       },
-      areFrameworkAlertsEnabled: plugins.alerting.getFrameworkAlertsEnabled(),
+      frameworkAlerts: plugins.alerting.frameworkAlerts,
       pluginStop$: this.pluginStop$,
     });
 
@@ -163,6 +163,7 @@ export class RuleRegistryPlugin
       },
       securityPluginSetup: security,
       ruleDataService,
+      getRuleType: plugins.alerting.getType,
     });
 
     const getRacClientWithRequest = (request: KibanaRequest) => {

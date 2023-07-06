@@ -13,6 +13,10 @@ import {
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
 
+export interface ServiceTransactionTypesResponse {
+  transactionTypes: string[];
+}
+
 export async function getServiceTransactionTypes({
   apmEventClient,
   serviceName,
@@ -25,7 +29,7 @@ export async function getServiceTransactionTypes({
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
-}) {
+}): Promise<ServiceTransactionTypesResponse> {
   const params = {
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],

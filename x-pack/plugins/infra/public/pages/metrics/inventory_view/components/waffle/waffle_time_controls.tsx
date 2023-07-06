@@ -26,14 +26,25 @@ export const WaffleTimeControls = withTheme(({ interval }: Props) => {
   const intervalAsString = convertIntervalToString(interval);
 
   const liveStreamingButton = isAutoReloading ? (
-    <EuiButton color="primary" iconSide="left" iconType="pause" onClick={stopAutoReload}>
+    <EuiButton
+      data-test-subj="infraWaffleTimeControlsStopRefreshingButton"
+      color="primary"
+      iconSide="left"
+      iconType="pause"
+      onClick={stopAutoReload}
+    >
       <FormattedMessage
         id="xpack.infra.waffleTime.stopRefreshingButtonLabel"
         defaultMessage="Stop refreshing"
       />
     </EuiButton>
   ) : (
-    <EuiButton iconSide="left" iconType="play" onClick={startAutoReload}>
+    <EuiButton
+      data-test-subj="infraWaffleTimeControlsAutoRefreshButton"
+      iconSide="left"
+      iconType="play"
+      onClick={startAutoReload}
+    >
       <FormattedMessage
         id="xpack.infra.waffleTime.autoRefreshButtonLabel"
         defaultMessage="Auto-refresh"

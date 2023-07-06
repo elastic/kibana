@@ -5,28 +5,26 @@
  * 2.0.
  */
 
-import { useEffect, useState, useContext } from 'react';
-import { SyntheticsRefreshContext } from '../../../contexts';
+import { useEffect, useState, useCallback } from 'react';
 
-export function useTickTick(interval?: number, refresh = true) {
-  const { refreshApp } = useContext(SyntheticsRefreshContext);
-
+export function useTickTick(interval?: number) {
   const [nextTick, setNextTick] = useState(Date.now());
 
   const [tickTick] = useState<NodeJS.Timer>(() =>
     setInterval(() => {
-      if (refresh) {
-        refreshApp();
-      }
       setNextTick(Date.now());
     }, interval ?? 5 * 1000)
   );
 
-  useEffect(() => {
-    return () => {
-      clearInterval(tickTick);
-    };
+  const clear = useCallback(() => {
+    clearInterval(tickTick);
   }, [tickTick]);
 
-  return { refreshTimer: tickTick, lastRefresh: nextTick };
+  useEffect(() => {
+    return () => {
+      clear();
+    };
+  }, [clear]);
+
+  return { refreshTimer: tickTick, lastRefresh: nextTick, clearTicks: clear };
 }

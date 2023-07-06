@@ -607,19 +607,22 @@ exports[`XYChart component it renders area 1`] = `
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -1607,19 +1610,22 @@ exports[`XYChart component it renders bar 1`] = `
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -2607,19 +2613,22 @@ exports[`XYChart component it renders horizontal bar 1`] = `
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -3607,19 +3616,22 @@ exports[`XYChart component it renders line 1`] = `
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -4607,19 +4619,22 @@ exports[`XYChart component it renders stacked area 1`] = `
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -5607,19 +5622,22 @@ exports[`XYChart component it renders stacked bar 1`] = `
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -6607,19 +6625,22 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -7637,19 +7658,22 @@ exports[`XYChart component split chart should render split chart if both, splitR
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -8875,19 +8899,22 @@ exports[`XYChart component split chart should render split chart if splitColumnA
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime
@@ -10106,19 +10133,22 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
         showLegend={false}
         showLegendExtra={false}
         theme={
-          Object {
-            "background": Object {
-              "color": undefined,
-            },
-            "barSeriesStyle": Object {},
-            "chartMargins": Object {},
-            "legend": Object {
-              "labelOptions": Object {
-                "maxLines": 0,
+          Array [
+            Object {
+              "background": Object {
+                "color": undefined,
               },
+              "barSeriesStyle": Object {},
+              "chartMargins": Object {},
+              "legend": Object {
+                "labelOptions": Object {
+                  "maxLines": 0,
+                },
+              },
+              "markSizeRatio": undefined,
             },
-            "markSizeRatio": undefined,
-          }
+            Object {},
+          ]
         }
       />
       <XYCurrentTime

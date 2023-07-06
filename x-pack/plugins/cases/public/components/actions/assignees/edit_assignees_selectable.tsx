@@ -27,7 +27,7 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useIsUserTyping } from '../../../common/use_is_user_typing';
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
-import type { Case } from '../../../../common';
+import type { CasesUI } from '../../../../common';
 import * as i18n from './translations';
 import { useItemsState } from '../use_items_state';
 import type { ItemSelectableOption, ItemsSelectionState } from '../types';
@@ -38,7 +38,7 @@ import { SmallUserAvatar } from '../../user_profiles/small_user_avatar';
 import { NoSelectedAssignees } from './no_selected_assignees';
 
 interface Props {
-  selectedCases: Case[];
+  selectedCases: CasesUI;
   onChangeAssignees: (args: ItemsSelectionState) => void;
 }
 

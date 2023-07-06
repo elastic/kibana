@@ -10,6 +10,7 @@ import { rawConfigService, configService, logger, mockServer } from './index.tes
 
 import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
+import { CriticalError } from '@kbn/core-base-server-internal';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
@@ -238,4 +239,17 @@ test('stops services if consequent logger upgrade fails', async () => {
   expect(mockServer.stop).toHaveBeenCalledTimes(1);
 
   expect(mockConsoleError.mock.calls).toMatchSnapshot();
+});
+
+test('handles migrator-only node exception', async () => {
+  const mockOnShutdown = jest.fn();
+  const root = new Root(rawConfigService, env, mockOnShutdown);
+  mockServer.start.mockImplementation(() => {
+    throw new CriticalError('Test', 'MigratioOnlyNode', 0);
+  });
+  await root.preboot();
+  await root.setup();
+  await expect(() => root.start()).rejects.toBeInstanceOf(CriticalError);
+  expect(mockServer.stop).toHaveBeenCalledTimes(1);
+  expect(mockOnShutdown).toHaveBeenCalledTimes(1);
 });

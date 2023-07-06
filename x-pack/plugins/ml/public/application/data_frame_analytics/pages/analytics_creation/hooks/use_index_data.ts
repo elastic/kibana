@@ -9,18 +9,18 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiDataGridColumn } from '@elastic/eui';
-import { CoreSetup } from '@kbn/core/public';
 
+import { CoreSetup } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
+import {
+  getCombinedRuntimeMappings,
+  isRuntimeMappings,
+  type RuntimeMappings,
+} from '@kbn/ml-runtime-field-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
-import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
-import { RuntimeMappings } from '../../../../../../common/types/fields';
-import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
-import { newJobCapsServiceAnalytics } from '../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-
-import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
-
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
   getFieldType,
   getDataGridSchemaFromKibanaFieldType,
@@ -32,10 +32,11 @@ import {
   EsSorting,
   UseIndexDataReturnType,
   getProcessedFields,
-  getCombinedRuntimeMappings,
-} from '../../../../components/data_grid';
-import { extractErrorMessage } from '../../../../../../common/util/errors';
-import { INDEX_STATUS } from '../../../common/analytics';
+  INDEX_STATUS,
+} from '@kbn/ml-data-grid';
+
+import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
+
 import { ml } from '../../../../services/ml_api_service';
 
 type IndexSearchResponse = estypes.SearchResponse;
@@ -58,7 +59,7 @@ function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
 }
 
 function getIndexPatternColumns(indexPattern: DataView, fieldsFilter: string[]) {
-  const { fields } = newJobCapsServiceAnalytics;
+  const { fields } = indexPattern;
 
   return fields
     .filter((field) => fieldsFilter.includes(field.name))
@@ -115,9 +116,9 @@ export const useIndexData = (
 
         // Get all field names for each returned doc and flatten it
         // to a list of unique field names used across all docs.
-        const allKibanaIndexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
+        const allDataViewFields = getFieldsFromKibanaIndexPattern(indexPattern);
         const populatedFields = [...new Set(docs.map(Object.keys).flat(1))]
-          .filter((d) => allKibanaIndexPatternFields.includes(d))
+          .filter((d) => allDataViewFields.includes(d))
           .sort();
 
         setStatus(INDEX_STATUS.LOADED);

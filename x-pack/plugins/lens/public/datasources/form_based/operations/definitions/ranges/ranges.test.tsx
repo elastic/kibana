@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink, EuiText } from '@elastic/eui';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -26,7 +26,7 @@ import {
   SLICES,
 } from './constants';
 import { RangePopover } from './advanced_editor';
-import { DragDropBuckets } from '../../../../../shared_components';
+import { DragDropBuckets } from '@kbn/visualization-ui-components/public';
 import { getFieldByNameFactory } from '../../../pure_helpers';
 import { IndexPattern } from '../../../../../types';
 
@@ -85,7 +85,6 @@ const sourceField = 'MyField';
 const defaultOptions = {
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
-  savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: {
     fromDate: 'now-1y',
     toDate: 'now',

@@ -5,13 +5,24 @@
  * 2.0.
  */
 
-import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
+import type { EuiTableActionsColumnType } from '@elastic/eui';
+
+import type { SignificantTerm, SignificantTermGroupItem } from '@kbn/ml-agg-utils';
+
+export type GroupTableItemGroup = Pick<
+  SignificantTermGroupItem,
+  'fieldName' | 'fieldValue' | 'docCount' | 'pValue' | 'duplicate'
+>;
 
 export interface GroupTableItem {
   id: string;
   docCount: number;
   pValue: number | null;
-  group: FieldValuePair[];
-  repeatedValues: FieldValuePair[];
-  histogram: ChangePoint['histogram'];
+  uniqueItemsCount: number;
+  groupItemsSortedByUniqueness: GroupTableItemGroup[];
+  histogram: SignificantTerm['histogram'];
 }
+
+export type TableItemAction = EuiTableActionsColumnType<
+  SignificantTerm | GroupTableItem
+>['actions'][number];

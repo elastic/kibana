@@ -7,7 +7,14 @@
 
 import React from 'react';
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiCode, EuiFlexGroup, EuiText } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -48,16 +55,20 @@ export const FieldRulesTable: React.FC<FieldRulesTableProps> = ({
       }),
       render: (rule: FieldRuleWithId) => (
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiText size="s">
-            {rule.source_type === FieldType.HTML
-              ? i18n.translate('xpack.enterpriseSearch.crawler.fieldRulesTable.HTMLLabel', {
-                  defaultMessage: 'HTML: ',
-                })
-              : i18n.translate('xpack.enterpriseSearch.crawler.fieldRulesTable.UrlLabel', {
-                  defaultMessage: 'URL: ',
-                })}
-          </EuiText>
-          <EuiCode>{rule.selector}</EuiCode>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              {rule.source_type === FieldType.HTML
+                ? i18n.translate('xpack.enterpriseSearch.crawler.fieldRulesTable.HTMLLabel', {
+                    defaultMessage: 'HTML: ',
+                  })
+                : i18n.translate('xpack.enterpriseSearch.crawler.fieldRulesTable.UrlLabel', {
+                    defaultMessage: 'URL: ',
+                  })}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCode>{rule.selector}</EuiCode>
+          </EuiFlexItem>
         </EuiFlexGroup>
       ),
     },
@@ -70,26 +81,30 @@ export const FieldRulesTable: React.FC<FieldRulesTableProps> = ({
         multiple_objects_handling: multipleObjectsHandling,
       }: FieldRuleWithId) => (
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiText size="s">
-            {content.value_type === ContentFrom.EXTRACTED
-              ? i18n.translate('xpack.enterpriseSearch.crawler.fieldRulesTable.extractedLabel', {
-                  defaultMessage: 'Extracted as: ',
-                })
-              : i18n.translate('xpack.enterpriseSearch.crawler.fieldRulesTable.fixedLabel', {
-                  defaultMessage: 'Fixed value: ',
-                })}
-          </EuiText>
-          <EuiCode>
-            {content.value_type === ContentFrom.FIXED
-              ? content.value
-              : multipleObjectsHandling === MultipleObjectsHandling.ARRAY
-              ? i18n.translate('xpack.enterpriseSearch.crawler.fieldRulesTable.arrayLabel', {
-                  defaultMessage: 'array',
-                })
-              : i18n.translate('xpack.enterpriseSearch.crawler.fieldRulesTable.stringLabel', {
-                  defaultMessage: 'string',
-                })}
-          </EuiCode>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              {content.value_type === ContentFrom.EXTRACTED
+                ? i18n.translate('xpack.enterpriseSearch.crawler.fieldRulesTable.extractedLabel', {
+                    defaultMessage: 'Extracted as: ',
+                  })
+                : i18n.translate('xpack.enterpriseSearch.crawler.fieldRulesTable.fixedLabel', {
+                    defaultMessage: 'Fixed value: ',
+                  })}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCode>
+              {content.value_type === ContentFrom.FIXED
+                ? content.value
+                : multipleObjectsHandling === MultipleObjectsHandling.ARRAY
+                ? i18n.translate('xpack.enterpriseSearch.crawler.fieldRulesTable.arrayLabel', {
+                    defaultMessage: 'array',
+                  })
+                : i18n.translate('xpack.enterpriseSearch.crawler.fieldRulesTable.stringLabel', {
+                    defaultMessage: 'string',
+                  })}
+            </EuiCode>
+          </EuiFlexItem>
         </EuiFlexGroup>
       ),
     },

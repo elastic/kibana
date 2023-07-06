@@ -16,13 +16,16 @@ import {
   createAppMockRenderer,
 } from '../../../common/mock';
 import { RegisteredAttachmentsPropertyActions } from './registered_attachments_property_actions';
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
 describe('RegisteredAttachmentsPropertyActions', () => {
   let appMock: AppMockRenderer;
 
   const props = {
     isLoading: false,
+    registeredAttachmentActions: [],
     onDelete: jest.fn(),
+    hideDefaultActions: false,
   };
 
   beforeEach(() => {
@@ -89,10 +92,42 @@ describe('RegisteredAttachmentsPropertyActions', () => {
     expect(result.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
   });
 
+  it('does not show the property actions when hideDefaultActions is enabled', async () => {
+    const result = appMock.render(
+      <RegisteredAttachmentsPropertyActions {...props} hideDefaultActions={true} />
+    );
+
+    expect(result.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
+  });
+
   it('does show the property actions with only delete permissions', async () => {
     appMock = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
     const result = appMock.render(<RegisteredAttachmentsPropertyActions {...props} />);
 
     expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
+  });
+
+  it('renders correctly registered attachments', async () => {
+    const onClick = jest.fn();
+    const action = [
+      {
+        type: AttachmentActionType.BUTTON as const,
+        label: 'My button',
+        iconType: 'download',
+        onClick,
+      },
+    ];
+
+    const result = appMock.render(
+      <RegisteredAttachmentsPropertyActions {...props} registeredAttachmentActions={action} />
+    );
+
+    expect(result.getByTestId('property-actions-user-action')).toBeInTheDocument();
+
+    userEvent.click(result.getByTestId('property-actions-user-action-ellipses'));
+    await waitForEuiPopoverOpen();
+
+    expect(result.getByTestId('property-actions-user-action-group').children.length).toBe(2);
+    expect(result.queryByTestId('property-actions-user-action-download')).toBeInTheDocument();
   });
 });

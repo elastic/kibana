@@ -12,6 +12,7 @@ import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   validateParams,
   validateConfig,
@@ -29,7 +30,6 @@ import {
   ValidatorServices,
 } from '../types';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
-import { ActionsClient } from '../actions_client';
 import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
@@ -41,11 +41,8 @@ const Millis2Nanos = 1000 * 1000;
 export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceStart;
+  security?: SecurityPluginStart;
   getServices: GetServicesFunction;
-  getActionsClientWithRequest: (
-    request: KibanaRequest,
-    authorizationContext?: ActionExecutionSource<unknown>
-  ) => Promise<PublicMethodsOf<ActionsClient>>;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
@@ -106,7 +103,6 @@ export class ActionExecutor {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
     }
-
     return withSpan(
       {
         name: `execute_action`,
@@ -123,7 +119,7 @@ export class ActionExecutor {
           actionTypeRegistry,
           eventLogger,
           preconfiguredActions,
-          getActionsClientWithRequest,
+          security,
         } = this.actionExecutorContext!;
 
         const services = getServices(request);
@@ -131,14 +127,11 @@ export class ActionExecutor {
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
         const actionInfo = await getActionInfoInternal(
-          getActionsClientWithRequest,
-          request,
           this.isESOCanEncrypt,
           encryptedSavedObjectsClient,
           preconfiguredActions,
           actionId,
-          namespace.namespace,
-          source
+          namespace.namespace
         );
 
         const { actionTypeId, name, config, secrets } = actionInfo;
@@ -194,6 +187,7 @@ export class ActionExecutor {
           name,
           actionExecutionId,
           isPreconfigured: this.actionInfo.isPreconfigured,
+          ...(source ? { source } : {}),
         });
 
         eventLogger.startTiming(event);
@@ -233,6 +227,7 @@ export class ActionExecutor {
             taskInfo,
             configurationUtilities,
             logger,
+            source,
           });
         } catch (err) {
           if (err.reason === ActionExecutionErrorReason.Validation) {
@@ -258,6 +253,39 @@ export class ActionExecutor {
         };
 
         event.event = event.event || {};
+
+        // start gen_ai extension
+        // add event.kibana.action.execution.gen_ai to event log when GenerativeAi Connector is executed
+        if (result.status === 'ok' && actionTypeId === '.gen-ai') {
+          const data = result.data as unknown as {
+            usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
+          };
+          event.kibana = event.kibana || {};
+          event.kibana.action = event.kibana.action || {};
+          event.kibana = {
+            ...event.kibana,
+            action: {
+              ...event.kibana.action,
+              execution: {
+                ...event.kibana.action.execution,
+                gen_ai: {
+                  usage: {
+                    total_tokens: data.usage?.total_tokens,
+                    prompt_tokens: data.usage?.prompt_tokens,
+                    completion_tokens: data.usage?.completion_tokens,
+                  },
+                },
+              },
+            },
+          };
+        }
+        // end gen_ai extension
+
+        const currentUser = security?.authc.getCurrentUser(request);
+
+        event.user = event.user || {};
+        event.user.name = currentUser?.username;
+        event.user.id = currentUser?.profile_uid;
 
         if (result.status === 'ok') {
           span?.setOutcome('success');
@@ -313,26 +341,18 @@ export class ActionExecutor {
     source?: ActionExecutionSource<Source>;
     consumer?: string;
   }) {
-    const {
-      spaces,
-      encryptedSavedObjectsClient,
-      preconfiguredActions,
-      eventLogger,
-      getActionsClientWithRequest,
-    } = this.actionExecutorContext!;
+    const { spaces, encryptedSavedObjectsClient, preconfiguredActions, eventLogger } =
+      this.actionExecutorContext!;
 
     const spaceId = spaces && spaces.getSpaceId(request);
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
     if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
       this.actionInfo = await getActionInfoInternal(
-        getActionsClientWithRequest,
-        request,
         this.isESOCanEncrypt,
         encryptedSavedObjectsClient,
         preconfiguredActions,
         actionId,
-        namespace.namespace,
-        source
+        namespace.namespace
       );
     }
     const task = taskInfo
@@ -366,6 +386,7 @@ export class ActionExecutor {
       relatedSavedObjects,
       actionExecutionId,
       isPreconfigured: this.actionInfo.isPreconfigured,
+      ...(source ? { source } : {}),
     });
 
     eventLogger.logEvent(event);
@@ -381,18 +402,12 @@ interface ActionInfo {
   isPreconfigured?: boolean;
 }
 
-async function getActionInfoInternal<Source = unknown>(
-  getActionsClientWithRequest: (
-    request: KibanaRequest,
-    authorizationContext?: ActionExecutionSource<unknown>
-  ) => Promise<PublicMethodsOf<ActionsClient>>,
-  request: KibanaRequest,
+async function getActionInfoInternal(
   isESOCanEncrypt: boolean,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   preconfiguredActions: PreConfiguredAction[],
   actionId: string,
-  namespace: string | undefined,
-  source?: ActionExecutionSource<Source>
+  namespace: string | undefined
 ): Promise<ActionInfo> {
   // check to see if it's a pre-configured action first
   const pcAction = preconfiguredActions.find(
@@ -415,14 +430,8 @@ async function getActionInfoInternal<Source = unknown>(
     );
   }
 
-  const actionsClient = await getActionsClientWithRequest(request, source);
-
-  // if not pre-configured action, should be a saved object
-  // ensure user can read the action before processing
-  const { actionTypeId, config, name } = await actionsClient.get({ id: actionId });
-
   const {
-    attributes: { secrets },
+    attributes: { secrets, actionTypeId, config, name },
   } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>('action', actionId, {
     namespace: namespace === 'default' ? undefined : namespace,
   });

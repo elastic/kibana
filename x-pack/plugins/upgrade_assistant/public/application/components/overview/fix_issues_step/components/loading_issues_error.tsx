@@ -12,7 +12,7 @@ export const LoadingIssuesError: FunctionComponent = ({ children }) => (
   <EuiText color="subdued" data-test-subj="loadingIssuesError">
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiIcon type="alert" color="danger" />
+        <EuiIcon type="warning" color="danger" />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>{children}</EuiFlexItem>

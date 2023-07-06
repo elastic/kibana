@@ -281,19 +281,16 @@ export const ADD_TO_NEW_CASE = i18n.translate(
   }
 );
 
-export const ADD_TO_CASE_DISABLED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.actions.addToCaseDisabled',
-  {
-    defaultMessage: 'Add to case is not supported for this selection',
-  }
-);
-
 export const INVESTIGATE_BULK_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addBulkToTimeline',
   {
     defaultMessage: 'Investigate in timeline',
   }
 );
+
+export const SESSIONS_TITLE = i18n.translate('xpack.securitySolution.sessionsView.sessionsTitle', {
+  defaultMessage: 'Sessions',
+});
 
 export const TAKE_ACTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.groups.additionalActions.takeAction',
@@ -386,35 +383,21 @@ export const STATS_GROUP_SEVERITY_MEDIUM = i18n.translate(
   }
 );
 
-export const ruleName = i18n.translate('xpack.securitySolution.selector.groups.ruleName.label', {
-  defaultMessage: 'Rule name',
-});
-export const userName = i18n.translate('xpack.securitySolution.selector.grouping.userName.label', {
-  defaultMessage: 'User name',
-});
-export const hostName = i18n.translate('xpack.securitySolution.selector.grouping.hostName.label', {
-  defaultMessage: 'Host name',
-});
-export const sourceIP = i18n.translate('xpack.securitySolution.selector.grouping.sourceIP.label', {
-  defaultMessage: 'Source IP',
-});
-export const sourceAddress = i18n.translate(
-  'xpack.securitySolution.selector.groups.sourceAddress.label',
-  {
-    defaultMessage: 'Source address',
-  }
-);
-
-export const destinationAddress = i18n.translate(
-  'xpack.securitySolution.selector.groups.destinationAddress.label',
-  {
-    defaultMessage: 'Destination address',
-  }
-);
-
 export const INSPECT_GROUPING_TITLE = i18n.translate(
   'xpack.securitySolution.detectionsEngine.grouping.inspectTitle',
   {
     defaultMessage: 'Grouping query',
   }
 );
+
+export const EVENT_RENDERED_VIEW_COLUMNS = {
+  timestamp: i18n.translate('xpack.securitySolution.EventRenderedView.timestampTitle.column', {
+    defaultMessage: 'Timestamp',
+  }),
+  rule: i18n.translate('xpack.securitySolution.EventRenderedView.ruleTitle.column', {
+    defaultMessage: 'Rule',
+  }),
+  eventSummary: i18n.translate('xpack.securitySolution.EventRenderedView.eventSummary.column', {
+    defaultMessage: 'Event Summary',
+  }),
+};

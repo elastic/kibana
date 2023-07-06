@@ -13,14 +13,16 @@ import {
   getAddTimeSliderControlButtonTitle,
   getOnlyOneTimeSliderControlMsg,
 } from '../../_dashboard_app_strings';
+import { useDashboardAPI } from '../../dashboard_app';
 
 interface Props {
   closePopover: () => void;
   controlGroup: ControlGroupContainer;
 }
 
-export const AddTimeSliderControlButton = ({ closePopover, controlGroup }: Props) => {
+export const AddTimeSliderControlButton = ({ closePopover, controlGroup, ...rest }: Props) => {
   const [hasTimeSliderControl, setHasTimeSliderControl] = useState(false);
+  const dashboard = useDashboardAPI();
 
   useEffect(() => {
     const subscription = controlGroup.getInput$().subscribe(() => {
@@ -40,10 +42,11 @@ export const AddTimeSliderControlButton = ({ closePopover, controlGroup }: Props
 
   return (
     <EuiContextMenuItem
-      key="addTimeSliderControl"
-      icon="plusInCircle"
-      onClick={() => {
-        controlGroup.addTimeSliderControl();
+      {...rest}
+      icon="timeslider"
+      onClick={async () => {
+        await controlGroup.addTimeSliderControl();
+        dashboard.scrollToTop();
         closePopover();
       }}
       data-test-subj="controls-create-timeslider-button"

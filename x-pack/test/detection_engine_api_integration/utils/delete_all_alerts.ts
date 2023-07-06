@@ -5,41 +5,41 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-
-import {
-  DETECTION_ENGINE_RULES_BULK_ACTION,
-  DETECTION_ENGINE_RULES_URL,
-} from '@kbn/security-solution-plugin/common/constants';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
+import { DETECTION_ENGINE_INDEX_URL } from '@kbn/security-solution-plugin/common/constants';
 import { countDownTest } from './count_down_test';
 
 /**
- * Removes all rules by looping over any found and removing them from REST.
- * @param supertest The supertest agent.
+ * Deletes all alerts from a given index or indices, defaults to `.alerts-security.alerts-*`
+ * For use inside of afterEach blocks of tests
  */
 export const deleteAllAlerts = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
-  log: ToolingLog
+  log: ToolingLog,
+  es: Client,
+  index: Array<'.alerts-security.alerts-*' | '.preview.alerts-security.alerts-*'> = [
+    '.alerts-security.alerts-*',
+  ]
 ): Promise<void> => {
   await countDownTest(
     async () => {
-      await supertest
-        .post(DETECTION_ENGINE_RULES_BULK_ACTION)
-        .send({ action: 'delete', query: '' })
-        .set('kbn-xsrf', 'true');
-
-      const { body: finalCheck } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
-        .set('kbn-xsrf', 'true')
-        .send();
+      await supertest.delete(DETECTION_ENGINE_INDEX_URL).set('kbn-xsrf', 'true').send();
+      await es.deleteByQuery({
+        index,
+        body: {
+          query: {
+            match_all: {},
+          },
+        },
+        refresh: true,
+      });
       return {
-        passed: finalCheck.data.length === 0,
+        passed: true,
       };
     },
     'deleteAllAlerts',
-    log,
-    50,
-    1000
+    log
   );
 };

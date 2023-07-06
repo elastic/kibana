@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SchemaArray, SchemaValue } from '@kbn/analytics-client';
+import type { RootSchema } from '@kbn/analytics-client';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 
 export interface TelemetryServiceSetupParams {
@@ -15,20 +15,17 @@ export interface TelemetryServiceSetupParams {
 export enum InfraTelemetryEventTypes {
   HOSTS_VIEW_QUERY_SUBMITTED = 'Hosts View Query Submitted',
   HOSTS_ENTRY_CLICKED = 'Host Entry Clicked',
+  HOST_FLYOUT_FILTER_REMOVED = 'Host Flyout Filter Removed',
+  HOST_FLYOUT_FILTER_ADDED = 'Host Flyout Filter Added',
+  HOST_VIEW_TOTAL_HOST_COUNT_RETRIEVED = 'Host View Total Host Count Retrieved',
 }
 
 export interface HostsViewQuerySubmittedParams {
-  control_filters: string[];
-  filters: string[];
+  control_filter_fields: string[];
+  filter_fields: string[];
   interval: string;
-  query: string;
-}
-
-export interface HostsViewQuerySubmittedSchema {
-  control_filters: SchemaArray<string, string>;
-  filters: SchemaArray<string, string>;
-  interval: SchemaValue<string>;
-  query: SchemaValue<string>;
+  with_query: boolean;
+  limit: number;
 }
 
 export interface HostEntryClickedParams {
@@ -36,24 +33,46 @@ export interface HostEntryClickedParams {
   cloud_provider?: string | null;
 }
 
-export interface HostEntryClickedSchema {
-  hostname: SchemaValue<string>;
-  cloud_provider: SchemaValue<string | undefined | null>;
+export interface HostFlyoutFilterActionParams {
+  field_name: string;
 }
+
+export interface HostsViewQueryHostsCountRetrievedParams {
+  total: number;
+}
+
+export type InfraTelemetryEventParams =
+  | HostsViewQuerySubmittedParams
+  | HostEntryClickedParams
+  | HostFlyoutFilterActionParams
+  | HostsViewQueryHostsCountRetrievedParams;
 
 export interface ITelemetryClient {
   reportHostEntryClicked(params: HostEntryClickedParams): void;
+  reportHostFlyoutFilterRemoved(params: HostFlyoutFilterActionParams): void;
+  reportHostFlyoutFilterAdded(params: HostFlyoutFilterActionParams): void;
+  reportHostsViewTotalHostCountRetrieved(params: HostsViewQueryHostsCountRetrievedParams): void;
   reportHostsViewQuerySubmitted(params: HostsViewQuerySubmittedParams): void;
 }
-
-export type InfraTelemetryEventParams = HostsViewQuerySubmittedParams | HostEntryClickedParams;
 
 export type InfraTelemetryEvent =
   | {
       eventType: InfraTelemetryEventTypes.HOSTS_VIEW_QUERY_SUBMITTED;
-      schema: HostsViewQuerySubmittedSchema;
+      schema: RootSchema<HostsViewQuerySubmittedParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_ADDED;
+      schema: RootSchema<HostFlyoutFilterActionParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.HOST_FLYOUT_FILTER_REMOVED;
+      schema: RootSchema<HostFlyoutFilterActionParams>;
     }
   | {
       eventType: InfraTelemetryEventTypes.HOSTS_ENTRY_CLICKED;
-      schema: HostEntryClickedSchema;
+      schema: RootSchema<HostEntryClickedParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.HOST_VIEW_TOTAL_HOST_COUNT_RETRIEVED;
+      schema: RootSchema<HostsViewQueryHostsCountRetrievedParams>;
     };

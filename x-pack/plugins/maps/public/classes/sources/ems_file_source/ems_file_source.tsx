@@ -7,7 +7,7 @@
 
 import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Feature } from 'geojson';
+import { Feature, GeoJsonProperties } from 'geojson';
 import { FileLayer } from '@elastic/ems-client';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { AbstractVectorSource, GeoJsonWithMeta, IVectorSource } from '../vector_source';
@@ -16,7 +16,6 @@ import { getEmsFileLayers } from '../../../util';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { UpdateSourceEditor } from './update_source_editor';
 import { EMSFileField } from '../../fields/ems_file_field';
-import { registerSource } from '../source_registry';
 import { IField } from '../../fields/field';
 import { EMSFileSourceDescriptor } from '../../../../common/descriptor_types';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
@@ -199,7 +198,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     return this._tooltipFields.length > 0;
   }
 
-  async getTooltipProperties(properties: unknown): Promise<ITooltipProperty[]> {
+  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
     const promises = this._tooltipFields.map((field) => {
       // @ts-ignore
       const value = properties[field.getName()];
@@ -218,8 +217,3 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     return emsSettings.isEMSUrlSet() ? [LICENSED_FEATURES.ON_PREM_EMS] : [];
   }
 }
-
-registerSource({
-  ConstructorFunction: EMSFileSource,
-  type: SOURCE_TYPES.EMS_FILE,
-});

@@ -556,7 +556,28 @@ describe('useRulesTableSavedState', () => {
   });
 
   describe('when there is invalid state in the url', () => {
-    it('does not return the filter', () => {
+    it('does not return filter when filters source has invalid value', () => {
+      mockRulesTablePersistedState({
+        urlState: {
+          searchTerm: 'test',
+          // @ts-expect-error Passing an invalid value for the test
+          source: 'invalid',
+          tags: ['tag-a'],
+          enabled: true,
+        },
+        storageState: null,
+      });
+
+      const {
+        result: {
+          current: { filter },
+        },
+      } = renderHook(() => useRulesTableSavedState());
+
+      expect(filter).toEqual({});
+    });
+
+    it('does not return filter when tags have invalid values', () => {
       mockRulesTablePersistedState({
         urlState: {
           searchTerm: 'test',
@@ -564,75 +585,62 @@ describe('useRulesTableSavedState', () => {
           // @ts-expect-error Passing an invalid value for the test
           tags: [1, 2, 3],
           enabled: true,
-          field: 'name',
-          order: 'asc',
-          page: 2,
-          perPage: 10,
         },
         storageState: null,
       });
 
       const {
         result: {
-          current: { filter, sorting, pagination },
+          current: { filter },
         },
       } = renderHook(() => useRulesTableSavedState());
 
       expect(filter).toEqual({});
-      expect(sorting).toEqual({
-        field: 'name',
-        order: 'asc',
-      });
-      expect(pagination).toEqual({
-        page: 2,
-        perPage: 10,
-      });
     });
 
-    it('does not return the sorting', () => {
+    it('does not return filter when enabled state has invalid value', () => {
       mockRulesTablePersistedState({
         urlState: {
           searchTerm: 'test',
           source: RuleSource.Custom,
-          tags: ['test'],
-          enabled: true,
-          field: 'name',
+          tags: ['tag-a'],
           // @ts-expect-error Passing an invalid value for the test
-          order: 'abc',
-          page: 2,
-          perPage: 10,
+          enabled: 10,
         },
         storageState: null,
       });
 
       const {
         result: {
-          current: { filter, sorting, pagination },
+          current: { filter },
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter).toEqual({
-        searchTerm: 'test',
-        source: RuleSource.Custom,
-        tags: ['test'],
-        enabled: true,
-      });
-      expect(sorting).toEqual({});
-      expect(pagination).toEqual({
-        page: 2,
-        perPage: 10,
-      });
+      expect(filter).toEqual({});
     });
 
-    it('does not return the pagination', () => {
+    it('does not return the sorting when order has invalid value', () => {
       mockRulesTablePersistedState({
         urlState: {
-          searchTerm: 'test',
-          source: RuleSource.Custom,
-          tags: ['test'],
-          enabled: true,
           field: 'name',
-          order: 'asc',
+          // @ts-expect-error Passing an invalid value for the test
+          order: 'abc',
+        },
+        storageState: null,
+      });
+
+      const {
+        result: {
+          current: { sorting },
+        },
+      } = renderHook(() => useRulesTableSavedState());
+
+      expect(sorting).toEqual({});
+    });
+
+    it('does not return the pagination when page number has invalid value', () => {
+      mockRulesTablePersistedState({
+        urlState: {
           // @ts-expect-error Passing an invalid value for the test
           page: 'aaa',
           perPage: 10,
@@ -642,26 +650,90 @@ describe('useRulesTableSavedState', () => {
 
       const {
         result: {
-          current: { filter, sorting, pagination },
+          current: { pagination },
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter).toEqual({
-        searchTerm: 'test',
-        source: RuleSource.Custom,
-        tags: ['test'],
-        enabled: true,
+      expect(pagination).toEqual({});
+    });
+
+    it('does not return the pagination when page number has negative value', () => {
+      mockRulesTablePersistedState({
+        urlState: {
+          page: -1,
+          perPage: 10,
+        },
+        storageState: null,
       });
-      expect(sorting).toEqual({
-        field: 'name',
-        order: 'asc',
+
+      const {
+        result: {
+          current: { pagination },
+        },
+      } = renderHook(() => useRulesTableSavedState());
+
+      expect(pagination).toEqual({});
+    });
+
+    it('does not return the pagination when per page number has invalid value', () => {
+      mockRulesTablePersistedState({
+        urlState: {
+          // @ts-expect-error Passing an invalid value for the test
+          perPage: 'aaa',
+        },
+        storageState: null,
       });
+
+      const {
+        result: {
+          current: { pagination },
+        },
+      } = renderHook(() => useRulesTableSavedState());
+
+      expect(pagination).toEqual({});
+    });
+
+    it('does not return the pagination when per page number has negative value', () => {
+      mockRulesTablePersistedState({
+        urlState: {
+          perPage: -1,
+        },
+        storageState: null,
+      });
+
+      const {
+        result: {
+          current: { pagination },
+        },
+      } = renderHook(() => useRulesTableSavedState());
+
       expect(pagination).toEqual({});
     });
   });
 
   describe('when there is invalid state in the storage', () => {
-    it('does not return the filter', () => {
+    it('does not return filter when filters source has invalid value', () => {
+      mockRulesTablePersistedState({
+        urlState: null,
+        storageState: {
+          searchTerm: 'test',
+          // @ts-expect-error Passing an invalid value for the test
+          source: 'invalid',
+          tags: ['tag-a'],
+          enabled: true,
+        },
+      });
+
+      const {
+        result: {
+          current: { filter },
+        },
+      } = renderHook(() => useRulesTableSavedState());
+
+      expect(filter).toEqual({});
+    });
+
+    it('does not return filter when tags have invalid values', () => {
       mockRulesTablePersistedState({
         urlState: null,
         storageState: {
@@ -692,49 +764,29 @@ describe('useRulesTableSavedState', () => {
       });
     });
 
-    it('does not return the sorting', () => {
+    it('does not return sorting when order has invalid value', () => {
       mockRulesTablePersistedState({
         urlState: null,
         storageState: {
-          searchTerm: 'test',
-          source: RuleSource.Custom,
-          tags: ['test'],
-          enabled: true,
           field: 'name',
           // @ts-expect-error Passing an invalid value for the test
           order: 'abc',
-          perPage: 10,
         },
       });
 
       const {
         result: {
-          current: { filter, sorting, pagination },
+          current: { sorting },
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter).toEqual({
-        searchTerm: 'test',
-        source: RuleSource.Custom,
-        tags: ['test'],
-        enabled: true,
-      });
       expect(sorting).toEqual({});
-      expect(pagination).toEqual({
-        perPage: 10,
-      });
     });
 
-    it('does not return the pagination', () => {
+    it('does not return pagination when per page has invalid value', () => {
       mockRulesTablePersistedState({
         urlState: null,
         storageState: {
-          searchTerm: 'test',
-          source: RuleSource.Custom,
-          tags: ['test'],
-          enabled: true,
-          field: 'name',
-          order: 'asc',
           // @ts-expect-error Passing an invalid value for the test
           perPage: 'aaa',
         },
@@ -742,20 +794,25 @@ describe('useRulesTableSavedState', () => {
 
       const {
         result: {
-          current: { filter, sorting, pagination },
+          current: { pagination },
         },
       } = renderHook(() => useRulesTableSavedState());
 
-      expect(filter).toEqual({
-        searchTerm: 'test',
-        source: RuleSource.Custom,
-        tags: ['test'],
-        enabled: true,
+      expect(pagination).toEqual({});
+    });
+
+    it('does not return pagination when per page has negative value', () => {
+      mockRulesTablePersistedState({
+        urlState: null,
+        storageState: { perPage: -1 },
       });
-      expect(sorting).toEqual({
-        field: 'name',
-        order: 'asc',
-      });
+
+      const {
+        result: {
+          current: { pagination },
+        },
+      } = renderHook(() => useRulesTableSavedState());
+
       expect(pagination).toEqual({});
     });
   });

@@ -91,7 +91,7 @@ describe('SlackActionFields renders', () => {
       });
     });
 
-    it('validates teh web hook url field correctly', async () => {
+    it('validates the web hook url field correctly', async () => {
       const actionConnector = {
         secrets: {
           webhookUrl: 'http://test.com',

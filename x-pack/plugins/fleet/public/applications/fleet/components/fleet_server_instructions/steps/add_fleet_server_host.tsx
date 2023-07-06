@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback } from 'react';
 import type { EuiStepProps } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import {
   EuiSwitch,
   EuiButton,
@@ -111,8 +112,24 @@ export const AddFleetServerHostStepContent = ({
       <EuiText>
         <FormattedMessage
           id="xpack.fleet.fleetServerSetup.addFleetServerHostStepDescription"
-          defaultMessage="First, set the public IP or host name and port that agents will use to reach Fleet Server. It uses port {port} by default. We'll then generate a policy for you automatically. "
-          values={{ port: <EuiCode>8220</EuiCode> }}
+          defaultMessage="First, set the public IP or host name and port that agents will use to reach Fleet Server. It uses port {port} by default {toolTip}. We'll then generate a policy for you automatically. "
+          values={{
+            port: <EuiCode>8220</EuiCode>,
+            toolTip: (
+              <EuiIconTip
+                iconProps={{
+                  className: 'eui-alignTop',
+                }}
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.fleetServerSetup.getStartedInstructionsPortTooltips"
+                    defaultMessage="This can only be set during Fleet Server installation."
+                  />
+                }
+                position="right"
+              />
+            ),
+          }}
         />
       </EuiText>
       <EuiSpacer size="m" />

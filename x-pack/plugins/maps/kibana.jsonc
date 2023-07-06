@@ -29,7 +29,8 @@
       "mapsEms",
       "savedObjects",
       "share",
-      "presentationUtil"
+      "presentationUtil",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "cloud",
@@ -46,7 +47,8 @@
       "kibanaReact",
       "kibanaUtils",
       "usageCollection",
-      "unifiedSearch"
+      "unifiedSearch",
+      "fieldFormats"
     ],
     "extraPublicDirs": [
       "common"

@@ -6,7 +6,7 @@
  */
 
 import { Plugin, CoreSetup } from '@kbn/core/server';
-
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -48,8 +48,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             push: ['securitySolutionFixture'],
           },
           savedObject: {
-            all: [],
-            read: [],
+            all: [...filesSavedObjectTypes],
+            read: [...filesSavedObjectTypes],
           },
           ui: [],
         },
@@ -61,7 +61,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           },
           savedObject: {
             all: [],
-            read: [],
+            read: [...filesSavedObjectTypes],
           },
           ui: [],
         },
@@ -81,8 +81,8 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                     delete: ['securitySolutionFixture'],
                   },
                   savedObject: {
-                    all: [],
-                    read: [],
+                    all: [...filesSavedObjectTypes],
+                    read: [...filesSavedObjectTypes],
                   },
                   ui: [],
                 },

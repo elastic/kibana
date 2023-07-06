@@ -193,6 +193,24 @@ describe('parseDataStreamElasticsearchEntry', () => {
       },
     });
   });
+  it('Should handle dynamic_dataset', () => {
+    expect(
+      parseDataStreamElasticsearchEntry({
+        dynamic_dataset: true,
+      })
+    ).toEqual({
+      dynamic_dataset: true,
+    });
+  });
+  it('Should handle dynamic_namespace', () => {
+    expect(
+      parseDataStreamElasticsearchEntry({
+        dynamic_namespace: true,
+      })
+    ).toEqual({
+      dynamic_namespace: true,
+    });
+  });
 });
 
 describe('parseTopLevelElasticsearchEntry', () => {
@@ -361,13 +379,17 @@ describe('parseAndVerifyArchive', () => {
     expect(() =>
       parseAndVerifyArchive(['input_only-0.1.0/manifest.yml', 'dummy/manifest.yml'], {})
     ).toThrowError(
-      new PackageInvalidArchiveError('Package contains more than one top-level directory.')
+      new PackageInvalidArchiveError(
+        'Package contains more than one top-level directory; top-level directory found: input_only-0.1.0; filePath: dummy/manifest.yml'
+      )
     );
   });
 
   it('should throw on missing manifest file', () => {
     expect(() => parseAndVerifyArchive(['input_only-0.1.0/test/manifest.yml'], {})).toThrowError(
-      new PackageInvalidArchiveError('Package must contain a top-level manifest.yml file.')
+      new PackageInvalidArchiveError(
+        'Package at top-level directory input_only-0.1.0 must contain a top-level manifest.yml file.'
+      )
     );
   });
 
@@ -378,7 +400,9 @@ describe('parseAndVerifyArchive', () => {
       parseAndVerifyArchive(['input_only-0.1.0/manifest.yml'], {
         'input_only-0.1.0/manifest.yml': buf,
       })
-    ).toThrowError('Could not parse top-level package manifest: YAMLException');
+    ).toThrowError(
+      'Could not parse top-level package manifest at top-level directory input_only-0.1.0: YAMLException'
+    );
   });
 
   it('should throw on missing required fields', () => {
@@ -398,7 +422,9 @@ version: 0.1.0
       parseAndVerifyArchive(['input_only-0.1.0/manifest.yml'], {
         'input_only-0.1.0/manifest.yml': buf,
       })
-    ).toThrowError('Invalid top-level package manifest: one or more fields missing of ');
+    ).toThrowError(
+      'Invalid top-level package manifest at top-level directory input_only-0.1.0 (package name: input_only): one or more fields missing of '
+    );
   });
 
   it('should throw on name or version mismatch', () => {
@@ -491,6 +517,39 @@ describe('parseAndVerifyDataStreams', () => {
       {
         dataset: 'ds',
         elasticsearch: {},
+        package: 'input-only',
+        path: 'stream1',
+        release: 'ga',
+        title: 'Custom Logs',
+        type: 'logs',
+      },
+    ]);
+  });
+
+  it('should parse dotted elasticsearch keys', async () => {
+    expect(
+      parseAndVerifyDataStreams({
+        paths: ['input-only-0.1.0/data_stream/stream1/manifest.yml'],
+        pkgName: 'input-only',
+        pkgVersion: '0.1.0',
+        manifests: {
+          'input-only-0.1.0/data_stream/stream1/manifest.yml': Buffer.from(
+            `
+          title: Custom Logs
+          type: logs
+          dataset: ds
+          version: 0.1.0
+          elasticsearch.dynamic_dataset: true`,
+            'utf8'
+          ),
+        },
+      })
+    ).toEqual([
+      {
+        dataset: 'ds',
+        elasticsearch: {
+          dynamic_dataset: true,
+        },
         package: 'input-only',
         path: 'stream1',
         release: 'ga',

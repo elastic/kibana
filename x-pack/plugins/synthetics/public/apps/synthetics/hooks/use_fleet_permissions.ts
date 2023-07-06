@@ -18,17 +18,19 @@ export function useFleetPermissions() {
 
   const canSaveIntegrations: boolean = Boolean(fleet?.authz.integrations.writeIntegrationPolicies);
   const canReadAgentPolicies = Boolean(fleet?.authz.fleet.readAgentPolicies);
+  const canCreateAgentPolicies = Boolean(fleet?.authz.fleet.all);
 
   return {
     canReadAgentPolicies,
     canSaveIntegrations,
+    canCreateAgentPolicies,
   };
 }
 
-export function useCanUpdatePrivateMonitor(monitor: EncryptedSyntheticsMonitor) {
-  const { canSaveIntegrations } = useFleetPermissions();
+export function useCanManagePrivateLocation() {
+  const { canSaveIntegrations, canReadAgentPolicies } = useFleetPermissions();
 
-  return canUpdatePrivateMonitor(monitor, canSaveIntegrations);
+  return Boolean(canSaveIntegrations && canReadAgentPolicies);
 }
 
 export function canUpdatePrivateMonitor(

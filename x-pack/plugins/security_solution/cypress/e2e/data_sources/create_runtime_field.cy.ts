@@ -11,39 +11,47 @@ import { openTimelineFieldsBrowser, populateTimeline } from '../../tasks/timelin
 
 import { HOSTS_URL, ALERTS_URL } from '../../urls/navigation';
 
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 
 import { getNewRule } from '../../objects/rule';
 import { refreshPage } from '../../tasks/security_header';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { openEventsViewerFieldsBrowser } from '../../tasks/hosts/events';
-import { assertFieldDisplayed, createField } from '../../tasks/create_runtime_field';
+import { createField } from '../../tasks/create_runtime_field';
+import { openAlertsFieldBrowser } from '../../tasks/alerts';
+import { deleteRuntimeField } from '../../tasks/sourcerer';
+import { GET_DATA_GRID_HEADER } from '../../screens/common/data_grid';
+import { GET_TIMELINE_HEADER } from '../../screens/timeline';
+
+const alertRunTimeField = 'field.name.alert.page';
+const timelineRuntimeField = 'field.name.timeline';
 
 describe('Create DataView runtime field', () => {
   before(() => {
+    deleteRuntimeField('security-solution-default', alertRunTimeField);
+    deleteRuntimeField('security-solution-default', timelineRuntimeField);
+  });
+
+  beforeEach(() => {
     login();
   });
 
   it('adds field to alert table', () => {
-    const fieldName = 'field.name.alert.page';
     visit(ALERTS_URL);
-    createCustomRuleEnabled(getNewRule());
+    createRule(getNewRule());
     refreshPage();
     waitForAlertsToPopulate();
-    openEventsViewerFieldsBrowser();
-
-    createField(fieldName);
-    assertFieldDisplayed(fieldName, 'alerts');
+    openAlertsFieldBrowser();
+    createField(alertRunTimeField);
+    cy.get(GET_DATA_GRID_HEADER(alertRunTimeField)).should('exist');
   });
 
   it('adds field to timeline', () => {
-    const fieldName = 'field.name.timeline';
     visit(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();
     openTimelineFieldsBrowser();
 
-    createField(fieldName);
-    assertFieldDisplayed(fieldName);
+    createField(timelineRuntimeField);
+    cy.get(GET_TIMELINE_HEADER(timelineRuntimeField)).should('exist');
   });
 });

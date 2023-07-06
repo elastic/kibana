@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { range } from 'lodash';
 import { RuleType } from '@kbn/alerting-plugin/server';
+import { schema } from '@kbn/config-schema';
 import {
   DEFAULT_INSTANCES_TO_GENERATE,
   ALERTING_EXAMPLE_APP_ID,
@@ -78,4 +79,16 @@ export const alertType: RuleType<
     };
   },
   producer: ALERTING_EXAMPLE_APP_ID,
+  validate: {
+    params: schema.object({
+      instances: schema.maybe(schema.number()),
+      thresholds: schema.maybe(
+        schema.object({
+          small: schema.maybe(schema.number()),
+          medium: schema.maybe(schema.number()),
+          large: schema.maybe(schema.number()),
+        })
+      ),
+    }),
+  },
 };

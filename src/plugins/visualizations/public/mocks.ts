@@ -24,6 +24,9 @@ import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
+import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { VisualizationsPlugin } from './plugin';
 import { Schemas } from './vis_types';
 import { Schema, VisualizationsSetup, VisualizationsStart } from '.';
@@ -31,8 +34,8 @@ import { Schema, VisualizationsSetup, VisualizationsStart } from '.';
 const createSetupContract = (): VisualizationsSetup => ({
   createBaseVisualization: jest.fn(),
   registerAlias: jest.fn(),
-  hideTypes: jest.fn(),
   visEditorsRegistry: { registerDefault: jest.fn(), register: jest.fn(), get: jest.fn() },
+  listingViewRegistry: { add: jest.fn() },
 });
 
 const createStartContract = (): VisualizationsStart => ({
@@ -54,6 +57,11 @@ const createInstance = async () => {
     inspector: inspectorPluginMock.createSetupContract(),
     urlForwarding: urlForwardingPluginMock.createSetupContract(),
     uiActions: uiActionsPluginMock.createSetupContract(),
+    contentManagement: {
+      registry: {
+        register: jest.fn(),
+      },
+    },
   });
 
   const doStart = () =>
@@ -71,6 +79,7 @@ const createInstance = async () => {
       savedObjectsClient: coreMock.createStart().savedObjects.client,
       savedObjects: savedObjectsPluginMock.createStartContract(),
       savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
+      savedSearch: savedSearchPluginMock.createStartContract(),
       navigation: navigationPluginMock.createStartContract(),
       presentationUtil: presentationUtilPluginMock.createStartContract(coreMock.createStart()),
       urlForwarding: urlForwardingPluginMock.createStartContract(),
@@ -79,6 +88,20 @@ const createInstance = async () => {
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       usageCollection: {
         reportUiCounter: jest.fn(),
+      },
+      savedObjectsManagement: savedObjectsManagementPluginMock.createStartContract(),
+      contentManagement: {
+        client: {
+          search: jest.fn(),
+          get: jest.fn(),
+          create: jest.fn(),
+          update: jest.fn(),
+          delete: jest.fn(),
+        } as unknown as ContentManagementPublicStart['client'],
+        registry: {
+          get: jest.fn(),
+          getAll: jest.fn(),
+        },
       },
     });
 

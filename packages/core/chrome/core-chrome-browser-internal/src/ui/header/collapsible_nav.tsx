@@ -161,6 +161,7 @@ export function CollapsibleNav({
       button={button}
       ownFocus={false}
       size={248}
+      className="kbnCollapsibleNav"
     >
       {customNavLink && (
         <>
@@ -280,7 +281,7 @@ export function CollapsibleNav({
 
       <EuiHorizontalRule margin="none" />
 
-      <EuiFlexItem className="eui-yScroll">
+      <EuiFlexItem className="kbnCollapsibleNav__solutions">
         {/* Kibana, Observability, Security, and Management sections */}
         {orderedCategories.map((categoryName) => {
           const category = categoryDictionary[categoryName]!;

@@ -23,6 +23,7 @@ interface ProcessAlertsOpts<
   alertLimit: number;
   autoRecoverAlerts: boolean;
   flappingSettings: RulesSettingsFlappingProperties;
+  maintenanceWindowIds: string[];
 }
 interface ProcessAlertsResult<
   State extends AlertInstanceState,
@@ -50,6 +51,7 @@ export function processAlerts<
   alertLimit,
   autoRecoverAlerts,
   flappingSettings,
+  maintenanceWindowIds,
 }: ProcessAlertsOpts<State, Context>): ProcessAlertsResult<
   State,
   Context,
@@ -62,14 +64,16 @@ export function processAlerts<
         existingAlerts,
         previouslyRecoveredAlerts,
         alertLimit,
-        flappingSettings
+        flappingSettings,
+        maintenanceWindowIds
       )
     : processAlertsHelper(
         alerts,
         existingAlerts,
         previouslyRecoveredAlerts,
         autoRecoverAlerts,
-        flappingSettings
+        flappingSettings,
+        maintenanceWindowIds
       );
 }
 
@@ -83,7 +87,8 @@ function processAlertsHelper<
   existingAlerts: Record<string, Alert<State, Context>>,
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>,
   autoRecoverAlerts: boolean,
-  flappingSettings: RulesSettingsFlappingProperties
+  flappingSettings: RulesSettingsFlappingProperties,
+  maintenanceWindowIds: string[]
 ): ProcessAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   const existingAlertIds = new Set(Object.keys(existingAlerts));
   const previouslyRecoveredAlertsIds = new Set(Object.keys(previouslyRecoveredAlerts));
@@ -114,15 +119,17 @@ function processAlertsHelper<
             }
             updateAlertFlappingHistory(flappingSettings, newAlerts[id], true);
           }
+          newAlerts[id].setMaintenanceWindowIds(maintenanceWindowIds);
         } else {
           // this alert did exist in previous run
           // calculate duration to date for active alerts
           const state = existingAlerts[id].getState();
+          const currentState = activeAlerts[id].getState();
           const durationInMs =
             new Date(currentTime).valueOf() - new Date(state.start as string).valueOf();
           const duration = state.start ? millisToNanos(durationInMs) : undefined;
           activeAlerts[id].replaceState({
-            ...state,
+            ...currentState,
             ...(state.start ? { start: state.start } : {}),
             ...(duration !== undefined ? { duration } : {}),
           });
@@ -175,7 +182,8 @@ function processAlertsLimitReached<
   existingAlerts: Record<string, Alert<State, Context>>,
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>,
   alertLimit: number,
-  flappingSettings: RulesSettingsFlappingProperties
+  flappingSettings: RulesSettingsFlappingProperties,
+  maintenanceWindowIds: string[]
 ): ProcessAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   const existingAlertIds = new Set(Object.keys(existingAlerts));
   const previouslyRecoveredAlertsIds = new Set(Object.keys(previouslyRecoveredAlerts));
@@ -243,6 +251,8 @@ function processAlertsLimitReached<
           }
           updateAlertFlappingHistory(flappingSettings, newAlerts[id], true);
         }
+
+        newAlerts[id].setMaintenanceWindowIds(maintenanceWindowIds);
 
         if (!hasCapacityForNewAlerts()) {
           break;

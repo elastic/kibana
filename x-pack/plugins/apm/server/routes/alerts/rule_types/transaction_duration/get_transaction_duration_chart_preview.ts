@@ -7,14 +7,17 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { AggregationType } from '../../../../../common/rules/apm_rule_types';
+import {
+  AggregationType,
+  ApmRuleType,
+} from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
   TRANSACTION_TYPE,
+  TRANSACTION_NAME,
 } from '../../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { AlertParams } from '../../route';
+import { AlertParams, PreviewChartResponse } from '../../route';
 import {
   getSearchTransactionsEvents,
   getDocumentTypeFilterForTransactions,
@@ -22,12 +25,17 @@ import {
   getProcessorEventForTransactions,
 } from '../../../../lib/helpers/transactions';
 import {
-  ENVIRONMENT_NOT_DEFINED,
-  getEnvironmentLabel,
-} from '../../../../../common/environment_filter_values';
-import { averageOrPercentileAgg } from './average_or_percentile_agg';
+  averageOrPercentileAgg,
+  getMultiTermsSortOrder,
+} from './average_or_percentile_agg';
 import { APMConfig } from '../../../..';
 import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { getGroupByTerms } from '../utils/get_groupby_terms';
+import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
+import {
+  BarSeriesDataMap,
+  getFilteredBarSeries,
+} from '../utils/get_filtered_series_for_preview_chart';
 
 export async function getTransactionDurationChartPreview({
   alertParams,
@@ -37,15 +45,17 @@ export async function getTransactionDurationChartPreview({
   alertParams: AlertParams;
   config: APMConfig;
   apmEventClient: APMEventClient;
-}) {
+}): Promise<PreviewChartResponse> {
   const {
     aggregationType = AggregationType.Avg,
     environment,
     serviceName,
     transactionType,
+    transactionName,
     interval,
     start,
     end,
+    groupBy: groupByFields,
   } = alertParams;
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
     config,
@@ -56,8 +66,15 @@ export async function getTransactionDurationChartPreview({
   const query = {
     bool: {
       filter: [
-        ...termQuery(SERVICE_NAME, serviceName),
-        ...termQuery(TRANSACTION_TYPE, transactionType),
+        ...termQuery(SERVICE_NAME, serviceName, {
+          queryEmptyString: false,
+        }),
+        ...termQuery(TRANSACTION_TYPE, transactionType, {
+          queryEmptyString: false,
+        }),
+        ...termQuery(TRANSACTION_NAME, transactionName, {
+          queryEmptyString: false,
+        }),
         ...rangeQuery(start, end),
         ...environmentQuery(environment),
         ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
@@ -67,6 +84,11 @@ export async function getTransactionDurationChartPreview({
 
   const transactionDurationField = getDurationFieldForTransactions(
     searchAggregatedTransactions
+  );
+
+  const allGroupByFields = getAllGroupByFields(
+    ApmRuleType.TransactionDuration,
+    groupByFields
   );
 
   const aggs = {
@@ -81,23 +103,18 @@ export async function getTransactionDurationChartPreview({
         },
       },
       aggs: {
-        environment: {
-          terms: {
-            field: SERVICE_ENVIRONMENT,
-            missing: ENVIRONMENT_NOT_DEFINED.value,
-            size: 10,
-            order: {
-              [aggregationType === AggregationType.Avg
-                ? 'avgLatency'
-                : `pctLatency.${
-                    aggregationType === AggregationType.P95 ? 95 : 99
-                  }`]: 'desc',
-            } as Record<string, 'desc'>,
+        series: {
+          multi_terms: {
+            terms: [...getGroupByTerms(allGroupByFields)],
+            size: 1000,
+            ...getMultiTermsSortOrder(aggregationType),
           },
-          aggs: averageOrPercentileAgg({
-            aggregationType,
-            transactionDurationField,
-          }),
+          aggs: {
+            ...averageOrPercentileAgg({
+              aggregationType,
+              transactionDurationField,
+            }),
+          },
         },
       },
     },
@@ -114,32 +131,39 @@ export async function getTransactionDurationChartPreview({
   );
 
   if (!resp.aggregations) {
-    return [];
+    return { series: [], totalGroups: 0 };
   }
 
-  const environmentDataMap = resp.aggregations.timeseries.buckets.reduce(
+  const seriesDataMap = resp.aggregations.timeseries.buckets.reduce(
     (acc, bucket) => {
       const x = bucket.key;
-      bucket.environment.buckets.forEach((environmentBucket) => {
-        const env = environmentBucket.key as string;
+      bucket.series.buckets.forEach((seriesBucket) => {
+        const bucketKey = seriesBucket.key.join('_');
         const y =
-          'avgLatency' in environmentBucket
-            ? environmentBucket.avgLatency.value
-            : environmentBucket.pctLatency.values[0].value;
-        if (acc[env]) {
-          acc[env].push({ x, y });
+          'avgLatency' in seriesBucket
+            ? seriesBucket.avgLatency.value
+            : seriesBucket.pctLatency.values[0].value;
+        if (acc[bucketKey]) {
+          acc[bucketKey].push({ x, y });
         } else {
-          acc[env] = [{ x, y }];
+          acc[bucketKey] = [{ x, y }];
         }
       });
 
       return acc;
     },
-    {} as Record<string, Array<{ x: number; y: number | null }>>
+    {} as BarSeriesDataMap
   );
 
-  return Object.keys(environmentDataMap).map((env) => ({
-    name: getEnvironmentLabel(env),
-    data: environmentDataMap[env],
+  const series = Object.keys(seriesDataMap).map((key) => ({
+    name: key,
+    data: seriesDataMap[key],
   }));
+
+  const filteredSeries = getFilteredBarSeries(series);
+
+  return {
+    series: filteredSeries,
+    totalGroups: series.length,
+  };
 }

@@ -45,6 +45,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdActionId,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         name: 'An email action',
         connector_type_id: '.email',
@@ -71,6 +72,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         name: 'An email action',
         connector_type_id: '.email',
@@ -124,8 +126,8 @@ export default function emailTest({ getService }: FtrProviderContext) {
               cc: null,
               bcc: null,
               subject: 'email-subject',
-              html: `<p>email-message</p>\n<p>--</p>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`,
-              text: 'email-message\n\n--\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).',
+              html: `<p>email-message</p>\n<hr>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`,
+              text: 'email-message\n\n---\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).',
               headers: {},
             },
           });
@@ -147,11 +149,32 @@ export default function emailTest({ getService }: FtrProviderContext) {
         .then((resp: any) => {
           const { text, html } = resp.body.data.message;
           expect(text).to.eql(
-            '_italic_ **bold** https://elastic.co link\n\n--\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).'
+            '_italic_ **bold** https://elastic.co link\n\n---\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).'
           );
           expect(html).to.eql(
-            `<p><em>italic</em> <strong>bold</strong> <a href="https://elastic.co">https://elastic.co</a> link</p>\n<p>--</p>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`
+            `<p><em>italic</em> <strong>bold</strong> <a href="https://elastic.co">https://elastic.co</a> link</p>\n<hr>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`
           );
+        });
+    });
+
+    it('should return an error when sending html via execute endpoint', async () => {
+      await supertest
+        .post(`/api/actions/connector/${createdActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: ['kibana-action-test@elastic.co'],
+            subject: 'HTML message check',
+            message: '_italic_ **bold** https://elastic.co link',
+            messageHTML:
+              '<html><body><a href="https://elastic.co" style="font-weight: bold; font-style: italic">View at Elastic</a></body></html>',
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          const { status, message } = resp.body;
+          expect(status).to.eql('error');
+          expect(message).to.eql('HTML email can only be sent via notifications');
         });
     });
 
@@ -174,10 +197,10 @@ export default function emailTest({ getService }: FtrProviderContext) {
         .then((resp: any) => {
           const { text, html } = resp.body.data.message;
           expect(text).to.eql(
-            'message\n\n--\n\nThis message was sent by Elastic. [View my path in Elastic](https://localhost:5601/my/path).'
+            'message\n\n---\n\nThis message was sent by Elastic. [View my path in Elastic](https://localhost:5601/my/path).'
           );
           expect(html).to.eql(
-            `<p>message</p>\n<p>--</p>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601/my/path\">View my path in Elastic</a>.</p>\n`
+            `<p>message</p>\n<hr>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601/my/path\">View my path in Elastic</a>.</p>\n`
           );
         });
     });
@@ -325,8 +348,8 @@ export default function emailTest({ getService }: FtrProviderContext) {
               cc: null,
               bcc: null,
               subject: 'email-subject',
-              html: `<p>email-message</p>\n<p>--</p>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`,
-              text: 'email-message\n\n--\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).',
+              html: `<p>email-message</p>\n<hr>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`,
+              text: 'email-message\n\n---\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).',
               headers: {},
             },
           });
@@ -356,6 +379,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdAction.id,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         name: 'An email action',
         connector_type_id: '.email',
@@ -382,6 +406,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         name: 'An email action',
         connector_type_id: '.email',
@@ -422,6 +447,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdAction.id,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         name: 'An email action',
         connector_type_id: '.email',
@@ -448,6 +474,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         name: 'An email action',
         connector_type_id: '.email',
@@ -493,6 +520,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdMSExchangeActionId,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         name: 'An email action',
         connector_type_id: '.email',
@@ -521,6 +549,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         name: 'An email action',
         connector_type_id: '.email',

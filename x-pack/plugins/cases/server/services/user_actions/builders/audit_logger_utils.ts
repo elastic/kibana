@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UserAction as Action } from '../../../../common/api';
+import type { ActionCategory as Action } from '../../../../common/api';
 
 const actionsToVerbs: Record<Action, string> = {
   add: 'added',

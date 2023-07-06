@@ -7,7 +7,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 
-import type { Role, RoleIndexPrivilege } from '../../../common/model';
+import type { Role, RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../common/model';
 import { copyRole } from '../../../common/model';
 
 export class RolesAPIClient {
@@ -34,14 +34,28 @@ export class RolesAPIClient {
 
   private transformRoleForSave(role: Role) {
     // Remove any placeholder index privileges
-    const isPlaceholderPrivilege = (indexPrivilege: RoleIndexPrivilege) =>
-      indexPrivilege.names.length === 0;
+    const isPlaceholderPrivilege = (
+      indexPrivilege: RoleIndexPrivilege | RoleRemoteIndexPrivilege
+    ) => {
+      if (
+        'clusters' in indexPrivilege &&
+        indexPrivilege.clusters &&
+        indexPrivilege.clusters.length > 0
+      ) {
+        return false;
+      }
+      return indexPrivilege.names.length === 0 && indexPrivilege.privileges.length === 0;
+    };
     role.elasticsearch.indices = role.elasticsearch.indices.filter(
+      (indexPrivilege) => !isPlaceholderPrivilege(indexPrivilege)
+    );
+    role.elasticsearch.remote_indices = role.elasticsearch.remote_indices?.filter(
       (indexPrivilege) => !isPlaceholderPrivilege(indexPrivilege)
     );
 
     // Remove any placeholder query entries
     role.elasticsearch.indices.forEach((index) => index.query || delete index.query);
+    role.elasticsearch.remote_indices?.forEach((index) => index.query || delete index.query);
 
     role.kibana.forEach((kibanaPrivilege) => {
       // If a base privilege is defined, then do not persist feature privileges

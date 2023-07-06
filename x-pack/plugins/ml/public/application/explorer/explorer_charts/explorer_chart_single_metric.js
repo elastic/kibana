@@ -16,15 +16,16 @@ import React from 'react';
 import d3 from 'd3';
 import $ from 'jquery';
 import moment from 'moment';
-import { i18n } from '@kbn/i18n';
 
-import { formatHumanReadableDateTime } from '../../../../common/util/date_utils';
-import { formatValue } from '../../formatters/format_value';
+import { i18n } from '@kbn/i18n';
 import {
   getFormattedSeverityScore,
   getSeverityColor,
   getSeverityWithLow,
-} from '../../../../common/util/anomaly_utils';
+} from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
+
+import { formatValue } from '../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
   MULTI_BUCKET_SYMBOL_SIZE,
@@ -53,7 +54,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     timeBuckets: PropTypes.object.isRequired,
     onPointerUpdate: PropTypes.func.isRequired,
     chartTheme: PropTypes.object.isRequired,
-    cursor: PropTypes.object.isRequired,
+    cursor: PropTypes.object,
   };
 
   componentDidMount() {
