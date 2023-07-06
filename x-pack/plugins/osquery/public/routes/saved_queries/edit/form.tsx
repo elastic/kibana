@@ -76,6 +76,7 @@ const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButton
+                      data-test-subj="savedQueryFormUpdateButton"
                       isLoading={isSubmitting}
                       color="primary"
                       fill
