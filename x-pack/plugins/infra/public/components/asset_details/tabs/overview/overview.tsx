@@ -55,36 +55,6 @@ export const Overview = ({
     metadata,
   } = useMetadata(nodeName, nodeType, inventoryModel.requiredMetrics, sourceId, currentTimeRange);
 
-  if (fetchMetadataError) {
-    return (
-      <EuiCallOut
-        title={i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.errorTitle', {
-          defaultMessage: 'Sorry, there was an error',
-        })}
-        color="danger"
-        iconType="error"
-        data-test-subj="infraMetadataErrorCallout"
-      >
-        <FormattedMessage
-          id="xpack.infra.assetDetailsEmbeddable.overview.errorMessage"
-          defaultMessage="There was an error loading your data. Try to {reload} and open the host details again."
-          values={{
-            reload: (
-              <EuiLink
-                data-test-subj="infraMetadataReloadPageLink"
-                onClick={() => window.location.reload()}
-              >
-                {i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.errorAction', {
-                  defaultMessage: 'reload the page',
-                })}
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiCallOut>
-    );
-  }
-
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem grow={false}>
@@ -95,9 +65,36 @@ export const Overview = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <MetadataSummary metadata={metadata} metadataLoading={metadataLoading} />
+        {fetchMetadataError ? (
+          <EuiCallOut
+            title={i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.errorTitle', {
+              defaultMessage: 'Sorry, there was an error',
+            })}
+            color="danger"
+            iconType="error"
+            data-test-subj="infraMetadataErrorCallout"
+          >
+            <FormattedMessage
+              id="xpack.infra.assetDetailsEmbeddable.overview.errorMessage"
+              defaultMessage="There was an error loading your host metadata. Try to {reload} and open the host details again."
+              values={{
+                reload: (
+                  <EuiLink
+                    data-test-subj="infraMetadataReloadPageLink"
+                    onClick={() => window.location.reload()}
+                  >
+                    {i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.errorAction', {
+                      defaultMessage: 'reload the page',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiCallOut>
+        ) : (
+          <MetadataSummary metadata={metadata} metadataLoading={metadataLoading} />
+        )}
       </EuiFlexItem>
-      <EuiFlexItem grow={false} />
     </EuiFlexGroup>
   );
 };
