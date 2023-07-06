@@ -39,7 +39,7 @@ const mainAliasNames = mainApiRequestsToIntercept.map(
   ({ aliasName }) => `@${aliasName}`
 );
 
-describe('Storage explorer', () => {
+describe('Storage Explorer', () => {
   before(() => {
     const { rangeFrom, rangeTo } = timeRange;
     synthtrace.index(
@@ -72,7 +72,7 @@ describe('Storage explorer', () => {
     });
 
     it('has no detectable a11y violations on load', () => {
-      cy.contains('h1', 'Storage explorer');
+      cy.contains('h1', 'Storage Explorer');
       // set skipFailures to true to not fail the test when there are accessibility failures
       checkA11y({ skipFailures: true });
     });

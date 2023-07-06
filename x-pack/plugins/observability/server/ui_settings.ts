@@ -155,7 +155,7 @@ export const uiSettings: Record<string, UiSettings> = {
       'xpack.observability.apmServiceInventoryOptimizedSortingDescription',
       {
         defaultMessage:
-          '{technicalPreviewLabel} Default APM Service Inventory and Storage explorer pages sort (for Services without Machine Learning applied) to sort by Service Name.',
+          '{technicalPreviewLabel} Default APM Service Inventory and Storage Explorer pages sort (for Services without Machine Learning applied) to sort by Service Name.',
         values: {
           technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
         },

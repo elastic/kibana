@@ -82,7 +82,7 @@ export function StorageExplorer() {
         title={
           <h2>
             {i18n.translate('xpack.apm.storageExplorer.loadingPromptTitle', {
-              defaultMessage: 'Loading Storage explorer...',
+              defaultMessage: 'Loading Storage Explorer...',
             })}
           </h2>
         }
