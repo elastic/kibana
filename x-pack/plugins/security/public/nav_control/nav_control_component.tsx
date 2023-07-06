@@ -34,6 +34,7 @@ export interface UserMenuLink {
   href: string;
   order?: number;
   setAsProfile?: boolean;
+  /** Render a custom ReactNode instead of the default <EuiContextMenuItem /> */
   content?: ReactNode;
 }
 

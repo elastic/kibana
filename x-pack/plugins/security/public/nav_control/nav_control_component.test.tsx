@@ -183,63 +183,70 @@ describe('SecurityNavControl', () => {
     expect(wrapper.find(EuiContextMenu).prop('panels')).toMatchInlineSnapshot(`
       Array [
         Object {
+          "content": <ContextMenuContent
+            items={
+              Array [
+                Object {
+                  "data-test-subj": "profileLink",
+                  "href": "edit-profile-link",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="user"
+                  />,
+                  "name": <FormattedMessage
+                    defaultMessage="Edit profile"
+                    id="xpack.security.navControlComponent.editProfileLinkText"
+                    values={Object {}}
+                  />,
+                  "onClick": [Function],
+                },
+                Object {
+                  "content": undefined,
+                  "data-test-subj": "userMenuLink__link1",
+                  "href": "path-to-link-1",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="empty"
+                  />,
+                  "name": "link1",
+                },
+                Object {
+                  "content": undefined,
+                  "data-test-subj": "userMenuLink__link2",
+                  "href": "path-to-link-2",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="empty"
+                  />,
+                  "name": "link2",
+                },
+                Object {
+                  "content": undefined,
+                  "data-test-subj": "userMenuLink__link3",
+                  "href": "path-to-link-3",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="empty"
+                  />,
+                  "name": "link3",
+                },
+                Object {
+                  "data-test-subj": "logoutLink",
+                  "href": "",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="exit"
+                  />,
+                  "name": <FormattedMessage
+                    defaultMessage="Log out"
+                    id="xpack.security.navControlComponent.logoutLinkText"
+                    values={Object {}}
+                  />,
+                },
+              ]
+            }
+          />,
           "id": 0,
-          "items": Array [
-            Object {
-              "data-test-subj": "profileLink",
-              "href": "edit-profile-link",
-              "icon": <EuiIcon
-                size="m"
-                type="user"
-              />,
-              "name": <FormattedMessage
-                defaultMessage="Edit profile"
-                id="xpack.security.navControlComponent.editProfileLinkText"
-                values={Object {}}
-              />,
-              "onClick": [Function],
-            },
-            Object {
-              "data-test-subj": "userMenuLink__link1",
-              "href": "path-to-link-1",
-              "icon": <EuiIcon
-                size="m"
-                type="empty"
-              />,
-              "name": "link1",
-            },
-            Object {
-              "data-test-subj": "userMenuLink__link2",
-              "href": "path-to-link-2",
-              "icon": <EuiIcon
-                size="m"
-                type="empty"
-              />,
-              "name": "link2",
-            },
-            Object {
-              "data-test-subj": "userMenuLink__link3",
-              "href": "path-to-link-3",
-              "icon": <EuiIcon
-                size="m"
-                type="empty"
-              />,
-              "name": "link3",
-            },
-            Object {
-              "data-test-subj": "logoutLink",
-              "href": "",
-              "icon": <EuiIcon
-                size="m"
-                type="exit"
-              />,
-              "name": <FormattedMessage
-                defaultMessage="Log out"
-                id="xpack.security.navControlComponent.logoutLinkText"
-                values={Object {}}
-              />,
-            },
-          ],
           "title": "full name",
         },
       ]
@@ -270,49 +277,56 @@ describe('SecurityNavControl', () => {
     expect(wrapper.find(EuiContextMenu).prop('panels')).toMatchInlineSnapshot(`
       Array [
         Object {
+          "content": <ContextMenuContent
+            items={
+              Array [
+                Object {
+                  "content": undefined,
+                  "data-test-subj": "userMenuLink__link1",
+                  "href": "path-to-link-1",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="empty"
+                  />,
+                  "name": "link1",
+                },
+                Object {
+                  "content": undefined,
+                  "data-test-subj": "userMenuLink__link2",
+                  "href": "path-to-link-2",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="empty"
+                  />,
+                  "name": "link2",
+                },
+                Object {
+                  "content": undefined,
+                  "data-test-subj": "userMenuLink__link3",
+                  "href": "path-to-link-3",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="empty"
+                  />,
+                  "name": "link3",
+                },
+                Object {
+                  "data-test-subj": "logoutLink",
+                  "href": "",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="exit"
+                  />,
+                  "name": <FormattedMessage
+                    defaultMessage="Log out"
+                    id="xpack.security.navControlComponent.logoutLinkText"
+                    values={Object {}}
+                  />,
+                },
+              ]
+            }
+          />,
           "id": 0,
-          "items": Array [
-            Object {
-              "data-test-subj": "userMenuLink__link1",
-              "href": "path-to-link-1",
-              "icon": <EuiIcon
-                size="m"
-                type="empty"
-              />,
-              "name": "link1",
-            },
-            Object {
-              "data-test-subj": "userMenuLink__link2",
-              "href": "path-to-link-2",
-              "icon": <EuiIcon
-                size="m"
-                type="empty"
-              />,
-              "name": "link2",
-            },
-            Object {
-              "data-test-subj": "userMenuLink__link3",
-              "href": "path-to-link-3",
-              "icon": <EuiIcon
-                size="m"
-                type="empty"
-              />,
-              "name": "link3",
-            },
-            Object {
-              "data-test-subj": "logoutLink",
-              "href": "",
-              "icon": <EuiIcon
-                size="m"
-                type="exit"
-              />,
-              "name": <FormattedMessage
-                defaultMessage="Log out"
-                id="xpack.security.navControlComponent.logoutLinkText"
-                values={Object {}}
-              />,
-            },
-          ],
           "title": "full name",
         },
       ]
@@ -340,22 +354,26 @@ describe('SecurityNavControl', () => {
     expect(wrapper.find(EuiContextMenu).prop('panels')).toMatchInlineSnapshot(`
       Array [
         Object {
+          "content": <ContextMenuContent
+            items={
+              Array [
+                Object {
+                  "data-test-subj": "logoutLink",
+                  "href": "",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="exit"
+                  />,
+                  "name": <FormattedMessage
+                    defaultMessage="Log in"
+                    id="xpack.security.navControlComponent.loginLinkText"
+                    values={Object {}}
+                  />,
+                },
+              ]
+            }
+          />,
           "id": 0,
-          "items": Array [
-            Object {
-              "data-test-subj": "logoutLink",
-              "href": "",
-              "icon": <EuiIcon
-                size="m"
-                type="exit"
-              />,
-              "name": <FormattedMessage
-                defaultMessage="Log in"
-                id="xpack.security.navControlComponent.loginLinkText"
-                values={Object {}}
-              />,
-            },
-          ],
           "title": "full name",
         },
       ]

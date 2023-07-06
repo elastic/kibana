@@ -212,6 +212,10 @@ export class SecurityPlugin
         suggest: this.securityApiClients.userProfiles.suggest.bind(
           this.securityApiClients.userProfiles
         ),
+        update: this.securityApiClients.userProfiles.update.bind(
+          this.securityApiClients.userProfiles
+        ),
+        userProfile$: this.securityApiClients.userProfiles.userProfile$,
       },
       hooks: {
         useUpdateUserProfile: getUseUpdateUserProfile({
@@ -258,7 +262,10 @@ export interface SecurityPluginStart {
   /**
    * A set of methods to work with Kibana user profiles.
    */
-  userProfiles: Pick<UserProfileAPIClient, 'getCurrent' | 'bulkGet' | 'suggest'>;
+  userProfiles: Pick<
+    UserProfileAPIClient,
+    'getCurrent' | 'bulkGet' | 'suggest' | 'update' | 'userProfile$'
+  >;
 
   /**
    * A set of hooks to work with Kibana user profiles
