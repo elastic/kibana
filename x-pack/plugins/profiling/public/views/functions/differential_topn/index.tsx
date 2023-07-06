@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { AsyncComponent } from '../../../components/async_component';
@@ -146,15 +146,17 @@ export function DifferentialTopNFunctionsView() {
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          <PrimaryAndComparisonSearchBar />
+          <EuiPanel hasShadow={false} color="subdued">
+            <PrimaryAndComparisonSearchBar />
+            <EuiHorizontalRule />
+            <NormalizationMenu
+              mode={normalizationMode}
+              options={normalizationOptions}
+              onChange={onChangeNormalizationMode}
+            />
+          </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <NormalizationMenu
-            mode={normalizationMode}
-            options={normalizationOptions}
-            onChange={onChangeNormalizationMode}
-          />
-        </EuiFlexItem>
+        <EuiFlexItem grow={false} />
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="s">
             <EuiFlexItem>

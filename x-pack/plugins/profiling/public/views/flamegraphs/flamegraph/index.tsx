@@ -58,12 +58,6 @@ export function FlameGraphView() {
 
   return (
     <EuiFlexGroup direction="column">
-      <EuiFlexItem grow={false}>
-        <EuiPanel hasShadow={false} color="subdued">
-          <PrimaryProfilingSearchBar />
-          <EuiHorizontalRule />
-        </EuiPanel>
-      </EuiFlexItem>
       <EuiFlexItem>
         <AsyncComponent {...state} style={{ height: '100%' }} size="xl">
           <FlameGraph
