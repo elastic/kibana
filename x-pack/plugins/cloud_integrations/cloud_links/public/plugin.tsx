@@ -43,7 +43,7 @@ export class CloudLinksPlugin
         });
       }
       if (security) {
-        maybeAddCloudLinks({ security, chrome: core.chrome, cloud });
+        maybeAddCloudLinks({ security, chrome: core.chrome, cloud, docLinks: core.docLinks });
       }
     }
   }

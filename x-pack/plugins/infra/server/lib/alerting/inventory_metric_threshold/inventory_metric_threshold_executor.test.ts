@@ -29,6 +29,7 @@ import { createInventoryMetricThresholdExecutor } from './inventory_metric_thres
 import { ConditionResult } from './evaluate_condition';
 import { InfraBackendLibs } from '../../infra_types';
 import { infraPluginMock } from '../../../mocks';
+import { logsSharedPluginMock } from '@kbn/logs-shared-plugin/server/mocks';
 
 jest.mock('./evaluate_condition', () => ({ evaluateCondition: jest.fn() }));
 
@@ -121,7 +122,7 @@ const mockLibs = {
   },
   getStartServices: () => [
     null,
-    infraPluginMock.createSetupContract(),
+    { logsShared: logsSharedPluginMock.createStartContract() },
     infraPluginMock.createStartContract(),
   ],
   configuration: createMockStaticConfiguration({}),
