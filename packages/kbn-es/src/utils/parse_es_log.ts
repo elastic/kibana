@@ -19,16 +19,6 @@ function colorForLevel(level: string) {
   return chalk.reset;
 }
 
-function handleNonCapture(data: string) {
-  return [
-    {
-      formattedMessage: data.trim(),
-      message: data.trim(),
-      level: 'warn',
-    },
-  ];
-}
-
 function parseLog(
   data: string,
   regex: RegExp,
@@ -38,7 +28,13 @@ function parseLog(
   let capture = regex.exec(data);
 
   if (!capture) {
-    return handleNonCapture(data);
+    return [
+      {
+        formattedMessage: data.trim(),
+        message: data.trim(),
+        level: 'warn',
+      },
+    ];
   }
 
   do {
