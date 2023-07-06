@@ -9,6 +9,10 @@ import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
 import { packagePolicyRouteService } from '@kbn/fleet-plugin/common';
+import {
+  DefaultPolicyNotificationMessage,
+  DefaultPolicyRuleNotificationMessage,
+} from '../../../../common/endpoint/models/policy_config';
 import type { GetPolicyResponse } from '../../pages/policy/types';
 import { useHttp } from '../../../common/lib/kibana';
 import type { PolicyData, PolicyConfig } from '../../../../common/endpoint/types';
@@ -44,6 +48,8 @@ export const useFetchEndpointPolicy = (
         packagePolicyRouteService.getInfoPath(policyId)
       );
 
+      applyDefaultsToPolicyIfNeeded(apiResponse.item);
+
       return {
         item: apiResponse.item,
         settings: apiResponse.item.inputs[0].config.policy.value,
@@ -51,4 +57,36 @@ export const useFetchEndpointPolicy = (
       };
     },
   });
+};
+
+const applyDefaultsToPolicyIfNeeded = (policyItem: PolicyData): void => {
+  const settings = policyItem.inputs[0].config.policy.value;
+
+  // sets default user notification message if policy config message is empty
+  if (settings.windows.popup.malware.message === '') {
+    settings.windows.popup.malware.message = DefaultPolicyNotificationMessage;
+    settings.mac.popup.malware.message = DefaultPolicyNotificationMessage;
+    settings.linux.popup.malware.message = DefaultPolicyNotificationMessage;
+  }
+  if (settings.windows.popup.ransomware.message === '') {
+    settings.windows.popup.ransomware.message = DefaultPolicyNotificationMessage;
+  }
+  if (settings.windows.popup.memory_protection.message === '') {
+    settings.windows.popup.memory_protection.message = DefaultPolicyRuleNotificationMessage;
+  }
+  if (settings.mac.popup.memory_protection.message === '') {
+    settings.mac.popup.memory_protection.message = DefaultPolicyRuleNotificationMessage;
+  }
+  if (settings.linux.popup.memory_protection.message === '') {
+    settings.linux.popup.memory_protection.message = DefaultPolicyRuleNotificationMessage;
+  }
+  if (settings.windows.popup.behavior_protection.message === '') {
+    settings.windows.popup.behavior_protection.message = DefaultPolicyRuleNotificationMessage;
+  }
+  if (settings.mac.popup.behavior_protection.message === '') {
+    settings.mac.popup.behavior_protection.message = DefaultPolicyRuleNotificationMessage;
+  }
+  if (settings.linux.popup.behavior_protection.message === '') {
+    settings.linux.popup.behavior_protection.message = DefaultPolicyRuleNotificationMessage;
+  }
 };

@@ -11,6 +11,7 @@ import type { EuiFlexItemProps } from '@elastic/eui';
 import { EuiRadio, EuiSpacer, EuiFlexGroup, EuiFlexItem, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SettingCardHeader } from './setting_card';
 import type { PolicyFormComponentCommonProps } from '../types';
 import type {
   ImmutableArray,
@@ -20,7 +21,6 @@ import type {
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import type { MacPolicyProtection, LinuxPolicyProtection, PolicyProtection } from '../../../types';
 import { useLicense } from '../../../../../../common/hooks/use_license';
-import { ConfigFormHeading } from '../../components/config_form';
 
 export type DetectPreventProtectionLavelProps = PolicyFormComponentCommonProps & {
   protection: PolicyProtection;
@@ -57,12 +57,12 @@ export const DetectPreventProtectionLevel = memo<DetectPreventProtectionLavelPro
 
     return (
       <>
-        <ConfigFormHeading>
+        <SettingCardHeader>
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policyDetailsConfig.protectionLevel"
             defaultMessage="Protection level"
           />
-        </ConfigFormHeading>
+        </SettingCardHeader>
         <EuiSpacer size="xs" />
         <EuiFlexGroup>
           {radios.map(({ label, id, flexGrow }) => {
