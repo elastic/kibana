@@ -52,13 +52,12 @@ export const getIndexPattern = (eventIndex?: string | null) => {
 };
 
 export const getSessionViewLazy = (
-  props: SessionViewDeps,
-  usageCollection?: UsageCollectionStart
+  props: SessionViewDeps & { usageCollection?: UsageCollectionStart }
 ) => {
   const index = getIndexPattern(props.index);
   const trackEvent = (key: SessionViewTelemetryKey) => {
-    if (usageCollection) {
-      usageCollection.reportUiCounter(USAGE_COLLECTION_APP_NAME, METRIC_TYPE.CLICK, key);
+    if (props.usageCollection) {
+      props.usageCollection.reportUiCounter(USAGE_COLLECTION_APP_NAME, METRIC_TYPE.CLICK, key);
     }
   };
 

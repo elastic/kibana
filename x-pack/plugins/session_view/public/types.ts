@@ -64,9 +64,6 @@ export interface SessionViewDeps {
   // start time is passed in order to scope session_view queries to the appropriate time range, and avoid querying data across all time.
   sessionStartTime: string;
 
-  // helper function to do click tracking via usageCollection.reportUiCounter
-  trackEvent: (name: SessionViewTelemetryKey) => void;
-
   height?: number;
   isFullScreen?: boolean;
   // if provided, the session view will jump to and select the provided event if it belongs to the session leader

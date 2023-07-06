@@ -44,7 +44,7 @@ value:
       uuid: 1c7a1280-f28c-4e06-96b2-e4e5f05d1d61
       params:
         level: info
-        message: "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}"
+        message: "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}"
         connector_type_id: .server-log
       connector_type_id: .server-log
       frequency:

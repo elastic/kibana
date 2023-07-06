@@ -8,6 +8,8 @@ properties:
   cases:
     type: array
     description: An array containing one or more case objects.
+    maxItems: 100
+    minItems: 1
     items:
       type: object
       required:
@@ -35,7 +37,7 @@ properties:
         settings:
           $ref: 'settings.yaml'
         severity:
-          $ref: 'severity_property.yaml' 
+          $ref: 'severity_property.yaml'
         status:
           $ref: 'status.yaml'
         tags:

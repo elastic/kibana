@@ -23,7 +23,7 @@ export class SessionViewPlugin implements Plugin<SessionViewPluginStart, Session
   public start(core: CoreStart, plugins: SessionViewPluginStartDeps): SessionViewPluginStart {
     return {
       getSessionView: (sessionViewDeps: SessionViewDeps) =>
-        getSessionViewLazy(sessionViewDeps, plugins?.usageCollection),
+        getSessionViewLazy({ ...sessionViewDeps, usageCollection: plugins?.usageCollection }),
     };
   }
 

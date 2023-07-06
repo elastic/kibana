@@ -4360,10 +4360,10 @@ components:
             params:
               level: info
               message: |-
-                alert '{{alertName}}' is active for group '{{context.group}}':
+                Rule '{{rule.name}}' is active for group '{{context.group}}':
 
                 - Value: {{context.value}}
-                - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
+                - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
                 - Timestamp: {{context.date}}
         consumer: alerts
         name: my rule
@@ -4401,10 +4401,10 @@ components:
             params:
               level: info
               message: |-
-                alert {{alertName}} is active for group {{context.group} :
+                Rule {{rule.name}} is active for group {{context.group} :
 
                 - Value: {{context.value}}
-                - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
+                - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
                 - Timestamp: {{context.date}}
         api_key_created_by_user: false
         api_key_owner: elastic
@@ -4493,10 +4493,10 @@ components:
             params:
               level: info
               message: |-
-                alert {{alertName}} is active for group {{context.group}}:
+                Rule {{rule.name}} is active for group {{context.group}}:
 
                 - Value: {{context.value}}
-                - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
+                - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
                 - Timestamp: {{context.date}
               connector_type_id: .server-log
             connector_type_id: .server-log
@@ -4527,10 +4527,10 @@ components:
             params:
               level: info
               message: |-
-                alert {{alertName}} is active for group {{context.group}}:
+                Rule {{rule.name}} is active for group {{context.group}}:
 
                 - Value: {{context.value}}
-                - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
+                - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
                 - Timestamp: {{context.date}}
         params:
           aggField: sheet.version
@@ -4596,10 +4596,10 @@ components:
             params:
               level: info
               message: |-
-                alert {{alertName}} is active for group {{context.group}}:
+                Rule {{rule.name}} is active for group {{context.group}}:
 
                 - Value: {{context.value}}
-                - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
+                - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
                 - Timestamp: {{context.date}
             id: 96b668d0-a1b6-11ed-afdf-d39a49596974
             uuid: 07aef2a0-9eed-4ef9-94ec-39ba58eb609d
@@ -4670,10 +4670,10 @@ components:
                 params:
                   level: info
                   message: |-
-                    alert {{alertName}} is active for group {{context.group}}:
+                    Rule {{rule.name}} is active for group {{context.group}}:
 
                     - Value: {{context.value}}
-                    - Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}
+                    - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}
                     - Timestamp: {{context.date}}
                   connector_type_id: .server-log
                 frequency:
