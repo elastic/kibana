@@ -9,6 +9,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const ExternalLinkEmbeddableStrings = {
+  getDisplayName: () =>
+    i18n.translate('navigationEmbeddable.externalLink.displayName', {
+      defaultMessage: 'URL',
+    }),
+  getDescription: () =>
+    i18n.translate('navigationEmbeddable.externalLink.description', {
+      defaultMessage: 'Go to URL',
+    }),
   getPlaceholder: () =>
     i18n.translate('navigationEmbeddable.externalLink.editor.placeholder', {
       defaultMessage: 'Enter external URL',

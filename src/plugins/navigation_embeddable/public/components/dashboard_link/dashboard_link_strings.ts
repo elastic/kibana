@@ -9,6 +9,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const DashboardLinkEmbeddableStrings = {
+  getDisplayName: () =>
+    i18n.translate('navigationEmbeddable.dashboardLink.displayName', {
+      defaultMessage: 'Dashboard',
+    }),
+  getDescription: () =>
+    i18n.translate('navigationEmbeddable.dsahboardLink.description', {
+      defaultMessage: 'Go to dashboard',
+    }),
   getSearchPlaceholder: () =>
     i18n.translate('navigationEmbeddable.dashboardLink.editor.searchPlaceholder', {
       defaultMessage: 'Search for a dashboard',

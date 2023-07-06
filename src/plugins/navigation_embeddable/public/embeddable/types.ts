@@ -7,36 +7,29 @@
  */
 
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common';
-import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
+import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+
+import { ExternalLinkEmbeddableStrings } from '../components/external_link/external_link_strings';
+import { DashboardLinkEmbeddableStrings } from '../components/dashboard_link/dashboard_link_strings';
 
 /**
- * Explicit Input
+ * Dashboard to dashboard links
  */
-
 export const DASHBOARD_LINK_TYPE = 'dashboardLink';
-export const EXTERNAL_LINK_TYPE = 'externalLink';
-
-export const NavigationLinkInfo: {
-  [id in NavigationLinkType]: { icon: string; displayName: string; description: string };
-} = {
-  [DASHBOARD_LINK_TYPE]: {
-    icon: 'dashboardApp',
-    displayName: 'Dashboard',
-    description: 'Go to dashboard',
-  },
-  [EXTERNAL_LINK_TYPE]: {
-    icon: 'link',
-    displayName: 'URL',
-    description: 'Go to URL',
-  },
-};
-
 export interface DashboardItem {
   id: string;
   attributes: DashboardAttributes;
 }
 
+/**
+ * External URL links
+ */
+export const EXTERNAL_LINK_TYPE = 'externalLink';
+
+/**
+ * Navigation embeddable explicit input
+ */
 export type NavigationLinkType = typeof DASHBOARD_LINK_TYPE | typeof EXTERNAL_LINK_TYPE;
 
 export interface NavigationEmbeddableLink {
@@ -50,8 +43,23 @@ export interface NavigationEmbeddableInput extends EmbeddableInput {
   links: { [id: string]: NavigationEmbeddableLink };
 }
 
+export const NavigationLinkInfo: {
+  [id in NavigationLinkType]: { icon: string; displayName: string; description: string };
+} = {
+  [DASHBOARD_LINK_TYPE]: {
+    icon: 'dashboardApp',
+    displayName: DashboardLinkEmbeddableStrings.getDisplayName(),
+    description: DashboardLinkEmbeddableStrings.getDescription(),
+  },
+  [EXTERNAL_LINK_TYPE]: {
+    icon: 'link',
+    displayName: ExternalLinkEmbeddableStrings.getDisplayName(),
+    description: ExternalLinkEmbeddableStrings.getDescription(),
+  },
+};
+
 /**
- * Redux state
+ *  Navigation embeddable redux state
  */
 export interface NavigationEmbeddableComponentState {
   totalDashboards?: number;

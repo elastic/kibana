@@ -8,12 +8,17 @@
 
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { EuiButtonEmpty } from '@elastic/eui';
-import { NavigationEmbeddableLink } from '../../embeddable/types';
-import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+
+import {
+  DASHBOARD_LINK_TYPE,
+  NavigationEmbeddableLink,
+  NavigationLinkInfo,
+} from '../../embeddable/types';
 import { fetchDashboard } from './dashboard_link_tools';
+import { useNavigationEmbeddable } from '../../embeddable/navigation_embeddable';
 
 export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLink }) => {
   const navEmbeddable = useNavigationEmbeddable();
@@ -30,7 +35,7 @@ export const DashboardLinkComponent = ({ link }: { link: NavigationEmbeddableLin
   return (
     <EuiButtonEmpty
       isLoading={loadingDestinationDashboard}
-      iconType="dashboardApp" // TODO: REPLACE THIS
+      iconType={NavigationLinkInfo[DASHBOARD_LINK_TYPE].icon}
       {...(link.destination === parentDashboardId
         ? {
             color: 'text',
