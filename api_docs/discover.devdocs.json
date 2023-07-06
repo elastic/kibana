@@ -26,6 +26,191 @@
     "interfaces": [
       {
         "parentPluginId": "discover",
+        "id": "def-public.DiscoverStateContainer",
+        "type": "Interface",
+        "tags": [],
+        "label": "DiscoverStateContainer",
+        "description": [],
+        "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverStateContainer.appState",
+            "type": "Object",
+            "tags": [],
+            "label": "appState",
+            "description": [
+              "\nApp state, the _a part of the URL"
+            ],
+            "signature": [
+              "DiscoverAppStateContainer"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverStateContainer.dataState",
+            "type": "Object",
+            "tags": [],
+            "label": "dataState",
+            "description": [
+              "\nData fetching related state"
+            ],
+            "signature": [
+              "DiscoverDataStateContainer"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverStateContainer.internalState",
+            "type": "Object",
+            "tags": [],
+            "label": "internalState",
+            "description": [
+              "\nInternal shared state that's used at several places in the UI"
+            ],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.ReduxLikeStateContainer",
+                "text": "ReduxLikeStateContainer"
+              },
+              "<",
+              "InternalState",
+              ", InternalStateTransitions, {}>"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverStateContainer.savedSearchState",
+            "type": "Object",
+            "tags": [],
+            "label": "savedSearchState",
+            "description": [
+              "\nState of saved search, the saved object of Discover"
+            ],
+            "signature": [
+              "DiscoverSavedSearchContainer"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverStateContainer.searchSessionManager",
+            "type": "Object",
+            "tags": [],
+            "label": "searchSessionManager",
+            "description": [
+              "\nService for handling search sessions"
+            ],
+            "signature": [
+              "DiscoverSearchSessionManager"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverStateContainer.actions",
+            "type": "Object",
+            "tags": [],
+            "label": "actions",
+            "description": [
+              "\nComplex functions to update multiple containers from UI"
+            ],
+            "signature": [
+              "{ fetchData: (initial?: boolean | undefined) => void; initializeAndSync: () => () => void; loadDataViewList: () => Promise<void>; loadSavedSearch: (param?: ",
+              "LoadParams",
+              " | undefined) => Promise<",
+              {
+                "pluginId": "savedSearch",
+                "scope": "public",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-public.SavedSearch",
+                "text": "SavedSearch"
+              },
+              " | undefined>; onCreateDefaultAdHocDataView: (dataViewSpec: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ") => Promise<void>; onDataViewCreated: (dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => Promise<void>; onDataViewEdited: (dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => Promise<void>; onOpenSavedSearch: (savedSearchId: string) => void; onUpdateQuery: (payload: { dateRange: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              "; query?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.AggregateQuery",
+                "text": "AggregateQuery"
+              },
+              " | undefined; }, isUpdate?: boolean | undefined) => void; onChangeDataView: (id: string) => Promise<void>; setDataView: (dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => void; undoSavedSearchChanges: () => void; updateAdHocDataViewId: () => void; }"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
         "id": "def-public.ISearchEmbeddable",
         "type": "Interface",
         "tags": [],
@@ -266,6 +451,40 @@
     "misc": [
       {
         "parentPluginId": "discover",
+        "id": "def-public.CustomizationCallback",
+        "type": "Type",
+        "tags": [],
+        "label": "CustomizationCallback",
+        "description": [],
+        "signature": [
+          "(options: ",
+          "CustomizationCallbackContext",
+          ") => void | (() => void) | Promise<void | (() => void)>"
+        ],
+        "path": "src/plugins/discover/public/customizations/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.CustomizationCallback.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "CustomizationCallbackContext"
+            ],
+            "path": "src/plugins/discover/public/customizations/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
         "id": "def-public.SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID",
         "type": "string",
         "tags": [],
@@ -395,7 +614,13 @@
           "description": [],
           "signature": [
             "(profileName: string, callback: ",
-            "CustomizationCallback",
+            {
+              "pluginId": "discover",
+              "scope": "public",
+              "docId": "kibDiscoverPluginApi",
+              "section": "def-public.CustomizationCallback",
+              "text": "CustomizationCallback"
+            },
             ") => void"
           ],
           "path": "src/plugins/discover/public/plugin.tsx",
@@ -425,7 +650,13 @@
               "label": "callback",
               "description": [],
               "signature": [
-                "CustomizationCallback"
+                {
+                  "pluginId": "discover",
+                  "scope": "public",
+                  "docId": "kibDiscoverPluginApi",
+                  "section": "def-public.CustomizationCallback",
+                  "text": "CustomizationCallback"
+                }
               ],
               "path": "src/plugins/discover/public/plugin.tsx",
               "deprecated": false,
@@ -966,16 +1197,16 @@
                 "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/hooks/use_discover_link.tsx"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/multi_page_layout/hooks/use_get_logs_discover_link.tsx"
+              },
+              {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/common/components/results_links/results_links.tsx"
               },
               {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/multi_page_layout/hooks/use_get_logs_discover_link.tsx"
               },
               {
                 "plugin": "cloudSecurityPosture",
