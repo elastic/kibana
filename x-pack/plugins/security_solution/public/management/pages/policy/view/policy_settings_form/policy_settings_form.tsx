@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { BehaviourProtectionCard } from './components/behaviour_protection_card';
 import { MemoryProtectionCard } from './components/memory_protection_card';
 import { RansomwareProtectionCard } from './components/ransomware_protection_card';
 import { MalwareProtectionsCard } from './components/malware_protections_card';
@@ -40,6 +41,9 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
       <EuiSpacer size="l" />
 
       <MemoryProtectionCard {...props} data-test-subj={getTestId('memory')} />
+      <EuiSpacer size="l" />
+
+      <BehaviourProtectionCard {...props} data-test-subj={getTestId('behaviour')} />
       <EuiSpacer size="l" />
 
       <EuiSpacer size="m" />
