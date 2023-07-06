@@ -6,3 +6,6 @@
  */
 
 export { ExportType } from '@kbn/reporting-plugin/server/export_types/common';
+export { PngExportType } from './png_v2';
+export { PdfExportType } from './printable_pdf_v2';
+export { CsvSearchsourceExportType } from './csv_searchsource';

@@ -5,4 +5,7 @@
  * 2.0.
  */
 
+export { ExportType } from './export_type';
+export { PdfExportType } from './printable_pdf_v2';
 export { PngExportType } from './png_v2';
+export { CsvSearchsourceExportType } from './csv_searchsource';
