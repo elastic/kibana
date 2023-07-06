@@ -259,7 +259,7 @@ export const PolicyFormPoC = memo<{ policyId: string }>(({ policyId }) => {
       <div
         style={{
           height: '5em',
-          background: 'lightgrey',
+          background: 'yellow',
           margin: '2em 0 2em',
           padding: '2em 1em 2em',
         }}
