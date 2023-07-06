@@ -41,7 +41,7 @@ export function parseEsLog(data: string) {
   return lines;
 }
 
-function colorForLevel(level: string) {
+export function colorForLevel(level: string) {
   switch (level) {
     case 'WARN':
       return chalk.yellow;

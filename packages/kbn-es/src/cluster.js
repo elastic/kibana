@@ -17,6 +17,7 @@ const { downloadSnapshot, installSnapshot, installSource, installArchive } = req
 const { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } = require('./paths');
 const {
   log: defaultLog,
+  parseDockerLog,
   parseEsLog,
   extractConfigFiles,
   NativeRealm,
@@ -382,23 +383,23 @@ exports.Cluster = class Cluster {
       []
     );
 
-    this._log.info('%s %s', ES_BIN, args.join(' '));
     const esJavaOpts = this.javaOptions(options);
-
     this._log.info('ES_JAVA_OPTS: %s', esJavaOpts);
 
     if (isDocker) {
-      this._log.info('docker %s', dockerCmd.join(' '));
+      this._log.info('%s %s', installPath, dockerCmd.join(' '));
 
       this._process = execa(installPath, dockerCmd, {
-        stdio: ['ignore', 'inherit', 'inherit'],
+        stdio: ['ignore', 'pipe', 'pipe'],
       });
 
       // TODO: handle detached with inherit does not properly detach
       // TODO: better way to do this? attach to docker process?
-      this._process.stdout = process.stdout;
-      this._process.stderr = process.stderr;
+      // this._process.stdout = process.stdout;
+      // this._process.stderr = process.stderr;
     } else {
+      this._log.info('%s %s', ES_BIN, args.join(' '));
+
       this._process = execa(ES_BIN, args, {
         cwd: installPath,
         env: {
@@ -460,7 +461,7 @@ exports.Cluster = class Cluster {
     // parse and forward es stdout to the log
     this._process.stdout.on('data', (data) => {
       const chunk = data.toString();
-      const lines = parseEsLog(chunk);
+      const lines = isDocker ? parseDockerLog(chunk) : parseEsLog(chunk);
       lines.forEach((line) => {
         if (!reportSent && line.message.includes('publish_address')) {
           reportSent = true;

@@ -54,10 +54,17 @@ export const docker: Command = {
     const { version, password = 'changeme' } = defaults;
 
     // TODO: enrollment token + env params?
-    // TODO: allow private registry?
+    // TODO: private registry?
     // TODO: docker-compose
     // TODO: check docker installed
     // TODO: get image name by version number? snapshot or release?
+    // TODO: add serverless flag
+    // TODO: parse docker logs
+    // TODO: tests
+    // TODO: docs?
+    // TODO: validate img
+    // TODO: network?
+    // TODO: restart last container?
     return dedent`
     Options:
 
