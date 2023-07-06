@@ -486,6 +486,17 @@ describe('cors', () => {
   });
 });
 
+describe('versioned', () => {
+  it('defaults to "false" when not in dev', () => {
+    expect(config.schema.validate({}, { dev: undefined })).toMatchObject({
+      versioned: { strictRequestVersionCheck: false },
+    });
+    expect(config.schema.validate({}, { dev: false })).toMatchObject({
+      versioned: { strictRequestVersionCheck: false },
+    });
+  });
+});
+
 describe('HttpConfig', () => {
   it('converts customResponseHeaders to strings or arrays of strings', () => {
     const httpSchema = config.schema;
