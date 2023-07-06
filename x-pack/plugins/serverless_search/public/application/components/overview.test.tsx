@@ -5,10 +5,14 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '../../test/test_utils';
+import { render, core } from '../../test/test_utils';
 import { ElasticsearchOverview as Overview } from './overview';
 
 describe('<Overview />', () => {
+  beforeEach(() => {
+    core.http.fetch.mockResolvedValueOnce({ apiKeys: [] });
+  });
+
   test('renders without throwing an error', () => {
     const wrapper = render(<Overview />);
     expect(wrapper).toBeDefined();
