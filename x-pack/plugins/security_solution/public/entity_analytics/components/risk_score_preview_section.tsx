@@ -28,6 +28,7 @@ import { useRiskScorePreview } from '../api/hooks/use_preview_risk_scores';
 import { useKibana } from '../../common/lib/kibana';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
 
 interface IRiskScorePreviewPanel {
   showMessage: string;
@@ -77,12 +78,13 @@ const RiskScorePreviewPanel = ({
 };
 
 export const RiskScorePreviewSection = () => {
-  const [query, setQuery] = useState<{
-    dateRange: { from: string; to: string };
-    query: Query;
-  }>({
-    dateRange: { from: 'now-24h', to: 'now' },
-    query: { query: '', language: 'kuery' },
+  const [dateRange, setDateRange] = useState<{ from: string; to: string }>({
+    from: 'now-24h',
+    to: 'now',
+  });
+
+  const [filters, setFilters] = useState<{ bool: BoolQuery }>({
+    bool: { must: [], filter: [], should: [], must_not: [] },
   });
 
   const {
@@ -91,20 +93,13 @@ export const RiskScorePreviewSection = () => {
     },
   } = useKibana().services;
 
-  let riskScorePreviewFilter: { bool: BoolQuery } = {
-    bool: { must: [], filter: [], should: [], must_not: [] },
-  };
-  try {
-    riskScorePreviewFilter = buildEsQuery(undefined, query.query, []);
-  } catch (e) {
-    // Default to keeping default filter
-  }
+  const { addError } = useAppToasts();
 
   const { data, isLoading, refetch, isError } = useRiskScorePreview({
-    filter: riskScorePreviewFilter,
+    filter: filters,
     range: {
-      start: query.dateRange.from,
-      end: query.dateRange.to,
+      start: dateRange.from,
+      end: dateRange.to,
     },
   });
 
@@ -147,18 +142,25 @@ export const RiskScorePreviewSection = () => {
             appName="siem"
             isLoading={isLoading}
             indexPatterns={[indexPattern] as DataView[]}
-            query={query.query}
-            dateRangeFrom={query.dateRange.from}
-            dateRangeTo={query.dateRange.to}
-            onQuerySubmit={(payload) =>
-              setQuery({
-                query: payload.query ?? { query: '', language: 'kuery' },
-                dateRange: {
-                  from: payload.dateRange.from,
-                  to: payload.dateRange.to,
-                },
-              })
-            }
+            // query={query.query}
+            dateRangeFrom={dateRange.from}
+            dateRangeTo={dateRange.to}
+            onQuerySubmit={(payload) => {
+              setDateRange({
+                from: payload.dateRange.from,
+                to: payload.dateRange.to,
+              });
+              try {
+                const newFilters = buildEsQuery(
+                  undefined,
+                  payload.query ?? { query: '', language: 'kuery' },
+                  []
+                );
+                setFilters(newFilters);
+              } catch (e) {
+                addError(e, { title: i18n.PREVIEW_QUERY_ERROR_TITLE });
+              }
+            }}
             showFilterBar={false}
             showDatePicker={true}
             displayStyle={'inPage'}

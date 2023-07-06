@@ -113,7 +113,7 @@ export const PREVIEW_ERROR_TITLE = i18n.translate(
 export const PREVIEW_ERROR_MESSAGE = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.errorMessage',
   {
-    defaultMessage: 'Something went wrong when creating the preview. You can try again.',
+    defaultMessage: 'Something went wrong when creating the preview. Please try again.',
   }
 );
 
@@ -121,5 +121,12 @@ export const PREVIEW_ERROR_TRY_AGAIN = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.tryAgain',
   {
     defaultMessage: 'Try again',
+  }
+);
+
+export const PREVIEW_QUERY_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.queryErrorTitle',
+  {
+    defaultMessage: 'Invalid query',
   }
 );
