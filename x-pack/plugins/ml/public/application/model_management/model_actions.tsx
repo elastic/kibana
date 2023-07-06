@@ -80,7 +80,7 @@ export function useModelActions({
         cluster: ['manage_ingest_pipelines'],
       })
       .then((result) => {
-        const canManagePipelines = result.cluster.manage_ingest_pipelines;
+        const canManagePipelines = result.cluster?.manage_ingest_pipelines;
         if (isMounted) {
           setCanManageIngestPipelines(canManagePipelines);
         }

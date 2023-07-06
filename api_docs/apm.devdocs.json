@@ -124,7 +124,7 @@
           "section": "def-common.LocatorPublic",
           "text": "LocatorPublic"
         },
-        "<{ serviceName: undefined; } | ({ serviceName: string; } & { serviceOverviewTab?: \"errors\" | \"traces\" | \"metrics\" | \"logs\" | undefined; } & { query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
+        "<{ serviceName: undefined; } | ({ serviceName: string; } & { serviceOverviewTab?: \"errors\" | \"metrics\" | \"traces\" | \"logs\" | undefined; } & { query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
         "Branded",
         "<string, ",
         {
@@ -782,7 +782,13 @@
                 "text": "HomeServerPluginStart"
               },
               ">; } | undefined; ml?: { setup: ",
-              "SharedServices",
+              {
+                "pluginId": "ml",
+                "scope": "server",
+                "docId": "kibMlPluginApi",
+                "section": "def-server.MlPluginSetup",
+                "text": "MlPluginSetup"
+              },
               "; start: () => Promise<never>; } | undefined; security?: { setup: ",
               {
                 "pluginId": "security",
