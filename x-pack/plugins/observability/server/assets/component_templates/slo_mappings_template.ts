@@ -52,9 +52,6 @@ export const getSLOMappingsTemplate = (name: string) => ({
                 },
               },
             },
-            sliceDurationInSeconds: {
-              type: 'long',
-            },
             numerator: {
               type: 'long',
             },
