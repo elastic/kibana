@@ -65,6 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
       for (const job of testSetupJobConfigs) {
         await ml.api.createAnomalyDetectionJob(job);
       }
+      await ml.api.syncSavedObjects();
     });
 
     after(async () => {
