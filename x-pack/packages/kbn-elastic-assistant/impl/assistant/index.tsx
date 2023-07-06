@@ -80,7 +80,6 @@ const AssistantComponent: React.FC<Props> = ({
     promptContexts,
     title,
     allSystemPrompts,
-    setConversations,
   } = useAssistantContext();
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
