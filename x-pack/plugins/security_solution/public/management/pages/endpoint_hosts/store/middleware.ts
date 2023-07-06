@@ -121,7 +121,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       (action.type === 'userChangedUrl' || action.type === 'appRequestedEndpointList') &&
       isOnEndpointPage(getState())
     ) {
-      await endpointDetailsListMiddleware({ coreStart, store, fetchIndexPatterns });
+      await endpointListMiddleware({ coreStart, store, fetchIndexPatterns });
     }
 
     // Isolate Host
@@ -342,7 +342,7 @@ const loadEndpointsPendingActions = async ({
   }
 };
 
-async function endpointDetailsListMiddleware({
+async function endpointListMiddleware({
   store,
   coreStart,
   fetchIndexPatterns,
