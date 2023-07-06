@@ -93,7 +93,7 @@ describe('setAlertTagsRoute', () => {
   });
 
   describe('500s', () => {
-    test('returns 500 if ', async () => {
+    test('returns 500 if asCurrentUser throws error', async () => {
       request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_ALERT_TAGS_URL,
