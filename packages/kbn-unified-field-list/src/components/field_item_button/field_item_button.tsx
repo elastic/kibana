@@ -62,7 +62,11 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
  * @param otherProps
  * @constructor
  */
-export function FieldItemButton<T extends FieldListItem = DataViewField>({
+
+const typedMemo: <T>(c: T) => T = React.memo;
+export const FieldItemButton = typedMemo(FieldItemButtonComponent);
+
+export function FieldItemButtonComponent<T extends FieldListItem = DataViewField>({
   field,
   fieldSearchHighlight,
   isSelected,

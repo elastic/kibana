@@ -336,7 +336,6 @@ describe('FormBased Data Panel', () => {
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       onIndexPatternRefresh: jest.fn(),
-      dragDropContext: createMockedDragDropContext(),
       currentIndexPatternId: '1',
       core,
       dateRange: {
@@ -387,9 +386,6 @@ describe('FormBased Data Panel', () => {
           currentIndexPatternId: '',
         }}
         setState={jest.fn()}
-        dragDropContext={createMockedDragDropContext({
-          dragging: { id: '1', humanData: { label: 'Label' } },
-        })}
         frame={createMockFramePublicAPI()}
       />
     );

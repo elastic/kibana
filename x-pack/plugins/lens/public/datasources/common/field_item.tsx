@@ -72,6 +72,10 @@ export interface FieldItemDatatableColumnProps extends FieldItemBaseProps {
 
 export type FieldItemProps = FieldItemIndexPatternFieldProps | FieldItemDatatableColumnProps;
 
+const panelProps = {
+  'data-test-subj': 'lnsFieldListPanelFieldContent',
+};
+
 export function InnerFieldItem(props: FieldItemProps) {
   const {
     field,
@@ -175,12 +179,16 @@ export function InnerFieldItem(props: FieldItemProps) {
 
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
 
-  const { buttonAddFieldToWorkspaceProps, onAddFieldToWorkspace } = getFieldItemActions({
-    value,
-    hasSuggestionForField,
-    dropOntoWorkspace,
-    closeFieldPopover: closePopover,
-  });
+  const { buttonAddFieldToWorkspaceProps, onAddFieldToWorkspace } = useMemo(
+    () =>
+      getFieldItemActions({
+        value,
+        hasSuggestionForField,
+        dropOntoWorkspace,
+        closeFieldPopover: closePopover,
+      }),
+    [closePopover, dropOntoWorkspace, hasSuggestionForField, value]
+  );
 
   const commonFieldItemButtonProps = {
     isSelected: false, // multiple selections are allowed
@@ -201,9 +209,7 @@ export function InnerFieldItem(props: FieldItemProps) {
         initialFocus=".lnsFieldItem__fieldPanel"
         className="lnsFieldItem__popoverAnchor"
         data-test-subj="lnsFieldListPanelField"
-        panelProps={{
-          'data-test-subj': 'lnsFieldListPanelFieldContent',
-        }}
+        panelProps={panelProps}
         container={document.querySelector<HTMLElement>('.application') || undefined}
         button={
           <DragDrop

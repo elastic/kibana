@@ -292,60 +292,64 @@ const DragInner = memo(function DragInner({
     return { onKeyDown, onKeyUp };
   }, [activeDropTarget, setTargetOfIndex]);
 
-  const dragStart = (
-    e: DroppableEvent | KeyboardEvent<HTMLButtonElement>,
-    keyboardModeOn?: boolean
-  ) => {
-    // Setting stopPropgagation causes Chrome failures, so
-    // we are manually checking if we've already handled this
-    // in a nested child, and doing nothing if so...
-    if (e && 'dataTransfer' in e && e.dataTransfer.getData('text')) {
-      return;
-    }
+  const dragStart = useCallback(
+    (e: DroppableEvent | KeyboardEvent<HTMLButtonElement>, keyboardModeOn?: boolean) => {
+      // Setting stopPropgagation causes Chrome failures, so
+      // we are manually checking if we've already handled this
+      // in a nested child, and doing nothing if so...
+      if (e && 'dataTransfer' in e && e.dataTransfer.getData('text')) {
+        return;
+      }
 
-    // We only can reach the dragStart method if the element is draggable,
-    // so we know we have DraggableProps if we reach this code.
-    if (e && 'dataTransfer' in e) {
-      e.dataTransfer.setData('text', value.humanData.label);
-    }
+      // We only can reach the dragStart method if the element is draggable,
+      // so we know we have DraggableProps if we reach this code.
+      if (e && 'dataTransfer' in e) {
+        e.dataTransfer.setData('text', value.humanData.label);
+      }
 
-    // Chrome causes issues if you try to render from within a
-    // dragStart event, so we drop a setTimeout to avoid that.
+      // Chrome causes issues if you try to render from within a
+      // dragStart event, so we drop a setTimeout to avoid that.
 
-    const currentTarget = e?.currentTarget;
+      const currentTarget = e?.currentTarget;
 
-    setTimeout(() => {
-      dndDispatch({
-        type: 'startDragging',
-        payload: {
-          ...(keyboardModeOn ? { keyboardMode: true } : {}),
-          dragging: {
-            ...value,
-            ghost: keyboardModeOn
-              ? {
-                  children,
-                  style: {
-                    width: currentTarget.offsetWidth,
-                    minHeight: currentTarget?.offsetHeight,
-                  },
-                }
-              : undefined,
+      setTimeout(() => {
+        dndDispatch({
+          type: 'startDragging',
+          payload: {
+            ...(keyboardModeOn ? { keyboardMode: true } : {}),
+            dragging: {
+              ...value,
+              ghost: keyboardModeOn
+                ? {
+                    children,
+                    style: {
+                      width: currentTarget.offsetWidth,
+                      minHeight: currentTarget?.offsetHeight,
+                    },
+                  }
+                : undefined,
+            },
           },
-        },
+        });
+        onDragStart?.(currentTarget);
       });
-      onDragStart?.(currentTarget);
-    });
-  };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dndDispatch, value, onDragStart]
+  );
 
-  const dragEnd = (e?: DroppableEvent) => {
-    e?.stopPropagation();
+  const dragEnd = useCallback(
+    (e?: DroppableEvent) => {
+      e?.stopPropagation();
 
-    dndDispatch({
-      type: 'endDragging',
-      payload: { dragging: value },
-    });
-    onDragEnd?.();
-  };
+      dndDispatch({
+        type: 'endDragging',
+        payload: { dragging: value },
+      });
+      onDragEnd?.();
+    },
+    [dndDispatch, value, onDragEnd]
+  );
 
   const setNextTarget = (e: KeyboardEvent<HTMLButtonElement>, reversed = false) => {
     const nextTarget = nextValidDropTarget(
@@ -473,13 +477,13 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
     getCustomDropTarget,
   } = props;
 
-  const { dragging, activeDropTarget, dataTestSubjPrefix } = dndState;
+  const { dragging, activeDropTarget, dataTestSubjPrefix, keyboardMode } = dndState;
 
   const [isInZone, setIsInZone] = useState(false);
   const mainTargetRef = useRef<HTMLDivElement>(null);
 
   useShallowCompareEffect(() => {
-    if (dropTypes && dropTypes?.[0] && onDrop && dndState.keyboardMode) {
+    if (dropTypes && dropTypes?.[0] && onDrop && keyboardMode) {
       dndDispatch({
         type: 'registerDropTargets',
         payload: dropTypes.reduce(
@@ -491,7 +495,7 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
         ),
       });
     }
-  }, [order, dndDispatch, dropTypes, dndState.keyboardMode]);
+  }, [order, dndDispatch, dropTypes, keyboardMode]);
 
   useEffect(() => {
     let isMounted = true;
@@ -848,7 +852,7 @@ const ReorderableDrop = memo(function ReorderableDrop(
 ) {
   const { onDrop, value, dndState, dndDispatch, reorderableGroup } = props;
 
-  const { dragging, dataTestSubjPrefix } = dndState;
+  const { dragging, dataTestSubjPrefix, activeDropTarget } = dndState;
   const currentIndex = reorderableGroup.findIndex((i) => i.id === value.id);
 
   const [{ isReorderOn, reorderedItems, draggingHeight, direction }, reorderDispatch] =
@@ -871,7 +875,7 @@ const ReorderableDrop = memo(function ReorderableDrop(
   const onReorderableDragOver = (e: DroppableEvent) => {
     e.preventDefault();
     // An optimization to prevent a bunch of React churn.
-    if (dndState.activeDropTarget?.id !== value?.id && onDrop) {
+    if (activeDropTarget?.id !== value?.id && onDrop) {
       const draggingIndex = reorderableGroup.findIndex((i) => i.id === dragging?.id);
       if (!dragging || draggingIndex === -1) {
         return;

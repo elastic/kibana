@@ -25,8 +25,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
+import { ChildDragDropProvider, type DraggingIdentifier } from '@kbn/dom-drag-drop';
 import { DimensionTrigger } from '@kbn/visualization-ui-components/public';
+import memoizeOne from 'memoize-one';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -72,7 +73,7 @@ import {
   cloneLayer,
   getNotifiableFeatures,
 } from './utils';
-import { getUniqueLabelGenerator, isDraggedDataViewField } from '../../utils';
+import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
@@ -111,6 +112,20 @@ function wrapOnDot(str?: string) {
   // without us having to draw a lot of extra DOM elements, etc
   return str ? str.replace(/\./g, '.\u200B') : '';
 }
+
+const getSelectedFieldsFromColumns = memoizeOne(
+  (columns: GenericIndexPatternColumn[]) =>
+    columns
+      .flatMap((c) => {
+        if (operationDefinitionMap[c.operationType]?.getCurrentFields) {
+          return operationDefinitionMap[c.operationType]?.getCurrentFields?.(c) || [];
+        } else if ('sourceField' in c) {
+          return c.sourceField;
+        }
+      })
+      .filter(nonNullable),
+  isEqual
+);
 
 function getSortingHint(column: GenericIndexPatternColumn, dataView?: IndexPattern | DataView) {
   if (column.dataType === 'string') {
@@ -421,18 +436,9 @@ export function getFormBasedDatasource({
     },
 
     getSelectedFields(state) {
-      const fields: string[] = [];
-      Object.values(state?.layers)?.forEach((l) => {
-        const { columns } = l;
-        Object.values(columns).forEach((c) => {
-          if (operationDefinitionMap[c.operationType]?.getCurrentFields) {
-            fields.push(...(operationDefinitionMap[c.operationType]?.getCurrentFields?.(c) || []));
-          } else if ('sourceField' in c) {
-            fields.push(c.sourceField);
-          }
-        });
-      });
-      return fields;
+      return getSelectedFieldsFromColumns(
+        Object.values(state?.layers)?.flatMap((l) => Object.values(l.columns))
+      );
     },
 
     toExpression: (state, layerId, indexPatterns, dateRange, nowInstant, searchSessionId) =>
@@ -470,7 +476,7 @@ export function getFormBasedDatasource({
     },
 
     renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<FormBasedPrivateState>) {
-      const { onChangeIndexPattern, ...otherProps } = props;
+      const { onChangeIndexPattern, dragDropContext, ...otherProps } = props;
       const layerFields = formBasedDatasource?.getSelectedFields?.(props.state);
 
       render(
@@ -487,18 +493,20 @@ export function getFormBasedDatasource({
                 share,
               }}
             >
-              <FormBasedDataPanel
-                data={data}
-                dataViews={dataViews}
-                fieldFormats={fieldFormats}
-                charts={charts}
-                indexPatternFieldEditor={dataViewFieldEditor}
-                {...otherProps}
-                core={core}
-                uiActions={uiActions}
-                onIndexPatternRefresh={onRefreshIndexPattern}
-                layerFields={layerFields}
-              />
+              <ChildDragDropProvider value={dragDropContext}>
+                <FormBasedDataPanel
+                  data={data}
+                  dataViews={dataViews}
+                  fieldFormats={fieldFormats}
+                  charts={charts}
+                  indexPatternFieldEditor={dataViewFieldEditor}
+                  {...otherProps}
+                  core={core}
+                  uiActions={uiActions}
+                  onIndexPatternRefresh={onRefreshIndexPattern}
+                  layerFields={layerFields}
+                />
+              </ChildDragDropProvider>
             </KibanaContextProvider>
           </I18nProvider>
         </KibanaThemeProvider>,
