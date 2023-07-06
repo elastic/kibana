@@ -77,7 +77,7 @@ fi
 
 echo "Extracting Elastic Agent"
 updateStepProgress "ea-extract" "loading"
-tar -xzf ${artifact}.tar.gz --checkpoint=.1000
+tar -xzf ${artifact}.tar.gz
 echo ""
 if [ "$?" -eq 0 ]; then
   echo "Elastic Agent extracted"
