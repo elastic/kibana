@@ -136,6 +136,9 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
               targetRules.push({ ...current, version: target.version });
               break;
             case PickVersionValues.TARGET:
+              // if (target.rule_id === 'a00681e3-9ed6-447c-ab2c-be648821c622') {
+              //   debugger;
+              // }
               targetRules.push(target);
               break;
             default:

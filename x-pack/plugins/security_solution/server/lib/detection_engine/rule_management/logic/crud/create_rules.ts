@@ -37,6 +37,7 @@ export const createRules = async ({
     data: internalRule,
     allowMissingConnectorSecrets,
   });
+  debugger;
 
   return rule;
 };
