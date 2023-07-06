@@ -6,7 +6,10 @@
  */
 
 import rison from '@kbn/rison';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  SearchMvtRequest,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RENDER_AS } from './constants';
 
 export function getAggsTileRequest({
@@ -32,7 +35,7 @@ export function getAggsTileRequest({
   y: number;
   z: number;
 }) {
-  const requestBody = rison.decode(risonRequestBody) as estypes.SearchRequest['body'];
+  const requestBody = rison.decode(risonRequestBody) as SearchRequest['body'];
   if (!requestBody) {
     throw new Error('Required requestBody parameter not provided');
   }
@@ -53,7 +56,7 @@ export function getAggsTileRequest({
       fields: requestBody.fields ? requestBody.fields : [],
       runtime_mappings: requestBody.runtime_mappings,
       with_labels: hasLabels,
-    } as estypes.SearchMvtRequest['body'],
+    } as SearchMvtRequest['body'],
   };
 }
 
@@ -76,7 +79,7 @@ export function getHitsTileRequest({
   y: number;
   z: number;
 }) {
-  const requestBody = rison.decode(risonRequestBody) as estypes.SearchRequest['body'];
+  const requestBody = rison.decode(risonRequestBody) as SearchRequest['body'];
   if (!requestBody) {
     throw new Error('Required requestBody parameter not provided');
   }
@@ -89,7 +92,7 @@ export function getHitsTileRequest({
     runtime_mappings: requestBody.runtime_mappings,
     track_total_hits: typeof requestBody.size === 'number' ? requestBody.size + 1 : false,
     with_labels: hasLabels,
-  } as estypes.SearchMvtRequest['body'];
+  } as SearchMvtRequest['body'];
   if (requestBody.fields) {
     // @ts-expect-error SearchRequest['body'].fields and SearchMvtRequest['body'].fields types do not allign, even though they do in implemenation
     tileRequestBody.fields = requestBody.fields;
