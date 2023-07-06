@@ -26,6 +26,22 @@ export const RulesTableToolbar = React.memo(() => {
     (ruleManagementFilters?.rules_summary.prebuilt_installed_count ?? 0);
   const updateTotal = prebuiltRulesStatus?.num_prebuilt_rules_to_upgrade ?? 0;
 
+  const ruleUpdateTab = useMemo(
+    () => ({
+      [AllRulesTabs.updates]: {
+        id: AllRulesTabs.updates,
+        name: i18n.RULE_UPDATES_TAB,
+        disabled: false,
+        href: `/rules/${AllRulesTabs.updates}`,
+        isBeta: updateTotal > 0,
+        betaOptions: {
+          text: `${updateTotal}`,
+        },
+      },
+    }),
+    [updateTotal]
+  );
+
   const ruleTabs = useMemo(
     () => ({
       [AllRulesTabs.management]: {
@@ -48,18 +64,9 @@ export const RulesTableToolbar = React.memo(() => {
           text: `${installedTotal}`,
         },
       },
-      [AllRulesTabs.updates]: {
-        id: AllRulesTabs.updates,
-        name: i18n.RULE_UPDATES_TAB,
-        disabled: false,
-        href: `/rules/${AllRulesTabs.updates}`,
-        isBeta: updateTotal > 0,
-        betaOptions: {
-          text: `${updateTotal}`,
-        },
-      },
+      ...(updateTotal > 0 ? ruleUpdateTab : {}),
     }),
-    [installedTotal, updateTotal]
+    [installedTotal, ruleUpdateTab, updateTotal]
   );
 
   return <TabNavigation navTabs={ruleTabs} />;

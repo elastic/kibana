@@ -53,11 +53,14 @@ export const remove890Indices: SavedObjectMigrationFn<
     indicesArr.push('heartbeat-8*');
   }
 
+  const syntheticsIndexRemoved = indexToRemove > -1;
+
   return {
     ...doc,
     attributes: {
       ...doc.attributes,
       heartbeatIndices: indicesArr.join(','),
+      ...(syntheticsIndexRemoved && { syntheticsIndexRemoved }),
     },
   };
 };
