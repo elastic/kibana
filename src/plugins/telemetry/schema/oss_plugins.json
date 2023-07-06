@@ -8938,6 +8938,12 @@
             "description": "Default value of the setting was changed."
           }
         },
+        "securitySolution:alertTags": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Default value of the setting was changed."
+          }
+        },
         "securitySolution:newsFeedUrl": {
           "type": "keyword",
           "_meta": {
@@ -9074,12 +9080,6 @@
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
-          }
-        },
-        "securitySolution:alertTags": {
-          "type": "keyword",
-          "_meta": {
-            "description": "Default value of the setting was changed."
           }
         },
         "search:includeFrozen": {

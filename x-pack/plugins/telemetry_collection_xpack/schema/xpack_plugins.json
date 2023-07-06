@@ -5418,6 +5418,165 @@
         }
       }
     },
+    "cloud_defend": {
+      "properties": {
+        "indices": {
+          "properties": {
+            "alerts": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "file": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "process": {
+              "properties": {
+                "doc_count": {
+                  "type": "long"
+                },
+                "deleted": {
+                  "type": "long"
+                },
+                "size_in_bytes": {
+                  "type": "long"
+                },
+                "last_doc_timestamp": {
+                  "type": "date"
+                }
+              }
+            },
+            "latestPackageVersion": {
+              "type": "keyword"
+            },
+            "packageStatus": {
+              "properties": {
+                "status": {
+                  "type": "keyword"
+                },
+                "installedPackagePolicies": {
+                  "type": "long"
+                },
+                "healthyAgents": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "pods_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
+              "container_image_name": {
+                "type": "keyword"
+              },
+              "pod_name": {
+                "type": "keyword"
+              },
+              "process_doc_count": {
+                "type": "long"
+              },
+              "file_doc_count": {
+                "type": "long"
+              },
+              "alert_doc_count": {
+                "type": "long"
+              }
+            }
+          }
+        },
+        "accounts_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "account_id": {
+                "type": "keyword"
+              },
+              "total_doc_count": {
+                "type": "long"
+              },
+              "file_doc_count": {
+                "type": "long"
+              },
+              "process_doc_count": {
+                "type": "long"
+              },
+              "alert_doc_count": {
+                "type": "long"
+              },
+              "kubernetes_version": {
+                "type": "keyword"
+              },
+              "agents_count": {
+                "type": "short"
+              },
+              "nodes_count": {
+                "type": "short"
+              },
+              "pods_count": {
+                "type": "short"
+              }
+            }
+          }
+        },
+        "installation_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "package_policy_id": {
+                "type": "keyword"
+              },
+              "policy_yaml": {
+                "type": "keyword"
+              },
+              "policy_json": {
+                "type": "keyword"
+              },
+              "package_version": {
+                "type": "keyword"
+              },
+              "agent_policy_id": {
+                "type": "keyword"
+              },
+              "created_at": {
+                "type": "date"
+              },
+              "agent_count": {
+                "type": "long"
+              }
+            }
+          }
+        }
+      }
+    },
     "cloud_security_posture": {
       "properties": {
         "indices": {

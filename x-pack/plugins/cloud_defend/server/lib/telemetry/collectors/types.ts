@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { CloudDefendStatusCode } from '../../../../common';
-
 export interface CloudDefendUsage {
   indices: CloudDefendIndicesStats;
   pods_stats: CloudDefendPodsStats[];
@@ -15,7 +13,7 @@ export interface CloudDefendUsage {
 }
 
 export interface PackageSetupStatus {
-  status: CloudDefendStatusCode;
+  status: string;
   installedPackagePolicies: number;
   healthyAgents: number;
 }
