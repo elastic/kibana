@@ -16,8 +16,8 @@ TIP: In the `Description` area, you can use
 https://www.markdownguide.org/cheat-sheet[Markdown] syntax to create formatted
 text.
 
-. Optionally, add assignees and tags. You can add users only if they meet
-the necessary <<setup-cases,prerequisites>>.
+. Optionally, add a category, assignees, and tags.
+You can add users only if they meet the necessary <<setup-cases,prerequisites>>.
 
 . For *External incident management system*, select a connector. For more
 information, refer to <<add-case-connectors>>.
@@ -115,7 +115,7 @@ When you subsequently add assignees to cases, they receive an email.
 === Manage cases
 
 In *Management > {stack-manage-app} > Cases*, you can search cases and filter
-them by attributes such as assignees, severity, status, and tags. You can also
+them by attributes such as assignees, categories, severity, status, and tags. You can also
 select multiple cases and use bulk actions to delete cases or change their
 attributes.
 
@@ -126,7 +126,7 @@ To view a case, click on its name. You can then:
 * Add or remove assignees.
 * Add a connector.
 * Send updates to external systems (if external connections are configured).
-* Edit tags.
+* Edit the category and tags.
 * Refresh the case to retrieve the latest updates.
 * Change the status.
 * Change the severity.
