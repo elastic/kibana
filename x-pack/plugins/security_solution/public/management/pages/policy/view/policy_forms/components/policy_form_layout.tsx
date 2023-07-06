@@ -16,6 +16,8 @@ import {
   EuiSpacer,
   EuiPanel,
   EuiSkeletonText,
+  EuiSwitch,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -208,6 +210,10 @@ PolicyFormLayout.displayName = 'PolicyFormLayout';
 export const PolicyFormPoC = memo<{ policyId: string }>(({ policyId }) => {
   const { error, data } = useFetchEndpointPolicy(policyId);
   const [policySettings, setPolicySettings] = useState(data?.settings);
+  const [isViewOnlyMode, setIsViewOnlyMode] = useState(false);
+  const handleViewModeChange = useCallback(() => {
+    setIsViewOnlyMode((prevState) => !prevState);
+  }, []);
 
   const handleSettingsOnChange: PolicySettingsFormProps['onChange'] = useCallback(
     ({ updatedPolicy }) => {
@@ -234,7 +240,21 @@ export const PolicyFormPoC = memo<{ policyId: string }>(({ policyId }) => {
 
   return (
     <div>
-      <PolicySettingsForm policy={policySettings} onChange={handleSettingsOnChange} mode="edit" />
+      <div>
+        <EuiSwitch
+          label={'View only mode'}
+          checked={isViewOnlyMode}
+          onChange={handleViewModeChange}
+        />
+      </div>
+
+      <EuiHorizontalRule margin="xxl" />
+
+      <PolicySettingsForm
+        policy={policySettings}
+        onChange={handleSettingsOnChange}
+        mode={isViewOnlyMode ? 'view' : 'edit'}
+      />
 
       <div
         style={{

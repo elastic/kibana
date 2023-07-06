@@ -19,7 +19,7 @@ import type {
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import type { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
 
-export interface ProtectionSwitchProps extends PolicyFormComponentCommonProps {
+export interface ProtectionSettingCardSwitchProps extends PolicyFormComponentCommonProps {
   protection: PolicyProtection;
   protectionLabel?: string;
   osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
@@ -34,7 +34,7 @@ export interface ProtectionSwitchProps extends PolicyFormComponentCommonProps {
   }) => PolicyConfig;
 }
 
-export const ProtectionSwitch = React.memo(
+export const ProtectionSettingCardSwitch = React.memo(
   ({
     protection,
     protectionLabel,
@@ -43,10 +43,20 @@ export const ProtectionSwitch = React.memo(
     onChange,
     policy,
     mode,
-  }: ProtectionSwitchProps) => {
+  }: ProtectionSettingCardSwitchProps) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const showEditableFormFields = mode === 'edit';
+    const isEditMode = mode === 'edit';
     const selected = policy && policy.windows[protection].mode;
+    const switchLabel = i18n.translate(
+      'xpack.securitySolution.endpoint.policy.details.protectionsEnabled',
+      {
+        defaultMessage: '{protectionLabel} {mode, select, true {enabled} false {disabled}}',
+        values: {
+          protectionLabel,
+          mode: selected !== ProtectionModes.off,
+        },
+      }
+    );
 
     const handleSwitchChange = useCallback(
       (event) => {
@@ -110,22 +120,20 @@ export const ProtectionSwitch = React.memo(
       [policy, onChange, additionalOnSwitchChange, osList, isPlatinumPlus, protection]
     );
 
+    if (!isEditMode) {
+      return <>{switchLabel}</>;
+    }
+
     return (
       <EuiSwitch
-        label={i18n.translate('xpack.securitySolution.endpoint.policy.details.protectionsEnabled', {
-          defaultMessage: '{protectionLabel} {mode, select, true {enabled} false {disabled}}',
-          values: {
-            protectionLabel,
-            mode: selected !== ProtectionModes.off,
-          },
-        })}
+        label={switchLabel}
         checked={selected !== ProtectionModes.off}
         onChange={handleSwitchChange}
-        disabled={!showEditableFormFields}
+        disabled={!isEditMode}
         data-test-subj={`${protection}ProtectionSwitch`}
       />
     );
   }
 );
 
-ProtectionSwitch.displayName = 'ProtectionSwitch';
+ProtectionSettingCardSwitch.displayName = 'ProtectionSettingCardSwitch';

@@ -22,6 +22,14 @@ import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import type { MacPolicyProtection, LinuxPolicyProtection, PolicyProtection } from '../../../types';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 
+const DETECT_LABEL = i18n.translate('xpack.securitySolution.endpoint.policy.details.detect', {
+  defaultMessage: 'Detect',
+});
+
+const PREVENT_LABEL = i18n.translate('xpack.securitySolution.endpoint.policy.details.prevent', {
+  defaultMessage: 'Prevent',
+});
+
 export type DetectPreventProtectionLavelProps = PolicyFormComponentCommonProps & {
   protection: PolicyProtection;
   osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
@@ -29,6 +37,8 @@ export type DetectPreventProtectionLavelProps = PolicyFormComponentCommonProps &
 
 export const DetectPreventProtectionLevel = memo<DetectPreventProtectionLavelProps>(
   ({ policy, protection, osList, mode, onChange, 'data-test-subj': dataTestSubj }) => {
+    const isEditMode = mode === 'edit';
+
     // FIXME:PT remove this. Make it module global const
     const radios: Immutable<
       Array<{
@@ -40,20 +50,26 @@ export const DetectPreventProtectionLevel = memo<DetectPreventProtectionLavelPro
       return [
         {
           id: ProtectionModes.detect,
-          label: i18n.translate('xpack.securitySolution.endpoint.policy.details.detect', {
-            defaultMessage: 'Detect',
-          }),
+          label: DETECT_LABEL,
           flexGrow: 1,
         },
         {
           id: ProtectionModes.prevent,
-          label: i18n.translate('xpack.securitySolution.endpoint.policy.details.prevent', {
-            defaultMessage: 'Prevent',
-          }),
+          label: PREVENT_LABEL,
           flexGrow: 5,
         },
       ];
     }, []);
+
+    const currentProtectionLevelLabel = useMemo(() => {
+      const radio = radios.find((item) => item.id === policy.windows[protection].mode);
+
+      if (radio) {
+        return radio.label;
+      }
+
+      return PREVENT_LABEL;
+    }, [policy.windows, protection, radios]);
 
     return (
       <>
@@ -65,21 +81,25 @@ export const DetectPreventProtectionLevel = memo<DetectPreventProtectionLavelPro
         </SettingCardHeader>
         <EuiSpacer size="xs" />
         <EuiFlexGroup>
-          {radios.map(({ label, id, flexGrow }) => {
-            return (
-              <EuiFlexItem grow={flexGrow} key={id}>
-                <ProtectionRadio
-                  policy={policy}
-                  onChange={onChange}
-                  mode={mode}
-                  protection={protection}
-                  protectionMode={id}
-                  osList={osList}
-                  label={label}
-                />
-              </EuiFlexItem>
-            );
-          })}
+          {isEditMode ? (
+            radios.map(({ label, id, flexGrow }) => {
+              return (
+                <EuiFlexItem grow={flexGrow} key={id}>
+                  <ProtectionRadio
+                    policy={policy}
+                    onChange={onChange}
+                    mode={mode}
+                    protection={protection}
+                    protectionMode={id}
+                    osList={osList}
+                    label={label}
+                  />
+                </EuiFlexItem>
+              );
+            })
+          ) : (
+            <>{currentProtectionLevelLabel}</>
+          )}
         </EuiFlexGroup>
       </>
     );

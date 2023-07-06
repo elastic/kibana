@@ -18,12 +18,41 @@ import {
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
+import { getEmptyValue } from '../../../../../../common/components/empty_value';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import { SettingCardHeader } from './setting_card';
 import type { PolicyFormComponentCommonProps } from '../types';
 import type { ImmutableArray, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import type { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
+
+const NOTIFY_USER_CHECKBOX_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policyDetail.notifyUser',
+  {
+    defaultMessage: 'Notify user',
+  }
+);
+
+const DO_NOT_NOTIFY_USER_CHECKBOX_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policyDetail.doNotNotifyUser',
+  {
+    defaultMessage: "Don't notify user",
+  }
+);
+
+const NOTIFICATION_MESSAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policyDetailsConfig.customizeUserNotification',
+  {
+    defaultMessage: 'Notification message',
+  }
+);
+
+const CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.policyDetailsConfig.customizeUserNotification',
+  {
+    defaultMessage: 'Customize notification message',
+  }
+);
 
 interface NotifyUserOptionProps extends PolicyFormComponentCommonProps {
   protection: PolicyProtection;
@@ -34,10 +63,13 @@ export const NotifyUserOption = React.memo(
   ({ policy, onChange, mode, protection, osList }: NotifyUserOptionProps) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
 
-    const showEditableFormFields = mode === 'edit';
+    const isEditMode = mode === 'edit';
     const selected = policy.windows[protection].mode;
     const userNotificationSelected = policy.windows.popup[protection].enabled;
     const userNotificationMessage = policy.windows.popup[protection].message;
+    const checkboxLabel = userNotificationSelected
+      ? NOTIFY_USER_CHECKBOX_LABEL
+      : DO_NOT_NOTIFY_USER_CHECKBOX_LABEL;
 
     const handleUserNotificationCheckbox = useCallback(
       (event) => {
@@ -129,73 +161,81 @@ export const NotifyUserOption = React.memo(
         <SupportedVersionForProtectionNotice protection={protection} />
 
         <EuiSpacer size="s" />
-        <EuiCheckbox
-          data-test-subj={`${protection}UserNotificationCheckbox`}
-          id={`${protection}UserNotificationCheckbox}`}
-          onChange={handleUserNotificationCheckbox}
-          checked={userNotificationSelected}
-          disabled={!showEditableFormFields || selected === ProtectionModes.off}
-          label={i18n.translate('xpack.securitySolution.endpoint.policyDetail.notifyUser', {
-            defaultMessage: 'Notify user',
-          })}
-        />
-        {userNotificationSelected && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  <h4>
-                    <FormattedMessage
-                      id="xpack.securitySolution.endpoint.policyDetailsConfig.customizeUserNotification"
-                      defaultMessage="Customize notification message"
-                    />
-                  </h4>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} data-test-subj={`${protection}TooltipIcon`}>
-                <EuiIconTip
-                  position="right"
-                  data-test-subj={`${protection}Tooltip`}
-                  content={
-                    <>
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.a"
-                        defaultMessage="Selecting the user notification option will display a notification to the host user when { protectionName } is prevented or detected."
-                        values={{
-                          protectionName: tooltipProtectionText(protection),
-                        }}
-                      />
-                      <EuiSpacer size="m" />
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.c"
-                        defaultMessage="
-                    The user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the { bracketText }."
-                        values={{
-                          bracketText: tooltipBracketText(protection),
-                        }}
-                      />
-                    </>
-                  }
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="xs" />
-            <EuiTextArea
-              placeholder={i18n.translate(
-                'xpack.securitySolution.endpoint.policyDetails.userNotification.placeholder',
-                {
-                  defaultMessage: 'Input your custom notification message',
-                }
-              )}
-              value={userNotificationMessage}
-              onChange={handleCustomUserNotification}
-              fullWidth={true}
-              disabled={!showEditableFormFields}
-              data-test-subj={`${protection}UserNotificationCustomMessage`}
-            />
-          </>
+
+        {isEditMode ? (
+          <EuiCheckbox
+            data-test-subj={`${protection}UserNotificationCheckbox`}
+            id={`${protection}UserNotificationCheckbox}`}
+            onChange={handleUserNotificationCheckbox}
+            checked={userNotificationSelected}
+            disabled={!isEditMode || selected === ProtectionModes.off}
+            label={checkboxLabel}
+          />
+        ) : (
+          <>{checkboxLabel}</>
         )}
+
+        {userNotificationSelected &&
+          (isEditMode ? (
+            <>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <h4>{CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL}</h4>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} data-test-subj={`${protection}TooltipIcon`}>
+                  <EuiIconTip
+                    position="right"
+                    data-test-subj={`${protection}Tooltip`}
+                    content={
+                      <>
+                        <FormattedMessage
+                          id="xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.a"
+                          defaultMessage="Selecting the user notification option will display a notification to the host user when { protectionName } is prevented or detected."
+                          values={{
+                            protectionName: tooltipProtectionText(protection),
+                          }}
+                        />
+                        <EuiSpacer size="m" />
+                        <FormattedMessage
+                          id="xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.c"
+                          defaultMessage="
+                      The user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the { bracketText }."
+                          values={{
+                            bracketText: tooltipBracketText(protection),
+                          }}
+                        />
+                      </>
+                    }
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="xs" />
+              <EuiTextArea
+                placeholder={i18n.translate(
+                  'xpack.securitySolution.endpoint.policyDetails.userNotification.placeholder',
+                  {
+                    defaultMessage: 'Input your custom notification message',
+                  }
+                )}
+                value={userNotificationMessage}
+                onChange={handleCustomUserNotification}
+                fullWidth={true}
+                disabled={!isEditMode}
+                data-test-subj={`${protection}UserNotificationCustomMessage`}
+              />
+            </>
+          ) : (
+            <>
+              <EuiSpacer size="m" />
+              <EuiText size="s">
+                <h4>{NOTIFICATION_MESSAGE_LABEL}</h4>
+              </EuiText>
+              <>{userNotificationMessage || getEmptyValue()}</>
+            </>
+          ))}
       </>
     );
   }
