@@ -158,7 +158,7 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
   if (dynamicTemplates.length > 0) {
     indexTemplateMappings.dynamic_templates = dynamicTemplates;
   }
-  if (runtimeFields) {
+  if (Object.keys(runtimeFields).length > 0) {
     console.log('>> adding runtime fields', runtimeFields);
     indexTemplateMappings.runtime = runtimeFields;
   }
