@@ -60,6 +60,10 @@ properties:
                   description: The field of the metric.
                   type: string
                   example: processor.processed
+                filter:
+                  description: The filter to apply to the metric.
+                  type: string
+                  example: processor.outcome: "success"
           equation:
             description: The equation to calculate the "good" metric.
             type: string
@@ -96,6 +100,10 @@ properties:
                   description: The field of the metric.
                   type: string
                   example: processor.processed
+                filter:
+                  description: The filter to apply to the metric.
+                  type: string
+                  example: processor.outcome: *
           equation:
             description: The equation to calculate the "total" metric.
             type: string
