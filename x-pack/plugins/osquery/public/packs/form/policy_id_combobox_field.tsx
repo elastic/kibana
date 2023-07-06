@@ -66,11 +66,15 @@ const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption<string>) => (
       <EuiFlexGroup>
+        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+        {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
         <EuiFlexItem css={agentPolicyColumnCss} grow={2}>
           <span className="eui-textTruncate">
             {(option.key && agentPoliciesById?.[option.key]?.name) ?? option.label}
           </span>
         </EuiFlexItem>
+        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+        {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
         <EuiFlexItem css={agentPolicyColumnCss} grow={5}>
           <EuiTextColor className="eui-textTruncate" color="subdued">
             {(option.key && agentPoliciesById?.[option.key].description) ?? ''}

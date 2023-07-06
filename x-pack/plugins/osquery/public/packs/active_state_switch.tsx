@@ -19,7 +19,7 @@ import { useUpdatePack } from './use_update_pack';
 import { PACKS_ID } from './constants';
 import type { PackSavedObject } from './types';
 
-const euiLoadingSpinnerCss = ({ theme }: { theme: EuiThemeComputed }) => ({
+const euiLoadingSpinnerCss = (theme: EuiThemeComputed) => ({
   marginRight: theme.size.s,
 });
 
@@ -91,6 +91,8 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
 
   return (
     <>
+      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+      {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
       {isLoading && <EuiLoadingSpinner css={euiLoadingSpinnerCss} />}
       <EuiSwitch
         checked={!!item.enabled}

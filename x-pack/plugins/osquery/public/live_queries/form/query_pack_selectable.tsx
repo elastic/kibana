@@ -5,50 +5,59 @@
  * 2.0.
  */
 
+import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useController } from 'react-hook-form';
+import styled from '@emotion/styled';
 
-const euiCardCss = ({ theme, selectable }) => ({
-  padding: 0,
-  display: 'flex',
-  flexDirection: 'row',
-  border:
-    selectable?.isSelected &&
-    `1px solid ${theme.colors ? theme.colors.success : theme.eui.euiColorSuccess}`,
-  '.euiCard__content': {
-    padding: '16px 92px 16px 16px !important',
-  },
-  '.euiTitle': {
-    fontSize: '1rem',
-  },
-  '.euiText': {
-    marginTop: 0,
-    color: theme.colors ? theme.colors.subduedText : theme.eui.euiTextSubduedColor,
-  },
+const StyledEuiCard = styled(EuiCard)`
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  border: ${({
+    theme,
+    selectable,
+  }: {
+    theme: EuiThemeComputed;
+    selectable: { isSelected: boolean };
+  }) => {
+    if (selectable?.isSelected) {
+      return `1px solid ${theme.colors.success}`;
+    }
+  }};
+  .euiCard__content {
+    padding: 16px 92px 16px 16px !important;
+  }
+  .euiTitle {
+    font-size: 1rem;
+  }
+  .euiText {
+    margin-top: 0;
+    color: ${({ theme }) => theme.colors.subduedText};
+  }
 
-  '> button[role="switch"]': {
-    minInlineSize: '80px',
-    height: '100% !important',
-    width: '80px',
-    borderRadius: '0 5px 5px 0',
+  > button[role='switch'] {
+    min-inline-size: 80px;
+    height: 100% !important;
+    width: 80px;
+    border-radius: 0 5px 5px 0;
 
-    '> span': {
-      '> svg': {
-        width: '18px',
-        height: '18px',
-        display: 'inline-block !important',
-      },
+    > span {
+      > svg {
+        width: 18px;
+        height: 18px;
+        display: inline-block !important;
+      }
 
       // hide the label
-      '> :not(svg)': {
-        display: 'none',
-      },
-    },
-  },
-});
-
+      > :not(svg) {
+        display: none;
+      }
+    }
+  }
+`;
 interface QueryPackSelectableProps {
   canRunSingleQuery: boolean;
   canRunPacks: boolean;
@@ -99,8 +108,9 @@ export const QueryPackSelectable = ({
       <EuiFormRow label="Query type" fullWidth>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
-            <EuiCard
-              css={euiCardCss}
+            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+            {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
+            <StyledEuiCard
               layout="horizontal"
               title={i18n.translate('xpack.osquery.liveQuery.queryForm.singleQueryTypeLabel', {
                 defaultMessage: 'Single query',
@@ -118,8 +128,9 @@ export const QueryPackSelectable = ({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiCard
-              css={euiCardCss}
+            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+            {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
+            <StyledEuiCard
               layout="horizontal"
               title={i18n.translate('xpack.osquery.liveQuery.queryForm.packQueryTypeLabel', {
                 defaultMessage: 'Pack',

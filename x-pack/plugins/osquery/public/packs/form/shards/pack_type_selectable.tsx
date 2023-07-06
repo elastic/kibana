@@ -9,31 +9,41 @@ import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiRadio } from '@elast
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
+import styled from '@emotion/styled';
+import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
-const euiCardCss = ({ theme, selectable }) => ({
-  padding: '16px 92px 16px 16px !important',
-  border:
-    selectable?.isSelected &&
-    `1px solid ${theme.colors ? theme.colors.success : theme.eui.euiColorSuccess}`,
+const StyledEuiCard = styled(EuiCard)`
+  padding: 16px 92px 16px 16px !important;
+  border: ${({
+    theme,
+    selectable,
+  }: {
+    theme: EuiThemeComputed;
+    selectable: { isSelected: boolean };
+  }) => {
+    if (selectable?.isSelected) {
+      return `1px solid ${theme.colors.success}`;
+    }
+  }};
 
-  '.euiTitle': {
-    fontSize: '1rem',
-  },
+  .euiTitle {
+    font-size: 1rem;
+  }
 
-  '.euiSpacer': {
-    display: 'none',
-  },
+  .euiSpacer {
+    display: none;
+  }
 
-  '.euiText': {
-    marginTop: 0,
-    marginLeft: '25px',
-    color: theme.colors ? theme.colors.subduedText : theme.eui.euiTextSubduedColor,
-  },
+  .euiText {
+    margin-top: 0;
+    margin-left: 25px;
+    color: ${({ theme }) => theme.colors.subduedText};
+  }
 
-  '> button[role="switch"]': {
-    display: 'none',
-  },
-});
+  > button[role='switch'] {
+    display: none;
+  }
+`;
 
 interface PackTypeSelectableProps {
   packType: string;
@@ -76,8 +86,9 @@ const PackTypeSelectableComponent = ({
       <EuiFormRow label="Type" fullWidth>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
-            <EuiCard
-              css={euiCardCss}
+            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+            {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
+            <StyledEuiCard
               layout="horizontal"
               title={
                 <EuiRadio
@@ -100,8 +111,9 @@ const PackTypeSelectableComponent = ({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiCard
-              css={euiCardCss}
+            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+            {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
+            <StyledEuiCard
               layout="horizontal"
               title={
                 <EuiRadio

@@ -10,14 +10,11 @@ import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
+import { css } from '@emotion/react/dist/emotion-react.cjs';
 import type { ShardsArray } from '../../../../common/schemas/common/utils';
 import { ShardsPolicyField } from './shards_policy_field';
 import { ShardsPercentageField } from './shards_percentage_field';
 import { overflowCss } from '../../utils';
-
-const buttonWrapperCss = ({ index }: { index: number }) => ({
-  marginTop: index === 0 && '16px',
-});
 
 export type ShardsFormReturn = UseFormReturn<{ shardsArray: ShardsArray }>;
 
@@ -42,6 +39,13 @@ const ShardsFormComponent = ({
     }
   }, [index, onDelete]);
 
+  const buttonWrapperCss = useCallback(
+    () => css`
+      margin-top: ${index === 0 && '16px'};
+    `,
+    [index]
+  );
+
   return (
     <>
       <EuiFlexGroup
@@ -64,7 +68,7 @@ const ShardsFormComponent = ({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <div css={buttonWrapperCss} index={index}>
+              <div css={buttonWrapperCss}>
                 <EuiButtonIcon
                   aria-label={i18n.translate(
                     'xpack.osquery.pack.form.deleteShardsRowButtonAriaLabel',

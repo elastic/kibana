@@ -11,6 +11,7 @@ import { EuiCodeBlock, EuiFormRow, EuiAccordion, EuiSpacer } from '@elastic/eui'
 import React, { useCallback, useMemo, useState } from 'react';
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import type { LiveQueryFormFields } from '.';
 import { OsqueryEditor } from '../../editor';
 import { useKibana } from '../../common/lib/kibana';
@@ -22,9 +23,9 @@ const euiCodeBlockCss = {
   minHeight: '100px',
 };
 
-const euiAccordionCss = ({ theme }) => ({
+const euiAccordionCss = (theme: EuiThemeComputed) => ({
   '.euiAccordion__button': {
-    color: theme.colors ? theme.colors.primary : theme.eui.euiColorPrimary,
+    color: theme.colors.primary,
   },
   '.euiAccordion__childWrapper': {
     '-webkit-transition': 'none',
@@ -147,6 +148,8 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
 
       {!isAdvancedToggleHidden && (
         <EuiAccordion
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>
           css={euiAccordionCss}
           id="advanced"
           forceState={advancedContentState}

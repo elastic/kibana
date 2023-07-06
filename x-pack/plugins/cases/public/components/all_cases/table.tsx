@@ -84,6 +84,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         selectedCases={selectedCases}
         deselectCases={deselectCases}
       />
+      test
       <EuiBasicTable
         className={classnames({ isSelectorView })}
         columns={columns}

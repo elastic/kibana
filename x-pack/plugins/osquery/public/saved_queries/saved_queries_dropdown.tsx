@@ -98,6 +98,8 @@ const SavedQueriesDropdownComponent: React.FC<SavedQueriesDropdownProps> = ({
         <div css={textTruncateCss}>
           <EuiTextColor color="subdued">{value.description}</EuiTextColor>
         </div>
+        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+        {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
         <EuiCodeBlock css={euiCodeBlockCss} language="sql" fontSize="m" paddingSize="s">
           {value.query.split('\n').join(' ')}
         </EuiCodeBlock>

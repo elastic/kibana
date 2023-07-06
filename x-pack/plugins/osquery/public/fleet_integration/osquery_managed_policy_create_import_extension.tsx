@@ -28,6 +28,7 @@ import type {
   PackagePolicyEditExtensionComponentProps,
 } from '@kbn/fleet-plugin/public';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { useKibana } from '../common/lib/kibana';
 import { NavigationButtons } from './navigation_buttons';
@@ -135,9 +136,9 @@ export const packConfigFilesValidator = (
 
 const CommonUseField = getUseField({ component: Field });
 
-const euiAccordionCss = ({ theme }) => ({
+const euiAccordionCss = (theme: EuiThemeComputed) => ({
   '.euiAccordion__button': {
-    color: theme.colors ? theme.colors.primary : theme.eui.euiColorPrimary,
+    color: theme.colors.primary,
   },
 });
 
@@ -373,6 +374,8 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
           <NavigationButtons isDisabled={!editMode} agentPolicyId={policy?.policy_id} />
           <EuiSpacer size="xxl" />
           <EuiAccordion
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>
             css={euiAccordionCss}
             id="advanced"
             buttonContent={i18n.translate(

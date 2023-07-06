@@ -29,7 +29,7 @@ import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useAgentPolicyAgentIds } from '../../../agents/use_agent_policy_agent_ids';
 import { AgentPoliciesPopover } from '../../../packs/packs_table';
 
-const dividerCss = ({ theme }: { theme: EuiThemeComputed }) => ({
+const dividerCss = (theme: EuiThemeComputed) => ({
   width: 0,
   height: '100%',
   borderLeft: theme.border.thin,
@@ -112,6 +112,8 @@ const PackDetailsPageComponent = () => {
           </EuiDescriptionList>
         </EuiFlexItem>
         <EuiFlexItem grow={false} key="agents_failed_count_divider">
+          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+          {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
           <div css={dividerCss} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} key="edit_button">

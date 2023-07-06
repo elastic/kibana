@@ -6,7 +6,7 @@
  */
 
 import { filter, isEmpty, map, omit, reduce } from 'lodash';
-import type { EuiAccordionProps } from '@elastic/eui';
+import type { EuiAccordionProps, EuiThemeComputed } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -40,9 +40,9 @@ import { overflowCss } from '../utils';
 
 type PackFormData = Omit<PackItem, 'id' | 'queries'> & { queries: PackQueryFormData[] };
 
-const euiAccordionCss = ({ theme }) => ({
+const euiAccordionCss = (theme: EuiThemeComputed) => ({
   '.euiAccordion__button': {
-    color: theme.colors ? theme.colors.primary : theme.eui.euiColorPrimary,
+    color: theme.colors.primary,
   },
 });
 
@@ -270,6 +270,8 @@ const PackFormComponent: React.FC<PackFormProps> = ({
             <EuiFlexGroup>
               <EuiFlexItem css={overflowCss}>
                 <EuiAccordion
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore TODO wait for changes in css?: Interpolation<Theme>
                   css={euiAccordionCss}
                   id="shardsToggle"
                   forceState={shardsToggleState}

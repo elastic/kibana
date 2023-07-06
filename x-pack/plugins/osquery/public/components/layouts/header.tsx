@@ -7,24 +7,16 @@
 
 // copied from x-pack/plugins/fleet/public/applications/fleet/components/header.tsx
 
-import React, { memo } from 'react';
-import type { EuiThemeComputed } from '@elastic/eui';
+import React, { memo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import type { EuiFlexItemProps } from '@elastic/eui/src/components/flex/flex_item';
+import { css } from '@emotion/react';
+import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
-const containerCss = ({ theme }: { theme: EuiThemeComputed }) => ({
+const containerCss = (theme: EuiThemeComputed) => ({
   borderBottom: theme.border.thin,
   backgroundColor: theme.colors.body,
-});
-
-const wrapperCss = ({ theme, maxWidth }: { theme: EuiThemeComputed; maxWidth?: number }) => ({
-  maxWidth: `${maxWidth || 1200}px`,
-  marginLeft: 'auto',
-  marginRight: 'auto',
-  paddingTop: theme.size.xl,
-  paddingLeft: theme.size.m,
-  paddingRight: theme.size.m,
 });
 
 const tabsCss = {
@@ -65,35 +57,54 @@ const HeaderComponent: React.FC<HeaderProps> = ({
   maxWidth,
   tabsClassName,
   'data-test-subj': dataTestSubj,
-}) => (
-  <div css={containerCss} data-test-subj={dataTestSubj}>
-    <div css={wrapperCss} maxWidth={maxWidth}>
-      <HeaderColumns
-        leftColumn={leftColumn}
-        rightColumn={rightColumn}
-        rightColumnGrow={rightColumnGrow}
-      />
-      {children}
-      <EuiFlexGroup>
-        {tabs ? (
-          <EuiFlexItem>
-            <EuiSpacer size="s" />
-            <EuiTabs className={tabsClassName} css={tabsCss}>
-              {tabs.map((props) => (
-                <EuiTab {...(props as EuiTabProps)} key={props.id}>
-                  {props.name}
-                </EuiTab>
-              ))}
-            </EuiTabs>
-          </EuiFlexItem>
-        ) : (
-          <EuiFlexItem>
-            <EuiSpacer size="l" />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+}) => {
+  const wrapperCss = useCallback(
+    (theme: EuiThemeComputed) => css`
+      max-width: ${maxWidth || 1200}px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-top: ${theme.size.xl};
+      padding-left: ${theme.size.m};
+      padding-right: ${theme.size.m};
+    `,
+
+    [maxWidth]
+  );
+
+  return (
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>
+    <div css={containerCss} data-test-subj={dataTestSubj}>
+      {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+      {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
+      <div css={wrapperCss}>
+        <HeaderColumns
+          leftColumn={leftColumn}
+          rightColumn={rightColumn}
+          rightColumnGrow={rightColumnGrow}
+        />
+        {children}
+        <EuiFlexGroup>
+          {tabs ? (
+            <EuiFlexItem>
+              <EuiSpacer size="s" />
+              <EuiTabs className={tabsClassName} css={tabsCss}>
+                {tabs.map((props) => (
+                  <EuiTab {...(props as EuiTabProps)} key={props.id}>
+                    {props.name}
+                  </EuiTab>
+                ))}
+              </EuiTabs>
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem>
+              <EuiSpacer size="l" />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export const Header = React.memo(HeaderComponent);

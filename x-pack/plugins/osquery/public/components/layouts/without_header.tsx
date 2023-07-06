@@ -9,7 +9,7 @@ import React, { Fragment } from 'react';
 import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui';
 
-export const pageCss = ({ theme }: { theme: EuiThemeComputed }) => ({
+export const pageCss = (theme: EuiThemeComputed) => ({
   background: theme.colors.emptyShade,
   width: '100%',
   alignSelf: 'center',
@@ -29,6 +29,8 @@ interface Props {
 
 export const WithoutHeaderLayout: React.FC<Props> = ({ restrictWidth, children }) => (
   <Fragment>
+    {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+    {/* @ts-ignore // TODO wait for changes in css?: Interpolation<Theme>*/}
     <EuiPage css={pageCss} restrictWidth={restrictWidth || 1200}>
       <EuiPageBody>
         <div css={contentCss}>

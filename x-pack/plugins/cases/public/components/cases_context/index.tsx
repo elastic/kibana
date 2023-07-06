@@ -10,12 +10,14 @@ import type { Dispatch, ReactNode } from 'react';
 import { merge } from 'lodash';
 import React, { useCallback, useEffect, useState, useReducer } from 'react';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
+import { EuiThemeProvider as StyledComponentsThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
 import { QueryClientProvider } from '@tanstack/react-query';
+import { useIsDarkTheme } from '../../common/use_is_dark_theme';
 import type { CasesContextStoreAction } from './cases_context_reducer';
 import type {
   CasesFeaturesAllRequired,
@@ -104,6 +106,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     releasePhase,
     dispatch,
   }));
+  const isDarkTheme = useIsDarkTheme();
 
   /**
    * Only update the context if the nested permissions fields changed, this avoids a rerender when the object's reference
@@ -149,16 +152,18 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
   );
 
   return isCasesContextValue(value) ? (
-    <QueryClientProvider client={casesQueryClient}>
-      <CasesContext.Provider value={value}>
-        {applyFilesContext(
-          <>
-            <CasesGlobalComponents state={state} />
-            {children}
-          </>
-        )}
-      </CasesContext.Provider>
-    </QueryClientProvider>
+    <StyledComponentsThemeProvider darkMode={isDarkTheme}>
+      <QueryClientProvider client={casesQueryClient}>
+        <CasesContext.Provider value={value}>
+          {applyFilesContext(
+            <>
+              <CasesGlobalComponents state={state} />
+              {children}
+            </>
+          )}
+        </CasesContext.Provider>
+      </QueryClientProvider>
+    </StyledComponentsThemeProvider>
   ) : null;
 };
 CasesProvider.displayName = 'CasesProvider';
