@@ -114,7 +114,7 @@ const uploadSourceMapRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/sourcemaps 2023-10-31',
   options: {
     tags: ['access:apm', 'access:apm_write'],
-    body: { accepts: ['multipart/form-data'] },
+    body: { accepts: ['multipart/form-data'], maxBytes: 30 * 1024 * 1024 },
   },
   params: t.type({
     body: t.type({
@@ -273,7 +273,7 @@ const uploadAndroidMapRoute = createApmServerRoute({
 
 const deleteSourceMapRoute = createApmServerRoute({
   endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-10-31',
-  options: { tags: ['access:apm', 'access:apm_write'], maxBytes: 30 * 1024 * 102 },
+  options: { tags: ['access:apm', 'access:apm_write'] },
   params: t.type({
     path: t.type({
       id: t.string,
