@@ -8,10 +8,6 @@
 import type { CoreStart } from '@kbn/core/public';
 import { CustomizationCallback } from '@kbn/discover-plugin/public';
 import React from 'react';
-<<<<<<< HEAD
-=======
-
->>>>>>> 443cf5faa5be40d9126f4b7614acdf500dfd16e4
 import { dynamic } from '../utils/dynamic';
 
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
