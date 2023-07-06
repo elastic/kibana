@@ -38,6 +38,8 @@ const docsLinks = [
   },
 ];
 
+const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';
+
 export const RiskScoreEnableSection = () => {
   const [checked, setChecked] = useState(false);
 
@@ -54,7 +56,7 @@ export const RiskScoreEnableSection = () => {
             <EuiFlexItem grow={false}>{i18n.ENTITY_RISK_SCORING}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems={'center'}>
-                <EuiFlexItem css={{ minWidth: '50px' }}>
+                <EuiFlexItem css={{ minWidth: MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING }}>
                   {checked ? (
                     <EuiHealth color="success">{i18n.RISK_SCORE_MODULE_STATUS_ON}</EuiHealth>
                   ) : (
