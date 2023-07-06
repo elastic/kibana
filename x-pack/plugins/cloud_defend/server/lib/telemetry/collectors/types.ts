@@ -37,6 +37,7 @@ export interface IndexStats {
 
 export interface CloudDefendPodsStats {
   account_id: string;
+  pod_name: string;
   container_image_name: string;
   file_doc_count: number;
   process_doc_count: number;

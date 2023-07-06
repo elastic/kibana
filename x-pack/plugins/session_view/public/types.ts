@@ -23,6 +23,32 @@ export interface SessionViewPluginSetupDeps {
   usageCollection?: UsageCollectionSetup;
 }
 
+// the following are all the reportUiCounter click tracking events we send up.
+export type SessionViewTelemetryKey =
+  | 'loaded_from_cloud_defend_log'
+  | 'loaded_from_cloud_defend_alert'
+  | 'loaded_from_endpoint_log'
+  | 'loaded_from_endpoint_alert'
+  | 'loaded_from_unknown_log'
+  | 'loaded_from_unknown_alert'
+  | 'refresh_clicked'
+  | 'process_selected'
+  | 'details_opened'
+  | 'details_closed'
+  | 'display_options_changed'
+  | 'alert_details_loaded'
+  | 'disabled_tty_clicked' // tty button clicked when disabled (no data or not enabled)
+  | 'tty_loaded' // tty player succesfully loaded
+  | 'tty_playback_started'
+  | 'tty_playback_stopped'
+  | 'verbose_mode_enabled'
+  | 'verbose_mode_disabled'
+  | 'timestamp_enabled'
+  | 'timestamp_disabled'
+  | 'search_performed'
+  | 'search_next'
+  | 'search_previous';
+
 export interface SessionViewDeps {
   // we pass in the index of the session leader that spawned session_view, this avoids having to query multiple cross cluster indices
   index: string;
@@ -32,6 +58,9 @@ export interface SessionViewDeps {
 
   // start time is passed in order to scope session_view queries to the appropriate time range, and avoid querying data across all time.
   sessionStartTime: string;
+
+  // helper function to do click tracking via usageCollection.reportUiCounter
+  trackEvent: (name: SessionViewTelemetryKey) => void;
 
   height?: number;
   isFullScreen?: boolean;
@@ -49,7 +78,6 @@ export interface SessionViewDeps {
     handleOnAlertDetailsClosed: () => void
   ) => void;
   canReadPolicyManagement?: boolean;
-  usageCollection?: UsageCollectionSetup;
 }
 
 export interface EuiTabProps {

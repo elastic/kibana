@@ -9,7 +9,9 @@ import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { SessionViewDeps } from '../types';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { SessionViewDeps, SessionViewTelemetryKey } from '../types';
+import { USAGE_COLLECTION_APP_NAME } from '../../common/constants';
 
 // Initializing react-query
 const queryClient = new QueryClient();
@@ -54,11 +56,16 @@ export const getSessionViewLazy = (
   usageCollection: UsageCollectionSetup
 ) => {
   const index = getIndexPattern(props.index);
+  const trackEvent = (key: SessionViewTelemetryKey) => {
+    if (usageCollection) {
+      usageCollection.reportUiCounter(USAGE_COLLECTION_APP_NAME, METRIC_TYPE.CLICK, key);
+    }
+  };
 
   return (
     <QueryClientProvider client={queryClient}>
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <SessionViewLazy {...props} index={index} usageCollection={usageCollection} />
+        <SessionViewLazy {...props} index={index} trackEvent={trackEvent} />
       </Suspense>
     </QueryClientProvider>
   );
