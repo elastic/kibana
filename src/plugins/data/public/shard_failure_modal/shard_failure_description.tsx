@@ -110,7 +110,7 @@ export function ShardFailureDescription(props: ShardFailure) {
           align-self: flex-start;
         `}
       >
-        <EuiButtonEmpty onClick={() => setShowDetails((prev) => !prev)} flush="left">
+        <EuiButtonEmpty size="s" onClick={() => setShowDetails((prev) => !prev)} flush="left">
           {showDetails
             ? i18n.translate(
                 'data.search.searchSource.fetch.shardsFailedModal.showLessButtonLabel',
