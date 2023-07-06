@@ -495,6 +495,12 @@ describe('versioned', () => {
       versioned: { strictRequestVersionCheck: false },
     });
   });
+
+  it('defaults to "true" when in dev', () => {
+    expect(config.schema.validate({}, { dev: true })).toMatchObject({
+      versioned: { strictRequestVersionCheck: true },
+    });
+  });
 });
 
 describe('HttpConfig', () => {
