@@ -273,7 +273,7 @@ const uploadAndroidMapRoute = createApmServerRoute({
 
 const deleteSourceMapRoute = createApmServerRoute({
   endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-10-31',
-  options: { tags: ['access:apm', 'access:apm_write'] },
+  options: { tags: ['access:apm', 'access:apm_write'], maxBytes: 30 * 1024 * 102 },
   params: t.type({
     path: t.type({
       id: t.string,
