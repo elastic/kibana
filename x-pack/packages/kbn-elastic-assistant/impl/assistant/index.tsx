@@ -79,6 +79,7 @@ const AssistantComponent: React.FC<Props> = ({
     http,
     promptContexts,
     title,
+    allSystemPrompts,
   } = useAssistantContext();
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
@@ -170,6 +171,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   // For auto-focusing prompt within timeline
   const promptTextAreaRef = useRef<HTMLTextAreaElement>(null);
+
   useEffect(() => {
     if (shouldRefocusPrompt && promptTextAreaRef.current) {
       promptTextAreaRef?.current.focus();
@@ -187,6 +189,15 @@ const AssistantComponent: React.FC<Props> = ({
     }, 0);
   }, [currentConversation.messages.length, selectedPromptContextsCount]);
   ////
+  //
+
+  const selectedSystemPrompt = useMemo(() => {
+    if (currentConversation.apiConfig.defaultSystemPromptId) {
+      return allSystemPrompts.find(
+        (prompt) => prompt.id === currentConversation.apiConfig.defaultSystemPromptId
+      );
+    }
+  }, [allSystemPrompts, currentConversation.apiConfig.defaultSystemPromptId]);
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
@@ -203,7 +214,7 @@ const AssistantComponent: React.FC<Props> = ({
         onNewReplacements,
         promptText,
         selectedPromptContexts,
-        selectedSystemPrompt: currentConversation.apiConfig.defaultSystemPrompt,
+        selectedSystemPrompt,
       });
 
       const updatedMessages = appendMessage({
@@ -224,6 +235,7 @@ const AssistantComponent: React.FC<Props> = ({
       appendMessage({ conversationId: selectedConversationId, message: responseMessage });
     },
     [
+      selectedSystemPrompt,
       appendMessage,
       appendReplacements,
       currentConversation.apiConfig,
@@ -561,6 +573,7 @@ const AssistantComponent: React.FC<Props> = ({
                   conversation={currentConversation}
                   isDisabled={isWelcomeSetup}
                   http={http}
+                  allSystemPrompts={allSystemPrompts}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
