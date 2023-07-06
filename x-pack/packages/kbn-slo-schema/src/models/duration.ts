@@ -55,6 +55,10 @@ class Duration {
   format(): string {
     return `${this.value}${this.unit}`;
   }
+
+  asSeconds(): number {
+    return moment.duration(this.value, toMomentUnitOfTime(this.unit)).asSeconds();
+  }
 }
 
 const toDurationUnit = (unit: string): DurationUnit => {

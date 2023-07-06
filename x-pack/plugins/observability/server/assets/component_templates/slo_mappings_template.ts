@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SLO_RESOURCES_VERSION } from '../constants';
+
 export const getSLOMappingsTemplate = (name: string) => ({
   name,
   template: {
@@ -23,6 +25,36 @@ export const getSLOMappingsTemplate = (name: string) => ({
             revision: {
               type: 'long',
             },
+            instanceId: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
+            objective: {
+              properties: {
+                target: {
+                  type: 'double',
+                },
+                sliceDurationInSeconds: {
+                  type: 'long',
+                },
+              },
+            },
+            budgetingMethod: {
+              type: 'keyword',
+            },
+            timeWindow: {
+              properties: {
+                duration: {
+                  type: 'keyword',
+                },
+                type: {
+                  type: 'keyword',
+                },
+              },
+            },
+            sliceDurationInSeconds: {
+              type: 'long',
+            },
             numerator: {
               type: 'long',
             },
@@ -32,9 +64,6 @@ export const getSLOMappingsTemplate = (name: string) => ({
             isGoodSlice: {
               type: 'byte',
             },
-            context: {
-              type: 'flattened',
-            },
           },
         },
       },
@@ -42,7 +71,7 @@ export const getSLOMappingsTemplate = (name: string) => ({
   },
   _meta: {
     description: 'Mappings for SLO rollup data',
-    version: 2,
+    version: SLO_RESOURCES_VERSION,
     managed: true,
     managed_by: 'observability',
   },
