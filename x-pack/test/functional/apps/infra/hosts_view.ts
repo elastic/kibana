@@ -267,9 +267,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       describe('Metadata Tab', () => {
-        it('should render metadata tab, add and remove filter', async () => {
+        it('should render metadata tab, pin/unpin row, add and remove filter', async () => {
           const metadataTab = await pageObjects.infraHostsView.getMetadataTabName();
           expect(metadataTab).to.contain('Metadata');
+
+          // Add Pin
+          await pageObjects.infraHostsView.clickAddMetadataPin();
+          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(true);
+
+          // Persist pin after refresh
+          await browser.refresh();
+          await pageObjects.infraHome.waitForLoading();
+          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(true);
+
+          // Remove Pin
+          await pageObjects.infraHostsView.clickRemoveMetadataPin();
+          expect(await pageObjects.infraHostsView.getRemovePinExist()).to.be(false);
 
           await pageObjects.infraHostsView.clickAddMetadataFilter();
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -287,6 +300,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.infraHostsView.getRemoveFilterExist();
           expect(removeFilterShouldNotExist).to.be(false);
         });
+      });
+
+      it('should render metadata tab, pin and unpin table row', async () => {
+        const metadataTab = await pageObjects.infraHostsView.getMetadataTabName();
+        expect(metadataTab).to.contain('Metadata');
       });
 
       describe('Processes Tab', () => {
