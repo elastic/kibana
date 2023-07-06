@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { debounce } from 'lodash';
 import useAsync from 'react-use/lib/useAsync';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import {
   EuiBadge,
@@ -56,6 +57,14 @@ export const DashboardLinkDestinationPicker = ({
     setDashboardListOptions(dashboardOptions);
   }, [dashboardList, searchString]);
 
+  const debouncedSetSearch = useMemo(
+    () =>
+      debounce((newSearch: string) => {
+        setSearchString(newSearch);
+      }, 250),
+    [setSearchString]
+  );
+
   useEffect(() => {
     if (selectedDashboard) {
       setDestination(selectedDashboard.id);
@@ -70,16 +79,17 @@ export const DashboardLinkDestinationPicker = ({
       <EuiFieldSearch
         isClearable={true}
         placeholder={DashboardLinkEmbeddableStrings.getSearchPlaceholder()}
-        onSearch={(value) => {
-          setSearchString(value);
+        onChange={(e) => {
+          debouncedSetSearch(e.target.value);
         }}
       />
       <EuiSpacer size="s" />
       <EuiSelectable
-        aria-label={DashboardLinkEmbeddableStrings.getDashboardPickerAriaLabel()}
         singleSelection={true}
         options={dashboardListOptions}
         isLoading={loadingDashboardList}
+        listProps={{ onFocusBadge: false, bordered: true, isVirtualized: true }}
+        aria-label={DashboardLinkEmbeddableStrings.getDashboardPickerAriaLabel()}
         onChange={(newOptions, _, selected) => {
           if (selected.checked) {
             setSelectedDashboard(selected.data as DashboardItem);
@@ -88,7 +98,6 @@ export const DashboardLinkDestinationPicker = ({
           }
           setDashboardListOptions(newOptions);
         }}
-        listProps={{ onFocusBadge: false, bordered: true, isVirtualized: true }}
         renderOption={(option) => {
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center">
