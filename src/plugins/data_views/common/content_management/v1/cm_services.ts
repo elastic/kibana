@@ -54,6 +54,7 @@ const dataViewSavedObjectSchema = savedObjectSchema(dataViewAttributesSchema);
 const dataViewCreateOptionsSchema = schema.object({
   id: createOptionsSchemas.id,
   initialNamespaces: createOptionsSchemas.initialNamespaces,
+  overwrite: schema.maybe(createOptionsSchemas.overwrite),
 });
 
 const dataViewSearchOptionsSchema = schema.object({
