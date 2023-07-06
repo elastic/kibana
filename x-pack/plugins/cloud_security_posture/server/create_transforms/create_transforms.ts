@@ -105,11 +105,7 @@ export const startTransformIfNotStarted = async (
       }
     }
 
-    if (
-      fetchedTransformStats.state === 'stopping' ||
-      fetchedTransformStats.state === 'aborting' ||
-      fetchedTransformStats.state === 'failed'
-    ) {
+    if (fetchedTransformStats.state === 'stopping' || fetchedTransformStats.state === 'aborting') {
       logger.error(
         `Not starting transform ${transformId} since it's state is: ${fetchedTransformStats.state}`
       );
