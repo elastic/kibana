@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
 import { ILicenseState } from '../lib';
 import { defineLegacyRoutes } from './legacy';
 import { AlertingRequestHandlerContext } from '../types';
-import { createRuleRoute } from './create_rule';
+import { createRuleRoute } from './rule/create';
 import { getRuleRoute, getInternalRuleRoute } from './get_rule';
 import { updateRuleRoute } from './update_rule';
 import { deleteRuleRoute } from './delete_rule';

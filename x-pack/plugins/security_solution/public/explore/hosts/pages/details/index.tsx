@@ -49,7 +49,7 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
 import type { HostDetailsProps } from './types';
-import { type } from './utils';
+import { HostsType } from '../../store/model';
 import { getHostDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
@@ -269,7 +269,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               to={to}
               from={from}
               detailName={detailName}
-              type={type}
+              type={HostsType.details}
               setQuery={setQuery}
               filterQuery={stringifiedAdditionalFilters}
               hostDetailsPagePath={hostDetailsPagePath}

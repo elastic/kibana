@@ -58,6 +58,11 @@ export function registerSetupRoute({
           request,
           useDefaultAuth: true,
         });
+        const clientWithProfilingAuth = createProfilingEsClient({
+          esClient,
+          request,
+          useDefaultAuth: false,
+        });
 
         const setupOptions: ProfilingSetupOptions = {
           client: clientWithDefaultAuth,
@@ -84,7 +89,10 @@ export function registerSetupRoute({
           });
         }
 
-        state.data.available = await hasProfilingData(setupOptions);
+        state.data.available = await hasProfilingData({
+          ...setupOptions,
+          client: clientWithProfilingAuth,
+        });
         if (state.data.available) {
           return response.ok({
             body: {
@@ -163,31 +171,33 @@ export function registerSetupRoute({
           });
         }
 
-        const verifyFunctions = [
-          isApmPackageInstalled,
-          validateApmPolicy,
-          validateCollectorPackagePolicy,
-          validateMaximumBuckets,
-          validateResourceManagement,
-          validateSecurityRole,
-          validateSymbolizerPackagePolicy,
-        ];
-        const partialStates = await Promise.all(verifyFunctions.map((fn) => fn(setupOptions)));
+        const partialStates = await Promise.all(
+          [
+            isApmPackageInstalled,
+            validateApmPolicy,
+            validateCollectorPackagePolicy,
+            validateMaximumBuckets,
+            validateResourceManagement,
+            validateSecurityRole,
+            validateSymbolizerPackagePolicy,
+          ].map((fn) => fn(setupOptions))
+        );
         const mergedState = mergePartialSetupStates(state, partialStates);
 
-        if (areResourcesSetup(mergedState)) {
+        const executeFunctions = [
+          ...(mergedState.packages.installed ? [] : [installLatestApmPackage]),
+          ...(mergedState.policies.apm.installed ? [] : [updateApmPolicy]),
+          ...(mergedState.policies.collector.installed ? [] : [createCollectorPackagePolicy]),
+          ...(mergedState.policies.symbolizer.installed ? [] : [createSymbolizerPackagePolicy]),
+          ...(mergedState.resource_management.enabled ? [] : [enableResourceManagement]),
+          ...(mergedState.permissions.configured ? [] : [setSecurityRole]),
+          ...(mergedState.settings.configured ? [] : [setMaximumBuckets]),
+        ];
+
+        if (!executeFunctions.length) {
           return response.ok();
         }
 
-        const executeFunctions = [
-          installLatestApmPackage,
-          updateApmPolicy,
-          createCollectorPackagePolicy,
-          createSymbolizerPackagePolicy,
-          enableResourceManagement,
-          setSecurityRole,
-          setMaximumBuckets,
-        ];
         await Promise.all(executeFunctions.map((fn) => fn(setupOptions)));
 
         // We return a status code of 202 instead of 200 because enabling

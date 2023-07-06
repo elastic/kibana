@@ -6,11 +6,19 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import type { FilterManager } from '@kbn/data-plugin/public';
+import type { FilterManager, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { NotificationsStart } from '@kbn/core-notifications-browser';
 import { createFilter, isEmptyFilterValue } from './create_filter';
 import { FILTER_CELL_ACTION_TYPE } from '../../constants';
 import { createCellActionFactory } from '../factory';
-import { CellActionFieldValue } from '../../types';
+import {
+  isTypeSupportedByDefaultActions,
+  isValueSupportedByDefaultActions,
+  valueToArray,
+  filterOutNullableValues,
+} from '../utils';
+import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '../translations';
+import { DefaultActionsSupportedValue } from '../types';
 
 const ICON = 'minusInCircle';
 const FILTER_OUT = i18n.translate('cellActions.actions.filterOut', {
@@ -18,7 +26,13 @@ const FILTER_OUT = i18n.translate('cellActions.actions.filterOut', {
 });
 
 export const createFilterOutActionFactory = createCellActionFactory(
-  ({ filterManager }: { filterManager: FilterManager }) => ({
+  ({
+    filterManager,
+    notifications: { toasts },
+  }: {
+    filterManager: FilterManager;
+    notifications: NotificationsStart;
+  }) => ({
     type: FILTER_CELL_ACTION_TYPE,
     getIconType: () => ICON,
     getDisplayName: () => FILTER_OUT,
@@ -28,18 +42,27 @@ export const createFilterOutActionFactory = createCellActionFactory(
 
       return (
         data.length === 1 && // TODO Add support for multiple values
-        !!field.name
+        !!field.name &&
+        isTypeSupportedByDefaultActions(field.type as KBN_FIELD_TYPES)
       );
     },
+
     execute: async ({ data }) => {
       const field = data[0]?.field;
-      const value = data[0]?.value;
+      const rawValue = data[0]?.value;
+      const value = filterOutNullableValues(valueToArray(rawValue));
 
-      addFilterOut({
-        filterManager,
-        fieldName: field.name,
-        value,
-      });
+      if (isValueSupportedByDefaultActions(value)) {
+        addFilterOut({
+          filterManager,
+          fieldName: field.name,
+          value,
+        });
+      } else {
+        toasts.addWarning({
+          title: ACTION_INCOMPATIBLE_VALUE_WARNING,
+        });
+      }
     },
   })
 );
@@ -51,7 +74,7 @@ export const addFilterOut = ({
 }: {
   filterManager: FilterManager | undefined;
   fieldName: string;
-  value: CellActionFieldValue;
+  value: DefaultActionsSupportedValue;
 }) => {
   if (filterManager != null) {
     const filter = createFilter({

@@ -42,6 +42,8 @@ export interface Props {
   legend: EuiButtonGroupProps['legend'];
   /** Array of `IconButton` */
   buttons: IconButton[];
+  /** Button size */
+  buttonSize?: EuiButtonGroupProps['buttonSize'];
 }
 
 type Option = EuiButtonGroupOptionProps & Omit<IconButton, 'label'>;
@@ -49,7 +51,7 @@ type Option = EuiButtonGroupOptionProps & Omit<IconButton, 'label'>;
 /**
  * A group of buttons each performing an action, represented by an icon.
  */
-export const IconButtonGroup = ({ buttons, legend }: Props) => {
+export const IconButtonGroup = ({ buttons, legend, buttonSize = 'm' }: Props) => {
   const euiTheme = useEuiTheme();
   const iconButtonGroupStyles = IconButtonGroupStyles(euiTheme);
 
@@ -71,7 +73,7 @@ export const IconButtonGroup = ({ buttons, legend }: Props) => {
 
   return (
     <EuiButtonGroup
-      buttonSize="m"
+      buttonSize={buttonSize}
       legend={legend}
       options={buttonGroupOptions}
       onChange={onChangeIconsMulti}

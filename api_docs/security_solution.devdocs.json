@@ -636,6 +636,230 @@
     "interfaces": [
       {
         "parentPluginId": "securitySolution",
+        "id": "def-public.NavigationLink",
+        "type": "Interface",
+        "tags": [],
+        "label": "NavigationLink",
+        "description": [],
+        "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.NavigationLink.categories",
+            "type": "Object",
+            "tags": [],
+            "label": "categories",
+            "description": [],
+            "signature": [
+              "readonly ",
+              {
+                "pluginId": "@kbn/security-solution-side-nav",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionSideNavPluginApi",
+                "section": "def-common.LinkCategory",
+                "text": "LinkCategory"
+              },
+              "<",
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.SecurityPageName",
+                "text": "SecurityPageName"
+              },
+              ">[] | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.NavigationLink.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.NavigationLink.disabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.NavigationLink.id",
+            "type": "Enum",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "securitySolution",
+                "scope": "common",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-common.SecurityPageName",
+                "text": "SecurityPageName"
+              }
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.NavigationLink.landingIcon",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "landingIcon",
+            "description": [],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.NavigationLink.landingImage",
+            "type": "string",
+            "tags": [],
+            "label": "landingImage",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.NavigationLink.links",
+            "type": "Array",
+            "tags": [],
+            "label": "links",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "securitySolution",
+                "scope": "public",
+                "docId": "kibSecuritySolutionPluginApi",
+                "section": "def-public.NavigationLink",
+                "text": "NavigationLink"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.NavigationLink.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.NavigationLink.sideNavIcon",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sideNavIcon",
+            "description": [],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.NavigationLink.skipUrlState",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "skipUrlState",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.NavigationLink.unauthorized",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "unauthorized",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.NavigationLink.isBeta",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isBeta",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-public.NavigationLink.betaOptions",
+            "type": "Object",
+            "tags": [],
+            "label": "betaOptions",
+            "description": [],
+            "signature": [
+              "{ text: string; } | undefined"
+            ],
+            "path": "x-pack/plugins/security_solution/public/common/links/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
         "id": "def-public.TimelineModel",
         "type": "Interface",
         "tags": [],
@@ -1679,7 +1903,13 @@
             "() => ",
             "Observable",
             "<",
-            "NavigationLink",
+            {
+              "pluginId": "securitySolution",
+              "scope": "public",
+              "docId": "kibSecuritySolutionPluginApi",
+              "section": "def-public.NavigationLink",
+              "text": "NavigationLink"
+            },
             "[]>"
           ],
           "path": "x-pack/plugins/security_solution/public/types.ts",
@@ -1750,6 +1980,26 @@
               "isRequired": true
             }
           ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginStart.getBreadcrumbsNav$",
+          "type": "Function",
+          "tags": [],
+          "label": "getBreadcrumbsNav$",
+          "description": [],
+          "signature": [
+            "() => ",
+            "Observable",
+            "<",
+            "BreadcrumbsNav",
+            ">"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
           "returnComment": []
         }
       ],
@@ -2536,7 +2786,7 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "Readonly<{ prebuiltRulesPackageVersion?: string | undefined; } & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; maxUploadResponseActionFileBytes: number; }> & { experimentalFeatures: ",
+          "Readonly<{ prebuiltRulesPackageVersion?: string | undefined; } & { enabled: boolean; signalsIndex: string; maxRuleImportExportSize: number; maxRuleImportPayloadBytes: number; maxTimelineImportExportSize: number; maxTimelineImportPayloadBytes: number; alertMergeStrategy: \"allFields\" | \"missingFields\" | \"noFields\"; alertIgnoreFields: string[]; enableExperimental: string[]; packagerTaskInterval: string; packagerTaskPackagePolicyUpdateBatchSize: number; maxUploadResponseActionFileBytes: number; }> & { experimentalFeatures: ",
           {
             "pluginId": "securitySolution",
             "scope": "common",
@@ -2684,6 +2934,21 @@
       },
       {
         "parentPluginId": "securitySolution",
+        "id": "def-common.APP_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "APP_PATH",
+        "description": [],
+        "signature": [
+          "\"/app/security\""
+        ],
+        "path": "x-pack/plugins/security_solution/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
         "id": "def-common.APP_UI_ID",
         "type": "string",
         "tags": [],
@@ -2779,6 +3044,21 @@
           "{ readonly tGridEnabled: boolean; readonly tGridEventRenderedViewEnabled: boolean; readonly excludePoliciesInFilterEnabled: boolean; readonly kubernetesEnabled: boolean; readonly chartEmbeddablesEnabled: boolean; readonly donutChartEmbeddablesEnabled: boolean; readonly alertsPreviewChartEmbeddablesEnabled: boolean; readonly previewTelemetryUrlEnabled: boolean; readonly insightsRelatedAlertsByProcessAncestry: boolean; readonly extendedRuleExecutionLoggingEnabled: boolean; readonly socTrendsEnabled: boolean; readonly responseActionsEnabled: boolean; readonly endpointResponseActionsEnabled: boolean; readonly alertDetailsPageEnabled: boolean; readonly responseActionUploadEnabled: boolean; readonly alertsPageChartsEnabled: boolean; readonly alertTypeEnabled: boolean; readonly securityFlyoutEnabled: boolean; readonly assistantEnabled: boolean; readonly alertsPageFiltersEnabled: boolean; readonly newUserDetailsFlyout: boolean; readonly detectionsCoverageOverview: boolean; readonly riskScoringPersistence: boolean; readonly riskScoringRoutesEnabled: boolean; }"
         ],
         "path": "x-pack/plugins/security_solution/common/experimental_features.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.MANAGE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "MANAGE_PATH",
+        "description": [],
+        "signature": [
+          "\"/manage\""
+        ],
+        "path": "x-pack/plugins/security_solution/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
