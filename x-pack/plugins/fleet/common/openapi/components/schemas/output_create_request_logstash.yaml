@@ -1,4 +1,4 @@
-title: Output
+title: logstash
 type: object
 properties:
   id:
@@ -11,7 +11,7 @@ properties:
     type: string
   type:
     type: string
-    enum: ['elasticsearch', 'logstash']
+    enum: ['logstash']
   hosts:
     type: array
     items:
@@ -55,7 +55,6 @@ properties:
       loadbalance:
         type: boolean
 required:
-  - id
-  - is_default
   - name
+  - hosts
   - type
