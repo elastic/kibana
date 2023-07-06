@@ -39,7 +39,7 @@ const mainAliasNames = mainApiRequestsToIntercept.map(
   ({ aliasName }) => `@${aliasName}`
 );
 
-describe('Storage Explorer', () => {
+describe('Storage explorer', () => {
   before(() => {
     const { rangeFrom, rangeTo } = timeRange;
     synthtrace.index(

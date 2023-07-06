@@ -167,7 +167,7 @@ const apmSettingsTitle = i18n.translate(
 const apmStorageExplorerTitle = i18n.translate(
   'xpack.apm.navigation.apmStorageExplorerTitle',
   {
-    defaultMessage: 'Storage Explorer',
+    defaultMessage: 'Storage explorer',
   }
 );
 

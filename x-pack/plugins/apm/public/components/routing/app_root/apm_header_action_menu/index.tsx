@@ -58,7 +58,7 @@ export function ApmHeaderActionMenu() {
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             {i18n.translate('xpack.apm.storageExplorerLinkLabel', {
-              defaultMessage: 'Storage Explorer',
+              defaultMessage: 'Storage explorer',
             })}
           </EuiFlexItem>
         </EuiFlexGroup>
