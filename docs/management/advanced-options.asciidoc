@@ -598,3 +598,4 @@ The URL of a custom PNG image that appears on {kib} browser tabs.
 [[provide-usage-data]]`telemetry:enabled`::
 Enabling data usage collection (also known as Telemetry) allows us to learn
 what our users are most interested in, so we can improve our products and services.
+Refer to our https://www.elastic.co/legal/product-privacy-statement[Privacy Statement] for more details.
