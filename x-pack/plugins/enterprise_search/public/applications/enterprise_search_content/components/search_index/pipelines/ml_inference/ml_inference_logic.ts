@@ -591,15 +591,18 @@ export const MLInferenceLogic = kea<
               destination_field: destinationField,
               model_id: modelId,
               source_field: sourceField,
+              field_mappings: fieldMappings,
             } = pipelineParams;
 
+            const missingSourceFields =
+              fieldMappings?.map((f) => f.sourceField).filter((f) => !sourceFields?.includes(f)) ??
+              [];
             const mlModel = supportedMLModels.find((model) => model.model_id === modelId);
             const modelType = mlModel ? getMLType(getMlModelTypesForModelConfig(mlModel)) : '';
             const disabledReason = getDisabledReason(
-              sourceFields,
-              sourceField,
+              missingSourceFields,
               indexProcessorNames,
-              pipelineName,
+              pipelineName
             );
 
             return {
