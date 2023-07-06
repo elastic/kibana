@@ -30,6 +30,7 @@ import {
   BulkGetAttachmentsRequestRt,
   BulkGetAttachmentsResponseRt,
 } from '.';
+import { PathReporter } from 'io-ts/lib/PathReporter';
 
 describe('Comments', () => {
   describe('CommentAttributesBasicRt', () => {
@@ -780,26 +781,21 @@ describe('Comments', () => {
     });
 
     it('error when too many comments are passed', () => {
-      const query = BulkCreateCommentRequestRt.decode(
-        Array(MAX_ADD_COMMENTS + 1).fill({
-          comment: 'Solve this fast!',
-          type: CommentType.user,
-          owner: 'cases',
-          foo: 'bar',
-        })
-      );
-
-      expect(query).toEqual({
-        _tag: 'Left',
-        left: expect.any(Array),
+      const commentRequest = Array(MAX_ADD_COMMENTS + 1).fill({
+        comment: 'Solve this fast!',
+        type: CommentType.user,
+        owner: 'cases',
       });
+
+      expect(PathReporter.report(BulkCreateCommentRequestRt.decode(commentRequest))).toContain(
+        'The length of the field attachments is too long. Array must be of length <= 100.'
+      );
     });
 
     it('error when no comments are passed', () => {
-      expect(BulkCreateCommentRequestRt.decode([])).toEqual({
-        _tag: 'Left',
-        left: expect.any(Array),
-      });
+      expect(PathReporter.report(BulkCreateCommentRequestRt.decode([]))).toContain(
+        'The length of the field attachments is too short. Array must be of length >= 1.'
+      );
     });
   });
 
