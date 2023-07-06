@@ -99,7 +99,7 @@ export function getEditLensConfiguration(
         redirectCallback,
         initialInput: {
           attributes,
-          id: 'random-id',
+          id: '797798a7-8746-4ace-a459-65e42a4f0fde',
         },
       })
     );

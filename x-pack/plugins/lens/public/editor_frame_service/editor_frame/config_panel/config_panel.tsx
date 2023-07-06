@@ -89,14 +89,18 @@ export function LayerPanels(
         if (datasourceId) {
           dispatchLens(
             updateDatasourceState({
-              updater: (prevState: unknown) =>
-                typeof newState === 'function' ? newState(prevState) : newState,
+              updater: (prevState: unknown) => {
+                onUpdateStateCb?.(
+                  typeof newState === 'function' ? newState(prevState) : newState,
+                  visualization.state
+                );
+                return typeof newState === 'function' ? newState(prevState) : newState;
+              },
               datasourceId,
               clearStagedPreview: false,
               dontSyncLinkedDimensions,
             })
           );
-          onUpdateStateCb?.(newState, visualization.state);
         }
       },
     [dispatchLens, onUpdateStateCb, visualization.state]
@@ -136,6 +140,7 @@ export function LayerPanels(
                   typeof newVisualizationState === 'function'
                     ? newVisualizationState(prevState.visualization.state)
                     : newVisualizationState;
+                onUpdateStateCb?.(updatedDatasourceState, updatedVisualizationState);
 
                 return {
                   ...prevState,
@@ -154,7 +159,6 @@ export function LayerPanels(
               },
             })
           );
-          onUpdateStateCb?.(newDatasourceState, newVisualizationState);
         }, 0);
       },
     [dispatchLens, onUpdateStateCb]

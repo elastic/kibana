@@ -72,8 +72,8 @@ export function LensEditConfigurationFlyout({
   });
 
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
-  const { isLoading } = useLensSelector((state) => state.lens);
-  if (isLoading) return null;
+  const { isLoading, persistedDoc } = useLensSelector((state) => state.lens);
+  if (isLoading || !persistedDoc) return null;
   const newApi = {
     ...framePublicAPI,
     activeData,
