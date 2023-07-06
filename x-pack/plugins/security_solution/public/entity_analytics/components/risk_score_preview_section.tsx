@@ -18,7 +18,7 @@ import {
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import type { BoolQuery, Query } from '@kbn/es-query';
+import type { BoolQuery } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { RiskScoreEntity } from '../../../common/risk_engine/types';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
