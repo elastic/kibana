@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { IToasts } from '@kbn/core/public';
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -157,7 +157,9 @@ describe('Autocomplete component tests', () => {
     expect(screen.queryByText('context.tags')).not.toBeInTheDocument();
   });
 
-  it.skip('can go down to selectable component if press keydown', async () => {
+  it('can go down to selectable component if press keydown', async () => {
+    const spy = jest.spyOn(React, 'useRef');
+
     renderWithProviders(
       <TextAreaWithAutocomplete
         messageVariables={defaultMessageVariables}
@@ -172,12 +174,17 @@ describe('Autocomplete component tests', () => {
     );
 
     screen.getByTestId('messageTextArea').focus();
-
     fireEvent.change(screen.getByTestId('messageTextArea'), {
       target: { value: '{{' },
     });
+
+    // Obtain a reference to EuiSelectable by spying on React.useRef
+    const refToEuiSelectable = spy.mock.results
+      .map((res) => res.value.current)
+      .find((element) => element.onFocus);
+    refToEuiSelectable.onFocus = jest.fn(); // mock the onFocus
+
     fireEvent.keyDown(screen.getByTestId('messageTextArea'), { code: 'ArrowDown' });
-    // await new Promise((resolve) => setTimeout(resolve, 100));
-    expect(await screen.findByTestId('alert-selectableOption')).toHaveFocus();
+    expect(refToEuiSelectable.onFocus).toBeCalled();
   });
 });

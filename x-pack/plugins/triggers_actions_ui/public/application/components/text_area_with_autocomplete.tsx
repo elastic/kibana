@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useRef, useCallback } from 'react';
-// eslint-disable-next-line import/no-extraneous-dependencies
+import React, { useState, useMemo, useCallback } from 'react';
 import getCaretCoordinates from 'textarea-caret';
 import {
   EuiTextArea,
@@ -24,14 +23,14 @@ import { AddMessageVariables } from './add_message_variables';
 import { templateActionVariable } from '../lib';
 
 interface Props {
-  messageVariables?: ActionVariable[];
-  paramsProperty: string;
+  editAction: (property: string, value: any, index: number) => void;
+  errors?: string[];
   index: number;
   inputTargetValue?: string;
   isDisabled?: boolean;
-  editAction: (property: string, value: any, index: number) => void;
   label: string;
-  errors?: string[];
+  messageVariables?: ActionVariable[];
+  paramsProperty: string;
 }
 
 export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
@@ -45,8 +44,8 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
   paramsProperty,
 }) => {
   const [matches, setMatches] = useState<string[]>([]);
-  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
-  const selectableRef = useRef<EuiSelectable | null>(null);
+  const textAreaRef = React.useRef<HTMLTextAreaElement | null>(null);
+  const selectableRef = React.useRef<EuiSelectable | null>(null);
   const [caretPosition, setCaretPosition] = useState({ top: 0, left: 0, height: 0, width: 0 });
   const [isListOpen, setListOpen] = useState(false);
   const [selectableHasFocus, setSelectableHasFocus] = useState(false);
@@ -60,7 +59,6 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
       'data-test-subj': `${variable}-selectableOption`,
     }));
   }, [matches]);
-
   const onOptionPick = useCallback(
     (newOptions: EuiSelectableOption[]) => {
       if (!textAreaRef.current) return;
@@ -88,7 +86,7 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
 
   const onChangeWithMessageVariable = useCallback(() => {
     if (!textAreaRef.current) return;
-    const { value, selectionStart } = textAreaRef.current; // check for selectionEnd, should be when the start is?
+    const { value, selectionStart } = textAreaRef.current;
 
     window.setTimeout(() => {
       if (textAreaRef.current) {
@@ -233,8 +231,8 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<Props> = ({
 
   return (
     <EuiFormRow
-      fullWidth
       error={errors}
+      fullWidth
       isDisabled={isDisabled}
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       label={label}
