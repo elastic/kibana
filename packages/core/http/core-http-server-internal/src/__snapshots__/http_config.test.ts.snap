@@ -128,6 +128,7 @@ Object {
   },
   "versioned": Object {
     "strictClientVersionCheck": true,
+    "strictRequestVersionCheck": false,
     "versionResolution": "oldest",
   },
   "xsrf": Object {
