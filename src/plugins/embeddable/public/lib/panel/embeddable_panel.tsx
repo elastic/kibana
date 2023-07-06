@@ -374,7 +374,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (isPromise(node)) {
       node.then((resolved) => {
         if (this.mounted) {
-          this.setState({ node: resolved })
+          this.setState({ node: resolved });
         }
       });
     } else {
