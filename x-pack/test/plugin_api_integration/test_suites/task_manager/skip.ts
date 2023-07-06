@@ -121,7 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         const task = await currentTask(createdTask.id);
-        // reschedules 1 more time and set the status as 'dead_letter'
+        // reschedules 1 more time and set the status as 'dead_letter' as the task throws an error
         expect(task.attempts).to.eql(1);
         expect(task.status).to.eql(TaskStatus.DeadLetter);
         expect(task.numSkippedRuns).to.eql(2);

@@ -196,7 +196,9 @@ export class SampleTaskManagerFixturePlugin
           param: schema.string(),
         }),
         createTaskRunner: () => ({
-          async run() {},
+          async run() {
+            throwRetryableError(new Error('Retry'), true);
+          },
         }),
       },
     });
