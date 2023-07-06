@@ -226,7 +226,6 @@ export const getManagementFilteredLinks = async (
     (canReadHostIsolationExceptions &&
       (await checkArtifactHasData(HostIsolationExceptionsApiClient.getInstance(core.http))));
 
-
   const linksToExclude: SecurityPageName[] = [];
 
   if (!canReadEndpointList) {
