@@ -115,7 +115,7 @@ export class SavedObjectsSyncService {
         },
         params: {},
         state: {
-          runs: 0,
+          runs: 'd',
           totalSavedObjectsSynced: 0,
         },
         scope: ['ml'],
@@ -125,7 +125,7 @@ export class SavedObjectsSyncService {
 
       return taskInstance;
     } catch (e) {
-      this.log.error(`Error running task: ${SAVED_OBJECTS_SYNC_TASK_ID}, `, e?.message ?? e);
+      this.log.error(`Error running task: ${SAVED_OBJECTS_SYNC_TASK_ID}, `, e);
       return null;
     }
   }
@@ -139,6 +139,6 @@ function createLocalLogger(logger: Logger, preText: string) {
   return {
     info: (text: string) => logger.info(`${preText}${text}`),
     warn: (text: string) => logger.warn(`${preText}${text}`),
-    error: (text: string, e?: Error) => logger.error(`${preText}${text} ${e ?? ''}`),
+    error: (text: string, e?: Error) => logger.error(`${preText}${text} ${e?.message ?? ''}`),
   };
 }
