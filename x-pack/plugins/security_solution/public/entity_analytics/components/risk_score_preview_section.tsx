@@ -142,7 +142,6 @@ export const RiskScorePreviewSection = () => {
             appName="siem"
             isLoading={isLoading}
             indexPatterns={[indexPattern] as DataView[]}
-            // query={query.query}
             dateRangeFrom={dateRange.from}
             dateRangeTo={dateRange.to}
             onQuerySubmit={(payload) => {
