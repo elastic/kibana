@@ -37,7 +37,7 @@ image::apm/images/apm-service-map-anomaly.png[Example view of anomaly scores on 
 
 To enable machine learning anomaly detection:
 
-. From the Services overview, Traces overview, or Service Map tab,
+. From the Services overview, Traces overview, or Service map tab,
 select **Anomaly detection**.
 
 . Click **Create ML Job**.

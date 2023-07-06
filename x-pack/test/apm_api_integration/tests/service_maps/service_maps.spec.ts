@@ -43,7 +43,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         const err = e as ApmApiError;
         expect(err.res.status).to.be(403);
         expectSnapshot(err.res.body.message).toMatchInline(
-          `"In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."`
+          `"In order to access Service maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."`
         );
       }
     });
@@ -127,7 +127,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
     });
   });
 
-  registry.when('Service Map with data', { config: 'trial', archives: ['apm_8.0.0'] }, () => {
+  registry.when('Service map with data', { config: 'trial', archives: ['apm_8.0.0'] }, () => {
     describe('/internal/apm/service-map', () => {
       let response: ServiceMapResponse;
       before(async () => {

@@ -50,7 +50,7 @@ distributed tracing will not work, and the connection will not be drawn on the m
 [[visualize-your-architecture]]
 === Visualize your architecture
 
-Select the **Service Map** tab to get started.
+Select the **Service map** tab to get started.
 By default, all instrumented services and connections are shown.
 Whether you're onboarding a new engineer, or just trying to grasp the big picture,
 drag things around, zoom in and out, and begin to visualize how your services are connected.
