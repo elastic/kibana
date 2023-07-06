@@ -278,7 +278,7 @@ export class GeoJsonImporter extends Importer {
       return;
     }
 
-    const { value: batch, done } = await this._iterator.next();
+    const { value: batch, done }: any = await this._iterator.next();
 
     if (!this._isActive || done) {
       this._hasNext = false;
