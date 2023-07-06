@@ -19,7 +19,12 @@ import { MultiFieldMapping, SelectedFieldMappings } from './multi_field_selector
 import { SingleFieldMapping } from './single_field_selector';
 
 export const ConfigureFields: React.FC = () => {
-  const { isTextExpansionModelSelected } = useValues(MLInferenceLogic);
+  const {
+    isTextExpansionModelSelected,
+    addInferencePipelineModal: { configuration },
+  } = useValues(MLInferenceLogic);
+  const areInputsDisabled = configuration.existingPipeline !== false;
+
   return (
     <>
       <EuiFlexGroup>
@@ -51,8 +56,8 @@ export const ConfigureFields: React.FC = () => {
       <EuiForm component="form">
         {isTextExpansionModelSelected ? (
           <>
-            <MultiFieldMapping />
-            <SelectedFieldMappings />
+            {areInputsDisabled || <MultiFieldMapping />}
+            <SelectedFieldMappings isReadOnly={areInputsDisabled} />
           </>
         ) : (
           <>
