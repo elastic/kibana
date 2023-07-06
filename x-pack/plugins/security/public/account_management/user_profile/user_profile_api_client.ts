@@ -11,7 +11,8 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { HttpStart } from '@kbn/core/public';
 
-import type { GetUserProfileResponse, UserProfile, UserProfileData } from '../../../common';
+import type { GetUserProfileResponse, UserProfile } from '../../../common';
+import type { UserProfileData } from './user_profile';
 
 /**
  * Parameters for the get user profile for the current user API.

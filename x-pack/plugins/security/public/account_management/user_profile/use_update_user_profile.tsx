@@ -16,13 +16,6 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { UserProfileData } from './user_profile';
 import type { UserProfileAPIClient } from './user_profile_api_client';
 
-interface ThemeDarkModeUpdate {
-  key: 'darkMode';
-  value: '' | 'dark' | 'light';
-}
-
-type UpdateSettingProps = ThemeDarkModeUpdate;
-
 interface Deps {
   apiClient: UserProfileAPIClient;
   notifications: NotificationsStart;
@@ -47,8 +40,6 @@ interface Props {
 export type UpdateUserProfileHook = (props?: Props) => {
   /** Update the user profile */
   update: (data: UserProfileData) => void;
-  /** Update a single key/value user setting. */
-  updateSetting: (data: UpdateSettingProps) => void;
   /** Handler to show a notification after the user profile has been updated */
   showSuccessNotification: (props: { isRefreshRequired: boolean }) => void;
   /** Flag to indicate if currently updating */
@@ -145,7 +136,7 @@ export const getUseUpdateUserProfile = ({ apiClient, notifications }: Deps) => {
     );
 
     const update = useCallback(
-      (udpatedData: UserProfileData) => {
+      <D extends UserProfileData>(udpatedData: D) => {
         userProfileSnapshot.current = userProfileData;
         setIsLoading(true);
         return apiClient.update(udpatedData).then(() => onUserProfileUpdate(udpatedData));
@@ -153,22 +144,8 @@ export const getUseUpdateUserProfile = ({ apiClient, notifications }: Deps) => {
       [onUserProfileUpdate, userProfileData]
     );
 
-    const updateSetting = useCallback(
-      async (props: UpdateSettingProps) => {
-        const updatedData = {
-          userSettings: {
-            [props.key]: props.value,
-          },
-        };
-
-        return update(updatedData);
-      },
-      [update]
-    );
-
     return {
       update,
-      updateSetting,
       showSuccessNotification,
       userProfileData,
       isLoading,

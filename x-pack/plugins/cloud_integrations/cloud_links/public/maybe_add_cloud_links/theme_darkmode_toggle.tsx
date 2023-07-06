@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-  EuiButtonEmpty,
   EuiContextMenuItem,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,10 +26,17 @@ export const ThemDarkModeToggle = ({ useUpdateUserProfile }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [checked, setChecked] = useState(false);
 
-  const { userProfileData, isLoading, updateSetting } = useUpdateUserProfile({
+  const { userProfileData, isLoading, update } = useUpdateUserProfile({
     notificationSuccess: {
-      title: 'Color theme updated',
-      pageReloadText: 'Reload the page to see the changes',
+      title: i18n.translate('xpack.cloudLinks.userMenuLinks.darkMode.successNotificationTitle', {
+        defaultMessage: 'Color theme updated',
+      }),
+      pageReloadText: i18n.translate(
+        'xpack.cloudLinks.userMenuLinks.darkMode.successNotificationText',
+        {
+          defaultMessage: 'Reload the page to see the changes',
+        }
+      ),
     },
     pageReloadChecker: (prev, next) => {
       return prev?.userSettings?.darkMode !== next.userSettings?.darkMode;
@@ -38,6 +44,20 @@ export const ThemDarkModeToggle = ({ useUpdateUserProfile }: Props) => {
   });
 
   const { userSettings: { darkMode = 'light' } = { darkMode: undefined } } = userProfileData ?? {};
+
+  const toggleDarkMode = useCallback(
+    (on: boolean) => {
+      if (isLoading) {
+        return;
+      }
+      update({
+        userSettings: {
+          darkMode: on ? 'dark' : 'light',
+        },
+      });
+    },
+    [isLoading, update]
+  );
 
   useEffect(() => {
     setChecked(darkMode === 'dark');
@@ -54,13 +74,8 @@ export const ThemDarkModeToggle = ({ useUpdateUserProfile }: Props) => {
           icon={darkMode === 'dark' ? 'moon' : 'sun'}
           size="s"
           onClick={() => {
-            if (isLoading) {
-              return;
-            }
-            updateSetting({
-              key: 'darkMode',
-              value: darkMode === 'light' ? 'dark' : 'light',
-            });
+            const on = darkMode === 'light' ? true : false;
+            toggleDarkMode(on);
           }}
         >
           {i18n.translate('xpack.cloudLinks.userMenuLinks.darkModeToggle', {
@@ -82,14 +97,9 @@ export const ThemDarkModeToggle = ({ useUpdateUserProfile }: Props) => {
           showLabel={false}
           checked={checked}
           onChange={(e) => {
-            const on = e.target.checked;
-            updateSetting({
-              key: 'darkMode',
-              value: on ? 'dark' : 'light',
-            });
+            toggleDarkMode(e.target.checked);
           }}
           aria-describedby={toggleTextSwitchId}
-          disabled={isLoading}
           compressed
         />
       </EuiFlexItem>
