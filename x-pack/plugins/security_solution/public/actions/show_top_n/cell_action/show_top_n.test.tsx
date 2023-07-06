@@ -17,6 +17,7 @@ import { createStore } from '../../../common/store';
 import { createShowTopNCellActionFactory } from './show_top_n';
 import React from 'react';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -45,7 +46,7 @@ describe('createShowTopNCellActionFactory', () => {
         value: 'the-value',
         field: {
           name: 'user.name',
-          type: 'keyword',
+          type: KBN_FIELD_TYPES.STRING,
           aggregatable: true,
           searchable: true,
         },
@@ -71,23 +72,6 @@ describe('createShowTopNCellActionFactory', () => {
   });
 
   describe('isCompatible', () => {
-    it('should return true if everything is okay', async () => {
-      expect(await showTopNAction.isCompatible(context)).toEqual(true);
-    });
-
-    it('should return false if field esType does not support aggregations', async () => {
-      expect(
-        await showTopNAction.isCompatible({
-          ...context,
-          data: [
-            {
-              field: { ...context.data[0].field, esTypes: ['text'] },
-            },
-          ],
-        })
-      ).toEqual(false);
-    });
-
     it('should return false if field is not aggregatable', async () => {
       expect(
         await showTopNAction.isCompatible({
@@ -99,6 +83,42 @@ describe('createShowTopNCellActionFactory', () => {
           ],
         })
       ).toEqual(false);
+    });
+
+    it('should return false if field is nested', async () => {
+      expect(
+        await showTopNAction.isCompatible({
+          ...context,
+          data: [
+            {
+              field: { ...context.data[0].field, subType: { nested: { path: 'test_path' } } },
+            },
+          ],
+        })
+      ).toEqual(false);
+    });
+
+    describe.each([
+      { type: KBN_FIELD_TYPES.STRING, expectedValue: true },
+      { type: KBN_FIELD_TYPES.BOOLEAN, expectedValue: true },
+      { type: KBN_FIELD_TYPES.NUMBER, expectedValue: true },
+      { type: KBN_FIELD_TYPES.IP, expectedValue: true },
+      { type: KBN_FIELD_TYPES.DATE, expectedValue: false },
+      { type: KBN_FIELD_TYPES.GEO_SHAPE, expectedValue: false },
+      { type: KBN_FIELD_TYPES.IP_RANGE, expectedValue: false },
+    ])('lens supported KBN types', ({ type, expectedValue }) => {
+      it(`should return ${expectedValue} when type is ${type}`, async () => {
+        expect(
+          await showTopNAction.isCompatible({
+            ...context,
+            data: [
+              {
+                field: { ...context.data[0].field, type },
+              },
+            ],
+          })
+        ).toEqual(expectedValue);
+      });
     });
   });
 
