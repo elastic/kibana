@@ -52,7 +52,7 @@ interface UrlDrilldownDeps {
   getSyntaxHelpDocsLink: () => string;
   getVariablesHelpDocsLink: () => string;
   settings: SettingsStart;
-  theme: ThemeServiceStart;
+  theme: () => ThemeServiceStart;
 }
 
 export type ActionContext = ChartActionContext<EmbeddableWithQueryInput>;
