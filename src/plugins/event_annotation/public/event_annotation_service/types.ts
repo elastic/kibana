@@ -7,18 +7,18 @@
  */
 
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common/ast';
-import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { EventAnnotationGroupContent } from '../../common/types';
 import { EventAnnotationConfig, EventAnnotationGroupConfig } from '../../common';
 
 export interface EventAnnotationServiceType {
   loadAnnotationGroup: (savedObjectId: string) => Promise<EventAnnotationGroupConfig>;
+  groupExistsWithTitle: (title: string) => Promise<boolean>;
   findAnnotationGroupContent: (
     searchTerm: string,
     pageSize: number,
-    references?: SavedObjectsFindOptionsReference[],
-    referencesToExclude?: SavedObjectsFindOptionsReference[]
+    tagsToInclude?: string[],
+    tagsToExclude?: string[]
   ) => Promise<{ total: number; hits: EventAnnotationGroupContent[] }>;
   deleteAnnotationGroups: (ids: string[]) => Promise<void>;
   createAnnotationGroup: (group: EventAnnotationGroupConfig) => Promise<{ id: string }>;

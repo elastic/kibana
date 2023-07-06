@@ -8,14 +8,17 @@ info:
   license:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
+servers:
+  - url: http://localhost:5601
+    description: local
+security:
+  - basicAuth: []
+  - apiKeyAuth: []
 tags:
   - name: slo
     description: SLO APIs enable you to define, manage and track service-level objectives
   - name: composite slo
     description: Composite SLO APIs enable you to define, manage and track a group of SLOs.
-servers:
-  - url: http://localhost:5601
-    description: local
 paths:
   /s/{spaceId}/api/observability/composite_slos:
     post:
@@ -53,6 +56,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '409':
           description: Conflict - The Composite SLO id already exists
           content:
@@ -121,6 +130,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '404':
           description: Not found response
           content:
@@ -158,6 +173,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '404':
           description: Not found response
           content:
@@ -200,6 +221,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '404':
           description: Not found response
           content:
@@ -232,6 +259,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '404':
           description: Not found response
           content:
@@ -274,6 +307,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '409':
           description: Conflict - The SLO id already exists
           content:
@@ -360,6 +399,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '404':
           description: Not found response
           content:
@@ -397,6 +442,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '404':
           description: Not found response
           content:
@@ -439,6 +490,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '404':
           description: Not found response
           content:
@@ -471,6 +528,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '404':
           description: Not found response
           content:
@@ -504,6 +567,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '404':
           description: Not found response
           content:
@@ -537,6 +606,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
         '404':
           description: Not found response
           content:
@@ -579,6 +654,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
 components:
   securitySchemes:
     basicAuth:
@@ -811,6 +892,23 @@ components:
         statusCode:
           type: number
           example: 401
+        error:
+          type: string
+          example: Unauthorized
+        message:
+          type: string
+          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+    403_response:
+      title: Unauthorized
+      type: object
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: number
+          example: 403
         error:
           type: string
           example: Unauthorized
@@ -1405,6 +1503,3 @@ components:
               example: 0.9836
             errorBudget:
               $ref: '#/components/schemas/error_budget'
-security:
-  - basicAuth: []
-  - apiKeyAuth: []

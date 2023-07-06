@@ -7,6 +7,7 @@
 
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import { fetchFindLatestPackageOrThrow } from '@kbn/fleet-plugin/server/services/epm/registry';
 import { getCollectorPolicy } from './fleet_policies';
 
 export interface SetupDataCollectionInstructions {
@@ -16,6 +17,9 @@ export interface SetupDataCollectionInstructions {
   };
   symbolizer: {
     host?: string;
+  };
+  profilerAgent: {
+    version: string;
   };
 }
 
@@ -28,6 +32,7 @@ export async function getSetupInstructions({
   soClient: SavedObjectsClientContract;
   apmServerHost?: string;
 }): Promise<SetupDataCollectionInstructions> {
+  const profilerAgent = await fetchFindLatestPackageOrThrow('profiler_agent', { prerelease: true });
   const collectorPolicy = await getCollectorPolicy({ packagePolicyClient, soClient });
 
   if (!collectorPolicy) {
@@ -45,6 +50,9 @@ export async function getSetupInstructions({
     },
     symbolizer: {
       host: symbolizerHost,
+    },
+    profilerAgent: {
+      version: profilerAgent.version,
     },
   };
 }
