@@ -65,7 +65,13 @@ describe('workspace_panel_wrapper', () => {
         isFullscreen={false}
         lensInspector={{} as unknown as LensInspector}
         getUserMessages={() => []}
-      />
+      />,
+      {
+        preloadedState: {
+          visualization: { activeId: 'myVis', state: visState },
+          datasourceStates: {},
+        },
+      }
     );
 
     expect(renderToolbarMock).toHaveBeenCalledWith(expect.any(Element), {
