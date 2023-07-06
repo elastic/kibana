@@ -80,6 +80,7 @@ const AssistantComponent: React.FC<Props> = ({
     promptContexts,
     title,
     allSystemPrompts,
+    setConversations,
   } = useAssistantContext();
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
@@ -171,6 +172,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   // For auto-focusing prompt within timeline
   const promptTextAreaRef = useRef<HTMLTextAreaElement>(null);
+
   useEffect(() => {
     if (shouldRefocusPrompt && promptTextAreaRef.current) {
       promptTextAreaRef?.current.focus();
@@ -190,19 +192,13 @@ const AssistantComponent: React.FC<Props> = ({
   ////
   //
 
-  const defaultSystemPrompt = useMemo(
-    () => allSystemPrompts.find((prompt) => prompt.isNewConversationDefault),
-    [allSystemPrompts]
-  );
-
   const selectedSystemPrompt = useMemo(() => {
     if (currentConversation.apiConfig.defaultSystemPromptId) {
       return allSystemPrompts.find(
         (prompt) => prompt.id === currentConversation.apiConfig.defaultSystemPromptId
       );
     }
-    return defaultSystemPrompt;
-  }, [allSystemPrompts, currentConversation.apiConfig.defaultSystemPromptId, defaultSystemPrompt]);
+  }, [allSystemPrompts, currentConversation.apiConfig.defaultSystemPromptId]);
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(

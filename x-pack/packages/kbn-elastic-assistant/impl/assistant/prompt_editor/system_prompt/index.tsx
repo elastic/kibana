@@ -12,7 +12,6 @@ import { css } from '@emotion/react';
 import { useAssistantContext } from '../../../assistant_context';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
-import type { Prompt } from '../../types';
 import { SelectSystemPrompt } from './select_system_prompt';
 import { useConversation } from '../../use_conversation';
 
@@ -24,17 +23,10 @@ const SystemPromptComponent: React.FC<Props> = ({ conversation }) => {
   const { allSystemPrompts } = useAssistantContext();
   const { setApiConfig } = useConversation();
 
-  const defaultSystemPrompt = useMemo(
-    () => allSystemPrompts?.find((p) => p.isNewConversationDefault),
-    [allSystemPrompts]
+  const selectedPrompt = useMemo(
+    () => allSystemPrompts?.find((p) => p.id === conversation?.apiConfig.defaultSystemPromptId),
+    [allSystemPrompts, conversation]
   );
-
-  const selectedPrompt: Prompt | undefined = useMemo(() => {
-    if (conversation?.apiConfig.defaultSystemPromptId) {
-      return allSystemPrompts.find((p) => p.id === conversation.apiConfig.defaultSystemPromptId);
-    }
-    return defaultSystemPrompt;
-  }, [conversation, defaultSystemPrompt, allSystemPrompts]);
 
   const [isEditing, setIsEditing] = React.useState<boolean>(false);
 
