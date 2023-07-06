@@ -59,9 +59,6 @@ export class IconPreview extends Component<Props, State> {
 
   componentWillUnmount() {
     this._isMounted = false;
-    if (this._checker) {
-      this._checker.destroy();
-    }
     if (this.state.map) {
       this.state.map.remove();
       this.state.map = null;
