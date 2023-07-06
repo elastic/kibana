@@ -3337,6 +3337,8 @@ components:
         cases:
           type: array
           description: An array containing one or more case objects.
+          maxItems: 100
+          minItems: 1
           items:
             type: object
             required:
