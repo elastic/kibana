@@ -14,6 +14,7 @@ import { EditableMarkdown } from '.';
 import { TestProviders } from '../../common/mock';
 import type { Content } from '../user_actions/schema';
 import { schema } from '../user_actions/schema';
+import { MAX_COMMENT_LENGTH } from '../../../common/constants';
 
 jest.mock('../../common/lib/kibana');
 
@@ -21,7 +22,6 @@ const onChangeEditable = jest.fn();
 const onSaveContent = jest.fn();
 
 const newValue = 'Hello from Tehas';
-const emptyValue = '';
 const hyperlink = `[hyperlink](http://elastic.co)`;
 const draftStorageKey = `cases.testAppId.caseId.markdown-id.markdownEditor`;
 const content = `A link to a timeline ${hyperlink}`;
@@ -100,20 +100,6 @@ describe('EditableMarkdown', () => {
     expect(onSaveContent).not.toHaveBeenCalled();
   });
 
-  it('Save button disabled if current text is empty', async () => {
-    render(
-      <MockHookWrapperComponent>
-        <EditableMarkdown {...defaultProps} />
-      </MockHookWrapperComponent>
-    );
-
-    fireEvent.change(screen.getByTestId('euiMarkdownEditorTextArea'), { value: emptyValue });
-
-    await waitFor(() => {
-      expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
-    });
-  });
-
   it('Cancel button click calls only onChangeEditable', async () => {
     render(
       <MockHookWrapperComponent>
@@ -126,6 +112,50 @@ describe('EditableMarkdown', () => {
     await waitFor(() => {
       expect(onSaveContent).not.toHaveBeenCalled();
       expect(onChangeEditable).toHaveBeenCalledWith(defaultProps.id);
+    });
+  });
+
+  describe('errors', () => {
+    beforeAll(() => {
+      jest.useFakeTimers();
+    });
+
+    it('Shows error message and save button disabled if current text is empty', async () => {
+      render(
+        <MockHookWrapperComponent>
+          <EditableMarkdown {...defaultProps} />
+        </MockHookWrapperComponent>
+      );
+
+      userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+
+      userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), ' ');
+
+      await waitFor(() => {
+        expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
+        expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
+      });
+    });
+
+    it('Shows error message and save button disabled if current text is too long', async () => {
+      const longComment = 'b'.repeat(MAX_COMMENT_LENGTH + 1);
+
+      render(
+        <MockHookWrapperComponent>
+          <EditableMarkdown {...defaultProps} />
+        </MockHookWrapperComponent>
+      );
+
+      const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
+
+      userEvent.paste(markdown, longComment);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('The length of the comment is too long. The maximum length is 30000.')
+        ).toBeInTheDocument();
+        expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
+      });
     });
   });
 

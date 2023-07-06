@@ -11,6 +11,7 @@ import React from 'react';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import * as i18n from '../case_view/translations';
+import { MAX_COMMENT_LENGTH } from '../../../common/constants';
 
 interface EditableMarkdownFooterProps {
   handleSaveAction: () => Promise<void>;
@@ -42,7 +43,7 @@ const EditableMarkdownFooterComponent: React.FC<EditableMarkdownFooterProps> = (
           fill
           iconType="save"
           onClick={handleSaveAction}
-          disabled={!content}
+          disabled={!content || content.length > MAX_COMMENT_LENGTH}
           size="s"
         >
           {i18n.SAVE}
