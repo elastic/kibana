@@ -35,7 +35,7 @@ if [ "${OS}" == "Linux" ]; then
     arch=arm64
   fi
 elif [ "${OS}" == "Darwin" ]; then
-  os=macos
+  os=darwin
   if [ "${ARCH}" == "arm64" ]; then
     arch=aarch64
   fi
