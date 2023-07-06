@@ -81,7 +81,7 @@ export const useDashboardListingTable = ({
   const {
     dashboardSessionStorage,
     dashboardCapabilities: { showWriteControls },
-    dashboardContentManagement: { findDashboards, deleteDashboards },
+    dashboardContentManagement: { findDashboards, deleteDashboards, updateDashboardMeta },
     settings: { uiSettings },
     notifications: { toasts },
   } = pluginServices.getServices();
@@ -219,6 +219,11 @@ export const useDashboardListingTable = ({
 
   const tableListViewTableProps = useMemo(
     () => ({
+      contentEditor: {
+        isReadonly: !showWriteControls,
+        onSave: updateDashboardMeta,
+        customValidators: undefined,
+      },
       createItem: !showWriteControls ? undefined : createItem,
       deleteItems: !showWriteControls ? undefined : deleteItems,
       editItem: !showWriteControls ? undefined : editItem,
@@ -254,6 +259,7 @@ export const useDashboardListingTable = ({
       onFetchSuccess,
       showWriteControls,
       title,
+      updateDashboardMeta,
       urlStateEnabled,
     ]
   );
