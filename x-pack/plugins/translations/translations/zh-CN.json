@@ -36362,7 +36362,6 @@
     "xpack.synthetics.totalDuration.metrics": "步骤持续时间",
     "xpack.synthetics.totalDuration.transferSize": "传输大小",
     "xpack.synthetics.uptimeFeatureCatalogueTitle": "运行时间",
-    "xpack.synthetics.uptimeSettings.index": "Uptime 设置 - 索引",
     "xpack.synthetics.wait": "等待",
     "xpack.synthetics.waterfall.applyFilters.label": "选择要应用筛选的项目",
     "xpack.synthetics.waterfall.applyFilters.message": "单击以添加或移除筛选",
