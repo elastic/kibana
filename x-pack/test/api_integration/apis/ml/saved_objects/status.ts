@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
       await spacesService.delete(idSpace1);
       await spacesService.delete(idSpace2);
       await ml.api.cleanMlIndices();
-      await ml.testResources.cleanMLSavedObjects();
+      await ml.testResources.cleanMLSavedObjects([idSpace1, idSpace2]);
     });
 
     it('should list jobs and saved objects', async () => {

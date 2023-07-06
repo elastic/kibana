@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.api.deleteAnomalyDetectionJobES(jobId);
       }
       await spacesService.delete(idSpace1);
-      await ml.testResources.cleanMLSavedObjects();
+      await ml.testResources.cleanMLSavedObjects([idSpace1]);
       await ml.api.cleanMlIndices();
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });

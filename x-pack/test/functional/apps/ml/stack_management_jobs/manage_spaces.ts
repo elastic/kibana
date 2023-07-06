@@ -135,7 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
           await spacesService.delete(spaceId);
         }
       }
-      await ml.testResources.cleanMLSavedObjects();
+      await ml.testResources.cleanMLSavedObjects([spaceIds.idSpaceDefault, spaceIds.idSpace1]);
       await ml.api.cleanMlIndices();
       await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
       await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
