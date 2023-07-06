@@ -125,8 +125,8 @@ export class CoreVersionedRoute implements VersionedRoute {
     const req = originalReq as Mutable<KibanaRequest>;
     let version: ApiVersion;
 
-    const requestVersion = readVersion(req, this.enableQueryVersion);
-    if (!requestVersion) {
+    const maybeVersion = readVersion(req, this.enableQueryVersion);
+    if (!maybeVersion) {
       if (this.isPublic && this.defaultResolutionStrategy) {
         version = this.getDefaultVersion(this.defaultResolutionStrategy);
       } else {
@@ -135,7 +135,7 @@ export class CoreVersionedRoute implements VersionedRoute {
         });
       }
     } else {
-      version = requestVersion;
+      version = maybeVersion;
     }
     if (hasQueryVersion(req)) {
       if (this.enableQueryVersion) {
