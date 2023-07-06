@@ -20,7 +20,7 @@ import {
 } from '@kbn/core/server';
 import { map$ } from '@kbn/std';
 import { schema } from '@kbn/config-schema';
-import { BFETCH_ROUTE_VERSION_1 } from '../common/constants';
+import { BFETCH_ROUTE_VERSION_LATEST } from '../common/constants';
 import {
   StreamingResponseHandler,
   BatchRequestData,
@@ -121,7 +121,7 @@ export class BfetchServerPlugin
     (path, handler, method = 'POST', pluginRouter) => {
       const httpRouter = pluginRouter || router;
       const routeDefinition = {
-        version: BFETCH_ROUTE_VERSION_1,
+        version: BFETCH_ROUTE_VERSION_LATEST,
         validate: {
           request: {
             body: schema.any(),
