@@ -132,6 +132,7 @@ import type { TypedLensByValueInput } from './embeddable_component';
 import type { LensPluginStartDependencies } from '../plugin';
 import { EmbeddableFeatureBadge } from './embeddable_info_badges';
 import { getDatasourceLayers } from '../state_management/utils';
+import type { EditLensConfigurationProps } from '../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -743,6 +744,8 @@ export class Embeddable
 
   async updateVisualization(datasourceState: unknown, visualizationState: unknown) {
     const viz = this.savedVis;
+    const datasourceId = (this.activeDatasourceId ??
+      'formBased') as EditLensConfigurationProps['datasourceId'];
     if (viz?.state) {
       const attrs = {
         ...viz,
@@ -751,7 +754,7 @@ export class Embeddable
           visualization: visualizationState,
           datasourceStates: {
             ...viz.state.datasourceStates,
-            textBased: datasourceState,
+            [datasourceId]: datasourceState,
           },
         },
       };
@@ -767,6 +770,9 @@ export class Embeddable
       this.deps.visualizationMap,
       this.deps.datasourceMap
     );
+
+    const datasourceId = (this.activeDatasourceId ??
+      'formBased') as EditLensConfigurationProps['datasourceId'];
     const attributes = this.savedVis as TypedLensByValueInput['attributes'];
     const dataView = this.dataViews[0];
     if (attributes) {
@@ -775,7 +781,7 @@ export class Embeddable
           attributes={attributes}
           dataView={dataView}
           updateAll={this.updateVisualization.bind(this)}
-          datasourceId={this.isTextBasedLanguage() ? 'textBased' : 'formBased'}
+          datasourceId={datasourceId}
           adaptersTables={this.lensInspector.adapters.tables?.tables}
         />
       );
