@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,6 +23,7 @@ import React, { ReactNode } from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { Field } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { CreateSLOForm } from '../../types';
+import { QueryBuilder } from '../common/query_builder';
 
 interface Option {
   label: string;
@@ -33,6 +35,7 @@ interface MetricIndicatorProps {
   indexFields: Field[] | undefined;
   isLoadingIndex: boolean;
   metricLabel: string;
+  filterLabel: string;
   equationLabel: string;
   metricTooltip: ReactNode;
   equationTooltip: ReactNode;
@@ -64,6 +67,7 @@ export function MetricIndicator({
   indexFields,
   isLoadingIndex,
   metricLabel,
+  filterLabel,
   equationLabel,
   metricTooltip,
   equationTooltip,
@@ -106,23 +110,18 @@ export function MetricIndicator({
     <>
       <EuiFlexItem>
         {fields?.map((metric, index) => (
-          <EuiFormRow
-            fullWidth
-            label={
-              <span>
-                {metricLabel} {metric.name} {metricTooltip}
-              </span>
-            }
-            key={metric.id}
-          >
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
-              <EuiFlexItem>
-                <input hidden {...register(`indicator.params.${type}.metrics.${index}.name`)} />
-                <input
-                  hidden
-                  {...register(`indicator.params.${type}.metrics.${index}.aggregation`)}
-                />
-
+          <EuiFlexGroup alignItems="center" gutterSize="xs" key={metric.id}>
+            <input hidden {...register(`indicator.params.${type}.metrics.${index}.name`)} />
+            <input hidden {...register(`indicator.params.${type}.metrics.${index}.aggregation`)} />
+            <EuiFlexItem>
+              <EuiFormRow
+                fullWidth
+                label={
+                  <span>
+                    {metricLabel} {metric.name} {metricTooltip}
+                  </span>
+                }
+              >
                 <Controller
                   name={`indicator.params.${type}.metrics.${index}.field`}
                   defaultValue=""
@@ -171,26 +170,47 @@ export function MetricIndicator({
                     />
                   )}
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={0}>
-                <EuiButtonIcon
-                  iconType="trash"
-                  color="danger"
-                  style={{ marginBottom: '0.2em' }}
-                  onClick={handleDeleteMetric(index)}
-                  disabled={disableDelete}
-                  title={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.customMetric.deleteLabel',
-                    { defaultMessage: 'Delete metric' }
-                  )}
-                  aria-label={i18n.translate(
-                    'xpack.observability.slo.sloEdit.sliType.customMetric.deleteLabel',
-                    { defaultMessage: 'Delete metric' }
-                  )}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <QueryBuilder
+                dataTestSubj="customKqlIndicatorFormGoodQueryInput"
+                indexPatternString={watch('indicator.params.index')}
+                label={`${filterLabel} ${metric.name}`}
+                name={`indicator.params.${type}.metrics.${index}.filter`}
+                placeholder=""
+                required={false}
+                tooltip={
+                  <EuiIconTip
+                    content={i18n.translate(
+                      'xpack.observability.slo.sloEdit.sliType.customMetric.goodQuery.tooltip',
+                      {
+                        defaultMessage: 'This KQL query should return a subset of events.',
+                      }
+                    )}
+                    position="top"
+                  />
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={0}>
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                style={{ marginTop: '1.5em' }}
+                onClick={handleDeleteMetric(index)}
+                disabled={disableDelete}
+                title={i18n.translate(
+                  'xpack.observability.slo.sloEdit.sliType.customMetric.deleteLabel',
+                  { defaultMessage: 'Delete metric' }
+                )}
+                aria-label={i18n.translate(
+                  'xpack.observability.slo.sloEdit.sliType.customMetric.deleteLabel',
+                  { defaultMessage: 'Delete metric' }
+                )}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ))}
         <EuiFlexGroup>
           <EuiFlexItem grow={0}>

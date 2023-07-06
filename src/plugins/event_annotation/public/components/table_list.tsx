@@ -95,8 +95,8 @@ export const EventAnnotationGroupTableList = ({
       return eventAnnotationService.findAnnotationGroupContent(
         searchTerm,
         listingLimit, // TODO is this right?
-        references,
-        referencesToExclude
+        references?.map(({ id }) => id),
+        referencesToExclude?.map(({ id }) => id)
       );
     },
     [eventAnnotationService, listingLimit]
