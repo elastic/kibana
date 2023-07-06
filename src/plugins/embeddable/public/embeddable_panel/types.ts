@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { ReactNode } from 'react';
+import { MaybePromise } from '@kbn/utility-types';
 import { Action, UiActionsService } from '@kbn/ui-actions-plugin/public';
 
 import {
@@ -48,7 +50,7 @@ export interface EmbeddablePanelProps {
   showShadow?: boolean;
   hideHeader?: boolean;
   hideInspector?: boolean;
-  embeddable: IEmbeddable;
+  embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput, MaybePromise<ReactNode>>;
   showNotifications?: boolean;
   containerContext?: EmbeddableContainerContext;
   actionPredicate?: (actionId: string) => boolean;

@@ -30,15 +30,7 @@ export const openAddPanelFlyout = ({
   const flyoutSession = core.overlays.openFlyout(
     toMountPoint(
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <LazyAddPanelFlyout
-          container={container}
-          onAddPanel={onAddPanel}
-          onClose={() => {
-            if (flyoutSession) {
-              flyoutSession.close();
-            }
-          }}
-        />
+        <LazyAddPanelFlyout container={container} onAddPanel={onAddPanel} />
       </Suspense>,
       { theme$: core.theme.theme$ }
     ),

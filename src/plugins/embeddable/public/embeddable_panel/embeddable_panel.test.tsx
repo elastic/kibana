@@ -321,7 +321,11 @@ test('Edit mode actions are hidden if parent is in view mode', async () => {
 
   const component = await renderEmbeddableInPanel({ embeddable });
 
-  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  await act(async () => {
+    findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+    await nextTick();
+    component.update();
+  });
   expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
   await nextTick();
   component.update();
@@ -336,8 +340,11 @@ test('Edit mode actions are shown in edit mode', async () => {
   const button = findTestSubject(component, 'embeddablePanelToggleMenuIcon');
 
   expect(button.length).toBe(1);
-  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-
+  await act(async () => {
+    findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+    await nextTick();
+    component.update();
+  });
   expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
   await nextTick();
   act(() => {
@@ -352,10 +359,13 @@ test('Edit mode actions are shown in edit mode', async () => {
   });
 
   // Need to close and re-open to refresh. It doesn't update automatically.
-  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-  await nextTick();
-  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-  await nextTick();
+  await act(async () => {
+    findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+    await nextTick();
+    findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+    await nextTick();
+    component.update();
+  });
   expect(findTestSubject(component, 'embeddablePanelContextMenuOpen').length).toBe(1);
 
   await act(async () => {
@@ -467,7 +477,12 @@ test('Should work in minimal way rendering only the inspector action', async () 
 
   const component = await renderEmbeddableInPanel({ embeddable });
 
-  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  await act(async () => {
+    findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+    await nextTick();
+    component.update();
+  });
+
   expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
   await act(async () => {
     await nextTick();

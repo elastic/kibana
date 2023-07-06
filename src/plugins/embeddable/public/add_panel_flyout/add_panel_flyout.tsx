@@ -63,30 +63,30 @@ const runAddTelemetry = (
 };
 
 export const AddPanelFlyout = ({
-  onClose,
   container,
   onAddPanel,
 }: {
-  onClose: () => void;
   container: IContainer;
   onAddPanel?: (id: string) => void;
 }) => {
-  const factoriesMap: FactoryMap = useMemo(() => {
-    return [...embeddableStart.getEmbeddableFactories()].reduce((acc, factory) => {
-      acc[factory.type] = factory;
-      return acc;
-    }, {} as FactoryMap);
+  const factoriesBySavedObjectType: FactoryMap = useMemo(() => {
+    return [...embeddableStart.getEmbeddableFactories()]
+      .filter((embeddableFactory) => Boolean(embeddableFactory.savedObjectMetaData?.type))
+      .reduce((acc, factory) => {
+        acc[factory.savedObjectMetaData!.type] = factory;
+        return acc;
+      }, {} as FactoryMap);
   }, []);
 
   const metaData = useMemo(
     () =>
-      Object.values(factoriesMap)
+      Object.values(factoriesBySavedObjectType)
         .filter(
           (embeddableFactory) =>
             Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
         )
         .map(({ savedObjectMetaData }) => savedObjectMetaData as SavedObjectMetaData<unknown>),
-    [factoriesMap]
+    [factoriesBySavedObjectType]
   );
 
   const onChoose: SavedObjectFinderProps['onChoose'] = useCallback(
@@ -96,7 +96,7 @@ export const AddPanelFlyout = ({
       name: string,
       savedObject: SavedObjectCommon
     ) => {
-      const factoryForSavedObjectType = factoriesMap[type];
+      const factoryForSavedObjectType = factoriesBySavedObjectType[type];
       if (!factoryForSavedObjectType) {
         throw new EmbeddableFactoryNotFoundError(type);
       }
@@ -110,7 +110,7 @@ export const AddPanelFlyout = ({
       showSuccessToast(name);
       runAddTelemetry(container.type, factoryForSavedObjectType, savedObject);
     },
-    [container, factoriesMap, onAddPanel]
+    [container, factoriesBySavedObjectType, onAddPanel]
   );
 
   return (

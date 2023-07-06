@@ -7,7 +7,6 @@
  */
 
 import { Subscription } from 'rxjs';
-import deepEqual from 'fast-deep-equal';
 import { EuiBadge, EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -70,28 +69,26 @@ export const useEmbeddablePanelBadges = (
     let mounted = true;
     let subscription: Subscription;
 
-    const maybeUpdateNotificationsAndBadges = async () => {
+    const updateNotificationsAndBadges = async () => {
       const [newBadges, newNotifications] = await Promise.all([
         getAllBadgesFromEmbeddable(),
         getAllNotificationsFromEmbeddable(),
       ]);
       if (!mounted) return;
-      setBadges((lastBadges) => (deepEqual(lastBadges, newBadges) ? lastBadges : newBadges));
-      setNotifications((lastNotifications) =>
-        deepEqual(lastNotifications, newNotifications) ? lastNotifications : newNotifications
-      );
+      setBadges(newBadges);
+      setNotifications(newNotifications);
     };
 
-    maybeUpdateNotificationsAndBadges().then(() => {
+    updateNotificationsAndBadges().then(() => {
       if (mounted) {
         /**
          * since any piece of state could theoretically change which actions are available we need to
          * recalculate them on any input change or any parent input change.
          */
-        subscription = embeddable.getInput$().subscribe(() => maybeUpdateNotificationsAndBadges());
+        subscription = embeddable.getInput$().subscribe(() => updateNotificationsAndBadges());
         if (embeddable.parent) {
           subscription.add(
-            embeddable.parent.getInput$().subscribe(() => maybeUpdateNotificationsAndBadges())
+            embeddable.parent.getInput$().subscribe(() => updateNotificationsAndBadges())
           );
         }
       }

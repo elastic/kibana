@@ -26,6 +26,7 @@ import {
   EmbeddableOutput,
   EmbeddableStart,
   EmbeddablePanel,
+  openAddPanelFlyout,
 } from '@kbn/embeddable-plugin/public';
 import { SearchableListContainer, SearchableContainerInput } from './searchable_list_container';
 
@@ -121,7 +122,7 @@ export class SearchableListContainerComponentInner extends Component<Props, Stat
   };
 
   public renderControls() {
-    const { input } = this.props;
+    const { input, embeddable } = this.props;
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
@@ -149,6 +150,17 @@ export class SearchableListContainerComponentInner extends Component<Props, Stat
               value={this.props.input.search || ''}
               onChange={(ev) => this.updateSearch(ev.target.value)}
             />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow hasEmptyLabelSpace>
+            <EuiButton
+              data-test-subj="addPanelToListContainer"
+              disabled={input.search === ''}
+              onClick={() => openAddPanelFlyout({ container: embeddable })}
+            >
+              Add panel
+            </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem />

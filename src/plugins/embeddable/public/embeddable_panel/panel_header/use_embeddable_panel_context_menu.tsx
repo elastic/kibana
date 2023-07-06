@@ -8,7 +8,6 @@
 
 import classNames from 'classnames';
 import { Subscription } from 'rxjs';
-import deepEqual from 'fast-deep-equal';
 import useMountedState from 'react-use/lib/useMountedState';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -82,12 +81,10 @@ export const useEmbeddablePanelContextMenu = ({
     return sortedActions;
   }, [actionPredicate, embeddable, universalActions, getActions]);
 
-  const maybeUpdatePanelActions = useCallback(async () => {
+  const updatePanelActions = useCallback(async () => {
     const newActions = await getAllPanelActions();
     if (!mounted()) return;
-    setContextMenuActions((currentActions) =>
-      deepEqual(currentActions, newActions) ? currentActions : newActions
-    );
+    setContextMenuActions(newActions);
   }, [getAllPanelActions, mounted]);
 
   /**
@@ -97,24 +94,22 @@ export const useEmbeddablePanelContextMenu = ({
   useEffect(() => {
     let subscription: Subscription;
 
-    maybeUpdatePanelActions().then(() => {
+    updatePanelActions().then(() => {
       if (mounted()) {
         /**
          * since any piece of state could theoretically change which actions are available we need to
          * recalculate them on any input change or any parent input change.
          */
-        subscription = embeddable.getInput$().subscribe(() => maybeUpdatePanelActions());
+        subscription = embeddable.getInput$().subscribe(() => updatePanelActions());
         if (embeddable.parent) {
-          subscription.add(
-            embeddable.parent.getInput$().subscribe(() => maybeUpdatePanelActions())
-          );
+          subscription.add(embeddable.parent.getInput$().subscribe(() => updatePanelActions()));
         }
       }
     });
     return () => {
       subscription?.unsubscribe();
     };
-  }, [embeddable, getAllPanelActions, maybeUpdatePanelActions, mounted]);
+  }, [embeddable, getAllPanelActions, updatePanelActions, mounted]);
 
   /**
    * When actions are updated, build and set panels
@@ -149,7 +144,7 @@ export const useEmbeddablePanelContextMenu = ({
       color="text"
       className="embPanel__optionsMenuButton"
       onClick={() => {
-        maybeUpdatePanelActions().then(() => {
+        updatePanelActions().then(() => {
           if (!mounted()) return;
           setIsContextMenuOpen((isOpen) => !isOpen);
         });

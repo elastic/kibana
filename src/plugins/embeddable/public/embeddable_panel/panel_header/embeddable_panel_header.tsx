@@ -24,12 +24,12 @@ import { useEmbeddablePanelContextMenu } from './use_embeddable_panel_context_me
 export const EmbeddablePanelHeader = ({
   index,
   headerId,
-  showBadges,
   getActions,
   embeddable,
   actionPredicate,
   universalActions,
-  showNotifications,
+  showBadges = true,
+  showNotifications = true,
 }: EmbeddablePanelProps & { headerId: string; universalActions: PanelUniversalActions }) => {
   const selfStyledEmbeddableOptions = useMemo(
     () => (isSelfStyledEmbeddable(embeddable) ? embeddable.getSelfStyledOptions() : undefined),

@@ -7,9 +7,10 @@
  */
 
 import classNames from 'classnames';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 
+import { isPromise } from '@kbn/std';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 import {
@@ -29,6 +30,7 @@ import { EmbeddablePanelProps, PanelUniversalActions } from './types';
 import { EmbeddablePanelHeader } from './panel_header/embeddable_panel_header';
 
 export const EmbeddablePanel = (panelProps: EmbeddablePanelProps) => {
+  const [node, setNode] = useState<ReactNode | undefined>();
   const { hideHeader, showShadow, embeddable, containerContext, hideInspector } = panelProps;
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
@@ -73,8 +75,12 @@ export const EmbeddablePanel = (panelProps: EmbeddablePanelProps) => {
    * Render embeddable into ref, set up error subscription
    */
   useEffect(() => {
-    if (embeddableRoot.current) {
-      embeddable.render(embeddableRoot.current);
+    if (!embeddableRoot.current) return;
+    const nextNode = embeddable.render(embeddableRoot.current) ?? undefined;
+    if (isPromise(nextNode)) {
+      nextNode.then((resolved) => setNode(resolved));
+    } else {
+      setNode(nextNode);
     }
     const errorSubscription = embeddable.getOutput$().subscribe({
       next: (output) => {
@@ -141,7 +147,9 @@ export const EmbeddablePanel = (panelProps: EmbeddablePanelProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      <div className="embPanel__content" ref={embeddableRoot} {...contentAttrs} />
+      <div className="embPanel__content" ref={embeddableRoot} {...contentAttrs}>
+        {node}
+      </div>
     </EuiPanel>
   );
 };
