@@ -382,8 +382,7 @@ class DocLinks {
     this.connectorsDropbox = docLinks.links.enterpriseSearch.connectorsDropbox;
     this.connectorsGoogleCloudStorage =
       docLinks.links.enterpriseSearch.connectorsGoogleCloudStorage;
-    this.connectorsGoogleDrive =
-      docLinks.links.enterpriseSearch.connectorsGoogleDrive;
+    this.connectorsGoogleDrive = docLinks.links.enterpriseSearch.connectorsGoogleDrive;
     this.connectorsJira = docLinks.links.enterpriseSearch.connectorsJira;
     this.connectorsMicrosoftSQL = docLinks.links.enterpriseSearch.connectorsMicrosoftSQL;
     this.connectorsMongoDB = docLinks.links.enterpriseSearch.connectorsMongoDB;
