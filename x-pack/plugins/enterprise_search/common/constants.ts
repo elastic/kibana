@@ -10,6 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { ProductFeatures } from './types';
 import { IngestPipelineParams } from './types/connectors';
 
+export const SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.search.productName', {
+  defaultMessage: 'Search',
+});
+
 export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
   ID: 'enterpriseSearch',
   NAME: i18n.translate('xpack.enterpriseSearch.overview.productName', {
