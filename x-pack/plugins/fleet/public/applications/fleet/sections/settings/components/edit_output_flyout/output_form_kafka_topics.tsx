@@ -108,13 +108,6 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
       : null;
   };
 
-  // const matchErrorsByIndex = useMemo(
-  //   () => (index: number) => {
-  //     return errors?.filter((error) => error.index === index).map((error) => error.message);
-  //   },
-  //   [errors]
-  // );
-
   const globalErrors = useMemo(() => {
     return errors && errors.filter((err) => err.index === undefined).map(({ message }) => message);
   }, [errors]);
@@ -189,184 +182,189 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
             />
           }
         >
-          <></>
-        </EuiFormRow>
-      )}
-      {topics.length > 1 ? (
-        <EuiDragDropContext onDragEnd={onDragEndHandler}>
-          <EuiDroppable droppableId={`${id}Droppable`} spacing="none">
-            {topics.map((topic, index) => {
-              const topicErrors = indexedErrors[index];
-              return (
-                <React.Fragment key={index}>
-                  <EuiDraggable
-                    spacing="m"
-                    index={index}
-                    draggableId={`${id}${index}Draggable`}
-                    // isDragDisabled={disabled}
-                    customDragHandle={true}
-                    style={{
-                      paddingLeft: 0,
-                      paddingRight: 0,
-                    }}
-                  >
-                    {(provided, state) => (
-                      <>
-                        <EuiSpacer size="s" />
+          {topics.length > 1 ? (
+            <EuiDragDropContext onDragEnd={onDragEndHandler}>
+              <EuiDroppable droppableId={`${id}Droppable`} spacing="none">
+                {topics.map((topic, index) => {
+                  const topicErrors = indexedErrors[index];
+                  return (
+                    <React.Fragment key={index}>
+                      <EuiDraggable
+                        spacing="m"
+                        index={index}
+                        draggableId={`${id}${index}Draggable`}
+                        // isDragDisabled={disabled}
+                        customDragHandle={true}
+                        style={{
+                          paddingLeft: 0,
+                          paddingRight: 0,
+                        }}
+                      >
+                        {(provided, state) => (
+                          <>
+                            <EuiSpacer size="s" />
+                            <EuiFlexGroup
+                              gutterSize="none"
+                              wrap
+                              style={
+                                state.isDragging
+                                  ? { background: theme.eui.euiPanelBackgroundColorModifiers.plain }
+                                  : {}
+                              }
+                            >
+                              <EuiFlexItem grow={false}>
+                                <DraggableDiv
+                                  {...provided.dragHandleProps}
+                                  aria-label={i18n.translate('xpack.fleet.settings.sortHandle', {
+                                    defaultMessage: 'Sort host handle',
+                                  })}
+                                >
+                                  <EuiIcon color="text" type="grab" />
+                                </DraggableDiv>
+                              </EuiFlexItem>
 
-                        <EuiFlexGroup
-                          gutterSize="none"
-                          wrap
-                          style={
-                            state.isDragging
-                              ? { background: theme.eui.euiPanelBackgroundColorModifiers.plain }
-                              : {}
-                          }
+                              <EuiFlexItem style={{ flex: '30%', paddingRight: 10 }}>
+                                <EuiFormRow fullWidth>
+                                  <EuiSelect
+                                    fullWidth
+                                    options={kafkaTopicWhenTypes}
+                                    value={topic.when?.type}
+                                    onChange={(e) =>
+                                      handleTopicProcessorChange(index, 'type', e.target.value)
+                                    }
+                                  />
+                                </EuiFormRow>
+                              </EuiFlexItem>
+                              <EuiFlexItem style={{ flex: '40%' }}>
+                                <EuiFormRow fullWidth>
+                                  <EuiFieldText
+                                    value={topic.when?.condition}
+                                    onChange={(e) =>
+                                      handleTopicProcessorChange(index, 'condition', e.target.value)
+                                    }
+                                  />
+                                </EuiFormRow>
+                              </EuiFlexItem>
+
+                              <EuiFlexItem grow={false} style={{ marginTop: 10 }}>
+                                <EuiButtonIcon
+                                  color="text"
+                                  onClick={() => deleteTopicProcessor(index)}
+                                  iconType="cross"
+                                  aria-label={i18n.translate(
+                                    'xpack.fleet.multiRowInput.deleteButton',
+                                    {
+                                      defaultMessage: 'Delete row',
+                                    }
+                                  )}
+                                />
+                              </EuiFlexItem>
+                              <EuiFlexItem
+                                style={{
+                                  flex: '0 50%',
+                                  marginLeft: 'auto',
+                                  marginRight: 23,
+                                  paddingTop: 10,
+                                }}
+                              >
+                                <EuiFormRow
+                                  fullWidth
+                                  error={displayErrors(topicErrors)}
+                                  isInvalid={(topicErrors?.length ?? 0) > 0}
+                                >
+                                  <EuiFieldText
+                                    autoFocus={autoFocus}
+                                    prepend="Topic"
+                                    value={topic.topic}
+                                    isInvalid={(topicErrors?.length ?? 0) > 0}
+                                    onChange={(e) =>
+                                      handleTopicProcessorChange(index, 'topic', e.target.value)
+                                    }
+                                  />
+                                </EuiFormRow>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          </>
+                        )}
+                      </EuiDraggable>
+                    </React.Fragment>
+                  );
+                })}
+              </EuiDroppable>
+            </EuiDragDropContext>
+          ) : (
+            <>
+              {topics.map((topic, index) => {
+                const topicErrors = indexedErrors[index];
+                return (
+                  <>
+                    <EuiSpacer size="m" />
+
+                    <EuiFlexGroup gutterSize="none" wrap>
+                      <EuiFlexItem style={{ flex: '30%', paddingRight: 10 }}>
+                        <EuiFormRow fullWidth>
+                          <EuiSelect
+                            fullWidth
+                            options={kafkaTopicWhenTypes}
+                            value={topic.when?.type}
+                            onChange={(e) =>
+                              handleTopicProcessorChange(index, 'type', e.target.value)
+                            }
+                          />
+                        </EuiFormRow>
+                      </EuiFlexItem>
+                      <EuiFlexItem style={{ flex: '40%' }}>
+                        <EuiFormRow fullWidth>
+                          <EuiFieldText
+                            value={topic.when?.condition}
+                            onChange={(e) =>
+                              handleTopicProcessorChange(index, 'condition', e.target.value)
+                            }
+                          />
+                        </EuiFormRow>
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={false} style={{ marginTop: 10 }}>
+                        <EuiButtonIcon
+                          color="text"
+                          onClick={() => deleteTopicProcessor(index)}
+                          iconType="cross"
+                          aria-label={i18n.translate('xpack.fleet.multiRowInput.deleteButton', {
+                            defaultMessage: 'Delete row',
+                          })}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        style={{
+                          flex: '0 53%',
+                          marginLeft: 'auto',
+                          marginRight: 23,
+                          paddingTop: 10,
+                        }}
+                      >
+                        <EuiFormRow
+                          fullWidth
+                          error={displayErrors(topicErrors)}
+                          isInvalid={(topicErrors?.length ?? 0) > 0}
                         >
-                          <EuiFlexItem grow={false}>
-                            <DraggableDiv
-                              {...provided.dragHandleProps}
-                              aria-label={i18n.translate('xpack.fleet.settings.sortHandle', {
-                                defaultMessage: 'Sort host handle',
-                              })}
-                            >
-                              <EuiIcon color="text" type="grab" />
-                            </DraggableDiv>
-                          </EuiFlexItem>
-
-                          <EuiFlexItem style={{ flex: '30%', paddingRight: 10 }}>
-                            <EuiFormRow fullWidth>
-                              <EuiSelect
-                                fullWidth
-                                options={kafkaTopicWhenTypes}
-                                value={topic.when?.type}
-                                onChange={(e) =>
-                                  handleTopicProcessorChange(index, 'type', e.target.value)
-                                }
-                              />
-                            </EuiFormRow>
-                          </EuiFlexItem>
-                          <EuiFlexItem style={{ flex: '40%' }}>
-                            <EuiFormRow fullWidth>
-                              <EuiFieldText
-                                value={topic.when?.condition}
-                                onChange={(e) =>
-                                  handleTopicProcessorChange(index, 'condition', e.target.value)
-                                }
-                              />
-                            </EuiFormRow>
-                          </EuiFlexItem>
-
-                          <EuiFlexItem grow={false} style={{ marginTop: 10 }}>
-                            <EuiButtonIcon
-                              color="text"
-                              onClick={() => deleteTopicProcessor(index)}
-                              iconType="cross"
-                              aria-label={i18n.translate('xpack.fleet.multiRowInput.deleteButton', {
-                                defaultMessage: 'Delete row',
-                              })}
-                            />
-                          </EuiFlexItem>
-                          <EuiFlexItem
-                            style={{
-                              flex: '0 50%',
-                              marginLeft: 'auto',
-                              marginRight: 23,
-                              paddingTop: 10,
-                            }}
-                          >
-                            <EuiFormRow
-                              fullWidth
-                              error={displayErrors(topicErrors)}
-                              isInvalid={(topicErrors?.length ?? 0) > 0}
-                            >
-                              <EuiFieldText
-                                autoFocus={autoFocus}
-                                prepend="Topic"
-                                value={topic.topic}
-                                isInvalid={(topicErrors?.length ?? 0) > 0}
-                                onChange={(e) =>
-                                  handleTopicProcessorChange(index, 'topic', e.target.value)
-                                }
-                              />
-                            </EuiFormRow>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </>
-                    )}
-                  </EuiDraggable>
-                </React.Fragment>
-              );
-            })}
-          </EuiDroppable>
-        </EuiDragDropContext>
-      ) : (
-        <>
-          {topics.map((topic, index) => {
-            const topicErrors = indexedErrors[index];
-            return (
-              <>
-                <EuiSpacer size="m" />
-
-                <EuiFlexGroup gutterSize="none" wrap>
-                  <EuiFlexItem style={{ flex: '30%', paddingRight: 10 }}>
-                    <EuiFormRow fullWidth>
-                      <EuiSelect
-                        fullWidth
-                        options={kafkaTopicWhenTypes}
-                        value={topic.when?.type}
-                        onChange={(e) => handleTopicProcessorChange(index, 'type', e.target.value)}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem style={{ flex: '40%' }}>
-                    <EuiFormRow fullWidth>
-                      <EuiFieldText
-                        value={topic.when?.condition}
-                        onChange={(e) =>
-                          handleTopicProcessorChange(index, 'condition', e.target.value)
-                        }
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem grow={false} style={{ marginTop: 10 }}>
-                    <EuiButtonIcon
-                      color="text"
-                      onClick={() => deleteTopicProcessor(index)}
-                      iconType="cross"
-                      aria-label={i18n.translate('xpack.fleet.multiRowInput.deleteButton', {
-                        defaultMessage: 'Delete row',
-                      })}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    style={{
-                      flex: '0 53%',
-                      marginLeft: 'auto',
-                      marginRight: 23,
-                      paddingTop: 10,
-                    }}
-                  >
-                    <EuiFormRow
-                      fullWidth
-                      error={displayErrors(topicErrors)}
-                      isInvalid={(topicErrors?.length ?? 0) > 0}
-                    >
-                      <EuiFieldText
-                        isInvalid={(topicErrors?.length ?? 0) > 0}
-                        autoFocus={autoFocus}
-                        prepend="Topic"
-                        value={topic.topic}
-                        onChange={(e) => handleTopicProcessorChange(index, 'topic', e.target.value)}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
-            );
-          })}
-        </>
+                          <EuiFieldText
+                            isInvalid={(topicErrors?.length ?? 0) > 0}
+                            autoFocus={autoFocus}
+                            prepend="Topic"
+                            value={topic.topic}
+                            onChange={(e) =>
+                              handleTopicProcessorChange(index, 'topic', e.target.value)
+                            }
+                          />
+                        </EuiFormRow>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </>
+                );
+              })}
+            </>
+          )}
+        </EuiFormRow>
       )}
       {displayErrors(globalErrors)}
 
