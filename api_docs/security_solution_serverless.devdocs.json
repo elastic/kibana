@@ -1,5 +1,5 @@
 {
-  "id": "serverlessSecurity",
+  "id": "securitySolutionServerless",
   "client": {
     "classes": [],
     "functions": [],
@@ -8,13 +8,13 @@
     "misc": [],
     "objects": [],
     "setup": {
-      "parentPluginId": "serverlessSecurity",
-      "id": "def-public.ServerlessSecurityPluginSetup",
+      "parentPluginId": "securitySolutionServerless",
+      "id": "def-public.SecuritySolutionServerlessPluginSetup",
       "type": "Interface",
       "tags": [],
-      "label": "ServerlessSecurityPluginSetup",
+      "label": "SecuritySolutionServerlessPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/serverless_security/public/types.ts",
+      "path": "x-pack/plugins/security_solution_serverless/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -22,13 +22,13 @@
       "initialIsOpen": true
     },
     "start": {
-      "parentPluginId": "serverlessSecurity",
-      "id": "def-public.ServerlessSecurityPluginStart",
+      "parentPluginId": "securitySolutionServerless",
+      "id": "def-public.SecuritySolutionServerlessPluginStart",
       "type": "Interface",
       "tags": [],
-      "label": "ServerlessSecurityPluginStart",
+      "label": "SecuritySolutionServerlessPluginStart",
       "description": [],
-      "path": "x-pack/plugins/serverless_security/public/types.ts",
+      "path": "x-pack/plugins/security_solution_serverless/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -44,13 +44,13 @@
     "misc": [],
     "objects": [],
     "setup": {
-      "parentPluginId": "serverlessSecurity",
-      "id": "def-server.ServerlessSecurityPluginSetup",
+      "parentPluginId": "securitySolutionServerless",
+      "id": "def-server.SecuritySolutionServerlessPluginSetup",
       "type": "Interface",
       "tags": [],
-      "label": "ServerlessSecurityPluginSetup",
+      "label": "SecuritySolutionServerlessPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/serverless_security/server/types.ts",
+      "path": "x-pack/plugins/security_solution_serverless/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -58,13 +58,13 @@
       "initialIsOpen": true
     },
     "start": {
-      "parentPluginId": "serverlessSecurity",
-      "id": "def-server.ServerlessSecurityPluginStart",
+      "parentPluginId": "securitySolutionServerless",
+      "id": "def-server.SecuritySolutionServerlessPluginStart",
       "type": "Interface",
       "tags": [],
-      "label": "ServerlessSecurityPluginStart",
+      "label": "SecuritySolutionServerlessPluginStart",
       "description": [],
-      "path": "x-pack/plugins/serverless_security/server/types.ts",
+      "path": "x-pack/plugins/security_solution_serverless/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -79,31 +79,31 @@
     "enums": [],
     "misc": [
       {
-        "parentPluginId": "serverlessSecurity",
+        "parentPluginId": "securitySolutionServerless",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
         "signature": [
-          "\"serverlessSecurity\""
+          "\"securitySolutionServerless\""
         ],
-        "path": "x-pack/plugins/serverless_security/common/index.ts",
+        "path": "x-pack/plugins/security_solution_serverless/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "serverlessSecurity",
+        "parentPluginId": "securitySolutionServerless",
         "id": "def-common.PLUGIN_NAME",
         "type": "string",
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
         "signature": [
-          "\"serverlessSecurity\""
+          "\"securitySolutionServerless\""
         ],
-        "path": "x-pack/plugins/serverless_security/common/index.ts",
+        "path": "x-pack/plugins/security_solution_serverless/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
