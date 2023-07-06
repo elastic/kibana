@@ -3407,15 +3407,7 @@
             "$ref": "#/components/parameters/page_index"
           },
           {
-            "name": "perPage",
-            "in": "query",
-            "description": "The number of items to return. Limited to 100 items.",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 20,
-              "maximum": 100
-            }
+            "$ref": "#/components/parameters/page_size"
           },
           {
             "$ref": "#/components/parameters/sort_order"
@@ -3908,11 +3900,12 @@
       "page_size": {
         "in": "query",
         "name": "perPage",
-        "description": "The number of items to return.",
+        "description": "The number of items to return. Limited to 100 items.",
         "required": false,
         "schema": {
           "type": "integer",
-          "default": 20
+          "default": 20,
+          "maximum": 100
         }
       },
       "reporters": {
@@ -5562,6 +5555,7 @@
           "comment": {
             "description": "The new comment. It is required only when `type` is `user`.",
             "type": "string",
+            "maxLength": 30000,
             "example": "A new comment."
           },
           "owner": {
@@ -5651,6 +5645,7 @@
           "comment": {
             "description": "The new comment. It is required only when `type` is `user`.",
             "type": "string",
+            "maxLength": 30000,
             "example": "A new comment."
           },
           "id": {

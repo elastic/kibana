@@ -2082,14 +2082,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/case_id'
         - $ref: '#/components/parameters/page_index'
-        - name: perPage
-          in: query
-          description: The number of items to return. Limited to 100 items.
-          required: false
-          schema:
-            type: integer
-            default: 20
-            maximum: 100
+        - $ref: '#/components/parameters/page_size'
         - $ref: '#/components/parameters/sort_order'
         - $ref: '#/components/parameters/space_id'
       responses:
@@ -2379,11 +2372,12 @@ components:
     page_size:
       in: query
       name: perPage
-      description: The number of items to return.
+      description: The number of items to return. Limited to 100 items.
       required: false
       schema:
         type: integer
         default: 20
+        maximum: 100
     reporters:
       in: query
       name: reporters
@@ -3605,6 +3599,7 @@ components:
         comment:
           description: The new comment. It is required only when `type` is `user`.
           type: string
+          maxLength: 30000
           example: A new comment.
         owner:
           $ref: '#/components/schemas/owners'
@@ -3671,6 +3666,7 @@ components:
         comment:
           description: The new comment. It is required only when `type` is `user`.
           type: string
+          maxLength: 30000
           example: A new comment.
         id:
           type: string
