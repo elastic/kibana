@@ -148,6 +148,10 @@ export function CustomMetricIndicatorTypeForm() {
             'xpack.observability.slo.sloEdit.sliType.customMetric.goodMetricLabel',
             { defaultMessage: 'Good metric' }
           )}
+          filterLabel={i18n.translate(
+            'xpack.observability.slo.sloEdit.sliType.customMetric.goodFilterLabel',
+            { defaultMessage: 'Good filter' }
+          )}
           metricTooltip={
             <EuiIconTip
               content={i18n.translate(
@@ -186,6 +190,10 @@ export function CustomMetricIndicatorTypeForm() {
           metricLabel={i18n.translate(
             'xpack.observability.slo.sloEdit.sliType.customMetric.totalMetricLabel',
             { defaultMessage: 'Total metric' }
+          )}
+          filterLabel={i18n.translate(
+            'xpack.observability.slo.sloEdit.sliType.customMetric.totalFilterLabel',
+            { defaultMessage: 'Total filter' }
           )}
           metricTooltip={
             <EuiIconTip
