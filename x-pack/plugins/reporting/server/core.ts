@@ -39,7 +39,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import * as Rx from 'rxjs';
-import { filter, first, map, take } from 'rxjs/operators';
+import { filter, map, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
@@ -136,7 +136,7 @@ export class ReportingCore {
 
     this.csvV2ExportType = new CsvV2ExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.csvV2ExportType);
-    
+
     this.pngExport = new PngExportType(this.core, this.config, this.logger, this.context);
     this.exportTypesRegistry.register(this.pngExport);
 
@@ -168,12 +168,11 @@ export class ReportingCore {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
 
-
     this.csvSearchSourceExport.setup(setupDeps);
     this.csvV2ExportType.setup(setupDeps);
 
     this.pdfExport.setup(setupDeps);
-    
+
     this.pngExport.setup(setupDeps);
 
     const { executeTask, monitorTask } = this;
