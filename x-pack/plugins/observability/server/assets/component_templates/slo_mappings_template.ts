@@ -42,7 +42,7 @@ export const getSLOMappingsTemplate = (name: string) => ({
   },
   _meta: {
     description: 'Mappings for SLO rollup data',
-    version: 1,
+    version: 2,
     managed: true,
     managed_by: 'observability',
   },

@@ -18,6 +18,8 @@ import {
   SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_INDEX_TEMPLATE_NAME,
   SLO_RESOURCES_VERSION,
+  SLO_INDEX_TEMPLATE_PATTERN,
+  SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX,
 } from '../../assets/constants';
 import { getSLOMappingsTemplate } from '../../assets/component_templates/slo_mappings_template';
 import { getSLOSettingsTemplate } from '../../assets/component_templates/slo_settings_template';
@@ -35,9 +37,7 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     const alreadyInstalled = await this.areResourcesAlreadyInstalled();
 
     if (alreadyInstalled) {
-      this.logger.debug(
-        `Skipping installation of resources shared for SLO since they already exist`
-      );
+      this.logger.debug('SLO resources already installed - skipping.');
       return;
     }
 
@@ -52,34 +52,36 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       ]);
 
       await this.createOrUpdateIndexTemplate(
-        getSLOIndexTemplate(SLO_INDEX_TEMPLATE_NAME, `${SLO_INDEX_TEMPLATE_NAME}-*`, [
+        getSLOIndexTemplate(SLO_INDEX_TEMPLATE_NAME, SLO_INDEX_TEMPLATE_PATTERN, [
           SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
           SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
         ])
       );
 
       await this.createOrUpdateIngestPipelineTemplate(
-        getSLOPipelineTemplate(
-          SLO_INGEST_PIPELINE_NAME,
-          this.getPipelinePrefix(SLO_RESOURCES_VERSION)
-        )
+        getSLOPipelineTemplate(SLO_INGEST_PIPELINE_NAME, SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX)
       );
     } catch (err) {
-      this.logger.error(`Error installing resources shared for SLO - ${err.message}`);
+      this.logger.error(`Error installing resources shared for SLO: ${err.message}`);
       throw err;
     }
   }
 
-  private getPipelinePrefix(version: number): string {
-    // Following https://www.elastic.co/blog/an-introduction-to-the-elastic-data-stream-naming-scheme
-    // slo-observability.sli-<version>.<index-date>
-    return `${SLO_INDEX_TEMPLATE_NAME}-v${version}.`;
-  }
-
   private async areResourcesAlreadyInstalled(): Promise<boolean> {
-    const indexTemplateExists = await this.esClient.indices.existsIndexTemplate({
-      name: SLO_INDEX_TEMPLATE_NAME,
-    });
+    let indexTemplateExists = false;
+    try {
+      const { index_templates: indexTemplates } = await this.esClient.indices.getIndexTemplate({
+        name: SLO_INDEX_TEMPLATE_NAME,
+      });
+      const sloIndexTemplate = indexTemplates.find(
+        (template) => template.name === SLO_INDEX_TEMPLATE_NAME
+      );
+      indexTemplateExists =
+        !!sloIndexTemplate &&
+        sloIndexTemplate.index_template._meta?.version === SLO_RESOURCES_VERSION;
+    } catch (err) {
+      return false;
+    }
 
     let ingestPipelineExists = false;
     try {

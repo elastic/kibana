@@ -19,7 +19,7 @@ export const getSLOPipelineTemplate = (id: string, indexNamePrefix: string) => (
   ],
   _meta: {
     description: 'SLO ingest pipeline',
-    version: 1,
+    version: 2,
     managed: true,
     managed_by: 'observability',
   },

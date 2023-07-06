@@ -14,7 +14,7 @@ export const getSLOSettingsTemplate = (name: string) => ({
   },
   _meta: {
     description: 'Settings for SLO rollup data',
-    version: 1,
+    version: 2,
     managed: true,
     managed_by: 'observability',
   },
