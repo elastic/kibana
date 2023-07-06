@@ -32,7 +32,7 @@ export const upgradePrebuiltRules = async (rulesClient: RulesClient, rules: Preb
       concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
       items: rules,
       executor: async (rule) => {
-        return upgradeRule({ rulesClient, rule, immutable: true });
+        return upgradeRule(rulesClient, rule);
       },
     });
 
@@ -46,16 +46,10 @@ export const upgradePrebuiltRules = async (rulesClient: RulesClient, rules: Preb
  * @param rule The rule to apply the update for
  * @returns Promise of what was updated.
  */
-interface UpgradeRuleParams {
-  rulesClient: RulesClient;
-  rule: PrebuiltRuleAsset;
-  immutable?: boolean;
-}
-const upgradeRule = async ({
-  rulesClient,
-  rule,
-  immutable = false,
-}: UpgradeRuleParams): Promise<SanitizedRule<RuleParams>> => {
+const upgradeRule = async (
+  rulesClient: RulesClient,
+  rule: PrebuiltRuleAsset
+): Promise<SanitizedRule<RuleParams>> => {
   const existingRule = await readRules({
     rulesClient,
     ruleId: rule.rule_id,
@@ -77,7 +71,7 @@ const upgradeRule = async ({
 
     return createRules({
       rulesClient,
-      immutable,
+      immutable: true,
       params: {
         ...rule,
         // Force the prepackaged rule to use the enabled state from the existing rule,
