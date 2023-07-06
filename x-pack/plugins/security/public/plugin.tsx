@@ -25,11 +25,8 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SecurityLicense } from '../common/licensing';
 import { SecurityLicenseService } from '../common/licensing';
 import type { UpdateUserProfileHook } from './account_management';
-import {
-  accountManagementApp,
-  getUseUpdateUserProfile,
-  UserProfileAPIClient,
-} from './account_management';
+import { accountManagementApp, UserProfileAPIClient } from './account_management';
+import { getUseUpdateUserProfile } from './account_management/user_profile/use_update_user_profile';
 import { AnalyticsService } from './analytics';
 import { AnonymousAccessService } from './anonymous_access';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';

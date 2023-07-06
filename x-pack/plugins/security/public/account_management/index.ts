@@ -13,5 +13,3 @@ export type {
   UserProfileSuggestParams,
   UpdateUserProfileHook,
 } from './user_profile';
-
-export { getUseUpdateUserProfile } from './user_profile';

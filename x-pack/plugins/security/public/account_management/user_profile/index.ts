@@ -14,4 +14,4 @@ export type {
   UserProfileSuggestParams,
 } from './user_profile_api_client';
 
-export { getUseUpdateUserProfile, type UpdateUserProfileHook } from './use_update_user_profile';
+export type { UpdateUserProfileHook } from './use_update_user_profile';

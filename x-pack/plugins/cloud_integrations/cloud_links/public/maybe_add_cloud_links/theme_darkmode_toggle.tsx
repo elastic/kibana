@@ -15,7 +15,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { UpdateUserProfileHook } from '@kbn/security-plugin/public';
+import type { UpdateUserProfileHook } from '@kbn/security-plugin/public';
 
 interface Props {
   useUpdateUserProfile: UpdateUserProfileHook;
