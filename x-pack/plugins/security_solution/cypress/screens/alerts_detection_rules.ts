@@ -177,7 +177,7 @@ export const REFRESH_SETTINGS_SELECTION_NOTE = '[data-test-subj="refreshSettings
 
 export const REFRESH_RULES_STATUS = '[data-test-subj="refreshRulesStatus"]';
 
-export const RULE_EXECUTION_STATUS = '[data-test-subj="ruleExecutionStatus"]';
+export const RULE_EXECUTION_STATUS_BADGE = '[data-test-subj="ruleExecutionStatus"]';
 
 export const EXECUTION_STATUS_FILTER_BUTTON = '[data-test-subj="executionStatusFilterButton"]';
 

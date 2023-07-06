@@ -6,19 +6,22 @@
  */
 
 import {
-  RULE_EXECUTION_STATUS,
-  RULE_NAME,
+  RULE_EXECUTION_STATUS_BADGE,
   EXECUTION_STATUS_FILTER_BUTTON,
   EXECUTION_STATUS_FILTER_OPTION,
 } from '../screens/alerts_detection_rules';
 
 export const expectRulesWithExecutionStatus = (expectedCount: number, status: string) => {
-  cy.get(`${RULE_EXECUTION_STATUS}:contains("${status}")`).should('have.length', expectedCount);
+  cy.get(`${RULE_EXECUTION_STATUS_BADGE}:contains("${status}")`).should(
+    'have.length',
+    expectedCount
+  );
 };
+
+export const expectNumberOfRulesShownOnPage = (expectedCount: number) =>
+  cy.get(RULE_EXECUTION_STATUS_BADGE).should('have.length', expectedCount);
 
 export const filterByExecutionStatus = (status: string) => {
   cy.get(EXECUTION_STATUS_FILTER_BUTTON).click();
   cy.get(`${EXECUTION_STATUS_FILTER_OPTION}:contains("${status}")`).click();
-  cy.get(RULE_NAME).should('have.length', 1);
-  expectRulesWithExecutionStatus(1, status);
 };

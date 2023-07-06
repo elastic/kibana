@@ -16,10 +16,9 @@ export const deleteIndex = (index: string) => {
 };
 
 export const createIndex = (indexName: string, properties: Record<string, unknown>) =>
-  cy.request({
+  rootRequest({
     method: 'PUT',
     url: `${Cypress.env('ELASTICSEARCH_URL')}/${indexName}`,
-    headers: { 'kbn-xsrf': 'cypress-creds' },
     body: {
       mappings: {
         properties,
@@ -27,11 +26,10 @@ export const createIndex = (indexName: string, properties: Record<string, unknow
     },
   });
 
-export const indexDocument = (indexName: string, document: Record<string, unknown>) =>
-  cy.request({
+export const createDocument = (indexName: string, document: Record<string, unknown>) =>
+  rootRequest({
     method: 'POST',
     url: `${Cypress.env('ELASTICSEARCH_URL')}/${indexName}/_doc`,
-    headers: { 'kbn-xsrf': 'cypress-creds' },
     body: document,
   });
 

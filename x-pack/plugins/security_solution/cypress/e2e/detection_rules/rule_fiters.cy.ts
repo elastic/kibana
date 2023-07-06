@@ -8,20 +8,18 @@
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
-import { findRuleRowInTable } from '../../tasks/rule_snoozing';
-import { expectRulesWithExecutionStatus, filterByExecutionStatus } from '../../tasks/rule_filters';
+import {
+  expectRulesWithExecutionStatus,
+  filterByExecutionStatus,
+  expectNumberOfRulesShownOnPage,
+} from '../../tasks/rule_filters';
 
 import { SECURITY_DETECTIONS_RULES_URL } from '../../urls/navigation';
-
-import {
-  RULES_MANAGEMENT_TABLE,
-  RULE_EXECUTION_STATUS,
-} from '../../screens/alerts_detection_rules';
 
 import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
 
 import { createRule, waitForRulesToFinishExecution } from '../../tasks/api_calls/rules';
-import { deleteIndex, createIndex, indexDocument } from '../../tasks/api_calls/elasticsearch';
+import { deleteIndex, createIndex, createDocument } from '../../tasks/api_calls/elasticsearch';
 
 import { getNewRule } from '../../objects/rule';
 
@@ -36,63 +34,72 @@ describe('Rule management filters', () => {
     resetRulesTableState();
     deleteAlertsAndRules();
     esArchiverResetKibana();
-
-    deleteIndex('test_index');
-
-    createIndex('test_index', {
-      '@timestamp': {
-        type: 'date',
-      },
-    });
-
-    indexDocument('test_index', {});
-
-    createRule(
-      getNewRule({
-        name: 'Successful rule',
-        rule_id: 'successful_rule',
-        index: ['test_index'],
-      })
-    );
-
-    createRule(
-      getNewRule({
-        name: 'Warning rule',
-        rule_id: 'warning_rule',
-        index: ['non_existent_index'],
-      })
-    );
-
-    createRule(
-      getNewRule({
-        name: 'Failed rule',
-        rule_id: 'failed_rule',
-        index: ['test_index'],
-        // Setting a crazy large "Additional look-back time" to force a failure
-        from: 'now-9007199254746990s',
-      })
-    );
-
-    waitForRulesToFinishExecution(['successful_rule', 'warning_rule', 'failed_rule']);
-
-    visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
-
-    waitForRulesTableToBeLoaded();
   });
 
   describe('Last response filter', () => {
-    it('Filters rules by last response', () => {
-      findRuleRowInTable(RULES_MANAGEMENT_TABLE, 'Successful rule').should('exist');
+    it('Filters rules by last response', function () {
+      deleteIndex('test_index');
 
-      cy.get(RULE_EXECUTION_STATUS).should('have.length', 3);
+      createIndex('test_index', {
+        '@timestamp': {
+          type: 'date',
+        },
+      });
 
+      createDocument('test_index', {});
+
+      createRule(
+        getNewRule({
+          name: 'Successful rule',
+          rule_id: 'successful_rule',
+          index: ['test_index'],
+        })
+      );
+
+      createRule(
+        getNewRule({
+          name: 'Warning rule',
+          rule_id: 'warning_rule',
+          index: ['non_existent_index'],
+        })
+      );
+
+      createRule(
+        getNewRule({
+          name: 'Failed rule',
+          rule_id: 'failed_rule',
+          index: ['test_index'],
+          // Setting a crazy large "Additional look-back time" to force a failure
+          from: 'now-9007199254746990s',
+        })
+      );
+
+      waitForRulesToFinishExecution(['successful_rule', 'warning_rule', 'failed_rule'], new Date());
+
+      visitWithoutDateRange(SECURITY_DETECTIONS_RULES_URL);
+
+      waitForRulesTableToBeLoaded();
+
+      // Initial table state - before filtering by status
+      expectNumberOfRulesShownOnPage(3);
       expectRulesWithExecutionStatus(1, 'Succeeded');
       expectRulesWithExecutionStatus(1, 'Warning');
       expectRulesWithExecutionStatus(1, 'Failed');
 
+      // Table state after filtering by Succeeded status
       filterByExecutionStatus('Succeeded');
+      expectNumberOfRulesShownOnPage(1);
+      expectRulesWithExecutionStatus(1, 'Succeeded');
+
+      // Table state after filtering by Warning status
       filterByExecutionStatus('Warning');
+      expectNumberOfRulesShownOnPage(1);
+      expectRulesWithExecutionStatus(1, 'Warning');
+
+      // Table state after filtering by Failed status
       filterByExecutionStatus('Failed');
+      expectNumberOfRulesShownOnPage(1);
+      expectRulesWithExecutionStatus(1, 'Failed');
     });
   });
 });

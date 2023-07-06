@@ -77,7 +77,7 @@ export const importRule = (ndjsonPath: string) => {
     });
 };
 
-export const waitForRulesToFinishExecution = (ruleIds: string[]) =>
+export const waitForRulesToFinishExecution = (ruleIds: string[], afterDate?: Date) =>
   cy.waitUntil(
     () =>
       rootRequest<FetchRulesResponse>({
@@ -85,9 +85,17 @@ export const waitForRulesToFinishExecution = (ruleIds: string[]) =>
         url: DETECTION_ENGINE_RULES_URL_FIND,
       }).then((response) => {
         const areAllRulesFinished = ruleIds.every((ruleId) =>
-          response.body.data.some(
-            (rule) => rule.rule_id === ruleId && typeof rule.execution_summary !== 'undefined'
-          )
+          response.body.data.some((rule) => {
+            const ruleExecutionDate = rule.execution_summary?.last_execution?.date;
+
+            const isDateOk = afterDate
+              ? !!(ruleExecutionDate && new Date(ruleExecutionDate) > afterDate)
+              : true;
+
+            return (
+              rule.rule_id === ruleId && typeof rule.execution_summary !== 'undefined' && isDateOk
+            );
+          })
         );
         return areAllRulesFinished;
       }),
