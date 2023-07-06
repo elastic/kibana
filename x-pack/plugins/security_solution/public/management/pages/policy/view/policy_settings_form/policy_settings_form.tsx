@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { AttackSurfaceReductionCard } from './components/attack_surface_reduction_card';
 import { BehaviourProtectionCard } from './components/behaviour_protection_card';
 import { MemoryProtectionCard } from './components/memory_protection_card';
@@ -17,6 +17,16 @@ import type { PolicyFormComponentCommonProps } from './types';
 import { AdvancedSection } from './components/advanced_section';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 
+const PROTECTIONS_SECTION_TITLE = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.protections',
+  { defaultMessage: 'Protections' }
+);
+
+const SETTINGS_SECTION_TITLE = i18n.translate(
+  'xpack.securitySolution.endpoint.policy.details.settings',
+  { defaultMessage: 'Settings' }
+);
+
 export type PolicySettingsFormProps = PolicyFormComponentCommonProps;
 
 export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
@@ -24,15 +34,7 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
 
   return (
     <div data-test-subj={getTestId()}>
-      <EuiText size="xs" color="subdued">
-        <h4>
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policy.details.protections"
-            defaultMessage="Protections"
-          />
-        </h4>
-      </EuiText>
-
+      <FormSectionTitle>{PROTECTIONS_SECTION_TITLE}</FormSectionTitle>
       <EuiSpacer size="s" />
 
       <MalwareProtectionsCard {...props} data-test-subj={getTestId('malware')} />
@@ -50,9 +52,21 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
       <AttackSurfaceReductionCard {...props} data-test-subj={getTestId('attachSurface')} />
       <EuiSpacer size="l" />
 
+      <FormSectionTitle>{SETTINGS_SECTION_TITLE}</FormSectionTitle>
+      <EuiSpacer size="s" />
+
       <EuiSpacer size="m" />
       <AdvancedSection {...props} data-test-subj={getTestId('advancedSection')} />
     </div>
   );
 });
 PolicySettingsForm.displayName = 'PolicySettingsForm';
+
+export const FormSectionTitle = memo(({ children }) => {
+  return (
+    <EuiText size="xs" color="subdued">
+      <h4>{children}</h4>
+    </EuiText>
+  );
+});
+FormSectionTitle.displayName = 'FormSectionTitle';
