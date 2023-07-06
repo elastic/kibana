@@ -192,12 +192,6 @@ export async function createCollectorPackagePolicy({
   packagePolicyClient,
   config,
 }: ProfilingSetupOptions) {
-  const collectorPolicy = await getCollectorPolicy({ packagePolicyClient, soClient });
-  // In case collector policy has been already created do not try to create it again
-  if (collectorPolicy) {
-    return;
-  }
-
   const packageName = 'profiler_collector';
   const { version } = await fetchFindLatestPackageOrThrow(packageName, { prerelease: true });
   const packagePolicy = {
@@ -256,11 +250,6 @@ export async function createSymbolizerPackagePolicy({
   packagePolicyClient,
   config,
 }: ProfilingSetupOptions) {
-  const symbolizerPolicy = await getSymbolizerPolicy({ packagePolicyClient, soClient });
-  // In case symbolizer policy has been already created do not try to create it again
-  if (symbolizerPolicy) {
-    return;
-  }
   const packageName = 'profiler_symbolizer';
   const { version } = await fetchFindLatestPackageOrThrow(packageName, { prerelease: true });
   const packagePolicy = {
