@@ -220,7 +220,8 @@ function _generateMappings(
 
         console.log('There is a runtime field ', field.name);
         console.log('Properties: ', runtimeFieldProps);
-        ctx.addRuntimeField({ path: field.name, properties: runtimeFieldProps });
+        const path = ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name;
+        ctx.addRuntimeField({ path, properties: runtimeFieldProps });
 
         return; // runtime fields should not be added as a property
       }
