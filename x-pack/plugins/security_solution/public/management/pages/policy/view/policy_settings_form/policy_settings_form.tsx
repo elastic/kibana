@@ -8,11 +8,12 @@
 import React, { memo } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { MalwareProtectionsCard } from './components/malware_protections_card';
 import type { PolicyFormComponentCommonProps } from './types';
 import { AdvancedSection } from './components/advanced_section';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 
-type PolicySettingsFormProps = PolicyFormComponentCommonProps;
+export type PolicySettingsFormProps = PolicyFormComponentCommonProps;
 
 export const PolicySettingsForm = memo<PolicySettingsFormProps>(
   ({ policy, onChange, mode = 'edit', 'data-test-subj': dataTestSubj }) => {
@@ -28,6 +29,14 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>(
             />
           </h4>
         </EuiText>
+
+        <EuiSpacer size="s" />
+        <MalwareProtectionsCard
+          policy={policy}
+          onChange={onChange}
+          mode={mode}
+          data-test-subj={getTestId('malware')}
+        />
 
         <EuiSpacer size="m" />
         <AdvancedSection

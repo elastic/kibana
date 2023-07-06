@@ -1,0 +1,165 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo, useCallback, useMemo } from 'react';
+import { cloneDeep } from 'lodash';
+import type { EuiFlexItemProps } from '@elastic/eui';
+import { EuiRadio, EuiSpacer, EuiFlexGroup, EuiFlexItem, useGeneratedHtmlId } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { PolicyFormComponentCommonProps } from '../types';
+import type {
+  ImmutableArray,
+  UIPolicyConfig,
+  Immutable,
+} from '../../../../../../../common/endpoint/types';
+import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import type { MacPolicyProtection, LinuxPolicyProtection, PolicyProtection } from '../../../types';
+import { useLicense } from '../../../../../../common/hooks/use_license';
+import { ConfigFormHeading } from '../../components/config_form';
+
+export type DetectPreventProtectionLavelProps = PolicyFormComponentCommonProps & {
+  protection: PolicyProtection;
+  osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
+};
+
+export const DetectPreventProtectionLevel = memo<DetectPreventProtectionLavelProps>(
+  ({ policy, protection, osList, mode, onChange, 'data-test-subj': dataTestSubj }) => {
+    // FIXME:PT remove this. Make it module global const
+    const radios: Immutable<
+      Array<{
+        id: ProtectionModes;
+        label: string;
+        flexGrow: EuiFlexItemProps['grow'];
+      }>
+    > = useMemo(() => {
+      return [
+        {
+          id: ProtectionModes.detect,
+          label: i18n.translate('xpack.securitySolution.endpoint.policy.details.detect', {
+            defaultMessage: 'Detect',
+          }),
+          flexGrow: 1,
+        },
+        {
+          id: ProtectionModes.prevent,
+          label: i18n.translate('xpack.securitySolution.endpoint.policy.details.prevent', {
+            defaultMessage: 'Prevent',
+          }),
+          flexGrow: 5,
+        },
+      ];
+    }, []);
+
+    return (
+      <>
+        <ConfigFormHeading>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policyDetailsConfig.protectionLevel"
+            defaultMessage="Protection level"
+          />
+        </ConfigFormHeading>
+        <EuiSpacer size="xs" />
+        <EuiFlexGroup>
+          {radios.map(({ label, id, flexGrow }) => {
+            return (
+              <EuiFlexItem grow={flexGrow} key={id}>
+                <ProtectionRadio
+                  policy={policy}
+                  onChange={onChange}
+                  mode={mode}
+                  protection={protection}
+                  protectionMode={id}
+                  osList={osList}
+                  label={label}
+                />
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGroup>
+      </>
+    );
+  }
+);
+DetectPreventProtectionLevel.displayName = 'DetectPreventProtectionLevel';
+
+interface ProtectionRadioProps extends PolicyFormComponentCommonProps {
+  protection: PolicyProtection;
+  protectionMode: ProtectionModes;
+  osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
+  label: string;
+}
+
+const ProtectionRadio = React.memo(
+  ({
+    protection,
+    protectionMode,
+    osList,
+    label,
+    onChange,
+    policy,
+    mode,
+    'data-test-subj': dataTestSubj,
+  }: ProtectionRadioProps) => {
+    const radioButtonId = useGeneratedHtmlId();
+    const selected = policy.windows[protection].mode;
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
+    const showEditableFormFields = mode === 'edit';
+
+    const handleRadioChange = useCallback(() => {
+      const newPayload = cloneDeep(policy);
+
+      for (const os of osList) {
+        if (os === 'windows') {
+          newPayload[os][protection].mode = protectionMode;
+        } else if (os === 'mac') {
+          newPayload[os][protection as MacPolicyProtection].mode = protectionMode;
+        } else if (os === 'linux') {
+          newPayload[os][protection as LinuxPolicyProtection].mode = protectionMode;
+        }
+        if (isPlatinumPlus) {
+          if (os === 'windows') {
+            if (protectionMode === ProtectionModes.prevent) {
+              newPayload[os].popup[protection].enabled = true;
+            } else {
+              newPayload[os].popup[protection].enabled = false;
+            }
+          } else if (os === 'mac') {
+            if (protectionMode === ProtectionModes.prevent) {
+              newPayload[os].popup[protection as MacPolicyProtection].enabled = true;
+            } else {
+              newPayload[os].popup[protection as MacPolicyProtection].enabled = false;
+            }
+          } else if (os === 'linux') {
+            if (protectionMode === ProtectionModes.prevent) {
+              newPayload[os].popup[protection as LinuxPolicyProtection].enabled = true;
+            } else {
+              newPayload[os].popup[protection as LinuxPolicyProtection].enabled = false;
+            }
+          }
+        }
+      }
+
+      onChange({ isValid: true, updatedPolicy: newPayload });
+    }, [isPlatinumPlus, onChange, osList, policy, protection, protectionMode]);
+
+    // FIXME:PT Why is this className being used below? can it be removed?
+    return (
+      <EuiRadio
+        className="policyDetailsProtectionRadio"
+        label={label}
+        id={radioButtonId}
+        checked={selected === protectionMode}
+        onChange={handleRadioChange}
+        disabled={!showEditableFormFields || selected === ProtectionModes.off}
+        data-test-subj={`${protection}ProtectionMode_${protectionMode}`}
+      />
+    );
+  }
+);
+
+ProtectionRadio.displayName = 'ProtectionRadio';

@@ -12,4 +12,5 @@ const popupVersions: Array<[string, string]> = [
   ['behavior_protection', '7.15+'],
 ];
 
+// FIXME:PT should be deleted. No need to be public outside of hte User Notify component
 export const popupVersionsMap: ReadonlyMap<string, string> = new Map<string, string>(popupVersions);
