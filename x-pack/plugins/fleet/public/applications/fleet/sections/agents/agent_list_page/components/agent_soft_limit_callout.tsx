@@ -7,9 +7,13 @@
 
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
+
+import { useConfig } from '../../../../hooks';
 
 export const AgentSoftLimitCallout = () => {
+  const config = useConfig();
+
   return (
     <EuiCallOut
       iconType="warning"
@@ -23,7 +27,10 @@ export const AgentSoftLimitCallout = () => {
     >
       <FormattedMessage
         id="xpack.fleet.agentSoftLimitCallout.calloutDescription"
-        defaultMessage="Fleet do not support more than 250000 active agents, you should unenroll some agents to stay under that limit."
+        defaultMessage="Fleet supports a maximum of {nbAgents} active agents. You need to unenroll some agents to ensure that all active agents are able to connect and new agents can be enrolled."
+        values={{
+          nbAgents: <FormattedNumber value={config.internal?.activeAgentsSoftLimit ?? 25000} />,
+        }}
       />
     </EuiCallOut>
   );
