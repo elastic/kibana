@@ -126,6 +126,7 @@ export const OptionsListControl = ({
   const button = (
     <div className="optionsList--filterBtnWrapper" ref={resizeRef}>
       <EuiFilterButton
+        badgeColor="success"
         iconType="arrowDown"
         isLoading={debouncedLoading}
         className={classNames('optionsList--filterBtn', {
