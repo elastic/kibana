@@ -57,6 +57,7 @@ const ContextMenuContent = ({ items }: ContextMenuProps) => {
               key={i}
               icon={item.icon}
               size="s"
+              href={item.href}
               data-test-subj={item['data-test-subj']}
             >
               {item.name}
