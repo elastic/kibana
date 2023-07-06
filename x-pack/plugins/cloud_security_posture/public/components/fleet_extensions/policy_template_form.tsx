@@ -136,10 +136,9 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setTimeout(() => setIsLoading(false), 200);
     }, [validationResultsNonNullFields]);
 
-    const { data: packagePolicyList, invalidateQueryCache } = usePackagePolicyList(
-      packageInfo.name,
-      { enabled: canFetchIntegration }
-    );
+    const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
+      enabled: canFetchIntegration,
+    });
 
     useEffect(() => {
       if (isEditPage) return;
@@ -149,6 +148,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // Required for mount only to ensure a single input type is selected
       // This will remove errors in validationResults.vars
       setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
+      refetch();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading, input.policy_template, isEditPage]);
 
@@ -168,7 +168,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       newPolicy,
       updatePolicy,
       setCanFetchIntegration,
-      invalidateQueryCache,
     });
 
     if (isLoading) {
@@ -281,7 +280,6 @@ const usePolicyTemplateInitialName = ({
   packagePolicyList,
   updatePolicy,
   setCanFetchIntegration,
-  invalidateQueryCache,
 }: {
   isEditPage: boolean;
   isLoading: boolean;
@@ -290,7 +288,6 @@ const usePolicyTemplateInitialName = ({
   packagePolicyList: PackagePolicy[] | undefined;
   updatePolicy: (policy: NewPackagePolicy) => void;
   setCanFetchIntegration: (canFetch: boolean) => void;
-  invalidateQueryCache: () => void;
 }) => {
   useEffect(() => {
     if (!integration) return;
@@ -312,7 +309,6 @@ const usePolicyTemplateInitialName = ({
       name: currentIntegrationName,
     });
     setCanFetchIntegration(false);
-    invalidateQueryCache();
     // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, integration, isEditPage, packagePolicyList]);
