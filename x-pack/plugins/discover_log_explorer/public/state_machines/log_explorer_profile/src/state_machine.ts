@@ -8,23 +8,22 @@
 import { IToasts } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DiscoverStateContainer } from '@kbn/discover-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { actions, createMachine, interpret, InterpreterFrom } from 'xstate';
 import { isDatasetSelection } from '../../../utils/dataset_selection';
+import { createAndSetDataView } from './data_view_service';
 import { DEFAULT_CONTEXT } from './defaults';
 import type {
   LogExplorerProfileContext,
   LogExplorerProfileEvent,
   LogExplorerProfileTypestate,
 } from './types';
-import { initializeFromUrl, updateUrlState } from './url_state_storage_service';
-import { createAndSetDataView } from './data_view_service';
+import { initializeFromUrl, listenUrlChange } from './url_state_storage_service';
 
 export const createPureLogExplorerProfileStateMachine = (
   initialContext: LogExplorerProfileContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UCiAPADgG1QCcxCAFQ1AMwEs8wA6AVwDtrWAXagQz2oC9IAYgDaABgC6iUDlSxqnVMykgsiAIwAOAMz0NagEwBWUaICcWgCxrTogOz6ANCACeifZfoA2C1rVbPGoam3pYaAL5hTmiYuATEZBQ0dPRs8ty8fGxQAGIUALYAqoR4ghCKDGwAbqgA1gzR2PhEJORUtBUc6fxZuaiFxQhVqADGXArMYuKTyjJy48qqCMYauvp6+haGGrZWW55Orgj6RvSmap6eooa+7hoa+hFR6I1xLYntKZ083cw5+UUlEgUQj0fBjShEPL0BqxZoJNrJVKcb6ZX69fp4QbMaqjcaTaZIECzNKKBaIYymXT3PQGNamYw7A7qMz0KxXUz6UQ+Cz6PxaR4gGFNeKtJIMYbEMZZAAiYy4ADVqGAAO6lcqfap1aHPWEi97JCVgKW-WXsBVK5VYnFSxT4iQzWQkpSExb0tT0Y4XAz+CyBAJMo76Tz0HamcwabyGexqQyeAVC17wsVMHAQY1QAEAZTN7DAauYHU19R1wreCIYjFT6azObAVpGNomEgJ0kd8xd6i0910XPufgsohjawDG0p9m8AT0hgstk8hnjJcToo+SK6AggggKpGlAEEACoYAD6u73O8zGD3h-PyAwAGE9wBJADyADkW0S29RSR2EH5uxpe15SxB0MYcXEQPRWTDDktEMWNDBjTw1AiSIQGYVAIDgZQEzhZc6AdOYv2dUBFgAWn2cCEFIwxTmguj6IjBcYlLJMPhYVcUUgAinTJBAeRHLQdBCc5-EEiNQNsJiXlw-UOjSFEen+YpuPbEi3FsFYNFMDRNk5QJRC0UwRzUUR6DUHwYy7QdgM8B5UJwvVy3oQ101Nc0VRUojeNsNRbHoYwTC0dxPB2OcRxZLQzHuLkAhMWxBKk3Uy2TSs004X4azGMBPO-NTfxjPyOWsLQfLsadrhHE5PV9KMo18krEpYvC5ORDIuMJYlVJUdQQtMzx6RnURAh8jSLBHHwzIsi4zj8eKLAsFCwiAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UCiAPADgG1QCcxCAFQ1AMwEs8wA6AVwDtrWAXagQz2oC9IAYgDaABgC6iUDlSxqnVMykgsiALQAmAMz0AHAE5dAFi0B2AKwAaEAE9EARi3n6+gGxHjZ8wF9v1tJi4BMRkFDR09Gzy3Lx8bFAAYhQAtgCqhHiCEIoMbABuqADWDAHY+EQk5FS0uRwx-PFJqGkZCPmoAMZcCsxi4n3KMnI9yqoI9qai9KZaokauuhbWdggaGrrT5vqmruauGj5+IKVBFaHVEVGcPA3MiSnpmSQUhPT43ZREyfQn5SFV4Vq0RucTuTRaeDazAKXR6fQGSBAQ2iilG6nsGns0127lEB0WBlErmWiDWGws2xxB18-nQZWClTCNUidRB8QAIt0uAA1ahgADuWRyLIKxR+dNO-yZl1ZsQ5XN5AqhMO61EU8Ikg1kKKUiLGjlM9HMGlcRIxogsWi0JIQ82cpnsunMxn0JtEWnWNOOEr+jIuQOucrunPYPL5gueRDeeA+X3FgV950BLOBQagIbDSvasLVvQkCOk2pGesQzjM9lEGN0WkWWlchl0NvM9n09Hsew0+n0ojmztdXt+DKTzKu9QEEEiEDoglSpHZAEEACoYAD6C8X84AyhhFyvt8gMABhRcASQA8gA5AtIou5tEIetTesY5vmC0mfTW2yILz0Vz2fZXEfdxdHbIwBx9IcARHWV+EgSdp3XLcdz3DAD2Pc8LxXDAACUcLPHDr2RYtQDGBZWzWXFTAsUwPy-FYjDceh3XdTsjCJDwwIghMoOlAMx3gxgcAgVVgwVcMhWYWpRRKSCzmgmVUzgichJEzgxNDRV+WVTpVXVfNNURYi7xLBAHQ2f8rS2UR9A-QwbU7Q0PDtD1tH2bQtG4+l5L4lNA2UphhNE9NxIFQRI1ed52E+QhvkHHz-T8gSVKC9SQs08MdJzfT+kMwthhM0jEEmLFtFEcw7VsrQu0bb9xkMFxu20EwLB7HtPK9ZhUAgOBlHiqV-S1ArUVMzR1jbcyljq7R6HmZyvC8yU-WTFhRxBSAhp1e81EdKYJkdKaVgxDQXAWo5+uWmClNBe5mkeTaSJURBP2Yt9TFAg4bXsCsXBAlrDlpHiEuTNa0wzLSHsKp6EFA6YtH+m06ymOYjA0SZqytK0TUWxMFP49aIEhkaioQGsNnMLQK3htYyUpr7vtmpr4a8Nr3Rx3jEtBgLqCnMAid1EmTFcI1KfdVGaerexEdNeg0crGZ2xA9t2eBq7-PHQK1PlDKBX5+8KzmZjqO2PFzFo6r6J-IC-1cSmjBbDjQIq3xfCAA */
   createMachine<LogExplorerProfileContext, LogExplorerProfileEvent, LogExplorerProfileTypestate>(
     {
       context: initialContext,
@@ -39,37 +38,56 @@ export const createPureLogExplorerProfileStateMachine = (
           invoke: {
             src: 'initializeFromUrl',
             onDone: {
-              target: 'creatingDataView',
+              target: 'initializingDataView',
               actions: ['storeDatasetSelection'],
             },
             onError: {
-              target: 'creatingDataView',
-              actions: ['notifyRestoreFailed'],
+              target: 'initializingDataView',
+              actions: ['notifyDatasetSelectionRestoreFailed'],
             },
           },
         },
-        creatingDataView: {
+        initializingDataView: {
           invoke: {
             src: 'createDataView',
             onDone: {
-              target: 'updatingUrlState',
-              actions: ['storeDataView'],
-            },
-          },
-        },
-        updatingUrlState: {
-          invoke: {
-            src: 'updateUrlState',
-            onDone: {
               target: 'initialized',
+            },
+            onError: {
+              target: 'initialized',
+              actions: ['notifyCreateDataViewFailed'],
             },
           },
         },
         initialized: {
-          on: {
-            UPDATE_DATASET_SELECTION: {
-              actions: ['storeDatasetSelection'],
-              target: 'creatingDataView',
+          initial: 'idle',
+          states: {
+            idle: {
+              invoke: {
+                src: 'listenUrlChange',
+              },
+              on: {
+                UPDATE_DATASET_SELECTION: {
+                  target: 'updatingDataView',
+                  actions: ['storeDatasetSelection'],
+                },
+                DATASET_SELECTION_RESTORE_FAILURE: {
+                  target: 'updatingDataView',
+                  actions: ['notifyDatasetSelectionRestoreFailed'],
+                },
+              },
+            },
+            updatingDataView: {
+              invoke: {
+                src: 'createDataView',
+                onDone: {
+                  target: 'idle',
+                },
+                onError: {
+                  target: 'idle',
+                  actions: ['notifyCreateDataViewFailed'],
+                },
+              },
             },
           },
         },
@@ -77,18 +95,11 @@ export const createPureLogExplorerProfileStateMachine = (
     },
     {
       actions: {
-        notifyRestoreFailed: actions.pure(() => undefined),
+        notifyDatasetSelectionRestoreFailed: actions.pure(() => undefined),
         storeDatasetSelection: actions.assign((_context, event) =>
           'data' in event && isDatasetSelection(event.data)
             ? {
                 datasetSelection: event.data,
-              }
-            : {}
-        ),
-        storeDataView: actions.assign((_context, event) =>
-          'data' in event && event.data instanceof DataView
-            ? {
-                dataView: event.data,
               }
             : {}
         ),
@@ -111,14 +122,26 @@ export const createLogExplorerProfileStateMachine = ({
 }: LogExplorerProfileStateMachineDependencies) =>
   createPureLogExplorerProfileStateMachine(initialContext).withConfig({
     actions: {
-      notifyRestoreFailed: () => {
+      notifyDatasetSelectionRestoreFailed: () => {
         toasts.addWarning({
           title: i18n.translate(
-            'xpack.discoverLogExplorer.datasetSelection.restoreFailedToastTitle',
+            'xpack.discoverLogExplorer.datasetSelection.restoreDatasetSelectionFailedToastTitle',
             { defaultMessage: "We couldn't restore your datasets selection." }
           ),
           text: i18n.translate(
-            'xpack.discoverLogExplorer.datasetSelection.restoreFailedToastMessage',
+            'xpack.discoverLogExplorer.datasetSelection.restoreDatasetSelectionFailedToastMessage',
+            { defaultMessage: 'We switched to "All log datasets" as the default selection.' }
+          ),
+        });
+      },
+      notifyCreateDataViewFailed: () => {
+        toasts.addWarning({
+          title: i18n.translate(
+            'xpack.discoverLogExplorer.datasetSelection.createDataViewFailedToastTitle',
+            { defaultMessage: "We couldn't create a data view for your selection." }
+          ),
+          text: i18n.translate(
+            'xpack.discoverLogExplorer.datasetSelection.createDataViewFailedToastMessage',
             { defaultMessage: 'We switched to "All log datasets" as the default selection.' }
           ),
         });
@@ -126,8 +149,10 @@ export const createLogExplorerProfileStateMachine = ({
     },
     services: {
       createDataView: createAndSetDataView({ dataViews, stateContainer }),
-      initializeFromUrl: initializeFromUrl({ stateContainer }),
-      updateUrlState: updateUrlState({ stateContainer }),
+      listenUrlChange: listenUrlChange({ stateContainer }),
+      initializeFromUrl: initializeFromUrl({
+        stateContainer,
+      }),
     },
   });
 

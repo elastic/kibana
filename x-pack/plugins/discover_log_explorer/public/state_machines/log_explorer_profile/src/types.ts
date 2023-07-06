@@ -5,16 +5,11 @@
  * 2.0.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { DoneInvokeEvent } from 'xstate';
 import type { DatasetEncodingError, DatasetSelection } from '../../../utils/dataset_selection';
 
 export interface WithDatasetSelection {
   datasetSelection: DatasetSelection;
-}
-
-export interface WithDataView {
-  dataView: DataView;
 }
 
 export type DefaultLogExplorerProfileState = WithDatasetSelection;
@@ -29,16 +24,20 @@ export type LogExplorerProfileTypestate =
       context: WithDatasetSelection;
     }
   | {
-      value: 'creatingDataView';
-      context: WithDatasetSelection & WithDataView;
-    }
-  | {
-      value: 'updatingUrlState';
-      context: WithDatasetSelection & WithDataView;
+      value: 'initializingDataView';
+      context: WithDatasetSelection;
     }
   | {
       value: 'initialized';
-      context: WithDatasetSelection & WithDataView;
+      context: WithDatasetSelection;
+    }
+  | {
+      value: 'initialized.idle';
+      context: WithDatasetSelection;
+    }
+  | {
+      value: 'initialized.updatingDataView';
+      context: WithDatasetSelection;
     };
 
 export type LogExplorerProfileContext = LogExplorerProfileTypestate['context'];
@@ -50,7 +49,8 @@ export type LogExplorerProfileEvent =
       type: 'UPDATE_DATASET_SELECTION';
       data: DatasetSelection;
     }
-  | DoneInvokeEvent<DatasetSelection>
-  | DoneInvokeEvent<DataView>
+  | {
+      type: 'DATASET_SELECTION_RESTORE_FAILURE';
+    }
   | DoneInvokeEvent<DatasetEncodingError>
   | DoneInvokeEvent<Error>;
