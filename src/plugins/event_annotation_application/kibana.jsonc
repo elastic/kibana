@@ -1,15 +1,15 @@
 {
   "type": "plugin",
-  "id": "@kbn/event-annotation-plugin",
+  "id": "@kbn/event-annotation-application-plugin",
   "owner": "@elastic/kibana-visualizations",
-  "description": "The Event Annotation service contains expressions for event annotations",
+  "description": "The listing page for event annotations.",
   "plugin": {
-    "id": "eventAnnotation",
-    "server": true,
+    "id": "eventAnnotationApplication",
+    "server": false,
     "browser": true,
     "requiredPlugins": [
-      "expressions",
       "savedObjectsManagement",
+      "eventAnnotation",
       "data",
       "presentationUtil",
       "visualizations",
@@ -23,9 +23,7 @@
       "savedObjectsTagging",
     ],
     "requiredBundles": [
-      "data",
-      "savedObjectsFinder",
-      "dataViews",
+      "kibanaReact",
       "visualizationUiComponents"
     ],
     "extraPublicDirs": [

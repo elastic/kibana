@@ -10,6 +10,7 @@ import { CoreStart } from '@kbn/core/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { EventAnnotationServiceType } from './types';
+export type { EventAnnotationServiceType };
 
 export class EventAnnotationService {
   private eventAnnotationService?: EventAnnotationServiceType;

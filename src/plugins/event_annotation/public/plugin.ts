@@ -10,7 +10,6 @@ import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import {
   ContentManagementPublicSetup,
@@ -29,8 +28,6 @@ import {
   eventAnnotationGroup,
 } from '../common';
 import { getFetchEventAnnotations } from './fetch_event_annotations';
-import type { EventAnnotationListingPageServices } from './get_table_list';
-import { ANNOTATIONS_LISTING_VIEW_ID } from '../common/constants';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 
 export interface EventAnnotationStartDependencies {
@@ -77,47 +74,6 @@ export class EventAnnotationPlugin
       name: i18n.translate('eventAnnotation.content.name', {
         defaultMessage: 'Annotation group',
       }),
-    });
-
-    dependencies.visualizations.listingViewRegistry.add({
-      title: i18n.translate('eventAnnotation.listingViewTitle', {
-        defaultMessage: 'Annotation groups',
-      }),
-      id: ANNOTATIONS_LISTING_VIEW_ID,
-      getTableList: async (props) => {
-        const [coreStart, pluginsStart] = await core.getStartServices();
-
-        const eventAnnotationService = await new EventAnnotationService(
-          coreStart,
-          pluginsStart.contentManagement,
-          pluginsStart.savedObjectsManagement
-        ).getService();
-
-        const ids = await pluginsStart.dataViews.getIds();
-        const dataViews = await Promise.all(ids.map((id) => pluginsStart.dataViews.get(id)));
-
-        const services: EventAnnotationListingPageServices = {
-          core: coreStart,
-          savedObjectsTagging: pluginsStart.savedObjectsTagging,
-          eventAnnotationService,
-          PresentationUtilContextProvider: pluginsStart.presentationUtil.ContextProvider,
-          dataViews,
-          createDataView: pluginsStart.dataViews.create.bind(pluginsStart.dataViews),
-          queryInputServices: {
-            http: coreStart.http,
-            docLinks: coreStart.docLinks,
-            notifications: coreStart.notifications,
-            uiSettings: coreStart.uiSettings,
-            dataViews: pluginsStart.dataViews,
-            unifiedSearch: pluginsStart.unifiedSearch,
-            data: pluginsStart.data,
-            storage: new Storage(localStorage),
-          },
-        };
-
-        const { getTableList } = await import('./get_table_list');
-        return getTableList(props, services);
-      },
     });
   }
 
