@@ -40,7 +40,15 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       procs,
       config,
       installDir: options.installDir,
-      extraKbnOpts: options.installDir ? [] : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+      extraKbnOpts: options.installDir
+        ? []
+        : [
+            '--dev',
+            '--no-dev-config',
+            '--no-dev-credentials',
+            // Simulate versioned API behavior of onprem Kibana for FTR tests
+            '--server.versioned.versionResolution=oldest',
+          ],
     });
 
     reportTime(runStartTime, 'ready', {
