@@ -95,7 +95,7 @@ export interface AppDependencies {
 }
 
 export interface ConfigSchema {
-  serverless: {
-    enabled: boolean;
+  deeplinks: {
+    visible: boolean;
   };
 }

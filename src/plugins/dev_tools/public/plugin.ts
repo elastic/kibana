@@ -127,7 +127,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
               id: tool.id,
               title: tool.title as string,
               path: `#/${tool.id}`,
-              navLinkStatus: config.serverless.enabled
+              navLinkStatus: config.deeplinks.visible
                 ? AppNavLinkStatus.visible
                 : AppNavLinkStatus.default,
             };
@@ -139,7 +139,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
 
         return {
           deepLinks,
-          navLinkStatus: config.serverless.enabled
+          navLinkStatus: config.deeplinks.visible
             ? AppNavLinkStatus.visible
             : AppNavLinkStatus.default,
         };

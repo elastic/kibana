@@ -10,14 +10,8 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
 const configSchema = schema.object({
-  serverless: schema.object({
-    enabled: schema.conditional(
-      schema.contextRef('serverless'),
-      true,
-      schema.literal(true),
-      schema.never(),
-      { defaultValue: schema.contextRef('serverless') }
-    ),
+  deeplinks: schema.object({
+    visible: schema.boolean({ defaultValue: false }),
   }),
 });
 
@@ -27,7 +21,7 @@ export type DevToolsPublicConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<DevToolsPublicConfig> = {
   exposeToBrowser: {
-    serverless: true,
+    deeplinks: true,
   },
   schema: configSchema,
 };

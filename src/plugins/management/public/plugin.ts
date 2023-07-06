@@ -59,13 +59,15 @@ export class ManagementPlugin
       (section: ManagementSection) => ({
         id: section.id,
         title: section.title,
-        navLinkStatus: AppNavLinkStatus.visible,
+        navLinkStatus: config.deeplinks.visible
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.default,
         deepLinks: section.getAppsEnabled().map((mgmtApp) => ({
           id: mgmtApp.id,
           title: mgmtApp.title,
           path: mgmtApp.basePath,
           keywords: mgmtApp.keywords,
-          navLinkStatus: config.serverless.enabled
+          navLinkStatus: config.deeplinks.visible
             ? AppNavLinkStatus.visible
             : AppNavLinkStatus.default,
         })),

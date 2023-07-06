@@ -103,11 +103,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.sessions.management.refreshTimeout (duration)',
         'data.search.sessions.maxUpdateRetries (number)',
         'data.search.sessions.notTouchedTimeout (duration)',
-        'dev_tools.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
+        'dev_tools.deeplinks.visible (boolean)',
         'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
         'home.disableWelcomeScreen (boolean)',
-        'management.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
+        'management.deeplinks.visible (boolean)',
         'map.emsFileApiUrl (string)',
         'map.emsFontLibraryUrl (string)',
         'map.emsLandingPageUrl (string)',
