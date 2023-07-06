@@ -7,6 +7,7 @@
  */
 
 import { lastValueFrom, Subscription } from 'rxjs';
+import { css } from '@emotion/react';
 import {
   onlyDisabledFiltersChanged,
   Filter,
@@ -39,7 +40,7 @@ import { CellActionsProvider } from '@kbn/cell-actions';
 import { VIEW_MODE } from '../../common/constants';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
 import { buildDataTableRecord } from '../utils/build_data_record';
-import { DataTableRecord, EsHitRecord } from '../types';
+import { DataTableRecord, EsHitRecord, SearchResponseInterceptedWarning } from '../types';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
 import { DiscoverServices } from '../build_services';
@@ -63,6 +64,8 @@ import { isTextBasedQuery } from '../application/main/utils/is_text_based_query'
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { fetchSql } from '../application/main/utils/fetch_sql';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
+import { getSearchResponseInterceptedWarnings } from '../utils/get_search_response_intercepted_warnings';
+import { WarningsCallout } from '../components/common/warnings_callout/warnings_callout';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -76,6 +79,7 @@ export type SearchProps = Partial<DiscoverGridProps> &
     filter?: (field: DataViewField, value: string[], operator: string) => void;
     hits?: DataTableRecord[];
     totalHitCount?: number;
+    interceptedWarnings?: SearchResponseInterceptedWarning[];
     onMoveColumn?: (column: string, index: number) => void;
     onUpdateRowHeight?: (rowHeight?: number) => void;
     onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
@@ -203,6 +207,7 @@ export class SavedSearchEmbeddable
     this.inspectorAdapters.requests!.reset();
 
     this.searchProps!.isLoading = true;
+    this.searchProps!.interceptedWarnings = undefined;
 
     const wasAlreadyRendered = this.getOutput().rendered;
 
@@ -279,8 +284,19 @@ export class SavedSearchEmbeddable
             }),
           },
           executionContext,
+          disableShardFailureWarning: true,
         })
       );
+
+      if (this.inspectorAdapters.requests) {
+        this.searchProps!.interceptedWarnings = getSearchResponseInterceptedWarnings({
+          services: this.services,
+          adapter: this.inspectorAdapters.requests,
+          options: {
+            disableShardFailureWarning: true,
+          },
+        });
+      }
 
       this.updateOutput({
         ...this.getOutput(),
@@ -573,7 +589,25 @@ export class SavedSearchEmbeddable
           <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
             <KibanaContextProvider services={searchProps.services}>
               <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
-                <SavedSearchEmbeddableComponent {...props} />
+                <>
+                  <SavedSearchEmbeddableComponent {...props} />
+                  {!!props.searchProps.interceptedWarnings?.length && (
+                    <div
+                      css={css({
+                        position: 'absolute',
+                        zIndex: 2,
+                        left: 0,
+                        bottom: 0,
+                      })}
+                    >
+                      <WarningsCallout
+                        variant="badge"
+                        interceptedWarnings={props.searchProps.interceptedWarnings}
+                        data-test-subj="savedSearchEmbeddableWarningsCallout"
+                      />
+                    </div>
+                  )}
+                </>
               </CellActionsProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>

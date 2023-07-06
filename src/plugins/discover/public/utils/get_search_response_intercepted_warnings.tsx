@@ -17,12 +17,12 @@ export const getSearchResponseInterceptedWarnings = ({
   adapter,
   options,
 }: {
-  services: DiscoverServices;
+  services: Pick<DiscoverServices, 'data' | 'theme'>;
   adapter: RequestAdapter;
   options?: {
     disableShardFailureWarning?: boolean;
   };
-}): SearchResponseInterceptedWarning[] => {
+}): SearchResponseInterceptedWarning[] | undefined => {
   const interceptedWarnings: SearchResponseInterceptedWarning[] = [];
 
   services.data.search.showWarnings(adapter, (warning, meta) => {
@@ -48,5 +48,5 @@ export const getSearchResponseInterceptedWarnings = ({
     }
   });
 
-  return interceptedWarnings;
+  return interceptedWarnings.length ? interceptedWarnings : undefined;
 };

@@ -79,7 +79,7 @@ export const fetchDocuments = (
 
     return {
       records,
-      interceptedWarnings: interceptedWarnings.length ? interceptedWarnings : undefined,
+      interceptedWarnings,
     };
   });
 };
