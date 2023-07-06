@@ -30,8 +30,8 @@ const SystemPromptComponent: React.FC<Props> = ({ conversation }) => {
   );
 
   const selectedPrompt: Prompt | undefined = useMemo(() => {
-    if (conversation?.apiConfig.defaultSystemPrompt) {
-      return allSystemPrompts.find((p) => p.id === conversation.apiConfig.defaultSystemPrompt);
+    if (conversation?.apiConfig.defaultSystemPromptId) {
+      return allSystemPrompts.find((p) => p.id === conversation.apiConfig.defaultSystemPromptId);
     }
     return defaultSystemPrompt;
   }, [conversation, defaultSystemPrompt, allSystemPrompts]);
@@ -44,7 +44,7 @@ const SystemPromptComponent: React.FC<Props> = ({ conversation }) => {
         conversationId: conversation.id,
         apiConfig: {
           ...conversation.apiConfig,
-          defaultSystemPrompt: undefined,
+          defaultSystemPromptId: undefined,
         },
       });
     }

@@ -88,15 +88,15 @@ export const SystemPromptModal: React.FC<Props> = React.memo(
         ...convo,
         apiConfig: {
           ...convo.apiConfig,
-          defaultSystemPrompt: currentPromptConversationIds.includes(convo.id)
+          defaultSystemPromptId: currentPromptConversationIds.includes(convo.id)
             ? selectedSystemPrompt?.id
-            : convo.apiConfig.defaultSystemPrompt === selectedSystemPrompt?.id
+            : convo.apiConfig.defaultSystemPromptId === selectedSystemPrompt?.id
             ? // remove the the default System Prompt if it is assigned to a conversation
               // but that conversation is not in the currentPromptConversationList
               // This means conversation was removed in the current transaction
               undefined
             : //  leave it as it is .. if that conversation was neither added nor removed.
-              convo.apiConfig.defaultSystemPrompt,
+              convo.apiConfig.defaultSystemPromptId,
         },
       }));
 
@@ -145,7 +145,7 @@ export const SystemPromptModal: React.FC<Props> = React.memo(
         const currenlySelectedConversations =
           newPrompt != null
             ? Object.values(conversations).filter(
-                (conversation) => conversation?.apiConfig.defaultSystemPrompt === newPrompt?.id
+                (conversation) => conversation?.apiConfig.defaultSystemPromptId === newPrompt?.id
               )
             : [];
         setSelectedConversations(currenlySelectedConversations);

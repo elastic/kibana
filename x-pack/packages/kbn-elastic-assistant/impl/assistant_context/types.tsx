@@ -45,7 +45,7 @@ export interface ConversationTheme {
 export interface Conversation {
   apiConfig: {
     connectorId?: string;
-    defaultSystemPrompt?: string;
+    defaultSystemPromptId?: string;
     provider?: OpenAiProviderType;
   };
   id: string;

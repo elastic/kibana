@@ -21,7 +21,7 @@ import { useAssistantContext } from '../../../assistant_context';
 const BASE_CONVERSATION: Conversation = {
   ...BASE_CONVERSATIONS[DEFAULT_CONVERSATION_TITLE],
   apiConfig: {
-    defaultSystemPrompt: mockSystemPrompt.id,
+    defaultSystemPromptId: mockSystemPrompt.id,
   },
 };
 
@@ -268,7 +268,7 @@ describe('SystemPrompt', () => {
           [DEFAULT_CONVERSATION_TITLE]: expect.objectContaining({
             id: DEFAULT_CONVERSATION_TITLE,
             apiConfig: expect.objectContaining({
-              defaultSystemPrompt: customPromptName,
+              defaultSystemPromptId: customPromptName,
             }),
           }),
         })
@@ -316,7 +316,7 @@ describe('SystemPrompt', () => {
           [DEFAULT_CONVERSATION_TITLE]: expect.objectContaining({
             id: DEFAULT_CONVERSATION_TITLE,
             apiConfig: expect.objectContaining({
-              defaultSystemPrompt: undefined,
+              defaultSystemPromptId: undefined,
             }),
           }),
         })
@@ -326,7 +326,7 @@ describe('SystemPrompt', () => {
       const secondMockConversation: Conversation = {
         id: 'second',
         apiConfig: {
-          defaultSystemPrompt: undefined,
+          defaultSystemPromptId: undefined,
         },
         messages: [],
       };
@@ -395,13 +395,13 @@ describe('SystemPrompt', () => {
         [DEFAULT_CONVERSATION_TITLE]: expect.objectContaining({
           id: DEFAULT_CONVERSATION_TITLE,
           apiConfig: expect.objectContaining({
-            defaultSystemPrompt: undefined,
+            defaultSystemPromptId: undefined,
           }),
         }),
         [secondMockConversation.id]: {
           ...secondMockConversation,
           apiConfig: {
-            defaultSystemPrompt: mockSystemPrompt.id,
+            defaultSystemPromptId: mockSystemPrompt.id,
           },
         },
       });
@@ -421,7 +421,10 @@ describe('SystemPrompt', () => {
   });
 
   it('clears the selected system prompt when the clear button is clicked', () => {
-    const apiConfig = { apiConfig: { defaultSystemPrompt: undefined }, conversationId: 'Default' };
+    const apiConfig = {
+      apiConfig: { defaultSystemPromptId: undefined },
+      conversationId: 'Default',
+    };
     render(<SystemPrompt conversation={BASE_CONVERSATION} />);
 
     userEvent.click(screen.getByTestId('clear'));

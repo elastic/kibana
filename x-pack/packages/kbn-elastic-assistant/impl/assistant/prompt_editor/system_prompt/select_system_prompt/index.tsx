@@ -70,7 +70,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
           conversationId: conversation.id,
           apiConfig: {
             ...conversation.apiConfig,
-            defaultSystemPrompt: prompt?.id,
+            defaultSystemPromptId: prompt?.id,
           },
         });
       }

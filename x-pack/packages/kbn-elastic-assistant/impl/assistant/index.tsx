@@ -196,13 +196,13 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const selectedSystemPrompt = useMemo(() => {
-    if (currentConversation.apiConfig.defaultSystemPrompt) {
+    if (currentConversation.apiConfig.defaultSystemPromptId) {
       return allSystemPrompts.find(
-        (prompt) => prompt.id === currentConversation.apiConfig.defaultSystemPrompt
+        (prompt) => prompt.id === currentConversation.apiConfig.defaultSystemPromptId
       );
     }
     return defaultSystemPrompt;
-  }, [allSystemPrompts, currentConversation.apiConfig.defaultSystemPrompt, defaultSystemPrompt]);
+  }, [allSystemPrompts, currentConversation.apiConfig.defaultSystemPromptId, defaultSystemPrompt]);
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(

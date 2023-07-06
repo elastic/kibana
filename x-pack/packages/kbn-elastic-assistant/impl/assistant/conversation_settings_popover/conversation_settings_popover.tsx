@@ -43,7 +43,7 @@ export const ConversationSettingsPopover: React.FC<ConversationSettingsPopoverPr
     }, [conversation.apiConfig]);
 
     const selectedPrompt: Prompt | undefined = useMemo(() => {
-      const convoDefaultSystemPromptId = conversation?.apiConfig.defaultSystemPrompt;
+      const convoDefaultSystemPromptId = conversation?.apiConfig.defaultSystemPromptId;
       if (convoDefaultSystemPromptId && allSystemPrompts) {
         return allSystemPrompts.find((prompt) => prompt.id === convoDefaultSystemPromptId);
       }

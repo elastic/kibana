@@ -105,7 +105,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
             apiConfig: {
               connectorId: defaultConnectorId,
               provider: defaultProvider,
-              defaultSystemPrompt: defaultSystemPrompt?.id,
+              defaultSystemPromptId: defaultSystemPrompt?.id,
             },
           };
           setConversation({ conversation: newConversation });
