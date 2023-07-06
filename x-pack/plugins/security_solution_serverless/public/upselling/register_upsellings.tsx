@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React from 'react';
-import type { UpsellingService } from '@kbn/security-solution-plugin/public';
-import { SecurityPageName, AppFeatureKey } from '@kbn/security-solution-plugin/common';
+import type React from 'react';
+import type { SecurityPageName, AppFeatureKey } from '@kbn/security-solution-plugin/common';
 import type {
   UpsellingService,
   PageUpsellings,
