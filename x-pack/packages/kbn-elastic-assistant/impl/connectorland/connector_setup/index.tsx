@@ -81,6 +81,8 @@ export const useConnectorSetup = ({
   // Access all conversations so we can add connector to all on initial setup
   const { conversations } = useAssistantContext();
 
+  const [setupSkipped, setSetupSkipped] = useState(false);
+
   const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
   const [showAddConnectorButton, setShowAddConnectorButton] = useState<boolean>(() => {
     // If no presentation data on messages, default to showing add connector button so it doesn't delay render and flash on screen
@@ -132,6 +134,7 @@ export const useConnectorSetup = ({
   // Show button to add connector after last message has finished streaming
   const handleSkipSetup = useCallback(() => {
     setCurrentMessageIndex(MESSAGE_INDEX_BEFORE_CONNECTOR);
+    setSetupSkipped(true);
   }, [setCurrentMessageIndex]);
 
   // Create EuiCommentProps[] from conversation messages
@@ -142,12 +145,22 @@ export const useConnectorSetup = ({
         conversation.messages[index].timestamp = new Date().toLocaleString();
       }
       const isLastMessage = index === length - 1;
-      const enableStreaming =
-        (message.presentation?.stream ?? false) && currentMessageIndex !== length - 1;
+
+      const streamingEnabled = (() => {
+        if (setupSkipped && index <= MESSAGE_INDEX_BEFORE_CONNECTOR) {
+          return false;
+        }
+
+        const isMessageStreaming = !!message.presentation?.stream;
+        const isNotLastMessage = currentMessageIndex !== length - 1;
+
+        return isMessageStreaming && isNotLastMessage;
+      })();
+
       return (
         <StreamingText
           text={message.content}
-          delay={enableStreaming ? 50 : 0}
+          delay={streamingEnabled ? 50 : 0}
           onStreamingComplete={
             isLastMessage ? onHandleLastMessageStreamingComplete : onHandleMessageStreamingComplete
           }
@@ -166,6 +179,7 @@ export const useConnectorSetup = ({
       currentMessageIndex,
       onHandleLastMessageStreamingComplete,
       onHandleMessageStreamingComplete,
+      setupSkipped,
     ]
   );
 
