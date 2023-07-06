@@ -21363,7 +21363,6 @@
     "xpack.maps.sescurity.destinationLayerLabel": "{indexPatternTitle} | 目标点",
     "xpack.maps.sescurity.lineLayerLabel": "{indexPatternTitle} | 线",
     "xpack.maps.sescurity.sourceLayerLabel": "{indexPatternTitle} | 源点",
-    "xpack.maps.setViewControl.outOfRangeErrorMsg": "必须介于 {min} 和 {max} 之间",
     "xpack.maps.source.ems_xyzDescription": "使用 {z}/{x}/{y} url 模式的 Raster 图像磁贴地图服务。",
     "xpack.maps.source.ems.noOnPremConnectionDescription": "无法连接到 {host}。",
     "xpack.maps.source.emsFile.unableToFindFileIdErrorMessage": "找不到 ID 为 {id} 的 EMS 矢量形状。{info}",
