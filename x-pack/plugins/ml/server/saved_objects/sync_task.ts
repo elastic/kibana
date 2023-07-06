@@ -115,7 +115,7 @@ export class SavedObjectsSyncService {
         },
         params: {},
         state: {
-          runs: 'd',
+          runs: 0,
           totalSavedObjectsSynced: 0,
         },
         scope: ['ml'],
