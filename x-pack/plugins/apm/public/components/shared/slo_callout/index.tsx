@@ -69,7 +69,7 @@ export function SloCallout({
           <p>
             <FormattedMessage
               id="xpack.apm.slo.callout.description"
-              defaultMessage="How quickly will you respond if the service goes down? Keep the performance, speed and user experience high with a SLO"
+              defaultMessage="Keep your service's performance, speed, and user experience high with a Service Level Objective (SLO)."
             />
           </p>
         </EuiFlexItem>
