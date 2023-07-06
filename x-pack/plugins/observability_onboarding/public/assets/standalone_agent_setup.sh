@@ -12,7 +12,7 @@ if [ -z "${BASH_VERSION:-}" ]; then
   fail "bash required"
 fi
 
-if [ $# -lt 5 ]; then
+if [ $# -lt 4 ]; then
   fail "usage: $0 api_key api_endpoint agent_version onboarding_id [autoDownloadConfig=1]"
 fi
 
@@ -20,7 +20,7 @@ API_KEY_ENCODED=$1
 API_ENDPOINT=$2
 ELASTIC_AGENT_VERSION=$3
 ONBOARDING_ID=$4
-AUTO_DOWNLOAD_CONFIG=$5
+AUTO_DOWNLOAD_CONFIG=${5:-}
 
 # require curl
 [ $(builtin type -P curl) ] || fail "curl required"
