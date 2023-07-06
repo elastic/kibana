@@ -3,8 +3,25 @@
 .navEmbeddableLinkEditor {
   @include euiFlyout;
   animation: euiFlyoutAnimation $euiAnimSpeedNormal $euiAnimSlightResistance;
-  
+
   .linkEditorBackButton {
     height: auto;
+  }
+}
+
+.thisisatest2 {
+  width: 100%;
+}
+
+.navEmbeddablePanelEditor {
+  .linkText {
+    flex: 1;
+    min-width: 0;
+    
+    .wrapText {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 }

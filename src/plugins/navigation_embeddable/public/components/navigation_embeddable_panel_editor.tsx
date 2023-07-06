@@ -123,12 +123,19 @@ export const NavigationEmbeddablePanelEditor = ({
                   {linkList?.map((link) => {
                     return (
                       <div key={link.id}>
-                        <EuiPanel hasBorder hasShadow={false} paddingSize="s">
-                          <EuiFlexGroup gutterSize="s">
+                        <EuiPanel
+                          className="navEmbeddablePanelEditor"
+                          hasBorder
+                          hasShadow={false}
+                          paddingSize="s"
+                        >
+                          <EuiFlexGroup gutterSize="s" responsive={false} wrap={false}>
                             <EuiFlexItem grow={false}>
                               <EuiIcon type={link.icon} color="text" />
                             </EuiFlexItem>
-                            <EuiFlexItem>{link.label}</EuiFlexItem>
+                            <EuiFlexItem className="linkText">
+                              <div className="wrapText">{link.label}</div>
+                            </EuiFlexItem>
                           </EuiFlexGroup>
                         </EuiPanel>
                         <EuiSpacer size="s" />
