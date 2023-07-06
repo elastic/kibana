@@ -487,18 +487,18 @@ describe('cors', () => {
 });
 
 describe('versioned', () => {
-  it('defaults to "false" when not in dev', () => {
+  it('defaults version resolution "oldest" not in dev', () => {
     expect(config.schema.validate({}, { dev: undefined })).toMatchObject({
-      versioned: { strictRequestVersionCheck: false },
+      versioned: { versionResolution: 'oldest' },
     });
     expect(config.schema.validate({}, { dev: false })).toMatchObject({
-      versioned: { strictRequestVersionCheck: false },
+      versioned: { versionResolution: 'oldest' },
     });
   });
 
-  it('defaults to "true" when in dev', () => {
+  it('defaults version resolution "none" when in dev', () => {
     expect(config.schema.validate({}, { dev: true })).toMatchObject({
-      versioned: { strictRequestVersionCheck: true },
+      versioned: { versionResolution: 'none' },
     });
   });
 });

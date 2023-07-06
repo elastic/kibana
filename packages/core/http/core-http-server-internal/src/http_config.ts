@@ -168,10 +168,24 @@ const configSchema = schema.object(
     ),
     restrictInternalApis: schema.boolean({ defaultValue: false }), // allow access to internal routes by default to prevent breaking changes in current offerings
     versioned: schema.object({
-      // Which handler resolution algo to use: "newest" or "oldest"
-      versionResolution: schema.oneOf([schema.literal('newest'), schema.literal('oldest')], {
-        defaultValue: 'oldest',
-      }),
+      /**
+       * Which handler resolution algo to use: "newest" or "oldest".
+       *
+       * @note in development we have an additional option "none" which is also the default.
+       *       This prevents any fallbacks and requires that a version specified.
+       *       Useful for ensuring that a given client always specifies a version.
+       */
+      versionResolution: schema.conditional(
+        schema.contextRef('dev'),
+        true,
+        schema.oneOf([schema.literal('newest'), schema.literal('oldest'), schema.literal('none')], {
+          defaultValue: 'none',
+        }),
+        schema.oneOf([schema.literal('newest'), schema.literal('oldest')], {
+          defaultValue: 'oldest',
+        })
+      ),
+
       /**
        * Whether we require the Kibana browser build version to match the Kibana server build version.
        *
@@ -179,19 +193,6 @@ const configSchema = schema.object(
        * same-build browsers can access the Kibana server.
        */
       strictClientVersionCheck: schema.boolean({ defaultValue: true }),
-
-      /**
-       * When true, all requests to versioned endpoints must have a version specified.
-       *
-       * @note If true, this overrides the `versionResolution` as no resolution will be attempted.
-       * @note Useful for ensuring that a given client always specifies a version.
-       */
-      strictRequestVersionCheck: schema.conditional(
-        schema.contextRef('dev'),
-        true,
-        schema.boolean({ defaultValue: true }),
-        schema.boolean({ defaultValue: false })
-      ),
     }),
   },
   {
@@ -266,9 +267,8 @@ export class HttpConfig implements IHttpConfig {
   public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
   public versioned: {
-    versionResolution: 'newest' | 'oldest';
+    versionResolution: 'newest' | 'oldest' | 'none';
     strictClientVersionCheck: boolean;
-    strictRequestVersionCheck: boolean;
   };
   public shutdownTimeout: Duration;
   public restrictInternalApis: boolean;
