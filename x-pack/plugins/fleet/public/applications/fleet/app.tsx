@@ -258,7 +258,7 @@ export const FleetAppContext: React.FC<{
     return (
       <RedirectAppLinks application={startServices.application}>
         <startServices.i18n.Context>
-          <KibanaContextProvider services={{ ...startServices }}>
+          <KibanaContextProvider services={{ ...startServices, theme: { theme$ } }}>
             <EuiErrorBoundary>
               <ConfigContext.Provider value={config}>
                 <KibanaVersionContext.Provider value={kibanaVersion}>
