@@ -96,7 +96,7 @@ export const Table = ({ loading, rows, onSearchChange, search, showActionsColumn
             <AddMetadataPinToRow
               fieldName={item.name}
               pinnedItems={pinnedItems ?? []}
-              setPinnedItems={setPinnedItems}
+              onPinned={setPinnedItems}
             />
           );
         },

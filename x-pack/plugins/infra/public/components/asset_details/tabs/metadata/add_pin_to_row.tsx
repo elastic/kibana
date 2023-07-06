@@ -13,7 +13,7 @@ import type { Field } from './utils';
 interface AddMetadataPinToRowProps {
   fieldName: Field['name'];
   pinnedItems: Array<Field['name']>;
-  setPinnedItems: Dispatch<React.SetStateAction<Array<Field['name']> | undefined>>;
+  onPinned: Dispatch<React.SetStateAction<Array<Field['name']> | undefined>>;
 }
 
 const PIN_FIELD = i18n.translate('xpack.infra.metadataEmbeddable.pinField', {
@@ -23,15 +23,15 @@ const PIN_FIELD = i18n.translate('xpack.infra.metadataEmbeddable.pinField', {
 export const AddMetadataPinToRow = ({
   fieldName,
   pinnedItems,
-  setPinnedItems,
+  onPinned,
 }: AddMetadataPinToRowProps) => {
-  const handleAddPin = (pin: Field['name']) => {
-    setPinnedItems([...pinnedItems, pin]);
+  const handleAddPin = () => {
+    onPinned([...pinnedItems, fieldName]);
   };
 
-  const handleRemovePin = (pin: Field['name']) => {
-    if (pinnedItems && pinnedItems.includes(pin)) {
-      setPinnedItems((pinnedItems ?? []).filter((pinName: string) => pin !== pinName));
+  const handleRemovePin = () => {
+    if (pinnedItems && pinnedItems.includes(fieldName)) {
+      onPinned((pinnedItems ?? []).filter((pinName: string) => fieldName !== pinName));
     }
   };
 
@@ -51,7 +51,7 @@ export const AddMetadataPinToRow = ({
             aria-label={i18n.translate('xpack.infra.metadataEmbeddable.pinAriaLabel', {
               defaultMessage: 'Pinned field',
             })}
-            onClick={() => handleRemovePin(fieldName)}
+            onClick={handleRemovePin}
           />
         </EuiToolTip>
       </span>
@@ -67,7 +67,7 @@ export const AddMetadataPinToRow = ({
           iconType="pin"
           data-test-subj="infraMetadataEmbeddableAddPin"
           aria-label={PIN_FIELD}
-          onClick={() => handleAddPin(fieldName)}
+          onClick={handleAddPin}
         />
       </EuiToolTip>
     </span>
