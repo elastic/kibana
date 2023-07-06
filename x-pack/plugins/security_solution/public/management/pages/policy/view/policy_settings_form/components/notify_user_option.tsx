@@ -233,6 +233,7 @@ export const NotifyUserOption = React.memo(
               <EuiText size="s">
                 <h4>{NOTIFICATION_MESSAGE_LABEL}</h4>
               </EuiText>
+              <EuiSpacer size="xs" />
               <>{userNotificationMessage || getEmptyValue()}</>
             </>
           ))}
