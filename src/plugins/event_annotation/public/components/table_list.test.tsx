@@ -108,8 +108,8 @@ describe('annotation list view', () => {
     expect(mockEventAnnotationService.findAnnotationGroupContent).toHaveBeenCalledWith(
       'My Search Query',
       30,
-      [{ id: 'first_id', type: 'sometype' }],
-      [{ id: 'second_id', type: 'sometype' }]
+      ['first_id'],
+      ['second_id']
     );
   });
 

@@ -30,6 +30,7 @@ const connector = {
   name: 'ServiceNow',
   isPreconfigured: false,
   isDeprecated: false,
+  isSystemAction: false,
   config: {
     apiUrl: 'https://dev94428.service-now.com/',
   },

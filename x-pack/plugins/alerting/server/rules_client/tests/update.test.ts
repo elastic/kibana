@@ -151,6 +151,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     rulesClientParams.getActionsClient.mockResolvedValue(actionsClient);
@@ -200,6 +201,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
       {
         id: '2',
@@ -216,6 +218,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -476,6 +479,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
       {
         id: '2',
@@ -492,6 +496,7 @@ describe('update()', () => {
         name: 'another email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
       {
         id: 'preconfigured',
@@ -508,6 +513,7 @@ describe('update()', () => {
         name: 'preconfigured email connector',
         isPreconfigured: true,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     actionsClient.isPreconfigured.mockReset();
@@ -1438,6 +1444,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
       {
         id: '2',
@@ -1454,6 +1461,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -2024,6 +2032,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
       {
         id: '2',
@@ -2040,6 +2049,7 @@ describe('update()', () => {
         name: 'another connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
 
@@ -2098,6 +2108,7 @@ describe('update()', () => {
         name: 'slack connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     actionsClient.isPreconfigured.mockReset();
@@ -2259,6 +2270,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
       {
         id: '2',
@@ -2275,6 +2287,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -2610,6 +2623,7 @@ describe('update()', () => {
         name: 'email connector',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
       },
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
