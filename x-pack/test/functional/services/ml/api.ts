@@ -612,7 +612,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async getAnomalyDetectionJob(jobId: string) {
       const response = await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`);
-      this.assertResponseStatusCode(200, response.status, response.body);
+      this.assertResponseStatusCode(200, response.status, response.body, 'getAnomalyDetectionJob');
       return response;
     },
 
