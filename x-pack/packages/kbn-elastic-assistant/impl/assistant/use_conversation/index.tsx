@@ -163,17 +163,16 @@ export const useConversation = (): UseConversation => {
    */
   const createConversation = useCallback(
     ({ conversationId, messages }: CreateConversationProps): Conversation | undefined => {
-      let newConversation: Conversation | undefined;
+      const newConversation: Conversation = {
+        ...DEFAULT_CONVERSATION_STATE,
+        id: conversationId,
+        messages: messages != null ? messages : [],
+      };
       setConversations((prev: Record<string, Conversation>) => {
         const prevConversation: Conversation | undefined = prev[conversationId];
         if (prevConversation != null) {
           throw new Error('Conversation already exists!');
         } else {
-          newConversation = {
-            ...DEFAULT_CONVERSATION_STATE,
-            id: conversationId,
-            messages: messages != null ? messages : [],
-          };
           return {
             ...prev,
             [conversationId]: {

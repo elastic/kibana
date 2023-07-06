@@ -20,10 +20,8 @@ import { DOCUMENT_DETAILS } from './translations';
 import moment from 'moment-timezone';
 import { useDateFormat, useTimeZone } from '../../../common/lib/kibana';
 import { mockDataFormattedForFieldBrowser, mockGetFieldsData } from '../mocks/mock_context';
-import { AssistantProvider } from '@kbn/elastic-assistant';
-import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { useAssistant } from '../hooks/use_assistant';
+import { MockAssistantProvider } from '../../../common/mock/mock_assistant_provider';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../hooks/use_assistant');
@@ -32,31 +30,14 @@ moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
-const actionTypeRegistry = actionTypeRegistryMock.create();
-const mockGetInitialConversations = jest.fn(() => ({}));
-const mockGetComments = jest.fn(() => []);
-const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
 
 const renderHeader = (contextValue: RightPanelContext) =>
   render(
-    <AssistantProvider
-      actionTypeRegistry={actionTypeRegistry}
-      augmentMessageCodeBlocks={jest.fn()}
-      baseAllow={[]}
-      baseAllowReplacement={[]}
-      defaultAllow={[]}
-      defaultAllowReplacement={[]}
-      getComments={mockGetComments}
-      getInitialConversations={mockGetInitialConversations}
-      setConversations={jest.fn()}
-      setDefaultAllow={jest.fn()}
-      setDefaultAllowReplacement={jest.fn()}
-      http={mockHttp}
-    >
+    <MockAssistantProvider>
       <RightPanelContext.Provider value={contextValue}>
         <HeaderTitle />
       </RightPanelContext.Provider>
-    </AssistantProvider>
+    </MockAssistantProvider>
   );
 
 describe('<HeaderTitle />', () => {
