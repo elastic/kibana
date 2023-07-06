@@ -106,7 +106,7 @@ export function SloListItem({
         params: { sloId: slo.id },
       },
       {
-        replace: true,
+        replace: false,
       }
     );
   };
