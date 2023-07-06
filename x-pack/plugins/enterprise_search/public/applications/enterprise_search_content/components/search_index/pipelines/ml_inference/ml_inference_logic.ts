@@ -326,6 +326,7 @@ export const MLInferenceLogic = kea<
         modelID: params.model_id,
         pipelineName,
         sourceField: params.source_field,
+        fieldMappings: params.field_mappings,
       });
     },
     setIndexName: ({ indexName }) => {
