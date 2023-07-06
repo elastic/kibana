@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { Observable } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { MountPoint, CoreTheme } from '@kbn/core/public';
-import { KibanaThemeProvider } from '../theme';
+import { KibanaThemeProvider } from '../theme/kibana_theme_provider';
 
 export interface ToMountPointOptions {
   theme$?: Observable<CoreTheme>;
