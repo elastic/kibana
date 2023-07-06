@@ -275,7 +275,7 @@ export function validateKafkaHeaders(pairs: Array<{ key: string; value: string }
     } else if (hasKey && hasValue) {
       if (existingKeys.has(key)) {
         errors.push({
-          message: i18n.translate('xpack.fleet.settings.outputForm.kafkaHeadersMissingValueError', {
+          message: i18n.translate('xpack.fleet.settings.outputForm.kafkaHeadersMissingKeyError', {
             defaultMessage: 'Duplicate key "{key}"',
             values: { key },
           }),

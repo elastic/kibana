@@ -83,14 +83,14 @@ export const OutputFormKafkaSection: React.FunctionComponent<Props> = (props) =>
         sortable={true}
         helpText={
           <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.logstashHostsInputDescription"
+            id="xpack.fleet.settings.editOutputFlyout.kafkaHostsInputDescription"
             defaultMessage="Specify the URLs that your agents will use to connect to Kafka. For more information, see the {guideLink}."
             values={{
               guideLink: (
                 <EuiLink href={docLinks.links.fleet.settings} target="_blank" external>
                   <FormattedMessage
                     id="xpack.fleet.settings.fleetUserGuideLink"
-                    defaultMessage="Fleet User Guide"
+                    defaultMessage="Fleet and Elastic Agent Guide"
                   />
                 </EuiLink>
               ),
