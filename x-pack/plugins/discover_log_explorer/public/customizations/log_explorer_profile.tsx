@@ -8,8 +8,6 @@
 import type { CoreStart } from '@kbn/core/public';
 import { CustomizationCallback } from '@kbn/discover-plugin/public';
 import React from 'react';
-
-import { DiscoverLogExplorerStartDeps } from '../types';
 import { dynamic } from '../utils/dynamic';
 
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
