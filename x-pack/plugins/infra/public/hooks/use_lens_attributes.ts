@@ -102,13 +102,7 @@ export const useLensAttributes = ({
   });
 
   const injectFilters = useCallback(
-    ({
-      filters = [],
-      query = { language: 'kuery', query: '' },
-    }: {
-      filters?: Filter[];
-      query?: Query;
-    }): LensAttributes | null => {
+    ({ filters, query }: { filters: Filter[]; query: Query }): LensAttributes | null => {
       if (!attributes.current) {
         return null;
       }
@@ -125,15 +119,7 @@ export const useLensAttributes = ({
   );
 
   const openInLensAction = useCallback(
-    ({
-        timeRange,
-        query,
-        filters = [],
-      }: {
-        timeRange: TimeRange;
-        filters?: Filter[];
-        query?: Query;
-      }) =>
+    ({ timeRange, query, filters }: { timeRange: TimeRange; filters: Filter[]; query: Query }) =>
       () => {
         const injectedAttributes = injectFilters({ filters, query });
         if (injectedAttributes) {
@@ -153,7 +139,15 @@ export const useLensAttributes = ({
   );
 
   const getExtraActions = useCallback(
-    ({ timeRange, filters, query }: { timeRange: TimeRange; filters: Filter[]; query?: Query }) => {
+    ({
+      timeRange,
+      filters = [],
+      query = { language: 'kuery', query: '' },
+    }: {
+      timeRange: TimeRange;
+      filters?: Filter[];
+      query?: Query;
+    }) => {
       const openInLens = getOpenInLensAction(openInLensAction({ timeRange, filters, query }));
       return [openInLens];
     },

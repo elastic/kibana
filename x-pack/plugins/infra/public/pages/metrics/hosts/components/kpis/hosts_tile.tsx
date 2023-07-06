@@ -47,7 +47,7 @@ export const HostsTile = ({ style }: Pick<KPIChartProps, 'style'>) => {
       subtitle={getSubtitle()}
       toolTip={
         <TooltipContent
-          formula={hostLensFormulas.hostCount.formula}
+          formula={hostLensFormulas.hostCount.value}
           description={TOOLTIP.hostCount}
         />
       }

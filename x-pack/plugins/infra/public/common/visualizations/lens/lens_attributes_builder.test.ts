@@ -54,18 +54,20 @@ const getMetricLayer = (formula: string): GenericIndexPatternColumn => ({
   timeScale: undefined,
 });
 
-const HISTOGRAM_LAYER = {
+const getHistogramLayer = (interval: string, includeEmptyRows?: boolean) => ({
   dataType: 'date',
   isBucketed: true,
   label: '@timestamp',
   operationType: 'date_histogram',
-  params: {
-    includeEmptyRows: true,
-    interval: 'auto',
-  },
+  params: includeEmptyRows
+    ? {
+        includeEmptyRows,
+        interval,
+      }
+    : { interval },
   scale: 'interval',
   sourceField: '@timestamp',
-};
+});
 
 const REFERENCE_LINE_LAYER: ReferenceBasedIndexPatternColumn = {
   customLabel: true,
@@ -120,16 +122,15 @@ describe('lens_attributes_builder', () => {
         },
       } = builder.build();
 
-      expect(layers).toEqual([
-        {
-          layer: {
-            columnOrder: ['metric_formula_accessor'],
-            columns: {
-              metric_formula_accessor: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
-            },
+      expect(layers).toEqual({
+        layer: {
+          columnOrder: ['metric_formula_accessor'],
+          columns: {
+            metric_formula_accessor: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
           },
+          indexPatternId: 'mock-id',
         },
-      ]);
+      });
 
       expect(visualization).toEqual({
         color: undefined,
@@ -163,26 +164,25 @@ describe('lens_attributes_builder', () => {
         },
       } = builder.build();
 
-      expect(layers).toEqual([
-        {
-          layer: {
-            columnOrder: ['metric_formula_accessor'],
-            columns: {
-              metric_formula_accessor: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
-            },
+      expect(layers).toEqual({
+        layer: {
+          columnOrder: ['metric_formula_accessor'],
+          columns: {
+            metric_formula_accessor: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
           },
-          layer_trendline: {
-            columnOrder: ['x_date_histogram', 'metric_formula_accessor_trendline'],
-            columns: {
-              metric_formula_accessor_trendline: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
-              x_date_histogram: HISTOGRAM_LAYER,
-            },
-            indexPatternId: 'mock-id',
-            linkToLayers: ['layer'],
-            sampling: 1,
-          },
+          indexPatternId: 'mock-id',
         },
-      ]);
+        layer_trendline: {
+          columnOrder: ['x_date_histogram', 'metric_formula_accessor_trendline'],
+          columns: {
+            metric_formula_accessor_trendline: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
+            x_date_histogram: getHistogramLayer('auto', true),
+          },
+          indexPatternId: 'mock-id',
+          linkToLayers: ['layer'],
+          sampling: 1,
+        },
+      });
 
       expect(visualization).toEqual({
         color: undefined,
@@ -220,18 +220,16 @@ describe('lens_attributes_builder', () => {
         },
       } = builder.build();
 
-      expect(layers).toEqual([
-        {
-          layer_0: {
-            columnOrder: ['x_date_histogram', 'formula_accessor_0_0'],
-            columns: {
-              x_date_histogram: HISTOGRAM_LAYER,
-              formula_accessor_0_0: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
-            },
-            indexPatternId: 'mock-id',
+      expect(layers).toEqual({
+        layer_0: {
+          columnOrder: ['x_date_histogram', 'formula_accessor_0_0'],
+          columns: {
+            x_date_histogram: getHistogramLayer('auto'),
+            formula_accessor_0_0: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
           },
+          indexPatternId: 'mock-id',
         },
-      ]);
+      });
 
       expect((visualization as any).layers).toEqual([
         {
@@ -269,27 +267,25 @@ describe('lens_attributes_builder', () => {
         },
       } = builder.build();
 
-      expect(layers).toEqual([
-        {
-          layer_0: {
-            columnOrder: ['x_date_histogram', 'formula_accessor_0_0'],
-            columns: {
-              x_date_histogram: HISTOGRAM_LAYER,
-              formula_accessor_0_0: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
-            },
-            indexPatternId: 'mock-id',
+      expect(layers).toEqual({
+        layer_0: {
+          columnOrder: ['x_date_histogram', 'formula_accessor_0_0'],
+          columns: {
+            x_date_histogram: getHistogramLayer('auto'),
+            formula_accessor_0_0: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
           },
-          layer_1_reference: {
-            columnOrder: ['formula_accessor_1_0_reference_column'],
-            columns: {
-              formula_accessor_1_0_reference_column: REFERENCE_LINE_LAYER,
-            },
-            incompleteColumns: {},
-            linkToLayers: [],
-            sampling: 1,
-          },
+          indexPatternId: 'mock-id',
         },
-      ]);
+        layer_1_reference: {
+          columnOrder: ['formula_accessor_1_0_reference_column'],
+          columns: {
+            formula_accessor_1_0_reference_column: REFERENCE_LINE_LAYER,
+          },
+          incompleteColumns: {},
+          linkToLayers: [],
+          sampling: 1,
+        },
+      });
 
       expect((visualization as any).layers).toEqual([
         {
@@ -336,19 +332,17 @@ describe('lens_attributes_builder', () => {
         },
       } = builder.build();
 
-      expect(layers).toEqual([
-        {
-          layer_0: {
-            columnOrder: ['x_date_histogram', 'formula_accessor_0_0', 'formula_accessor_0_1'],
-            columns: {
-              x_date_histogram: HISTOGRAM_LAYER,
-              formula_accessor_0_0: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
-              formula_accessor_0_1: getMetricLayer(AVERAGE_CPU_SYSTEM_FORMULA),
-            },
-            indexPatternId: 'mock-id',
+      expect(layers).toEqual({
+        layer_0: {
+          columnOrder: ['x_date_histogram', 'formula_accessor_0_0', 'formula_accessor_0_1'],
+          columns: {
+            x_date_histogram: getHistogramLayer('auto'),
+            formula_accessor_0_0: getMetricLayer(AVERAGE_CPU_USER_FORMULA),
+            formula_accessor_0_1: getMetricLayer(AVERAGE_CPU_SYSTEM_FORMULA),
           },
+          indexPatternId: 'mock-id',
         },
-      ]);
+      });
 
       expect((visualization as any).layers).toEqual([
         {

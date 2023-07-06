@@ -67,9 +67,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/core-http-server",
     "@kbn/logs-shared-plugin",
-    "@kbn/licensing-plugin",
-    "@kbn/core-saved-objects-api-server",
-    "@kbn/visualizations-plugin",
+    "@kbn/licensing-plugin"
   ],
   "exclude": ["target/**/*"]
 }

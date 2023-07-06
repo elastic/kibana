@@ -14,8 +14,8 @@ import type {
   TypedLensByValueInput,
   XYState,
   XYDataLayerConfig,
+  FormulaPublicApi,
 } from '@kbn/lens-plugin/public';
-import type { FormatParams } from '@kbn/visualizations-plugin/common';
 import { hostLensFormulas } from './constants';
 export type LensAttributes = TypedLensByValueInput['attributes'];
 
@@ -69,11 +69,11 @@ export interface ChartConfig<
 }
 
 // Formula
-
+type LensFormula = Parameters<FormulaPublicApi['insertOrReplaceFormulaColumn']>[1];
 export interface FormulaConfig {
   label?: string;
   color?: string;
-  format: NonNullable<FormatParams['format']>;
+  format: NonNullable<LensFormula['format']>;
   value: string;
 }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import {
   FormBasedPersistedState,
