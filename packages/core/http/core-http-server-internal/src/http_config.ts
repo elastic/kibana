@@ -265,7 +265,11 @@ export class HttpConfig implements IHttpConfig {
   public externalUrl: IExternalUrlConfig;
   public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
-  public versioned: { versionResolution: 'newest' | 'oldest'; strictClientVersionCheck: boolean };
+  public versioned: {
+    versionResolution: 'newest' | 'oldest';
+    strictClientVersionCheck: boolean;
+    strictRequestVersionCheck: boolean;
+  };
   public shutdownTimeout: Duration;
   public restrictInternalApis: boolean;
 
