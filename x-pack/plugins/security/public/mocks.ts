@@ -24,6 +24,9 @@ function createStartMock() {
     navControlService: navControlServiceMock.createStart(),
     userProfiles: { getCurrent: jest.fn(), bulkGet: jest.fn(), suggest: jest.fn() },
     uiApi: getUiApiMock.createStart(),
+    hooks: {
+      useUpdateUserProfile: jest.fn(),
+    },
   };
 }
 

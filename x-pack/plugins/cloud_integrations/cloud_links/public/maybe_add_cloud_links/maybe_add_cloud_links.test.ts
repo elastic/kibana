@@ -73,6 +73,15 @@ describe('maybeAddCloudLinks', () => {
             "label": "Organization",
             "order": 300,
           },
+          Object {
+            "content": <ThemDarkModeToggle
+              useUpdateUserProfile={[MockFunction]}
+            />,
+            "href": "",
+            "iconType": "",
+            "label": "",
+            "order": 400,
+          },
         ],
       ]
     `);
@@ -143,6 +152,15 @@ describe('maybeAddCloudLinks', () => {
             "iconType": "gear",
             "label": "Organization",
             "order": 300,
+          },
+          Object {
+            "content": <ThemDarkModeToggle
+              useUpdateUserProfile={[MockFunction]}
+            />,
+            "href": "",
+            "iconType": "",
+            "label": "",
+            "order": 400,
           },
         ],
       ]

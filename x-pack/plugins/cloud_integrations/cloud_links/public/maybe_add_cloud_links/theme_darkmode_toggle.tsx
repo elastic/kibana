@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   EuiButtonEmpty,
+  EuiContextMenuItem,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
@@ -15,10 +16,10 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { UpdateUserProfileHook } from '@kbn/security-plugin/public';
 
 interface Props {
-  useUpdateUserProfile: SecurityPluginStart['hooks']['useUpdateUserProfile'];
+  useUpdateUserProfile: UpdateUserProfileHook;
 }
 
 export const ThemDarkModeToggle = ({ useUpdateUserProfile }: Props) => {
@@ -44,15 +45,15 @@ export const ThemDarkModeToggle = ({ useUpdateUserProfile }: Props) => {
   }
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="xs">
       <EuiFlexItem>
-        <EuiButtonEmpty
-          className="euiContextMenuItem euiContextMenuItem--small"
-          iconType={darkMode === 'dark' ? 'moon' : 'sun'}
-          contentProps={{ css: { justifyContent: 'flex-start', fontWeight: 400 } }}
-          flush="left"
-          color="text"
+        <EuiContextMenuItem
+          icon={darkMode === 'dark' ? 'moon' : 'sun'}
+          size="s"
           onClick={() => {
+            if (isLoading) {
+              return;
+            }
             updateSetting({
               key: 'darkMode',
               value: darkMode === 'light' ? 'dark' : 'light',
@@ -62,7 +63,7 @@ export const ThemDarkModeToggle = ({ useUpdateUserProfile }: Props) => {
           {i18n.translate('xpack.cloudLinks.userMenuLinks.darkModeToggle', {
             defaultMessage: 'Dark mode',
           })}
-        </EuiButtonEmpty>
+        </EuiContextMenuItem>
       </EuiFlexItem>
       <EuiFlexItem grow={false} css={{ paddingRight: euiTheme.size.m }}>
         <EuiSwitch
