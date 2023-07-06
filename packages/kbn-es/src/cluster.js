@@ -484,7 +484,7 @@ exports.Cluster = class Cluster {
       if (stdioTarget) {
         stdioTarget.write(chunk);
       } else {
-        this._log.error(chalk.red());
+        this._log.error(chalk.red(chunk.trim()));
       }
     });
 
