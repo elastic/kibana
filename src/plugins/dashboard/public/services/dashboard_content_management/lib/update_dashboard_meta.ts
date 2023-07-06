@@ -7,7 +7,7 @@
  */
 
 import { Reference } from '@kbn/content-management-utils';
-import { DashboardContainerInput, extractReferences } from '../../../../common';
+import { DashboardContainerInput } from '../../../../common';
 import { DashboardStartDependencies } from '../../../plugin';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { DashboardCrudTypes } from '../../../../common/content_management';
