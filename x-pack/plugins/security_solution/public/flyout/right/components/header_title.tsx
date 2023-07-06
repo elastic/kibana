@@ -36,7 +36,6 @@ export const HeaderTitle: FC = memo(() => {
     dataFormattedForFieldBrowser,
     isAlert,
   });
-  console.log('showAssistant', showAssistant);
 
   return (
     <>
