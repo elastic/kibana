@@ -11,6 +11,7 @@ import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../apm_common/field_selector';
+import { DataPreviewChart } from '../common/data_preview_chart';
 import { QueryBuilder } from '../common/query_builder';
 
 export function ApmAvailabilityIndicatorTypeForm() {
@@ -117,6 +118,8 @@ export function ApmAvailabilityIndicatorTypeForm() {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <DataPreviewChart />
     </EuiFlexGroup>
   );
 }

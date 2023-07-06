@@ -6,10 +6,9 @@
  */
 
 import * as rt from 'io-ts';
-import { MAX_BULK_GET_ATTACHMENTS } from '../../../constants';
-import { limitedArraySchema } from '../../../schema';
+import { MAX_BULK_GET_ATTACHMENTS, MAX_COMMENTS_PER_PAGE } from '../../../constants';
+import { limitedArraySchema, paginationSchema } from '../../../schema';
 import { jsonValueRt } from '../../runtime_types';
-import { NumberFromString } from '../../saved_object';
 
 import { UserRt } from '../../user';
 
@@ -289,22 +288,17 @@ export const CommentsFindResponseRt = rt.strict({
 
 export const CommentsRt = rt.array(CommentRt);
 
-export const FindCommentsQueryParamsRt = rt.exact(
-  rt.partial({
-    /**
-     * The page of objects to return
-     */
-    page: rt.union([rt.number, NumberFromString]),
-    /**
-     * The number of objects to return for a page
-     */
-    perPage: rt.union([rt.number, NumberFromString]),
-    /**
-     * Order to sort the response
-     */
-    sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
-  })
-);
+export const FindCommentsQueryParamsRt = rt.intersection([
+  rt.exact(
+    rt.partial({
+      /**
+       * Order to sort the response
+       */
+      sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+    })
+  ),
+  paginationSchema({ maxPerPage: MAX_COMMENTS_PER_PAGE }),
+]);
 
 export const BulkCreateCommentRequestRt = rt.array(CommentRequestRt);
 
