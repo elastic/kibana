@@ -33,6 +33,5 @@ export async function fetchRuleVersionsTriad({
       : ruleAssetsClient.fetchLatestAssets(),
   ]);
   const baseRules = await ruleAssetsClient.fetchAssetsByVersion(currentRules);
-  debugger;
   return zipRuleVersions(currentRules, baseRules, latestRules);
 }

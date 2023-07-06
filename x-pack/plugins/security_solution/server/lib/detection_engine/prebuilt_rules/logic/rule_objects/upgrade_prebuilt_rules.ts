@@ -70,7 +70,6 @@ const upgradeRule = async ({
   // and replace it with the new rule, keeping the enabled setting, actions, throttle, id,
   // and exception lists from the old rule
   if (rule.type !== existingRule.params.type) {
-    debugger;
     await deleteRules({
       ruleId: existingRule.id,
       rulesClient,
