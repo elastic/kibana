@@ -172,7 +172,12 @@ const configSchema = schema.object(
       versionResolution: schema.oneOf([schema.literal('newest'), schema.literal('oldest')], {
         defaultValue: 'oldest',
       }),
-      // Whether we enforce version checks on client requests
+      /**
+       * Whether we require the Kibana browser build version to match the Kibana server build version.
+       *
+       * This number is determined when a distributable version of Kibana is built and ensures that only
+       * same-build browsers can access the Kibana server.
+       */
       strictClientVersionCheck: schema.boolean({ defaultValue: true }),
     }),
   },
