@@ -43,7 +43,6 @@
     "@kbn/utility-types",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/osquery-io-ts-types",
-    "@kbn/ui-theme",
     "@kbn/i18n-react",
     "@kbn/discover-plugin",
     "@kbn/lens-plugin",
