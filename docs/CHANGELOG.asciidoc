@@ -69,9 +69,11 @@ cause Kibana to run out of memory during an upgrade.  For example, we have obser
 out of memory during an upgrade when there were 20 agent policies with 5 integrations in each. 
 
 *Workaround* +
-There are two workaround options available:
-- Increase the Kibana instance size to 2GB. So far, we are not able to reproduce the issue with 2GB instances.
-- Set `xpack.fleet.setup.agentPolicySchemaUpgradeBatchSize` to `2` in the `kibana.yml` and restart the Kibana instance(s).
+Two workaround options are available:
+
+* Increase the Kibana instance size to 2GB. So far, we are not able to reproduce the issue with 2GB instances.
+* Set `xpack.fleet.setup.agentPolicySchemaUpgradeBatchSize` to `2` in the `kibana.yml` and restart the Kibana instance(s).
+
 In 8.9.0, we are addressing this by changing the default batch size to `2`.
 
 ====
