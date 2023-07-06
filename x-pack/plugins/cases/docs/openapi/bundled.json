@@ -5553,6 +5553,7 @@
           "comment": {
             "description": "The new comment. It is required only when `type` is `user`.",
             "type": "string",
+            "maxLength": 30000,
             "example": "A new comment."
           },
           "owner": {
@@ -5642,6 +5643,7 @@
           "comment": {
             "description": "The new comment. It is required only when `type` is `user`.",
             "type": "string",
+            "maxLength": 30000,
             "example": "A new comment."
           },
           "id": {
