@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { PathReporter } from 'io-ts/lib/PathReporter';
+import { MAX_SUGGESTED_PROFILES } from '../../constants';
 import { SuggestUserProfilesRequestRt, CaseUserProfileRt } from './user_profiles';
 
 describe('userProfile', () => {
@@ -55,6 +57,24 @@ describe('userProfile', () => {
           size: 5,
         },
       });
+    });
+
+    it(`does not accept size param bigger than ${MAX_SUGGESTED_PROFILES}`, () => {
+      const query = SuggestUserProfilesRequestRt.decode({
+        ...defaultRequest,
+        size: MAX_SUGGESTED_PROFILES + 1,
+      });
+
+      expect(PathReporter.report(query)).toContain('The size field cannot be more than 10.');
+    });
+
+    it('does not accept size param lower than 1', () => {
+      const query = SuggestUserProfilesRequestRt.decode({
+        ...defaultRequest,
+        size: 0,
+      });
+
+      expect(PathReporter.report(query)).toContain('The size field cannot be less than 1.');
     });
   });
 
