@@ -17,7 +17,7 @@ interface SessionViewSearchBarDeps {
   totalMatches: number;
   onPrevious: (index: number) => void;
   onNext: (index: number) => void;
-  trackEvent(name: SessionViewTelemetryKey): void;
+  trackEvent?: (name: SessionViewTelemetryKey) => void;
 }
 
 const translatePlaceholder = {
@@ -58,7 +58,9 @@ export const SessionViewSearchBar = ({
         setSearchQuery('');
       }
 
-      trackEvent('search_performed');
+      if (trackEvent) {
+        trackEvent('search_performed');
+      }
     },
     [setSearchQuery, trackEvent]
   );
@@ -67,12 +69,16 @@ export const SessionViewSearchBar = ({
     (page: number) => {
       setSelectedResult(page);
 
-      if (page > selectedResult) {
+      const isNext = page > selectedResult;
+
+      if (isNext) {
         onNext(page);
-        trackEvent('search_next');
       } else {
         onPrevious(page);
-        trackEvent('search_previous');
+      }
+
+      if (trackEvent) {
+        trackEvent(isNext ? 'search_next' : 'search_previous');
       }
     },
     [onNext, onPrevious, selectedResult, trackEvent]

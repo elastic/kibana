@@ -8,7 +8,7 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { SessionViewDeps, SessionViewTelemetryKey } from '../types';
 import { USAGE_COLLECTION_APP_NAME } from '../../common/constants';
@@ -53,7 +53,7 @@ export const getIndexPattern = (eventIndex?: string | null) => {
 
 export const getSessionViewLazy = (
   props: SessionViewDeps,
-  usageCollection: UsageCollectionSetup
+  usageCollection?: UsageCollectionStart
 ) => {
   const index = getIndexPattern(props.index);
   const trackEvent = (key: SessionViewTelemetryKey) => {

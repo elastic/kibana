@@ -33,9 +33,14 @@ export type SessionViewTelemetryKey =
   | 'loaded_from_unknown_alert'
   | 'refresh_clicked'
   | 'process_selected'
+  | 'collapse_tree'
+  | 'children_opened'
+  | 'children_closed'
+  | 'alerts_opened'
+  | 'alerts_closed'
   | 'details_opened'
   | 'details_closed'
-  | 'display_options_changed'
+  | 'output_clicked'
   | 'alert_details_loaded'
   | 'disabled_tty_clicked' // tty button clicked when disabled (no data or not enabled)
   | 'tty_loaded' // tty player succesfully loaded

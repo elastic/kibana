@@ -244,10 +244,11 @@ export const SessionView = ({
   }, []);
 
   const toggleDetailPanel = useCallback(() => {
+    const newValue = !isDetailOpen;
     detailPanelCollapseFn.current();
-    setIsDetailOpen(!isDetailOpen);
+    setIsDetailOpen(newValue);
 
-    if (isDetailOpen) {
+    if (newValue) {
       trackEvent('details_opened');
     } else {
       trackEvent('details_closed');
@@ -277,7 +278,7 @@ export const SessionView = ({
       }
 
       if (checkedOptions.timestamp !== displayOptions?.timestamp) {
-        if (checkedOptions.verboseMode) {
+        if (checkedOptions.timestamp) {
           trackEvent('timestamp_enabled');
         } else {
           trackEvent('timestamp_disabled');
@@ -357,6 +358,7 @@ export const SessionView = ({
                 size="m"
                 aria-label={TOGGLE_TTY_PLAYER}
                 data-test-subj="sessionView:TTYPlayerToggle"
+                css={!hasTTYOutput && styles.fakeDisabled}
               />
             </EuiToolTip>
           </EuiFlexItem>
@@ -448,6 +450,7 @@ export const SessionView = ({
                       onShowAlertDetails={onShowAlertDetails}
                       showTimestamp={displayOptions?.timestamp}
                       verboseMode={displayOptions?.verboseMode}
+                      trackEvent={trackEvent}
                     />
                   </div>
                 )}
