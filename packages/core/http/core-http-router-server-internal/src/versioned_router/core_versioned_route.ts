@@ -72,14 +72,14 @@ export class CoreVersionedRoute implements VersionedRoute {
 
   private isPublic: boolean;
   private enableQueryVersion: boolean;
-  private defaultResolutionStrategy?: Exclude<HandlerResolutionStrategy, 'none'>;
+  private resolutionStrategy?: Exclude<HandlerResolutionStrategy, 'none'>;
   private constructor(
     private readonly router: CoreVersionedRouter,
     public readonly method: Method,
     public readonly path: string,
     public readonly options: VersionedRouteConfig<Method>
   ) {
-    this.defaultResolutionStrategy =
+    this.resolutionStrategy =
       this.router.defaultHandlerResolutionStrategy === 'none'
         ? undefined
         : this.router.defaultHandlerResolutionStrategy;
@@ -127,8 +127,8 @@ export class CoreVersionedRoute implements VersionedRoute {
 
     const maybeVersion = readVersion(req, this.enableQueryVersion);
     if (!maybeVersion) {
-      if (this.isPublic && this.defaultResolutionStrategy) {
-        version = this.getDefaultVersion(this.defaultResolutionStrategy);
+      if (this.isPublic && this.resolutionStrategy) {
+        version = this.getDefaultVersion(this.resolutionStrategy);
       } else {
         return res.badRequest({
           body: `Please specify a version via ${ELASTIC_HTTP_VERSION_HEADER} header. Available versions: ${this.versionsToString()}`,
