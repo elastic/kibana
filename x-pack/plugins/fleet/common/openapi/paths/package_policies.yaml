@@ -27,6 +27,9 @@ get:
   operationId: get-package-policies
   security: []
   parameters:
+    - $ref: ../components/parameters/page_size.yaml
+    - $ref: ../components/parameters/page_index.yaml
+    - $ref: ../components/parameters/kuery.yaml
     - $ref: ../components/parameters/format.yaml
 parameters: []
 post:

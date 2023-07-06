@@ -19,6 +19,9 @@ import { BulkRequestBodySchema } from './common';
 
 export const GetPackagePoliciesRequestSchema = {
   query: schema.object({
+    page: schema.number({ defaultValue: 1 }),
+    perPage: schema.number({ defaultValue: 20 }),
+    kuery: schema.maybe(schema.string()),
     format: schema.maybe(
       schema.oneOf([schema.literal(inputsFormat.Simplified), schema.literal(inputsFormat.Legacy)])
     ),

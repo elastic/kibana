@@ -3903,6 +3903,15 @@
         "security": [],
         "parameters": [
           {
+            "$ref": "#/components/parameters/page_size"
+          },
+          {
+            "$ref": "#/components/parameters/page_index"
+          },
+          {
+            "$ref": "#/components/parameters/kuery"
+          },
+          {
             "$ref": "#/components/parameters/format"
           }
         ]
