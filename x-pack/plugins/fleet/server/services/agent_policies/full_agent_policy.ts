@@ -211,8 +211,8 @@ export async function getFullAgentPolicy(
         features,
         protection: fullAgentPolicy.agent.protection,
       },
-      inputs: inputs.map(({ id, name, revision, type }) => ({
-        id,
+      inputs: inputs.map(({ id: inputId, name, revision, type }) => ({
+        id: inputId,
         name,
         revision,
         type,

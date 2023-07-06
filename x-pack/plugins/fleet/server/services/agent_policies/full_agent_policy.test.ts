@@ -438,19 +438,7 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should populate agent.protection and signed properties if encryption is available', async () => {
-    const mockContext = createAppContextStartContractMock();
-    mockContext.messageSigningService.sign = jest
-      .fn()
-      .mockImplementation((message: Record<string, unknown>) =>
-        Promise.resolve({
-          data: Buffer.from(JSON.stringify(message), 'utf8'),
-          signature: 'thisisasignature',
-        })
-      );
-    mockContext.messageSigningService.getPublicKey = jest
-      .fn()
-      .mockResolvedValue('thisisapublickey');
-    appContextService.start(mockContext);
+    appContextService.start(createAppContextStartContractMock());
 
     mockAgentPolicy({});
     const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
