@@ -11,5 +11,15 @@ export const DATAVIEW_NOT_FOUND = (dataViewId: string): string =>
   i18n.translate('xpack.securitySolution.riskEngine.calculateScores.dataViewNotFoundError', {
     values: { dataViewId },
     defaultMessage:
-      'The specified dataview ({dataViewId}) was not found. Please use an existing dataview, or omit the parameter to use the default risk inputs.',
+      'The specified dataview ({dataViewId}) was not found. Please use an existing dataview.',
   });
+
+export const OPTIONAL_DATAVIEW_NOT_FOUND = (dataViewId: string): string =>
+  i18n.translate(
+    'xpack.securitySolution.riskEngine.calculateScores.optionalDataViewNotFoundError',
+    {
+      values: { dataViewId },
+      defaultMessage:
+        'The specified dataview ({dataViewId}) was not found. Please use an existing dataview, or omit the parameter to use the default risk inputs.',
+    }
+  );
