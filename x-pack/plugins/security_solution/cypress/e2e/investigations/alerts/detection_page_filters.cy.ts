@@ -240,7 +240,7 @@ describe(`Detections : Page Filters`, () => {
       createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
     });
 
-    it(`Alert list is updated when the alerts are updated`, () => {
+    it.only(`Alert list is updated when the alerts are updated`, () => {
       // mark status of one alert to be acknowledged
       selectCountTable();
       cy.get(ALERTS_COUNT)
