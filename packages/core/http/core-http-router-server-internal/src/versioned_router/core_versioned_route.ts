@@ -23,7 +23,7 @@ import type {
   RouteConfigOptions,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
-import type { Method } from './types';
+import type { HandlerResolutionStrategy, Method } from './types';
 import type { CoreVersionedRouter } from './core_versioned_router';
 
 import { validate } from './validate';
@@ -71,17 +71,20 @@ export class CoreVersionedRoute implements VersionedRoute {
   }
 
   private isPublic: boolean;
-  private isInternal: boolean;
   private enableQueryVersion: boolean;
+  private defaultResolutionStrategy?: Exclude<HandlerResolutionStrategy, 'none'>;
   private constructor(
     private readonly router: CoreVersionedRouter,
     public readonly method: Method,
     public readonly path: string,
     public readonly options: VersionedRouteConfig<Method>
   ) {
+    this.defaultResolutionStrategy =
+      this.router.defaultHandlerResolutionStrategy === 'none'
+        ? undefined
+        : this.router.defaultHandlerResolutionStrategy;
     this.isPublic = this.options.access === 'public';
     this.enableQueryVersion = this.options.enableQueryVersion === true;
-    this.isInternal = !this.isPublic;
     this.router.router[this.method](
       {
         path: this.path,
@@ -100,8 +103,8 @@ export class CoreVersionedRoute implements VersionedRoute {
   }
 
   /** This method assumes that one or more versions handlers are registered  */
-  private getDefaultVersion(): ApiVersion {
-    return resolvers[this.router.defaultHandlerResolutionStrategy]([...this.handlers.keys()]);
+  private getDefaultVersion(strategy: Exclude<HandlerResolutionStrategy, 'none'>): ApiVersion {
+    return resolvers[strategy]([...this.handlers.keys()]);
   }
 
   private versionsToString(): string {
@@ -120,11 +123,19 @@ export class CoreVersionedRoute implements VersionedRoute {
       });
     }
     const req = originalReq as Mutable<KibanaRequest>;
+    let version: ApiVersion;
+
     const requestVersion = readVersion(req, this.enableQueryVersion);
-    if (!requestVersion && !this.canUseDefaultVersion()) {
-      return res.badRequest({
-        body: `Please specify a version via ${ELASTIC_HTTP_VERSION_HEADER} header. Available versions: ${this.versionsToString()}`,
-      });
+    if (!requestVersion) {
+      if (this.isPublic && this.defaultResolutionStrategy) {
+        version = this.getDefaultVersion(this.defaultResolutionStrategy);
+      } else {
+        return res.badRequest({
+          body: `Please specify a version via ${ELASTIC_HTTP_VERSION_HEADER} header. Available versions: ${this.versionsToString()}`,
+        });
+      }
+    } else {
+      version = requestVersion;
     }
     if (hasQueryVersion(req)) {
       if (this.enableQueryVersion) {
@@ -135,7 +146,6 @@ export class CoreVersionedRoute implements VersionedRoute {
           body: `Use of query parameter "${ELASTIC_HTTP_VERSION_QUERY_PARAM}" is not allowed. Please specify the API version using the "${ELASTIC_HTTP_VERSION_HEADER}" header.`,
         });
     }
-    const version: ApiVersion = requestVersion ?? this.getDefaultVersion();
 
     const invalidVersionMessage = isValidRouteVersion(this.isPublic, version);
     if (invalidVersionMessage) {
@@ -197,10 +207,6 @@ export class CoreVersionedRoute implements VersionedRoute {
       response
     );
   };
-
-  private canUseDefaultVersion(): boolean {
-    return !this.isInternal && !this.router.isDev;
-  }
 
   private validateVersion(version: string) {
     // We do an additional check here while we only have a single allowed public version

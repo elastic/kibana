@@ -127,7 +127,7 @@ export interface RouterOptions {
    * Which route resolution algo to use
    * @default 'oldest'
    */
-  versionedRouteResolution?: 'newest' | 'oldest';
+  versionedRouteResolution?: 'newest' | 'oldest' | 'none';
 }
 
 /**
