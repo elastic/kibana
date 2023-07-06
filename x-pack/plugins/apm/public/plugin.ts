@@ -147,7 +147,7 @@ const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
   defaultMessage: 'Traces',
 });
 const serviceMapTitle = i18n.translate('xpack.apm.navigation.serviceMapTitle', {
-  defaultMessage: 'Service map',
+  defaultMessage: 'Service Map',
 });
 
 const dependenciesTitle = i18n.translate(

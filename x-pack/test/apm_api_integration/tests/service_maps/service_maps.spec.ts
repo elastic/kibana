@@ -24,7 +24,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
 
-  registry.when('Service map with a basic license', { config: 'basic', archives: [] }, () => {
+  registry.when('Service Map with a basic license', { config: 'basic', archives: [] }, () => {
     it('is only be available to users with Platinum license (or higher)', async () => {
       try {
         await apmApiClient.readUser({
@@ -43,13 +43,13 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         const err = e as ApmApiError;
         expect(err.res.status).to.be(403);
         expectSnapshot(err.res.body.message).toMatchInline(
-          `"In order to access Service maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."`
+          `"In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."`
         );
       }
     });
   });
 
-  registry.when('Service map without data', { config: 'trial', archives: [] }, () => {
+  registry.when('Service Map without data', { config: 'trial', archives: [] }, () => {
     describe('/internal/apm/service-map', () => {
       it('returns an empty list', async () => {
         const response = await apmApiClient.readUser({
@@ -127,7 +127,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
     });
   });
 
-  registry.when('Service map with data', { config: 'trial', archives: ['apm_8.0.0'] }, () => {
+  registry.when('Service Map with data', { config: 'trial', archives: ['apm_8.0.0'] }, () => {
     describe('/internal/apm/service-map', () => {
       let response: ServiceMapResponse;
       before(async () => {

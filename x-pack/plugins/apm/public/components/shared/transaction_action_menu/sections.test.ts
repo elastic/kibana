@@ -79,7 +79,7 @@ describe('Transaction action menu', () => {
         },
         {
           key: 'serviceMap',
-          title: 'Service map',
+          title: 'Service Map',
           subtitle: 'View service map filtered by this trace.',
           actions: [
             {
@@ -160,7 +160,7 @@ describe('Transaction action menu', () => {
         },
         {
           key: 'serviceMap',
-          title: 'Service map',
+          title: 'Service Map',
           subtitle: 'View service map filtered by this trace.',
           actions: [
             {
@@ -240,7 +240,7 @@ describe('Transaction action menu', () => {
         },
         {
           key: 'serviceMap',
-          title: 'Service map',
+          title: 'Service Map',
           subtitle: 'View service map filtered by this trace.',
           actions: [
             {

@@ -195,7 +195,7 @@ describe('Service Overview', () => {
       cy.contains('Overview');
       cy.contains('Transactions');
       cy.contains('Error');
-      cy.contains('Service map');
+      cy.contains('Service Map');
       // Waits until the agent request is finished to check the tab.
       cy.wait('@agentRequest');
       cy.get('.euiTabs .euiTab__content').then((elements) => {
