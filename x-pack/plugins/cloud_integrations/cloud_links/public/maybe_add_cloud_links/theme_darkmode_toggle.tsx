@@ -19,9 +19,10 @@ import { UpdateUserProfileHook } from '@kbn/security-plugin/public';
 
 interface Props {
   useUpdateUserProfile: UpdateUserProfileHook;
+  getSpaceDarkModeValue: () => boolean | undefined;
 }
 
-export const ThemDarkModeToggle = ({ useUpdateUserProfile }: Props) => {
+export const ThemDarkModeToggle = ({ useUpdateUserProfile, getSpaceDarkModeValue }: Props) => {
   const toggleTextSwitchId = useGeneratedHtmlId({ prefix: 'toggleTextSwitch' });
   const { euiTheme } = useEuiTheme();
   const [checked, setChecked] = useState(false);
@@ -43,7 +44,7 @@ export const ThemDarkModeToggle = ({ useUpdateUserProfile }: Props) => {
     },
   });
 
-  const { userSettings: { darkMode = 'light' } = { darkMode: undefined } } = userProfileData ?? {};
+  const { userSettings: { darkMode } = { darkMode: undefined } } = userProfileData ?? {};
 
   const toggleDarkMode = useCallback(
     (on: boolean) => {
@@ -60,8 +61,16 @@ export const ThemDarkModeToggle = ({ useUpdateUserProfile }: Props) => {
   );
 
   useEffect(() => {
-    setChecked(darkMode === 'dark');
-  }, [darkMode]);
+    let updatedValue = false;
+
+    if (typeof darkMode !== 'string') {
+      // User profile does not have yet any preference -> default to space dark mode value
+      updatedValue = getSpaceDarkModeValue() ?? false;
+    } else {
+      updatedValue = darkMode === 'dark';
+    }
+    setChecked(updatedValue);
+  }, [darkMode, getSpaceDarkModeValue]);
 
   if (!userProfileData) {
     return null;
