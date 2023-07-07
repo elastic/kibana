@@ -20,6 +20,23 @@ export interface CalculateScoresParams {
   weights?: RiskWeights;
 }
 
+export interface CalculateAndPersistScoresParams {
+  afterKeys: AfterKeys;
+  debug?: boolean;
+  index: string;
+  filter?: unknown;
+  identifierType: IdentifierType;
+  pageSize: number;
+  range: { start: string; end: string };
+  weights?: RiskWeights;
+}
+
+export interface CalculateAndPersistScoresResponse {
+  after_keys: AfterKeys;
+  errors: string[];
+  scores_written: number;
+}
+
 export interface CalculateScoresResponse {
   debug?: {
     request: unknown;

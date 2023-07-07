@@ -5,6 +5,24 @@
  * 2.0.
  */
 
-export const calculateAndPersistRiskScores = async (params: unknown) => {
-  return '';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+
+import type { RiskEngineDataClient } from './risk_engine_data_client';
+import type { CalculateAndPersistScoresParams, CalculateAndPersistScoresResponse } from './types';
+import { calculateRiskScores } from './calculate_risk_scores';
+
+export const calculateAndPersistRiskScores = async (
+  params: CalculateAndPersistScoresParams & {
+    esClient: ElasticsearchClient;
+    logger: Logger;
+    spaceId: string;
+    riskEngineDataClient: RiskEngineDataClient;
+  }
+): Promise<CalculateAndPersistScoresResponse> => {
+  const { riskEngineDataClient, spaceId, ...rest } = params;
+  const writer = await riskEngineDataClient.getWriter({ namespace: spaceId });
+  const { after_keys: afterKeys, scores } = await calculateRiskScores(rest);
+  const results = await writer.bulk(scores);
+
+  return { after_keys: afterKeys, errors: [], scores_written: scores.length };
 };

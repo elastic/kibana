@@ -27,12 +27,19 @@ export const riskScorePreviewRoute = (router: SecuritySolutionPluginRouter, logg
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-      const soClient = (await context.core).savedObjects.client;
-      const siemClient = (await context.securitySolution).getAppClient();
+      const securityContext = await context.securitySolution;
+      const coreContext = await context.core;
+      const esClient = coreContext.elasticsearch.client.asCurrentUser;
+      const soClient = coreContext.savedObjects.client;
+      const siemClient = securityContext.getAppClient();
+      const spaceId = securityContext.getSpaceId();
+      const riskEngineDataClient = securityContext.getRiskEngineDataClient();
+
       const riskScoreService = riskScoreServiceFactory({
         esClient,
         logger,
+        riskEngineDataClient,
+        spaceId,
       });
 
       const {
