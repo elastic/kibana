@@ -8,11 +8,13 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
-export interface LinkToAlertsRule {
+export interface LinkToAlertsRuleProps {
   onClick?: () => void;
+  inHostFlyout?: boolean;
 }
 
-export const LinkToAlertsRule = ({ onClick }: LinkToAlertsRule) => {
+// TODO customize message
+export const LinkToAlertsRule = ({ onClick, inHostFlyout }: LinkToAlertsRuleProps) => {
   return (
     <EuiButtonEmpty
       data-test-subj="infraNodeContextPopoverCreateInventoryRuleButton"

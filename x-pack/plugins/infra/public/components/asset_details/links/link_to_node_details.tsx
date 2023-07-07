@@ -12,13 +12,13 @@ import { getNodeDetailUrl } from '../../../pages/link_to';
 import { findInventoryModel } from '../../../../common/inventory_models';
 import type { InventoryItemType } from '../../../../common/inventory_models/types';
 
-export interface LinkToAlertsRule {
+export interface LinkToNodeDetails {
   currentTime: number;
   nodeId: string;
   nodeType: InventoryItemType;
 }
 
-export const LinkToNodeDetails = ({ nodeId, nodeType, currentTime }: LinkToAlertsRule) => {
+export const LinkToNodeDetails = ({ nodeId, nodeType, currentTime }: LinkToNodeDetails) => {
   const inventoryModel = findInventoryModel(nodeType);
   const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
 

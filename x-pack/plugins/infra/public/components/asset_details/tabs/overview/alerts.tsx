@@ -12,6 +12,8 @@ import {
 } from '@kbn/observability-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
 import type { AlertStatus } from '../../../../pages/metrics/hosts/types';
 import {
@@ -28,6 +30,7 @@ import type { AlertsEsQuery } from '../../../../pages/metrics/hosts/hooks/use_al
 // TODO replace once https://github.com/elastic/kibana/pull/160924 is ready
 import { useUnifiedSearchContext } from '../../../../pages/metrics/hosts/hooks/use_unified_search';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { LinkToAlertsRule } from '../../links/link_to_alerts';
 
 const ALERT_STATUS: AlertStatus = 'all';
 
@@ -77,17 +80,31 @@ const MemoAlertSummaryWidget = React.memo(
     };
 
     return (
-      <AlertSummaryWidget
-        chartProps={chartProps}
-        featureIds={infraAlertFeatureIds}
-        filter={alertsQuery}
-        timeRange={summaryTimeRange}
-
-        // Can be added to hide the chart
-        // once https://github.com/elastic/kibana/pull/161263 is merged
-        // fullSize
-        // shouldHideCharts
-      />
+      <>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem>
+            <EuiText style={{ fontWeight: 700, textTransform: 'uppercase' }} size="s">
+              <FormattedMessage
+                id="xpack.infra.assetDetails.overview.alertsSectionTitle"
+                defaultMessage="Alerts"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <LinkToAlertsRule inHostFlyout />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <AlertSummaryWidget
+          chartProps={chartProps}
+          featureIds={infraAlertFeatureIds}
+          filter={alertsQuery}
+          timeRange={summaryTimeRange}
+          // Can be added to hide the chart
+          // once https://github.com/elastic/kibana/pull/161263 is merged
+          // fullSize
+          // shouldHideCharts
+        />
+      </>
     );
   }
 );
