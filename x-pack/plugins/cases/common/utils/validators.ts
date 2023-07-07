@@ -8,8 +8,6 @@
 import type { CaseAssignees } from '../api';
 import { MAX_ASSIGNEES_PER_CASE } from '../constants';
 
-export const isInvalidTag = (value: string) => value.trim() === '';
-
 export const areTotalAssigneesInvalid = (assignees?: CaseAssignees): boolean => {
   if (assignees == null) {
     return false;
