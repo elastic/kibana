@@ -57,30 +57,38 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
     []
   );
 
-  const alertTagsPanels: UseBulkAlertTagsPanel[] = [
-    {
-      id: 1,
-      title: TitleContent,
-      'data-test-subj': 'alert-tags-context-menu-panel',
-      renderContent: ({
-        alertItems,
-        refresh,
-        setIsBulkActionsLoading,
-        clearSelection,
-        closePopoverMenu,
-      }: RenderContentPanelProps) => (
-        <BulkAlertTagsPanel
-          alertItems={alertItems}
-          refresh={refresh}
-          refetchQuery={refetch}
-          setIsLoading={setIsBulkActionsLoading}
-          clearSelection={clearSelection}
-          closePopoverMenu={closePopoverMenu}
-          onSubmit={handleOnAlertTagsSubmit}
-        />
-      ),
-    },
-  ];
+  const renderContent = useCallback(
+    ({
+      alertItems,
+      refresh,
+      setIsBulkActionsLoading,
+      clearSelection,
+      closePopoverMenu,
+    }: RenderContentPanelProps) => (
+      <BulkAlertTagsPanel
+        alertItems={alertItems}
+        refresh={refresh}
+        refetchQuery={refetch}
+        setIsLoading={setIsBulkActionsLoading}
+        clearSelection={clearSelection}
+        closePopoverMenu={closePopoverMenu}
+        onSubmit={handleOnAlertTagsSubmit}
+      />
+    ),
+    [handleOnAlertTagsSubmit, refetch]
+  );
+
+  const alertTagsPanels: UseBulkAlertTagsPanel[] = useMemo(
+    () => [
+      {
+        id: 1,
+        title: TitleContent,
+        'data-test-subj': 'alert-tags-context-menu-panel',
+        renderContent,
+      },
+    ],
+    [TitleContent, renderContent]
+  );
 
   return {
     alertTagsItems,
