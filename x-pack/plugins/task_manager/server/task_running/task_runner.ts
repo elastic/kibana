@@ -394,7 +394,7 @@ export class TaskManagerRunner implements TaskRunner {
 
       if (data) {
         try {
-          this.definition.indirectParamsSchema.validate(data);
+          this.definition.indirectParamsSchema.validate(data.indirectParams);
         } catch (err) {
           this.logger.warn(
             `Task (${taskType}/${id}) has a validation error in its indirect params: ${err.message}`

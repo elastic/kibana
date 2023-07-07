@@ -3110,7 +3110,7 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
-  test('loadIndirectParams Fetches the ruleData and returns the rawRule', async () => {
+  test('loadIndirectParams Fetches the ruleData and returns the indirectParams', async () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     const taskRunner = new TaskRunner({
       ruleType,
@@ -3125,10 +3125,12 @@ describe('Task Runner', () => {
       inMemoryMetrics,
     });
 
-    const result = await taskRunner.beforeRun();
+    const result = await taskRunner.loadIndirectParams();
 
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({ data: mockedRawRuleSO.attributes });
+    expect(result).toEqual({
+      data: expect.objectContaining({ indirectParams: mockedRawRuleSO.attributes }),
+    });
   });
 
   test('loadIndirectParams return error when cannot fetch the ruleData', async () => {
@@ -3147,7 +3149,7 @@ describe('Task Runner', () => {
       inMemoryMetrics,
     });
 
-    const result = await taskRunner.beforeRun();
+    const result = await taskRunner.loadIndirectParams();
 
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ error });

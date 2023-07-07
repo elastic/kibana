@@ -18,6 +18,7 @@ const action = {
     pass: 'foo',
   },
   isPreconfigured: false,
+  isSystemAction: false,
 };
 
 const preconfiguredAction = {

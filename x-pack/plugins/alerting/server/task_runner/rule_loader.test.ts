@@ -64,7 +64,7 @@ describe('rule_loader', () => {
       ? { error }
       : {
           data: {
-            rawRule: { ...mockedRawRuleSO.attributes, enabled: ruleEnabled },
+            indirectParams: { ...mockedRawRuleSO.attributes, enabled: ruleEnabled },
             rule: { ...mockedRule, params },
             rulesClient,
             version: '1',
@@ -106,7 +106,7 @@ describe('rule_loader', () => {
         expect(result.rule.alertTypeId).toBe(ruleTypeId);
         expect(result.rule.name).toBe(ruleName);
         expect(result.rule.params).toBe(ruleParams);
-        expect(result.rawRule).toEqual(mockedRawRuleSO.attributes);
+        expect(result.indirectParams).toEqual(mockedRawRuleSO.attributes);
         expect(result.version).toBe('1');
         expect(result.rulesClient).toBe(rulesClient);
       });
@@ -189,7 +189,7 @@ describe('rule_loader', () => {
 
       expect(result.fakeRequest).toEqual(expect.any(CoreKibanaRequest));
       expect(result.rule.alertTypeId).toBe(ruleTypeId);
-      expect(result.rawRule).toEqual({
+      expect(result.indirectParams).toEqual({
         ...mockedRawRuleSO.attributes,
         apiKey,
         enabled,
@@ -210,7 +210,7 @@ describe('rule_loader', () => {
       expect(result.rule.alertTypeId).toBe(ruleTypeId);
       expect(result.rulesClient).toBeTruthy();
       expect(contextMock.spaceIdToNamespace.mock.calls[0]).toEqual([spaceId]);
-      expect(result.rawRule).toEqual({
+      expect(result.indirectParams).toEqual({
         ...mockedRawRuleSO.attributes,
         apiKey,
         enabled,

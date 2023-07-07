@@ -15,6 +15,7 @@ export const rawConnectorSchema = schema.object({
   secrets: schema.recordOf(schema.string(), schema.any()),
   // PreconfiguredAction ---
   isPreconfigured: schema.maybe(schema.boolean()),
+  isSystemAction: schema.boolean(),
   id: schema.conditional(
     schema.siblingRef('isPreconfigured'),
     true,

@@ -161,7 +161,7 @@ export class SampleTaskManagerFixturePlugin
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
           async loadIndirectParams() {
-            return { data: { baz: 'foo' } }; // invalid
+            return { data: { indirectParams: { baz: 'foo' } } }; // invalid
           },
           async run() {
             return { state: {}, schedule: { interval: '1s' }, hasError: true };
@@ -178,7 +178,7 @@ export class SampleTaskManagerFixturePlugin
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
           async loadIndirectParams() {
-            return { data: { baz: 'foo' } }; // invalid
+            return { data: { indirectParams: { baz: 'foo' } } }; // invalid
           },
           async run() {
             throwRetryableError(new Error('Retry'), true);

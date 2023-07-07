@@ -25,6 +25,7 @@ import {
   throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { LoadedIndirectParams } from '@kbn/task-manager-plugin/server/task';
 import { ActionExecutorContract, ActionInfo } from './action_executor';
 import {
   ActionTaskExecutorParams,
@@ -55,9 +56,13 @@ export interface TaskRunnerContext {
   savedObjectsRepository: ISavedObjectsRepository;
 }
 
-export type ActionData =
-  | { data: { actionInfo: ActionInfo; taskParams: TaskParams }; error?: never }
-  | { data?: never; error: Error };
+export interface ActionData extends LoadedIndirectParams<RawAction> {
+  indirectParams: RawAction;
+  actionInfo: ActionInfo;
+  taskParams: TaskParams;
+}
+
+export type ActionDataResult<T extends LoadedIndirectParams> = LoadIndirectParamsResult<T>;
 
 type TaskParams = Omit<SavedObject<ActionTaskParams>, 'id' | 'type'>;
 
@@ -102,10 +107,10 @@ export class TaskRunnerFactory {
     const actionExecutionId = uuidv4();
     const actionTaskExecutorParams = taskInstance.params as ActionTaskExecutorParams;
 
-    let actionData: ActionData;
+    let actionData: ActionDataResult<ActionData>;
 
     return {
-      async loadIndirectParams(): Promise<LoadIndirectParamsResult<RawAction>> {
+      async loadIndirectParams(): Promise<ActionDataResult<ActionData>> {
         try {
           const taskParams = await getActionTaskParams(
             actionTaskExecutorParams,
@@ -123,9 +128,13 @@ export class TaskRunnerFactory {
             namespace.namespace
           );
           actionData = {
-            data: { taskParams, actionInfo },
+            data: {
+              indirectParams: actionInfo.rawAction,
+              taskParams,
+              actionInfo,
+            },
           };
-          return { data: actionInfo.rawAction };
+          return actionData;
         } catch (error) {
           actionData = { error };
           return { error };
@@ -133,7 +142,7 @@ export class TaskRunnerFactory {
       },
       async run() {
         if (!actionData) {
-          await this.loadIndirectParams();
+          actionData = await this.loadIndirectParams();
         }
         if (actionData.error) {
           return throwRetryableError(actionData.error, true);

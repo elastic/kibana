@@ -1068,7 +1068,31 @@ describe('Task Runner Factory', () => {
       'test'
     );
 
-    expect(result).toEqual({ data: mockActionInfo.rawAction });
+    expect(result).toEqual({
+      data: {
+        indirectParams: mockActionInfo.rawAction,
+        actionInfo: mockActionInfo,
+        taskParams: {
+          attributes: {
+            actionId: '9',
+            apiKey: 'MTIzOmFiYw==',
+            executionId: '123abc',
+            params: {
+              baz: true,
+            },
+          },
+          id: '3',
+          references: [
+            {
+              id: '9',
+              name: 'actionRef',
+              type: 'action',
+            },
+          ],
+          type: 'action_task_params',
+        },
+      },
+    });
   });
 
   test("loadIndirectParams returns error when it can't fetch the actionInfo", async () => {

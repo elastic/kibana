@@ -10,11 +10,7 @@ import { omit } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/core/server';
-import {
-  LoadIndirectParamsResult,
-  ConcreteTaskInstance,
-  throwUnrecoverableError,
-} from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { ExecutionHandler, RunResult } from './execution_handler';
@@ -38,7 +34,6 @@ import {
   RuleTaskState,
   RuleTypeRegistry,
   RawRuleLastRun,
-  RawRule,
 } from '../types';
 import { asErr, asOk, isErr, isOk, map, resolveErr, Result } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -70,7 +65,13 @@ import { IExecutionStatusAndMetrics } from '../lib/rule_execution_status';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { wrapSearchSourceClient } from '../lib/wrap_search_source_client';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { getRuleAttributes, RuleDataResult, validateRule } from './rule_loader';
+import {
+  getRuleAttributes,
+  RuleData,
+  RuleDataResult,
+  ValidatedRuleData,
+  validateRule,
+} from './rule_loader';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
 import { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import { ILastRun, lastRunFromState, lastRunToRaw } from '../lib/last_run_status';
@@ -149,7 +150,7 @@ export class TaskRunner<
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RunningHandler;
   private ruleResult: RuleResultService;
-  private ruleData?: RuleDataResult<Params>;
+  private ruleData?: RuleDataResult<RuleData<Params>>;
   private runDate = new Date();
 
   constructor({
@@ -613,7 +614,11 @@ export class TaskRunner<
   /**
    * Initialize event logger, load and validate the rule
    */
-  private prepareToRun() {
+  private async prepareToRun(): Promise<ValidatedRuleData<Params>> {
+    if (!this.ruleData) {
+      this.ruleData = await this.loadIndirectParams();
+    }
+
     const {
       params: { alertId: ruleId, spaceId, consumer },
     } = this.taskInstance;
@@ -651,13 +656,6 @@ export class TaskRunner<
     });
 
     this.alertingEventLogger.start(this.runDate);
-
-    if (!this.ruleData) {
-      throw new ErrorWithReason(
-        RuleExecutionStatusErrorReasons.Unknown,
-        new Error(`ruleData is not available`)
-      );
-    }
 
     return validateRule({
       alertingEventLogger: this.alertingEventLogger,
@@ -770,38 +768,20 @@ export class TaskRunner<
     return { executionStatus, executionMetrics };
   }
 
-  async beforeRun(): Promise<LoadIndirectParamsResult<RawRule>> {
+  async loadIndirectParams(): Promise<RuleDataResult<RuleData<Params>>> {
     this.runDate = new Date();
     return await this.timer.runWithTimer(TaskRunnerTimerSpan.PrepareRule, async () => {
       try {
         const {
           params: { alertId: ruleId, spaceId },
         } = this.taskInstance;
-        const attributes = await getRuleAttributes<Params>(this.context, ruleId, spaceId);
-
-        this.ruleData = {
-          data: {
-            rule: attributes.rule,
-            rawRule: attributes.rawRule,
-            version: attributes.version,
-            fakeRequest: attributes.fakeRequest,
-            rulesClient: attributes.rulesClient,
-          },
-        };
+        const data = await getRuleAttributes<Params>(this.context, ruleId, spaceId);
+        this.ruleData = { data };
       } catch (err) {
         const error = new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err);
         this.ruleData = { error };
       }
-
-      const { error, data } = this.ruleData;
-
-      if (error) {
-        this.ruleData = { error };
-        return { error };
-      }
-      this.ruleData = { data };
-
-      return { data: data.rawRule };
+      return this.ruleData;
     });
   }
 
@@ -827,11 +807,7 @@ export class TaskRunner<
     let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
     let schedule: Result<IntervalSchedule, Error>;
     try {
-      if (!this.ruleData) {
-        await this.beforeRun();
-      }
-
-      const preparedResult = this.prepareToRun();
+      const preparedResult = await this.prepareToRun();
 
       this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring);
 

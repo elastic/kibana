@@ -87,7 +87,16 @@ export interface FailedTaskResult {
   status: TaskStatus.Failed | TaskStatus.DeadLetter;
 }
 
-export type LoadIndirectParamsResult<T = Record<string, unknown>> =
+type IndirectParamsType = Record<string, unknown>;
+
+export interface LoadedIndirectParams<
+  IndirectParams extends IndirectParamsType = IndirectParamsType
+> {
+  [key: string]: unknown;
+  indirectParams: IndirectParams;
+}
+
+export type LoadIndirectParamsResult<T extends LoadedIndirectParams = LoadedIndirectParams> =
   | {
       data: T;
       error?: never;

@@ -8,6 +8,10 @@
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { CoreKibanaRequest, FakeRawRequest, Headers } from '@kbn/core/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import {
+  LoadedIndirectParams,
+  LoadIndirectParamsResult,
+} from '@kbn/task-manager-plugin/server/task';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -21,17 +25,15 @@ import {
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 
-export interface RuleData<Params extends RuleTypeParams> extends Record<string, unknown> {
+export interface RuleData<Params extends RuleTypeParams> extends LoadedIndirectParams<RawRule> {
+  indirectParams: RawRule;
   rule: SanitizedRule<Params>;
-  rawRule: RawRule;
   version: string | undefined;
   fakeRequest: CoreKibanaRequest;
   rulesClient: RulesClientApi;
 }
 
-export type RuleDataResult<Params extends RuleTypeParams> =
-  | { data: RuleData<Params>; error?: never }
-  | { data?: never; error: ErrorWithReason };
+export type RuleDataResult<T extends LoadedIndirectParams> = LoadIndirectParamsResult<T>;
 
 export interface ValidatedRuleData<Params extends RuleTypeParams> extends RuleData<Params> {
   validatedParams: Params;
@@ -45,7 +47,7 @@ interface ValidateRuleParams<Params extends RuleTypeParams> {
   spaceId: string;
   context: TaskRunnerContext;
   ruleTypeRegistry: RuleTypeRegistry;
-  ruleData: RuleDataResult<Params>;
+  ruleData: RuleDataResult<RuleData<Params>>;
 }
 
 export function validateRule<Params extends RuleTypeParams>(
@@ -57,14 +59,14 @@ export function validateRule<Params extends RuleTypeParams>(
 
   const {
     ruleData: {
-      data: { rawRule, rule, fakeRequest, rulesClient, version },
+      data: { indirectParams, rule, fakeRequest, rulesClient, version },
     },
     ruleTypeRegistry,
     paramValidator,
     alertingEventLogger,
   } = params;
 
-  const { enabled, apiKey } = rawRule;
+  const { enabled, apiKey } = indirectParams;
 
   if (!enabled) {
     throw new ErrorWithReason(
@@ -95,7 +97,7 @@ export function validateRule<Params extends RuleTypeParams>(
 
   return {
     rule,
-    rawRule,
+    indirectParams,
     fakeRequest,
     apiKey,
     rulesClient,
@@ -108,13 +110,7 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
   context: TaskRunnerContext,
   ruleId: string,
   spaceId: string
-): Promise<{
-  rule: SanitizedRule<Params>;
-  rawRule: RawRule;
-  fakeRequest: CoreKibanaRequest;
-  rulesClient: RulesClientApi;
-  version?: string;
-}> {
+): Promise<RuleData<Params>> {
   const namespace = context.spaceIdToNamespace(spaceId);
 
   const rawRule = await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
@@ -137,7 +133,7 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
   return {
     rule,
     version: rawRule.version,
-    rawRule: rawRule.attributes,
+    indirectParams: rawRule.attributes,
     fakeRequest,
     rulesClient,
   };

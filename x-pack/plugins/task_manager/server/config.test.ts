@@ -162,7 +162,7 @@ describe('config validation', () => {
         "requeue_invalid_tasks": Object {
           "delay": 3000,
           "enabled": false,
-          "max_attempts": 20,
+          "max_attempts": 100,
         },
         "unsafe": Object {
           "authenticate_background_task_utilization": true,
