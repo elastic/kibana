@@ -31,7 +31,7 @@ The Linux sandbox depends on user namespaces, which were introduced with the 3.8
 distributions don't support or allow non-privileged processes to create user namespaces, or they require the CAP_SYS_ADMIN capability. The {report-features}
 automatically disable the sandbox when it detects it is running on systems where it is not enabled.
 Without explicitly setting `xpack.screenshotting.browser.chromium.disableSandbox: false` in `kibana.yml`,
-the {report-features} may detect that it can't be enabled. In these situations, you'll see the following message in your {kib} startup logs:
+the {report-features} may detect that it can't be enabled. In the event it is automatically disabled, you'll see the following message in your {kib} startup logs:
 `Chromium sandbox provides an additional layer of protection, but is not supported for your OS.
 Automatically setting 'xpack.screenshotting.browser.chromium.disableSandbox: true'.`
 
