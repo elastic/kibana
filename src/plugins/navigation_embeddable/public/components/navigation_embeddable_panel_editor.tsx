@@ -144,7 +144,6 @@ export const NavigationEmbeddablePanelEditor = ({
                   })}
                   <EuiButtonEmpty
                     size="s"
-                    flush="left"
                     iconType="plusInCircle"
                     onClick={() => setShowLinkEditorFlyout(true)}
                   >
