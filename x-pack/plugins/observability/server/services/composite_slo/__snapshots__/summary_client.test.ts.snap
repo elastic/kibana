@@ -16,7 +16,7 @@ Object {
 exports[`SummaryClient fetchSummary with a rolling and occurrences composite SLO returns the summary 2`] = `
 Array [
   Object {
-    "index": ".slo-observability.sli-v1*",
+    "index": ".slo-observability.sli-v2*",
   },
   Object {
     "aggs": Object {
@@ -108,7 +108,7 @@ Object {
 exports[`SummaryClient with rolling and timeslices SLO returns the summary 2`] = `
 Array [
   Object {
-    "index": ".slo-observability.sli-v1*",
+    "index": ".slo-observability.sli-v2*",
   },
   Object {
     "aggs": Object {
