@@ -7,7 +7,8 @@
 
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
+import type { OperatingSystem } from '@kbn/securitysolution-utils';
+import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
 import type { EventFormOption } from './event_collection_card';
 import { EventCollectionCard } from './event_collection_card';
 import type { PolicyFormComponentCommonProps } from '../types';
@@ -90,7 +91,7 @@ export const WindowsEventCollectionCard = memo<WindowsEventCollectionCardProps>(
   return (
     <EventCollectionCard<OperatingSystem.WINDOWS>
       {...props}
-      os={OperatingSystem.WINDOWS}
+      os={PolicyOperatingSystem.windows}
       selection={props.policy.windows.events}
       options={OPTIONS}
     />
