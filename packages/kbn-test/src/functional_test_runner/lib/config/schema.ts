@@ -201,7 +201,7 @@ export const schema = Joi.object()
       .keys({
         license: Joi.valid('basic', 'trial', 'gold').default('basic'),
         from: Joi.string().default('snapshot'),
-        serverArgs: Joi.array().items(Joi.string()),
+        serverArgs: Joi.array().items(Joi.string()).default([]),
         esJavaOpts: Joi.string(),
         dataArchive: Joi.string(),
         ssl: Joi.boolean().default(false),

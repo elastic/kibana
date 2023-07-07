@@ -77,9 +77,10 @@ export async function createTestUserService(ctx: FtrProviderContext, role: Role,
   const config = ctx.getService('config');
 
   const enabled =
-    !(config.get('esTestCluster.serverArgs') || []).some(
-      (arg: string) => arg === 'xpack.security.enabled=false'
-    ) && !config.get('security.disableTestUser');
+    !config
+      .get('esTestCluster.serverArgs')
+      .some((arg: string) => arg === 'xpack.security.enabled=false') &&
+    !config.get('security.disableTestUser');
 
   if (enabled) {
     log.debug('===============creating roles and users===============');
