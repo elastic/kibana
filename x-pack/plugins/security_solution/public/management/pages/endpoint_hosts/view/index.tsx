@@ -77,6 +77,15 @@ const StyledDatePicker = styled.div`
   }
 `;
 
+interface GetEndpointListColumnsProps {
+  canReadPolicyManagement: boolean;
+  backToEndpointList: PolicyDetailsRouteState['backLink'];
+  getHostPendingActions: ReturnType<typeof getEndpointPendingActionsCallback>;
+  queryParams: Immutable<EndpointIndexUIQueryParams>;
+  search: string;
+  getAppUrl: ReturnType<typeof useAppUrl>['getAppUrl'];
+}
+
 const getEndpointListColumns = ({
   canReadPolicyManagement,
   backToEndpointList,
@@ -84,14 +93,7 @@ const getEndpointListColumns = ({
   queryParams,
   search,
   getAppUrl,
-}: {
-  canReadPolicyManagement: boolean;
-  backToEndpointList: PolicyDetailsRouteState['backLink'];
-  getHostPendingActions: ReturnType<typeof getEndpointPendingActionsCallback>;
-  queryParams: Immutable<EndpointIndexUIQueryParams>;
-  search: string;
-  getAppUrl: ReturnType<typeof useAppUrl>['getAppUrl'];
-}): Array<EuiBasicTableColumn<Immutable<HostInfo>>> => {
+}: GetEndpointListColumnsProps): Array<EuiBasicTableColumn<Immutable<HostInfo>>> => {
   const lastActiveColumnName = i18n.translate('xpack.securitySolution.endpoint.list.lastActive', {
     defaultMessage: 'Last active',
   });
@@ -305,6 +307,7 @@ const getEndpointListColumns = ({
 
 // FIXME: this needs refactoring - we are pulling in all selectors from endpoint, which includes many more than what the list uses
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
+
 export const EndpointList = () => {
   const history = useHistory();
   const { services } = useKibana();
@@ -336,6 +339,7 @@ export const EndpointList = () => {
   } = useUserPrivileges().endpointPrivileges;
   const { search } = useFormatUrl(SecurityPageName.administration);
   const { search: searchParams } = useLocation();
+  const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
   const { getAppUrl } = useAppUrl();
   const dispatch = useDispatch<(a: EndpointAction) => void>();
   // cap ability to page at 10k records. (max_result_window)
@@ -343,7 +347,23 @@ export const EndpointList = () => {
   const [showTransformFailedCallout, setShowTransformFailedCallout] = useState(false);
   const [shouldCheckTransforms, setShouldCheckTransforms] = useState(true);
 
-  const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
+  const hasListData = useMemo(() => listData && listData.length > 0, [listData]);
+
+  const refreshStyle = useMemo(() => {
+    return { display: endpointsExist ? 'flex' : 'none', maxWidth: 200 };
+  }, [endpointsExist]);
+
+  const refreshIsPaused = useMemo(() => {
+    return !endpointsExist ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled;
+  }, [endpointsExist, hasSelectedEndpoint, isAutoRefreshEnabled]);
+
+  const refreshInterval = useMemo(() => {
+    return !endpointsExist ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
+  }, [endpointsExist, autoRefreshInterval]);
+
+  const shouldShowKQLBar = useMemo(() => {
+    return endpointsExist && !patternsError;
+  }, [endpointsExist, patternsError]);
 
   useEffect(() => {
     // if no endpoint policy, skip transform check
@@ -452,7 +472,8 @@ export const EndpointList = () => {
     [dispatch]
   );
 
-  const NOOP = useCallback(() => {}, []);
+  // Used for an auto-refresh super date picker version without any date/time selection
+  const onTimeChange = useCallback(() => {}, []);
 
   const handleDeployEndpointsClick =
     useNavigateToAppEventHandler<AgentPolicyDetailsDeployAgentAction>('fleet', {
@@ -461,16 +482,6 @@ export const EndpointList = () => {
         onDoneNavigateTo: [APP_UI_ID, { path: getEndpointListPath({ name: 'endpointList' }) }],
       },
     });
-
-  const selectionOptions = useMemo<EuiSelectableProps['options']>(() => {
-    return policyItems.map((item) => {
-      return {
-        key: item.policy_id,
-        label: item.name,
-        checked: selectedPolicyId === item.policy_id ? 'on' : undefined,
-      };
-    });
-  }, [policyItems, selectedPolicyId]);
 
   const handleSelectableOnChange = useCallback<(o: EuiSelectableProps['options']) => void>(
     (changedOptions) => {
@@ -538,11 +549,18 @@ export const EndpointList = () => {
         </ManagementEmptyStateWrapper>
       );
     } else if (!policyItemsLoading && policyItems && policyItems.length > 0) {
+      const selectionOptions: EuiSelectableProps['options'] = policyItems.map((item) => {
+        return {
+          key: item.policy_id,
+          label: item.name,
+          checked: selectedPolicyId === item.policy_id ? 'on' : undefined,
+        };
+      });
       return (
         <HostsEmptyState
           loading={loading}
           onActionClick={handleDeployEndpointsClick}
-          actionDisabled={selectedPolicyId === undefined}
+          actionDisabled={!selectedPolicyId}
           handleSelectableOnChange={handleSelectableOnChange}
           selectionOptions={selectionOptions}
         />
@@ -568,35 +586,20 @@ export const EndpointList = () => {
     handleDeployEndpointsClick,
     selectedPolicyId,
     handleSelectableOnChange,
-    selectionOptions,
     handleCreatePolicyClick,
     canAccessFleet,
     canReadEndpointList,
     endpointPrivilegesLoading,
   ]);
 
-  const hasListData = listData && listData.length > 0;
-
-  const refreshStyle = useMemo(() => {
-    return { display: endpointsExist ? 'flex' : 'none', maxWidth: 200 };
-  }, [endpointsExist]);
-
-  const refreshIsPaused = useMemo(() => {
-    return !endpointsExist ? false : hasSelectedEndpoint ? true : !isAutoRefreshEnabled;
-  }, [endpointsExist, hasSelectedEndpoint, isAutoRefreshEnabled]);
-
-  const refreshInterval = useMemo(() => {
-    return !endpointsExist ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
-  }, [endpointsExist, autoRefreshInterval]);
-
-  const shouldShowKQLBar = useMemo(() => {
-    return endpointsExist && !patternsError;
-  }, [endpointsExist, patternsError]);
-
   const transformFailedCalloutDescription = useMemo(() => {
     const failingTransformIds = metadataTransformStats
-      .filter((transformStat) => WARNING_TRANSFORM_STATES.has(transformStat.state))
-      .map((transformStat) => transformStat.id)
+      .reduce<string[]>((acc, currentValue) => {
+        if (WARNING_TRANSFORM_STATES.has(currentValue.state)) {
+          acc.push(currentValue.id);
+        }
+        return acc;
+      }, [])
       .join(', ');
 
     return (
@@ -698,7 +701,7 @@ export const EndpointList = () => {
             <StyledDatePicker>
               <EuiSuperDatePicker
                 className="endpointListDatePicker"
-                onTimeChange={NOOP}
+                onTimeChange={onTimeChange}
                 isDisabled={hasSelectedEndpoint}
                 onRefresh={onRefresh}
                 isPaused={refreshIsPaused}
