@@ -584,6 +584,7 @@ function UserRoles({ user }: { user: AuthenticatedUser }) {
     );
     return (
       <EuiPopover
+        panelPaddingSize="s"
         button={button}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
