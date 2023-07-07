@@ -1,33 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
-import { render, waitFor, cleanup } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, waitFor, cleanup } from '@testing-library/react';
 import {
   MaintenanceWindowStatus,
   MAINTENANCE_WINDOW_FEATURE_ID,
 } from '@kbn/alerting-plugin/common';
 import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import type { AsApiContract } from '@kbn/alerting-plugin/server/routes/lib';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
-import { MaintenanceWindowCallout } from './maintenance_window_callout';
-import { TestProviders } from '../../../../common/mock';
+import { MaintenanceWindowCallout } from '.';
 import { fetchActiveMaintenanceWindows } from './api';
-
-jest.mock('../../../../common/hooks/use_app_toasts');
 
 jest.mock('./api', () => ({
   fetchActiveMaintenanceWindows: jest.fn(() => Promise.resolve([])),
 }));
 
-jest.mock('../../../../common/lib/kibana');
+const TestProviders: React.FC<{}> = ({ children }) => {
+  const queryClient = new QueryClient();
+  return (
+    <I18nProvider>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </I18nProvider>
+  );
+};
 
 const RUNNING_MAINTENANCE_WINDOW_1: Partial<MaintenanceWindow> = {
   title: 'Running maintenance window 1',
@@ -72,29 +75,37 @@ const UPCOMING_MAINTENANCE_WINDOW: Partial<MaintenanceWindow> = {
   ],
 };
 
-const useKibanaMock = useKibana as jest.Mock;
 const fetchActiveMaintenanceWindowsMock = fetchActiveMaintenanceWindows as jest.Mock;
 
-describe('MaintenanceWindowCallout', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+const kibanaServicesMock = {
+  application: {
+    capabilities: {
+      [MAINTENANCE_WINDOW_FEATURE_ID]: {
+        save: true,
+        show: true,
+      },
+    },
+  },
+  notifications: {
+    toasts: {
+      addError: jest.fn(),
+      add: jest.fn(),
+      remove: jest.fn(),
+      get$: jest.fn(),
+      addInfo: jest.fn(),
+      addWarning: jest.fn(),
+      addDanger: jest.fn(),
+      addSuccess: jest.fn(),
+    },
+  },
+  http: {
+    fetch: jest.fn(),
+  },
+};
 
+describe('MaintenanceWindowCallout', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-
-    appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
-    useKibanaMock.mockReturnValue({
-      services: {
-        application: {
-          capabilities: {
-            [MAINTENANCE_WINDOW_FEATURE_ID]: {
-              save: true,
-              show: true,
-            },
-          },
-        },
-      },
-    });
   });
 
   afterEach(() => {
@@ -105,7 +116,10 @@ describe('MaintenanceWindowCallout', () => {
   it('should be visible if currently there is at least one "running" maintenance window', async () => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
 
-    const { findAllByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
+    const { findAllByText } = render(
+      <MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />,
+      { wrapper: TestProviders }
+    );
 
     expect(await findAllByText('Maintenance window is running')).toHaveLength(1);
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
@@ -117,7 +131,10 @@ describe('MaintenanceWindowCallout', () => {
       RUNNING_MAINTENANCE_WINDOW_2,
     ]);
 
-    const { findAllByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
+    const { findAllByText } = render(
+      <MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />,
+      { wrapper: TestProviders }
+    );
 
     expect(await findAllByText('Maintenance window is running')).toHaveLength(1);
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
@@ -126,8 +143,12 @@ describe('MaintenanceWindowCallout', () => {
   it('should be visible if currently there is a recurring "running" maintenance window', async () => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([RECURRING_RUNNING_MAINTENANCE_WINDOW]);
 
-    const { findByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
+    const { findByText } = render(
+      <MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />,
+      { wrapper: TestProviders }
+    );
 
+    // @ts-expect-error Jest types are incomplete in packages
     expect(await findByText('Maintenance window is running')).toBeInTheDocument();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
@@ -137,8 +158,10 @@ describe('MaintenanceWindowCallout', () => {
       [] // API returns an empty array if there are no active maintenance windows
     );
 
-    const { container } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
-
+    const { container } = render(<MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />, {
+      wrapper: TestProviders,
+    });
+    // @ts-expect-error Jest types are incomplete in packages
     expect(container).toBeEmptyDOMElement();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
@@ -146,8 +169,10 @@ describe('MaintenanceWindowCallout', () => {
   it('should NOT be visible if currently there are only "upcoming" maintenance windows', async () => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([UPCOMING_MAINTENANCE_WINDOW]);
 
-    const { container } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
-
+    const { container } = render(<MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />, {
+      wrapper: TestProviders,
+    });
+    // @ts-expect-error Jest types are incomplete in packages
     expect(container).toBeEmptyDOMElement();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
@@ -179,11 +204,13 @@ describe('MaintenanceWindowCallout', () => {
     const mockError = new Error('Network error');
     fetchActiveMaintenanceWindowsMock.mockRejectedValue(mockError);
 
-    render(<MaintenanceWindowCallout />, { wrapper: createReactQueryWrapper() });
+    render(<MaintenanceWindowCallout kibanaServices={kibanaServicesMock} />, {
+      wrapper: createReactQueryWrapper(),
+    });
 
     await waitFor(() => {
-      expect(appToastsMock.addError).toHaveBeenCalledTimes(1);
-      expect(appToastsMock.addError).toHaveBeenCalledWith(mockError, {
+      expect(kibanaServicesMock.notifications.toasts.addError).toHaveBeenCalledTimes(1);
+      expect(kibanaServicesMock.notifications.toasts.addError).toHaveBeenCalledWith(mockError, {
         title: 'Failed to check if maintenance windows are active',
         toastMessage: 'Rule notifications are stopped while the maintenance window is running.',
       });
@@ -191,42 +218,44 @@ describe('MaintenanceWindowCallout', () => {
   });
 
   it('should return null if window maintenance privilege is NONE', async () => {
-    useKibanaMock.mockReturnValue({
-      services: {
-        application: {
-          capabilities: {
-            [MAINTENANCE_WINDOW_FEATURE_ID]: {
-              save: false,
-              show: false,
-            },
+    const servicesMock = {
+      ...kibanaServicesMock,
+      application: {
+        capabilities: {
+          [MAINTENANCE_WINDOW_FEATURE_ID]: {
+            save: false,
+            show: false,
           },
         },
       },
-    });
+    };
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
 
-    const { container } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
-
+    const { container } = render(<MaintenanceWindowCallout kibanaServices={servicesMock} />, {
+      wrapper: TestProviders,
+    });
+    // @ts-expect-error Jest types are incomplete in packages
     expect(container).toBeEmptyDOMElement();
   });
 
   it('should work as expected if window maintenance privilege is READ ', async () => {
-    useKibanaMock.mockReturnValue({
-      services: {
-        application: {
-          capabilities: {
-            [MAINTENANCE_WINDOW_FEATURE_ID]: {
-              save: false,
-              show: true,
-            },
+    const servicesMock = {
+      ...kibanaServicesMock,
+      application: {
+        capabilities: {
+          [MAINTENANCE_WINDOW_FEATURE_ID]: {
+            save: false,
+            show: true,
           },
         },
       },
-    });
+    };
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
 
-    const { findByText } = render(<MaintenanceWindowCallout />, { wrapper: TestProviders });
-
+    const { findByText } = render(<MaintenanceWindowCallout kibanaServices={servicesMock} />, {
+      wrapper: TestProviders,
+    });
+    // @ts-expect-error Jest types are incomplete in packages
     expect(await findByText('Maintenance window is running')).toBeInTheDocument();
   });
 });
