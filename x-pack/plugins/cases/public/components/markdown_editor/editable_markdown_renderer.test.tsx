@@ -152,7 +152,9 @@ describe('EditableMarkdown', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText('The length of the comment is too long. The maximum length is 30000 characters.')
+          screen.getByText(
+            'The length of the comment is too long. The maximum length is 30000 characters.'
+          )
         ).toBeInTheDocument();
         expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
       });
