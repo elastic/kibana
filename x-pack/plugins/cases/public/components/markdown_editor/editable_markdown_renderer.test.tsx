@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
-import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, Form, FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { waitFor, fireEvent, screen, render, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import * as i18n from '../../common/translations';
+
+const { emptyField, maxLengthField } = fieldValidators;
 
 import { EditableMarkdown } from '.';
 import { TestProviders } from '../../common/mock';
-import type { Content } from '../user_actions/schema';
-import { schema } from '../user_actions/schema';
-import { MAX_COMMENT_LENGTH } from '../../../common/constants';
 
 jest.mock('../../common/lib/kibana');
 
@@ -25,6 +27,24 @@ const newValue = 'Hello from Tehas';
 const hyperlink = `[hyperlink](http://elastic.co)`;
 const draftStorageKey = `cases.testAppId.caseId.markdown-id.markdownEditor`;
 const content = `A link to a timeline ${hyperlink}`;
+const maxLength = 5000;
+
+const mockSchema: FormSchema<{ content: string }> = {
+  content: {
+    type: FIELD_TYPES.TEXTAREA,
+    validations: [
+      {
+        validator: emptyField(i18n.REQUIRED_FIELD),
+      },
+      {
+        validator: maxLengthField({
+          length: maxLength,
+          message: i18n.MAX_LENGTH_ERROR('textarea', maxLength),
+        }),
+      },
+    ],
+  },
+};
 
 const editorRef: React.MutableRefObject<null | undefined> = { current: null };
 const defaultProps = {
@@ -36,7 +56,7 @@ const defaultProps = {
   onChangeEditable,
   onSaveContent,
   fieldName: 'content',
-  formSchema: schema,
+  formSchema: mockSchema,
   editorRef,
 };
 
@@ -45,10 +65,10 @@ describe('EditableMarkdown', () => {
     children,
     testProviderProps = {},
   }) => {
-    const { form } = useForm<Content>({
+    const { form } = useForm<{ content: string }>({
       defaultValue: { content },
       options: { stripEmptyFields: false },
-      schema,
+      schema: mockSchema,
     });
 
     return (
@@ -116,10 +136,6 @@ describe('EditableMarkdown', () => {
   });
 
   describe('errors', () => {
-    beforeAll(() => {
-      jest.useFakeTimers();
-    });
-
     it('Shows error message and save button disabled if current text is empty', async () => {
       render(
         <MockHookWrapperComponent>
@@ -132,7 +148,7 @@ describe('EditableMarkdown', () => {
       userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '');
 
       await waitFor(() => {
-        expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
+        expect(screen.getByText('Required field')).toBeInTheDocument();
         expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
       });
     });
@@ -149,13 +165,13 @@ describe('EditableMarkdown', () => {
       userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '  ');
 
       await waitFor(() => {
-        expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
+        expect(screen.getByText('Required field')).toBeInTheDocument();
         expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
       });
     });
 
     it('Shows error message and save button disabled if current text is too long', async () => {
-      const longComment = 'b'.repeat(MAX_COMMENT_LENGTH + 1);
+      const longComment = 'b'.repeat(maxLength + 1);
 
       render(
         <MockHookWrapperComponent>
@@ -170,7 +186,7 @@ describe('EditableMarkdown', () => {
       await waitFor(() => {
         expect(
           screen.getByText(
-            'The length of the comment is too long. The maximum length is 30000 characters.'
+            `The length of the textarea is too long. The maximum length is ${maxLength} characters.`
           )
         ).toBeInTheDocument();
         expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
