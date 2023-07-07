@@ -42,10 +42,7 @@ export const EmptyDimensionButton = ({
           justify-content: flex-start;
           padding: 0 !important;
           color: ${euiThemeVars.euiTextSubduedColor};
-
-          .euiButtonEmpty__text {
-            margin-left: 0;
-          }
+          gap: 0;
 
           .euiIcon {
             margin-left: ${euiThemeVars.euiSizeS};
