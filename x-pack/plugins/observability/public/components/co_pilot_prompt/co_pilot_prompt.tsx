@@ -54,6 +54,7 @@ export interface CoPilotPromptProps<TPromptId extends CoPilotPromptId> {
   promptId: TPromptId;
   coPilot: CoPilotService;
   params: PromptParamsOf<TPromptId>;
+  feedbackEnabled: boolean;
 }
 
 // eslint-disable-next-line import/no-default-export
@@ -62,6 +63,7 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
   coPilot,
   promptId,
   params,
+  feedbackEnabled,
 }: CoPilotPromptProps<TPromptId>) {
   const [hasOpened, setHasOpened] = useState(false);
 
@@ -125,7 +127,7 @@ export default function CoPilotPrompt<TPromptId extends CoPilotPromptId>({
         {state === 'complete' ? (
           <>
             <EuiSpacer size="m" />
-            {coPilot.isTrackingEnabled() ? (
+            {coPilot.isTrackingEnabled() && feedbackEnabled ? (
               <CoPilotPromptFeedback
                 messages={messages}
                 response={content}

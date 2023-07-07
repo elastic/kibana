@@ -204,6 +204,7 @@ export const LogEntryFlyout = ({
                   title={explainLogMessageTitle}
                   params={explainLogMessageParams}
                   promptId={CoPilotPromptId.LogsExplainMessage}
+                  feedbackEnabled={false}
                 />
               </EuiFlexItem>
             ) : null}
@@ -214,6 +215,7 @@ export const LogEntryFlyout = ({
                   title={similarLogMessagesTitle}
                   params={similarLogMessageParams}
                   promptId={CoPilotPromptId.LogsFindSimilar}
+                  feedbackEnabled={false}
                 />
               </EuiFlexItem>
             ) : null}

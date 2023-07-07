@@ -113,6 +113,7 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds, samp
                 title={i18n.translate('xpack.profiling.frameInformationWindow.optimizeFunction', {
                   defaultMessage: 'Optimize function',
                 })}
+                feedbackEnabled={true}
               />
             </EuiFlexItem>
           </>

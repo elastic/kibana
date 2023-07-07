@@ -49,6 +49,7 @@ export const CopilotProcessRow = ({ command }: { command: string }) => {
                 title={explainProcessMessageTitle}
                 params={explainProcessParams}
                 promptId={CoPilotPromptId.InfraExplainProcess}
+                feedbackEnabled={true}
               />
             </EuiFlexItem>
           </EuiFlexItem>
