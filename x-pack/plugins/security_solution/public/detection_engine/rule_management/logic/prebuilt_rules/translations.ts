@@ -36,7 +36,7 @@ export const INSTALL_RULE_FAILED = (failed: number) =>
 export const RULE_UPGRADE_FAILED = i18n.translate(
   'xpack.securitySolution.detectionEngine.prebuiltRules.toast.ruleUpgradeFailed',
   {
-    defaultMessage: 'Rule upgrade failed',
+    defaultMessage: 'Rule update failed',
   }
 );
 

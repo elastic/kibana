@@ -474,7 +474,7 @@ export type PolicyInfo = Immutable<{
 }>;
 
 // Host Information as returned by the Host Details API.
-// NOTE:  `HostInfo` type is the original and defined as Immutable.
+// NOTE:The `HostInfo` type is the original and defined as Immutable.
 export interface HostInfoInterface {
   metadata: HostMetadataInterface;
   host_status: HostStatus;
@@ -485,7 +485,7 @@ export interface HostInfoInterface {
        */
       configured: PolicyInfo;
       /**
-       * Last reported running in agent (may lag behind configured)
+       * Last reported running in agent (might lag behind configured)
        */
       applied: PolicyInfo;
     };
@@ -494,14 +494,22 @@ export interface HostInfoInterface {
      */
     endpoint: PolicyInfo;
   };
+  /**
+   * The time when the Elastic Agent associated with this Endpoint host checked in with fleet
+   * Conceptually the value is the same as Agent['last_checkin'] if present, but we fall back to
+   * UnitedAgentMetadataPersistedData['united']['endpoint']['metadata']['@timestamp']
+   * if `Agent.last_checkin` value is `undefined`
+   */
+  last_checkin: string;
 }
 
 export type HostInfo = Immutable<HostInfoInterface>;
 
 // Host metadata document streamed up to ES by the Endpoint running on host machines.
-// NOTE:  `HostMetadata` type is the original and defined as Immutable. If needing to
+// NOTE: The `HostMetadata` type is the original and defined as Immutable. If you need to
 //        work with metadata that is not mutable, use `HostMetadataInterface`
 export type HostMetadata = Immutable<HostMetadataInterface>;
+
 export interface HostMetadataInterface {
   '@timestamp': number;
   event: {

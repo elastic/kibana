@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AllDatasetSelection } from '../../../utils/dataset_selection';
 import { HashedCache } from '../../../../common/hashed_cache';
 import { INTEGRATION_PANEL_ID } from '../constants';
 import { DatasetsSelectorSearchParams } from '../types';
@@ -16,6 +17,7 @@ export const defaultSearch: DatasetsSelectorSearchParams = {
 };
 
 export const DEFAULT_CONTEXT: DefaultDatasetsSelectorContext = {
+  selection: AllDatasetSelection.create(),
   searchCache: new HashedCache(),
   panelId: INTEGRATION_PANEL_ID,
   search: defaultSearch,
