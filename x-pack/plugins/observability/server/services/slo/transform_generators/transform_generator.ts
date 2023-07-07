@@ -7,7 +7,7 @@
 
 import { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 
 import { TransformSettings } from '../../../assets/transform_templates/slo_transform_template';
 import { SLO } from '../../../domain/models';
@@ -29,6 +29,44 @@ export abstract class TransformGenerator {
           source: `emit(${slo.revision})`,
         },
       },
+      'slo.instanceId': {
+        type: 'keyword' as MappingRuntimeFieldType,
+        script: {
+          source: `emit('${ALL_VALUE}')`,
+        },
+      },
+      'slo.objective.target': {
+        type: 'double' as MappingRuntimeFieldType,
+        script: {
+          source: `emit(${slo.objective.target})`,
+        },
+      },
+      ...(slo.objective.timesliceWindow && {
+        'slo.objective.sliceDurationInSeconds': {
+          type: 'long' as MappingRuntimeFieldType,
+          script: {
+            source: `emit(${slo.objective.timesliceWindow!.asSeconds()})`,
+          },
+        },
+      }),
+      'slo.budgetingMethod': {
+        type: 'keyword' as MappingRuntimeFieldType,
+        script: {
+          source: `emit('${slo.budgetingMethod}')`,
+        },
+      },
+      'slo.timeWindow.duration': {
+        type: 'keyword' as MappingRuntimeFieldType,
+        script: {
+          source: `emit('${slo.timeWindow.duration.format()}')`,
+        },
+      },
+      'slo.timeWindow.type': {
+        type: 'keyword' as MappingRuntimeFieldType,
+        script: {
+          source: `emit('${slo.timeWindow.type}')`,
+        },
+      },
     };
   }
 
@@ -43,16 +81,18 @@ export abstract class TransformGenerator {
     }
 
     return {
-      'slo.id': {
-        terms: {
-          field: 'slo.id',
+      'slo.id': { terms: { field: 'slo.id' } },
+      'slo.revision': { terms: { field: 'slo.revision' } },
+      'slo.instanceId': { terms: { field: 'slo.instanceId' } },
+      'slo.objective.target': { terms: { field: 'slo.objective.target' } },
+      ...(slo.objective.timesliceWindow && {
+        'slo.objective.sliceDurationInSeconds': {
+          terms: { field: 'slo.objective.sliceDurationInSeconds' },
         },
-      },
-      'slo.revision': {
-        terms: {
-          field: 'slo.revision',
-        },
-      },
+      }),
+      'slo.budgetingMethod': { terms: { field: 'slo.budgetingMethod' } },
+      'slo.timeWindow.duration': { terms: { field: 'slo.timeWindow.duration' } },
+      'slo.timeWindow.type': { terms: { field: 'slo.timeWindow.type' } },
       // timestamp field defined in the destination index
       '@timestamp': {
         date_histogram: {
