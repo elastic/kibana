@@ -43,6 +43,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         name: 'My action',
         connector_type_id: 'test.index-record',
         is_missing_secrets: false,
+        is_system_action: false,
         config: {
           unencrypted: `This value shouldn't get encrypted`,
         },
@@ -104,6 +105,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           name: 'My action',
           actionTypeId: 'test.index-record',
           isMissingSecrets: false,
+          isSystemAction: false,
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },

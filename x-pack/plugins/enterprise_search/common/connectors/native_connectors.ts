@@ -1622,7 +1622,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         type: FieldType.BOOLEAN,
-        ui_restrictions: [],
+        ui_restrictions: ['advanced'],
         validations: [],
         value: false,
       },

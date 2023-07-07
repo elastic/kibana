@@ -161,7 +161,7 @@ export const isPersistedByValueAnnotationsLayer = (
   (layer.persistanceType === 'byValue' || !layer.persistanceType);
 
 export const isByReferenceAnnotationsLayer = (
-  layer: XYAnnotationLayerConfig
+  layer: XYLayerConfig
 ): layer is XYByReferenceAnnotationLayerConfig =>
   'annotationGroupId' in layer && '__lastSaved' in layer;
 

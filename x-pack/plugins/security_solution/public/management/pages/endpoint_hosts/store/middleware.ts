@@ -16,22 +16,22 @@ import type {
 } from '@kbn/timelines-plugin/common';
 import {
   BASE_POLICY_RESPONSE_ROUTE,
+  ENDPOINT_FIELDS_SEARCH_STRATEGY,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
-  metadataCurrentIndexPattern,
-  METADATA_UNITED_INDEX,
   METADATA_TRANSFORMS_STATUS_ROUTE,
-  ENDPOINT_FIELDS_SEARCH_STRATEGY,
+  METADATA_UNITED_INDEX,
+  metadataCurrentIndexPattern,
 } from '../../../../../common/endpoint/constants';
 import type {
   GetHostPolicyResponse,
   HostInfo,
   HostIsolationRequestBody,
-  ResponseActionApiResponse,
   HostResultList,
   Immutable,
   ImmutableObject,
   MetadataListResponse,
+  ResponseActionApiResponse,
 } from '../../../../../common/endpoint/types';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
@@ -59,9 +59,9 @@ import type {
 } from '../types';
 import type { EndpointPackageInfoStateChanged } from './action';
 import {
-  detailsData,
   endpointPackageInfo,
   endpointPackageVersion,
+  fullDetailsHostInfo,
   getCurrentIsolationRequestState,
   getIsEndpointPackageInfoUninitialized,
   getIsIsolationRequestPending,
@@ -86,7 +86,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
   depsStart
 ) => {
   // this needs to be called after endpointPackageVersion is loaded (getEndpointPackageInfo)
-  // or else wrong pattern might be loaded
+  // or else the wrong pattern might be loaded
   async function fetchIndexPatterns(
     state: ImmutableObject<EndpointState>
   ): Promise<DataViewBase[]> {
@@ -115,6 +115,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
     };
     return [indexPattern];
   }
+
   return (store) => (next) => async (action) => {
     next(action);
 
@@ -329,13 +330,13 @@ const loadEndpointsPendingActions = async ({
   dispatch,
 }: EndpointPageStore): Promise<void> => {
   const state = getState();
-  const detailsEndpoint = detailsData(state);
+  const detailsEndpoint = fullDetailsHostInfo(state);
   const listEndpoints = listData(state);
   const agentsIds = new Set<string>();
 
   // get all agent ids for the endpoints in the list
   if (detailsEndpoint) {
-    agentsIds.add(detailsEndpoint.elastic.agent.id);
+    agentsIds.add(detailsEndpoint.metadata.elastic.agent.id);
   }
 
   for (const endpointInfo of listEndpoints) {

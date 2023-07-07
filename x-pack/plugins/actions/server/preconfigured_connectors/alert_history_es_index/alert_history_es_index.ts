@@ -19,6 +19,7 @@ export function getAlertHistoryEsIndex(): Readonly<PreConfiguredAction> {
     id: AlertHistoryEsIndexConnectorId,
     isPreconfigured: true,
     isDeprecated: false,
+    isSystemAction: false,
     config: {
       index: AlertHistoryDefaultIndexName,
     },

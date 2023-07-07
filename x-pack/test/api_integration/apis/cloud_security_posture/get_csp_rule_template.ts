@@ -55,8 +55,9 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(500);
 
-      expect(body.message).to.be(
-        'Please provide either benchmarkId or packagePolicyId, but not both'
+      expect(body.message).to.eql(
+        'Please provide either benchmarkId or packagePolicyId, but not both',
+        `expected message to be 'Please provide either benchmarkId or packagePolicyId, but not both' but got ${body.message} instead`
       );
     });
 
@@ -80,8 +81,9 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(500);
 
-      expect(body.message).to.be(
-        'Please provide either benchmarkId or packagePolicyId, but not both'
+      expect(body.message).to.eql(
+        'Please provide either benchmarkId or packagePolicyId, but not both',
+        `expected message to be 'Please provide either benchmarkId or packagePolicyId, but not both' but got ${body.message} instead`
       );
     });
 
@@ -95,8 +97,14 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(404);
 
-      expect(body.statusCode).to.be(404);
-      expect(body.error).to.be('Not Found');
+      expect(body.statusCode).to.eql(
+        404,
+        `expected status code to be 404 but got ${body.statusCode} instead`
+      );
+      expect(body.error).to.eql(
+        'Not Found',
+        `expected error message to be 'Not Found' but got ${body.error} instead`
+      );
     });
 
     it(`Should return 200 status code and filter rules by benchmarkId`, async () => {
@@ -124,7 +132,10 @@ export default function ({ getService }: FtrProviderContext) {
         (rule: CspRuleTemplate) => rule.metadata.benchmark.id === 'cis_k8s'
       );
 
-      expect(allRulesHaveCorrectBenchmarkId).to.be(true);
+      expect(allRulesHaveCorrectBenchmarkId).to.eql(
+        true,
+        `expected true but got ${allRulesHaveCorrectBenchmarkId} instead`
+      );
     });
 
     it(`Should return 200 status code, and only requested fields in the response`, async () => {
@@ -157,7 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      expect(fieldsMatched).to.be(true);
+      expect(fieldsMatched).to.eql(true, `expected true but got ${fieldsMatched} instead`);
     });
 
     it(`Should return 200 status code, items sorted by metadata.section field`, async () => {
@@ -188,7 +199,8 @@ export default function ({ getService }: FtrProviderContext) {
       const isSorted = sections.every(
         (section, index) => index === 0 || section >= sections[index - 1]
       );
-      expect(isSorted).to.be(true);
+
+      expect(isSorted).to.eql(true, `expected true but got ${isSorted} instead`);
     });
 
     it(`Should return 200 status code and paginate rules with a limit of PerPage`, async () => {
@@ -213,7 +225,10 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(body.items.length).to.be(perPage);
+      expect(body.items.length).to.eql(
+        perPage,
+        `expected length to be ${perPage} but got ${body.items.length} instead`
+      );
     });
   });
 }

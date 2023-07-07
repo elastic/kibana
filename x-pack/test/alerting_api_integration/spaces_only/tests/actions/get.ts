@@ -42,6 +42,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           is_preconfigured: false,
           is_deprecated: false,
           is_missing_secrets: false,
+          is_system_action: false,
           connector_type_id: 'test.index-record',
           name: 'My action',
           config: {
@@ -83,6 +84,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           id: 'my-slack1',
           is_preconfigured: true,
           is_deprecated: false,
+          is_system_action: false,
           connector_type_id: '.slack',
           name: 'Slack#xyz',
         });
@@ -95,6 +97,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           id: 'my-deprecated-servicenow',
           is_preconfigured: true,
           is_deprecated: true,
+          is_system_action: false,
           connector_type_id: '.servicenow',
           name: 'ServiceNow#xyz',
         });
@@ -107,6 +110,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           id: 'my-deprecated-servicenow-default',
           is_preconfigured: true,
           is_deprecated: true,
+          is_system_action: false,
           connector_type_id: '.servicenow',
           name: 'ServiceNow#xyz',
         });
@@ -136,6 +140,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
             id: createdAction.id,
             isPreconfigured: false,
             isDeprecated: false,
+            isSystemAction: false,
             actionTypeId: 'test.index-record',
             isMissingSecrets: false,
             name: 'My action',
@@ -178,6 +183,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
             id: 'my-slack1',
             isPreconfigured: true,
             isDeprecated: false,
+            isSystemAction: false,
             actionTypeId: '.slack',
             name: 'Slack#xyz',
           });

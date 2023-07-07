@@ -45,6 +45,7 @@ describe('actionTypeRegistry', () => {
           secrets: {},
           isPreconfigured: true,
           isDeprecated: false,
+          isSystemAction: false,
         },
       ],
     };
@@ -214,6 +215,26 @@ describe('actionTypeRegistry', () => {
         executor,
       });
       expect(actionTypeRegistryParams.licensing.featureUsage.register).not.toHaveBeenCalled();
+    });
+
+    test('does not allows registering system actions', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      expect(() =>
+        actionTypeRegistry.register({
+          id: 'my-action-type',
+          name: 'My action type',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          isSystemAction: true,
+          validate: {
+            config: { schema: schema.object({}) },
+            secrets: { schema: schema.object({}) },
+            params: { schema: schema.object({}) },
+          },
+          executor,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"System actions are not supported"`);
     });
   });
 
