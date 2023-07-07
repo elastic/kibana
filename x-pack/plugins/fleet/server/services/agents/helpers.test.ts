@@ -164,7 +164,7 @@ describe('searchHitToAgent', () => {
     });
   });
 
-  it('should work when some parameter is not present', () => {
+  it('should work when units is not present', () => {
     const hit = {
       _source: {
         access_api_key_id: 'EH_RlIgBn_WkCEINY-qh',
@@ -244,11 +244,7 @@ describe('searchHitToAgent', () => {
         '68233290-0486-11ee-97a3-c3856dd800f7': {
           api_key_id: 'En_RlIgBn_WkCEINb-pQ',
           type: 'elasticsearch',
-          to_retire_api_key_ids: [
-            {
-              retired_at: '',
-            },
-          ],
+          to_retire_api_key_ids: [],
         },
       },
       components: [
