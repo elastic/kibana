@@ -220,17 +220,35 @@ describe('MlInferenceLogic', () => {
           },
         ]);
       });
-      it('returns disabled pipeline option if missing source field', () => {
+      it('returns disabled pipeline option if missing source fields', () => {
         FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
           'unit-test': {
             processors: [
               {
                 inference: {
                   field_map: {
-                    body_content: 'text_field',
+                    title: 'text_field', // Does not exist in index
                   },
                   model_id: 'test-model',
-                  target_field: 'ml.inference.test-field',
+                  target_field: 'ml.inference.title',
+                },
+              },
+              {
+                inference: {
+                  field_map: {
+                    body: 'text_field', // Exists in index
+                  },
+                  model_id: 'test-model',
+                  target_field: 'ml.inference.body',
+                },
+              },
+              {
+                inference: {
+                  field_map: {
+                    body_content: 'text_field', // Does not exist in index
+                  },
+                  model_id: 'test-model',
+                  target_field: 'ml.inference.body_content',
                 },
               },
             ],
@@ -240,13 +258,13 @@ describe('MlInferenceLogic', () => {
 
         expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
           {
-            destinationField: 'test-field',
+            destinationField: 'title',
             disabled: true,
-            disabledReason: expect.any(String),
+            disabledReason: expect.stringContaining('title, body_content'),
             modelId: 'test-model',
             modelType: '',
             pipelineName: 'unit-test',
-            sourceField: 'body_content',
+            sourceField: 'title',
           },
         ]);
       });

@@ -134,9 +134,9 @@ describe('SelectedFieldMappings', () => {
     expect(wrapper.find(EuiBasicTable)).toHaveLength(1);
     const table = wrapper.find(EuiBasicTable);
     expect(table.prop('columns').map((c) => c.name)).toEqual([
-      'Source fields',
+      'Source field',
       '',
-      'Target fields',
+      'Target field',
     ]);
   });
 });
