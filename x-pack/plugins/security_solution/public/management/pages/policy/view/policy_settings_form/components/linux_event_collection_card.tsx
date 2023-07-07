@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { OperatingSystem } from '@kbn/securitysolution-utils';
 import { i18n } from '@kbn/i18n';
 import type { PolicyFormComponentCommonProps } from '../types';
@@ -43,6 +43,7 @@ const OPTIONS: ReadonlyArray<EventFormOption<OperatingSystem.LINUX>> = [
 
 const SUPPLEMENTAL_OPTIONS: ReadonlyArray<SupplementalEventFormOption<OperatingSystem.LINUX>> = [
   {
+    id: 'sessionDataSection',
     title: i18n.translate(
       'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_data.title',
       {
@@ -57,9 +58,15 @@ const SUPPLEMENTAL_OPTIONS: ReadonlyArray<SupplementalEventFormOption<OperatingS
       }
     ),
     name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_data',
+      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_dataChecked',
       {
         defaultMessage: 'Collect session data',
+      }
+    ),
+    uncheckedName: i18n.translate(
+      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.session_dataUnChecked',
+      {
+        defaultMessage: 'Do not collect session data',
       }
     ),
     protectionField: 'session_data',
@@ -69,9 +76,15 @@ const SUPPLEMENTAL_OPTIONS: ReadonlyArray<SupplementalEventFormOption<OperatingS
   },
   {
     name: i18n.translate(
-      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.tty_io',
+      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.tty_ioChecked',
       {
         defaultMessage: 'Capture terminal output',
+      }
+    ),
+    uncheckedName: i18n.translate(
+      'xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.tty_ioUnChecked',
+      {
+        defaultMessage: 'Do not capture terminal output',
       }
     ),
     protectionField: 'tty_io',
@@ -93,12 +106,30 @@ const SUPPLEMENTAL_OPTIONS: ReadonlyArray<SupplementalEventFormOption<OperatingS
 type LinuxEventCollectionCardProps = PolicyFormComponentCommonProps;
 
 export const LinuxEventCollectionCard = memo<LinuxEventCollectionCardProps>((props) => {
+  const supplementalOptions = useMemo(() => {
+    if (props.mode === 'edit') {
+      return SUPPLEMENTAL_OPTIONS;
+    }
+
+    // View only mode: remove instructions for session data
+    return SUPPLEMENTAL_OPTIONS.map((option) => {
+      if (option.id === 'sessionDataSection') {
+        return {
+          ...option,
+          description: undefined,
+        };
+      }
+
+      return option;
+    });
+  }, [props.mode]);
+
   return (
     <EventCollectionCard<OperatingSystem.LINUX>
       {...props}
       os={PolicyOperatingSystem.linux}
       selection={props.policy.linux.events}
-      supplementalOptions={SUPPLEMENTAL_OPTIONS}
+      supplementalOptions={supplementalOptions}
       options={OPTIONS}
     />
   );

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { PropsWithChildren, ReactElement, ReactNode } from 'react';
 import React, { memo, useCallback, useContext, useMemo } from 'react';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
+import type { OperatingSystem } from '@kbn/securitysolution-utils';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import {
@@ -30,12 +31,6 @@ import type {
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
 
-const OPERATING_SYSTEM_TO_TEST_SUBJ: { [K in OperatingSystem]: string } = {
-  [OperatingSystem.WINDOWS]: 'Windows',
-  [OperatingSystem.LINUX]: 'Linux',
-  [OperatingSystem.MAC]: 'Mac',
-};
-
 interface OperatingSystemToOsMap {
   [OperatingSystem.WINDOWS]: PolicyOperatingSystem.windows;
   [OperatingSystem.LINUX]: PolicyOperatingSystem.linux;
@@ -53,9 +48,11 @@ export interface EventFormOption<T extends OperatingSystem> {
 }
 
 export interface SupplementalEventFormOption<T extends OperatingSystem> {
+  id?: string;
   title?: string;
   description?: string;
   name: string;
+  uncheckedName?: string;
   protectionField: ProtectionField<T>;
   tooltipText?: string;
   beta?: boolean;
@@ -71,8 +68,15 @@ export interface EventCollectionCardProps<T extends OperatingSystem>
   supplementalOptions?: ReadonlyArray<SupplementalEventFormOption<T>>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ANY = any;
+type EventCollectionCardComponent = <T extends OperatingSystem>(
+  props: PropsWithChildren<EventCollectionCardProps<T>>,
+  context?: ANY
+) => ReactElement<ANY, ANY> | null;
+
 // FIXME:PT fix EventCollectionCard generic
-export const EventCollectionCard = memo(
+export const EventCollectionCard: EventCollectionCardComponent = memo(
   <T extends OperatingSystem>({
     policy,
     onChange,
@@ -150,6 +154,7 @@ export const EventCollectionCard = memo(
               title,
               description,
               name,
+              uncheckedName,
               protectionField,
               tooltipText,
               beta,
@@ -157,6 +162,11 @@ export const EventCollectionCard = memo(
               isDisabled,
             }) => {
               const keyPath = `${os}.events.${protectionField}`;
+              const isChecked = get(policy, keyPath);
+
+              if (!isEditMode && !isChecked) {
+                return null;
+              }
 
               return (
                 <div
@@ -185,6 +195,7 @@ export const EventCollectionCard = memo(
 
                       <EventCheckbox
                         label={name}
+                        unCheckedLabel={uncheckedName}
                         key={keyPath}
                         keyPath={keyPath}
                         policy={policy}
@@ -221,13 +232,24 @@ interface EventCheckboxProps
   extends PolicyFormComponentCommonProps,
     Pick<EuiCheckboxProps, 'label' | 'disabled'> {
   keyPath: string;
+  unCheckedLabel?: ReactNode;
 }
 
 const EventCheckbox = memo<EventCheckboxProps>(
-  ({ policy, onChange, label, mode, keyPath, disabled, 'data-test-subj': dataTestSubj }) => {
+  ({
+    policy,
+    onChange,
+    label,
+    unCheckedLabel,
+    mode,
+    keyPath,
+    disabled,
+    'data-test-subj': dataTestSubj,
+  }) => {
     const checkboxId = useGeneratedHtmlId();
     const isChecked: boolean = get(policy, keyPath);
     const isEditMode = mode === 'edit';
+    const displayLabel = isChecked ? label : unCheckedLabel ? unCheckedLabel : label;
 
     const checkboxOnChangeHandler = useCallback(
       (ev) => {
@@ -243,14 +265,14 @@ const EventCheckbox = memo<EventCheckboxProps>(
       <EuiCheckbox
         key={keyPath}
         id={checkboxId}
-        label={label}
+        label={displayLabel}
         data-test-subj={dataTestSubj}
         checked={isChecked}
         onChange={checkboxOnChangeHandler}
         disabled={disabled}
       />
     ) : isChecked ? (
-      <div>{label}</div>
+      <div>{displayLabel}</div>
     ) : null;
   }
 );
