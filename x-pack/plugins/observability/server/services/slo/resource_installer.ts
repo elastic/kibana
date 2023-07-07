@@ -44,7 +44,7 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     const alreadyInstalled = await this.areResourcesAlreadyInstalled();
 
     if (alreadyInstalled) {
-      this.logger.debug('SLO resources already installed - skipping.');
+      this.logger.info('SLO resources already installed - skipping');
       return;
     }
 

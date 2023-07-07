@@ -46,6 +46,7 @@ import { ManageSLO } from '../../services/slo/manage_slo';
 import { getGlobalDiagnosis, getSloDiagnosis } from '../../services/slo/get_diagnosis';
 import { getBurnRates } from '../../services/slo/get_burn_rates';
 import { GetPreviewData } from '../../services/slo/get_preview_data';
+import { DefaultSummaryTransformInstaller } from '../../services/slo/summary_transform/summary_transform_installer';
 
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
@@ -79,7 +80,13 @@ const createSLORoute = createObservabilityServerRoute({
     const resourceInstaller = new DefaultResourceInstaller(esClient, logger);
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
-    const createSLO = new CreateSLO(resourceInstaller, repository, transformManager);
+    const summaryInstaller = new DefaultSummaryTransformInstaller(esClient, logger);
+    const createSLO = new CreateSLO(
+      resourceInstaller,
+      repository,
+      transformManager,
+      summaryInstaller
+    );
 
     const response = await createSLO.execute(params.body);
 

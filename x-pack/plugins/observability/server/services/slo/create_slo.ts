@@ -14,19 +14,24 @@ import { ResourceInstaller } from './resource_installer';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 import { validateSLO } from '../../domain/services';
+import { SummaryTransformInstaller } from './summary_transform/summary_transform_installer';
 
 export class CreateSLO {
   constructor(
     private resourceInstaller: ResourceInstaller,
     private repository: SLORepository,
-    private transformManager: TransformManager
+    private transformManager: TransformManager,
+    private summaryInstaller: SummaryTransformInstaller
   ) {}
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
     const slo = this.toSLO(params);
     validateSLO(slo);
 
+    // TODO Move this out of this service, and call that directly in the server plugin start function
     await this.resourceInstaller.ensureCommonResourcesInstalled();
+    await this.summaryInstaller.installAndStart();
+
     await this.repository.save(slo, { throwOnConflict: true });
 
     let sloTransformId;
