@@ -396,7 +396,7 @@ describe('useUserProfileForm', () => {
     });
   });
 
-  describe.only('User roles section', () => {
+  describe('User roles section', () => {
     it('should display the user roles', () => {
       const data: UserProfileData = {};
 
