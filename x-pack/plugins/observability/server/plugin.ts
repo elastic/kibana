@@ -12,6 +12,7 @@ import {
   CoreSetup,
   DEFAULT_APP_CATEGORIES,
   Logger,
+  CoreStart,
 } from '@kbn/core/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
@@ -47,6 +48,8 @@ import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { OpenAIService } from './services/openai';
 import { threshold } from './saved_objects/threshold';
+import { DefaultResourceInstaller } from './services/slo';
+import { DefaultSummaryTransformInstaller } from './services/slo/summary_transform/summary_transform_installer';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 
@@ -286,7 +289,24 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     };
   }
 
-  public start() {}
+  public start(core: CoreStart, plugins: PluginStart) {
+    const esClient = core.elasticsearch.client.asInternalUser;
+    const sloResourceInstaller = new DefaultResourceInstaller(esClient, this.logger);
+    const sloSummaryInstaller = new DefaultSummaryTransformInstaller(esClient, this.logger);
+
+    sloResourceInstaller
+      .ensureCommonResourcesInstalled()
+      .catch((e) => {
+        this.logger.error('Failed to install SLO common resources');
+        this.logger.error(e);
+      })
+      .then(() =>
+        sloSummaryInstaller.installAndStart().catch((err) => {
+          this.logger.error('Failed to install SLO summary transforms');
+          this.logger.error(err);
+        })
+      );
+  }
 
   public stop() {}
 }
