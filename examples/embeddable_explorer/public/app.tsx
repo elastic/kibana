@@ -108,7 +108,7 @@ const EmbeddableExplorerApp = ({
       ),
     },
     {
-      title: 'Dynamically adding children to a container',
+      title: 'Context menu',
       id: 'embeddablePanelExample',
       component: (
         <EmbeddablePanelExample

@@ -16,6 +16,7 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
   EuiText,
+  EuiPageTemplate,
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { EmbeddableStart, IEmbeddable } from '@kbn/embeddable-plugin/public';
@@ -116,16 +117,12 @@ export function EmbeddablePanelExample({ embeddableServices, searchListContainer
   });
 
   return (
-    <EuiPageBody>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>The embeddable panel component</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody>
+    <>
+      <EuiPageTemplate.Header
+        pageTitle="Context menu"
+      />
+      <EuiPageTemplate.Section grow={false}>
+        <>
           <EuiText>
             You can render your embeddable inside the EmbeddablePanel component. This adds some
             extra rendering and offers a context menu with pluggable actions. Using EmbeddablePanel
@@ -142,8 +139,8 @@ export function EmbeddablePanelExample({ embeddableServices, searchListContainer
           </EuiPanel>
 
           <EuiSpacer />
-        </EuiPageContentBody>
-      </EuiPageContent>
-    </EuiPageBody>
+        </>
+      </EuiPageTemplate.Section>
+    </>
   );
 }
