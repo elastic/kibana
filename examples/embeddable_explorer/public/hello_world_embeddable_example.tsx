@@ -9,8 +9,6 @@
 import React from 'react';
 import {
   EuiPageTemplate,
-  EuiPageBody,
-  EuiPageSection,
   EuiPanel,
   EuiText,
   EuiTitle,
@@ -31,7 +29,7 @@ export function HelloWorldEmbeddableExample({ helloWorldEmbeddableFactory }: Pro
   return (
     <>
       <EuiPageTemplate.Header
-        pageTitle="Hello world example"
+        pageTitle="Render embeddable"
       />
       <EuiPageTemplate.Section grow={false} bottomBorder="extended">
         <>

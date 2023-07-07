@@ -81,7 +81,7 @@ const EmbeddableExplorerApp = ({
 }: Props) => {
   const pages: PageDef[] = [
     {
-      title: 'Hello world embeddable',
+      title: 'Render embeddable',
       id: 'helloWorldEmbeddableSection',
       component: (
         <HelloWorldEmbeddableExample
@@ -90,7 +90,7 @@ const EmbeddableExplorerApp = ({
       ),
     },
     {
-      title: 'Todo embeddable',
+      title: 'Update embeddable state',
       id: 'todoEmbeddableSection',
       component: (
         <TodoEmbeddableExample
