@@ -17,7 +17,6 @@ import {
   EuiIconTip,
   EuiSpacer,
   EuiText,
-  htmlIdGenerator,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { cloneDeep, get, set } from 'lodash';
@@ -84,7 +83,6 @@ export const EventCollectionCard = memo(
     'data-test-subj': dataTestSubj,
   }: EventCollectionCardProps<T>) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const isEditMode = mode === 'edit';
     const theme = useContext(ThemeContext);
 
     const selectedCount: number = useMemo(() => {
@@ -153,6 +151,8 @@ export const EventCollectionCard = memo(
               indented,
               isDisabled,
             }) => {
+              const keyPath = `${os}.events.${protectionField}`;
+
               return (
                 <div
                   key={String(protectionField)}
@@ -164,6 +164,7 @@ export const EventCollectionCard = memo(
                       <SettingCardHeader>{title}</SettingCardHeader>
                     </>
                   )}
+
                   {description && (
                     <>
                       <EuiSpacer size="s" />
@@ -172,25 +173,29 @@ export const EventCollectionCard = memo(
                       </EuiText>
                     </>
                   )}
+
                   <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiSpacer size="s" />
-                      <EuiCheckbox
-                        id={htmlIdGenerator()()}
+
+                      <EventCheckbox
                         label={name}
-                        data-test-subj={`policy${OPERATING_SYSTEM_TO_TEST_SUBJ[os]}Event_${protectionField}`}
-                        checked={selection[protectionField]}
-                        onChange={(event) => {
-                          // onValueSelection(protectionField, event.target.checked)
-                        }}
-                        disabled={!isEditMode || (isDisabled ? isDisabled(policy) : false)}
+                        key={keyPath}
+                        keyPath={keyPath}
+                        policy={policy}
+                        onChange={onChange}
+                        mode={mode}
+                        disabled={isDisabled ? isDisabled(policy) : false}
+                        data-test-subj={getTestId(protectionField as string)}
                       />
                     </EuiFlexItem>
+
                     {tooltipText && (
                       <EuiFlexItem grow={false}>
                         <EuiIconTip position="right" content={tooltipText} />
                       </EuiFlexItem>
                     )}
+
                     {beta && (
                       <EuiFlexItem grow={false}>
                         <EuiBetaBadge label="beta" size="s" />
@@ -209,12 +214,12 @@ EventCollectionCard.displayName = 'EventCollectionCard';
 
 interface EventCheckboxProps
   extends PolicyFormComponentCommonProps,
-    Pick<EuiCheckboxProps, 'label'> {
+    Pick<EuiCheckboxProps, 'label' | 'disabled'> {
   keyPath: string;
 }
 
 const EventCheckbox = memo<EventCheckboxProps>(
-  ({ policy, onChange, label, mode, keyPath, 'data-test-subj': dataTestSubj }) => {
+  ({ policy, onChange, label, mode, keyPath, disabled, 'data-test-subj': dataTestSubj }) => {
     const checkboxId = useGeneratedHtmlId();
     const isChecked: boolean = get(policy, keyPath);
     const isEditMode = mode === 'edit';
@@ -237,6 +242,7 @@ const EventCheckbox = memo<EventCheckboxProps>(
         data-test-subj={dataTestSubj}
         checked={isChecked}
         onChange={checkboxOnChangeHandler}
+        disabled={disabled}
       />
     ) : (
       <div>{label}</div>
