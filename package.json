@@ -77,7 +77,7 @@
     "yarn": "^1.22.19"
   },
   "resolutions": {
-    "**/@types/node": "18",
+    "**/@types/node": "18.16.18",
     "**/chokidar": "^3.5.3",
     "**/globule/minimatch": "^3.1.2",
     "**/hoist-non-react-statics": "^3.3.2",
