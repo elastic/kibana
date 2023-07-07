@@ -22,10 +22,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
-import { generateNewAgentPolicyWithDefaults } from '../../../services';
 import type { AgentPolicy, NewAgentPolicy } from '../../../types';
 
 import { sendCreateAgentPolicy, useStartServices } from '../../../hooks';
+
+import { generateNewAgentPolicyWithDefaults } from '../../../../../../common/services/generate_new_agent_policy';
 
 import { agentPolicyFormValidation } from '.';
 
