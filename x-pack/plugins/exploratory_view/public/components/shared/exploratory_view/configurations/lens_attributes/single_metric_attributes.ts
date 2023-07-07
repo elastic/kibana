@@ -42,8 +42,6 @@ export class SingleMetricLensAttributes extends LensAttributes {
     this.globalFilter = this.getGlobalFilter(this.isMultiSeries);
     const layer0 = this.getSingleMetricLayer()!;
 
-    console.log('layer0', layer0);
-
     this.layers = {
       layer0,
     };
