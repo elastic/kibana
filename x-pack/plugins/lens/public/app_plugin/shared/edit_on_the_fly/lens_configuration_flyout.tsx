@@ -43,7 +43,8 @@ export interface EditConfigPanelProps {
   startDependencies: LensPluginStartDependencies;
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
-  setIsFlyoutVisible?: (flag: boolean) => void;
+  closeFlyout?: () => void;
+  wrapInFlyout?: boolean;
   datasourceId: 'formBased' | 'textBased';
   adaptersTables?: Record<string, Datatable>;
 }
@@ -57,7 +58,7 @@ export function LensEditConfigurationFlyout({
   datasourceMap,
   datasourceId,
   updateAll,
-  setIsFlyoutVisible,
+  closeFlyout,
   adaptersTables,
 }: EditConfigPanelProps) {
   const currentDataViewId = dataView.id ?? '';
@@ -111,10 +112,6 @@ export function LensEditConfigurationFlyout({
       dateRange,
     };
   }, [activeData, dataViews, datasourceLayers, dateRange]);
-
-  const closeFlyout = () => {
-    setIsFlyoutVisible?.(false);
-  };
 
   const layerPanelsProps = {
     framePublicAPI,
