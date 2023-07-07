@@ -10,7 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, withRouter, RouteComponentProps } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import { EuiPage, EuiPageSideBar_Deprecated as EuiPageSideBar, EuiSideNav } from '@elastic/eui';
+import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
 
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -126,12 +126,12 @@ const EmbeddableExplorerApp = ({
 
   return (
     <Router basename={basename}>
-      <EuiPage>
-        <EuiPageSideBar>
+      <EuiPageTemplate offset={0}>
+        <EuiPageTemplate.Sidebar>
           <Nav navigateToApp={navigateToApp} pages={pages} />
-        </EuiPageSideBar>
+        </EuiPageTemplate.Sidebar>
         {routes}
-      </EuiPage>
+      </EuiPageTemplate>
     </Router>
   );
 };
