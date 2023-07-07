@@ -343,7 +343,7 @@
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
             "signature": [
-              "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
+              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
@@ -715,7 +715,7 @@
         "label": "LicenseCheckState",
         "description": [],
         "signature": [
-          "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
+          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
@@ -819,6 +819,10 @@
               "path": "x-pack/plugins/ml/public/plugin.ts"
             },
             {
+              "plugin": "profiling",
+              "path": "x-pack/plugins/profiling/public/components/contexts/license/license_context.tsx"
+            },
+            {
               "plugin": "apm",
               "path": "x-pack/plugins/apm/public/context/license/license_context.tsx"
             },
@@ -853,10 +857,6 @@
             {
               "plugin": "watcher",
               "path": "x-pack/plugins/watcher/public/plugin.ts"
-            },
-            {
-              "plugin": "profiling",
-              "path": "x-pack/plugins/profiling/public/components/contexts/license/license_context.tsx"
             }
           ]
         },
@@ -1598,7 +1598,7 @@
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
             "signature": [
-              "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
+              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
@@ -2067,7 +2067,7 @@
         "label": "LicenseCheckState",
         "description": [],
         "signature": [
-          "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
+          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
