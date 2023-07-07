@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiAccordion,
@@ -18,7 +18,7 @@ import {
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import type { BoolQuery } from '@kbn/es-query';
+import type { BoolQuery, TimeRange, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { RiskScoreEntity } from '../../../common/risk_engine/types';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
@@ -108,6 +108,26 @@ export const RiskScorePreviewSection = () => {
   const hosts = getRiskiestScores(data?.scores, 'host.name');
   const users = getRiskiestScores(data?.scores, 'user.name');
 
+  const onQuerySubmit = useCallback(
+    (payload: { dateRange: TimeRange; query?: Query }) => {
+      setDateRange({
+        from: payload.dateRange.from,
+        to: payload.dateRange.to,
+      });
+      try {
+        const newFilters = buildEsQuery(
+          undefined,
+          payload.query ?? { query: '', language: 'kuery' },
+          []
+        );
+        setFilters(newFilters);
+      } catch (e) {
+        addError(e, { title: i18n.PREVIEW_QUERY_ERROR_TITLE });
+      }
+    },
+    [addError, setDateRange, setFilters]
+  );
+
   if (isError) {
     return (
       <EuiCallOut
@@ -144,22 +164,7 @@ export const RiskScorePreviewSection = () => {
             indexPatterns={[indexPattern] as DataView[]}
             dateRangeFrom={dateRange.from}
             dateRangeTo={dateRange.to}
-            onQuerySubmit={(payload) => {
-              setDateRange({
-                from: payload.dateRange.from,
-                to: payload.dateRange.to,
-              });
-              try {
-                const newFilters = buildEsQuery(
-                  undefined,
-                  payload.query ?? { query: '', language: 'kuery' },
-                  []
-                );
-                setFilters(newFilters);
-              } catch (e) {
-                addError(e, { title: i18n.PREVIEW_QUERY_ERROR_TITLE });
-              }
-            }}
+            onQuerySubmit={onQuerySubmit}
             showFilterBar={false}
             showDatePicker={true}
             displayStyle={'inPage'}
