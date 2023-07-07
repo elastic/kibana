@@ -113,6 +113,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   isDisabled?: boolean;
 
   submitOnBlur?: boolean;
+
+  currentDataViewId?: string;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -523,6 +525,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     if (this.shouldRenderFilterBar()) {
       filterBar = this.shouldShowDatePickerAsBadge() ? (
         <FilterItems
+          currentDataViewId={this.props.dataViewPickerComponentProps?.currentDataViewId}
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}
           indexPatterns={this.props.indexPatterns!}
@@ -533,6 +536,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         />
       ) : (
         <FilterBar
+          currentDataViewId={this.props.dataViewPickerComponentProps?.currentDataViewId}
           afterQueryBar
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}

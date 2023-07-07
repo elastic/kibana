@@ -33,6 +33,10 @@ export interface Props {
    * Disable all interactive actions
    */
   isDisabled?: boolean;
+  /**
+   * Currently selected data view id
+   */
+  currentDataViewId?: string;
 }
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
@@ -51,6 +55,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       tabIndex={-1}
     >
       <FilterItems
+        currentDataViewId={props.currentDataViewId}
         filters={props.filters!}
         onFiltersUpdated={props.onFiltersUpdated}
         indexPatterns={props.indexPatterns!}

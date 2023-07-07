@@ -59,6 +59,7 @@ export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps 
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
   readOnly?: boolean;
+  currentDataViewId?: string;
 }
 
 type FilterPopoverProps = HTMLAttributes<HTMLDivElement> & EuiPopoverProps;
@@ -287,6 +288,7 @@ function FilterItemComponent(props: FilterItemProps) {
   function isFilterApplicable() {
     // Any filter is applicable if no index patterns were provided to FilterBar.
     if (!props.indexPatterns.length) return true;
+    if (props.currentDataViewId && props.currentDataViewId !== filter.meta.index) return false;
 
     const ip = getIndexPatternFromFilter(filter, indexPatterns);
     if (ip) return true;

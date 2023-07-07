@@ -22,6 +22,8 @@ import type { IUnifiedSearchPluginServices } from '../../types';
  * as part of the `Filter[]` property.
  */
 export interface FilterItemsProps {
+  /** Currently selected data view id to determine if filter can be applied **/
+  currentDataViewId?: string;
   /** Array of filters that will be rendered as filter pills */
   filters: Filter[];
   /** Optional property that controls whether or not clicking the filter pill opens a popover *and* whether
@@ -79,6 +81,7 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: FilterItemsProps)
           timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
           filtersForSuggestions={props.filtersForSuggestions}
           readOnly={readOnly}
+          currentDataViewId={props.currentDataViewId}
         />
       </EuiFlexItem>
     ));
