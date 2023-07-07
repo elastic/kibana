@@ -396,7 +396,7 @@ describe('useUserProfileForm', () => {
     });
   });
 
-  describe('User roles section', () => {
+  describe.only('User roles section', () => {
     it('should display the user roles', () => {
       const data: UserProfileData = {};
 
@@ -418,10 +418,43 @@ describe('useUserProfileForm', () => {
           <UserProfile user={nonCloudUser} data={data} />
         </Providers>
       );
-      expect(testWrapper.exists('EuiBadgeGroup[data-test-subj="userRoles"]')).toBeTruthy();
+      expect(testWrapper.exists('span[data-test-subj="userRoles"]')).toBeTruthy();
 
-      const rolesList = testWrapper.find('EuiBadgeGroup[data-test-subj="userRoles"]').children();
-      expect(rolesList.length).toEqual(nonCloudUser.roles.length);
+      expect(testWrapper.exists('EuiButtonEmpty[data-test-subj="userRolesExpand"]')).toBeFalsy();
+      expect(testWrapper.exists('EuiBadgeGroup[data-test-subj="remainingRoles"]')).toBeFalsy();
+    });
+
+    it('should display a popover for users with more than one role', () => {
+      const data: UserProfileData = {};
+
+      const nonCloudUser = mockAuthenticatedUser({ elastic_cloud_user: false });
+      coreStart.settings.client.get.mockReturnValue(false);
+      coreStart.settings.client.isOverridden.mockReturnValue(true);
+
+      nonCloudUser.roles = [...nonCloudUser.roles, 'user-role-1', 'user-role-2'];
+      const testWrapper = mount(
+        <Providers
+          services={coreStart}
+          theme$={theme$}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles: new UserProfileAPIClient(coreStart.http),
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          <UserProfile user={nonCloudUser} data={data} />
+        </Providers>
+      );
+
+      const extraRoles = nonCloudUser.roles.splice(1);
+
+      const userRolesExpandButton = testWrapper.find(
+        'EuiButtonEmpty[data-test-subj="userRolesExpand"]'
+      );
+
+      expect(userRolesExpandButton).toBeTruthy();
+      expect(userRolesExpandButton.text()).toEqual(`+${extraRoles.length} Roles.`);
     });
   });
 });

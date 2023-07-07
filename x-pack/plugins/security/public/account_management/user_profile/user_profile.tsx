@@ -22,6 +22,7 @@ import {
   EuiIconTip,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
+  EuiPopover,
   EuiPageTemplate_Deprecated as EuiPageTemplate,
   EuiSpacer,
   EuiText,
@@ -560,42 +561,52 @@ function UserPasswordEditor({
 }
 
 function UserRoles({ user }: { user: AuthenticatedUser }) {
-  return (
-    <EuiDescribedFormGroup
-      fullWidth
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.security.accountManagement.userProfile.userRoles"
-            defaultMessage="User Roles"
-          />
-        </h2>
-      }
-      description={
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
+  const closePopover = () => setIsPopoverOpen(false);
+
+  const [firstRole] = user.roles;
+  const remainingRoles = user.roles.slice(1);
+
+  const renderMoreRoles = () => {
+    const button = (
+      <EuiButtonEmpty size="xs" onClick={onButtonClick} data-test-subj="userRolesExpand">
         <FormattedMessage
-          id="xpack.security.accountManagement.userProfile.userRoleDescription"
-          defaultMessage="Information about your access and permissions."
+          id="xpack.security.accountManagement.userProfile.rolesCountLabel"
+          defaultMessage="+{count, plural,
+              one {# Role}
+              other {# Roles}
+            }."
+          values={{ count: remainingRoles.length }}
         />
-      }
-    >
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.security.accountManagement.userProfile.userRolesLabel"
-            defaultMessage="User Roles"
-          />
-        }
-        fullWidth
+      </EuiButtonEmpty>
+    );
+    return (
+      <EuiPopover
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        data-test-subj="userRolesPopover"
       >
-        <EuiBadgeGroup gutterSize="s" data-test-subj="userRoles">
-          {user.roles.map((role) => (
-            <EuiBadge key={role} color="hollow" data-test-subj={`role${role}`}>
+        <EuiBadgeGroup gutterSize="xs" data-test-subj="remainingRoles">
+          {remainingRoles.map((role) => (
+            <EuiBadge color="hollow" key={role}>
               {role}
             </EuiBadge>
           ))}
         </EuiBadgeGroup>
-      </EuiFormRow>
-    </EuiDescribedFormGroup>
+      </EuiPopover>
+    );
+  };
+
+  return (
+    <>
+      <EuiBadge key={firstRole} color="hollow" data-test-subj={`role${firstRole}`}>
+        {firstRole}
+      </EuiBadge>
+      {remainingRoles.length ? renderMoreRoles() : null}
+    </>
   );
 }
 
@@ -623,7 +634,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           defaultMessage="Username"
         />
       ),
-      description: user.username as string | undefined,
+      description: user.username as string | undefined | JSX.Element,
       helpText: (
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.usernameHelpText"
@@ -669,6 +680,23 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
       testSubj: 'email',
     });
   }
+
+  rightSideItems.push({
+    title: (
+      <FormattedMessage
+        id="xpack.security.accountManagement.userProfile.rolesLable"
+        defaultMessage="Roles"
+      />
+    ),
+    description: <UserRoles user={user} />,
+    helpText: (
+      <FormattedMessage
+        id="xpack.security.accountManagement.userProfile.rolesHelpText"
+        defaultMessage="Your access and permissions."
+      />
+    ),
+    testSubj: 'userRoles',
+  });
 
   return (
     <>
@@ -741,7 +769,6 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   user={user}
                   onShowPasswordForm={() => setShowChangePasswordForm(true)}
                 />
-                <UserRoles user={user} />
                 {isCloudUser ? null : (
                   <UserSettingsEditor
                     formik={formik}
