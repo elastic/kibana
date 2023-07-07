@@ -192,5 +192,88 @@ describe('lens_error_helpers', () => {
         'Network error, try again later or contact your administrator.',
       ]);
     });
+
+    it('should report two specific errors in case of an unsupported operation applied to a TSDB counter', () => {
+      expect(
+        getOriginalRequestErrorMessages({
+          stack:
+            'Error: EsError: Field [bytes_counter] of type [long][counter] is not supported for aggregation [sum]',
+          message:
+            '[layeredXyVis] > [esaggs] > EsError: Field [bytes_counter] of type [long][counter] is not supported for aggregation [sum]',
+          name: 'Error',
+          original: {
+            attributes: {
+              type: 'status_exception',
+              reason: 'error while executing search',
+              caused_by: {
+                type: 'search_phase_execution_exception',
+                reason: 'all shards failed',
+                phase: 'query',
+                grouped: true,
+                failed_shards: [
+                  {
+                    shard: 0,
+                    index: 'tsdb_index',
+                    reason: {
+                      type: 'illegal_argument_exception',
+                      reason:
+                        'Field [bytes_counter] of type [long][counter] is not supported for aggregation [sum]',
+                    },
+                  },
+                ],
+                caused_by: {
+                  type: 'illegal_argument_exception',
+                  reason:
+                    'Field [bytes_counter] of type [long][counter] is not supported for aggregation [sum]',
+                  caused_by: {
+                    type: 'illegal_argument_exception',
+                    reason:
+                      'Field [bytes_counter] of type [long][counter] is not supported for aggregation [sum]',
+                  },
+                },
+              },
+            },
+            err: {
+              message:
+                'status_exception\n\tCaused by:\n\t\tsearch_phase_execution_exception: all shards failed',
+              statusCode: 400,
+              attributes: {
+                type: 'status_exception',
+                reason: 'error while executing search',
+                caused_by: {
+                  type: 'search_phase_execution_exception',
+                  reason: 'all shards failed',
+                  phase: 'query',
+                  grouped: true,
+                  failed_shards: [
+                    {
+                      shard: 0,
+                      index: 'tsdb_index',
+                      reason: {
+                        type: 'illegal_argument_exception',
+                        reason:
+                          'Field [bytes_counter] of type [long][counter] is not supported for aggregation [sum]',
+                      },
+                    },
+                  ],
+                  caused_by: {
+                    type: 'illegal_argument_exception',
+                    reason:
+                      'Field [bytes_counter] of type [long][counter] is not supported for aggregation [sum]',
+                    caused_by: {
+                      type: 'illegal_argument_exception',
+                      reason:
+                        'Field [bytes_counter] of type [long][counter] is not supported for aggregation [sum]',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        } as Error)
+      ).toEqual([
+        'The field [bytes_counter] of type [counter] has been used with the unsupported operation [sum].',
+      ]);
+    });
   });
 });
