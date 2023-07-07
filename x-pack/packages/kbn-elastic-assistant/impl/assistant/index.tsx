@@ -109,8 +109,9 @@ const AssistantComponent: React.FC<Props> = ({
       conversations[selectedConversationId] ?? BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE];
     if (!isAssistantEnabled) {
       if (
+        conversation.messages.length === 0 ||
         conversation.messages[conversation.messages.length - 1].content !==
-        enterpriseMessaging[0].content
+          enterpriseMessaging[0].content
       ) {
         return {
           ...conversation,
