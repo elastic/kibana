@@ -51,7 +51,7 @@ const Nav = withRouter(({ history, navigateToApp, pages }: NavProps) => {
     <EuiSideNav
       items={[
         {
-          name: 'Embeddable explorer',
+          name: 'Embeddable examples',
           id: 'home',
           items: [...navItems],
         },
@@ -99,12 +99,11 @@ const EmbeddableExplorerApp = ({
       ),
     },
     {
-      title: 'List container embeddable',
+      title: 'Container embeddable',
       id: 'listContainerSection',
       component: (
         <ListContainerExample
           listContainerEmbeddableFactory={embeddableExamples.factories.getListContainerEmbeddableFactory()}
-          searchableListContainerEmbeddableFactory={embeddableExamples.factories.getSearchableListContainerEmbeddableFactory()}
         />
       ),
     },
