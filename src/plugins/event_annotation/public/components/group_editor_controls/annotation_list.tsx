@@ -7,13 +7,13 @@
  */
 
 import { css } from '@emotion/react';
-import { DragContext, DragDrop, DropTargetSwapDuplicateCombine } from '@kbn/dom-drag-drop';
+import { DragDrop, DropTargetSwapDuplicateCombine } from '@kbn/dom-drag-drop';
 import {
   DimensionButton,
   DimensionTrigger,
   EmptyDimensionButton,
 } from '@kbn/visualization-ui-components/public';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
@@ -34,7 +34,7 @@ export const AnnotationList = ({
     setNewAnnotationId(uuidv4());
   }, [annotations.length]);
 
-  const [{ dragging }] = useContext(DragContext);
+  const [{ dragging }] = [{ dragging: false }];
 
   const addAnnotationText = i18n.translate('eventAnnotation.annotationList.add', {
     defaultMessage: 'Add annotation',
