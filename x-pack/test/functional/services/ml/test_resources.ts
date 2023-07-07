@@ -521,11 +521,12 @@ export function MachineLearningTestResourcesProvider(
       await this.deleteSavedObjectById(savedObjectId, SavedObjectType.ML_JOB, true, space);
     },
 
-    async cleanMLSavedObjects(spaces?: string[]) {
+    async cleanMLSavedObjects(additionalSpaces: string[] = []) {
+      // clean default space
       await this.cleanMLJobSavedObjects();
       await this.cleanMLTrainedModelsSavedObjects();
 
-      for (const space of spaces ?? [undefined]) {
+      for (const space of additionalSpaces) {
         await this.cleanMLJobSavedObjects(space);
         await this.cleanMLTrainedModelsSavedObjects(space);
       }
