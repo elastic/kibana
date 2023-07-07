@@ -105,7 +105,7 @@ export const useConnectorSetup = ({
     const timeoutId = setTimeout(() => {
       bottomRef.current?.scrollIntoView({ block: 'end' });
       return setCurrentMessageIndex(currentMessageIndex + 1);
-    }, conversation.messages[currentMessageIndex].presentation?.delay ?? 0);
+    }, conversation.messages[currentMessageIndex]?.presentation?.delay ?? 0);
     return () => clearTimeout(timeoutId);
   }, [conversation.messages, currentMessageIndex]);
 
@@ -131,7 +131,7 @@ export const useConnectorSetup = ({
       }
       const isLastMessage = index === length - 1;
       const enableStreaming =
-        (message.presentation?.stream ?? false) && currentMessageIndex !== length - 1;
+        (message?.presentation?.stream ?? false) && currentMessageIndex !== length - 1;
       return (
         <StreamingText
           text={message.content}
