@@ -8,15 +8,17 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import {
+  useLogHighlightsStateContext,
+  useLogPositionStateContext,
+  useLogViewContext,
+} from '@kbn/logs-shared-plugin/public';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
 import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
 import { LogTextScaleControls } from '../../../components/logging/log_text_scale_controls';
 import { LogTextWrapControls } from '../../../components/logging/log_text_wrap_controls';
-import { useLogHighlightsStateContext } from '../../../containers/logs/log_highlights/log_highlights';
-import { useLogPositionStateContext } from '../../../containers/logs/log_position';
 import { useLogViewConfigurationContext } from '../../../containers/logs/log_view_configuration';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useLogViewContext } from '../../../hooks/use_log_view';
 import { StreamLiveButton } from './components/stream_live_button';
 
 export const LogsToolbar = () => {

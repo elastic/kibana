@@ -52,7 +52,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
   alert,
 }) => {
   const { services } = useKibanaContextForPlugin();
-  const { dataViews, logViews } = services;
+  const { dataViews, logsShared } = services;
   const [dataView, setDataView] = useState<DataView | undefined>();
   const [esSearchQuery, setEsSearchQuery] = useState<QueryDslQueryContainer | undefined>();
   const [logSpikeParams, setLogSpikeParams] = useState<
@@ -61,9 +61,8 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
 
   useEffect(() => {
     const getDataView = async () => {
-      const { timestampField, dataViewReference } = await logViews.client.getResolvedLogView(
-        rule.params.logView
-      );
+      const { timestampField, dataViewReference } =
+        await logsShared.logViews.client.getResolvedLogView(rule.params.logView);
 
       if (dataViewReference.id) {
         const logDataView = await dataViews.get(dataViewReference.id);
@@ -94,7 +93,7 @@ export const ExplainLogRateSpikes: FC<AlertDetailsExplainLogRateSpikesSectionPro
     ) {
       getDataView();
     }
-  }, [rule, alert, dataViews, logViews]);
+  }, [rule, alert, dataViews, logsShared]);
 
   // Identify `intervalFactor` to adjust time ranges based on alert settings.
   // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.

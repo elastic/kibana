@@ -218,6 +218,30 @@ describe('EditableTitle', () => {
     );
   });
 
+  it('does not submit the title is empty', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <EditableTitle {...defaultProps} />
+      </TestProviders>
+    );
+
+    wrapper.find('button[data-test-subj="editable-title-edit-icon"]').simulate('click');
+    wrapper.update();
+
+    wrapper
+      .find('input[data-test-subj="editable-title-input-field"]')
+      .simulate('change', { target: { value: '' } });
+
+    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
+    wrapper.update();
+    expect(wrapper.find('.euiFormErrorText').text()).toBe('A name is required.');
+
+    expect(submitTitle).not.toHaveBeenCalled();
+    expect(wrapper.find('[data-test-subj="editable-title-edit-icon"]').first().exists()).toBe(
+      false
+    );
+  });
+
   it('does not show an error after a previous edit error was displayed', () => {
     const longTitle = 'a'.repeat(161);
 
