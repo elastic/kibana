@@ -164,7 +164,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
   const handleQueryFlyoutClose = useCallback(() => setQueryDetailsFlyoutOpen(null), []);
 
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
+    Record<string, React.ReactNode>
+  >({});
   const renderIDColumn = useCallback(
     (id: string) => (
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -265,7 +267,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     [data, getHandleErrorsToggle, itemIdToExpandedRowMap]
   );
 
-  const getItemId = useCallback((item: PackItem) => get(item, 'id'), []);
+  const getItemId = useCallback((item: PackItem) => get(item, 'id'), []) as unknown as string;
 
   const renderResultActions = useCallback(
     (row: { action_id: string }) => {
@@ -330,6 +332,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         width: '40%',
       },
       {
+        field: '',
         name: i18n.translate('xpack.osquery.pack.queriesTable.docsResultsColumnTitle', {
           defaultMessage: 'Docs',
         }),
@@ -337,6 +340,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         render: renderDocsColumn,
       },
       {
+        field: '',
         name: i18n.translate('xpack.osquery.pack.queriesTable.agentsResultsColumnTitle', {
           defaultMessage: 'Agents',
         }),
@@ -344,6 +348,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         render: renderAgentsColumn,
       },
       {
+        field: '',
         name: i18n.translate('xpack.osquery.pack.queriesTable.viewResultsColumnTitle', {
           defaultMessage: 'View results',
         }),
@@ -351,6 +356,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         render: renderResultActions,
       },
       {
+        field: '',
         id: 'actions',
         width: '45px',
         isVisuallyHiddenLabel: true,
@@ -374,7 +380,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const sorting = useMemo(
     () => ({
       sort: {
-        field: 'id' as keyof PackItem,
+        field: 'id' as const,
         direction: Direction.asc,
       },
     }),
@@ -408,21 +414,15 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           agentIds={agentIds}
         />
       )}
-      {/* eslint-disable @typescript-eslint/ban-ts-comment */}
       <EuiBasicTable
         css={euiBasicTableCss}
         items={data ?? EMPTY_ARRAY}
-        // @ts-ignore
         itemId={getItemId}
-        // @ts-ignore
         columns={columns}
-        // @ts-ignore
         sorting={sorting}
-        // @ts-ignore
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         isExpandable
       />
-      {/* eslint-enable @typescript-eslint/ban-ts-comment */}
       {queryDetailsFlyoutOpen ? (
         <QueryDetailsFlyout onClose={handleQueryFlyoutClose} action={queryDetailsFlyoutOpen} />
       ) : null}

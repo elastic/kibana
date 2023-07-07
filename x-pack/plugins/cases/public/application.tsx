@@ -28,7 +28,9 @@ export const renderApp = (deps: RenderAppProps) => {
 
   ReactDOM.render(<App deps={deps} />, element);
 
-  return () => {};
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
 };
 
 interface CasesAppWithContextProps {
