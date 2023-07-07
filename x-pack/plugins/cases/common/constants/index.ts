@@ -111,6 +111,7 @@ export const MAX_CATEGORY_FILTER_LENGTH = 100 as const;
 export const MAX_TAGS_FILTER_LENGTH = 100 as const;
 export const MAX_ASSIGNEES_FILTER_LENGTH = 100 as const;
 export const MAX_REPORTERS_FILTER_LENGTH = 100 as const;
+export const MAX_SUPPORTED_CONNECTORS_RETURNED = 1000 as const;
 
 /**
  * Validation
@@ -123,6 +124,7 @@ export const MAX_COMMENT_LENGTH = 30000 as const;
 export const MAX_LENGTH_PER_TAG = 256 as const;
 export const MAX_TAGS_PER_CASE = 200 as const;
 export const MAX_DELETE_IDS_LENGTH = 100 as const;
+export const MAX_CASES_TO_UPDATE = 100 as const;
 
 /**
  * Cases features

@@ -169,7 +169,7 @@ Object {
                 class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
               >
                 <button
-                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-warning"
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
                   data-test-subj="actionConnectorsWarningsCallOutButton"
                   type="button"
                 >
@@ -233,7 +233,7 @@ Object {
               class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
             >
               <button
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-warning"
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
                 data-test-subj="actionConnectorsWarningsCallOutButton"
                 type="button"
               >
@@ -354,7 +354,7 @@ Object {
                 class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
               >
                 <button
-                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-warning"
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
                   data-test-subj="actionConnectorsWarningsCallOutButton"
                   type="button"
                 >
@@ -418,7 +418,7 @@ Object {
               class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
             >
               <button
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-warning"
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
                 data-test-subj="actionConnectorsWarningsCallOutButton"
                 type="button"
               >
@@ -539,7 +539,7 @@ Object {
                 class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
               >
                 <button
-                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-warning"
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
                   data-test-subj="actionConnectorsWarningsCallOutButton"
                   type="button"
                 >
@@ -603,7 +603,7 @@ Object {
               class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
             >
               <button
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-warning"
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
                 data-test-subj="actionConnectorsWarningsCallOutButton"
                 type="button"
               >

@@ -57,7 +57,7 @@ Array [
         >
           <button
             aria-label="close"
-            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
+            class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
             type="button"
           >
             <span
