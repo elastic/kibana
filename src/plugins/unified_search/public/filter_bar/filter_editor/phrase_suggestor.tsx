@@ -91,7 +91,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
       useTimeRange: timeRangeForSuggestionsOverride,
       boolFilter: buildQueryFromFilters(filtersForSuggestions, undefined).filter,
       method: filtersForSuggestions?.length ? 'terms_agg' : undefined,
-      suggestionType: this.props.suggestionsAbstraction?.type,
+      querySuggestionKey: this.props.suggestionsAbstraction?.type,
     });
 
     this.setState({ suggestions, isLoading: false });
