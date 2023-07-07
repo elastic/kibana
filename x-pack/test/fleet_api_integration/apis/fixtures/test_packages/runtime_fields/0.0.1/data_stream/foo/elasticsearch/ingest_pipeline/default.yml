@@ -4,6 +4,9 @@ processors:
 - set:
     field: sample_field
     value: "1"
+- set:
+    field: my_date
+    copy_from: "@timestamp"
 on_failure:
 - set:
     field: error.message

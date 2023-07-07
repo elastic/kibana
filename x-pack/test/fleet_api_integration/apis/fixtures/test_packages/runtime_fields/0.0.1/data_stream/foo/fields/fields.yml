@@ -7,13 +7,21 @@
   type: keyword
   runtime: >-
     emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))
+- name: my_date
+  type: date
+  date_format: "yyyy-MM-dd"
+  runtime: true
+- name: to_be_long
+  type: long
+  runtime: true
 - name: runtime.date
   type: date
   date_format: date_optional_time
   runtime: >-
-    emit(doc['@timestamp'].value)
+    emit(doc['@timestamp'].value.toLocalDate().toEpochDay())
 - name: labels.*
   type: keyword
+  object_type_mapping_type: double
   runtime: true
 - name: responses
   type: group

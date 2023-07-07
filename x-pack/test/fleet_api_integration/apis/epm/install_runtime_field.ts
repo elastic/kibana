@@ -64,13 +64,17 @@ export default function (providerContext: FtrProviderContext) {
           },
           type: 'keyword',
         },
+        my_date: {
+          format: 'yyyy-MM-dd',
+          type: 'date',
+        },
         'responses.runtime_group_boolean': {
           type: 'boolean',
         },
         'runtime.date': {
           format: 'date_optional_time',
           script: {
-            source: "emit(doc['@timestamp'].value)",
+            source: "emit(doc['@timestamp'].value.toLocalDate().toEpochDay())",
           },
           type: 'date',
         },
@@ -84,6 +88,9 @@ export default function (providerContext: FtrProviderContext) {
         runtime_boolean: {
           type: 'boolean',
         },
+        to_be_long: {
+          type: 'long',
+        },
       });
 
       const dynamicTemplates = template.template.mappings.dynamic_templates;
@@ -91,7 +98,7 @@ export default function (providerContext: FtrProviderContext) {
         {
           'labels.*': {
             path_match: 'labels.*',
-            match_mapping_type: 'string',
+            match_mapping_type: 'double',
             runtime: {
               type: 'keyword',
             },

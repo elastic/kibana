@@ -165,7 +165,7 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
   if (Object.keys(runtimeFields).length > 0) {
     indexTemplateMappings.runtime = runtimeFields;
   }
-  console.log('Final index template mappings: ', indexTemplateMappings);
+  console.log('Final index template mappings: ', JSON.stringify(indexTemplateMappings, null, 2));
   return indexTemplateMappings;
 }
 
@@ -236,6 +236,7 @@ function _generateMappings(
               properties: dynProperties,
               runtimeProperties: fieldProps,
             });
+            // ctx.addRuntimeField({ path, properties: fieldProps });
           }
           return;
         }
