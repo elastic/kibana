@@ -74,8 +74,8 @@ export class NavigationEmbeddableFactoryDefinition
   ) {
     if (!parent) return {};
 
-    const { openCreateNewFlyout: createNavigationEmbeddable } = await import(
-      '../editor/open_create_new_flyout'
+    const { openEditorFlyout: createNavigationEmbeddable } = await import(
+      '../editor/open_editor_flyout'
     );
 
     const input = await createNavigationEmbeddable(

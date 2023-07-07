@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { Subject } from 'rxjs';
-import { v4 as uuidv4 } from 'uuid';
 import { skip, take, takeUntil } from 'rxjs/operators';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -21,15 +20,15 @@ import { NavigationEmbeddablePanelEditor } from '../components/navigation_embedd
 /**
  * @throws in case user cancels
  */
-export async function openCreateNewFlyout(
+export async function openEditorFlyout(
   initialInput?: Omit<NavigationEmbeddableInput, 'id'>,
   parentDashboard?: DashboardContainer
 ): Promise<Partial<NavigationEmbeddableInput>> {
   return new Promise((resolve, reject) => {
     const closed$ = new Subject<true>();
 
-    const onSave = (containerInput: Partial<NavigationEmbeddableInput>) => {
-      resolve(containerInput);
+    const onSave = (partialInput: Partial<NavigationEmbeddableInput>) => {
+      resolve(partialInput);
       editorFlyout.close();
     };
 
@@ -50,7 +49,7 @@ export async function openCreateNewFlyout(
     const editorFlyout = coreServices.overlays.openFlyout(
       toMountPoint(
         <NavigationEmbeddablePanelEditor
-          initialInput={{ id: uuidv4(), ...initialInput }}
+          initialInput={initialInput ?? {}}
           onClose={onCancel}
           onSave={onSave}
           parentDashboard={parentDashboard}
