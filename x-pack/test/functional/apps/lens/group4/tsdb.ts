@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { partition } from 'lodash';
 import moment from 'moment';
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
