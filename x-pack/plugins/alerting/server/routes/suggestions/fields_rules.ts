@@ -29,7 +29,7 @@ export function registerFieldsRoute(
 ) {
   router.post(
     {
-      path: '/internal/rules/suggestions/fields',
+      path: '/internal/rules/saved_objects/fields',
       validate: {
         body: schema.nullable(
           schema.object({

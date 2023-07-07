@@ -32,7 +32,7 @@ describe('registerFieldsRoute', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/internal/rules/suggestions/fields"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/rules/saved_objects/fields"`);
 
     const [context, req, res] = mockHandlerArguments(
       {},
@@ -67,7 +67,7 @@ describe('registerFieldsRoute', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/internal/rules/suggestions/fields"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/rules/saved_objects/fields"`);
 
     const [context, req, res] = mockHandlerArguments(
       {},

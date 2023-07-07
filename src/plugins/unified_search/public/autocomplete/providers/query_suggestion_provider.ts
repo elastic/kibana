@@ -45,7 +45,6 @@ export interface QuerySuggestionBasic {
   start: number;
   text: string;
   cursorIndex?: number;
-  displayText?: string;
 }
 
 /** @public **/

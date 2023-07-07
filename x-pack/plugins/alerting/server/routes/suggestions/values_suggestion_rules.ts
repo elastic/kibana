@@ -32,15 +32,12 @@ const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
 };
 
 export const RulesSuggestionsSchema = {
-  body: schema.object(
-    {
-      field: schema.string(),
-      query: schema.string(),
-      filters: schema.maybe(schema.any()),
-      fieldMeta: schema.maybe(schema.any()),
-    },
-    { unknowns: 'allow' }
-  ),
+  body: schema.object({
+    field: schema.string(),
+    query: schema.string(),
+    filters: schema.maybe(schema.any()),
+    fieldMeta: schema.maybe(schema.any()),
+  }),
 };
 
 export function registerValueSuggestionsRoute(

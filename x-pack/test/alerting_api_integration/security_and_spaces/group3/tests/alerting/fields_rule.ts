@@ -20,7 +20,7 @@ export default function getRuleFieldsTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle request appropriately to get rule fields', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/internal/rules/suggestions/fields`)
+            .post(`${getUrlPrefix(space.id)}/internal/rules/saved_objects/fields`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send();

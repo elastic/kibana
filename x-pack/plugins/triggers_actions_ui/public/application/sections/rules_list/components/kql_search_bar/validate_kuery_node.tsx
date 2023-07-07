@@ -35,8 +35,15 @@ export const validateFieldsKueryNode = ({
   suggestionsAbstraction: SuggestionsAbstraction;
 }) => {
   const fields = Object.values(suggestionsAbstraction.fields).reduce<string[]>((acc, saf) => {
-    if (!acc.includes(saf.displayField)) {
+    if (saf.displayField && !acc.includes(saf.displayField)) {
       acc.push(saf.displayField);
+    }
+    if (
+      saf.displayField &&
+      saf.nestedDisplayField &&
+      !acc.includes(`${saf.displayField}.${saf.nestedDisplayField}`)
+    ) {
+      acc.push(`${saf.displayField}.${saf.nestedDisplayField}`);
     }
     return acc;
   }, []);
@@ -71,6 +78,9 @@ const iterateFieldsKueryNode = ({
   let localNestedKeys: string | undefined;
   if (localStoreValue === undefined) {
     localStoreValue = astFilter.type === 'function' && astFunctionType.includes(astFilter.function);
+  }
+  if (astFilter.type === 'function' && astFilter.function === 'nested') {
+    hasNestedKey = true;
   }
 
   astFilter.arguments.forEach((ast: KueryNode, index: number) => {

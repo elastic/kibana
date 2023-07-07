@@ -40,8 +40,10 @@ export interface SuggestionsAbstraction {
     {
       field: string;
       fieldToQuery: string;
-      displayField: string;
+      displayField: string | undefined;
+      nestedDisplayField?: string;
       nestedField?: string;
+      nestedPath?: string;
     }
   >;
 }

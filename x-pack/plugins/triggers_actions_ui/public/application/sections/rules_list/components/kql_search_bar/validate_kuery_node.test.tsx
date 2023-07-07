@@ -63,6 +63,69 @@ describe('validateFieldsKueryNode', () => {
     `);
   });
 
+  test('validate a valid nested kuery node', () => {
+    const astFilter = fromKueryExpression('actions: { id: ".email" } and enabled: true');
+
+    expect(
+      validateFieldsKueryNode({
+        astFilter,
+        suggestionsAbstraction: TestSuggestionsAbstractions,
+      })
+    ).toMatchInlineSnapshot(`undefined`);
+
+    expect(astFilter).toMatchInlineSnapshot(`
+      Object {
+        "arguments": Array [
+          Object {
+            "arguments": Array [
+              Object {
+                "isQuoted": false,
+                "type": "literal",
+                "value": "alert.attributes.actions",
+              },
+              Object {
+                "arguments": Array [
+                  Object {
+                    "isQuoted": false,
+                    "type": "literal",
+                    "value": "actionTypeId",
+                  },
+                  Object {
+                    "isQuoted": true,
+                    "type": "literal",
+                    "value": ".email",
+                  },
+                ],
+                "function": "is",
+                "type": "function",
+              },
+            ],
+            "function": "nested",
+            "type": "function",
+          },
+          Object {
+            "arguments": Array [
+              Object {
+                "isQuoted": false,
+                "type": "literal",
+                "value": "alert.attributes.enabled",
+              },
+              Object {
+                "isQuoted": false,
+                "type": "literal",
+                "value": true,
+              },
+            ],
+            "function": "is",
+            "type": "function",
+          },
+        ],
+        "function": "and",
+        "type": "function",
+      }
+    `);
+  });
+
   test('validate a NON valid kuery node', () => {
     const astFilter = fromKueryExpression('tags: "fast" and foo: "bar"');
 

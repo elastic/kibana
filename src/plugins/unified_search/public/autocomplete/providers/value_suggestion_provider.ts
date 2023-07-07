@@ -24,7 +24,7 @@ interface ValueSuggestionsGetFnArgs {
   boolFilter?: any[];
   signal?: AbortSignal;
   method?: ValueSuggestionsMethod;
-  suggestionType?: 'rules' | 'cases' | 'alerts';
+  querySuggestionKey?: 'rules' | 'cases' | 'alerts';
 }
 
 const getAutocompleteTimefilter = ({ timefilter }: TimefilterSetup, indexPattern: DataView) => {
@@ -63,12 +63,12 @@ export const setupValueSuggestionProvider = (
       method: ValueSuggestionsMethod = core.uiSettings.get<ValueSuggestionsMethod>(
         UI_SETTINGS.AUTOCOMPLETE_VALUE_SUGGESTION_METHOD
       ),
-      suggestionType?: string
+      querySuggestionKey?: string
     ) => {
       usageCollector?.trackRequest();
       let path = `/internal/kibana/suggestions/values/${index}`;
-      if (suggestionType) {
-        path = `/internal/${suggestionType}/suggestions/values`;
+      if (querySuggestionKey) {
+        path = `/internal/${querySuggestionKey}/suggestions/values`;
       }
       return core.http
         .fetch<T>(path, {
@@ -78,7 +78,7 @@ export const setupValueSuggestionProvider = (
             field: field.name,
             fieldMeta: field?.toSpec?.(),
             filters,
-            method,
+            ...(querySuggestionKey === undefined ? { method } : { fieldMeta: field }),
           }),
           signal,
           version: '1',
@@ -99,7 +99,7 @@ export const setupValueSuggestionProvider = (
     boolFilter,
     signal,
     method,
-    suggestionType,
+    querySuggestionKey,
   }: ValueSuggestionsGetFnArgs): Promise<any[]> => {
     const shouldSuggestValues = core!.uiSettings.get<boolean>(
       UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES
@@ -129,7 +129,15 @@ export const setupValueSuggestionProvider = (
     const filters = [...(boolFilter ? boolFilter : []), ...filterQuery];
     try {
       usageCollector?.trackCall();
-      return await requestSuggestions(title, field, query, filters, signal, method, suggestionType);
+      return await requestSuggestions(
+        title,
+        field,
+        query,
+        filters,
+        signal,
+        method,
+        querySuggestionKey
+      );
     } catch (e) {
       if (!signal?.aborted) {
         usageCollector?.trackError();

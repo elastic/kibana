@@ -14,16 +14,24 @@ describe('enhanceSuggestionAbstractionFields', () => {
       Object {
         "fields": Object {
           "actions": Object {
-            "displayField": "actions",
             "field": "alert.actions.actionTypeId",
-            "fieldToQuery": "alert.attributes.actions.actionTypeId",
-            "nestedField": "alert.actions:{ actionTypeId  }",
+            "fieldToQuery": "alert.attributes.actions",
+            "nestedField": "actionTypeId",
+            "nestedPath": "alert.actions",
+          },
+          "actions.id": Object {
+            "field": "alert.actions.actionTypeId",
+            "fieldToQuery": "actionTypeId",
+            "nestedField": "actionTypeId",
+            "nestedPath": "alert.actions",
           },
           "alert.actions.actionTypeId": Object {
             "displayField": "actions",
             "field": "alert.actions.actionTypeId",
-            "fieldToQuery": "alert.attributes.actions.actionTypeId",
-            "nestedField": "alert.actions:{ actionTypeId  }",
+            "fieldToQuery": "alert.attributes.actions",
+            "nestedDisplayField": "id",
+            "nestedField": "actionTypeId",
+            "nestedPath": "alert.actions",
           },
           "alert.alertTypeId": Object {
             "displayField": "type",
@@ -66,42 +74,34 @@ describe('enhanceSuggestionAbstractionFields', () => {
             "fieldToQuery": "alert.attributes.tags",
           },
           "enabled": Object {
-            "displayField": "enabled",
             "field": "alert.enabled",
             "fieldToQuery": "alert.attributes.enabled",
           },
           "lastResponse": Object {
-            "displayField": "lastResponse",
             "field": "alert.lastRun.outcome",
             "fieldToQuery": "alert.attributes.lastRun.outcome",
           },
           "muted": Object {
-            "displayField": "muted",
             "field": "alert.muteAll",
             "fieldToQuery": "alert.attributes.muteAll",
           },
           "name": Object {
-            "displayField": "name",
             "field": "alert.name.keyword",
             "fieldToQuery": "alert.attributes.name.keyword",
           },
           "tags": Object {
-            "displayField": "tags",
             "field": "alert.tags",
             "fieldToQuery": "alert.attributes.tags",
           },
           "threat.tactic.name": Object {
-            "displayField": "threat.tactic.name",
             "field": "alert.params.threat.tactic.name",
             "fieldToQuery": "alert.attributes.params.threat.tactic.name",
           },
           "threat.technique.name": Object {
-            "displayField": "threat.technique.name",
             "field": "alert.params.threat.technique.name",
             "fieldToQuery": "alert.attributes.params.threat.technique.name",
           },
           "type": Object {
-            "displayField": "type",
             "field": "alert.alertTypeId",
             "fieldToQuery": "alert.attributes.alertTypeId",
           },

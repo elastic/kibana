@@ -56,7 +56,7 @@ export const setupGetValueSuggestions: KqlQuerySuggestionProvider = (
           useTimeRange,
           signal,
           method,
-          suggestionType: suggestionsAbstraction?.type,
+          querySuggestionKey: suggestionsAbstraction?.type,
         }).then((valueSuggestions) => {
           const quotedValues = valueSuggestions.map((value) =>
             typeof value === 'string' ? `"${escapeQuotes(value)}"` : `${value}`

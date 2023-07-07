@@ -15,7 +15,17 @@ export const enhanceSuggestionAbstractionFields = (
     fields: Object.entries(enhanceSuggestionsAbstraction.fields).reduce<
       SuggestionsAbstraction['fields']
     >((acc, [key, value]) => {
-      Object.assign(acc, { [value.displayField]: value });
+      const { displayField, nestedDisplayField, ...rest } = value;
+      if (nestedDisplayField && displayField) {
+        Object.assign(acc, {
+          [`${displayField}.${nestedDisplayField}`]: { ...rest, fieldToQuery: rest.nestedField },
+        });
+        Object.assign(acc, {
+          [`${displayField}`]: rest,
+        });
+      } else if (displayField) {
+        Object.assign(acc, { [displayField]: rest });
+      }
       return acc;
     }, enhanceSuggestionsAbstraction.fields),
   };

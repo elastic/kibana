@@ -49,12 +49,7 @@ import type {
 import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
-import {
-  AutocompleteService,
-  QuerySuggestion,
-  QuerySuggestionField,
-  QuerySuggestionTypes,
-} from '../autocomplete';
+import { AutocompleteService, QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
 import { getTheme } from '../services';
 import './query_string_input.scss';
 
@@ -298,20 +293,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
           method: this.props.filtersForSuggestions?.length ? 'terms_agg' : undefined,
           suggestionsAbstraction: this.props.suggestionsAbstraction,
         })) || [];
-      return [...suggestions, ...recentSearchSuggestions].map((suggestion) => {
-        let displayText;
-        const fieldName = (suggestion as QuerySuggestionField)?.field?.name ?? '';
-        if (
-          this.props.suggestionsAbstraction &&
-          this.props.suggestionsAbstraction?.fields[fieldName]
-        ) {
-          displayText = this.props.suggestionsAbstraction?.fields[fieldName]?.displayField;
-        }
-        return {
-          ...suggestion,
-          displayText,
-        };
-      });
+      return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {
       // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error
       // Ignore aborted requests
@@ -487,7 +469,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
     if (!this.inputRef) {
       return;
     }
-    const { type, displayText = suggestion.text, start, end, cursorIndex } = suggestion;
+    const { type, text, start, end, cursorIndex } = suggestion;
 
     this.handleNestedFieldSyntaxNotification(suggestion);
 
@@ -498,7 +480,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
     }
 
     const value = query.substr(0, selectionStart) + query.substr(selectionEnd);
-    const newQueryString = value.substr(0, start) + displayText + value.substr(end);
+    const newQueryString = value.substr(0, start) + text + value.substr(end);
 
     this.reportUiCounter?.(
       METRIC_TYPE.CLICK,
@@ -512,8 +494,8 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
     this.onQueryStringChange(newQueryString);
 
     this.setState({
-      selectionStart: start + (cursorIndex ? cursorIndex : displayText.length),
-      selectionEnd: start + (cursorIndex ? cursorIndex : displayText.length),
+      selectionStart: start + (cursorIndex ? cursorIndex : text.length),
+      selectionEnd: start + (cursorIndex ? cursorIndex : text.length),
     });
     const isTypeRecentSearch = type === QuerySuggestionTypes.RecentSearch;
 

@@ -22,8 +22,10 @@ export const suggestionsAbstraction: SuggestionsAbstraction = {
     },
     'alert.actions.actionTypeId': {
       field: 'alert.actions.actionTypeId',
-      nestedField: 'alert.actions:{ actionTypeId  }',
-      fieldToQuery: 'alert.attributes.actions.actionTypeId',
+      nestedPath: 'alert.actions',
+      nestedField: 'actionTypeId',
+      nestedDisplayField: 'id',
+      fieldToQuery: 'alert.attributes.actions',
       displayField: 'actions',
     },
     'alert.alertTypeId': {

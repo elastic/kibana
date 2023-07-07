@@ -37,7 +37,7 @@ export const KqlSearchBar = React.memo<KqlSearchBarProps>(({ onQuerySubmit }) =>
     error,
   } = useAsync(async () => {
     return http.post<Array<{ name: string; esTypes: string[] }>>(
-      `/internal/rules/suggestions/fields`,
+      `/internal/rules/saved_objects/fields`,
       {
         body: JSON.stringify({
           fields: Object.keys(suggestionsAbstraction.fields).filter((key) =>
