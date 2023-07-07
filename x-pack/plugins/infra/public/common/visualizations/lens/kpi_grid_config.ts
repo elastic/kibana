@@ -19,58 +19,43 @@ export interface KPIChartProps {
   toolTip: string;
 }
 
-export const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle'>> = [
+export const KPI_CHARTS: Array<Omit<KPIChartProps, 'loading' | 'subtitle' | 'style'>> = [
   {
     type: 'cpuUsage',
     trendLine: true,
     backgroundColor: '#F1D86F',
-    title: i18n.translate(
-      'xpack.infra.assetDetailsEmbeddable.overview.metricTrend.cpuUsage.title',
-      {
-        defaultMessage: 'CPU Usage',
-      }
-    ),
+    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.cpuUsage.title', {
+      defaultMessage: 'CPU Usage',
+    }),
     toolTip: TOOLTIP.cpuUsage,
   },
   {
     type: 'normalizedLoad1m',
     trendLine: true,
     backgroundColor: '#79AAD9',
-    title: i18n.translate(
-      'xpack.infra.assetDetailsEmbeddable.overview.metricTrend.normalizedLoad1m.title',
-      {
-        defaultMessage: 'Normalized Load',
-      }
-    ),
+    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.normalizedLoad1m.title', {
+      defaultMessage: 'Normalized Load',
+    }),
     toolTip: TOOLTIP.rx,
   },
   {
     type: 'memoryUsage',
     trendLine: true,
     backgroundColor: '#A987D1',
-    title: i18n.translate(
-      'xpack.infra.assetDetailsEmbeddable.overview.metricTrend.memoryUsage.title',
-      {
-        defaultMessage: 'Memory Usage',
-      }
-    ),
-    toolTip: i18n.translate(
-      'xpack.infra.assetDetailsEmbeddable.overview.metricTrend.memoryUsage.tooltip',
-      {
-        defaultMessage: 'Main memory usage excluding page cache.',
-      }
-    ),
+    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.memoryUsage.title', {
+      defaultMessage: 'Memory Usage',
+    }),
+    toolTip: i18n.translate('xpack.infra.hostsViewPage.metricTrend.memoryUsage.tooltip', {
+      defaultMessage: 'Main memory usage excluding page cache.',
+    }),
   },
   {
     type: 'diskSpaceUsage',
     trendLine: true,
     backgroundColor: '#F5A35C',
-    title: i18n.translate(
-      'xpack.infra.assetDetailsEmbeddable.overview.metricTrend.diskSpaceUsage.title',
-      {
-        defaultMessage: 'Disk Space Usage',
-      }
-    ),
+    title: i18n.translate('xpack.infra.hostsViewPage.metricTrend.diskSpaceUsage.title', {
+      defaultMessage: 'Disk Space Usage',
+    }),
     toolTip: TOOLTIP.tx,
   },
 ];
