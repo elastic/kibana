@@ -1800,7 +1800,8 @@
                         "type": "integer"
                       }
                     }
-                  }
+                  },
+                  "maxItems": 1000
                 },
                 "examples": {
                   "findConnectorResponse": {
