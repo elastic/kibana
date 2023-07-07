@@ -67,7 +67,7 @@ export const getUseCellActionsHook = (tableId: TableId) => {
       return columns.map(
         (column) =>
           getFieldSpec(column.id) ?? {
-            name: column.id,
+            name: '',
             type: '', // When type is an empty string all cell actions are incompatible
             aggregatable: false,
             searchable: false,
