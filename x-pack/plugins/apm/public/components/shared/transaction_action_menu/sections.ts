@@ -320,7 +320,7 @@ export const getSections = ({
         title: i18n.translate(
           'xpack.apm.transactionActionMenu.serviceMap.title',
           {
-            defaultMessage: 'Service map',
+            defaultMessage: 'Service Map',
           }
         ),
         subtitle: i18n.translate(
