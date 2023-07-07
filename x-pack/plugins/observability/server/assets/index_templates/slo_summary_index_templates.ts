@@ -7,15 +7,17 @@
 
 import { SLO_RESOURCES_VERSION } from '../constants';
 
-export const getSLOSettingsTemplate = (name: string) => ({
+export const getSLOSummaryIndexTemplate = (
+  name: string,
+  indexPattern: string,
+  composedOf: string[]
+) => ({
   name,
-  template: {
-    settings: {
-      hidden: true,
-    },
-  },
+  index_patterns: [indexPattern],
+  composed_of: composedOf,
+  priority: 500,
   _meta: {
-    description: 'Settings for SLO rollup data',
+    description: 'SLO summary index template',
     version: SLO_RESOURCES_VERSION,
     managed: true,
     managed_by: 'observability',
