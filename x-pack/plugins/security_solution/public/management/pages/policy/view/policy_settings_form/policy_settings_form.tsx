@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AntivirusRegistrationCard } from './components/antivirus_registration_card';
 import { LinuxEventCollectionCard } from './components/linux_event_collection_card';
 import { MacEventCollectionCard } from './components/mac_event_collection_card';
 import { WindowsEventCollectionCard } from './components/windows_event_collection_card';
@@ -65,6 +66,9 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
       <EuiSpacer size="l" />
 
       <LinuxEventCollectionCard {...props} data-test-subj={getTestId('linuxEvents')} />
+      <EuiSpacer size="l" />
+
+      <AntivirusRegistrationCard {...props} data-test-subj={getTestId('antivirusRegistration')} />
       <EuiSpacer size="l" />
 
       <EuiSpacer size="m" />
