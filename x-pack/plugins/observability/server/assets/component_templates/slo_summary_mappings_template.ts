@@ -7,15 +7,11 @@
 
 import { SLO_RESOURCES_VERSION } from '../constants';
 
-export const getSLOMappingsTemplate = (name: string) => ({
+export const getSLOSummaryMappingsTemplate = (name: string) => ({
   name,
   template: {
     mappings: {
       properties: {
-        '@timestamp': {
-          type: 'date',
-          format: 'date_optional_time||epoch_millis',
-        },
         slo: {
           properties: {
             id: {
@@ -28,16 +24,6 @@ export const getSLOMappingsTemplate = (name: string) => ({
             instanceId: {
               type: 'keyword',
               ignore_above: 256,
-            },
-            objective: {
-              properties: {
-                target: {
-                  type: 'double',
-                },
-                sliceDurationInSeconds: {
-                  type: 'long',
-                },
-              },
             },
             budgetingMethod: {
               type: 'keyword',
@@ -52,22 +38,34 @@ export const getSLOMappingsTemplate = (name: string) => ({
                 },
               },
             },
-            numerator: {
-              type: 'long',
-            },
-            denominator: {
-              type: 'long',
-            },
-            isGoodSlice: {
-              type: 'byte',
-            },
           },
+        },
+        sliValue: {
+          type: 'double',
+        },
+        goodEvents: {
+          type: 'long',
+        },
+        totalEvents: {
+          type: 'long',
+        },
+        errorBudgetInitial: {
+          type: 'double',
+        },
+        errorBudgetConsumed: {
+          type: 'double',
+        },
+        errorBudgetRemaining: {
+          type: 'double',
+        },
+        status: {
+          type: 'byte',
         },
       },
     },
   },
   _meta: {
-    description: 'Mappings for SLO rollup data',
+    description: 'SLO summary mappings template',
     version: SLO_RESOURCES_VERSION,
     managed: true,
     managed_by: 'observability',
