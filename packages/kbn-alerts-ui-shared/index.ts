@@ -8,3 +8,4 @@
 
 export { AlertLifecycleStatusBadge } from './src/alert_lifecycle_status_badge';
 export type { AlertLifecycleStatusBadgeProps } from './src/alert_lifecycle_status_badge';
+export { MaintenanceWindowCallout } from './src/maintenance_window_callout';

@@ -22,7 +22,7 @@ export type {
   ActionResult,
   ActionTypeExecutorOptions,
   ActionType,
-  PreConfiguredAction,
+  InMemoryConnector,
   ActionsApiRequestHandlerContext,
   FindActionResult,
 } from './types';

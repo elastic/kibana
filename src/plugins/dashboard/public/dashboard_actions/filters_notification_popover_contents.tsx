@@ -26,9 +26,13 @@ import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_
 
 export interface FiltersNotificationProps {
   context: FiltersNotificationActionContext;
+  setDisableEditButton: (flag: boolean) => void;
 }
 
-export function FiltersNotificationPopoverContents({ context }: FiltersNotificationProps) {
+export function FiltersNotificationPopoverContents({
+  context,
+  setDisableEditButton,
+}: FiltersNotificationProps) {
   const { embeddable } = context;
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<Filter[]>([]);
@@ -53,6 +57,7 @@ export function FiltersNotificationPopoverContents({ context }: FiltersNotificat
           const language = getAggregateQueryMode(embeddableQuery);
           setQueryLanguage(language);
           setQueryString(embeddableQuery[language as keyof AggregateQuery]);
+          setDisableEditButton(true);
         }
       }
       setIsLoading(false);
