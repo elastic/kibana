@@ -1106,6 +1106,7 @@ paths:
                       type: string
                     referencedByCount:
                       type: integer
+                maxItems: 1000
               examples:
                 findConnectorResponse:
                   $ref: '#/components/examples/find_connector_response'
