@@ -111,6 +111,7 @@ export const MAX_CATEGORY_FILTER_LENGTH = 100 as const;
 export const MAX_TAGS_FILTER_LENGTH = 100 as const;
 export const MAX_ASSIGNEES_FILTER_LENGTH = 100 as const;
 export const MAX_REPORTERS_FILTER_LENGTH = 100 as const;
+export const MAX_SUPPORTED_CONNECTORS_RETURNED = 1000 as const;
 
 /**
  * Validation

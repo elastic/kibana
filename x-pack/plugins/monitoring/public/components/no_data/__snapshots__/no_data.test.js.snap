@@ -52,7 +52,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
             data-test-subj="enableCollectionInterval"
             type="button"
           >
@@ -68,15 +68,15 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
         class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
       />
       <button
-        class="euiButtonEmpty css-9t7nyf-empty-primary"
+        class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
         data-test-subj="useInternalCollection"
         type="button"
       >
         <span
-          class="euiButtonContent euiButtonEmpty__content"
+          class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
         >
           <span
-            class="euiButtonEmpty__text"
+            class="eui-textTruncate euiButtonEmpty__text"
           >
             <span
               class="emotion-euiTextColor-subdued"
@@ -143,7 +143,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <button
-            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-fill-primary"
+            class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
             data-test-subj="enableCollectionInterval"
             type="button"
           >
@@ -159,15 +159,15 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
         class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge emotion-euiHorizontalRule-half-l"
       />
       <button
-        class="euiButtonEmpty css-9t7nyf-empty-primary"
+        class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
         data-test-subj="useInternalCollection"
         type="button"
       >
         <span
-          class="euiButtonContent euiButtonEmpty__content"
+          class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
         >
           <span
-            class="euiButtonEmpty__text"
+            class="eui-textTruncate euiButtonEmpty__text"
           >
             <span
               class="emotion-euiTextColor-subdued"
