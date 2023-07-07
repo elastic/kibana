@@ -306,7 +306,7 @@ export class ActionsClient {
       if (foundInMemoryConnector?.isPreconfigured) {
         throw new PreconfiguredActionDisabledModificationError(
           i18n.translate('xpack.actions.serverSideErrors.predefinedActionUpdateDisabled', {
-            defaultMessage: 'Preconfigured action {id} is not allowed to update.',
+            defaultMessage: 'Preconfigured action {id} can not be updated.',
             values: {
               id,
             },

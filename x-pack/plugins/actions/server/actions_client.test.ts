@@ -2675,7 +2675,7 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Preconfigured action testPreconfigured is not allowed to update."`
+      `"Preconfigured action testPreconfigured can not be updated."`
     );
   });
 
