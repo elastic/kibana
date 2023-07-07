@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
+import { TEST_IDS } from '../../../../constants';
 import { Prompt } from '../../../../../..';
 import * as i18n from './translations';
 import { SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION } from '../translations';
@@ -56,6 +57,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
           isNewConversationDefault: sp.isNewConversationDefault ?? false,
         },
         label: sp.name,
+        'data-test-subj': `${TEST_IDS.SYSTEM_PROMPT_SELECTOR}-${sp.id}`,
       }))
     );
     const selectedOptions = useMemo<SystemPromptSelectorOption[]>(() => {
@@ -148,6 +150,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
           component={'span'}
           gutterSize={'none'}
           justifyContent="spaceBetween"
+          data-test-subj="systemPromptOptionSelector"
         >
           <EuiFlexItem grow={1} component={'span'}>
             <EuiFlexGroup alignItems="center" component={'span'} gutterSize={'s'}>
@@ -205,6 +208,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
         aria-label={i18n.SYSTEM_PROMPT_SELECTOR}
         className={SYSTEM_PROMPT_SELECTOR_CLASSNAME}
         compressed
+        data-test-subj={TEST_IDS.SYSTEM_PROMPT_SELECTOR}
         fullWidth
         placeholder={i18n.SYSTEM_PROMPT_SELECTOR}
         customOptionText={`${i18n.CUSTOM_OPTION_TEXT} {searchValue}`}

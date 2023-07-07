@@ -25,6 +25,7 @@ import type { Prompt } from '../../../types';
 import { useAssistantContext } from '../../../../assistant_context';
 import { useConversation } from '../../../use_conversation';
 import { SYSTEM_PROMPTS_TAB } from '../../../settings/assistant_settings';
+import { TEST_IDS } from '../../../constants';
 
 export interface Props {
   compressed?: boolean;
@@ -53,7 +54,10 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
 }) => {
   const {
     allSystemPrompts,
+    conversations,
+    setAllSystemPrompts,
     isSettingsModalVisible,
+    setConversations,
     setIsSettingsModalVisible,
     setSelectedSettingsTab,
   } = useAssistantContext();
@@ -70,7 +74,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
           conversationId: conversation.id,
           apiConfig: {
             ...conversation.apiConfig,
-            defaultSystemPrompt: prompt,
+            defaultSystemPromptId: prompt?.id,
           },
         });
       }
@@ -85,7 +89,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
       dropdownDisplay: (
         <EuiFlexGroup gutterSize="none" key={ADD_NEW_SYSTEM_PROMPT}>
           <EuiFlexItem grow={true}>
-            <EuiButtonEmpty iconType="plus" size="xs">
+            <EuiButtonEmpty iconType="plus" size="xs" data-test-subj="addSystemPrompt">
               {i18n.ADD_NEW_SYSTEM_PROMPT}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -98,11 +102,26 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
     };
   }, []);
 
+  // TODO: From previous onSystemPromptsChange = useCallback(
+  // if (updatedConversations && updatedConversations.length > 0) {
+  //   const updatedConversationObject = updatedConversations?.reduce<
+  //     Record<string, Conversation>
+  //   >((updatedObj, currentConv) => {
+  //     updatedObj[currentConv.id] = currentConv;
+  //     return updatedObj;
+  //   }, {});
+  //   setConversations({
+  //     ...conversations,
+  //     ...updatedConversationObject,
+  //   });
+  // }
+
   // SuperSelect State/Actions
   const options = useMemo(
     () => getOptions({ prompts: allSystemPrompts, showTitles }),
     [allSystemPrompts, showTitles]
   );
+
   const onChange = useCallback(
     (selectedSystemPromptId) => {
       if (selectedSystemPromptId === ADD_NEW_SYSTEM_PROMPT) {
@@ -151,7 +170,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
               // If the z-index is not defined, when a popover is opened, it sets the target z-index + 2000
               popoverProps={{ zIndex: euiThemeVars.euiZLevel8 }}
               compressed={compressed}
-              data-test-subj="promptSuperSelect"
+              data-test-subj={TEST_IDS.PROMPT_SUPERSELECT}
               fullWidth
               hasDividers
               itemLayoutAlign="top"

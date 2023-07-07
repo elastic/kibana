@@ -23,21 +23,25 @@ import { ModelSelector } from '../../../connectorland/models/model_selector/mode
 
 export interface ConversationSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;
+  allSystemPrompts: Prompt[];
   conversation: Conversation;
   http: HttpSetup;
   isDisabled?: boolean;
 }
 
 export const ConversationSettings: React.FC<ConversationSettingsProps> = React.memo(
-  ({ actionTypeRegistry, conversation, http, isDisabled = false }) => {
+  ({ actionTypeRegistry, allSystemPrompts, conversation, http, isDisabled = false }) => {
     const provider = useMemo(() => {
       return conversation.apiConfig?.provider;
     }, [conversation.apiConfig]);
 
-    const selectedPrompt: Prompt | undefined = useMemo(
-      () => conversation?.apiConfig.defaultSystemPrompt,
-      [conversation]
-    );
+    const selectedPrompt: Prompt | undefined = useMemo(() => {
+      const convoDefaultSystemPromptId = conversation?.apiConfig.defaultSystemPromptId;
+      if (convoDefaultSystemPromptId && allSystemPrompts) {
+        return allSystemPrompts.find((prompt) => prompt.id === convoDefaultSystemPromptId);
+      }
+      return allSystemPrompts.find((prompt) => prompt.isNewConversationDefault);
+    }, [conversation, allSystemPrompts]);
 
     return (
       <>

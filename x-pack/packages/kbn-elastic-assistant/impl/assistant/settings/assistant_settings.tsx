@@ -66,7 +66,7 @@ interface Props {
  */
 export const AssistantSettings: React.FC<Props> = React.memo(
   ({ onClose, onSave, selectedConversation, selectedTab: defaultSelectedTab }) => {
-    const { actionTypeRegistry, http } = useAssistantContext();
+    const { actionTypeRegistry, allSystemPrompts, http } = useAssistantContext();
     const [selectedTab, setSelectedTab] = useState<SettingsTabs>(
       defaultSelectedTab ?? CONVERSATIONS_TAB
     );
@@ -186,13 +186,16 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               >
                 {selectedTab === CONVERSATIONS_TAB && (
                   <ConversationSettings
+                    allSystemPrompts={allSystemPrompts}
                     actionTypeRegistry={actionTypeRegistry}
                     conversation={selectedConversation}
                     http={http}
                   />
                 )}
                 {selectedTab === QUICK_PROMPTS_TAB && <QuickPromptSettings />}
-                {selectedTab === SYSTEM_PROMPTS_TAB && <SystemPromptSettings />}
+                {selectedTab === SYSTEM_PROMPTS_TAB && (
+                  <SystemPromptSettings onSystemPromptsChange={() => {}} />
+                )}
                 {selectedTab === ANONYMIZATION_TAB && <AnonymizationSettings pageSize={5} />}
                 {selectedTab === FUNCTIONS_TAB && <></>}
                 {selectedTab === ADVANCED_TAB && <AdvancedSettings />}
