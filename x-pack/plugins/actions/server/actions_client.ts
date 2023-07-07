@@ -228,7 +228,7 @@ export class ActionsClient {
     if (foundInMemoryConnector?.isPreconfigured) {
       throw Boom.badRequest(
         i18n.translate('xpack.actions.serverSideErrors.predefinedIdConnectorAlreadyExists', {
-          defaultMessage: 'This {id} already exist in preconfigured action.',
+          defaultMessage: 'This {id} already exists in a preconfigured action.',
           values: {
             id,
           },
@@ -295,7 +295,7 @@ export class ActionsClient {
       if (foundInMemoryConnector?.isSystemAction) {
         throw Boom.badRequest(
           i18n.translate('xpack.actions.serverSideErrors.systemActionUpdateForbidden', {
-            defaultMessage: 'System action {id} is not allowed to update.',
+            defaultMessage: 'System action {id} can not be updated.',
             values: {
               id,
             },
