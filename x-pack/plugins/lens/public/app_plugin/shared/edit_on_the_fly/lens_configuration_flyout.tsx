@@ -79,6 +79,7 @@ export function LensEditConfigurationFlyout({
     activeData,
   };
 
+
   const layerPanelsProps = {
     framePublicAPI: newApi,
     datasourceMap,

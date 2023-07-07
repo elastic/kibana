@@ -11,6 +11,7 @@ import custom from '../../../assets/source_icons/custom.svg';
 import dropbox from '../../../assets/source_icons/dropbox.svg';
 import github from '../../../assets/source_icons/github.svg';
 import google_cloud_storage from '../../../assets/source_icons/google_cloud_storage.svg';
+import google_drive from '../../../assets/source_icons/google_drive.svg';
 import jira_cloud from '../../../assets/source_icons/jira_cloud.svg';
 import mongodb from '../../../assets/source_icons/mongodb.svg';
 import microsoft_sql from '../../../assets/source_icons/mssql.svg';
@@ -31,6 +32,7 @@ export const CONNECTOR_ICONS = {
   dropbox,
   github,
   google_cloud_storage,
+  google_drive,
   jira_cloud,
   microsoft_sql,
   mongodb,

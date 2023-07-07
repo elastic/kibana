@@ -34,6 +34,7 @@ import {
   VisualizationDimensionGroupConfig,
   UserMessagesGetter,
   AddLayerFunction,
+  RegisterLibraryAnnotationGroupFunction,
 } from '../../../types';
 import { LayerSettings } from './layer_settings';
 import { LayerPanelProps, ActiveDimensionState } from './types';
@@ -63,6 +64,7 @@ export function LayerPanel(
     layerIndex: number;
     isOnlyLayer: boolean;
     addLayer: AddLayerFunction;
+    registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
     updateVisualization: StateSetter<unknown>;
     updateDatasource: (
       datasourceId: string | undefined,
@@ -352,6 +354,7 @@ export function LayerPanel(
             layerId,
             visualizationState,
             updateVisualization,
+            props.registerLibraryAnnotationGroup,
             isSaveable
           )
           .map((action) => ({
@@ -385,18 +388,19 @@ export function LayerPanel(
       ].filter((i) => i.isCompatible),
     [
       activeVisualization,
+      layerId,
+      visualizationState,
+      updateVisualization,
+      props.registerLibraryAnnotationGroup,
+      isSaveable,
       core,
+      layerIndex,
       isOnlyLayer,
       isTextBasedLanguage,
+      visualizationLayerSettings,
       layerDatasource?.renderLayerSettings,
-      layerId,
-      layerIndex,
       onCloneLayer,
       onRemoveLayer,
-      updateVisualization,
-      visualizationLayerSettings,
-      visualizationState,
-      isSaveable,
     ]
   );
   const layerActionsFlyoutRef = useRef<HTMLDivElement | null>(null);

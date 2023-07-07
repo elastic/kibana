@@ -298,7 +298,13 @@ export const getXyVisualization = ({
     ];
   },
 
-  getSupportedActionsForLayer(layerId, state, setState, isSaveable) {
+  getSupportedActionsForLayer(
+    layerId,
+    state,
+    setState,
+    registerLibraryAnnotationGroup,
+    isSaveable
+  ) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
     const actions = [];
@@ -308,6 +314,7 @@ export const getXyVisualization = ({
           state,
           layer,
           setState,
+          registerLibraryAnnotationGroup,
           core,
           isSaveable,
           eventAnnotationService,

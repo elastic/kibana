@@ -258,6 +258,11 @@ export function LayerPanels(
     setNextFocusedLayerId(layerId);
   };
 
+  const registerLibraryAnnotationGroupFunction = useCallback(
+    (groupInfo) => dispatchLens(registerLibraryAnnotationGroup(groupInfo)),
+    [dispatchLens]
+  );
+
   const hideAddLayerButton = query && isOfAggregateQueryType(query);
 
   return (
@@ -273,6 +278,7 @@ export function LayerPanels(
           !hidden && (
             <LayerPanel
               {...props}
+              registerLibraryAnnotationGroup={registerLibraryAnnotationGroupFunction}
               dimensionGroups={groups}
               activeVisualization={activeVisualization}
               registerNewLayerRef={registerNewLayerRef}
@@ -381,8 +387,7 @@ export function LayerPanels(
               );
             }
           },
-          registerLibraryAnnotationGroup: (groupInfo) =>
-            dispatchLens(registerLibraryAnnotationGroup(groupInfo)),
+          registerLibraryAnnotationGroup: registerLibraryAnnotationGroupFunction,
         })}
     </EuiForm>
   );
