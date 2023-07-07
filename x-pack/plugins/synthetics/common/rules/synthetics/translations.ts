@@ -88,7 +88,7 @@ export const TlsTranslations = {
     },
   }),
   defaultRecoveryMessage: i18n.translate('xpack.synthetics.rules.tls.defaultRecoveryMessage', {
-    defaultMessage: `TLS alert for monitor "{monitorName}" has recovered - Elastic Synthetics\n\nDetails:\n\n- Summary: {summary}\n- New status : {newStatus}\n- Previous status: {previousStatus}\n- Monitor: {monitorName}  \n- Monitor URL: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}`,
+    defaultMessage: `TLS alert for monitor "{monitorName}" has recovered - Elastic Synthetics\n\nDetails:\n\n- Summary: {summary}\n- New status : {newStatus}\n- Previous status: {previousStatus}\n- Monitor: {monitorName}  \n- URL: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}`,
     values: {
       summary: '{{context.summary}}',
       previousStatus: '{{context.previousStatus}}',
