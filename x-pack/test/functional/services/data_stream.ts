@@ -16,6 +16,7 @@ const waitFor = (time: number = 1000) => new Promise((r) => setTimeout(r, time))
 export function DataStreamProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
+  const retry = getService('retry');
 
   const downsampleDefaultOptions = {
     isStream: true,
@@ -54,33 +55,51 @@ export function DataStreamProvider({ getService }: FtrProviderContext) {
     const downsampledTargetIndex = `${indexOrStream}_downsampled`;
     log.info(`add write block to "${sourceIndex}" index...`);
     await es.indices.addBlock({ index: sourceIndex, block: 'write' });
+    let waitTime = 1000;
 
-    try {
-      log.debug('Wait 1s before running the downsampling to avoid a null_pointer_exception');
-      await waitFor(1000);
+    await retry.tryForTime(
+      15000,
+      async () => {
+        log.debug(
+          `Wait ${
+            waitTime / 1000
+          }s before running the downsampling to avoid a null_pointer_exception`
+        );
+        await waitFor(waitTime);
 
-      log.info(`downsampling "${sourceIndex}" index...`);
-      await es.indices.downsample({
-        index: sourceIndex,
-        target_index: downsampledTargetIndex,
-        config: { fixed_interval: interval || downsampleDefaultOptions.interval },
-      });
-    } catch (err) {
-      if (isStream) {
-        const [exists, oldIndexExists] = await Promise.all([
-          es.indices.getDataStream({ name: indexOrStream }),
-          es.indices.exists({ index: sourceIndex }),
-        ]);
-        log.debug(`Data stream exists: ${Boolean(exists)}; old_index exists: ${oldIndexExists}`);
-      } else {
-        const exists = await es.indices.exists({ index: indexOrStream });
-        log.debug(`Index exists: ${exists}`);
+        try {
+          log.info(`downsampling "${sourceIndex}" index...`);
+          await es.indices.downsample({
+            index: sourceIndex,
+            target_index: downsampledTargetIndex,
+            config: { fixed_interval: interval || downsampleDefaultOptions.interval },
+          });
+        } catch (err) {
+          // Ignore this specific errors
+          if (err.message.match(/resource_already_exists_exception/)) {
+            log.info(`ignoring resource_already_exists_exception...`);
+            return;
+          }
+          // increase the waiting time exponentially?
+          waitTime = waitTime * 1.5;
+          // make it bubble up everything else
+          throw err;
+        }
+      },
+      async () => {
+        // provide some debug info if the retry fails
+        if (isStream) {
+          const [exists, oldIndexExists] = await Promise.all([
+            es.indices.getDataStream({ name: indexOrStream }),
+            es.indices.exists({ index: sourceIndex }),
+          ]);
+          log.debug(`Data stream exists: ${Boolean(exists)}; old_index exists: ${oldIndexExists}`);
+        } else {
+          const exists = await es.indices.exists({ index: indexOrStream });
+          log.debug(`Index exists: ${exists}`);
+        }
       }
-      if (!err.message.match(/resource_already_exists_exception/)) {
-        throw err;
-      }
-      log.info(`ignoring resource_already_exists_exception...`);
-    }
+    );
 
     if (deleteOriginal) {
       log.info(`Deleting original index ${sourceIndex}`);
