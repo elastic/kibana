@@ -199,14 +199,24 @@ export function LayerPanels(
           layerIds,
         })
       );
+      if (activeDatasourceId && onUpdateStateCb) {
+        const newState = lensStore.getState().lens;
+        onUpdateStateCb(
+          newState.datasourceStates[activeDatasourceId].state,
+          newState.visualization.state
+        );
+      }
       removeLayerRef(layerToRemoveId);
     },
     [
+      activeDatasourceId,
       activeVisualization.id,
       datasourceMap,
       datasourceStates,
       dispatchLens,
       layerIds,
+      lensStore,
+      onUpdateStateCb,
       props.framePublicAPI.datasourceLayers,
       props.uiActions,
       removeLayerRef,
@@ -246,6 +256,7 @@ export function LayerPanels(
 
   const addLayer: AddLayerFunction = (layerType, extraArg, ignoreInitialValues) => {
     const layerId = generateId();
+
     dispatchLens(addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues }));
 
     if (activeDatasourceId && onUpdateStateCb) {

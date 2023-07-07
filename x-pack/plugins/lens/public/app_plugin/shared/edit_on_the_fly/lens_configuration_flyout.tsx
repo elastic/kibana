@@ -86,7 +86,7 @@ export function LensEditConfigurationFlyout({
     core: coreStart,
     dataViews: startDependencies.dataViews,
     uiActions: startDependencies.uiActions,
-    hideLayerHeader: true,
+    hideLayerHeader: datasourceId === 'textBased',
     onUpdateStateCb: updateAll,
   };
   return (
