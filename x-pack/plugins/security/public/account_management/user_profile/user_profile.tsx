@@ -590,7 +590,13 @@ function UserRoles({ user }: { user: AuthenticatedUser }) {
         closePopover={closePopover}
         data-test-subj="userRolesPopover"
       >
-        <EuiBadgeGroup gutterSize="xs" data-test-subj="remainingRoles">
+        <EuiBadgeGroup
+          gutterSize="xs"
+          data-test-subj="remainingRoles"
+          style={{
+            maxWidth: '200px',
+          }}
+        >
           {remainingRoles.map((role) => (
             <EuiBadge color="hollow" key={role}>
               {role}
