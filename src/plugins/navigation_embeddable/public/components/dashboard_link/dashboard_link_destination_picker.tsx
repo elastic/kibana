@@ -13,8 +13,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiSpacer,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiHighlight,
   EuiSelectable,
   EuiFieldSearch,
@@ -27,11 +25,13 @@ import { DashboardLinkEmbeddableStrings } from './dashboard_link_strings';
 
 export const DashboardLinkDestinationPicker = ({
   setDestination,
+  setPlaceholder,
   currentDestination,
   parentDashboard,
   ...other
 }: {
   setDestination: (destination?: string) => void;
+  setPlaceholder: (placeholder?: string) => void;
   currentDestination?: string;
   parentDashboard?: DashboardContainer;
 }) => {
@@ -51,11 +51,18 @@ export const DashboardLinkDestinationPicker = ({
         return {
           data: dashboard,
           label: dashboard.attributes.title,
+          ...(dashboard.id === parentDashboardId
+            ? {
+                prepend: (
+                  <EuiBadge>{DashboardLinkEmbeddableStrings.getCurrentDashboardLabel()}</EuiBadge>
+                ),
+              }
+            : {}),
         } as EuiSelectableOption;
       }) ?? [];
 
     setDashboardListOptions(dashboardOptions);
-  }, [dashboardList, searchString]);
+  }, [dashboardList, parentDashboardId, searchString]);
 
   const debouncedSetSearch = useMemo(
     () =>
@@ -68,10 +75,12 @@ export const DashboardLinkDestinationPicker = ({
   useEffect(() => {
     if (selectedDashboard) {
       setDestination(selectedDashboard.id);
+      setPlaceholder(selectedDashboard.attributes.title);
     } else {
       setDestination(undefined);
+      setPlaceholder(undefined);
     }
-  }, [selectedDashboard, setDestination]);
+  }, [selectedDashboard, setDestination, setPlaceholder]);
 
   /* {...other} is needed so all inner elements are treated as part of the form */
   return (
@@ -99,18 +108,7 @@ export const DashboardLinkDestinationPicker = ({
           setDashboardListOptions(newOptions);
         }}
         renderOption={(option) => {
-          return (
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiHighlight search={searchString}>{option.label}</EuiHighlight>
-              </EuiFlexItem>
-              {option.id === parentDashboardId && (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge>{DashboardLinkEmbeddableStrings.getCurrentDashboardLabel()}</EuiBadge>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          );
+          return <EuiHighlight search={searchString}>{option.label}</EuiHighlight>;
         }}
       >
         {(list) => list}

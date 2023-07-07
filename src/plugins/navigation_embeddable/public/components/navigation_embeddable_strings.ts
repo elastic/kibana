@@ -47,7 +47,7 @@ export const NavEmbeddableStrings = {
         }),
       getLinkTextLabel: () =>
         i18n.translate('navigationEmbeddable.linkEditor.linkTextLabel', {
-          defaultMessage: 'Text',
+          defaultMessage: 'Text (optional)',
         }),
       getLinkTextPlaceholder: () =>
         i18n.translate('navigationEmbeddable.linkEditor.linkTextPlaceholder', {

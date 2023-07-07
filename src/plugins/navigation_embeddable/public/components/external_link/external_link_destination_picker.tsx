@@ -16,10 +16,12 @@ const isValidUrl =
 
 export const ExternalLinkDestinationPicker = ({
   setDestination,
+  setPlaceholder,
   currentDestination,
   ...other
 }: {
   setDestination: (destination?: string) => void;
+  setPlaceholder: (placeholder?: string) => void;
   currentDestination?: string;
 }) => {
   const [validUrl, setValidUrl] = useState<boolean>(true);
@@ -35,6 +37,7 @@ export const ExternalLinkDestinationPicker = ({
           const isValid = isValidUrl.test(url);
           setValidUrl(isValid);
           setDestination(isValid ? url : undefined);
+          setPlaceholder(isValid ? url : undefined);
         }}
       />
     </div>

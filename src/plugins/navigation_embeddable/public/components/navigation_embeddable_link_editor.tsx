@@ -43,13 +43,14 @@ export const NavigationEmbeddableLinkEditor = ({
   onClose,
   parentDashboard,
 }: {
-  onClose: (closeBoth: boolean) => void;
   onSave: (newLink: NavigationEmbeddableLink) => void;
+  onClose: (closeBoth: boolean) => void;
   parentDashboard?: DashboardContainer;
 }) => {
   const [selectedLinkType, setSelectedLinkType] = useState<NavigationLinkType>(DASHBOARD_LINK_TYPE);
   const [linkLabel, setLinkLabel] = useState<string>('');
   const [linkDestination, setLinkDestination] = useState<string | undefined>();
+  const [linkLabelPlaceholder, setLinkLabelPlaceholder] = useState<string | undefined>();
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
     return ([DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE] as NavigationLinkType[]).map((type) => {
@@ -90,12 +91,14 @@ export const NavigationEmbeddableLinkEditor = ({
         </EuiButtonEmpty>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiForm component="form">
+        <EuiForm component="form" fullWidth>
           <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkTypePickerLabel()}>
             <EuiRadioGroup
               options={linkTypes}
               idSelected={selectedLinkType}
               onChange={(id) => {
+                setLinkDestination(undefined);
+                setLinkLabelPlaceholder(undefined);
                 setSelectedLinkType(id as NavigationLinkType);
               }}
             />
@@ -104,21 +107,26 @@ export const NavigationEmbeddableLinkEditor = ({
           <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkDestinationLabel()}>
             {selectedLinkType === DASHBOARD_LINK_TYPE ? (
               <DashboardLinkDestinationPicker
+                parentDashboard={parentDashboard}
                 setDestination={setLinkDestination}
                 currentDestination={linkDestination}
-                parentDashboard={parentDashboard}
+                setPlaceholder={setLinkLabelPlaceholder}
               />
             ) : (
               <ExternalLinkDestinationPicker
                 setDestination={setLinkDestination}
                 currentDestination={linkDestination}
+                setPlaceholder={setLinkLabelPlaceholder}
               />
             )}
           </EuiFormRow>
 
           <EuiFormRow label={NavEmbeddableStrings.editor.linkEditor.getLinkTextLabel()}>
             <EuiFieldText
-              placeholder={NavEmbeddableStrings.editor.linkEditor.getLinkTextPlaceholder()}
+              placeholder={
+                linkLabelPlaceholder ||
+                NavEmbeddableStrings.editor.linkEditor.getLinkTextPlaceholder()
+              }
               value={linkLabel}
               onChange={(e) => {
                 setLinkLabel(e.target.value);
