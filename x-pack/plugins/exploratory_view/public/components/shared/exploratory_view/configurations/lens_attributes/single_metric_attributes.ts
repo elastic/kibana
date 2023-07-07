@@ -42,6 +42,8 @@ export class SingleMetricLensAttributes extends LensAttributes {
     this.globalFilter = this.getGlobalFilter(this.isMultiSeries);
     const layer0 = this.getSingleMetricLayer()!;
 
+    console.log('layer0', layer0);
+
     this.layers = {
       layer0,
     };
@@ -106,6 +108,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
         columns: {
           [this.columnId]: {
             ...buildNumberColumn(sourceField),
+            customLabel: true,
             label: name ?? columnLabel,
             operationType: sourceField === RECORDS_FIELD ? 'count' : operationType || 'median',
             filter: columnFilter,
@@ -175,6 +178,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
           ...this.getPercentileNumberColumn(sourceField, operationType!, seriesConfig),
           label: columnLabel ?? '',
           filter: columnFilter,
+          customLabel: true,
         },
       },
       columnOrder: [this.columnId],
