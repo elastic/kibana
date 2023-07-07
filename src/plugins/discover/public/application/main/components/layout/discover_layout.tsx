@@ -47,7 +47,6 @@ import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
-import { WarningsCallout } from '../../../../components/common/warnings_callout/warnings_callout';
 
 /**
  * Local storage key for sidebar persistence state
@@ -74,7 +73,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     spaces,
     inspector,
   } = useDiscoverServices();
-  const { main$, documents$ } = stateContainer.dataState.data$;
+  const { main$ } = stateContainer.dataState.data$;
   const [query, savedQuery, columns, sort] = useAppStateSelector((state) => [
     state.query,
     state.savedQuery,
@@ -114,8 +113,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     () => getResultState(dataState.fetchStatus, dataState.foundDocuments!, isPlainRecord),
     [dataState.fetchStatus, dataState.foundDocuments, isPlainRecord]
   );
-
-  const interceptedWarnings = useDataState(documents$).interceptedWarnings;
 
   const onOpenInspector = useInspector({
     inspector,
@@ -198,20 +195,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const mainDisplay = useMemo(() => {
     if (resultState === 'none') {
-      if (interceptedWarnings?.length) {
-        return (
-          <WarningsCallout
-            variant="empty_prompt"
-            interceptedWarnings={interceptedWarnings}
-            data-test-subj="dscNoResultsInterceptedWarningsCallout"
-          />
-        );
-      }
-
       const globalQueryState = data.query.getState();
 
       return (
         <DiscoverNoResults
+          stateContainer={stateContainer}
           isTimeBased={isTimeBased}
           query={globalQueryState.query}
           filters={globalQueryState.filters}
@@ -254,7 +242,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     stateContainer,
     viewMode,
     onDropFieldToTable,
-    interceptedWarnings,
   ]);
 
   return (
