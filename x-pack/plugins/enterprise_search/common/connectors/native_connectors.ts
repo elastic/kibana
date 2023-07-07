@@ -1626,11 +1626,43 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      use_document_level_security: {
+        default_value: false,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.useDocumentLevelSecurityLabel',
+          {
+            defaultMessage: 'Enable document level security',
+          }
+        ),
+        options: [],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.sharepoint_online.configuration.useDocumentLevelSecurityTooltip',
+          {
+            defaultMessage:
+              'Document level security ensures identities and permissions set in Sharepoint Online are maintained in Elasticsearch. This metadata is added to your Elasticsearch documents, so you can control user and group read-access. Access control syncs ensure this metadata is kept up to date.',
+          }
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
         advanced: { enabled: true },
         basic: { enabled: true },
+      },
+      [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
+      [FeatureName.INCREMENTAL_SYNC]: {
+        enabled: true,
       },
     },
     name: i18n.translate('xpack.enterpriseSearch.nativeConnectors.sharepoint_online.name', {

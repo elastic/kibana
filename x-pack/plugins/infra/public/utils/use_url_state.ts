@@ -10,7 +10,7 @@ import { Location } from 'history';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { decode, RisonValue } from '@kbn/rison';
 import { useHistory } from 'react-router-dom';
-import { replaceStateKeyInQueryString } from '../../common/log_views';
+import { replaceStateKeyInQueryString } from '../../common/url_state_storage_service';
 
 export const useUrlState = <State>({
   defaultState,

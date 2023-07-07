@@ -2412,6 +2412,17 @@
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionResult.isSystemAction",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSystemAction",
+            "description": [],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2646,6 +2657,20 @@
               "<Config>; secrets: ",
               "ValidatorType",
               "<Secrets>; connector?: ((config: Config, secrets: Secrets) => string | null) | undefined; }"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionType.isSystemAction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSystemAction",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,

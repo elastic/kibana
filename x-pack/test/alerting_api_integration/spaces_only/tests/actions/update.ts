@@ -51,6 +51,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .expect(200, {
           id: createdAction.id,
           is_preconfigured: false,
+          is_system_action: false,
           is_deprecated: false,
           connector_type_id: 'test.index-record',
           is_missing_secrets: false,
@@ -215,6 +216,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
             id: createdAction.id,
             isPreconfigured: false,
             isDeprecated: false,
+            isSystemAction: false,
             actionTypeId: 'test.index-record',
             isMissingSecrets: false,
             name: 'My action updated',

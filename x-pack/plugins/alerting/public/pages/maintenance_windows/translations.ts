@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { Moment } from 'moment';
-import { Frequency } from 'rrule';
+import { Frequency } from '@kbn/rrule';
 import { monthDayDate } from './helpers/month_day_date';
 
 export const MAINTENANCE_WINDOWS = i18n.translate('xpack.alerting.maintenanceWindows', {

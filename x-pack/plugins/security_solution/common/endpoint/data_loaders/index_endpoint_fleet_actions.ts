@@ -71,7 +71,10 @@ export const indexEndpointAndFleetActionsForHost = async (
     // start with endpoint action
     const logsEndpointAction: LogsEndpointAction = endpointActionGenerator.generate({
       EndpointActions: {
-        data: { comment: 'data generator: this host is bad' },
+        data: {
+          comment: 'data generator: this host is bad',
+          ...(options.alertIds ? { command: 'isolate' } : {}),
+        },
       },
     });
 

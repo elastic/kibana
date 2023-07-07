@@ -36,7 +36,7 @@ export function DiagnosticsIndexPatternSettings() {
     !indexTemplatesByIndexPattern ||
     indexTemplatesByIndexPattern?.length === 0
   ) {
-    return null;
+    return <EuiText>No settings to display</EuiText>;
   }
 
   const elms = indexTemplatesByIndexPattern.map(

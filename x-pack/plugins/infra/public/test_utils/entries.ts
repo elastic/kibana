@@ -6,16 +6,7 @@
  */
 
 import faker from 'faker';
-import { LogEntry } from '../../common/log_entry';
-import { LogViewColumnConfiguration } from '../../common/log_views';
-
-export const ENTRIES_EMPTY = {
-  data: {
-    entries: [],
-    topCursor: null,
-    bottomCursor: null,
-  },
-};
+import { LogEntry, LogViewColumnConfiguration } from '@kbn/logs-shared-plugin/common';
 
 export function generateFakeEntries(
   count: number,

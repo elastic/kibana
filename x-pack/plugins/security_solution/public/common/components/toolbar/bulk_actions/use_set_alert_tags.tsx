@@ -10,11 +10,11 @@ import type { CoreStart } from '@kbn/core/public';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getUpdateAlertsQuery } from '../../../../detections/components/alerts_table/actions';
 import type { AlertTags } from '../../../../../common/detection_engine/schemas/common';
 import { DETECTION_ENGINE_ALERT_TAGS_URL } from '../../../../../common/constants';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import * as i18n from './translations';
+import { getUpdateAlertsQuery } from './helpers';
 
 export type SetAlertTagsFunc = (
   tags: AlertTags,

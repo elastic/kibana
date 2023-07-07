@@ -184,7 +184,7 @@ describe('Detections Rules API', () => {
         method: 'GET',
         query: {
           filter:
-            '(alert.attributes.name: "\\" OR (foo:bar)" OR alert.attributes.params.index: "\\" OR (foo:bar)" OR alert.attributes.params.threat.tactic.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.tactic.name: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.name: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.subtechnique.id: "\\" OR (foo:bar)" OR alert.attributes.params.threat.technique.subtechnique.name: "\\" OR (foo:bar)")',
+            '(alert.attributes.name: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.index: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.tactic.id: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.tactic.name: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.id: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.name: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.subtechnique.id: "\\" \\OR \\(foo\\:bar\\)" OR alert.attributes.params.threat.technique.subtechnique.name: "\\" \\OR \\(foo\\:bar\\)")',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -395,7 +395,7 @@ describe('Detections Rules API', () => {
         method: 'GET',
         query: {
           filter:
-            'alert.attributes.tags:("hello" AND "world") AND (alert.attributes.name: "ruleName" OR alert.attributes.params.index: "ruleName" OR alert.attributes.params.threat.tactic.id: "ruleName" OR alert.attributes.params.threat.tactic.name: "ruleName" OR alert.attributes.params.threat.technique.id: "ruleName" OR alert.attributes.params.threat.technique.name: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.id: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.name: "ruleName")',
+            '(alert.attributes.name: "ruleName" OR alert.attributes.params.index: "ruleName" OR alert.attributes.params.threat.tactic.id: "ruleName" OR alert.attributes.params.threat.tactic.name: "ruleName" OR alert.attributes.params.threat.technique.id: "ruleName" OR alert.attributes.params.threat.technique.name: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.id: "ruleName" OR alert.attributes.params.threat.technique.subtechnique.name: "ruleName") AND alert.attributes.tags:("hello" AND "world")',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',

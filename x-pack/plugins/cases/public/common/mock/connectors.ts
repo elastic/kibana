@@ -19,6 +19,7 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance1.service-now.com',
     },
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: false,
   },
   {
@@ -30,6 +31,7 @@ export const connectorsMock: ActionConnector[] = [
       orgId: '201',
     },
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: false,
   },
   {
@@ -40,6 +42,7 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance.atlassian.ne',
     },
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: false,
   },
   {
@@ -50,6 +53,7 @@ export const connectorsMock: ActionConnector[] = [
       apiUrl: 'https://instance1.service-now.com',
     },
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: false,
   },
   {
@@ -61,6 +65,7 @@ export const connectorsMock: ActionConnector[] = [
       usesTableApi: true,
     },
     isPreconfigured: false,
+    isSystemAction: false,
     isDeprecated: true,
   },
 ];
