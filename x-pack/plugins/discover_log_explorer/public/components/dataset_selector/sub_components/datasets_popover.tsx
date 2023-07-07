@@ -53,6 +53,7 @@ export const DatasetsPopover = ({
           iconSide="right"
           onClick={onClick}
           fullWidth={isMobile}
+          data-test-subj={`${POPOVER_ID}-button`}
         >
           {iconType ? (
             <EuiIcon type={iconType} />
