@@ -859,9 +859,9 @@ describe('Comments', () => {
       });
 
       it(`no errors when empty array of attachments`, () => {
-        expect(PathReporter.report(BulkCreateCommentRequestRt.decode([]))).toStrictEqual(
-          ["No errors!"]
-        );
+        expect(PathReporter.report(BulkCreateCommentRequestRt.decode([]))).toStrictEqual([
+          'No errors!',
+        ]);
       });
     });
   });
