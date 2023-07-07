@@ -105,17 +105,20 @@ const AssistantComponent: React.FC<Props> = ({
   // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
   // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
   const welcomeConversation = useMemo(() => {
-    const wc =
+    const conversation =
       conversations[selectedConversationId] ?? BASE_CONVERSATIONS[WELCOME_CONVERSATION_TITLE];
     if (!isAssistantEnabled) {
-      if (!wc.messages.some((message) => message.content === enterpriseMessaging[0].content)) {
+      if (
+        conversation.messages[conversation.messages.length - 1].content ===
+        enterpriseMessaging[0].content
+      ) {
         return {
-          ...wc,
-          messages: [...wc.messages, ...enterpriseMessaging],
+          ...conversation,
+          messages: [...conversation.messages, ...enterpriseMessaging],
         };
       }
     }
-    return wc;
+    return conversation;
   }, [conversations, isAssistantEnabled, selectedConversationId]);
 
   const { data: connectors, refetch: refetchConnectors } = useLoadConnectors({ http });
