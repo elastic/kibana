@@ -13,7 +13,6 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import {
   validateParams,
   validateConfig,
@@ -29,6 +28,8 @@ import {
   PreConfiguredAction,
   RawAction,
   ValidatorServices,
+  ActionTypeSecrets,
+  ActionTypeConfig,
 } from '../types';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
 import { ActionExecutionSource } from './action_execution_source';
@@ -53,7 +54,7 @@ export interface ActionExecutorContext {
 export interface TaskInfo {
   scheduled: Date;
   attempts: number;
-  numSkippedRuns?: ConcreteTaskInstance['numSkippedRuns'];
+  numSkippedRuns?: number;
 }
 
 export interface ExecuteOptions<Source = unknown> {
@@ -409,7 +410,7 @@ export class ActionExecutor {
         secrets: pcAction.secrets,
         actionId,
         isPreconfigured: true,
-        rawAction: { ...pcAction, isMissingSecrets: false } as RawAction,
+        rawAction: { ...pcAction, isMissingSecrets: false },
       };
     }
 
@@ -445,8 +446,8 @@ export class ActionExecutor {
 export interface ActionInfo {
   actionTypeId: string;
   name: string;
-  config: unknown;
-  secrets: unknown;
+  config: ActionTypeConfig;
+  secrets: ActionTypeSecrets;
   actionId: string;
   isPreconfigured?: boolean;
   rawAction: RawAction;
@@ -472,8 +473,8 @@ interface ValidateActionOpts {
   actionId: string;
   actionType: ActionType;
   params: Record<string, unknown>;
-  config: unknown;
-  secrets: unknown;
+  config: Record<string, unknown>;
+  secrets: Record<string, unknown>;
   taskInfo?: TaskInfo;
 }
 

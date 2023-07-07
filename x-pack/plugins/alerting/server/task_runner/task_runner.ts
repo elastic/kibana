@@ -11,7 +11,7 @@ import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/core/server';
 import {
-  BeforeRunResult,
+  LoadIndirectParamsResult,
   ConcreteTaskInstance,
   throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
@@ -770,7 +770,7 @@ export class TaskRunner<
     return { executionStatus, executionMetrics };
   }
 
-  async beforeRun(): Promise<BeforeRunResult<RawRule>> {
+  async beforeRun(): Promise<LoadIndirectParamsResult<RawRule>> {
     this.runDate = new Date();
     return await this.timer.runWithTimer(TaskRunnerTimerSpan.PrepareRule, async () => {
       try {

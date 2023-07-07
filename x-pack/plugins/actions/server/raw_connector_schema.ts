@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const rawActionSchema = schema.object({
+export const rawConnectorSchema = schema.object({
   actionTypeId: schema.string(),
   name: schema.string(),
   isMissingSecrets: schema.boolean(),

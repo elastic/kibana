@@ -1599,7 +1599,7 @@ describe('TaskManagerRunner', () => {
             bar: {
               title: 'Bar!',
               createTaskRunner: () => ({
-                async beforeRun() {
+                async loadIndirectParams() {
                   return { data: { foo: 'bar' } };
                 },
                 async run() {
@@ -1664,7 +1664,7 @@ describe('TaskManagerRunner', () => {
             bar: {
               title: 'Bar!',
               createTaskRunner: () => ({
-                async beforeRun() {
+                async loadIndirectParams() {
                   return { data: { foo: 'bar' } };
                 },
                 async run() {
@@ -1714,7 +1714,7 @@ describe('TaskManagerRunner', () => {
             bar: {
               title: 'Bar!',
               createTaskRunner: () => ({
-                async beforeRun() {
+                async loadIndirectParams() {
                   return { data: { foo: 'bar' } };
                 },
                 async run() {
@@ -1757,7 +1757,7 @@ describe('TaskManagerRunner', () => {
             bar: {
               title: 'Bar!',
               createTaskRunner: () => ({
-                async beforeRun() {
+                async loadIndirectParams() {
                   return { data: { foo: 'bar' } };
                 },
                 async run() {
@@ -1804,7 +1804,7 @@ describe('TaskManagerRunner', () => {
             bar: {
               title: 'Bar!',
               createTaskRunner: () => ({
-                async beforeRun() {
+                async loadIndirectParams() {
                   return { data: { foo: 'bar' } };
                 },
                 async run() {
@@ -1850,7 +1850,7 @@ describe('TaskManagerRunner', () => {
             bar: {
               title: 'Bar!',
               createTaskRunner: () => ({
-                async beforeRun() {
+                async loadIndirectParams() {
                   return { data: { foo: 'bar' } };
                 },
                 async run() {
@@ -1897,7 +1897,7 @@ describe('TaskManagerRunner', () => {
             bar: {
               title: 'Bar!',
               createTaskRunner: () => ({
-                async beforeRun() {
+                async loadIndirectParams() {
                   return { data: { foo: 'bar' } };
                 },
                 async run() {
@@ -1950,7 +1950,7 @@ describe('TaskManagerRunner', () => {
             bar: {
               title: 'Bar!',
               createTaskRunner: () => ({
-                async beforeRun() {
+                async loadIndirectParams() {
                   return { data: { foo: 'bar' } };
                 },
                 async run() {
@@ -2002,7 +2002,7 @@ describe('TaskManagerRunner', () => {
             bar: {
               title: 'Bar!',
               createTaskRunner: () => ({
-                async beforeRun() {
+                async loadIndirectParams() {
                   return { data: { baz: 'bar' } };
                 },
                 async run() {

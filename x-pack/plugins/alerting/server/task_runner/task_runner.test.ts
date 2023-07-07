@@ -1763,7 +1763,7 @@ describe('Task Runner', () => {
   });
 
   test('recovers gracefully when the Rule Task Runner throws an exception when loading rule to prepare for run', async () => {
-    // used in beforeRun() which is called to load rule data
+    // used in loadIndirectParams() which is called to load rule data
     rulesClient.getAlertFromRaw.mockImplementation(() => {
       throw new Error(GENERIC_ERROR_MESSAGE);
     });
@@ -3110,7 +3110,7 @@ describe('Task Runner', () => {
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
-  test('beforeRun Fetches the ruleData and returns the rawRule', async () => {
+  test('loadIndirectParams Fetches the ruleData and returns the rawRule', async () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
     const taskRunner = new TaskRunner({
       ruleType,
@@ -3131,7 +3131,7 @@ describe('Task Runner', () => {
     expect(result).toEqual({ data: mockedRawRuleSO.attributes });
   });
 
-  test('beforeRun return error when cannot fetch the ruleData', async () => {
+  test('loadIndirectParams return error when cannot fetch the ruleData', async () => {
     const error = new Error('test');
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(error);
     const taskRunner = new TaskRunner({

@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { rawActionSchema } from './raw_action_schema';
+import { rawConnectorSchema } from './raw_connector_schema';
 import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
 import { getActionTypeFeatureUsageName, TaskRunnerFactory, ILicenseState } from './lib';
@@ -166,7 +166,7 @@ export class ActionTypeRegistry {
         title: actionType.name,
         maxAttempts,
         createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
-        indirectParamsSchema: rawActionSchema,
+        indirectParamsSchema: rawConnectorSchema,
       },
     });
     // No need to notify usage on basic action types

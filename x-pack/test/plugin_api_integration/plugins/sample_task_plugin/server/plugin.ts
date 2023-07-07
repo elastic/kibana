@@ -157,10 +157,10 @@ export class SampleTaskManagerFixturePlugin
       },
       sampleRecurringTaskWithInvalidIndirectParam: {
         title: 'Sample Recurring Task that has invalid indirect params',
-        description: 'A sample task that returns invalid params in beforeRun all the time',
+        description: 'A sample task that returns invalid params in loadIndirectParams all the time',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
-          async beforeRun() {
+          async loadIndirectParams() {
             return { data: { baz: 'foo' } }; // invalid
           },
           async run() {
@@ -174,10 +174,10 @@ export class SampleTaskManagerFixturePlugin
       sampleOneTimeTaskWithInvalidIndirectParam: {
         title: 'Sample One Time Task that has invalid indirect params',
         description:
-          'A sample task that returns invalid params in beforeRun all the time and throws error in the run method',
+          'A sample task that returns invalid params in loadIndirectParams all the time and throws error in the run method',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
-          async beforeRun() {
+          async loadIndirectParams() {
             return { data: { baz: 'foo' } }; // invalid
           },
           async run() {

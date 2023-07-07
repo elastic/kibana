@@ -54,7 +54,7 @@ const eventLoopDelaySchema = schema.object({
 const requeueInvalidTasksConfig = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   delay: schema.number({ defaultValue: 3000, min: 0 }),
-  max_attempts: schema.number({ defaultValue: 20, min: 1 }),
+  max_attempts: schema.number({ defaultValue: 100, min: 1, max: 500 }),
 });
 
 export const configSchema = schema.object(

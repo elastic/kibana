@@ -17,6 +17,7 @@ import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
 import { RecoveredActionGroupId } from '../common';
+import { rawRuleSchema } from './raw_rule_schema';
 
 const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -439,7 +440,7 @@ describe('Create Lifecycle', () => {
           'alerting:test': {
             createTaskRunner: expect.any(Function),
             paramsSchema: expect.any(Object),
-            indirectParamsSchema: expect.any(Object),
+            indirectParamsSchema: rawRuleSchema,
             timeout: '20m',
             title: 'Test',
           },

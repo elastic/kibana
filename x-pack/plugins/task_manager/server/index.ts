@@ -19,7 +19,7 @@ export type {
   TaskRunCreatorFunction,
   RunContext,
   IntervalSchedule,
-  BeforeRunResult,
+  LoadIndirectParamsResult,
 } from './task';
 
 export { TaskStatus } from './task';

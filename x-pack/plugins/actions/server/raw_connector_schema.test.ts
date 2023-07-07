@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rawActionSchema } from './raw_action_schema';
+import { rawConnectorSchema } from './raw_connector_schema';
 
 const action = {
   actionTypeId: '12345',
@@ -27,56 +27,56 @@ const preconfiguredAction = {
   isDeprecated: false,
 };
 
-describe('Raw Action Schema', () => {
+describe('Raw Connector Schema', () => {
   test('valid action', () => {
-    expect(rawActionSchema.validate(action)).toEqual(action);
+    expect(rawConnectorSchema.validate(action)).toEqual(action);
   });
 
   test('valid preconfigured action', () => {
-    expect(rawActionSchema.validate(preconfiguredAction)).toEqual(preconfiguredAction);
+    expect(rawConnectorSchema.validate(preconfiguredAction)).toEqual(preconfiguredAction);
   });
 
   test('invalid action', () => {
-    expect(() => rawActionSchema.validate({ ...action, foo: 'bar' })).toThrow(
+    expect(() => rawConnectorSchema.validate({ ...action, foo: 'bar' })).toThrow(
       '[foo]: definition for this key is missing'
     );
   });
 
   test('invalid action with missing params', () => {
     const { name, ...actionWithoutName } = action;
-    expect(() => rawActionSchema.validate(actionWithoutName)).toThrow(
+    expect(() => rawConnectorSchema.validate(actionWithoutName)).toThrow(
       '[name]: expected value of type [string] but got [undefined]'
     );
   });
 
   test('invalid action with preconfigured params', () => {
-    expect(() => rawActionSchema.validate({ ...action, id: '1' })).toThrow(
+    expect(() => rawConnectorSchema.validate({ ...action, id: '1' })).toThrow(
       "[id]: a value wasn't expected to be present"
     );
   });
 
   test('invalid action with preconfigured params (isDeprecated)', () => {
-    expect(() => rawActionSchema.validate({ ...action, isDeprecated: '1' })).toThrow(
+    expect(() => rawConnectorSchema.validate({ ...action, isDeprecated: '1' })).toThrow(
       "[isDeprecated]: a value wasn't expected to be present"
     );
   });
 
   test('invalid preconfigured action', () => {
-    expect(() => rawActionSchema.validate({ ...preconfiguredAction, foo: '1' })).toThrow(
+    expect(() => rawConnectorSchema.validate({ ...preconfiguredAction, foo: '1' })).toThrow(
       '[foo]: definition for this key is missing'
     );
   });
 
   test('invalid preconfigured action without conditional param (id)', () => {
     const { id, ...preconfiguredActionWithoutId } = preconfiguredAction;
-    expect(() => rawActionSchema.validate(preconfiguredActionWithoutId)).toThrow(
+    expect(() => rawConnectorSchema.validate(preconfiguredActionWithoutId)).toThrow(
       '[id]: expected value of type [string] but got [undefined]'
     );
   });
 
   test('invalid preconfigured action without conditional param (isDeprecated)', () => {
     const { isDeprecated, ...preconfiguredActionWithoutIsDeprecated } = preconfiguredAction;
-    expect(() => rawActionSchema.validate(preconfiguredActionWithoutIsDeprecated)).toThrow(
+    expect(() => rawConnectorSchema.validate(preconfiguredActionWithoutIsDeprecated)).toThrow(
       '[isDeprecated]: expected value of type [boolean] but got [undefined]'
     );
   });

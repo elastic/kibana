@@ -129,6 +129,7 @@ describe('Task Runner Factory', () => {
     jest.resetAllMocks();
     jest.clearAllMocks();
     actionExecutorInitializerParams.getServices.mockReturnValue(services);
+    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
   });
 
   test(`throws an error if factory isn't initialized`, () => {
@@ -172,7 +173,6 @@ describe('Task Runner Factory', () => {
       },
       references: [],
     });
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
     const runnerResult = await taskRunner.run();
 
@@ -233,7 +233,6 @@ describe('Task Runner Factory', () => {
         },
       ],
     });
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
     const runnerResult = await taskRunner.run();
 
@@ -289,7 +288,6 @@ describe('Task Runner Factory', () => {
       },
       references: [],
     });
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
     const runnerResult = await taskRunner.run();
 
@@ -347,7 +345,6 @@ describe('Task Runner Factory', () => {
       },
       references: [{ name: 'source', id: 'abc', type: 'alert' }],
     });
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
     const runnerResult = await taskRunner.run();
 
@@ -409,7 +406,6 @@ describe('Task Runner Factory', () => {
       },
       references: [],
     });
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
     const runnerResult = await taskRunner.run();
 
@@ -547,7 +543,6 @@ describe('Task Runner Factory', () => {
       data: { foo: true },
       retry: false,
     });
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
     try {
       await taskRunner.run();
@@ -581,7 +576,6 @@ describe('Task Runner Factory', () => {
         },
       ],
     });
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
     await taskRunner.run();
 
@@ -640,7 +634,6 @@ describe('Task Runner Factory', () => {
         },
       ],
     });
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
     await taskRunner.run();
 
@@ -694,7 +687,6 @@ describe('Task Runner Factory', () => {
         },
       ],
     });
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
     await taskRunner.run();
 
@@ -754,7 +746,6 @@ describe('Task Runner Factory', () => {
         },
       ],
     });
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
     await taskRunner.run();
 
@@ -781,9 +772,7 @@ describe('Task Runner Factory', () => {
   test(`doesn't use API key when not provided`, async () => {
     const factory = new TaskRunnerFactory(mockedActionExecutor, inMemoryMetrics);
     factory.initialize(taskRunnerFactoryInitializerParams);
-    const taskRunner = factory.create({
-      taskInstance: mockedTaskInstance,
-    });
+    const taskRunner = factory.create({ taskInstance: mockedTaskInstance });
 
     mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
@@ -803,7 +792,6 @@ describe('Task Runner Factory', () => {
         },
       ],
     });
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
     await taskRunner.run();
 
@@ -857,7 +845,6 @@ describe('Task Runner Factory', () => {
     mockedActionExecutor.execute.mockImplementation(() => {
       throw new ActionTypeDisabledError('Fail', 'license_invalid');
     });
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
     try {
       await taskRunner.run();
@@ -899,7 +886,6 @@ describe('Task Runner Factory', () => {
       data: { foo: true },
       retry: false,
     });
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
     let err;
     try {
@@ -941,7 +927,6 @@ describe('Task Runner Factory', () => {
     });
     const thrownError = new Error('Fail');
     mockedActionExecutor.execute.mockRejectedValueOnce(thrownError);
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
     let err;
     try {
@@ -974,7 +959,6 @@ describe('Task Runner Factory', () => {
       },
       references: [],
     });
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
     await taskRunner.run();
 
@@ -1007,7 +991,6 @@ describe('Task Runner Factory', () => {
       },
       references: [],
     });
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
     let err;
     try {
@@ -1047,7 +1030,7 @@ describe('Task Runner Factory', () => {
     expect(inMemoryMetrics.increment.mock.calls[0][0]).toBe(IN_MEMORY_METRICS.ACTION_TIMEOUTS);
   });
 
-  test('beforeRun fetches taskParams and actionInfo and returns the rawAction', async () => {
+  test('loadIndirectParams fetches taskParams and actionInfo and returns the rawAction', async () => {
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
     });
@@ -1070,9 +1053,8 @@ describe('Task Runner Factory', () => {
         },
       ],
     });
-    mockedActionExecutor.getActionInfoInternal.mockResolvedValueOnce(mockActionInfo);
 
-    const result = await taskRunner.beforeRun();
+    const result = await taskRunner.loadIndirectParams();
 
     expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
     expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
@@ -1089,11 +1071,14 @@ describe('Task Runner Factory', () => {
     expect(result).toEqual({ data: mockActionInfo.rawAction });
   });
 
-  test("beforeRun returns error when it can't fetch the actionInfo", async () => {
+  test("loadIndirectParams returns error when it can't fetch the actionInfo", async () => {
+    jest.resetAllMocks();
+    const error = new Error('test');
+    mockedActionExecutor.getActionInfoInternal.mockRejectedValueOnce(error);
+
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
     });
-    const error = new Error('test');
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '3',
@@ -1112,9 +1097,8 @@ describe('Task Runner Factory', () => {
         },
       ],
     });
-    mockedActionExecutor.getActionInfoInternal.mockRejectedValueOnce(error);
 
-    const result = await taskRunner.beforeRun();
+    const result = await taskRunner.loadIndirectParams();
 
     expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
     expect(mockedActionExecutor.getActionInfoInternal).toHaveBeenCalledTimes(1);
@@ -1122,10 +1106,13 @@ describe('Task Runner Factory', () => {
   });
 
   test('throws error if it cannot fetch task or action data', async () => {
+    jest.resetAllMocks();
+    const error = new Error('test');
+    mockedActionExecutor.getActionInfoInternal.mockRejectedValueOnce(error);
+
     const taskRunner = taskRunnerFactory.create({
       taskInstance: mockedTaskInstance,
     });
-    const error = new Error('test');
     spaceIdToNamespace.mockReturnValueOnce('namespace-test');
     mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       id: '3',
@@ -1144,7 +1131,6 @@ describe('Task Runner Factory', () => {
         },
       ],
     });
-    mockedActionExecutor.getActionInfoInternal.mockRejectedValueOnce(error);
 
     await expect(taskRunner.run()).rejects.toThrow('test');
   });

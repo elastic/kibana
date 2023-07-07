@@ -19,7 +19,7 @@ import {
   SavedObjectReference,
 } from '@kbn/core/server';
 import {
-  BeforeRunResult,
+  LoadIndirectParamsResult,
   RunContext,
   throwRetryableError,
   throwUnrecoverableError,
@@ -105,7 +105,7 @@ export class TaskRunnerFactory {
     let actionData: ActionData;
 
     return {
-      async beforeRun(): Promise<BeforeRunResult<RawAction>> {
+      async loadIndirectParams(): Promise<LoadIndirectParamsResult<RawAction>> {
         try {
           const taskParams = await getActionTaskParams(
             actionTaskExecutorParams,
@@ -133,7 +133,7 @@ export class TaskRunnerFactory {
       },
       async run() {
         if (!actionData) {
-          await this.beforeRun();
+          await this.loadIndirectParams();
         }
         if (actionData.error) {
           return throwRetryableError(actionData.error, true);

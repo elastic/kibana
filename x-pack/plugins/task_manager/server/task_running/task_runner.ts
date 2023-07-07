@@ -389,8 +389,8 @@ export class TaskManagerRunner implements TaskRunner {
     const { state, taskType, id, numSkippedRuns = 0 } = this.instance.task;
     const { max_attempts: maxAttempts } = this.requeueInvalidTasksConfig;
 
-    if (this.task?.beforeRun) {
-      const { data } = await this.task.beforeRun();
+    if (this.task?.loadIndirectParams) {
+      const { data } = await this.task.loadIndirectParams();
 
       if (data) {
         try {
