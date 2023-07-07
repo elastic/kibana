@@ -345,7 +345,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: `Preconfigured action custom-system-abc-connector is not allowed to update.`,
+                message: `Preconfigured action custom-system-abc-connector can not be updated.`,
               });
               break;
             default:
@@ -423,8 +423,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  'System action system-connector-test.system-action is not allowed to update.',
+                message: 'System action system-connector-test.system-action can not be updated.',
               });
               break;
             default:

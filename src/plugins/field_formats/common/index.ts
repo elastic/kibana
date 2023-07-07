@@ -33,7 +33,7 @@ export {
   HistogramFormat,
 } from './converters';
 
-export { getHighlightRequest } from './utils';
+export { getHighlightRequest, geoUtils } from './utils';
 
 export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
 export { FORMATS_UI_SETTINGS } from './constants/ui_settings';

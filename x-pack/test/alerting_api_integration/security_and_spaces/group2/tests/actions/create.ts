@@ -350,7 +350,8 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: 'This custom-system-abc-connector already exist in preconfigured action.',
+                message:
+                  'This custom-system-abc-connector already exists in a preconfigured action.',
               });
               break;
             default:
