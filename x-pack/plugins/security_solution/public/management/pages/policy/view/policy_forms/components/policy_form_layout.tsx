@@ -240,7 +240,15 @@ export const PolicyFormPoC = memo<{ policyId: string }>(({ policyId }) => {
 
   return (
     <div>
-      <div>
+      <div
+        style={{
+          background: 'lightyellow',
+          position: 'sticky',
+          top: '94px',
+          padding: '2em 1em',
+          zIndex: 10000,
+        }}
+      >
         <EuiSwitch
           label={'View only mode'}
           checked={isViewOnlyMode}
@@ -258,10 +266,12 @@ export const PolicyFormPoC = memo<{ policyId: string }>(({ policyId }) => {
 
       <div
         style={{
-          height: '5em',
           background: 'yellow',
-          margin: '2em 0 2em',
-          padding: '2em 1em 2em',
+          margin: '100vh 0 2em',
+          padding: '5em 1em',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          fontSize: '2em',
         }}
       >
         {'ORIGINAL FORM BELOW'}

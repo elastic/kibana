@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { cloneDeep, get, set } from 'lodash';
 import type { EuiCheckboxProps } from '@elastic/eui/src/components/form/checkbox/checkbox';
+import { getEmptyValue } from '../../../../../../common/components/empty_value';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { PolicyFormComponentCommonProps } from '../types';
 import { SettingCard, SettingCardHeader } from './setting_card';
@@ -83,7 +84,9 @@ export const EventCollectionCard = memo(
     'data-test-subj': dataTestSubj,
   }: EventCollectionCardProps<T>) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const isEditMode = mode === 'edit';
     const theme = useContext(ThemeContext);
+    const totalOptions = options.length;
 
     const selectedCount: number = useMemo(() => {
       const supplementalSelectionFields: string[] = supplementalOptions
@@ -108,7 +111,7 @@ export const EventCollectionCard = memo(
                 defaultMessage: '{selected} / {total} event collections enabled',
                 values: {
                   selected: selectedCount,
-                  total: options.length,
+                  total: totalOptions,
                 },
               }
             )}
@@ -138,6 +141,8 @@ export const EventCollectionCard = memo(
             />
           );
         })}
+
+        {selectedCount === 0 && !isEditMode && <div>{getEmptyValue()}</div>}
 
         {supplementalOptions &&
           supplementalOptions.map(
@@ -244,9 +249,9 @@ const EventCheckbox = memo<EventCheckboxProps>(
         onChange={checkboxOnChangeHandler}
         disabled={disabled}
       />
-    ) : (
+    ) : isChecked ? (
       <div>{label}</div>
-    );
+    ) : null;
   }
 );
 EventCheckbox.displayName = 'EventCheckbox';
