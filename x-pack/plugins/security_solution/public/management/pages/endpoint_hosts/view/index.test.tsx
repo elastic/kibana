@@ -1223,6 +1223,7 @@ describe('when on the endpoint list page', () => {
       expect(banner).toHaveTextContent(transforms[1].id);
     });
   });
+
   describe('endpoint list onboarding screens with RBAC', () => {
     beforeEach(() => {
       setEndpointListApiMockImplementation(coreStart.http, {
@@ -1283,6 +1284,7 @@ describe('when on the endpoint list page', () => {
       expect(startButton).toBeNull();
     });
   });
+
   describe('endpoint list take action with RBAC controls', () => {
     let renderResult: ReturnType<AppContextTestRender['render']>;
 

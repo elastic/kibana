@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type CSSProperties, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { type CSSProperties, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import {
   EuiBasicTable,
@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiHorizontalRule,
-  EuiLink,
   type EuiSelectableProps,
   EuiSpacer,
   EuiSuperDatePicker,
@@ -30,6 +29,7 @@ import type {
   AgentPolicyDetailsDeployAgentAction,
   CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
+import { TransformFailedCallout } from './components/transform_failed_callout';
 import type { EndpointIndexUIQueryParams } from '../types';
 import { EndpointListNavLink } from './components/endpoint_list_nav_link';
 import { EndpointAgentStatus } from '../../../../common/components/endpoint/endpoint_agent_status';
@@ -58,18 +58,13 @@ import type { EndpointAction } from '../store/action';
 import { OutOfDate } from './components/out_of_date';
 import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
-import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { TableRowActions } from './components/table_row_actions';
-import { CallOut } from '../../../../common/components/callouts';
-import { metadataTransformPrefix } from '../../../../../common/endpoint/constants';
-import { APP_UI_ID, WARNING_TRANSFORM_STATES } from '../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../common/constants';
 import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { useKibana } from '../../../../common/lib/kibana';
 import { BackToPolicyListButton } from './components/back_to_policy_list_button';
 
 const MAX_PAGINATED_ITEM = 9999;
-const TRANSFORM_URL = '/data/transform';
 
 const StyledDatePicker = styled.div`
   .euiFormControlLayout--group {
@@ -310,7 +305,6 @@ const selector = (createStructuredSelector as CreateStructuredSelector)(selector
 
 export const EndpointList = () => {
   const history = useHistory();
-  const { services } = useKibana();
   const {
     listData,
     pageIndex,
@@ -344,9 +338,8 @@ export const EndpointList = () => {
   const dispatch = useDispatch<(a: EndpointAction) => void>();
   // cap ability to page at 10k records. (max_result_window)
   const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
-  const [showTransformFailedCallout, setShowTransformFailedCallout] = useState(false);
-  const [shouldCheckTransforms, setShouldCheckTransforms] = useState(true);
 
+  const hasPolicyData = useMemo(() => policyItems && policyItems.length > 0, [policyItems]);
   const hasListData = useMemo(() => listData && listData.length > 0, [listData]);
 
   const refreshStyle = useMemo(() => {
@@ -364,27 +357,6 @@ export const EndpointList = () => {
   const shouldShowKQLBar = useMemo(() => {
     return endpointsExist && !patternsError;
   }, [endpointsExist, patternsError]);
-
-  useEffect(() => {
-    // if no endpoint policy, skip transform check
-    if (!shouldCheckTransforms || !policyItems || !policyItems.length) {
-      return;
-    }
-
-    dispatch({ type: 'loadMetadataTransformStats' });
-    setShouldCheckTransforms(false);
-  }, [policyItems, shouldCheckTransforms, dispatch]);
-
-  useEffect(() => {
-    const hasFailure = metadataTransformStats.some((transform) =>
-      WARNING_TRANSFORM_STATES.has(transform?.state)
-    );
-    setShowTransformFailedCallout(hasFailure);
-  }, [metadataTransformStats]);
-
-  const closeTransformFailedCallout = useCallback(() => {
-    setShowTransformFailedCallout(false);
-  }, []);
 
   const paginationSetup = useMemo(() => {
     return {
@@ -548,7 +520,7 @@ export const EndpointList = () => {
           <PolicyEmptyState loading={endpointPrivilegesLoading} />
         </ManagementEmptyStateWrapper>
       );
-    } else if (!policyItemsLoading && policyItems && policyItems.length > 0) {
+    } else if (!policyItemsLoading && hasPolicyData) {
       const selectionOptions: EuiSelectableProps['options'] = policyItems.map((item) => {
         return {
           key: item.policy_id,
@@ -573,102 +545,25 @@ export const EndpointList = () => {
       );
     }
   }, [
-    endpointsExist,
-    policyItemsLoading,
-    policyItems,
-    listData,
-    columns,
-    listError?.message,
-    paginationSetup,
-    onTableChange,
-    loading,
-    setTableRowProps,
-    handleDeployEndpointsClick,
-    selectedPolicyId,
-    handleSelectableOnChange,
-    handleCreatePolicyClick,
     canAccessFleet,
     canReadEndpointList,
+    columns,
+    endpointsExist,
     endpointPrivilegesLoading,
+    handleCreatePolicyClick,
+    handleDeployEndpointsClick,
+    handleSelectableOnChange,
+    hasPolicyData,
+    listData,
+    listError?.message,
+    loading,
+    onTableChange,
+    paginationSetup,
+    policyItemsLoading,
+    policyItems,
+    selectedPolicyId,
+    setTableRowProps,
   ]);
-
-  const transformFailedCalloutDescription = useMemo(() => {
-    const failingTransformIds = metadataTransformStats
-      .reduce<string[]>((acc, currentValue) => {
-        if (WARNING_TRANSFORM_STATES.has(currentValue.state)) {
-          acc.push(currentValue.id);
-        }
-        return acc;
-      }, [])
-      .join(', ');
-
-    return (
-      <>
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.list.transformFailed.message"
-          defaultMessage="A required transform, {transformId}, is currently failing. Most of the time this can be fixed by {transformsPage}. For additional help, please visit the {docsPage}"
-          values={{
-            transformId: failingTransformIds || metadataTransformPrefix,
-            transformsPage: (
-              <LinkToApp
-                data-test-subj="failed-transform-restart-link"
-                appId="management"
-                appPath={TRANSFORM_URL}
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.list.transformFailed.restartLink"
-                  defaultMessage="restarting the transform"
-                />
-              </LinkToApp>
-            ),
-            docsPage: (
-              <EuiLink
-                data-test-subj="failed-transform-docs-link"
-                href={services.docLinks.links.endpoints.troubleshooting}
-                target="_blank"
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.list.transformFailed.docsLink"
-                  defaultMessage="troubleshooting documentation"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-        <EuiSpacer size="s" />
-      </>
-    );
-  }, [metadataTransformStats, services.docLinks.links.endpoints.troubleshooting]);
-
-  const transformFailedCallout = useMemo(() => {
-    if (!showTransformFailedCallout) {
-      return;
-    }
-
-    return (
-      <>
-        <CallOut
-          message={{
-            id: 'endpoints-list-transform-failed',
-            type: 'warning',
-            title: i18n.translate('xpack.securitySolution.endpoint.list.transformFailed.title', {
-              defaultMessage: 'Required transform failed',
-            }),
-            description: transformFailedCalloutDescription,
-          }}
-          dismissButtonText={i18n.translate(
-            'xpack.securitySolution.endpoint.list.transformFailed.dismiss',
-            {
-              defaultMessage: 'Dismiss',
-            }
-          )}
-          onDismiss={closeTransformFailedCallout}
-          showDismissButton={true}
-        />
-        <EuiSpacer size="m" />
-      </>
-    );
-  }, [showTransformFailedCallout, closeTransformFailedCallout, transformFailedCalloutDescription]);
 
   return (
     <AdministrationListPage
@@ -690,7 +585,10 @@ export const EndpointList = () => {
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
-        {transformFailedCallout}
+        <TransformFailedCallout
+          metadataTransformStats={metadataTransformStats}
+          hasNoPolicyData={!hasPolicyData}
+        />
         <EuiFlexGroup gutterSize="s" alignItems="center">
           {shouldShowKQLBar && (
             <EuiFlexItem>
