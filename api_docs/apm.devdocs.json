@@ -124,7 +124,7 @@
           "section": "def-common.LocatorPublic",
           "text": "LocatorPublic"
         },
-        "<{ serviceName: undefined; } | ({ serviceName: string; } & { serviceOverviewTab?: \"errors\" | \"traces\" | \"metrics\" | \"logs\" | undefined; } & { query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
+        "<{ serviceName: undefined; } | ({ serviceName: string; } & { serviceOverviewTab?: \"errors\" | \"metrics\" | \"traces\" | \"logs\" | undefined; } & { query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
         "Branded",
         "<string, ",
         {
@@ -782,7 +782,13 @@
                 "text": "HomeServerPluginStart"
               },
               ">; } | undefined; ml?: { setup: ",
-              "SharedServices",
+              {
+                "pluginId": "ml",
+                "scope": "server",
+                "docId": "kibMlPluginApi",
+                "section": "def-server.MlPluginSetup",
+                "text": "MlPluginSetup"
+              },
               "; start: () => Promise<never>; } | undefined; security?: { setup: ",
               {
                 "pluginId": "security",
@@ -1015,7 +1021,7 @@
           "IndicesGetResponse",
           "; ingestPipelines: ",
           "IngestGetPipelineResponse",
-          "; }; apmIndexTemplates: { name: string; isNonStandard: boolean; exists: boolean; }[]; fleetPackageInfo: { isInstalled: boolean; version?: string | undefined; }; kibanaVersion: string; elasticsearchVersion: string; apmEvents: ",
+          "; }; apmIndices: Readonly<{ error: string; onboarding: string; span: string; transaction: string; metric: string; }>; apmIndexTemplates: { name: string; isNonStandard: boolean; exists: boolean; }[]; fleetPackageInfo: { isInstalled: boolean; version?: string | undefined; }; kibanaVersion: string; elasticsearchVersion: string; apmEvents: ",
           "ApmEvent",
           "[]; invalidIndices: ",
           "IndiciesItem",

@@ -22,7 +22,7 @@ import {
   AppNavLinkStatus,
   AppDeepLink,
 } from '@kbn/core/public';
-import { ManagementSetup, ManagementStart } from './types';
+import { ManagementSetup, ManagementStart, NavigationCardsSubject } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
 import { ManagementAppLocatorDefinition } from '../common/locator';
@@ -72,6 +72,11 @@ export class ManagementPlugin
   private hasAnyEnabledApps = true;
 
   private isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
+  private landingPageRedirect$ = new BehaviorSubject<string | undefined>(undefined);
+  private cardsNavigationConfig$ = new BehaviorSubject<NavigationCardsSubject>({
+    enabled: false,
+    hideLinksTo: [],
+  });
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -116,8 +121,11 @@ export class ManagementPlugin
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),
           kibanaVersion,
+          coreStart,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
           isSidebarEnabled$: managementPlugin.isSidebarEnabled$,
+          cardsNavigationConfig$: managementPlugin.cardsNavigationConfig$,
+          landingPageRedirect$: managementPlugin.landingPageRedirect$,
         });
       },
     });
@@ -146,6 +154,10 @@ export class ManagementPlugin
     return {
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>
         this.isSidebarEnabled$.next(isSidebarEnabled),
+      setupCardsNavigation: ({ enabled, hideLinksTo }) =>
+        this.cardsNavigationConfig$.next({ enabled, hideLinksTo }),
+      setLandingPageRedirect: (landingPageRedirect: string) =>
+        this.landingPageRedirect$.next(landingPageRedirect),
     };
   }
 }

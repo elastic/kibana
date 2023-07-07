@@ -47,7 +47,7 @@ export const SETTINGS_CONNECTOR_TITLE = i18n.translate(
 export const SETTINGS_PROMPT_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.promptTitle',
   {
-    defaultMessage: 'System Prompt',
+    defaultMessage: 'System prompt',
   }
 );
 

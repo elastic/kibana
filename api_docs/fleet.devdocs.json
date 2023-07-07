@@ -5427,6 +5427,38 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-server.ArtifactsClientInterface.bulkDeleteArtifacts",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkDeleteArtifacts",
+            "description": [],
+            "signature": [
+              "(ids: string[]) => Promise<Error[]>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.ArtifactsClientInterface.bulkDeleteArtifacts.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-server.ArtifactsClientInterface.listArtifacts",
             "type": "Function",
             "tags": [],
@@ -20996,194 +21028,6 @@
       },
       {
         "parentPluginId": "fleet",
-        "id": "def-common.NewOutput",
-        "type": "Interface",
-        "tags": [],
-        "label": "NewOutput",
-        "description": [],
-        "path": "x-pack/plugins/fleet/common/types/models/output.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.NewOutput.is_default",
-            "type": "boolean",
-            "tags": [],
-            "label": "is_default",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.NewOutput.is_default_monitoring",
-            "type": "boolean",
-            "tags": [],
-            "label": "is_default_monitoring",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.NewOutput.is_preconfigured",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "is_preconfigured",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.NewOutput.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.NewOutput.type",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "\"logstash\" | \"elasticsearch\""
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.NewOutput.hosts",
-            "type": "Array",
-            "tags": [],
-            "label": "hosts",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.NewOutput.ca_sha256",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ca_sha256",
-            "description": [],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.NewOutput.ca_trusted_fingerprint",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ca_trusted_fingerprint",
-            "description": [],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.NewOutput.config_yaml",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "config_yaml",
-            "description": [],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.NewOutput.ssl",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ssl",
-            "description": [],
-            "signature": [
-              "{ certificate_authorities?: string[] | undefined; certificate?: string | undefined; key?: string | undefined; } | null | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.NewOutput.proxy_id",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "proxy_id",
-            "description": [],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.NewOutput.shipper",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "shipper",
-            "description": [],
-            "signature": [
-              "ShipperOutput",
-              " | null | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fleet",
-            "id": "def-common.NewOutput.allow_edit",
-            "type": "Array",
-            "tags": [],
-            "label": "allow_edit",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/plugins/fleet/common/types/models/output.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
         "id": "def-common.NewPackagePolicy",
         "type": "Interface",
         "tags": [],
@@ -24862,6 +24706,25 @@
           "\"fleet-message-signing-keys\""
         ],
         "path": "x-pack/plugins/fleet/common/constants/message_signing_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.NewOutput",
+        "type": "Type",
+        "tags": [],
+        "label": "NewOutput",
+        "description": [],
+        "signature": [
+          "NewElasticsearchOutput",
+          " | ",
+          "NewLogstashOutput",
+          " | ",
+          "KafkaOutput"
+        ],
+        "path": "x-pack/plugins/fleet/common/types/models/output.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
