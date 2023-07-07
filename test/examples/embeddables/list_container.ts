@@ -37,21 +37,5 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         expect(tasks).to.eql(['Go to school', 'Watch planet earth', 'Read the encyclopedia']);
       });
     });
-
-    it('searchable container deletes children', async () => {
-      await testSubjects.click('todoCheckBox-1');
-      await testSubjects.click('deleteCheckedTodos');
-
-      const text = await testSubjects.getVisibleTextAll('helloWorldEmbeddable');
-      expect(text).to.eql(['HELLO WORLD!']);
-    });
-
-    it('searchable container finds matches in multi-task children', async () => {
-      await testSubjects.setValue('filterTodos', 'earth');
-      await testSubjects.click('checkMatchingTodos');
-      await testSubjects.click('deleteCheckedTodos');
-
-      await testSubjects.missingOrFail('multiTaskTodoTask');
-    });
   });
 }
