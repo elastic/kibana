@@ -308,7 +308,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                   error={form.errors.role_descriptors}
                   isInvalid={form.touched.role_descriptors && !!form.errors.role_descriptors}
                 >
-                  <CodeEditorField // TODO theme provided in context by x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx
+                  <CodeEditorField
                     value={form.values.role_descriptors!}
                     onChange={(value) => form.setValue('role_descriptors', value)}
                     languageId="xjson"
@@ -406,7 +406,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                   error={form.errors.metadata}
                   isInvalid={form.touched.metadata && !!form.errors.metadata}
                 >
-                  <CodeEditorField // TODO theme provided in context by x-pack/plugins/security/public/management/api_keys/api_keys_management_app.tsx
+                  <CodeEditorField
                     value={form.values.metadata!}
                     onChange={(value) => form.setValue('metadata', value)}
                     languageId="xjson"

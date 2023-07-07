@@ -719,7 +719,7 @@ export const App = (props: {
                   </EuiFlexGroup>
                   <EuiFlexGroup style={{ height: '75vh' }} direction="column">
                     <EuiFlexItem>
-                      <CodeEditor // TODO theme is provided above!
+                      <CodeEditor
                         languageId={HJsonLang}
                         options={{
                           fontSize: 14,
