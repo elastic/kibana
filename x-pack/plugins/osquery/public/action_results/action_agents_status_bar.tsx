@@ -12,12 +12,10 @@ import { AGENT_STATUSES, getColorForAgentStatus } from './services/agent_status'
 import type { ActionAgentStatus } from './types';
 
 const euiColorPaletteDisplayCss = {
-  '&.osquery-action-agent-status-bar': {
+  border: 'none',
+  borderRadius: 0,
+  '&:after': {
     border: 'none',
-    borderRadius: 0,
-    '&:after': {
-      border: 'none',
-    },
   },
 };
 
@@ -38,12 +36,5 @@ export const AgentStatusBar: React.FC<{
     }, [] as Array<{ stop: number; color: string }>);
   }, [agentStatus]);
 
-  return (
-    <EuiColorPaletteDisplay
-      css={euiColorPaletteDisplayCss}
-      className="osquery-action-agent-status-bar"
-      size="s"
-      palette={palette}
-    />
-  );
+  return <EuiColorPaletteDisplay css={euiColorPaletteDisplayCss} size="s" palette={palette} />;
 };

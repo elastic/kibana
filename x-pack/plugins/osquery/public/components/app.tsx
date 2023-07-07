@@ -11,7 +11,7 @@ import {
   EuiLoadingSpinner,
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
 } from '@elastic/eui';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -31,19 +31,13 @@ const OsqueryAppComponent = () => {
     return (
       <EuiPage paddingSize="none">
         <EuiPageBody>
-          <EuiPageContent
-            verticalPosition="center"
-            horizontalPosition="center"
-            paddingSize="none"
-            color="subdued"
-            hasShadow={false}
-          >
+          <EuiPageSection paddingSize="none" color="subdued">
             {hasCustomBranding ? (
               <EuiLoadingSpinner size="xxl" />
             ) : (
               <EuiLoadingElastic size="xxl" />
             )}
-          </EuiPageContent>
+          </EuiPageSection>
         </EuiPageBody>
       </EuiPage>
     );

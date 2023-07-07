@@ -9,8 +9,9 @@
 import React, { FC, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { EuiProvider, EuiProviderProps } from '@elastic/eui';
+import { EuiProvider, EuiProviderProps, useEuiTheme } from '@elastic/eui';
 import createCache from '@emotion/cache';
+import { ThemeProvider as EmotionThemeProvider } from '@emotion/react';
 import type { CoreTheme } from '@kbn/core/public';
 import { getColorMode } from './utils';
 
@@ -40,6 +41,7 @@ That copy and this comment can be removed once https://github.com/elastic/kibana
 export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, modify, children }) => {
   const theme = useObservable(theme$, defaultTheme);
   const colorMode = useMemo(() => getColorMode(theme), [theme]);
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiProvider
       colorMode={colorMode}
@@ -48,7 +50,7 @@ export const KibanaThemeProvider: FC<KibanaThemeProviderProps> = ({ theme$, modi
       utilityClasses={false}
       modify={modify}
     >
-      {children}
+      <EmotionThemeProvider theme={euiTheme}>{children}</EmotionThemeProvider>
     </EuiProvider>
   );
 };

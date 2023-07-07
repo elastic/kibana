@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary, useEuiTheme } from '@elastic/eui';
+import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { CoreStart } from '@kbn/core/public';
-import { ThemeProvider as EmotionThemeProvider } from '@emotion/react';
 import { KibanaContextProvider } from '../common/lib/kibana';
 
 import { queryClient } from '../query_client';
+import { KibanaThemeProvider } from '../shared_imports';
 import type { StartPlugins } from '../types';
 
 export interface ServicesWrapperProps {
@@ -20,19 +20,15 @@ export interface ServicesWrapperProps {
   children: React.ReactNode;
 }
 
-const ServicesWrapperComponent: React.FC<ServicesWrapperProps> = ({ services, children }) => {
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    <EmotionThemeProvider theme={euiTheme}>
-      <KibanaContextProvider services={services}>
-        <EuiErrorBoundary>
-          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-        </EuiErrorBoundary>
-      </KibanaContextProvider>
-    </EmotionThemeProvider>
-  );
-};
+const ServicesWrapperComponent: React.FC<ServicesWrapperProps> = ({ services, children }) => (
+  <KibanaThemeProvider theme$={services.theme.theme$}>
+    <KibanaContextProvider services={services}>
+      <EuiErrorBoundary>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </EuiErrorBoundary>
+    </KibanaContextProvider>
+  </KibanaThemeProvider>
+);
 
 const ServicesWrapper = React.memo(ServicesWrapperComponent);
 
