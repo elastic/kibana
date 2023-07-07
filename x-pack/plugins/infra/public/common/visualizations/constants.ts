@@ -42,3 +42,5 @@ export const visualizationTypes = {
   lineChart: LineChart,
   metricChart: MetricChart,
 };
+
+export const HOST_METRICS_DOC_HREF = 'https://ela.st/docs-infra-host-metrics';

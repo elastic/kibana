@@ -51,7 +51,8 @@ export function getEditLensConfiguration(
     attributes,
     dataView,
     updateAll,
-    setIsFlyoutVisible,
+    closeFlyout,
+    wrapInFlyout,
     datasourceId,
     adaptersTables,
   }: EditLensConfigurationProps) => {
@@ -88,15 +89,38 @@ export function getEditLensConfiguration(
     const lensStore: LensRootStore = makeConfigureStore(storeDeps, {
       lens: getPreloadedState(storeDeps) as LensAppState,
     } as unknown as PreloadedState<LensState>);
-    const closeFlyout = () => {
-      setIsFlyoutVisible?.(false);
+
+    const getWrapper = (children: JSX.Element) => {
+      if (wrapInFlyout) {
+        return (
+          <EuiFlyout
+            type="push"
+            ownFocus
+            onClose={() => {
+              closeFlyout?.();
+            }}
+            aria-labelledby={i18n.translate('xpack.lens.config.editLabel', {
+              defaultMessage: 'Edit configuration',
+            })}
+            size="s"
+            hideCloseButton
+            css={css`
+              background: none;
+            `}
+          >
+            {children}
+          </EuiFlyout>
+        );
+      } else {
+        return children;
+      }
     };
 
     const configPanelProps = {
       attributes,
       dataView,
       updateAll,
-      setIsFlyoutVisible,
+      closeFlyout,
       datasourceId,
       adaptersTables,
       coreStart,
@@ -105,25 +129,10 @@ export function getEditLensConfiguration(
       datasourceMap,
     };
 
-    return (
-      <EuiFlyout
-        type="push"
-        ownFocus
-        onClose={closeFlyout}
-        aria-labelledby={i18n.translate('xpack.lens.config.editLabel', {
-          defaultMessage: 'Edit configuration',
-        })}
-        size="s"
-        className="lnsEditConfigurationFlyout"
-        css={css`
-          background: none;
-        `}
-        hideCloseButton
-      >
-        <Provider store={lensStore}>
-          <LensEditConfigurationFlyout {...configPanelProps} />
-        </Provider>
-      </EuiFlyout>
+    return getWrapper(
+      <Provider store={lensStore}>
+        <LensEditConfigurationFlyout {...configPanelProps} />
+      </Provider>
     );
   };
 }
