@@ -52,6 +52,7 @@ export {
   SPECIFIC_SCRIPTED_FIELD_PATH_LEGACY,
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
+  DATA_VIEW_SWAP_REFERENCES_PATH,
 } from './constants';
 
 export type { SERVICE_KEY_TYPE } from './constants';
