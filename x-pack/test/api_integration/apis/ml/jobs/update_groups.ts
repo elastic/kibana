@@ -62,18 +62,12 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
-      await ml.api.cleanMlIndices();
-      await ml.testResources.cleanMLSavedObjects();
-
       for (const job of testSetupJobConfigs) {
         await ml.api.createAnomalyDetectionJob(job);
       }
     });
 
     after(async () => {
-      for (const job of testSetupJobConfigs) {
-        await ml.api.deleteAnomalyDetectionJobES(job.job_id);
-      }
       await ml.api.cleanMlIndices();
       await ml.testResources.cleanMLSavedObjects();
     });
