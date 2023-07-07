@@ -34,7 +34,7 @@ const TITLES = {
   }),
 };
 
-interface ConfigFormProps {
+interface SettingCardProps {
   /**
    * A subtitle for this component.
    **/
@@ -56,7 +56,7 @@ export const SettingCardHeader: FC = memo(({ children }) => (
 ));
 SettingCardHeader.displayName = 'SettingCardHeader';
 
-export const SettingCard: FC<ConfigFormProps> = memo(
+export const SettingCard: FC<SettingCardProps> = memo(
   ({ type, supportedOss, osRestriction, dataTestSubj, rightCorner, children }) => {
     const paddingSize = useContext(ThemeContext).eui.euiPanelPaddingModifiers.paddingMedium;
     return (

@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { WindowsEventCollectionCard } from './components/windows_event_collection_card';
 import { AttackSurfaceReductionCard } from './components/attack_surface_reduction_card';
 import { BehaviourProtectionCard } from './components/behaviour_protection_card';
 import { MemoryProtectionCard } from './components/memory_protection_card';
@@ -54,6 +55,8 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
 
       <FormSectionTitle>{SETTINGS_SECTION_TITLE}</FormSectionTitle>
       <EuiSpacer size="s" />
+
+      <WindowsEventCollectionCard {...props} data-test-subj={getTestId('windowsEvents')} />
 
       <EuiSpacer size="m" />
       <AdvancedSection {...props} data-test-subj={getTestId('advancedSection')} />
