@@ -4,7 +4,9 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "@emotion/react/types/css-prop",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
@@ -30,5 +32,5 @@
     "@kbn/coloring",
     "@kbn/field-formats-plugin",
     "@kbn/unified-field-list",
-  ]
+  ],
 }
