@@ -38,15 +38,4 @@ export class IndexPatternsService extends FtrService {
 
     return response.data.index_pattern;
   }
-
-  /**
-   * Removes an index pattern
-   */
-  async remove(indexPatternId: string, spaceId = ''): Promise<boolean> {
-    const response = await this.kibanaServer.request({
-      path: `${spaceId}/api/index_patterns/index_pattern/${indexPatternId}`,
-      method: 'DELETE',
-    });
-    return response.status === 200;
-  }
 }
