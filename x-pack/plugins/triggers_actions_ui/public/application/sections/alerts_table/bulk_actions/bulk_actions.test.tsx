@@ -168,7 +168,6 @@ describe('AlertsTable.BulkActions', () => {
     updatedAt: Date.now(),
     onToggleColumn: () => {},
     onResetColumns: () => {},
-    onColumnsChange: () => {},
     onChangeVisibleColumns: () => {},
     browserFields: {},
     query: {},

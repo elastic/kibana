@@ -139,6 +139,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     updatedAt,
     browserFields,
     onChangeVisibleColumns,
+    onColumnResize,
     showAlertStatusWithFlapping = false,
     showInspectButton = false,
   } = props;
@@ -480,6 +481,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
               onChangePage: onChangePageIndex,
             }}
             rowHeightsOptions={props.rowHeightsOptions}
+            onColumnResize={onColumnResize}
             ref={dataGridRef}
           />
         )}
