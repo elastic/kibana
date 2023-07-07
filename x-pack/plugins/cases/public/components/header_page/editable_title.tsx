@@ -57,7 +57,12 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
 
   const onClickEditIcon = useCallback(() => setEditMode(true), []);
   const onClickSubmit = useCallback((): void => {
-    if (newTitle.length > MAX_TITLE_LENGTH) {
+    if (!newTitle.trim().length) {
+      setErrors([i18n.TITLE_REQUIRED]);
+      return;
+    }
+
+    if (newTitle.trim().length > MAX_TITLE_LENGTH) {
       setErrors([i18n.MAX_LENGTH_ERROR('title', MAX_TITLE_LENGTH)]);
       return;
     }
@@ -69,10 +74,10 @@ const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoad
     setErrors([]);
   }, [newTitle, onSubmit, title]);
 
-  const handleOnChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => setNewTitle(e.target.value),
-    []
-  );
+  const handleOnChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setNewTitle(e.target.value);
+    setErrors([]);
+  }, []);
 
   const hasErrors = errors.length > 0;
 

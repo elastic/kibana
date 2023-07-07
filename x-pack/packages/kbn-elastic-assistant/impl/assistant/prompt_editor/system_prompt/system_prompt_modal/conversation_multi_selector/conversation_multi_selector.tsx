@@ -8,11 +8,12 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
+import { TEST_IDS } from '../../../../constants';
 import { Conversation } from '../../../../../..';
 import * as i18n from '../translations';
 
 interface Props {
-  onConversationSelectionChange: (conversations: Conversation[]) => void;
+  onConversationSelectionChange: (currentPromptConversations: Conversation[]) => void;
   conversations: Conversation[];
   selectedConversations?: Conversation[];
 }
@@ -27,6 +28,7 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
       () =>
         conversations.map((conversation) => ({
           label: conversation.id,
+          'data-test-subj': TEST_IDS.CONVERSATIONS_MULTISELECTOR_OPTION(conversation.id),
         })),
       [conversations]
     );
@@ -62,6 +64,7 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
 
     return (
       <EuiComboBox
+        data-test-subj={TEST_IDS.CONVERSATIONS_MULTISELECTOR}
         aria-label={i18n.SYSTEM_PROMPT_DEFAULT_CONVERSATIONS}
         options={options}
         selectedOptions={selectedOptions}
