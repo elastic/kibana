@@ -39,6 +39,13 @@ const isRequestError = (e: Error | RequestError): e is RequestError => {
   return false;
 };
 
+const isTSDBError = (e: ReasonDescription): boolean => {
+  return (
+    e.type === 'illegal_argument_exception' &&
+    /\]\[counter\] is not supported for aggregation/.test(e.reason)
+  );
+};
+
 // what happens for runtime field used on indexpatterns not accessible to the user?
 // they will throw on the kibana side as data will be undefined
 const isEsAggError = (e: Error | EsAggError): e is EsAggError => {
@@ -127,6 +134,18 @@ export function getOriginalRequestErrorMessages(error?: ExpressionRenderError | 
                 context: rootError.context.reason
                   ? `${rootError.context.reason} (${rootError.context.type})`
                   : rootError.context.type,
+              },
+            })
+          );
+        } else if (isTSDBError(rootError)) {
+          const [fieldName, _type, _isCounter, opUsed] = rootError.reason.match(/\[(\w)*\]/g)!;
+          errorMessages.push(
+            i18n.translate('xpack.lens.editorFrame.expressionTSDBDetailedMessage', {
+              defaultMessage:
+                'The field {field} of type [counter] has been used with the unsupported operation {op}.',
+              values: {
+                field: fieldName,
+                op: opUsed,
               },
             })
           );
