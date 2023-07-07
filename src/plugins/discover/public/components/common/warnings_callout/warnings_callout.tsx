@@ -94,21 +94,37 @@ export const WarningsCallout = ({
           </EuiFlexGroup>
         }
         body={
-          <p>
+          <ul
+            className="eui-yScrollWithShadows"
+            css={css`
+              max-height: 50vh;
+              overflow: auto;
+              list-style: none !important;
+              margin: 0 !important;
+              padding: 0 0 ${euiTheme.size.xs} 0 !important;
+              text-align: left;
+            `}
+          >
             {interceptedWarnings.map((warning, index) => (
-              <WarningContent
+              <li
                 key={`warning-${index}`}
-                warning={warning}
-                textSize="m"
-                groupStyles={{ direction: 'column' }}
-                data-test-subj={dataTestSubj}
-              />
+                css={css`
+                  padding: 0;
+                  & + & {
+                    margin-top: ${euiTheme.size.l};
+                  }
+                `}
+              >
+                <WarningContent
+                  warning={warning}
+                  textSize="m"
+                  groupStyles={{ direction: 'column' }}
+                  data-test-subj={dataTestSubj}
+                />
+              </li>
             ))}
-          </p>
+          </ul>
         }
-        css={css`
-          text-align: left;
-        `}
       />
     );
   }
