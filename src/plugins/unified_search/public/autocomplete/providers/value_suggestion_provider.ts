@@ -76,9 +76,9 @@ export const setupValueSuggestionProvider = (
           body: JSON.stringify({
             query,
             field: field.name,
-            fieldMeta: field?.toSpec?.(),
+            fieldMeta: field.toSpec?.() ?? field,
             filters,
-            ...(querySuggestionKey === undefined ? { method } : { fieldMeta: field }),
+            ...(querySuggestionKey === undefined ? { method } : {}),
           }),
           signal,
           version: '1',

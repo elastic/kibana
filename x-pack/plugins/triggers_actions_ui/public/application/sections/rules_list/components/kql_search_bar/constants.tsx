@@ -28,6 +28,15 @@ export const suggestionsAbstraction: SuggestionsAbstraction = {
       fieldToQuery: 'alert.attributes.actions',
       displayField: 'actions',
     },
+    // To show multiple nested fields
+    // 'alert.actions.group': {
+    //   field: 'alert.actions.group',
+    //   nestedPath: 'alert.actions',
+    //   nestedField: 'group',
+    //   nestedDisplayField: 'group',
+    //   fieldToQuery: 'alert.attributes.actions',
+    //   displayField: 'actions',
+    // },
     'alert.alertTypeId': {
       field: 'alert.alertTypeId',
       fieldToQuery: 'alert.attributes.alertTypeId',
