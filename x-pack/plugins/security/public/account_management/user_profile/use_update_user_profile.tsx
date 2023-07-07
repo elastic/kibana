@@ -64,8 +64,11 @@ const i18nTexts = {
   },
 };
 
-export const getUseUpdateUserProfile = ({ apiClient, notifications }: Deps) => {
-  if (useUpdateUserProfile) {
+export const getUseUpdateUserProfile = (
+  { apiClient, notifications }: Deps,
+  useCacheInstance = true
+) => {
+  if (useUpdateUserProfile && useCacheInstance) {
     return useUpdateUserProfile;
   }
 
