@@ -1093,6 +1093,33 @@ describe('EPM template', () => {
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(runtimeFieldMapping);
   });
+
+  it('tests processing runtime fields in a dynamic template', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: labels.*
+  type: keyword
+  runtime: true
+`;
+    const runtimeFieldMapping = {
+      properties: {},
+      dynamic_templates: [
+        {
+          'labels.*': {
+            match_mapping_type: 'string',
+            path_match: 'labels.*',
+            runtime: {
+              type: 'keyword',
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
   it('tests priority and index pattern for data stream without dataset_is_prefix', () => {
     const dataStreamDatasetIsPrefixUnset = {
       type: 'metrics',

@@ -128,15 +128,19 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
       matchingType: string;
       pathMatch: string;
       properties: string;
+      runtimeProperties?: string;
     }) => {
       const name = dynamicMapping.path;
       if (dynamicTemplateNames.has(name)) {
         return;
       }
 
-      const dynamicTemplate: Properties = {
-        mapping: dynamicMapping.properties,
-      };
+      const dynamicTemplate: Properties = {};
+      if (dynamicMapping.runtimeProperties !== undefined) {
+        dynamicTemplate.runtime = dynamicMapping.runtimeProperties;
+      } else {
+        dynamicTemplate.mapping = dynamicMapping.properties;
+      }
 
       if (dynamicMapping.matchingType) {
         dynamicTemplate.match_mapping_type = dynamicMapping.matchingType;
@@ -145,11 +149,11 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
       if (dynamicMapping.pathMatch) {
         dynamicTemplate.path_match = dynamicMapping.pathMatch;
       }
+
       dynamicTemplateNames.add(name);
       dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
     },
     addRuntimeField: (runtimeField: { path: string; properties: Properties }) => {
-      console.log('>> properties ', runtimeField.properties);
       runtimeFields[`${runtimeField.path}`] = runtimeField.properties;
     },
   });
@@ -159,7 +163,6 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
     indexTemplateMappings.dynamic_templates = dynamicTemplates;
   }
   if (Object.keys(runtimeFields).length > 0) {
-    console.log('>> adding runtime fields', runtimeFields);
     indexTemplateMappings.runtime = runtimeFields;
   }
   console.log('Final index template mappings: ', indexTemplateMappings);
@@ -195,34 +198,51 @@ function _generateMappings(
       const type = field.type || 'keyword';
 
       if (field.runtime !== undefined) {
-        let runtimeFieldProps: Properties = getDefaultProperties(field);
-        switch (type) {
-          case 'integer':
-            runtimeFieldProps.type = 'long';
-            break;
-          case 'scaled_float':
-            runtimeFieldProps = scaledFloat(field);
-            break;
-          case 'date':
-            const dateMappings = generateDateMapping(field);
-            runtimeFieldProps = { ...runtimeFieldProps, ...dateMappings, type: 'date' };
-            break;
-          default:
-            runtimeFieldProps.type = type;
-        }
-
-        if (typeof field.runtime === 'string') {
-          const scriptObject = {
-            source: field.runtime.trim(),
-          };
-          runtimeFieldProps.script = scriptObject;
-        }
-
-        console.log('There is a runtime field ', field.name);
-        console.log('Properties: ', runtimeFieldProps);
         const path = ctx.groupFieldName ? `${ctx.groupFieldName}.${field.name}` : field.name;
-        ctx.addRuntimeField({ path, properties: runtimeFieldProps });
+        let runtimeFieldProps: Properties = getDefaultProperties(field);
 
+        // Is it a dynamic template?
+        if (type === 'object' && field.object_type) {
+          const pathMatch = path.includes('*') ? path : `${path}.*`;
+
+          let dynProperties: Properties = getDefaultProperties(field);
+          let matchingType: string | undefined;
+          switch (field.object_type) {
+            case 'keyword':
+              dynProperties.type = field.object_type;
+              matchingType = field.object_type_mapping_type ?? 'string';
+              break;
+            case 'double':
+            case 'long':
+            case 'boolean':
+              dynProperties = {
+                type: field.object_type,
+                time_series_metric: field.metric_type,
+              };
+              matchingType = field.object_type_mapping_type ?? field.object_type;
+            default:
+              break;
+          }
+
+          // get the runtime properies of this field assuming type equals to object_type
+          const _field = { ...field, type: field.object_type };
+          const fieldProps = generateRuntimeFieldProps(_field);
+
+          if (dynProperties && matchingType) {
+            ctx.addDynamicMapping({
+              path,
+              pathMatch,
+              matchingType,
+              properties: dynProperties,
+              runtimeProperties: fieldProps,
+            });
+          }
+          return;
+        }
+        const fieldProps = generateRuntimeFieldProps(field);
+        runtimeFieldProps = { ...runtimeFieldProps, ...fieldProps };
+
+        ctx.addRuntimeField({ path, properties: runtimeFieldProps });
         return; // runtime fields should not be added as a property
       }
 
@@ -479,6 +499,30 @@ function generateDateMapping(field: Field): IndexTemplateMapping {
     mapping.ignore_malformed = false;
   }
 
+  return mapping;
+}
+
+function generateRuntimeFieldProps(field: Field): IndexTemplateMapping {
+  let mapping: IndexTemplateMapping = {};
+  const type = field.type || keyword;
+  switch (type) {
+    case 'integer':
+      mapping.type = 'long';
+      break;
+    case 'date':
+      const dateMappings = generateDateMapping(field);
+      mapping = { ...mapping, ...dateMappings, type: 'date' };
+      break;
+    default:
+      mapping.type = type;
+  }
+
+  if (typeof field.runtime === 'string') {
+    const scriptObject = {
+      source: field.runtime.trim(),
+    };
+    mapping.script = scriptObject;
+  }
   return mapping;
 }
 
