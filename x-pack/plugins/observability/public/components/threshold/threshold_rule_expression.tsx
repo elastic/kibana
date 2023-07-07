@@ -6,6 +6,7 @@
  */
 
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { debounce } from 'lodash';
 import {
   EuiAccordion,
   EuiButtonEmpty,
@@ -25,23 +26,24 @@ import { DataViewBase } from '@kbn/es-query';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { debounce } from 'lodash';
 import {
   ForLastExpression,
   IErrorObject,
   RuleTypeParams,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { useKibana } from '../../../utils/kibana_react';
-import { Aggregators, Comparator, QUERY_INVALID } from '../../../../common/threshold_rule/types';
-import { TimeUnitChar } from '../../../../common/utils/formatters/duration';
-import { AlertContextMeta, AlertParams, MetricExpression } from '../types';
-import { ExpressionChart } from './expression_chart';
-import { ExpressionRow } from './expression_row';
-import { MetricsExplorerKueryBar } from './kuery_bar';
-import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
-import { convertKueryToElasticSearchQuery } from '../helpers/kuery';
-import { MetricsExplorerGroupBy } from './group_by';
+
+import { useKibana } from '../../utils/kibana_react';
+import { Aggregators, Comparator, QUERY_INVALID } from '../../../common/threshold_rule/types';
+import { TimeUnitChar } from '../../../common/utils/formatters/duration';
+import { AlertContextMeta, AlertParams, MetricExpression } from './types';
+import { ExpressionChart } from './components/expression_chart';
+import { ExpressionRow } from './components/expression_row';
+import { MetricsExplorerKueryBar } from './components/kuery_bar';
+import { MetricsExplorerGroupBy } from './components/group_by';
+import { MetricsExplorerOptions } from './hooks/use_metrics_explorer_options';
+import { convertKueryToElasticSearchQuery } from './helpers/kuery';
+
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 type Props = Omit<
@@ -340,6 +342,7 @@ export default function Expressions(props: Props) {
       <DataViewSelectPopover
         dependencies={{ dataViews, dataViewEditor }}
         dataView={dataView}
+        metadata={{ adHocDataViewList: metadata?.adHocDataViewList || [] }}
         onSelectDataView={onSelectDataView}
         onChangeMetaData={({ adHocDataViewList }) => {
           onChangeMetaData({ ...metadata, adHocDataViewList });

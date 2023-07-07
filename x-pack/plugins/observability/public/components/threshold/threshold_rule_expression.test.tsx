@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { useKibana } from '../../../utils/kibana_react';
-import { kibanaStartMock } from '../../../utils/kibana_react.mock';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-
-import Expressions from './expression';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { MetricsExplorerMetric } from '../../../../common/threshold_rule/metrics_explorer';
-import { Comparator } from '../../../../common/threshold_rule/types';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
-jest.mock('../../../utils/kibana_react');
+import { Comparator } from '../../../common/threshold_rule/types';
+import { MetricsExplorerMetric } from '../../../common/threshold_rule/metrics_explorer';
+import { useKibana } from '../../utils/kibana_react';
+import { kibanaStartMock } from '../../utils/kibana_react.mock';
+import Expressions from './threshold_rule_expression';
+
+jest.mock('../../utils/kibana_react');
 
 const useKibanaMock = useKibana as jest.Mock;
 
