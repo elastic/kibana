@@ -30,7 +30,7 @@ interface Props {
  * Modal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever
  * component currently has focus and any specific context it may provide through the SAssInterface.
  */
-export const AssistantOverlay: React.FC<Props> = React.memo(({ isAssistantEnabled }: Props) => {
+export const AssistantOverlay = React.memo<Props>(({ isAssistantEnabled }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [conversationId, setConversationId] = useState<string | undefined>(
     WELCOME_CONVERSATION_TITLE
