@@ -850,7 +850,6 @@ describe('Comments', () => {
           comment: 'Solve this fast!',
           type: CommentType.user,
           owner: 'cases',
-          foo: 'bar',
         };
         const attachments = Array(MAX_BULK_CREATE_ATTACHMENTS + 1).fill(comment);
 
