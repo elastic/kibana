@@ -139,7 +139,7 @@ export class RuleRegistryPlugin
       this.createRouteHandlerContext()
     );
 
-    defineRoutes(router);
+    defineRoutes(router, logger);
 
     return {
       ruleDataService: this.ruleDataService,

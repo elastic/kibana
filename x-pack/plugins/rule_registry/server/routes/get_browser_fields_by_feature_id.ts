@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import * as t from 'io-ts';
 
@@ -14,7 +14,10 @@ import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
 
-export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerContext>) => {
+export const getBrowserFieldsByFeatureId = (
+  router: IRouter<RacRequestHandlerContext>,
+  logger: Logger
+) => {
   router.get(
     {
       path: `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
@@ -36,10 +39,16 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
         const { featureIds = [] } = request.query;
-
+        let startTime = new Date();
         const indices = await alertsClient.getAuthorizedAlertsIndices(
           Array.isArray(featureIds) ? featureIds : [featureIds]
         );
+
+        logger.error(
+          `### BrowserFields ### get indices -> ${new Date().getTime() - startTime.getTime()}`
+        );
+        startTime = new Date();
+
         const o11yIndices =
           indices?.filter((index) => index.startsWith('.alerts-observability')) ?? [];
         if (o11yIndices.length === 0) {
@@ -56,7 +65,9 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
           metaFields: ['_id', '_index'],
           allowNoIndex: true,
         });
-
+        logger.error(
+          `### BrowserFields ### get browserFields ${new Date().getTime() - startTime.getTime()}`
+        );
         return response.ok({
           body: browserFields,
         });

@@ -1087,13 +1087,24 @@ export class AlertsClient {
     allowNoIndex: boolean;
   }): Promise<BrowserFields> {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
+    let startTime = new Date();
     const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
       pattern: indices,
       metaFields,
       fieldCapsOptions: { allow_no_indices: allowNoIndex },
     });
+    this.logger.error(
+      `### BrowserFields ### getFieldsForWildcard ${new Date().getTime() - startTime.getTime()}`
+    );
 
-    return fieldDescriptorToBrowserFieldMapper(fields);
+    startTime = new Date();
+    const data = fieldDescriptorToBrowserFieldMapper(fields);
+    this.logger.error(
+      `### BrowserFields ### fieldDescriptorToBrowserFieldMapper ${
+        new Date().getTime() - startTime.getTime()
+      }`
+    );
+    return data;
   }
 
   public async getAADFields({ ruleTypeId }: { ruleTypeId: string }) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import { RacRequestHandlerContext } from '../types';
 import { getAlertByIdRoute } from './get_alert_by_id';
 import { updateAlertByIdRoute } from './update_alert_by_id';
@@ -17,14 +17,14 @@ import { getBrowserFieldsByFeatureId } from './get_browser_fields_by_feature_id'
 import { getAlertSummaryRoute } from './get_alert_summary';
 import { getAADFieldsByRuleType } from './get_aad_fields_by_rule_type';
 
-export function defineRoutes(router: IRouter<RacRequestHandlerContext>) {
+export function defineRoutes(router: IRouter<RacRequestHandlerContext>, logger: Logger) {
   getAlertByIdRoute(router);
   updateAlertByIdRoute(router);
   getAlertsIndexRoute(router);
   bulkUpdateAlertsRoute(router);
   findAlertsByQueryRoute(router);
   getFeatureIdsByRegistrationContexts(router);
-  getBrowserFieldsByFeatureId(router);
+  getBrowserFieldsByFeatureId(router, logger);
   getAlertSummaryRoute(router);
   getAADFieldsByRuleType(router);
 }
