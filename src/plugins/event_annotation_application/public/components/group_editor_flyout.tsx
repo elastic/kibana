@@ -22,7 +22,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
+import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import type {
   EventAnnotationConfig,
   EventAnnotationGroupConfig,

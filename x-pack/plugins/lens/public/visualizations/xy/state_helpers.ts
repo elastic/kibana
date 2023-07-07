@@ -16,7 +16,7 @@ import { isQueryAnnotationConfig } from '@kbn/event-annotation-plugin/public';
 import { i18n } from '@kbn/i18n';
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
-import { validateQuery } from '@kbn/visualization-ui-components/public';
+import { validateQuery } from '@kbn/visualization-ui-components';
 import { DataViewsState } from '../../state_management';
 import { FramePublicAPI, DatasourcePublicAPI, AnnotationGroups } from '../../types';
 import {

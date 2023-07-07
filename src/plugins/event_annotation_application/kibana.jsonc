@@ -16,7 +16,6 @@
       "dataViews",
       "unifiedSearch",
       "kibanaUtils",
-      "visualizationUiComponents",
       "contentManagement"
     ],
     "optionalPlugins": [
@@ -24,7 +23,6 @@
     ],
     "requiredBundles": [
       "kibanaReact",
-      "visualizationUiComponents"
     ],
   }
 }

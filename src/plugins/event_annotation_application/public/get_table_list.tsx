@@ -14,7 +14,7 @@ import { type TableListTabParentProps } from '@kbn/content-management-tabbed-tab
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
+import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { EventAnnotationGroupTableList } from './components/table_list';

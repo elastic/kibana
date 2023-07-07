@@ -10,7 +10,7 @@ import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { AnnotationEditorControls } from '@kbn/event-annotation-application-plugin/public';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useDebouncedValue } from '@kbn/visualization-ui-components/public';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import moment from 'moment';
 import { search } from '@kbn/data-plugin/public';

@@ -25,7 +25,7 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
 import { isEqual } from 'lodash';
-import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components/public';
+import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { generateId } from '../../id_generator';
 import {

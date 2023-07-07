@@ -17,9 +17,9 @@ import {
   FieldPicker,
   FilterQueryInput,
   type QueryInputServices,
-} from '@kbn/visualization-ui-components/public';
+} from '@kbn/visualization-ui-components';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { isFieldLensCompatible } from '@kbn/visualization-ui-components/public';
+import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 
 export const defaultQuery: Query = {

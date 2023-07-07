@@ -28,7 +28,7 @@ import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/moc
 import { act } from 'react-dom/test-utils';
 import { GroupEditorFlyout } from './group_editor_flyout';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { QueryInputServices } from '@kbn/visualization-ui-components/public';
+import { QueryInputServices } from '@kbn/visualization-ui-components';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 import { IToasts } from '@kbn/core-notifications-browser';
 

@@ -17,7 +17,7 @@ import { GroupEditorControls } from './group_editor_controls';
 import { EuiTextAreaProps, EuiTextProps } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { act } from 'react-dom/test-utils';
-import type { QueryInputServices } from '@kbn/visualization-ui-components/public';
+import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { AnnotationEditorControls, ENABLE_INDIVIDUAL_ANNOTATION_EDITING } from '..';
 
 jest.mock('@elastic/eui', () => {

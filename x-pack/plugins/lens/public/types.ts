@@ -46,7 +46,7 @@ import type {
   DragContextState,
   DropType,
 } from '@kbn/dom-drag-drop';
-import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
+import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,

@@ -19,9 +19,9 @@ import {
   DragDropBuckets,
   DraggableBucketContainer,
   FieldsBucketContainer,
-} from '@kbn/visualization-ui-components/public';
+} from '@kbn/visualization-ui-components';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { isFieldLensCompatible } from '@kbn/visualization-ui-components/public';
+import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 
 export const MAX_TOOLTIP_FIELDS_SIZE = 2;

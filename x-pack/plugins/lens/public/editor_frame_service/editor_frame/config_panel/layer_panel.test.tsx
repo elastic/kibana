@@ -22,7 +22,7 @@ import {
   mountWithProvider,
 } from '../../../mocks';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
-import { DimensionButton } from '@kbn/visualization-ui-components/public';
+import { DimensionButton } from '@kbn/visualization-ui-components';
 
 jest.mock('../../../id_generator');
 

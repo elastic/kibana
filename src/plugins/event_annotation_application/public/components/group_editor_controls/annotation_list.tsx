@@ -12,7 +12,7 @@ import {
   DimensionButton,
   DimensionTrigger,
   EmptyDimensionButton,
-} from '@kbn/visualization-ui-components/public';
+} from '@kbn/visualization-ui-components';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { euiThemeVars } from '@kbn/ui-theme';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
+import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import {
   defaultAnnotationColor,

@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export {};
+import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+
+export type FormatFactory = (mapping?: SerializedFieldFormat) => IFieldFormat;
+
+export type LineStyle = 'solid' | 'dashed' | 'dotted';

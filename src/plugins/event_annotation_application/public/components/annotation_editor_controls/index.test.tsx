@@ -15,7 +15,7 @@ import {
   EventAnnotationConfig,
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-plugin/common';
-import { QueryInputServices } from '@kbn/visualization-ui-components/public';
+import { QueryInputServices } from '@kbn/visualization-ui-components';
 import moment from 'moment';
 import { act } from 'react-dom/test-utils';
 import { EuiButtonGroup } from '@elastic/eui';

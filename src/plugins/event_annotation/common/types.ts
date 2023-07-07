@@ -10,7 +10,7 @@ import type { UserContentCommonSchema } from '@kbn/content-management-table-list
 import { DataViewSpec, KibanaQueryOutput } from '@kbn/data-plugin/common';
 import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { $Values } from '@kbn/utility-types';
-import { LineStyle } from '@kbn/visualization-ui-components/common/types';
+import type { LineStyle } from '@kbn/visualization-ui-components';
 import { AvailableAnnotationIcons } from './constants';
 import {
   ManualEventAnnotationOutput,

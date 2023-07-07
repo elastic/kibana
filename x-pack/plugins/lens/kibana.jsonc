@@ -55,7 +55,6 @@
       "embeddable",
       "fieldFormats",
       "charts",
-      "visualizationUiComponents",
       "eventAnnotationApplication",
     ],
     "extraPublicDirs": [
