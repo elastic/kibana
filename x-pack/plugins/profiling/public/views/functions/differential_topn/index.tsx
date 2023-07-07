@@ -26,6 +26,7 @@ import {
 import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
 import { TopNFunctionsGrid } from '../../../components/topn_functions';
 import { TopNFunctionsSummary } from '../../../components/topn_functions_summary';
+import { AsyncStatus } from '../../../hooks/use_async';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../../hooks/use_profiling_route_path';
@@ -196,7 +197,16 @@ export function DifferentialTopNFunctionsView() {
               onChange={onChangeNormalizationMode}
             />
             <EuiSpacer />
-            <TopNFunctionsSummary />
+            <TopNFunctionsSummary
+              baselineTopNFunctions={state.data}
+              comparisonTopNFunctions={comparisonState.data}
+              baselineScaleFactor={isNormalizedByTime ? baselineTime : baseline}
+              comparisonScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
+              isLoading={
+                state.status === AsyncStatus.Loading ||
+                comparisonState.status === AsyncStatus.Loading
+              }
+            />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={false} />

@@ -8,61 +8,127 @@
 import { Chart, Metric, MetricDatum } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { TopNFunctions } from '../../../common/functions';
+import { asCost } from '../../utils/formatters/as_cost';
+import { asWeight } from '../../utils/formatters/as_weight';
+import { calculateBaseComparisonDiff } from '../topn_functions/utils';
+import { ExtraValue } from './extra_value';
 
-export function TopNFunctionsSummary() {
+interface Props {
+  baselineTopNFunctions?: TopNFunctions;
+  comparisonTopNFunctions?: TopNFunctions;
+  baselineScaleFactor?: number;
+  comparisonScaleFactor?: number;
+  isLoading: boolean;
+}
+
+export function TopNFunctionsSummary({
+  baselineTopNFunctions,
+  comparisonTopNFunctions,
+  baselineScaleFactor,
+  comparisonScaleFactor,
+  isLoading,
+}: Props) {
   const theme = useEuiTheme();
+
+  const totalSamplesDiff = calculateBaseComparisonDiff({
+    baselineValue: baselineTopNFunctions?.TotalCount || 0,
+    baselineScaleFactor,
+    comparisonValue: comparisonTopNFunctions?.TotalCount || 0,
+    comparisonScaleFactor,
+  });
+
+  const co2EmissionDiff = calculateBaseComparisonDiff({
+    baselineValue: baselineTopNFunctions?.impactEstimates?.annualizedCo2 || 0,
+    baselineScaleFactor,
+    comparisonValue: comparisonTopNFunctions?.impactEstimates?.annualizedCo2 || 0,
+    comparisonScaleFactor,
+    formatValue: asWeight,
+  });
+
+  const costImpactDiff = calculateBaseComparisonDiff({
+    baselineValue: baselineTopNFunctions?.impactEstimates?.annualizedDollarCost || 0,
+    baselineScaleFactor,
+    comparisonValue: comparisonTopNFunctions?.impactEstimates?.annualizedDollarCost || 0,
+    comparisonScaleFactor,
+    formatValue: asCost,
+  });
+
+  // TODO: I don't think I must use selfCPUPerc here
+  const performanceDiff = calculateBaseComparisonDiff({
+    baselineValue: baselineTopNFunctions?.selfCPUPerc || 0,
+    baselineScaleFactor,
+    comparisonValue: comparisonTopNFunctions?.selfCPUPerc || 0,
+    comparisonScaleFactor,
+  });
+
   const data: MetricDatum[] = useMemo(() => {
     return [
       {
         color: theme.euiTheme.colors.emptyShade,
-        title: 'Total number of samples',
+        title: 'Total number of samples (estd.)',
         icon: () => <EuiIcon type="documents" />,
-        extra: (
-          <span>
-            Last year <strong>$12.3k</strong>
-          </span>
+        extra: isLoading ? undefined : (
+          <ExtraValue
+            value={totalSamplesDiff.comparisonValue}
+            diff={totalSamplesDiff.label}
+            color={totalSamplesDiff.color}
+            icon={totalSamplesDiff.icon}
+          />
         ),
-        value: 34.2,
-        valueFormatter: (v) => `${v}%`,
+        value: isLoading ? 'N/A' : totalSamplesDiff.baseValue,
       },
       {
         color: theme.euiTheme.colors.emptyShade,
         title: 'Gained/Lost overaal performance by',
         icon: () => <EuiIcon type="visGauge" />,
-        extra: (
-          <span>
-            Last year <strong>$12.3k</strong>
-          </span>
+        extra: isLoading ? undefined : (
+          <ExtraValue
+            value={performanceDiff.comparisonValue}
+            diff={performanceDiff.label}
+            color={performanceDiff.color}
+            icon={performanceDiff.icon}
+          />
         ),
-        value: 59.5,
-        valueFormatter: (v) => `${v}%`,
+        value: isLoading ? 'N/A' : performanceDiff.baseValue,
       },
       {
         color: theme.euiTheme.colors.emptyShade,
         title: 'Estimated CO2 emission impact',
         icon: () => <EuiIcon type="globe" />,
-        extra: (
-          <span>
-            Last year <strong>$12.3k</strong>
-          </span>
+        extra: isLoading ? undefined : (
+          <ExtraValue
+            value={co2EmissionDiff.comparisonValue}
+            diff={co2EmissionDiff.label}
+            color={co2EmissionDiff.color}
+            icon={co2EmissionDiff.icon}
+          />
         ),
-        value: 21.0,
-        valueFormatter: (v) => `${v.toFixed(1)}%`,
+        value: isLoading ? 'N/A' : co2EmissionDiff.baseValue,
       },
       {
         color: theme.euiTheme.colors.emptyShade,
         title: 'Estimated cost impact',
         icon: () => <EuiIcon type="currency" />,
-        extra: (
-          <span>
-            Last year <strong>$12.3k</strong>
-          </span>
+        extra: isLoading ? undefined : (
+          <ExtraValue
+            value={costImpactDiff.comparisonValue}
+            diff={costImpactDiff.label}
+            color={costImpactDiff.color}
+            icon={costImpactDiff.icon}
+          />
         ),
-        value: 21.0,
-        valueFormatter: (v) => `${v.toFixed(1)}%`,
+        value: isLoading ? 'N/A' : costImpactDiff.baseValue,
       },
     ];
-  }, [theme.euiTheme.colors.emptyShade]);
+  }, [
+    co2EmissionDiff,
+    isLoading,
+    theme.euiTheme.colors.emptyShade,
+    totalSamplesDiff,
+    costImpactDiff,
+    performanceDiff,
+  ]);
 
   return (
     <EuiFlexGroup direction="row" style={{ height: 120 }}>
