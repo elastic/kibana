@@ -166,6 +166,8 @@ describe('SecurityNavControl', () => {
   });
 
   it('should render additional user menu links registered by other plugins and should render the default Edit Profile link as the first link when no custom profile link is provided', async () => {
+    const DummyComponent = () => <div>Dummy Component</div>;
+
     const wrapper = shallow(
       <SecurityNavControl
         editProfileUrl="edit-profile-link"
@@ -175,6 +177,13 @@ describe('SecurityNavControl', () => {
             { label: 'link1', href: 'path-to-link-1', iconType: 'empty', order: 1 },
             { label: 'link2', href: 'path-to-link-2', iconType: 'empty', order: 2 },
             { label: 'link3', href: 'path-to-link-3', iconType: 'empty', order: 3 },
+            {
+              label: 'dummyComponent',
+              href: '',
+              iconType: 'empty',
+              order: 4,
+              content: DummyComponent,
+            },
           ])
         }
       />
@@ -229,6 +238,16 @@ describe('SecurityNavControl', () => {
                     type="empty"
                   />,
                   "name": "link3",
+                },
+                Object {
+                  "content": [Function],
+                  "data-test-subj": "userMenuLink__dummyComponent",
+                  "href": "",
+                  "icon": <EuiIcon
+                    size="m"
+                    type="empty"
+                  />,
+                  "name": "dummyComponent",
                 },
                 Object {
                   "data-test-subj": "logoutLink",
