@@ -62,7 +62,7 @@ export const addAlertsToCase = ({
       url: getCaseFindUserActionsUrl(caseId),
       qs: {
         sortOrder: 'asc',
-        perPage: 10000,
+        perPage: 100,
       },
     }).then((caseUserActionsResponse) => {
       const userActions = caseUserActionsResponse.body.userActions;
