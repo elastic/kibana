@@ -38,12 +38,18 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type {
+  ExportTypesPluginSetup,
+  ExportTypesPluginStart,
+} from '@kbn/reporting-export-types-plugin/server';
 import * as Rx from 'rxjs';
-import { filter, first, map, switchMap, take } from 'rxjs/operators';
+import { filter, first, map, take } from 'rxjs/operators';
 import type { ReportingSetup } from '.';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { createConfig, ReportingConfigType } from './config';
-import { ExportTypeStartDeps } from './export_types/common/export_type';
+// import { CsvSearchSourceExportType } from './export_types/csv_searchsource';
+// import { CsvV2ExportType } from './export_types/csv_v2';
+// import { PdfExportType } from './export_types/printable_pdf_v2';
 import { checkLicense, ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
@@ -61,6 +67,7 @@ export interface ReportingInternalSetup {
   logger: Logger;
   status: StatusServiceSetup;
   docLinks: DocLinksServiceSetup;
+  exportTypes: ExportTypesPluginSetup;
 }
 
 export interface ReportingInternalStart {
@@ -76,7 +83,7 @@ export interface ReportingInternalStart {
   screenshotting: ScreenshottingStart;
   security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
-  exportTypes: ExportTypeStartDeps[];
+  exportTypes: ExportTypesPluginStart;
 }
 
 /**
@@ -105,6 +112,9 @@ export class ReportingCore {
   private monitorTask: MonitorReportsTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
+  // private csvSearchSourceExport: CsvSearchSourceExportType;
+  // private csvV2ExportType: CsvV2ExportType;
+  // private pdfExport: PdfExportType;
   private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
@@ -119,6 +129,20 @@ export class ReportingCore {
     this.packageInfo = context.env.packageInfo;
     const config = createConfig(core, context.config.get<ReportingConfigType>(), logger);
     this.config = config;
+
+    // this.csvSearchSourceExport = new CsvSearchSourceExportType(
+    //   this.core,
+    //   this.config,
+    //   this.logger,
+    //   this.context
+    // );
+    // this.exportTypesRegistry.register(this.csvSearchSourceExport);
+
+    // this.csvV2ExportType = new CsvV2ExportType(this.core, this.config, this.logger, this.context);
+    // this.exportTypesRegistry.register(this.csvV2ExportType);
+
+    // this.pdfExport = new PdfExportType(this.core, this.config, this.logger, this.context);
+    // this.exportTypesRegistry.register(this.pdfExport);
 
     this.deprecatedAllowedRoles = config.roles.enabled ? config.roles.allow : false;
     this.executeTask = new ExecuteReportTask(this, config, this.logger);
@@ -145,7 +169,10 @@ export class ReportingCore {
     this.pluginSetup$.next(true); // trigger the observer
     this.pluginSetupDeps = setupDeps; // cache
 
+    // this.csvSearchSourceExport.setup(setupDeps);
+    // this.csvV2ExportType.setup(setupDeps);
     // this.pdfExport.setup(setupDeps);
+    setupDeps.exportTypes.setup(setupDeps);
 
     const { executeTask, monitorTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
@@ -160,7 +187,11 @@ export class ReportingCore {
   public async pluginStart(startDeps: ReportingInternalStart) {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
-    // this.pdfExport.start({ ...startDeps, reporting: this.getContract() });
+    const reportingStart = this.getContract();
+    startDeps.exportTypes.start({ ...startDeps, reporting: reportingStart });
+    // this.csvSearchSourceExport.start({ ...startDeps, reporting: reportingStart });
+    // this.csvV2ExportType.start({ ...startDeps, reporting: reportingStart });
+    // this.pdfExport.start({ ...startDeps, reporting: reportingStart });
 
     await this.assertKibanaIsAvailable();
 
@@ -188,7 +219,6 @@ export class ReportingCore {
       )
       .toPromise();
   }
-
   /*
    * Blocks the caller until setup is done
    */
@@ -379,7 +409,7 @@ export class ReportingCore {
     options: PngScreenshotOptions | PdfScreenshotOptions
   ): Rx.Observable<PngScreenshotResult | PdfScreenshotResult> {
     return Rx.defer(() => this.getPluginStartDeps()).pipe(
-      switchMap(({ screenshotting }) => {
+      Rx.switchMap(({ screenshotting }) => {
         return screenshotting.getScreenshots({
           ...options,
           urls: options.urls.map((url) =>

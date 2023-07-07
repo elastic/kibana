@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*", "../reporting_export_types/server/csv_searchsource"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -39,15 +39,5 @@
     "@kbn/generate-csv",
     "@kbn/reporting-common",
     "@kbn/saved-search-plugin",
-  ],
-  "exclude": [
-    "target/**/*",
-    "x-pack/plugins/reporting/server/routes/diagnostic/screenshot.ts",
-    "x-pack/plugins/reporting/server/routes/generate/csv_searchsource_immediate.ts",
-    "x-pack/plugins/reporting/server/export_types/csv_searchsource_immediate/*",
-    "x-pack/plugins/reporting/server/export_types/csv_searchsource/*",
-    "x-pack/plugins/reporting/server/export_types/csv_v2/*",
-    "x-pack/plugins/reporting/server/export_types/png_*/*",
-    "x-pack/plugins/reporting/server/export_types/printable_pdf/execute_job/*",
   ]
 }

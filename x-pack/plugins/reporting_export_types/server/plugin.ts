@@ -9,7 +9,8 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '
 
 import { ConfigSchema, ReportingConfigType } from '@kbn/reporting-plugin/server/config';
 import {
-  CsvSearchsourceExportType,
+  CsvSearchSourceExportType,
+  CsvV2ExportType,
   ExportType,
   PdfExportType,
   PngExportType,
@@ -19,7 +20,7 @@ import { ExportTypesPluginSetup, ExportTypesPluginStart } from './types';
 export class ExportTypesPlugin
   implements Plugin<{}, {}, ExportTypesPluginSetup, ExportTypesPluginStart>
 {
-  exportTypes: ExportType[];
+  public exportTypes: ExportType[];
 
   constructor(
     private core: CoreSetup,
@@ -28,8 +29,8 @@ export class ExportTypesPlugin
     logger: Logger
   ) {
     this.exportTypes = [
-      new CsvSearchsourceExportType(this.core, reportingConfig, logger, initializerContext),
-      // new CsvV2ExportType(this.core, reportingConfig, logger, initializerContext),
+      new CsvSearchSourceExportType(this.core, reportingConfig, logger, initializerContext),
+      new CsvV2ExportType(this.core, reportingConfig, logger, initializerContext),
       new PdfExportType(this.core, reportingConfig, logger, initializerContext),
       new PngExportType(this.core, reportingConfig, logger, initializerContext),
     ];
@@ -45,7 +46,6 @@ export class ExportTypesPlugin
   }
 
   public start(core: CoreStart, plugins: ExportTypesPluginStart) {
-    this.exportTypes.forEach((eType) => {});
     return {};
   }
 

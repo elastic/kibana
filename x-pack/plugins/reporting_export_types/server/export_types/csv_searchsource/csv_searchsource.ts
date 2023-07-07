@@ -23,18 +23,18 @@ import { decryptJobHeaders } from '@kbn/reporting-plugin/server/export_types/com
 import { JobParamsCSV, TaskPayloadCSV } from './types';
 import { BaseExportTypeSetupDeps, BaseExportTypeStartDeps, ExportType } from '../export_type';
 
-type CsvSearchsourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
+type CsvSearchSourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
 
-interface CsvSearchsourceExportTypeStartDeps extends BaseExportTypeStartDeps {
+interface CsvSearchSourceExportTypeStartDeps extends BaseExportTypeStartDeps {
   discover: DiscoverServerPluginStart;
   data: DataPluginStart;
 }
 
-export class CsvSearchsourceExportType extends ExportType<
+export class CsvSearchSourceExportType extends ExportType<
   JobParamsCSV,
   TaskPayloadCSV,
-  CsvSearchsourceExportTypeSetupDeps,
-  CsvSearchsourceExportTypeStartDeps
+  CsvSearchSourceExportTypeSetupDeps,
+  CsvSearchSourceExportTypeStartDeps
 > {
   id = 'csv_searchsource';
   name = CSV_JOB_TYPE;

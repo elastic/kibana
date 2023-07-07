@@ -8,4 +8,5 @@
 export { ExportType } from './export_type';
 export { PdfExportType } from './printable_pdf_v2';
 export { PngExportType } from './png_v2';
-export { CsvSearchsourceExportType } from './csv_searchsource';
+export { CsvSearchSourceExportType } from './csv_searchsource';
+export { CsvV2ExportType } from './csv_v2';
