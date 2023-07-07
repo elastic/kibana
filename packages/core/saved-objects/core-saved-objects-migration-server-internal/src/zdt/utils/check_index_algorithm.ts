@@ -12,11 +12,17 @@ import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal'
  * The list of values returned by `checkIndexCurrentAlgorithm`.
  *
  * - `zdt`
+ * - `zdt-partially-migrated`
  * - `v2-compatible`
  * - `v2-incompatible`
  * - `unknown`
  */
-export type CheckCurrentAlgorithmResult = 'zdt' | 'v2-compatible' | 'v2-incompatible' | 'unknown';
+export type CheckCurrentAlgorithmResult =
+  | 'zdt'
+  | 'v2-partially-migrated'
+  | 'v2-compatible'
+  | 'v2-incompatible'
+  | 'unknown';
 
 export const checkIndexCurrentAlgorithm = (
   indexMapping: IndexMapping
@@ -27,7 +33,7 @@ export const checkIndexCurrentAlgorithm = (
   }
 
   const hasV2Meta = !!meta.migrationMappingPropertyHashes;
-  const hasZDTMeta = !!meta.docVersions || !!meta.mappingVersions;
+  const hasZDTMeta = !!meta.mappingVersions;
 
   if (hasV2Meta && hasZDTMeta) {
     return 'unknown';
@@ -37,7 +43,8 @@ export const checkIndexCurrentAlgorithm = (
     return isCompatible ? 'v2-compatible' : 'v2-incompatible';
   }
   if (hasZDTMeta) {
-    return 'zdt';
+    const isFullZdt = !!meta.docVersions;
+    return isFullZdt ? 'zdt' : 'v2-partially-migrated';
   }
   return 'unknown';
 };
