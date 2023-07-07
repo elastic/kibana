@@ -129,7 +129,24 @@ describe('EditableMarkdown', () => {
 
       userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
 
-      userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), ' ');
+      userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '');
+
+      await waitFor(() => {
+        expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
+        expect(screen.getByTestId('editable-save-markdown')).toHaveProperty('disabled');
+      });
+    });
+
+    it('Shows error message and save button disabled if current text is of empty characters', async () => {
+      render(
+        <MockHookWrapperComponent>
+          <EditableMarkdown {...defaultProps} />
+        </MockHookWrapperComponent>
+      );
+
+      userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+
+      userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), '  ');
 
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();

@@ -24,6 +24,8 @@ const EditableMarkdownFooterComponent: React.FC<EditableMarkdownFooterProps> = (
 }) => {
   const [{ content }] = useFormData<{ content: string }>({ watch: ['content'] });
 
+  const isDisabled = !content?.trim().length || content.trim().length > MAX_COMMENT_LENGTH;
+
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -43,7 +45,7 @@ const EditableMarkdownFooterComponent: React.FC<EditableMarkdownFooterProps> = (
           fill
           iconType="save"
           onClick={handleSaveAction}
-          disabled={!content || content.length > MAX_COMMENT_LENGTH}
+          disabled={isDisabled}
           size="s"
         >
           {i18n.SAVE}

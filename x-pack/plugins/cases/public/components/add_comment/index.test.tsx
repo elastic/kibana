@@ -201,11 +201,26 @@ describe('AddComment ', () => {
 
       const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
 
+      userEvent.type(markdown, 'test');
       userEvent.clear(markdown);
-      userEvent.type(markdown, '   ');
 
       await waitFor(() => {
         expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
+        expect(screen.getByTestId('submit-comment')).toHaveAttribute('disabled');
+      });
+    });
+
+    it('shows an error when comment is of empty characters', async () => {
+      appMockRender.render(<AddComment {...addCommentProps} />);
+
+      const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
+
+      userEvent.clear(markdown);
+      userEvent.type(markdown, '  ');
+
+      await waitFor(() => {
+        expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
+        expect(screen.getByTestId('submit-comment')).toHaveAttribute('disabled');
       });
     });
 
@@ -224,6 +239,7 @@ describe('AddComment ', () => {
             'The length of the comment is too long. The maximum length is 30000 characters.'
           )
         ).toBeInTheDocument();
+        expect(screen.getByTestId('submit-comment')).toHaveAttribute('disabled');
       });
     });
   });
