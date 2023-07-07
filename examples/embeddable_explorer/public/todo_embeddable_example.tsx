@@ -93,6 +93,7 @@ export class TodoEmbeddableExample extends React.Component<Props, State> {
               <EmbeddableRenderer
                 factory={this.props.todoEmbeddableFactory}
                 input={{
+                  id: '1',
                   task: this.state.task,
                   title: this.state.title,
                   icon: this.state.icon,
@@ -104,6 +105,7 @@ export class TodoEmbeddableExample extends React.Component<Props, State> {
               {`<EmbeddableRenderer
   factory={this.props.todoEmbeddableFactory}
   input={{
+    id: '1',
     task: this.state.task,
     title: this.state.title,
     icon: this.state.icon,
