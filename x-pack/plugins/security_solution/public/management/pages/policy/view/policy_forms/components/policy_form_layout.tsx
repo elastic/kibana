@@ -44,7 +44,7 @@ import { APP_UI_ID } from '../../../../../../../common/constants';
 import type { PolicyDetailsRouteState } from '../../../../../../../common/endpoint/types';
 import { SecuritySolutionPageWrapper } from '../../../../../../common/components/page_wrapper';
 import { PolicyDetailsForm } from '../../policy_details_form';
-import { ConfirmUpdate } from './policy_form_confirm_update';
+import { ConfirmUpdate } from '../../policy_settings_layout/components/policy_form_confirm_update';
 
 export const PolicyFormLayout = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();

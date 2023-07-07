@@ -1,0 +1,203 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiBottomBar,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
+import { cloneDeep } from 'lodash';
+import { useUpdateEndpointPolicy } from '../../../../hooks/policy/use_update_endpoint_policy';
+import type { PolicySettingsFormProps } from '../policy_settings_form/policy_settings_form';
+import { PolicySettingsForm } from '../policy_settings_form';
+import type {
+  MaybeImmutable,
+  PolicyConfig,
+  PolicyData,
+  PolicyDetailsRouteState,
+} from '../../../../../../common/endpoint/types';
+import { useKibana, useToasts } from '../../../../../common/lib/kibana';
+import { useShowEditableFormFields } from '../policy_hooks';
+import { APP_UI_ID } from '../../../../../../common';
+import { getPoliciesPath } from '../../../../common/routing';
+import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
+import { ConfirmUpdate } from './components/policy_form_confirm_update';
+
+export interface PolicySettingsLayoutProps {
+  policy: MaybeImmutable<PolicyData>;
+}
+
+export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(({ policy: _policy }) => {
+  const policy = _policy as PolicyData;
+  const {
+    services: {
+      theme,
+      application: { navigateToApp },
+    },
+  } = useKibana();
+  const toasts = useToasts();
+  const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
+  const isEditMode = useShowEditableFormFields();
+  const {
+    isLoading: isUpdating,
+    error: udpateError,
+    mutate: sendPolicyUpdate,
+  } = useUpdateEndpointPolicy();
+
+  // Local state
+  const [policySettings, setPolicySettings] = useState<PolicyConfig>(
+    cloneDeep(policy.inputs[0].config.policy.value)
+  );
+  const [showConfirm, setShowConfirm] = useState<boolean>(false);
+  const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
+
+  // const policyAgentStatusSummary = usePolicyDetailsSelector(agentStatusSummary);
+  // const policyUpdateStatus = usePolicyDetailsSelector(updateStatus);
+  const policyName = policy?.name ?? '';
+
+  const routingOnCancelNavigateTo = routeState?.onCancelNavigateTo;
+  const navigateToAppArguments = useMemo((): Parameters<ApplicationStart['navigateToApp']> => {
+    if (routingOnCancelNavigateTo) {
+      return routingOnCancelNavigateTo;
+    }
+
+    return [
+      APP_UI_ID,
+      {
+        path: getPoliciesPath(),
+      },
+    ];
+  }, [routingOnCancelNavigateTo]);
+
+  const handleSettingsOnChange: PolicySettingsFormProps['onChange'] = useCallback((updates) => {
+    setPolicySettings(updates.updatedPolicy);
+  }, []);
+
+  // Handle showing update statuses
+
+  // FIXME:PT implement
+  // useEffect(() => {
+  //   if (policyUpdateStatus) {
+  //     if (policyUpdateStatus.success) {
+  //       toasts.addSuccess({
+  //         title: i18n.translate(
+  //           'xpack.securitySolution.endpoint.policy.details.updateSuccessTitle',
+  //           {
+  //             defaultMessage: 'Success!',
+  //           }
+  //         ),
+  //         text: toMountPoint(
+  //           <span data-test-subj="policyDetailsSuccessMessage">
+  //             <FormattedMessage
+  //               id="xpack.securitySolution.endpoint.policy.details.updateSuccessMessage"
+  //               defaultMessage="Integration {name} has been updated."
+  //               values={{ name: policyName }}
+  //             />
+  //           </span>,
+  //           { theme$: theme.theme$ }
+  //         ),
+  //       });
+  //
+  //       if (routeState && routeState.onSaveNavigateTo) {
+  //         navigateToApp(...routeState.onSaveNavigateTo);
+  //       }
+  //     } else {
+  //       toasts.addDanger({
+  //         title: i18n.translate('xpack.securitySolution.endpoint.policy.details.updateErrorTitle', {
+  //           defaultMessage: 'Failed!',
+  //         }),
+  //         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  //         text: policyUpdateStatus.error!.message,
+  //       });
+  //     }
+  //   }
+  // }, [navigateToApp, toasts, policyName, policyUpdateStatus, routeState, theme.theme$]);
+
+  const handleCancelOnClick = useNavigateToAppEventHandler(...navigateToAppArguments);
+
+  const handleSaveOnClick = useCallback(() => {
+    setShowConfirm(true);
+  }, []);
+
+  const handleSaveConfirmation = useCallback(() => {
+    const update = cloneDeep(policy);
+
+    update.inputs[0].config.policy.value = policySettings;
+    sendPolicyUpdate({ policy: update });
+  }, [policy, policySettings, sendPolicyUpdate]);
+
+  const handleSaveCancel = useCallback(() => {
+    setShowConfirm(false);
+  }, []);
+
+  useEffect(() => {
+    if (!routeState && locationRouteState) {
+      setRouteState(locationRouteState);
+    }
+  }, [locationRouteState, routeState]);
+
+  return (
+    <>
+      {showConfirm && (
+        <ConfirmUpdate
+          endpointCount={/* FIXME:PT implement policyAgentStatusSummary?.total ??*/ 0}
+          onCancel={handleSaveCancel}
+          onConfirm={handleSaveConfirmation}
+        />
+      )}
+
+      <PolicySettingsForm
+        policy={policySettings}
+        onChange={handleSettingsOnChange}
+        mode={isEditMode ? 'edit' : 'view'}
+      />
+
+      <EuiSpacer size="xxl" />
+
+      <EuiBottomBar paddingSize="s">
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              color="text"
+              onClick={handleCancelOnClick}
+              data-test-subj="policyDetailsCancelButton"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policy.details.cancel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          {isEditMode && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill={true}
+                iconType="save"
+                data-test-subj="policyDetailsSaveButton"
+                onClick={handleSaveOnClick}
+                isLoading={isUpdating}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.endpoint.policy.details.save"
+                  defaultMessage="Save"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiBottomBar>
+    </>
+  );
+});
+PolicySettingsLayout.displayName = 'PolicySettingsLayout';

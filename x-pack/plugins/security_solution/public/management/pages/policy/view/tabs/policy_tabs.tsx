@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { PolicySettingsLayout } from '../policy_settings_layout';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
   getPolicyDetailPath,
@@ -36,7 +37,6 @@ import {
   policyIdFromParams,
 } from '../../store/policy_details/selectors';
 import { PolicyArtifactsLayout } from '../artifacts/layout/policy_artifacts_layout';
-import { PolicyFormLayout } from '../policy_forms/components';
 import { usePolicyDetailsSelector } from '../policy_hooks';
 import { POLICY_ARTIFACT_EVENT_FILTERS_LABELS } from './event_filters_translations';
 import { POLICY_ARTIFACT_TRUSTED_APPS_LABELS } from './trusted_apps_translations';
@@ -195,7 +195,8 @@ export const PolicyTabs = React.memo(() => {
         content: (
           <>
             <EuiSpacer />
-            <PolicyFormLayout />
+
+            <PolicySettingsLayout policy={policyItem} />
           </>
         ),
       },
