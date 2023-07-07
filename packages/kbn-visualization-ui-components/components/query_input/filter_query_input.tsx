@@ -19,6 +19,7 @@ import {
   EuiPopoverProps,
 } from '@elastic/eui';
 import type { DataViewBase, Query } from '@kbn/es-query';
+import type { QueryStringInputComponent } from '@kbn/unified-search-plugin/public';
 import { useDebouncedValue } from '../debounced_value';
 import { QueryInput, validateQuery } from '.';
 import type { QueryInputServices } from '.';
@@ -43,6 +44,7 @@ export function FilterQueryInput({
   initiallyOpen,
   ['data-test-subj']: dataTestSubj,
   queryInputServices,
+  QueryStringInput,
   appName,
 }: {
   inputFilter: Query | undefined;
@@ -52,6 +54,7 @@ export function FilterQueryInput({
   label?: string;
   initiallyOpen?: boolean;
   ['data-test-subj']?: string;
+  QueryStringInput: QueryStringInputComponent;
   queryInputServices: QueryInputServices;
   appName: string;
 }) {
@@ -156,6 +159,7 @@ export function FilterQueryInput({
                 onSubmit={() => {}}
                 data-test-subj={dataTestSubj}
                 appName={appName}
+                QueryStringInput={QueryStringInput}
                 services={queryInputServices}
               />
             </EuiFormRow>

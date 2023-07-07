@@ -7,7 +7,8 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
+  preset: '@kbn/test',
   rootDir: '../..',
   roots: ['<rootDir>/packages/kbn-visualization-ui-components'],
+  setupFiles: ['jest-canvas-mock'],
 };

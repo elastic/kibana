@@ -21,6 +21,7 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 
 export const defaultQuery: Query = {
   query: '',
@@ -85,6 +86,7 @@ export const ConfigPanelQueryAnnotation = ({
           }}
           dataView={dataView}
           appName={appName}
+          QueryStringInput={QueryStringInput}
           queryInputServices={queryInputServices}
         />
       </EuiFormRow>

@@ -30,4 +30,7 @@ export const QueryStringInput = (props: QueryStringInputProps) => (
     <LazyQueryStringInputUI {...props} />
   </React.Suspense>
 );
-export type { QueryStringInputProps };
+
+type QueryStringInputComponent = React.FC<QueryStringInputProps>;
+
+export type { QueryStringInputProps, QueryStringInputComponent };
