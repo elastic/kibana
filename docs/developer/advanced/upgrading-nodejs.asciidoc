@@ -18,6 +18,8 @@ These files must be updated when upgrading Node.js:
     Besides this property, the list of files under `node_repositories` must be updated along with their respective SHA256 hashes.
     These can be found on the https://nodejs.org[nodejs.org] website.
     Example for Node.js v18.16.1: https://nodejs.org/dist/v18.16.1/SHASUMS256.txt.asc
+  - {kib-repo}blob/{branch}/docs/assets/NODE_BINARIES.txt[NODE_BINARIES.txt] - if you are upgrading to an elastic-built Node.js release. 
+    See the next section for more information.
 
 See PR {kib-repo}pull/128123[#128123] for an example of how the Node.js version has been upgraded previously.
 
@@ -29,6 +31,9 @@ When upgrading to a new major version of Node.js, the following extra steps must
     As an example, here's the https://github.com/nodejs/node/blob/v18.x/BUILDING.md#platform-list[Node.js 18 supported platform list].
     You can change which Node.js major version to view, by changing the selected branch.
     If Node.js has dropped support for platform still supported by Kibana, appropriate steps must be taken as soon as possible to deprecate support for this platform. This way support for it can be dropped before the currently used major version of Node.js https://github.com/nodejs/release#release-schedule[reaches End-of-Life].
+  - An exception to the above is the Node.js 18 upgrade. According to the document linked above, official builds of Node.js 18 won't support CentOS7/RHEL7,
+    however since the Node.js 16 end-of-life came earlier than planned, thus Kibana couldn't drop support for these platforms in a timely manner. 
+    Because of this, we're building unofficial releases of Node.js using https://github.com/elastic/kibana-custom-nodejs-builds[this repository.]
 
 === Backporting
 

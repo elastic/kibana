@@ -1,0 +1,24 @@
+### Node binaries information
+Here you can find some help to identify the different Node.js distributables.
+
+When building Kibana, we're downloading and bundling our custom versions with glibc 2.17 compatibility,
+that are built using this repository: https://github.com/elastic/kibana-custom-nodejs-builds.
+This is to keep compatibility for Node.js 18 on older platforms that Kibana supports, but official Node.js builds don't (RHEL7/CentOS7).
+
+
+Below, we're listing the distributables that have been replaced by our custom builds:
+
+
+## Official releases (as per https://nodejs.org/dist/v18.16.1/SHASUMS256.txt)
+
+555b5c521e068acc976e672978ba0f5b1a0c030192b50639384c88143f4460bc  node-v18.16.1-linux-arm64.tar.gz
+144eb4103e0193de8a41187817261d35970f1a13a11e779e16a4f1d9c99bcc82  node-v18.16.1-linux-arm64.tar.xz
+59582f51570d0857de6333620323bdeee5ae36107318f86ce5eca24747cabf5b  node-v18.16.1-linux-x64.tar.gz
+ecfe263dbd9c239f37b5adca823b60be1bb57feabbccd25db785e647ebc5ff5e  node-v18.16.1-linux-x64.tar.xz
+
+## Elastic-built releases (as per: https://storage.googleapis.com/kibana-custom-node-artifacts/node-glibc-217/dist/v18.16.1/SHASUMS256.txt)
+
+a3e3fa926b2507617ca614c839ccb63dae6a9f2adc28bd9f1cbc266868e13f6d  node-v18.16.1-linux-arm64.tar.gz
+e067ada7ee3c6bb3f91b804e7d686dff11ad8249b3c8ef83e1fe126d65965a9e  node-v18.16.1-linux-arm64.tar.xz
+6e17e6f99635d6fc1917adba68bb93905d0974c545604d4d8ad833821daae94a  node-v18.16.1-linux-x64.tar.gz
+6142c97e37921137d91dde2cd4279357da035a82cff644db790f7a5815cd2903  node-v18.16.1-linux-x64.tar.xz
