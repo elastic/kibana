@@ -58,7 +58,7 @@ export const useEmbeddablePanelContextMenu = ({
   const mounted = useMountedState();
 
   const getAllPanelActions = useCallback(async () => {
-    let regularActions = await (async () => {
+    const regularActions = await (async () => {
       if (getActions) return await getActions(CONTEXT_MENU_TRIGGER, { embeddable });
       return (
         (await uiActions.getTriggerCompatibleActions(CONTEXT_MENU_TRIGGER, {
@@ -66,19 +66,22 @@ export const useEmbeddablePanelContextMenu = ({
         })) ?? []
       );
     })();
+
+    let allActions = regularActions.concat(
+      Object.values(universalActions ?? {}) as Array<Action<object>>
+    );
+
     const { disabledActions } = embeddable.getInput();
     if (disabledActions) {
       const removeDisabledActions = removeById(disabledActions);
-      regularActions = regularActions.filter(removeDisabledActions);
+      allActions = allActions.filter(removeDisabledActions);
     }
-    let sortedActions = regularActions
-      .concat(Object.values(universalActions || {}) as Array<Action<object>>)
-      .sort(sortByOrderField);
+    allActions.sort(sortByOrderField);
 
     if (actionPredicate) {
-      sortedActions = sortedActions.filter(({ id }) => actionPredicate(id));
+      allActions = allActions.filter(({ id }) => actionPredicate(id));
     }
-    return sortedActions;
+    return allActions;
   }, [actionPredicate, embeddable, universalActions, getActions]);
 
   const updatePanelActions = useCallback(async () => {
