@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { FILE_STORAGE_METADATA_INDEX_PATTERN } from '../constants';
-
 import { getFileDataIndexName, getFileMetadataIndexName } from '..';
-
-import { getIntegrationNameFromIndexName } from './file_storage';
 
 describe('File Storage services', () => {
   describe('File Index Names', () => {
@@ -28,18 +24,5 @@ describe('File Storage services', () => {
     it('should generate file data index name for files to be delivered to host', () => {
       expect(getFileDataIndexName('foo', true)).toEqual('.fleet-fileds-tohost-data-foo');
     });
-  });
-
-  describe('getIntegrationNameFromIndexName()', () => {
-    it.each([
-      ['regular index names', '.fleet-fileds-fromhost-meta-agent'],
-      ['datastream index names', '.ds-.fleet-fileds-fromhost-data-agent-2023.06.30-00001'],
-    ])('should handle %s', (_, index) => {
-      expect(getIntegrationNameFromIndexName(index, FILE_STORAGE_METADATA_INDEX_PATTERN)).toEqual(
-        'agent'
-      );
-    });
-
-    it.todo('should error if index pattern does not include `*`');
   });
 });

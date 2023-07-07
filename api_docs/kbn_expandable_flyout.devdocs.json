@@ -37,7 +37,7 @@
             "section": "def-common.ExpandableFlyoutProps",
             "text": "ExpandableFlyoutProps"
           },
-          ">): JSX.Element; displayName: string | undefined; }"
+          ">): JSX.Element | null; displayName: string | undefined; }"
         ],
         "path": "packages/kbn-expandable-flyout/src/index.tsx",
         "deprecated": false,
